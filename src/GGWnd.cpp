@@ -38,7 +38,6 @@ Wnd::Wnd() :
    m_parent(0), 
    m_zorder(0), 
    m_visible(true), 
-   m_ontop(false), 
    m_max_size(1 << 30, 1 << 30),
    m_flags(0)
 {
@@ -49,12 +48,12 @@ Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
    m_parent(0), 
    m_zorder(0), 
    m_visible(true), 
-   m_ontop(false), 
    m_upperleft(x, y), 
    m_lowerright(x + w, y + h), 
    m_max_size(1 << 30, 1 << 30),
    m_flags(flags)
 {
+   ValidateFlags();
 }
 
 Wnd::Wnd(const XMLElement& elem) : 
@@ -62,7 +61,6 @@ Wnd::Wnd(const XMLElement& elem) :
    m_parent(0), 
    m_zorder(0), 
    m_visible(true), 
-   m_ontop(false), 
    m_max_size(1 << 30, 1 << 30),
    m_flags(0)
 {
@@ -83,9 +81,6 @@ Wnd::Wnd(const XMLElement& elem) :
    
    curr_elem  = &elem.Child("m_visible");
    m_visible = lexical_cast<bool>(curr_elem->Attribute("value"));
-   
-   curr_elem  = &elem.Child("m_ontop");
-   m_ontop = lexical_cast<bool>(curr_elem->Attribute("value"));
    
    curr_elem  = &elem.Child("m_upperleft");
    m_upperleft = Pt(curr_elem->Child("GG::Pt"));
@@ -180,10 +175,6 @@ XMLElement Wnd::XMLEncode() const
 
    temp = XMLElement("m_visible");
    temp.SetAttribute("value", boost::lexical_cast<string>(m_visible));
-   retval.AppendChild(temp);
-
-   temp = XMLElement("m_ontop");
-   temp.SetAttribute("value", boost::lexical_cast<string>(m_ontop));
    retval.AppendChild(temp);
 
    temp = XMLElement("m_upperleft");
@@ -400,6 +391,12 @@ int Wnd::Run()
       retval = 1;
    }
    return retval;
+}
+
+void Wnd::ValidateFlags()
+{
+   if ((m_flags & MODAL) && (m_flags & ONTOP))
+      m_flags &= ~ONTOP;
 }
 
 } // namespace GG

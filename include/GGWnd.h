@@ -42,7 +42,7 @@ namespace GG {
    window.  On-topness is useful for 
    modeless dialog boxes, among other things. Modal windows are available (by setting the MODAL window creation 
    flag), and are also always-on-top, but are 
-   handled differently and do not have their m_ontop members set to true.  
+   handled differently and do not have ONTOP specified in their creation flags.  
    Modal windows are executed by calling Run(), which registers them as modal windows and starts the local 
    execution of the application's event pump.  Execution of the code that calls Run() is effectively halted 
    until Run() returns.  Derived classes that wish to use modal execution should set m_done = true to escape from 
@@ -61,7 +61,8 @@ public:
          DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
          DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
          RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
-         MODAL =        1 << 4   ///< this window is modal; while it is active, no other windows are interactive
+         ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
+         MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and need not be flagged as ONTOP.
          }; 
          
    GGEXCEPTION(WndException);   ///< exception class \see GG::GGEXCEPTION
@@ -69,19 +70,21 @@ public:
    /** \name Structors */ //@{
    virtual ~Wnd(); ///< virtual dtor
    //@}
-   
+
    /** \name Accessors */ //@{
    bool           Clickable() const   {return m_flags & CLICKABLE;}   ///< does a click over this window pass through?
    bool           Dragable() const    {return m_flags & DRAGABLE;}    ///< does a click here become a drag? 
    bool           DragKeeper() const  {return m_flags & DRAG_KEEPER;} ///< when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway?
    bool           Visible() const     {return m_visible;}             ///< is the window visible?
    bool           Resizable() const   {return m_flags & RESIZABLE;}   ///< can this window be resized using the mouse?
+   bool           OnTop() const       {return m_flags & ONTOP;}       ///< is this an on-top window?
    bool           Modal() const       {return m_flags & MODAL;}       ///< is this a modal window?
    const string&  WindowText() const  {return m_text;}                ///< returns text associated with this window
    Pt             UpperLeft() const;                                  ///< returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
    Pt             LowerRight() const;                                 ///< returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
    int            Width() const              {return m_lowerright.x - m_upperleft.x;} ///< returns width of window in pixels
    int            Height() const             {return m_lowerright.y - m_upperleft.y;} ///< returns width of window in pixels
+   int            ZOrder() const             {return m_zorder;}       ///< returns the position of this window in the z-order (root (non-child) windows only)
    Pt             WindowDimensions() const   {return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y);} ///< returns a \a Pt packed with width in \a x and height in \a y
    Pt             MinDimensions() const      {return m_min_size;} ///< returns the minimum allowable dimensions of window
    Pt             MaxDimensions() const      {return m_max_size;} ///< returns the maximum allowable dimensions of window
@@ -89,6 +92,7 @@ public:
    /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
       virtual b/c different windows have different shapes (and so ways of calculating client area)*/
    virtual Pt     ClientUpperLeft() const       {return UpperLeft();}
+      void           RegisterOnTop(Wnd* wnd);      ///< adds a GG::Wnd into the z-list on top of all windows; sets wnd->m_ontop to true
    
    /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
       virtual b/c different windows have different shapes (and so ways of calculating client area)*/
@@ -166,11 +170,12 @@ protected:
    bool           m_done;           ///< derived modal Wnd's set this to true to stop modal loop
 
 private:
+   void ValidateFlags();            ///< sanity-checks the window creation flags
+
    Wnd*           m_parent;         ///< ptr to this window's parent; =0 if this is the root
    list<Wnd*>     m_children;       ///< list of ptrs to child windows kept in order of decreasing area
    int            m_zorder;         ///< where this window is in the z-order (root (non-child) windows only)
    bool           m_visible;        ///< is this window drawn?
-   bool           m_ontop;          ///< is this an always-on-top window (drawn after all others)?
    Pt             m_upperleft;      ///< upper left point of window
    Pt             m_lowerright;     ///< lower right point of window
    Pt             m_min_size;       ///< minimum window size Pt(0, 0) (= none) by default
@@ -178,8 +183,8 @@ private:
    
    Uint32         m_flags;          ///< flags supplied at window creation for clickability, dragability, drag-keeperness, and resizability
 
-   friend class App;                ///< App needs access to \a m_zorder, \a m_ontop, etc. in order to Register() windows
-   friend class ZList;              ///< App needs access to \a m_zorder, etc. in order to order windows
+   friend class App;                ///< App needs access to \a m_zorder, m_children, etc.
+   friend class ZList;              ///< ZList needs access to \a m_zorder in order to order windows
 };
 
 } // namespace GG

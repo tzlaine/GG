@@ -60,7 +60,7 @@ Wnd* ZList::Pick(const Pt& pt, Wnd* modal) const
 
 void ZList::Add(Wnd* wnd)
 {
-   // add wnd to the end of the list..
+   // add wnd to the end of the list...
    if (empty()) { // list empty
       wnd->m_zorder = DESIRED_LOWEST_Z; // by default, add first element at DESIRED_LOWEST_Z
       insert(begin(), wnd);
@@ -91,10 +91,10 @@ bool ZList::MoveUp(Wnd* wnd)
    iterator it = std::find(begin(), end(), wnd);
    if (it != end()) { // note that this also implies !empty()..
       int top_z = front()->m_zorder; // ..so this is okay to do without checking
-      if (!front()->m_ontop || wnd->m_ontop) { // if there are no on-top windows, or wnd is an on-top window..
+      if (!front()->OnTop() || wnd->OnTop()) { // if there are no on-top windows, or wnd is an on-top window..
          (*it)->m_zorder = top_z + DESIRED_GAP_SIZE + 1; // ..just slap wnd on top of the topmost element
          splice(begin(), *this, it);
-      } else { // front()->m_ontop && !wnd->m_ontop, so only move wnd up to just below the bottom of the on-top range
+      } else { // front()->OnTop() && !wnd->OnTop(), so only move wnd up to just below the bottom of the on-top range
          iterator first_non_ontop_it = FirstNonOnTop();
          int prev_z = (*--first_non_ontop_it)->m_zorder;
          int curr_z = (*++first_non_ontop_it)->m_zorder;
@@ -124,10 +124,10 @@ bool ZList::MoveDown(Wnd* wnd)
    iterator it = std::find(begin(), end(), wnd);
    if (it != end()) {
       int bottom_z = back()->m_zorder;
-      if (back()->m_ontop || !wnd->m_ontop) { // if there are only on-top windows, or wnd is not an on-top window..
+      if (back()->OnTop() || !wnd->OnTop()) { // if there are only on-top windows, or wnd is not an on-top window..
          (*it)->m_zorder = bottom_z - DESIRED_GAP_SIZE - 1; // ..just put wnd below the bottom element
          splice(end(), *this, it);
-      } else { // !back()->m_ontop && wnd->m_ontop, so only move wnd up to just below the bottom of the on-top range
+      } else { // !back()->OnTop() && wnd->OnTop(), so only move wnd up to just below the bottom of the on-top range
          iterator first_non_ontop_it = FirstNonOnTop();
          int prev_z = (*--first_non_ontop_it)->m_zorder;
          int curr_z = (*++first_non_ontop_it)->m_zorder;
@@ -197,7 +197,7 @@ ZList::iterator ZList::FirstNonOnTop()
 {
    iterator retval = begin();
    for (; retval != end(); ++retval)
-      if (!(*retval)->m_ontop)
+      if (!(*retval)->OnTop())
          break;
    return retval;
 }

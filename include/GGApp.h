@@ -118,7 +118,6 @@ public:
    virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
 
    void           Register(Wnd* wnd);           ///< adds a GG::Wnd into the z-list
-   void           RegisterOnTop(Wnd* wnd);      ///< adds a GG::Wnd into the z-list on top of all windows; sets wnd->m_ontop to true
    void           Remove(Wnd* wnd);             ///< removes a GG::Wnd from the z-list
    void           MoveUp(Wnd* wnd);             ///< moves a GG::Wnd to the top of the z-list
    void           MoveDown(Wnd* wnd);           ///< moves a GG::Wnd to the bottom of the z-list

@@ -92,7 +92,7 @@ public:
     /** This struct is used to render GG:Font text.  
         It holds vital data on each line that a string occupies when rendered with given format flags.  Each value 
         extents[i] is the furthest that the right side of the i-th character extends from the beginning of the line.*/
-    struct LineData
+    struct GG_API LineData
     {
         int Width() const {return (!extents.empty() ? extents.back() : 0);}; ///< returns the width of the line, in pixels
 
@@ -103,7 +103,7 @@ public:
     };
 
     /** This just holds the essential data necessary to represent a text formatting tag.*/
-    struct Tag
+    struct GG_API Tag
     {
         Tag() : close_tag(false), char_length(0) {} ///< default ctor
  
@@ -114,7 +114,7 @@ public:
 
     /** This holds the state of tags during rendering of text.  By keeping track of this state across multiple calls to
         RenderText(), the user can preserve the functionality of the text formatting tags, if present.*/
-    struct RenderState
+    struct GG_API RenderState
     {
         RenderState() : ignore_tags(false), use_italics(false), draw_underline(false), color_set(false) {} ///< default ctor
 

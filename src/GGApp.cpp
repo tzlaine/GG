@@ -481,14 +481,15 @@ App* App::GetApp()
 void App::RenderWindow(Wnd* wnd)
 {
     if (wnd->Render() == true) {
-        if (wnd->ClipChildren())
+        bool clip = wnd->ClipChildren();
+        if (clip)
             wnd->BeginClipping();
         for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
             if ((*it)->Visible()) {
                 RenderWindow(*it);
             }
         }
-        if (wnd->ClipChildren())
+        if (clip)
             wnd->EndClipping();
     }
 }

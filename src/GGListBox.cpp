@@ -343,12 +343,8 @@ bool ListBox::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
 
-    // clip rows to viewable area, and save old scissor state
-    glPushAttrib(GL_SCISSOR_BIT);
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(ul.x + BORDER_THICK, App::GetApp()->AppHeight() - lr.y + 2 * BottomMargin() + BORDER_THICK,
-              lr.x - ul.x - 2 * BORDER_THICK - RightMargin(),
-              lr.y - ul.y - 2 * BORDER_THICK - BottomMargin());
+    // clip rows to client area
+    BeginClipping();
 
     int last_visible_row = LastVisibleRow();
     int last_visible_col = LastVisibleCol();
@@ -394,8 +390,7 @@ bool ListBox::Render()
         top += m_rows[i]->Height();
     }
 
-    // restore previous scissor-clipping state
-    glPopAttrib();
+    EndClipping();
 
     if (m_vscroll)
         m_vscroll->Render();

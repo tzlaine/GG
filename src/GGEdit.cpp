@@ -165,11 +165,8 @@ bool Edit::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, 2);
 
-    // clip text to viewable area, and save old scissor state
-    glPushAttrib(GL_SCISSOR_BIT);
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(ul.x + (PIXEL_MARGIN - 1), App::GetApp()->AppHeight() - lr.y, lr.x - ul.x - 2 * (PIXEL_MARGIN - 1), lr.y - ul.y);
-
+    BeginClipping();
+    
     const vector<int>& extents = GetLineData()[0].extents;
     int first_char_offset = FirstCharOffset();
     int text_y_pos = ul.y + int(((lr.y - ul.y) - GetFont()->Height()) / 2.0f + 0.5f);
@@ -211,8 +208,7 @@ bool Edit::Render()
         }
     }
 
-    // restore previous state
-    glPopAttrib();
+    EndClipping();
 
     return true;
 }

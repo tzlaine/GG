@@ -34,7 +34,8 @@ namespace { // file-scope constants and functions
 const double   PI = 3.14159426;
 const double   SQRT2OVER2 = std::sqrt(2.0) / 2.0;
 
-bool g_scissor_clipping_in_use = false;
+/// a stack of the currently-active clipping rects, in GG coordinates, not OpenGL scissor coordinates
+vector<Rect> g_scissor_clipping_rects;
 
 /// whenever points on the unit circle are calculated with expensive sin() and cos() calls, the results are cached here
 map<int, valarray<double> > unit_circle_coords;
@@ -574,21 +575,30 @@ void BeginScissorClipping(Pt ul, Pt lr)
 
 void BeginScissorClipping(int x1, int y1, int x2, int y2)
 {
-    if (!g_scissor_clipping_in_use) {
+    if (g_scissor_clipping_rects.empty()) {
         // save old scissor state
         glPushAttrib(GL_SCISSOR_BIT);
         glEnable(GL_SCISSOR_TEST);
+    } else {
+        const Rect& r = g_scissor_clipping_rects.back();
+        x1 = std::max(r.Left(), std::min(x1, r.Right()));
+        y1 = std::max(r.Top(), std::min(y1, r.Bottom()));
+        x2 = std::max(r.Left(), std::min(x2, r.Right()));
+        y2 = std::max(r.Top(), std::min(y2, r.Bottom()));
     }
     glScissor(x1, App::GetApp()->AppHeight() - y2, x2 - x1, y2 - y1);
-    g_scissor_clipping_in_use = true;
+    g_scissor_clipping_rects.push_back(Rect(x1, y1, x2, y2));
 }
 
 void EndScissorClipping()
 {
-    if (g_scissor_clipping_in_use) {
+    g_scissor_clipping_rects.pop_back();
+    if (g_scissor_clipping_rects.empty()) {
         // restore previous scissor-clipping state
         glPopAttrib();
-        g_scissor_clipping_in_use = false;
+    } else {
+        const Rect& r = g_scissor_clipping_rects.back();
+        glScissor(r.Left(), App::GetApp()->AppHeight() - r.Bottom(), r.Width(), r.Height());
     }
 }
 

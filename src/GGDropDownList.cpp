@@ -129,6 +129,16 @@ const DropDownList::Row* DropDownList::CurrentItem() const
     return m_current_item_idx == -1 ? 0 : &m_LB->GetRow(m_current_item_idx);
 }
 
+Pt DropDownList::ClientUpperLeft() const
+{
+    return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK);
+}
+
+Pt DropDownList::ClientLowerRight() const
+{
+    return LowerRight() - Pt(BORDER_THICK, BORDER_THICK);
+}
+
 bool DropDownList::Render()
 {
     // draw beveled rectangle around client area
@@ -141,17 +151,9 @@ bool DropDownList::Render()
     // draw ListBox::Row of currently displayed item, if any
     const Row* current_item = CurrentItem();
     if (current_item) {
-        // clip row to viewable area, and save old scissor state
-        glPushAttrib(GL_SCISSOR_BIT);
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(ul.x + BORDER_THICK, App::GetApp()->AppHeight() - lr.y + BORDER_THICK,
-                  lr.x - ul.x - 2 * BORDER_THICK,
-                  lr.y - ul.y - 2 * BORDER_THICK);
-
+        BeginClipping();
         m_LB->RenderRow(current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->LastVisibleCol());
-
-        // restore previous scissor-clipping state
-        glPopAttrib();
+        EndClipping();
     }
 
     return true;

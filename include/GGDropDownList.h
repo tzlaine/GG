@@ -109,6 +109,9 @@ public:
     ListBoxStyle   ColAlignment(int n) const  {return m_LB->ColAlignment(n);}///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
     ListBoxStyle   RowAlignment(int n) const  {return m_LB->RowAlignment(n);}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
+    virtual Pt     ClientUpperLeft() const;
+    virtual Pt     ClientLowerRight() const;
+
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an DropDownList object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object

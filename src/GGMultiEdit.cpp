@@ -166,11 +166,8 @@ bool MultiEdit::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, 2);
 
-    // clip text to viewable area, and save old scissor state
-    glPushAttrib(GL_SCISSOR_BIT);
-    glEnable(GL_SCISSOR_TEST);
-    const int GAP = PIXEL_MARGIN - 2;
-    glScissor(ul.x + 2, App::GetApp()->AppHeight() - (lr.y - BottomMargin() - 2), ClientSize().x + 2 * GAP, ClientSize().y + 2 * GAP);
+    // clip text to client area
+    BeginClipping();
 
     Font::RenderState state;
     int first_visible_row = FirstVisibleRow();
@@ -232,8 +229,7 @@ bool MultiEdit::Render()
         }
     }
 
-    // restore previous state
-    glPopAttrib();
+    EndClipping();
 
     return true;
 }

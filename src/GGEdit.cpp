@@ -30,13 +30,12 @@
 
 namespace GG {
 
-namespace {
-const int PIXEL_MARGIN = 5;
-}
-
 ////////////////////////////////////////////////
 // GG::Edit
 ////////////////////////////////////////////////
+// static(s)
+const int Edit::PIXEL_MARGIN = 5;
+
 Edit::Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
         TextControl(x, y, w, h, str, TF_LEFT, text_color, flags),

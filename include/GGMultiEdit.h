@@ -52,7 +52,7 @@ class Scroll;
     call RecreateScrolls() at the end of the subclass's constructor, to ensure that the correct type of Scrolls are created;
     if scrolls are created in the MultiEdit base constructor, the virtual function table may not be complete yet, so 
     GG::Scrolls may be created instead of the types used in the overloaded New*Scroll() functions. */
-class MultiEdit : public Edit
+class GG_API MultiEdit : public Edit
 {
 public:
     using Wnd::SizeMove;

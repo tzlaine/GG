@@ -46,7 +46,7 @@ class Button;
     thing.  The default text for the buttons depends on the number of buttons.  For a one-button dialog, the default
     is "ok"; for a two-button dialog, the defults are "ok" and "cancel"; and for a three-button dialog, the defults 
     are "yes", "no", and "cancel".*/
-class ThreeButtonDlg : public Wnd
+class GG_API ThreeButtonDlg : public Wnd
 {
 public:
     /** \name Structors */ //@{

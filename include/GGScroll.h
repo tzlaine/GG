@@ -48,7 +48,7 @@ class Button;
     However, if you want to save and load a Scroll (using an XML encoding) that has custom buttons and/or tab, you 
     must add the new derived types to the App's XMLObjectFactory.  Otherwise, Scroll's XMLElement ctor will not know 
     how to create the custom controls at load-time.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory for details.*/
-class Scroll : public Control
+class GG_API Scroll : public Control
 {
 public:
     using Wnd::SizeMove;

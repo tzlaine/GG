@@ -35,6 +35,18 @@ typedef signed short Sint16;    ///< signed short from SDL.h; provided here in c
 typedef unsigned int Uint32;    ///< unsigned int from SDL.h; provided here in case GG is not being driven by SDL
 typedef signed int Sint32;      ///< signed int from SDL.h; provided here in case GG is not being driven by SDL
 
+#ifdef _MSC_VER
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
+# ifdef GIGI_EXPORTS
+#  define GG_API __declspec(dllexport)
+# else
+#  define GG_API __declspec(dllimport)
+# endif
+#else
+# define GG_API
+#endif
+
 // include OpenGL headers
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -97,7 +109,7 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 
 namespace GG {
 /** A base type for all templated EnumMap types. */
-struct EnumMapBase
+struct GG_API EnumMapBase
 {
     virtual ~EnumMapBase() {}
     virtual const std::string& FromEnum(int) const = 0;
@@ -132,7 +144,7 @@ template <class E> EnumMap<E> GetEnumMap()
 	...
     ENUM_MAP_END\endverbatim */
 #define ENUM_MAP_BEGIN( name )                                                  \
-template <> struct EnumMap< name > : EnumMapBase                                \
+template <> struct EnumMap< name > : EnumMapBase                       \
 {                                                                               \
     typedef name EnumType;                                                      \
     EnumMap ()                                                                  \
@@ -147,7 +159,7 @@ template <> struct EnumMap< name > : EnumMapBase                                
     virtual ~EnumMap() {}                                                       \
     virtual const std::string& FromEnum(int i) const                            \
     {                                                                           \
-	return map_.find(EnumType(i))->second;                                  \
+        return map_.find(EnumType(i))->second;                                  \
     }                                                                           \
     int FromString (const std::string &str) const                               \
     {                                                                           \
@@ -160,13 +172,13 @@ template <> struct EnumMap< name > : EnumMapBase                                
         }                                                                       \
         return BAD_VALUE;                                                       \
     }                                                                           \
-    static const int BAD_VALUE = -5000000;                                      \
+	enum {BAD_VALUE = -5000000};                                                \
     std::map<EnumType, std::string> map_;                                       \
 };
 
 /** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
 #define ENUM_STREAM_IN( name )                                                  \
-inline std::istream& operator>>(std::istream& is, name& v)                      \
+GG_API inline std::istream& operator>>(std::istream& is, name& v)             \
 {                                                                               \
     std::string str;                                                            \
     is >> str;                                                                  \
@@ -176,7 +188,7 @@ inline std::istream& operator>>(std::istream& is, name& v)                      
 
 /** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
 #define ENUM_STREAM_OUT( name )                                                 \
-inline std::ostream& operator<<(std::ostream& os, name v)                       \
+GG_API inline std::ostream& operator<<(std::ostream& os, name v)              \
 {                                                                               \
     os << GetEnumMap< name >().FromEnum(v);                                     \
     return os;                                                                  \
@@ -207,7 +219,7 @@ using std::valarray;
 
 /** This is a base class for all GG exceptions.  It is based on the std::exception class.  Since it is preferable that exceptions
     not throw other exceptions, "throw()" (which means "throws nothing") has been appended to every member function.*/
-class GGException : public std::exception
+class GG_API GGException : public std::exception
 {
 public:
    GGException() throw() {}                                    ///< a default ctor
@@ -221,12 +233,12 @@ private:
 };
 
 /** Okay, I \a hate macros, but this one is just too useful, since I want all the GG exception classes to be uniform and simple.*/
-#define GGEXCEPTION( x ) class x : public GGException \
-{ \
-public: \
-    x () throw() : GGException() {} \
-    x (const string& msg) throw() : GGException(msg) {} \
-    virtual const char* what() const throw() {return #x ;} \
+#define GGEXCEPTION( x ) class GG_API x : public GGException                  \
+{                                                                               \
+public:                                                                         \
+    x () throw() : GGException() {}                                             \
+    x (const string& msg) throw() : GGException(msg) {}                         \
+    virtual const char* what() const throw() {return #x ;}                      \
 };
 
 /** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/

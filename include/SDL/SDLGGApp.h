@@ -52,22 +52,22 @@
 /** This is an abstract singleton class that represents the application framework of an SDL OpenGL 
     application. By default, it includes the Bob Pendleton's fastevents/net2 library.
 
-    Usage indications:
-    Any application including an object of this class should declare that object as a global variable. The name 
-    of this variable will herein be assumed to be g_app. It must be allocated on the stack; if it is created 
-    dynamically a memory leak may ocurr, and there is no guarantee that its destructor will be called. 
-    SDLGGApp is designed so the main() of the application can consist of just the one line "g_app();".
+    Usage:
+    Any application including an object of this class should declare that object as a local variable in main(). 
+    The name of this variable will herein be assumed to be "app". It should be allocated on the stack; if it 
+    is created dynamically a leak may occur. 
+    SDLGGApp is designed so the main() of the application can consist of just the one line "app();".
     
     To do this, the user needs only to override the Initialize() and FinalCleanup() methods, and ensure that 
-    the program does not terminate abnormally; this ensures FinalCleanup() is called when g_app's destructor 
+    the program does not terminate abnormally; this ensures FinalCleanup() is called when app's destructor 
     is invoked. Exit() can also perform cleanup and terminate the application cleanly.
     
     Most of the member methods of SDLGGApp have been declared virtual, to give the user great control when
-    subclassing. The virtual function calls are not a performance issue, since none of the methods is called
-    repeatedly, except HandleEvent(); if this is a problem, just create a new function in your subclass and
-    call that from within Run() instead of HandleEvent(). Note that though the bulk of the program execution 
-    takes place within Run(), Run() itself is also only called once.*/
-class SDLGGApp : public GG::App
+    subclassing. The virtual function calls are usually not a performance issue, since none of the methods 
+    is called repeatedly, except HandleEvent(); if this is a problem, just create a new function in your 
+    subclass and call that from within Run() instead of HandleEvent(). Note that though the bulk of the 
+    program execution takes place within Run(), Run() itself is also only called once. */
+class GG_API SDLGGApp : public GG::App
 {
 public:
     /** \name Structors */ //@{
@@ -84,7 +84,7 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    void operator()()                   {App::operator()();} ///< external interface to Run()
+    void           operator()() {App::operator()();}///< external interface to Run()
    
     virtual void   Exit(int code);                  ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
 

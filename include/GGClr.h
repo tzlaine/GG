@@ -38,7 +38,7 @@ namespace GG {
     unsigned bytes that compose an RGBA color, or the individual unsigned bytes "a", "r", "g", and "b", each of which represents a 
     color channel.  You should not use literals to initialize Color objects; depending on the endian-ness of the machine, 
     0x00FFFFFF would be transparent white (little-endian) or opaque yellow (big-endian).*/
-struct Clr
+struct GG_API Clr
 {
     /** \name Structors */ //@{
     Clr();                                                    ///< default ctor
@@ -70,17 +70,17 @@ struct Clr
 };
 
 // some useful color constants
-const Clr CLR_ZERO(0, 0, 0, 0);
-const Clr CLR_BLACK(0, 0, 0, 255);
-const Clr CLR_WHITE(255, 255, 255, 255);
-const Clr CLR_GRAY(127, 127, 127, 255);
-const Clr CLR_SHADOW(127, 127, 127, 127);
-const Clr CLR_RED(255, 0, 0, 255);
-const Clr CLR_GREEN(0, 255, 0, 255);
-const Clr CLR_BLUE(0, 0, 255, 255);
-const Clr CLR_CYAN(0, 255, 255, 255);
-const Clr CLR_YELLOW(255, 255, 0, 255);
-const Clr CLR_MAGENTA(255, 0, 255, 255);
+extern GG_API const Clr CLR_ZERO;
+extern GG_API const Clr CLR_BLACK;
+extern GG_API const Clr CLR_WHITE;
+extern GG_API const Clr CLR_GRAY;
+extern GG_API const Clr CLR_SHADOW;
+extern GG_API const Clr CLR_RED;
+extern GG_API const Clr CLR_GREEN;
+extern GG_API const Clr CLR_BLUE;
+extern GG_API const Clr CLR_CYAN;
+extern GG_API const Clr CLR_YELLOW;
+extern GG_API const Clr CLR_MAGENTA;
 
 } // namepace GG
 

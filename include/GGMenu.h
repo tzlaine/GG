@@ -41,7 +41,7 @@ class TextControl;
     (and so non-zero); any item_ID <= 0 is considered invlaid.  Each MenuItem has a signal that is emmitted with its 
     menu_ID member whenever it is selected. Such signals may be emitted even when the menu_ID is 0.  These signals allow
     each MenuItem to be attached directly to code that should be executed when that item is selected. */
-struct MenuItem
+struct GG_API MenuItem
 {
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int)> SelectedSignalType; ///< invokes the appropriate functor to handle the menu selection, and passes the ID assigned to the item
@@ -100,7 +100,7 @@ struct MenuItem
     browses the menu items, such as displaying some visual cue to indicate the result of chosing a particular menu entry, 
     you can attach a slot function to the BrowsedSignalType object returned by BrowsedSignal().  Whenever the mouse moves 
     to a new menu item, this signal is emitted with the ID number of the item under the cursor.  */
-class MenuBar : public Control
+class GG_API MenuBar : public Control
 {
 public:
     using Wnd::SizeMove;
@@ -201,7 +201,7 @@ private:
     as the user browses the menu items, such as displaying some visual cue to indicate the result of chosing a particular 
     menu entry, you can attach a slot function to the BrowsedSignalType object returned by BrowsedSignal().  Whenever the 
     mouse moves to a new menu item, this signal is emitted with the ID number of the item under the cursor. */
-class PopupMenu : public Wnd
+class GG_API PopupMenu : public Wnd
 {
 public:
     /** \name Signal Types */ //@{

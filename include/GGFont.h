@@ -40,7 +40,7 @@
 namespace GG {
 
 /** returns a string of the form "<rgba r g b a>" from a Clr object with color channels r, b, g, a.*/
-string RgbaTag(const Clr& c);
+GG_API string RgbaTag(const Clr& c);
 
 
 /** This class creates one or more 16-bpp OpenGL textures that contain rendered text from a requested font file at the 
@@ -87,7 +87,7 @@ string RgbaTag(const Clr& c);
     tags at all, call DetermineLines() and RenderText() with the parameter tags == false (this is the default value), or 
     include a \<pre\> tag at the beginning of the text to be rendered.
    */
-class Font
+class GG_API Font
 {
 public:
     /** This struct is used to render GG:Font text.  
@@ -232,7 +232,7 @@ ENUM_STREAM_OUT(Font::GlyphRange)
     that the original shared_ptr is destroyed.  Due to the shared_ptr semantics, the object pointed to by the shared_ptr is deleted 
     if and only if the last shared_ptr that refers to it is deleted.  So any requested font can be used as long as the caller 
     desires, even when another caller tells the FontManager to free the font.*/
-class FontManager
+class GG_API FontManager
 {
 private:
     /// This GG::FontManager-private struct is used as a key type for the map of rendered fonts.

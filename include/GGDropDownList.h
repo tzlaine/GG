@@ -51,7 +51,7 @@ namespace GG {
     DropDownList.  Though you can still set the alignment, indentation, etc. of individual rows, as in ListBox, the 
     currently-selected row will have the same alignment, indentation, etc. when displayed in the control in its 
     unopened state.  This may look quite ugly.*/
-class DropDownList : public Control
+class GG_API DropDownList : public Control
 {
 public:
     using Wnd::SizeMove;

@@ -50,7 +50,7 @@ namespace GG {
    focus.  So you would only receive a single update, namely "100", which is a valid number for that control, 
    and you would receive it only when it is certain that the user is finished editing the text (when the focus
    changes).  Note that both signals may be used at the same time, if desired.*/
-class Edit : public TextControl
+class GG_API Edit : public TextControl
 {
 public:
     /** \name Signal Types */ //@{

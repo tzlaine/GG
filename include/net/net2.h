@@ -50,42 +50,42 @@ extern "C" {
   // General NET2 routines
   //
 
-  int NET2_Init();                                           // Initialize net2 
-  void NET2_Quit();                                          // Shutdown net2
+  extern DECLSPEC int NET2_Init();                                           // Initialize net2 
+  extern DECLSPEC void NET2_Quit();                                          // Shutdown net2
 
-  int NET2_GetEventType(SDL_Event *event);                   // get the event type from a net2 event
-  int NET2_GetSocket(SDL_Event *event);                      // get the socket from an event
-  int NET2_GetEventData(SDL_Event *event);                   // get the auxiliar data from an event
+  extern DECLSPEC int NET2_GetEventType(SDL_Event *event);                   // get the event type from a net2 event
+  extern DECLSPEC int NET2_GetSocket(SDL_Event *event);                      // get the socket from an event
+  extern DECLSPEC int NET2_GetEventData(SDL_Event *event);                   // get the auxiliar data from an event
 
-  char *NET2_GetError();                                     // get a string describing the last error
-  char *NET2_GetEventError(SDL_Event *event);                // get the string for an error event
+  extern DECLSPEC char *NET2_GetError();                                     // get a string describing the last error
+  extern DECLSPEC char *NET2_GetEventError(SDL_Event *event);                // get the string for an error event
 
-  int NET2_ResolveHost(IPaddress *ip, char *name, int port); // get the IP address for a host name
+  extern DECLSPEC int NET2_ResolveHost(IPaddress *ip, char *name, int port); // get the IP address for a host name
 
   //------------------------------------------
   //
   // TCP routines
   //
 
-  int NET2_TCPAcceptOn(int port);                          // Accept incoming connections
-  int NET2_TCPAcceptOnIP(IPaddress *ip);                   // Accept incoming connections
-  int NET2_TCPConnectTo(char *host, int port);             // Connect to an IP address/port
-  int NET2_TCPConnectToIP(IPaddress *ip);                  // Connect to an IP address/port
-  void NET2_TCPClose(int socket);                          // close a TCP socket
-  int NET2_TCPSend(int socket, char *buf, int len);        // Send data to a socket
-  int NET2_TCPRead(int socket, char *buf, int len);        // Read data from a socket
-  IPaddress *NET2_TCPGetPeerAddress(int socket);           // Get the IP address of a socket
+  extern DECLSPEC int NET2_TCPAcceptOn(int port);                          // Accept incoming connections
+  extern DECLSPEC int NET2_TCPAcceptOnIP(IPaddress *ip);                   // Accept incoming connections
+  extern DECLSPEC int NET2_TCPConnectTo(char *host, int port);             // Connect to an IP address/port
+  extern DECLSPEC int NET2_TCPConnectToIP(IPaddress *ip);                  // Connect to an IP address/port
+  extern DECLSPEC void NET2_TCPClose(int socket);                          // close a TCP socket
+  extern DECLSPEC int NET2_TCPSend(int socket, char *buf, int len);        // Send data to a socket
+  extern DECLSPEC int NET2_TCPRead(int socket, char *buf, int len);        // Read data from a socket
+  extern DECLSPEC IPaddress *NET2_TCPGetPeerAddress(int socket);           // Get the IP address of a socket
 
   //------------------------------------------
   //
   // UDP routines
   //
 
-  int NET2_UDPAcceptOn(int port, int size);
-  void NET2_UDPClose(int socket);
-  int NET2_UDPSend(IPaddress *addr, char *buf, int len);
-  UDPpacket *NET2_UDPRead(int socket);
-  void NET2_UDPFreePacket(UDPpacket *p);
+  extern DECLSPEC int NET2_UDPAcceptOn(int port, int size);
+  extern DECLSPEC void NET2_UDPClose(int socket);
+  extern DECLSPEC int NET2_UDPSend(IPaddress *addr, char *buf, int len);
+  extern DECLSPEC UDPpacket *NET2_UDPRead(int socket);
+  extern DECLSPEC void NET2_UDPFreePacket(UDPpacket *p);
 
 #ifdef __cplusplus
 }

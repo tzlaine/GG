@@ -65,7 +65,7 @@ class SubTexture;
     controls, in order for such controls to be automatically saved and loaded using XML encoding, any user-defined 
     Control subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and 
     GG::XMLObjectFactory for details. */
-class ListBox : public Control
+class GG_API ListBox : public Control
 {
 public:
     using Wnd::SizeMove;
@@ -80,9 +80,9 @@ public:
         only affects the first cell in the Row (and not its sub rows).  This is intended to facilitate indented lists
         like tree-views, etc.  A Row may include several subrows; each subrow is considered to be part of its Row.  Note 
         that Rows are stored in ListBoxes by reference, not copy; this means that you can subclass from Row to create your 
-	own custom Row types.  This is the recommended method for associating a row with the non-GUI object that it 
-	represents. */
-    struct Row : public vector<Control*>, public Wnd
+        own custom Row types.  This is the recommended method for associating a row with the non-GUI object that it 
+        represents. */
+    struct GG_API Row : public vector<Control*>, public Wnd
     {
         using vector<Control*>::push_back; // this brings push_back into this subclass, even though we've overloaded it locally
 
@@ -99,7 +99,7 @@ public:
         virtual const string& SortKey(int column) const; ///< returns the string by which this row may be sorted
 
         virtual XMLElement    XMLEncode() const;         ///< constructs an XMLElement from an Row object
-	virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Row
+        virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Row
         //@}
 
         /** \name Mutators */ //@{
@@ -121,7 +121,7 @@ public:
 
     /** thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any 
         time during the receipt of a drop -- even in a function called by a DroppedSignal. */
-    class DontAcceptDropException : public GGException {};
+    class GG_API DontAcceptDropException : public GGException {};
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void ()>                         ClearedSignalType;        ///< emitted when the list box is cleared

@@ -48,7 +48,7 @@ class Font;
 
 /** the default file open/save dialog box.  This dialog, like all the common GG dialogs, is modal.  It asks the user
     for one or more filenames, which the caller may retrieve with a call to Result() after the dialog is closed.*/
-class FileDlg : public Wnd
+class GG_API FileDlg : public Wnd
 {
 public:
     /** \name Structors */ //@{

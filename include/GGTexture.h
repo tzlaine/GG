@@ -48,7 +48,7 @@ namespace GG {
     not support the alteration of textures once loaded.  Texture therefore also does not provide any such support.  Also,
     since a texture saved as an XMLElement is recreated from the filename associated with the texture, creating a texture from
     a programmatically created or altered image requires that the recreation of the Texture be handled by the user explicitly. */
-class Texture
+class GG_API Texture
 {
 public:
     GGEXCEPTION(TextureException);   ///< exception class \see GG::GGEXCEPTION
@@ -125,7 +125,7 @@ private:
 };
 
 /** This class is a convenient way to store the info needed to use a portion of an OpenGL texture.*/
-class SubTexture
+class GG_API SubTexture
 {
 public:
     GGEXCEPTION(SubTextureException);   ///< exception class \see GG::GGEXCEPTION
@@ -180,7 +180,7 @@ private:
 /** This singleton class is essentially a very thin wrapper around a map of Texture smart pointers, keyed on std::string texture names.  
     The user need only request a texture through GetTexture(); if the texture is not already resident, it will be loaded.  If the user would 
     like to create her own images and store them in the manager, that can be accomplished via StoreTexture() calls.*/
-class TextureManager
+class GG_API TextureManager
 {
 public:
     GGEXCEPTION(TextureManagerException);   ///< exception class \see GG::GGEXCEPTION

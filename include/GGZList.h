@@ -41,7 +41,7 @@ class Wnd;
     the inserted window is placed after them if it is not also modal or on-top. Z-values decrease into the screen.  Windows 
     in the z-list are kept in front-to-back order.  No windows may share the same z-value.  Add, Remove, MoveUp, and MoveDown 
     all also add/remove/move all descendent windows.*/
-class ZList : public list<Wnd*>
+class GG_API ZList : public list<Wnd*>
 {
 public:
     GGEXCEPTION(ZListException);   ///< exception class \see GG::GGEXCEPTION

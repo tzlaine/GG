@@ -55,7 +55,7 @@ class Texture;
     you set the end frame index to N, the last frame to be shown will be N, not N - 1. Also, while this control does 
     not need to be the same size as the frames replayed within it, the size of the frames is taken from the size 
     of the control when it is contructed. */
-class DynamicGraphic : public Control
+class GG_API DynamicGraphic : public Control
 {
 public:
     /** \name Signal Types */ //@{

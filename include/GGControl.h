@@ -39,7 +39,7 @@ namespace GG {
     All controls may be disabled.  By default, a Control passes keyboard input to its parent Wnd.  Any class derived
     from Control should do the same with any keyboard input it does not need for its own use.  For instance, an Edit
     control needs to know about arrow key keyboard input, but it should pass other key presses like 'ESC' to its parent.*/
-class Control : public Wnd
+class GG_API Control : public Wnd
 {
 public:
     /** \name Accessors */ //@{

@@ -35,7 +35,7 @@
 namespace GG {
 
 /** a GG screen coordinate class */
-struct Pt
+struct GG_API Pt
 {
     /** \name Structors */ //@{
     Pt();                       ///< default ctor
@@ -73,7 +73,7 @@ struct Pt
 };
 
 /** a GG rectangle class. this is essentially just two points that bound the rectangle*/
-struct Rect
+struct GG_API Rect
 {
     /** \name Structors */ //@{
     Rect();                                ///< default ctor
@@ -116,8 +116,8 @@ struct Rect
     Pt lr; ///< the lower-right corner of the Rect
 };
 
-inline Rect operator+(const Pt& pt, const Rect& rect) {return rect + pt;} ///< returns \a rect shifted by adding \a pt to each corner
-inline Rect operator-(const Pt& pt, const Rect& rect) {return rect - pt;} ///< returns \a rect shifted by subtracting \a pt from each corner
+GG_API inline Rect operator+(const Pt& pt, const Rect& rect) {return rect + pt;} ///< returns \a rect shifted by adding \a pt to each corner
+GG_API inline Rect operator-(const Pt& pt, const Rect& rect) {return rect - pt;} ///< returns \a rect shifted by subtracting \a pt from each corner
 
 } // namepace GG
 

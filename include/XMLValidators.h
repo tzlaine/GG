@@ -67,7 +67,7 @@ template <> inline long double mod<long double>(long double dividend, long doubl
 }
 
 /** base class for all OptionsDB validators. Simply provides the basic interface. */
-struct ValidatorBase
+struct GG_API ValidatorBase
 {
     /** returns normally if \a str is a valid value, or throws otherwise */
     virtual void Validate(const std::string& str) const = 0;
@@ -218,30 +218,30 @@ public:
 
         if (val < (m_zero ? 0 : 1)) {
             throw std::runtime_error("FlagEnumValidator::Validate() : String \"" + str + "\" has a value less than the allowed minimum of " +
-				     boost::lexical_cast<std::string>(m_zero ? T(0) : T(1)) + ".");
-	} else if (val > m_max) {
+                                     boost::lexical_cast<std::string>(m_zero ? T(0) : T(1)) + ".");
+        } else if (val > m_max) {
             throw std::runtime_error("FlagEnumValidator::Validate() : String \"" + str + "\" has a value greater than the allowed maximum of " +
-				     boost::lexical_cast<std::string>(m_max) + ".");
-	}
+                                     boost::lexical_cast<std::string>(m_max) + ".");
+        }
 
-	bool match = false;
-	if (m_zero && val == 0) {
-	    match = true;
-	} else {
-	    int match_val = 1;
-	    while (match_val < m_max) {
-		if (val == match_val) {
-		    match = true;
-		    break;
-		}
-		match_val *= 2;
-	    }
-	}
+        bool match = false;
+        if (m_zero && val == 0) {
+            match = true;
+        } else {
+            int match_val = 1;
+            while (match_val < m_max) {
+                if (val == match_val) {
+                    match = true;
+                    break;
+                }
+                match_val *= 2;
+            }
+        }
 
         if (!match) {
             throw std::runtime_error("FlagEnumValidator::Validate() : String \"" + str + "\" has a value that is not a power of two " +
-				     boost::lexical_cast<std::string>(m_min) + ".");
-	}
+                                     boost::lexical_cast<std::string>(m_min) + ".");
+        }
     }
 
     virtual FlagEnumValidator *Clone() const
@@ -260,10 +260,10 @@ struct ListValidator : public ValidatorBase
 {
     virtual void Validate(const std::string& str) const
     {
-	vector<string> tokens = Tokenize(str);
-	for (unsigned int i = 0; i < tokens.size(); ++i) {
-	    boost::lexical_cast<T>(tokens[i]);
-	}
+        vector<string> tokens = Tokenize(str);
+        for (unsigned int i = 0; i < tokens.size(); ++i) {
+            boost::lexical_cast<T>(tokens[i]);
+        }
     }
 
     virtual ListValidator *Clone() const
@@ -278,13 +278,13 @@ struct MapListValidator : public ValidatorBase
 {
     virtual void Validate(const std::string& str) const
     {
-	pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
-	for (unsigned int i = 0; i < tokens.size(); ++i) {
-	    boost::lexical_cast<T1>(tokens.first[i]);
-	}
-	for (unsigned int i = 0; i < tokens.size(); ++i) {
-	    boost::lexical_cast<T2>(tokens.second[i]);
-	}
+        pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
+        for (unsigned int i = 0; i < tokens.size(); ++i) {
+            boost::lexical_cast<T1>(tokens.first[i]);
+        }
+        for (unsigned int i = 0; i < tokens.size(); ++i) {
+            boost::lexical_cast<T2>(tokens.second[i]);
+        }
     }
 
     virtual MapListValidator *Clone() const

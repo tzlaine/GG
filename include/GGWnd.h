@@ -57,7 +57,7 @@ namespace GG {
     Wnd-derived children, in order for such children to be automatically saved and loaded using XML encoding, any 
     user-defined Wnd subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and 
     GG::XMLObjectFactory for details.*/
-class Wnd : public boost::signals::trackable
+class GG_API Wnd : public boost::signals::trackable
 {
 public:
     /// window creation flags

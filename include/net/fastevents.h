@@ -32,15 +32,16 @@
 extern "C" {
 #endif
 
-  int FE_Init();                         // Initialize FE
-  void FE_Quit();                        // shutdown FE
+  extern DECLSPEC int FE_Init();                         // Initialize FE
+  extern DECLSPEC void FE_Quit();                        // shutdown FE
 
-  void FE_PumpEvents();                  // replacement for SDL_PumpEvents
-  int FE_PollEvent(SDL_Event *event);    // replacement for SDL_PollEvent
-  int FE_WaitEvent(SDL_Event *event);    // replacement for SDL_WaitEvent
-  int FE_PushEvent(SDL_Event *event);    // replacement for SDL_PushEvent
+  extern DECLSPEC void FE_PumpEvents();                  // replacement for SDL_PumpEvents
+  extern DECLSPEC int FE_PollEvent(SDL_Event *event);    // replacement for SDL_PollEvent
+  extern DECLSPEC int FE_WaitEvent(SDL_Event *event);    // replacement for SDL_WaitEvent
+  extern DECLSPEC int FE_PushEvent(SDL_Event *event);    // replacement for SDL_PushEvent
 
-  char *FE_GetError();                   // get the last error
+  extern DECLSPEC char *FE_GetError();                   // get the last error
+
 #ifdef __cplusplus
 }
 #endif

@@ -53,7 +53,7 @@ namespace GG {
     still held by at least one DynamicText object, it will not be destroyed, due to the shared_ptr.  Note that if "" is supplied as the 
     font_filename parameter, no text will be rendered, but a valid DynamicText object will be constructed, which may later contain
     renderable text. DynamicText objects support text with formatting tags. See GG::Font for details.*/
-class TextControl : public Control
+class GG_API TextControl : public Control
 {
 public:
     /** \name Structors */ //@{

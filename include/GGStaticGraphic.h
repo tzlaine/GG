@@ -41,7 +41,7 @@ namespace GG {
 /** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a 
     StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the StaticGraphic's
     window area. \see StaticGraphicStyle*/
-class StaticGraphic : public Control
+class GG_API StaticGraphic : public Control
 {
 public:
     /** \name Structors */ //@{

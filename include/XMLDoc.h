@@ -28,6 +28,16 @@
 #ifndef _XMLDoc_h_
 #define _XMLDoc_h_
 
+#ifdef _MSC_VER
+# ifdef GIGI_EXPORTS
+#  define GG_API __declspec(dllexport)
+# else
+#  define GG_API __declspec(dllimport)
+# endif
+#else
+# define GG_API
+#endif
+
 #include <boost/lexical_cast.hpp>
 
 #include <fstream>       
@@ -104,7 +114,7 @@ using std::vector;
     single concatenated string, as illustrated above.
     This is not the most time- or space-efficient way to organize object data, but it may just be one of the simplest 
     and most easily read. */
-class XMLElement
+class GG_API XMLElement
 {
 public:
     typedef vector<XMLElement>::iterator         child_iterator;
@@ -225,7 +235,7 @@ private:
 
 /** encapsulates an entire XML document.  Each XMLDoc is assumed to take up an entire file, and to contain an arbitrary
     number of XMLElements within its root_node member. */
-class XMLDoc
+class GG_API XMLDoc
 {
 public:
     /** \name Structors */ //@{
@@ -274,7 +284,7 @@ private:
     static void AppendToText(const char* first, const char* last);
 };
 
-class XMLElementValidator
+class GG_API XMLElementValidator
 {
 public:
     /** \name Structors */ //@{
@@ -313,11 +323,11 @@ private:
 
 
 /** Breaks a given string up into tokens.  The resulting vector contains all the non-whitespace characters from \a str. */
-vector<string> Tokenize(const string& str);
+GG_API vector<string> Tokenize(const string& str);
 
 /** Takes a string of the form "(first, second) (first, second) ..." and produces two vectors of token strings: 
     one for keys and one for values. */
-pair<vector<string>, vector<string> > TokenizeMapString(const string& str);
+GG_API pair<vector<string>, vector<string> > TokenizeMapString(const string& str);
 
 /** Takes any simple STL container (vector, set, etc.) and puts its contents into a whitespace-delimited list.  
     Due to the key-value pair organization of STL maps, this function does not work with them.  Use StringFromMap() 

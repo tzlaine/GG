@@ -41,9 +41,9 @@ Connect(SigT& sig, const typename SigT::slot_type& _slot, int grp = 0) {return s
     in slot group \a grp.  Slot call groups are called in ascending order; slots within each group are called in an 
     undefined order. Overloads exist for const- and non-const- versions with 0 to 8 arguments.  8 was picked as the max 
     simply because boost::bind only supports up to 8 args as of version 1.29.0.*/
-template <class R, class T> inline
+template <class C, class R, class T> inline
 boost::signals::connection 
-Connect(boost::signal<R ()>& sig, 
+Connect(boost::signal<R (), C>& sig, 
         R (T::* fn) (), 
         T* obj, 
         int grp = 0)
@@ -51,9 +51,9 @@ Connect(boost::signal<R ()>& sig,
     return sig.connect(grp, boost::bind(fn, obj));
 }
 
-template <class R, class T> inline
+template <class C, class R, class T> inline
 boost::signals::connection 
-Connect(boost::signal<R ()>& sig, 
+Connect(boost::signal<R (), C>& sig, 
         R (T::* fn) () const, 
         T* obj, 
         int grp = 0)
@@ -61,9 +61,9 @@ Connect(boost::signal<R ()>& sig,
     return sig.connect(grp, boost::bind(fn, obj));
 }
 
-template <class R, class T, class A1> inline
+template <class C, class R, class T, class A1> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1)>& sig, 
+Connect(boost::signal<R (A1), C>& sig, 
         R (T::* fn) (A1), 
         T* obj, 
         int grp = 0)
@@ -71,9 +71,9 @@ Connect(boost::signal<R (A1)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1));
 }
 
-template <class R, class T, class A1> inline
+template <class C, class R, class T, class A1> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1)>& sig,
+Connect(boost::signal<R (A1), C>& sig,
         R (T::* fn) (A1) const, 
         T* obj, 
         int grp = 0)
@@ -81,9 +81,9 @@ Connect(boost::signal<R (A1)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1));
 }
 
-template <class R, class T, class A1, class A2> inline
+template <class C, class R, class T, class A1, class A2> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2)>& sig, 
+Connect(boost::signal<R (A1, A2), C>& sig, 
         R (T::* fn) (A1, A2), 
         T* obj, 
         int grp = 0)
@@ -91,9 +91,9 @@ Connect(boost::signal<R (A1, A2)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2));
 }
 
-template <class R, class T, class A1, class A2> inline
+template <class C, class R, class T, class A1, class A2> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2)>& sig, 
+Connect(boost::signal<R (A1, A2), C>& sig, 
         R (T::* fn) (A1, A2) const, 
         T* obj, 
         int grp = 0)
@@ -101,9 +101,9 @@ Connect(boost::signal<R (A1, A2)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2));
 }
 
-template <class R, class T, class A1, class A2, class A3> inline
+template <class C, class R, class T, class A1, class A2, class A3> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3)>& sig, 
+Connect(boost::signal<R (A1, A2, A3), C>& sig, 
         R (T::* fn) (A1, A2, A3), 
         T* obj, 
         int grp = 0)
@@ -111,9 +111,9 @@ Connect(boost::signal<R (A1, A2, A3)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3));
 }
 
-template <class R, class T, class A1, class A2, class A3> inline
+template <class C, class R, class T, class A1, class A2, class A3> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3)>& sig, 
+Connect(boost::signal<R (A1, A2, A3), C>& sig, 
         R (T::* fn) (A1, A2, A3) const, 
         T* obj, 
         int grp = 0)
@@ -121,9 +121,9 @@ Connect(boost::signal<R (A1, A2, A3)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4), 
         T* obj, 
         int grp = 0)
@@ -131,9 +131,9 @@ Connect(boost::signal<R (A1, A2, A3, A4)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4) const, 
         T* obj, 
         int grp = 0)
@@ -141,9 +141,9 @@ Connect(boost::signal<R (A1, A2, A3, A4)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5), 
         T* obj, 
         int grp = 0)
@@ -151,9 +151,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5) const, 
         T* obj, 
         int grp = 0)
@@ -161,9 +161,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5, class A6> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5, A6)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5, A6), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5, A6), 
         T* obj, 
         int grp = 0)
@@ -171,9 +171,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5, class A6> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5, A6)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5, A6), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5, A6) const, 
         T* obj, 
         int grp = 0)
@@ -181,9 +181,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5, A6, A7), 
         T* obj, 
         int grp = 0)
@@ -191,9 +191,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5, A6, A7) const, 
         T* obj, 
         int grp = 0)
@@ -201,9 +201,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5, A6, A7, A8), 
         T* obj, 
         int grp = 0)
@@ -211,9 +211,9 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8)>& sig,
     return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7, _8));
 }
 
-template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> inline
+template <class C, class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> inline
 boost::signals::connection 
-Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8)>& sig, 
+Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8), C>& sig, 
         R (T::* fn) (A1, A2, A3, A4, A5, A6, A7, A8) const, 
         T* obj, 
         int grp = 0)

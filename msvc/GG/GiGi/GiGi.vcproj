@@ -86,6 +86,7 @@
 				OutputFile="$(OutDir)/GiGi.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;C:\SDL-1.2.7\lib&quot;;&quot;C:\log4cpp-0.3.4b\msvc6\log4cppDLL\Release&quot;;&quot;C:\freetype-2.1.7\objs&quot;;C:\DevIL\lib;&quot;C:\boost-1.30.2\libs\filesystem\build\bin\libboost_filesystem.lib\vc7.1\release\runtime-link-dynamic&quot;;&quot;C:\boost-1.30.2\libs\signals\build\bin\libboost_signals.lib\vc7.1\release\runtime-link-dynamic&quot;"
+				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -167,6 +168,15 @@
 				RelativePath="..\..\..\src\GGMultiEdit.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\src\GGPluginInterface.cpp">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="..\..\..\libltdl"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\src\GGPtRect.cpp">
 			</File>
 			<File
@@ -192,6 +202,15 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\GGZList.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\libltdl\ltdl.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="error_t=int;HAVE_STDIO_H;HAVE_STDLIB_H;HAVE_STRING_H;HAVE_CTYPE_H;HAVE_MEMORY_H;HAVE_ERRNO_H;__WIN32__;HAVE_MEMCPY=1;HAVE_MEMMOVE=1;LTDL_OBJDIR=\&quot;.libs/\&quot;;LTDL_DLOPEN_DEPLIBS=1;LTDL_SHLIBPATH_VAR=\&quot;PATH\&quot;;LTDL_SHLIB_EXT=\&quot;.dll\&quot;"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\XMLDoc.cpp">
@@ -253,6 +272,9 @@
 				RelativePath="..\..\..\include\GGMultiEdit.h">
 			</File>
 			<File
+				RelativePath="..\..\..\include\GGPluginInterface.h">
+			</File>
+			<File
 				RelativePath="..\..\..\include\GGPtRect.h">
 			</File>
 			<File
@@ -284,6 +306,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\GGZList.h">
+			</File>
+			<File
+				RelativePath="..\..\..\libltdl\ltdl.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\XMLDoc.h">

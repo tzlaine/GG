@@ -149,6 +149,9 @@
 				RelativePath="..\..\..\src\GGEdit.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\src\GGEventPump.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\src\dialogs\GGFileDlg.cpp">
 			</File>
 			<File
@@ -227,6 +230,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\GGEdit.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\GGEventPump.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\dialogs\GGFileDlg.h">

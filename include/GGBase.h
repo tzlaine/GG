@@ -111,6 +111,7 @@ namespace GG {
 /** A base type for all templated EnumMap types. */
 struct GG_API EnumMapBase
 {
+    enum {BAD_VALUE = -5000000};
     virtual ~EnumMapBase() {}
     virtual const std::string& FromEnum(int) const = 0;
     virtual int FromString (const std::string&) const = 0;
@@ -144,9 +145,10 @@ template <class E> EnumMap<E> GetEnumMap()
 	...
     ENUM_MAP_END\endverbatim */
 #define ENUM_MAP_BEGIN( name )                                                  \
-template <> struct EnumMap< name > : EnumMapBase                       \
+template <> struct EnumMap< name > : EnumMapBase                                \
 {                                                                               \
     typedef name EnumType;                                                      \
+    typedef std::map<EnumType, std::string> MapType;                            \
     EnumMap ()                                                                  \
     {
 
@@ -156,7 +158,6 @@ template <> struct EnumMap< name > : EnumMapBase                       \
 /** Declares the end of a template specialization of EnumMap, for enumerated type \a name. */
 #define ENUM_MAP_END                                                            \
     }                                                                           \
-    virtual ~EnumMap() {}                                                       \
     virtual const std::string& FromEnum(int i) const                            \
     {                                                                           \
         return map_.find(EnumType(i))->second;                                  \
@@ -172,13 +173,12 @@ template <> struct EnumMap< name > : EnumMapBase                       \
         }                                                                       \
         return BAD_VALUE;                                                       \
     }                                                                           \
-	enum {BAD_VALUE = -5000000};                                                \
-    std::map<EnumType, std::string> map_;                                       \
+    MapType map_;                                                               \
 };
 
 /** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
 #define ENUM_STREAM_IN( name )                                                  \
-GG_API inline std::istream& operator>>(std::istream& is, name& v)             \
+GG_API inline std::istream& operator>>(std::istream& is, name& v)               \
 {                                                                               \
     std::string str;                                                            \
     is >> str;                                                                  \
@@ -188,7 +188,7 @@ GG_API inline std::istream& operator>>(std::istream& is, name& v)             \
 
 /** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
 #define ENUM_STREAM_OUT( name )                                                 \
-GG_API inline std::ostream& operator<<(std::ostream& os, name v)              \
+GG_API inline std::ostream& operator<<(std::ostream& os, name v)                \
 {                                                                               \
     os << GetEnumMap< name >().FromEnum(v);                                     \
     return os;                                                                  \
@@ -233,7 +233,7 @@ private:
 };
 
 /** Okay, I \a hate macros, but this one is just too useful, since I want all the GG exception classes to be uniform and simple.*/
-#define GGEXCEPTION( x ) class GG_API x : public GGException                  \
+#define GGEXCEPTION( x ) class GG_API x : public GGException                    \
 {                                                                               \
 public:                                                                         \
     x () throw() : GGException() {}                                             \
@@ -649,6 +649,281 @@ enum Key {
     GGK_LAST
 };
 
+// define EnumMap and stream operators for Mod
+ENUM_MAP_BEGIN(Key)
+    ENUM_MAP_INSERT(GGK_UNKNOWN)
+    ENUM_MAP_INSERT(GGK_FIRST)
+    ENUM_MAP_INSERT(GGK_BACKSPACE)
+    ENUM_MAP_INSERT(GGK_TAB)
+    ENUM_MAP_INSERT(GGK_CLEAR)
+    ENUM_MAP_INSERT(GGK_RETURN)
+    ENUM_MAP_INSERT(GGK_PAUSE)
+    ENUM_MAP_INSERT(GGK_ESCAPE)
+    ENUM_MAP_INSERT(GGK_SPACE)
+    ENUM_MAP_INSERT(GGK_EXCLAIM)
+    ENUM_MAP_INSERT(GGK_QUOTEDBL)
+    ENUM_MAP_INSERT(GGK_HASH)
+    ENUM_MAP_INSERT(GGK_DOLLAR)
+    ENUM_MAP_INSERT(GGK_AMPERSAND)
+    ENUM_MAP_INSERT(GGK_QUOTE)
+    ENUM_MAP_INSERT(GGK_LEFTPAREN)
+    ENUM_MAP_INSERT(GGK_RIGHTPAREN)
+    ENUM_MAP_INSERT(GGK_ASTERISK)
+    ENUM_MAP_INSERT(GGK_PLUS)
+    ENUM_MAP_INSERT(GGK_COMMA)
+    ENUM_MAP_INSERT(GGK_MINUS)
+    ENUM_MAP_INSERT(GGK_PERIOD)
+    ENUM_MAP_INSERT(GGK_SLASH)
+    ENUM_MAP_INSERT(GGK_0)
+    ENUM_MAP_INSERT(GGK_1)
+    ENUM_MAP_INSERT(GGK_2)
+    ENUM_MAP_INSERT(GGK_3)
+    ENUM_MAP_INSERT(GGK_4)
+    ENUM_MAP_INSERT(GGK_5)
+    ENUM_MAP_INSERT(GGK_6)
+    ENUM_MAP_INSERT(GGK_7)
+    ENUM_MAP_INSERT(GGK_8)
+    ENUM_MAP_INSERT(GGK_9)
+    ENUM_MAP_INSERT(GGK_COLON)
+    ENUM_MAP_INSERT(GGK_SEMICOLON)
+    ENUM_MAP_INSERT(GGK_LESS)
+    ENUM_MAP_INSERT(GGK_EQUALS)
+    ENUM_MAP_INSERT(GGK_GREATER)
+    ENUM_MAP_INSERT(GGK_QUESTION)
+    ENUM_MAP_INSERT(GGK_AT)
+    ENUM_MAP_INSERT(GGK_A)
+    ENUM_MAP_INSERT(GGK_B)
+    ENUM_MAP_INSERT(GGK_C)
+    ENUM_MAP_INSERT(GGK_D)
+    ENUM_MAP_INSERT(GGK_E)
+    ENUM_MAP_INSERT(GGK_F)
+    ENUM_MAP_INSERT(GGK_G)
+    ENUM_MAP_INSERT(GGK_H)
+    ENUM_MAP_INSERT(GGK_I)
+    ENUM_MAP_INSERT(GGK_J)
+    ENUM_MAP_INSERT(GGK_K)
+    ENUM_MAP_INSERT(GGK_L)
+    ENUM_MAP_INSERT(GGK_M)
+    ENUM_MAP_INSERT(GGK_N)
+    ENUM_MAP_INSERT(GGK_O)
+    ENUM_MAP_INSERT(GGK_P)
+    ENUM_MAP_INSERT(GGK_Q)
+    ENUM_MAP_INSERT(GGK_R)
+    ENUM_MAP_INSERT(GGK_S)
+    ENUM_MAP_INSERT(GGK_T)
+    ENUM_MAP_INSERT(GGK_U)
+    ENUM_MAP_INSERT(GGK_V)
+    ENUM_MAP_INSERT(GGK_W)
+    ENUM_MAP_INSERT(GGK_X)
+    ENUM_MAP_INSERT(GGK_Y)
+    ENUM_MAP_INSERT(GGK_Z)
+    ENUM_MAP_INSERT(GGK_LEFTBRACKET)
+    ENUM_MAP_INSERT(GGK_BACKSLASH)
+    ENUM_MAP_INSERT(GGK_RIGHTBRACKET)
+    ENUM_MAP_INSERT(GGK_CARET)
+    ENUM_MAP_INSERT(GGK_UNDERSCORE)
+    ENUM_MAP_INSERT(GGK_BACKQUOTE)
+    ENUM_MAP_INSERT(GGK_a)
+    ENUM_MAP_INSERT(GGK_b)
+    ENUM_MAP_INSERT(GGK_c)
+    ENUM_MAP_INSERT(GGK_d)
+    ENUM_MAP_INSERT(GGK_e)
+    ENUM_MAP_INSERT(GGK_f)
+    ENUM_MAP_INSERT(GGK_g)
+    ENUM_MAP_INSERT(GGK_h)
+    ENUM_MAP_INSERT(GGK_i)
+    ENUM_MAP_INSERT(GGK_j)
+    ENUM_MAP_INSERT(GGK_k)
+    ENUM_MAP_INSERT(GGK_l)
+    ENUM_MAP_INSERT(GGK_m)
+    ENUM_MAP_INSERT(GGK_n)
+    ENUM_MAP_INSERT(GGK_o)
+    ENUM_MAP_INSERT(GGK_p)
+    ENUM_MAP_INSERT(GGK_q)
+    ENUM_MAP_INSERT(GGK_r)
+    ENUM_MAP_INSERT(GGK_s)
+    ENUM_MAP_INSERT(GGK_t)
+    ENUM_MAP_INSERT(GGK_u)
+    ENUM_MAP_INSERT(GGK_v)
+    ENUM_MAP_INSERT(GGK_w)
+    ENUM_MAP_INSERT(GGK_x)
+    ENUM_MAP_INSERT(GGK_y)
+    ENUM_MAP_INSERT(GGK_z)
+    ENUM_MAP_INSERT(GGK_DELETE)
+
+    ENUM_MAP_INSERT(GGK_WORLD_0)
+    ENUM_MAP_INSERT(GGK_WORLD_1)
+    ENUM_MAP_INSERT(GGK_WORLD_2)
+    ENUM_MAP_INSERT(GGK_WORLD_3)
+    ENUM_MAP_INSERT(GGK_WORLD_4)
+    ENUM_MAP_INSERT(GGK_WORLD_5)
+    ENUM_MAP_INSERT(GGK_WORLD_6)
+    ENUM_MAP_INSERT(GGK_WORLD_7)
+    ENUM_MAP_INSERT(GGK_WORLD_8)
+    ENUM_MAP_INSERT(GGK_WORLD_9)
+    ENUM_MAP_INSERT(GGK_WORLD_10)
+    ENUM_MAP_INSERT(GGK_WORLD_11)
+    ENUM_MAP_INSERT(GGK_WORLD_12)
+    ENUM_MAP_INSERT(GGK_WORLD_13)
+    ENUM_MAP_INSERT(GGK_WORLD_14)
+    ENUM_MAP_INSERT(GGK_WORLD_15)
+    ENUM_MAP_INSERT(GGK_WORLD_16)
+    ENUM_MAP_INSERT(GGK_WORLD_17)
+    ENUM_MAP_INSERT(GGK_WORLD_18)
+    ENUM_MAP_INSERT(GGK_WORLD_19)
+    ENUM_MAP_INSERT(GGK_WORLD_20)
+    ENUM_MAP_INSERT(GGK_WORLD_21)
+    ENUM_MAP_INSERT(GGK_WORLD_22)
+    ENUM_MAP_INSERT(GGK_WORLD_23)
+    ENUM_MAP_INSERT(GGK_WORLD_24)
+    ENUM_MAP_INSERT(GGK_WORLD_25)
+    ENUM_MAP_INSERT(GGK_WORLD_26)
+    ENUM_MAP_INSERT(GGK_WORLD_27)
+    ENUM_MAP_INSERT(GGK_WORLD_28)
+    ENUM_MAP_INSERT(GGK_WORLD_29)
+    ENUM_MAP_INSERT(GGK_WORLD_30)
+    ENUM_MAP_INSERT(GGK_WORLD_31)
+    ENUM_MAP_INSERT(GGK_WORLD_32)
+    ENUM_MAP_INSERT(GGK_WORLD_33)
+    ENUM_MAP_INSERT(GGK_WORLD_34)
+    ENUM_MAP_INSERT(GGK_WORLD_35)
+    ENUM_MAP_INSERT(GGK_WORLD_36)
+    ENUM_MAP_INSERT(GGK_WORLD_37)
+    ENUM_MAP_INSERT(GGK_WORLD_38)
+    ENUM_MAP_INSERT(GGK_WORLD_39)
+    ENUM_MAP_INSERT(GGK_WORLD_40)
+    ENUM_MAP_INSERT(GGK_WORLD_41)
+    ENUM_MAP_INSERT(GGK_WORLD_42)
+    ENUM_MAP_INSERT(GGK_WORLD_43)
+    ENUM_MAP_INSERT(GGK_WORLD_44)
+    ENUM_MAP_INSERT(GGK_WORLD_45)
+    ENUM_MAP_INSERT(GGK_WORLD_46)
+    ENUM_MAP_INSERT(GGK_WORLD_47)
+    ENUM_MAP_INSERT(GGK_WORLD_48)
+    ENUM_MAP_INSERT(GGK_WORLD_49)
+    ENUM_MAP_INSERT(GGK_WORLD_50)
+    ENUM_MAP_INSERT(GGK_WORLD_51)
+    ENUM_MAP_INSERT(GGK_WORLD_52)
+    ENUM_MAP_INSERT(GGK_WORLD_53)
+    ENUM_MAP_INSERT(GGK_WORLD_54)
+    ENUM_MAP_INSERT(GGK_WORLD_55)
+    ENUM_MAP_INSERT(GGK_WORLD_56)
+    ENUM_MAP_INSERT(GGK_WORLD_57)
+    ENUM_MAP_INSERT(GGK_WORLD_58)
+    ENUM_MAP_INSERT(GGK_WORLD_59)
+    ENUM_MAP_INSERT(GGK_WORLD_60)
+    ENUM_MAP_INSERT(GGK_WORLD_61)
+    ENUM_MAP_INSERT(GGK_WORLD_62)
+    ENUM_MAP_INSERT(GGK_WORLD_63)
+    ENUM_MAP_INSERT(GGK_WORLD_64)
+    ENUM_MAP_INSERT(GGK_WORLD_65)
+    ENUM_MAP_INSERT(GGK_WORLD_66)
+    ENUM_MAP_INSERT(GGK_WORLD_67)
+    ENUM_MAP_INSERT(GGK_WORLD_68)
+    ENUM_MAP_INSERT(GGK_WORLD_69)
+    ENUM_MAP_INSERT(GGK_WORLD_70)
+    ENUM_MAP_INSERT(GGK_WORLD_71)
+    ENUM_MAP_INSERT(GGK_WORLD_72)
+    ENUM_MAP_INSERT(GGK_WORLD_73)
+    ENUM_MAP_INSERT(GGK_WORLD_74)
+    ENUM_MAP_INSERT(GGK_WORLD_75)
+    ENUM_MAP_INSERT(GGK_WORLD_76)
+    ENUM_MAP_INSERT(GGK_WORLD_77)
+    ENUM_MAP_INSERT(GGK_WORLD_78)
+    ENUM_MAP_INSERT(GGK_WORLD_79)
+    ENUM_MAP_INSERT(GGK_WORLD_80)
+    ENUM_MAP_INSERT(GGK_WORLD_81)
+    ENUM_MAP_INSERT(GGK_WORLD_82)
+    ENUM_MAP_INSERT(GGK_WORLD_83)
+    ENUM_MAP_INSERT(GGK_WORLD_84)
+    ENUM_MAP_INSERT(GGK_WORLD_85)
+    ENUM_MAP_INSERT(GGK_WORLD_86)
+    ENUM_MAP_INSERT(GGK_WORLD_87)
+    ENUM_MAP_INSERT(GGK_WORLD_88)
+    ENUM_MAP_INSERT(GGK_WORLD_89)
+    ENUM_MAP_INSERT(GGK_WORLD_90)
+    ENUM_MAP_INSERT(GGK_WORLD_91)
+    ENUM_MAP_INSERT(GGK_WORLD_92)
+    ENUM_MAP_INSERT(GGK_WORLD_93)
+    ENUM_MAP_INSERT(GGK_WORLD_94)
+    ENUM_MAP_INSERT(GGK_WORLD_95)
+
+    ENUM_MAP_INSERT(GGK_KP0)
+    ENUM_MAP_INSERT(GGK_KP1)
+    ENUM_MAP_INSERT(GGK_KP2)
+    ENUM_MAP_INSERT(GGK_KP3)
+    ENUM_MAP_INSERT(GGK_KP4)
+    ENUM_MAP_INSERT(GGK_KP5)
+    ENUM_MAP_INSERT(GGK_KP6)
+    ENUM_MAP_INSERT(GGK_KP7)
+    ENUM_MAP_INSERT(GGK_KP8)
+    ENUM_MAP_INSERT(GGK_KP9)
+    ENUM_MAP_INSERT(GGK_KP_PERIOD)
+    ENUM_MAP_INSERT(GGK_KP_DIVIDE)
+    ENUM_MAP_INSERT(GGK_KP_MULTIPLY)
+    ENUM_MAP_INSERT(GGK_KP_MINUS)
+    ENUM_MAP_INSERT(GGK_KP_PLUS)
+    ENUM_MAP_INSERT(GGK_KP_ENTER)
+    ENUM_MAP_INSERT(GGK_KP_EQUALS)
+
+    ENUM_MAP_INSERT(GGK_UP)
+    ENUM_MAP_INSERT(GGK_DOWN)
+    ENUM_MAP_INSERT(GGK_RIGHT)
+    ENUM_MAP_INSERT(GGK_LEFT)
+    ENUM_MAP_INSERT(GGK_INSERT)
+    ENUM_MAP_INSERT(GGK_HOME)
+    ENUM_MAP_INSERT(GGK_END)
+    ENUM_MAP_INSERT(GGK_PAGEUP)
+    ENUM_MAP_INSERT(GGK_PAGEDOWN)
+
+    ENUM_MAP_INSERT(GGK_F1)
+    ENUM_MAP_INSERT(GGK_F2)
+    ENUM_MAP_INSERT(GGK_F3)
+    ENUM_MAP_INSERT(GGK_F4)
+    ENUM_MAP_INSERT(GGK_F5)
+    ENUM_MAP_INSERT(GGK_F6)
+    ENUM_MAP_INSERT(GGK_F7)
+    ENUM_MAP_INSERT(GGK_F8)
+    ENUM_MAP_INSERT(GGK_F9)
+    ENUM_MAP_INSERT(GGK_F10)
+    ENUM_MAP_INSERT(GGK_F11)
+    ENUM_MAP_INSERT(GGK_F12)
+    ENUM_MAP_INSERT(GGK_F13)
+    ENUM_MAP_INSERT(GGK_F14)
+    ENUM_MAP_INSERT(GGK_F15)
+
+    ENUM_MAP_INSERT(GGK_NUMLOCK)
+    ENUM_MAP_INSERT(GGK_CAPSLOCK)
+    ENUM_MAP_INSERT(GGK_SCROLLOCK)
+    ENUM_MAP_INSERT(GGK_RSHIFT)
+    ENUM_MAP_INSERT(GGK_LSHIFT)
+    ENUM_MAP_INSERT(GGK_RCTRL)
+    ENUM_MAP_INSERT(GGK_LCTRL)
+    ENUM_MAP_INSERT(GGK_RALT)
+    ENUM_MAP_INSERT(GGK_LALT)
+    ENUM_MAP_INSERT(GGK_RMETA)
+    ENUM_MAP_INSERT(GGK_LMETA)
+    ENUM_MAP_INSERT(GGK_LSUPER)
+    ENUM_MAP_INSERT(GGK_RSUPER)
+    ENUM_MAP_INSERT(GGK_MODE)
+    ENUM_MAP_INSERT(GGK_COMPOSE)
+
+    ENUM_MAP_INSERT(GGK_HELP)
+    ENUM_MAP_INSERT(GGK_PRINT)
+    ENUM_MAP_INSERT(GGK_SYSREQ)
+    ENUM_MAP_INSERT(GGK_BREAK)
+    ENUM_MAP_INSERT(GGK_MENU)
+    ENUM_MAP_INSERT(GGK_POWER)
+    ENUM_MAP_INSERT(GGK_EURO)
+    ENUM_MAP_INSERT(GGK_UNDO)
+
+    ENUM_MAP_INSERT(GGK_LAST)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Key)
+ENUM_STREAM_OUT(Key)
+
+
 /** adpated from SDLKey enum in SDL_keysym.h of the SDL library; enumeration of valid key mods (possibly |'d together)*/
 enum Mod {
     GGKMOD_NONE       = 0x0000,
@@ -669,6 +944,30 @@ enum Mod {
     GGKMOD_ALT        = (GGKMOD_LALT | GGKMOD_RALT),      ///< either alt key
     GGKMOD_META       = (GGKMOD_LMETA | GGKMOD_RMETA)     ///< either meta key
 };
+
+// define EnumMap and stream operators for Mod
+ENUM_MAP_BEGIN(Mod)
+    ENUM_MAP_INSERT(GGKMOD_NONE)
+    ENUM_MAP_INSERT(GGKMOD_LSHIFT)
+    ENUM_MAP_INSERT(GGKMOD_RSHIFT)
+    ENUM_MAP_INSERT(GGKMOD_LCTRL)
+    ENUM_MAP_INSERT(GGKMOD_RCTRL)
+    ENUM_MAP_INSERT(GGKMOD_LALT)
+    ENUM_MAP_INSERT(GGKMOD_RALT)
+    ENUM_MAP_INSERT(GGKMOD_LMETA)
+    ENUM_MAP_INSERT(GGKMOD_RMETA)
+    ENUM_MAP_INSERT(GGKMOD_NUM)
+    ENUM_MAP_INSERT(GGKMOD_CAPS)
+    ENUM_MAP_INSERT(GGKMOD_MODE)
+    ENUM_MAP_INSERT(GGKMOD_RESERVED)
+    ENUM_MAP_INSERT(GGKMOD_CTRL)
+    ENUM_MAP_INSERT(GGKMOD_SHIFT)
+    ENUM_MAP_INSERT(GGKMOD_ALT)
+    ENUM_MAP_INSERT(GGKMOD_META)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Mod)
+ENUM_STREAM_OUT(Mod)
 
 } // namespace GG
 

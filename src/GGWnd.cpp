@@ -29,85 +29,84 @@
 
 namespace GG {
 
-/************************************************\
-|   Class GG::Wnd 
-|   OpenGL custom GUI window class
-\************************************************/
-Wnd::Wnd() : 
-    m_done(false),
-    m_parent(0), 
-    m_zorder(0), 
-    m_visible(true), 
-    m_max_size(1 << 30, 1 << 30),
-    m_flags(0)
+///////////////////////////////////////
+// class GG::Wnd
+///////////////////////////////////////
+Wnd::Wnd() :
+        m_done(false),
+        m_parent(0),
+        m_zorder(0),
+        m_visible(true),
+        m_max_size(1 << 30, 1 << 30),
+        m_flags(0)
 {
 }
 
-Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) : 
-    m_done(false),
-    m_parent(0), 
-    m_zorder(0), 
-    m_visible(true), 
-    m_upperleft(x, y), 
-    m_lowerright(x + w, y + h), 
-    m_max_size(1 << 30, 1 << 30),
-    m_flags(flags)
+Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
+        m_done(false),
+        m_parent(0),
+        m_zorder(0),
+        m_visible(true),
+        m_upperleft(x, y),
+        m_lowerright(x + w, y + h),
+        m_max_size(1 << 30, 1 << 30),
+        m_flags(flags)
 {
     ValidateFlags();
 }
 
-Wnd::Wnd(const XMLElement& elem) : 
-    m_done(false),
-    m_parent(0), 
-    m_zorder(0), 
-    m_visible(true), 
-    m_max_size(1 << 30, 1 << 30),
-    m_flags(0)
+Wnd::Wnd(const XMLElement& elem) :
+        m_done(false),
+        m_parent(0),
+        m_zorder(0),
+        m_visible(true),
+        m_max_size(1 << 30, 1 << 30),
+        m_flags(0)
 {
     if (elem.Tag() != "GG::Wnd")
-	throw std::invalid_argument("Attempted to construct a GG::Wnd from an XMLElement that had a tag other than \"GG::Wnd\"");
-   
+        throw std::invalid_argument("Attempted to construct a GG::Wnd from an XMLElement that had a tag other than \"GG::Wnd\"");
+
     const XMLElement* curr_elem = &elem.Child("m_text");
     m_text = curr_elem->Text();
 
     curr_elem = &elem.Child("m_children");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-	if (Wnd* w = GG::App::GetApp()->GenerateWnd(curr_elem->Child(i)))
-	    AttachChild(w);
+        if (Wnd* w = GG::App::GetApp()->GenerateWnd(curr_elem->Child(i)))
+            AttachChild(w);
     }
-      
+
     curr_elem  = &elem.Child("m_zorder");
     m_zorder = lexical_cast<int>(curr_elem->Attribute("value"));
-   
+
     curr_elem  = &elem.Child("m_visible");
     m_visible = lexical_cast<bool>(curr_elem->Attribute("value"));
-   
+
     curr_elem  = &elem.Child("m_upperleft");
     m_upperleft = Pt(curr_elem->Child("GG::Pt"));
-   
+
     curr_elem  = &elem.Child("m_lowerright");
     m_lowerright = Pt(curr_elem->Child("GG::Pt"));
-   
+
     curr_elem  = &elem.Child("m_min_size");
     m_min_size = Pt(curr_elem->Child("GG::Pt"));
-   
+
     curr_elem  = &elem.Child("m_max_size");
     m_max_size = Pt(curr_elem->Child("GG::Pt"));
-   
+
     curr_elem  = &elem.Child("m_flags");
     m_flags = lexical_cast<Uint32>(curr_elem->Attribute("value"));
 }
 
-Wnd::~Wnd() 
+Wnd::~Wnd()
 {
     DeleteChildren();
 }
 
-Pt Wnd::UpperLeft() const 
+Pt Wnd::UpperLeft() const
 {
     Pt retval = m_upperleft;
     if (m_parent)
-	retval += m_parent->ClientUpperLeft();
+        retval += m_parent->ClientUpperLeft();
     return retval;
 }
 
@@ -115,7 +114,7 @@ Pt Wnd::LowerRight() const
 {
     Pt retval = m_lowerright;
     if (m_parent)
-	retval += m_parent->ClientUpperLeft();
+        retval += m_parent->ClientUpperLeft();
     return retval;
 }
 
@@ -123,7 +122,7 @@ Wnd* Wnd::RootParent() const
 {
     Wnd* retval = m_parent;
     while (retval && retval->Parent()) {
-	retval = retval->Parent();
+        retval = retval->Parent();
     }
     return retval;
 }
@@ -143,14 +142,14 @@ WndRegion Wnd::WindowRegion(const Pt& pt) const
     int y_pos = MIDDLE;
 
     if (pt.x < ClientUpperLeft().x)
-	x_pos = LEFT;
+        x_pos = LEFT;
     else if (pt.x > ClientLowerRight().x)
-	x_pos = RIGHT;
+        x_pos = RIGHT;
 
     if (pt.y < ClientUpperLeft().y)
-	y_pos = TOP;
+        y_pos = TOP;
     else if (pt.y > ClientLowerRight().y)
-	y_pos = BOTTOM;
+        y_pos = BOTTOM;
 
     return (Resizable() ? WndRegion(x_pos + 3 * y_pos) : WR_NONE);
 }
@@ -159,16 +158,16 @@ XMLElement Wnd::XMLEncode() const
 {
     XMLElement retval("GG::Wnd");
     XMLElement temp;
-   
+
     temp = XMLElement("m_text", m_text);
     retval.AppendChild(temp);
-   
+
     temp = XMLElement("m_children");
     for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
-	temp.AppendChild((*it)->XMLEncode());
+        temp.AppendChild((*it)->XMLEncode());
     }
     retval.AppendChild(temp);
-   
+
     temp = XMLElement("m_zorder");
     temp.SetAttribute("value", boost::lexical_cast<string>(m_zorder));
     retval.AppendChild(temp);
@@ -192,11 +191,11 @@ XMLElement Wnd::XMLEncode() const
     temp = XMLElement("m_max_size");
     temp.AppendChild(m_max_size.XMLEncode());
     retval.AppendChild(temp);
-   
+
     temp = XMLElement("m_flags");
     temp.SetAttribute("value", boost::lexical_cast<string>(m_flags));
     retval.AppendChild(temp);
-   
+
     return retval;
 }
 
@@ -204,9 +203,9 @@ void Wnd::Hide(bool children/* = true*/)
 {
     m_visible = false;
     if (children) {
-	std::list<Wnd*>::iterator it = m_children.begin();
-	for (; it != m_children.end(); ++it)
-	    (*it)->Hide();
+        std::list<Wnd*>::iterator it = m_children.begin();
+        for (; it != m_children.end(); ++it)
+            (*it)->Hide();
     }
 }
 
@@ -214,9 +213,9 @@ void Wnd::Show(bool children/* = true*/)
 {
     m_visible = true;
     if (children) {
-	std::list<Wnd*>::iterator it = m_children.begin();
-	for (; it != m_children.end(); ++it)
-	    (*it)->Show();
+        std::list<Wnd*>::iterator it = m_children.begin();
+        for (; it != m_children.end(); ++it)
+            (*it)->Show();
     }
 }
 
@@ -255,16 +254,16 @@ void Wnd::SizeMove(int x1, int y1, int x2, int y2)
 {
     Pt min_sz = MinDimensions();
     if (x1 > x2 - min_sz.x) {
-	if (x1 != m_upperleft.x)
-	    x1 = x2 - min_sz.x;
-	else if (x2 != m_lowerright.x)
-	    x2 = x1 + min_sz.x;
+        if (x1 != m_upperleft.x)
+            x1 = x2 - min_sz.x;
+        else if (x2 != m_lowerright.x)
+            x2 = x1 + min_sz.x;
     }
     if (y1 > y2 - min_sz.y) {
-	if (y1 != m_upperleft.y)
-	    y1 = y2 - min_sz.y;
-	else if (y2 != m_lowerright.y)
-	    y2 = y1 + min_sz.y;
+        if (y1 != m_upperleft.y)
+            y1 = y2 - min_sz.y;
+        else if (y2 != m_lowerright.y)
+            y2 = y1 + min_sz.y;
     }
     m_upperleft = Pt(x1, y1);
     m_lowerright = Pt(x2, y2);
@@ -283,54 +282,54 @@ void Wnd::Resize(int x, int y)
 void Wnd::AttachChild(Wnd* wnd)
 {
     if (wnd) {
-	// remove from previous parent, if any
-	if (wnd->Parent())
-	    wnd->Parent()->DetachChild(wnd);
-   
-	// maintain sorted order of decreasing size 
-	// this increases expectation that the window containing a given point gets reached early in a traversal of the child list
-	std::list<Wnd*>::iterator it = m_children.begin();
-	Pt wnd_range = wnd->LowerRight() - wnd->UpperLeft();
-	int wnd_area = wnd_range.x * wnd_range.y;
-	for (; it != m_children.end(); ++it) {
-	    Pt it_range = (*it)->LowerRight() - (*it)->UpperLeft();
-	    int it_area = it_range.x * it_range.y;
-	    if (wnd_area > it_area)
-		break;
-	}
-	m_children.insert(it, wnd); 
-	wnd->m_parent = this;
+        // remove from previous parent, if any
+        if (wnd->Parent())
+            wnd->Parent()->DetachChild(wnd);
+
+        // maintain sorted order of decreasing size
+        // this increases expectation that the window containing a given point gets reached early in a traversal of the child list
+        std::list<Wnd*>::iterator it = m_children.begin();
+        Pt wnd_range = wnd->LowerRight() - wnd->UpperLeft();
+        int wnd_area = wnd_range.x * wnd_range.y;
+        for (; it != m_children.end(); ++it) {
+            Pt it_range = (*it)->LowerRight() - (*it)->UpperLeft();
+            int it_area = it_range.x * it_range.y;
+            if (wnd_area > it_area)
+                break;
+        }
+        m_children.insert(it, wnd);
+        wnd->m_parent = this;
     }
 }
 
 void Wnd::DetachChild(Wnd* wnd)
 {
     if (wnd) {
-	std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
-	if (it != m_children.end()) {
-	    m_children.erase(it);
-	    wnd->m_parent = 0;
-	}
+        std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
+        if (it != m_children.end()) {
+            m_children.erase(it);
+            wnd->m_parent = 0;
+        }
     }
 }
 
 void Wnd::DetachChildren()
 {
     for (std::list<Wnd*>::iterator it = m_children.begin(); it != m_children.end();) {
-	std::list<Wnd*>::iterator temp = it;
-	++it;
-	DetachChild(*temp);
+        std::list<Wnd*>::iterator temp = it;
+        ++it;
+        DetachChild(*temp);
     }
 }
 
 void Wnd::DeleteChild(Wnd* wnd)
 {
     if (wnd) {
-	std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
-	if (it != m_children.end()) {
-	    boost::checked_delete(wnd);
-	    m_children.erase(it);
-	}
+        std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
+        if (it != m_children.end()) {
+            boost::checked_delete(wnd);
+            m_children.erase(it);
+        }
     }
 }
 
@@ -338,7 +337,7 @@ void Wnd::DeleteChildren()
 {
     std::list<Wnd*>::iterator it = m_children.begin();
     for (; it != m_children.end(); ++it)
-	boost::checked_delete(*it);
+        boost::checked_delete(*it);
     m_children.clear();
 }
 
@@ -378,17 +377,17 @@ int Wnd::Run()
 {
     int retval = 0;
     if (m_flags & MODAL) {
-	App& app = *App::GetApp();
-	Wnd* old_focus_wnd = app.FocusWnd();
-	app.RegisterModal(this);
-   
-	while (!m_done)
-	    app.PollAndRender();
-   
-	app.Remove(this);
-	app.SetFocusWnd(old_focus_wnd);
-   
-	retval = 1;
+        App& app = *App::GetApp();
+        Wnd* old_focus_wnd = app.FocusWnd();
+        app.RegisterModal(this);
+
+        while (!m_done)
+            app.PollAndRender();
+
+        app.Remove(this);
+        app.SetFocusWnd(old_focus_wnd);
+
+        retval = 1;
     }
     return retval;
 }
@@ -396,7 +395,7 @@ int Wnd::Run()
 void Wnd::ValidateFlags()
 {
     if ((m_flags & MODAL) && (m_flags & ONTOP))
-	m_flags &= ~ONTOP;
+        m_flags &= ~ONTOP;
 }
 
 } // namespace GG

@@ -42,8 +42,8 @@ class Button : public StaticText
 public:
     /// the states of being for a GG::Button
     enum ButtonState {BN_PRESSED,    ///< the button is being pressed by the user, and the cursor is over the button
-		      BN_UNPRESSED,  ///< the button is unpressed
-		      BN_ROLLOVER    ///< the button has the cursor over it, but is unpressed
+                      BN_UNPRESSED,  ///< the button is unpressed
+                      BN_ROLLOVER    ///< the button has the cursor over it, but is unpressed
                      };
 
     /** \name Signal Types */ //@{
@@ -121,10 +121,10 @@ class StateButton : public StaticText
 public:
     /// the built-in visual styles of state buttons
     enum StateButtonStyle {SBSTYLE_3D_XBOX,        ///< draws a down-beveled box with a 3D x-mark inside
-			   SBSTYLE_3D_CHECKBOX,    ///< draws a down-beveled box with a 3D check-mark inside
-			   SBSTYLE_3D_RADIO,       ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
-			   SBSTYLE_3D_BUTTON,      ///< draws a button that toggles bewtween popped up and pushed down
-			   SBSTYLE_3D_ROUND_BUTTON ///< draws a down-beveled circle with an up-beveled circle inside
+                           SBSTYLE_3D_CHECKBOX,    ///< draws a down-beveled box with a 3D check-mark inside
+                           SBSTYLE_3D_RADIO,       ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
+                           SBSTYLE_3D_BUTTON,      ///< draws a button that toggles bewtween popped up and pushed down
+                           SBSTYLE_3D_ROUND_BUTTON ///< draws a down-beveled circle with an up-beveled circle inside
                           };
 
     /** \name Signal Types */ //@{
@@ -137,8 +137,8 @@ public:
 
     /** \name Structors */ //@{
     StateButton(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt, 
-		Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
-		int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
+                Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
+                int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
     StateButton(const XMLElement& elem); ///< ctor that constructs a StateButton object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a StateButton object
     //@}
 
@@ -211,15 +211,15 @@ public:
     virtual int      Render()                {return 1;}
 
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
-	currently-checked button index is set to -1. */
+        currently-checked button index is set to -1. */
     void             SetCheck(int idx);
 
     /** disables (with b == true) or enables (with b == false) the idx-th button, if it exists.  If the button exists,
-	is being disabled, and is the one currently checked, the currently-checked button index is set to -1. */
+        is being disabled, and is the one currently checked, the currently-checked button index is set to -1. */
     void             DisableButton(int idx, bool b = true); 
 
     /** adds a button to the group. \note There is no way to remove buttons; RadioButtonGroup is meant to be a 
-	simple grouping control. */
+        simple grouping control. */
     void             AddButton(StateButton* bn);
 
     ButtonChangedSignalType& ButtonChangedSignal() {return m_button_changed_sig;} ///< returns the button changed signal object for this RadioButtonGroup
@@ -231,11 +231,11 @@ private:
     class ButtonClickedFunctor // for catching button-click signals from the contained buttons
     {
     public:
-	ButtonClickedFunctor(RadioButtonGroup* grp, int idx) : m_grp(grp), m_idx(idx) {}
-	void operator()(bool checked) {m_grp->HandleRadioClick(checked, m_idx);}
+        ButtonClickedFunctor(RadioButtonGroup* grp, int idx) : m_grp(grp), m_idx(idx) {}
+        void operator()(bool checked) {m_grp->HandleRadioClick(checked, m_idx);}
     private:
-	RadioButtonGroup* m_grp;
-	int m_idx;
+        RadioButtonGroup* m_grp;
+        int m_idx;
     };
    
     void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active

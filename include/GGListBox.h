@@ -60,46 +60,46 @@ public:
     using Wnd::SizeMove;
 
     /** This is a single item in a listbox.
-	A Row is primarily a container for Controls.  Each "cell" in a Row is a Control* which points to an 
-	object of a subclass of Control.  Each such Control can be connected to arbitrary functionality using signals and 
-	slots.  Each Row contains a "data type" string, which indicates the user's definition
-	of what type of data the Row represents (eg "Annual Rainfall", "ship_def", etc.).  During dragging and dropping, the 
-	data type associated with a Row indicates to potential drop targets what type of data the Row represents; the target 
-	may accept or decline the drop based on the data type.  Indentation is also definable for each Row; such indentation
-	only affects the first cell in the Row (and not its sub rows).  This is intended to be used to create indented lists
-	like tree-views, etc.  A Row may include several subrows; each subrow is considered to be part of its Row. */
+        A Row is primarily a container for Controls.  Each "cell" in a Row is a Control* which points to an 
+        object of a subclass of Control.  Each such Control can be connected to arbitrary functionality using signals and 
+        slots.  Each Row contains a "data type" string, which indicates the user's definition
+        of what type of data the Row represents (eg "Annual Rainfall", "ship_def", etc.).  During dragging and dropping, the 
+        data type associated with a Row indicates to potential drop targets what type of data the Row represents; the target 
+        may accept or decline the drop based on the data type.  Indentation is also definable for each Row; such indentation
+        only affects the first cell in the Row (and not its sub rows).  This is intended to be used to create indented lists
+        like tree-views, etc.  A Row may include several subrows; each subrow is considered to be part of its Row. */
     struct Row : public vector<Control*>
     {
-	using vector<Control*>::push_back; // this brings push_back into this subclass, even though we've overloaded it locally
-      
-	/** \name Structors */ //@{
-	Row() : height(0), alignment(LB_VCENTER), indentation(0) {} ///< default ctor
-	Row(const string& data, int ht, Uint32 align = LB_VCENTER, int indent = 0, int rows = 0) : 
-	    vector<Control*>(rows), data_type(data), height(ht), alignment(align), indentation(indent) {} ///< ctor. \a rows is the number of cells the row should have
-	Row(const XMLElement& elem);
-	//@}
+        using vector<Control*>::push_back; // this brings push_back into this subclass, even though we've overloaded it locally
 
-	/** \name Accessors */ //@{
-	int             Height() const;    ///< returns the height of this row, considering height and/or contents of sub_rows
-      
+        /** \name Structors */ //@{
+        Row() : height(0), alignment(LB_VCENTER), indentation(0) {} ///< default ctor
+        Row(const string& data, int ht, Uint32 align = LB_VCENTER, int indent = 0, int rows = 0) : 
+            vector<Control*>(rows), data_type(data), height(ht), alignment(align), indentation(indent) {} ///< ctor. \a rows is the number of cells the row should have
+        Row(const XMLElement& elem);
+        //@}
+
+        /** \name Accessors */ //@{
+        int             Height() const;    ///< returns the height of this row, considering height and/or contents of sub_rows
+
         XMLElement      XMLEncode() const; ///< constructs an XMLElement from an Row object
-	//@}
-   
-	/** \name Mutators */ //@{
-	void push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, bool dynamic_text = true); ///< overload of push_back that creates a DynamicText or StaticText Control and adds it to the Row
-	void push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, bool dynamic_text = true); ///< overload of push_back that creates a DynamicText or StaticText Control and adds it to the Row
-	void push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
-	//@}
+        //@}
 
-	// these two generate graphics and text controls from basic text or subtextures
-	static Control* CreateControl(const string& str, const shared_ptr<Font>& font, Clr color, bool dynamic_text); ///< creates a "shrink-fit" DynamicText or StaticText Control from text, font, and color parameters
-	static Control* CreateControl(const SubTexture& st); ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
+        /** \name Mutators */ //@{
+        void push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, bool dynamic_text = true); ///< overload of push_back that creates a DynamicText or StaticText Control and adds it to the Row
+        void push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, bool dynamic_text = true); ///< overload of push_back that creates a DynamicText or StaticText Control and adds it to the Row
+        void push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
+        //@}
 
-	string          data_type;     ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
-	int             height;        ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
-	Uint32          alignment;     ///< one of LB_TOP, LB_VCENTER, LB_BOTTOM
-	int             indentation;   ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
-	vector<Row>     sub_rows;      ///< for making multiple-line rows
+        // these two generate graphics and text controls from basic text or subtextures
+        static Control* CreateControl(const string& str, const shared_ptr<Font>& font, Clr color, bool dynamic_text); ///< creates a "shrink-fit" DynamicText or StaticText Control from text, font, and color parameters
+        static Control* CreateControl(const SubTexture& st); ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
+
+        string          data_type;     ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
+        int             height;        ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
+        Uint32          alignment;     ///< one of LB_TOP, LB_VCENTER, LB_BOTTOM
+        int             indentation;   ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
+        vector<Row>     sub_rows;      ///< for making multiple-line rows
     };
 
     /** \name Signal Types */ //@{
@@ -138,23 +138,23 @@ public:
     virtual Pt     ClientUpperLeft() const;
     virtual Pt     ClientLowerRight() const;
 
-    bool           Empty() const              {return m_rows.empty();}      ///< returns true when the ListBox is empty
-    const Row&     GetRow(int n) const        {return m_rows[n];}           ///< returns a const reference to the row at index \a n; not range-checked
-    const set<int>& Selections() const        {return m_selections;}        ///< returns a const reference to the set row indexes that is currently selected
-    bool           Selected(int n) const      {return m_selections.find(n) != m_selections.end();} ///< returns true if row \a n is selected
-    Uint32         Style() const              {return m_style;}             ///< returns the style flags of the listbox \see GG::ListBoxStyle
-    const Row&     ColHeaders() const         {return m_header_row;}        ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
-    int            FirstRowShown() const      {return m_first_row_shown;}   ///< returns the index of the first row visible in the listbox
-    int            FirstColShown() const      {return m_first_col_shown;}   ///< returns the index of the first column visible in the listbox
-    int            RowHeight() const          {return m_row_height;}        ///< returns the default row height. \note Each row may have its own height, diferent from the one returned by this function.
-    int            NumRows() const            {return int(m_rows.size());}  ///< returns the total number of rows in the ListBox
-    int            NumCols() const            {return m_col_widths.size();} ///< returns the total number of columns in the ListBox
-    int            SortCol() const;                                         ///< returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
-    int            ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
-    Uint32         ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    Uint32         RowAlignment(int n) const  {return m_rows[n].alignment;} ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    bool            Empty() const              {return m_rows.empty();}      ///< returns true when the ListBox is empty
+    const Row&      GetRow(int n) const        {return m_rows[n];}           ///< returns a const reference to the row at index \a n; not range-checked
+    const set<int>& Selections() const         {return m_selections;}        ///< returns a const reference to the set row indexes that is currently selected
+    bool            Selected(int n) const      {return m_selections.find(n) != m_selections.end();} ///< returns true if row \a n is selected
+    Uint32          Style() const              {return m_style;}             ///< returns the style flags of the listbox \see GG::ListBoxStyle
+    const Row&      ColHeaders() const         {return m_header_row;}        ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
+    int             FirstRowShown() const      {return m_first_row_shown;}   ///< returns the index of the first row visible in the listbox
+    int             FirstColShown() const      {return m_first_col_shown;}   ///< returns the index of the first column visible in the listbox
+    int             RowHeight() const          {return m_row_height;}        ///< returns the default row height. \note Each row may have its own height, diferent from the one returned by this function.
+    int             NumRows() const            {return int(m_rows.size());}  ///< returns the total number of rows in the ListBox
+    int             NumCols() const            {return m_col_widths.size();} ///< returns the total number of columns in the ListBox
+    int             SortCol() const;                                         ///< returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
+    int             ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
+    Uint32          ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
+    Uint32          RowAlignment(int n) const  {return m_rows[n].alignment;} ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
     const set<string>&   
-    AllowedDropTypes() const   {return m_allowed_types;}     ///< returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains "", all drop types are allowed.
+                    AllowedDropTypes() const   {return m_allowed_types;}     ///< returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains "", all drop types are allowed.
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an ListBox object
     //@}

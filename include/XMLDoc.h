@@ -108,15 +108,15 @@ public:
     int  ChildIndex(const string& child) const;              ///< returns the index of the child called \a name, or -1 if not found
 
     /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-	 range-checked; be sure there are at least idx+1 elements before calling. */
+        range-checked; be sure there are at least idx+1 elements before calling. */
     const XMLElement& Child(unsigned int idx) const {return m_children[idx];}
    
     /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
-	 checked; be sure there is such a child before calling. */   
+        checked; be sure there is such a child before calling. */   
     const XMLElement& Child(const string& child) const;
 
     /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-	 at least one child before calling. */   
+        at least one child before calling. */   
     const XMLElement& LastChild() const {return m_children.back();}
    
     /** returns the value of the attribute with name \a key, or "" if no such named attribute is found */
@@ -133,11 +133,11 @@ public:
    
     /** \name Mutators */ //@{
     /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-	 range-checked; be sure there are at least idx+1 elements before calling. */
+        range-checked; be sure there are at least idx+1 elements before calling. */
     XMLElement& Child(unsigned int idx) {return m_children[idx];}
    
     /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
-	 checked; be sure there is such a child before calling. */   
+        checked; be sure there is such a child before calling. */   
     XMLElement& Child(const string& child);
 
     /** sets an attribute \a attrib, whose value is \a val in the XMLElement.  No two attributes can have the same name. */
@@ -162,15 +162,15 @@ public:
     void AppendChild(const string& child) {m_children.push_back(XMLElement(child));}
    
     /** adds a child \a e in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-	range-checked; be sure there are at least idx+1 elements before calling. */
+   range-checked; be sure there are at least idx+1 elements before calling. */
     void AddChildBefore(const XMLElement& e, unsigned int idx) {m_children.insert(m_children.begin() + idx, e);}
    
     /** removes the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-	range-checked; be sure there are at least idx+1 elements before calling. */
+        range-checked; be sure there are at least idx+1 elements before calling. */
     void RemoveChild(unsigned int idx) {m_children.erase(m_children.begin() + idx);}
    
     /** removes the child called \a shild from the XMLElement.  \note This function is not value-checked; be sure 
-	the desired element exists before calling. */
+        the desired element exists before calling. */
     void RemoveChild(const string& child) {m_children.erase(m_children.begin() + ChildIndex(child));}
 
     /** removes all children from the XMLElement*/
@@ -184,11 +184,11 @@ public:
 
 private:
     /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
-	in an XMLDoc document*/
+        in an XMLDoc document*/
     XMLElement(const string& t, bool r) : m_tag(t), m_root(r) {}
    
-    /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-	 at least one child before calling. */   
+    /** returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
+        at least one child before calling. */   
     XMLElement& LastChild() {return m_children.back();}
    
     string               m_tag;        ///< the tag-name of the XMLElement
@@ -217,14 +217,14 @@ public:
 
     /** \name Accessors */ //@{
     /** writes the XMLDoc to an output stream; returns the stream.  If \a whitespace is false, the document is written 
-	without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in a 
-	more standard human-readable form. */
+        without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in a 
+        more standard human-readable form. */
     ostream& WriteDoc(ostream& os, bool whitespace = true) const;
     //@}
    
     /** \name Mutators */ //@{
     /** destroys the current contents of the XMLDoc, and replaces tham with the constents of the document in the input 
-	stream \a is; returns the stream*/
+        stream \a is; returns the stream*/
     istream& ReadDoc(istream& is);
     //@}
 
@@ -238,8 +238,8 @@ private:
     static vector<XMLElement*> s_element_stack;
    
     /** takes an element from expat and creates an XMLElement from it, and adds it to XMLDoc::s_curr_parsing_doc. 
-	If this_ptr (== XMLDoc::s_curr_parsing_doc) is nonzero, the new element becomes its root_node; otherwise, 
-	the new element gets appended to the XMLElement currently being read. */
+        If this_ptr (== XMLDoc::s_curr_parsing_doc) is nonzero, the new element becomes its root_node; otherwise, 
+        the new element gets appended to the XMLElement currently being read. */
     static void BeginElement(void* user_data, const char* name, const char** attrs);
    
     /** takes an end-of-element token from expat and pops s_curr_parsing_doc */
@@ -251,8 +251,5 @@ private:
 
 } // namespace GG
 
-
 #endif // _XMLDoc_h_
-
-
 

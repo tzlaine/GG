@@ -33,42 +33,42 @@ const double   PI = 3.14159426;
 const double   SQRT2OVER2 = sqrt(2) / 2;
 
 /// whenever points on the unit circle are calculated with expensive sin() and cos() calls, the results are cached here
-map<int, valarray<double> > unit_circle_coords; 
+map<int, valarray<double> > unit_circle_coords;
 /// this doesn't serve as a cache, but does allow us to prevent numerous constructions and destructions of Clr valarrays.
-map<int, valarray<Clr> > color_arrays; 
+map<int, valarray<Clr> > color_arrays;
 
 void Rectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr border_color2, int bevel_thick)
 {
     glDisable(GL_TEXTURE_2D);
 
-    int inner_x1 = x1 + bevel_thick, inner_y1 = y1 + bevel_thick, 
-	inner_x2 = x2 - bevel_thick, inner_y2 = y2 - bevel_thick;
+    int inner_x1 = x1 + bevel_thick, inner_y1 = y1 + bevel_thick,
+                   inner_x2 = x2 - bevel_thick, inner_y2 = y2 - bevel_thick;
 
     // draw beveled edges
     if (bevel_thick) {
-	glBegin(GL_QUADS);
-	glColor4ubv(border_color1.v);
-	glVertex2i(inner_x2, inner_y1);
-	glVertex2i(x2, y1);
-	glVertex2i(x1, y1);
-	glVertex2i(inner_x1, inner_y1);
-	glVertex2i(inner_x1, inner_y1);
-	glVertex2i(x1, y1);
-	glVertex2i(x1, y2);
-	glVertex2i(inner_x1, inner_y2);
-	glEnd();
+        glBegin(GL_QUADS);
+        glColor4ubv(border_color1.v);
+        glVertex2i(inner_x2, inner_y1);
+        glVertex2i(x2, y1);
+        glVertex2i(x1, y1);
+        glVertex2i(inner_x1, inner_y1);
+        glVertex2i(inner_x1, inner_y1);
+        glVertex2i(x1, y1);
+        glVertex2i(x1, y2);
+        glVertex2i(inner_x1, inner_y2);
+        glEnd();
 
-	glBegin(GL_QUADS);
-	glColor4ubv(border_color2.v);
-	glVertex2i(x2, y1);
-	glVertex2i(inner_x2, inner_y1);
-	glVertex2i(inner_x2, inner_y2);
-	glVertex2i(x2, y2);
-	glVertex2i(x2, y2);
-	glVertex2i(inner_x2, inner_y2);
-	glVertex2i(inner_x1, inner_y2);
-	glVertex2i(x1, y2);
-	glEnd();
+        glBegin(GL_QUADS);
+        glColor4ubv(border_color2.v);
+        glVertex2i(x2, y1);
+        glVertex2i(inner_x2, inner_y1);
+        glVertex2i(inner_x2, inner_y2);
+        glVertex2i(x2, y2);
+        glVertex2i(x2, y2);
+        glVertex2i(inner_x2, inner_y2);
+        glVertex2i(inner_x1, inner_y2);
+        glVertex2i(x1, y2);
+        glEnd();
     }
 
     // draw interior of rectangle
@@ -88,8 +88,8 @@ void Check(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr color3)
     glDisable(GL_TEXTURE_2D);
 
     // all vertices
-    double verts[][2] = {{-0.2f, 0.2f}, {-0.6f, -0.2f}, {-0.6f, 0.0f}, {-0.2f, 0.4f}, {-0.8f, 0.0f}, 
-			 {-0.2f, 0.6f}, { 0.8f, -0.4f}, {0.6f, -0.4f}, {0.8f, -0.8f}};
+    double verts[][2] = {{-0.2f, 0.2f}, {-0.6f, -0.2f}, {-0.6f, 0.0f}, {-0.2f, 0.4f}, {-0.8f, 0.0f},
+                         {-0.2f, 0.6f}, { 0.8f, -0.4f}, {0.6f, -0.4f}, {0.8f, -0.8f}};
 
     glPushMatrix();
     const double sf = 1.25f; // just a scale factor; the check wasn't the right size as drawn originally
@@ -143,10 +143,10 @@ void X(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr color3)
     glDisable(GL_TEXTURE_2D);
 
     // all vertices
-    double verts[][2] = {{-0.4f, -0.6f}, {-0.6f, -0.4f}, {-0.4f, -0.4f}, {-0.2f, 0.0f}, {-0.6f, 0.4f}, 
-			 {-0.4f, 0.6f}, {-0.4f, 0.4f}, {0.0f, 0.2f}, {0.4f, 0.6f}, {0.6f, 0.4f}, 
-			 {0.4f, 0.4f}, {0.2f, 0.0f}, {0.6f, -0.4f}, {0.4f, -0.6f}, {0.4f, -0.4f}, 
-			 {0.0f, -0.2f}, {0.0f, 0.0f}};
+    double verts[][2] = {{-0.4f, -0.6f}, {-0.6f, -0.4f}, {-0.4f, -0.4f}, {-0.2f, 0.0f}, {-0.6f, 0.4f},
+                         {-0.4f, 0.6f}, {-0.4f, 0.4f}, {0.0f, 0.2f}, {0.4f, 0.6f}, {0.6f, 0.4f},
+                         {0.4f, 0.4f}, {0.2f, 0.0f}, {0.6f, -0.4f}, {0.4f, -0.6f}, {0.4f, -0.4f},
+                         {0.0f, -0.2f}, {0.0f, 0.0f}};
 
     glPushMatrix();
     const double sf = 1.75f; // just a scale factor; the check wasn't the right size as drawn originally
@@ -224,14 +224,14 @@ void BubbleArc(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr color
     glDisable(GL_TEXTURE_2D);
 
     // correct theta* values to range [0, 2pi)
-    if (theta1 < 0) 
-	theta1 += (int(-theta1 / (2 * PI)) + 1) * 2 * PI;
+    if (theta1 < 0)
+        theta1 += (int(-theta1 / (2 * PI)) + 1) * 2 * PI;
     else if (theta1 >= 2 * PI)
-	theta1 -= int(theta1 / (2 * PI)) * 2 * PI;
+        theta1 -= int(theta1 / (2 * PI)) * 2 * PI;
     if (theta2 < 0)
-	theta2 += (int(-theta2 / (2 * PI)) + 1) * 2 * PI;
+        theta2 += (int(-theta2 / (2 * PI)) + 1) * 2 * PI;
     else if (theta2 >= 2 * PI)
-	theta2 -= int(theta2 / (2 * PI)) * 2 * PI;
+        theta2 -= int(theta2 / (2 * PI)) * 2 * PI;
 
     const int      SLICES = std::min(3 + std::max(wd, ht), 50);  // this is a good guess at how much to tesselate the circle coordinates (50 segments max)
     const double   HORZ_THETA = (2 * PI) / SLICES;
@@ -240,25 +240,25 @@ void BubbleArc(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr color
     valarray<Clr>&    colors = color_arrays[SLICES];
     bool calc_vertices = unit_vertices.size() == 0;
     if (calc_vertices) {
-	unit_vertices.resize(2 * (SLICES + 1), 0.0);
-	double theta = 0.0f;
-	for (int j = 0; j <= SLICES; theta += HORZ_THETA, ++j) { // calculate x,y values for each point on a unit circle divided into SLICES arcs
+        unit_vertices.resize(2 * (SLICES + 1), 0.0);
+        double theta = 0.0f;
+        for (int j = 0; j <= SLICES; theta += HORZ_THETA, ++j) { // calculate x,y values for each point on a unit circle divided into SLICES arcs
             unit_vertices[j*2] = cos(-theta);
             unit_vertices[j*2+1] = sin(-theta);
-	}
-	colors.resize(SLICES + 1, 0u); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
+        }
+        colors.resize(SLICES + 1, 0u); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
     }
     int first_slice_idx = int(theta1 / HORZ_THETA + 1);
     int last_slice_idx = int(theta2 / HORZ_THETA - 1);
     if (theta1 >= theta2)
-	last_slice_idx += SLICES;
+        last_slice_idx += SLICES;
     for (int j = first_slice_idx; j <= last_slice_idx; ++j) { // calculate the color value for each needed point
-	int X = (j > SLICES ? (j - SLICES) : j) * 2, Y = X + 1;
-	double color_scale_factor = (SQRT2OVER2 * (unit_vertices[X] + unit_vertices[Y]) + 1) / 2; // this is essentially the dot product of (x,y) with (sqrt2over2,sqrt2over2), the direction of the light source, scaled to the range [0,1]
-	colors[j] = Clr(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-			Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-			Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-			Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor)).i;
+        int X = (j > SLICES ? (j - SLICES) : j) * 2, Y = X + 1;
+        double color_scale_factor = (SQRT2OVER2 * (unit_vertices[X] + unit_vertices[Y]) + 1) / 2; // this is essentially the dot product of (x,y) with (sqrt2over2,sqrt2over2), the direction of the light source, scaled to the range [0,1]
+        colors[j] = Clr(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
+                        Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                        Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                        Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor)).i;
     }
 
     glPushMatrix();
@@ -269,28 +269,28 @@ void BubbleArc(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr color
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(0, 0);
     // point on circle at angle theta1
-    double x = cos(-theta1), 
-	y = sin(-theta1);
+    double x = cos(-theta1),
+               y = sin(-theta1);
     double color_scale_factor = (SQRT2OVER2 * (x + y) + 1) / 2;
     glColor4ub(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-	       Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-	       Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-	       Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+               Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+               Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+               Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
     glVertex2f(x, y);
     // angles in between theta1 and theta2, if any
-    for (int i = first_slice_idx; i <= last_slice_idx; ++i) { 
-	int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
-	glColor4ubv(colors[i].v);
-	glVertex2f(unit_vertices[X], unit_vertices[Y]);
+    for (int i = first_slice_idx; i <= last_slice_idx; ++i) {
+        int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
+        glColor4ubv(colors[i].v);
+        glVertex2f(unit_vertices[X], unit_vertices[Y]);
     }
     // theta2
-    x = cos(-theta2); 
+    x = cos(-theta2);
     y = sin(-theta2);
     color_scale_factor = (SQRT2OVER2 * (x + y) + 1) / 2;
     glColor4ub(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-	       Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-	       Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-	       Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+               Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+               Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+               Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
     glVertex2f(x, y);
     glEnd();
     glPopMatrix();
@@ -303,14 +303,14 @@ void CircleArc(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr
     glDisable(GL_TEXTURE_2D);
 
     // correct theta* values to range [0, 2pi)
-    if (theta1 < 0) 
-	theta1 += (int(-theta1 / (2 * PI)) + 1) * 2 * PI;
+    if (theta1 < 0)
+        theta1 += (int(-theta1 / (2 * PI)) + 1) * 2 * PI;
     else if (theta1 >= 2 * PI)
-	theta1 -= int(theta1 / (2 * PI)) * 2 * PI;
+        theta1 -= int(theta1 / (2 * PI)) * 2 * PI;
     if (theta2 < 0)
-	theta2 += (int(-theta2 / (2 * PI)) + 1) * 2 * PI;
+        theta2 += (int(-theta2 / (2 * PI)) + 1) * 2 * PI;
     else if (theta2 >= 2 * PI)
-	theta2 -= int(theta2 / (2 * PI)) * 2 * PI;
+        theta2 -= int(theta2 / (2 * PI)) * 2 * PI;
 
     const int      SLICES = std::min(3 + std::max(wd, ht), 50);  // this is a good guess at how much to tesselate the circle coordinates (50 segments max)
     const double   HORZ_THETA = (2 * PI) / SLICES;
@@ -319,25 +319,25 @@ void CircleArc(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr
     valarray<Clr>&    colors = color_arrays[SLICES];
     bool calc_vertices = unit_vertices.size() == 0;
     if (calc_vertices) {
-	unit_vertices.resize(2 * (SLICES + 1), 0.0);
-	double theta = 0.0f;
-	for (int j = 0; j <= SLICES; theta += HORZ_THETA, ++j) { // calculate x,y values for each point on a unit circle divided into SLICES arcs
+        unit_vertices.resize(2 * (SLICES + 1), 0.0);
+        double theta = 0.0f;
+        for (int j = 0; j <= SLICES; theta += HORZ_THETA, ++j) { // calculate x,y values for each point on a unit circle divided into SLICES arcs
             unit_vertices[j*2] = cos(-theta);
             unit_vertices[j*2+1] = sin(-theta);
-	}
-	colors.resize(SLICES + 1, 0u); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
+        }
+        colors.resize(SLICES + 1, 0u); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
     }
     int first_slice_idx = int(theta1 / HORZ_THETA + 1);
     int last_slice_idx = int(theta2 / HORZ_THETA - 1);
     if (theta1 >= theta2)
-	last_slice_idx += SLICES;
+        last_slice_idx += SLICES;
     for (int j = first_slice_idx; j <= last_slice_idx; ++j) { // calculate the color value for each needed point
-	int X = (j > SLICES ? (j - SLICES) : j) * 2, Y = X + 1;
-	double color_scale_factor = (SQRT2OVER2 * (unit_vertices[X] + unit_vertices[Y]) + 1) / 2; // this is essentially the dot product of (x,y) with (sqrt2over2,sqrt2over2), the direction of the light source, scaled to the range [0,1]
-	colors[j] = Clr(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-			Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-			Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-			Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor)).i;
+        int X = (j > SLICES ? (j - SLICES) : j) * 2, Y = X + 1;
+        double color_scale_factor = (SQRT2OVER2 * (unit_vertices[X] + unit_vertices[Y]) + 1) / 2; // this is essentially the dot product of (x,y) with (sqrt2over2,sqrt2over2), the direction of the light source, scaled to the range [0,1]
+        colors[j] = Clr(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
+                        Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+                        Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+                        Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor)).i;
     }
 
     glPushMatrix();
@@ -353,8 +353,8 @@ void CircleArc(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr
     glVertex2f(theta1_x * inner_radius, theta1_y * inner_radius);
     // angles in between theta1 and theta2, if any
     for (int i = first_slice_idx; i <= last_slice_idx; ++i) {
-	int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
-	glVertex2f(unit_vertices[X] * inner_radius, unit_vertices[Y] * inner_radius);
+        int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
+        glVertex2f(unit_vertices[X] * inner_radius, unit_vertices[Y] * inner_radius);
     }      // theta2
     double theta2_x = cos(-theta2), theta2_y = sin(-theta2);
     glVertex2f(theta2_x * inner_radius, theta2_y * inner_radius);
@@ -363,24 +363,24 @@ void CircleArc(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr
     // point on circle at angle theta1
     double color_scale_factor = (SQRT2OVER2 * (theta1_x + theta1_y) + 1) / 2;
     glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-	       Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-	       Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-	       Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+               Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+               Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+               Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
     glVertex2f(theta1_x, theta1_y);
     glVertex2f(theta1_x * inner_radius, theta1_y * inner_radius);
     // angles in between theta1 and theta2, if any
-    for (int i = first_slice_idx; i <= last_slice_idx; ++i) { 
-	int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
-	glColor4ubv(colors[i].v);
-	glVertex2f(unit_vertices[X], unit_vertices[Y]);
-	glVertex2f(unit_vertices[X] * inner_radius, unit_vertices[Y] * inner_radius);
+    for (int i = first_slice_idx; i <= last_slice_idx; ++i) {
+        int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
+        glColor4ubv(colors[i].v);
+        glVertex2f(unit_vertices[X], unit_vertices[Y]);
+        glVertex2f(unit_vertices[X] * inner_radius, unit_vertices[Y] * inner_radius);
     }
     // theta2
     color_scale_factor = (SQRT2OVER2 * (theta2_x + theta2_y) + 1) / 2;
     glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-	       Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-	       Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-	       Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+               Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+               Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+               Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
     glVertex2f(theta2_x, theta2_y);
     glVertex2f(theta2_x * inner_radius, theta2_y * inner_radius);
     glEnd();
@@ -401,9 +401,9 @@ void RoundedRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_colo
     // top
     double color_scale_factor = (SQRT2OVER2 * (0 + 1) + 1) / 2;
     glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-	       Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-	       Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-	       Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+               Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+               Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+               Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
     glBegin(GL_QUADS);
     glVertex2i(x2 - corner_radius, y1);
     glVertex2i(x1 + corner_radius, y1);
@@ -422,9 +422,9 @@ void RoundedRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_colo
     // right
     color_scale_factor = (SQRT2OVER2 * (-1 + 0) + 1) / 2;
     glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-	       Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-	       Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-	       Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+               Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+               Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+               Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
     glBegin(GL_QUADS);
     glVertex2i(x2, y1 + corner_radius);
     glVertex2i(x2 - thick, y1 + corner_radius);
@@ -474,9 +474,9 @@ void BubbleRectangle(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr
     // top
     double color_scale_factor = (SQRT2OVER2 * (0 + 1) + 1) / 2;
     Clr scaled_color(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-		     Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-		     Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-		     Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+                     Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                     Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                     Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
     glBegin(GL_QUADS);
     glColor4ubv(scaled_color.v);
     glVertex2i(x2 - corner_radius, y1);
@@ -499,9 +499,9 @@ void BubbleRectangle(int x1, int y1, int x2, int y2, Clr color1, Clr color2, Clr
     // right
     color_scale_factor = (SQRT2OVER2 * (-1 + 0) + 1) / 2;
     scaled_color = Clr(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-		       Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-		       Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-		       Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+                       Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                       Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                       Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
     glBegin(GL_QUADS);
     glColor4ubv(color1.v);
     glVertex2i(x2 - corner_radius, y1 + corner_radius);

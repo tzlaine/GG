@@ -78,14 +78,14 @@ class App
 public: 
     /// these are the only events absolutely necessary for GG to function properly
     enum EventType {KEYPRESS,    ///< a down key press or key repeat, with or without modifiers like Alt, Ctrl, Meta, etc.
-		    LPRESS,      ///< a left mouse button press
-		    MPRESS,      ///< a middle mouse button press
-		    RPRESS,      ///< a right mouse button press
-		    LRELEASE,    ///< a left mouse button release
-		    MRELEASE,    ///< a middle mouse button release
-		    RRELEASE,    ///< a right mouse button release
-		    MOUSEMOVE,   ///< movement of the mouse
-		    MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
+                    LPRESS,      ///< a left mouse button press
+                    MPRESS,      ///< a middle mouse button press
+                    RPRESS,      ///< a right mouse button press
+                    LRELEASE,    ///< a left mouse button release
+                    MRELEASE,    ///< a middle mouse button release
+                    RRELEASE,    ///< a right mouse button release
+                    MOUSEMOVE,   ///< movement of the mouse
+                    MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
                    };
 
     /** \name Structors */ //@{

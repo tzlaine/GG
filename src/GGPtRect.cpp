@@ -31,23 +31,23 @@ namespace GG {
 ////////////////////////////////////////////////
 // GG::Pt
 ////////////////////////////////////////////////
-Pt::Pt() : 
-    x(0), 
-    y(0) 
+Pt::Pt() :
+        x(0),
+        y(0)
 {
 }
 
-Pt::Pt(int x_, int y_) : 
-    x(x_), 
-    y(y_) 
+Pt::Pt(int x_, int y_) :
+        x(x_),
+        y(y_)
 {
 }
 
 Pt::Pt(const XMLElement& elem)
 {
     if (elem.Tag() != "GG::Pt")
-	throw std::invalid_argument("Attempted to construct a GG::Pt from an XMLElement that had a tag other than \"GG::Pt\"");
-   
+        throw std::invalid_argument("Attempted to construct a GG::Pt from an XMLElement that had a tag other than \"GG::Pt\"");
+
     const XMLElement& x_elem = elem.Child("x");
     const XMLElement& y_elem = elem.Child("y");
     x = lexical_cast<int>(x_elem.Attribute("value"));
@@ -81,17 +81,17 @@ Rect::Rect(const Pt& pt1, const Pt& pt2)
     lr.y = std::max(pt1.y, pt2.y);
 }
 
-Rect::Rect(int x1, int y1, int x2, int y2) : 
-    ul(Pt(x1, y1)), 
-    lr(Pt(x2, y2))
+Rect::Rect(int x1, int y1, int x2, int y2) :
+        ul(Pt(x1, y1)),
+        lr(Pt(x2, y2))
 {
 }
 
 Rect::Rect(const XMLElement& elem)
 {
     if (elem.Tag() != "GG::Rect")
-	throw std::invalid_argument("Attempted to construct a GG::Rect from an XMLElement that had a tag other than \"GG::Rect\"");
-   
+        throw std::invalid_argument("Attempted to construct a GG::Rect from an XMLElement that had a tag other than \"GG::Rect\"");
+
     const XMLElement& ul_pt_elem = elem.Child("ul");
     const XMLElement& lr_pt_elem = elem.Child("lr");
     ul = Pt(ul_pt_elem.Child(0));
@@ -109,5 +109,4 @@ XMLElement Rect::XMLEncode() const
 }
 
 } // namespace GG
-
 

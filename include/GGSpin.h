@@ -87,123 +87,123 @@ public:
     /** \name Structors */ //@{
     /** ctor*/
     Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const shared_ptr<Font>& font, Clr color, 
-	 Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-	 Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
-	Control(x, y, w, h),
-	m_value(value),
-	m_step_size(step),
-	m_min_value(min),
-	m_max_value(max),
-	m_editable(edits),
-	m_up_bn(up),
-	m_dn_bn(down),
-	m_initial_depressed_area(NONE),
-	m_depressed_area(NONE)
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
+         Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
+        Control(x, y, w, h),
+        m_value(value),
+        m_step_size(step),
+        m_min_value(min),
+        m_max_value(max),
+        m_editable(edits),
+        m_up_bn(up),
+        m_dn_bn(down),
+        m_initial_depressed_area(NONE),
+        m_depressed_area(NONE)
     {
-	Init(font, color, text_color, interior, flags);
+        Init(font, color, text_color, interior, flags);
     }
    
     /** ctor*/
     Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const string& font_filename, int pts, Clr color, 
-	 Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-	 Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
-	Control(x, y, w, h),
-	m_value(value),
-	m_step_size(step),
-	m_min_value(min),
-	m_max_value(max),
-	m_editable(edits),
-	m_up_bn(up),
-	m_dn_bn(down),
-	m_initial_depressed_area(NONE),
-	m_depressed_area(NONE)
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
+         Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
+        Control(x, y, w, h),
+        m_value(value),
+        m_step_size(step),
+        m_min_value(min),
+        m_max_value(max),
+        m_editable(edits),
+        m_up_bn(up),
+        m_dn_bn(down),
+        m_initial_depressed_area(NONE),
+        m_depressed_area(NONE)
     {
-	Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
+        Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
     }
    
     /** ctor that does not required height. Height is determined from the font and point size used.*/
     Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const shared_ptr<Font>& font, Clr color, 
-	 Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-	 Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
-	Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
-	m_value(value),
-	m_step_size(step),
-	m_min_value(min),
-	m_max_value(max),
-	m_editable(edits),
-	m_up_bn(up),
-	m_dn_bn(down),
-	m_initial_depressed_area(NONE),
-	m_depressed_area(NONE)
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
+         Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
+        Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
+        m_value(value),
+        m_step_size(step),
+        m_min_value(min),
+        m_max_value(max),
+        m_editable(edits),
+        m_up_bn(up),
+        m_dn_bn(down),
+        m_initial_depressed_area(NONE),
+        m_depressed_area(NONE)
     {
-	Init(font, color, text_color, interior, flags);
+        Init(font, color, text_color, interior, flags);
     }
    
     /** ctor that does not required height. Height is determined from the font and point size used.*/
     Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const string& font_filename, int pts, Clr color, 
-	 Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-	 Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
-	Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN),
-	m_value(value),
-	m_step_size(step),
-	m_min_value(min),
-	m_max_value(max),
-	m_editable(edits),
-	m_up_bn(up),
-	m_dn_bn(down),
-	m_initial_depressed_area(NONE),
-	m_depressed_area(NONE)
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
+         Uint32 flags = CLICKABLE | DRAG_KEEPER) : 
+        Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN),
+        m_value(value),
+        m_step_size(step),
+        m_min_value(min),
+        m_max_value(max),
+        m_editable(edits),
+        m_up_bn(up),
+        m_dn_bn(down),
+        m_initial_depressed_area(NONE),
+        m_depressed_area(NONE)
     {
-	Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
+        Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
     }
    
     /** ctor that constructs an Spin object from an XMLElement. \throw std::invalid_argument May throw 
-	std::invalid_argument if \a elem does not encode a Spin object*/
+        std::invalid_argument if \a elem does not encode a Spin object*/
     Spin(const XMLElement& elem) : 
-	Control(elem.Child("GG::Control")),
-	m_initial_depressed_area(NONE),
-	m_depressed_area(NONE)
+        Control(elem.Child("GG::Control")),
+        m_initial_depressed_area(NONE),
+        m_depressed_area(NONE)
     {
-	if (elem.Tag() != XMLTypeName())
-	    throw std::invalid_argument("Attempted to construct a " + XMLTypeName() + " from an XMLElement that had a tag other than \"" + XMLTypeName() + "\"");
+        if (elem.Tag() != XMLTypeName())
+            throw std::invalid_argument("Attempted to construct a " + XMLTypeName() + " from an XMLElement that had a tag other than \"" + XMLTypeName() + "\"");
 
-	const XMLElement* curr_elem = &elem.Child("m_value");
-	m_value = lexical_cast<T>(curr_elem->Attribute("value"));
-	
-	curr_elem = &elem.Child("m_step_size");
-	m_step_size = lexical_cast<T>(curr_elem->Attribute("value"));
-	
-	curr_elem = &elem.Child("m_min_value");
-	m_min_value = lexical_cast<T>(curr_elem->Attribute("value"));
-	
-	curr_elem = &elem.Child("m_max_value");
-	m_max_value = lexical_cast<T>(curr_elem->Attribute("value"));
-	
-	curr_elem = &elem.Child("m_editable");
-	m_editable = lexical_cast<bool>(curr_elem->Attribute("value"));
-	
-	curr_elem = &elem.Child("m_edit");
-	m_edit = new Edit(curr_elem->Child("GG::Edit"));
-	if (m_editable) {
-	    AttachChild(m_edit);
-	    m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
-	}
-	
-	curr_elem = &elem.Child("m_up_bn");
-	Wnd* w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
-	if (Button* b = dynamic_cast<Button*>(w)) {
-	    m_up_bn.reset(b);
-	} else {
-	    throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the increment button for a GG::Spin.");
-	}
-	
-	curr_elem = &elem.Child("m_dn_bn");
-	w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
-	if (Button* b = dynamic_cast<Button*>(w)) {
-	    m_dn_bn.reset(b);
-	} else {
-	    throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the decrement button for a GG::Spin.");
-	}
+        const XMLElement* curr_elem = &elem.Child("m_value");
+        m_value = lexical_cast<T>(curr_elem->Attribute("value"));
+   
+        curr_elem = &elem.Child("m_step_size");
+        m_step_size = lexical_cast<T>(curr_elem->Attribute("value"));
+   
+        curr_elem = &elem.Child("m_min_value");
+        m_min_value = lexical_cast<T>(curr_elem->Attribute("value"));
+   
+        curr_elem = &elem.Child("m_max_value");
+        m_max_value = lexical_cast<T>(curr_elem->Attribute("value"));
+   
+        curr_elem = &elem.Child("m_editable");
+        m_editable = lexical_cast<bool>(curr_elem->Attribute("value"));
+   
+        curr_elem = &elem.Child("m_edit");
+        m_edit = new Edit(curr_elem->Child("GG::Edit"));
+        if (m_editable) {
+            AttachChild(m_edit);
+            m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
+        }
+   
+        curr_elem = &elem.Child("m_up_bn");
+        Wnd* w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
+        if (Button* b = dynamic_cast<Button*>(w)) {
+            m_up_bn.reset(b);
+        } else {
+            throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the increment button for a GG::Spin.");
+        }
+   
+        curr_elem = &elem.Child("m_dn_bn");
+        w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
+        if (Button* b = dynamic_cast<Button*>(w)) {
+            m_dn_bn.reset(b);
+        } else {
+            throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the decrement button for a GG::Spin.");
+        }
     }
     
     /** dtor*/
@@ -225,114 +225,114 @@ public:
     /** constructs an XMLElement from a Spin object*/
     virtual XMLElement XMLEncode() const
     {
-	XMLElement retval(XMLTypeName());
-	if (m_editable)
-	    const_cast<Spin*>(this)->DetachChildren();
-	retval.AppendChild(Control::XMLEncode());
-	if (m_editable)
-	    const_cast<Spin*>(this)->AttachChild(m_edit);
-	
-	XMLElement temp;
-	
-	temp = XMLElement("m_value");
-	temp.SetAttribute("value", lexical_cast<string>(m_value));
-	retval.AppendChild(temp);
-	
-	temp = XMLElement("m_step_size");
-	temp.SetAttribute("value", lexical_cast<string>(m_step_size));
-	retval.AppendChild(temp);
-	
-	temp = XMLElement("m_min_value");
-	temp.SetAttribute("value", lexical_cast<string>(m_min_value));
-	retval.AppendChild(temp);
+        XMLElement retval(XMLTypeName());
+        if (m_editable)
+            const_cast<Spin*>(this)->DetachChildren();
+        retval.AppendChild(Control::XMLEncode());
+        if (m_editable)
+            const_cast<Spin*>(this)->AttachChild(m_edit);
+   
+        XMLElement temp;
+   
+        temp = XMLElement("m_value");
+        temp.SetAttribute("value", lexical_cast<string>(m_value));
+        retval.AppendChild(temp);
+   
+        temp = XMLElement("m_step_size");
+        temp.SetAttribute("value", lexical_cast<string>(m_step_size));
+        retval.AppendChild(temp);
+   
+        temp = XMLElement("m_min_value");
+        temp.SetAttribute("value", lexical_cast<string>(m_min_value));
+        retval.AppendChild(temp);
 
-	temp = XMLElement("m_max_value");
-	temp.SetAttribute("value", lexical_cast<string>(m_max_value));
-	retval.AppendChild(temp);
-	
-	temp = XMLElement("m_editable");
-	temp.SetAttribute("value", lexical_cast<string>(m_editable));
-	retval.AppendChild(temp);
-	
-	temp = XMLElement("m_edit");
-	temp.AppendChild(m_edit->XMLEncode());
-	retval.AppendChild(temp);
-	
-	temp = XMLElement("m_up_bn");
-	temp.AppendChild(m_up_bn->XMLEncode());
-	retval.AppendChild(temp);
-	
-	temp = XMLElement("m_dn_bn");
-	temp.AppendChild(m_dn_bn->XMLEncode());
-	retval.AppendChild(temp);
+        temp = XMLElement("m_max_value");
+        temp.SetAttribute("value", lexical_cast<string>(m_max_value));
+        retval.AppendChild(temp);
+   
+        temp = XMLElement("m_editable");
+        temp.SetAttribute("value", lexical_cast<string>(m_editable));
+        retval.AppendChild(temp);
+   
+        temp = XMLElement("m_edit");
+        temp.AppendChild(m_edit->XMLEncode());
+        retval.AppendChild(temp);
+   
+        temp = XMLElement("m_up_bn");
+        temp.AppendChild(m_up_bn->XMLEncode());
+        retval.AppendChild(temp);
+   
+        temp = XMLElement("m_dn_bn");
+        temp.AppendChild(m_dn_bn->XMLEncode());
+        retval.AppendChild(temp);
 
-	return retval;
+        return retval;
     }
     //@}
 
     /** \name Mutators */ //@{
     virtual int Render()
     {
-	Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-	Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
-	Pt ul = UpperLeft(), lr = LowerRight();
-	BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
-	if (!m_editable) {
-	    m_edit->OffsetMove(UpperLeft());
-	    m_edit->Render();
-	    m_edit->OffsetMove(-UpperLeft());
-	}
-	m_up_bn->OffsetMove(UpperLeft());
-	m_dn_bn->OffsetMove(UpperLeft());
-	m_up_bn->Render();
-	m_dn_bn->Render();
-	m_up_bn->OffsetMove(-UpperLeft());
-	m_dn_bn->OffsetMove(-UpperLeft());
-	return 1;
+        Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
+        Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
+        Pt ul = UpperLeft(), lr = LowerRight();
+        BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
+        if (!m_editable) {
+            m_edit->OffsetMove(UpperLeft());
+            m_edit->Render();
+            m_edit->OffsetMove(-UpperLeft());
+        }
+        m_up_bn->OffsetMove(UpperLeft());
+        m_dn_bn->OffsetMove(UpperLeft());
+        m_up_bn->Render();
+        m_dn_bn->Render();
+        m_up_bn->OffsetMove(-UpperLeft());
+        m_dn_bn->OffsetMove(-UpperLeft());
+        return 1;
     }
    
     virtual int LButtonDown(const Pt& pt, Uint32 keys)
     {
-	if (!Disabled()) {
-	    Pt ul = UpperLeft();
-	    if (m_up_bn->InWindow(pt - ul)) {
-		m_initial_depressed_area = UP_BN;
-		m_depressed_area = UP_BN;
-		m_up_bn->SetState(Button::BN_PRESSED);
-		Incr();
-	    } else if (m_dn_bn->InWindow(pt - ul)) {
-		m_initial_depressed_area = DN_BN;
-		m_depressed_area = DN_BN;
-		m_dn_bn->SetState(Button::BN_PRESSED);
-		Decr();
-	    } else {
-		m_initial_depressed_area = NONE;
-		m_depressed_area = NONE;
-	    }
-	}
-	return 1;
+        if (!Disabled()) {
+            Pt ul = UpperLeft();
+            if (m_up_bn->InWindow(pt - ul)) {
+                m_initial_depressed_area = UP_BN;
+                m_depressed_area = UP_BN;
+                m_up_bn->SetState(Button::BN_PRESSED);
+                Incr();
+            } else if (m_dn_bn->InWindow(pt - ul)) {
+                m_initial_depressed_area = DN_BN;
+                m_depressed_area = DN_BN;
+                m_dn_bn->SetState(Button::BN_PRESSED);
+                Decr();
+            } else {
+                m_initial_depressed_area = NONE;
+                m_depressed_area = NONE;
+            }
+        }
+        return 1;
     }
    
     virtual int LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     {
-	if (!Disabled()) {
-	    Pt ul = UpperLeft();
-	    if (m_up_bn->InWindow(pt - ul)) {
-		Incr();
-	    } else if (m_dn_bn->InWindow(pt - ul)) {
-		Decr();
-	    }
-	}
-	return 1;
+        if (!Disabled()) {
+            Pt ul = UpperLeft();
+            if (m_up_bn->InWindow(pt - ul)) {
+                Incr();
+            } else if (m_dn_bn->InWindow(pt - ul)) {
+                Decr();
+            }
+        }
+        return 1;
     }
    
     virtual int LButtonUp(const Pt& pt, Uint32 keys)
     {
-	m_up_bn->SetState(Button::BN_UNPRESSED);
-	m_dn_bn->SetState(Button::BN_UNPRESSED);
-	m_initial_depressed_area = NONE;
-	m_depressed_area = NONE;
-	return 1;
+        m_up_bn->SetState(Button::BN_UNPRESSED);
+        m_dn_bn->SetState(Button::BN_UNPRESSED);
+        m_initial_depressed_area = NONE;
+        m_depressed_area = NONE;
+        return 1;
     }
    
     virtual int LClick(const Pt& pt, Uint32 keys)      {return LButtonUp(pt, keys);}
@@ -341,51 +341,51 @@ public:
    
     virtual int Keypress(Key key, Uint32 key_mods)
     {
-	switch (key) {
-	    case GGK_HOME:
-		SetValue(m_min_value);
-		break;
-	    case GGK_END:
-		SetValue(m_max_value);
-		break;
-	    case GGK_PAGEUP:
-	    case GGK_UP:
-	    case GGK_PLUS:
-	    case GGK_KP_PLUS:
-		Incr();
-		break;
-	    case GGK_PAGEDOWN:
-	    case GGK_DOWN:
-	    case GGK_MINUS:
-	    case GGK_KP_MINUS:
-		Decr();
-		break;
-	    default:
-		break;
-	}
-	return 1;
+        switch (key) {
+        case GGK_HOME:
+            SetValue(m_min_value);
+            break;
+        case GGK_END:
+            SetValue(m_max_value);
+            break;
+        case GGK_PAGEUP:
+        case GGK_UP:
+        case GGK_PLUS:
+        case GGK_KP_PLUS:
+            Incr();
+            break;
+        case GGK_PAGEDOWN:
+        case GGK_DOWN:
+        case GGK_MINUS:
+        case GGK_KP_MINUS:
+            Decr();
+            break;
+        default:
+            break;
+        }
+        return 1;
     }
 
     // sizes the conrol, then resizes the Buttons and Edit as needed
     virtual void SizeMove(int x1, int y1, int x2, int y2)
     {
-	Wnd::SizeMove(x1, y1, x2, y2);
-	const int BN_X_POS = Width() - (Height() - 2 * BORDER_THICK) - BORDER_THICK;
-	const int BN_WIDTH = Height() - 2 * BORDER_THICK;
-	const int BNS_HEIGHT = BN_WIDTH; // height of BOTH buttons
-	m_edit->SizeMove(0, 0, Width() - Height(), Height());
-	m_up_bn->SizeMove(BN_X_POS, BORDER_THICK,
-			  BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2);
-	m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + m_up_bn->Wnd::Height(),
-			  BN_X_POS + BN_WIDTH, BORDER_THICK + m_up_bn->Wnd::Height() + BNS_HEIGHT - m_up_bn->Wnd::Height());
+        Wnd::SizeMove(x1, y1, x2, y2);
+        const int BN_X_POS = Width() - (Height() - 2 * BORDER_THICK) - BORDER_THICK;
+        const int BN_WIDTH = Height() - 2 * BORDER_THICK;
+        const int BNS_HEIGHT = BN_WIDTH; // height of BOTH buttons
+        m_edit->SizeMove(0, 0, Width() - Height(), Height());
+        m_up_bn->SizeMove(BN_X_POS, BORDER_THICK,
+                          BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2);
+        m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + m_up_bn->Wnd::Height(),
+                          BN_X_POS + BN_WIDTH, BORDER_THICK + m_up_bn->Wnd::Height() + BNS_HEIGHT - m_up_bn->Wnd::Height());
     }
    
     virtual void Disable(bool b = true)
     {
-	Control::Disable(b);
-	m_edit->Disable(b);
-	m_up_bn->Disable(b);
-	m_dn_bn->Disable(b);
+        Control::Disable(b);
+        m_edit->Disable(b);
+        m_up_bn->Disable(b);
+        m_dn_bn->Disable(b);
     }
    
     void Incr() {SetValue(m_value + m_step_size);}  ///< increments the value of the control's text by StepSize(), up to at most MaxValue()
@@ -394,25 +394,25 @@ public:
     /** sets the value of the control's text to \a value, locked to the range [MinValue(), MaxValue()]*/
     void SetValue(T value)
     {
-	T old_value = m_value;
-	if (value < m_min_value) {
-	    m_value = m_min_value;
-	} else if (m_max_value < value) {
-	    m_value = m_max_value;
-	} else {
-	    // if the value supplied does not equal a valid value
-	    if (std::abs(details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
-		// find nearest valid value to the one supplied
-		T closest_below = details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
-		T closest_above = closest_below + m_step_size;
-		m_value = ((value - closest_below) < (closest_above - value) ? closest_below : closest_above);
-	    } else {
-		m_value = value;
-	    }
-	}
-	*m_edit << m_value;
-	if (m_value != old_value)
-	    m_value_changed_sig(m_value);
+        T old_value = m_value;
+        if (value < m_min_value) {
+            m_value = m_min_value;
+        } else if (m_max_value < value) {
+            m_value = m_max_value;
+        } else {
+            // if the value supplied does not equal a valid value
+            if (std::abs(details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
+                // find nearest valid value to the one supplied
+                T closest_below = details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
+                T closest_above = closest_below + m_step_size;
+                m_value = ((value - closest_below) < (closest_above - value) ? closest_below : closest_above);
+            } else {
+                m_value = value;
+            }
+        }
+        *m_edit << m_value;
+        if (m_value != old_value)
+            m_value_changed_sig(m_value);
     }
     
     void           SetStepSize(T step)     {m_step_size = step;}   ///< sets the step size of the control to \a step
@@ -422,12 +422,12 @@ public:
     /** turns on or off the mode that allows the user to edit the value in the spinbox directly*/
     void AllowEdits(bool b = true)
     {
-	DetachChildren();
-	m_edit_connection.disconnect();
-	if (m_editable = b) {
-	    AttachChild(m_edit);
-	    m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
-	}
+        DetachChildren();
+        m_edit_connection.disconnect();
+        if (m_editable = b) {
+            AttachChild(m_edit);
+            m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
+        }
     }
    
     virtual void   SetColor(Clr c)               {Control::SetColor(c); m_up_bn->SetColor(c); m_dn_bn->SetColor(c);}
@@ -440,13 +440,13 @@ public:
     //@}
 
     /** returns a std::string representing this Spin's exact type, including the type of its data, to aid with automatic
-	XML saving and loading*/
+        XML saving and loading*/
     static string XMLTypeName()
     {
-	string retval = "GG::Spin_";
-	retval += typeid(ValueType).name();
-	retval += "_";
-	return retval;
+        string retval = "GG::Spin_";
+        retval += typeid(ValueType).name();
+        retval += "_";
+        return retval;
     }
    
 private:
@@ -457,29 +457,29 @@ private:
 
     void Init(const shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
     {
-	Control::SetColor(color);
-	m_edit = new Edit(0, 0, 1, 1, boost::lexical_cast<string>(m_value), font, CLR_ZERO, text_color, interior);
-	if (!m_up_bn)
-	    m_up_bn = shared_ptr<Button>(new Button(0, 0, 1, 1, "+", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
-	if (!m_dn_bn)
-	    m_dn_bn = shared_ptr<Button>(new Button(0, 0, 1, 1, "-", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
-	if (m_editable) {
-	    AttachChild(m_edit);
-	    m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
-	}
-	SizeMove(UpperLeft(), LowerRight());
+        Control::SetColor(color);
+        m_edit = new Edit(0, 0, 1, 1, boost::lexical_cast<string>(m_value), font, CLR_ZERO, text_color, interior);
+        if (!m_up_bn)
+            m_up_bn = shared_ptr<Button>(new Button(0, 0, 1, 1, "+", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
+        if (!m_dn_bn)
+            m_dn_bn = shared_ptr<Button>(new Button(0, 0, 1, 1, "-", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
+        if (m_editable) {
+            AttachChild(m_edit);
+            m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
+        }
+        SizeMove(UpperLeft(), LowerRight());
     }
    
     void ValueUpdated(const string& val_text)
     {
-	T value;
-	try {
-	    value = boost::lexical_cast<T>(val_text);
-	} catch (boost::bad_lexical_cast) {
-	    SetValue(m_min_value);
-	    return;
-	}
-	SetValue(value);
+        T value;
+        try {
+            value = boost::lexical_cast<T>(val_text);
+        } catch (boost::bad_lexical_cast) {
+            SetValue(m_min_value);
+            return;
+        }
+        SetValue(value);
     }
    
     T        m_value;

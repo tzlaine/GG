@@ -138,8 +138,8 @@ public:
     SubTexture(); ///< default ctor
    
     /** creates a SubTexture from a GG::Texture and coordinates into it. \warning Calling code <b>must not</b> delete 
-	\a texture; \a texture becomes the property of a shared_ptr inside the SubTexture. \throw SubTextureException 
-	May throw. */
+        \a texture; \a texture becomes the property of a shared_ptr inside the SubTexture. \throw SubTextureException 
+        May throw. */
     SubTexture(const Texture* texture, int x1, int y1, int x2, int y2); 
    
     /** creates a SubTexture from a GG::Texture and coordinates into it \throw SubTextureException May throw. */

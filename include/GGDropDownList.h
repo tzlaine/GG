@@ -114,9 +114,9 @@ public:
     void           LockColWidths()            {m_LB->LockColWidths();}   ///< fixes the column widths; by default, an empty list will take on the number of columns of its first added row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called.
     void           UnLockColWidths()          {m_LB->UnLockColWidths();} ///< allows the number of columns to be determined by the first row added to an empty ListBox
     void           SetColAlignment(int n, Uint32 align) 
-	{m_LB->SetColAlignment(n, align);} ///< sets the alignment of column \a n to \a align; not range-checked
+                                              {m_LB->SetColAlignment(n, align);} ///< sets the alignment of column \a n to \a align; not range-checked
     void           SetRowAlignment(int n, Uint32 align) 
-	{m_LB->SetRowAlignment(n, align);} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
+                                              {m_LB->SetRowAlignment(n, align);} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
 
     SelChangedSignalType& SelChangedSignal()  {return m_sel_changed_sig;}///< returns the selection change signal object for this DropDownList
     //@}

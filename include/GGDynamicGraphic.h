@@ -57,13 +57,13 @@ class DynamicGraphic : public Control
 public:
     /** \name Signal Types */ //@{
     /** emitted whenever playback ends because the last frame was reached and Looping() == false; the argument is the 
-	index of the last frame (may be the first frame, if playing in reverse).  \note Unlike most other signals, this 
-	one is emitted during the execution of Render(), so keep this in mind when processing this signal.*/
+        index of the last frame (may be the first frame, if playing in reverse).  \note Unlike most other signals, this 
+        one is emitted during the execution of Render(), so keep this in mind when processing this signal.*/
     typedef boost::signal<void (int)> StoppedSignalType;
    
     /** emitted whenever the last frame of animation is reached; the argument is the index of the last frame (may be the 
-	first frame, if playing in reverse).  \note Unlike most other signals, this one is emitted during the execution 
-	of Render(), so keep this in mind when processing this signal.*/
+        first frame, if playing in reverse).  \note Unlike most other signals, this one is emitted during the execution 
+        of Render(), so keep this in mind when processing this signal.*/
     typedef boost::signal<void (int)> EndFrameSignalType;
     //@}
 
@@ -74,17 +74,17 @@ public:
 
     /** \name Structors */ //@{
     /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
-	indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> 
-	delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.*/
+        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> 
+        delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture, int frames = -1, Uint32 flags = 0); 
    
     /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
-	indicates all possible area is considered to contain valid frames.*/
+        indicates all possible area is considered to contain valid frames.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const shared_ptr<Texture>& texture, int frames = -1, Uint32 flags = 0);
    
     /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1 
-	indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
-	Textures but the last are assumed to have the maximum number of frames based on their sizes.*/
+        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
+        Textures but the last are assumed to have the maximum number of frames based on their sizes.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures, int frames = -1, Uint32 flags = 0);
    
     DynamicGraphic(const XMLElement& elem); ///< ctor that constructs an DynamicGraphic object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a DynamicGraphic object
@@ -107,22 +107,22 @@ public:
     virtual int Render();
    
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to 
-	contain the maximum possible number of frames based on its size and the frame size.  \warning Calling code 
-	<b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.
-	\throw std::invalid_argument May throw std::invalid_argument if \a texture is not large enough to contain
-	any frames.*/
+        contain the maximum possible number of frames based on its size and the frame size.  \warning Calling code 
+        <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.
+        \throw std::invalid_argument May throw std::invalid_argument if \a texture is not large enough to contain
+        any frames.*/
     void AddFrames(const Texture* texture, int frames = -1);
    
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to 
-	contain the maximum possible number of frames based on its size and the frame size.  \throw std::invalid_argument 
-	May throw std::invalid_argument if \a texture is not large enough to contain any frames.*/
+        contain the maximum possible number of frames based on its size and the frame size.  \throw std::invalid_argument 
+        May throw std::invalid_argument if \a texture is not large enough to contain any frames.*/
     void AddFrames(const shared_ptr<Texture>& texture, int frames = -1);
    
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Textures are assumed to 
-	contain the maximum possible number of frames based on its size and the frame size.  Regardless of the value of 
-	\a frames, all Textures but the last are assumed to have the maximum number of frames based on their sizes.
-	\throw std::invalid_argument May throw std::invalid_argument if at least one element of \a textures is not large 
-	enough to contain any frames.*/
+        contain the maximum possible number of frames based on its size and the frame size.  Regardless of the value of 
+        \a frames, all Textures but the last are assumed to have the maximum number of frames based on their sizes.
+        \throw std::invalid_argument May throw std::invalid_argument if at least one element of \a textures is not large 
+        enough to contain any frames.*/
     void AddFrames(const vector<shared_ptr<Texture> >& textures, int frames = -1);
    
     void  Play();                    ///< starts the animation of the image
@@ -144,8 +144,8 @@ public:
 private:
     struct FrameSet
     {
-	shared_ptr<const Texture>  texture; ///< the texture with the frames in it
-	int                        frames;  ///< the number of frames in this texture
+        shared_ptr<const Texture>  texture; ///< the texture with the frames in it
+        int                        frames;  ///< the number of frames in this texture
     };
    
     int FramesInTexture(const Texture* t);

@@ -122,4 +122,3 @@ private:
 
 #endif // _SDLGGApp_h_
 
-

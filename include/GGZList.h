@@ -51,8 +51,8 @@ public:
    
     /** \name Mutators */ //@{
     /** Add() places \a wnd in the list in front of the first entry with z-value <= wnd->ZOrder(), or at the end of the list, 
-	whichever comes first. If wnd->ZOrder() == 0, Add() inserts \a wnd at the front of the list, and updates \a 
-	wnd's z-value. */
+        whichever comes first. If wnd->ZOrder() == 0, Add() inserts \a wnd at the front of the list, and updates \a 
+        wnd's z-value. */
     void Add(Wnd* wnd);
     bool Remove(Wnd* wnd);   ///< removes \a wnd from z-order
     bool MoveUp(Wnd* wnd);   ///< moves \a wnd from its current position to the beginning of list; updates wnd's z-value
@@ -69,5 +69,4 @@ private:
 } // namespace GG
 
 #endif // _GGZList_h_
-
 

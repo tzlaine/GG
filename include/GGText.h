@@ -140,36 +140,36 @@ class Font
 {
 public:
     /** This struct is used to render GG:Font text.  
-	It holds vital data on each line that a string occupies when rendered with given format flags.  Each value 
-	extents[i] is the furthest that the right side of the i-th character extends from the beginning of the line.*/
+        It holds vital data on each line that a string occupies when rendered with given format flags.  Each value 
+        extents[i] is the furthest that the right side of the i-th character extends from the beginning of the line.*/
     struct LineData
     {
-	int Width() const {return (!extents.empty() ? extents.back() : 0);}; ///< returns the width of the line, in pixels
+        int Width() const {return (!extents.empty() ? extents.back() : 0);}; ///< returns the width of the line, in pixels
 
-	int begin_idx;       ///< the index into the text string of the first character of the line
-	int end_idx;         ///< the index of the last + 1 character of the line
-	vector<int> extents; ///< the cummulative extents of the characters on this line of the text (0 extent is the left side)
+        int begin_idx;       ///< the index into the text string of the first character of the line
+        int end_idx;         ///< the index of the last + 1 character of the line
+        vector<int> extents; ///< the cummulative extents of the characters on this line of the text (0 extent is the left side)
     };
 
     /** This just holds the essential data necessary to represent a text formatting tag. */
     struct Tag
     {
-	Tag() : close_tag(false), char_length(0) {} ///< default ctor
-      
-	vector<string> tokens;        ///< the tokens of the tag (tokens are broken up by ' ' and '\t' whitespace characters)
-	bool           close_tag;     ///< true if this is a "close" tag (eg "</i>")
-	int            char_length;   ///< the total number of characters that comprise the tag, including brackets and whitespace.  0 indicates that this is not a valid tag.
+        Tag() : close_tag(false), char_length(0) {} ///< default ctor
+ 
+        vector<string> tokens;        ///< the tokens of the tag (tokens are broken up by ' ' and '\t' whitespace characters)
+        bool           close_tag;     ///< true if this is a "close" tag (eg "</i>")
+        int            char_length;   ///< the total number of characters that comprise the tag, including brackets and whitespace.  0 indicates that this is not a valid tag.
     };
 
     GGEXCEPTION(FontException);   ///< exception class \see GG::GGEXCEPTION
 
     /** the ranges of character glyphs to be rendered in this font*/
     enum GlyphRange {NUMBER = 1,                ///< only the numbers ('0' - '9')
-		     ALPHA_UPPER = 2,           ///< only the uppercase alphabet ('A' - 'Z')
-		     ALPHA_LOWER = 4,           ///< only the lowercase alphabet ('a' - 'z')
-		     SYMBOL = 8,                ///< everything printable not covered above
-		     ALL_DEFINED_RANGES = 15,   ///< everything above (all printable characters)
-		     ALL_CHARS = 31             ///< all characters (0x00 - 0xFF)
+                     ALPHA_UPPER = 2,           ///< only the uppercase alphabet ('A' - 'Z')
+                     ALPHA_LOWER = 4,           ///< only the lowercase alphabet ('a' - 'z')
+                     SYMBOL = 8,                ///< everything printable not covered above
+                     ALL_DEFINED_RANGES = 15,   ///< everything above (all printable characters)
+                     ALL_CHARS = 31             ///< all characters (0x00 - 0xFF)
                     };
       
     /** \name Structors */ //@{
@@ -206,16 +206,16 @@ public:
 
 private:
     /** This just holds the essential data necessary to render a glyph from the OpenGL texture(s) 
-	created at GG::Font creation time.*/
+        created at GG::Font creation time.*/
     struct Glyph
     {
-	Glyph() : advance(0) {} ///< default ctor
-	Glyph(const shared_ptr<Texture>& texture, int x1, int y1, int x2, int y2, int adv) : 
-	    sub_texture(SubTexture(texture, x1, y1, x2, y2)), advance(adv), width(x2 - x1) {} ///< ctor
+        Glyph() : advance(0) {} ///< default ctor
+        Glyph(const shared_ptr<Texture>& texture, int x1, int y1, int x2, int y2, int adv) : 
+            sub_texture(SubTexture(texture, x1, y1, x2, y2)), advance(adv), width(x2 - x1) {} ///< ctor
 
-	SubTexture  sub_texture;   ///< the subtexture containing just this glyph
-	int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
-	int         width;         ///< the width of the glyph only
+        SubTexture  sub_texture;   ///< the subtexture containing just this glyph
+        int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
+        int         width;         ///< the width of the glyph only
     };
 
     void              Init(const string& font_filename, int pts, Uint32 range);
@@ -237,7 +237,7 @@ private:
     int                  m_space_width; ///< the width in pixels of the glyph for the space character
     map<char, Glyph>     m_glyphs;      ///< the locations of the images of each glyph within the textures
     vector<shared_ptr<Texture> >
-    m_textures;    ///< the OpenGL texture objects in which the glyphs can be found
+                         m_textures;    ///< the OpenGL texture objects in which the glyphs can be found
    
     // all these are mutable, since they are called in functions that do rendering, but that do not otherwise change any state
     mutable bool         m_use_italics;    ///< set to true upon encountering an <i> tag, and to false when an </i> tag is seen
@@ -263,11 +263,11 @@ private:
     /// This GG::FontManager-private struct is used as a key type for the map of rendered fonts.
     struct FontKey 
     {
-	FontKey(const string& str, int pts) : filename(str), points(pts) {} ///< ctor
-	bool operator<(const FontKey& rhs) const {return (filename < rhs.filename || (filename == rhs.filename && points < rhs.points));} ///< less-than operator
+        FontKey(const string& str, int pts) : filename(str), points(pts) {} ///< ctor
+        bool operator<(const FontKey& rhs) const {return (filename < rhs.filename || (filename == rhs.filename && points < rhs.points));} ///< less-than operator
 
-	string   filename;   ///< the name of the file from which this font was created
-	int      points;     ///< the point size in which this font was rendered
+        string   filename;   ///< the name of the file from which this font was created
+        int      points;     ///< the point size in which this font was rendered
     };
 
 public:

@@ -32,40 +32,40 @@ namespace GG {
 ////////////////////////////////////////////////
 // GG::StaticGraphic
 ////////////////////////////////////////////////
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style/* = 0*/, Uint32 flags/* = 0*/) : 
-    Control(x, y, w, h, flags), 
-    m_style(style)
+StaticGraphic::StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style/* = 0*/, Uint32 flags/* = 0*/) :
+        Control(x, y, w, h, flags),
+        m_style(style)
 {
     Init(SubTexture(texture, 0, 0, texture->DefaultWidth(), texture->DefaultHeight()));
 }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style/* = 0*/, 
-                             Uint32 flags/* = 0*/) : 
-    Control(x, y, w, h, flags), 
-    m_style(style)
+StaticGraphic::StaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style/* = 0*/,
+                             Uint32 flags/* = 0*/) :
+        Control(x, y, w, h, flags),
+        m_style(style)
 {
     Init(SubTexture(texture, 0, 0, texture->DefaultWidth(), texture->DefaultHeight()));
 }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style/* = 0*/, 
-                             Uint32 flags/* = 0*/) : 
-    Control(x, y, w, h, flags), 
-    m_style(style)
+StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style/* = 0*/,
+                             Uint32 flags/* = 0*/) :
+        Control(x, y, w, h, flags),
+        m_style(style)
 {
     Init(subtexture);
 }
 
-StaticGraphic::StaticGraphic(const XMLElement& elem) : 
-    Control(elem.Child("GG::Control")), m_style(0)
+StaticGraphic::StaticGraphic(const XMLElement& elem) :
+        Control(elem.Child("GG::Control")), m_style(0)
 {
     if (elem.Tag() != "GG::StaticGraphic")
-	throw std::invalid_argument("Attempted to construct a GG::StaticGraphic from an XMLElement that had a tag other than \"GG::StaticGraphic\"");
-   
+        throw std::invalid_argument("Attempted to construct a GG::StaticGraphic from an XMLElement that had a tag other than \"GG::StaticGraphic\"");
+
     SetColor(CLR_WHITE);
-   
+
     const XMLElement* curr_elem = &elem.Child("m_graphic");
     m_graphic = SubTexture(curr_elem->Child("GG::SubTexture"));
-   
+
     curr_elem = &elem.Child("m_style");
     m_style = lexical_cast<Uint32>(curr_elem->Attribute("value"));
 }
@@ -80,44 +80,44 @@ int StaticGraphic::Render()
     Pt graphic_sz(m_graphic.Width(), m_graphic.Height());
     Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
     if (m_style & SG_FITGRAPHIC) {
-	if (m_style & SG_PROPSCALE) {
-	    double scale_x = window_sz.x / double(graphic_sz.x), 
-                scale_y = window_sz.y / double(graphic_sz.y);
-	    double scale = (scale_x < scale_y) ? scale_x : scale_y;
-	    pt2.x = int(graphic_sz.x * scale);
-	    pt2.y = int(graphic_sz.y * scale);
-	} else {
-	    pt2 = window_sz;
-	}
+        if (m_style & SG_PROPSCALE) {
+            double scale_x = window_sz.x / double(graphic_sz.x),
+                             scale_y = window_sz.y / double(graphic_sz.y);
+            double scale = (scale_x < scale_y) ? scale_x : scale_y;
+            pt2.x = int(graphic_sz.x * scale);
+            pt2.y = int(graphic_sz.y * scale);
+        } else {
+            pt2 = window_sz;
+        }
     } else if (m_style & SG_SHRINKFIT) {
-	if (m_style & SG_PROPSCALE) {
-	    double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0, 
-                scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
-	    double scale = (scale_x < scale_y) ? scale_x : scale_y;
-	    pt2.x = int(graphic_sz.x * scale);
-	    pt2.y = int(graphic_sz.y * scale);
-	} else {
-	    pt2 = window_sz;
-	}
+        if (m_style & SG_PROPSCALE) {
+            double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
+                             scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
+            double scale = (scale_x < scale_y) ? scale_x : scale_y;
+            pt2.x = int(graphic_sz.x * scale);
+            pt2.y = int(graphic_sz.y * scale);
+        } else {
+            pt2 = window_sz;
+        }
     }
 
     int shift = 0;
     if (m_style & SG_LEFT) {
-	shift = ul.x;
+        shift = ul.x;
     } else if (m_style & SG_CENTER) {
-	shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
+        shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
     } else { // m_style & SG_RIGHT
-	shift = lr.x - (pt2.x - pt1.x);
+        shift = lr.x - (pt2.x - pt1.x);
     }
     pt1.x += shift;
     pt2.x += shift;
 
     if (m_style & SG_TOP) {
-	shift = ul.y;
+        shift = ul.y;
     } else if (m_style & SG_VCENTER) {
-	shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
+        shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
     } else { // m_style & SG_BOTTOM
-	shift = lr.y - (pt2.y - pt1.y);
+        shift = lr.y - (pt2.y - pt1.y);
     }
     pt1.y += shift;
     pt2.y += shift;
@@ -133,15 +133,15 @@ XMLElement StaticGraphic::XMLEncode() const
     retval.AppendChild(Control::XMLEncode());
 
     XMLElement temp;
-  
+
     temp = XMLElement("m_graphic");
     temp.AppendChild(m_graphic.XMLEncode());
     retval.AppendChild(temp);
-   
+
     temp = XMLElement("m_style");
     temp.SetAttribute("value", lexical_cast<string>(m_style));
     retval.AppendChild(temp);
-   
+
     return retval;
 }
 
@@ -159,26 +159,25 @@ void StaticGraphic::ValidateStyle()
     if (m_style & SG_RIGHT) ++dup_ct;
     if (m_style & SG_CENTER) ++dup_ct;
     if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use SG_CENTER by default
-	m_style &= ~(SG_RIGHT | SG_LEFT);
-	m_style |= SG_CENTER;
+        m_style &= ~(SG_RIGHT | SG_LEFT);
+        m_style |= SG_CENTER;
     }
     dup_ct = 0;
     if (m_style & SG_TOP) ++dup_ct;
     if (m_style & SG_BOTTOM) ++dup_ct;
     if (m_style & SG_VCENTER) ++dup_ct;
     if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use SG_VCENTER by default
-	m_style &= ~(SG_TOP | SG_BOTTOM);
-	m_style |= SG_VCENTER;
+        m_style &= ~(SG_TOP | SG_BOTTOM);
+        m_style |= SG_VCENTER;
     }
     dup_ct = 0;
     if (m_style & SG_FITGRAPHIC) ++dup_ct;
     if (m_style & SG_SHRINKFIT) ++dup_ct;
     if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use SG_SHRINKFIT by default
-	m_style &= ~SG_FITGRAPHIC;
-	m_style |= SG_SHRINKFIT;
+        m_style &= ~SG_FITGRAPHIC;
+        m_style |= SG_SHRINKFIT;
     }
 }
 
 } // namespace GG
-
 

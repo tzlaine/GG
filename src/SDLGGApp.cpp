@@ -29,17 +29,17 @@
 using std::string;
 
 // member functions
-SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) : 
-    GG::App(this, app_name), 
-    m_app_width(w), 
-    m_app_height(h), 
-    m_delta_t(1), 
-    m_FPS(-1.0), 
-    m_calc_FPS(calc_FPS)
+SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
+        GG::App(this, app_name),
+        m_app_width(w),
+        m_app_height(h),
+        m_delta_t(1),
+        m_FPS(-1.0),
+        m_calc_FPS(calc_FPS)
 {
 }
 
-SDLGGApp::~SDLGGApp() 
+SDLGGApp::~SDLGGApp()
 {
     SDLQuit();
 }
@@ -80,35 +80,35 @@ GG::Key SDLGGApp::GGKeyFromSDLKey(const SDL_keysym& key)
     // this code works because both SDLKey and GG::Key map (at least
     // partially) to the printable ASCII characters
     if (shift || caps_lock) {
-	if (shift != caps_lock && (retval >= 'a' && retval <= 'z')) {
-	    retval = GG::Key(toupper(retval));
-	} else if (shift) { // the caps lock key should not affect these
-	    // this assumes a US keyboard layout
-	    switch (retval) {
-		case '`': retval = GG::Key('~'); break;
-		case '1': retval = GG::Key('!'); break;
-		case '2': retval = GG::Key('@'); break;
-		case '3': retval = GG::Key('#'); break;
-		case '4': retval = GG::Key('$'); break;
-		case '5': retval = GG::Key('%'); break;
-		case '6': retval = GG::Key('^'); break;
-		case '7': retval = GG::Key('&'); break;
-		case '8': retval = GG::Key('*'); break;
-		case '9': retval = GG::Key('('); break;
-		case '0': retval = GG::Key(')'); break;
-		case '-': retval = GG::Key('_'); break;
-		case '=': retval = GG::Key('+'); break;
-		case '[': retval = GG::Key('{'); break;
-		case ']': retval = GG::Key('}'); break;
-		case '\\': retval = GG::Key('|'); break;
-		case ';': retval = GG::Key(':'); break;
-		case '\'': retval = GG::Key('"'); break;
-		case ',': retval = GG::Key('<'); break;
-		case '.': retval = GG::Key('>'); break;
-		case '/': retval = GG::Key('?'); break;
-		default: break;
-	    }
-	}
+        if (shift != caps_lock && (retval >= 'a' && retval <= 'z')) {
+            retval = GG::Key(toupper(retval));
+        } else if (shift) { // the caps lock key should not affect these
+            // this assumes a US keyboard layout
+            switch (retval) {
+            case '`': retval = GG::Key('~'); break;
+            case '1': retval = GG::Key('!'); break;
+            case '2': retval = GG::Key('@'); break;
+            case '3': retval = GG::Key('#'); break;
+            case '4': retval = GG::Key('$'); break;
+            case '5': retval = GG::Key('%'); break;
+            case '6': retval = GG::Key('^'); break;
+            case '7': retval = GG::Key('&'); break;
+            case '8': retval = GG::Key('*'); break;
+            case '9': retval = GG::Key('('); break;
+            case '0': retval = GG::Key(')'); break;
+            case '-': retval = GG::Key('_'); break;
+            case '=': retval = GG::Key('+'); break;
+            case '[': retval = GG::Key('{'); break;
+            case ']': retval = GG::Key('}'); break;
+            case '\\': retval = GG::Key('|'); break;
+            case ';': retval = GG::Key(':'); break;
+            case '\'': retval = GG::Key('"'); break;
+            case ',': retval = GG::Key('<'); break;
+            case '.': retval = GG::Key('>'); break;
+            case '/': retval = GG::Key('?'); break;
+            default: break;
+            }
+        }
     }
     return retval;
 }
@@ -118,44 +118,44 @@ void SDLGGApp::SDLInit()
     const SDL_VideoInfo* vid_info = 0;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
-	Logger().errorStream() << "SDL initialization failed: " << SDL_GetError();
-	Exit(1);
+        Logger().errorStream() << "SDL initialization failed: " << SDL_GetError();
+        Exit(1);
     }
 
     if (SDLNet_Init() < 0) {
-	Logger().errorStream() << "SDL Net initialization failed: " << SDLNet_GetError();
-	Exit(1);
+        Logger().errorStream() << "SDL Net initialization failed: " << SDLNet_GetError();
+        Exit(1);
     }
-  
+
     if (TTF_Init() < 0) {
-	Logger().errorStream() << "TTF initialization failed: " << TTF_GetError();
-	Exit(1);
+        Logger().errorStream() << "TTF initialization failed: " << TTF_GetError();
+        Exit(1);
     }
 
     if (FE_Init() < 0) {
-	Logger().errorStream() << "FastEvents initialization failed: " << FE_GetError();
-	Exit(1);
+        Logger().errorStream() << "FastEvents initialization failed: " << FE_GetError();
+        Exit(1);
     }
 
     vid_info = SDL_GetVideoInfo();
 
     if (!vid_info) {
-	Logger().errorStream() << "Video info query failed: " << SDL_GetError();
-	Exit(1);
+        Logger().errorStream() << "Video info query failed: " << SDL_GetError();
+        Exit(1);
     }
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     if (SDL_SetVideoMode(m_app_width, m_app_height, 16, SDL_OPENGL) == 0) {
-	Logger().errorStream() << "Video mode set failed: " << SDL_GetError();
-	Exit(1);
+        Logger().errorStream() << "Video mode set failed: " << SDL_GetError();
+        Exit(1);
     }
-   
+
     if (NET2_Init() < 0) {
-	Logger().errorStream() << "SDL Net2 initialization failed: " << NET2_GetError();
-	Exit(1);
+        Logger().errorStream() << "SDL Net2 initialization failed: " << NET2_GetError();
+        Exit(1);
     }
-  
+
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
     EnableMouseDragRepeat(SDL_DEFAULT_REPEAT_DELAY / 2, SDL_DEFAULT_REPEAT_INTERVAL / 2);
 
@@ -192,41 +192,41 @@ void SDLGGApp::HandleSDLEvent(const SDL_Event& event)
     GG::Pt mouse_rel(event.motion.xrel, event.motion.yrel);
 
     switch(event.type) {
-	case SDL_KEYDOWN:
-	    if (key < GG::GGK_NUMLOCK)
-		send_to_gg = true;
-	    gg_event = GG::App::KEYPRESS;
-	    break;
-	case SDL_MOUSEMOTION:
-	    send_to_gg = true;
-	    gg_event = GG::App::MOUSEMOVE;
-	    break;
-	case SDL_MOUSEBUTTONDOWN:
-	    send_to_gg = true;
-	    switch (event.button.button) {
-		case SDL_BUTTON_LEFT:      gg_event = GG::App::LPRESS; break;
-		case SDL_BUTTON_MIDDLE:    gg_event = GG::App::MPRESS; break;
-		case SDL_BUTTON_RIGHT:     gg_event = GG::App::RPRESS; break;
-		case SDL_BUTTON_WHEELUP:   gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
-		case SDL_BUTTON_WHEELDOWN: gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
-	    }
-	    key_mods = SDL_GetModState();
-	    break;
-	case SDL_MOUSEBUTTONUP:
-	    send_to_gg = true;
-	    switch (event.button.button) {
-		case SDL_BUTTON_LEFT:   gg_event = GG::App::LRELEASE; break;
-		case SDL_BUTTON_MIDDLE: gg_event = GG::App::MRELEASE; break;
-		case SDL_BUTTON_RIGHT:  gg_event = GG::App::RRELEASE; break;
-	    }
-	    key_mods = SDL_GetModState();
-	    break;
-	case SDL_QUIT:
-	    Exit(0);
-	    break;
+    case SDL_KEYDOWN:
+        if (key < GG::GGK_NUMLOCK)
+            send_to_gg = true;
+        gg_event = GG::App::KEYPRESS;
+        break;
+    case SDL_MOUSEMOTION:
+        send_to_gg = true;
+        gg_event = GG::App::MOUSEMOVE;
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+        send_to_gg = true;
+        switch (event.button.button) {
+        case SDL_BUTTON_LEFT:      gg_event = GG::App::LPRESS; break;
+        case SDL_BUTTON_MIDDLE:    gg_event = GG::App::MPRESS; break;
+        case SDL_BUTTON_RIGHT:     gg_event = GG::App::RPRESS; break;
+        case SDL_BUTTON_WHEELUP:   gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
+        case SDL_BUTTON_WHEELDOWN: gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
+        }
+        key_mods = SDL_GetModState();
+        break;
+    case SDL_MOUSEBUTTONUP:
+        send_to_gg = true;
+        switch (event.button.button) {
+        case SDL_BUTTON_LEFT:   gg_event = GG::App::LRELEASE; break;
+        case SDL_BUTTON_MIDDLE: gg_event = GG::App::MRELEASE; break;
+        case SDL_BUTTON_RIGHT:  gg_event = GG::App::RRELEASE; break;
+        }
+        key_mods = SDL_GetModState();
+        break;
+    case SDL_QUIT:
+        Exit(0);
+        break;
     }
     if (send_to_gg)
-	GG::App::HandleEvent(gg_event, key, key_mods, mouse_pos, mouse_rel);
+        GG::App::HandleEvent(gg_event, key, key_mods, mouse_pos, mouse_rel);
 }
 
 void SDLGGApp::RenderBegin()
@@ -266,56 +266,56 @@ void SDLGGApp::PollAndRender()
     // handle events
     SDL_Event event;
     while (0 < FE_PollEvent(&event)) {
-	if (event.type  == SDL_MOUSEBUTTONDOWN || event.type  == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEMOTION)
-	    last_mouse_event_time = time;
-	HandleSDLEvent(event);
+        if (event.type  == SDL_MOUSEBUTTONDOWN || event.type  == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEMOTION)
+            last_mouse_event_time = time;
+        HandleSDLEvent(event);
     }
 
     // update time and track FPS if needed
     time = SDL_GetTicks();
     m_delta_t = time - most_recent_time;
     if (m_calc_FPS) {
-	++frames;
-	if (time - last_FPS_time > 1000) { // calculate FPS at most once a second
-	    m_FPS = frames / ((time - last_FPS_time) / 1000.0f);
-	    last_FPS_time = time;
-	    frames = 0;
-	}
+        ++frames;
+        if (time - last_FPS_time > 1000) { // calculate FPS at most once a second
+            m_FPS = frames / ((time - last_FPS_time) / 1000.0f);
+            last_FPS_time = time;
+            frames = 0;
+        }
     }
     most_recent_time = time;
 
     // handle mouse drag repeats
     if (old_mouse_repeat_delay != MouseRepeatDelay() || old_mouse_repeat_interval != MouseRepeatInterval()) { // if there's a change in the values, zero everything out and start the counting over
-	old_mouse_repeat_delay = MouseRepeatDelay();
-	old_mouse_repeat_interval = MouseRepeatInterval();
-	mouse_drag_repeat_start_time = 0;
-	last_mouse_drag_repeat_time = 0;
+        old_mouse_repeat_delay = MouseRepeatDelay();
+        old_mouse_repeat_interval = MouseRepeatInterval();
+        mouse_drag_repeat_start_time = 0;
+        last_mouse_drag_repeat_time = 0;
     }
     int x, y;
     // if drag repeat is enabled, the left mouse button is depressed (a drag is ocurring), and the last event processed wasn't too recent
-    if (MouseRepeatDelay() && SDL_GetMouseState(&x, &y) & SDL_BUTTON_LEFT && time - last_mouse_event_time > old_mouse_repeat_interval) { 
-	if (!mouse_drag_repeat_start_time) { // if we're just starting the drag, mark the time we started
-	    mouse_drag_repeat_start_time = time;
-	} else if (mouse_drag_repeat_start_time == MouseRepeatDelay()) { // if we're counting repeat intervals
-	    if (time - last_mouse_drag_repeat_time > MouseRepeatInterval()) {
-		last_mouse_drag_repeat_time = time;
-		event.type = SDL_MOUSEMOTION;
-		event.motion.x = x;
-		event.motion.y = y;
-		event.motion.xrel = event.motion.yrel = 0; // this is just an update, so set the motion to 0
-		HandleSDLEvent(event);
-	    }
-	} else if (time - mouse_drag_repeat_start_time > MouseRepeatDelay()) { // if we're done waiting for the initial delay period
-	    mouse_drag_repeat_start_time = MouseRepeatDelay(); // set this as equal so we know later that we've passed the delay interval
-	    last_mouse_drag_repeat_time = time;
-	    event.type = SDL_MOUSEMOTION;
-	    event.motion.x = x;
-	    event.motion.y = y;
-	    event.motion.xrel = event.motion.yrel = 0;
-	    HandleSDLEvent(event);
-	}
+    if (MouseRepeatDelay() && SDL_GetMouseState(&x, &y) & SDL_BUTTON_LEFT && time - last_mouse_event_time > old_mouse_repeat_interval) {
+        if (!mouse_drag_repeat_start_time) { // if we're just starting the drag, mark the time we started
+            mouse_drag_repeat_start_time = time;
+        } else if (mouse_drag_repeat_start_time == MouseRepeatDelay()) { // if we're counting repeat intervals
+            if (time - last_mouse_drag_repeat_time > MouseRepeatInterval()) {
+                last_mouse_drag_repeat_time = time;
+                event.type = SDL_MOUSEMOTION;
+                event.motion.x = x;
+                event.motion.y = y;
+                event.motion.xrel = event.motion.yrel = 0; // this is just an update, so set the motion to 0
+                HandleSDLEvent(event);
+            }
+        } else if (time - mouse_drag_repeat_start_time > MouseRepeatDelay()) { // if we're done waiting for the initial delay period
+            mouse_drag_repeat_start_time = MouseRepeatDelay(); // set this as equal so we know later that we've passed the delay interval
+            last_mouse_drag_repeat_time = time;
+            event.type = SDL_MOUSEMOTION;
+            event.motion.x = x;
+            event.motion.y = y;
+            event.motion.xrel = event.motion.yrel = 0;
+            HandleSDLEvent(event);
+        }
     } else { // otherwise, reset the mouse drag repeat start time to zero
-	mouse_drag_repeat_start_time = 0;
+        mouse_drag_repeat_start_time = 0;
     }
 
     // do one iteration of the render loop
@@ -328,20 +328,19 @@ void SDLGGApp::PollAndRender()
 void SDLGGApp::Run()
 {
     try {
-	SDLInit();
-	Initialize();
-	while (1)
-	    PollAndRender();
+        SDLInit();
+        Initialize();
+        while (1)
+            PollAndRender();
     } catch (const std::invalid_argument& exception) {
-	Logger().fatal("std::invalid_argument Exception caught in App::Run(): " + string(exception.what()));
-	Exit(1);
+        Logger().fatal("std::invalid_argument Exception caught in App::Run(): " + string(exception.what()));
+        Exit(1);
     } catch (const std::runtime_error& exception) {
-	Logger().fatal("std::runtime_error Exception caught in App::Run(): " + string(exception.what()));
-	Exit(1);
+        Logger().fatal("std::runtime_error Exception caught in App::Run(): " + string(exception.what()));
+        Exit(1);
     } catch (const GG::GGException& exception) {
-	Logger().fatal("GG::GGException (subclass " + string(exception.what()) + ") caught in App::Run(): " + exception.Message());
-	Exit(1);
+        Logger().fatal("GG::GGException (subclass " + string(exception.what()) + ") caught in App::Run(): " + exception.Message());
+        Exit(1);
     }
 }
-
 

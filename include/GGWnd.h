@@ -58,11 +58,11 @@ class Wnd : public boost::signals::trackable
 public:
     /// window creation flags
     enum {CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
-	  DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
-	  DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
-	  RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
-	  ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
-	  MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
+          DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
+          DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
+          RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
+          ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
+          MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
          }; 
          
     GGEXCEPTION(WndException);   ///< exception class \see GG::GGEXCEPTION
@@ -90,12 +90,12 @@ public:
     Pt             MaxDimensions() const      {return m_max_size;} ///< returns the maximum allowable dimensions of window
    
     /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
-	virtual b/c different windows have different shapes (and so ways of calculating client area)*/
+        virtual b/c different windows have different shapes (and so ways of calculating client area)*/
     virtual Pt     ClientUpperLeft() const       {return UpperLeft();}
     void           RegisterOnTop(Wnd* wnd);      ///< adds a GG::Wnd into the z-list on top of all windows; sets wnd->m_ontop to true
    
     /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
-	virtual b/c different windows have different shapes (and so ways of calculating client area)*/
+        virtual b/c different windows have different shapes (and so ways of calculating client area)*/
     virtual Pt     ClientLowerRight() const      {return LowerRight();}
    
     Pt             ClientDimensions() const      {return ClientLowerRight() - ClientUpperLeft();} ///< \see WindowDimensions()
@@ -151,7 +151,7 @@ public:
     virtual int    LosingFocus();                                    ///< respond to this window losing the input focus
 
     /** this executes a modal window and gives it its modality.  For non-modal windows, this function is a no-op.
-	It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
+        It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
     virtual int    Run();
     //@}
 

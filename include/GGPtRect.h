@@ -47,7 +47,7 @@ struct Pt
     Pt   operator-(const Pt& rhs) const {return Pt(x - rhs.x, y - rhs.y);} ///< returns the vector difference of *this and \a rhs
    
     /** returns true if x < \a rhs.x or returns true if x == \a rhs.x and y <\a rhs.y.  This is useful for sorting Pts 
-	in STL containers and algorithms*/
+        in STL containers and algorithms*/
     bool Less(const Pt& rhs) const {return x < rhs.x ? true : (x == rhs.x ? (y < rhs.y ? true : false) : false);}
 
     bool operator==(const Pt& rhs) const {return x == rhs.x && y == rhs.y;} ///< returns true if *this is identical to \a rhs
@@ -119,5 +119,4 @@ inline Rect operator-(const Pt& pt, const Rect& rect) {return rect - pt;} ///< r
 } // namepace GG
 
 #endif // _GGPtRect_h_
-
 

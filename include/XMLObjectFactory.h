@@ -50,11 +50,11 @@ public:
     /** \name Accessors */ //@{
     T* GenerateObject(const XMLElement& elem) const ///< returns a heap-allocated subclass object of the appropriate type
     {
-	T* retval = 0;
-	typename std::map<std::string, Generator>::const_iterator it = m_generators.find(elem.Tag());
-	if (it != m_generators.end())
-	    retval = it->second(elem);
-	return retval;
+        T* retval = 0;
+        typename std::map<std::string, Generator>::const_iterator it = m_generators.find(elem.Tag());
+        if (it != m_generators.end())
+            retval = it->second(elem);
+        return retval;
     }
     //@}
    
@@ -71,6 +71,4 @@ private:
 } // namespace GG
 
 #endif // _XMLObjectFactory_h_
-
-
 

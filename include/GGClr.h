@@ -54,14 +54,14 @@ struct Clr
     //@}
    
     union {
-	Uint32 i;     ///< represents Clr as a packed RGBA color
-	Uint8  v[4];  ///< represents Clr as a vector of RGBA components
-	struct {
-	    Uint8 r;   ///< the red channel
-	    Uint8 g;   ///< the green channel
-	    Uint8 b;   ///< the blue channel
-	    Uint8 a;   ///< the alpha channel
-	};
+        Uint32 i;     ///< represents Clr as a packed RGBA color
+        Uint8  v[4];  ///< represents Clr as a vector of RGBA components
+        struct {
+            Uint8 r;   ///< the red channel
+            Uint8 g;   ///< the green channel
+            Uint8 b;   ///< the blue channel
+            Uint8 a;   ///< the alpha channel
+        };
     };
 };
 
@@ -81,5 +81,4 @@ const Clr CLR_MAGENTA(255, 0, 255, 255);
 } // namepace GG
 
 #endif // _GGClr_h_
-
 

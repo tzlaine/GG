@@ -54,20 +54,21 @@ int XMLElement::ChildIndex(const string& child) const
 {
     int retval = -1;
     for (unsigned int i = 0; i < m_children.size(); ++i) {
-	if (m_children[i].m_tag == child) {
-	    retval = i;
-	    break;
-	}
+        if (m_children[i].m_tag == child) {
+            retval = i;
+            break;
+        }
     }
     return retval;
 }
 
-const XMLElement& XMLElement::Child(const string& child) const 
+const XMLElement& XMLElement::Child(const string& child) const
 {
-    unsigned int i = 0; 
-    for (; i < m_children.size(); ++i) 
-	if (m_children[i].m_tag == child) 
-	    break; 
+    unsigned int i = 0;
+    for (; i < m_children.size(); ++i) {
+        if (m_children[i].m_tag == child)
+            break;
+    }
     return m_children[i];
 }
 
@@ -76,48 +77,49 @@ const string& XMLElement::Attribute(const string& attrib) const
     static const string empty_str("");
     map<string, string>::const_iterator it = m_attributes.find(attrib);
     if (it != m_attributes.end())
-	return it->second;
+        return it->second;
     else
-	return empty_str;
+        return empty_str;
 }
 
 ostream& XMLElement::WriteElement(ostream& os, int indent/* = 0*/, bool whitespace/* = true*/) const
 {
-    if (whitespace) 
-	for (int i = 0; i < indent; ++i)
-	    os << INDENT_STR;
+    if (whitespace)
+        for (int i = 0; i < indent; ++i)
+            os << INDENT_STR;
     os << '<' << m_tag;
     for (std::map<string, string>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
-	os << ' ' << it->first << "=\"" << it->second << "\"";
+        os << ' ' << it->first << "=\"" << it->second << "\"";
     if (m_children.empty() && m_text.empty() && !m_root) {
-	os << "/>";
-	if (whitespace) 
-	    os << "\n";
+        os << "/>";
+        if (whitespace)
+            os << "\n";
     } else {
-	os << ">";
-	if (!m_text.empty())
-	    os << "\"<![CDATA[" << m_text << "]]>\"";
-	if (whitespace && !m_children.empty())
-	    os << "\n";
-	for (unsigned int i = 0; i < m_children.size(); ++i)
-	    m_children[i].WriteElement(os, indent + 1, whitespace);
-	if (whitespace && !m_children.empty()) {
-	    for (int i = 0; i < indent; ++i) {
-		os << INDENT_STR;
-	    }
-	}
-	os << "</" << m_tag << ">";
-	if (whitespace) os << "\n";
+        os << ">";
+        if (!m_text.empty())
+            os << "\"<![CDATA[" << m_text << "]]>\"";
+        if (whitespace && !m_children.empty())
+            os << "\n";
+        for (unsigned int i = 0; i < m_children.size(); ++i)
+            m_children[i].WriteElement(os, indent + 1, whitespace);
+        if (whitespace && !m_children.empty()) {
+            for (int i = 0; i < indent; ++i) {
+                os << INDENT_STR;
+            }
+        }
+        os << "</" << m_tag << ">";
+        if (whitespace) os << "\n";
     }
     return os;
 }
 
-XMLElement& XMLElement::Child(const string& child) 
+XMLElement& XMLElement::Child(const string& child)
 {
-    unsigned int i = 0; 
-    for (; i < m_children.size(); ++i) 
-	if (m_children[i].m_tag == child)
-	    break; 
+    unsigned int i = 0;
+    for (; i < m_children.size(); ++i) {
+        if (m_children[i].m_tag == child)
+            break;
+    }
     return m_children[i];
 }
 
@@ -142,9 +144,9 @@ istream& XMLDoc::ReadDoc(istream& is)
     XML_SetCharacterDataHandler(p, &XMLDoc::CharacterData);
     string parse_str;
     while (is) {
-	string str;
-	getline(is, str);
-	parse_str += str + '\n';
+        string str;
+        getline(is, str);
+        parse_str += str + '\n';
     }
     XML_Parse(p, parse_str.c_str(), parse_str.size(), true);
     XML_ParserFree(p);
@@ -152,53 +154,51 @@ istream& XMLDoc::ReadDoc(istream& is)
     return is;
 }
 
-void XMLDoc::BeginElement(void* user_data, const char* name, const char** attrs) 
+void XMLDoc::BeginElement(void* user_data, const char* name, const char** attrs)
 {
     if (XMLDoc* this_ptr = XMLDoc::s_curr_parsing_doc) {
-	if (!s_element_stack.empty()) {
-	    s_element_stack.back()->AppendChild(name);
-	    s_element_stack.push_back(&s_element_stack.back()->LastChild());
-	} else {
-	    this_ptr->root_node = XMLElement(name, true);
-	    s_element_stack.push_back(&this_ptr->root_node);
-	}
-	while (attrs && *attrs) {
-	    s_element_stack.back()->SetAttribute(*attrs, *(attrs + 1));
-	    attrs += 2;
-	}
-	found_first_quote = found_last_quote = false;
+        if (!s_element_stack.empty()) {
+            s_element_stack.back()->AppendChild(name);
+            s_element_stack.push_back(&s_element_stack.back()->LastChild());
+        } else {
+            this_ptr->root_node = XMLElement(name, true);
+            s_element_stack.push_back(&this_ptr->root_node);
+        }
+        while (attrs && *attrs) {
+            s_element_stack.back()->SetAttribute(*attrs, *(attrs + 1));
+            attrs += 2;
+        }
+        found_first_quote = found_last_quote = false;
     }
 }
 
 void XMLDoc::EndElement(void* user_data, const char* name)
 {
     if (!s_element_stack.empty())
-	s_element_stack.pop_back();
+        s_element_stack.pop_back();
 }
 
 void XMLDoc::CharacterData(void *user_data, const char *s, int len)
 {
     if (!found_last_quote) {
-	string str;
-	for (int i = 0; i < len; ++i, ++s) {
-	    char c = *s;
-	    if (c == '"') {
-		if (!found_first_quote) {
-		    found_first_quote = true;
-		    continue;
-		} else if (found_first_quote && !found_last_quote && i == len - 1) {
-		    found_last_quote = true;
-		    break;
-		}
-	    }
-	    if (found_first_quote)
-		str += c;
-	}
-	s_element_stack.back()->m_text += str;
+        string str;
+        for (int i = 0; i < len; ++i, ++s) {
+            char c = *s;
+            if (c == '"') {
+                if (!found_first_quote) {
+                    found_first_quote = true;
+                    continue;
+                } else if (found_first_quote && !found_last_quote && i == len - 1) {
+                    found_last_quote = true;
+                    break;
+                }
+            }
+            if (found_first_quote)
+                str += c;
+        }
+        s_element_stack.back()->m_text += str;
     }
 }
 
 } // namespace GG
-
-
 

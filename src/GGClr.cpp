@@ -31,53 +31,53 @@ namespace GG {
 ////////////////////////////////////////////////
 // GG::Clr
 ////////////////////////////////////////////////
-Clr::Clr() : 
-    i(0) 
+Clr::Clr() :
+        i(0)
 {
 }
 
-Clr::Clr(Uint32 clr) : 
-    i(clr) 
+Clr::Clr(Uint32 clr) :
+        i(clr)
 {
 }
 
-Clr::Clr(int _r, int _g, int _b, int _a) 
+Clr::Clr(int _r, int _g, int _b, int _a)
 {
-    r = std::min(_r, 255); 
-    g = std::min(_g, 255); 
-    b = std::min(_b, 255); 
+    r = std::min(_r, 255);
+    g = std::min(_g, 255);
+    b = std::min(_b, 255);
     a = std::min(_a, 255);
 }
 
-Clr::Clr(double _r, double _g, double _b, double _a) 
+Clr::Clr(double _r, double _g, double _b, double _a)
 {
-    r = Uint8(_r * 255); 
-    g = Uint8(_g * 255); 
-    b = Uint8(_b * 255); 
+    r = Uint8(_r * 255);
+    g = Uint8(_g * 255);
+    b = Uint8(_b * 255);
     a = Uint8(_a * 255);
 }
 
-Clr::Clr(Uint8 arr[]) 
+Clr::Clr(Uint8 arr[])
 {
-    r = arr[0]; 
-    g = arr[1]; 
-    b = arr[2]; 
+    r = arr[0];
+    g = arr[1];
+    b = arr[2];
     a = arr[3];
 }
 
-Clr::Clr(double arr[]) 
+Clr::Clr(double arr[])
 {
-    r = Uint8(arr[0] * 255); 
-    g = Uint8(arr[1] * 255); 
-    b = Uint8(arr[2] * 255); 
+    r = Uint8(arr[0] * 255);
+    g = Uint8(arr[1] * 255);
+    b = Uint8(arr[2] * 255);
     a = Uint8(arr[3] * 255);
 }
 
 Clr::Clr(const XMLElement& elem)
 {
     if (elem.Tag() != "GG::Clr")
-	throw std::invalid_argument("Attempted to construct a GG::Clr from an XMLElement that had a tag other than \"GG::Clr\"");
-   
+        throw std::invalid_argument("Attempted to construct a GG::Clr from an XMLElement that had a tag other than \"GG::Clr\"");
+
     const XMLElement& r_elem = elem.Child("red");
     const XMLElement& g_elem = elem.Child("green");
     const XMLElement& b_elem = elem.Child("blue");
@@ -87,7 +87,7 @@ Clr::Clr(const XMLElement& elem)
     b = lexical_cast<int>(b_elem.Attribute("value"));
     a = lexical_cast<int>(a_elem.Attribute("value"));
 }
-   
+
 XMLElement Clr::XMLEncode() const
 {
     XMLElement retval("GG::Clr");
@@ -107,5 +107,4 @@ XMLElement Clr::XMLEncode() const
 }
 
 } // namespace GG
-
 

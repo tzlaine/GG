@@ -93,13 +93,22 @@ public:
     void           SetInteriorColor(Clr c)       {m_int_color = c;}         ///< sets the interior color of the control
     void           SetHiliteColor(Clr c)         {m_hilite_color = c;}      ///< sets the color used to render hiliting around selected text
     void           SetSelectedTextColor(Clr c)   {m_sel_text_color = c;}    ///< sets the color used to render selected text
-    void           SelectAll()                   {m_cursor_pos.first = 0; m_cursor_pos.second = Length();} ///< selects all text in the entire control
+    virtual void   SelectAll()                   {m_cursor_pos.first = 0; m_cursor_pos.second = Length();} ///< selects all text in the entire control
     virtual void   SetText(const string& str);
 
     EditedSignalType&       EditedSignal()       {return m_edited_sig;}        ///< returns the edited signal object for this Edit
     FocusUpdateSignalType&  FocusUpdateSignal()  {return m_focus_update_sig;}  ///< returns the focus update signal object for this Edit
     //@}
    
+protected:
+    const pair<int, int>&            CursorPosn() const      {return m_cursor_pos;}      ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
+    int                              FirstCharShown() const  {return m_first_char_shown;}///< returns the index of the first character visible in the Edit
+    const string&                    PreviousText() const    {return m_previous_text;}   ///< returns the text that was in the edit at the time fo the last focus gain
+    const vector<Font::LineData>&    LineData() const        {return m_line_data;}       ///< returns the Font-generated breakdown of lines in the text
+    const shared_ptr<Font>&          Font() const            {return m_font;}            ///< returns the font used in the Edit
+
+    static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame
+
 private:
     bool     MultiSelected() const {return m_cursor_pos.first != m_cursor_pos.second;}   ///< returns true if >= 1 characters selected
     void     ClearSelected();           ///< clears (deletes) selected characters, as when a del, backspace, or character is entered

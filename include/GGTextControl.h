@@ -53,33 +53,33 @@ public:
     Clr            TextColor() const                {return m_text_color;}                 ///< returns the text color (may differ from the Control::Color() in some subclasses)
    
     /** sets the value of \a t to the interpreted value of the control's text.
-	If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
-	then the >> operator will do so.  Note that the return type is void, so multiple >> operations cannot be strung 
-	together.  Also, because lexical_cast attempts to convert the entire contents of the string to a single value, a 
-	TextControl containing the string "4.15 3.8" will fill a float with 0.0 (the default construction of float), 
-	even though there is a perfectly valid 4.15 value that occurs first in the string.  \note boost::lexical_cast 
-	usually throws boost::bad_lexical_cast when it cannot perform a requested cast, though >> will return a 
-	default-constructed T if one cannot be deduced from the control's text. */
+        If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
+        then the >> operator will do so.  Note that the return type is void, so multiple >> operations cannot be strung 
+        together.  Also, because lexical_cast attempts to convert the entire contents of the string to a single value, a 
+        TextControl containing the string "4.15 3.8" will fill a float with 0.0 (the default construction of float), 
+        even though there is a perfectly valid 4.15 value that occurs first in the string.  \note boost::lexical_cast 
+        usually throws boost::bad_lexical_cast when it cannot perform a requested cast, though >> will return a 
+        default-constructed T if one cannot be deduced from the control's text. */
     template <class T> void operator>>(T& t) const
     {
-	try {t = boost::lexical_cast<T>(Control::m_text);}
-	catch (boost::bad_lexical_cast) {t = T();}
+        try {t = boost::lexical_cast<T>(Control::m_text);}
+        catch (boost::bad_lexical_cast) {t = T();}
     }
    
     /** sets the value of \a t to the interpreted value of the control's text.
-	If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
-	then GetValue() will do so.  Because lexical_cast attempts to convert the entire contents of the string to a 
-	single value, a TextControl containing the string "4.15 3.8" will throw, even though there is a perfectly 
-	valid 4.15 value that occurs first in the string.  \throw boost::bad_lexical_cast boost::lexical_cast throws 
-	boost::bad_lexical_cast when it cannot perform a requested cast. This is handy for validating data in a dialog box;
-	Otherwise, using operator>>(), you may get the default value, even though the text in the control may not be the 
-	default value at all, but garbage. */
+        If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
+        then GetValue() will do so.  Because lexical_cast attempts to convert the entire contents of the string to a 
+        single value, a TextControl containing the string "4.15 3.8" will throw, even though there is a perfectly 
+        valid 4.15 value that occurs first in the string.  \throw boost::bad_lexical_cast boost::lexical_cast throws 
+        boost::bad_lexical_cast when it cannot perform a requested cast. This is handy for validating data in a dialog box;
+        Otherwise, using operator>>(), you may get the default value, even though the text in the control may not be the 
+        default value at all, but garbage. */
     template <class T> void GetValue(T& t) const {t = boost::lexical_cast<T, string>(Control::m_text);}
    
     operator const string&() const         {return Control::m_text;}  ///< returns the control's text; allows TextControl's to be used as std::string's
 
-    bool  Empty() const                     {return Control::m_text.empty();}   ///< returns true when text string equals ""
-    int   Length() const                     {return Control::m_text.length();}  ///< returns length of text string
+    bool  Empty() const                    {return Control::m_text.empty();}   ///< returns true when text string equals ""
+    int   Length() const                   {return Control::m_text.length();}  ///< returns length of text string
     //@}
    
     /** \name Mutators */ //@{
@@ -90,9 +90,9 @@ public:
     virtual void   SetColor(Clr c)                  {SetColor(c); m_text_color = c;}       ///< just like Color::SetColor(), except that this one also adjusts the text color
 
     /** Sets the value of the control's text to the stringified version of t.
-	If t can be converted to a string representation by a boost::lexical_cast (and thus by a stringstream), then the << operator
-	will do so, eg double(4.15) to string("4.15").  Note that the return type is void, so multiple << operations cannot be 
-	strung together.  \throw boost::bad_lexical_cast boost::lexical_cast throws boost::bad_lexical_cast when it is confused.*/
+        If t can be converted to a string representation by a boost::lexical_cast (and thus by a stringstream), then the << operator
+        will do so, eg double(4.15) to string("4.15").  Note that the return type is void, so multiple << operations cannot be 
+        strung together.  \throw boost::bad_lexical_cast boost::lexical_cast throws boost::bad_lexical_cast when it is confused.*/
     template <class T> void operator<<(T t) {SetText(boost::lexical_cast<string>(t));}
    
     void  operator+=(const string& str)    {SetText(Control::m_text + str);}   ///< appends \a str to text string by way of SetText()
@@ -132,8 +132,8 @@ public:
     StaticText(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt = 0, Clr color = CLR_BLACK, Uint32 flags = 0); ///< ctor
    
     /** ctor that does not require window size.  
-	Window size is determined from the string and font; the window will be large enough to fit the text as rendered, and no
-	larger.  The private member m_fit_to_text is also set to true. \see StaticText::SetText()*/
+        Window size is determined from the string and font; the window will be large enough to fit the text as rendered, and no
+        larger.  The private member m_fit_to_text is also set to true. \see StaticText::SetText()*/
     StaticText(int x, int y, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 flags = 0);
    
     StaticText(const XMLElement& elem); ///< ctor that constructs a StaticText object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a StaticText object
@@ -148,8 +148,8 @@ public:
     virtual int    Render();
    
     /** sets the text to \a str, and re-renders the underlying text image; may resizze the window.  
-	If the private member m_fit_to_text is true (i.e. the second ctor was used), calls to this function cause the window to 
-	be resized to whatever space the newly rendered text occupies.*/
+        If the private member m_fit_to_text is true (i.e. the second ctor was used), calls to this function cause the window to 
+        be resized to whatever space the newly rendered text occupies.*/
     virtual void   SetText(const string& str); 
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticText object
@@ -175,13 +175,13 @@ public:
     DynamicText(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt = 0, Clr color = CLR_BLACK, Uint32 flags = 0); ///< ctor taking a font filename and font point size
 
     /** ctor that does not require window size.
-	Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
-	and no larger.  The private member m_fit_to_text is also set to true. \see DynamicText::SetText() */
+        Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
+        and no larger.  The private member m_fit_to_text is also set to true. \see DynamicText::SetText() */
     DynamicText(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 flags = 0);
    
     /** ctor that does not require window size.
-	Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
-	and no larger.  The private member m_fit_to_text is also set to true. \see DynamicText::SetText() */
+        Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
+        and no larger.  The private member m_fit_to_text is also set to true. \see DynamicText::SetText() */
     DynamicText(int x, int y, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 flags = 0);
    
     DynamicText(const XMLElement& elem); ///< ctor that constructs a DynamicText object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a DynamicText object
@@ -191,8 +191,8 @@ public:
     virtual int    Render();
 
     /** sets the text to \a str; may resize the window.  If the private member m_fit_to_text is true (i.e. if the second 
-	ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 
-	text occupies. */
+        ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 
+        text occupies. */
     virtual void   SetText(const string& str);
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a DynamicText object

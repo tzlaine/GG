@@ -64,7 +64,7 @@ public:
    
     /** \name Structors */ //@{
     /** ctor. \warning Calling code <b>must not</b> delete the buttons passed to this ctro, if any.  They become the 
-	property of shared_ptrs inside the Scroll.*/
+        property of shared_ptrs inside the Scroll.*/
     Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Button* decr = 0, Button* incr = 0, Button* tab = 0, Uint32 flags = CLICKABLE);
     Scroll(const XMLElement& elem); ///< ctor that constructs a Scroll object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Scroll object
     //@}

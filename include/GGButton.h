@@ -239,8 +239,8 @@ ENUM_STREAM_OUT(StateButton::StateButtonStyle)
     The signal indicates which button has been pressed, by passing the index of the button; the currently-checked button 
     index is -1 when no button is checked.  Any StateButton-derived controls can be used in a RadioButtonGroup.
     However, if you want to save and load a RadioButtonGroup (using an XML encoding) that has custom buttons, you 
-    must add the new derived type(s) to the App's XMLObjectFactory.  Otherwise, Scroll's XMLElement ctor will not know 
-    how to create the custom controls at load-time.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory for details.*/
+    must add the new derived type(s) to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory 
+    for details.*/
 class GG_API RadioButtonGroup : public Control
 {
 public:

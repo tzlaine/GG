@@ -557,9 +557,9 @@ Clr DisabledColor(Clr clr)
 {
     Clr retval = clr;
     const double gray_factor = 0.75; // amount to move clr in the direction of gray
-    retval.r = Uint8((CLR_GRAY.r - retval.r) * gray_factor);
-    retval.g = Uint8((CLR_GRAY.g - retval.g) * gray_factor);
-    retval.b = Uint8((CLR_GRAY.b - retval.b) * gray_factor);
+    retval.r += (CLR_GRAY.r - retval.r) * gray_factor;
+    retval.g += (CLR_GRAY.g - retval.g) * gray_factor;
+    retval.b += (CLR_GRAY.b - retval.b) * gray_factor;
     return retval;
 }
 

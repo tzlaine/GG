@@ -135,8 +135,7 @@ bool DropDownList::Render()
     // draw ListBox::Row of currently displayed item, if any
     const Row* current_item = CurrentItem();
     if (current_item) {
-        // clip row to viewable area, and save old scissor state, if any
-        bool disable_scissor = !glIsEnabled(GL_SCISSOR_TEST);
+        // clip row to viewable area, and save old scissor state
         glPushAttrib(GL_SCISSOR_BIT);
         glEnable(GL_SCISSOR_TEST);
         glScissor(ul.x + BORDER_THICK, App::GetApp()->AppHeight() - lr.y + BORDER_THICK,
@@ -146,8 +145,6 @@ bool DropDownList::Render()
         m_LB->RenderRow(current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->LastVisibleCol());
 
         // restore previous scissor-clipping state
-        if (disable_scissor)
-            glDisable(GL_SCISSOR_TEST);
         glPopAttrib();
     }
 

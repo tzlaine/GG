@@ -166,8 +166,7 @@ bool MultiEdit::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, 2);
 
-    // clip text to viewable area, and save old scissor state, if any
-    bool disable_scissor = !glIsEnabled(GL_SCISSOR_TEST);
+    // clip text to viewable area, and save old scissor state
     glPushAttrib(GL_SCISSOR_BIT);
     glEnable(GL_SCISSOR_TEST);
     const int GAP = PIXEL_MARGIN - 2;
@@ -234,8 +233,6 @@ bool MultiEdit::Render()
     }
 
     // restore previous state
-    if (disable_scissor)
-        glDisable(GL_SCISSOR_TEST);
     glPopAttrib();
 
     return true;

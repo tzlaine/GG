@@ -29,7 +29,7 @@
    - Optional network support; SDL_net and Fastevents make it possible to receive network packets as SDL messages
 
    \section nonfeatures Non-Features
-   - GG is not threadsafe, due to signals and slots
+   - GG is not fully threadsafe, due to its use of signals and slots
    - No sound support is provided
 */
 
@@ -37,11 +37,10 @@
    \section building_reqs Requirements
    GG requires gcc 3.2 or later.
    <p>
-   GG relies on several other open-source libraries:
-   - DevIL 1.6.5 - http://openil.sourceforge.net
+   GG relies on a few other open-source libraries:
+   - DevIL 1.6.6 - http://openil.sourceforge.net
    - FreeType 2.1.2 - http://www.freetype.org
    - boost 1.30.0 - http://www.boost.org
-   - Expat 1.95.5 - http://www.libexpat.org (1.95.6 does not appear to work, so please use this version)
    - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
 
    Optional libraries:
@@ -55,9 +54,8 @@
    documentation will appear in the GG/doc/html directory.
    \section howto_build How To Build GG
    To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
-   boost.signals, boost.regex, and boost.filesystem libraries are needed.  You will of course also need to build and 
-   make available all of the libraries listed in the requirements above.  See www.boost.org for details on building 
-   boost.
+   boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  You will 
+   of course also need to build and make available all of the libraries listed in the requirements above.
    
    Once this is done, Unix users can simply type
    \verbatim
@@ -187,7 +185,7 @@
    One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
    capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
    elements for network transmission and receipt.  To satisfy all these requirements, GG uses an object serialization 
-   approach based on XML.  XML objects are trivial to parse using libexpat, and are not much harder to create.  In addition,
+   approach based on XML.  XML objects are relatively easy to parse, and are even easier to create.  In addition,
    they produce human-readable (if not always human-comprehensible) bytestreams.  When saved to files, these can be edited
    by hand, obviating the need for a recompile just to change the appearance of a window or button.
    \section XML_IO_approach Approach

@@ -40,7 +40,7 @@
    GG relies on a few other open-source libraries:
    - DevIL 1.6.6 - http://openil.sourceforge.net
    - FreeType 2.1.2 - http://www.freetype.org
-   - *boost 1.30.2 - http://www.boost.org
+   - boost 1.30.2 - http://www.boost.org
    - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
 
    Optional libraries:
@@ -53,7 +53,6 @@
    GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
    documentation will appear in the GG/doc/html directory.
    <br>
-   * Note that this is the exact version of boost that must be used.  There is at least one later version, but it breaks GG code.
 
    \section howto_build How To Build GG
 

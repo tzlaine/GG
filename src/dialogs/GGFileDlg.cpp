@@ -47,17 +47,18 @@ using namespace boost::spirit;
 // these functors are used by the if_p, while_p, and for_p parsers in UpdateList()
 struct LeadingWildcard
 {
-    LeadingWildcard(const string& str) : m_value(*str.begin() == '*') {}
+    LeadingWildcard(const string& str) : m_value(!str.empty() && *str.begin() == '*') {}
     bool operator()() const {return m_value;}
     bool m_value;
 };
 struct TrailingWildcard
 {
-    TrailingWildcard(const string& str) : m_value(*str.rbegin() == '*' && 1 < str.size()) {}
+    TrailingWildcard(const string& str) : m_value(!str.empty() && *str.rbegin() == '*') {}
     bool operator()() const {return m_value;}
     bool m_value;
 };
-struct Index 
+
+struct Index
 {
     Index(int i = 0) : m_initial_value(i) {}
     void operator()() const {value = m_initial_value;}
@@ -75,6 +76,19 @@ struct IndexIncr
 {
     void operator()() const {++Index::value;}
 };
+
+struct FrontStringBegin
+{
+    FrontStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+    const char* operator()() const {return m_strings->front().c_str();}
+    shared_ptr<vector<string> > m_strings;
+};
+struct FrontStringEnd
+{
+    FrontStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+    const char* operator()() const {return m_strings->front().c_str() + m_strings->front().size();}
+    shared_ptr<vector<string> > m_strings;
+};
 struct IndexedStringBegin
 {
     IndexedStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
@@ -86,24 +100,6 @@ struct IndexedStringEnd
     IndexedStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
     const char* operator()() const {return (*m_strings)[Index::value].c_str() + (*m_strings)[Index::value].size();}
     shared_ptr<vector<string> > m_strings;
-};
-struct Less
-{
-    Less(int lhs, int rhs) : m_value(lhs < rhs) {}
-    bool operator()() const {return m_value;}
-    bool m_value;
-};
-struct StringBegin
-{
-    StringBegin(const string& str) : m_string(str) {}
-    const char* operator()() const {return m_string.c_str();}
-    string m_string;
-};
-struct StringEnd
-{
-    StringEnd(const string& str) : m_string(str) {}
-    const char* operator()() const {return m_string.c_str() + m_string.size();}
-    string m_string;
 };
 }
 
@@ -544,17 +540,13 @@ void FileDlg::UpdateList()
             } else {
                 file_filters[i] = 
                     if_p (LeadingWildcard(filter_specs[i])) [
-                        while_p (wildcard - f_str_p(StringBegin(non_wildcards->front()), StringEnd(non_wildcards->front()))) [
-                            eps_p
-                        ] 
-                        >> f_str_p(StringBegin(non_wildcards->front()), StringEnd(non_wildcards->front()))
+                        *(wildcard - f_str_p(FrontStringBegin(non_wildcards), FrontStringEnd(non_wildcards))) 
+                        >> f_str_p(FrontStringBegin(non_wildcards), FrontStringEnd(non_wildcards))
                     ] .else_p [
-                        f_str_p(StringBegin(non_wildcards->front()), StringEnd(non_wildcards->front()))
+                        f_str_p(FrontStringBegin(non_wildcards), FrontStringEnd(non_wildcards))
                     ] 
                     >> for_p (Index(1), IndexLess(static_cast<int>(non_wildcards->size()) - 1), IndexIncr()) [
-                        while_p (wildcard - f_str_p(IndexedStringBegin(non_wildcards), IndexedStringEnd(non_wildcards))) [
-                            eps_p
-                        ] 
+                        *(wildcard - f_str_p(IndexedStringBegin(non_wildcards), IndexedStringEnd(non_wildcards)))
                         >> f_str_p(IndexedStringBegin(non_wildcards), IndexedStringEnd(non_wildcards))
                     ] 
                     >> if_p (TrailingWildcard(filter_specs[i])) [
@@ -565,7 +557,7 @@ void FileDlg::UpdateList()
     }
 
     if (s_working_dir.string() != s_working_dir.root_path().string() &&
-            s_working_dir.branch_path().string() != "") {
+        s_working_dir.branch_path().string() != "") {
         ListBox::Row* row = new ListBox::Row;
         row->push_back("[..]", m_font, m_text_color);
         m_files_list->Insert(row);

@@ -233,7 +233,7 @@ bool App::OrCombiner::operator()(InIt first, InIt last) const
 {
     bool retval = false;
     while (first != last)
-        retval |= *first++;
+        retval |= static_cast<bool>(*first++);
     return retval;
 }
 

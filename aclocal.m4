@@ -6097,7 +6097,7 @@ AC_MSG_RESULT([$SED])
 # stolen from Manish Singh
 # Shamelessly stolen from Owen Taylor
 
-dnl AM_PATH_SDL([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
+AM_PATH_SDL([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
 dnl Test for SDL, and define SDL_CFLAGS and SDL_LIBS
 dnl
 AC_DEFUN([AM_PATH_SDL],

@@ -397,7 +397,7 @@ const int HORIZONTAL_MARGIN = 3; // distance to leave between edge of PopupMenu 
 
 PopupMenu::PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/, 
                      Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
-   Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | DRAGABLE | MODAL), 
+   Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL), 
    m_font(font), 
    m_border_color(color), 
    m_int_color(interior), 

@@ -6,5 +6,5 @@ includedir=@includedir@/GG
 Name: GiGi
 Description: [description pending]
 Version: @VERSION@
-Libs: -L${libdir} -lGiGi @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp -lexpat @DEVIL_LIBS@
+Libs: -L${libdir} -lGiGi @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp @DEVIL_LIBS@
 Cflags: -I${includedir} -I${includedir}/dialogs

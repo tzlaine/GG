@@ -223,8 +223,8 @@ AC_CACHE_SAVE
 
 SAVE_LIBS="$LIBS"
 YG_GET_PATH(boost)
-YG_CHECK_BOOST([1.3.0],,[FAILED=yes])
-AC_CHECK_LIB(boost_regex,main,[],[FAILED=yes])
+YG_CHECK_BOOST([1.30.2],,[FAILED=yes])
+#AC_CHECK_LIB(boost_regex,main,[],[FAILED=yes])
 AC_CHECK_LIB(boost_filesystem,main,[],[FAILED=yes])
 AC_CHECK_LIB(boost_signals,main,[],[FAILED=yes])
 
@@ -234,9 +234,8 @@ LIBS="$SAVE_LIBS"
 
 if test $FAILED = yes; then 
   AC_MSG_ERROR([boost libs not found.
-** You need the Boost C++ libraries, version 1.3.0 or better,
+** You need the Boost C++ libraries, version 1.30.2 or better,
 ** as well as the following boost-modules:
-** - boost.regex
 ** - boost.filesystem
 ** - boost.signals
 ** download them from http://www.boost.org])
@@ -260,10 +259,10 @@ CPPFLAGS="$SAVE_CPPFLAGS"
 LIBS="$SAVE_LIBS"
 
 ### expat and log4cpp check
-YG_GET_PATH(expat)
-SAVE_LIBS="$LIBS"
-AC_CHECK_LIB(expat,XML_ParserCreate,[],[AC_MSG_FAILURE([You'll need expat])])
-LIBS="$SAVE_LIBS"
+#YG_GET_PATH(expat)
+#SAVE_LIBS="$LIBS"
+#AC_CHECK_LIB(expat,XML_ParserCreate,[],[AC_MSG_FAILURE([You'll need expat])])
+#LIBS="$SAVE_LIBS"
 
 YG_GET_PATH(log4cpp)
 AC_LANG_CPLUSPLUS
@@ -303,10 +302,10 @@ AM_CONDITIONAL(DEBUG,[test x$enable_debug = xyes])
 
 AC_CONFIG_FILES([Makefile 
                  src/Makefile 
-		 include/Makefile
+                 include/Makefile
                  include/GGConfig.h
                  GiGi.pc
-		 GiGiNet.pc
-		 GiGiSDL.pc
+                 GiGiNet.pc
+                 GiGiSDL.pc
                 ])
 AC_OUTPUT

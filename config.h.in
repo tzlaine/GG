@@ -46,14 +46,8 @@
    (-lboost_filesystem). */
 #undef HAVE_LIBBOOST_FILESYSTEM
 
-/* Define to 1 if you have the `boost_regex' library (-lboost_regex). */
-#undef HAVE_LIBBOOST_REGEX
-
 /* Define to 1 if you have the `boost_signals' library (-lboost_signals). */
 #undef HAVE_LIBBOOST_SIGNALS
-
-/* Define to 1 if you have the `expat' library (-lexpat). */
-#undef HAVE_LIBEXPAT
 
 /* Define to 1 if you have the `SDL' library (-lSDL). */
 #undef HAVE_LIBSDL

@@ -92,7 +92,6 @@ public:
     /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/
     virtual Pt     ClientUpperLeft() const       {return UpperLeft();}
-    void           RegisterOnTop(Wnd* wnd);      ///< adds a GG::Wnd into the z-list on top of all windows; sets wnd->m_ontop to true
    
     /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/

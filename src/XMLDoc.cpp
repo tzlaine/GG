@@ -178,7 +178,7 @@ void XMLDoc::EndElement(void* user_data, const char* name)
 
 void XMLDoc::CharacterData(void *user_data, const char *s, int len)
 {
-   if (s_element_stack.back()->Tag() == "ELMTEXT") {
+   if (!found_last_quote) {
       string str;
       for (int i = 0; i < len; ++i, ++s) {
          char c = *s;

@@ -26,6 +26,7 @@ GGWnd.h						\
 GGZList.h					\
 XMLDoc.h					\
 XMLObjectFactory.h				\
+XMLValidators.h					\
 dialogs/GGFileDlg.h				\
 dialogs/GGThreeButtonDlg.h			\
 SDL/SDLGGApp.h					\

@@ -124,7 +124,24 @@ bool StaticGraphic::Render()
     pt1.y += shift;
     pt2.y += shift;
 
+    // HACK! This code ensures that unscaled StaticGraphics are reproduced exactly, even
+    // though they theoretically should be even when using non-GL_NEAREST* scaling.
+    bool render_scaled = (m_style & (GR_FITGRAPHIC | GR_SHRINKFIT)) && (window_sz != graphic_sz);
+    GLenum min_filter, mag_filter;
+    if (!render_scaled) {
+        min_filter = m_graphic.GetTexture()->MinFilter();
+        mag_filter = m_graphic.GetTexture()->MagFilter();
+        glBindTexture(GL_TEXTURE_2D, m_graphic.GetTexture()->OpenGLId());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_graphic.GetTexture()->MipMapped() ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_graphic.GetTexture()->MipMapped() ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+    }
+
     m_graphic.OrthoBlit(pt1, pt2, false);
+
+    if (!render_scaled) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
+    }
 
     return true;
 }

@@ -226,8 +226,7 @@ AC_CACHE_SAVE
 
 SAVE_LIBS="$LIBS"
 YG_GET_PATH(boost)
-YG_CHECK_BOOST([1.30.2],,[FAILED=yes])
-#AC_CHECK_LIB(boost_regex,main,[],[FAILED=yes])
+YG_CHECK_BOOST([1.30.0],,[FAILED=yes])
 AC_CHECK_LIB(boost_filesystem,main,[],[FAILED=yes])
 AC_CHECK_LIB(boost_signals,main,[],[FAILED=yes])
 
@@ -237,7 +236,7 @@ LIBS="$SAVE_LIBS"
 
 if test $FAILED = yes; then 
   AC_MSG_ERROR([boost libs not found.
-** You need the Boost C++ libraries, version 1.30.2 or better,
+** You need the Boost C++ libraries, version 1.30.0 or better,
 ** as well as the following boost-modules:
 ** - boost.filesystem
 ** - boost.signals
@@ -352,6 +351,18 @@ AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],[compile with debugging 
 		     , [enable_debug=$enableval], [enable_debug=no])
 AM_CONDITIONAL(DEBUG,[test x$enable_debug = xyes])
 
+dnl If we have /usr/local/share/aclocal, include it into aclocal's search-path
+AC_MSG_CHECKING([if we have /usr/local/share/aclocal])
+if test -d /usr/local/share/aclocal; then
+  AC_MSG_RESULT([yes, adding it to aclocal's search-path])
+  ACLOCAL_INCLUDE="-I /usr/local/share/aclocal"
+else
+  AC_MSG_RESULT([no])
+  ACLOCAL_INCLUDE=""
+fi
+AC_SUBST([ACLOCAL_INCLUDE])
+
+
 AC_CONFIG_FILES([Makefile 
                  src/Makefile 
                  include/Makefile
@@ -374,8 +385,8 @@ if test x$DO_ALLEGRO_WARNING = xyes; then
 *** Your DevIL-library is linked with Allegro, and this
 *** would require placing an "END_OF_MAIN"-macro after the program's
 *** main routine. GG contains a hack to remove this requiremnet, but it's
-*** a dirty hack and might not work. Note that you _cannot_ use this GiGi 
-*** in Allegro programs!
+*** a dirty hack and might not work. Note that your Allegro programs will
+*** crash if you use GiGi and forget the "END_OF_MAIN"-macro!
 *** If you want to be able to use GiGi in Allegro-programs, run configure with
 *** the '--disable-allegro-hack' option.])
 fi

@@ -14,13 +14,24 @@ public:
     void Update();
     int Status;
     ~Test();
+private:
+    virtual void SDLInit();
 };
 
 
 void Test::Initialize()
 {
-    Status = SDL_Init(SDL_INIT_NOPARACHUTE);
+//    Status = SDL_Init(SDL_INIT_NOPARACHUTE|SDL_INIT_VIDEO);
+    SDLInit();
+    
 }
+
+void Test::SDLInit()
+{
+   SDL_SetVideoMode(640,480,16,SDL_OPENGL);
+//   GLInit();
+}
+
 
 void Test::Enter2DMode()
 {
@@ -44,10 +55,7 @@ extern "C" int main(int argc, char* argv[])
     Test a;
     a.Initialize();
     
+    
     return a.Status;
     
 }
-
-    
-
-

@@ -54,40 +54,45 @@ set<string> Font::s_action_tags;
 set<string> Font::s_known_tags;
 
 namespace {
-int NextPowerOfTwo(int input)
-{
-    int value = 1;
-    while (value < input)
-        value <<= 1;
-    return value;
-}
-
-/** This is used to collect data on the glyphs as they are recorded into buffers, for use in creating Glyph objects at the end
-   of Font's constructor.*/
-struct TempGlyphData
-{
-    TempGlyphData() {} ///< default ctor
-    TempGlyphData(int i, int _x1, int _y1, int _x2, int _y2, int lb, int a) : idx(i), x1(_x1), y1(_y1), x2(_x2), y2(_y2), left_b(lb), adv(a) {} ///< ctor
-    int      idx;              ///< index into m_textures of texture that contains this glyph
-    int      x1, y1, x2, y2;   ///< area of glyph subtexture within texture
-    int	     left_b;	       ///< left bearing (see Glyph)
-    int      adv;              ///< advance of glyph (see Glyph)
-};
-
-struct FTLibraryWrapper
-{
-    GGEXCEPTION(FTLibraryWrapperException);   ///< exception class \see GG::GGEXCEPTION
-    FTLibraryWrapper() : library(0)
+    int NextPowerOfTwo(int input)
     {
-        if (!library && FT_Init_FreeType(&library)) // if no library exists and we can't create one...
-            throw FTLibraryWrapperException("Unable to initialize FreeType font library object");
+        int value = 1;
+        while (value < input)
+            value <<= 1;
+        return value;
     }
-    ~FTLibraryWrapper() {FT_Done_FreeType(library);}
-    FT_Library library;
-} g_library;
 
-const double ITALICS_SLANT_ANGLE = 12; // degrees
-const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 / 180.0); // factor used to shear glyphs ITALICS_SLANT_ANGLE degrees CW from straight up
+    inline FT_ULong CharToFT_ULong(char c)
+    {
+        return static_cast<FT_ULong>(c < 0 ? static_cast<unsigned char>(256 + c) : static_cast<unsigned char>(c));
+    }
+
+    /** This is used to collect data on the glyphs as they are recorded into buffers, for use in creating Glyph objects at the end
+        of Font's constructor.*/
+    struct TempGlyphData
+    {
+        TempGlyphData() {} ///< default ctor
+        TempGlyphData(int i, int _x1, int _y1, int _x2, int _y2, int lb, int a) : idx(i), x1(_x1), y1(_y1), x2(_x2), y2(_y2), left_b(lb), adv(a) {} ///< ctor
+        int      idx;              ///< index into m_textures of texture that contains this glyph
+        int      x1, y1, x2, y2;   ///< area of glyph subtexture within texture
+        int      left_b;           ///< left bearing (see Glyph)
+        int      adv;              ///< advance of glyph (see Glyph)
+    };
+
+    struct FTLibraryWrapper
+    {
+        GGEXCEPTION(FTLibraryWrapperException);   ///< exception class \see GG::GGEXCEPTION
+        FTLibraryWrapper() : library(0)
+        {
+            if (!library && FT_Init_FreeType(&library)) // if no library exists and we can't create one...
+                throw FTLibraryWrapperException("Unable to initialize FreeType font library object");
+        }
+        ~FTLibraryWrapper() {FT_Done_FreeType(library);}
+        FT_Library library;
+    } g_library;
+
+    const double ITALICS_SLANT_ANGLE = 12; // degrees
+    const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 / 180.0); // factor used to shear glyphs ITALICS_SLANT_ANGLE degrees CW from straight up
 }
 
 Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
@@ -114,9 +119,9 @@ Font::Font(const XMLElement& elem)
 
 int Font::RenderGlyph(int x, int y, char c) const
 {
-    std::map<char, Glyph>::const_iterator it = m_glyphs.find(c);
+    std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(c));
     if (it == m_glyphs.end())
-        it = m_glyphs.find(' '); // print a space when an unrendered glyph is requested
+        it = m_glyphs.find(CharToFT_ULong(' ')); // print a space when an unrendered glyph is requested
     return RenderGlyph(x, y, it->second, 0);
 }
 
@@ -154,7 +159,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
     bool expand_tabs = format & TF_LEFT;
 
     // get the width of a space character in pixels, and the spacing of tab stops in spaces and pixels
-    std::map<char, Glyph>::const_iterator it = m_glyphs.find(' ');
+    std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(' '));
     int tab_width = (format >> 16) & 0xFF; // width of tabs is embedded in bits 16-23
     if (!tab_width)
         tab_width = 8; // default tab width
@@ -177,7 +182,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
             x = x1 + static_cast<int>(((x2 - x1) - curr_line.Width()) / 2.0);
         y = y_origin + rows_rendered * m_lineskip;
         for (int i = curr_line.begin_idx; i < curr_line.end_idx; ++i) {
-            char c = text[i];
+            FT_ULong c = CharToFT_ULong(text[i]);
             if (c == '\t' && expand_tabs) {
                 int curr_tab_location = (x - x1) / tab_pixel_width;   // find the nearest previous tab stop
                 x = x1 + (curr_tab_location + 1) * tab_pixel_width;   // then find the location of the next tab stop
@@ -191,7 +196,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
                 } else {
                     it = m_glyphs.find(c);
                     if (it == m_glyphs.end())
-                        it = m_glyphs.find(' '); // print a space when an unrendered glyph is requested
+                        it = m_glyphs.find(CharToFT_ULong(' ')); // print a space when an unrendered glyph is requested
                     x += RenderGlyph(x, y, it->second, render_state);
                 }
             }
@@ -241,7 +246,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
     line_data.back().justification = orig_just;
 
     for (unsigned int i = 0; i < text.size(); ++i) {
-        char c = text[i];
+        FT_ULong c = CharToFT_ULong(text[i]);
         if (c == '\n') {                // if a newline is explicitly requested,
             line_data.back().end_idx = i;       // end the current line
             line_data.push_back(LineData());    // start a new one
@@ -324,10 +329,10 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                 }
             }
 
-            std::map<char, Glyph>::const_iterator it = m_glyphs.find(c);
+            std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
             if (it == m_glyphs.end()) {
-                it = m_glyphs.find(' ');   // use a space when an unrendered glyph is requested (the space char is always rendered)
-                c = ' ';                   // and reflect this choice in the value of c
+                it = m_glyphs.find(CharToFT_ULong(' '));   // use a space when an unrendered glyph is requested (the space char is always rendered)
+                c = CharToFT_ULong(' ');                   // and reflect this choice in the value of c
             }
             int char_advance = it->second.advance;
             int char_width = it->second.width;
@@ -355,8 +360,8 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                 while (i < text.size() && !isspace(c = text[i])) {
                     it = m_glyphs.find(c);
                     if (it == m_glyphs.end()) {
-                        it = m_glyphs.find(' ');
-                        c = ' ';
+                        it = m_glyphs.find(CharToFT_ULong(' '));
+                        c = CharToFT_ULong(' ');
                     }
                     word_extents.push_back(word_advance += it->second.advance);
                     word_width = word_advance - (it->second.advance - it->second.width);
@@ -366,8 +371,8 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                 while (i < text.size() && ((c = text[i]) == ' ' || (!expand_tabs && c == '\t'))) {
                     it = m_glyphs.find(c);
                     if (it == m_glyphs.end()) {
-                        it = m_glyphs.find(' ');
-                        c = ' ';
+                        it = m_glyphs.find(CharToFT_ULong(' '));
+                        c = CharToFT_ULong(' ');
                     }
                     word_extents.push_back(word_advance += it->second.advance);
                     ++i;
@@ -522,7 +527,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
           ALPHA_LOWER_STOP = 0x7B, SYMBOL_START1 = 0x21, SYMBOL_STOP1 = 0x30, SYMBOL_START2 = 0x3A, SYMBOL_STOP2 = 0x41,
           SYMBOL_START3 = 0x5B, SYMBOL_STOP3 = 0x61, SYMBOL_START4 = 0x7B, SYMBOL_STOP4 = 0x7F};
 
-    vector<int> range_vec;
+    vector<unsigned int> range_vec;
     if (range < ALL_CHARS) { // if certain specified ranges of glyphs are to be used
         range_vec.push_back(0x20); // the space character is always needed
         range_vec.push_back(0x21);
@@ -561,7 +566,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
     // declare vector of image buffers into which we will copy glyph images and create first buffer
     vector<Uint16*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
     vector<Pt> buffer_sizes;
-    map<char, TempGlyphData> temp_glyph_data;
+    map<FT_ULong, TempGlyphData> temp_glyph_data;
     Uint16* temp_buf = new Uint16[BUF_SZ]; // 16 bpp: we are creating a luminance + alpha image
     for (int i = 0; i < BUF_SZ; ++i)
         temp_buf[i] = 0;
@@ -576,8 +581,8 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
         range_vec.pop_back();
 
         // copy glyph images
-        for (int c = low; c < high; ++c) {
-            if (GenerateGlyph(face, c)) {
+        for (unsigned int c = low; c < high; ++c) {
+            if (GenerateGlyph(face, static_cast<FT_ULong>(c))) {
                 const FT_Bitmap& glyph_bitmap = face->glyph->bitmap;
 
                 if (x + glyph_bitmap.width >= BUF_WIDTH) { // start a new row of glyph images
@@ -641,15 +646,15 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
     }
 
     // create Glyph objects from temp glyph data
-    for (std::map<char, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
+    for (std::map<FT_ULong, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
         m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.x1, it->second.y1, it->second.x2, it->second.y2, it->second.left_b, it->second.adv);
 
     // record the width of the space character
-    std::map<char, Glyph>::const_iterator glyph_it = m_glyphs.find(' ');
+    std::map<FT_ULong, Glyph>::const_iterator glyph_it = m_glyphs.find(CharToFT_ULong(' '));
     m_space_width = glyph_it->second.advance;
 }
 
-bool Font::GenerateGlyph(FT_Face face, char ch)
+bool Font::GenerateGlyph(FT_Face face, FT_ULong ch)
 {
     bool retval = true;
 
@@ -660,13 +665,15 @@ bool Font::GenerateGlyph(FT_Face face, char ch)
     FT_UInt index = FT_Get_Char_Index(face, ch);
     if (index) {
         if (FT_Load_Glyph(face, index, FT_LOAD_DEFAULT))
-            throw FontException((string("GG::Font::GetGlyphBitmap : Freetype could not load the glyph for character \'") + ch) + "\'");
+            throw FontException((string("GG::Font::GetGlyphBitmap : Freetype could not load the glyph for character \'") + 
+                                 (ch < 256 ? lexical_cast<string>(char(ch)) : lexical_cast<string>(ch))) + "\'");
 
         FT_GlyphSlot glyph = face->glyph;
 
         // render the glyph
         if (FT_Render_Glyph(glyph, ft_render_mode_normal))
-            throw FontException((string("GG::Font::GetGlyphBitmap : Freetype could not render the glyph for character \'") + ch) + "\'");
+            throw FontException((string("GG::Font::GetGlyphBitmap : Freetype could not render the glyph for character \'") + 
+                                 (ch < 256 ? lexical_cast<string>(char(ch)) : lexical_cast<string>(ch))) + "\'");
     } else {
         retval = false;
     }
@@ -676,7 +683,6 @@ bool Font::GenerateGlyph(FT_Face face, char ch)
 
 int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState* render_state) const
 {
-
     if (render_state && render_state->use_italics) {
         // render subtexture to tilted rhombus instead of rectangle
         glBindTexture(GL_TEXTURE_2D, glyph.sub_texture.GetTexture()->OpenGLId());

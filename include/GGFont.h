@@ -154,7 +154,7 @@ public:
     int               Descent() const      {return m_descent;}        ///< returns the maximum amount below the baseline the text can go, in pixels
     int               Height() const       {return m_height;}         ///< returns (Ascent() - Descent()), in pixels
     int               Lineskip() const     {return m_lineskip;}       ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
-    int               SpaceWidth() const{return m_space_width;}    ///< returns the width in pixels of the glyph for the space character
+    int               SpaceWidth() const   {return m_space_width;}    ///< returns the width in pixels of the glyph for the space character
     int               RenderGlyph(const Pt& pt, char c) const {return RenderGlyph(pt.x, pt.y, c);}   ///< renders glyph for \a c and returns advance of glyph rendered
     int               RenderGlyph(int x, int y, char c) const;     ///< renders glyph for \a c and returns advance of glyph rendered
     int               RenderText(const Pt& pt, const string& text) const {return RenderText(pt.x, pt.y, text);}  ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
@@ -189,7 +189,7 @@ private:
     };
 
     void              Init(const string& font_filename, int pts, Uint32 range);
-    bool              GenerateGlyph(FT_Face font, char ch);
+    bool              GenerateGlyph(FT_Face font, FT_ULong ch);
     inline int        RenderGlyph(int x, int y, const Glyph& glyph, const RenderState* render_state) const;
     void              HandleTag(const Tag& tag, int x, int y, const double* orig_color, RenderState& render_state) const;
 
@@ -204,7 +204,7 @@ private:
     double               m_underline_height; ///< height (thickness) of underline
     double               m_italics_offset;   ///< amount that the top of an italicized glyph is left of the bottom
     int                  m_space_width; ///< the width in pixels of the glyph for the space character
-    map<char, Glyph>     m_glyphs;      ///< the locations of the images of each glyph within the textures
+    map<FT_ULong, Glyph> m_glyphs;      ///< the locations of the images of each glyph within the textures
     vector<shared_ptr<Texture> >
                          m_textures;    ///< the OpenGL texture objects in which the glyphs can be found
    

@@ -3,6 +3,8 @@ dnl Process this file with -*-autoconf-*- to produce a configure script.
 AC_PREREQ(2.57)
 AC_INIT(libGiGi, 0.5.0.0)
 
+dnl YG_REMOVE(A,B) is equivalent to ${A/$B/} on bash
+AC_DEFUN([YG_REMOVE],[`echo "$$1"|sed -e \"s@$$2@@\"`])
 
 dnl From the libtool-infopage:
 dnl   Update the version information only immediately before a public
@@ -77,7 +79,8 @@ AC_FUNC_ERROR_AT_LINE
 AC_FUNC_MALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([floor gethostbyaddr gethostbyname memmove memset sqrt])
+AC_CHECK_FUNCS([floor gethostbyaddr gethostbyname memmove memset])
+AC_SEARCH_LIBS(sqrt,[m],[],[AC_MSG_FAILURE([The sqrt-function was not found. This is bad!])])
 
 # Checks for libraries.
 AC_CACHE_SAVE
@@ -105,13 +108,13 @@ dnl    AC_TRY_LINK([#include "SDL.h"],[SDL_Init(SDL_INIT_VIDEO);],[],[AC_MSG_ERR
     AC_CHECK_LIB([SDL],[SDL_Init],[],[AC_MSG_FAILURE([dnl
 SDL was not found, did you specify the correct paths
 (--with-sdl-include,--with-sdl-libdir)? See ./configure --help])])
-    LIBS=$OLD_LIBS
+    LIBS="$OLD_LIBS"
   else
      # Unix target, we require sdl-config here (at least for now, to eliminate strange linking errors)
-     AM_PATH_SDL([1.2.0],[],[AC_MSG_ERROR([SDL is required])])
+     AM_PATH_SDL([1.2.5],[],[AC_MSG_ERROR([SDL is required])])
   fi
 else
-  AM_PATH_SDL([1.2.0],[],[AC_MSG_ERROR([SDL is required])])
+  AM_PATH_SDL([1.2.5],[],[AC_MSG_ERROR([SDL is required])])
 fi
 
 AC_CACHE_SAVE
@@ -130,7 +133,7 @@ if test "$FT_CONFIG" = "no"; then
     YG_GET_PATH(ft)
     FT2_CFLAGS=$FT_CPPFLAGS
     AC_SUBST(FT2_CFLAGS)
-    FT2_LIBS="-lfreetype $FT2_LDADD"
+    FT2_LIBS="-lfreetype $FT2_LDFLAGS"
     AC_SUBST(FT2_LIBS)
     OLD_LIBS=$LIBS
     LIBS="$OLD_LIBS $FT2_LIBS"
@@ -144,7 +147,7 @@ if test "$FT_CONFIG" = "no"; then
   FT_Init_FreeType(&library);],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)
 AC_MSG_ERROR([Freetype was not found, did you specify the correct paths
 (--with-ft-include,--with-ft-libdir)? See ./configure --help])])
-    LIBS=$OLD_LIBS
+    LIBS="$OLD_LIBS"
   else
      # Unix target, we require freetype-config here (at least for now, to eliminate strange linking errors)
      AC_CHECK_FT2(9.0.0,[],[AC_MSG_ERROR([FreeType is required])])
@@ -167,7 +170,7 @@ fi
 ### SDL_net check
 
 YG_GET_PATH(sdlnet)
-AC_ARG_WITH([builtin-sdlnet],[AC_HELP_STRING([--with-builtin-sdlnet],[forces/forbids use of built-in version of SDL_net, default is autodetect])])
+AC_ARG_WITH([builtin-sdlnet],[AC_HELP_STRING([--with-builtin-sdlnet],[forces/forbids use of built-in version of SDL_net, default is force])],[],[with_builtin_sdlnet=yes])
 
 if test x$with_builtin_sdlnet = xyes; then
   AC_MSG_NOTICE(using built-in SDL_net)
@@ -193,17 +196,16 @@ Make sure you have the OpenGL-developer-libraries installed and have given
 the correct include path!])])
 
 SAVE_LIBS="$LIBS"
-LIBS=""
 YG_SEARCH_LIBS([OpenGl],[GL MesaGL opengl32],
                [#include <GL/gl.h>],[glEnd();],
                [],[AC_MSG_FAILURE([OpenGL headers were found, but unable to link a simple GL program!])])
 YG_SEARCH_LIBS([OpenGL's GLU],[GLU MesaGLU glu32],
                [#include <GL/glu.h>],[gluPerspective(0.,0.,0.,0.);],
                [],[AC_MSG_FAILURE([OpenGL's GLU library was not found!])])
-GL_LIBS="$LIBS"
+
+GL_LIBS="YG_REMOVE(LIBS,SAVE_LIBS)"
 AC_SUBST(GL_LIBS)
 LIBS="$SAVE_LIBS"
-
 FAILED=no
 
 AC_CACHE_SAVE
@@ -211,14 +213,13 @@ AC_CACHE_SAVE
 ### Boost check
 
 SAVE_LIBS="$LIBS"
-LIBS=""
 YG_GET_PATH(boost)
 YG_CHECK_BOOST([1.3.0],,[FAILED=yes])
 AC_CHECK_LIB(boost_regex,main,[],[FAILED=yes])
 AC_CHECK_LIB(boost_filesystem,main,[],[FAILED=yes])
 AC_CHECK_LIB(boost_signals,main,[],[FAILED=yes])
 
-BOOST_LIBS="$LIBS"
+BOOST_LIBS="YG_REMOVE(LIBS,SAVE_LIBS)"
 AC_SUBST(BOOST_LIBS)
 LIBS="$SAVE_LIBS"
 
@@ -239,24 +240,25 @@ YG_GET_PATH(devil)
 SAVE_LIBS="$LIBS"
 SAVE_CPPFLAGS="$CPPFLAGS"
 # do we need to check for libjpeg, libpng etc?
-LIBS="-lIL -lILU $GL_LIBS $SDL_LIBS"
+LIBS="$GL_LIBS $SDL_LIBS -lIL -lILU"
 CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
 AC_CHECK_HEADERS([IL/il.h IL/ilu.h IL/ilut.h],,[AC_MSG_ERROR([The DevIL headers were not found])])
 YG_SEARCH_LIBS([DevIL],[ILUT],[#include <IL/ilut.h>],[ilutInit();],[],
                [AC_MSG_FAILURE([Unable to link DevIL test program, do you have DevIL installed?])])
-DEVIL_LIBS="$LIBS"
+DEVIL_LIBS="YG_REMOVE(LIBS,SAVE_LIBS)"
 AC_SUBST(DEVIL_LIBS)
 CPPFLAGS="$SAVE_CPPFLAGS"
 LIBS="$SAVE_LIBS"
 
 ### expat and log4cpp check
 YG_GET_PATH(expat)
+SAVE_LIBS="$LIBS"
 AC_CHECK_LIB(expat,XML_ParserCreate,[],[AC_MSG_FAILURE([You'll need expat])])
-
+LIBS="$SAVE_LIBS"
 
 YG_GET_PATH(log4cpp)
 AC_LANG_CPLUSPLUS
-AC_CHECK_HEADERS([log4cpp/Category.hh],,[AC_MSG_ERROR(log4cpp/Category.hh not found in include-path)])
+AC_CHECK_HEADERS([log4cpp/Category.hh],,[AC_MSG_FAILURE(log4cpp/Category.hh not found in include-path)])
 SAVE_LIBS="$LIBS"
 YG_SEARCH_LIBS([log4cpp],[log4cpp],
                [#include <log4cpp/Category.hh>],[log4cpp::Category::shutdown();],
@@ -265,8 +267,9 @@ LIBS="$SAVE_LIBS"
 dnl AC_CHECK_LIB(z,deflate,[],[AC_MSG_ERROR(Zlib is missing!)])
 
 AC_LANG_C
-if test x$with_builtin_sdlnet = xyes -a $WIN32=yes; then
+if test x$with_builtin_sdlnet = xyes -a $WIN32 = yes; then
   # the windows version of sdlnet needs wsock32 linked in
+  AC_CHECK_LIB(wsock32,main,[],[AC_MSG_FAILURE([wsock32 not found!])])
   LIBS="$LIBS -lwsock32"
 fi
 dnl without net switch

@@ -40,9 +40,11 @@ const double DEFAULT_FPS = 15.0;
 }
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture,
-                               int frames/* = -1*/, Uint32 flags/* = 0*/) :
+                               Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
         Control(x, y, w, h, flags),
         m_margin(margin),
+        m_frame_width(w),
+        m_frame_height(h),
         m_FPS(DEFAULT_FPS),
         m_playing(true),
         m_looping(loop),
@@ -52,17 +54,21 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
         m_curr_frame(0),
         m_first_frame_time(-1),
         m_last_frame_time(-1),
-        m_first_frame_idx(0)
+        m_first_frame_idx(0),
+        m_style(style)
 {
+    ValidateStyle();
     SetColor(CLR_WHITE);
     AddFrames(texture, frames);
     m_last_frame_idx = m_frames - 1;
 }
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const shared_ptr<Texture>& texture,
-                               int frames/* = -1*/, Uint32 flags/* = 0*/) :
+                               Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
         Control(x, y, w, h, flags),
         m_margin(margin),
+        m_frame_width(w),
+        m_frame_height(h),
         m_FPS(DEFAULT_FPS),
         m_playing(true),
         m_looping(loop),
@@ -72,17 +78,21 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
         m_curr_frame(0),
         m_first_frame_time(-1),
         m_last_frame_time(-1),
-        m_first_frame_idx(0)
+        m_first_frame_idx(0),
+        m_style(style)
 {
+    ValidateStyle();
     SetColor(CLR_WHITE);
     AddFrames(texture, frames);
     m_last_frame_idx = m_frames - 1;
 }
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures,
-                               int frames/* = -1*/, Uint32 flags/* = 0*/) :
+                               Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
         Control(x, y, w, h, flags),
         m_margin(margin),
+        m_frame_width(w),
+        m_frame_height(h),
         m_FPS(DEFAULT_FPS),
         m_playing(true),
         m_looping(loop),
@@ -92,8 +102,10 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
         m_curr_frame(0),
         m_first_frame_time(-1),
         m_last_frame_time(-1),
-        m_first_frame_idx(0)
+        m_first_frame_idx(0),
+        m_style(style)
 {
+    ValidateStyle();
     SetColor(CLR_WHITE);
     AddFrames(textures, frames);
     m_last_frame_idx = m_frames - 1;
@@ -102,6 +114,8 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
         Control(elem.Child("GG::Control")),
         m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Attribute("value"))),
+        m_frame_width(boost::lexical_cast<int>(elem.Child("m_frame_width").Attribute("value"))),
+        m_frame_height(boost::lexical_cast<int>(elem.Child("m_frame_height").Attribute("value"))),
         m_first_frame_time(-1),
         m_last_frame_time(-1)
 {
@@ -154,6 +168,9 @@ DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
     curr_elem = &elem.Child("m_last_frame_idx");
     m_last_frame_idx = lexical_cast<int>(curr_elem->Attribute("value"));
 
+    curr_elem = &elem.Child("m_style");
+    m_style = lexical_cast<Uint32>(curr_elem->Attribute("value"));
+
     SetFrameIndex(m_curr_frame);
 }
 
@@ -163,6 +180,18 @@ XMLElement DynamicGraphic::XMLEncode() const
     retval.AppendChild(Control::XMLEncode());
 
     XMLElement temp;
+
+    temp = XMLElement("m_margin");
+    temp.SetAttribute("value", lexical_cast<string>(m_margin));
+    retval.AppendChild(temp);
+
+    temp = XMLElement("m_frame_width");
+    temp.SetAttribute("value", lexical_cast<string>(m_frame_width));
+    retval.AppendChild(temp);
+
+    temp = XMLElement("m_frame_height");
+    temp.SetAttribute("value", lexical_cast<string>(m_frame_height));
+    retval.AppendChild(temp);
 
     temp = XMLElement("m_textures");
     for (unsigned int i = 0; i < m_textures.size(); ++i) {
@@ -206,8 +235,8 @@ XMLElement DynamicGraphic::XMLEncode() const
     temp.SetAttribute("value", lexical_cast<string>(m_last_frame_idx));
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_margin");
-    temp.SetAttribute("value", lexical_cast<string>(m_margin));
+    temp = XMLElement("m_style");
+    temp.SetAttribute("value", lexical_cast<string>(m_style));
     retval.AppendChild(temp);
 
     return retval;
@@ -250,11 +279,59 @@ int DynamicGraphic::Render()
         Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
         glColor4ubv(color_to_use.v);
 
-        int cols = m_textures[m_curr_texture].texture->DefaultWidth() / (Width() + m_margin);
-        int x = (m_curr_subtexture % cols) * (Width() + m_margin) + m_margin;
-        int y = (m_curr_subtexture / cols) * (Height() + m_margin) + m_margin;
-        SubTexture st(m_textures[m_curr_texture].texture, x, y, x + Width(), y + Height());
-        st.OrthoBlit(UpperLeft(), false);
+        int cols = m_textures[m_curr_texture].texture->DefaultWidth() / (m_frame_width + m_margin);
+        int x = (m_curr_subtexture % cols) * (m_frame_width + m_margin) + m_margin;
+        int y = (m_curr_subtexture / cols) * (m_frame_height + m_margin) + m_margin;
+        SubTexture st(m_textures[m_curr_texture].texture, x, y, x + m_frame_width, y + m_frame_height);
+
+        Pt ul = UpperLeft(), lr = LowerRight();
+        Pt window_sz(lr - ul);
+        Pt graphic_sz(m_frame_width, m_frame_height);
+        Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
+        if (m_style & SG_FITGRAPHIC) {
+            if (m_style & SG_PROPSCALE) {
+                double scale_x = window_sz.x / double(graphic_sz.x),
+                    scale_y = window_sz.y / double(graphic_sz.y);
+                double scale = (scale_x < scale_y) ? scale_x : scale_y;
+                pt2.x = int(graphic_sz.x * scale);
+                pt2.y = int(graphic_sz.y * scale);
+            } else {
+                pt2 = window_sz;
+            }
+        } else if (m_style & SG_SHRINKFIT) {
+            if (m_style & SG_PROPSCALE) {
+                double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
+                    scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
+                double scale = (scale_x < scale_y) ? scale_x : scale_y;
+                pt2.x = int(graphic_sz.x * scale);
+                pt2.y = int(graphic_sz.y * scale);
+            } else {
+                pt2 = window_sz;
+            }
+        }
+
+        int shift = 0;
+        if (m_style & SG_LEFT) {
+            shift = ul.x;
+        } else if (m_style & SG_CENTER) {
+            shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
+        } else { // m_style & SG_RIGHT
+            shift = lr.x - (pt2.x - pt1.x);
+        }
+        pt1.x += shift;
+        pt2.x += shift;
+
+        if (m_style & SG_TOP) {
+            shift = ul.y;
+        } else if (m_style & SG_VCENTER) {
+            shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
+        } else { // m_style & SG_BOTTOM
+            shift = lr.y - (pt2.y - pt1.y);
+        }
+        pt1.y += shift;
+        pt2.y += shift;
+
+        st.OrthoBlit(pt1, pt2, false);
 
         if (send_end_frame_signal)
             m_end_frame_sig(final_frame_idx);
@@ -448,6 +525,33 @@ int DynamicGraphic::FramesInTexture(const Texture* t) const
     int cols = t->DefaultWidth() / (Width() + m_margin);
     int rows = t->DefaultHeight() / (Height() + m_margin);
     return cols * rows;
+}
+
+void DynamicGraphic::ValidateStyle()
+{
+    int dup_ct = 0;   // duplication count
+    if (m_style & SG_LEFT) ++dup_ct;
+    if (m_style & SG_RIGHT) ++dup_ct;
+    if (m_style & SG_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use SG_CENTER by default
+        m_style &= ~(SG_RIGHT | SG_LEFT);
+        m_style |= SG_CENTER;
+    }
+    dup_ct = 0;
+    if (m_style & SG_TOP) ++dup_ct;
+    if (m_style & SG_BOTTOM) ++dup_ct;
+    if (m_style & SG_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use SG_VCENTER by default
+        m_style &= ~(SG_TOP | SG_BOTTOM);
+        m_style |= SG_VCENTER;
+    }
+    dup_ct = 0;
+    if (m_style & SG_FITGRAPHIC) ++dup_ct;
+    if (m_style & SG_SHRINKFIT) ++dup_ct;
+    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use SG_SHRINKFIT by default
+        m_style &= ~SG_FITGRAPHIC;
+        m_style |= SG_SHRINKFIT;
+    }
 }
 
 } // namespace GG

@@ -171,17 +171,6 @@ else
   AC_CHECK_FT2(9.0.0,[],[AC_MSG_ERROR([FreeType is required])])
 fi
 
-### SDL_image check
-
-#dnl can't use sdl-image, ${sdl-image_libdir} would be misinterpreted
-#YG_GET_PATH(sdl_image)
-#AC_CACHE_SAVE
-#XXCPPFLAGS="$CPPFLAGS"
-#CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
-#AC_CHECK_HEADERS([SDL_image.h],[],[AC_MSG_ERROR([SDL_image.h not found])])
-#AC_CHECK_LIB(SDL_image,IMG_Load,[],[AC_MSG_ERROR([SDL_image is needed])])
-#CPPFLAGS="$XXCPPFLAGS"
-
 ### SDL_net check
 
 YG_GET_PATH(sdlnet)
@@ -261,7 +250,10 @@ SAVE_CPPFLAGS="$CPPFLAGS"
 LIBS="$GL_LIBS $SDL_LIBS -lIL -lILU"
 CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
 AC_CHECK_HEADERS([IL/il.h IL/ilu.h IL/ilut.h],,[AC_MSG_ERROR([The DevIL headers were not found])])
-YG_SEARCH_LIBS([DevIL],[ILUT],[#include <IL/ilut.h>],[ilutInit();],[],
+YG_SEARCH_LIBS([DevIL],[ILUT],[/* In some cases DevIL was linked with Allegro, 
+which requires the following to be defined */
+void * _mangled_main_address = (void*)0xdeafdead;
+#include <IL/ilut.h>],[ilutInit();],[],
 	       [# Maybe we have a broken libdevIL?
 		SAVE2_LIBS="$LIBS"
 		LIBS="$SAVE_LIBS"
@@ -271,11 +263,11 @@ to link. Do you have DevIL installed?])],[AC_LIBOBJ(_vsnprintf)])
 		LIBS="$SAVE2_LIBS"
 		SAVE_CPPFLAGS="$CPPFLAGS"
 		CPPFLAGS="$CPPFLAGS -I$srcdir"
-		YG_SEARCH_LIBS([broken DevIL],[ILUT],[#include <IL/ilut.h>
-#include <src/_vsnprintf.c>],[ilutInit();],[AC_MSG_WARN([
-*** Your DevIL-libraries are broken! They require the `_vsnprintf' function,
-*** which is called `vsnprintf' on your system. I have created a wrapper,
-*** so GiGi _should_ compile fine anyway.])],
+		YG_SEARCH_LIBS([broken DevIL],[ILUT],[/* In some cases DevIL was linked with Allegro, 
+which requires the following to be defined */
+void * _mangled_main_address = (void*)0xdeafdead;
+#include <IL/ilut.h>
+#include <src/_vsnprintf.c>],[ilutInit();],[DO_BROKEN_DEVIL_WARNING=yes],
                	 [AC_MSG_FAILURE([Unable to link DevIL test program, do you have DevIL installed?])])
 		CPPFLAGS="$SAVE_CPPFLAGS"
                 ])
@@ -283,6 +275,36 @@ DEVIL_LIBS="YG_REMOVE(LIBS,SAVE_LIBS)"
 AC_SUBST(DEVIL_LIBS)
 CPPFLAGS="$SAVE_CPPFLAGS"
 LIBS="$SAVE_LIBS"
+AC_MSG_CHECKING([whether DevIL was linked with OpenGL support])
+AC_EGREP_CPP([^I am compiled with OpenGL$],[
+#include <IL/ilut.h>
+#ifdef ILUT_USE_OPENGL
+I am compiled with OpenGL
+#endif       ],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT([nope, that's bad!])
+                   AC_MSG_ERROR([Your libDevIL does not contain support for OpenGL!])])
+AC_MSG_CHECKING([whether DevIL was linked with allegro])
+AC_EGREP_CPP([^I am compiled with allegro$],[
+#include <IL/ilut.h>
+#ifdef ILUT_USE_ALLEGRO
+I am compiled with allegro
+#endif     ],[DEVIL_WITH_ALLEGRO=yes
+AC_MSG_RESULT([unfortunately, yes])], 
+             [AC_MSG_RESULT([no, that's good!])])
+if test x$DEVIL_WITH_ALLEGRO = xyes; then
+  AC_DEFINE(GG_DEVIL_WITH_ALLEGRO,,[Define if DevIL is linked with allegro])
+  GG_DEVIL_WITH_ALLEGRO="#define GG_DEVIL_WITH_ALLEGRO"
+  DO_ALLEGRO_WARNING=yes
+  GG_NO_ALLEGRO_HACK="/* #undef GG_NO_ALLEGRO_HACK */"
+  AC_ARG_ENABLE([allegro-hack],[AC_HELP_STRING([--disable-allegro-hack],[Disable the hack for Allegro-linked DevILs (ignored if DevIL is not linked against Allegro)])],[if test x$enableval == xno; then
+  DO_ALLEGRO_WARNING=nohack
+  GG_NO_ALLEGRO_HACK="#define GG_NO_ALLEGRO_HACK"
+fi      ])
+else
+  GG_DEVIL_WITH_ALLEGRO="/* #undef GG_DEVIL_WITH_ALLEGRO */"
+  GG_NO_ALLEGRO_HACK="/* #undef GG_NO_ALLEGRO_HACK */"
+fi
+AC_SUBST(GG_DEVIL_WITH_ALLEGRO)
+AC_SUBST(GG_NO_ALLEGRO_HACK)
 
 ### expat and log4cpp check
 #YG_GET_PATH(expat)
@@ -335,3 +357,28 @@ AC_CONFIG_FILES([Makefile
                  GiGiSDL.pc
                 ])
 AC_OUTPUT
+if test x$DO_BROKEN_DEVIL_WARNING = xyes; then
+  AC_MSG_WARN([
+*** Your DevIL-libraries are broken! They require the `_vsnprintf' function,
+*** which is called `vsnprintf' on your system. I have created a wrapper,
+*** so GiGi _should_ compile fine anyway.])
+fi
+if test x$DO_ALLEGRO_WARNING = xyes; then
+  AC_MSG_WARN([
+*** Your DevIL-library is linked with Allegro, and this
+*** would require placing an "END_OF_MAIN"-macro after the program's
+*** main routine. GG contains a hack to remove this requiremnet, but it's
+*** a dirty hack and might not work. Note that you _cannot_ use this GiGi 
+*** in Allegro programs!
+*** If you want to be able to use GiGi in Allegro-programs, run configure with
+*** the '--disable-allegro-hack' option.])
+fi
+if test x$DO_ALLEGRO_WARNING = xnohack; then
+  AC_MSG_WARN([
+*** Your DevIL-library is linked with Allegro, and this
+*** requires placing an "END_OF_MAIN"-macro after the program's
+*** main routine. You have chosen to omit the hack that would eliminate this
+*** requirement! This means that _every_ program that uses this library
+*** has to #include <allegro.h> and place END_OF_MAIN() after the main 
+*** function.])
+fi

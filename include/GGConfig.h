@@ -32,5 +32,12 @@
 #define GG_USE_NET 1
 #endif
 
+/* Define if DevIL was compiled with allegro */
+/* #undef GG_DEVIL_WITH_ALLEGRO */
+
+/* In case GG_DEVIL_WITH_ALLEGRO is defined, define if you do not want the
+   Allegro hack to be compiled in */
+/* #undef GG_NO_ALLEGRO_HACK */
+
 #endif // _GGConfig_h_
 

@@ -30,6 +30,31 @@
 #include <XMLValidators.h>
 
 #include <IL/il.h>
+
+/* some versions of libDevIL are linked with Allegro, which requires
+   _mangled_main_address to be defined. Futhermore, ilut.h includes
+   allegro.h as extern "C", which is wrong, because allegro defines
+   some C++-classes if it detects a C++ compiler. So, we need to
+   include allegro before including ilut!
+ 
+   If GG_NO_ALLEGRO_HACK is not defined, we include an
+   _mangled_main_address variable with a dummy value; this would cause
+   * Allegro programs to crash! Therefore, if GG_NO_ALLEGRO_HACK is
+   defined, the developer has to use Allegro's END_OF_MAIN macro. */
+
+#ifndef _GGConfig_h_
+# include "GGConfig.h"
+#endif
+
+#ifdef GG_DEVIL_WITH_ALLEGRO
+# include <allegro.h>
+# ifndef GG_NO_ALLEGRO_HACK
+   /* This "hexspeak" address should stand out in an debugger,
+      reminding the developer what went wrong */
+   void * _mangled_main_address = (void*) 0xdeadbabe;
+# endif
+#endif
+
 #include <IL/ilut.h>
 
 namespace GG {

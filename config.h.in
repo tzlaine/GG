@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define if DevIL is linked with allegro */
+#undef GG_DEVIL_WITH_ALLEGRO
+
 /* Define to true if you want net support */
 #undef GG_USE_NET
 

@@ -117,9 +117,9 @@ public:
         text occupies. */
     virtual void   SetText(const string& str);
     virtual void   SetText(const char* str)         {SetText(string(str));}
-    void           SetTextFormat(Uint32 format)     {m_format = format; ValidateFormat();} ///< sets the text format; ensures that the flags are sane
-    void           SetTextColor(Clr color)          {m_text_color = color;}                ///< sets the text color
-    virtual void   SetColor(Clr c)                  {SetColor(c); m_text_color = c;}       ///< just like Color::SetColor(), except that this one also adjusts the text color
+    void           SetTextFormat(Uint32 format)     {m_format = format; ValidateFormat();}    ///< sets the text format; ensures that the flags are sane
+    void           SetTextColor(Clr color)          {m_text_color = color;}                   ///< sets the text color
+    virtual void   SetColor(Clr c)                  {Control::SetColor(c); m_text_color = c;} ///< just like Control::SetColor(), except that this one also adjusts the text color
 
     /** Sets the value of the control's text to the stringified version of t.
         If t can be converted to a string representation by a boost::lexical_cast (and thus by a stringstream), then the << operator

@@ -188,7 +188,7 @@ public:
     {
         T val = boost::lexical_cast<T>(str);
 
-        if (val == EnumMap<T>::BAD_VALUE) {
+        if (val == static_cast<int>(EnumMap<T>::BAD_VALUE)) {
             throw std::runtime_error("MappedEnumValidator::Validate() : String \"" + str + "\" does not match any value in the EnumMap for its type.");
 	}
     }

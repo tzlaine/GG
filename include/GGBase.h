@@ -95,6 +95,95 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #include <valarray>
 #include <numeric>
 
+namespace GG {
+/** A base type for all templated EnumMap types. */
+struct EnumMapBase
+{
+    virtual ~EnumMapBase() {}
+    virtual const std::string& FromEnum(int) const = 0;
+    virtual int FromString (const std::string&) const = 0;
+};
+
+/** A mapping between the values of an enum and the string representations of the enum's values.  A 
+    specialization should be declared for each enumerated type for which an EnumMap is desired. */
+template <class E> struct EnumMap : EnumMapBase
+{
+    virtual ~EnumMap() {}
+    virtual const std::string& FromEnum(int) const {return "";}
+    virtual int FromString (const std::string&) const {return 0;}
+};
+
+/** Returns a map of the values of an enum to the corresponding string representation of that value. */
+template <class E> EnumMap<E> GetEnumMap()
+{
+    static EnumMap<E> enum_map;
+    return enum_map;
+}
+}
+
+
+/** Declares the beginning of a template specialization of EnumMap, for enumerated type \a name.
+    Text-to-enum conversion is one of those places that calls for macro magic.  To use these for 
+    e.g. "enum Foo {FOO, BAR};", call: 
+    \verbatim 
+    ENUM_MAP_BEGIN( Foo ) 
+        ENUM_MAP_INSERT( FOO )
+	ENUM_MAP_INSERT( BAR )
+	...
+    ENUM_MAP_END\endverbatim */
+#define ENUM_MAP_BEGIN( name )                                                  \
+template <> struct EnumMap< name > : EnumMapBase                                \
+{                                                                               \
+    typedef name EnumType;                                                      \
+    EnumMap ()                                                                  \
+    {
+
+/** Adds a single value from an enumerated type, and its corresponding string representation, to an EnumMap. */
+#define ENUM_MAP_INSERT( value ) map_[ value ] = #value ;
+
+/** Declares the end of a template specialization of EnumMap, for enumerated type \a name. */
+#define ENUM_MAP_END                                                            \
+    }                                                                           \
+    virtual ~EnumMap() {}                                                       \
+    virtual const std::string& FromEnum(int i) const                            \
+    {                                                                           \
+	return map_.find(EnumType(i))->second;                                  \
+    }                                                                           \
+    int FromString (const std::string &str) const                               \
+    {                                                                           \
+        for (std::map<EnumType, std::string>::const_iterator it = map_.begin(); \
+             it != map_.end();                                                  \
+             ++it) {                                                            \
+            if (it->second == str) {                                            \
+                return it->first;                                               \
+            }                                                                   \
+        }                                                                       \
+        return BAD_VALUE;                                                       \
+    }                                                                           \
+    static const int BAD_VALUE = -5000000;                                      \
+    std::map<EnumType, std::string> map_;                                       \
+};
+
+/** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
+#define ENUM_STREAM_IN( name )                                                  \
+inline std::istream& operator>>(std::istream& is, name& v)                      \
+{                                                                               \
+    std::string str;                                                            \
+    is >> str;                                                                  \
+    v = name (GetEnumMap< name >().FromString(str));                            \
+    return is;                                                                  \
+}
+
+/** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
+#define ENUM_STREAM_OUT( name )                                                 \
+inline std::ostream& operator<<(std::ostream& os, name v)                       \
+{                                                                               \
+    os << GetEnumMap< name >().FromEnum(v);                                     \
+    return os;                                                                  \
+}
+
+
+
 /** \namespace GG
     The namespace that encloses all GG classes, functions, typedefs, enums, etc.*/
 namespace GG {
@@ -114,6 +203,7 @@ using std::multimap;
 using std::list;
 using std::pair;
 using std::valarray;
+
 
 /** This is a base class for all GG exceptions.  It is based on the std::exception class.  Since it is preferable that exceptions
     not throw other exceptions, "throw()" (which means "throws nothing") has been appended to every member function.*/
@@ -169,21 +259,56 @@ enum TextFormat {
     TF_LINEWRAP =  1 << 7      ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
 };
 
+// define EnumMap and stream operators for TextFormat
+ENUM_MAP_BEGIN(TextFormat)
+    ENUM_MAP_INSERT(TF_NONE)
+    ENUM_MAP_INSERT(TF_VCENTER)
+    ENUM_MAP_INSERT(TF_TOP)
+    ENUM_MAP_INSERT(TF_BOTTOM)
+    ENUM_MAP_INSERT(TF_CENTER)
+    ENUM_MAP_INSERT(TF_LEFT)
+    ENUM_MAP_INSERT(TF_RIGHT)
+    ENUM_MAP_INSERT(TF_WORDBREAK)
+    ENUM_MAP_INSERT(TF_LINEWRAP)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(TextFormat)
+ENUM_STREAM_OUT(TextFormat)
+
+
 /** styles for StaticGraphic controls*/
-enum StaticGraphicStyle {
-    SG_NONE =      0,
-    SG_VCENTER =   1 << 0,     ///< Centers graphic vertically.
-    SG_TOP =       1 << 1,     ///< Top-justifies graphic.
-    SG_BOTTOM =    1 << 2,     ///< Justifies the graphic to the bottom of the rectangle.
+enum GraphicStyle {
+    GR_NONE =      0,
+    GR_VCENTER =   1 << 0,     ///< Centers graphic vertically.
+    GR_TOP =       1 << 1,     ///< Top-justifies graphic.
+    GR_BOTTOM =    1 << 2,     ///< Justifies the graphic to the bottom of the rectangle.
 
-    SG_CENTER =    1 << 3,     ///< Centers graphic horizontally in the rectangle.
-    SG_LEFT =      1 << 4,     ///< Aligns graphic to the left.
-    SG_RIGHT =     1 << 5,     ///< Aligns graphic to the right.
+    GR_CENTER =    1 << 3,     ///< Centers graphic horizontally in the rectangle.
+    GR_LEFT =      1 << 4,     ///< Aligns graphic to the left.
+    GR_RIGHT =     1 << 5,     ///< Aligns graphic to the right.
 
-    SG_FITGRAPHIC =1 << 6,     ///< Scales graphic to fit within the StaticGraphic's window dimensions.
-    SG_SHRINKFIT = 1 << 7,     ///< Like SG_FITGRAPHIC, but this one only scales the image if it otherwise would not fit in the window.
-    SG_PROPSCALE = 1 << 8      ///< If SG_FITGRAPHIC or SG_SHRINKFIT is used, this ensures scaling is done proportionally.
+    GR_FITGRAPHIC =1 << 6,     ///< Scales graphic to fit within the StaticGraphic's window dimensions.
+    GR_SHRINKFIT = 1 << 7,     ///< Like GR_FITGRAPHIC, but this one only scales the image if it otherwise would not fit in the window.
+    GR_PROPSCALE = 1 << 8      ///< If GR_FITGRAPHIC or GR_SHRINKFIT is used, this ensures scaling is done proportionally.
 };
+
+// define EnumMap and stream operators for GraphicStyle
+ENUM_MAP_BEGIN(GraphicStyle)
+    ENUM_MAP_INSERT(GR_NONE)
+    ENUM_MAP_INSERT(GR_VCENTER)
+    ENUM_MAP_INSERT(GR_TOP)
+    ENUM_MAP_INSERT(GR_BOTTOM)
+    ENUM_MAP_INSERT(GR_CENTER)
+    ENUM_MAP_INSERT(GR_LEFT)
+    ENUM_MAP_INSERT(GR_RIGHT)
+    ENUM_MAP_INSERT(GR_FITGRAPHIC)
+    ENUM_MAP_INSERT(GR_SHRINKFIT)
+    ENUM_MAP_INSERT(GR_PROPSCALE)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(GraphicStyle)
+ENUM_STREAM_OUT(GraphicStyle)
+
 
 /** styles for ListBox controls*/
 enum ListBoxStyle {
@@ -208,6 +333,28 @@ enum ListBoxStyle {
 
     LB_BROWSEUPDATES =   1 << 19, ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
 };   
+
+// define EnumMap and stream operators for ListBoxStyle
+ENUM_MAP_BEGIN(ListBoxStyle)
+    ENUM_MAP_INSERT(LB_NONE)
+    ENUM_MAP_INSERT(LB_VCENTER)
+    ENUM_MAP_INSERT(LB_TOP)
+    ENUM_MAP_INSERT(LB_BOTTOM)
+    ENUM_MAP_INSERT(LB_CENTER)
+    ENUM_MAP_INSERT(LB_LEFT)
+    ENUM_MAP_INSERT(LB_RIGHT)
+    ENUM_MAP_INSERT(LB_NOSORT)
+    ENUM_MAP_INSERT(LB_SORTDESCENDING)
+    ENUM_MAP_INSERT(LB_NOSEL)
+    ENUM_MAP_INSERT(LB_SINGLESEL)
+    ENUM_MAP_INSERT(LB_QUICKSEL)
+    ENUM_MAP_INSERT(LB_DRAGDROP)
+    ENUM_MAP_INSERT(LB_USERDELETE)
+    ENUM_MAP_INSERT(LB_BROWSEUPDATES)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(ListBoxStyle)
+ENUM_STREAM_OUT(ListBoxStyle)
 
 /** adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added*/
 enum Key {

@@ -63,9 +63,10 @@ int NextPowerOfTwo(int input)
 struct TempGlyphData
 {
     TempGlyphData() {} ///< default ctor
-    TempGlyphData(int i, int _x1, int _y1, int _x2, int _y2, int a) : idx(i), x1(_x1), y1(_y1), x2(_x2), y2(_y2), adv(a) {} ///< ctor
+    TempGlyphData(int i, int _x1, int _y1, int _x2, int _y2, int lb, int a) : idx(i), x1(_x1), y1(_y1), x2(_x2), y2(_y2), left_b(lb), adv(a) {} ///< ctor
     int      idx;              ///< index into m_textures of texture that contains this glyph
     int      x1, y1, x2, y2;   ///< area of glyph subtexture within texture
+    int	     left_b;	       ///< left bearing (see Glyph)
     int      adv;              ///< advance of glyph (see Glyph)
 };
 
@@ -619,6 +620,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
                 // record info on how to find and use this glyph later
                 temp_glyph_data[c] = TempGlyphData(static_cast<int>(buffer_vec.size()) - 1,
                                                    x, y, x + glyph_bitmap.width, y + m_height,
+                                                   static_cast<int>((std::ceil(face->glyph->metrics.horiBearingX / 64.0))), // convert from 26.6 fixed point format and round up
                                                    static_cast<int>((std::ceil(face->glyph->metrics.horiAdvance / 64.0)))); // convert from 26.6 fixed point format and round up
 
                 // advance buffer write-position
@@ -645,7 +647,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
 
     // create Glyph objects from temp glyph data
     for (std::map<char, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
-        m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.x1, it->second.y1, it->second.x2, it->second.y2, it->second.adv);
+        m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.x1, it->second.y1, it->second.x2, it->second.y2, it->second.left_b, it->second.adv);
 
     // record the width of the space character
     std::map<char, Glyph>::const_iterator glyph_it = m_glyphs.find(' ');
@@ -679,21 +681,22 @@ bool Font::GenerateGlyph(FT_Face face, char ch)
 
 int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState* render_state) const
 {
+
     if (render_state && render_state->use_italics) {
         // render subtexture to tilted rhombus instead of rectangle
         glBindTexture(GL_TEXTURE_2D, glyph.sub_texture.GetTexture()->OpenGLId());
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[1]);
-        glVertex2d(x + m_italics_offset, y);
+        glVertex2d(x + glyph.left_bearing + m_italics_offset, y);
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[1]);
-        glVertex2d(x + m_italics_offset + glyph.sub_texture.Width(), y);
+        glVertex2d(x + glyph.left_bearing + m_italics_offset + glyph.sub_texture.Width(), y);
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[3]);
-        glVertex2d(x - m_italics_offset, y + glyph.sub_texture.Height());
+        glVertex2d(x + glyph.left_bearing - m_italics_offset, y + glyph.sub_texture.Height());
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[3]);
-        glVertex2d(x - m_italics_offset + glyph.sub_texture.Width(), y + glyph.sub_texture.Height());
+        glVertex2d(x + glyph.left_bearing - m_italics_offset + glyph.sub_texture.Width(), y + glyph.sub_texture.Height());
         glEnd();
     } else {
-        glyph.sub_texture.OrthoBlit(x, y, false);
+        glyph.sub_texture.OrthoBlit(x + glyph.left_bearing, y, false);
     }
     if (render_state && render_state->draw_underline) {
         double x1 = x;

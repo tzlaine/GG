@@ -43,7 +43,7 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const sh
 {
     ValidateFormat();
     Control::m_text = str;
-    if (m_font) m_font->DetermineLines(WindowText(), m_format, WindowDimensions().x, m_line_data, true);
+    if (m_font) m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
 }
 
 TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts,
@@ -56,7 +56,7 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const st
 {
     ValidateFormat();
     Control::m_text = str;
-    if (m_font) m_font->DetermineLines(WindowText(), m_format, WindowDimensions().x, m_line_data, true);
+    if (m_font) m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
 }
 
 TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
@@ -70,7 +70,7 @@ TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>
     ValidateFormat();
     Control::m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, WindowDimensions().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
         Resize(text_sz);
     }
 }
@@ -86,7 +86,7 @@ TextControl::TextControl(int x, int y, const string& str, const string& font_fil
     ValidateFormat();
     Control::m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, WindowDimensions().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
         Resize(text_sz);
     }
 }
@@ -112,7 +112,7 @@ TextControl::TextControl(const XMLElement& elem) :
     m_fit_to_text = lexical_cast<bool>(curr_elem->Attribute("value"));
 
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, WindowDimensions().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
         if (m_fit_to_text)
             Resize(text_sz);
     }
@@ -156,7 +156,7 @@ void TextControl::SetText(const string& str)
 {
     Control::m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, WindowDimensions().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
         if (m_fit_to_text)
             Resize(text_sz);
     }

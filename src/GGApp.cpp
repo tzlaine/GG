@@ -98,22 +98,22 @@ namespace {
 struct GG::AppImplData
 {
     AppImplData() :
-	focus_wnd(0),
-	mouse_pos(0,0),
-	mouse_rel(0,0),
-	mouse_repeat_delay(0),
-	mouse_repeat_interval(0),
-	double_click_interval(500),
-	prev_wnd_under_cursor(0),
-	curr_wnd_under_cursor(0),
-	wnd_region(WR_NONE),
-    delta_t(0),
-    FPS(-1.0),
-    calc_FPS(false),
-    max_FPS(0.0),
-	double_click_wnd(0),
-	double_click_start_time(-1),
-	double_click_time(-1),
+        focus_wnd(0),
+        mouse_pos(0,0),
+        mouse_rel(0,0),
+        mouse_repeat_delay(0),
+        mouse_repeat_interval(0),
+        double_click_interval(500),
+        prev_wnd_under_cursor(0),
+        curr_wnd_under_cursor(0),
+        wnd_region(WR_NONE),
+        delta_t(0),
+        FPS(-1.0),
+        calc_FPS(false),
+        max_FPS(0.0),
+        double_click_wnd(0),
+        double_click_start_time(-1),
+        double_click_time(-1),
     log_category(log4cpp::Category::getRoot())
     {
         button_state[0] = button_state[1] = button_state[2] = false;
@@ -140,8 +140,9 @@ struct GG::AppImplData
     string       app_name;              // the user-defined name of the apllication
 
     ZList        zlist;                 // object that keeps the GUI windows in the correct depth ordering
-    Wnd*         focus_wnd;             // GUI window that currently has the input focus
-    list<Wnd*>   modal_wnds;            // modal GUI windows (only the one in back is active, simulating a stack but allowing traversal of the list)
+    Wnd*         focus_wnd;             // GUI window that currently has the input focus (this is the base level focus window, used when no modal windows are active)
+    list<pair<Wnd*, Wnd*> >
+                 modal_wnds;            // modal GUI windows, and the window with focus for that modality (only the one in back is active, simulating a stack but allowing traversal of the list)
 
     bool   button_state[3];             // the up/down states of the three buttons on the mouse are kept here
     Pt     mouse_pos;                   // absolute position of mouse based on last MOUSEMOVE event
@@ -218,7 +219,7 @@ App::~App()
 
 Wnd* App::FocusWnd() const
 {
-    return s_impl->focus_wnd;
+    return s_impl->modal_wnds.empty() ? s_impl->focus_wnd : s_impl->modal_wnds.back().second;
 }
 
 Wnd* App::GetWindowUnder(const Pt& pt) const
@@ -316,14 +317,14 @@ void App::operator()()
 void App::SetFocusWnd(Wnd* wnd)
 {
     // inform old focus wnd that it is losing focus
-    if (s_impl->focus_wnd)
-        s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::LosingFocus));
+    if (FocusWnd())
+        FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::LosingFocus));
 
-    s_impl->focus_wnd = wnd;
+    (s_impl->modal_wnds.empty() ? s_impl->focus_wnd : s_impl->modal_wnds.back().second) = wnd;
 
     // inform new focus wnd that it is gaining focus
-    if (s_impl->focus_wnd)
-        s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
+    if (FocusWnd())
+        FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
 }
 
 void App::Wait(int ms)
@@ -338,22 +339,36 @@ void App::Register(Wnd* wnd)
 void App::RegisterModal(Wnd* wnd)
 {
     if (wnd && wnd->Modal()) {
-        s_impl->modal_wnds.push_back(wnd);
+        s_impl->modal_wnds.push_back(std::make_pair(wnd, wnd));
+        wnd->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
     }
 }
 
 void App::Remove(Wnd* wnd)
 {
     if (wnd) {
-        if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back() == wnd) { // if it's the current modal window, remove it from the modal list
+        if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back().first == wnd) { // if it's the current modal window, remove it from the modal list
             s_impl->modal_wnds.pop_back();
         } else { // if it's not a modal window, remove it from the z-order
             s_impl->zlist.Remove(wnd);
         }
 
         // ensure that GUI state variables don't become dangling pointers when a Wnd is removed
-        if (MatchesOrContains(wnd, s_impl->focus_wnd))
-            s_impl->focus_wnd = 0;
+        if (s_impl->modal_wnds.empty()) {
+            if (MatchesOrContains(wnd, s_impl->focus_wnd))
+                s_impl->focus_wnd = 0;
+        } else {
+            for (list<pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
+                if (MatchesOrContains(wnd, it->second)) {
+                    if (MatchesOrContains(wnd, it->first)) {
+                        it->second = 0;
+                    } else { // if the modal window for the removed window's focus level is available, revert focus to the modal window
+                        if (it->second = it->first)
+                            it->first->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
+                    }
+                }
+            }
+        }
         if (MatchesOrContains(wnd, s_impl->prev_wnd_under_cursor))
             s_impl->prev_wnd_under_cursor = 0;
         if (MatchesOrContains(wnd, s_impl->curr_wnd_under_cursor))
@@ -540,8 +555,8 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             if (s_impl->accelerators.find(std::make_pair(key, massaged_mods)) != s_impl->accelerators.end())
                 processed = AcceleratorSignal(key, massaged_mods)();
         }
-        if (!processed && s_impl->focus_wnd)
-            s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::Keypress, key, key_mods));
+        if (!processed && FocusWnd())
+            FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::Keypress, key, key_mods));
         break;}
     case MOUSEMOVE:{
         curr_wnd_under_cursor = GetWindowUnder(pos); // get window under mouse position
@@ -718,23 +733,18 @@ void App::Render()
             RenderWindow(*it);
     }
     // render modal windows back-to-front
-    for (std::list<Wnd*>::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
-        if ((*it)->Visible())
-            RenderWindow(*it);
+    for (list<pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
+        if (it->first->Visible())
+            RenderWindow(it->first);
     }
     // render drag-drop windows in arbitrary order (sorted by pointer value)
     for (map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {
         if (it->first->Visible()) {
             Pt parent_offset = (it->first->Parent() ? it->first->Parent()->ClientUpperLeft() : Pt(0, 0));
             Pt old_pos = it->first->UpperLeft() - parent_offset;
-//std::cout << "it->first->UpperLeft()=" << it->first->UpperLeft().x << "," << it->first->UpperLeft().y << "\n";
             it->first->MoveTo(s_impl->mouse_pos - parent_offset - it->second);
-/*std::cout << "    s_impl->mouse_pos=" << s_impl->mouse_pos.x << "," << s_impl->mouse_pos.y << " it->second=" 
-          << it->second.x << "," << it->second.y << " it->first->UpperLeft()=" 
-          << it->first->UpperLeft().x << "," << it->first->UpperLeft().y << "\n";*/
             RenderWindow(it->first);
             it->first->MoveTo(old_pos);
-//std::cout << "it->first->UpperLeft()=" << it->first->UpperLeft().x << "," << it->first->UpperLeft().y << "\n\n";
         }
     }
     Exit2DMode();
@@ -744,7 +754,7 @@ Wnd* App::ModalWindow() const
 {
     Wnd* retval = 0;
     if (!s_impl->modal_wnds.empty())
-        retval = s_impl->modal_wnds.back();
+        retval = s_impl->modal_wnds.back().first;
     return retval;
 }
 

@@ -219,6 +219,9 @@ public:
     int             FirstRowShown() const      {return m_first_row_shown;}   ///< returns the index of the first row visible in the listbox
     int             FirstColShown() const      {return m_first_col_shown;}   ///< returns the index of the first column visible in the listbox
 
+    int             LastVisibleRow() const;    ///< last row that could be drawn, taking into account the contents and the size of client area
+    int             LastVisibleCol() const;    ///< last column that could be drawn, taking into account the contents and the size of client area
+
     /** returns the default row height. \note Each row may have its own height, diferent from the one returned by this function. */
     int             RowHeight() const          {return m_row_height;}
 
@@ -285,6 +288,7 @@ public:
 
     void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
     void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
+    void           BringRowIntoView(int n);                                 ///< moves the scrollbars so that row \a n is visible
 
     void           SetInteriorColor(Clr c)      {m_int_color = c;}          ///< sets the color painted into the client area of the control
     void           SetHiliteColor(Clr c)        {m_hilite_color = c;}       ///< sets the color behind selected line items
@@ -329,8 +333,6 @@ protected:
     int            CellMargin() const {return m_cell_margin;} ///< the number of pixels left between the contents of each cell and the cell boundary
     bool           AcceptsDropType(const string& str) const;  ///< called by another listbox when one of its line items is dropped over this listbox
 
-    int            LastVisibleRow() const;  ///< last row that could be drawn, taking into account the contents and the size of client area
-    int            LastVisibleCol() const;  ///< last column that could be drawn, taking into account the contents and the size of client area
     int            RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (it may be < 0 or >= NumRows())
     Pt             DragOffset(const Pt& pt) const; ///< returns offset of \a pt into the row \a pt falls in, or (-1,-1) if pt falls under no row
 

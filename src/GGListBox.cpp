@@ -473,6 +473,28 @@ Pt ListBox::ClientLowerRight() const
     return LowerRight() - Pt(BORDER_THICK + RightMargin(), BORDER_THICK + BottomMargin());
 }
 
+int ListBox::LastVisibleRow() const
+{
+    int visible_pixels = ClientSize().y;
+    int acc = 0, i;
+    for (i = m_first_row_shown; i < static_cast<int>(m_rows.size()); ++i) {
+        acc += m_rows[i]->Height();
+        if (visible_pixels <= acc) break;
+    }
+    if (i >= static_cast<int>(m_rows.size()))
+        i = static_cast<int>(m_rows.size()) - 1;
+    return i;
+}
+
+int ListBox::LastVisibleCol() const
+{
+    int retval = m_first_col_shown;
+    int right_boundary = m_col_widths.empty() ? ClientSize().x : m_col_widths[m_first_col_shown];
+    while (right_boundary <= ClientLowerRight().x && retval < static_cast<int>(m_col_widths.size()) - 1)
+        right_boundary += m_col_widths[++retval];
+    return retval;
+}
+
 int ListBox::SortCol() const
 {
     return (m_sort_col >= 0 && m_sort_col < static_cast<int>(m_col_widths.size()) ? m_sort_col : 0);
@@ -937,6 +959,27 @@ void ListBox::IndentRow(int n, int i)
         m_rows[i]->indentation = i;
 }
 
+void ListBox::BringRowIntoView(int n)
+{
+    if (0 <= n && n < static_cast<int>(m_rows.size())) {
+        int old_first_row = m_first_row_shown;
+        if (n >= 0 && n < m_first_row_shown) {
+            m_first_row_shown = n;
+        } else if (LastVisibleRow() <= n) { // find the row that preceeds the target row by about ClientSize().y pixels, and make it the first row shown
+            int avail_space = ClientSize().y - m_rows[n]->Height();
+            m_first_row_shown = n;
+            while (0 < m_first_row_shown && 0 < (avail_space -= m_rows[m_first_row_shown - 1]->Height()))
+                --m_first_row_shown;
+        }
+        if (m_first_row_shown != old_first_row && m_vscroll) {
+            int acc = 0;
+            for (int i = 0; i < m_first_row_shown; ++i)
+                acc += m_rows[i]->Height();
+            m_vscroll->ScrollTo(acc);
+        }
+    }
+}
+
 void ListBox::SetStyle(Uint32 s)
 {
     // if we're going from an unsorted style to a sorted one, do the sorting now
@@ -1119,28 +1162,6 @@ bool ListBox::AcceptsDropType(const string& str) const
     return retval;
 }
 
-int ListBox::LastVisibleRow() const
-{
-    int visible_pixels = ClientSize().y;
-    int acc = 0, i;
-    for (i = m_first_row_shown; i < static_cast<int>(m_rows.size()); ++i) {
-        acc += m_rows[i]->Height();
-        if (visible_pixels <= acc) break;
-    }
-    if (i >= static_cast<int>(m_rows.size()))
-        i = static_cast<int>(m_rows.size()) - 1;
-    return i;
-}
-
-int ListBox::LastVisibleCol() const
-{
-    int retval = m_first_col_shown;
-    int right_boundary = m_col_widths.empty() ? ClientSize().x : m_col_widths[m_first_col_shown];
-    while (right_boundary <= ClientLowerRight().x && retval < static_cast<int>(m_col_widths.size()) - 1)
-        right_boundary += m_col_widths[++retval];
-    return retval;
-}
-
 int ListBox::RowUnderPt(const Pt& pt) const
 {
     int retval;
@@ -1241,21 +1262,7 @@ int ListBox::Insert(const shared_ptr<Row>& row, int at, bool dropped)
 
 void ListBox::BringCaretIntoView()
 {
-    int old_first_row = m_first_row_shown;
-    if (m_caret >= 0 && m_caret < m_first_row_shown) {
-        m_first_row_shown = m_caret;
-    } else if (m_caret > LastVisibleRow()) { // find the row that preceeds the caret by about ClientSize().y pixels, and make it the first row shown
-        int avail_space = ClientSize().y - m_rows[m_caret]->Height();
-        m_first_row_shown = m_caret;
-        while (m_first_row_shown > 0 && (avail_space -= m_rows[m_first_row_shown - 1]->Height()) > 0)
-            --m_first_row_shown;
-    }
-    if (m_first_row_shown != old_first_row && m_vscroll) {
-        int acc = 0;
-        for (int i = 0; i < m_first_row_shown; ++i)
-            acc += m_rows[i]->Height();
-        m_vscroll->ScrollTo(acc);
-    }
+    BringRowIntoView(m_caret);
 }
 
 Scroll* ListBox::NewVScroll(bool horz_scroll)

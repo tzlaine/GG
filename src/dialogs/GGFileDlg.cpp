@@ -375,8 +375,14 @@ void FileDlg::Init(const string& directory)
     AttachChild(m_files_label);
     AttachChild(m_file_types_label);
 
-    if (directory != "")
+    if (directory != "") {
+        if (!boost::filesystem::exists(boost::filesystem::initial_path() / directory)) {
+            throw InitialDirectoryDoesNotExistException("FileDlg::Init() : Initial directory \"" + 
+                                                        (boost::filesystem::initial_path() / directory).native_directory_string() + 
+                                                        "\" does not exist.");
+        }
         SetWorkingDirectory(boost::filesystem::initial_path() / directory);
+    }
 
     UpdateDirectoryText();
     PopulateFilters();

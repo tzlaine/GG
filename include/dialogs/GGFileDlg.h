@@ -51,12 +51,15 @@ class Font;
 class GG_API FileDlg : public Wnd
 {
 public:
+    GGEXCEPTION(InitialDirectoryDoesNotExistException);   ///< exception class \see GG::GGEXCEPTION
+
     /** \name Structors */ //@{
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, 
         if desired (such as when "Save As" is called in an app, and there is a current filename).  If \a directory is "", 
         the initial directory is the WorkingDirectory(), otherwise the directory given is taken to be relative to 
         boost::filesystem::initial_path().  \a save indicates whether this is a save or load dialog; \a multi indicates whether 
-        multiple file selections are allowed.*/
+        multiple file selections are allowed.  \throw GG::InitialDirectoryDoesNotExistException Will throw 
+        GG::InitialDirectoryDoesNotExistException when \a directory is invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const shared_ptr<Font>& font, Clr color, 
 	    Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
@@ -64,7 +67,8 @@ public:
         if desired (such as when "Save As" is called in an app, and there is a current filename).  If \a directory is "", 
         the initial directory is the WorkingDirectory(), otherwise the directory given is taken to be relative to 
         boost::filesystem::initial_path().  \a save indicates whether this is a save or load dialog; \a multi indicates whether 
-        multiple file selections are allowed.*/
+        multiple file selections are allowed.  \throw GG::InitialDirectoryDoesNotExistException Will throw 
+        GG::InitialDirectoryDoesNotExistException when \a directory is invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const string& font_filename, int pts, Clr color, 
 	    Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
@@ -79,7 +83,9 @@ public:
         "*.txt"). Only the '*' character is supported as a wildcard.  More than one wildcard expression can be specified in 
         a filter; if so, they must be separated by a comma and exactly one space (", ").  Each filter is considered OR-ed 
         together with the others, so passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  
-        Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.*/
+        Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.  
+        \throw GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory 
+        is invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
 	    const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
@@ -94,7 +100,9 @@ public:
         "*.txt"). Only the '*' character is supported as a wildcard.  More than one wildcard expression can be specified in 
         a filter; if so, they must be separated by a comma and exactly one space (", ").  Each filter is considered OR-ed 
         together with the others, so passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  
-        Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.*/
+        Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.  
+        \throw GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory is 
+        invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
 	    const string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 

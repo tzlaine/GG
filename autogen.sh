@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "** Creating configure and friends"
 set -x
-aclocal -I m4
+aclocal -I m4 -I /usr/local/share/aclocal -I /usr/share/aclocal
 autoconf
 libtoolize
 autoheader

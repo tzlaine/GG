@@ -67,7 +67,11 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+AC_LIBTOOL_DLOPEN
+AC_LIBLTDL_CONVENIENCE
 AC_PROG_LIBTOOL
+AC_SUBST(INCLTDL)
+AC_SUBST(LIBLTDL)
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -383,3 +387,5 @@ if test x$DO_ALLEGRO_WARNING = xnohack; then
 *** function.])
 fi
 AC_MSG_NOTICE([Now, do a 'make' followed by an 'make install'])
+
+AC_CONFIG_SUBDIRS(libltdl)

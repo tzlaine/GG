@@ -1,6 +1,6 @@
 EXTRA_DIST = m4 lgpl.txt doc
-ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = include src
+ACLOCAL_AMFLAGS = -I m4 -I /usr/share/aclocal -I /usr/local/share/aclocal
+SUBDIRS = libltdl include src
 
 pkgconfigdir = $(libdir)/pkgconfig
 

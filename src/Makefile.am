@@ -18,6 +18,7 @@ GGFont.cpp					\
 GGListBox.cpp					\
 GGMenu.cpp					\
 GGMultiEdit.cpp					\
+GGPluginInterface.cpp				\
 GGPtRect.cpp					\
 GGScroll.cpp					\
 GGSlider.cpp					\

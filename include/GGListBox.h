@@ -33,11 +33,10 @@
 #endif
 
 namespace GG {
-    class Font;
-    class ListBox;
-    class Scroll;
-    class SubTexture;
-}
+
+class Font;
+class Scroll;
+class SubTexture;
 
 
 /** ListBox provides a flexible control that can contain rows and columns of other controls, even other ListBoxes.
@@ -334,6 +333,8 @@ private:
    
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
 };
+
+} // namespace GG
 
 #endif // _GGListBox_h_
 

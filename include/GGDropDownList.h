@@ -37,8 +37,6 @@
 #endif
 
 namespace GG {
-    class DropDownList;
-}
 
 /** displays a single choice, and allows the user to select items from a pop-up list.  DropDownList is based upon 
     GG::ListBox, but has significant restrictions over the functionality of GG::ListBox.  Specifically, all list items
@@ -143,6 +141,8 @@ private:
    
     mutable SelChangedSignalType m_sel_changed_sig;
 };
+
+} // namespace GG
 
 #endif // _GGDropDownList_h_
 

@@ -100,6 +100,11 @@ Rect::Rect(const XMLElement& elem)
     lr = Pt(elem.Child("lr").Child(0));
 }
 
+bool Rect::Contains(const Pt& pt) const 
+{
+    return (ul <= pt && pt < lr);
+}
+
 XMLElement Rect::XMLEncode() const
 {
     XMLElement retval("GG::Rect");

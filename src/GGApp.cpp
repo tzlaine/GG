@@ -463,6 +463,11 @@ void App::AddWndGenerator(const string& name, Wnd* (*fn)(const XMLElement&))
     s_impl->wnd_factory.AddGenerator(name, fn);
 }
 
+void App::RemoveWndGenerator(const string& name)
+{
+    s_impl->wnd_factory.RemoveGenerator(name);
+}
+
 log4cpp::Category& App::Logger()
 {
     return s_impl->log_category;

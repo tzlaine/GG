@@ -66,6 +66,9 @@ public:
     /** \name Mutators */ //@{
     /** adds (or overrides) a new generator that can generate subclass objects described by \a name */
     void AddGenerator(const std::string& name, Generator gen) {m_generators[name] = gen;}
+
+    /** removes the generator that can generate subclass objects described by \a name, if one exists */
+    void RemoveGenerator(const std::string& name) {m_generators.erase(name);}
     //@}
 
 private:

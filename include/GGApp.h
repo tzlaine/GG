@@ -196,6 +196,7 @@ public:
     shared_ptr<Texture> GetTexture(const string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                FreeTexture(const string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
     void                AddWndGenerator(const string& name, Wnd* (*fn)(const XMLElement&)); ///< adds or overrides a Wnd-subclass generator associated with \a name
+    void                RemoveWndGenerator(const string& name); ///< removes the Wnd-subclass generator associated with \a name
     log4cpp::Category&  Logger();
     //@}
 

@@ -474,6 +474,21 @@ App* App::GetApp()
     return s_app;
 }
 
+void App::RenderWindow(Wnd* wnd)
+{
+    if (wnd->Render() == true) {
+        if (wnd->ClipChildren())
+            wnd->BeginClipping();
+        for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
+            if ((*it)->Visible()) {
+                RenderWindow(*it);
+            }
+        }
+        if (wnd->ClipChildren())
+            wnd->EndClipping();
+    }
+}
+
 void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
     Wnd*&       prev_wnd_under_cursor = s_impl->prev_wnd_under_cursor;
@@ -679,21 +694,6 @@ void App::Render()
             RenderWindow(*it);
     }
     Exit2DMode();
-}
-
-void App::RenderWindow(Wnd* wnd)
-{
-    if (wnd->Render() == true) {
-        if (wnd->ClipChildren())
-            wnd->BeginClipping();
-        for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
-            if ((*it)->Visible()) {
-                RenderWindow(*it);
-            }
-        }
-        if (wnd->ClipChildren())
-            wnd->EndClipping();
-    }
 }
 
 Wnd* App::ModalWindow() const

@@ -196,8 +196,9 @@ public:
     log4cpp::Category&  Logger();
     //@}
 
-    static App*  GetApp();  ///< allows any GG code access to app framework by calling App::GetApp()
-   
+    static App*  GetApp();                ///< allows any GG code access to app framework by calling App::GetApp()
+    static void  RenderWindow(Wnd* wnd);  ///< renders a window and (conditionally) all its descendents
+    
 protected:
     /** \name Structors */ //@{
     App(const string& app_name); ///< protected ctor, called by derived classes
@@ -216,7 +217,6 @@ protected:
 
 private:
     virtual void   Run() = 0;                    // initializes app state, then executes main event handler/render loop (PollAndRender())
-    void           RenderWindow(Wnd* wnd);       // renders a window and (optionally) all its descendents
     Wnd*           ModalWindow() const;          // returns the currently modal window, if any
 
     static App*                    s_app;

@@ -1268,7 +1268,7 @@ void ListBox::RenderSubRow(const Row* subrow, int left, int top, int last_col)
             }
 
             (*subrow)[i]->MoveTo(Pt(x, y) - ClientUpperLeft());
-            (*subrow)[i]->Render();
+            App::RenderWindow((*subrow)[i]);
         }
     }
 }

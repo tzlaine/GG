@@ -575,9 +575,9 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
 
     int x = 0, y = 0, max_x = 0;
     while (!range_vec.empty()) {
-        int high = range_vec.back();
+        unsigned int high = range_vec.back();
         range_vec.pop_back();
-        int low = range_vec.back();
+        unsigned int low = range_vec.back();
         range_vec.pop_back();
 
         // copy glyph images
@@ -701,7 +701,7 @@ int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState*
     }
     if (render_state && render_state->draw_underline) {
         double x1 = x;
-	double y1 = y + m_height + m_descent - m_underline_offset;
+        double y1 = y + m_height + m_descent - m_underline_offset;
         double x2 = x1 + glyph.advance;
         double y2 = y1 + m_underline_height;
         glDisable(GL_TEXTURE_2D);

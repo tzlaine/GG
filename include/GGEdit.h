@@ -105,7 +105,7 @@ protected:
     int                              FirstCharShown() const  {return m_first_char_shown;}///< returns the index of the first character visible in the Edit
     const string&                    PreviousText() const    {return m_previous_text;}   ///< returns the text that was in the edit at the time fo the last focus gain
     const vector<Font::LineData>&    LineData() const        {return m_line_data;}       ///< returns the Font-generated breakdown of lines in the text
-    const shared_ptr<Font>&          Font() const            {return m_font;}            ///< returns the font used in the Edit
+    const shared_ptr<Font>&          GetFont() const         {return m_font;}            ///< returns the font used in the Edit
 
     static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame
 

@@ -38,6 +38,10 @@
 # define GG_API
 #endif
 
+#ifndef _GGEnum_h_
+#include "GGEnum.h"
+#endif
+
 #include <boost/lexical_cast.hpp>
 
 #include <fstream>       

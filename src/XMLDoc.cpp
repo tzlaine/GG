@@ -98,6 +98,32 @@ chset_t Sch("\x20\x9\xD\xA");
 ////////////////////////////////////////////////
 // GG::XMLElement
 ////////////////////////////////////////////////
+XMLElement::XMLElement(const string& t, bool r) :
+    m_tag(t),
+    m_root(r)
+{
+}
+
+const string& XMLElement::Tag() const
+{
+    return m_tag;
+}
+
+const string& XMLElement::Text() const
+{
+    return m_text;
+}
+
+int XMLElement::NumChildren() const
+{
+    return m_children.size();
+}
+
+int XMLElement::NumAttributes() const
+{
+    return m_attributes.size();
+}
+
 bool XMLElement::ContainsChild(const string& child) const
 {
     return ChildIndex(child) != -1;
@@ -120,6 +146,11 @@ int XMLElement::ChildIndex(const string& child) const
     return retval;
 }
 
+const XMLElement& XMLElement::Child(unsigned int idx) const
+{
+    return m_children.at(idx);
+}
+
 const XMLElement& XMLElement::Child(const string& child) const
 {
     unsigned int i = 0;
@@ -127,7 +158,19 @@ const XMLElement& XMLElement::Child(const string& child) const
         if (m_children[i].m_tag == child)
             break;
     }
+
+    if (i == m_children.size())
+        throw std::range_error("XMLElement::Child(): This XMLElement contains no child \"" + child + "\".");
+
     return m_children[i];
+}
+
+const XMLElement& XMLElement::LastChild() const
+{
+    if (m_children.empty())
+        throw std::range_error("XMLElement::LastChild(): LastChild() was called on an empty XMLElement.");
+
+    return m_children.back();
 }
 
 const string& XMLElement::Attribute(const string& attrib) const
@@ -174,6 +217,31 @@ ostream& XMLElement::WriteElement(ostream& os, int indent/* = 0*/, bool whitespa
     return os;
 }
 
+XMLElement::const_child_iterator XMLElement::child_begin() const
+{
+    return m_children.begin();
+}
+
+XMLElement::const_child_iterator XMLElement::child_end() const
+{
+    return m_children.end();
+}
+
+XMLElement::const_attr_iterator XMLElement::attr_begin() const
+{
+    return m_attributes.begin();
+}
+
+XMLElement::const_attr_iterator XMLElement::attr_end() const
+{
+    return m_attributes.end();
+}
+
+XMLElement& XMLElement::Child(unsigned int idx)
+{
+    return m_children.at(idx);
+}
+
 XMLElement& XMLElement::Child(const string& child)
 {
     unsigned int i = 0;
@@ -181,7 +249,105 @@ XMLElement& XMLElement::Child(const string& child)
         if (m_children[i].m_tag == child)
             break;
     }
+
+    if (i == m_children.size())
+        throw std::range_error("XMLElement::Child(): This XMLElement contains no child \"" + child + "\".");
+
     return m_children[i];
+}
+
+XMLElement& XMLElement::LastChild()
+{
+    if (m_children.empty())
+        throw std::range_error("XMLElement::LastChild(): LastChild() was called on an empty XMLElement.");
+
+    return m_children.back();
+}
+
+void XMLElement::SetAttribute(const string& attrib, const string& val)
+{
+    m_attributes[attrib] = val;
+}
+
+void XMLElement::SetTag(const string& tag)
+{
+    m_tag = tag;
+}
+
+void XMLElement::SetText(const string& text)
+{
+    m_text = text;
+}
+
+void XMLElement::RemoveAttribute(const string& attrib)
+{
+    m_attributes.erase(attrib);
+}
+
+void XMLElement::RemoveAttributes()
+{
+    m_attributes.clear();
+}
+
+void XMLElement::AppendChild(const XMLElement& e)
+{
+    m_children.push_back(e);
+}
+
+void XMLElement::AppendChild(const string& child)
+{
+    m_children.push_back(XMLElement(child));
+}
+
+void XMLElement::AddChildBefore(const XMLElement& e, unsigned int idx)
+{
+    if (m_children.size() <= idx)
+        throw std::range_error("XMLElement::AddChildBefore(): Index " + lexical_cast<string>(idx) + " is out of range.");
+
+    m_children.insert(m_children.begin() + idx, e);
+}
+
+void XMLElement::RemoveChild(unsigned int idx)
+{
+    if (m_children.size() <= idx)
+        throw std::range_error("XMLElement::RemoveChild(): Index " + lexical_cast<string>(idx) + " is out of range.");
+
+    m_children.erase(m_children.begin() + idx);
+}
+
+void XMLElement::RemoveChild(const string& child)
+{
+    int idx = ChildIndex(child);
+
+    if (idx == -1)
+        throw std::range_error("XMLElement::RemoveChild(): This XMLElement contains no child \"" + child + "\".");
+
+    m_children.erase(m_children.begin() + idx);
+}
+
+void XMLElement::RemoveChildren()
+{
+    m_children.clear();
+}
+
+XMLElement::child_iterator XMLElement::child_begin()
+{
+    return m_children.begin();
+}
+
+XMLElement::child_iterator XMLElement::child_end()
+{
+    return m_children.end();
+}
+
+XMLElement::attr_iterator XMLElement::attr_begin()
+{
+    return m_attributes.begin();
+}
+
+XMLElement::attr_iterator XMLElement::attr_end()
+{
+    return m_attributes.end();
 }
 
 
@@ -194,6 +360,16 @@ vector<XMLElement*>  XMLDoc::s_element_stack;
 XMLDoc::RuleDefiner  XMLDoc::s_rule_definer;
 XMLElement           XMLDoc::s_temp_elem;
 string               XMLDoc::s_temp_attr_name;
+
+XMLDoc::XMLDoc(const string& root_tag/*= "GG::XMLDoc"*/) :
+    root_node(XMLElement(root_tag, true))
+{
+}
+
+XMLDoc::XMLDoc(const istream& is) :
+    root_node(XMLElement())
+{
+}
 
 ostream& XMLDoc::WriteDoc(ostream& os, bool whitespace/* = true*/) const
 {
@@ -552,7 +728,19 @@ XMLElementValidator& XMLElementValidator::Child(const string& child)
         if (m_children[i].m_tag == child)
             break;
     }
+
+    if (i == m_children.size())
+        throw std::range_error("XMLElementValidator::Child(): This XMLElementValidator contains no child \"" + child + "\".");
+
     return m_children[i];
+}
+
+XMLElementValidator& XMLElementValidator::LastChild()
+{
+    if (m_children.empty())
+        throw std::range_error("XMLElementValidator::LastChild(): LastChild() was called on an empty XMLElementValidator.");
+
+    return m_children.back();
 }
 
 void XMLElementValidator::SetAttribute(const string& attrib, ValidatorBase* value_validator)

@@ -139,25 +139,25 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    const string& Tag() const {return m_tag;}                ///< returns the tag-name of the XMLElement
-    const string& Text() const {return m_text;}              ///< returns the text of this XMLElement
-    int NumChildren() const {return m_children.size();}      ///< returns the number of children in the XMLElement
-    int NumAttributes() const {return m_attributes.size();}  ///< returns the number of attributes in the XMLElement
-    bool ContainsChild(const string& child) const;           ///< returns true if the element contains a child called \a name
-    bool ContainsAttribute(const string& attrib) const;      ///< returns true if the element contains an attribute called \a name
-    int  ChildIndex(const string& child) const;              ///< returns the index of the child called \a name, or -1 if not found
+    const string& Tag() const;                          ///< returns the tag-name of the XMLElement
+    const string& Text() const;                         ///< returns the text of this XMLElement
+    int NumChildren() const;                            ///< returns the number of children in the XMLElement
+    int NumAttributes() const;                          ///< returns the number of attributes in the XMLElement
+    bool ContainsChild(const string& child) const;      ///< returns true if the element contains a child called \a name
+    bool ContainsAttribute(const string& attrib) const; ///< returns true if the element contains an attribute called \a name
+    int  ChildIndex(const string& child) const;         ///< returns the index of the child called \a name, or -1 if not found
 
-    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-        range-checked; be sure there are at least idx+1 elements before calling. */
-    const XMLElement& Child(unsigned int idx) const {return m_children[idx];}
+    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
+         An out of range index will cause an exception. */
+    const XMLElement& Child(unsigned int idx) const;
 
-    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
-        checked; be sure there is such a child before calling. */   
+    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \throw std::out_of_range
+         An exception is thrown if no child named \a child exists. */   
     const XMLElement& Child(const string& child) const;
 
-    /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-        at least one child before calling. */   
-    const XMLElement& LastChild() const {return m_children.back();}
+    /**  returns the last child in child list of the XMLElement.  \throw std::out_of_range Calling this on an empty
+         element will cause an exception. */   
+    const XMLElement& LastChild() const;
 
     /** returns the value of the attribute with name \a key, or "" if no such named attribute is found */
     const string& XMLElement::Attribute(const string& attrib) const;
@@ -165,71 +165,71 @@ public:
     /** writes the XMLElement to an output stream; returns the stream */
     ostream& WriteElement(ostream& os, int indent = 0, bool whitespace = true) const;
 
-    const_child_iterator child_begin() const {return m_children.begin();}   ///< const_iterator to the first child in the XMLElement
-    const_child_iterator child_end() const   {return m_children.end();}     ///< const_iterator to the last + 1 child in the XMLElement
-    const_attr_iterator  attr_begin() const  {return m_attributes.begin();} ///< const_iterator to the first attribute in the XMLElement
-    const_attr_iterator  attr_end() const    {return m_attributes.end();}   ///< const_iterator to the last + 1 attribute in the XMLElement
+    const_child_iterator child_begin() const; ///< const_iterator to the first child in the XMLElement
+    const_child_iterator child_end() const;   ///< const_iterator to the last + 1 child in the XMLElement
+    const_attr_iterator  attr_begin() const;  ///< const_iterator to the first attribute in the XMLElement
+    const_attr_iterator  attr_end() const;    ///< const_iterator to the last + 1 attribute in the XMLElement
     //@}
 
     /** \name Mutators */ //@{
-    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-        range-checked; be sure there are at least idx+1 elements before calling. */
-    XMLElement& Child(unsigned int idx) {return m_children[idx];}
+    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
+         An out of range index will cause an exception. */
+    XMLElement& Child(unsigned int idx);
 
-    /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \note This function is not 
-        checked; be sure there is such a child before calling. */   
+    /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \throw std::out_of_range
+         An exception is thrown if no child named \a child exists. */   
     XMLElement& Child(const string& child);
 
-    /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-        at least one child before calling. */   
-    XMLElement& LastChild() {return m_children.back();}
+    /**  returns the last child in child list of the XMLElement.  \throw std::out_of_range Calling this on an empty
+         element will cause an exception. */   
+    XMLElement& LastChild();
 
-    /** sets an attribute \a attrib, whose value is \a val in the XMLElement.  No two attributes can have the same name. */
-    void SetAttribute(const string& attrib, const string& val) {m_attributes[attrib] = val;} 
+    /** sets (and possibly overwrites) an attribute \a attrib, with the value \a val. */
+    void SetAttribute(const string& attrib, const string& val);
 
     /** sets the tag to \a tag */
-    void SetTag(const string& tag) {m_tag = tag;} 
+    void SetTag(const string& tag);
 
     /** sets the text to \a text */
-    void SetText(const string& text) {m_text = text;} 
+    void SetText(const string& text);
 
     /** removes attribute \a attrib from the XMLElement*/
-    void RemoveAttribute(const string& attrib) {m_attributes.erase(attrib);}
+    void RemoveAttribute(const string& attrib);
 
     /** removes all attributes from the XMLElement*/
-    void RemoveAttributes() {m_attributes.clear();}
+    void RemoveAttributes();
 
     /** adds child XMLElement \a e to the end of the child list of the XMLElement */
-    void AppendChild(const XMLElement& e) {m_children.push_back(e);}
+    void AppendChild(const XMLElement& e);
 
     /** creates an empty XMLElement with tag-name \a child, and adds it to the end of the child list of the XMLElement */
-    void AppendChild(const string& child) {m_children.push_back(XMLElement(child));}
+    void AppendChild(const string& child);
 
-    /** adds a child \a e in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-   range-checked; be sure there are at least idx+1 elements before calling. */
-    void AddChildBefore(const XMLElement& e, unsigned int idx) {m_children.insert(m_children.begin() + idx, e);}
+    /** adds a child \a e in the \a idx-th position of the child list of the XMLElement. \throw std::out_of_range
+         An out of range index will cause an exception. */
+    void AddChildBefore(const XMLElement& e, unsigned int idx);
 
-    /** removes the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-        range-checked; be sure there are at least idx+1 elements before calling. */
-    void RemoveChild(unsigned int idx) {m_children.erase(m_children.begin() + idx);}
+    /** removes the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
+         An out of range index will cause an exception. */
+    void RemoveChild(unsigned int idx);
 
-    /** removes the child called \a shild from the XMLElement.  \note This function is not value-checked; be sure 
-        the desired element exists before calling. */
-    void RemoveChild(const string& child) {m_children.erase(m_children.begin() + ChildIndex(child));}
+    /** removes the child called \a shild from the XMLElement.  \throw std::out_of_range An exception is thrown if no
+        child named \a child exists. */
+    void RemoveChild(const string& child);
 
     /** removes all children from the XMLElement*/
-    void RemoveChildren() {m_children.clear();}
+    void RemoveChildren();
 
-    child_iterator child_begin()  {return m_children.begin();}     ///< iterator to the first child in the XMLElement
-    child_iterator child_end()    {return m_children.end();}       ///< iterator to the last + 1 child in the XMLElement
-    attr_iterator  attr_begin()   {return m_attributes.begin();}   ///< iterator to the first attribute in the XMLElement
-    attr_iterator  attr_end()     {return m_attributes.end();}     ///< iterator to the last + 1 attribute in the XMLElement
+    child_iterator child_begin();     ///< iterator to the first child in the XMLElement
+    child_iterator child_end();       ///< iterator to the last + 1 child in the XMLElement
+    attr_iterator  attr_begin();   ///< iterator to the first attribute in the XMLElement
+    attr_iterator  attr_end();     ///< iterator to the last + 1 attribute in the XMLElement
     //@}
 
 private:
     /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
         in an XMLDoc document*/
-    XMLElement(const string& t, bool r) : m_tag(t), m_root(r) {}
+    XMLElement(const string& t, bool r);
 
     string               m_tag;        ///< the tag-name of the XMLElement
     string               m_text;       ///< the text of this XMLElement
@@ -249,10 +249,10 @@ class GG_API XMLDoc
 public:
     /** \name Structors */ //@{
     /** ctor that constructs an empty XML document with a root node with tag-name \a root_tag */
-    XMLDoc(const string& root_tag = "GG::XMLDoc") : root_node(XMLElement(root_tag, true)) {}
+    XMLDoc(const string& root_tag = "GG::XMLDoc");
 
     /** ctor that constructs an XML document from an input stream \a is */
-    XMLDoc(const istream& is) : root_node(XMLElement()) {}
+    XMLDoc(const istream& is);
     //@}
 
     /** \name Accessors */ //@{
@@ -309,15 +309,18 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    /**  returns the child in the child list of the XMLElementValidator that has the tag-name \a child.  \note This function is not 
-        checked; be sure there is such a child before calling. */   
+    /**  returns the child in the child list of the XMLElementValidator that has the tag-name \a child.  \throw std::out_of_range
+         An exception is thrown if no child named \a child exists. */   
     XMLElementValidator& Child(const string& child);
 
-    /**  returns the last child in the child list of the XMLElementValidator.  \note This function is not 
-        checked; be sure there is such a child before calling. */
-    XMLElementValidator& LastChild() {return m_children.back();}
+    /**  returns the last child in the child list of the XMLElementValidator.  \throw std::out_of_range Calling this on an empty
+         element will cause an exception. */
+    XMLElementValidator& LastChild();
 
+    /** sets (and possibly overwrites) an attribute \a attrib, with the value \a val. */
     void SetAttribute(const string& attrib, ValidatorBase* value_validator);
+
+    /** adds child XMLElementValidator \a ev to the end of the child list of the XMLElementValidator */
     void AppendChild(const XMLElementValidator& ev);
     //@}
 

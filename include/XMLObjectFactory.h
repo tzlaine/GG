@@ -43,38 +43,65 @@ class XMLElement;
     you can instantiate XMLObjectFactory with the type of the hierarchy's base class, and provide functions that can each 
     construct one specific class in the hierarchy.  By providing a string that identifies each class, and creating XML objects
     with that string as a tag, you can ensure a method for creating the correct polymorphic subclass object at run-time. */
-template <class T> class XMLObjectFactory
+template <class T>
+class XMLObjectFactory
 {
 public:
     typedef T* (*Generator)(const XMLElement&); ///< this defines the function signature for XMLObjectFactory object generators
 
     /** \name Structors */ //@{
-    XMLObjectFactory() {} ///< ctor
+    XMLObjectFactory(); ///< ctor
     //@}
 
     /** \name Accessors */ //@{
-    T* GenerateObject(const XMLElement& elem) const ///< returns a heap-allocated subclass object of the appropriate type
-    {
-        T* retval = 0;
-        typename std::map<std::string, Generator>::const_iterator it = m_generators.find(elem.Tag());
-        if (it != m_generators.end())
-            retval = it->second(elem);
-        return retval;
-    }
+    /** returns a heap-allocated subclass object of the appropriate type \throw std::runtime_error If \a elem has an unknown tag, an exception is thrown. */
+    T* GenerateObject(const XMLElement& elem) const;
     //@}
    
     /** \name Mutators */ //@{
-    /** adds (or overrides) a new generator that can generate subclass objects described by \a name */
-    void AddGenerator(const std::string& name, Generator gen) {m_generators[name] = gen;}
+    /** adds a new generator (or replaces one that already exists) that can generate subclass objects described by \a name */
+    void AddGenerator(const std::string& name, Generator gen);
 
     /** removes the generator that can generate subclass objects described by \a name, if one exists */
-    void RemoveGenerator(const std::string& name) {m_generators.erase(name);}
+    void RemoveGenerator(const std::string& name);
     //@}
 
 private:
+    typedef typename std::map<std::string, Generator> GeneratorMap;
+
     /** mapping from strings to functions that can create the type of object that corresponds to the string */
-    std::map<std::string, Generator> m_generators;
+    GeneratorMap m_generators;
 };
+
+
+// template implementations
+template <class T>
+XMLObjectFactory<T>::XMLObjectFactory()
+{
+}
+
+template <class T>
+T* XMLObjectFactory<T>::GenerateObject(const XMLElement& elem) const ///< returns a heap-allocated subclass object of the appropriate type
+{
+    typename GeneratorMap::const_iterator it = m_generators.find(elem.Tag());
+
+    if (it == m_generators.end())
+        throw std::runtime_error("XMLObjectFactory::GenerateObject(): No generator exists for XMLElements with the tag \"" + elem.Tag() + "\".");
+
+    return it->second(elem);
+}
+
+template <class T>
+void XMLObjectFactory<T>::AddGenerator(const std::string& name, Generator gen)
+{
+    m_generators[name] = gen;
+}
+
+template <class T>
+void XMLObjectFactory<T>::RemoveGenerator(const std::string& name)
+{
+    m_generators.erase(name);
+}
 
 } // namespace GG
 

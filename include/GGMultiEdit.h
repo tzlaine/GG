@@ -35,20 +35,26 @@ namespace GG {
 
 class Scroll;
 
-/** This is a multi-line text input control.
-    If the TERMINAL_STYLE flag is in use, rows that exceed the history limit will be removed from the beginning of the 
-    text; otherwise, they are removed from the end.
-    If none of the no-scroll style flags are in use, the scrolls are created and destroyed automatically, as needed.
-    If either TF_LINEWRAP of TF_WORDBREAK are in use, NO_HSCROLL must be in use as well.
-    MultiEdit supports text formatting tags.  See GG::Font for details.
-    TF_VCENTER is not an allowed style; if it is specified, TF_TOP will be used in its place. */
+/** This is a multi-line text input and display control.
+    MultiEdit is designed to be used as a basic text-input control for text longer than one line, or to display large
+    amounts of formatted or unformatted text.  MultiEdit supports text formatting tags.  See GG::Font for details.  
+    Several style flags are available.  If the TERMINAL_STYLE flag is in use, rows that exceed the history limit will 
+    be removed from the beginning of the text; otherwise, they are removed from the end.  If either TF_LINEWRAP of 
+    TF_WORDBREAK are in use, NO_HSCROLL must be in use as well.  TF_VCENTER is not an allowed style; if it is specified, 
+    TF_TOP will be used in its place.  The justification introduced by text formatting tags is very different from that 
+    introduced by the TF_* styles.  The former justifies lines within the space taken up by the text.  The latter justifies 
+    the entire block of text within the client area of the control.  So if you specify TF_LEFT and use <right> formatting 
+    tags on the entire text, the text will appear to be right-justified, but you will probably only see the extreme left 
+    of the text area without scrolling.  If none of the no-scroll style flags are in use, the scrolls are created and 
+    destroyed automatically, as needed.  If non-standard Scrolls are desired, subclasses can create their own Scroll-derived 
+    scrolls by overriding NewVScroll() and NewHScroll().*/
 class MultiEdit : public Edit
 {
 public:
     using Wnd::SizeMove;
 
-    /** the styles of display and interaction for a MultiEdit.  The TF_WORDBREAK and TF_LINEWRAP GG::TextFormat flags also 
-        apply.*/
+    /** the styles of display and interaction for a MultiEdit.  The TF_WORDBREAK, TF_LINEWRAP, TF_LEFT, TF_CENTER, and 
+        TF_RIGHT GG::TextFormat flags also apply.*/
     enum Styles {READ_ONLY =       1 << 10, ///< the control is not user-interactive, only used to display text.  Text can still be programmatically altered and selected.
                  TERMINAL_STYLE =  1 << 11, ///< the text in the control is displayed so that the bottom is visible, instead of the top
                  INTEGRAL_HEIGHT = 1 << 12, ///< the height of the control will always be a multiple of the height of one row (fractions rounded down)
@@ -89,35 +95,44 @@ public:
     virtual void   SelectAll();
     virtual void   SetText(const string& str);
 
-    /** sets the maximum number of rows of text that the control will keep around */
+    /** sets the maximum number of rows of text that the control will keep */
     void           SetMaxLinesOfHistory(int max) {m_max_lines_history = max; SetText(m_text);}
     //@}
 
 protected:
-    static const int SCROLL_WIDTH;
+    /** \name Accessors */ //@{
+    bool    MultiSelected() const;      ///< returns true if >= 1 characters are selected
+    int     RightMargin() const;        ///< returns the width of the scrollbar on the right side of the control (0 if none)
+    int     BottomMargin() const;       ///< returns the width of the scrollbar at the bottom of the control (0 if none)
+    pair<int, int> CharAt(const Pt& pt) const; ///< returns row and character index of \a pt, or (0, 0) if \a pt falls outside the text.  \a pt is in client-space coordinates
+    int     StringIndexOf(int row, int char_idx) const; ///< returns index into WindowText() of position \a char_idx in row \a row.  Not range-checked.
+    int     RowStartX(int row) const;       ///< returns the the x-coordinate of the beginning of row \a row, in cleint-space coordinates.  Not range-checked.
+    int     CharXOffset(int row, int idx) const; ///< returns the distance in pixels from the start of row \a row to the character at index idx.  Not range-checked.
+    int     RowAt(int y) const;             ///< returns the line that falls under y coordinate \a y.  \a y must be in client-space coordinates.
+    int     CharAt(int row, int x) const;   ///< returns the index of the character in row \a row that falls under x coordinate \a x.  \a x must be in client-space coordinates.
+    int     FirstVisibleRow() const;        ///< returns the index of the first visible row, or 0 if none
+    int     LastVisibleRow() const;         ///< returns the index of the last visible row, or 0 if none
+    int     FirstFullyVisibleRow() const;   ///< returns the index of the first fully visible row, or 0 if none
+    int     LastFullyVisibleRow() const;    ///< returns the index of the last fully visible row, or 0 if none
+    int     FirstVisibleChar(int row) const;///< returns the index of the first visible character of row \a row, or 0 if none
+    int     LastVisibleChar(int row) const; ///< returns the index of the last visible character of row \a row, or 0 if none
+    pair<int, int> HighCursorPos() const;   ///< returns the greater of m_cursor_begin and m_cursor_end
+    pair<int, int> LowCursorPos() const;    ///< returns the lesser of m_cursor_begin and m_cursor_end
+    //@}
+
+    /** \name Mutators */ //@{
+    virtual Scroll* NewVScroll(bool horz_scroll);   ///< creates and returns a new vertical scroll, allowing subclasses to use Scroll-derived scrolls
+    virtual Scroll* NewHScroll(bool vert_scroll);   ///< creates and returns a new horizontal scroll, allowing subclasses to use Scroll-derived scrolls
+    //@}
+
+    static const int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls
 
 private:
     void    Init();
     void    ValidateStyle();
-    bool    MultiSelected() const;      ///< returns true if >= 1 characters are selected
-    void    ClearSelected();            ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
-    void    AdjustView();               ///< makes sure the caret ends up in view after an arbitrary move
-    void    AdjustScrolls();            ///< sets the sizes of the scroll-space and the sizes of the screen-space of the scrolls
-    int     RightMargin() const;
-    int     BottomMargin() const;
-    pair<int, int> CharAt(const Pt& pt) const; ///< returns row and character index of \a posn; returns (-1, -1) if \a pt does not fall on the text
-    int     StringIndexOf(int row, int char_idx) const; ///< returns row and character index of position \a char_idx in row \a row
-    int     ScreenXPosOfChar(int row, int idx) const; ///< returns the screen x-coordinate of the left side of the character at index idx in m_text
-    int     RowAt(int y) const;             ///< returns the line that falls under y coordinate \a y (in client coordinates)
-    int     CharAt(int row, int x) const;   ///< returns the index of the character in row \a row that falls under x coordinate \a x (in client coordinates)
-    int     FirstVisibleRow() const;        ///< returns the index of the first visible row (may return an out-of-bounds result)
-    int     LastVisibleRow() const;         ///< returns the index of the last visible row (may return an out-of-bounds result)
-    int     FirstFullyVisibleRow() const;   ///< returns the index of the first fully visible row (may return an out-of-bounds result)
-    int     LastFullyVisibleRow() const;    ///< returns the index of the last fully visible row (may return an out-of-bounds result)
-    int     FirstVisibleChar(int row) const;///< returns the index of the first visible character of row \a row (may return an out-of-bounds result)
-    int     LastVisibleChar(int row) const; ///< returns the index of the last visible character of row \a row (may return an out-of-bounds result)
-    pair<int, int> HighCursorPos() const;
-    pair<int, int> LowCursorPos() const;
+    void    ClearSelected();   ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
+    void    AdjustView();      ///< makes sure the caret ends up in view after an arbitrary move or SetText()
+    void    AdjustScrolls();   ///< sets the sizes of the scroll-space and the screen-space of the scrolls
     void    VScrolled(int upper, int lower, int range_upper, int range_lower);
     void    HScrolled(int upper, int lower, int range_upper, int range_lower);
 
@@ -126,6 +141,8 @@ private:
     pair<int, int> m_cursor_begin;      ///< the row and character index of the first character in the hilited selection
     pair<int, int> m_cursor_end;        ///< the row and character index + 1 of the last character in the hilited selection
                                         // if m_cursor_begin == m_cursor_end, the caret is draw at m_cursor_end
+
+    Pt          m_contents_sz;          ///< the size of the entire text block in the control (not just the visible part)
 
     int         m_first_col_shown;      ///< the position (counted from the left side of the text) of the first pixel shown
     int         m_first_row_shown;      ///< the position (counted from the top of the text) of the first pixel shown

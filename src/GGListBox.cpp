@@ -58,9 +58,11 @@ namespace {
 // GG::ListBox::Row::Cell
 ////////////////////////////////////////////////
 ListBox::Row::Cell::Cell() :
-    control(0),
     col_alignment(LB_CENTER),
     width(5)
+{}
+
+ListBox::Row::Cell::~Cell()
 {}
 
 ListBox::Row::Cell::Cell(const XMLElement& elem)
@@ -68,7 +70,7 @@ ListBox::Row::Cell::Cell(const XMLElement& elem)
     if (elem.Tag() != "GG::ListBox::Row::Cell")
         throw std::invalid_argument("Attempted to construct a GG::ListBox::Row::Cell from an XMLElement that had a tag other than \"GG::ListBox::Row::Cell\"");
 
-    control = dynamic_cast<Control*>(GG::App::GetApp()->GenerateWnd(elem.Child("control")));
+    control.reset(dynamic_cast<Control*>(GG::App::GetApp()->GenerateWnd(elem.Child("control"))));
     col_alignment = lexical_cast<ListBoxStyle>(elem.Child("col_alignment").Text());
     width = lexical_cast<int>(elem.Child("width").Text());
 }
@@ -130,16 +132,12 @@ ListBox::Row::Row(const XMLElement& elem)
 
     curr_elem = &elem.Child("sub_rows");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-        sub_rows.push_back(new Row(curr_elem->Child(i)));
+        sub_rows.push_back(shared_ptr<Row>(new Row(curr_elem->Child(i))));
     }
 }
 
 ListBox::Row::~Row()
-{
-    // note that this does not clean up the contents of the row (the Controls); these will be freed as children of the ListBox
-    for (unsigned int i = 0; i < sub_rows.size(); ++i)
-        delete sub_rows[i];
-}
+{}
 
 int ListBox::Row::Height() const
 {
@@ -159,12 +157,12 @@ size_t ListBox::Row::size() const
     return cells.size();
 }
 
-Control* ListBox::Row::operator[](size_t n) const
+const shared_ptr<Control>& ListBox::Row::operator[](size_t n) const
 {
     return cells[n].control;
 }
 
-Control* ListBox::Row::at(size_t n) const
+const shared_ptr<Control>& ListBox::Row::at(size_t n) const
 {
     return cells.at(n).control;
 }
@@ -197,7 +195,7 @@ XMLElement ListBox::Row::XMLEncode() const
     retval.AppendChild(XMLElement("margin", lexical_cast<string>(margin)));
 
     temp = XMLElement("sub_rows");
-    for (std::vector<Row*>::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
+    for (std::vector<shared_ptr<Row> >::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
         temp.AppendChild((*it)->XMLEncode());
     }
     retval.AppendChild(temp);
@@ -224,7 +222,7 @@ XMLElementValidator ListBox::Row::XMLValidator() const
     retval.AppendChild(XMLElementValidator("margin", new Validator<int>()));
 
     temp = XMLElementValidator("sub_rows");
-    for (std::vector<Row*>::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
+    for (std::vector<shared_ptr<Row> >::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
         temp.AppendChild((*it)->XMLValidator());
     }
     retval.AppendChild(temp);
@@ -240,6 +238,11 @@ bool ListBox::Row::Render()
 }
 
 void ListBox::Row::push_back(Control* c)
+{
+    push_back(shared_ptr<Control>(c));
+}
+
+void ListBox::Row::push_back(const shared_ptr<Control>& c)
 {
     cells.resize(cells.size() + 1);
     cells.back().control = c;
@@ -353,7 +356,6 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_style(0),
-    m_header_row(0),
     m_row_height(22),
     m_keep_col_widths(false),
     m_clip_cells(false),
@@ -361,7 +363,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
 {
     SetColor(color);
     ValidateStyle();
-    m_header_row = new Row;
+    m_header_row.reset(new Row);
 }
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_widths,
@@ -384,7 +386,6 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_w
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_style(0),
-    m_header_row(0),
     m_row_height(22),
     m_keep_col_widths(true),
     m_clip_cells(false),
@@ -393,7 +394,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_w
     SetColor(color);
     ValidateStyle();
     m_col_alignments.resize(m_col_widths.size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
-    m_header_row = new Row;
+    m_header_row.reset(new Row);
 }
 
 ListBox::ListBox(const XMLElement& elem) :
@@ -407,8 +408,7 @@ ListBox::ListBox(const XMLElement& elem) :
     m_row_drag_offset(Pt(-1, -1)),
     m_last_row_browsed(-1),
     m_suppress_delete_signal(false),
-    m_style(0),
-    m_header_row(0)
+    m_style(0)
 {
     if (elem.Tag() != "GG::ListBox")
         throw std::invalid_argument("Attempted to construct a GG::ListBox from an XMLElement that had a tag other than \"GG::ListBox\"");
@@ -430,11 +430,11 @@ ListBox::ListBox(const XMLElement& elem) :
     const XMLElement* curr_elem = &elem.Child("m_header_row");
     if (curr_elem->NumChildren()) {
         if (Row* row = dynamic_cast<Row*>(App::GetApp()->GenerateWnd(curr_elem->Child(0))))
-            m_header_row = row;
+            m_header_row.reset(row);
         else
             throw std::runtime_error("ListBox::ListBox : Attempted to use a non-Row object as the header row.");
     } else {
-        m_header_row = new Row;
+        m_header_row.reset(new Row);
     }
 
     m_row_height = lexical_cast<int>(elem.Child("m_row_height").Text());
@@ -452,7 +452,7 @@ ListBox::ListBox(const XMLElement& elem) :
     }
 
     for (unsigned int i = 0; i < m_rows.size(); ++i)
-        AttachRowChildren(m_rows[i].get());
+        AttachRowChildren(m_rows[i]);
 
     AttachRowChildren(m_header_row);
 
@@ -527,7 +527,7 @@ bool ListBox::Render()
 
     // draw column headings
     if (m_header_row->size() && static_cast<int>(m_header_row->size()) == NumCols())
-        RenderRow(m_header_row, cl_ul.x, cl_ul.y - m_header_row->Height(), m_first_col_shown, last_visible_col);
+        RenderRow(m_header_row.get(), cl_ul.x, cl_ul.y - m_header_row->Height(), m_first_col_shown, last_visible_col);
 
     // draw data in cells
     top = cl_ul.y;
@@ -581,7 +581,7 @@ void ListBox::LButtonUp(const Pt& pt, Uint32 keys)
                 try {
                     drop_target_wnd->Insert(dragged_row, ins_row, true);
                 } catch (const DontAcceptDropException& e) {
-                    AttachRowChildren(dragged_row.get());
+                    AttachRowChildren(dragged_row);
                     delete_row = false;
                 }
                 if (delete_row) {
@@ -607,7 +607,7 @@ void ListBox::LButtonUp(const Pt& pt, Uint32 keys)
                     try {
                         drop_target_wnd->Insert(it->second, ins_row, true);
                     } catch (const DontAcceptDropException& e) {
-                        AttachRowChildren(it->second.get());
+                        AttachRowChildren(it->second);
                         sels.erase(it->first);
                     }
                 }
@@ -645,7 +645,7 @@ void ListBox::LClick(const Pt& pt, Uint32 keys)
                 if (!(m_style & LB_NOSEL))
                     ClickAtRow(sel_row, keys);
                 m_lclick_row = sel_row;
-                m_lclicked_sig(sel_row, m_rows[sel_row].get(), pt);
+                m_lclicked_sig(sel_row, m_rows[sel_row], pt);
             } else if (m_row_drag_offset != Pt(-1, -1) && (m_style & LB_DRAGDROP) && (m_style & LB_NOSORT) && 
                        m_selections.size() <= 1) {
                 // allow arbitrary rearrangement of NOSORT lists that have dragging and dropping enabled (NOSEL and SINGLESEL only)
@@ -655,7 +655,7 @@ void ListBox::LClick(const Pt& pt, Uint32 keys)
                 try {
                     Insert(dragged_row, sel_row, true);
                 } catch (const DontAcceptDropException& e) {
-                    AttachRowChildren(dragged_row.get());
+                    AttachRowChildren(dragged_row);
                     delete_row = false;
                 }
                 if (delete_row) {
@@ -684,7 +684,7 @@ void ListBox::LDoubleClick(const Pt& pt, Uint32 keys)
 {
     int row = RowUnderPt(pt);
     if (!Disabled() && row >= 0 && row == m_lclick_row && InClient(pt)) {
-        m_double_clicked_sig(row, m_rows[row].get());
+        m_double_clicked_sig(row, m_rows[row]);
         m_old_sel_row = -1;
         m_row_drag_offset = Pt(-1, -1);
         if (0 <= m_old_sel_row && m_old_sel_row < static_cast<int>(m_rows.size()))
@@ -709,7 +709,7 @@ void ListBox::RClick(const Pt& pt, Uint32 keys)
     int row = RowUnderPt(pt);
     if (!Disabled() && row >= 0 && row == m_old_rdown_row && InClient(pt)) {
         m_rclick_row = row;
-        m_rclicked_sig(row, m_rows[row].get(), pt);
+        m_rclicked_sig(row, m_rows[row], pt);
     }
     m_old_rdown_row = -1;
 }
@@ -855,7 +855,7 @@ void ListBox::Delete(int idx)
             }
         }
 
-	    DetachRowChildren(m_rows[idx].get());
+	    DetachRowChildren(m_rows[idx]);
 	    m_rows.erase(m_rows.begin() + idx);
 
 	    if (idx <= m_caret) // move caret up, if needed
@@ -946,7 +946,11 @@ void ListBox::SetStyle(Uint32 s)
 
 void ListBox::SetColHeaders(Row* r)
 {
-    delete m_header_row;
+    SetColHeaders(shared_ptr<Row>(r));
+}
+
+void ListBox::SetColHeaders(const shared_ptr<Row>& r)
+{
     m_header_row = r;
     // if this column header is being added to an empty listbox, the listbox takes on some of the
     // attributes of the header, similarly to the insertion of a row into an empty listbox; see Insert()
@@ -1190,8 +1194,8 @@ int ListBox::Insert(const shared_ptr<Row>& row, int at, bool dropped)
     }
 
     // add controls as children and adjust row heights and number of row item cells, if not already set
-    AttachRowChildren(m_rows[retval].get());
-    NormalizeRow(m_rows[retval].get());
+    AttachRowChildren(m_rows[retval]);
+    NormalizeRow(m_rows[retval]);
 
     // "bump" the selections on lower rows down one row
     if (retval != -1) {
@@ -1211,7 +1215,7 @@ int ListBox::Insert(const shared_ptr<Row>& row, int at, bool dropped)
     if (dropped) {
         // ensure that no one has a problem with this drop in user space (if so, they should throw)
         try {
-            m_dropped_sig(retval, row.get());
+            m_dropped_sig(retval, row);
         } catch (const DontAcceptDropException& e) {
             // if there is a problem, silently undo the drop
             m_suppress_delete_signal = true;
@@ -1221,7 +1225,7 @@ int ListBox::Insert(const shared_ptr<Row>& row, int at, bool dropped)
             throw; // re-throw so that LButtonUp() of the source ListBox can react as well
         }
     } else {
-        m_inserted_sig(retval, row.get());
+        m_inserted_sig(retval, row);
     }
 
     return retval;
@@ -1272,7 +1276,7 @@ void ListBox::RenderRow(const Row* row, int left, int top, int first_col, int la
 {
     // draw this row's controls on the -1 iteration, then each of its subrows on iterations 0 through sub_rows.size() - 1
     for (int j = -1; j < static_cast<int>(row->sub_rows.size()); ++j) {
-        const Row* subrow_to_use = (j == -1 ? row : row->sub_rows[j]); // use main (non sub_row) data for the -1 iteration
+        const Row* subrow_to_use = (j == -1 ? row : row->sub_rows[j].get()); // use main (non sub_row) data for the -1 iteration
         RenderSubRow(subrow_to_use, left, top, first_col, last_col);
         top += subrow_to_use->height;
     }
@@ -1440,7 +1444,7 @@ int ListBox::ClickAtRow(int row, Uint32 keys)
     return 1;
 }
 
-void ListBox::NormalizeRow(Row* row)
+void ListBox::NormalizeRow(const shared_ptr<Row>& row)
 {
     row->resize(m_col_widths.size());
     row->SetColWidths(m_col_widths);
@@ -1454,22 +1458,24 @@ void ListBox::NormalizeRow(Row* row)
     }
 }
 
-void ListBox::AttachRowChildren(Row* row)
+void ListBox::AttachRowChildren(const shared_ptr<Row>& row)
 {
     for (unsigned int i = 0; i < row->size(); ++i) {
-        AttachChild((*row)[i]);
+        AttachChild((*row)[i].get());
     }    
     for (unsigned int i = 0; i < row->sub_rows.size(); ++i) {
         AttachRowChildren(row->sub_rows[i]);
     }
 }
 
-void ListBox::DetachRowChildren(Row* row)
+void ListBox::DetachRowChildren(const shared_ptr<Row>& row)
 {
-    for (unsigned int i = 0; i < row->size(); ++i)
-        DetachChild((*row)[i]);
-    for (unsigned int i = 0; i < row->sub_rows.size(); ++i)
+    for (unsigned int i = 0; i < row->size(); ++i) {
+        DetachChild((*row)[i].get());
+    }
+    for (unsigned int i = 0; i < row->sub_rows.size(); ++i) {
         DetachRowChildren(row->sub_rows[i]);
+    }
 }
 
 void ListBox::RenderSubRow(const Row* subrow, int left, int top, int first_col, int last_col)
@@ -1478,7 +1484,7 @@ void ListBox::RenderSubRow(const Row* subrow, int left, int top, int first_col, 
     int bottom = top + subrow->height;
     // draw each control in turn
     for (int i = first_col; i <= last_col; ++i) {
-        Control* control = (*subrow)[i];
+        const shared_ptr<Control>& control = (*subrow)[i];
         if (control) {
             int col_width = subrow->cells[i].width;
             left = right;
@@ -1506,7 +1512,7 @@ void ListBox::RenderSubRow(const Row* subrow, int left, int top, int first_col, 
             }
 
             control->MoveTo(Pt(x, y) - (control->Parent() ? control->Parent()->ClientUpperLeft() : Pt(0, 0)));
-            App::RenderWindow(control);
+            App::RenderWindow(control.get());
         }
     }
 }

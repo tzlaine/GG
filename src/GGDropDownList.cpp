@@ -63,7 +63,7 @@ namespace {
                 m_done = true;
             }
         }
-        void LBLeftClickSlot(int, const ListBox::Row*, const Pt&)
+        void LBLeftClickSlot(int, const shared_ptr<ListBox::Row>&, const Pt&)
         {
             m_done = true;
         }

@@ -75,9 +75,9 @@ public:
     using Wnd::SizeMove;
 
     /** This is a single item in a listbox.
-        A Row is primarily a container for Controls.  Each "cell" in a Row is a Control* which points to an 
+        A Row is primarily a container for Controls.  Each Cell in a Row is a Control* which points to an 
         object of a subclass of Control.  Each such Control can be connected to arbitrary functionality using signals and 
-        slots.  Each Row contains a "data type" string, which indicates the user's definition
+        slots.  Each Row contains a data type string, which indicates the user's definition
         of what type of data the Row represents (e.g. "Annual Rainfall", "ship_def", etc.).  During dragging and dropping, the 
         data type associated with a Row indicates to potential drop targets what type of data the Row represents; the target 
         may accept or decline the drop based on the data type.  Indentation is also definable for each Row; such indentation
@@ -92,17 +92,18 @@ public:
     struct GG_API Row : public Wnd
     {
         /** A cell in a GG::ListBox::Row, consisting of a single Control, a column alignment and a width. */
-        struct Cell
+        struct GG_API Cell
         {
             Cell(); ///< default ctor
             Cell(const XMLElement& elem); ///< XML ctor
+            virtual ~Cell();
 
             XMLElement          XMLEncode() const;    ///< constructs an XMLElement from an Cell object
             XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Cell
 
-            Control*     control;
-            ListBoxStyle col_alignment;
-            int          width;
+            shared_ptr<Control> control;
+            ListBoxStyle        col_alignment;
+            int                 width;
         };
 
         /** \name Structors */ //@{
@@ -113,22 +114,23 @@ public:
         //@}
 
         /** \name Accessors */ //@{
-        int                   Height() const;             ///< returns the height of this row, considering height and/or contents of sub_rows
-        virtual const string& SortKey(int column) const;  ///< returns the string by which this row may be sorted
-        size_t                size() const;               ///< returns the number of Controls in this Row
-        Control*              operator[](size_t n) const; ///< returns the Control in the \a nth cell of this Row; not range checked
-        Control*              at(size_t n) const;         ///< returns the Control in the \a nth cell of this Row \throw std::range_error throws when size() <= \a n
-        ListBoxStyle          ColAlignment(int n) const;  ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
-        int                   ColWidth(int n) const;      ///< returns the width of the \a nth cell of this Row; not range checked
+        int                        Height() const;             ///< returns the height of this row, considering height and/or contents of sub_rows
+        virtual const string&      SortKey(int column) const;  ///< returns the string by which this row may be sorted
+        size_t                     size() const;               ///< returns the number of Controls in this Row
+        const shared_ptr<Control>& operator[](size_t n) const; ///< returns the Control in the \a nth cell of this Row; not range checked
+        const shared_ptr<Control>& at(size_t n) const;         ///< returns the Control in the \a nth cell of this Row \throw std::range_error throws when size() <= \a n
+        ListBoxStyle               ColAlignment(int n) const;  ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
+        int                        ColWidth(int n) const;      ///< returns the width of the \a nth cell of this Row; not range checked
 
-        virtual XMLElement          XMLEncode() const;    ///< constructs an XMLElement from an Row object
+        virtual XMLElement          XMLEncode() const;    ///< constructs an XMLElement from a Row object
         virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Row
         //@}
 
         /** \name Mutators */ //@{
         virtual bool   Render();
 
-        void     push_back(Control* c); ///< adds a given Control to the end of the Row
+        void     push_back(Control* c); ///< adds a given Control to the end of the Row; this Control becomes property of the Row and should not be deleted or added to another Row
+        void     push_back(const shared_ptr<Control>&); ///< adds a given Control to the end of the Row; this Control becomes property of the Row and should not be deleted or added to another Row
         void     push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
         void     push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
         void     push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
@@ -144,13 +146,14 @@ public:
         static Control* CreateControl(const string& str, const shared_ptr<Font>& font, Clr color); ///< creates a "shrink-fit" TextControl from text, font, and color parameters
         static Control* CreateControl(const SubTexture& st); ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
 
-        string               data_type;      ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
-        int                  height;         ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
-        ListBoxStyle         row_alignment;  ///< vertical row alignment, one of LB_TOP, LB_VCENTER, or LB_BOTTOM
-        int                  indentation;    ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
-        vector<Cell>         cells;          ///< the Controls on the top level of this Row; .second is horizontal alignment, one of LB_LEFT, LB_CENTER, or LB_RIGHT
-        int                  margin;         ///< the amount of space left between each edge of the cell and its contents, in pixels
-        vector<Row*>         sub_rows;       ///< for making multi-line rows
+        string       data_type;      ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
+        int          height;         ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
+        ListBoxStyle row_alignment;  ///< vertical row alignment, one of LB_TOP, LB_VCENTER, or LB_BOTTOM
+        int          indentation;    ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
+        vector<Cell> cells;          ///< the Controls on the top level of this Row; .second is horizontal alignment, one of LB_LEFT, LB_CENTER, or LB_RIGHT
+        int          margin;         ///< the amount of space left between each edge of the cell and its contents, in pixels
+        vector<shared_ptr<Row> >
+                     sub_rows;       ///< for making multi-line rows
     };
 
     /** thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any 
@@ -158,17 +161,20 @@ public:
     class GG_API DontAcceptDropException : public GGException {};
 
     /** \name Signal Types */ //@{
-    typedef boost::signal<void ()>                         ClearedSignalType;        ///< emitted when the list box is cleared
-    typedef boost::signal<void (const set<int>&)>          SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
-    typedef boost::signal<void (int, const ListBox::Row*)> InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
-    typedef boost::signal<void (int, const ListBox::Row*)> DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
-    typedef boost::signal<void (int, const ListBox::Row*, const Pt&)>
-                                                           LeftClickedSignalType;    ///< emitted when a row in the listbox is clicked; provides the index of the row right-clicked and the Row contents right-clicked
-    typedef boost::signal<void (int, const ListBox::Row*, const Pt&)>
-                                                           RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
-    typedef boost::signal<void (int, const ListBox::Row*)> DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
-    typedef boost::signal<void (int)>                      DeletedSignalType;        ///< emitted when a row in the listbox is deleted; provides the index of the deletion point
-    typedef boost::signal<void (int)>                      BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row
+    typedef boost::signal<void ()>                ClearedSignalType;        ///< emitted when the list box is cleared
+    typedef boost::signal<void (const set<int>&)> SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
+    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&)>
+                                                  InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
+    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&)>
+                                                  DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
+    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&, const Pt&)>
+                                                  LeftClickedSignalType;    ///< emitted when a row in the listbox is clicked; provides the index of the row right-clicked and the Row contents right-clicked
+    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&, const Pt&)>
+                                                  RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
+    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&)>
+                                                  DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
+    typedef boost::signal<void (int)>             DeletedSignalType;        ///< emitted when a row in the listbox is deleted; provides the index of the deletion point
+    typedef boost::signal<void (int)>             BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row
     //@}
 
     /** \name Slot Types */ //@{
@@ -265,7 +271,7 @@ public:
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, then resizes the scrollbars as needed
 
-    int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This ListBox retains ownership of \a row.
+    int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This Row becomes the property of the ListBox and should not be deleted or inserted into any other ListBoxes.
     int            Insert(const shared_ptr<Row>& row,
                           int at = -1);                   ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point
     void           Delete(int idx);                       ///< removes the row at index \a idx from the ListBox
@@ -287,7 +293,8 @@ public:
     /** sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle */
     void           SetStyle(Uint32 s);
 
-    void           SetColHeaders(Row* r);                                   ///< sets the row used as headings for the columns
+    void           SetColHeaders(Row* r);                                   ///< sets the row used as headings for the columns; this Row becomes property of the ListBox and should not be deleted or inserted into any other ListBoxes
+    void           SetColHeaders(const shared_ptr<Row>& r);                 ///< sets the row used as headings for the columns
     void           RemoveColHeaders()         {m_header_row->clear();}      ///< removes any columns headings set
 
     /** sets the default row height \note Each row may have its own height, diferent from the one set by this function. */
@@ -350,9 +357,9 @@ private:
     void           VScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the vertical scroll bar are caught here
     void           HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
     int            ClickAtRow(int row, Uint32 keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys
-    void           NormalizeRow(Row* row); ///< adjusts a Row so that it has the same number of cells as other rows, and each subrow's height is defined
-    void           AttachRowChildren(Row* row); ///< adds all the Controls in \a row (and its subrows) to the child list of the ListBox
-    void           DetachRowChildren(Row* row); ///< removes all the Controls in \a row (and its subrows) from the child list of the ListBox
+    void           NormalizeRow(const shared_ptr<Row>& row); ///< adjusts a Row so that it has the same number of cells as other rows, and each subrow's height is defined
+    void           AttachRowChildren(const shared_ptr<Row>& row); ///< adds all the Controls in \a row (and its subrows) to the child list of the ListBox
+    void           DetachRowChildren(const shared_ptr<Row>& row); ///< removes all the Controls in \a row (and its subrows) from the child list of the ListBox
 
     static void    RenderSubRow(const Row* subrow, int left, int top, int first_col, int last_col); ///< renders a subrow of data
 
@@ -383,7 +390,7 @@ private:
     Clr            m_hilite_color;     ///< color behind selected line items
     Uint32         m_style;            ///< composed of ListBoxStyles enums (see GUIBase.h)
 
-    Row*           m_header_row;       ///< row of header text/graphics
+    shared_ptr<Row>m_header_row;       ///< row of header text/graphics
     int            m_row_height;       ///< default row height
     bool           m_keep_col_widths;  ///< should we keep the column widths, once set?
     bool           m_clip_cells;       ///< if true, the contents of each cell will be clipped to the visible area of that cell (TODO: currently unused)

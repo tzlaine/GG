@@ -97,6 +97,8 @@ public:
     Uint32         RowAlignment(int n) const  {return m_LB->RowAlignment(n);}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an DropDownList object
+
+    SelChangedSignalType& SelChangedSignal() const {return m_sel_changed_sig;}///< returns the selection change signal object for this DropDownList
     //@}
    
     /** \name Mutators */ //@{
@@ -106,7 +108,7 @@ public:
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
-    int            Insert(const Row& row, int at = -1);         ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point
+    int            Insert(Row* row, int at = -1);               ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point
     void           Delete(int idx);                             ///< removes the row at index \a idx from the list
     void           Clear();                                     ///< empties the list
     void           IndentRow(int n, int i) {m_LB->IndentRow(n, i);}///< sets the indentation of the row at index \a n to \a i; not range-checked
@@ -124,9 +126,6 @@ public:
                                               {m_LB->SetColAlignment(n, align);} ///< sets the alignment of column \a n to \a align; not range-checked
     void           SetRowAlignment(int n, Uint32 align) 
                                               {m_LB->SetRowAlignment(n, align);} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
-    void foo();
-
-    SelChangedSignalType& SelChangedSignal()  {return m_sel_changed_sig;}///< returns the selection change signal object for this DropDownList
     //@}
 
 protected:
@@ -138,7 +137,7 @@ private:
     int            m_current_item_idx;  ///< the index of the currently-selected list item (-1 if none is selected)
     ListBox*       m_LB;                ///< the ListBox used to render the selected row and the popup list
    
-    SelChangedSignalType m_sel_changed_sig;
+    mutable SelChangedSignalType m_sel_changed_sig;
 };
 
 } // namespace GG

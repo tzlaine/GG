@@ -141,7 +141,7 @@ int DropDownList::Render()
                   lr.x - ul.x - 2 * BORDER_THICK,
                   lr.y - ul.y - 2 * BORDER_THICK);
 
-        m_LB->RenderRow(*current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->LastVisibleCol());
+        m_LB->RenderRow(current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->LastVisibleCol());
 
         // restore previous scissor-clipping state
         if (disable_scissor)
@@ -214,12 +214,11 @@ void DropDownList::SizeMove(int x1, int y1, int x2, int y2)
     m_LB->MoveTo(x1, y1 + Height());
 }
 
-int DropDownList::Insert(const Row& row, int at/* = -1*/)
+int DropDownList::Insert(Row* row, int at/* = -1*/)
 {
-    Row r(row);
-    r.height = m_LB->RowHeight();
-    r.sub_rows.clear();
-    return m_LB->Insert(r, at);
+    row->height = m_LB->RowHeight();
+    row->sub_rows.clear();
+    return m_LB->Insert(row, at);
 }
 
 void DropDownList::Delete(int idx)

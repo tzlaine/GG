@@ -140,7 +140,7 @@ struct GG::AppImplData
     string       app_name;              // the user-defined name of the apllication
 
     ZList        zlist;                 // object that keeps the GUI windows in the correct depth ordering
-    Wnd*         focus_wnd;             // GUI window that currently has the input focus and its backup
+    Wnd*         focus_wnd;             // GUI window that currently has the input focus
     list<Wnd*>   modal_wnds;            // modal GUI windows (only the one in back is active, simulating a stack but allowing traversal of the list)
 
     bool   button_state[3];             // the up/down states of the three buttons on the mouse are kept here
@@ -624,17 +624,22 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
         switch (event) {
         case LRELEASE:{
-            if (drag_wnds[0] && curr_wnd_under_cursor == drag_wnds[0]) { // if the release is over the place where the button-down event occurred
+            Wnd* click_wnd = drag_wnds[0];
+            s_impl->drag_drop_wnds.clear();
+            s_impl->button_state[0] = false;
+            drag_wnds[0] = 0;       // if the mouse button is released, stop the tracking the drag window
+            wnd_region = WR_NONE;   // and clear this, just in case
+            if (click_wnd && curr_wnd_under_cursor == click_wnd) { // if the release is over the place where the button-down event occurred
                 // if this is second l-click over a window that just received an l-click within
                 // the time limit -- it's a double-click, not a click
-                if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == drag_wnds[0] &&
+                if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == click_wnd &&
                     s_impl->double_click_button == 0) {
-                    drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDoubleClick, pos, key_mods));
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LDoubleClick, pos, key_mods));
                     s_impl->double_click_wnd = 0;
                     s_impl->double_click_start_time = -1;
                     s_impl->double_click_time = -1;
                 } else {
-                    drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LClick, pos, key_mods));
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LClick, pos, key_mods));
                     if (s_impl->double_click_time > 0) {
                         s_impl->double_click_wnd = 0;
                         s_impl->double_click_start_time = -1;
@@ -642,20 +647,16 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     } else {
                         s_impl->double_click_start_time = Ticks();
                         s_impl->double_click_time = 0;
-                        s_impl->double_click_wnd = drag_wnds[0];
+                        s_impl->double_click_wnd = click_wnd;
                         s_impl->double_click_button = 0;
                     }
                 }
             } else {
-                if (drag_wnds[0])
-                    drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LButtonUp, pos, key_mods));
+                if (click_wnd)
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LButtonUp, pos, key_mods));
                 s_impl->double_click_wnd = 0;
                 s_impl->double_click_time = -1;
             }
-            s_impl->drag_drop_wnds.clear();
-            s_impl->button_state[0] = false;
-            drag_wnds[0] = 0;       // if the mouse button is released, stop the tracking the drag window
-            wnd_region = WR_NONE;   // and clear this, just in case
             break;}
         case MRELEASE:{
             s_impl->button_state[1] = false;
@@ -663,22 +664,25 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             s_impl->double_click_time = -1;
             break;}
         case RRELEASE:{
-            if (drag_wnds[2] && curr_wnd_under_cursor == drag_wnds[2]) { // if the release is over the place where the button-down event occurred
+            Wnd* click_wnd = drag_wnds[2];
+            s_impl->button_state[2] = false;
+            drag_wnds[2] = 0;
+            if (click_wnd && curr_wnd_under_cursor == click_wnd) { // if the release is over the place where the button-down event occurred
                 // if this is second r-click over a window that just received an r-click within
                 // the time limit -- it's a double-click, not a click
-                if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == drag_wnds[2] &&
+                if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == click_wnd &&
                     s_impl->double_click_button == 2) {
-                    drag_wnds[2]->HandleEvent(Wnd::Event(Wnd::Event::RDoubleClick, pos, key_mods));
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::RDoubleClick, pos, key_mods));
                     s_impl->double_click_wnd = 0;
                     s_impl->double_click_time = -1;
                 } else {
-                    drag_wnds[2]->HandleEvent(Wnd::Event(Wnd::Event::RClick, pos, key_mods));
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::RClick, pos, key_mods));
                     if (s_impl->double_click_time > 0) {
                         s_impl->double_click_wnd = 0;
                         s_impl->double_click_time = -1;
                     } else {
                         s_impl->double_click_time = 0;
-                        s_impl->double_click_wnd = drag_wnds[2];
+                        s_impl->double_click_wnd = click_wnd;
                         s_impl->double_click_button = 2;
                     }
                 }
@@ -686,8 +690,6 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 s_impl->double_click_wnd = 0;
                 s_impl->double_click_time = -1;
             }
-            s_impl->button_state[2] = false;
-            drag_wnds[2] = 0;
             break;}
         default:
             break;

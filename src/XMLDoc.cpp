@@ -96,7 +96,7 @@ ostream& XMLElement::WriteElement(ostream& os, int indent/* = 0*/, bool whitespa
    } else {
       os << ">";
       if (!m_text.empty())
-         os << '"' << m_text << '"';
+         os << "\"<![CDATA[" << m_text << "]]>\"";
       if (whitespace && !m_children.empty())
          os << "\n";
       for (unsigned int i = 0; i < m_children.size(); ++i)
@@ -178,7 +178,7 @@ void XMLDoc::EndElement(void* user_data, const char* name)
 
 void XMLDoc::CharacterData(void *user_data, const char *s, int len)
 {
-   if (!found_last_quote) {
+   if (s_element_stack.back()->Tag() == "ELMTEXT") {
       string str;
       for (int i = 0; i < len; ++i, ++s) {
          char c = *s;

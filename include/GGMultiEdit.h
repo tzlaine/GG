@@ -101,7 +101,7 @@ public:
 
 protected:
     /** \name Accessors */ //@{
-    bool    MultiSelected() const;      ///< returns true if >= 1 characters are selected
+    virtual bool MultiSelected() const;      ///< returns true if >= 1 characters are selected
     int     RightMargin() const;        ///< returns the width of the scrollbar on the right side of the control (0 if none)
     int     BottomMargin() const;       ///< returns the width of the scrollbar at the bottom of the control (0 if none)
     pair<int, int> CharAt(const Pt& pt) const; ///< returns row and character index of \a pt, or (0, 0) if \a pt falls outside the text.  \a pt is in client-space coordinates

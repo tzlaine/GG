@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /* GG is a GUI for SDL and OpenGL.
    Copyright (C) 2003 T. Zachary Laine
 
@@ -146,6 +147,8 @@ public:
     bool             Checked() const                {return m_checked;}    ///< returns true if button is checked
     Clr              InteriorColor() const          {return m_int_color;}  ///< returns the interior color of the box, circle, or other enclosing shape
     StateButtonStyle Style() const                  {return m_style;}      ///< returns the visual style of the button \see StateButtonStyle
+
+    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
     //@}
    
     /** \name Mutators */ //@{
@@ -159,8 +162,6 @@ public:
     void             SetStyle(StateButtonStyle bs)  {m_style = bs;}        ///< sets the visual style of the button \see StateButtonStyle
 
     CheckedSignalType& CheckedSignal()              {return m_checked_sig;} ///< returns the checked signal object for this StaticButton
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
     //@}
 
 protected:

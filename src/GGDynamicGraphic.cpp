@@ -113,6 +113,79 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
     m_last_frame_idx = m_frames - 1;
 }
 
+DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const Texture* texture,
+                               Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
+    Control(x, y, w, h, flags),
+    m_margin(margin),
+    m_frame_width(frame_width),
+    m_frame_height(frame_height),
+    m_FPS(DEFAULT_FPS),
+    m_playing(true),
+    m_looping(loop),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(style)
+{
+    ValidateStyle();
+    SetColor(CLR_WHITE);
+    AddFrames(texture, frames);
+    m_last_frame_idx = m_frames - 1;
+}
+
+DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const shared_ptr<Texture>& texture,
+                               Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
+    Control(x, y, w, h, flags),
+    m_margin(margin),
+    m_frame_width(frame_width),
+    m_frame_height(frame_height),
+    m_FPS(DEFAULT_FPS),
+    m_playing(true),
+    m_looping(loop),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(style)
+{
+    ValidateStyle();
+    SetColor(CLR_WHITE);
+    AddFrames(texture, frames);
+    m_last_frame_idx = m_frames - 1;
+}
+
+DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, 
+                               const vector<shared_ptr<Texture> >& textures, Uint32 style/* = 0*/, int frames/* = -1*/, 
+                               Uint32 flags/* = 0*/) :
+    Control(x, y, w, h, flags),
+    m_margin(margin),
+    m_frame_width(frame_width),
+    m_frame_height(frame_height),
+    m_FPS(DEFAULT_FPS),
+    m_playing(true),
+    m_looping(loop),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(style)
+{
+    ValidateStyle();
+    SetColor(CLR_WHITE);
+    AddFrames(textures, frames);
+    m_last_frame_idx = m_frames - 1;
+}
+
 DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
     Control(elem.Child("GG::Control")),
     m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Text())),
@@ -245,6 +318,8 @@ bool DynamicGraphic::Render()
         if (m_playing) {
             if (m_first_frame_time == -1) {
                 m_last_frame_time = m_first_frame_time = App::GetApp()->Ticks();
+                if (0.0 != m_FPS) // needed if a start index was set
+                    m_first_frame_time -= 1000.0 / m_FPS * m_curr_frame;
             } else {
                 int old_frame = m_curr_frame;
                 int curr_time = App::GetApp()->Ticks();
@@ -458,13 +533,19 @@ void DynamicGraphic::SetFrameIndex(int idx)
             m_playing = true;
         } else { // use O(n) linear search if necessary
             m_curr_frame = idx;
-            for (unsigned int i = 0; i < m_textures.size(); ++i) {
-                if (0 < idx - m_textures[i].frames) {
-                    idx -= m_textures[i].frames;
-                } else {
-                    m_curr_texture = i;
-                    m_curr_subtexture = idx;
-                    break;
+            if (idx == 0) {
+                m_curr_texture = 0;
+                m_curr_subtexture = 0;
+            } else {
+                m_curr_texture = 0;
+                for (unsigned int i = 0; i < m_textures.size(); ++i) {
+                    if (0 <= idx - m_textures[i].frames) {
+                        idx -= m_textures[i].frames;
+                        m_curr_texture++;
+                    } else {
+                        m_curr_subtexture = idx;
+                        break;
+                    }
                 }
             }
         }
@@ -517,8 +598,8 @@ void DynamicGraphic::SetStyle(Uint32 style)
 
 int DynamicGraphic::FramesInTexture(const Texture* t) const
 {
-    int cols = t->DefaultWidth() / (Width() + m_margin);
-    int rows = t->DefaultHeight() / (Height() + m_margin);
+    int cols = t->DefaultWidth() / (m_frame_width + m_margin);
+    int rows = t->DefaultHeight() / (m_frame_height + m_margin);
     return cols * rows;
 }
 
@@ -550,4 +631,3 @@ void DynamicGraphic::ValidateStyle()
 }
 
 } // namespace GG
-

@@ -48,8 +48,8 @@ class Texture;
     Texture creation and editing easier.  The width of this margin must be supplied to DynamicGraphic's ctor, and is
     constant once set.  The margin applies to the top and left of \a each image, so the margins at the right and 
     bottom edges of the texture are optional.  The multiple-Texture ctor assumes that all Textures but the last are 
-    packed with frames; if you need to specify multiple Textures with dead space, construct using single-Texture ctor 
-    and use AddFrames().  Note that DynamicGraphic doesn't have "animated" in its name; it can replay 
+    packed with frames; if you need to specify multiple Textures with dead space, construct using the single-Texture 
+    ctor and use AddFrames().  Note that DynamicGraphic doesn't have "animated" in its name; it can replay 
     images at any speed, and moreover it can be used as a sort of slideshow, and doesn't necessarily need to be 
     animated at all. \note This is a situation in which the "last+1" idiom used throughout GG does not apply; when 
     you set the end frame index to N, the last frame to be shown will be N, not N - 1. Also, while this control does 
@@ -89,6 +89,23 @@ public:
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
         Textures but the last are assumed to have the maximum number of frames based on their sizes.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
+
+    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
+        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> 
+        delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.  This ctor 
+        allows specification of a frame size different from the size of the DynamicGraphic's size. */
+    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const Texture* texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0); 
+
+    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
+        indicates all possible area is considered to contain valid frames.  This ctor allows specification of a 
+        frame size different from the size of the DynamicGraphic's size. */
+    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const shared_ptr<Texture>& texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
+
+    /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1 
+        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
+        Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor 
+        allows specification of a frame size different from the size of the DynamicGraphic's size. */
+    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const vector<shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
 
     DynamicGraphic(const XMLElement& elem); ///< ctor that constructs an DynamicGraphic object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a DynamicGraphic object
     //@}

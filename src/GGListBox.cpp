@@ -41,18 +41,9 @@ class RowSorter // used to sort rows by a certain column (which may contain some
 public:
     RowSorter(int col, bool less) : sort_col(col), return_less(less) {}
 
-    bool operator()(const ListBox::Row& lr, const ListBox::Row& rr)
+    bool operator()(const ListBox::Row* lr, const ListBox::Row* rr)
     {
-        bool retval = false;
-        if (lr[sort_col] && rr[sort_col]) {
-            retval = return_less ? lr[sort_col]->WindowText() < rr[sort_col]->WindowText() :
-                lr[sort_col]->WindowText() > rr[sort_col]->WindowText();
-        } else if (lr[sort_col] && !rr[sort_col]) {
-            retval = return_less ? false : true;
-        } else if (!lr[sort_col] && rr[sort_col]) {
-            retval = return_less ? true : false;
-        }
-        return retval;
+        return return_less ? lr->SortKey(sort_col) < rr->SortKey(sort_col) : lr->SortKey(sort_col) > rr->SortKey(sort_col);
     }
 
 private:
@@ -91,8 +82,15 @@ ListBox::Row::Row(const XMLElement& elem)
 
     curr_elem = &elem.Child("sub_rows");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-        sub_rows.push_back(Row(curr_elem->Child(i)));
+        sub_rows.push_back(new Row(curr_elem->Child(i)));
     }
+}
+
+ListBox::Row::~Row()
+{
+    // note that this does not clean up the contents of the row (the Controls); these will be freed as children of the ListBox
+    for (unsigned int i = 0; i < sub_rows.size(); ++i)
+        delete sub_rows[i];
 }
 
 int ListBox::Row::Height() const
@@ -100,8 +98,13 @@ int ListBox::Row::Height() const
     int retval = height;
     if (!sub_rows.empty())
         for (unsigned int i = 0; i < sub_rows.size(); ++i)
-            retval += sub_rows[i].height;
+            retval += sub_rows[i]->height;
     return retval;
+}
+
+const string& ListBox::Row::SortKey(int column) const
+{
+    return at(column)->WindowText();
 }
 
 XMLElement ListBox::Row::XMLEncode() const
@@ -135,8 +138,8 @@ XMLElement ListBox::Row::XMLEncode() const
     retval.AppendChild(temp);
 
     temp = XMLElement("sub_rows");
-    for (std::vector<Row>::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
-        temp.AppendChild(it->XMLEncode());
+    for (std::vector<Row*>::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
+        temp.AppendChild((*it)->XMLEncode());
     }
     retval.AppendChild(temp);
 
@@ -185,12 +188,14 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
         m_lclick_row(-1),
         m_rclick_row(-1),
         m_row_drag_offset(Pt(-1, -1)),
+        m_last_row_browsed(-1),
         m_first_row_shown(0),
         m_first_col_shown(0),
         m_cell_margin(2),
         m_int_color(interior),
         m_hilite_color(CLR_SHADOW),
         m_style(0),
+        m_header_row(0),
         m_row_height(22),
         m_keep_col_widths(false),
         m_clip_cells(false),
@@ -198,6 +203,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
 {
     SetColor(color);
     ValidateStyle();
+    m_header_row = new Row;
 }
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_widths,
@@ -211,6 +217,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_w
         m_lclick_row(-1),
         m_rclick_row(-1),
         m_row_drag_offset(Pt(-1, -1)),
+        m_last_row_browsed(-1),
         m_first_row_shown(0),
         m_first_col_shown(0),
         m_col_widths(col_widths),
@@ -218,6 +225,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_w
         m_int_color(interior),
         m_hilite_color(CLR_SHADOW),
         m_style(0),
+        m_header_row(0),
         m_row_height(22),
         m_keep_col_widths(false),
         m_clip_cells(false),
@@ -225,6 +233,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_w
 {
     SetColor(color);
     ValidateStyle();
+    m_header_row = new Row;
 }
 
 ListBox::ListBox(const XMLElement& elem) :
@@ -235,7 +244,9 @@ ListBox::ListBox(const XMLElement& elem) :
         m_old_rdown_row(-1),
         m_lclick_row(-1),
         m_rclick_row(-1),
-        m_row_drag_offset(Pt(-1, -1))
+        m_row_drag_offset(Pt(-1, -1)),
+        m_last_row_browsed(-1),
+        m_header_row(0)
 {
     if (elem.Tag() != "GG::ListBox")
         throw std::invalid_argument("Attempted to construct a GG::ListBox from an XMLElement that had a tag other than \"GG::ListBox\"");
@@ -250,7 +261,10 @@ ListBox::ListBox(const XMLElement& elem) :
 
     curr_elem = &elem.Child("m_rows");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-        m_rows.push_back(Row(curr_elem->Child(i)));
+        if (Row* row = dynamic_cast<Row*>(App::GetApp()->GenerateWnd(curr_elem->Child(i))))
+            m_rows.push_back(row);
+        else
+            throw std::runtime_error("ListBox::ListBox : Attempted to use a non-Row object as a ListBox row.");
     }
 
     curr_elem = &elem.Child("m_first_row_shown");
@@ -282,7 +296,14 @@ ListBox::ListBox(const XMLElement& elem) :
     m_style = lexical_cast<Uint32>(curr_elem->Attribute("value"));
 
     curr_elem = &elem.Child("m_header_row");
-    m_header_row = Row(curr_elem->Child("GG::ListBox::Row"));
+    if (curr_elem->NumChildren()) {
+        if (Row* row = dynamic_cast<Row*>(App::GetApp()->GenerateWnd(curr_elem->Child(0))))
+            m_header_row = row;
+        else
+            throw std::runtime_error("ListBox::ListBox : Attempted to use a non-Row object as the header row.");
+    } else {
+        m_header_row = new Row;
+    }
 
     curr_elem = &elem.Child("m_row_height");
     m_row_height = lexical_cast<int>(curr_elem->Attribute("value"));
@@ -309,9 +330,16 @@ ListBox::ListBox(const XMLElement& elem) :
     AdjustScrolls();
 }
 
+ListBox::~ListBox()
+{
+    // note that this does not clean up the contents of the row (the Controls); these will be freed as children of the ListBox
+    for (unsigned int i = 0; i < m_rows.size(); ++i)
+        delete m_rows[i];
+}
+
 Pt ListBox::ClientUpperLeft() const
 {
-    return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0));
+    return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->size() ? m_header_row->Height() : 0));
 }
 
 Pt ListBox::ClientLowerRight() const
@@ -356,9 +384,9 @@ int ListBox::Render()
                 top = (prev_sel == curr_sel - 1) ? bottom : 0;
                 if (!top) {
                     for (int i = m_first_row_shown; i < curr_sel; ++i)
-                        top += m_rows[i].Height();
+                        top += m_rows[i]->Height();
                 }
-                bottom = top + m_rows[curr_sel].Height();
+                bottom = top + m_rows[curr_sel]->Height();
                 if (bottom > cl_lr.y)
                     bottom = cl_lr.y;
                 FlatRectangle(cl_ul.x, cl_ul.y + top, cl_lr.x, cl_ul.y + bottom, hilite_color_to_use, CLR_ZERO, 0);
@@ -371,20 +399,20 @@ int ListBox::Render()
             (App::GetApp()->FocusWnd() == this || App::GetApp()->FocusWnd() == m_vscroll || App::GetApp()->FocusWnd() == m_hscroll)) {
         int top = cl_ul.y;
         for (int i = m_first_row_shown; i < m_caret; ++i)
-            top += m_rows[i].Height();
-        bottom = top + m_rows[m_caret].Height();
+            top += m_rows[i]->Height();
+        bottom = top + m_rows[m_caret]->Height();
         FlatRectangle(cl_ul.x, top, cl_lr.x, bottom, CLR_ZERO, CLR_SHADOW, 2);
     }
 
     // draw column headings
-    if (m_header_row.size() && static_cast<int>(m_header_row.size()) == NumCols())
-        RenderRow(m_header_row, cl_ul.x, cl_ul.y - m_header_row.Height(), last_visible_col);
+    if (m_header_row->size() && static_cast<int>(m_header_row->size()) == NumCols())
+        RenderRow(m_header_row, cl_ul.x, cl_ul.y - m_header_row->Height(), last_visible_col);
 
     // draw data in cells
     top = cl_ul.y;
     for (int i = m_first_row_shown; i <= last_visible_row; ++i) {
         RenderRow(m_rows[i], cl_ul.x, top, last_visible_col);
-        top += m_rows[i].Height();
+        top += m_rows[i]->Height();
     }
 
     // restore previous scissor-clipping state
@@ -393,7 +421,7 @@ int ListBox::Render()
     glPopAttrib();
 
     // draw dragged line item, if one exists
-    if (m_row_drag_offset != Pt(-1, -1)) {
+    if (m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
         Pt drag_row_ul = App::GetApp()->MousePosition() - m_row_drag_offset;
         RenderRow(m_rows[m_old_sel_row], drag_row_ul.x, drag_row_ul.y, last_visible_col);
     }
@@ -401,31 +429,45 @@ int ListBox::Render()
     return 1;
 }
 
-int ListBox::LButtonDown(const GG::Pt& pt, Uint32 keys)
+int ListBox::LButtonDown(const Pt& pt, Uint32 keys)
 {
-    if (!Disabled() && !(m_style & LB_NOSEL)) {
+    if (!Disabled()) {
         m_old_sel_row = RowUnderPt(pt);
-        if (m_old_sel_row >= static_cast<int>(m_rows.size()) || !InClient(pt))
+        if (m_old_sel_row >= static_cast<int>(m_rows.size()) || !InClient(pt)) {
             m_old_sel_row = -1;
-        if (m_style & LB_DRAGDROP)
-            m_row_drag_offset = DragOffset(pt);
+        } else {
+            m_old_sel_row_selected = m_selections.find(m_old_sel_row) != m_selections.end();
+            if (!(m_style & LB_NOSEL) && !m_old_sel_row_selected)
+                ClickAtRow(m_old_sel_row, keys);
+            if (m_style & LB_DRAGDROP && (((m_style & LB_NOSEL) || m_selections.find(m_old_sel_row) != m_selections.end())))
+                m_row_drag_offset = DragOffset(pt);
+        }
     }
     return 1;
 }
 
 int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
 {
-    if (!Disabled() && (m_style & LB_DRAGDROP) && (m_old_sel_row != -1)) {
+    if (!Disabled() && (m_style & LB_DRAGDROP) && m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
         Wnd* tmp = App::GetApp()->GetWindowUnder(pt);
         ListBox* drop_target_wnd;
-        if ((drop_target_wnd = dynamic_cast<ListBox*>(tmp)) &&
-                drop_target_wnd->AcceptsDropType(m_rows[m_old_sel_row].data_type))
-        {
-            // this will drop the item into the place selected by the user's mouse position, if no sorting is done on
-            // target listbox.
+        if ((drop_target_wnd = dynamic_cast<ListBox*>(tmp)) && 
+            drop_target_wnd->AcceptsDropType(m_rows[m_old_sel_row]->data_type)) {
+            // this will drop the item selected by the user's mouse position (or all selected items) into the place, 
+            // if no sorting is done on target listbox.
             int ins_row = drop_target_wnd->RowUnderPt(pt);
-            drop_target_wnd->Insert(m_rows[m_old_sel_row], ins_row, true);
-            Delete(m_old_sel_row);
+            if (m_selections.empty()) {
+                drop_target_wnd->Insert(m_rows[m_old_sel_row], ins_row, true);
+                Delete(m_old_sel_row);
+            } else {
+                for (set<int>::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
+                    drop_target_wnd->Insert(m_rows[*it], ins_row++, true);
+                }
+                set<int> sels = m_selections;
+                for (set<int>::reverse_iterator it = sels.rbegin(); it != sels.rend(); ++it) {
+                    Delete(*it);
+                }
+            }
             if (m_caret > static_cast<int>(m_rows.size()) - 1)
                 m_caret = static_cast<int>(m_rows.size()) - 1;
         }
@@ -437,18 +479,19 @@ int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
 
 int ListBox::LClick(const Pt& pt, Uint32 keys)
 {
-    if (!Disabled() && !(m_style & LB_NOSEL)) {
+    if (!Disabled()) {
         if (m_old_sel_row >= 0 && InClient(pt)) {
             int sel_row = RowUnderPt(pt);
             if (sel_row == m_old_sel_row) {
+                if (!(m_style & LB_NOSEL))
+                    ClickAtRow(sel_row, keys);
                 m_lclick_row = sel_row;
-                ClickAtRow(sel_row, keys);
-                // allow arbitrary rearrangement of unsorted lists that have dragging and dropping enabled
-            } else if (m_row_drag_offset != Pt(-1, -1) && (m_style & LB_DRAGDROP) && (m_style & LB_NOSORT)) {
-                Row r = m_rows[m_old_sel_row];
-                Delete(m_old_sel_row);
-                sel_row = RowUnderPt(pt);
-                Insert(r, sel_row, true);
+            } else if (m_row_drag_offset != Pt(-1, -1) && (m_style & LB_DRAGDROP) && (m_style & LB_NOSORT) && 
+                       (m_selections.empty() || (m_style & LB_SINGLESEL))) {
+                // allow arbitrary rearrangement of unsorted lists that have dragging and dropping enabled (NOSEL and SINGLESEL only)
+                int old_sel_row = m_old_sel_row;
+                Insert(m_rows[old_sel_row], sel_row, true);
+                Delete(old_sel_row + (sel_row <= old_sel_row ? 1 : 0));
             }
         }
     }
@@ -520,14 +563,14 @@ int ListBox::Keypress(Key key, Uint32 key_mods)
     case GGK_PAGEUP: // page up key (not numpad key)
         if (m_caret != -1) {
             int space = ClientDimensions().y;
-            while (m_caret >= 1 && (space -= m_rows[m_caret - 1].Height()) > 0)
+            while (m_caret >= 1 && (space -= m_rows[m_caret - 1]->Height()) > 0)
                 --m_caret;
         }
         break;
     case GGK_PAGEDOWN: // page down key (not numpad key)
         if (m_caret != -1) {
             int space = ClientDimensions().y;
-            while (m_caret < static_cast<int>(m_rows.size()) - 1 && (space -= m_rows[m_caret].Height()) > 0)
+            while (m_caret < static_cast<int>(m_rows.size()) - 1 && (space -= m_rows[m_caret]->Height()) > 0)
                 ++m_caret;
         }
         break;
@@ -575,15 +618,18 @@ int ListBox::MouseHere(const Pt& pt, Uint32 keys)
         int sel_row = RowUnderPt(pt);
         if (sel_row >= static_cast<int>(m_rows.size()))
             sel_row = -1;
-        m_browsed_sig(sel_row);
+        if (m_last_row_browsed != sel_row)
+            m_browsed_sig(m_last_row_browsed = sel_row);
     }
     return 1;
 }
 
 int ListBox::MouseLeave(const Pt& pt, Uint32 keys)
 {
-    if (!Disabled() && (m_style & LB_BROWSEUPDATES))
-        m_browsed_sig(-1);
+    if (!Disabled() && (m_style & LB_BROWSEUPDATES)) {
+        if (m_last_row_browsed != -1)
+            m_browsed_sig(m_last_row_browsed = -1);
+    }
     return 1;
 }
 
@@ -597,7 +643,7 @@ void ListBox::SizeMove(int x1, int y1, int x2, int y2)
     AdjustScrolls(); // fix those pesky scrollbars
 }
 
-int ListBox::Insert(const Row& row, int at/*= -1*/)
+int ListBox::Insert(Row* row, int at/*= -1*/)
 {
     return Insert(row, at, false);
 }
@@ -613,8 +659,10 @@ void ListBox::Delete(int idx)
                 m_selections.erase(i + 1);
             }
         }
-        m_rows.erase(m_rows.begin() + idx);
     }
+
+    DetachRowChildren(m_rows[idx]);
+    m_rows.erase(m_rows.begin() + idx);
 
     if (idx <= m_caret) // move caret up, if needed
         --m_caret;
@@ -627,6 +675,8 @@ void ListBox::Delete(int idx)
 void ListBox::Clear()
 {
     bool signal = !m_rows.empty(); // inhibit signal if the list box was already empty
+    for (unsigned int i = 0; i < m_rows.size(); ++i)
+        delete m_rows[i];
     m_rows.clear();
     m_caret = -1;
     DeleteChildren();
@@ -635,6 +685,7 @@ void ListBox::Clear()
     m_first_row_shown = m_first_col_shown = 0;
     m_selections.clear();
     m_old_sel_row = -1;
+    m_lclick_row = -1;
 
     if (!m_keep_col_widths) { // remove column widths and alignments, if needed
         m_col_widths.clear();
@@ -669,17 +720,19 @@ void ListBox::ClearRow(int n)
 void ListBox::SelectRow(int n)
 {
     if (n >= 0 && n < static_cast<int>(m_rows.size()) && m_selections.find(n) == m_selections.end()) {
+        bool emit_signal = m_selections.find(n) == m_selections.end();
         if (m_style & LB_SINGLESEL)
-            ClearSelection();
+            m_selections.clear();
         m_selections.insert(n);
-        m_sel_changed_sig(m_selections);
+        if (emit_signal)
+            m_sel_changed_sig(m_selections);
     }
 }
 
 void ListBox::IndentRow(int n, int i)
 {
     if (n >= 0 && n < static_cast<int>(m_rows.size()) && i >= 0)
-        m_rows[i].indentation = i;
+        m_rows[i]->indentation = i;
 }
 
 void ListBox::SetStyle(Uint32 s)
@@ -697,16 +750,17 @@ void ListBox::SetStyle(Uint32 s)
     ValidateStyle();
 }
 
-void ListBox::SetColHeaders(const Row& r)
+void ListBox::SetColHeaders(Row* r)
 {
+    delete m_header_row;
     m_header_row = r;
     // if this column header is being added to an empty listbox, the listbox takes on some of the
     // attributes of the header, similarly to the insertion of a row into an empty listbox; see Insert()
     if (m_rows.empty() && m_col_widths.empty()) {
-        m_col_widths.resize(m_header_row.size(), (ClientDimensions().x - SCROLL_WIDTH) / m_header_row.size());
+        m_col_widths.resize(m_header_row->size(), (ClientDimensions().x - SCROLL_WIDTH) / m_header_row->size());
         // put the remainder in the last column, so the total width == ClientDimensions().x - SCROLL_WIDTH
-        m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % m_header_row.size();
-        m_col_alignments.resize(m_header_row.size(), (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+        m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % m_header_row->size();
+        m_col_alignments.resize(m_header_row->size(), (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         AttachRowChildren(m_header_row);
         NormalizeRow(m_header_row);
     }
@@ -758,8 +812,8 @@ XMLElement ListBox::XMLEncode() const
     retval.AppendChild(temp);
 
     temp = XMLElement("m_rows");
-    for (std::vector<Row>::const_iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
-        temp.AppendChild(it->XMLEncode());
+    for (std::vector<Row*>::const_iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
+        temp.AppendChild((*it)->XMLEncode());
     }
     retval.AppendChild(temp);
 
@@ -802,7 +856,8 @@ XMLElement ListBox::XMLEncode() const
     retval.AppendChild(temp);
 
     temp = XMLElement("m_header_row");
-    temp.AppendChild(m_header_row.XMLEncode());
+    if (m_header_row)
+        temp.AppendChild(m_header_row->XMLEncode());
     retval.AppendChild(temp);
 
     temp = XMLElement("m_row_height");
@@ -858,7 +913,7 @@ int ListBox::LastVisibleRow() const
     int visible_pixels = ClientDimensions().y;
     int acc = 0, i;
     for (i = m_first_row_shown; i < static_cast<int>(m_rows.size()); ++i) {
-        acc += m_rows[i].Height();
+        acc += m_rows[i]->Height();
         if (visible_pixels <= acc) break;
     }
     if (i >= static_cast<int>(m_rows.size()))
@@ -880,7 +935,7 @@ int ListBox::RowUnderPt(const Pt& pt) const
     int retval;
     int acc = ClientUpperLeft().y;
     for (retval = m_first_row_shown; retval < static_cast<int>(m_rows.size()); ++retval) {
-        acc += m_rows[retval].Height();
+        acc += m_rows[retval]->Height();
         if (pt.y <= acc) break;
     }
     return retval;
@@ -894,9 +949,9 @@ Pt ListBox::DragOffset(const Pt& pt) const
         retval.x = pt.x - cl_ul.x; // we know the x-offset immediately
         int acc = cl_ul.y;
         for (unsigned int i = m_first_row_shown; i < m_rows.size(); ++i) {
-            acc += m_rows[i].Height();
+            acc += m_rows[i]->Height();
             if (pt.y <= acc) {
-                retval.y = pt.y - (acc - m_rows[i].Height());
+                retval.y = pt.y - (acc - m_rows[i]->Height());
                 break;
             }
         }
@@ -906,17 +961,17 @@ Pt ListBox::DragOffset(const Pt& pt) const
     return retval;
 }
 
-int ListBox::Insert(const Row& row, int at, bool dropped)
+int ListBox::Insert(Row* row, int at, bool dropped)
 {
     int retval = at;
 
     // the first row inserted into an empty list box defines the number of columns, and initializes the column widths
     if (m_rows.empty() && (m_col_widths.empty() || !m_keep_col_widths)) {
-        m_col_widths.resize(row.size(), (ClientDimensions().x - SCROLL_WIDTH) / row.size());
+        m_col_widths.resize(row->size(), (ClientDimensions().x - SCROLL_WIDTH) / row->size());
         // put the remainder in the last column, so the total width == ClientDimensions().x - SCROLL_WIDTH
-        m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % row.size();
-        m_col_alignments.resize(row.size(), (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
-        if (m_header_row.size())
+        m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % row->size();
+        m_col_alignments.resize(row->size(), (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+        if (m_header_row->size())
             NormalizeRow(m_header_row);
     }
 
@@ -925,12 +980,12 @@ int ListBox::Insert(const Row& row, int at, bool dropped)
             at = m_rows.size();
         retval = at;
         m_rows.insert(m_rows.begin() + retval, row);
-    } else { // otherwise, put it into the list in the right spot using inplace_merge
-        const string& row_str = row[m_sort_col]->WindowText();
+    } else { // otherwise, put it into the list in the right spot
+        const string& row_str = (*row)[m_sort_col]->WindowText();
         retval = 0;
         while ((retval < static_cast<int>(m_rows.size())) &&
-                ((m_style & LB_SORTDESCENDING) ? (row_str <= m_rows[retval][m_sort_col]->WindowText()) :
-                 (row_str >= m_rows[retval][m_sort_col]->WindowText())))
+                ((m_style & LB_SORTDESCENDING) ? (row_str <= (*m_rows[retval])[m_sort_col]->WindowText()) :
+                 (row_str >= (*m_rows[retval])[m_sort_col]->WindowText())))
             ++retval;
         m_rows.insert(m_rows.begin() + retval, row);
     }
@@ -968,15 +1023,15 @@ void ListBox::BringCaretIntoView()
     if (m_caret >= 0 && m_caret < m_first_row_shown) {
         m_first_row_shown = m_caret;
     } else if (m_caret > LastVisibleRow()) { // find the row that preceeds the caret by about ClientDimensions().y pixels, and make it the first row shown
-        int avail_space = ClientDimensions().y - m_rows[m_caret].Height();
+        int avail_space = ClientDimensions().y - m_rows[m_caret]->Height();
         m_first_row_shown = m_caret;
-        while (m_first_row_shown > 0 && (avail_space -= m_rows[m_first_row_shown - 1].Height()) > 0)
+        while (m_first_row_shown > 0 && (avail_space -= m_rows[m_first_row_shown - 1]->Height()) > 0)
             --m_first_row_shown;
     }
     if (m_first_row_shown != old_first_row && m_vscroll) {
         int acc = 0;
         for (int i = 0; i < m_first_row_shown; ++i)
-            acc += m_rows[i].Height();
+            acc += m_rows[i]->Height();
         m_vscroll->ScrollTo(acc);
     }
 }
@@ -984,14 +1039,14 @@ void ListBox::BringCaretIntoView()
 Scroll* ListBox::NewVScroll(bool horz_scroll)
 {
     Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
-                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0))));
+                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->size() ? m_header_row->Height() : 0))));
     return new Scroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horz_scroll ? SCROLL_WIDTH : 0), Scroll::VERTICAL, m_color, CLR_SHADOW);
 }
 
 Scroll* ListBox::NewHScroll(bool vert_scroll)
 {
     Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
-                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0))));
+                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->size() ? m_header_row->Height() : 0))));
     return new Scroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
 }
 
@@ -1036,13 +1091,13 @@ void ListBox::AdjustScrolls()
 
     // this client area calculation disregards the thickness of scrolls
     Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
-                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0))));
+                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->size() ? m_header_row->Height() : 0))));
 
     int total_x_extent = 0, total_y_extent = 0;
     for (unsigned int i = 0; i < m_col_widths.size(); ++i)
         total_x_extent += m_col_widths[i];
     for (unsigned int i = 0; i < m_rows.size(); ++i)
-        total_y_extent += m_rows[i].Height();
+        total_y_extent += m_rows[i]->Height();
 
     vertical_needed = (total_y_extent > cl_sz.y ||
                        (total_y_extent > cl_sz.y - SCROLL_WIDTH && total_x_extent > cl_sz.x - SCROLL_WIDTH));
@@ -1089,7 +1144,7 @@ void ListBox::VScrolled(int tab_low, int tab_high, int low, int high)
     m_first_row_shown = 0;
     for (unsigned int i = 0; i < m_rows.size(); ++i) {
         if (tab_low > 0) {
-            tab_low -= m_rows[i].Height();
+            tab_low -= m_rows[i]->Height();
             ++m_first_row_shown;
         }
     }
@@ -1106,33 +1161,33 @@ void ListBox::HScrolled(int tab_low, int tab_high, int low, int high)
     }
 }
 
-void ListBox::RenderRow(const Row& row, int left, int top, int last_col)
+void ListBox::RenderRow(const Row* row, int left, int top, int last_col)
 {
     // draw this row's controls on the -1 iteration, then each of its subrows on iterations 0 through sub_rows.size() - 1
-    for (int j = -1; j < static_cast<int>(row.sub_rows.size()); ++j) {
-        const Row& subrow_to_use = (j == -1 ? row : row.sub_rows[j]); // use main (non sub_row) data for the -1 iteration
+    for (int j = -1; j < static_cast<int>(row->sub_rows.size()); ++j) {
+        const Row* subrow_to_use = (j == -1 ? row : row->sub_rows[j]); // use main (non sub_row) data for the -1 iteration
         RenderSubRow(subrow_to_use, left, top, last_col);
-        top += subrow_to_use.height;
+        top += subrow_to_use->height;
     }
 }
 
-void ListBox::RenderSubRow(const Row& subrow, int left, int top, int last_col)
+void ListBox::RenderSubRow(const Row* subrow, int left, int top, int last_col)
 {
     int right = left;
-    int bottom = top + subrow.height;
+    int bottom = top + subrow->height;
     // draw each control in turn
     for (int i = m_first_col_shown; i <= last_col; ++i) {
-        if (subrow[i]) {
+        if ((*subrow)[i]) {
             left = right;
             right += m_col_widths[i];
             int x = 0, y = 0;
-            Pt control_sz = subrow[i]->WindowDimensions();
-            Uint32 alignment = subrow.alignment | m_col_alignments[i];
+            Pt control_sz = (*subrow)[i]->WindowDimensions();
+            Uint32 alignment = subrow->alignment | m_col_alignments[i];
 
             if (alignment & LB_LEFT) {
                 x = left + m_cell_margin;
                 if (!i)
-                    x += subrow.indentation; // indentation only applies to left-justified items in the first cell
+                    x += subrow->indentation; // indentation only applies to left-justified items in the first cell
             } else if (alignment & LB_CENTER) {
                 x = left + m_cell_margin + (m_col_widths[i] - 2 * m_cell_margin - control_sz.x) / 2;
             } else { // (m_style & LB_RIGHT)
@@ -1142,19 +1197,20 @@ void ListBox::RenderSubRow(const Row& subrow, int left, int top, int last_col)
             if (alignment & LB_TOP) {
                 y = top + m_cell_margin;
             } else if (alignment & LB_VCENTER) {
-                y = top + m_cell_margin + (subrow.height - 2 * m_cell_margin - control_sz.y) / 2;
+                y = top + m_cell_margin + (subrow->height - 2 * m_cell_margin - control_sz.y) / 2;
             } else { // (m_style & LB_BOTTOM)
                 y = bottom - m_cell_margin - control_sz.y;
             }
 
-            subrow[i]->MoveTo(Pt(x, y) - ClientUpperLeft());
-            subrow[i]->Render();
+            (*subrow)[i]->MoveTo(Pt(x, y) - ClientUpperLeft());
+            (*subrow)[i]->Render();
         }
     }
 }
 
 int ListBox::ClickAtRow(int row, Uint32 keys)
 {
+    std::set<int> previous_selections = m_selections;
     if (m_style & LB_SINGLESEL) { // no special keys are being used; just clear all previous selections, select this row, set the caret here
         m_selections.clear();
         m_selections.insert(row);
@@ -1197,7 +1253,7 @@ int ListBox::ClickAtRow(int row, Uint32 keys)
             }
         } else { // unless LB_QUICKSEL is used, this is treated just like LB_SINGLESEL above
             if (m_style&LB_QUICKSEL) {
-                if (m_selections.find(row) != m_selections.end())
+                if (m_old_sel_row_selected)
                     m_selections.erase(row);
                 else
                     m_selections.insert(row);
@@ -1209,35 +1265,42 @@ int ListBox::ClickAtRow(int row, Uint32 keys)
             }
         }
     }
-    m_sel_changed_sig(m_selections);
+    if (previous_selections != m_selections)
+        m_sel_changed_sig(m_selections);
     return 1;
 }
 
-void ListBox::NormalizeRow(Row& row)
+void ListBox::NormalizeRow(Row* row)
 {
-    row.resize(m_col_widths.size());
-    if (!row.height)
-        row.height = m_row_height;
-    for (unsigned int i = 0; i < row.sub_rows.size(); ++i) {
-        row.sub_rows[i].resize(m_col_widths.size());
-        if (!row.sub_rows[i].height)
-            row.sub_rows[i].height = row.height;
+    row->resize(m_col_widths.size());
+    if (!row->height)
+        row->height = m_row_height;
+    for (unsigned int i = 0; i < row->sub_rows.size(); ++i) {
+        row->sub_rows[i]->resize(m_col_widths.size());
+        if (!row->sub_rows[i]->height)
+            row->sub_rows[i]->height = row->height;
     }
 }
 
-void ListBox::AttachRowChildren(Row& row)
+void ListBox::AttachRowChildren(Row* row)
 {
     // attach controls in row to the list box, but hide them; we want to control how they're rendered,
     // but want them to be fully interactive, just as they would be any where else
-    for (int i = -1; i < static_cast<int>(row.sub_rows.size()); ++i) {
-        const Row& subrow_to_use = (i == -1 ? row : row.sub_rows[i]); // use main (non sub_row) data for the -1 iteration
-        for (unsigned int j = 0; j < subrow_to_use.size(); ++j) {
-            if (Control* curr_control = subrow_to_use[j]) {
-                AttachChild(curr_control);
-                curr_control->Hide();
-            }
-        }
+    for (unsigned int i = 0; i < row->size(); ++i) {
+        AttachChild((*row)[i]);
+        (*row)[i]->Hide();
+    }    
+    for (unsigned int i = 0; i < row->sub_rows.size(); ++i) {
+        AttachRowChildren(row->sub_rows[i]);
     }
+}
+
+void ListBox::DetachRowChildren(Row* row)
+{
+    for (unsigned int i = 0; i < row->size(); ++i)
+        DetachChild((*row)[i]);
+    for (unsigned int i = 0; i < row->sub_rows.size(); ++i)
+        DetachRowChildren(row->sub_rows[i]);
 }
 
 

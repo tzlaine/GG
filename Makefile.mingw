@@ -1,0 +1,50 @@
+MAIN_TARGET = GiGi.dll
+
+SRC_FILES = $(wildcard src/*.cpp) $(wildcard src/dialogs/*.cpp)
+GCC_FILES = $(wildcard src/*.c) $(wildcard src/net/*.c)
+
+GCC = gcc
+CXX = g++
+CC = $(CXX)
+
+DEBUG_LEVEL = -D__DEBUG__
+WARN_CCFLAGS = -Wall
+
+CCFLAGS = $(DEBUG_LEVEL) $(WARN_CCFLAGS)
+CXXFLAGS = -c $(CCFLAGS) $(INCLUDE)
+
+INCLUDE = -I/c/boost_1_30_0 \
+	-I/c/Dev-Cpp/include/freetype2 \
+	-I/c/Dev-Cpp/include/SDL \
+	-I/c/Expat-1.95.5/Source/lib \
+	-I/c/log4cpp-0.2.7/include \
+	-Iinclude \
+	-Iinclude/net \
+	-Iinclude/dialogs
+
+LIBDIRS =  -L"C:/Dev-Cpp/lib" -L"C:/Expat-1.95.5/StaticLibs" 
+LIBRARIES = -lwsock32 -lopengl32 -lglu32 $(LIBDIRS) -lboost_signals -lboost_filesystem -lboost_regex -llog4cpp ../freetype-6.dll ../libexpat.dll ../SDL.dll ../SDL_image.dll
+
+OCXX_FILES = $(SRC_FILES:%.cpp=%.o)
+OGCC_FILES = $(GCC_FILES:%.c=%.o)
+O_FILES = $(OCXX_FILES) $(OGCC_FILES)
+
+all: $(MAIN_TARGET)
+
+$(MAIN_TARGET): $(O_FILES)
+	g++ -shared -o $(MAIN_TARGET) $(O_FILES) $(LIBRARIES) -Wl,--export-all-symbols,--no-undefined,--out-implib,libGiGi.a
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@
+
+%.o: %.c
+	$(GCC) $(CXXFLAGS) $< -o $@
+
+.PHONY: clean
+
+clean:
+	rm -f $(MAIN_TARGET) $(O_FILES)
+
+
+
+

@@ -87,6 +87,7 @@ struct AppImplData
       curr_wnd_under_cursor(0), 
       wnd_region(WR_NONE), 
       double_click_wnd(0), 
+      double_click_start_time(-1) ,
       double_click_time(-1), 
       log_category(log4cpp::Category::getRoot())
    {
@@ -131,6 +132,7 @@ struct AppImplData
    
    Wnd*       double_click_wnd;        // GUI window most recently clicked
    int        double_click_button;     // the index of the mouse button used in the last click
+   int        double_click_start_time; // the time from which we started measuring double_click_time, in ms
    int        double_click_time;       // time elapsed since last click, in ms
 
    FontManager       font_manager;
@@ -227,14 +229,6 @@ void App::operator()()
 void App::Register(Wnd* wnd)
 {
    if (wnd) s_impl->zlist.Add(wnd);
-}
-
-void App::RegisterOnTop(Wnd* wnd)
-{
-   if (wnd) {
-      wnd->m_ontop = true;
-      s_impl->zlist.Add(wnd);
-   }
 }
 
 void App::Remove(Wnd* wnd)
@@ -345,10 +339,11 @@ void App::HandleEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, 
    Wnd**       drag_wnds = s_impl->drag_wnds;
    WndRegion&  wnd_region = s_impl->wnd_region;
    
-   // time-out any pending double-click that has outlived its interval
+   // track double-click time and time-out any pending double-click that has outlived its interval
    if (s_impl->double_click_time >= 0) {
-      s_impl->double_click_time += DeltaT();
+      s_impl->double_click_time = Ticks() - s_impl->double_click_start_time;
       if (s_impl->double_click_time >= s_impl->double_click_interval) {
+         s_impl->double_click_start_time = -1;
          s_impl->double_click_time = -1;
          s_impl->double_click_wnd = 0;
       }
@@ -448,13 +443,16 @@ void App::HandleEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, 
                 s_impl->double_click_button == 0) {
                drag_wnds[0]->LDoubleClick(pos, key_mods);
                s_impl->double_click_wnd = 0;
+               s_impl->double_click_start_time = -1;
                s_impl->double_click_time = -1;
             } else {
                drag_wnds[0]->LClick(pos, key_mods);
                if (s_impl->double_click_time > 0) {
                   s_impl->double_click_wnd = 0;
+                  s_impl->double_click_start_time = -1;
                   s_impl->double_click_time = -1;
                } else {
+                  s_impl->double_click_start_time = Ticks();
                   s_impl->double_click_time = 0;
                   s_impl->double_click_wnd = drag_wnds[0];
                   s_impl->double_click_button = 0;

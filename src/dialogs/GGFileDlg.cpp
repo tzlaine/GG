@@ -324,7 +324,7 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     const int BUTTON_WIDTH = USABLE_WIDTH / 4;
 
     boost::filesystem::path filename_path(filename);
-    m_files_edit = new Edit(0, 0, 100, filename_path.leaf(), m_font, m_border_color); // use Edit's necessary-height calcs to determine height of the edit
+    m_files_edit = new Edit(0, 0, 100, filename_path.leaf(), m_font, m_border_color, m_text_color); // use Edit's necessary-height calcs to determine height of the edit
     m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LB_NOSORT);
 

@@ -64,11 +64,14 @@ private:
 };
 }
 
-DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Uint32 flags/* = CLICKABLE*/) :
+DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb/* = 0*/,
+                           Uint32 flags/* = CLICKABLE*/) :
         Control(x, y, w, row_ht, flags),
         m_current_item_idx(-1),
-        m_LB(new ListBox(x, y, w, drop_ht, color, color, flags))
+        m_LB(lb)
 {
+    if (!m_LB)
+        m_LB = new ListBox(x, y, w, drop_ht, color, color, flags);
     m_LB->SetRowHeight(row_ht);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
@@ -77,11 +80,13 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
 }
 
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior,
-                           Uint32 flags/* = CLICKABLE*/) :
+                           ListBox* lb/* = 0*/, Uint32 flags/* = CLICKABLE*/) :
         Control(x, y, w, row_ht, flags),
         m_current_item_idx(-1),
-        m_LB(new ListBox(x, y, w, drop_ht, color, interior, flags))
+        m_LB(lb)
 {
+    if (!m_LB)
+        m_LB = new ListBox(x, y, w, drop_ht, color, interior, flags);
     m_LB->SetRowHeight(row_ht);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
@@ -99,7 +104,11 @@ DropDownList::DropDownList(const XMLElement& elem) :
     m_current_item_idx = lexical_cast<int>(curr_elem->Attribute("value"));
 
     curr_elem = &elem.Child("m_LB");
-    m_LB = new ListBox(curr_elem->Child("GG::ListBox"));
+    if (ListBox* lb = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))) {
+        m_LB = lb;
+    } else {
+        throw std::runtime_error("DropDownList::DropDownList : Attempted to use a non-ListBox object as the drop-down list.");
+    }
 }
 
 DropDownList::~DropDownList()

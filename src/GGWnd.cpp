@@ -234,10 +234,7 @@ void Wnd::MoveTo(const Pt& pt)
 
 void Wnd::OffsetMove(int x, int y)
 {
-    m_upperleft.x += x;
-    m_upperleft.y += y;
-    m_lowerright.x += x;
-    m_lowerright.y += y;
+    SizeMove(m_upperleft.x + x, m_upperleft.y + y, m_lowerright.x + x, m_lowerright.y + y);
 }
 
 void Wnd::OffsetMove(const Pt& pt)

@@ -52,23 +52,23 @@ public:
     /** \name Structors */ //@{
     /** basic ctor*/
     ThreeButtonDlg(int x, int y, int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
-		   Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
-		   Button* one = 0, Button* two = 0);
+                   Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
+                   Button* one = 0, Button* two = 0);
 
     /** ctor that automatically centers the dialog in the app's area*/
     ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
-		   Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
-		   Button* one = 0, Button* two = 0);
+                   Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
+                   Button* one = 0, Button* two = 0);
                   
     /** basic ctor*/
     ThreeButtonDlg(int x, int y, int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
-		   Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
-		   const string& one = "", const string& two = "");
+                   Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
+                   const string& one = "", const string& two = "");
 
     /** ctor that automatically centers the dialog in the app's area*/
     ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
-		   Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
-		   const string& one = "", const string& two = "");
+                   Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
+                   const string& one = "", const string& two = "");
 
     ThreeButtonDlg(const XMLElement& elem); ///< ctor that constructs an ThreeButtonDlg object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a ThreeButtonDlg object
     //@}

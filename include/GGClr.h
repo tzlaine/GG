@@ -50,6 +50,8 @@ struct Clr
     //@}
    
     /** \name Accessors */ //@{
+    bool operator==(const Clr& rhs) {return i == rhs.i;} ///< returns true iff *this and rhs are identical
+
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Clr
     //@}
    

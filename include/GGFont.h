@@ -91,12 +91,13 @@ public:
     {
         int Width() const {return (!extents.empty() ? extents.back() : 0);}; ///< returns the width of the line, in pixels
 
-        int begin_idx;       ///< the index into the text string of the first character of the line
-        int end_idx;         ///< the index of the last + 1 character of the line
-        vector<int> extents; ///< the cummulative extents of the characters on this line of the text (0 extent is the left side)
+        int         begin_idx;      ///< the index into the text string of the first character of the line
+        int         end_idx;        ///< the index of the last + 1 character of the line
+        vector<int> extents;        ///< the cummulative extents of the characters on this line of the text (0 extent is the left side)
+        Uint32      justification;  ///< TF_LEFT, TF_CENTER, or TF_RIGHT; derived from text format flags and/or formatting tags in the text
     };
 
-    /** This just holds the essential data necessary to represent a text formatting tag. */
+    /** This just holds the essential data necessary to represent a text formatting tag.*/
     struct Tag
     {
         Tag() : close_tag(false), char_length(0) {} ///< default ctor
@@ -104,6 +105,19 @@ public:
         vector<string> tokens;        ///< the tokens of the tag (tokens are broken up by ' ' and '\t' whitespace characters)
         bool           close_tag;     ///< true if this is a "close" tag (eg "</i>")
         int            char_length;   ///< the total number of characters that comprise the tag, including brackets and whitespace.  0 indicates that this is not a valid tag.
+    };
+
+    /** This holds the state of tags during rendering of text.  By keeping track of this state across multiple calls to
+        RenderText(), the user can preserve the functionality of the text formatting tags, if present.*/
+    struct RenderState
+    {
+        RenderState() : ignore_tags(false), use_italics(false), draw_underline(false), color_set(false) {} ///< default ctor
+
+        bool    ignore_tags;        ///< set to true upon encountering a <pre> tag, and to false when a </pre> tag is seen
+        bool    use_italics;        ///< set to true upon encountering an \<i> tag, and to false when an \</i> tag is seen
+        bool    draw_underline;     ///< set to true upon encountering an \<u> tag, and to false when an \</u> tag is seen
+        bool    color_set;          ///< true when a tag has set the current color
+        Clr     curr_color;         ///< the current text color (as set by a tag)
     };
 
     GGEXCEPTION(FontException);   ///< exception class \see GG::GGEXCEPTION
@@ -132,12 +146,12 @@ public:
     int               Height() const    {return m_height;}         ///< returns (Ascent() - Descent()), in pixels
     int               Lineskip() const  {return m_lineskip;}       ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
     int               SpaceWidth() const{return m_space_width;}    ///< returns the width in pixels of the glyph for the space character
-    inline int        RenderGlyph(const Pt& pt, char c) const {return RenderGlyph(pt.x, pt.y, c);}   ///< renders glyph for \a c and returns advance of glyph rendered
-    inline int        RenderGlyph(int x, int y, char c) const;     ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderText(const Pt& pt, const string& text, bool tags = false) const {return RenderText(pt.x, pt.y, text, tags);}  ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
-    int               RenderText(int x, int y, const string& text, bool tags = false) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
-    void              RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, bool tags = false) const {RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, tags);} ///< formatted text rendering; treats formatting tags as regular text unless \a tags == true
-    void              RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, bool tags = false) const; ///< formatted text rendering; treats formatting tags as regular text unless \a tags == true
+    int               RenderGlyph(const Pt& pt, char c) const {return RenderGlyph(pt.x, pt.y, c);}   ///< renders glyph for \a c and returns advance of glyph rendered
+    int               RenderGlyph(int x, int y, char c) const;     ///< renders glyph for \a c and returns advance of glyph rendered
+    int               RenderText(const Pt& pt, const string& text) const {return RenderText(pt.x, pt.y, text);}  ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
+    int               RenderText(int x, int y, const string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
+    void              RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, bool tags = false, RenderState* render_state = 0) const {RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, tags, render_state);} ///< formatted text rendering; treats formatting tags as regular text unless \a tags == true
+    void              RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, bool tags = false, RenderState* render_state = 0) const; ///< formatted text rendering; treats formatting tags as regular text unless \a tags == true
     Pt                DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& lines, bool tags = false) const; ///< returns the maximum dimensions of the string in x and y; treats formatting tags as regular text unless \a tags == true
     Pt                TextExtent(const string& text, Uint32 format = TF_NONE, int box_width = 0, bool tags = false) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
 
@@ -156,7 +170,7 @@ private:
     {
         Glyph() : advance(0) {} ///< default ctor
         Glyph(const shared_ptr<Texture>& texture, int x1, int y1, int x2, int y2, int adv) : 
-            sub_texture(SubTexture(texture, x1, y1, x2, y2)), advance(adv), width(x2 - x1) {} ///< ctor
+            sub_texture(texture, x1, y1, x2, y2), advance(adv), width(x2 - x1) {} ///< ctor
 
         SubTexture  sub_texture;   ///< the subtexture containing just this glyph
         int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
@@ -165,9 +179,8 @@ private:
 
     void              Init(const string& font_filename, int pts, Uint32 range);
     bool              GenerateGlyph(FT_Face font, char ch);
-    inline int        RenderGlyph(int x, int y, const Glyph& glyph) const;
-    void              HandleTag(const Tag& tag, int x, int y, const double* orig_color) const;
-    void              DrawUnderline(int x, int y) const;
+    inline int        RenderGlyph(int x, int y, const Glyph& glyph, const RenderState* render_state) const;
+    void              HandleTag(const Tag& tag, int x, int y, const double* orig_color, RenderState& render_state) const;
 
     string               m_font_filename;
     int                  m_pt_sz;
@@ -184,11 +197,6 @@ private:
     vector<shared_ptr<Texture> >
                          m_textures;    ///< the OpenGL texture objects in which the glyphs can be found
    
-    // all these are mutable, since they are called in functions that do rendering, but that do not otherwise change any state
-    mutable bool         m_use_italics;    ///< set to true upon encountering an <i> tag, and to false when an </i> tag is seen
-    mutable int          m_underline_start;///< the x-coordinate of the start point for the current underlining line segment
-    mutable bool         m_ignore_tags;    ///< set to true upon encountering a <pre> tag, and to false when a </pre> tag is seen
-                        
     static set<string>   s_action_tags; ///< embedded tags that Font must act upon when rendering are stored here
     static set<string>   s_known_tags;  ///< embedded tags that Font knows about but should not act upon are stored here
 };

@@ -43,7 +43,7 @@ libGiGiSDL_la_SOURCES = 			\
 SDL/SDLGGApp.cpp
 
 libGiGi_la_LDFLAGS = -no-undefined -version-info @GGAPI_CURRENT@:@GGAPI_REVISION@:@GGAPI_AGE@
-libGiGi_la_LIBADD = @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp @DEVIL_LIBS@ @LTLIBOBJS@
+libGiGi_la_LIBADD = @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp @DEVIL_LIBS@ @LTLIBOBJS@ @LIBLTDL@
 
 libGiGiNet_la_LDFLAGS = -no-undefined -version-info @GGAPI_CURRENT@:@GGAPI_REVISION@:@GGAPI_AGE@
 libGiGiNet_la_LIBADD  = @SDL_LIBS@ @SDLNET_LIB@
@@ -60,7 +60,7 @@ if !DISABLE_NET
   libGiGiSDL_la_LIBADD += libGiGiNet.la
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs $(NET_CFLAGS) @SDL_CFLAGS@ @FT2_CFLAGS@
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs $(NET_CFLAGS) @SDL_CFLAGS@ @FT2_CFLAGS@ @INCLTDL@
 
 if DEBUG
   AM_CXXFLAGS = -g3 -Wall

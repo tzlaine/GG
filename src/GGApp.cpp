@@ -336,7 +336,6 @@ void App::Register(Wnd* wnd)
 void App::RegisterModal(Wnd* wnd)
 {
     if (wnd && wnd->Modal()) {
-        SetFocusWnd(wnd);
         s_impl->modal_wnds.push_back(wnd);
     }
 }

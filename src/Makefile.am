@@ -60,7 +60,7 @@ if !DISABLE_NET
   libGiGiSDL_la_LIBADD += libGiGiNet.la
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs $(NET_CFLAGS) @SDL_CFLAGS@ @FT2_CFLAGS@ @INCLTDL@
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs $(NET_CFLAGS) @SDL_CFLAGS@ @FT2_CFLAGS@ @INCLTDL@ @BOOST_CPPFLAGS@
 
 if DEBUG
   AM_CXXFLAGS = -g3 -Wall
@@ -72,6 +72,7 @@ TESTS = testy
 check_PROGRAMS= testy
 testy_SOURCES = $(top_srcdir)/test.cpp 
 testy_LDADD = libGiGiSDL.la
-testy_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs -I$(top_srcdir)/include/net -I$(top_srcdir)/include/SDL @SDL_CFLAGS@ @FT2_CFLAGS@
+testy_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs -I$(top_srcdir)/include/net -I$(top_srcdir)/include/SDL @SDL_CFLAGS@ @FT2_CFLAGS@ @BOOST_CPPFLAGS@
 
 DISTCLEANFILES = GG.log
+

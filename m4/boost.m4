@@ -10,12 +10,11 @@ AC_DEFUN([YG_CHECK_BOOST],
   WANT_BOOST_MAJOR=`expr $boost_min_version : '\([[0-9]]*\)'`
   WANT_BOOST_MINOR=`expr $boost_min_version : '[[0-9]]*\.\([[0-9]]*\)'`
   WANT_BOOST_SUB_MINOR=`expr $boost_min_version : '[[0-9]]*\.[[0-9]]*\.\([[0-9]]*\)'`
+  OLD_CXX_FLAGS=$CXXFLAGS
   if test x"$BOOST_CPPFLAGS" = x; then
     BOOST_CPPFLAGS="-I/usr/local/include/boost-$WANT_BOOST_MAJOR""_$WANT_BOOST_MINOR"
-    CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+    CXXFLAGS="$CXXFLAGS $BOOST_CPPFLAGS"
   fi
-  OLD_CXX_FLAGS=$CXXFLAGS
-  CXXFLAGS="$CXXFLAGS $BOOST_CPPFLAGS"
   AC_MSG_CHECKING([for the Boost C++ libraries, version $boost_min_version or newer])
   AC_TRY_COMPILE(
     [
@@ -55,6 +54,7 @@ AC_DEFUN([YG_CHECK_BOOST],
         ifelse([$3], , :, [$3])
       ])
   fi
-  CXXFLAGS=$OLD_CXXFLAGS
+  CXXFLAGS=$OLD_CXX_FLAGS
   AC_LANG_RESTORE
 ])
+

@@ -307,13 +307,13 @@ libGiGiNet_la_LIBADD = @SDL_LIBS@ @SDLNET_LIB@
 @DISABLE_NET_TRUE@NET_CFLAGS = 
 libGiGiSDL_la_LDFLAGS = -no-undefined -version-info @GGAPI_CURRENT@:@GGAPI_REVISION@:@GGAPI_AGE@
 libGiGiSDL_la_LIBADD = @SDL_LIBS@ libGiGi.la $(am__append_2)
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs $(NET_CFLAGS) @SDL_CFLAGS@ @FT2_CFLAGS@ @INCLTDL@
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs $(NET_CFLAGS) @SDL_CFLAGS@ @FT2_CFLAGS@ @INCLTDL@ @BOOST_CPPFLAGS@
 @DEBUG_FALSE@AM_CXXFLAGS = -O2 -DNDEBUG
 @DEBUG_TRUE@AM_CXXFLAGS = -g3 -Wall
 TESTS = testy
 testy_SOURCES = $(top_srcdir)/test.cpp 
 testy_LDADD = libGiGiSDL.la
-testy_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs -I$(top_srcdir)/include/net -I$(top_srcdir)/include/SDL @SDL_CFLAGS@ @FT2_CFLAGS@
+testy_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs -I$(top_srcdir)/include/net -I$(top_srcdir)/include/SDL @SDL_CFLAGS@ @FT2_CFLAGS@ @BOOST_CPPFLAGS@
 DISTCLEANFILES = GG.log
 all: all-am
 

@@ -209,6 +209,7 @@ public:
     Row&           GetRow(int n) {return *m_rows.at(n);}  ///< returns a pointer to the Row at row index \a n; not range-checked
    
     void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
+    void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
     void           SetStyle(Uint32 s);                                      ///< sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle
     void           SetColHeaders(Row* r);                                   ///< sets the row used as headings for the columns
     void           RemoveColHeaders()         {m_header_row->clear();}      ///< removes any columns headings set

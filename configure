@@ -23447,12 +23447,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   WANT_BOOST_MAJOR=`expr $boost_min_version : '\([0-9]*\)'`
   WANT_BOOST_MINOR=`expr $boost_min_version : '[0-9]*\.\([0-9]*\)'`
   WANT_BOOST_SUB_MINOR=`expr $boost_min_version : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+  OLD_CXX_FLAGS=$CXXFLAGS
   if test x"$BOOST_CPPFLAGS" = x; then
     BOOST_CPPFLAGS="-I/usr/local/include/boost-$WANT_BOOST_MAJOR""_$WANT_BOOST_MINOR"
-    CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+    CXXFLAGS="$CXXFLAGS $BOOST_CPPFLAGS"
   fi
-  OLD_CXX_FLAGS=$CXXFLAGS
-  CXXFLAGS="$CXXFLAGS $BOOST_CPPFLAGS"
   echo "$as_me:$LINENO: checking for the Boost C++ libraries, version $boost_min_version or newer" >&5
 echo $ECHO_N "checking for the Boost C++ libraries, version $boost_min_version or newer... $ECHO_C" >&6
   cat >conftest.$ac_ext <<_ACEOF
@@ -23576,7 +23575,7 @@ echo "${ECHO_T}no, version of installed Boost libraries is too old" >&6
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
   fi
-  CXXFLAGS=$OLD_CXXFLAGS
+  CXXFLAGS=$OLD_CXX_FLAGS
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'

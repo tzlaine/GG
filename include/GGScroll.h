@@ -80,6 +80,8 @@ public:
     Orientation     ScrollOrientation() const   {return m_orientation;} ///< returns the orientation of the Scroll
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Scroll object
+
+    ScrolledSignalType& ScrolledSignal() const  {return m_scrolled_sig;} ///< returns the scrolled signal object for this Scroll
     //@}
    
     /** \name Mutators */ //@{
@@ -105,8 +107,6 @@ public:
     void           ScrollLineDecr(); ///< scrolls the control up (or left) by a line
     void           ScrollPageIncr(); ///< scrolls the control down (or right) by a page
     void           ScrollPageDecr(); ///< scrolls the control up (or left) by a page
-   
-    ScrolledSignalType& ScrolledSignal() {return m_scrolled_sig;}    ///< returns the scrolled signal object for this Scroll
     //@}
 
 protected:
@@ -140,7 +140,7 @@ private:
     ScrollRegion         m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
     ScrollRegion         m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
 
-    ScrolledSignalType   m_scrolled_sig;
+    mutable ScrolledSignalType m_scrolled_sig;
 };
 
 } // namespace GG

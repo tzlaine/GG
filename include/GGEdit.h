@@ -80,6 +80,9 @@ public:
     Clr            SelectedTextColor() const     {return m_sel_text_color;} ///< returns the color used to render selected text
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an Edit object
+
+    EditedSignalType&       EditedSignal() const      {return m_edited_sig;}        ///< returns the edited signal object for this Edit
+    FocusUpdateSignalType&  FocusUpdateSignal() const {return m_focus_update_sig;}  ///< returns the focus update signal object for this Edit
     //@}
    
     /** \name Mutators */ //@{
@@ -96,9 +99,6 @@ public:
     void           SetSelectedTextColor(Clr c)   {m_sel_text_color = c;}    ///< sets the color used to render selected text
     virtual void   SelectAll()                   {m_cursor_pos.first = 0; m_cursor_pos.second = Length();} ///< selects all text in the entire control
     virtual void   SetText(const string& str);
-
-    EditedSignalType&       EditedSignal()       {return m_edited_sig;}        ///< returns the edited signal object for this Edit
-    FocusUpdateSignalType&  FocusUpdateSignal()  {return m_focus_update_sig;}  ///< returns the focus update signal object for this Edit
     //@}
    
 protected:
@@ -128,8 +128,8 @@ private:
 
     string      m_previous_text;    ///< the contents when the focus was last gained
    
-    EditedSignalType        m_edited_sig;
-    FocusUpdateSignalType   m_focus_update_sig;
+    mutable EditedSignalType      m_edited_sig;
+    mutable FocusUpdateSignalType m_focus_update_sig;
 };
 
 } // namespace GG

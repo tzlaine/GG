@@ -70,6 +70,8 @@ public:
     void              SetRolloverGraphic(const SubTexture& st)  {m_rollover_graphic = st;}    ///< sets a SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Button object
+
+    ClickedSignalType& ClickedSignal() const                    {return m_clicked_sig;} ///< returns the clicked signal object for this Button
     //@}
    
     /** \name Mutators */ //@{
@@ -81,10 +83,9 @@ public:
     virtual int    MouseHere(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_ROLLOVER; return 1;}
     virtual int    MouseLeave(const Pt& pt, Uint32 keys)           {if (!Disabled()) m_state = BN_UNPRESSED; return 1;}
 
-    virtual void   SetColor(Clr c)                        {Control::SetColor(c);}   ///< sets the control's color; does not affect the text color
+    virtual void   SetColor(Clr c)                                 {Control::SetColor(c);}   ///< sets the control's color; does not affect the text color
 
-    void               SetState(ButtonState state)        {m_state = state;}      ///< sets button state programmatically \see ButtonState
-    ClickedSignalType& ClickedSignal()                    {return m_clicked_sig;} ///< returns the clicked signal object for this Button
+    void           SetState(ButtonState state)                     {m_state = state;}      ///< sets button state programmatically \see ButtonState
     //@}
 
 protected:
@@ -103,7 +104,7 @@ private:
     SubTexture     m_pressed_graphic;   ///< graphic used to display button when it's depressed
     SubTexture     m_rollover_graphic;  ///< graphic used to display button when it's under the mouse and not pressed
    
-    ClickedSignalType m_clicked_sig;
+    mutable ClickedSignalType m_clicked_sig;
 };
 
 
@@ -149,6 +150,8 @@ public:
     StateButtonStyle Style() const                  {return m_style;}      ///< returns the visual style of the button \see StateButtonStyle
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
+
+    CheckedSignalType& CheckedSignal() const        {return m_checked_sig;} ///< returns the checked signal object for this StaticButton
     //@}
    
     /** \name Mutators */ //@{
@@ -160,8 +163,6 @@ public:
     virtual void     SetColor(Clr c)                {Control::SetColor(c);} ///< sets the color of the button; does not affect text color
     void             SetInteriorColor(Clr c)        {m_int_color = c;}     ///< sets the interior color of the box, circle, or other enclosing shape
     void             SetStyle(StateButtonStyle bs)  {m_style = bs;}        ///< sets the visual style of the button \see StateButtonStyle
-
-    CheckedSignalType& CheckedSignal()              {return m_checked_sig;} ///< returns the checked signal object for this StaticButton
     //@}
 
 protected:
@@ -183,7 +184,7 @@ private:
     int               m_button_wd, m_button_ht;
     int               m_text_x,    m_text_y;
    
-    CheckedSignalType m_checked_sig;
+    mutable CheckedSignalType m_checked_sig;
 };
 
 
@@ -219,6 +220,10 @@ public:
 
     /** returns the index of the currently checked button, or -1 if none are checked */
     int              CheckedButton() const   {return m_checked_button;}
+
+    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
+
+    ButtonChangedSignalType& ButtonChangedSignal() const {return m_button_changed_sig;} ///< returns the button changed signal object for this RadioButtonGroup
     //@}
    
     /** \name Mutators */ //@{
@@ -235,10 +240,6 @@ public:
     /** adds a button to the group. \note There is no way to remove buttons; RadioButtonGroup is meant to be a 
         simple grouping control. */
     void             AddButton(StateButton* bn);
-
-    ButtonChangedSignalType& ButtonChangedSignal() {return m_button_changed_sig;} ///< returns the button changed signal object for this RadioButtonGroup
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
     //@}
 
 protected:
@@ -261,11 +262,11 @@ private:
     void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active
    
     vector<StateButton*>               m_buttons;     ///< the state buttons in the group
-    vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be removed when manually unclicking the buttons
+    vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be disconnected when programmatically unclicking the buttons
 
-    int  m_checked_button; ///< the insdex of the currently-checked button; -1 if none is clicked
+    int  m_checked_button; ///< the index of the currently-checked button; -1 if none is clicked
    
-    ButtonChangedSignalType m_button_changed_sig;
+    mutable ButtonChangedSignalType m_button_changed_sig;
    
     friend class ButtonClickedFunctor;
 };

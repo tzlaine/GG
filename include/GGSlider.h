@@ -71,6 +71,8 @@ public:
     LineStyleType  LineStyle() const    {return m_line_style;}  ///< returns the style of line used to render the control
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
+
+    SlidSignalType& SlidSignal() const  {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
     //@}
 
     /** \name Mutators */ //@{
@@ -90,8 +92,6 @@ public:
     void           SlideTo(int p);  ///< slides the control to a certain spot
    
     void           SetLineStyle(LineStyleType style)   {m_line_style = style;}  ///< returns the style of line used to render the control
-
-    SlidSignalType& SlidSignal() {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
     //@}
 
 protected:
@@ -118,7 +118,7 @@ private:
     int                  m_tab_drag_offset;
     shared_ptr<Button>   m_tab;
 
-    SlidSignalType       m_slid_sig;
+    mutable SlidSignalType m_slid_sig;
 };
 
 } // namespace GG

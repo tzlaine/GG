@@ -59,10 +59,8 @@ struct MenuItem
    
     /** \name Accessors */ //@{
     XMLElement XMLEncode() const; ///< constructs an XMLElement from an MenuItem object
-    //@}
 
-    /** \name Mutators */ //@{
-    SelectedSignalType& SelectedSignal() {return *selected_signal;} ///< returns the selected signal object for this MenuItem
+    SelectedSignalType& SelectedSignal() const {return *selected_signal;} ///< returns the selected signal object for this MenuItem
     //@}
 
     string           label;      ///< text shown for this menu item
@@ -122,6 +120,8 @@ public:
     Clr               SelectedTextColor() const  {return m_sel_text_color;} ///< returns the color used to render a hilited menu item's text
    
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an MenuBar object
+
+    BrowsedSignalType& BrowsedSignal() const     {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
    
     /** \name Mutators */ //@{
@@ -143,8 +143,6 @@ public:
     void           SetTextColor(Clr clr)         {m_text_color = clr;}      ///< sets the color used to render menu item text
     void           SetHiliteColor(Clr clr)       {m_hilite_color = clr;}    ///< sets the color used to indicate a hilited menu item
     void           SetSelectedTextColor(Clr clr) {m_sel_text_color = clr;}  ///< sets the color used to render a hilited menu item's text
-   
-    BrowsedSignalType& BrowsedSignal()           {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
 
 protected:
@@ -169,7 +167,7 @@ private:
     vector<TextControl*> m_menu_labels; ///< the text for each top-level menu item
     int                  m_caret;       ///< the currently indicated top-level menu (open or under the cursor)
    
-    BrowsedSignalType m_browsed_signal;
+    mutable BrowsedSignalType m_browsed_signal;
 };
 
 
@@ -210,6 +208,8 @@ public:
     Clr         TextColor() const          {return m_text_color;}     ///< returns the color used to render menu item text
     Clr         HiliteColor() const        {return m_hilite_color;}   ///< returns the color used to indicate a hilited menu item
     Clr         SelectedTextColor() const  {return m_sel_text_color;} ///< returns the color used to render a hilited menu item's text
+   
+    BrowsedSignalType& BrowsedSignal() const {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
    
     /** \name Mutators */ //@{
@@ -229,8 +229,6 @@ public:
     void           SetTextColor(Clr clr)         {m_text_color = clr;}      ///< sets the color used to render menu item text
     void           SetHiliteColor(Clr clr)       {m_hilite_color = clr;}    ///< sets the color used to indicate a hilited menu item
     void           SetSelectedTextColor(Clr clr) {m_sel_text_color = clr;}  ///< sets the color used to render a hilited menu item's text
-   
-    BrowsedSignalType& BrowsedSignal()           {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
 
 protected:
@@ -258,7 +256,7 @@ private:
     const Pt          m_origin;         ///< the upper left hand corner of the control's visible area
     MenuItem*         m_item_selected;  ///< the menu item selected (0 if none)
    
-    BrowsedSignalType m_browsed_signal;
+    mutable BrowsedSignalType m_browsed_signal;
 };
 
 } // namespace GG

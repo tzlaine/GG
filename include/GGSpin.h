@@ -269,6 +269,8 @@ public:
 
         return retval;
     }
+
+    ValueChangedSignalType& ValueChangedSignal() const {return m_value_changed_sig;} ///< returns the value changed signal object for this DynamicGraphic
     //@}
 
     /** \name Mutators */ //@{
@@ -436,8 +438,6 @@ public:
     void           SetInteriorColor(Clr c)       {m_edit->SetInteriorColor(c);}      ///< sets the interior color of the control
     void           SetHiliteColor(Clr c)         {m_edit->SetHiliteColor(c);}        ///< sets the color used to render hiliting around selected text
     void           SetSelectedTextColor(Clr c)   {m_edit->SetSelectedTextColor(c);}  ///< sets the color used to render selected text   
-   
-    ValueChangedSignalType& ValueChangedSignal() {return m_value_changed_sig;} ///< returns the value changed signal object for this DynamicGraphic
     //@}
 
     /** returns a std::string representing this Spin's exact type, including the type of its data, to aid with automatic
@@ -516,7 +516,7 @@ private:
    
     boost::signals::connection m_edit_connection;
 
-    ValueChangedSignalType  m_value_changed_sig;
+    mutable ValueChangedSignalType m_value_changed_sig;
 };
 
 namespace details {

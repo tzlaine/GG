@@ -172,17 +172,19 @@ enum WndRegion {
 /** These flags are packed (via logical or) into a 32-bit unsigned int.  Bits 16-23 of the uint specify the number of 
    characters for each tab. The default number of characters per tab is 8.*/
 enum TextFormat {
-    TF_NONE =      0,
-    TF_VCENTER =   1 << 0,     ///< Centers text vertically.
-    TF_TOP =       1 << 1,     ///< Top-justifies text.
-    TF_BOTTOM =    1 << 2,     ///< Justifies the text to the bottom of the rectangle.
+    TF_NONE =       0,
+    TF_VCENTER =    1 << 0,     ///< Centers text vertically.
+    TF_TOP =        1 << 1,     ///< Top-justifies text.
+    TF_BOTTOM =     1 << 2,     ///< Justifies the text to the bottom of the rectangle.
     
-    TF_CENTER =    1 << 3,     ///< Centers text horizontally in the rectangle. 
-    TF_LEFT =      1 << 4,     ///< Aligns text to the left. 
-    TF_RIGHT =     1 << 5,     ///< Aligns text to the right. 
+    TF_CENTER =     1 << 3,     ///< Centers text horizontally in the rectangle. 
+    TF_LEFT =       1 << 4,     ///< Aligns text to the left. 
+    TF_RIGHT =      1 << 5,     ///< Aligns text to the right. 
 
-    TF_WORDBREAK = 1 << 6,     ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
-    TF_LINEWRAP =  1 << 7      ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
+    TF_WORDBREAK =  1 << 6,     ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
+    TF_LINEWRAP =   1 << 7,     ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
+
+    TF_IGNORETAGS = 1 << 8      ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
 };
 
 // define EnumMap and stream operators for TextFormat
@@ -196,6 +198,7 @@ ENUM_MAP_BEGIN(TextFormat)
     ENUM_MAP_INSERT(TF_RIGHT)
     ENUM_MAP_INSERT(TF_WORDBREAK)
     ENUM_MAP_INSERT(TF_LINEWRAP)
+    ENUM_MAP_INSERT(TF_IGNORETAGS)
 ENUM_MAP_END
 
 ENUM_STREAM_IN(TextFormat)

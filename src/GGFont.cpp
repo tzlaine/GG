@@ -81,7 +81,8 @@ Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RA
         m_pt_sz(pts),
         m_glyph_range(range)
 {
-    Init(font_filename, pts, range);
+	if (font_filename != "")
+		Init(font_filename, pts, range);
 }
 
 Font::Font(const XMLElement& elem)
@@ -98,7 +99,8 @@ Font::Font(const XMLElement& elem)
     curr_elem = &elem.Child("m_glyph_range");
     int range = lexical_cast<int>(curr_elem->Attribute("value"));
 
-    Init(font_filename, pts, range);
+    if (font_filename != "")
+		Init(font_filename, pts, range);
 }
 
 int Font::RenderGlyph(int x, int y, char c) const
@@ -797,12 +799,12 @@ FontManager::FontManager()
 
 shared_ptr<Font> FontManager::GetFont(const string& font_filename, int pts, Uint32 range/* = GGFont::ALL_DEFINED_RANGES*/)
 {
-    static const shared_ptr<Font> ZERO_SHARED_PTR;
+    static const shared_ptr<Font> EMPTY_FONT(new Font("", 0));
     FontKey key(font_filename, pts);
     std::map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
     if (it == m_rendered_fonts.end()) { // if no such font has been created, create it now
         if (font_filename == "")
-            return ZERO_SHARED_PTR; // keeps this function from throwing; "" is the only invalid font filename that shouldn't throw
+            return EMPTY_FONT; // keeps this function from throwing; "" is the only invalid font filename that shouldn't throw
         else
             return (m_rendered_fonts[key] = shared_ptr<Font>(new Font(font_filename, pts, range)));
         // if a font like this has been created, but it doesn't have all the right glyphs, release it and create a new one

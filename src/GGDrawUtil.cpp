@@ -28,6 +28,10 @@
 
 #include "GGApp.h"
 
+#include <valarray>
+
+using std::valarray;
+
 namespace GG {
 
 namespace { // file-scope constants and functions

@@ -41,6 +41,8 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #ifdef _MSC_VER
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
+# undef min
+# undef max
 # ifdef GIGI_EXPORTS
 #  define GG_API __declspec(dllexport)
 # else
@@ -107,7 +109,6 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #include <list>
 #include <algorithm>
 #include <cmath>
-#include <valarray>
 #include <numeric>
 
 /** \namespace GG
@@ -128,7 +129,6 @@ using std::set;
 using std::multimap;
 using std::list;
 using std::pair;
-using std::valarray;
 
 
 /** This is a base class for all GG exceptions.  It is based on the std::exception class.  Since it is preferable that exceptions

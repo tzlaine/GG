@@ -123,6 +123,8 @@ namespace {
         vector<shared_ptr<Font::TextElement> >& elements;
     };
 
+    boost::spirit::rule<> ws_p = (*boost::spirit::blank_p >> (boost::spirit::eol_p | '\n' | '\r' | '\f')) | +boost::spirit::blank_p;
+
     struct HandleWhitespaceFunctor
     {
         HandleWhitespaceFunctor(vector<shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
@@ -130,14 +132,13 @@ namespace {
             {
                 vector<string> string_vec;
                 using namespace boost::spirit;
-                rule<> ws_parser = *(((*blank_p >> eol_p) | +blank_p)[AppendToken(string_vec)]);
                 string ws_str = string(first, last);
-                parse(ws_str.c_str(), ws_parser);
+                parse(ws_str.c_str(), ws_p[AppendToken(string_vec)]);
                 for (unsigned int i = 0; i < string_vec.size(); ++i) {
                     shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
                     element->text = string(first, last);
                     elements.push_back(element);
-                    if (string_vec[i][string_vec[i].size() - 1] == '\n') {
+                    if (string_vec[i].substr(string_vec[i].size() - 1).find_first_of("\n\f\r") != std::string::npos) {
                         shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
                         elements.push_back(element);
                     }
@@ -456,7 +457,6 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
     rule<> close_tag_p = str_p("</") >> +(anychar_p - '>') >> '>';
     rule<> open_tag_p = ch_p('<') >> +(anychar_p - '>') >> '>';
     rule<> text_p = +(anychar_p - (close_tag_p | open_tag_p | space_p));
-    rule<> ws_p = +space_p;
     if (format & TF_IGNORETAGS) {
         text_p = +(anychar_p - space_p);
         rule<> lines_parser = *(text_p[HandleTextFunctor(text_elements)] |

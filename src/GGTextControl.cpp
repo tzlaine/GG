@@ -61,10 +61,10 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const st
     if (m_font) m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
 }
 
-TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
+TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
                          Uint32 flags/* = 0*/) :
     Control(x, y, 0, 0, flags),
-    m_format(0),
+    m_format(text_fmt),
     m_text_color(color),
     m_font(font),
     m_fit_to_text(true)
@@ -77,10 +77,10 @@ TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>
     }
 }
 
-TextControl::TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
+TextControl::TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
                          Uint32 flags/* = 0*/) :
     Control(x, y, 0, 0, flags),
-    m_format(0),
+    m_format(text_fmt),
     m_text_color(color),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_fit_to_text(true)

@@ -62,12 +62,12 @@ public:
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 flags = 0);
+    TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
    
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 flags = 0);
+    TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
    
     TextControl(const XMLElement& elem); ///< ctor that constructs a TextControl object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a TextControl object
     //@}

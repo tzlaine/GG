@@ -319,6 +319,9 @@ void Edit::Keypress(Key key, Uint32 key_mods)
             break;
         }
         if (emit_signal) m_edited_sig(m_text);
+    } else {
+        if (Parent())
+            Parent()->Keypress(key, key_mods);
     }
 }
 

@@ -212,10 +212,12 @@ void Scroll::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 
 void Scroll::LButtonUp(const Pt& pt, Uint32 keys)
 {
-    m_decr->SetState(Button::BN_UNPRESSED);
-    m_incr->SetState(Button::BN_UNPRESSED);
-    m_initial_depressed_area = SBR_NONE;
-    m_depressed_area = SBR_NONE;
+    if (!Disabled()) {
+        m_decr->SetState(Button::BN_UNPRESSED);
+        m_incr->SetState(Button::BN_UNPRESSED);
+        m_initial_depressed_area = SBR_NONE;
+        m_depressed_area = SBR_NONE;
+    }
 }
 
 void Scroll::SizeMove(int x1, int y1, int x2, int y2)

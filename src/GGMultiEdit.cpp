@@ -262,7 +262,7 @@ void MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 
 void MultiEdit::MouseWheel(const Pt& pt, int move, Uint32 keys)
 {
-    if (m_vscroll) {
+    if (!Disabled() && m_vscroll) {
         for (int i = 0; i < move; ++i)
             m_vscroll->ScrollLineDecr();
         for (int i = 0; i < -move; ++i)
@@ -272,206 +272,18 @@ void MultiEdit::MouseWheel(const Pt& pt, int move, Uint32 keys)
 
 void MultiEdit::Keypress(Key key, Uint32 key_mods)
 {
-    if (!Disabled() && !(m_style & READ_ONLY)) {
-        bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
-        bool emit_signal = false;
-        switch (key) {
-        case GGK_RETURN:
-        case GGK_KP_ENTER: {
-            if (MultiSelected())
-                ClearSelected();
-            Insert(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second), '\n');
-            ++m_cursor_begin.first;
-            m_cursor_begin.second = 0;
-            // the cursor might be off the bottom if the bottom row was just chopped off to satisfy m_max_lines_history
-            if (static_cast<int>(GetLineData().size()) - 1 < m_cursor_begin.first) {
-                m_cursor_begin.first = static_cast<int>(GetLineData().size()) - 1;
-                m_cursor_begin.second = static_cast<int>(GetLineData()[m_cursor_begin.first].extents.size());
-            }
-            m_cursor_end = m_cursor_begin;
-            emit_signal = true;
-            break;
-        }
-
-        case GGK_LEFT: {
-            if (MultiSelected() && !shift_down) {
-                m_cursor_begin = m_cursor_end = LowCursorPos();
-            } else if (0 < m_cursor_end.second) {
-                --m_cursor_end.second;
-                int extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
-                while (0 < m_cursor_end.second && extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second - 1])
-                    --m_cursor_end.second;
-                // if we're at the beginning of a line and there are only tag characters here, go up to the previous line, if any
-                if (!m_cursor_end.second && !GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] && 0 < m_cursor_end.first) {
-                    --m_cursor_end.first;
-                    m_cursor_end.second = GetLineData()[m_cursor_end.first].extents.size();
-                    int extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
-                    while (0 < m_cursor_end.second && extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second - 1])
-                        --m_cursor_end.second;
-                }
-            } else if (0 < m_cursor_end.first) {
-                --m_cursor_end.first;
-                m_cursor_end.second = GetLineData()[m_cursor_end.first].extents.size();
-                int extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
-                while (0 < m_cursor_end.second && extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second - 1])
-                    --m_cursor_end.second;
-            }
-            if (!shift_down)
-                m_cursor_begin = m_cursor_end;
-            break;
-        }
-
-        case GGK_RIGHT: {
-            int initial_extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
-            if (MultiSelected() && !shift_down) {
-                m_cursor_begin = m_cursor_end = HighCursorPos();
-            } else if (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size())) {
-                // if there are all tags on this line, we need to skip down to the next line, if one exists
-                if (!GetLineData()[m_cursor_end.first].extents.back()) {
-                    if (m_cursor_end.first < static_cast<int>(GetLineData().size() - 1)) {
-                        ++m_cursor_end.first;
-                        m_cursor_end.second = 0;
-                        while (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) && 
-                               !GetLineData()[m_cursor_end.first].extents[m_cursor_end.second])
-                            ++m_cursor_end.second;
-                    }
-                } else {
-                    while (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) - 1 && 
-                           initial_extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second + 1])
-                        ++m_cursor_end.second;
-                    ++m_cursor_end.second;
-                }
-            } else if (m_cursor_end.first < static_cast<int>(GetLineData().size()) - 1) {
-                ++m_cursor_end.first;
-                m_cursor_end.second = 0;
-                while (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) && 
-                       !GetLineData()[m_cursor_end.first].extents[m_cursor_end.second])
-                    ++m_cursor_end.second;
-            }
-            if (!shift_down)
-                m_cursor_begin = m_cursor_end;
-            break;
-        }
-
-        case GGK_UP: {
-            if (MultiSelected() && !shift_down) {
-                m_cursor_begin = m_cursor_end = LowCursorPos();
-            } else if (0 < m_cursor_end.first) {
-                int row_start = RowStartX(m_cursor_end.first);
-                int char_offset = CharXOffset(m_cursor_end.first, m_cursor_end.second);
-                --m_cursor_end.first;
-                m_cursor_end.second = CharAt(m_cursor_end.first, row_start + char_offset);
-                if (!shift_down)
-                    m_cursor_begin = m_cursor_end;
-            }
-            break;
-        }
-
-        case GGK_DOWN: {
-            if (MultiSelected() && !shift_down) {
-                m_cursor_begin = m_cursor_end = HighCursorPos();
-            } else if (m_cursor_end.first < static_cast<int>(GetLineData().size()) - 1) {
-                int row_start = RowStartX(m_cursor_end.first);
-                int char_offset = CharXOffset(m_cursor_end.first, m_cursor_end.second);
-                ++m_cursor_end.first;
-                m_cursor_end.second = CharAt(m_cursor_end.first, row_start + char_offset);
-                if (!shift_down)
-                    m_cursor_begin = m_cursor_end;
-            }
-            break;
-        }
-
-        case GGK_HOME: {
-            if (shift_down) {
-                m_cursor_end.second = 0;
-            } else {
-                m_cursor_begin.second = 0;
-                m_cursor_end = m_cursor_begin;
-            }
-            break;
-        }
-
-        case GGK_END: {
-            if (shift_down) {
-                m_cursor_end.second = GetLineData()[m_cursor_end.first].extents.size();
-            } else {
-                m_cursor_begin.second = GetLineData()[m_cursor_begin.first].extents.size();
-                m_cursor_end = m_cursor_begin;
-            }
-            break;
-        }
-
-        case GGK_PAGEUP: {
-            if (m_vscroll) {
-                m_vscroll->ScrollPageDecr();
-                int rows_moved = m_vscroll->PageSize() / GetFont()->Lineskip();
-                m_cursor_end.first = std::max(0, m_cursor_end.first - rows_moved);
-                if (static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) < m_cursor_end.second)
-                    m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].extents.size());
-                m_cursor_begin = m_cursor_end;
-            }
-            break;
-        }
-
-        case GGK_PAGEDOWN: {
-            if (m_vscroll) {
-                m_vscroll->ScrollPageIncr();
-                int rows_moved = m_vscroll->PageSize() / GetFont()->Lineskip();
-                m_cursor_end.first = std::min(m_cursor_end.first + rows_moved, static_cast<int>(GetLineData().size()) - 1);
-                if (static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) < m_cursor_end.second)
-                    m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].extents.size());
-                m_cursor_begin = m_cursor_end;
-            }
-            break;
-        }
-
-        case GGK_BACKSPACE: {
-            if (MultiSelected()) {
-                ClearSelected();
-                emit_signal = true;
-            } else if (0 < m_cursor_begin.second) {
-                m_cursor_end.second = --m_cursor_begin.second;
-                Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
-                emit_signal = true;
-            } else if (0 < m_cursor_begin.first) {
-                m_cursor_end.first = --m_cursor_begin.first;
-                m_cursor_end.second = m_cursor_begin.second = GetLineData()[m_cursor_begin.first].extents.size();
-                Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
-                emit_signal = true;
-            }
-            break;
-        }
-
-        case GGK_DELETE: {
-            if (MultiSelected()) {
-                ClearSelected();
-                emit_signal = true;
-            } else if (m_cursor_begin.second < static_cast<int>(GetLineData()[m_cursor_begin.first].extents.size())) {
-                Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
-                emit_signal = true;
-            } else if (m_cursor_begin.first < static_cast<int>(GetLineData().size()) - 1) {
-                int begin = StringIndexOf(m_cursor_begin.first, m_cursor_begin.second);
-                int length = StringIndexOf(m_cursor_begin.first + 1, 0) - begin;
-                Erase(begin, length);
-                emit_signal = true;
-            }
-            break;
-        }
-
-        default: {
-            // only process it if it's a printable character, and no significant modifiers are in use
-            if (isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
+    if (!Disabled()) {
+        if (!(m_style & READ_ONLY)) {
+            bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
+            bool emit_signal = false;
+            switch (key) {
+            case GGK_RETURN:
+            case GGK_KP_ENTER: {
                 if (MultiSelected())
                     ClearSelected();
-                // insert the character to the right of the caret
-                Insert(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second), key);
-                // then move the caret fwd one.
-                if (m_cursor_begin.second < static_cast<int>(GetLineData()[m_cursor_begin.first].extents.size())) {
-                    ++m_cursor_begin.second;
-                } else {
-                    ++m_cursor_begin.first;
-                    m_cursor_begin.second = 1;
-                }
+                Insert(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second), '\n');
+                ++m_cursor_begin.first;
+                m_cursor_begin.second = 0;
                 // the cursor might be off the bottom if the bottom row was just chopped off to satisfy m_max_lines_history
                 if (static_cast<int>(GetLineData().size()) - 1 < m_cursor_begin.first) {
                     m_cursor_begin.first = static_cast<int>(GetLineData().size()) - 1;
@@ -479,15 +291,208 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
                 }
                 m_cursor_end = m_cursor_begin;
                 emit_signal = true;
-            } else if (Parent()) {
-                return Parent()->Keypress(key, key_mods);
+                break;
             }
-            break;
+
+            case GGK_LEFT: {
+                if (MultiSelected() && !shift_down) {
+                    m_cursor_begin = m_cursor_end = LowCursorPos();
+                } else if (0 < m_cursor_end.second) {
+                    --m_cursor_end.second;
+                    int extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
+                    while (0 < m_cursor_end.second && extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second - 1])
+                        --m_cursor_end.second;
+                    // if we're at the beginning of a line and there are only tag characters here, go up to the previous line, if any
+                    if (!m_cursor_end.second && !GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] && 0 < m_cursor_end.first) {
+                        --m_cursor_end.first;
+                        m_cursor_end.second = GetLineData()[m_cursor_end.first].extents.size();
+                        int extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
+                        while (0 < m_cursor_end.second && extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second - 1])
+                            --m_cursor_end.second;
+                    }
+                } else if (0 < m_cursor_end.first) {
+                    --m_cursor_end.first;
+                    m_cursor_end.second = GetLineData()[m_cursor_end.first].extents.size();
+                    int extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
+                    while (0 < m_cursor_end.second && extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second - 1])
+                        --m_cursor_end.second;
+                }
+                if (!shift_down)
+                    m_cursor_begin = m_cursor_end;
+                break;
+            }
+
+            case GGK_RIGHT: {
+                int initial_extent = GetLineData()[m_cursor_end.first].extents.size() ? GetLineData()[m_cursor_end.first].extents[m_cursor_end.second] : 0;
+                if (MultiSelected() && !shift_down) {
+                    m_cursor_begin = m_cursor_end = HighCursorPos();
+                } else if (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size())) {
+                    // if there are all tags on this line, we need to skip down to the next line, if one exists
+                    if (!GetLineData()[m_cursor_end.first].extents.back()) {
+                        if (m_cursor_end.first < static_cast<int>(GetLineData().size() - 1)) {
+                            ++m_cursor_end.first;
+                            m_cursor_end.second = 0;
+                            while (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) && 
+                                !GetLineData()[m_cursor_end.first].extents[m_cursor_end.second])
+                                ++m_cursor_end.second;
+                        }
+                    } else {
+                        while (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) - 1 && 
+                            initial_extent == GetLineData()[m_cursor_end.first].extents[m_cursor_end.second + 1])
+                            ++m_cursor_end.second;
+                        ++m_cursor_end.second;
+                    }
+                } else if (m_cursor_end.first < static_cast<int>(GetLineData().size()) - 1) {
+                    ++m_cursor_end.first;
+                    m_cursor_end.second = 0;
+                    while (m_cursor_end.second < static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) && 
+                        !GetLineData()[m_cursor_end.first].extents[m_cursor_end.second])
+                        ++m_cursor_end.second;
+                }
+                if (!shift_down)
+                    m_cursor_begin = m_cursor_end;
+                break;
+            }
+
+            case GGK_UP: {
+                if (MultiSelected() && !shift_down) {
+                    m_cursor_begin = m_cursor_end = LowCursorPos();
+                } else if (0 < m_cursor_end.first) {
+                    int row_start = RowStartX(m_cursor_end.first);
+                    int char_offset = CharXOffset(m_cursor_end.first, m_cursor_end.second);
+                    --m_cursor_end.first;
+                    m_cursor_end.second = CharAt(m_cursor_end.first, row_start + char_offset);
+                    if (!shift_down)
+                        m_cursor_begin = m_cursor_end;
+                }
+                break;
+            }
+
+            case GGK_DOWN: {
+                if (MultiSelected() && !shift_down) {
+                    m_cursor_begin = m_cursor_end = HighCursorPos();
+                } else if (m_cursor_end.first < static_cast<int>(GetLineData().size()) - 1) {
+                    int row_start = RowStartX(m_cursor_end.first);
+                    int char_offset = CharXOffset(m_cursor_end.first, m_cursor_end.second);
+                    ++m_cursor_end.first;
+                    m_cursor_end.second = CharAt(m_cursor_end.first, row_start + char_offset);
+                    if (!shift_down)
+                        m_cursor_begin = m_cursor_end;
+                }
+                break;
+            }
+
+            case GGK_HOME: {
+                if (shift_down) {
+                    m_cursor_end.second = 0;
+                } else {
+                    m_cursor_begin.second = 0;
+                    m_cursor_end = m_cursor_begin;
+                }
+                break;
+            }
+
+            case GGK_END: {
+                if (shift_down) {
+                    m_cursor_end.second = GetLineData()[m_cursor_end.first].extents.size();
+                } else {
+                    m_cursor_begin.second = GetLineData()[m_cursor_begin.first].extents.size();
+                    m_cursor_end = m_cursor_begin;
+                }
+                break;
+            }
+
+            case GGK_PAGEUP: {
+                if (m_vscroll) {
+                    m_vscroll->ScrollPageDecr();
+                    int rows_moved = m_vscroll->PageSize() / GetFont()->Lineskip();
+                    m_cursor_end.first = std::max(0, m_cursor_end.first - rows_moved);
+                    if (static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) < m_cursor_end.second)
+                        m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].extents.size());
+                    m_cursor_begin = m_cursor_end;
+                }
+                break;
+            }
+
+            case GGK_PAGEDOWN: {
+                if (m_vscroll) {
+                    m_vscroll->ScrollPageIncr();
+                    int rows_moved = m_vscroll->PageSize() / GetFont()->Lineskip();
+                    m_cursor_end.first = std::min(m_cursor_end.first + rows_moved, static_cast<int>(GetLineData().size()) - 1);
+                    if (static_cast<int>(GetLineData()[m_cursor_end.first].extents.size()) < m_cursor_end.second)
+                        m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].extents.size());
+                    m_cursor_begin = m_cursor_end;
+                }
+                break;
+            }
+
+            case GGK_BACKSPACE: {
+                if (MultiSelected()) {
+                    ClearSelected();
+                    emit_signal = true;
+                } else if (0 < m_cursor_begin.second) {
+                    m_cursor_end.second = --m_cursor_begin.second;
+                    Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
+                    emit_signal = true;
+                } else if (0 < m_cursor_begin.first) {
+                    m_cursor_end.first = --m_cursor_begin.first;
+                    m_cursor_end.second = m_cursor_begin.second = GetLineData()[m_cursor_begin.first].extents.size();
+                    Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
+                    emit_signal = true;
+                }
+                break;
+            }
+
+            case GGK_DELETE: {
+                if (MultiSelected()) {
+                    ClearSelected();
+                    emit_signal = true;
+                } else if (m_cursor_begin.second < static_cast<int>(GetLineData()[m_cursor_begin.first].extents.size())) {
+                    Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
+                    emit_signal = true;
+                } else if (m_cursor_begin.first < static_cast<int>(GetLineData().size()) - 1) {
+                    int begin = StringIndexOf(m_cursor_begin.first, m_cursor_begin.second);
+                    int length = StringIndexOf(m_cursor_begin.first + 1, 0) - begin;
+                    Erase(begin, length);
+                    emit_signal = true;
+                }
+                break;
+            }
+
+            default: {
+                // only process it if it's a printable character, and no significant modifiers are in use
+                if (isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
+                    if (MultiSelected())
+                        ClearSelected();
+                    // insert the character to the right of the caret
+                    Insert(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second), key);
+                    // then move the caret fwd one.
+                    if (m_cursor_begin.second < static_cast<int>(GetLineData()[m_cursor_begin.first].extents.size())) {
+                        ++m_cursor_begin.second;
+                    } else {
+                        ++m_cursor_begin.first;
+                        m_cursor_begin.second = 1;
+                    }
+                    // the cursor might be off the bottom if the bottom row was just chopped off to satisfy m_max_lines_history
+                    if (static_cast<int>(GetLineData().size()) - 1 < m_cursor_begin.first) {
+                        m_cursor_begin.first = static_cast<int>(GetLineData().size()) - 1;
+                        m_cursor_begin.second = static_cast<int>(GetLineData()[m_cursor_begin.first].extents.size());
+                    }
+                    m_cursor_end = m_cursor_begin;
+                    emit_signal = true;
+                } else if (Parent()) {
+                    Parent()->Keypress(key, key_mods);
+                }
+                break;
+            }
+            }
+            AdjustView();
+            if (emit_signal)
+                EditedSignal()(m_text);
         }
-        }
-        AdjustView();
-        if (emit_signal)
-            EditedSignal()(m_text);
+    } else {
+        if (Parent())
+            Parent()->Keypress(key, key_mods);
     }
 }
 

@@ -196,39 +196,46 @@ void Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 
 void Slider::Keypress(Key key, Uint32 key_mods)
 {
-    switch (key) {
-    case GGK_HOME:
-        SlideTo(m_range_min);
-        break;
-    case GGK_END:
-        SlideTo(m_range_max);
-        break;
-    case GGK_UP:
-        if (m_orientation != HORIZONTAL)
-            SlideTo(m_posn + ((m_range_max - m_range_min) > 0 ? 1 : -1));
-        break;
-    case GGK_RIGHT:
-        if (m_orientation != VERTICAL)
-            SlideTo(m_posn + ((m_range_max - m_range_min) > 0 ? 1 : -1));
-        break;
-    case GGK_DOWN:
-        if (m_orientation != HORIZONTAL)
-            SlideTo(m_posn - ((m_range_max - m_range_min) > 0 ? 1 : -1));
-        break;
-    case GGK_LEFT:
-        if (m_orientation != VERTICAL)
-            SlideTo(m_posn - ((m_range_max - m_range_min) > 0 ? 1 : -1));
-        break;
-    case GGK_PLUS:
-    case GGK_KP_PLUS:
-        SlideTo(m_posn + 1);
-        break;
-    case GGK_MINUS:
-    case GGK_KP_MINUS:
-        SlideTo(m_posn - 1);
-        break;
-    default:
-        break;
+    if (!Disabled()) {
+        switch (key) {
+        case GGK_HOME:
+            SlideTo(m_range_min);
+            break;
+        case GGK_END:
+            SlideTo(m_range_max);
+            break;
+        case GGK_UP:
+            if (m_orientation != HORIZONTAL)
+                SlideTo(m_posn + ((m_range_max - m_range_min) > 0 ? 1 : -1));
+            break;
+        case GGK_RIGHT:
+            if (m_orientation != VERTICAL)
+                SlideTo(m_posn + ((m_range_max - m_range_min) > 0 ? 1 : -1));
+            break;
+        case GGK_DOWN:
+            if (m_orientation != HORIZONTAL)
+                SlideTo(m_posn - ((m_range_max - m_range_min) > 0 ? 1 : -1));
+            break;
+        case GGK_LEFT:
+            if (m_orientation != VERTICAL)
+                SlideTo(m_posn - ((m_range_max - m_range_min) > 0 ? 1 : -1));
+            break;
+        case GGK_PLUS:
+        case GGK_KP_PLUS:
+            SlideTo(m_posn + 1);
+            break;
+        case GGK_MINUS:
+        case GGK_KP_MINUS:
+            SlideTo(m_posn - 1);
+            break;
+        default:
+            if (Parent())
+                Parent()->Keypress(key, key_mods);
+            break;
+        }
+    } else {
+        if (Parent())
+            Parent()->Keypress(key, key_mods);
     }
 }
 

@@ -159,44 +159,51 @@ bool DropDownList::Render()
 
 void DropDownList::LClick(const Pt& pt, Uint32 keys)
 {
-    ModalListPicker picker(this, m_LB);
-    const set<int>& LB_sels = m_LB->Selections();
-    if (!LB_sels.empty()) {
-        if (m_LB->m_vscroll)
-            m_LB->m_vscroll->ScrollTo(*LB_sels.begin() * m_LB->RowHeight());
+    if (!Disabled()) {
+        ModalListPicker picker(this, m_LB);
+        const set<int>& LB_sels = m_LB->Selections();
+        if (!LB_sels.empty()) {
+            if (m_LB->m_vscroll)
+                m_LB->m_vscroll->ScrollTo(*LB_sels.begin() * m_LB->RowHeight());
+        }
+        m_LB->m_first_col_shown = 0;
+        picker.Run();
     }
-    m_LB->m_first_col_shown = 0;
-    picker.Run();
 }
 
 void DropDownList::Keypress(Key key, Uint32 key_mods)
 {
-    switch (key) {
-    case GGK_UP: // arrow-up (not numpad arrow)
-        if (1 <= m_current_item_idx)
-            Select(std::max(0, m_current_item_idx - 1));
-        break;
-    case GGK_DOWN: // arrow-down (not numpad arrow)
-        if (m_current_item_idx < m_LB->NumRows())
-            Select(std::min(m_current_item_idx + 1, m_LB->NumRows() - 1));
-        break;
-    case GGK_PAGEUP: // page up key (not numpad key)
-        if (m_LB->NumRows())
-            Select(std::max(0, m_current_item_idx - 10));
-        break;
-    case GGK_PAGEDOWN: // page down key (not numpad key)
-        if (m_LB->NumRows())
-            Select(std::min(m_current_item_idx + 10, m_LB->NumRows() - 1));
-        break;
-    case GGK_HOME: // home key (not numpad)
-        if (m_LB->NumRows())
-            Select(0);
-        break;
-    case GGK_END: // end key (not numpad)
-        if (m_LB->NumRows())
-            Select(m_LB->NumRows() - 1);
-        break;
-    default: // any other key gets passed along to the parent
+    if (!Disabled()) {
+        switch (key) {
+        case GGK_UP: // arrow-up (not numpad arrow)
+            if (1 <= m_current_item_idx)
+                Select(std::max(0, m_current_item_idx - 1));
+            break;
+        case GGK_DOWN: // arrow-down (not numpad arrow)
+            if (m_current_item_idx < m_LB->NumRows())
+                Select(std::min(m_current_item_idx + 1, m_LB->NumRows() - 1));
+            break;
+        case GGK_PAGEUP: // page up key (not numpad key)
+            if (m_LB->NumRows())
+                Select(std::max(0, m_current_item_idx - 10));
+            break;
+        case GGK_PAGEDOWN: // page down key (not numpad key)
+            if (m_LB->NumRows())
+                Select(std::min(m_current_item_idx + 10, m_LB->NumRows() - 1));
+            break;
+        case GGK_HOME: // home key (not numpad)
+            if (m_LB->NumRows())
+                Select(0);
+            break;
+        case GGK_END: // end key (not numpad)
+            if (m_LB->NumRows())
+                Select(m_LB->NumRows() - 1);
+            break;
+        default: // any other key gets passed along to the parent
+            if (Parent())
+                Parent()->Keypress(key, key_mods);
+        }
+    } else {
         if (Parent())
             Parent()->Keypress(key, key_mods);
     }
@@ -236,10 +243,13 @@ void DropDownList::Clear()
 void DropDownList::Select(int row)
 {
     int old_m_current_item_idx = m_current_item_idx;
-    if (row < -1 || m_LB->NumRows() <= row)
+    if (row <= -1 || m_LB->NumRows() <= row) {
         m_current_item_idx = -1;
-    else
+        m_LB->ClearSelection();
+    } else {
         m_current_item_idx = row;
+        m_LB->SelectRow(m_current_item_idx);
+    }
 
     if (m_current_item_idx != old_m_current_item_idx)
         m_sel_changed_sig(m_current_item_idx);

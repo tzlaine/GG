@@ -573,77 +573,82 @@ void ListBox::RClick(const Pt& pt, Uint32 keys)
 
 void ListBox::Keypress(Key key, Uint32 key_mods)
 {
-    switch (key) {
-    case GGK_SPACE: // space bar (selects item under caret like a mouse click)
-        if (m_caret != -1)
-            ClickAtRow(m_caret, key_mods);
-        break;
-    case GGK_DELETE: // delete key
-        if (m_style & LB_USERDELETE) {
-            set<int>::reverse_iterator r_it;
-            while ((r_it = m_selections.rbegin()) != m_selections.rend())
-                Delete(*r_it);
-            m_selections.clear();
-        }
-        break;
+    if (!Disabled()) {
+        switch (key) {
+        case GGK_SPACE: // space bar (selects item under caret like a mouse click)
+            if (m_caret != -1)
+                ClickAtRow(m_caret, key_mods);
+            break;
+        case GGK_DELETE: // delete key
+            if (m_style & LB_USERDELETE) {
+                set<int>::reverse_iterator r_it;
+                while ((r_it = m_selections.rbegin()) != m_selections.rend())
+                    Delete(*r_it);
+                m_selections.clear();
+            }
+            break;
 
-        // vertical scrolling keys
-    case GGK_UP: // arrow-up (not numpad arrow)
-        if (m_caret > 0)
-            --m_caret;
-        break;
-    case GGK_DOWN: // arrow-down (not numpad arrow)
-        if (m_caret != -1 && m_caret < static_cast<int>(m_rows.size()) - 1)
-            ++m_caret;
-        break;
-    case GGK_PAGEUP: // page up key (not numpad key)
-        if (m_caret != -1) {
-            int space = ClientSize().y;
-            while (m_caret >= 1 && (space -= m_rows[m_caret - 1]->Height()) > 0)
+            // vertical scrolling keys
+        case GGK_UP: // arrow-up (not numpad arrow)
+            if (m_caret > 0)
                 --m_caret;
-        }
-        break;
-    case GGK_PAGEDOWN: // page down key (not numpad key)
-        if (m_caret != -1) {
-            int space = ClientSize().y;
-            while (m_caret < static_cast<int>(m_rows.size()) - 1 && (space -= m_rows[m_caret]->Height()) > 0)
+            break;
+        case GGK_DOWN: // arrow-down (not numpad arrow)
+            if (m_caret != -1 && m_caret < static_cast<int>(m_rows.size()) - 1)
                 ++m_caret;
-        }
-        break;
-    case GGK_HOME: // home key (not numpad)
-        if (m_caret != -1 && !m_rows.empty())
-            m_caret = 0;
-        break;
-    case GGK_END: // end key (not numpad)
-        if (m_caret != -1)
-            m_caret = static_cast<int>(m_rows.size()) - 1;
-        break;
+            break;
+        case GGK_PAGEUP: // page up key (not numpad key)
+            if (m_caret != -1) {
+                int space = ClientSize().y;
+                while (m_caret >= 1 && (space -= m_rows[m_caret - 1]->Height()) > 0)
+                    --m_caret;
+            }
+            break;
+        case GGK_PAGEDOWN: // page down key (not numpad key)
+            if (m_caret != -1) {
+                int space = ClientSize().y;
+                while (m_caret < static_cast<int>(m_rows.size()) - 1 && (space -= m_rows[m_caret]->Height()) > 0)
+                    ++m_caret;
+            }
+            break;
+        case GGK_HOME: // home key (not numpad)
+            if (m_caret != -1 && !m_rows.empty())
+                m_caret = 0;
+            break;
+        case GGK_END: // end key (not numpad)
+            if (m_caret != -1)
+                m_caret = static_cast<int>(m_rows.size()) - 1;
+            break;
 
-        // horizontal scrolling keys
-    case GGK_LEFT: // left key (not numpad key)
-        if (m_first_col_shown) {
-            --m_first_col_shown;
-            m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
-        }
-        break;
-    case GGK_RIGHT:{ // right key (not numpad)
-	    int last_fully_visible_col = LastVisibleCol();
-	    if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientSize().x)
-	        --last_fully_visible_col;
-	    if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
-	        ++m_first_col_shown;
-	        m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
-	    }
-	break;}
+            // horizontal scrolling keys
+        case GGK_LEFT: // left key (not numpad key)
+            if (m_first_col_shown) {
+                --m_first_col_shown;
+                m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
+            }
+            break;
+        case GGK_RIGHT:{ // right key (not numpad)
+	        int last_fully_visible_col = LastVisibleCol();
+	        if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientSize().x)
+	            --last_fully_visible_col;
+	        if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
+	            ++m_first_col_shown;
+	            m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
+	        }
+	    break;}
 
-        // any other key gets passed along to the parent
-    default:
+            // any other key gets passed along to the parent
+        default:
+            if (Parent())
+                Parent()->Keypress(key, key_mods);
+        }
+
+        if (key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT)
+            BringCaretIntoView();
+    } else {
         if (Parent())
             Parent()->Keypress(key, key_mods);
-    }
-
-    if (key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT)
-        BringCaretIntoView();
+   }
 }
 
 void ListBox::MouseHere(const Pt& pt, Uint32 keys)

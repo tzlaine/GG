@@ -61,19 +61,19 @@ public:
    
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int)>   SelChangedSignalType;   ///< emitted when a new item is selected; the int parameter will be -1 when no item is selected
-	//@}
+    //@}
 
     /** \name Slot Types */ //@{
     typedef SelChangedSignalType::slot_type   SelChangedSlotType;  ///< type of functor(s) invoked on a SelChangedSignalType
     //@}
 
     /** \name Structors */ //@{
-	/** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null.  Client code should \a not attempt to 
-		delete \a lb once it has been passed to the DropDownList ctor. */
+    /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null.  Client code should \a not attempt to 
+        delete \a lb once it has been passed to the DropDownList ctor. */
     DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb = 0, Uint32 flags = CLICKABLE);
 
-	/** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null.  Client code should \a not attempt to 
-		delete \a lb once it has been passed to the DropDownList ctor. */
+    /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null.  Client code should \a not attempt to 
+        delete \a lb once it has been passed to the DropDownList ctor. */
     DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior, ListBox* lb = 0, Uint32 flags = CLICKABLE);
 
     DropDownList(const XMLElement& elem); ///< ctor that constructs an DropDownList object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a DropDownList object
@@ -124,7 +124,7 @@ public:
                                               {m_LB->SetColAlignment(n, align);} ///< sets the alignment of column \a n to \a align; not range-checked
     void           SetRowAlignment(int n, Uint32 align) 
                                               {m_LB->SetRowAlignment(n, align);} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
-	void foo();
+    void foo();
 
     SelChangedSignalType& SelChangedSignal()  {return m_sel_changed_sig;}///< returns the selection change signal object for this DropDownList
     //@}

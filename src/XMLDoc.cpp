@@ -59,8 +59,14 @@
 
 #include "XMLDoc.h"
 
+#include <XMLValidators.h>
+
 #include <boost/spirit.hpp>
 
+#include <stdexcept>
+
+
+#define DEBUG_OUTPUT 0
 
 namespace GG {
 
@@ -451,6 +457,154 @@ XMLDoc::RuleDefiner::RuleDefiner()
         alpha_p >> *(EncNameCh)
         ;
 }
+
+////////////////////////////////////////////////
+// GG::XMLElementValidator
+////////////////////////////////////////////////
+XMLElementValidator::XMLElementValidator(const string& tag, ValidatorBase* text_validator/* = 0*/) : 
+    m_tag(tag), 
+    m_text_validator(text_validator)
+{
+}
+
+XMLElementValidator::XMLElementValidator(const string& tag, const XMLElementValidator& body) : 
+    m_tag(tag), 
+    m_text_validator(0), 
+    m_children(vector<XMLElementValidator>(1, body))
+{
+}
+
+XMLElementValidator::XMLElementValidator(const XMLElementValidator& rhs)
+{
+    m_tag = rhs.m_tag;
+    m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
+    for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
+	m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
+    }
+    for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
+	m_children.push_back(rhs.m_children[i]);
+    }
+}
+
+const XMLElementValidator& XMLElementValidator::operator=(const XMLElementValidator& rhs)
+{
+    if (this != &rhs) {
+	Clear();
+    
+	m_tag = rhs.m_tag;
+	m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
+	for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
+	    m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
+	}
+	for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
+	    m_children.push_back(rhs.m_children[i]);
+	}
+    }
+    return *this;
+}
+
+XMLElementValidator::~XMLElementValidator()
+{
+    Clear();
+}
+
+void XMLElementValidator::Validate(const XMLElement& elem) const
+{
+#if DEBUG_OUTPUT    
+    std::cout << "Validating " << m_tag << " with element with tag \"" << elem.Tag() << "\"" << std::endl;
+#endif
+    if (m_text_validator) {
+#if DEBUG_OUTPUT    
+	std::cout << "  checking text \"" << elem.Text() << "\"" << std::endl;
+#endif
+	m_text_validator->Validate(elem.Text());
+    }
+
+    if (static_cast<unsigned int>(elem.NumAttributes()) != m_attribute_validators.size()) {
+	throw std::runtime_error("XMLElementValidator::Validate() : Encountered an XMLElement with a different number "
+				 "of children than this XMLElementValidator.");
+    }
+
+    XMLElement::const_attr_iterator attrib_it = elem.attr_begin();
+    for (map<string, ValidatorBase*>::const_iterator it = m_attribute_validators.begin(); 
+	 it != m_attribute_validators.end(); 
+	 ++it, ++attrib_it) {
+	if (it->second) {
+#if DEBUG_OUTPUT    
+	    std::cout << "  checking attribute \"" << it->first << "\" value \"" << attrib_it->second << "\"" << std::endl;
+#endif
+	    it->second->Validate(attrib_it->second);
+	}
+    }
+
+    for (unsigned int i = 0; i < m_children.size(); ++i) {
+	m_children[i].Validate(elem.Child(i));
+    }
+#if DEBUG_OUTPUT    
+    std::cout << std::endl;
+#endif
+}
+
+XMLElementValidator& XMLElementValidator::Child(const string& child)
+{
+    unsigned int i = 0;
+    for (; i < m_children.size(); ++i) {
+        if (m_children[i].m_tag == child)
+            break;
+    }
+    return m_children[i];
+}
+
+void XMLElementValidator::SetAttribute(const string& attrib, ValidatorBase* value_validator)
+{
+    delete m_attribute_validators[attrib];
+    m_attribute_validators[attrib] = value_validator;
+}
+
+void XMLElementValidator::AppendChild(const XMLElementValidator& ev) 
+{
+    m_children.push_back(ev);
+}
+
+void XMLElementValidator::Clear()
+{
+    delete m_text_validator;
+    m_text_validator = 0;
+    for (map<string, ValidatorBase*>::iterator it = m_attribute_validators.begin(); it != m_attribute_validators.end(); ++it) {
+	delete it->second;
+    }
+    m_attribute_validators.clear();
+    m_children.clear();
+}
+
+
+////////////////////////////////////////////////
+// Free Functions
+////////////////////////////////////////////////
+vector<string> Tokenize(const string& str)
+{
+    vector<string> retval;
+    parse(str.c_str(), *space_p >> *((+(anychar_p - space_p))[append(retval)] >> *space_p));
+    return retval;
+}
+
+pair<vector<string>, vector<string> > TokenizeMapString(const string& str)
+{
+    pair<vector<string>, vector<string> > retval;
+    if (!parse(str.c_str(), 
+	       *space_p >> *(
+			     ch_p('(') >> *space_p >> 
+			     (+(anychar_p - space_p - ch_p(',')))[append(retval.first)] >> *space_p >> 
+			     ch_p(',') >> *space_p >> 
+			     (+(anychar_p - space_p - ch_p(')')))[append(retval.second)] >> *space_p >> 
+			     ch_p(')') >> *space_p
+		            )
+	       ).full) {
+	throw std::runtime_error("Tokenize() : The string \"" + str + "\" is not a well-formed map string.");
+    }
+    return retval;
+}
+
 
 } // namespace GG
 

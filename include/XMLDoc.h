@@ -28,21 +28,26 @@
 #ifndef _XMLDoc_h_
 #define _XMLDoc_h_
 
-#include <iostream>       
+#include <boost/lexical_cast.hpp>
+
 #include <fstream>       
+#include <iostream>       
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace GG {
 
-using std::ostream;
+class ValidatorBase;
+
+using std::ifstream;
 using std::istream;
 using std::ofstream;
-using std::ifstream;
+using std::ostream;
+using std::map;
+using std::pair;
 using std::string;
 using std::vector;
-using std::map;
 
 /** encapsulates an XML element (from a <> tag to a </> tag).  XMLElement is a simplified XML element, 
     consisting only of a tag, a single text string, attributes and child elements.  It is designed to represent 
@@ -64,8 +69,8 @@ using std::map;
     \verbatim
       <bar>
          <foo>
-            <ref_ct value="13"/>
-            <data value="0.364951"/>
+            <ref_ct>13<ref_ct/>
+            <data>0.364951<data/>
          </foo>
       </bar>
     \endverbatim
@@ -94,7 +99,7 @@ using std::map;
     Each of these yields a burns.Text() of "Say  Gracie.".  When an XMLElement is saved, its text is saved within a CDATA section.
     Any string can be put inside one of these quoted text fields, even text that includes an arbitrary number of quotes.  So you 
     can assign any std::string or c-string to an element.  However, when hand-editing an XML file containing such text strings, you
-    need to be a bit careful.  The closing quote must be either the last thing other than whitespace.  Adding 
+    need to be a bit careful.  The closing quote must be the last thing other than whitespace.  Adding 
     more than one quoted text string to the XML element, with each string separated by other elements, will result in a 
     single concatenated string, as illustrated above.
     This is not the most time- or space-efficient way to organize object data, but it may just be one of the simplest 
@@ -111,6 +116,7 @@ public:
     XMLElement() : m_root(false) {} ///< default ctor
     XMLElement(const string& tag) : m_tag(tag), m_text(""), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag
     XMLElement(const string& tag, const string& text) : m_tag(tag), m_text(text), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and text \a text
+    XMLElement(const string& tag, const XMLElement& body) : m_tag(tag), m_children(vector<XMLElement>(1, body)), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and a single child \a body
     //@}
 
     /** \name Accessors */ //@{
@@ -151,9 +157,13 @@ public:
         range-checked; be sure there are at least idx+1 elements before calling. */
     XMLElement& Child(unsigned int idx) {return m_children[idx];}
 
-    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
+    /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \note This function is not 
         checked; be sure there is such a child before calling. */   
     XMLElement& Child(const string& child);
+
+    /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
+        at least one child before calling. */   
+    XMLElement& LastChild() {return m_children.back();}
 
     /** sets an attribute \a attrib, whose value is \a val in the XMLElement.  No two attributes can have the same name. */
     void SetAttribute(const string& attrib, const string& val) {m_attributes[attrib] = val;} 
@@ -173,7 +183,7 @@ public:
     /** adds child XMLElement \a e to the end of the child list of the XMLElement */
     void AppendChild(const XMLElement& e) {m_children.push_back(e);}
 
-    /** creates an empty XMLElement with tag-name \a s, and adds it to the end of the child list of the XMLElement */
+    /** creates an empty XMLElement with tag-name \a child, and adds it to the end of the child list of the XMLElement */
     void AppendChild(const string& child) {m_children.push_back(XMLElement(child));}
 
     /** adds a child \a e in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
@@ -201,10 +211,6 @@ private:
     /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
         in an XMLDoc document*/
     XMLElement(const string& t, bool r) : m_tag(t), m_root(r) {}
-
-    /** returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-        at least one child before calling. */   
-    XMLElement& LastChild() {return m_children.back();}
 
     string               m_tag;        ///< the tag-name of the XMLElement
     string               m_text;       ///< the text of this XMLElement
@@ -267,6 +273,103 @@ private:
     static void PopElem(const char*, const char*);
     static void AppendToText(const char* first, const char* last);
 };
+
+class XMLElementValidator
+{
+public:
+    /** \name Structors */ //@{
+    XMLElementValidator(const string& tag, ValidatorBase* text_validator = 0);
+    XMLElementValidator(const string& tag, const XMLElementValidator& body); ///< ctor that constructs an XMLElement with a tag-name \a tag and a single child \a body
+    XMLElementValidator(const XMLElementValidator& rhs);
+    const XMLElementValidator& operator=(const XMLElementValidator& rhs);
+    ~XMLElementValidator();
+    //@}
+
+    /** \name Accessors */ //@{
+    void Validate(const XMLElement& elem) const;
+    //@}
+
+    /** \name Mutators */ //@{
+    /**  returns the child in the child list of the XMLElementValidator that has the tag-name \a child.  \note This function is not 
+        checked; be sure there is such a child before calling. */   
+    XMLElementValidator& Child(const string& child);
+
+    /**  returns the last child in the child list of the XMLElementValidator.  \note This function is not 
+        checked; be sure there is such a child before calling. */
+    XMLElementValidator& LastChild() {return m_children.back();}
+
+    void SetAttribute(const string& attrib, ValidatorBase* value_validator);
+    void AppendChild(const XMLElementValidator& ev);
+    //@}
+
+private:
+    void Clear();
+
+    string                       m_tag;
+    ValidatorBase*               m_text_validator;
+    map<string, ValidatorBase*>  m_attribute_validators;
+    vector<XMLElementValidator>  m_children;
+};
+
+
+/** Breaks a given string up into tokens.  The resulting vector contains all the non-whitespace characters from \a str. */
+vector<string> Tokenize(const string& str);
+
+/** Takes a string of the form "(first, second) (first, second) ..." and produces two vectors of token strings: 
+    one for keys and one for values. */
+pair<vector<string>, vector<string> > TokenizeMapString(const string& str);
+
+/** Takes any simple STL container (vector, set, etc.) and puts its contents into a whitespace-delimited list.  
+    Due to the key-value pair organization of STL maps, this function does not work with them.  Use StringFromMap() 
+    instead. */
+template <class Cont>
+string StringFromContainer(const Cont& container)
+{
+    string retval;
+    for (typename Cont::const_iterator it = container.begin(); it != container.end(); ++it) {
+	retval += boost::lexical_cast<string>(*it) + " ";
+    }
+    return retval;
+}
+
+/** Takes an STL map and puts its contents into a whitespace-delimited list, in the format "(first, second) (first, second) ...". */
+template <class T1, class T2>
+string StringFromMap(const map<T1, T2>& container)
+{
+    string retval;
+    for (typename map<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
+	retval += "(" + boost::lexical_cast<string>(it->first) + ", " + boost::lexical_cast<string>(it->second) + ") ";
+    }
+    return retval;
+}
+
+/** Creates a container of the specified type from a string consisting whitespace-delimited list of elements.  Due 
+    to the key-value pair organization of STL maps, this function does not work with them.  Use ContainerFromMapString() 
+    instead. */
+template <class Cont>
+Cont ContainerFromString(const string& str)
+{
+    Cont retval;
+    vector<string> tokens = Tokenize(str);
+    std::insert_iterator<Cont> ins_it = std::inserter(retval, retval.begin());
+    typedef typename Cont::value_type T;
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+	ins_it = boost::lexical_cast<T>(tokens[i]);
+    }
+    return retval;
+}
+
+/** Creates an STL map from a string consisting whitespace-delimited list of elements in the format "(first, second) (first, second) ...". */
+template <class T1, class T2>
+map<T1, T2> MapFromString(const string& str)
+{
+    map<T1, T2> retval;
+    pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
+    for (unsigned int i = 0; i < tokens.first.size(); ++i) {
+	retval[boost::lexical_cast<T1>(tokens.first[i])] = boost::lexical_cast<T2>(tokens.second[i]);
+    }
+    return retval;
+}
 
 } // namespace GG
 

@@ -54,12 +54,17 @@ class SubTexture;
     column widths with LockColWidths().  If non-standard Scrolls are desired, subclasses can create their own 
     Scroll-derived scrolls by overriding NewVScroll() and NewHScroll().    When overriding NewVScroll() and 
     NewHScroll() in subclasses, call RecreateScrolls() at the end of the subclass's constructor, to ensure that 
-    the correct type of Scrolls are created; if scrolls are created in the MultiEdit base constructor, the virtual 
+    the correct type of Scrolls are created; if scrolls are created in the ListBox base constructor, the virtual 
     function table may not be complete yet, so GG::Scrolls may be created instead of the types used in the 
-    overloaded New*Scroll() functions. Note that while a ListBox can contain arbitrary Control-derived controls, 
-    in order for such controls to be automatically saved and loaded using XML encoding, any user-defined Control 
-    subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory
-    for details.*/
+    overloaded New*Scroll() functions. Note that Rows are stored by boost::shared_ptr, so there are three 
+    implications: 1) any Row inserted into a ListBox becomes the property of that list box, and should not be 
+    deleted; 2) Row pointers received from ListBox signals should never be deleted; and 3) Row pointers 
+    received from ListBox signals should never be inserted into another ListBox, nor otherwise used to create a 
+    shared_ptr.  If you want to move a Row from one ListBox to another, use GetRowPtr(int) and 
+    Insert(const shared_ptr<Row>&, int).  Also note that while a ListBox can contain arbitrary Control-derived 
+    controls, in order for such controls to be automatically saved and loaded using XML encoding, any user-defined 
+    Control subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and 
+    GG::XMLObjectFactory for details. */
 class ListBox : public Control
 {
 public:
@@ -69,13 +74,14 @@ public:
         A Row is primarily a container for Controls.  Each "cell" in a Row is a Control* which points to an 
         object of a subclass of Control.  Each such Control can be connected to arbitrary functionality using signals and 
         slots.  Each Row contains a "data type" string, which indicates the user's definition
-        of what type of data the Row represents (eg "Annual Rainfall", "ship_def", etc.).  During dragging and dropping, the 
+        of what type of data the Row represents (e.g. "Annual Rainfall", "ship_def", etc.).  During dragging and dropping, the 
         data type associated with a Row indicates to potential drop targets what type of data the Row represents; the target 
         may accept or decline the drop based on the data type.  Indentation is also definable for each Row; such indentation
-        only affects the first cell in the Row (and not its sub rows).  This is intended to be used to create indented lists
+        only affects the first cell in the Row (and not its sub rows).  This is intended to facilitate indented lists
         like tree-views, etc.  A Row may include several subrows; each subrow is considered to be part of its Row.  Note 
-        that Rows are stored in ListBoxes by pointer; this means that you can subclass from Row to create your own custom
-        Row types.  This is the recommended method for associating a row with the non-GUI object that it represents. */
+        that Rows are stored in ListBoxes by reference, not copy; this means that you can subclass from Row to create your 
+	own custom Row types.  This is the recommended method for associating a row with the non-GUI object that it 
+	represents. */
     struct Row : public vector<Control*>, public Wnd
     {
         using vector<Control*>::push_back; // this brings push_back into this subclass, even though we've overloaded it locally
@@ -114,7 +120,7 @@ public:
     };
 
     /** thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any 
-        time during the receipt of a drop -- even in a function called by a DroppedSignalType signal. */
+        time during the receipt of a drop -- even in a function called by a DroppedSignal. */
     class DontAcceptDropException : public GGException {};
 
     /** \name Signal Types */ //@{
@@ -157,7 +163,7 @@ public:
     virtual Pt      ClientLowerRight() const;
 
     bool            Empty() const              {return m_rows.empty();}      ///< returns true when the ListBox is empty
-    const Row&      GetRow(int n) const        {return *m_rows.at(n);}       ///< returns a const pointer to the row at index \a n; not range-checked
+    const Row&      GetRow(int n) const        {return *m_rows.at(n);}       ///< returns a const reference to the row at index \a n; not range-checked
     int             Caret() const              {return m_caret;}             ///< returns the index of the row that has the caret
     const set<int>& Selections() const         {return m_selections;}        ///< returns a const reference to the set row indexes that is currently selected
     bool            Selected(int n) const      {return m_selections.find(n) != m_selections.end();} ///< returns true if row \a n is selected
@@ -206,14 +212,18 @@ public:
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, then resizes the scrollbars as needed
 
-    int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point
+    int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This ListBox retains ownership of \a row.
+    int            Insert(const shared_ptr<Row>& row,
+			  int at = -1);                   ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point
     void           Delete(int idx);                       ///< removes the row at index \a idx from the ListBox
     void           Clear();                               ///< empties the ListBox
     void           ClearSelection();                      ///< deselects all currently-selected rows
     void           ClearRow(int n);                       ///< deselects row \a n
     void           SelectRow(int n);                      ///< selects row \a n
     void           IndentRow(int n, int i);               ///< sets the indentation of the row at index \a n to \a i; not range-checked
-    Row&           GetRow(int n) {return *m_rows.at(n);}  ///< returns a pointer to the Row at row index \a n; not range-checked
+    Row&           GetRow(int n) {return *m_rows.at(n);}  ///< returns a reference to the Row at row index \a n; not range-checked
+    const boost::shared_ptr<Row>&
+                   GetRowPtr(int n) {return m_rows.at(n);} ///< returns the actual boost::shared_ptr that holds the Row, so that Rows can be moved between ListBoxes by the user
 
     void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
     void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
@@ -253,7 +263,7 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    int             Insert(Row* row, int at, bool dropped); ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
+    int             Insert(const shared_ptr<Row>& row, int at, bool dropped); ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     virtual Scroll* NewVScroll(bool horz_scroll);   ///< creates and returns a new vertical scroll, allowing subclasses to use Scroll-derived scrolls
     virtual Scroll* NewHScroll(bool vert_scroll);   ///< creates and returns a new horizontal scroll, allowing subclasses to use Scroll-derived scrolls
@@ -285,7 +295,9 @@ private:
     int            m_last_row_browsed; ///< the last row sent out as having been browsed (used to prevent duplicate browse signals)
     bool           m_suppress_delete_signal; ///< needed to use delete internally-only when a drop is refused
 
-    vector<Row*>   m_rows;             ///< line item data
+    vector<shared_ptr<Row> >   
+                   m_rows;             ///< line item data
+
     int            m_first_row_shown;  ///< index of row at top of visible area (always 0 for LB_NOSCROLL)
     int            m_first_col_shown;  ///< like above, but index of column at left
     vector<int>    m_col_widths;       ///< the width of each of the columns goes here

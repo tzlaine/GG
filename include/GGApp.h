@@ -74,7 +74,7 @@ struct AppImplData;
     keep the mouse perfectly still, there will probably be no events sent to the scrollbar control after the first 
     button-down event.  When enabled, mouse drag repeat sends messages to the scrollbar when there otherwise would be none.
 */
-class App
+class GG_API App
 {
 public: 
     /// these are the only events absolutely necessary for GG to function properly
@@ -140,7 +140,7 @@ public:
    
 protected:
     /** \name Structors */ //@{
-    App(App* app, const string& app_name); ///< protected ctor, called by derived classes in order to provide App with a pointer \a app to the singleton App object.
+    App(const string& app_name); ///< protected ctor, called by derived classes
     //@}
 
     /** \name Mutators */ //@{

@@ -35,10 +35,9 @@
 namespace GG {
 
 /** This is a single-line text input control.
-   This is a simple edit box control.  It shares the Text interface that StaticText and DynamicText use, so it 
-   can be treated in many ways very similarly to a std::string.  The imlementation is very similar to DynamicText, 
-   using a Font and a pre-calculated vector of Font::LineData structs (since this is a single-line edit box, the 
-   vector should have exactly one element).  Note that the second set of constructors determine the height of 
+   This is a simple edit box control.  It inherits from TextControl, so it 
+   can be treated in many ways very similarly to a std::string.  
+   Note that the second set of constructors determine the height of 
    the control based on the height of the font used and the value of the constant PIXEL_MARGIN.  There are two
    types of signals emitted by an Edit control.  The first is EditedSignal(); this is emitted every time the
    contents of the Edit change.  Sometimes, however, you don't want that.  For instance, say you want to keep

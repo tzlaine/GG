@@ -388,7 +388,7 @@ void MenuBar::AdjustLayout()
     }
 
     // resize MenuBar if needed
-    int desired_ht = std::max(1u, menu_rows.size()) * m_font->Lineskip();
+    int desired_ht = std::max(size_t(1), menu_rows.size()) * m_font->Lineskip();
     if (Height() != desired_ht)
         Resize(Width(), desired_ht);
 }

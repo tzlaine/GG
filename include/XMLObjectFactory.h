@@ -35,37 +35,37 @@ namespace GG {
 class XMLElement;
 
 /** This class creates polymorphic subclasses of base class T from XML-formatted text.  For any polymorphic class hierarchy,
-   you can instantiate XMLObjectFactory with the type of the hierarchy's base class, and provide functions that can each 
-   construct one specific class in the hierarchy.  By providing a string that identifies each class, and creating XML objects
-   with that string as a tag, you can ensure a method for creating the correct polymorphic subclass object at run-time. */
+    you can instantiate XMLObjectFactory with the type of the hierarchy's base class, and provide functions that can each 
+    construct one specific class in the hierarchy.  By providing a string that identifies each class, and creating XML objects
+    with that string as a tag, you can ensure a method for creating the correct polymorphic subclass object at run-time. */
 template <class T> class XMLObjectFactory
 {
 public:
-   typedef T* (*Generator)(const XMLElement&); ///< this defines the function signature for XMLObjectFactory object generators
+    typedef T* (*Generator)(const XMLElement&); ///< this defines the function signature for XMLObjectFactory object generators
 
-   /** \name Structors */ //@{
-   XMLObjectFactory() {} ///< ctor
-   //@}
+    /** \name Structors */ //@{
+    XMLObjectFactory() {} ///< ctor
+    //@}
 
-   /** \name Accessors */ //@{
-   T* GenerateObject(const XMLElement& elem) const ///< returns a heap-allocated subclass object of the appropriate type
-   {
-      T* retval = 0;
-      typename std::map<std::string, Generator>::const_iterator it = m_generators.find(elem.Tag());
-      if (it != m_generators.end())
-         retval = it->second(elem);
-      return retval;
-   }
-   //@}
+    /** \name Accessors */ //@{
+    T* GenerateObject(const XMLElement& elem) const ///< returns a heap-allocated subclass object of the appropriate type
+    {
+	T* retval = 0;
+	typename std::map<std::string, Generator>::const_iterator it = m_generators.find(elem.Tag());
+	if (it != m_generators.end())
+	    retval = it->second(elem);
+	return retval;
+    }
+    //@}
    
-   /** \name Mutators */ //@{
-   /** adds (or overrides) a new generator that can generate subclass objects described by \a name */
-   void AddGenerator(const std::string& name, Generator gen) {m_generators[name] = gen;}
-   //@}
+    /** \name Mutators */ //@{
+    /** adds (or overrides) a new generator that can generate subclass objects described by \a name */
+    void AddGenerator(const std::string& name, Generator gen) {m_generators[name] = gen;}
+    //@}
 
 private:
-   /** mapping from strings to functions that can create the type of object that corresponds to the string */
-   std::map<std::string, Generator> m_generators;
+    /** mapping from strings to functions that can create the type of object that corresponds to the string */
+    std::map<std::string, Generator> m_generators;
 };
 
 } // namespace GG

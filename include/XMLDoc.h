@@ -48,205 +48,205 @@ using std::vector;
 using std::map;
 
 /** encapsulates an XML element (from a <> tag to a </> tag).  XMLElement is a simplified XML element, 
-   consisting only of a tag, a single text string, attributes and child elements.  It is designed to represent 
-   C++ objects to allow them to easily be saved to/loaded from disk and serialized to be sent over a network 
-   connection. It is *not* designed to represent documents. So when I say simplified, I mean it! For instance, 
-   here is no way to represent more than one text string in an element; eg 
-   \verbatim
+    consisting only of a tag, a single text string, attributes and child elements.  It is designed to represent 
+    C++ objects to allow them to easily be saved to/loaded from disk and serialized to be sent over a network 
+    connection. It is *not* designed to represent documents. So when I say simplified, I mean it! For instance, 
+    here is no way to represent more than one text string in an element; eg 
+    \verbatim
       <burns>Say <quote>Goodnight</quote> Gracie.</burns> 
-   \endverbatim
-   does \a not work! There's no way to put both in the "Say " and the " Gracie.". If, however, you wanted to represent an 
-   object bar of class foo:
-   \verbatim
+    \endverbatim
+    does \a not work! There's no way to put both in the "Say " and the " Gracie.". If, however, you wanted to represent an 
+    object bar of class foo:
+    \verbatim
       class foo
       {
          int ref_ct;
          double data;
       };
-   \endverbatim
-   you might do something like this: 
-   \verbatim
+    \endverbatim
+    you might do something like this: 
+    \verbatim
       <bar>
          <ref_ct value="13"/>
          <data value="0.364951"/>
       </bar>
-   \endverbatim
-   Further, this example is standard XML, but an XMLElement encloses its single text string in quotes, and puts it
-   just after the opening tag:
-   \verbatim
+    \endverbatim
+    Further, this example is standard XML, but an XMLElement encloses its single text string in quotes, and puts it
+    just after the opening tag:
+    \verbatim
       <burns>"Say "<quote>Goodnight</quote></burns> 
-   \endverbatim
-   This is done at write-time; accesses to the element text via Text() will return the raw string.  Any string can be 
-   put inside one of these quoted text fields, even text that includes an arbitrary number of quotes.  So you can assign
-   any std::string or c-string to an element.  However, when hand-editing an XML file containing such text strings, you
-   need to be a bit careful.  The closing quote must be either the last thing on a line, or the last character before a
-   tag; no whitespace other than a carriage return and (optionally) a linfeed can follow the closing quote.  Adding 
-   more than one quoted text string to the XML file will have no effect; only the first quoted string will be read.
-   This is not the most time- or space-efficient way to organize object data, but it may just be one of the simplest 
-   and most easily read. */
+    \endverbatim
+    This is done at write-time; accesses to the element text via Text() will return the raw string.  Any string can be 
+    put inside one of these quoted text fields, even text that includes an arbitrary number of quotes.  So you can assign
+    any std::string or c-string to an element.  However, when hand-editing an XML file containing such text strings, you
+    need to be a bit careful.  The closing quote must be either the last thing on a line, or the last character before a
+    tag; no whitespace other than a carriage return and (optionally) a linfeed can follow the closing quote.  Adding 
+    more than one quoted text string to the XML file will have no effect; only the first quoted string will be read.
+    This is not the most time- or space-efficient way to organize object data, but it may just be one of the simplest 
+    and most easily read. */
 class XMLElement
 {
 public:
-   typedef vector<XMLElement>::iterator         child_iterator;
-   typedef vector<XMLElement>::const_iterator   const_child_iterator;
-   typedef map<string, string>::iterator        attr_iterator;
-   typedef map<string, string>::const_iterator  const_attr_iterator;
+    typedef vector<XMLElement>::iterator         child_iterator;
+    typedef vector<XMLElement>::const_iterator   const_child_iterator;
+    typedef map<string, string>::iterator        attr_iterator;
+    typedef map<string, string>::const_iterator  const_attr_iterator;
 
-   /** \name Structors */ //@{
-   XMLElement() : m_root(false) {} ///< default ctor
-   XMLElement(const string& tag) : m_tag(tag), m_text(""), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag
-   XMLElement(const string& tag, const string& text) : m_tag(tag), m_text(text), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and text \a text
-   //@}
+    /** \name Structors */ //@{
+    XMLElement() : m_root(false) {} ///< default ctor
+    XMLElement(const string& tag) : m_tag(tag), m_text(""), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag
+    XMLElement(const string& tag, const string& text) : m_tag(tag), m_text(text), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and text \a text
+    //@}
 
-   /** \name Accessors */ //@{
-   const string& Tag() const {return m_tag;}                ///< returns the tag-name of the XMLElement
-   const string& Text() const {return m_text;}              ///< returns the text of this XMLElement
-   int NumChildren() const {return m_children.size();}      ///< returns the number of children in the XMLElement
-   int NumAttributes() const {return m_attributes.size();}  ///< returns the number of attributes in the XMLElement
-   bool ContainsChild(const string& child) const;           ///< returns true if the element contains a child called \a name
-   bool ContainsAttribute(const string& attrib) const;      ///< returns true if the element contains an attribute called \a name
-   int  ChildIndex(const string& child) const;              ///< returns the index of the child called \a name, or -1 if not found
+    /** \name Accessors */ //@{
+    const string& Tag() const {return m_tag;}                ///< returns the tag-name of the XMLElement
+    const string& Text() const {return m_text;}              ///< returns the text of this XMLElement
+    int NumChildren() const {return m_children.size();}      ///< returns the number of children in the XMLElement
+    int NumAttributes() const {return m_attributes.size();}  ///< returns the number of attributes in the XMLElement
+    bool ContainsChild(const string& child) const;           ///< returns true if the element contains a child called \a name
+    bool ContainsAttribute(const string& attrib) const;      ///< returns true if the element contains an attribute called \a name
+    int  ChildIndex(const string& child) const;              ///< returns the index of the child called \a name, or -1 if not found
 
-   /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-      range-checked; be sure there are at least idx+1 elements before calling. */
-   const XMLElement& Child(unsigned int idx) const {return m_children[idx];}
+    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
+	 range-checked; be sure there are at least idx+1 elements before calling. */
+    const XMLElement& Child(unsigned int idx) const {return m_children[idx];}
    
-   /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
-      checked; be sure there is such a child before calling. */   
-   const XMLElement& Child(const string& child) const;
+    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
+	 checked; be sure there is such a child before calling. */   
+    const XMLElement& Child(const string& child) const;
 
-   /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-   at least one child before calling. */   
-   const XMLElement& LastChild() const {return m_children.back();}
+    /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
+	 at least one child before calling. */   
+    const XMLElement& LastChild() const {return m_children.back();}
    
-   /** returns the value of the attribute with name \a key, or "" if no such named attribute is found */
-   const string& XMLElement::Attribute(const string& attrib) const;
+    /** returns the value of the attribute with name \a key, or "" if no such named attribute is found */
+    const string& XMLElement::Attribute(const string& attrib) const;
 
-   /** writes the XMLElement to an output stream; returns the stream */
-   ostream& WriteElement(ostream& os, int indent = 0, bool whitespace = true) const;
+    /** writes the XMLElement to an output stream; returns the stream */
+    ostream& WriteElement(ostream& os, int indent = 0, bool whitespace = true) const;
    
-   const_child_iterator child_begin() const {return m_children.begin();}   ///< const_iterator to the first child in the XMLElement
-   const_child_iterator child_end() const   {return m_children.end();}     ///< const_iterator to the last + 1 child in the XMLElement
-   const_attr_iterator  attr_begin() const  {return m_attributes.begin();} ///< const_iterator to the first attribute in the XMLElement
-   const_attr_iterator  attr_end() const    {return m_attributes.end();}   ///< const_iterator to the last + 1 attribute in the XMLElement
-   //@}
+    const_child_iterator child_begin() const {return m_children.begin();}   ///< const_iterator to the first child in the XMLElement
+    const_child_iterator child_end() const   {return m_children.end();}     ///< const_iterator to the last + 1 child in the XMLElement
+    const_attr_iterator  attr_begin() const  {return m_attributes.begin();} ///< const_iterator to the first attribute in the XMLElement
+    const_attr_iterator  attr_end() const    {return m_attributes.end();}   ///< const_iterator to the last + 1 attribute in the XMLElement
+    //@}
    
-   /** \name Mutators */ //@{
-   /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-      range-checked; be sure there are at least idx+1 elements before calling. */
-   XMLElement& Child(unsigned int idx) {return m_children[idx];}
+    /** \name Mutators */ //@{
+    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
+	 range-checked; be sure there are at least idx+1 elements before calling. */
+    XMLElement& Child(unsigned int idx) {return m_children[idx];}
    
-   /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
-      checked; be sure there is such a child before calling. */   
-   XMLElement& Child(const string& child);
+    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \note This function is not 
+	 checked; be sure there is such a child before calling. */   
+    XMLElement& Child(const string& child);
 
-   /** sets an attribute \a attrib, whose value is \a val in the XMLElement.  No two attributes can have the same name. */
-   void SetAttribute(const string& attrib, const string& val) {m_attributes[attrib] = val;} 
+    /** sets an attribute \a attrib, whose value is \a val in the XMLElement.  No two attributes can have the same name. */
+    void SetAttribute(const string& attrib, const string& val) {m_attributes[attrib] = val;} 
    
-   /** sets the tag to \a tag */
-   void SetTag(const string& tag) {m_tag = tag;} 
+    /** sets the tag to \a tag */
+    void SetTag(const string& tag) {m_tag = tag;} 
    
-   /** sets the text to \a text */
-   void SetText(const string& text) {m_text = text;} 
+    /** sets the text to \a text */
+    void SetText(const string& text) {m_text = text;} 
    
-   /** removes attribute \a attrib from the XMLElement*/
-   void RemoveAttribute(const string& attrib) {m_attributes.erase(attrib);}
+    /** removes attribute \a attrib from the XMLElement*/
+    void RemoveAttribute(const string& attrib) {m_attributes.erase(attrib);}
    
-   /** removes all attributes from the XMLElement*/
-   void RemoveAttributes() {m_attributes.clear();}
+    /** removes all attributes from the XMLElement*/
+    void RemoveAttributes() {m_attributes.clear();}
    
-   /** adds child XMLElement \a e to the end of the child list of the XMLElement */
-   void AppendChild(const XMLElement& e) {m_children.push_back(e);}
+    /** adds child XMLElement \a e to the end of the child list of the XMLElement */
+    void AppendChild(const XMLElement& e) {m_children.push_back(e);}
    
-   /** creates an empty XMLElement with tag-name \a s, and adds it to the end of the child list of the XMLElement */
-   void AppendChild(const string& child) {m_children.push_back(XMLElement(child));}
+    /** creates an empty XMLElement with tag-name \a s, and adds it to the end of the child list of the XMLElement */
+    void AppendChild(const string& child) {m_children.push_back(XMLElement(child));}
    
-   /** adds a child \a e in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-   range-checked; be sure there are at least idx+1 elements before calling. */
-   void AddChildBefore(const XMLElement& e, unsigned int idx) {m_children.insert(m_children.begin() + idx, e);}
+    /** adds a child \a e in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
+	range-checked; be sure there are at least idx+1 elements before calling. */
+    void AddChildBefore(const XMLElement& e, unsigned int idx) {m_children.insert(m_children.begin() + idx, e);}
    
-   /** removes the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
-      range-checked; be sure there are at least idx+1 elements before calling. */
-   void RemoveChild(unsigned int idx) {m_children.erase(m_children.begin() + idx);}
+    /** removes the child in the \a idx-th position of the child list of the XMLElement.  \note This function is not 
+	range-checked; be sure there are at least idx+1 elements before calling. */
+    void RemoveChild(unsigned int idx) {m_children.erase(m_children.begin() + idx);}
    
-   /** removes the child called \a shild from the XMLElement.  \note This function is not value-checked; be sure 
-      the desired element exists before calling. */
-   void RemoveChild(const string& child) {m_children.erase(m_children.begin() + ChildIndex(child));}
+    /** removes the child called \a shild from the XMLElement.  \note This function is not value-checked; be sure 
+	the desired element exists before calling. */
+    void RemoveChild(const string& child) {m_children.erase(m_children.begin() + ChildIndex(child));}
 
-   /** removes all children from the XMLElement*/
-   void RemoveChildren() {m_children.clear();}
+    /** removes all children from the XMLElement*/
+    void RemoveChildren() {m_children.clear();}
    
-   child_iterator child_begin()  {return m_children.begin();}     ///< iterator to the first child in the XMLElement
-   child_iterator child_end()    {return m_children.end();}       ///< iterator to the last + 1 child in the XMLElement
-   attr_iterator  attr_begin()   {return m_attributes.begin();}   ///< iterator to the first attribute in the XMLElement
-   attr_iterator  attr_end()     {return m_attributes.end();}     ///< iterator to the last + 1 attribute in the XMLElement
-   //@}
+    child_iterator child_begin()  {return m_children.begin();}     ///< iterator to the first child in the XMLElement
+    child_iterator child_end()    {return m_children.end();}       ///< iterator to the last + 1 child in the XMLElement
+    attr_iterator  attr_begin()   {return m_attributes.begin();}   ///< iterator to the first attribute in the XMLElement
+    attr_iterator  attr_end()     {return m_attributes.end();}     ///< iterator to the last + 1 attribute in the XMLElement
+    //@}
 
 private:
-   /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
-      in an XMLDoc document*/
-   XMLElement(const string& t, bool r) : m_tag(t), m_root(r) {}
+    /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
+	in an XMLDoc document*/
+    XMLElement(const string& t, bool r) : m_tag(t), m_root(r) {}
    
-   /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
-   at least one child before calling. */   
-   XMLElement& LastChild() {return m_children.back();}
+    /**  returns the last child in child list of the XMLElement.  \note This function is not checked; be sure there is 
+	 at least one child before calling. */   
+    XMLElement& LastChild() {return m_children.back();}
    
-   string               m_tag;        ///< the tag-name of the XMLElement
-   string               m_text;       ///< the text of this XMLElement
-   map<string, string>  m_attributes; ///< the attributes of the XMLElement, stored as key-value pairs
-   vector<XMLElement>   m_children;   ///< the XMLElement children of this XMLElement
+    string               m_tag;        ///< the tag-name of the XMLElement
+    string               m_text;       ///< the text of this XMLElement
+    map<string, string>  m_attributes; ///< the attributes of the XMLElement, stored as key-value pairs
+    vector<XMLElement>   m_children;   ///< the XMLElement children of this XMLElement
 
-   bool                 m_root;       ///< true if this XMLElement is the root element of an XMLDoc document
+    bool                 m_root;       ///< true if this XMLElement is the root element of an XMLDoc document
 
-   /** allows XMLDoc to create root XMLElements and call the non-const overload of LastChild() */
-   friend class XMLDoc;
+    /** allows XMLDoc to create root XMLElements and call the non-const overload of LastChild() */
+    friend class XMLDoc;
 };
 
 /** encapsulates an entire XML document.  Each XMLDoc is assumed to take up an entire file, and to contain an arbitrary
-   number of XMLElements within its root_node member. */
+    number of XMLElements within its root_node member. */
 class XMLDoc
 {
 public:
-   /** \name Structors */ //@{
-   /** ctor that constructs an empty XML document with a root node with tag-name \a root_tag */
-   XMLDoc(const string& root_tag = "GG::XMLDoc") : root_node(XMLElement(root_tag, true)) {}
+    /** \name Structors */ //@{
+    /** ctor that constructs an empty XML document with a root node with tag-name \a root_tag */
+    XMLDoc(const string& root_tag = "GG::XMLDoc") : root_node(XMLElement(root_tag, true)) {}
 
-   /** ctor that constructs an XML document from an input stream \a is */
-   XMLDoc(const istream& is) : root_node(XMLElement()) {}
-   //@}
+    /** ctor that constructs an XML document from an input stream \a is */
+    XMLDoc(const istream& is) : root_node(XMLElement()) {}
+    //@}
 
-   /** \name Accessors */ //@{
-   /** writes the XMLDoc to an output stream; returns the stream.  If \a whitespace is false, the document is written 
-      without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in a 
-      more standard human-readable form. */
-   ostream& WriteDoc(ostream& os, bool whitespace = true) const;
-   //@}
+    /** \name Accessors */ //@{
+    /** writes the XMLDoc to an output stream; returns the stream.  If \a whitespace is false, the document is written 
+	without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in a 
+	more standard human-readable form. */
+    ostream& WriteDoc(ostream& os, bool whitespace = true) const;
+    //@}
    
-   /** \name Mutators */ //@{
-   /** destroys the current contents of the XMLDoc, and replaces tham with the constents of the document in the input 
-      stream \a is; returns the stream*/
-   istream& ReadDoc(istream& is);
-   //@}
+    /** \name Mutators */ //@{
+    /** destroys the current contents of the XMLDoc, and replaces tham with the constents of the document in the input 
+	stream \a is; returns the stream*/
+    istream& ReadDoc(istream& is);
+    //@}
 
-   XMLElement root_node;  ///< the single XMLElement in the document, under which all other XMLElement are children
+    XMLElement root_node;  ///< the single XMLElement in the document, under which all other XMLElement are children
    
 private:
-   /** holds the XMLDoc to which ProcessElement should add elements */
-   static XMLDoc* s_curr_parsing_doc;
+    /** holds the XMLDoc to which ProcessElement should add elements */
+    static XMLDoc* s_curr_parsing_doc;
    
-   /** maintains the current environment for reading XMLElements (the current enclosing XMLElement) */
-   static vector<XMLElement*> s_element_stack;
+    /** maintains the current environment for reading XMLElements (the current enclosing XMLElement) */
+    static vector<XMLElement*> s_element_stack;
    
-   /** takes an element from expat and creates an XMLElement from it, and adds it to XMLDoc::s_curr_parsing_doc. 
-      If this_ptr (== XMLDoc::s_curr_parsing_doc) is nonzero, the new element becomes its root_node; otherwise, 
-      the new element gets appended to the XMLElement currently being read. */
-   static void BeginElement(void* user_data, const char* name, const char** attrs);
+    /** takes an element from expat and creates an XMLElement from it, and adds it to XMLDoc::s_curr_parsing_doc. 
+	If this_ptr (== XMLDoc::s_curr_parsing_doc) is nonzero, the new element becomes its root_node; otherwise, 
+	the new element gets appended to the XMLElement currently being read. */
+    static void BeginElement(void* user_data, const char* name, const char** attrs);
    
-   /** takes an end-of-element token from expat and pops s_curr_parsing_doc */
-   static void EndElement(void* user_data, const char* name);
+    /** takes an end-of-element token from expat and pops s_curr_parsing_doc */
+    static void EndElement(void* user_data, const char* name);
    
-   /** takes element text from expat and appends it to m_text */
-   static void CharacterData(void *user_data, const char *s, int len);
+    /** takes element text from expat and appends it to m_text */
+    static void CharacterData(void *user_data, const char *s, int len);
 };
 
 } // namespace GG

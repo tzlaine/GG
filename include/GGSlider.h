@@ -42,72 +42,72 @@ class Button;
 class Slider : public Control
 {
 public:
-   using Wnd::SizeMove;
+    using Wnd::SizeMove;
 
-   enum Orientation     {VERTICAL, HORIZONTAL};    ///< the orientation of the slider must be one of these two values
-   enum LineStyleType   {FLAT, RAISED, GROOVED};   ///< the rendering styles of the line the tab slides over
+    enum Orientation     {VERTICAL, HORIZONTAL};    ///< the orientation of the slider must be one of these two values
+    enum LineStyleType   {FLAT, RAISED, GROOVED};   ///< the rendering styles of the line the tab slides over
 
-   /** \name Signal Types */ //@{
-   typedef boost::signal<void (int, int, int)> SlidSignalType; ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
-   //@}
+    /** \name Signal Types */ //@{
+    typedef boost::signal<void (int, int, int)> SlidSignalType; ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
+    //@}
 
-   /** \name Slot Types */ //@{
-   typedef SlidSignalType::slot_type SlidSlotType;   ///< type of functor(s) invoked on a SlidSignalType
-   //@}
+    /** \name Slot Types */ //@{
+    typedef SlidSignalType::slot_type SlidSlotType;   ///< type of functor(s) invoked on a SlidSignalType
+    //@}
 
-   /** \name Structors */ //@{
-   Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-   Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab = 0, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-   Slider(const XMLElement& elem); ///< ctor that constructs a Scroll object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Scroll object
-   //@}
+    /** \name Structors */ //@{
+    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
+    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab = 0, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
+    Slider(const XMLElement& elem); ///< ctor that constructs a Scroll object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Scroll object
+    //@}
 
-   /** \name Accessors */ //@{
-   int            Posn() const         {return m_posn;}        ///< returns the current tab position
-   pair<int,int>  SliderRange() const  {return pair<int,int>(m_range_min, m_range_max);}  ///< returns the defined possible range of control
-   LineStyleType  LineStyle() const    {return m_line_style;}  ///< returns the style of line used to render the control
+    /** \name Accessors */ //@{
+    int            Posn() const         {return m_posn;}        ///< returns the current tab position
+    pair<int,int>  SliderRange() const  {return pair<int,int>(m_range_min, m_range_max);}  ///< returns the defined possible range of control
+    LineStyleType  LineStyle() const    {return m_line_style;}  ///< returns the style of line used to render the control
 
-   virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
-   //@}
+    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
+    //@}
 
-   /** \name Mutators */ //@{
-   virtual int    Render();
-   virtual int    LButtonDown(const Pt& pt, Uint32 keys);
-   virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-   virtual int    MouseHere(const Pt& pt, Uint32 keys)               {m_tab_drag_offset = -1; return 1;}
-   virtual int    Keypress(Key key, Uint32 key_mods);
+    /** \name Mutators */ //@{
+    virtual int    Render();
+    virtual int    LButtonDown(const Pt& pt, Uint32 keys);
+    virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual int    MouseHere(const Pt& pt, Uint32 keys)               {m_tab_drag_offset = -1; return 1;}
+    virtual int    Keypress(Key key, Uint32 key_mods);
 
-   virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the tab as needed
-   virtual void   Disable(bool b = true);
+    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the tab as needed
+    virtual void   Disable(bool b = true);
 
-   void           SizeSlider(int min, int max);                      ///< sets the logical range of the control
-   void           SetMax(int max)   {SizeSlider(m_range_min, max);}  ///< sets the maximum value of the control
-   void           SetMin(int min)   {SizeSlider(min, m_range_max);}  ///< sets the minimum value of the control
+    void           SizeSlider(int min, int max);                      ///< sets the logical range of the control
+    void           SetMax(int max)   {SizeSlider(m_range_min, max);}  ///< sets the maximum value of the control
+    void           SetMin(int min)   {SizeSlider(min, m_range_max);}  ///< sets the minimum value of the control
 
-   void           SlideTo(int p);  ///< slides the control to a certain spot
+    void           SlideTo(int p);  ///< slides the control to a certain spot
    
-   void           SetLineStyle(LineStyleType style)   {m_line_style = style;}  ///< returns the style of line used to render the control
+    void           SetLineStyle(LineStyleType style)   {m_line_style = style;}  ///< returns the style of line used to render the control
 
-   SlidSignalType& SlidSignal() {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
-   //@}
+    SlidSignalType& SlidSignal() {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
+    //@}
 
 private:
-   void  MoveTabToPosn();
-   void  UpdatePosn();
+    void  MoveTabToPosn();
+    void  UpdatePosn();
    
-   int                  m_posn;
-   int                  m_range_min;
-   int                  m_range_max;
+    int                  m_posn;
+    int                  m_range_min;
+    int                  m_range_max;
    
-   Orientation          m_orientation;
+    Orientation          m_orientation;
    
-   int                  m_line_width;
-   int                  m_tab_width;
-   LineStyleType        m_line_style;
+    int                  m_line_width;
+    int                  m_tab_width;
+    LineStyleType        m_line_style;
    
-   int                  m_tab_drag_offset;
-   shared_ptr<Button>   m_tab;
+    int                  m_tab_drag_offset;
+    shared_ptr<Button>   m_tab;
 
-   SlidSignalType       m_slid_sig;
+    SlidSignalType       m_slid_sig;
 };
 
 } // namespace GG

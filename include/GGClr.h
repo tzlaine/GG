@@ -34,35 +34,35 @@
 namespace GG {
 
 /** A simple 32-bit structure that can act as a packed 32-bit unsigned integer representation of a RGBA color, a vector of the four
-   unsigned bytes that compose an RGBA color, or the individual unsigned bytes "a", "r", "g", and "b", each of which represents a 
-   color channel.  You should not use literals to initialize Color objects; depending on the endian-ness of the machine, 
-   0x00FFFFFF would be transparent white (little-endian) or opaque yellow (big-endian).*/
+    unsigned bytes that compose an RGBA color, or the individual unsigned bytes "a", "r", "g", and "b", each of which represents a 
+    color channel.  You should not use literals to initialize Color objects; depending on the endian-ness of the machine, 
+    0x00FFFFFF would be transparent white (little-endian) or opaque yellow (big-endian).*/
 struct Clr
 {
-   /** \name Structors */ //@{
-   Clr();                                                    ///< default ctor
-   Clr(Uint32 clr);                                          ///< ctor that constructs a Clr from a 32-bit value packed with the 4 color channels
-   explicit Clr(int _r, int _g, int _b, int _a);             ///< ctor that constructs a Clr from four Uint8s that represent the color channels
-   explicit Clr(double _r, double _g, double _b, double _a); ///< ctor that constructs a Clr from four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
-   Clr(Uint8 arr[]);                                         ///< ctor that constructs a Clr from an array of at least four Uint8s that represent the color channels
-   Clr(double arr[]);                                        ///< ctor that constructs a Clr from an array of at least four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
-   Clr(const XMLElement& elem); ///< ctor that creates a Clr as defined in XMLElement elem. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Clr object
-   //@}
+    /** \name Structors */ //@{
+    Clr();                                                    ///< default ctor
+    Clr(Uint32 clr);                                          ///< ctor that constructs a Clr from a 32-bit value packed with the 4 color channels
+    explicit Clr(int _r, int _g, int _b, int _a);             ///< ctor that constructs a Clr from four Uint8s that represent the color channels
+    explicit Clr(double _r, double _g, double _b, double _a); ///< ctor that constructs a Clr from four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
+    Clr(Uint8 arr[]);                                         ///< ctor that constructs a Clr from an array of at least four Uint8s that represent the color channels
+    Clr(double arr[]);                                        ///< ctor that constructs a Clr from an array of at least four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
+    Clr(const XMLElement& elem); ///< ctor that creates a Clr as defined in XMLElement elem. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Clr object
+    //@}
    
-   /** \name Accessors */ //@{
-   XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Clr
-   //@}
+    /** \name Accessors */ //@{
+    XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Clr
+    //@}
    
-   union {
-      Uint32 i;     ///< represents Clr as a packed RGBA color
-      Uint8  v[4];  ///< represents Clr as a vector of RGBA components
-      struct {
-         Uint8 r;   ///< the red channel
-         Uint8 g;   ///< the green channel
-         Uint8 b;   ///< the blue channel
-         Uint8 a;   ///< the alpha channel
-      };
-   };
+    union {
+	Uint32 i;     ///< represents Clr as a packed RGBA color
+	Uint8  v[4];  ///< represents Clr as a vector of RGBA components
+	struct {
+	    Uint8 r;   ///< the red channel
+	    Uint8 g;   ///< the green channel
+	    Uint8 b;   ///< the blue channel
+	    Uint8 a;   ///< the alpha channel
+	};
+    };
 };
 
 // some useful color constants

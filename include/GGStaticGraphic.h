@@ -38,39 +38,39 @@
 namespace GG {
 
 /** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a 
-   StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the StaticGraphic's
-   window area. \see StaticGraphicStyle*/
+    StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the StaticGraphic's
+    window area. \see StaticGraphicStyle*/
 class StaticGraphic : public Control
 {
 public:
-   /** \name Structors */ //@{
-   /** creates a StaticGraphic from a pre-existing Texture.
-      \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
-      a SubTexture. */
-   StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style = 0, Uint32 flags = 0);
-   StaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing Texture.
-   StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing SubTexture.
-   StaticGraphic(const XMLElement& elem); ///< ctor that constructs a StaticGraphic object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a StaticGraphic object
-   //@}
+    /** \name Structors */ //@{
+    /** creates a StaticGraphic from a pre-existing Texture.
+	\warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
+	a SubTexture. */
+    StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style = 0, Uint32 flags = 0);
+    StaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing Texture.
+    StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing SubTexture.
+    StaticGraphic(const XMLElement& elem); ///< ctor that constructs a StaticGraphic object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a StaticGraphic object
+    //@}
 
-   /** \name Accessors */ //@{
-   Uint32   Style() const  {return m_style;}   ///< returns the style of the StaticGraphic \see StaticGraphicStyle
-   //@}
+    /** \name Accessors */ //@{
+    Uint32   Style() const  {return m_style;}   ///< returns the style of the StaticGraphic \see StaticGraphicStyle
+    //@}
    
-   /** \name Mutators */ //@{
-   virtual  int Render();
+    /** \name Mutators */ //@{
+    virtual  int Render();
 
-   void     SetStyle(Uint32 style)  {m_style = style; ValidateStyle();} ///< sets the style flags, and perfroms sanity checking \see StaticGraphicStyle
+    void     SetStyle(Uint32 style)  {m_style = style; ValidateStyle();} ///< sets the style flags, and perfroms sanity checking \see StaticGraphicStyle
 
-   virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticGraphic object
-   //@}
+    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticGraphic object
+    //@}
 
 private:
-   void     Init(const SubTexture& subtexture); ///< initializes a StaticGraphic from a SubTexture
-   void     ValidateStyle();   ///< ensures that the style flags are consistent
+    void     Init(const SubTexture& subtexture); ///< initializes a StaticGraphic from a SubTexture
+    void     ValidateStyle();   ///< ensures that the style flags are consistent
 
-   SubTexture  m_graphic;
-   Uint32      m_style;        ///< position of texture wrt the window area
+    SubTexture  m_graphic;
+    Uint32      m_style;        ///< position of texture wrt the window area
 };
 
 } // namespace GG

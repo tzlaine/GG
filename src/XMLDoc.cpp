@@ -42,83 +42,83 @@ vector<XMLElement*>  XMLDoc::s_element_stack;
 ////////////////////////////////////////////////
 bool XMLElement::ContainsChild(const string& child) const
 {
-   return ChildIndex(child) != -1;
+    return ChildIndex(child) != -1;
 }
 
 bool XMLElement::ContainsAttribute(const string& attrib) const
 {
-   return m_attributes.find(attrib) != m_attributes.end();
+    return m_attributes.find(attrib) != m_attributes.end();
 }
 
 int XMLElement::ChildIndex(const string& child) const
 {
-   int retval = -1;
-   for (unsigned int i = 0; i < m_children.size(); ++i) {
-      if (m_children[i].m_tag == child) {
-         retval = i;
-         break;
-      }
-   }
-   return retval;
+    int retval = -1;
+    for (unsigned int i = 0; i < m_children.size(); ++i) {
+	if (m_children[i].m_tag == child) {
+	    retval = i;
+	    break;
+	}
+    }
+    return retval;
 }
 
 const XMLElement& XMLElement::Child(const string& child) const 
 {
-   unsigned int i = 0; 
-   for (; i < m_children.size(); ++i) 
-      if (m_children[i].m_tag == child) 
-         break; 
-   return m_children[i];
+    unsigned int i = 0; 
+    for (; i < m_children.size(); ++i) 
+	if (m_children[i].m_tag == child) 
+	    break; 
+    return m_children[i];
 }
 
 const string& XMLElement::Attribute(const string& attrib) const
 {
-   static const string empty_str("");
-   map<string, string>::const_iterator it = m_attributes.find(attrib);
-   if (it != m_attributes.end())
-      return it->second;
-   else
-      return empty_str;
+    static const string empty_str("");
+    map<string, string>::const_iterator it = m_attributes.find(attrib);
+    if (it != m_attributes.end())
+	return it->second;
+    else
+	return empty_str;
 }
 
 ostream& XMLElement::WriteElement(ostream& os, int indent/* = 0*/, bool whitespace/* = true*/) const
 {
-   if (whitespace) 
-      for (int i = 0; i < indent; ++i)
-         os << INDENT_STR;
-   os << '<' << m_tag;
-   for (std::map<string, string>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
-      os << ' ' << it->first << "=\"" << it->second << "\"";
-   if (m_children.empty() && m_text.empty() && !m_root) {
-      os << "/>";
-      if (whitespace) 
-         os << "\n";
-   } else {
-      os << ">";
-      if (!m_text.empty())
-         os << "\"<![CDATA[" << m_text << "]]>\"";
-      if (whitespace && !m_children.empty())
-         os << "\n";
-      for (unsigned int i = 0; i < m_children.size(); ++i)
-         m_children[i].WriteElement(os, indent + 1, whitespace);
-      if (whitespace && !m_children.empty()) {
-         for (int i = 0; i < indent; ++i) {
-            os << INDENT_STR;
-         }
-      }
-      os << "</" << m_tag << ">";
-      if (whitespace) os << "\n";
-   }
-   return os;
+    if (whitespace) 
+	for (int i = 0; i < indent; ++i)
+	    os << INDENT_STR;
+    os << '<' << m_tag;
+    for (std::map<string, string>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+	os << ' ' << it->first << "=\"" << it->second << "\"";
+    if (m_children.empty() && m_text.empty() && !m_root) {
+	os << "/>";
+	if (whitespace) 
+	    os << "\n";
+    } else {
+	os << ">";
+	if (!m_text.empty())
+	    os << "\"<![CDATA[" << m_text << "]]>\"";
+	if (whitespace && !m_children.empty())
+	    os << "\n";
+	for (unsigned int i = 0; i < m_children.size(); ++i)
+	    m_children[i].WriteElement(os, indent + 1, whitespace);
+	if (whitespace && !m_children.empty()) {
+	    for (int i = 0; i < indent; ++i) {
+		os << INDENT_STR;
+	    }
+	}
+	os << "</" << m_tag << ">";
+	if (whitespace) os << "\n";
+    }
+    return os;
 }
 
 XMLElement& XMLElement::Child(const string& child) 
 {
-   unsigned int i = 0; 
-   for (; i < m_children.size(); ++i) 
-      if (m_children[i].m_tag == child)
-         break; 
-   return m_children[i];
+    unsigned int i = 0; 
+    for (; i < m_children.size(); ++i) 
+	if (m_children[i].m_tag == child)
+	    break; 
+    return m_children[i];
 }
 
 
@@ -127,75 +127,75 @@ XMLElement& XMLElement::Child(const string& child)
 ////////////////////////////////////////////////
 ostream& XMLDoc::WriteDoc(ostream& os, bool whitespace/* = true*/) const
 {
-   os << "<?xml version=\"1.0\"?>";
-   if (whitespace) os << "\n";
-   return root_node.WriteElement(os, 0, whitespace);
+    os << "<?xml version=\"1.0\"?>";
+    if (whitespace) os << "\n";
+    return root_node.WriteElement(os, 0, whitespace);
 }
 
 istream& XMLDoc::ReadDoc(istream& is)
 {
-   root_node = XMLElement(); // clear doc contents
-   s_element_stack.clear();  // clear this to start a fresh read
-   s_curr_parsing_doc = this;  // tell ProcessElement where to add elements
-   XML_Parser p = XML_ParserCreate(0);
-   XML_SetElementHandler(p, &XMLDoc::BeginElement, &XMLDoc::EndElement);
-   XML_SetCharacterDataHandler(p, &XMLDoc::CharacterData);
-   string parse_str;
-   while (is) {
-      string str;
-      getline(is, str);
-      parse_str += str + '\n';
-   }
-   XML_Parse(p, parse_str.c_str(), parse_str.size(), true);
-   XML_ParserFree(p);
-   s_curr_parsing_doc = 0;
-   return is;
+    root_node = XMLElement(); // clear doc contents
+    s_element_stack.clear();  // clear this to start a fresh read
+    s_curr_parsing_doc = this;  // tell ProcessElement where to add elements
+    XML_Parser p = XML_ParserCreate(0);
+    XML_SetElementHandler(p, &XMLDoc::BeginElement, &XMLDoc::EndElement);
+    XML_SetCharacterDataHandler(p, &XMLDoc::CharacterData);
+    string parse_str;
+    while (is) {
+	string str;
+	getline(is, str);
+	parse_str += str + '\n';
+    }
+    XML_Parse(p, parse_str.c_str(), parse_str.size(), true);
+    XML_ParserFree(p);
+    s_curr_parsing_doc = 0;
+    return is;
 }
 
 void XMLDoc::BeginElement(void* user_data, const char* name, const char** attrs) 
 {
-   if (XMLDoc* this_ptr = XMLDoc::s_curr_parsing_doc) {
-      if (!s_element_stack.empty()) {
-         s_element_stack.back()->AppendChild(name);
-         s_element_stack.push_back(&s_element_stack.back()->LastChild());
-      } else {
-         this_ptr->root_node = XMLElement(name, true);
-         s_element_stack.push_back(&this_ptr->root_node);
-      }
-      while (attrs && *attrs) {
-         s_element_stack.back()->SetAttribute(*attrs, *(attrs + 1));
-         attrs += 2;
-      }
-      found_first_quote = found_last_quote = false;
-   }
+    if (XMLDoc* this_ptr = XMLDoc::s_curr_parsing_doc) {
+	if (!s_element_stack.empty()) {
+	    s_element_stack.back()->AppendChild(name);
+	    s_element_stack.push_back(&s_element_stack.back()->LastChild());
+	} else {
+	    this_ptr->root_node = XMLElement(name, true);
+	    s_element_stack.push_back(&this_ptr->root_node);
+	}
+	while (attrs && *attrs) {
+	    s_element_stack.back()->SetAttribute(*attrs, *(attrs + 1));
+	    attrs += 2;
+	}
+	found_first_quote = found_last_quote = false;
+    }
 }
 
 void XMLDoc::EndElement(void* user_data, const char* name)
 {
-   if (!s_element_stack.empty())
-      s_element_stack.pop_back();
+    if (!s_element_stack.empty())
+	s_element_stack.pop_back();
 }
 
 void XMLDoc::CharacterData(void *user_data, const char *s, int len)
 {
-   if (!found_last_quote) {
-      string str;
-      for (int i = 0; i < len; ++i, ++s) {
-         char c = *s;
-         if (c == '"') {
-            if (!found_first_quote) {
-               found_first_quote = true;
-               continue;
-            } else if (found_first_quote && !found_last_quote && i == len - 1) {
-               found_last_quote = true;
-               break;
-            }
-         }
-         if (found_first_quote)
-            str += c;
-      }
-      s_element_stack.back()->m_text += str;
-   }
+    if (!found_last_quote) {
+	string str;
+	for (int i = 0; i < len; ++i, ++s) {
+	    char c = *s;
+	    if (c == '"') {
+		if (!found_first_quote) {
+		    found_first_quote = true;
+		    continue;
+		} else if (found_first_quote && !found_last_quote && i == len - 1) {
+		    found_last_quote = true;
+		    break;
+		}
+	    }
+	    if (found_first_quote)
+		str += c;
+	}
+	s_element_stack.back()->m_text += str;
+    }
 }
 
 } // namespace GG

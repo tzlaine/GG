@@ -32,34 +32,34 @@ namespace GG {
 // GG::Control
 ////////////////////////////////////////////////
 Control::Control(const XMLElement& elem) : 
-   Wnd(elem.Child("GG::Wnd"))
+    Wnd(elem.Child("GG::Wnd"))
 {
-   if (elem.Tag() != "GG::Control")
-      throw std::invalid_argument("Attempted to construct a GG::Control from an XMLElement that had a tag other than \"GG::Control\"");
+    if (elem.Tag() != "GG::Control")
+	throw std::invalid_argument("Attempted to construct a GG::Control from an XMLElement that had a tag other than \"GG::Control\"");
    
-   const XMLElement* curr_elem = &elem.Child("m_color");
-   m_color = Clr(curr_elem->Child("GG::Clr"));
+    const XMLElement* curr_elem = &elem.Child("m_color");
+    m_color = Clr(curr_elem->Child("GG::Clr"));
 
-   curr_elem = &elem.Child("m_disabled");
-   m_disabled = lexical_cast<bool>(curr_elem->Attribute("value"));
+    curr_elem = &elem.Child("m_disabled");
+    m_disabled = lexical_cast<bool>(curr_elem->Attribute("value"));
 }
 
 XMLElement Control::XMLEncode() const
 {
-   XMLElement retval("GG::Control");
-   retval.AppendChild(Wnd::XMLEncode());
+    XMLElement retval("GG::Control");
+    retval.AppendChild(Wnd::XMLEncode());
    
-   XMLElement temp;
+    XMLElement temp;
    
-   temp = XMLElement("m_color");
-   temp.AppendChild(m_color.XMLEncode());
-   retval.AppendChild(temp);
+    temp = XMLElement("m_color");
+    temp.AppendChild(m_color.XMLEncode());
+    retval.AppendChild(temp);
    
-   temp = XMLElement("m_disabled");
-   temp.SetAttribute("value", lexical_cast<string>(m_disabled));
-   retval.AppendChild(temp);
+    temp = XMLElement("m_disabled");
+    temp.SetAttribute("value", lexical_cast<string>(m_disabled));
+    retval.AppendChild(temp);
    
-   return retval;
+    return retval;
 }
 
 } // namespace GG

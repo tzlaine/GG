@@ -30,16 +30,16 @@
 namespace GG {
 
 /** connects a signal to a slot functor of the same type, putting \a _slot in slot group \a grp.  Slot call groups are 
-   called in ascending order; slots within each group are called in an undefined order.*/
+    called in ascending order; slots within each group are called in an undefined order.*/
 template <class SigT> inline 
 boost::signals::connection 
 Connect(SigT& sig, const typename SigT::slot_type& _slot, int grp = 0) {return sig.connect(grp, _slot);}
 
 
 /** connects a signal to a member function of a specific object that has the same function signature, putting \a R 
-   in slot group \a grp.  Slot call groups are called in ascending order; slots within each group are called in an 
-   undefined order. Overloads exist for const- and non-const- versions with 0 to 8 arguments.  8 was picked as the max 
-   simply because boost::bind only supports up to 8 args as of version 1.29.0.*/
+    in slot group \a grp.  Slot call groups are called in ascending order; slots within each group are called in an 
+    undefined order. Overloads exist for const- and non-const- versions with 0 to 8 arguments.  8 was picked as the max 
+    simply because boost::bind only supports up to 8 args as of version 1.29.0.*/
 template <class R, class T> inline
 boost::signals::connection 
 Connect(boost::signal<R ()>& sig, 
@@ -47,7 +47,7 @@ Connect(boost::signal<R ()>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj));
+    return sig.connect(grp, boost::bind(fn, obj));
 }
 
 template <class R, class T> inline
@@ -57,7 +57,7 @@ Connect(boost::signal<R ()>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj));
+    return sig.connect(grp, boost::bind(fn, obj));
 }
 
 template <class R, class T, class A1> inline
@@ -67,7 +67,7 @@ Connect(boost::signal<R (A1)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1));
+    return sig.connect(grp, boost::bind(fn, obj, _1));
 }
 
 template <class R, class T, class A1> inline
@@ -77,7 +77,7 @@ Connect(boost::signal<R (A1)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1));
+    return sig.connect(grp, boost::bind(fn, obj, _1));
 }
 
 template <class R, class T, class A1, class A2> inline
@@ -87,7 +87,7 @@ Connect(boost::signal<R (A1, A2)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2));
 }
 
 template <class R, class T, class A1, class A2> inline
@@ -97,7 +97,7 @@ Connect(boost::signal<R (A1, A2)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2));
 }
 
 template <class R, class T, class A1, class A2, class A3> inline
@@ -107,7 +107,7 @@ Connect(boost::signal<R (A1, A2, A3)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3));
 }
 
 template <class R, class T, class A1, class A2, class A3> inline
@@ -117,7 +117,7 @@ Connect(boost::signal<R (A1, A2, A3)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4> inline
@@ -127,7 +127,7 @@ Connect(boost::signal<R (A1, A2, A3, A4)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4> inline
@@ -137,7 +137,7 @@ Connect(boost::signal<R (A1, A2, A3, A4)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5> inline
@@ -147,7 +147,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5> inline
@@ -157,7 +157,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6> inline
@@ -167,7 +167,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6> inline
@@ -177,7 +177,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7> inline
@@ -187,7 +187,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7> inline
@@ -197,7 +197,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> inline
@@ -207,7 +207,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7, _8));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7, _8));
 }
 
 template <class R, class T, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> inline
@@ -217,7 +217,7 @@ Connect(boost::signal<R (A1, A2, A3, A4, A5, A6, A7, A8)>& sig,
         T* obj, 
         int grp = 0)
 {
-   return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7, _8));
+    return sig.connect(grp, boost::bind(fn, obj, _1, _2, _3, _4, _5, _6, _7, _8));
 }
 
 } // namespace GG

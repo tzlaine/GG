@@ -254,6 +254,7 @@ void SDLGGApp::SDLQuit()
 void SDLGGApp::PollAndRender()
 {
     static int last_FPS_time = 0;
+    static int last_frame_time = 0;
     static int most_recent_time = 0;
     static int time = 0;
     static int frames = 0;
@@ -275,19 +276,6 @@ void SDLGGApp::PollAndRender()
             last_mouse_event_time = time;
         HandleSDLEvent(event);
     }
-
-    // update time and track FPS if needed
-    time = Ticks();
-    m_delta_t = time - most_recent_time;
-    if (m_calc_FPS) {
-        ++frames;
-        if (time - last_FPS_time > 1000) { // calculate FPS at most once a second
-            m_FPS = frames / ((time - last_FPS_time) / 1000.0f);
-            last_FPS_time = time;
-            frames = 0;
-        }
-    }
-    most_recent_time = time;
 
     // handle mouse drag repeats
     if (old_mouse_repeat_delay != MouseRepeatDelay() || old_mouse_repeat_interval != MouseRepeatInterval()) { // if there's a change in the values, zero everything out and start the counting over
@@ -322,6 +310,29 @@ void SDLGGApp::PollAndRender()
     } else { // otherwise, reset the mouse drag repeat start time to zero
         mouse_drag_repeat_start_time = 0;
     }
+
+    time = Ticks();
+
+    // govern FPS speed if needed
+    if (double max_FPS = MaxFPS()) {
+        double min_ms_per_frame = 1000.0 * 1.0 / max_FPS;
+        double ms_to_wait = min_ms_per_frame - (time - last_frame_time);
+        if (0.0 < ms_to_wait)
+            SDL_Delay(ms_to_wait);
+    }
+    last_frame_time = time;
+
+    // track FPS if needed
+    m_delta_t = time - most_recent_time;
+    if (m_calc_FPS) {
+        ++frames;
+        if (1000 < time - last_FPS_time) { // calculate FPS at most once a second
+            m_FPS = frames / ((time - last_FPS_time) / 1000.0);
+            last_FPS_time = time;
+            frames = 0;
+        }
+    }
+    most_recent_time = time;
 
     // do one iteration of the render loop
     Update();

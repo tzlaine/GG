@@ -33,7 +33,8 @@
 #endif
 
 #ifndef __FREETYPE_H__
-#include <freetype/freetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #endif
 
 namespace GG {

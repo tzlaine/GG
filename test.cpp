@@ -1,3 +1,7 @@
+/*
+ * Use 'make check' to see if GG is working correctly.
+ */
+
 #include "SDL.h"
 #include <SDLGGApp.h>
 

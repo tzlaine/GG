@@ -3,6 +3,8 @@ dnl Process this file with -*-autoconf-*- to produce a configure script.
 AC_PREREQ(2.57)
 AC_INIT(libGiGi, 0.5.0.0)
 
+AC_CONFIG_LIBOBJ_DIR(lib)
+
 dnl YG_REMOVE(A,B) is equivalent to ${A/$B/} on bash
 AC_DEFUN([YG_REMOVE],[`echo "$$1"|sed -e \"s@$$2@@\"`])
 
@@ -75,8 +77,8 @@ AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
 # Checks for library functions.
-AC_FUNC_ERROR_AT_LINE
-AC_FUNC_MALLOC
+#AC_FUNC_ERROR_AT_LINE
+#AC_FUNC_MALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([floor gethostbyaddr gethostbyname memmove memset])
@@ -252,7 +254,23 @@ LIBS="$GL_LIBS $SDL_LIBS -lIL -lILU"
 CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
 AC_CHECK_HEADERS([IL/il.h IL/ilu.h IL/ilut.h],,[AC_MSG_ERROR([The DevIL headers were not found])])
 YG_SEARCH_LIBS([DevIL],[ILUT],[#include <IL/ilut.h>],[ilutInit();],[],
-               [AC_MSG_FAILURE([Unable to link DevIL test program, do you have DevIL installed?])])
+	       [# Maybe we have a broken libdevIL?
+		SAVE2_LIBS="$LIBS"
+		LIBS="$SAVE_LIBS"
+	        AC_CHECK_FUNC([vsnprintf],[],[AC_MSG_FAILURE([I seem to need `vsnprintf' for DevIL, but I can't find that function])])
+		AC_CHECK_FUNC([_vsnprintf],[AC_MSG_FAILURE([The `_vsnprintf'-function exists, the DevIL test program failed
+to link. Do you have DevIL installed?])],[AC_LIBOBJ(_vsnprintf)])
+		LIBS="$SAVE2_LIBS"
+		SAVE_CPPFLAGS="$CPPFLAGS"
+		CPPFLAGS="$CPPFLAGS -I$srcdir"
+		YG_SEARCH_LIBS([broken DevIL],[ILUT],[#include <IL/ilut.h>
+#include <src/_vsnprintf.c>],[ilutInit();],[AC_MSG_WARN([
+*** Your DevIL-libraries are broken! They require the `_vsnprintf' function,
+*** which is called `vsnprintf' on your system. I have created a wrapper,
+*** so GiGi _should_ compile fine anyway.])],
+               	 [AC_MSG_FAILURE([Unable to link DevIL test program, do you have DevIL installed?])])
+		CPPFLAGS="$SAVE_CPPFLAGS"
+                ])
 DEVIL_LIBS="YG_REMOVE(LIBS,SAVE_LIBS)"
 AC_SUBST(DEVIL_LIBS)
 CPPFLAGS="$SAVE_CPPFLAGS"
@@ -296,8 +314,8 @@ AC_SUBST(GG_USE_NET)
 AC_SUBST(GIGINET_DEP)
 
 dnl debug-mode switch
-AC_ARG_ENABLE([debug], [AC_HELP_STRING([--disable-debug],[compile without debugging symbols])] dnl
-		     , [], [enable_debug=yes])
+AC_ARG_ENABLE([debug], [AC_HELP_STRING([--enable-debug],[compile with debugging symbols])] dnl
+		     , [enable_debug=$enableval], [enable_debug=no])
 AM_CONDITIONAL(DEBUG,[test x$enable_debug = xyes])
 
 AC_CONFIG_FILES([Makefile 

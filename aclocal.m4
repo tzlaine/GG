@@ -1,4 +1,4 @@
-# generated automatically by aclocal 1.7.2 -*- Autoconf -*-
+# generated automatically by aclocal 1.7.9 -*- Autoconf -*-
 
 # Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
 # Free Software Foundation, Inc.
@@ -60,7 +60,7 @@ fi])])
 # This macro actually does too much some checks are only needed if
 # your package does certain things.  But this isn't really a big deal.
 
-# Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -78,14 +78,7 @@ fi])])
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-# serial 8
-
-# There are a few dirty hacks below to avoid letting `AC_PROG_CC' be
-# written in clear, in which case automake, when reading aclocal.m4,
-# will think it sees a *use*, and therefore will trigger all it's
-# C support machinery.  Also note that it means that autoscan, seeing
-# CC etc. in the Makefile, will ask for an AC_PROG_CC use...
-
+# serial 10
 
 AC_PREREQ([2.54])
 
@@ -130,8 +123,8 @@ m4_ifval([$2],
  AC_SUBST([PACKAGE], [$1])dnl
  AC_SUBST([VERSION], [$2])],
 [_AM_SET_OPTIONS([$1])dnl
- AC_SUBST([PACKAGE], [AC_PACKAGE_TARNAME])dnl
- AC_SUBST([VERSION], [AC_PACKAGE_VERSION])])dnl
+ AC_SUBST([PACKAGE], ['AC_PACKAGE_TARNAME'])dnl
+ AC_SUBST([VERSION], ['AC_PACKAGE_VERSION'])])dnl
 
 _AM_IF_OPTION([no-define],,
 [AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of package])
@@ -152,6 +145,7 @@ AM_PROG_INSTALL_STRIP
 # some platforms.
 AC_REQUIRE([AC_PROG_AWK])dnl
 AC_REQUIRE([AC_PROG_MAKE_SET])dnl
+AC_REQUIRE([AM_SET_LEADING_DOT])dnl
 
 _AM_IF_OPTION([no-dependencies],,
 [AC_PROVIDE_IFELSE([AC_PROG_CC],
@@ -174,7 +168,16 @@ AC_PROVIDE_IFELSE([AC_PROG_CXX],
 # loop where config.status creates the headers, so we can generate
 # our stamp files there.
 AC_DEFUN([_AC_AM_CONFIG_HEADER_HOOK],
-[_am_stamp_count=`expr ${_am_stamp_count-0} + 1`
+[# Compute $1's index in $config_headers.
+_am_stamp_count=1
+for _am_header in $config_headers :; do
+  case $_am_header in
+    $1 | $1:* )
+      break ;;
+    * )
+      _am_stamp_count=`expr $_am_stamp_count + 1` ;;
+  esac
+done
 echo "timestamp for $1" >`AS_DIRNAME([$1])`/stamp-h[]$_am_stamp_count])
 
 # Copyright 2002  Free Software Foundation, Inc.
@@ -204,7 +207,7 @@ AC_DEFUN([AM_AUTOMAKE_VERSION],[am__api_version="1.7"])
 # Call AM_AUTOMAKE_VERSION so it can be traced.
 # This function is AC_REQUIREd by AC_INIT_AUTOMAKE.
 AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
-	 [AM_AUTOMAKE_VERSION([1.7.2])])
+	 [AM_AUTOMAKE_VERSION([1.7.9])])
 
 # Helper functions for option handling.                    -*- Autoconf -*-
 
@@ -490,9 +493,42 @@ fi
 INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 AC_SUBST([INSTALL_STRIP_PROGRAM])])
 
-# serial 4						-*- Autoconf -*-
+#                                                          -*- Autoconf -*-
+# Copyright (C) 2003  Free Software Foundation, Inc.
 
-# Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+
+# serial 1
+
+# Check whether the underlying file-system supports filenames
+# with a leading dot.  For instance MS-DOS doesn't.
+AC_DEFUN([AM_SET_LEADING_DOT],
+[rm -rf .tst 2>/dev/null
+mkdir .tst 2>/dev/null
+if test -d .tst; then
+  am__leading_dot=.
+else
+  am__leading_dot=_
+fi
+rmdir .tst 2>/dev/null
+AC_SUBST([am__leading_dot])])
+
+# serial 5						-*- Autoconf -*-
+
+# Copyright (C) 1999, 2000, 2001, 2002, 2003  Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -553,18 +589,32 @@ AC_CACHE_CHECK([dependency style of $depcc],
   # using a relative directory.
   cp "$am_depcomp" conftest.dir
   cd conftest.dir
+  # We will build objects and dependencies in a subdirectory because
+  # it helps to detect inapplicable dependency modes.  For instance
+  # both Tru64's cc and ICC support -MD to output dependencies as a
+  # side effect of compilation, but ICC will put the dependencies in
+  # the current directory while Tru64 will put them in the object
+  # directory.
+  mkdir sub
 
   am_cv_$1_dependencies_compiler_type=none
   if test "$am_compiler_list" = ""; then
      am_compiler_list=`sed -n ['s/^#*\([a-zA-Z0-9]*\))$/\1/p'] < ./depcomp`
   fi
   for depmode in $am_compiler_list; do
+    # Setup a source with many dependencies, because some compilers
+    # like to wrap large dependency lists on column 80 (with \), and
+    # we should not choose a depcomp mode which is confused by this.
+    #
     # We need to recreate these files for each test, as the compiler may
     # overwrite some of them when testing with obscure command lines.
     # This happens at least with the AIX C compiler.
-    echo '#include "conftest.h"' > conftest.c
-    echo 'int i;' > conftest.h
-    echo "${am__include} ${am__quote}conftest.Po${am__quote}" > confmf
+    : > sub/conftest.c
+    for i in 1 2 3 4 5 6; do
+      echo '#include "conftst'$i'.h"' >> sub/conftest.c
+      : > sub/conftst$i.h
+    done
+    echo "${am__include} ${am__quote}sub/conftest.Po${am__quote}" > confmf
 
     case $depmode in
     nosideeffect)
@@ -582,13 +632,20 @@ AC_CACHE_CHECK([dependency style of $depcc],
     # mode.  It turns out that the SunPro C++ compiler does not properly
     # handle `-M -o', and we need to detect this.
     if depmode=$depmode \
-       source=conftest.c object=conftest.o \
-       depfile=conftest.Po tmpdepfile=conftest.TPo \
-       $SHELL ./depcomp $depcc -c -o conftest.o conftest.c >/dev/null 2>&1 &&
-       grep conftest.h conftest.Po > /dev/null 2>&1 &&
+       source=sub/conftest.c object=sub/conftest.${OBJEXT-o} \
+       depfile=sub/conftest.Po tmpdepfile=sub/conftest.TPo \
+       $SHELL ./depcomp $depcc -c -o sub/conftest.${OBJEXT-o} sub/conftest.c \
+         >/dev/null 2>conftest.err &&
+       grep sub/conftst6.h sub/conftest.Po > /dev/null 2>&1 &&
+       grep sub/conftest.${OBJEXT-o} sub/conftest.Po > /dev/null 2>&1 &&
        ${MAKE-make} -s -f confmf > /dev/null 2>&1; then
-      am_cv_$1_dependencies_compiler_type=$depmode
-      break
+      # icc doesn't choke on unknown options, it will just issue warnings
+      # (even with -Werror).  So we grep stderr for any message
+      # that says an option was ignored.
+      if grep 'ignoring option' conftest.err >/dev/null 2>&1; then :; else
+        am_cv_$1_dependencies_compiler_type=$depmode
+        break
+      fi
     fi
   done
 
@@ -610,16 +667,8 @@ AM_CONDITIONAL([am__fastdep$1], [
 # Choose a directory name for dependency files.
 # This macro is AC_REQUIREd in _AM_DEPENDENCIES
 AC_DEFUN([AM_SET_DEPDIR],
-[rm -f .deps 2>/dev/null
-mkdir .deps 2>/dev/null
-if test -d .deps; then
-  DEPDIR=.deps
-else
-  # MS-DOS does not allow filenames that begin with a dot.
-  DEPDIR=_deps
-fi
-rmdir .deps 2>/dev/null
-AC_SUBST([DEPDIR])
+[AC_REQUIRE([AM_SET_LEADING_DOT])dnl
+AC_SUBST([DEPDIR], ["${am__leading_dot}deps"])dnl
 ])
 
 
@@ -723,7 +772,7 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 
 # Check to see how 'make' treats includes.	-*- Autoconf -*-
 
-# Copyright (C) 2001, 2002 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -748,8 +797,9 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 AC_DEFUN([AM_MAKE_INCLUDE],
 [am_make=${MAKE-make}
 cat > confinc << 'END'
-doit:
+am__doit:
 	@echo done
+.PHONY: am__doit
 END
 # If we don't find an include directive, just comment out the code.
 AC_MSG_CHECKING([for style of include used by $am_make])
@@ -777,15 +827,16 @@ if test "$am__include" = "#"; then
       _am_result=BSD
    fi
 fi
-AC_SUBST(am__include)
-AC_SUBST(am__quote)
-AC_MSG_RESULT($_am_result)
+AC_SUBST([am__include])
+AC_SUBST([am__quote])
+AC_MSG_RESULT([$_am_result])
 rm -f confinc confmf
 ])
 
 # libtool.m4 - Configure libtool for the host system. -*-Autoconf-*-
 
 # serial 47 AC_PROG_LIBTOOL
+# Debian $Rev: 149 $
 
 
 # AC_PROVIDE_IFELSE(MACRO-NAME, IF-PROVIDED, IF-NOT-PROVIDED)
@@ -2211,6 +2262,12 @@ linux*)
   # before this can be enabled.
   hardcode_into_libs=yes
 
+  # Append ld.so.conf contents to the search path
+  if test -f /etc/ld.so.conf; then
+    ld_extra=`$SED -e 's/[:,\t]/ /g;s/=[^=]*$//;s/=[^= ]* / /g' /etc/ld.so.conf`
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $ld_extra"
+  fi
+
   # We used to test for /lib/ld.so.1 and disable shared libraries on
   # powerpc, because MkLinux only supported shared libraries with the
   # GNU dynamic linker.  Since this was broken with cross compilers,
@@ -2894,17 +2951,6 @@ mingw* | pw32*)
   ;;
 
 darwin* | rhapsody*)
-  # this will be overwritten by pass_all, but leave it in just in case
-  lt_cv_deplibs_check_method='file_magic Mach-O dynamically linked shared library'
-  lt_cv_file_magic_cmd='/usr/bin/file -L'
-  case "$host_os" in
-  rhapsody* | darwin1.[[012]])
-    lt_cv_file_magic_test_file=`/System/Library/Frameworks/System.framework/System`
-    ;;
-  *) # Darwin 1.3 on
-    lt_cv_file_magic_test_file='/usr/lib/libSystem.dylib'
-    ;;
-  esac
   lt_cv_deplibs_check_method=pass_all
   ;;
 
@@ -2947,37 +2993,17 @@ hpux10.20* | hpux11*)
   ;;
 
 irix5* | irix6* | nonstopux*)
-  case $host_os in
-  irix5* | nonstopux*)
-    # this will be overridden with pass_all, but let us keep it just in case
-    lt_cv_deplibs_check_method="file_magic ELF 32-bit MSB dynamic lib MIPS - version 1"
-    ;;
-  *)
-    case $LD in
-    *-32|*"-32 ") libmagic=32-bit;;
-    *-n32|*"-n32 ") libmagic=N32;;
-    *-64|*"-64 ") libmagic=64-bit;;
-    *) libmagic=never-match;;
-    esac
-    # this will be overridden with pass_all, but let us keep it just in case
-    lt_cv_deplibs_check_method="file_magic ELF ${libmagic} MSB mips-[[1234]] dynamic lib MIPS - version 1"
-    ;;
+  case $LD in
+  *-32|*"-32 ") libmagic=32-bit;;
+  *-n32|*"-n32 ") libmagic=N32;;
+  *-64|*"-64 ") libmagic=64-bit;;
+  *) libmagic=never-match;;
   esac
-  lt_cv_file_magic_test_file=`echo /lib${libsuff}/libc.so*`
   lt_cv_deplibs_check_method=pass_all
   ;;
 
 # This must be Linux ELF.
 linux*)
-  case $host_cpu in
-  alpha*|hppa*|i*86|ia64*|m68*|mips*|powerpc*|sparc*|s390*|sh*)
-    lt_cv_deplibs_check_method=pass_all ;;
-  *)
-    # glibc up to 2.1.1 does not perform some relocations on ARM
-    # this will be overridden with pass_all, but let us keep it just in case
-    lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[LM]]SB (shared object|dynamic lib )' ;;
-  esac
-  lt_cv_file_magic_test_file=`echo /lib/libc.so* /lib/libc-*.so`
   lt_cv_deplibs_check_method=pass_all
   ;;
 
@@ -3010,9 +3036,6 @@ openbsd*)
   ;;
 
 osf3* | osf4* | osf5*)
-  # this will be overridden with pass_all, but let us keep it just in case
-  lt_cv_deplibs_check_method='file_magic COFF format alpha shared library'
-  lt_cv_file_magic_test_file=/shlib/libc.so
   lt_cv_deplibs_check_method=pass_all
   ;;
 
@@ -3022,7 +3045,6 @@ sco3.2v5*)
 
 solaris*)
   lt_cv_deplibs_check_method=pass_all
-  lt_cv_file_magic_test_file=/lib/libc.so
   ;;
 
 sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
@@ -4627,7 +4649,8 @@ if test -f "$ltmain"; then
   # Now quote all the things that may contain metacharacters while being
   # careful not to overquote the AC_SUBSTed values.  We take copies of the
   # variables and quote the copies for generation of the libtool script.
-  for var in echo old_CC old_CFLAGS AR AR_FLAGS EGREP RANLIB LN_S LTCC NM SED SHELL \
+  for var in echo old_CC old_CFLAGS AR AR_FLAGS EGREP RANLIB LN_S LTCC NM \
+    SED SHELL STRIP \
     libname_spec library_names_spec soname_spec extract_expsyms_cmds \
     old_striplib striplib file_magic_cmd finish_cmds finish_eval \
     deplibs_check_method reload_flag reload_cmds need_locks \
@@ -4808,7 +4831,7 @@ LN_S=$lt_LN_S
 NM=$lt_NM
 
 # A symbol stripping program
-STRIP=$STRIP
+STRIP=$lt_STRIP
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=$MAGIC_CMD
@@ -5083,7 +5106,10 @@ else
   # If there is no Makefile yet, we rely on a make rule to execute
   # `config.status --recheck' to rerun these tests and create the
   # libtool script then.
-  test -f Makefile && make "$ltmain"
+  ltmain_in=`echo $ltmain | sed -e 's/\.sh$/.in/'`
+  if test -f "$ltmain_in"; then
+    test -f Makefile && make "$ltmain"
+  fi
 fi
 ])# AC_LIBTOOL_CONFIG
 
@@ -5156,7 +5182,7 @@ osf*)
   symcode='[[BCDEGQRST]]'
   ;;
 solaris* | sysv5*)
-  symcode='[[BDT]]'
+  symcode='[[BDRT]]'
   ;;
 sysv4)
   symcode='[[DFNSTU]]'
@@ -5174,7 +5200,7 @@ esac
 # If we're using GNU nm, then use its standard symbol codes.
 case `$NM -V 2>&1` in
 *GNU* | *'with BFD'*)
-  symcode='[[ABCDGISTW]]' ;;
+  symcode='[[ABCDGIRSTW]]' ;;
 esac
 
 # Try without a prefix undercore, then with it.
@@ -5942,6 +5968,31 @@ EOF
       _LT_AC_TAGVAR(hardcode_direct, $1)=yes
       _LT_AC_TAGVAR(hardcode_shlibpath_var, $1)=no
       ;;
+
+  linux*)
+    if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
+        tmp_archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+	_LT_AC_TAGVAR(archive_cmds, $1)="$tmp_archive_cmds"
+      supports_anon_versioning=no
+      case `$LD -v 2>/dev/null` in
+        *\ [01].* | *\ 2.[[0-9]].* | *\ 2.10.*) ;; # catch versions < 2.11
+        *\ 2.11.93.0.2\ *) supports_anon_versioning=yes ;; # RH7.3 ...
+        *\ 2.11.92.0.12\ *) supports_anon_versioning=yes ;; # Mandrake 8.2 ...
+        *\ 2.11.*) ;; # other 2.11 versions
+        *) supports_anon_versioning=yes ;;
+      esac
+      if test $supports_anon_versioning = yes; then
+        _LT_AC_TAGVAR(archive_expsym_cmds, $1)='$echo "{ global:" > $output_objdir/$libname.ver~
+cat $export_symbols | sed -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
+$echo "local: *; };" >> $output_objdir/$libname.ver~
+        $CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-version-script ${wl}$output_objdir/$libname.ver -o $lib'
+      else
+        _LT_AC_TAGVAR(archive_expsym_cmds, $1)="$tmp_archive_cmds"
+      fi
+    else
+      _LT_AC_TAGVAR(ld_shlibs, $1)=no
+    fi
+    ;;
 
     *)
       if $LD --help 2>&1 | grep ': supported targets:.* elf' > /dev/null; then
@@ -6904,89 +6955,105 @@ int main(int argc, char *argv[])
 
 # Configure paths for FreeType2
 # Marcelo Magallon 2001-10-26, based on gtk.m4 by Owen Taylor
+#
+# serial 2
 
-dnl AC_CHECK_FT2([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-dnl Test for FreeType2, and define FT2_CFLAGS and FT2_LIBS
-dnl
-AC_DEFUN(AC_CHECK_FT2,
-[dnl
-dnl Get the cflags and libraries from the freetype-config script
-dnl
-AC_ARG_WITH(ft-prefix,
-[  --with-ft-prefix=PREFIX
-                          Prefix where FreeType is installed (optional)],
-            ft_config_prefix="$withval", ft_config_prefix="")
-AC_ARG_WITH(ft-exec-prefix,
-[  --with-ft-exec-prefix=PREFIX
-                          Exec prefix where FreeType is installed (optional)],
-            ft_config_exec_prefix="$withval", ft_config_exec_prefix="")
-AC_ARG_ENABLE(freetypetest,
-[  --disable-freetypetest  Do not try to compile and run
-                          a test FreeType program],
-              [], enable_fttest=yes)
+# AC_CHECK_FT2([MINIMUM-VERSION [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
+# Test for FreeType 2, and define FT2_CFLAGS and FT2_LIBS.
+# MINIMUM-VERSION is what libtool reports; the default is `7.0.1' (this is
+# FreeType 2.0.4).
+#
+AC_DEFUN([AC_CHECK_FT2],
+  [# Get the cflags and libraries from the freetype-config script
+   #
+   AC_ARG_WITH([ft-prefix],
+     dnl don't quote AS_HELP_STRING!
+     AS_HELP_STRING([--with-ft-prefix=PREFIX],
+                    [Prefix where FreeType is installed (optional)]),
+     [ft_config_prefix="$withval"],
+     [ft_config_prefix=""])
 
-if test x$ft_config_exec_prefix != x ; then
-  ft_config_args="$ft_config_args --exec-prefix=$ft_config_exec_prefix"
-  if test x${FT2_CONFIG+set} != xset ; then
-    FT2_CONFIG=$ft_config_exec_prefix/bin/freetype-config
-  fi
-fi
-if test x$ft_config_prefix != x ; then
-  ft_config_args="$ft_config_args --prefix=$ft_config_prefix"
-  if test x${FT2_CONFIG+set} != xset ; then
-    FT2_CONFIG=$ft_config_prefix/bin/freetype-config
-  fi
-fi
-AC_PATH_PROG(FT2_CONFIG, freetype-config, no)
+   AC_ARG_WITH([ft-exec-prefix],
+     dnl don't quote AS_HELP_STRING!
+     AS_HELP_STRING([--with-ft-exec-prefix=PREFIX],
+                    [Exec prefix where FreeType is installed (optional)]),
+     [ft_config_exec_prefix="$withval"],
+     [ft_config_exec_prefix=""])
 
-min_ft_version=ifelse([$1], ,6.1.0,$1)
-AC_MSG_CHECKING(for FreeType - version >= $min_ft_version)
-no_ft=""
-if test "$FT2_CONFIG" = "no" ; then
-  no_ft=yes
-else
-  FT2_CFLAGS=`$FT2_CONFIG $ft_config_args --cflags`
-  FT2_LIBS=`$FT2_CONFIG $ft_config_args --libs`
-  ft_config_major_version=`$FT2_CONFIG $ft_config_args --version | \
-         sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-  ft_config_minor_version=`$FT2_CONFIG $ft_config_args --version | \
-         sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-  ft_config_micro_version=`$FT2_CONFIG $ft_config_args --version | \
-         sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-  ft_min_major_version=`echo $min_ft_version | \
-         sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-  ft_min_minor_version=`echo $min_ft_version | \
-         sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-  ft_min_micro_version=`echo $min_ft_version | \
-         sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-  if test x$enable_fttest = xyes ; then
-    ft_config_is_lt=""
-    if test $ft_config_major_version -lt $ft_min_major_version ; then
-      ft_config_is_lt=yes
-    else
-      if test $ft_config_major_version -eq $ft_min_major_version ; then
-        if test $ft_config_minor_version -lt $ft_min_minor_version ; then
-          ft_config_is_lt=yes
-        else
-          if test $ft_config_minor_version -eq $ft_min_minor_version ; then
-            if test $ft_config_micro_version -lt $ft_min_micro_version ; then
-              ft_config_is_lt=yes
-            fi
-          fi
-        fi
-      fi
-    fi
-    if test x$ft_config_is_lt = xyes ; then
-      no_ft=yes
-    else
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $FT2_CFLAGS"
-      LIBS="$FT2_LIBS $LIBS"
-dnl
-dnl Sanity checks for the results of freetype-config to some extent
-dnl
-      AC_TRY_RUN([
+   AC_ARG_ENABLE([freetypetest],
+     dnl don't quote AS_HELP_STRING!
+     AS_HELP_STRING([--disable-freetypetest],
+                    [Do not try to compile and run a test FreeType program]),
+     [],
+     [enable_fttest=yes])
+
+   if test x$ft_config_exec_prefix != x ; then
+     ft_config_args="$ft_config_args --exec-prefix=$ft_config_exec_prefix"
+     if test x${FT2_CONFIG+set} != xset ; then
+       FT2_CONFIG=$ft_config_exec_prefix/bin/freetype-config
+     fi
+   fi
+
+   if test x$ft_config_prefix != x ; then
+     ft_config_args="$ft_config_args --prefix=$ft_config_prefix"
+     if test x${FT2_CONFIG+set} != xset ; then
+       FT2_CONFIG=$ft_config_prefix/bin/freetype-config
+     fi
+   fi
+
+   AC_PATH_PROG([FT2_CONFIG], [freetype-config], [no])
+
+   min_ft_version=m4_if([$1], [], [7.0.1], [$1])
+   AC_MSG_CHECKING([for FreeType -- version >= $min_ft_version])
+   no_ft=""
+   if test "$FT2_CONFIG" = "no" ; then
+     no_ft=yes
+   else
+     FT2_CFLAGS=`$FT2_CONFIG $ft_config_args --cflags`
+     FT2_LIBS=`$FT2_CONFIG $ft_config_args --libs`
+     ft_config_major_version=`$FT2_CONFIG $ft_config_args --version | \
+       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+     ft_config_minor_version=`$FT2_CONFIG $ft_config_args --version | \
+       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+     ft_config_micro_version=`$FT2_CONFIG $ft_config_args --version | \
+       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+     ft_min_major_version=`echo $min_ft_version | \
+       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+     ft_min_minor_version=`echo $min_ft_version | \
+       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+     ft_min_micro_version=`echo $min_ft_version | \
+       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+     if test x$enable_fttest = xyes ; then
+       ft_config_is_lt=""
+       if test $ft_config_major_version -lt $ft_min_major_version ; then
+         ft_config_is_lt=yes
+       else
+         if test $ft_config_major_version -eq $ft_min_major_version ; then
+           if test $ft_config_minor_version -lt $ft_min_minor_version ; then
+             ft_config_is_lt=yes
+           else
+             if test $ft_config_minor_version -eq $ft_min_minor_version ; then
+               if test $ft_config_micro_version -lt $ft_min_micro_version ; then
+                 ft_config_is_lt=yes
+               fi
+             fi
+           fi
+         fi
+       fi
+       if test x$ft_config_is_lt = xyes ; then
+         no_ft=yes
+       else
+         ac_save_CFLAGS="$CFLAGS"
+         ac_save_LIBS="$LIBS"
+         CFLAGS="$CFLAGS $FT2_CFLAGS"
+         LIBS="$FT2_LIBS $LIBS"
+
+         #
+         # Sanity checks for the results of freetype-config to some extent.
+         #
+         AC_RUN_IFELSE([
+             AC_LANG_SOURCE([[
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <stdio.h>
@@ -6996,7 +7063,7 @@ int
 main()
 {
   FT_Library library;
-  FT_Error error;
+  FT_Error  error;
 
   error = FT_Init_FreeType(&library);
 
@@ -7008,43 +7075,62 @@ main()
     return 0;
   }
 }
-],, no_ft=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
-      CFLAGS="$ac_save_CFLAGS"
-      LIBS="$ac_save_LIBS"
-    fi             # test $ft_config_version -lt $ft_min_version
-  fi               # test x$enable_fttest = xyes
-fi                 # test "$FT2_CONFIG" = "no"
-if test x$no_ft = x ; then
-   AC_MSG_RESULT(yes)
-   ifelse([$2], , :, [$2])
-else
-   AC_MSG_RESULT(no)
-   if test "$FT2_CONFIG" = "no" ; then
-     echo "*** The freetype-config script installed by FreeType 2 could not be found."
-     echo "*** If FreeType 2 was installed in PREFIX, make sure PREFIX/bin is in"
-     echo "*** your path, or set the FT2_CONFIG environment variable to the"
-     echo "*** full path to freetype-config."
+
+             ]])
+           ],
+           [],
+           [no_ft=yes],
+           [echo $ECHO_N "cross compiling; assuming OK... $ECHO_C"])
+
+         CFLAGS="$ac_save_CFLAGS"
+         LIBS="$ac_save_LIBS"
+       fi             # test $ft_config_version -lt $ft_min_version
+     fi               # test x$enable_fttest = xyes
+   fi                 # test "$FT2_CONFIG" = "no"
+
+   if test x$no_ft = x ; then
+     AC_MSG_RESULT([yes])
+     m4_if([$2], [], [:], [$2])
    else
-     if test x$ft_config_is_lt = xyes ; then
-       echo "*** Your installed version of the FreeType 2 library is too old."
-       echo "*** If you have different versions of FreeType 2, make sure that"
-       echo "*** correct values for --with-ft-prefix or --with-ft-exec-prefix"
-       echo "*** are used, or set the FT2_CONFIG environment variable to the"
-       echo "*** full path to freetype-config."
+     AC_MSG_RESULT([no])
+     if test "$FT2_CONFIG" = "no" ; then
+       AC_MSG_WARN([
+
+  The freetype-config script installed by FreeType 2 could not be found.
+  If FreeType 2 was installed in PREFIX, make sure PREFIX/bin is in
+  your path, or set the FT2_CONFIG environment variable to the
+  full path to freetype-config.
+       ])
      else
-       echo "*** The FreeType test program failed to run.  If your system uses"
-       echo "*** shared libraries and they are installed outside the normal"
-       echo "*** system library path, make sure the variable LD_LIBRARY_PATH"
-       echo "*** (or whatever is appropiate for your system) is correctly set."
+       if test x$ft_config_is_lt = xyes ; then
+         AC_MSG_WARN([
+
+  Your installed version of the FreeType 2 library is too old.
+  If you have different versions of FreeType 2, make sure that
+  correct values for --with-ft-prefix or --with-ft-exec-prefix
+  are used, or set the FT2_CONFIG environment variable to the
+  full path to freetype-config.
+         ])
+       else
+         AC_MSG_WARN([
+
+  The FreeType test program failed to run.  If your system uses
+  shared libraries and they are installed outside the normal
+  system library path, make sure the variable LD_LIBRARY_PATH
+  (or whatever is appropiate for your system) is correctly set.
+         ])
+       fi
      fi
+
+     FT2_CFLAGS=""
+     FT2_LIBS=""
+     m4_if([$3], [], [:], [$3])
    fi
-   FT2_CFLAGS=""
-   FT2_LIBS=""
-   ifelse([$3], , :, [$3])
-fi
-AC_SUBST(FT2_CFLAGS)
-AC_SUBST(FT2_LIBS)
-])
+
+   AC_SUBST([FT2_CFLAGS])
+   AC_SUBST([FT2_LIBS])])
+
+# end of freetype2.m4
 
 #YG_SEARCH_LIBS(DESCRIPTION, LIBRARY-LIST, PROLOGUE, MAIN, [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
 # like AC_SEARCH_LIBS, but takes a prologue and the exact syntax for calling the function

@@ -40,7 +40,7 @@
    GG relies on a few other open-source libraries:
    - DevIL 1.6.6 - http://openil.sourceforge.net
    - FreeType 2.1.2 - http://www.freetype.org
-   - boost 1.30.2 - http://www.boost.org
+   - boost 1.32.0 - http://www.boost.org
    - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
 
    Optional libraries:
@@ -59,9 +59,8 @@
    \subsection howto_build_linux Linux
    To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
    boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  These two 
-   libraries and all the boost includes should be available in your path as well.  Unfortunately, boost has no installer, 
-   so you'll need to move the resulting library files manually, or specify their locations to configure below. You will 
-   of course also need to build and make available all of the libraries listed in the requirements above.
+   libraries and all the boost includes should be available in your path as well.  You will of course also need to build
+   and make available all of the libraries listed in the requirements above.
    
    Once this is done, Linux users can simply type
    \verbatim
@@ -73,7 +72,7 @@
    \verbatim
       ./configure --help\endverbatim
    to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
-   be especially useful on Windows systems.  Also, be aware that GG will install itself in /usr/local/lib by default; to change 
+   be especially useful on Cygwin/MinGW systems.  GG will install itself in /usr/local/lib by default; to change 
    this, use the --prefix=[LIB_PATH] command-line option when invoking configure.  Note that if you do not intend to use 
    the static version of GG, you should specify the --disable-static option, which will cut your build time roughly in half.
 
@@ -107,11 +106,11 @@
 	- Unzip the boost zipfile into your root directory.
 	- Open a "Visual Studio .NET 2003 Command Prompt".
 	- Execute:\verbatim
-    cd c:\[BOOST_DIR]\tools\build\jam_src
+    cd [BOOST_DIR]\tools\build\jam_src
     build.bat
     copy bin.ntx86\bjam.exe ..\..\..\..
     cd ..\..\..\..
-    bjam "-sTOOLS=vc7.1" "-sBUILD=release"\endverbatim
+    bjam\endverbatim
     <p>
     Finally, note that the solution file is set up to grab all include and library directories rooted at c:\, not just the boost 
     ones.  If you'd like to keep them somewhere else, you'll need to change the project settings.

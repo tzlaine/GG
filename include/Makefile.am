@@ -13,6 +13,7 @@ GGEdit.h					\
 GGFont.h					\
 GGListBox.h					\
 GGMenu.h					\
+GGMultiEdit.h					\
 GGPtRect.h					\
 GGScroll.h					\
 GGSignalsAndSlots.h				\

@@ -16,6 +16,7 @@ GGEdit.cpp					\
 GGFont.cpp					\
 GGListBox.cpp					\
 GGMenu.cpp					\
+GGMultiEdit.cpp					\
 GGPtRect.cpp					\
 GGScroll.cpp					\
 GGSlider.cpp					\

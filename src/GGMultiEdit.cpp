@@ -34,38 +34,38 @@
 namespace GG {
 
 namespace {
-struct MultiEditStyleValidator : public ValidatorBase
-{
-    virtual void Validate(const std::string& str) const
+    struct MultiEditStyleValidator : public ValidatorBase
     {
-	vector<string> tokens = Tokenize(str);
-	for (unsigned int i = 0; i < tokens.size(); ++i) {
-	    bool bad_cast = false;
-	    MultiEdit::Styles val1;
-	    try {
-		val1 = boost::lexical_cast<MultiEdit::Styles>(str);
-	    } catch (boost::bad_lexical_cast& e) {
-		bad_cast = true;
-	    }
+        virtual void Validate(const std::string& str) const
+        {
+            vector<string> tokens = Tokenize(str);
+            for (unsigned int i = 0; i < tokens.size(); ++i) {
+                bool bad_cast = false;
+                MultiEdit::Styles val1;
+                try {
+                    val1 = boost::lexical_cast<MultiEdit::Styles>(str);
+                } catch (boost::bad_lexical_cast& e) {
+                    bad_cast = true;
+                }
 
-	    if (bad_cast || val1 == EnumMap<MultiEdit::Styles>::BAD_VALUE) {
-		ListBoxStyle val2 = boost::lexical_cast<ListBoxStyle>(str);
-		if (val2 == EnumMap<ListBoxStyle>::BAD_VALUE || 
-		    (val2 != static_cast<int>(TF_WORDBREAK) && val2 != static_cast<int>(TF_LINEWRAP) && 
-		     val2 != static_cast<int>(TF_LEFT) && val2 != static_cast<int>(TF_CENTER) && 
-		     val2 != static_cast<int>(TF_RIGHT))) {
-		    throw std::runtime_error("MultiEditStyleValidator::Validate() : String \"" + str + "\" does not match any "
-					     "value in the MultiEdit::Styles or ListBoxStyle enumerated types.");
-		}
-	    }
-	}
-    }
+                if (bad_cast || val1 == EnumMap<MultiEdit::Styles>::BAD_VALUE) {
+                    ListBoxStyle val2 = boost::lexical_cast<ListBoxStyle>(str);
+                    if (val2 == EnumMap<ListBoxStyle>::BAD_VALUE || 
+                        (val2 != static_cast<int>(TF_WORDBREAK) && val2 != static_cast<int>(TF_LINEWRAP) && 
+                        val2 != static_cast<int>(TF_LEFT) && val2 != static_cast<int>(TF_CENTER) && 
+                        val2 != static_cast<int>(TF_RIGHT))) {
+                            throw std::runtime_error("MultiEditStyleValidator::Validate() : String \"" + str + "\" does not match any "
+                                "value in the MultiEdit::Styles or ListBoxStyle enumerated types.");
+                        }
+                }
+            }
+        }
 
-    virtual MultiEditStyleValidator *Clone() const
-    {
-        return new MultiEditStyleValidator();
-    }
-};
+        virtual MultiEditStyleValidator *Clone() const
+        {
+            return new MultiEditStyleValidator();
+        }
+    };
 }
 
 ////////////////////////////////////////////////
@@ -178,7 +178,7 @@ bool MultiEdit::Render()
     Uint32 text_format = TextFormat() & ~(TF_TOP | TF_BOTTOM) | TF_VCENTER;
     vector<Font::LineData> lines;
     for (int row = first_visible_row; row <= last_visible_row; ++row) {
-        int row_y_pos = m_style & TF_TOP ? 
+        int row_y_pos = ((m_style & TF_TOP) || m_contents_sz.y - ClientSize().y < 0) ? 
             cl_ul.y + row * GetFont()->Lineskip() - m_first_row_shown : 
             cl_lr.y - (static_cast<int>(GetLineData().size()) - row) * GetFont()->Lineskip() - m_first_row_shown + 
             (m_vscroll && m_hscroll ? BottomMargin() : 0);
@@ -459,7 +459,8 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
         }
 
         default: {
-            if (isprint(key)) { // only process it if it's a printable character
+            // only process it if it's a printable character, and no significant modifiers are in use
+            if (isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
                 if (MultiSelected())
                     ClearSelected();
                 // insert the character to the right of the caret
@@ -509,7 +510,7 @@ void MultiEdit::SelectAll()
 void MultiEdit::SetText(const string& str)
 {
      bool scroll_to_end = (m_style & TERMINAL_STYLE) &&
-          (!m_vscroll || m_vscroll->PosnRange().second == m_vscroll->ScrollRange().second + 1);
+          (!m_vscroll || m_vscroll->ScrollRange().second - m_vscroll->PosnRange().second <= 1);
 
     // trim the rows, if required by m_max_lines_history
     Pt cl_sz = ClientSize();
@@ -577,8 +578,8 @@ void MultiEdit::SetText(const string& str)
 
     AdjustScrolls();
     AdjustView();
-     if (scroll_to_end && m_vscroll)
-          m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
+    if (scroll_to_end && m_vscroll)
+        m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
     EditedSignal()(str);
 }
 
@@ -688,7 +689,7 @@ int MultiEdit::RowAt(int y) const
     int retval = 0;
     Uint32 format = TextFormat();
     y += m_first_row_shown;
-    if (format & TF_TOP) {
+    if ((format & TF_TOP) || m_contents_sz.y - ClientSize().y < 0) {
         retval = y / GetFont()->Lineskip();
     } else { // TF_BOTTOM
         retval = (static_cast<int>(GetLineData().size()) - 1) - 
@@ -806,8 +807,14 @@ void MultiEdit::ValidateStyle()
         m_style |= TF_TOP;
     }
 
-    if (!(m_style & (TF_LEFT | TF_CENTER | TF_RIGHT)))
+    int dup_ct = 0;   // duplication count
+    if (m_style & TF_LEFT) ++dup_ct;
+    if (m_style & TF_RIGHT) ++dup_ct;
+    if (m_style & TF_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use TF_LEFT by default
+        m_style &= ~(TF_RIGHT | TF_LEFT);
         m_style |= TF_LEFT;
+    }
 
     if (m_style & (TF_LINEWRAP | TF_WORDBREAK)) {
         m_style |= NO_HSCROLL;
@@ -840,7 +847,7 @@ void MultiEdit::AdjustView()
         horz_min = -excess_width / 2;
         horz_max = horz_min + m_contents_sz.x;
     }
-    if (format & TF_BOTTOM) {
+    if ((format & TF_BOTTOM) && 0 <= excess_height) {
         vert_min = -excess_height;
         vert_max = vert_min + m_contents_sz.y;
     }

@@ -205,7 +205,7 @@ void Wnd::Hide(bool children/* = true*/)
     if (children) {
         std::list<Wnd*>::iterator it = m_children.begin();
         for (; it != m_children.end(); ++it)
-            (*it)->Hide();
+            (*it)->Hide(children);
     }
 }
 
@@ -215,7 +215,7 @@ void Wnd::Show(bool children/* = true*/)
     if (children) {
         std::list<Wnd*>::iterator it = m_children.begin();
         for (; it != m_children.end(); ++it)
-            (*it)->Show();
+            (*it)->Show(children);
     }
 }
 

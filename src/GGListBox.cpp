@@ -34,7 +34,6 @@
 namespace GG {
 
 namespace {
-const int BORDER_THICK = 2;
 const int SCROLL_WIDTH = 14;
 
 class RowSorter // used to sort rows by a certain column (which may contain some empty cells)
@@ -172,6 +171,9 @@ Control* ListBox::Row::CreateControl(const SubTexture& st)
 ////////////////////////////////////////////////
 // GG::ListBox
 ////////////////////////////////////////////////
+// static(s)
+const int ListBox::BORDER_THICK = 2;
+
 ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
                  Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
         Control(x, y, w, h, flags),

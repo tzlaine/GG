@@ -211,6 +211,8 @@ public:
     BrowsedSignalType&       BrowsedSignal()       {return m_browsed_sig;}        ///< returns the browsed signal object for this ListBox
     //@}
 
+    static const int ListBox::BORDER_THICK; ///< the thickness with which to render the border of the control
+
 protected:
     /** \name Accessors */ //@{
     int            RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar

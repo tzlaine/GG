@@ -257,9 +257,9 @@ YG_SEARCH_LIBS([DevIL],[ILUT],[#include <IL/ilut.h>],[ilutInit();],[],
 	       [# Maybe we have a broken libdevIL?
 		SAVE2_LIBS="$LIBS"
 		LIBS="$SAVE_LIBS"
-	        AC_CHECK_FUNC([vsnprintf],[],[AC_MSG_FAILURE([I seem to need `vsnprintf' for DevIL, but I can't find that function])])
 		AC_CHECK_FUNC([_vsnprintf],[AC_MSG_FAILURE([The `_vsnprintf'-function exists, the DevIL test program failed
 to link. Do you have DevIL installed?])],[AC_LIBOBJ(_vsnprintf)])
+	        AC_CHECK_FUNC([vsnprintf],[],[AC_MSG_FAILURE([I seem to need `vsnprintf' for DevIL, but I can't find that function])])
 		LIBS="$SAVE2_LIBS"
 		SAVE_CPPFLAGS="$CPPFLAGS"
 		CPPFLAGS="$CPPFLAGS -I$srcdir"

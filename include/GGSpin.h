@@ -83,7 +83,6 @@ public:
     using Wnd::SizeMove;
 
     /** \name Signal Types */ //@{
-    // HACK! have to use the boost.signals portable syntax, since GCC 3.2 doesn't like "boost::signal<void (T)>"
     typedef typename boost::signal<void (T)> ValueChangedSignalType;  ///< emitted whenever the value of the Spin has changed
     //@}
 
@@ -186,7 +185,7 @@ public:
             AttachChild(m_edit);
             m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
         }
-   
+
         curr_elem = &elem.Child("m_up_bn");
         Wnd* w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
         if (Button* b = dynamic_cast<Button*>(w)) {
@@ -194,7 +193,7 @@ public:
         } else {
             throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the increment button for a GG::Spin.");
         }
-   
+
         curr_elem = &elem.Child("m_dn_bn");
         w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
         if (Button* b = dynamic_cast<Button*>(w)) {
@@ -203,7 +202,7 @@ public:
             throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the decrement button for a GG::Spin.");
         }
     }
-    
+
     /** dtor*/
     ~Spin() {DetachChildren(); delete m_edit;}
     //@}
@@ -287,7 +286,7 @@ public:
         m_dn_bn->OffsetMove(-UpperLeft());
         return true;
     }
-   
+
     virtual void LButtonDown(const Pt& pt, Uint32 keys)
     {
         if (!Disabled()) {
@@ -308,7 +307,7 @@ public:
             }
         }
     }
-   
+
     virtual void LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     {
         if (!Disabled()) {
@@ -320,7 +319,7 @@ public:
             }
         }
     }
-   
+
     virtual void LButtonUp(const Pt& pt, Uint32 keys)
     {
         m_up_bn->SetState(Button::BN_UNPRESSED);
@@ -328,11 +327,11 @@ public:
         m_initial_depressed_area = SR_NONE;
         m_depressed_area = SR_NONE;
     }
-   
+
     virtual void LClick(const Pt& pt, Uint32 keys)      {LButtonUp(pt, keys);}
     virtual void MouseHere(const Pt& pt, Uint32 keys)   {LButtonUp(pt, keys);}
     virtual void MouseLeave(const Pt& pt, Uint32 keys)  {m_depressed_area = SR_NONE;}
-   
+
     virtual void Keypress(Key key, Uint32 key_mods)
     {
         switch (key) {
@@ -369,10 +368,10 @@ public:
         m_edit->SizeMove(0, 0, Width() - Height(), Height());
         m_up_bn->SizeMove(BN_X_POS, BORDER_THICK,
                           BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2);
-        m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + m_up_bn->Height(),
-                          BN_X_POS + BN_WIDTH, BORDER_THICK + m_up_bn->Height() + BNS_HEIGHT - m_up_bn->Height());
+        m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + BNS_HEIGHT / 2,
+                          BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT);
     }
-   
+
     virtual void Disable(bool b = true)
     {
         Control::Disable(b);
@@ -380,10 +379,10 @@ public:
         m_up_bn->Disable(b);
         m_dn_bn->Disable(b);
     }
-   
+
     void Incr() {SetValue(m_value + m_step_size);}  ///< increments the value of the control's text by StepSize(), up to at most MaxValue()
     void Decr() {SetValue(m_value - m_step_size);}  ///< decrements the value of the control's text by StepSize(), down to at least MinValue()
-   
+
     /** sets the value of the control's text to \a value, locked to the range [MinValue(), MaxValue()]*/
     void SetValue(T value)
     {
@@ -407,11 +406,11 @@ public:
         if (m_value != old_value)
             m_value_changed_sig(m_value);
     }
-    
+
     void           SetStepSize(T step)     {m_step_size = step;}   ///< sets the step size of the control to \a step
     void           SetMinValue(T value)    {m_min_value = value;}  ///< sets the minimum value of the control to \a value
     void           SetMaxValue(T value)    {m_max_value = value;}  ///< sets the maximum value of the control to \a value
-   
+
     /** turns on or off the mode that allows the user to edit the value in the spinbox directly. */
     void AllowEdits(bool b = true)
     {
@@ -422,7 +421,7 @@ public:
             m_edit_connection = Connect(m_edit->FocusUpdateSignal(), &Spin::ValueUpdated, this);
         }
     }
-   
+
     virtual void   SetColor(Clr c)               {Control::SetColor(c); m_up_bn->SetColor(c); m_dn_bn->SetColor(c);}
     void           SetTextColor(Clr c)           {m_edit->SetTextColor(c);}          ///< sets the text color
     void           SetInteriorColor(Clr c)       {m_edit->SetInteriorColor(c);}      ///< sets the interior color of the control
@@ -477,7 +476,7 @@ private:
         }
         SizeMove(UpperLeft(), LowerRight());
     }
-   
+
     void ValueUpdated(const string& val_text)
     {
         T value;
@@ -489,21 +488,21 @@ private:
         }
         SetValue(value);
     }
-   
+
     T        m_value;
     T        m_step_size;
     T        m_min_value;
     T        m_max_value;
-   
+
     bool     m_editable;
-   
+
     Edit*                m_edit;
     shared_ptr<Button>   m_up_bn;
     shared_ptr<Button>   m_dn_bn;
 
     SpinRegion   m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
     SpinRegion   m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
-   
+
     boost::signals::connection m_edit_connection;
 
     mutable ValueChangedSignalType m_value_changed_sig;

@@ -481,8 +481,6 @@ void Wnd::ValidateFlags()
 
 void Wnd::HandleEvent(const Event& event)
 {
-    bool done = false;
-
     for (int i = static_cast<int>(m_filters.size()) - 1; i >= 0; --i) {
         if (m_filters[i]->EventFilter(this, event))
             return;

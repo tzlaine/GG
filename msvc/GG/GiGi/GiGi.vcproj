@@ -232,6 +232,9 @@
 				RelativePath="..\..\..\include\GGEdit.h">
 			</File>
 			<File
+				RelativePath="..\..\..\include\GGEnum.h">
+			</File>
+			<File
 				RelativePath="..\..\..\include\GGEventPump.h">
 			</File>
 			<File

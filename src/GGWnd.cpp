@@ -93,10 +93,22 @@ Wnd::Wnd(const XMLElement& elem) :
 
 Wnd::~Wnd()
 {
+    // remove this-references from Wnds that this Wnd filters
+    for (std::set<Wnd*>::iterator it1 = m_filtering.begin(); it1 != m_filtering.end(); ++it1) {
+        std::vector<Wnd*>::iterator it2 = std::find((*it1)->m_filters.begin(), (*it1)->m_filters.end(), this);
+        if (it2 != (*it1)->m_filters.end())
+            (*it1)->m_filters.erase(it2);
+    }
+
+    // remove this-references from Wnds that filter this Wnd
+    for (std::vector<Wnd*>::iterator it1 = m_filters.begin(); it1 != m_filters.end(); ++it1) {
+        (*it1)->m_filtering.erase(this);
+    }
+
     if (Parent()) {
-	Parent()->DetachChild(this);
+        Parent()->DetachChild(this);
     } else {
-	App::GetApp()->Remove(this);
+        App::GetApp()->Remove(this);
     }
 
     DeleteChildren();
@@ -363,37 +375,52 @@ void Wnd::DeleteChildren()
     }
 }
 
-int Wnd::Render() {return 1;}
+void Wnd::InstallEventFilter(Wnd* wnd)
+{
+    RemoveEventFilter(wnd);
+    m_filters.push_back(wnd);
+    wnd->m_filtering.insert(this);
+}
 
-int Wnd::LButtonDown(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::RemoveEventFilter(Wnd* wnd)
+{
+    std::vector<Wnd*>::iterator it = std::find(m_filters.begin(), m_filters.end(), wnd);
+    if (it != m_filters.end())
+        m_filters.erase(it);
+    wnd->m_filtering.erase(this);
+}
 
-int Wnd::LDrag(const Pt& pt, const Pt& move, Uint32 keys) {if (Dragable()) OffsetMove(move); return 1;}
+bool Wnd::Render() {return true;}
 
-int Wnd::LButtonUp(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::LButtonDown(const Pt& pt, Uint32 keys) {}
 
-int Wnd::LClick(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::LDrag(const Pt& pt, const Pt& move, Uint32 keys) {if (Dragable()) OffsetMove(move);}
 
-int Wnd::LDoubleClick(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::LButtonUp(const Pt& pt, Uint32 keys) {}
 
-int Wnd::RButtonDown(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::LClick(const Pt& pt, Uint32 keys) {}
 
-int Wnd::RClick(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::LDoubleClick(const Pt& pt, Uint32 keys) {}
 
-int Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::RButtonDown(const Pt& pt, Uint32 keys) {;}
 
-int Wnd::MouseEnter(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::RClick(const Pt& pt, Uint32 keys) {}
 
-int Wnd::MouseHere(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {}
 
-int Wnd::MouseLeave(const Pt& pt, Uint32 keys) {return 1;}
+void Wnd::MouseEnter(const Pt& pt, Uint32 keys) {}
 
-int Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {return 1;}
+void Wnd::MouseHere(const Pt& pt, Uint32 keys) {}
 
-int Wnd::Keypress(Key key, Uint32 key_mods) {return 1;}
+void Wnd::MouseLeave(const Pt& pt, Uint32 keys) {}
 
-int Wnd::GainingFocus() {return 1;}
+void Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {}
 
-int Wnd::LosingFocus() {return 1;}
+void Wnd::Keypress(Key key, Uint32 key_mods) {}
+
+void Wnd::GainingFocus() {}
+
+void Wnd::LosingFocus() {}
 
 int Wnd::Run()
 {
@@ -414,10 +441,72 @@ int Wnd::Run()
     return retval;
 }
 
+bool Wnd::EventFilter(Wnd* w, const Event& event) {return false;}
+
 void Wnd::ValidateFlags()
 {
     if ((m_flags & MODAL) && (m_flags & ONTOP))
         m_flags &= ~ONTOP;
+}
+
+void Wnd::HandleEvent(const Event& event)
+{
+    bool done = false;
+
+    for (int i = static_cast<int>(m_filters.size()) - 1; i >= 0; --i) {
+        if (m_filters[i]->EventFilter(this, event))
+            return;
+    }
+
+    switch (event.Type()) {
+	case Event::LButtonDown:
+	    LButtonDown(event.Point(), event.KeyMods());
+	    break;
+	case Event::LDrag:
+	    LDrag(event.Point(), event.DragMove(), event.KeyMods());
+	    break;
+	case Event::LButtonUp:
+	    LButtonUp(event.Point(), event.KeyMods());
+	    break;
+	case Event::LClick:
+	    LClick(event.Point(), event.KeyMods());
+	    break;
+	case Event::LDoubleClick:
+	    LDoubleClick(event.Point(), event.KeyMods());
+	    break;
+	case Event::RButtonDown:
+	    RButtonDown(event.Point(), event.KeyMods());
+	    break;
+	case Event::RClick:
+	    RClick(event.Point(), event.KeyMods());
+	    break;
+	case Event::RDoubleClick:
+	    RDoubleClick(event.Point(), event.KeyMods());
+	    break;
+	case Event::MouseEnter:
+	    MouseEnter(event.Point(), event.KeyMods());
+	    break;
+	case Event::MouseHere:
+	    MouseHere(event.Point(), event.KeyMods());
+	    break;
+	case Event::MouseLeave:
+	    MouseLeave(event.Point(), event.KeyMods());
+	    break;
+	case Event::MouseWheel:
+	    MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());
+	    break;
+	case Event::Keypress:
+	    Keypress(event.KeyPress(), event.KeyMods());
+	    break;
+	case Event::GainingFocus:
+	    GainingFocus();
+	    break;
+	case Event::LosingFocus:
+	    LosingFocus();
+	    break;
+	default:
+	    break;
+    }
 }
 
 } // namespace GG

@@ -37,15 +37,15 @@ namespace GG {
 class Button;
 
 /** a general pop-up message or user input box with one, two, or three buttons.  This is designed to be used as a 
-    generic message window, with just and "ok" button, or for any input consisting of only two or three choices, such 
+    generic message window, with just an "ok" button, or for any input consisting of only two or three choices, such 
     as "yes" and "no", "abort", "retry", and "fail", etc.  The enter key can be pressed to select the default button;
-    the first button is always the default, unless the user sets a different one via SetDefault().  Similarly, the 
+    the first button is always the default, unless the user sets a different one via SetDefaultButton().  Similarly, the 
     escape key can be pressed to select the button that will get the user out of the dialog without taking any action,
     if one exists; the last button is always the escape button, unless a different
-    one is set via SetEscape().  Note that this means that in a one-button dialog both enter and escape do the same 
-    thing.  The default text for the buttons depends on the number of buttons.  For a one-button dialog, the default
-    is "ok"; for a two-button dialog, the defults are "ok" and "cancel"; and for a three-button dialog, the defults 
-    are "yes", "no", and "cancel".*/
+    one is set via SetEscapeButton().  Note that this means that in a one-button dialog both enter and escape do the same 
+    thing.  The default labels for the buttons depends on the number of buttons.  For a one-button dialog, the default
+    label is "ok"; for a two-button dialog, the default labels are "ok" and "cancel"; and for a three-button dialog, the 
+    default labels are "yes", "no", and "cancel".*/
 class GG_API ThreeButtonDlg : public Wnd
 {
 public:

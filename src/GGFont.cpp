@@ -30,6 +30,8 @@
 #include <GGBase.h>
 #include <XMLValidators.h>
 
+#include <GGDrawUtil.h>
+
 #include <cmath>
 #include <boost/spirit.hpp>
 
@@ -161,10 +163,11 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
     int rows_rendered = 0;
     int y_origin = y1; // default value for TF_TOP
     if (format & TF_BOTTOM)
-	y_origin = y2 - (static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height;
+	y_origin = y2 - ((static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height);
     else if (format & TF_VCENTER)
         y_origin = y1 + static_cast<int>(((y2 - y1) - ((static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height)) / 2.0);
     int x = x1, y = y_origin;
+
     for (std::vector<LineData>::const_iterator cit = line_data->begin(); cit != line_data->end(); ++cit) {
         const LineData& curr_line = *cit;
         x = x1; // default value for TF_LEFT

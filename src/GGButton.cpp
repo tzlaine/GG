@@ -331,7 +331,7 @@ void StateButton::Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int
         }
         if (format & TF_BOTTOM) {      // put button at bottom, text just above
             bn_y = (h - bn_h);
-            m_text_y = int(h - (bn_h * (1 + SPACING)) - GetLineData().size() * GetFont()->Lineskip() + 0.5);
+            m_text_y = int(h - (bn_h * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
         }
 
         if (format & TF_CENTER) {      // center button horizontally

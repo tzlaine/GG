@@ -148,8 +148,10 @@ ostream& XMLElement::WriteElement(ostream& os, int indent/* = 0*/, bool whitespa
             os << "\n";
     } else {
         os << ">";
-        if (!m_text.empty()) {
+        if (!m_text.empty() && m_text.find_first_of("<&") != std::string::npos) {
             os << "<![CDATA[" << m_text << "]]>";
+        } else {
+            os << m_text;
         }
         if (whitespace && !m_children.empty())
             os << "\n";

@@ -37,7 +37,11 @@ namespace GG {
 /** This is the basic GG window class.
     Window boundaries are from m_upperleft to m_lowerright - Pt(1,1).
     It is assumed that childs window exists within the boundaries of their parents, although this is not required.
-    However, all clicks that land on a child that are also outside of the parent will not reach the child.
+    By default, Wnds do not clip their children; child clipping can be turned on or off using EnableChildClipping(),
+    which clips all children to the client area of the Wnd.  Subclasses can override BeginClipping() and EndClipping() 
+    if the clipping desired is something other than the client area of the Wnd, or if the Wnd is not rectangular.  
+    Regardless of clipping, all clicks that land on a child but outside of the parent will not reach the child, since 
+    clicks are detected by seaching the top-level Wnds and then searching the children within the ones that are hit.
     Ideally, "sibling" child windows should not overlap (unless they can without interfering, as in the case of a 
     bounding box, etc.).  If this is impossible or undesirable and control is needed over the order in which 
     children are rendered, MoveChildUp() and MoveChildDown() provide such control.  Always-on-top windows are 
@@ -58,7 +62,7 @@ namespace GG {
     no filter Wnd can be in a filter chain more than once.  Installing the same filter Wnd more than once removes 
     the Wnd from the filter chain and re-adds it to the beginning of the chain.  Note that the default 
     implementation of EventFilter() is to return false and do nothing else, so installing a Wnd-derived type with 
-    no overridden EventFilter() is a filter Wnd will have no effect.  Also note that just as it is legal for 
+    no overridden EventFilter() in a filter Wnd will have no effect.  Also note that just as it is legal for 
     keyboard accelerator slots to do nontrivial work and still return false (causing a keystroke event to be 
     generated), EventFilter() may return false even when it does nontrivial work, and the next filter in the chain
     will get a chance to process the Event.  It is even possible to have an arbitrary number of filters that all
@@ -88,6 +92,7 @@ public:
     bool           Clickable() const   {return m_flags & CLICKABLE;}   ///< does a click over this window pass through?
     bool           Dragable() const    {return m_flags & DRAGABLE;}    ///< does a click here become a drag? 
     bool           DragKeeper() const  {return m_flags & DRAG_KEEPER;} ///< when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway?
+    bool           ClipChildren() const {return m_clip_children;}      ///< is child clipping enabled?
     bool           Visible() const     {return m_visible;}             ///< is the window visible?
     bool           Resizable() const   {return m_flags & RESIZABLE;}   ///< can this window be resized using the mouse?
     bool           OnTop() const       {return m_flags & ONTOP;}       ///< is this an on-top window?
@@ -131,6 +136,9 @@ public:
     virtual void   SetText(const char* str)   {m_text = str;}      ///< set window text
     void           Hide(bool children = true);                     ///< suppresses rendering of this window (and possibly its children) during render loop
     void           Show(bool children = true);                     ///< enables rendering of this window (and possibly its children) during render loop
+    void           EnableChildClipping(bool enable = true);        ///< enables or disables clipping of child windows to the boundaries of this Wnd
+    virtual void   BeginClipping();                                ///< sets up child clipping for this window
+    virtual void   EndClipping();                                  ///< restores state to what it was before BeginClipping() was called
     void           MoveTo(int x, int y);                           ///< moves upper-left corner of window to \a x,\a y
     void           MoveTo(const Pt& pt);                           ///< moves upper-left corner of window to \a pt
     void           OffsetMove(int x, int y);                       ///< moves window by \a x, \a y pixels
@@ -252,6 +260,7 @@ private:
     list<Wnd*>     m_children;       ///< list of ptrs to child windows kept in order of decreasing area
     int            m_zorder;         ///< where this window is in the z-order (root (non-child) windows only)
     bool           m_visible;        ///< is this window drawn?
+    bool           m_clip_children;  ///< should the children of this window be clipped?
     Pt             m_upperleft;      ///< upper left point of window
     Pt             m_lowerright;     ///< lower right point of window
     Pt             m_min_size;       ///< minimum window size Pt(0, 0) (= none) by default

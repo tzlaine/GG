@@ -27,6 +27,7 @@
 #include "GGWnd.h"
 
 #include <GGApp.h>
+#include <GGDrawUtil.h>
 #include <GGEventPump.h>
 #include <XMLValidators.h>
 
@@ -61,6 +62,7 @@ Wnd::Wnd() :
     m_parent(0),
     m_zorder(0),
     m_visible(true),
+    m_clip_children(false),
     m_max_size(1 << 30, 1 << 30),
     m_flags(0)
 {
@@ -71,6 +73,7 @@ Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
     m_parent(0),
     m_zorder(0),
     m_visible(true),
+    m_clip_children(false),
     m_upperleft(x, y),
     m_lowerright(x + w, y + h),
     m_max_size(1 << 30, 1 << 30),
@@ -84,6 +87,7 @@ Wnd::Wnd(const XMLElement& elem) :
     m_parent(0),
     m_zorder(0),
     m_visible(true),
+    m_clip_children(false),
     m_max_size(1 << 30, 1 << 30),
     m_flags(0)
 {
@@ -100,6 +104,7 @@ Wnd::Wnd(const XMLElement& elem) :
 
     m_zorder = lexical_cast<int>(elem.Child("m_zorder").Text());
     m_visible = lexical_cast<bool>(elem.Child("m_visible").Text());
+    m_clip_children = lexical_cast<bool>(elem.Child("m_clip_children").Text());
     m_upperleft = Pt(elem.Child("m_upperleft").Child("GG::Pt"));
     m_lowerright = Pt(elem.Child("m_lowerright").Child("GG::Pt"));
     m_min_size = Pt(elem.Child("m_min_size").Child("GG::Pt"));
@@ -203,6 +208,7 @@ XMLElement Wnd::XMLEncode() const
     retval.LastChild().SetAttribute("edit", "never");
     retval.AppendChild(XMLElement("m_visible", boost::lexical_cast<string>(m_visible)));
     retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_clip_children", boost::lexical_cast<string>(m_clip_children)));
     retval.AppendChild(XMLElement("m_upperleft", m_upperleft.XMLEncode()));
     retval.AppendChild(XMLElement("m_lowerright", m_lowerright.XMLEncode()));
     retval.AppendChild(XMLElement("m_min_size", m_min_size.XMLEncode()));
@@ -268,6 +274,21 @@ void Wnd::Show(bool children/* = true*/)
         for (; it != m_children.end(); ++it)
             (*it)->Show(children);
     }
+}
+
+void Wnd::EnableChildClipping(bool enable/* = true*/)
+{
+    m_clip_children = enable;
+}
+
+void Wnd::BeginClipping()
+{
+    BeginScissorClipping(ClientUpperLeft(), ClientLowerRight());
+}
+
+void Wnd::EndClipping()
+{
+    EndScissorClipping();
 }
 
 void Wnd::MoveTo(int x, int y)

@@ -58,6 +58,9 @@
 /* Define to 1 if you have the `SDL' library (-lSDL). */
 #undef HAVE_LIBSDL
 
+/* Define to 1 if you have the `wsock32' library (-lwsock32). */
+#undef HAVE_LIBWSOCK32
+
 /* Define to 1 if you have the <log4cpp/Category.hh> header file. */
 #undef HAVE_LOG4CPP_CATEGORY_HH
 
@@ -82,9 +85,6 @@
 
 /* Define to 1 if you have the <SDL.h> header file. */
 #undef HAVE_SDL_H
-
-/* Define to 1 if you have the `sqrt' function. */
-#undef HAVE_SQRT
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H

@@ -189,6 +189,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
         m_rclick_row(-1),
         m_row_drag_offset(Pt(-1, -1)),
         m_last_row_browsed(-1),
+        m_suppress_delete_signal(false),
         m_first_row_shown(0),
         m_first_col_shown(0),
         m_cell_margin(2),
@@ -218,6 +219,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_w
         m_rclick_row(-1),
         m_row_drag_offset(Pt(-1, -1)),
         m_last_row_browsed(-1),
+        m_suppress_delete_signal(false),
         m_first_row_shown(0),
         m_first_col_shown(0),
         m_col_widths(col_widths),
@@ -246,6 +248,7 @@ ListBox::ListBox(const XMLElement& elem) :
         m_rclick_row(-1),
         m_row_drag_offset(Pt(-1, -1)),
         m_last_row_browsed(-1),
+        m_suppress_delete_signal(false),
         m_header_row(0)
 {
     if (elem.Tag() != "GG::ListBox")
@@ -448,8 +451,8 @@ int ListBox::LButtonDown(const Pt& pt, Uint32 keys)
 
 int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
 {
-    m_row_drag_offset = Pt(-1, -1);
     if (!Disabled() && (m_style & LB_DRAGDROP) && m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
+        m_row_drag_offset = Pt(-1, -1);
         Wnd* tmp = App::GetApp()->GetWindowUnder(pt);
         ListBox* drop_target_wnd;
         if ((drop_target_wnd = dynamic_cast<ListBox*>(tmp)) && 
@@ -458,13 +461,22 @@ int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
             // if no sorting is done on target listbox.
             int ins_row = drop_target_wnd->RowUnderPt(pt);
             if (m_selections.empty()) {
-                drop_target_wnd->Insert(m_rows[m_old_sel_row], ins_row, true);
-                Delete(m_old_sel_row);
-            } else {
-                for (set<int>::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
-                    drop_target_wnd->Insert(m_rows[*it], ins_row++, true);
+                try {
+                    drop_target_wnd->Insert(m_rows[m_old_sel_row], ins_row, true);
+                    Delete(m_old_sel_row);
+                } catch (const DontAcceptDropException& e) {
+                    AttachRowChildren(m_rows[m_old_sel_row]);
                 }
+            } else {
                 set<int> sels = m_selections;
+                for (set<int>::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
+                    try {
+                        drop_target_wnd->Insert(m_rows[*it], ins_row++, true);
+                    } catch (const DontAcceptDropException& e) {
+                        AttachRowChildren(m_rows[*it]);
+                        sels.erase(*it);
+                    }
+                }
                 for (set<int>::reverse_iterator it = sels.rbegin(); it != sels.rend(); ++it) {
                     Delete(*it);
                 }
@@ -472,6 +484,8 @@ int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
             if (m_caret > static_cast<int>(m_rows.size()) - 1)
                 m_caret = static_cast<int>(m_rows.size()) - 1;
         }
+    } else {
+        m_row_drag_offset = Pt(-1, -1);
     }
     m_old_sel_row = -1;
     return 1;
@@ -669,7 +683,8 @@ void ListBox::Delete(int idx)
 
     AdjustScrolls();
 
-    m_deleted_sig(idx);
+    if (!m_suppress_delete_signal)
+        m_deleted_sig(idx);
 }
 
 void ListBox::Clear()
@@ -1009,10 +1024,18 @@ int ListBox::Insert(Row* row, int at, bool dropped)
 
     AdjustScrolls();
 
-    if (dropped)
-        m_dropped_sig(retval, row);
-    else
+    if (dropped) {
+        try {
+            m_dropped_sig(retval, row);
+        } catch (const DontAcceptDropException& e) {
+            m_suppress_delete_signal = true;
+            Delete(retval);
+            m_suppress_delete_signal = false;
+            throw e;
+        }
+    } else {
         m_inserted_sig(retval, row);
+    }
 
     return retval;
 }

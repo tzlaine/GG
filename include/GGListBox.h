@@ -112,6 +112,10 @@ public:
         vector<Row*>    sub_rows;      ///< for making multiple-line rows
     };
 
+    /** thrown by a ListBox that does not wish to accept a recevied drop, for whatever reason. This may be throw at any 
+        time during the receipt of a drop -- even in a function called by a DroppedSignalType signal. */
+    class DontAcceptDropException : public GGException {};
+
     /** \name Signal Types */ //@{
     typedef boost::signal<void ()>                         ClearedSignalType;        ///< emitted when the list box is cleared
     typedef boost::signal<void (const set<int>&)>          SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
@@ -138,10 +142,10 @@ public:
     /** \name Structors */ //@{
     /** basic ctor */
     ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER);
-   
+
     /** ctor that allows the specification of column widths */
     ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_widths, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER);
-   
+
     ListBox(const XMLElement& elem); ///< ctor that constructs an ListBox object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a ListBox object
 
     virtual ~ListBox(); ///< virtual dtor
@@ -184,7 +188,7 @@ public:
     DeletedSignalType&       DeletedSignal() const       {return m_deleted_sig;}        ///< returns the deleted signal object for this ListBox
     BrowsedSignalType&       BrowsedSignal() const       {return m_browsed_sig;}        ///< returns the browsed signal object for this ListBox
     //@}
-   
+
     /** \name Mutators */ //@{
     virtual int    Render();
     virtual int    LButtonDown(const Pt& pt, Uint32 keys);
@@ -207,7 +211,7 @@ public:
     void           SelectRow(int n);                      ///< selects row \a n
     void           IndentRow(int n, int i);               ///< sets the indentation of the row at index \a n to \a i; not range-checked
     Row&           GetRow(int n) {return *m_rows.at(n);}  ///< returns a pointer to the Row at row index \a n; not range-checked
-   
+
     void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
     void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
     void           SetStyle(Uint32 s);                                      ///< sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle
@@ -276,6 +280,7 @@ private:
     int            m_rclick_row;       ///< the row most recently right-clicked
     Pt             m_row_drag_offset;  ///< offset used to draw above the drag rect in correct position relative to cursor
     int            m_last_row_browsed; ///< the last row sent out as having been browsed (used to prevent duplicate browse signals)
+    bool           m_suppress_delete_signal; ///< needed to use delete internally-only when a drop is refused
 
     vector<Row*>   m_rows;             ///< line item data
     int            m_first_row_shown;  ///< index of row at top of visible area (always 0 for LB_NOSCROLL)

@@ -44,7 +44,7 @@
    - FreeType 2.1.2 - http://www.freetype.org
    - boost 1.30.0 - http://www.boost.org
    - Expat 1.95.5 - http://www.libexpat.org (1.95.6 does not appear to work, so please use this version)
-   - log4cpp 0.2.7 - http://log4cpp.sourceforge.net
+   - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
 
    Optional libraries:
    - SDL 1.2.5 - http://www.libsdl.org

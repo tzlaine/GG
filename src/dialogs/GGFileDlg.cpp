@@ -434,9 +434,9 @@ void FileDlg::FileSetChanged(const set<int>& files)
         m_ok_button->SetText("Open");
 }
 
-void FileDlg::FileDoubleClicked(int n, const ListBox::Row& row)
+void FileDlg::FileDoubleClicked(int n, const ListBox::Row* row)
 {
-    string filename = row[0]->WindowText();
+    string filename = (*row)[0]->WindowText();
     m_files_list->ClearSelection();
     m_files_list->SelectRow(n);
     OkClicked();
@@ -469,8 +469,8 @@ void FileDlg::PopulateFilters()
         m_filter_list->Disable();
     } else {
         for (unsigned int i = 0; i < m_file_filters.size(); ++i) {
-            ListBox::Row row;
-            row.push_back(m_file_filters[i].first, m_font, m_text_color);
+            ListBox::Row* row = new ListBox::Row;
+            row->push_back(m_file_filters[i].first, m_font, m_text_color);
             m_filter_list->Insert(row);
         }
         m_filter_list->Select(0);
@@ -506,14 +506,14 @@ void FileDlg::UpdateList()
 
     if (m_working_dir.string() != m_working_dir.root_path().string() &&
             m_working_dir.branch_path().string() != "") {
-        ListBox::Row row;
-        row.push_back("[..]", m_font);
+        ListBox::Row* row = new ListBox::Row;
+        row->push_back("[..]", m_font);
         m_files_list->Insert(row);
     }
     for (fs::directory_iterator it(m_working_dir); it != end_it; ++it) {
         if (fs::exists(*it) && fs::is_directory(*it) && period_regex.Match(it->leaf())) {
-            ListBox::Row row;
-            row.push_back("[" + it->leaf() + "]", m_font);
+            ListBox::Row* row = new ListBox::Row;
+            row->push_back("[" + it->leaf() + "]", m_font);
             m_files_list->Insert(row);
         }
     }
@@ -527,8 +527,8 @@ void FileDlg::UpdateList()
                     meets_filters = true;
             }
             if (meets_filters) {
-                ListBox::Row row;
-                row.push_back(it->leaf(), m_font);
+                ListBox::Row* row = new ListBox::Row;
+                row->push_back(it->leaf(), m_font);
                 m_files_list->Insert(row);
             }
         }

@@ -99,7 +99,7 @@ private:
     void OkClicked();
     void CancelClicked() {m_done = true; m_result.clear();}
     void FileSetChanged(const set<int>& files);
-    void FileDoubleClicked(int n, const ListBox::Row& row);
+    void FileDoubleClicked(int n, const ListBox::Row* row);
     void FilesEditChanged(const string& str);
     void FilterChanged(int idx);
     void SetWorkingDirectory(const boost::filesystem::path& p);

@@ -50,6 +50,27 @@ GG_API Clr DarkColor(Clr clr);
     to render disabled controls.*/
 GG_API Clr DisabledColor(Clr clr);
 
+/** Sets up a GL scissor box, so that everything outside of the screen region defined by points \a pt1 and \a pt2 is clipped 
+    out.  These coordinates should be in GG screen coordinates, with +y downward, instead of GL's screen coordinates.
+    \note Failing to call EndClipRect() after calling this function and before the next unmatched glPopAttrib() call may 
+    produce unexpected results.  However, multiple calls to this function can safely be matched with only one call to 
+    EndScissorClipping(), as long as glPopAttrib() is never called between the first call of this function and the 
+    EndScissorClipping() call.*/
+GG_API void BeginScissorClipping(Pt ul, Pt lr);
+
+/** Sets up a GL scissor box, so that everything outside of the screen region defined by points (<i>x1</i>, <i>y1</i>) and 
+    (<i>x2</i>, <i>y2</i>) is clipped out.  These coordinates should be in GG screen coordinates, with +y downward, instead 
+    of GL's screen coordinates.
+    \note Failing to call EndClipRect() after calling this function and before the next unmatched glPopAttrib() call may 
+    produce unexpected results.  However, multiple calls to this function can safely be matched with only one call to 
+    EndScissorClipping(), as long as glPopAttrib() is never called between the first call of this function and the 
+    EndScissorClipping() call.*/
+GG_API void BeginScissorClipping(int x1, int y1, int x2, int y2);
+
+/** Ends the current GL scissor box, restoring GL scissor state to what it was before the corresponding call to BeginScissorClipping().  
+    \note If there is not an outstanding call to BeginScissorClipping() when this function is called, this function does nothing.*/
+GG_API void EndScissorClipping();
+
 /** Renders a rectangle starting at (x1,y1) and ending just before (x2,y2), and assumes that OpenGL in in a "2D" state.  
     The border is drawn in the desired thickness and color, then whatever is space is left inside that is filled with color 
     \a color.  No checking is done to make sure that \a border_thick * 2 is <= \a x2 - \a x1 (or <= \a y2 - \a y1, for that 

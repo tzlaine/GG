@@ -26,11 +26,15 @@
 
 #include "GGDrawUtil.h"
 
+#include "GGApp.h"
+
 namespace GG {
 
 namespace { // file-scope constants and functions
 const double   PI = 3.14159426;
 const double   SQRT2OVER2 = std::sqrt(2.0) / 2.0;
+
+bool g_scissor_clipping_in_use = false;
 
 /// whenever points on the unit circle are calculated with expensive sin() and cos() calls, the results are cached here
 map<int, valarray<double> > unit_circle_coords;
@@ -561,6 +565,31 @@ Clr DisabledColor(Clr clr)
     retval.g += (CLR_GRAY.g - retval.g) * gray_factor;
     retval.b += (CLR_GRAY.b - retval.b) * gray_factor;
     return retval;
+}
+
+void BeginScissorClipping(Pt ul, Pt lr)
+{
+    BeginScissorClipping(ul.x, ul.y, lr.x ,lr.y);
+}
+
+void BeginScissorClipping(int x1, int y1, int x2, int y2)
+{
+    if (!g_scissor_clipping_in_use) {
+        // save old scissor state
+        glPushAttrib(GL_SCISSOR_BIT);
+        glEnable(GL_SCISSOR_TEST);
+    }
+    glScissor(x1, App::GetApp()->AppHeight() - y2, x2 - x1, y2 - y1);
+    g_scissor_clipping_in_use = true;
+}
+
+void EndScissorClipping()
+{
+    if (g_scissor_clipping_in_use) {
+        // restore previous scissor-clipping state
+        glPopAttrib();
+        g_scissor_clipping_in_use = false;
+    }
 }
 
 void FlatRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, int border_thick/* = 2*/)

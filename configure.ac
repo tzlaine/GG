@@ -382,3 +382,4 @@ if test x$DO_ALLEGRO_WARNING = xnohack; then
 *** has to #include <allegro.h> and place END_OF_MAIN() after the main 
 *** function.])
 fi
+AC_MSG_NOTICE([Now, do a 'make' followed by an 'make install'])

@@ -141,6 +141,7 @@ public:
     virtual void   SetText(const char* str)   {m_text = str;}      ///< set window text
     void           Hide(bool children = true);                     ///< suppresses rendering of this window (and possibly its children) during render loop
     void           Show(bool children = true);                     ///< enables rendering of this window (and possibly its children) during render loop
+    virtual void   ModalInit();                                    ///< called during Run(), after a modal window is registered, this is the place that subclasses should put specialized modal window initialization, such as setting focus to child controls
     void           EnableChildClipping(bool enable = true);        ///< enables or disables clipping of child windows to the boundaries of this Wnd
     virtual void   BeginClipping();                                ///< sets up child clipping for this window
     virtual void   EndClipping();                                  ///< restores state to what it was before BeginClipping() was called

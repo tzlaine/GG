@@ -264,6 +264,10 @@ void Wnd::Show(bool children/* = true*/)
     }
 }
 
+void Wnd::ModalInit()
+{
+}
+
 void Wnd::EnableChildClipping(bool enable/* = true*/)
 {
     m_clip_children = enable;
@@ -458,12 +462,10 @@ int Wnd::Run()
     if (m_flags & MODAL) {
         App* app = App::GetApp();
         app->RegisterModal(this);
-
+        ModalInit();
         ModalEventPump pump(m_done);
         pump();
-
         app->Remove(this);
-
         retval = 1;
     }
     return retval;

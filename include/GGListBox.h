@@ -143,6 +143,8 @@ public:
     const Row&      GetRow(int n) const        {return m_rows[n];}           ///< returns a const reference to the row at index \a n; not range-checked
     const set<int>& Selections() const         {return m_selections;}        ///< returns a const reference to the set row indexes that is currently selected
     bool            Selected(int n) const      {return m_selections.find(n) != m_selections.end();} ///< returns true if row \a n is selected
+    Clr             InteriorColor() const      {return m_int_color;}         ///< returns the color painted into the client area of the control
+    Clr             HiliteColor() const        {return m_hilite_color;}      ///< returns the color behind selected line items
     Uint32          Style() const              {return m_style;}             ///< returns the style flags of the listbox \see GG::ListBoxStyle
     const Row&      ColHeaders() const         {return m_header_row;}        ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
     int             FirstRowShown() const      {return m_first_row_shown;}   ///< returns the index of the first row visible in the listbox
@@ -150,6 +152,7 @@ public:
     int             RowHeight() const          {return m_row_height;}        ///< returns the default row height. \note Each row may have its own height, diferent from the one returned by this function.
     int             NumRows() const            {return int(m_rows.size());}  ///< returns the total number of rows in the ListBox
     int             NumCols() const            {return m_col_widths.size();} ///< returns the total number of columns in the ListBox
+    bool            KeepColWidths() const      {return m_keep_col_widths;}   ///< returns true iff column widths are fixed \see LockColWidths()
     int             SortCol() const;                                         ///< returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
     int             ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
     Uint32          ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
@@ -219,6 +222,12 @@ protected:
     int            LastVisibleCol() const;  ///< last column that could be drawn, taking into account the contents and the size of client area
     int            RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (it may be < 0 or >= NumRows())
     Pt             DragOffset(const Pt& pt) const; ///< returns offset of \a pt into the row \a pt falls in, or (-1,-1) if pt falls under no row
+
+    int            Caret() const            {return m_caret;} ///< returns
+    int            OldSelRow() const        {return m_old_sel_row;} ///< returns
+    int            OldRDownRow() const      {return m_old_rdown_row;} ///< returns
+    int            LClickRow() const        {return m_lclick_row;} ///< returns
+    int            RClickRow() const        {return m_rclick_row;} ///< returns
     //@}
 
     /** \name Mutators */ //@{

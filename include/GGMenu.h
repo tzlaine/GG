@@ -114,6 +114,9 @@ public:
     const MenuItem&   GetMenu(const string& str) const;                        ///< returns a const reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists.
     const MenuItem&   GetMenu(int n) const;                                    ///< returns a const reference to the \a nth menu in the MenuBar; not range-checked
    
+    Clr               BorderColor() const        {return m_border_color;}   ///< returns the color used to render the border of the control
+    Clr               InteriorColor() const      {return m_int_color;}      ///< returns the color used to render the interior of the control
+    Clr               TextColor() const          {return m_text_color;}     ///< returns the color used to render menu item text
     Clr               HiliteColor() const        {return m_hilite_color;}   ///< returns the color used to indicate a hilited menu item
     Clr               SelectedTextColor() const  {return m_sel_text_color;} ///< returns the color used to render a hilited menu item's text
    
@@ -134,12 +137,22 @@ public:
     MenuItem&      GetMenu(int n) {return m_menu_data.next_level[n];} ///< returns a reference to the \a nth menu in the MenuBar; not range-checked
     void           AddMenu(const MenuItem& menu);                     ///< adds \a menu to the end of the top level of menus
    
+    void           SetBorderColor(Clr clr)       {m_border_color = clr;}    ///< sets the color used to render the border of the control
+    void           SetInteriorColor(Clr clr)     {m_int_color = clr;}       ///< sets the color used to render the interior of the control
+    void           SetTextColor(Clr clr)         {m_text_color = clr;}      ///< sets the color used to render menu item text
     void           SetHiliteColor(Clr clr)       {m_hilite_color = clr;}    ///< sets the color used to indicate a hilited menu item
     void           SetSelectedTextColor(Clr clr) {m_sel_text_color = clr;}  ///< sets the color used to render a hilited menu item's text
    
     BrowsedSignalType& BrowsedSignal()           {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
-   
+
+protected:
+    /** \name Accessors */ //@{
+    const shared_ptr<Font>&     GetFont() const     {return m_font;}        ///< returns the font used to render text in the control
+    const vector<TextControl*>& MenuLabels() const  {return m_menu_labels;} ///< returns the text for each top-level menu item
+    int                         Caret() const       {return m_caret;}       ///< returns the current position of the caret
+    //@}
+
 private:
     void AdjustLayout(); ///< determines the rects in m_menu_lables, and puts the menus in multiple rows if they will not fit in one
     void BrowsedSlot(int n) {m_browsed_signal(n);} ///< responds to a browse in a PopupMenu submenu, and passes it along
@@ -151,9 +164,9 @@ private:
     Clr               m_hilite_color;   ///< color behind selected items
     Clr               m_sel_text_color; ///< color of selected text
    
-    MenuItem             m_menu_data;      ///< this is not just a single menu item; the next_level element represents the entire menu
-    vector<TextControl*> m_menu_labels;  ///< the text for each top-level menu item
-    int                  m_caret;          ///< the currently indicated top-level menu (open or under the cursor)
+    MenuItem             m_menu_data;   ///< this is not just a single menu item; the next_level element represents the entire menu
+    vector<TextControl*> m_menu_labels; ///< the text for each top-level menu item
+    int                  m_caret;       ///< the currently indicated top-level menu (open or under the cursor)
    
     BrowsedSignalType m_browsed_signal;
 };
@@ -191,6 +204,9 @@ public:
     virtual Pt  ClientUpperLeft() const    {return m_origin;}
    
     int         MenuID() const             {return (m_item_selected ? m_item_selected->item_ID : 0);} ///< returns the integer ID of the menu item selected by the user, or 0 if none was selected
+    Clr         BorderColor() const        {return m_border_color;}   ///< returns the color used to render the border of the control
+    Clr         InteriorColor() const      {return m_int_color;}      ///< returns the color used to render the interior of the control
+    Clr         TextColor() const          {return m_text_color;}     ///< returns the color used to render menu item text
     Clr         HiliteColor() const        {return m_hilite_color;}   ///< returns the color used to indicate a hilited menu item
     Clr         SelectedTextColor() const  {return m_sel_text_color;} ///< returns the color used to render a hilited menu item's text
     //@}
@@ -207,12 +223,24 @@ public:
    
     virtual int    Run();
 
+    void           SetBorderColor(Clr clr)       {m_border_color = clr;}    ///< sets the color used to render the border of the control
+    void           SetInteriorColor(Clr clr)     {m_int_color = clr;}       ///< sets the color used to render the interior of the control
+    void           SetTextColor(Clr clr)         {m_text_color = clr;}      ///< sets the color used to render menu item text
     void           SetHiliteColor(Clr clr)       {m_hilite_color = clr;}    ///< sets the color used to indicate a hilited menu item
     void           SetSelectedTextColor(Clr clr) {m_sel_text_color = clr;}  ///< sets the color used to render a hilited menu item's text
    
     BrowsedSignalType& BrowsedSignal()           {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
-   
+
+protected:
+    /** \name Accessors */ //@{
+    const shared_ptr<Font>& GetFont() const     {return m_font;}        ///< returns the font used to render text in the control
+    const MenuItem&         MenuData() const    {return m_menu_data;}   ///< returns a const reference to the MenuItem that contains all the menu contents
+    const vector<Rect>&     OpenLevels() const  {return m_open_levels;} ///< returns the bounding rectangles for each open submenu, used to detect clicks in them
+    const vector<int>&      Caret() const       {return m_caret;}       ///< returns the stack representing the caret's location's path (eg 0th subitem of 1st subitem of item 3) back() is the most recent push
+    const MenuItem*         ItemSelected() const {return m_item_selected;} ///< returns the menu item selected (0 if none)
+    //@}
+
 private:
     shared_ptr<Font>  m_font;           ///< the font used to render the text in the control
     Clr               m_border_color;   ///< the color of the menu's border
@@ -227,7 +255,7 @@ private:
     vector<int>       m_caret;       ///< stack representing the caret's location's path (eg 0th subitem of 1st subitem of item 3) back() is the most recent push
    
     const Pt          m_origin;         ///< the upper left hand corner of the control's visible area
-    MenuItem*         m_item_selected;  ///< the value of the menu item selected (0 if none)
+    MenuItem*         m_item_selected;  ///< the menu item selected (0 if none)
    
     BrowsedSignalType m_browsed_signal;
 };

@@ -60,7 +60,7 @@ public:
         index of the last frame (may be the first frame, if playing in reverse).  \note Unlike most other signals, this 
         one is emitted during the execution of Render(), so keep this in mind when processing this signal.*/
     typedef boost::signal<void (int)> StoppedSignalType;
-   
+
     /** emitted whenever the last frame of animation is reached; the argument is the index of the last frame (may be the 
         first frame, if playing in reverse).  \note Unlike most other signals, this one is emitted during the execution 
         of Render(), so keep this in mind when processing this signal.*/
@@ -77,16 +77,16 @@ public:
         indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> 
         delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture, int frames = -1, Uint32 flags = 0); 
-   
+
     /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
         indicates all possible area is considered to contain valid frames.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const shared_ptr<Texture>& texture, int frames = -1, Uint32 flags = 0);
-   
+
     /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1 
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
         Textures but the last are assumed to have the maximum number of frames based on their sizes.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures, int frames = -1, Uint32 flags = 0);
-   
+
     DynamicGraphic(const XMLElement& elem); ///< ctor that constructs an DynamicGraphic object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a DynamicGraphic object
     //@}
 
@@ -99,32 +99,33 @@ public:
     int      TimeIndex() const    {return m_last_frame_time;}   ///< returns the time in ms (measured from the time of the first frame); -1 if none
     int      StartFrame() const   {return m_first_frame_idx;}   ///< returns the index of the earliest frame to be shown during playback.  \note when playing backwards this will be the last frame shown.
     int      EndFrame() const     {return m_last_frame_idx;}    ///< returns the index of the latest frame to be shown during playback.  \note when playing backwards this will be the first frame shown.
-   
+    int      Margin() const       {return m_margin;}            ///< returns the number of pixels placed between frames and between the frames and the Texture edges
+
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a DynamicGraphic object
     //@}
 
     /** \name Mutators */ //@{
     virtual int Render();
-   
+
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to 
         contain the maximum possible number of frames based on its size and the frame size.  \warning Calling code 
         <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.
         \throw std::invalid_argument May throw std::invalid_argument if \a texture is not large enough to contain
         any frames.*/
     void AddFrames(const Texture* texture, int frames = -1);
-   
+
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to 
         contain the maximum possible number of frames based on its size and the frame size.  \throw std::invalid_argument 
         May throw std::invalid_argument if \a texture is not large enough to contain any frames.*/
     void AddFrames(const shared_ptr<Texture>& texture, int frames = -1);
-   
+
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Textures are assumed to 
         contain the maximum possible number of frames based on its size and the frame size.  Regardless of the value of 
         \a frames, all Textures but the last are assumed to have the maximum number of frames based on their sizes.
         \throw std::invalid_argument May throw std::invalid_argument if at least one element of \a textures is not large 
         enough to contain any frames.*/
     void AddFrames(const vector<shared_ptr<Texture> >& textures, int frames = -1);
-   
+
     void  Play();                    ///< starts the animation of the image
     void  Pause();                   ///< stops playback without adjusting the frame index
     void  NextFrame();               ///< increments the frame index by 1.  If Looping() == true and the next frame would be be past the last, the first frame is shown.  Pauses playback.
@@ -136,22 +137,34 @@ public:
     void  SetTimeIndex(int idx);     ///< sets the frame index to the frame nearest time index \a idx, where \a idx measures time in ms from the beginning of the animation ( value is locked to range [0, Frames() * FPS()) ).  \note If looping is enabled, the time index may be any value >= 0.0, and values will "wrap" around the length of a loop.  If looping is disabled, any time index \a idx that is later than Frames() * FPS() is mapped to the last frame.
     void  SetStartFrame(int idx);    ///< sets the index of the first frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards this will be the last frame shown.
     void  SetEndFrame(int idx);      ///< sets the index of the last frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards this will be the first frame shown.
-   
+
     StoppedSignalType&   StoppedSignal()   {return m_stopped_sig;}    ///< returns the stopped signal object for this DynamicGraphic
     EndFrameSignalType&  EndFrameSignal()  {return m_end_frame_sig;}  ///< returns the end-frame signal object for this DynamicGraphic
     //@}
 
-private:
+protected:
     struct FrameSet
     {
         shared_ptr<const Texture>  texture; ///< the texture with the frames in it
         int                        frames;  ///< the number of frames in this texture
     };
-   
-    int FramesInTexture(const Texture* t);
-   
-    vector<FrameSet> m_textures;  ///< shared_ptr to texture objects with all animation frames
-   
+
+    /** \name Accessors */ //@{
+    int FramesInTexture(const Texture* t) const;                    ///< returns the maximum number of frames that could be stored in \a t given the size of the control and Margin()
+
+    const vector<FrameSet>& Textures() const {return m_textures;}   ///< returns the shared_ptrs to texture objects with all animation frames
+
+    int CurrentTexture() const      {return m_curr_texture;}        ///< returns the current Texture being shown (part of it, anyway); -1 if none
+    int CurrentSubTexture() const   {return m_curr_texture;}        ///< returns the current frame being shown within Texture number CurrTexture(); -1 if none
+    int FirstFrameTime() const      {return m_first_frame_time;}    ///< returns the time index in ms that the first frame in the sequence was shown during the current playback; -1 if none
+    int LastFrameTime() const       {return m_last_frame_time;}     ///< returns the time index in ms of the most recent frame shown (should be m_curr_frame); -1 if none
+    //@}
+
+    const int   m_margin;            ///< the number of pixels placed between frames and between the frames and the Texture edges
+
+private:
+    vector<FrameSet> m_textures;  ///< shared_ptrs to texture objects with all animation frames
+
     double      m_FPS;               ///< current rate of playback in FPS
     bool        m_playing;           ///< set to true if playback is happening
     bool        m_looping;           ///< set to true if the playback should start over when it reaches the end
@@ -163,9 +176,7 @@ private:
     int         m_last_frame_time;   ///< the time index in ms of the most recent frame shown (should be m_curr_frame); -1 if none
     int         m_first_frame_idx;   ///< the index of the first frame shown during playback, usually 0
     int         m_last_frame_idx;    ///< the index of the last frame shown during playback. usually m_frames - 1
-   
-    const int   m_margin;            ///< the number of pixels placed between frames and between the frames and the Texture edges
-   
+
     StoppedSignalType    m_stopped_sig;
     EndFrameSignalType   m_end_frame_sig;
 };

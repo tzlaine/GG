@@ -64,6 +64,9 @@ public:
     /** \name Accessors */ //@{
     int            Posn() const         {return m_posn;}        ///< returns the current tab position
     pair<int,int>  SliderRange() const  {return pair<int,int>(m_range_min, m_range_max);}  ///< returns the defined possible range of control
+    Orientation    GetOrientation() const{return m_orientation;} ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
+    int            TabWidth() const     {return m_tab_width;} ///< returns the width of the slider's tab, in pixels
+    int            LineWidth() const    {return m_line_width;} ///< returns the width of the line along which the tab slides, in pixels
     LineStyleType  LineStyle() const    {return m_line_style;}  ///< returns the style of line used to render the control
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
@@ -88,6 +91,13 @@ public:
     void           SetLineStyle(LineStyleType style)   {m_line_style = style;}  ///< returns the style of line used to render the control
 
     SlidSignalType& SlidSignal() {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
+    //@}
+
+protected:
+    /** \name Accessors */ //@{
+    int TabDragOffset() const {return m_tab_drag_offset;} ///< returns the offset from the cursor to the left edge of the tab; -1 when the tab is not being dragged
+
+    const shared_ptr<Button>& Tab() const {return m_tab;} ///< returns a pointer to the Button used as this control's sliding tab
     //@}
 
 private:

@@ -120,7 +120,12 @@ public:
 
     SelChangedSignalType& SelChangedSignal()  {return m_sel_changed_sig;}///< returns the selection change signal object for this DropDownList
     //@}
-   
+
+protected:
+    /** \name Mutators */ //@{
+    ListBox*       LB() {return m_LB;}  ///< returns the ListBox used to render the selected row and the popup list
+    //@}
+
 private:
     int            m_current_item_idx;  ///< the index of the currently-selected list item (-1 if none is selected)
     ListBox*       m_LB;                ///< the ListBox used to render the selected row and the popup list

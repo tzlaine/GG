@@ -448,13 +448,30 @@ public:
         retval += "_";
         return retval;
     }
-   
-private:
+
+protected:
     typedef T ValueType;
 
     enum {BORDER_THICK = 2, PIXEL_MARGIN = 5};
+
+    /** the regions of the control that a click may fall within; used to catch clicks on the contained Buttons */
     enum Region {NONE, UP_BN, DN_BN};
 
+    /** \name Accessors */ //@{
+    const shared_ptr<Button>&   UpButton() const    {return m_up_bn;} ///< returns a pointer to the Button control used as this control's up button
+    const shared_ptr<Button>&   DownButton() const  {return m_dn_bn;} ///< returns a pointer to the Button control used as this control's down button
+
+    Region  InitialDepressedRegion() const  {return m_initial_depressed_area;}  ///< returns the part of the control originally under cursor in LButtonDown msg
+    Region  DepressedRegion() const         {return m_depressed_area;}          ///< returns the part of the control currently being "depressed" by held-down mouse button
+
+    boost::signals::connection EditConnection() const {return m_edit_connection;} ///< returns the connection to the internal edit control's FocusUpdateSignal() signal
+    //@}
+
+    /** \name Mutators */ //@{
+    Edit* GetEdit() {return m_edit;}  ///< returns a pointer to the Edit control used to render this control's text and accept keyboard input
+    //@}
+
+private:
     void Init(const shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
     {
         Control::SetColor(color);

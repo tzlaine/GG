@@ -70,7 +70,7 @@ struct GG_API Clr
     };
 };
 
-GG_API inline bool operator==(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are identical
+GG_API bool operator==(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are identical
 
 // some useful color constants
 extern GG_API const Clr CLR_ZERO;

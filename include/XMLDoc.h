@@ -246,7 +246,8 @@ public:
     XMLElement root_node;  ///< the single XMLElement in the document, under which all other XMLElement are children
 
 private:
-    struct RuleDefiner {RuleDefiner();} s_rule_definer; ///< used to create XML parsing rules at static initialization time
+    struct RuleDefiner {RuleDefiner();};  ///< used to create XML parsing rules at static initialization time
+    static RuleDefiner s_rule_definer;
 
     /** holds the XMLDoc to which the code should add elements */
     static XMLDoc* s_curr_parsing_doc;
@@ -254,11 +255,16 @@ private:
     /** maintains the current environment for reading XMLElements (the current enclosing XMLElement) */
     static vector<XMLElement*> s_element_stack;
 
+    static XMLElement s_temp_elem;
+    static string s_temp_attr_name;
+
     // these are used along with the static members above during XML parsing
-    static void PushElem(const char* first, const char* last);
-    static void PopElem(const char*, const char*);
+    static void SetElemName(const char* first, const char* last);
     static void SetAttributeName(const char* first, const char* last);
     static void AddAttribute(const char* first, const char* last);
+    static void PushElem1(const char*, const char*);
+    static void PushElem2(const char*, const char*);
+    static void PopElem(const char*, const char*);
     static void AppendToText(const char* first, const char* last);
 };
 

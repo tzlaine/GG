@@ -89,9 +89,6 @@ chset_t NameChar = Letter | Digit | chset_t("._:-") | Extender;
 chset_t Sch("\x20\x9\xD\xA");
 }
 
-XMLDoc*              XMLDoc::s_curr_parsing_doc = 0;
-vector<XMLElement*>  XMLDoc::s_element_stack;
-
 ////////////////////////////////////////////////
 // GG::XMLElement
 ////////////////////////////////////////////////
@@ -183,6 +180,13 @@ XMLElement& XMLElement::Child(const string& child)
 ////////////////////////////////////////////////
 // GG::XMLDoc
 ////////////////////////////////////////////////
+// static(s)
+XMLDoc*              XMLDoc::s_curr_parsing_doc = 0;
+vector<XMLElement*>  XMLDoc::s_element_stack;
+XMLDoc::RuleDefiner  XMLDoc::s_rule_definer;
+XMLElement           XMLDoc::s_temp_elem;
+string               XMLDoc::s_temp_attr_name;
+
 ostream& XMLDoc::WriteDoc(ostream& os, bool whitespace/* = true*/) const
 {
     os << "<?xml version=\"1.0\"?>";
@@ -206,24 +210,41 @@ istream& XMLDoc::ReadDoc(istream& is)
     return is;
 }
 
-void XMLDoc::PushElem(const char* first, const char* last)
+void XMLDoc::SetElemName(const char* first, const char* last)
 {
-    static string last_pushed_elem;
-    string name(first, last);
+    s_temp_elem = XMLElement(string(first, last));
+}
+
+void XMLDoc::SetAttributeName(const char* first, const char* last)
+{
+    s_temp_attr_name = string(first, last);
+}
+
+void XMLDoc::AddAttribute(const char* first, const char* last)
+{
+    s_temp_elem.SetAttribute(s_temp_attr_name, string(first, last));
+}
+
+void XMLDoc::PushElem1(const char* first, const char* last)
+{
     if (XMLDoc* this_ = XMLDoc::s_curr_parsing_doc) {
         if (s_element_stack.empty()) {
-            this_->root_node = XMLElement(name, true);
+            this_->root_node = s_temp_elem;
             s_element_stack.push_back(&this_->root_node);
-            last_pushed_elem = name;
         } else {
-            // this is a dirty hack that avoids one-time duplicate element pushes
-            if (name == last_pushed_elem) {
-                last_pushed_elem = "";
-            } else {
-                s_element_stack.back()->AppendChild(name);
-                s_element_stack.push_back(&s_element_stack.back()->LastChild());
-                last_pushed_elem = name;
-            }
+            s_element_stack.back()->AppendChild(s_temp_elem);
+            s_element_stack.push_back(&s_element_stack.back()->LastChild());
+        }
+    }
+}
+
+void XMLDoc::PushElem2(const char* first, const char* last)
+{
+    if (XMLDoc* this_ = XMLDoc::s_curr_parsing_doc) {
+        if (s_element_stack.empty()) {
+            this_->root_node = s_temp_elem;
+        } else {
+            s_element_stack.back()->AppendChild(s_temp_elem);
         }
     }
 }
@@ -232,17 +253,6 @@ void XMLDoc::PopElem(const char*, const char*)
 {
     if (!s_element_stack.empty())
         s_element_stack.pop_back();
-}
-
-void XMLDoc::SetAttributeName(const char* first, const char* last)
-{
-    attribute_name = string(first, last);
-}
-
-void XMLDoc::AddAttribute(const char* first, const char* last)
-{
-    if (!s_element_stack.empty())
-        s_element_stack.back()->SetAttribute(attribute_name, string(first, last));
 }
 
 void XMLDoc::AppendToText(const char* first, const char* last)
@@ -259,9 +269,7 @@ void XMLDoc::AppendToText(const char* first, const char* last)
 
 XMLDoc::RuleDefiner::RuleDefiner()
 {
-    static string temp_elem_name;
-
-    // This is the start rule for XML
+    // This is the start rule for XML parsing
     document =
         prolog >> element >> *Misc
         ;
@@ -370,13 +378,13 @@ XMLDoc::RuleDefiner::RuleDefiner()
         ;
 
     element =
-        EmptyElemTag
-        |   STag >> content >> ETag
+        STag[&XMLDoc::PushElem1] >> content >> ETag
+        | EmptyElemTag[&XMLDoc::PushElem2]
         ;
 
     STag =
         '<'
-            >> Name[&XMLDoc::PushElem]
+            >> Name[&XMLDoc::SetElemName]
             >> *(S >> Attribute)
             >> !S
             >> '>'
@@ -405,10 +413,10 @@ XMLDoc::RuleDefiner::RuleDefiner()
 
     EmptyElemTag =
         '<'
-            >> Name[&XMLDoc::PushElem]
+            >> Name[&XMLDoc::SetElemName]
             >> *(S >> Attribute)
             >> !S
-            >> str_p("/>")[&XMLDoc::PopElem]
+            >> str_p("/>")
         ;
 
     CharRef =

@@ -49,11 +49,13 @@ Wnd* ZList::Pick(const Pt& pt, Wnd* modal) const
         retval = modal->InWindow(pt) ? PickWithinWindow(pt, modal) : 0;
     } else { // otherwise, look in the z-list
         const_iterator end_it = end();
-        for (const_iterator it = begin(); it != end_it; ++it)
-            if ((*it)->InWindow(pt)) {
-                retval = PickWithinWindow(pt, *it);
+        for (const_iterator it = begin(); it != end_it; ++it) {
+            Wnd* temp = 0;
+            if ((*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it))) {
+                retval = temp;
                 break;
             }
+        }
     }
     return retval;
 }

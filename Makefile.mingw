@@ -32,7 +32,7 @@ INCLUDE = -I/c/boost-1.30.2 \
 	-Iinclude/SDL
 
 GG_LIBDIRS =  -L"C:/Dev-Cpp/lib" -L"C:/DevIL/lib"
-GG_LIBRARIES = -lopengl32 -lglu32 $(GG_LIBDIRS) -lboost_signals -lboost_filesystem -llog4cpp ../freetype-6.dll -ldevil -lilu -lilut
+GG_LIBRARIES = -lopengl32 -lglu32 $(GG_LIBDIRS) -lboost_signals -lboost_filesystem -llog4cpp ../freetype-6.dll ../devil.dll ../ilu.dll ../ilut.dll
 
 NET_LIBDIRS = -L"C:/Dev-Cpp/lib"
 NET_LIBRARIES = -lwsock32 $(NET_LIBDIRS) ../SDL.dll

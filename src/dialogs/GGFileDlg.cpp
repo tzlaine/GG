@@ -37,20 +37,75 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/tokenizer.hpp>
-
-// HACK! this keeps gcc 3.2 from barfing when it sees "typedef long long uint64_t;"
-// in boost/cstdint.h when compiling under windows
-#ifdef WIN32
-#  define BOOST_MSVC -1
-#endif
-#include <boost/cregex.hpp>
-#ifdef WIN32
-#  undef BOOST_MSVC
-#endif
-
+#include <boost/spirit.hpp>
+#include <boost/spirit/dynamic.hpp>
 
 namespace GG {
+
+namespace {
+using namespace boost::spirit;
+// these functors are used by the if_p, while_p, and for_p parsers in UpdateList()
+struct LeadingWildcard
+{
+    LeadingWildcard(const string& str) : m_value(*str.begin() == '*') {}
+    bool operator()() const {return m_value;}
+    bool m_value;
+};
+struct TrailingWildcard
+{
+    TrailingWildcard(const string& str) : m_value(*str.rbegin() == '*' && 1 < str.size()) {}
+    bool operator()() const {return m_value;}
+    bool m_value;
+};
+struct Index 
+{
+    Index(int i = 0) : m_initial_value(i) {}
+    void operator()() const {value = m_initial_value;}
+    int m_initial_value;
+    static int value;
+};
+int Index::value;
+struct IndexLess
+{
+    IndexLess(int val) : m_value(val) {}
+    bool operator()() const {return Index::value <  m_value;}
+    int m_value;
+};
+struct IndexIncr  
+{
+    void operator()() const {++Index::value;}
+};
+struct IndexedStringBegin
+{
+    IndexedStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+    const char* operator()() const {return (*m_strings)[Index::value].c_str();}
+    shared_ptr<vector<string> > m_strings;
+};
+struct IndexedStringEnd
+{
+    IndexedStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+    const char* operator()() const {return (*m_strings)[Index::value].c_str() + (*m_strings)[Index::value].size();}
+    shared_ptr<vector<string> > m_strings;
+};
+struct Less
+{
+    Less(int lhs, int rhs) : m_value(lhs < rhs) {}
+    bool operator()() const {return m_value;}
+    bool m_value;
+};
+struct StringBegin
+{
+    StringBegin(const string& str) : m_string(str) {}
+    const char* operator()() const {return m_string.c_str();}
+    string m_string;
+};
+struct StringEnd
+{
+    StringEnd(const string& str) : m_string(str) {}
+    const char* operator()() const {return m_string.c_str() + m_string.size();}
+    string m_string;
+};
+}
 
 // static member definition(s)
 boost::filesystem::path FileDlg::m_working_dir = boost::filesystem::initial_path();
@@ -357,14 +412,9 @@ void FileDlg::OkClicked()
 
     // parse contents of edit control to determine file names
     m_result.clear();
-    string filenames;
-    *m_files_edit >> filenames;
-    typedef boost::tokenizer<boost::char_separator<char> > tok;
-    boost::char_separator<char> sep(" \t");
-    tok tokens(filenames, sep);
+
     set<string> files;
-    for (tok::iterator it = tokens.begin(); it != tokens.end(); ++it)
-        files.insert(*it);
+    parse(m_files_edit->WindowText().c_str(), (+anychar_p)[append(files)], space_p);
 
     if (m_save) { // file save case
         if (m_ok_button->WindowText() != "Save") {
@@ -381,9 +431,10 @@ void FileDlg::OkClicked()
                 results_valid = (dlg.Result() == 0);
             } else { // ensure that the filename is valid
                 // valid filenames are (for portability) one or more alphanumeric characters and underscores
-                // in any combination, containing at most one period:
-                boost::RegEx expr("[\\w]+[\\.]?[\\w]*");
-                if (save_file != "." && !expr.Match(save_file)) { // HACK! !- "." guards against unknown segfault
+                // in any combination, containing at most one period; the period cannot appear as the first 
+                // character
+                rule<> filename = +(alnum_p | '_') >> !ch_p('.') >> *(alnum_p | '_');
+                if (!parse(save_file.c_str(), filename).hit) {
                     // invalid file name; indicate this to the user
                     ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
                     dlg.Run();
@@ -482,25 +533,44 @@ void FileDlg::UpdateList()
     m_files_list->Clear();
     namespace fs = boost::filesystem;
     fs::directory_iterator end_it;
-    // filter out files and directories beginning with a period
-    boost::RegEx period_regex("[^\\.]+.*");
-    // create file filter regular expressions
-    vector<boost::RegEx> filter_regexes;
-    int idx = -1;
-    if ((idx = m_filter_list->CurrentItemIndex()) != -1) {
-        typedef boost::tokenizer<boost::char_separator<char> > tok;
-        boost::char_separator<char> sep(", ");
-        tok tokens(m_file_filters[idx].second, sep);
-        string wildcard_str = "[\\.\\w]*"; // any combination of periods, underscores, and alphanumerics
-        for (tok::iterator it = tokens.begin(); it != tokens.end(); ++it) {
-            string str = *it;
-            int posn = string::npos;
-            int look_at = 0;
-            while ((posn = str.find('*', look_at)) != static_cast<int>(string::npos)) {
-                str.replace(posn, 1, wildcard_str);
-                look_at = posn + wildcard_str.size();
+
+    // define a wildcard ('*') as any combination of periods, underscores, and alphanumerics, and some other punctuation characters
+    rule<> wildcard = anychar_p;
+
+    // define file filters based on the filter strings in the filter drop list
+    vector<rule<> > file_filters;
+
+    int idx = m_filter_list->CurrentItemIndex();
+    if (idx != -1) {
+        vector<string> filter_specs; // the filter specifications (e.g. "*.png")
+        parse(m_file_filters[idx].second.c_str(), *(!ch_p(',') >> (+(anychar_p - ','))[append(filter_specs)]), space_p);
+        file_filters.resize(filter_specs.size());
+        for (unsigned int i = 0; i < filter_specs.size(); ++i) {
+            shared_ptr<vector<string> > non_wildcards(new vector<string>); // the parts of the filter spec that are not wildcards
+            parse(filter_specs[i].c_str(), *(*ch_p('*') >> (+(anychar_p - '*'))[append(*non_wildcards)]));
+
+            if (non_wildcards->empty()) {
+                file_filters[i] = *anychar_p;
+            } else {
+                file_filters[i] = 
+                    if_p (LeadingWildcard(filter_specs[i])) [
+                        while_p (wildcard - f_str_p(StringBegin(non_wildcards->front()), StringEnd(non_wildcards->front()))) [
+                            eps_p
+                        ] 
+                        >> f_str_p(StringBegin(non_wildcards->front()), StringEnd(non_wildcards->front()))
+                    ] .else_p [
+                        f_str_p(StringBegin(non_wildcards->front()), StringEnd(non_wildcards->front()))
+                    ] 
+                    >> for_p (Index(1), IndexLess(static_cast<int>(non_wildcards->size()) - 1), IndexIncr()) [
+                        while_p (wildcard - f_str_p(IndexedStringBegin(non_wildcards), IndexedStringEnd(non_wildcards))) [
+                            eps_p
+                        ] 
+                        >> f_str_p(IndexedStringBegin(non_wildcards), IndexedStringEnd(non_wildcards))
+                    ] 
+                    >> if_p (TrailingWildcard(filter_specs[i])) [
+                        *wildcard
+                    ];
             }
-            filter_regexes.push_back(boost::RegEx(str));
         }
     }
 
@@ -511,19 +581,17 @@ void FileDlg::UpdateList()
         m_files_list->Insert(row);
     }
     for (fs::directory_iterator it(m_working_dir); it != end_it; ++it) {
-        if (fs::exists(*it) && fs::is_directory(*it) && period_regex.Match(it->leaf())) {
+        if (fs::exists(*it) && fs::is_directory(*it) && it->leaf()[0] != '.') {
             ListBox::Row* row = new ListBox::Row;
             row->push_back("[" + it->leaf() + "]", m_font);
             m_files_list->Insert(row);
         }
     }
     for (fs::directory_iterator it(m_working_dir); it != end_it; ++it) {
-        if (fs::exists(*it) && !fs::is_directory(*it) && period_regex.Match(it->leaf())) {
-            bool meets_filters = filter_regexes.empty();
-            for (vector<boost::RegEx>::iterator regex_it = filter_regexes.begin();
-                    regex_it != filter_regexes.end() && !meets_filters;
-                    ++regex_it) {
-                if (regex_it->Match(it->leaf()))
+        if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
+            bool meets_filters = file_filters.empty();
+            for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
+                if (parse(it->leaf().c_str(), file_filters[i]).full)
                     meets_filters = true;
             }
             if (meets_filters) {
@@ -577,4 +645,3 @@ void FileDlg::OpenDirectory()
 }
 
 } // namspace GG
-

@@ -402,7 +402,7 @@ int Scroll::TabSpace() const
 
 int Scroll::TabWidth() const
 {
-    return std::max(m_page_sz / (m_range_max - m_range_min + 1) * TabSpace(), MIN_TAB_SIZE);
+    return std::max(TabSpace() * m_page_sz / (m_range_max - m_range_min + 1), MIN_TAB_SIZE);
 }
 
 Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)

@@ -60,6 +60,7 @@ Wnd* NewRadioButtonGroup(const XMLElement& elem)  {return new RadioButtonGroup(e
 Wnd* NewEdit(const XMLElement& elem)              {return new Edit(elem);}
 Wnd* NewScroll(const XMLElement& elem)            {return new Scroll(elem);}
 Wnd* NewListBox(const XMLElement& elem)           {return new ListBox(elem);}
+Wnd* NewListBoxRow(const XMLElement& elem)        {return new ListBox::Row(elem);}
 Wnd* NewMenuBar(const XMLElement& elem)           {return new MenuBar(elem);}
 Wnd* NewMultiEdit(const XMLElement& elem)         {return new MultiEdit(elem);}
 Wnd* NewDropDownList(const XMLElement& elem)      {return new DropDownList(elem);}
@@ -104,6 +105,7 @@ struct AppImplData
         wnd_factory.AddGenerator("GG::Edit", &NewEdit);
         wnd_factory.AddGenerator("GG::Scroll", &NewScroll);
         wnd_factory.AddGenerator("GG::ListBox", &NewListBox);
+        wnd_factory.AddGenerator("GG::ListBox::Row", &NewListBoxRow);
         wnd_factory.AddGenerator("GG::MenuBar", &NewMenuBar);
         wnd_factory.AddGenerator("GG::MultiEdit", &NewMultiEdit);
         wnd_factory.AddGenerator("GG::DropDownList", &NewDropDownList);

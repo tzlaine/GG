@@ -222,7 +222,7 @@ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 $(srcdir)/configure:  $(srcdir)/configure.ac $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.ac m4/ac_caolan_search_package.m4 m4/ac_path_lib.m4 m4/acx_pthread.m4 m4/ax_check_gl.m4 m4/ax_enable_builddir.m4 m4/boost.m4 m4/yg_get_path.m4 m4/yg_search_libs.m4
+$(ACLOCAL_M4):  configure.ac m4/boost.m4 m4/yg_get_path.m4 m4/yg_search_libs.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1

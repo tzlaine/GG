@@ -3,17 +3,28 @@
 #define _GGPluginInterface_h_
 
 #ifndef _GGBase_h_
-#include  "GGBase.h"
+#include  <GGBase.h>
 #endif
 
 #ifndef LTDL_H
-#include "../../libltdl/ltdl.h"
+#include <ltdl.h>
 #endif
 
+#ifndef _GGButton_h_
 #include <GGButton.h>
+#endif
+
+#ifndef _GGScroll_h_
 #include <GGScroll.h>
+#endif
+
+#ifndef _GGSlider_h_
 #include <GGSlider.h>
+#endif
+
+#ifndef _GGSpin_h_
 #include <GGSpin.h>
+#endif
 
 #include <string>
 

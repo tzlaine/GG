@@ -102,24 +102,24 @@ public:
    
 protected:
     /** \name Accessors */ //@{
-    const pair<int, int>&            CursorPosn() const      {return m_cursor_pos;}      ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
-    int                              FirstCharShown() const  {return m_first_char_shown;}///< returns the index of the first character visible in the Edit
-    const string&                    PreviousText() const    {return m_previous_text;}   ///< returns the text that was in the edit at the time fo the last focus gain
-   //@}
+    bool                    MultiSelected() const   {return m_cursor_pos.first != m_cursor_pos.second;} ///< returns true if >= 1 characters selected
+    const pair<int, int>&   CursorPosn() const      {return m_cursor_pos;}      ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
+    int                     FirstCharShown() const  {return m_first_char_shown;}///< returns the index of the first character visible in the Edit
+    const string&           PreviousText() const    {return m_previous_text;}   ///< returns the text that was in the edit at the time fo the last focus gain
+    int                     CharIndexOf(int x) const;  ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
+    int                     FirstCharOffset() const;   ///< returns the pixel distance from the beginning of the string to just before the first visible character
+    int                     ScreenPosOfChar(int idx) const;  ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
+    int                     LastVisibleChar() const;   ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
+    //@}
 
     static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame
 
 private:
-    bool     MultiSelected() const {return m_cursor_pos.first != m_cursor_pos.second;}   ///< returns true if >= 1 characters selected
     void     ClearSelected();           ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
     void     AdjustView();              ///< makes sure the caret ends up in view after an arbitrary move
-    int      CharIndexOf(int x) const;  ///< returns index into string of the character x pixels from left edge of visible portion of string
-    int      FirstCharOffset() const;   ///< returns the pixel distance from the beginning of the string to just before the first visible character
-    int      ScreenPosOfChar(int idx) const;  ///< returns the screen x-coordinate of the left side of the character at index idx in m_text
-    int      LastVisibleChar() const;   ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
 
     pair<int, int> m_cursor_pos;        ///< if .first == .second, the caret is drawn before character at m_cursor_pos.first
-    ///< otherwise, the range is selected (when range is selected, caret is still considered at .first)
+                                        //   otherwise, the range is selected (when range is selected, caret is considered at .second)
     int         m_first_char_shown;     ///< index into the string of the first character on the left end of the control's viewable area
     Clr         m_int_color;            ///< color of background inside text box
     Clr         m_hilite_color;         ///< color behind selected range

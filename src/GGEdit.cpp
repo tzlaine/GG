@@ -123,6 +123,37 @@ Pt Edit::ClientLowerRight() const
     return LowerRight() - Pt(PIXEL_MARGIN, PIXEL_MARGIN);
 }
 
+XMLElement Edit::XMLEncode() const
+{
+    XMLElement retval("GG::Edit");
+    retval.AppendChild(TextControl::XMLEncode());
+
+    XMLElement temp;
+
+    temp = XMLElement("m_cursor_pos");
+    temp.SetAttribute("first", lexical_cast<string>(m_cursor_pos.first));
+    temp.SetAttribute("second", lexical_cast<string>(m_cursor_pos.second));
+    retval.AppendChild(temp);
+
+    temp = XMLElement("m_first_char_shown");
+    temp.SetAttribute("value", lexical_cast<string>(m_first_char_shown));
+    retval.AppendChild(temp);
+
+    temp = XMLElement("m_int_color");
+    temp.AppendChild(m_int_color.XMLEncode());
+    retval.AppendChild(temp);
+
+    temp = XMLElement("m_hilite_color");
+    temp.AppendChild(m_hilite_color.XMLEncode());
+    retval.AppendChild(temp);
+
+    temp = XMLElement("m_sel_text_color");
+    temp.AppendChild(m_sel_text_color.XMLEncode());
+    retval.AppendChild(temp);
+
+    return retval;
+}
+
 int Edit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -325,34 +356,41 @@ void Edit::SetText(const string& str)
     m_edited_sig(str);
 }
 
-XMLElement Edit::XMLEncode() const
+int Edit::CharIndexOf(int x) const
 {
-    XMLElement retval("GG::Edit");
-    retval.AppendChild(TextControl::XMLEncode());
+    int retval;
+    int first_char_offset = FirstCharOffset();
+    for (retval = 0; retval < Length(); ++retval) {
+        int curr_extent;
+        if (x + first_char_offset <= (curr_extent = GetLineData()[0].extents[retval])) { // the point falls within the character at index retval
+            int prev_extent = retval ? GetLineData()[0].extents[retval - 1] : 0;
+            int half_way = (prev_extent + curr_extent) / 2;
+            if (x + first_char_offset >= half_way) // if the point is more than halfway across the character, put the cursor *after* the character
+                ++retval;
+            break;
+        }
+    }
+    return retval;
+}
 
-    XMLElement temp;
+int Edit::FirstCharOffset() const
+{
+    return (m_first_char_shown ? GetLineData()[0].extents[m_first_char_shown - 1] : 0);
+}
 
-    temp = XMLElement("m_cursor_pos");
-    temp.SetAttribute("first", lexical_cast<string>(m_cursor_pos.first));
-    temp.SetAttribute("second", lexical_cast<string>(m_cursor_pos.second));
-    retval.AppendChild(temp);
+int Edit::ScreenPosOfChar(int idx) const
+{
+    int first_char_offset = FirstCharOffset();
+    return UpperLeft().x + PIXEL_MARGIN + ((idx ? int(GetLineData()[0].extents[idx - 1]) : 0) - first_char_offset);
+}
 
-    temp = XMLElement("m_first_char_shown");
-    temp.SetAttribute("value", lexical_cast<string>(m_first_char_shown));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_int_color");
-    temp.AppendChild(m_int_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_hilite_color");
-    temp.AppendChild(m_hilite_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_sel_text_color");
-    temp.AppendChild(m_sel_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
+int Edit::LastVisibleChar() const
+{
+    int first_char_offset = FirstCharOffset();
+    int retval;
+    for (retval = m_first_char_shown; retval < Length(); ++retval)
+        if ((retval ? GetLineData()[0].extents[retval - 1] : 0) - first_char_offset >= WindowDimensions().x - 2 * PIXEL_MARGIN)
+            break;
     return retval;
 }
 
@@ -392,44 +430,6 @@ void Edit::AdjustView()
             ++move_to;
         m_first_char_shown = move_to;
     }
-}
-
-int Edit::CharIndexOf(int x) const
-{
-    int retval;
-    int first_char_offset = FirstCharOffset();
-    for (retval = 0; retval < Length(); ++retval) {
-        int curr_extent;
-        if (x + first_char_offset <= (curr_extent = GetLineData()[0].extents[retval])) { // the point falls within the character at index retval
-            int prev_extent = retval ? GetLineData()[0].extents[retval - 1] : 0;
-            int half_way = (prev_extent + curr_extent) / 2;
-            if (x + first_char_offset >= half_way) // if the point is more than halfway across the character, put the cursor *after* the character
-                ++retval;
-            break;
-        }
-    }
-    return retval;
-}
-
-int Edit::FirstCharOffset() const
-{
-    return (m_first_char_shown ? GetLineData()[0].extents[m_first_char_shown - 1] : 0);
-}
-
-int Edit::ScreenPosOfChar(int idx) const
-{
-    int first_char_offset = FirstCharOffset();
-    return UpperLeft().x + PIXEL_MARGIN + ((idx ? int(GetLineData()[0].extents[idx - 1]) : 0) - first_char_offset);
-}
-
-int Edit::LastVisibleChar() const
-{
-    int first_char_offset = FirstCharOffset();
-    int retval;
-    for (retval = m_first_char_shown; retval < Length(); ++retval)
-        if ((retval ? GetLineData()[0].extents[retval - 1] : 0) - first_char_offset >= WindowDimensions().x - 2 * PIXEL_MARGIN)
-            break;
-    return retval;
 }
 
 } // namespace GG

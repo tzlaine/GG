@@ -105,14 +105,16 @@ public:
     ScrolledSignalType& ScrolledSignal() {return m_scrolled_sig;}    ///< returns the scrolled signal object for this Scroll
     //@}
 
-private:
+protected:
     enum ScrollRegion {SBR_NONE, SBR_TAB, SBR_LINE_DN, SBR_LINE_UP, SBR_PAGE_DN, SBR_PAGE_UP};
    
-    int            TabSpace() const;
-    int            TabWidth() const;
+    int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
+    int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
+    ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
+
+private:
     void           UpdatePosn();              ///< adjusts m_posn due to a tab-drag
     void           MoveTabToPosn();           ///< adjusts tab due to a button click, PgUp, etc.
-    ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
 
     Clr                  m_int_color;   ///< color inside border of slide area
     const Orientation    m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)

@@ -402,8 +402,26 @@ int Scroll::TabSpace() const
 
 int Scroll::TabWidth() const
 {
-    int tab_space = TabSpace();
-    return std::max(int(m_page_sz / (m_range_max - m_range_min + 1.0f) * tab_space), MIN_TAB_SIZE);
+    return std::max(m_page_sz / (m_range_max - m_range_min + 1) * TabSpace(), MIN_TAB_SIZE);
+}
+
+Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
+{
+    ScrollRegion retval;
+    Pt ul = UpperLeft();
+    if (m_decr->InWindow(pt - ul))
+        retval = SBR_LINE_DN;
+    else if (m_incr->InWindow(pt - ul))
+        retval = SBR_LINE_UP;
+    else if (m_tab->InWindow(pt - ul))
+        retval = SBR_TAB;
+    else if (!InWindow(pt))
+        retval = SBR_NONE;
+    else if (pt.x - ul.x < m_tab->UpperLeft().x || pt.y - ul.y <= m_tab->UpperLeft().y)
+        retval = SBR_PAGE_DN;
+    else
+        retval = SBR_PAGE_UP;
+    return retval;
 }
 
 void Scroll::UpdatePosn()
@@ -431,25 +449,6 @@ void Scroll::MoveTabToPosn()
                      int((double(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace)) :
                   Pt(int((double(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace),
                      m_tab->UpperLeft().y));
-}
-
-Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
-{
-    ScrollRegion retval;
-    Pt ul = UpperLeft();
-    if (m_decr->InWindow(pt - ul))
-        retval = SBR_LINE_DN;
-    else if (m_incr->InWindow(pt - ul))
-        retval = SBR_LINE_UP;
-    else if (m_tab->InWindow(pt - ul))
-        retval = SBR_TAB;
-    else if (!InWindow(pt))
-        retval = SBR_NONE;
-    else if (pt.x - ul.x < m_tab->UpperLeft().x || pt.y - ul.y <= m_tab->UpperLeft().y)
-        retval = SBR_PAGE_DN;
-    else
-        retval = SBR_PAGE_UP;
-    return retval;
 }
 
 } // namespace GG

@@ -884,6 +884,26 @@ int ListBox::RowUnderPt(const Pt& pt) const
     return retval;
 }
 
+Pt ListBox::DragOffset(const Pt& pt) const
+{
+    Pt retval(-1, -1);
+    Pt cl_ul = ClientUpperLeft();
+    if (InClient(pt)) {
+        retval.x = pt.x - cl_ul.x; // we know the x-offset immediately
+        int acc = cl_ul.y;
+        for (unsigned int i = m_first_row_shown; i < m_rows.size(); ++i) {
+            acc += m_rows[i].Height();
+            if (pt.y <= acc) {
+                retval.y = pt.y - (acc - m_rows[i].Height());
+                break;
+            }
+        }
+        if (retval.y == -1)
+            retval.x = -1;
+    }
+    return retval;
+}
+
 int ListBox::Insert(const Row& row, int at, bool dropped)
 {
     int retval = at;
@@ -1072,26 +1092,6 @@ void ListBox::HScrolled(int tab_low, int tab_high, int low, int high)
             ++m_first_col_shown;
         }
     }
-}
-
-Pt ListBox::DragOffset(const Pt& pt) const
-{
-    Pt retval(-1, -1);
-    Pt cl_ul = ClientUpperLeft();
-    if (InClient(pt)) {
-        retval.x = pt.x - cl_ul.x; // we know the x-offset immediately
-        int acc = cl_ul.y;
-        for (unsigned int i = m_first_row_shown; i < m_rows.size(); ++i) {
-            acc += m_rows[i].Height();
-            if (pt.y <= acc) {
-                retval.y = pt.y - (acc - m_rows[i].Height());
-                break;
-            }
-        }
-        if (retval.y == -1)
-            retval.x = -1;
-    }
-    return retval;
 }
 
 void ListBox::RenderRow(const Row& row, int left, int top, int last_col)

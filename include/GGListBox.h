@@ -218,6 +218,7 @@ protected:
     int            LastVisibleRow() const;  ///< last row that could be drawn, taking into account the contents and the size of client area
     int            LastVisibleCol() const;  ///< last column that could be drawn, taking into account the contents and the size of client area
     int            RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (it may be < 0 or >= NumRows())
+    Pt             DragOffset(const Pt& pt) const; ///< returns offset of \a pt into the row \a pt falls in, or (-1,-1) if pt falls under no row
     //@}
 
     /** \name Mutators */ //@{
@@ -232,7 +233,6 @@ private:
     void           AdjustScrolls(); ///< creates, destroys, or resizes scrolls to reflect size of data in listbox
     void           VScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the vertical scroll bar are caught here
     void           HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
-    Pt             DragOffset(const Pt& pt) const; ///< returns offset of pt into the row pt falls in, or (-1,-1) if pt falls under no row
     void           RenderRow(const Row& row, int left, int top, int last_col);       ///< renders a single row of data
     void           RenderSubRow(const Row& subrow, int left, int top, int last_col); ///< renders a subrow of data
     int            ClickAtRow(int row, Uint32 keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys

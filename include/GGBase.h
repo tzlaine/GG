@@ -188,13 +188,13 @@ enum StaticGraphicStyle {
 /** styles for ListBox controls*/
 enum ListBoxStyle {
     LB_NONE =            0,
-    LB_LEFT =            1 << 0,  ///< Cells are left-aligned. This is the default.
-    LB_CENTER =          1 << 1,  ///< Cells are center-aligned.
-    LB_RIGHT =           1 << 2,  ///< Cells are right-aligned.
+    LB_VCENTER =         1 << 0,  ///< Cells are aligned with the top of the list box control.
+    LB_TOP =             1 << 1,  ///< Cells are aligned with the top of the list box control. This is the default.
+    LB_BOTTOM =          1 << 2,  ///< Cells are aligned with the bottom of the list box control.
 
-    LB_TOP =             1 << 3,  ///< Cells are aligned with the top of the list box control. This is the default.
-    LB_VCENTER =         1 << 4,  ///< Cells are aligned with the top of the list box control.
-    LB_BOTTOM =          1 << 5,  ///< Cells are aligned with the bottom of the list box control.
+    LB_CENTER =          1 << 3,  ///< Cells are center-aligned.
+    LB_LEFT =            1 << 4,  ///< Cells are left-aligned. This is the default.
+    LB_RIGHT =           1 << 5,  ///< Cells are right-aligned.
 
     LB_NOSORT =          1 << 10, ///< List items are not sorted. Items are sorted by default.  When combined with LB_DRAGDROP, this style allows arbitrary rearrangement of list elements by dragging.
     LB_SORTDESCENDING =  1 << 11, ///< Items are sorted based on item text in ascending order. Ascending order is the default.

@@ -38,7 +38,7 @@ class Font;
 class TextControl;
 
 /** serves as a single menu entry in a GG::MenuBar or GG::PopupMenu; may include a submenu.  All legal item_IDs are positive
-    (and so non-zero); any item_ID <= 0 is considered invlaid.  Each MenuItem has a signal that is emmitted with its 
+    (and so non-zero); any item_ID <= 0 is considered invalid.  Each MenuItem has a signal that is emmitted with its 
     menu_ID member whenever it is selected. Such signals may be emitted even when the menu_ID is 0.  These signals allow
     each MenuItem to be attached directly to code that should be executed when that item is selected. */
 struct GG_API MenuItem

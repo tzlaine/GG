@@ -25,7 +25,10 @@
 /* $Header$ */
 
 #include "GGWnd.h"
-#include "GGApp.h"
+
+#include <GGApp.h>
+#include <XMLValidators.h>
+
 
 namespace GG {
 
@@ -33,72 +36,69 @@ namespace GG {
 // class GG::Wnd
 ///////////////////////////////////////
 Wnd::Wnd() :
-        m_done(false),
-        m_parent(0),
-        m_zorder(0),
-        m_visible(true),
-        m_max_size(1 << 30, 1 << 30),
-        m_flags(0)
+    m_done(false),
+    m_parent(0),
+    m_zorder(0),
+    m_visible(true),
+    m_max_size(1 << 30, 1 << 30),
+    m_flags(0)
 {
 }
 
 Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
-        m_done(false),
-        m_parent(0),
-        m_zorder(0),
-        m_visible(true),
-        m_upperleft(x, y),
-        m_lowerright(x + w, y + h),
-        m_max_size(1 << 30, 1 << 30),
-        m_flags(flags)
+    m_done(false),
+    m_parent(0),
+    m_zorder(0),
+    m_visible(true),
+    m_upperleft(x, y),
+    m_lowerright(x + w, y + h),
+    m_max_size(1 << 30, 1 << 30),
+    m_flags(flags)
 {
     ValidateFlags();
 }
 
 Wnd::Wnd(const XMLElement& elem) :
-        m_done(false),
-        m_parent(0),
-        m_zorder(0),
-        m_visible(true),
-        m_max_size(1 << 30, 1 << 30),
-        m_flags(0)
+    m_done(false),
+    m_parent(0),
+    m_zorder(0),
+    m_visible(true),
+    m_max_size(1 << 30, 1 << 30),
+    m_flags(0)
 {
     if (elem.Tag() != "GG::Wnd")
         throw std::invalid_argument("Attempted to construct a GG::Wnd from an XMLElement that had a tag other than \"GG::Wnd\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_text");
-    m_text = curr_elem->Text();
+    m_text = elem.Child("m_text").Text();
 
-    curr_elem = &elem.Child("m_children");
+    const XMLElement* curr_elem = &elem.Child("m_children");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
         if (Wnd* w = GG::App::GetApp()->GenerateWnd(curr_elem->Child(i)))
             AttachChild(w);
     }
 
-    curr_elem  = &elem.Child("m_zorder");
-    m_zorder = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_zorder = lexical_cast<int>(elem.Child("m_zorder").Text());
+    m_visible = lexical_cast<bool>(elem.Child("m_visible").Text());
+    m_upperleft = Pt(elem.Child("m_upperleft").Child("GG::Pt"));
+    m_lowerright = Pt(elem.Child("m_lowerright").Child("GG::Pt"));
+    m_min_size = Pt(elem.Child("m_min_size").Child("GG::Pt"));
+    m_max_size = Pt(elem.Child("m_max_size").Child("GG::Pt"));
 
-    curr_elem  = &elem.Child("m_visible");
-    m_visible = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem  = &elem.Child("m_upperleft");
-    m_upperleft = Pt(curr_elem->Child("GG::Pt"));
-
-    curr_elem  = &elem.Child("m_lowerright");
-    m_lowerright = Pt(curr_elem->Child("GG::Pt"));
-
-    curr_elem  = &elem.Child("m_min_size");
-    m_min_size = Pt(curr_elem->Child("GG::Pt"));
-
-    curr_elem  = &elem.Child("m_max_size");
-    m_max_size = Pt(curr_elem->Child("GG::Pt"));
-
-    curr_elem  = &elem.Child("m_flags");
-    m_flags = lexical_cast<Uint32>(curr_elem->Attribute("value"));
+    string flags_str = elem.Child("m_flags").Text();
+    vector<string> tokens = Tokenize(flags_str);
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+	m_flags |= GetEnumMap<Wnd::WndFlag>().FromString(tokens[i]);
+    }
 }
 
 Wnd::~Wnd()
 {
+    if (Parent()) {
+	Parent()->DetachChild(this);
+    } else {
+	App::GetApp()->Remove(this);
+    }
+
     DeleteChildren();
 }
 
@@ -157,45 +157,63 @@ WndRegion Wnd::WindowRegion(const Pt& pt) const
 XMLElement Wnd::XMLEncode() const
 {
     XMLElement retval("GG::Wnd");
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_text", m_text));
+    retval.LastChild().SetAttribute("edit", "always");
 
-    temp = XMLElement("m_text", m_text);
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_children");
+    XMLElement temp("m_children");
     for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
         temp.AppendChild((*it)->XMLEncode());
     }
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_zorder");
-    temp.SetAttribute("value", boost::lexical_cast<string>(m_zorder));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_zorder", boost::lexical_cast<string>(m_zorder)));
+    retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_visible", boost::lexical_cast<string>(m_visible)));
+    retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_upperleft", m_upperleft.XMLEncode()));
+    retval.AppendChild(XMLElement("m_lowerright", m_lowerright.XMLEncode()));
+    retval.AppendChild(XMLElement("m_min_size", m_min_size.XMLEncode()));
+    retval.AppendChild(XMLElement("m_max_size", m_max_size.XMLEncode()));
 
-    temp = XMLElement("m_visible");
-    temp.SetAttribute("value", boost::lexical_cast<string>(m_visible));
-    retval.AppendChild(temp);
+    string flags_str;
+    if (CLICKABLE & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(CLICKABLE) + " ";
+    if (DRAGABLE & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(DRAGABLE) + " ";
+    if (DRAG_KEEPER & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(DRAG_KEEPER) + " ";
+    if (RESIZABLE & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(RESIZABLE) + " ";
+    if (ONTOP & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(ONTOP) + " ";
+    if (MODAL & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(MODAL) + " ";
+    retval.AppendChild(XMLElement("m_flags", flags_str));
+    retval.LastChild().SetAttribute("edit", "never");
 
-    temp = XMLElement("m_upperleft");
-    temp.AppendChild(m_upperleft.XMLEncode());
-    retval.AppendChild(temp);
+    return retval;
+}
 
-    temp = XMLElement("m_lowerright");
-    temp.AppendChild(m_lowerright.XMLEncode());
-    retval.AppendChild(temp);
+XMLElementValidator Wnd::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Wnd");
+    retval.AppendChild(XMLElementValidator("m_text"));
+    retval.LastChild().SetAttribute("edit", 0);
 
-    temp = XMLElement("m_min_size");
-    temp.AppendChild(m_min_size.XMLEncode());
+#if 1
+    retval.AppendChild(XMLElementValidator("m_children")); // this will be filled in by subclasses as needed
+#else
+    XMLElementValidator temp("m_children");
+    for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+        temp.AppendChild((*it)->XMLValidator());
+    }
     retval.AppendChild(temp);
+#endif
 
-    temp = XMLElement("m_max_size");
-    temp.AppendChild(m_max_size.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_flags");
-    temp.SetAttribute("value", boost::lexical_cast<string>(m_flags));
-    retval.AppendChild(temp);
-
+    retval.AppendChild(XMLElementValidator("m_zorder", new Validator<int>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_visible", new Validator<bool>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_upperleft", m_upperleft.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_lowerright", m_lowerright.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_min_size", m_min_size.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_max_size", m_max_size.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_flags", new ListValidator<Wnd::WndFlag>()));
+    retval.LastChild().SetAttribute("edit", 0);
     return retval;
 }
 
@@ -312,6 +330,9 @@ void Wnd::DetachChild(Wnd* wnd)
     if (wnd) {
         std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
         if (it != m_children.end()) {
+	    // though child windows are never Register()ed, this Remove() makes sure that any 
+	    // GG::App state pointers to the child do not outlive the child
+	    App::GetApp()->Remove(wnd);
             m_children.erase(it);
             wnd->m_parent = 0;
         }
@@ -329,21 +350,17 @@ void Wnd::DetachChildren()
 
 void Wnd::DeleteChild(Wnd* wnd)
 {
-    if (wnd) {
-        std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
-        if (it != m_children.end()) {
-            boost::checked_delete(wnd);
-            m_children.erase(it);
-        }
+    if (wnd && std::find(m_children.begin(), m_children.end(), wnd) != m_children.end()) {
+	delete wnd;
     }
 }
 
 void Wnd::DeleteChildren()
 {
-    std::list<Wnd*>::iterator it = m_children.begin();
-    for (; it != m_children.end(); ++it)
-        boost::checked_delete(*it);
-    m_children.clear();
+    for (std::list<Wnd*>::iterator it = m_children.begin(); it != m_children.end();) {
+	Wnd* wnd = *it++;
+        delete wnd;
+    }
 }
 
 int Wnd::Render() {return 1;}

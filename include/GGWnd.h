@@ -61,13 +61,13 @@ class Wnd : public boost::signals::trackable
 {
 public:
     /// window creation flags
-    enum {CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
-          DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
-          DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
-          RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
-          ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
-          MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
-         }; 
+    enum WndFlag {CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
+		  DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
+		  DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
+		  RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
+		  ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
+		  MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
+                 };
          
     GGEXCEPTION(WndException);   ///< exception class \see GG::GGEXCEPTION
    
@@ -113,6 +113,8 @@ public:
     virtual WndRegion WindowRegion(const Pt& pt) const;      ///< also virtual b/c of different window shapes
    
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Wnd object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object.  This method is intended to be used in GG-Sketch.
     //@}
    
     /** \name Mutators */ //@{
@@ -138,7 +140,7 @@ public:
     void           DeleteChild(Wnd* wnd);  ///< removes, detaches, and deletes \a wnd; does nothing if wnd is not in the child list
     void           DeleteChildren();       ///< removes, detaches, and deletes all Wnds in the child list
     // message functions
-    virtual int    Render();                                         ///< draw self on screen
+    virtual int    Render();                                         ///< draw self on screen; a return value of 0 that children should be skipped in subsequent rendering
     virtual int    LButtonDown(const Pt& pt, Uint32 keys);           ///< respond to left button down msg.  A window receives this whenever any input device button changes from up to down while over the window.
     virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys); ///< respond to drag msg (even if this wnd is not dragable).   Drag messages are only sent to the window over which the button was dressed at teh beginning of the drag. A window receives this whenever any input device button is down and the mouse is moving while over the window.  If a window has the DRAG_KEEPER flag set, the window will also receive drag messages when the mouse is being dragged outside the window's area.
     virtual int    LButtonUp(const Pt& pt, Uint32 keys);             ///< respond to release of left mouse button outside window, if it was originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not currently over the window when this happens.
@@ -191,6 +193,19 @@ private:
     friend class App;                ///< App needs access to \a m_zorder, m_children, etc.
     friend class ZList;              ///< ZList needs access to \a m_zorder in order to order windows
 };
+
+// define EnumMap and stream operators for Wnd::WndFlag
+ENUM_MAP_BEGIN(Wnd::WndFlag)
+    ENUM_MAP_INSERT(Wnd::CLICKABLE)
+    ENUM_MAP_INSERT(Wnd::DRAGABLE)
+    ENUM_MAP_INSERT(Wnd::DRAG_KEEPER)
+    ENUM_MAP_INSERT(Wnd::RESIZABLE)
+    ENUM_MAP_INSERT(Wnd::ONTOP)
+    ENUM_MAP_INSERT(Wnd::MODAL)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Wnd::WndFlag)
+ENUM_STREAM_OUT(Wnd::WndFlag)
 
 } // namespace GG
 

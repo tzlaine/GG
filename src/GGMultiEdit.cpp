@@ -123,16 +123,16 @@ MultiEdit::MultiEdit(const XMLElement& elem) :
 
     vector<string> tokens = Tokenize(elem.Child("m_style").Text());
     for (unsigned int i = 0; i < tokens.size(); ++i) {
-	int s = GetEnumMap<Styles>().FromString(tokens[i]);
-	if (s != EnumMap<Styles>::BAD_VALUE) {
-	    m_style |= s;
-	}
-	int lbs = GetEnumMap<ListBoxStyle>().FromString(tokens[i]);
-	if (lbs != EnumMap<ListBoxStyle>::BAD_VALUE || 
-	    (lbs != TF_WORDBREAK && lbs != TF_LINEWRAP && 
-	     lbs != TF_LEFT && lbs != TF_CENTER && lbs != TF_RIGHT)) {
-	    m_style |= lbs;
-	}
+        int s = GetEnumMap<Styles>().FromString(tokens[i]);
+        if (s != EnumMap<Styles>::BAD_VALUE) {
+            m_style |= s;
+        }
+        int lbs = GetEnumMap<ListBoxStyle>().FromString(tokens[i]);
+        if (lbs != EnumMap<ListBoxStyle>::BAD_VALUE || 
+            (lbs != TF_WORDBREAK && lbs != TF_LINEWRAP &&
+            lbs != TF_LEFT && lbs != TF_CENTER && lbs != TF_RIGHT)) {
+                m_style |= lbs;
+        }
     }
     ValidateStyle();
 
@@ -152,7 +152,7 @@ Pt MultiEdit::ClientLowerRight() const
     return Edit::ClientLowerRight() - Pt(RightMargin(), BottomMargin());
 }
 
-int MultiEdit::Render()
+bool MultiEdit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
@@ -238,20 +238,19 @@ int MultiEdit::Render()
         glDisable(GL_SCISSOR_TEST);
     glPopAttrib();
 
-    return 1;
+    return true;
 }
 
-int MultiEdit::LButtonDown(const Pt& pt, Uint32 keys)
+void MultiEdit::LButtonDown(const Pt& pt, Uint32 keys)
 {
     // when a button press occurs, record the character position under the cursor, and remove any previous selection range
     if (!Disabled() && !(m_style & READ_ONLY)) {
         m_cursor_begin = m_cursor_end = CharAt(ScreenToClient(pt));
         AdjustView();
     }
-    return 1;
 }
 
-int MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 {
     if (!Disabled() && !(m_style & READ_ONLY)) {
         // when a drag occurs, move m_cursor_end to where the mouse is, which selects a range of characters
@@ -262,10 +261,9 @@ int MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
             click_pos.y < 0 || click_pos.y > ClientSize().y) 
             AdjustView();
     }
-    return 1;
 }
 
-int MultiEdit::Keypress(Key key, Uint32 key_mods)
+void MultiEdit::Keypress(Key key, Uint32 key_mods)
 {
     if (!Disabled() && !(m_style & READ_ONLY)) {
         bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
@@ -483,7 +481,6 @@ int MultiEdit::Keypress(Key key, Uint32 key_mods)
         if (emit_signal)
             EditedSignal()(m_text);
     }
-    return 1;
 }
 
 void MultiEdit::SizeMove(int x1, int y1, int x2, int y2)

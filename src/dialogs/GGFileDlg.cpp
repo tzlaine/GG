@@ -291,19 +291,18 @@ XMLElement FileDlg::XMLEncode() const
     return retval;
 }
 
-int FileDlg::Render()
+bool FileDlg::Render()
 {
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
-    return 1;
+    return true;
 }
 
-int FileDlg::Keypress(Key key, Uint32 key_mods)
+void FileDlg::Keypress(Key key, Uint32 key_mods)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER)
         OkClicked();
     else if (key == GGK_ESCAPE)
         CancelClicked();
-    return 1;
 }
 
 void FileDlg::SetButtonColor(Clr color)

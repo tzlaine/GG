@@ -143,11 +143,10 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int    Render();
-   
-    virtual int    LButtonDown(const Pt& pt, Uint32 keys);
-    virtual int    MouseHere(const Pt& pt, Uint32 keys);
-    virtual int    MouseLeave(const Pt& pt, Uint32 keys) {m_caret = -1; return 1;}
+    virtual bool   Render();
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys) {m_caret = -1;}
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2);
 
@@ -180,11 +179,11 @@ private:
     Clr               m_text_color;     ///< color used to paint text in control
     Clr               m_hilite_color;   ///< color behind selected items
     Clr               m_sel_text_color; ///< color of selected text
-   
+
     MenuItem             m_menu_data;   ///< this is not just a single menu item; the next_level element represents the entire menu
     vector<TextControl*> m_menu_labels; ///< the text for each top-level menu item
     int                  m_caret;       ///< the currently indicated top-level menu (open or under the cursor)
-   
+
     mutable BrowsedSignalType m_browsed_signal;
 };
 
@@ -232,15 +231,14 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int    Render();
-   
-    virtual int    LButtonUp(const Pt& pt, Uint32 keys);
-    virtual int    LClick(const Pt& pt, Uint32 keys)          {return LButtonUp(pt, keys);}
-    virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual int    RButtonUp(const Pt& pt, Uint32 keys)       {return LButtonUp(pt, keys);}
-    virtual int    RClick(const Pt& pt, Uint32 keys)          {return LButtonUp(pt, keys);}
-    virtual int    MouseHere(const Pt& pt, Uint32 keys)       {return LDrag(pt, Pt(), keys);}
-   
+    virtual bool   Render();
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+    virtual void   LClick(const Pt& pt, Uint32 keys)                 {LButtonUp(pt, keys);}
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   RButtonUp(const Pt& pt, Uint32 keys)              {LButtonUp(pt, keys);}
+    virtual void   RClick(const Pt& pt, Uint32 keys)                 {LButtonUp(pt, keys);}
+    virtual void   MouseHere(const Pt& pt, Uint32 keys)              {LDrag(pt, Pt(), keys);}
+
     virtual int    Run();
 
     void           SetBorderColor(Clr clr)       {m_border_color = clr;}    ///< sets the color used to render the border of the control

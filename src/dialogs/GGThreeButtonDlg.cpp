@@ -171,13 +171,13 @@ XMLElement ThreeButtonDlg::XMLEncode() const
     return retval;
 }
 
-int ThreeButtonDlg::Render()
+bool ThreeButtonDlg::Render()
 {
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
-    return 1;
+    return true;
 }
 
-int ThreeButtonDlg::Keypress(Key key, Uint32 key_mods)
+void ThreeButtonDlg::Keypress(Key key, Uint32 key_mods)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER && m_default != -1) {
         if (m_default == 0)
@@ -194,7 +194,6 @@ int ThreeButtonDlg::Keypress(Key key, Uint32 key_mods)
         else if (m_escape == 2)
             Button2Clicked();
     }
-    return 1;
 }
 
 void ThreeButtonDlg::SetButtonColor(Clr color)

@@ -109,7 +109,7 @@ Scroll::Scroll(const XMLElement& elem) :
     MoveTabToPosn(); // correct initial placement of tab, if necessary
 }
 
-int Scroll::Render()
+bool Scroll::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Clr int_color_to_use = Disabled() ? DisabledColor(m_int_color) : m_int_color;
@@ -125,10 +125,10 @@ int Scroll::Render()
         m_tab->Render();
         m_tab->OffsetMove(-UpperLeft());
     }
-    return 1;
+    return true;
 }
 
-int Scroll::LButtonDown(const Pt& pt, Uint32 keys)
+void Scroll::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         // when a button is pressed, record the region of the control the cursor is over
@@ -165,10 +165,9 @@ int Scroll::LButtonDown(const Pt& pt, Uint32 keys)
         default: break;
         }
     }
-    return 1;
 }
 
-int Scroll::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void Scroll::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 {
     if (!Disabled()) {
         // when dragging occurs, if we're dragging the tab, move it
@@ -209,16 +208,14 @@ int Scroll::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
             }
         }
     }
-    return 1;
 }
 
-int Scroll::LButtonUp(const Pt& pt, Uint32 keys)
+void Scroll::LButtonUp(const Pt& pt, Uint32 keys)
 {
     m_decr->SetState(Button::BN_UNPRESSED);
     m_incr->SetState(Button::BN_UNPRESSED);
     m_initial_depressed_area = SBR_NONE;
     m_depressed_area = SBR_NONE;
-    return 1;
 }
 
 void Scroll::SizeMove(int x1, int y1, int x2, int y2)

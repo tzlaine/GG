@@ -88,23 +88,23 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int    Render();
-    virtual int    LButtonDown(const Pt& pt, Uint32 keys);
-    virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual int    LButtonUp(const Pt& pt, Uint32 keys);
-    virtual int    LClick(const Pt& pt, Uint32 keys)         {return LButtonUp(pt, keys);}
-    virtual int    MouseHere(const Pt& pt, Uint32 keys)      {return LButtonUp(pt, keys);}
-    virtual int    MouseLeave(const Pt& pt, Uint32 keys)     {m_depressed_area = SBR_NONE; return 1;}
-   
+    virtual bool   Render();
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+    virtual void   LClick(const Pt& pt, Uint32 keys)         {LButtonUp(pt, keys);}
+    virtual void   MouseHere(const Pt& pt, Uint32 keys)      {LButtonUp(pt, keys);}
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys)     {m_depressed_area = SBR_NONE;}
+
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the buttons and tab as needed
     virtual void   Disable(bool b = true);
-   
+
     void           SizeScroll(int min, int max, int line, int page); ///< sets the logical ranges of the control, and the logical increment values
     void           SetMax(int max)        {SizeScroll(m_range_min, max, m_line_sz, m_page_sz);}    ///< sets the maximum value of the scroll
     void           SetMin(int min)        {SizeScroll(min, m_range_max, m_line_sz, m_page_sz);}    ///< sets the minimum value of the scroll
     void           SetLineSize(int line)  {SizeScroll(m_range_min, m_range_max, line, m_page_sz);} ///< sets the size of a line in the scroll. This is the number of logical units the tab moves when either of the up or down buttons is pressed.
     void           SetPageSize(int page)  {SizeScroll(m_range_min, m_range_max, m_line_sz, page);} ///< sets the maximum value of the scroll. This is the number of logical units the tab moves when either of the page-up or page-down areas is clicked.
-   
+
     void           ScrollTo(int p);  ///< scrolls the control to a certain spot
     void           ScrollLineIncr(); ///< scrolls the control down (or right) by a line
     void           ScrollLineDecr(); ///< scrolls the control up (or left) by a line
@@ -114,18 +114,18 @@ public:
 
 protected:
     /** \name Accessors */ //@{
-    int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
+    int             TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
     ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
-   
+
     const shared_ptr<Button>    TabButton() const   {return m_tab;}     ///< returns the button representing the tab
     const shared_ptr<Button>    IncrButton() const  {return m_incr;}    ///< returns the increase button (line down/line right)
     const shared_ptr<Button>    DecrButton() const  {return m_decr;}    ///< returns the decrease button (line up/line left)
     //@}
 
 private:
-    void           UpdatePosn();              ///< adjusts m_posn due to a tab-drag
-    void           MoveTabToPosn();           ///< adjusts tab due to a button click, PgUp, etc.
+    void           UpdatePosn();        ///< adjusts m_posn due to a tab-drag
+    void           MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
 
     Clr                  m_int_color;   ///< color inside border of slide area
     const Orientation    m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)

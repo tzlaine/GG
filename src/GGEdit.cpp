@@ -152,7 +152,7 @@ XMLElementValidator Edit::XMLValidator() const
     return retval;
 }
 
-int Edit::Render()
+bool Edit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(m_int_color) : m_int_color;
@@ -217,10 +217,10 @@ int Edit::Render()
         glDisable(GL_SCISSOR_TEST);
     glPopAttrib();
 
-    return 1;
+    return true;
 }
 
-int Edit::LButtonDown(const Pt& pt, Uint32 keys)
+void Edit::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         // when a button press occurs, record the character position under the cursor, and remove any previous selection range
@@ -228,10 +228,9 @@ int Edit::LButtonDown(const Pt& pt, Uint32 keys)
         int idx = CharIndexOf(click_xpos);
         m_cursor_pos.first = m_cursor_pos.second = idx;
     }
-    return 1;
 }
 
-int Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 {
     if (!Disabled()) {
         // when a drag occurs, move m_cursor_pos.second to where the mouse is, which selects a range of characters
@@ -240,10 +239,9 @@ int Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
         if (click_xpos < 0 || click_xpos > Size().x - 2 * PIXEL_MARGIN) // if we're dragging past the currently visible text
             AdjustView();
     }
-    return 1;
 }
 
-int Edit::Keypress(Key key, Uint32 key_mods)
+void Edit::Keypress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
         bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
@@ -324,20 +322,17 @@ int Edit::Keypress(Key key, Uint32 key_mods)
         }
         if (emit_signal) m_edited_sig(m_text);
     }
-    return 1;
 }
 
-int Edit::GainingFocus()
+void Edit::GainingFocus()
 {
     m_previous_text = WindowText();
-    return 1;
 }
 
-int Edit::LosingFocus()
+void Edit::LosingFocus()
 {
     if (m_previous_text != WindowText())
         m_focus_update_sig(WindowText());
-    return 1;
 }
 
 void Edit::SetText(const string& str)

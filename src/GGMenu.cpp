@@ -241,7 +241,7 @@ const MenuItem& MenuBar::GetMenu(int n) const
     return *(m_menu_data.next_level.begin() + n);
 }
 
-int MenuBar::Render()
+bool MenuBar::Render()
 {
     Pt ul = UpperLeft();
     Pt lr = LowerRight();
@@ -254,10 +254,10 @@ int MenuBar::Render()
         FlatRectangle(caret_ul.x, caret_ul.y, caret_lr.x, caret_lr.y, m_hilite_color, GG::CLR_ZERO, 0);
     }
 
-    return 1;
+    return true;
 }
 
-int MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
+void MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         for (int i = 0; i < static_cast<int>(m_menu_labels.size()); ++i) {
@@ -280,10 +280,9 @@ int MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
             }
         }
     }
-    return 1;
 }
 
-int MenuBar::MouseHere(const Pt& pt, Uint32 keys)
+void MenuBar::MouseHere(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         m_caret = -1;
@@ -294,7 +293,6 @@ int MenuBar::MouseHere(const Pt& pt, Uint32 keys)
             }
         }
     }
-    return 1;
 }
 
 void MenuBar::SizeMove(int x1, int y1, int x2, int y2)
@@ -444,7 +442,7 @@ PopupMenu::PopupMenu(int x, int y, const string& font_filename, int pts, const M
     m_open_levels.resize(1);
 }
 
-int PopupMenu::Render()
+bool PopupMenu::Render()
 {
     if (m_menu_data.next_level.size())
     {
@@ -539,10 +537,10 @@ int PopupMenu::Render()
         }
     }
 
-    return 1;
+    return true;
 }
 
-int PopupMenu::LButtonUp(const Pt& pt, Uint32 keys)
+void PopupMenu::LButtonUp(const Pt& pt, Uint32 keys)
 {
     if (m_caret[0] != -1) {
         MenuItem* menu_ptr = &m_menu_data;
@@ -554,10 +552,9 @@ int PopupMenu::LButtonUp(const Pt& pt, Uint32 keys)
     }
     m_browsed_signal(0);
     m_done = true;
-    return 1;
 }
 
-int PopupMenu::LDrag(const Pt& pt, const GG::Pt& move, Uint32 keys)
+void PopupMenu::LDrag(const Pt& pt, const GG::Pt& move, Uint32 keys)
 {
     bool cursor_is_in_menu = false;
     for (int i = static_cast<int>(m_open_levels.size()) - 1; i >= 0; --i) {
@@ -597,7 +594,6 @@ int PopupMenu::LDrag(const Pt& pt, const GG::Pt& move, Uint32 keys)
         update_ID = menu_ptr->item_ID;
     }
     m_browsed_signal(update_ID);
-    return 1;
 }
 
 int PopupMenu::Run()

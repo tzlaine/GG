@@ -124,7 +124,7 @@ XMLElementValidator Slider::XMLValidator() const
     return retval;
 }
 
-int Slider::Render()
+bool Slider::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -155,10 +155,10 @@ int Slider::Render()
     m_tab->OffsetMove(UpperLeft());
     m_tab->Render();
     m_tab->OffsetMove(-UpperLeft());
-    return 1;
+    return true;
 }
 
-int Slider::LButtonDown(const Pt& pt, Uint32 keys)
+void Slider::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         Pt ul = UpperLeft();
@@ -166,10 +166,9 @@ int Slider::LButtonDown(const Pt& pt, Uint32 keys)
         if (m_tab->InWindow(pt - ul))
             m_tab_drag_offset = m_orientation == VERTICAL ? m_tab->ScreenToWindow(pt - ul).y : m_tab->ScreenToWindow(pt - ul).x;
     }
-    return 1;
 }
 
-int Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 {
     if (!Disabled() && m_tab_drag_offset != -1) // if tab is being dragged
     {
@@ -193,10 +192,9 @@ int Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
             m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, click_pos - m_tab_drag_offset)) : m_tab->MoveTo(Pt(click_pos - m_tab_drag_offset, 0));
         UpdatePosn();
     }
-    return 1;
 }
 
-int Slider::Keypress(Key key, Uint32 key_mods)
+void Slider::Keypress(Key key, Uint32 key_mods)
 {
     switch (key) {
     case GGK_HOME:
@@ -232,7 +230,6 @@ int Slider::Keypress(Key key, Uint32 key_mods)
     default:
         break;
     }
-    return 1;
 }
 
 void Slider::SizeMove(int x1, int y1, int x2, int y2)

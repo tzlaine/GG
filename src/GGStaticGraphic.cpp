@@ -75,7 +75,7 @@ StaticGraphic::StaticGraphic(const XMLElement& elem) :
     ValidateStyle();
 }
 
-int StaticGraphic::Render()
+bool StaticGraphic::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     glColor4ubv(color_to_use.v);
@@ -129,7 +129,7 @@ int StaticGraphic::Render()
 
     m_graphic.OrthoBlit(pt1, pt2, false);
 
-    return 1;
+    return true;
 }
 
 XMLElement StaticGraphic::XMLEncode() const

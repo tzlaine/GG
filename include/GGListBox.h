@@ -199,22 +199,22 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual int    Render();
-    virtual int    LButtonDown(const Pt& pt, Uint32 keys);
-    virtual int    LButtonUp(const Pt& pt, Uint32 keys);
-    virtual int    LClick(const Pt& pt, Uint32 keys);
-    virtual int    LDoubleClick(const Pt& pt, Uint32 keys);
-    virtual int    RButtonDown(const Pt& pt, Uint32 keys);
-    virtual int    RClick(const Pt& pt, Uint32 keys);
-    virtual int    Keypress(Key key, Uint32 key_mods);
-    virtual int    MouseHere(const Pt& pt, Uint32 keys);
-    virtual int    MouseLeave(const Pt& pt, Uint32 keys);
+    virtual bool   Render();
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+    virtual void   LClick(const Pt& pt, Uint32 keys);
+    virtual void   LDoubleClick(const Pt& pt, Uint32 keys);
+    virtual void   RButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   RClick(const Pt& pt, Uint32 keys);
+    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, then resizes the scrollbars as needed
 
     int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This ListBox retains ownership of \a row.
     int            Insert(const shared_ptr<Row>& row,
-			  int at = -1);                   ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point
+                          int at = -1);                   ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point
     void           Delete(int idx);                       ///< removes the row at index \a idx from the ListBox
     void           Clear();                               ///< empties the ListBox
     void           ClearSelection();                      ///< deselects all currently-selected rows

@@ -39,17 +39,19 @@ class ModalListPicker : public Wnd
 {
 public:
     ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-	Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
-	m_drop_wnd(drop_wnd),
-	m_lb_wnd(lb_wnd),
-	m_old_lb_ul(m_lb_wnd->UpperLeft())
+        Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+        m_drop_wnd(drop_wnd),
+        m_lb_wnd(lb_wnd),
+        m_old_lb_ul(m_lb_wnd->UpperLeft())
     {
         Connect(m_lb_wnd->SelChangedSignal(), &ModalListPicker::LBSelChangedSlot, this);
         m_lb_wnd->OffsetMove(m_drop_wnd->Parent() ? m_drop_wnd->Parent()->UpperLeft() : Pt());
         AttachChild(m_lb_wnd);
     }
     ~ModalListPicker() {m_lb_wnd->MoveTo(m_old_lb_ul); DetachChild(m_lb_wnd);}
-    virtual int LClick(const Pt& pt, Uint32 keys) {m_done = true; return 1;}
+
+protected:
+    virtual void LClick(const Pt& pt, Uint32 keys) {m_done = true;}
 
 private:
     void LBSelChangedSlot(const set<int>& rows)
@@ -121,7 +123,7 @@ const DropDownList::Row* DropDownList::CurrentItem() const
     return m_current_item_idx == -1 ? 0 : &m_LB->GetRow(m_current_item_idx);
 }
 
-int DropDownList::Render()
+bool DropDownList::Render()
 {
     // draw beveled rectangle around client area
     Pt ul = UpperLeft(), lr = LowerRight();
@@ -149,10 +151,10 @@ int DropDownList::Render()
         glPopAttrib();
     }
 
-    return 1;
+    return true;
 }
 
-int DropDownList::LClick(const Pt& pt, Uint32 keys)
+void DropDownList::LClick(const Pt& pt, Uint32 keys)
 {
     const set<int>& LB_sels = m_LB->Selections();
     if (!LB_sels.empty()) {
@@ -166,13 +168,10 @@ int DropDownList::LClick(const Pt& pt, Uint32 keys)
 
     ModalListPicker picker(this, m_LB);
     picker.Run();
-    return 1;
 }
 
-int DropDownList::Keypress(Key key, Uint32 key_mods)
+void DropDownList::Keypress(Key key, Uint32 key_mods)
 {
-    int retval = 1;
-
     switch (key) {
     case GGK_UP: // arrow-up (not numpad arrow)
         if (1 <= m_current_item_idx)
@@ -200,10 +199,8 @@ int DropDownList::Keypress(Key key, Uint32 key_mods)
         break;
     default: // any other key gets passed along to the parent
         if (Parent())
-            retval = Parent()->Keypress(key, key_mods);
+            Parent()->Keypress(key, key_mods);
     }
-
-    return retval;
 }
 
 void DropDownList::SizeMove(int x1, int y1, int x2, int y2)

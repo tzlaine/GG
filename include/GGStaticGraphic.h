@@ -59,7 +59,7 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual  int Render();
+    virtual bool Render();
 
     void     SetStyle(Uint32 style)  {m_style = style; ValidateStyle();} ///< sets the style flags, and perfroms sanity checking \see StaticGraphicStyle
 

@@ -87,12 +87,12 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int    Render();
-    virtual int    LButtonDown(const Pt& pt, Uint32 keys);
-    virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual int    Keypress(Key key, Uint32 key_mods);
-    virtual int    GainingFocus();
-    virtual int    LosingFocus();
+    virtual bool   Render();
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   GainingFocus();
+    virtual void   LosingFocus();
 
     virtual void   SetColor(Clr c)               {Control::SetColor(c);}
     void           SetInteriorColor(Clr c)       {m_int_color = c;}         ///< sets the interior color of the control

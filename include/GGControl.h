@@ -52,10 +52,9 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int    Render() = 0;
-
-    virtual int    MouseWheel(const Pt& pt, int move, Uint32 keys) {return (Parent() ? Parent()->MouseWheel(pt, move, keys) : 1);}
-    virtual int    Keypress(Key key, Uint32 key_mods) {return (Parent() ? Parent()->Keypress(key, key_mods) : 1);}
+    virtual bool   Render() = 0;
+    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys) {if (Parent()) Parent()->MouseWheel(pt, move, keys);}
+    virtual void   Keypress(Key key, Uint32 key_mods) {if (Parent()) Parent()->Keypress(key, key_mods);}
 
     virtual void   SetColor(Clr c)            {m_color = c;}       ///< sets the color of the control
     virtual void   Disable(bool b = true)     {m_disabled = b;}    ///< disables/enables the control; disabled controls appear greyed

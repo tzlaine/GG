@@ -155,12 +155,12 @@ XMLElementValidator TextControl::XMLValidator() const
     return retval;
 }
 
-int TextControl::Render()
+bool TextControl::Render()
 {
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor4ubv(clr_to_use.v);
     if (m_font) m_font->RenderText(UpperLeft(), LowerRight(), m_text, m_format, &m_line_data, true);
-    return 1;
+    return true;
 }
 
 void TextControl::SetText(const string& str)

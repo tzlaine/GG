@@ -63,7 +63,7 @@ Button::Button(const XMLElement& elem) :
     m_rollover_graphic = SubTexture(elem.Child("m_rollover_graphic").Child("GG::SubTexture"));
 }
 
-int Button::Render()
+bool Button::Render()
 {
     switch (m_state)
     {
@@ -78,7 +78,7 @@ int Button::Render()
             RenderRollover();
         break;
     }
-    return 1;
+    return true;
 }
 
 XMLElement Button::XMLEncode() const
@@ -217,7 +217,7 @@ StateButton::StateButton(const XMLElement& elem) :
 }
 
 
-int StateButton::Render()
+bool StateButton::Render()
 {
     const Uint8 bevel = 2;
 
@@ -271,14 +271,13 @@ int StateButton::Render()
     TextControl::Render();
     OffsetMove(-m_text_x, -m_text_y);
 
-    return 1;
+    return true;
 }
 
-int StateButton::LClick(const Pt& pt, Uint32 keys)
+void StateButton::LClick(const Pt& pt, Uint32 keys)
 {
     if (!Disabled())
         SetCheck(!m_checked);
-    return 1;
 }
 
 XMLElement StateButton::XMLEncode() const

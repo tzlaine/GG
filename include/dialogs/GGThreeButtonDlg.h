@@ -59,7 +59,7 @@ public:
     ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
                    Button* one = 0, Button* two = 0);
-                  
+
     /** basic ctor*/
     ThreeButtonDlg(int x, int y, int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
@@ -83,9 +83,9 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual int Render();
-    virtual int Keypress(Key key, Uint32 key_mods);
-   
+    virtual bool Render();
+    virtual void Keypress(Key key, Uint32 key_mods);
+
     void SetButtonColor(Clr color);  ///< sets the color used to render the dialog's buttons
     void SetDefaultButton(int i);    ///< sets the number of the button that will be chosen by default if the user hits enter (-1 to disable)
     void SetEscapeButton(int i);     ///< sets the number of the button that will be chosen by default if the user hits ESC (-1 to disable)
@@ -100,7 +100,7 @@ private:
     void Button0Clicked()   {m_done = true; m_result = 0;}
     void Button1Clicked()   {m_done = true; m_result = 1;}
     void Button2Clicked()   {m_done = true; m_result = 2;}
-   
+
     Clr      m_color;
     Clr      m_border_color;
     Clr      m_text_color;

@@ -78,11 +78,11 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual int    Render();
-    virtual int    LButtonDown(const Pt& pt, Uint32 keys);
-    virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual int    MouseHere(const Pt& pt, Uint32 keys)               {m_tab_drag_offset = -1; return 1;}
-    virtual int    Keypress(Key key, Uint32 key_mods);
+    virtual bool   Render();
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   MouseHere(const Pt& pt, Uint32 keys)              {m_tab_drag_offset = -1;}
+    virtual void   Keypress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the tab as needed
     virtual void   Disable(bool b = true);
@@ -106,17 +106,17 @@ protected:
 private:
     void  MoveTabToPosn();
     void  UpdatePosn();
-   
+
     int                  m_posn;
     int                  m_range_min;
     int                  m_range_max;
-   
+
     Orientation          m_orientation;
-   
+
     int                  m_line_width;
     int                  m_tab_width;
     LineStyleType        m_line_style;
-   
+
     int                  m_tab_drag_offset;
     shared_ptr<Button>   m_tab;
 

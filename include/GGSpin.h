@@ -268,7 +268,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual int Render()
+    virtual bool Render()
     {
         Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
         Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
@@ -285,10 +285,10 @@ public:
         m_dn_bn->Render();
         m_up_bn->OffsetMove(-UpperLeft());
         m_dn_bn->OffsetMove(-UpperLeft());
-        return 1;
+        return true;
     }
    
-    virtual int LButtonDown(const Pt& pt, Uint32 keys)
+    virtual void LButtonDown(const Pt& pt, Uint32 keys)
     {
         if (!Disabled()) {
             Pt ul = UpperLeft();
@@ -307,10 +307,9 @@ public:
                 m_depressed_area = SR_NONE;
             }
         }
-        return 1;
     }
    
-    virtual int LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+    virtual void LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     {
         if (!Disabled()) {
             Pt ul = UpperLeft();
@@ -320,23 +319,21 @@ public:
                 Decr();
             }
         }
-        return 1;
     }
    
-    virtual int LButtonUp(const Pt& pt, Uint32 keys)
+    virtual void LButtonUp(const Pt& pt, Uint32 keys)
     {
         m_up_bn->SetState(Button::BN_UNPRESSED);
         m_dn_bn->SetState(Button::BN_UNPRESSED);
         m_initial_depressed_area = SR_NONE;
         m_depressed_area = SR_NONE;
-        return 1;
     }
    
-    virtual int LClick(const Pt& pt, Uint32 keys)      {return LButtonUp(pt, keys);}
-    virtual int MouseHere(const Pt& pt, Uint32 keys)   {return LButtonUp(pt, keys);}
-    virtual int MouseLeave(const Pt& pt, Uint32 keys)  {m_depressed_area = SR_NONE; return 1;}
+    virtual void LClick(const Pt& pt, Uint32 keys)      {LButtonUp(pt, keys);}
+    virtual void MouseHere(const Pt& pt, Uint32 keys)   {LButtonUp(pt, keys);}
+    virtual void MouseLeave(const Pt& pt, Uint32 keys)  {m_depressed_area = SR_NONE;}
    
-    virtual int Keypress(Key key, Uint32 key_mods)
+    virtual void Keypress(Key key, Uint32 key_mods)
     {
         switch (key) {
         case GGK_HOME:
@@ -360,7 +357,6 @@ public:
         default:
             break;
         }
-        return 1;
     }
 
     // sizes the conrol, then resizes the Buttons and Edit as needed

@@ -335,7 +335,7 @@ int ListBox::SortCol() const
     return (m_sort_col >= 0 && m_sort_col < static_cast<int>(m_col_widths.size()) ? m_sort_col : 0);
 }
 
-int ListBox::Render()
+bool ListBox::Render()
 {
     // draw beveled rectangle around client area
     Pt ul = UpperLeft(), lr = LowerRight();
@@ -404,9 +404,9 @@ int ListBox::Render()
     glPopAttrib();
 
     if (m_vscroll)
-	m_vscroll->Render();
+        m_vscroll->Render();
     if (m_hscroll)
-	m_hscroll->Render();
+        m_hscroll->Render();
 
     // draw dragged line item, if one exists
     if (m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
@@ -414,10 +414,10 @@ int ListBox::Render()
         RenderRow(m_rows[m_old_sel_row].get(), drag_row_ul.x, drag_row_ul.y, last_visible_col);
     }
 
-    return 0;
+    return false;
 }
 
-int ListBox::LButtonDown(const Pt& pt, Uint32 keys)
+void ListBox::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         m_old_sel_row = RowUnderPt(pt);
@@ -431,10 +431,9 @@ int ListBox::LButtonDown(const Pt& pt, Uint32 keys)
                 m_row_drag_offset = DragOffset(pt);
         }
     }
-    return 1;
 }
 
-int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
+void ListBox::LButtonUp(const Pt& pt, Uint32 keys)
 {
     if (!Disabled() && (m_style & LB_DRAGDROP) && m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
         m_row_drag_offset = Pt(-1, -1);
@@ -502,10 +501,9 @@ int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
         m_row_drag_offset = Pt(-1, -1);
     }
     m_old_sel_row = -1;
-    return 1;
 }
 
-int ListBox::LClick(const Pt& pt, Uint32 keys)
+void ListBox::LClick(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         if (m_old_sel_row >= 0 && InClient(pt)) {
@@ -525,10 +523,9 @@ int ListBox::LClick(const Pt& pt, Uint32 keys)
     }
     m_old_sel_row = -1;
     m_row_drag_offset = Pt(-1, -1);
-    return 1;
 }
 
-int ListBox::LDoubleClick(const Pt& pt, Uint32 keys)
+void ListBox::LDoubleClick(const Pt& pt, Uint32 keys)
 {
     int row = RowUnderPt(pt);
     if (!Disabled() && row >= 0 && row == m_lclick_row && InClient(pt)) {
@@ -536,10 +533,9 @@ int ListBox::LDoubleClick(const Pt& pt, Uint32 keys)
     } else {
         LClick(pt, keys);
     }
-    return 1;
 }
 
-int ListBox::RButtonDown(const Pt& pt, Uint32 keys)
+void ListBox::RButtonDown(const Pt& pt, Uint32 keys)
 {
     int row = RowUnderPt(pt);
     if (!Disabled() && row < static_cast<int>(m_rows.size()) && InClient(pt)) {
@@ -547,10 +543,9 @@ int ListBox::RButtonDown(const Pt& pt, Uint32 keys)
     } else {
         m_old_rdown_row = -1;
     }
-    return 1;
 }
 
-int ListBox::RClick(const Pt& pt, Uint32 keys)
+void ListBox::RClick(const Pt& pt, Uint32 keys)
 {
     int row = RowUnderPt(pt);
     if (!Disabled() && row >= 0 && row == m_old_rdown_row && InClient(pt)) {
@@ -558,17 +553,14 @@ int ListBox::RClick(const Pt& pt, Uint32 keys)
         m_rclicked_sig(row, m_rows[row].get(), pt);
     }
     m_old_rdown_row = -1;
-    return 1;
 }
 
-int ListBox::Keypress(Key key, Uint32 key_mods)
+void ListBox::Keypress(Key key, Uint32 key_mods)
 {
-    int retval = 1;
-
     switch (key) {
     case GGK_SPACE: // space bar (selects item under caret like a mouse click)
         if (m_caret != -1)
-            retval = ClickAtRow(m_caret, key_mods);
+            ClickAtRow(m_caret, key_mods);
         break;
     case GGK_DELETE: // delete key
         if (m_style & LB_USERDELETE) {
@@ -631,16 +623,14 @@ int ListBox::Keypress(Key key, Uint32 key_mods)
         // any other key gets passed along to the parent
     default:
         if (Parent())
-            retval = Parent()->Keypress(key, key_mods);
+            Parent()->Keypress(key, key_mods);
     }
 
     if (key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT)
         BringCaretIntoView();
-
-    return retval;
 }
 
-int ListBox::MouseHere(const Pt& pt, Uint32 keys)
+void ListBox::MouseHere(const Pt& pt, Uint32 keys)
 {
     if (!Disabled() && (m_style & LB_BROWSEUPDATES)) {
         int sel_row = RowUnderPt(pt);
@@ -649,16 +639,14 @@ int ListBox::MouseHere(const Pt& pt, Uint32 keys)
         if (m_last_row_browsed != sel_row)
             m_browsed_sig(m_last_row_browsed = sel_row);
     }
-    return 1;
 }
 
-int ListBox::MouseLeave(const Pt& pt, Uint32 keys)
+void ListBox::MouseLeave(const Pt& pt, Uint32 keys)
 {
     if (!Disabled() && (m_style & LB_BROWSEUPDATES)) {
         if (m_last_row_browsed != -1)
             m_browsed_sig(m_last_row_browsed = -1);
     }
-    return 1;
 }
 
 void ListBox::SizeMove(int x1, int y1, int x2, int y2)

@@ -78,16 +78,15 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int    Render();
-    virtual int    LButtonDown(const Pt& pt, Uint32 keys)          {if (!Disabled()) m_state = BN_PRESSED; return 1;}
-    virtual int    LDrag(const Pt& pt, const Pt& move, Uint32 keys){if (!Disabled()) m_state = BN_PRESSED; return 1;}
-    virtual int    LButtonUp(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_UNPRESSED; return 1;}
-    virtual int    LClick(const Pt& pt, Uint32 keys)               {if (!Disabled()) {m_state = BN_UNPRESSED; m_clicked_sig(); m_state = BN_UNPRESSED;} return 1;}
-    virtual int    MouseHere(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_ROLLOVER; return 1;}
-    virtual int    MouseLeave(const Pt& pt, Uint32 keys)           {if (!Disabled()) m_state = BN_UNPRESSED; return 1;}
+    virtual bool   Render();
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys)          {if (!Disabled()) m_state = BN_PRESSED;}
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys){if (!Disabled()) m_state = BN_PRESSED;}
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_UNPRESSED;}
+    virtual void   LClick(const Pt& pt, Uint32 keys)               {if (!Disabled()) {m_state = BN_UNPRESSED; m_clicked_sig(); m_state = BN_UNPRESSED;}}
+    virtual void   MouseHere(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_ROLLOVER;}
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys)           {if (!Disabled()) m_state = BN_UNPRESSED;}
 
     virtual void   SetColor(Clr c)                                 {Control::SetColor(c);}   ///< sets the control's color; does not affect the text color
-
     void           SetState(ButtonState state)                     {m_state = state;}      ///< sets button state programmatically \see ButtonState
     //@}
 
@@ -174,9 +173,6 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int      Render();
-    virtual int      LClick(const Pt& pt, Uint32 keys);
-
     void             Reset()                        {SetCheck(false);}     ///< unchecks button
     void             SetCheck(bool b = true)        {m_checked_sig(m_checked = b);} ///< (un)checks button
     virtual void     SetColor(Clr c)                {Control::SetColor(c);} ///< sets the color of the button; does not affect text color
@@ -192,6 +188,11 @@ protected:
     int ButtonHt() const    {return m_button_ht;}   ///< returns the height of the button part of the control
     int TextX() const       {return m_text_x;}      ///< returns the x coordinate of the text part of the control
     int TextY() const       {return m_text_y;}      ///< returns the y coordinate of the text part of the control
+    //@}
+
+    /** \name Mutators */ //@{
+    virtual bool     Render();
+    virtual void     LClick(const Pt& pt, Uint32 keys);
     //@}
 
 private:
@@ -263,25 +264,27 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual int      Render()                {return 1;}
-
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
         currently-checked button index is set to -1. */
-    void             SetCheck(int idx);
+    void SetCheck(int idx);
 
     /** disables (with b == true) or enables (with b == false) the idx-th button, if it exists.  If the button exists,
         is being disabled, and is the one currently checked, the currently-checked button index is set to -1. */
-    void             DisableButton(int idx, bool b = true); 
+    void DisableButton(int idx, bool b = true); 
 
     /** adds a button to the group. \note There is no way to remove buttons; RadioButtonGroup is meant to be a 
         simple grouping control. */
-    void             AddButton(StateButton* bn);
+    void AddButton(StateButton* bn);
     //@}
 
 protected:
     /** \name Accessors */ //@{
     const vector<StateButton*>&                 Buttons() const     {return m_buttons;}     ///< returns the state buttons in the group
     const vector<boost::signals::connection>&   Connections() const {return m_connections;} ///< returns the connections to the state buttons
+    //@}
+
+    /** \name Mutators */ //@{
+    virtual bool Render() {return true;}
     //@}
 
 private:

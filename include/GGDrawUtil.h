@@ -55,19 +55,15 @@ GG_API Clr DisabledColor(Clr clr);
 
 /** Sets up a GL scissor box, so that everything outside of the screen region defined by points \a pt1 and \a pt2 is clipped 
     out.  These coordinates should be in GG screen coordinates, with +y downward, instead of GL's screen coordinates.
-    \note Failing to call EndClipRect() after calling this function and before the next unmatched glPopAttrib() call may 
-    produce unexpected results.  However, multiple calls to this function can safely be matched with only one call to 
-    EndScissorClipping(), as long as glPopAttrib() is never called between the first call of this function and the 
-    EndScissorClipping() call.*/
+    \note Failing to call EndScissorClipping() after calling this function and before the next unmatched glPopAttrib() call may 
+    produce unexpected results.*/
 GG_API void BeginScissorClipping(Pt ul, Pt lr);
 
 /** Sets up a GL scissor box, so that everything outside of the screen region defined by points (<i>x1</i>, <i>y1</i>) and 
     (<i>x2</i>, <i>y2</i>) is clipped out.  These coordinates should be in GG screen coordinates, with +y downward, instead 
     of GL's screen coordinates.
-    \note Failing to call EndClipRect() after calling this function and before the next unmatched glPopAttrib() call may 
-    produce unexpected results.  However, multiple calls to this function can safely be matched with only one call to 
-    EndScissorClipping(), as long as glPopAttrib() is never called between the first call of this function and the 
-    EndScissorClipping() call.*/
+    \note Failing to call EndScissorClipping() after calling this function and before the next unmatched glPopAttrib() call may 
+    produce unexpected results.*/
 GG_API void BeginScissorClipping(int x1, int y1, int x2, int y2);
 
 /** Ends the current GL scissor box, restoring GL scissor state to what it was before the corresponding call to BeginScissorClipping().  

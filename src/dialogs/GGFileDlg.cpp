@@ -384,9 +384,14 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     PlaceLabelsAndEdits(BUTTON_WIDTH, BUTTON_HEIGHT);
 
     if (!m_ok_button)
-        m_ok_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2, BUTTON_WIDTH, BUTTON_HEIGHT, m_save ? m_save_str : m_open_str, font_filename, pts, m_button_color, m_text_color);
+        m_ok_button = new Button(0, 0, 1, 1, m_save ? m_save_str : m_open_str, font_filename, pts, m_button_color, m_text_color);
     if (!m_cancel_button)
-        m_cancel_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, m_cancel_str, font_filename, pts, m_button_color, m_text_color);
+        m_cancel_button = new Button(0, 0, 1, 1, m_cancel_str, font_filename, pts, m_button_color, m_text_color);
+
+    m_ok_button->MoveTo(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2);
+    m_ok_button->Resize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    m_cancel_button->MoveTo(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING));
+    m_cancel_button->Resize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
     // finally, we can create the listbox with the files in it, sized to fill the available space
     int file_list_top = m_curr_dir_text->Height() + V_SPACING;

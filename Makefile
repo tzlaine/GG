@@ -20,7 +20,7 @@ BOOST_FS_LIB = $(BOOST_DIR)/libs/filesystem/build/bin/libboost_filesystem.a/gcc/
 BOOST_REGEX_LIB = $(BOOST_DIR)/libs/regex/build/bin/libboost_regex.a/gcc/debug/runtime-link-dynamic
 
 # Library name
-LIBNAME  = GG.so
+LIBNAME  = libGiGi.so
 
 # Build commands
 CC   = gcc -D__DEBUG__
@@ -33,7 +33,7 @@ ALL_SRCS = $(CPP_SRCS) $(CC_SRCS) $(NET_SRCS)
 
 OBJS = $(addprefix objs/,$(notdir $(patsubst %.cpp,%.o,$(CPP_SRCS)) $(patsubst %.c,%.o,$(CC_SRCS))))
 
-INCS =  -Iinclude  -Iinclude/net  -I/usr/include  -I/usr/include/GL  -I$(SDL_INC)  -I$(FREETYPE_INC)  -I$(BOOST_INC)
+INCS =  -Iinclude  -Iinclude/net  -Iinclude/dialogs  -I/usr/include  -I/usr/include/GL  -I$(SDL_INC)  -I$(FREETYPE_INC)  -I$(BOOST_INC)
 LIBS =  -L/usr/lib -L/usr/X11R6/lib -L$(BOOST_SIG_LIB) -L$(BOOST_FS_LIB) -L$(BOOST_REGEX_LIB) -lSDL -lSDL_image -lGL -lGLU -lfreetype -lboost_signals -lboost_filesystem -lboost_regex -lexpat -llog4cpp
 
 # Build Flags
@@ -55,8 +55,10 @@ install :
 	install $(LIBNAME) /usr/lib
 	install -d /usr/include/GG
 	install -d /usr/include/GG/net
+	install -d /usr/include/GG/dialogs
 	install include/*.h /usr/include/GG
 	install include/net/*.h /usr/include/GG/net
+	install include/dialogs/*.h /usr/include/GG/dialogs
 
 library : libprep $(OBJS)
 	$(CPP) -shared -o $(LIBNAME) $(OBJS) $(LIBS)

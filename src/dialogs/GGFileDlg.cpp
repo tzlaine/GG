@@ -414,24 +414,18 @@ void FileDlg::OkClicked()
         } else if (files.size() == 1) {
             results_valid = true;
             string save_file = *files.begin();
-            fs::path p = s_working_dir / save_file;
+	    if (!fs::path::default_name_check()(save_file)) {
+		ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+		dlg.Run();
+		return;
+	    }
+	    fs::path p = s_working_dir / save_file;
             m_result.insert(p.native_directory_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
                 ThreeButtonDlg dlg(200, 125, save_file + " exists.\nOk to overwrite it?", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 2);
                 dlg.Run();
                 results_valid = (dlg.Result() == 0);
-            } else { // ensure that the filename is valid
-                // valid filenames are (for portability) one or more alphanumeric characters and underscores
-                // in any combination, containing at most one period; the period cannot appear as the first 
-                // character
-                rule<> filename = +(alnum_p | '_') >> !ch_p('.') >> *(alnum_p | '_');
-                if (!parse(save_file.c_str(), filename).hit) {
-                    // invalid file name; indicate this to the user
-                    ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
-                    dlg.Run();
-                    results_valid = false;
-                }
             }
         }
     } else { // file open case
@@ -439,8 +433,20 @@ void FileDlg::OkClicked()
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
             for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
+		if (!fs::path::default_name_check()(*it)) {
+		    ThreeButtonDlg dlg(300, 125, "\"" + (*it) + "\"\nis an invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+		    dlg.Run();
+                    results_valid = false;
+                    break;
+		}
                 fs::path p = s_working_dir / *it;
                 if (fs::exists(p)) {
+		    if (fs::is_directory(p)) {
+			ThreeButtonDlg dlg(300, 75, "\"" + (*it) + "\"\nis a directory.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+			dlg.Run();
+			results_valid = false;
+			break;
+		    }
                     m_result.insert(p.native_directory_string());
                     results_valid = true; // indicate validity only if at least one good file was found
                 } else {

@@ -428,7 +428,7 @@ void App::RemoveAccelerator(Key key, Uint32 key_mods)
     s_impl->accelerators.erase(std::make_pair(key, key_mods));
 }
 
-shared_ptr<Font> App::GetFont(const string& font_filename, int pts, Uint32 range/* = Font::ALL_DEFINED_RANGES*/)
+shared_ptr<Font> App::GetFont(const string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
 {
     return s_impl->font_manager.GetFont(font_filename, pts, range);
 }

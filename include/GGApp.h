@@ -183,7 +183,7 @@ public:
     /** removes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
     void           RemoveAccelerator(Key key, Uint32 key_mods);
 
-    shared_ptr<Font>    GetFont(const string& font_filename, int pts, Uint32 range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the desired font
+    shared_ptr<Font>    GetFont(const string& font_filename, int pts, Uint32 range = Font::ALL_CHARS); ///< returns a shared_ptr to the desired font
     void                FreeFont(const string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
 
     /** adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that. */

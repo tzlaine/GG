@@ -42,6 +42,7 @@ const double DEFAULT_FPS = 15.0;
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture,
                                int frames/* = -1*/, Uint32 flags/* = 0*/) :
         Control(x, y, w, h, flags),
+        m_margin(margin),
         m_FPS(DEFAULT_FPS),
         m_playing(true),
         m_looping(loop),
@@ -51,8 +52,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
         m_curr_frame(0),
         m_first_frame_time(-1),
         m_last_frame_time(-1),
-        m_first_frame_idx(0),
-        m_margin(margin)
+        m_first_frame_idx(0)
 {
     SetColor(CLR_WHITE);
     AddFrames(texture, frames);
@@ -62,6 +62,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const shared_ptr<Texture>& texture,
                                int frames/* = -1*/, Uint32 flags/* = 0*/) :
         Control(x, y, w, h, flags),
+        m_margin(margin),
         m_FPS(DEFAULT_FPS),
         m_playing(true),
         m_looping(loop),
@@ -71,8 +72,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
         m_curr_frame(0),
         m_first_frame_time(-1),
         m_last_frame_time(-1),
-        m_first_frame_idx(0),
-        m_margin(margin)
+        m_first_frame_idx(0)
 {
     SetColor(CLR_WHITE);
     AddFrames(texture, frames);
@@ -82,6 +82,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures,
                                int frames/* = -1*/, Uint32 flags/* = 0*/) :
         Control(x, y, w, h, flags),
+        m_margin(margin),
         m_FPS(DEFAULT_FPS),
         m_playing(true),
         m_looping(loop),
@@ -91,8 +92,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
         m_curr_frame(0),
         m_first_frame_time(-1),
         m_last_frame_time(-1),
-        m_first_frame_idx(0),
-        m_margin(margin)
+        m_first_frame_idx(0)
 {
     SetColor(CLR_WHITE);
     AddFrames(textures, frames);
@@ -101,9 +101,9 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 
 DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
         Control(elem.Child("GG::Control")),
+        m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Attribute("value"))),
         m_first_frame_time(-1),
-        m_last_frame_time(-1),
-        m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Attribute("value")))
+        m_last_frame_time(-1)
 {
     if (elem.Tag() != "GG::DynamicGraphic")
         throw std::invalid_argument("Attempted to construct a GG::DynamicGraphic from an XMLElement that had a tag other than \"GG::DynamicGraphic\"");
@@ -443,7 +443,7 @@ void DynamicGraphic::SetEndFrame(int idx)
         SetFrameIndex(m_last_frame_idx);
 }
 
-int DynamicGraphic::FramesInTexture(const Texture* t)
+int DynamicGraphic::FramesInTexture(const Texture* t) const
 {
     int cols = t->DefaultWidth() / (Width() + m_margin);
     int rows = t->DefaultHeight() / (Height() + m_margin);

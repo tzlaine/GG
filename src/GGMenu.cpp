@@ -25,9 +25,11 @@
 /* $Header$ */
 
 #include "GGMenu.h"
-#include "GGApp.h"
-#include "GGTextControl.h"
-#include "GGDrawUtil.h"
+
+#include <GGApp.h>
+#include <GGTextControl.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
@@ -39,25 +41,49 @@ const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in 
 ////////////////////////////////////////////////
 // GG::MenuItem
 ////////////////////////////////////////////////
+MenuItem::MenuItem() : 
+    item_ID(0), 
+    disabled(false), 
+    checked(false), 
+    selected_signal(new SelectedSignalType())
+{
+}
+
+MenuItem::MenuItem(const string& str, int id, bool disable, bool check) : 
+    label(str), 
+    item_ID(id), 
+    disabled(disable), 
+    checked(check), 
+    selected_signal(new SelectedSignalType())
+{
+}
+
+MenuItem::MenuItem(const string& str, int id, bool disable, bool check, const MenuItem::SelectedSlotType& slot) : 
+    label(str), 
+    item_ID(id), 
+    disabled(disable), 
+    checked(check), 
+    selected_signal(new SelectedSignalType())
+{
+    selected_signal->connect(slot);
+}
+
+MenuItem::~MenuItem()
+{
+}
+
 MenuItem::MenuItem(const XMLElement& elem) :
-        selected_signal(new SelectedSignalType())
+    selected_signal(new SelectedSignalType())
 {
     if (elem.Tag() != "GG::MenuItem")
         throw std::invalid_argument("Attempted to construct a GG::MenuItem from an XMLElement that had a tag other than \"GG::MenuItem\"");
 
-    const XMLElement* curr_elem = &elem.Child("label");
-    label = curr_elem->Text();
+    label = elem.Child("label").Text();
+    item_ID = lexical_cast<int>(elem.Child("item_ID").Text());
+    disabled = lexical_cast<bool>(elem.Child("disabled").Text());
+    checked = lexical_cast<bool>(elem.Child("checked").Text());
 
-    curr_elem = &elem.Child("item_ID");
-    item_ID = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("disabled");
-    disabled = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("checked");
-    checked = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("next_level");
+    const XMLElement* curr_elem = &elem.Child("next_level");
     for (int i = 0; i < curr_elem->NumChildren(); ++i)
         next_level.push_back(MenuItem(curr_elem->Child(i)));
 }
@@ -65,30 +91,34 @@ MenuItem::MenuItem(const XMLElement& elem) :
 XMLElement MenuItem::XMLEncode() const
 {
     XMLElement retval("GG::MenuItem");
+    retval.AppendChild(XMLElement("label", label));
+    retval.AppendChild(XMLElement("item_ID", lexical_cast<string>(item_ID)));
+    retval.AppendChild(XMLElement("disabled", lexical_cast<string>(disabled)));
+    retval.AppendChild(XMLElement("checked", lexical_cast<string>(checked)));
 
-    XMLElement temp;
-
-    temp = XMLElement("label", label);
-    retval.AppendChild(temp);
-
-    temp = XMLElement("item_ID");
-    temp.SetAttribute("value", lexical_cast<string>(item_ID));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("disabled");
-    temp.SetAttribute("value", lexical_cast<string>(disabled));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("checked");
-    temp.SetAttribute("value", lexical_cast<string>(checked));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("next_level");
+    XMLElement temp("next_level");
     for (unsigned int i = 0; i < next_level.size(); ++i) {
         temp.AppendChild(next_level[i].XMLEncode());
     }
     retval.AppendChild(temp);
 
+    return retval;
+}
+
+XMLElementValidator MenuItem::XMLValidator() const
+{
+    XMLElementValidator retval("GG::MenuItem");
+
+    retval.AppendChild(XMLElementValidator("label"));
+    retval.AppendChild(XMLElementValidator("item_ID", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("disabled", new Validator<bool>()));
+    retval.AppendChild(XMLElementValidator("checked", new Validator<bool>()));
+
+    XMLElementValidator temp("next_level");
+    for (unsigned int i = 0; i < next_level.size(); ++i) {
+        temp.AppendChild(next_level[i].XMLValidator());
+    }
+    retval.AppendChild(temp);
     return retval;
 }
 
@@ -98,13 +128,13 @@ XMLElement MenuItem::XMLEncode() const
 ////////////////////////////////////////////////
 MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, Clr text_color/* = GG::CLR_WHITE*/,
                  Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
-        Control(x, y, w, font->Lineskip()),
-        m_font(font),
-        m_border_color(color),
-        m_int_color(interior),
-        m_text_color(text_color),
-        m_sel_text_color(text_color),
-        m_caret(-1)
+    Control(x, y, w, font->Lineskip()),
+    m_font(font),
+    m_border_color(color),
+    m_int_color(interior),
+    m_text_color(text_color),
+    m_sel_text_color(text_color),
+    m_caret(-1)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -114,13 +144,13 @@ MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, Clr text_col
 
 MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, Clr text_color/* = GG::CLR_WHITE*/,
                  Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
-        Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
-        m_font(App::GetApp()->GetFont(font_filename, pts)),
-        m_border_color(color),
-        m_int_color(interior),
-        m_text_color(text_color),
-        m_sel_text_color(text_color),
-        m_caret(-1)
+    Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
+    m_font(App::GetApp()->GetFont(font_filename, pts)),
+    m_border_color(color),
+    m_int_color(interior),
+    m_text_color(text_color),
+    m_sel_text_color(text_color),
+    m_caret(-1)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -130,14 +160,14 @@ MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, Clr 
 
 MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, const MenuItem& m,
                  Clr text_color/* = GG::CLR_WHITE*/, Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
-        Control(x, y, w, font->Lineskip()),
-        m_font(font),
-        m_border_color(color),
-        m_int_color(interior),
-        m_text_color(text_color),
-        m_sel_text_color(text_color),
-        m_menu_data(m),
-        m_caret(-1)
+    Control(x, y, w, font->Lineskip()),
+    m_font(font),
+    m_border_color(color),
+    m_int_color(interior),
+    m_text_color(text_color),
+    m_sel_text_color(text_color),
+    m_menu_data(m),
+    m_caret(-1)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -147,14 +177,14 @@ MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, const MenuIt
 
 MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, const MenuItem& m,
                  Clr text_color/* = GG::CLR_WHITE*/, Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
-        Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
-        m_font(App::GetApp()->GetFont(font_filename, pts)),
-        m_border_color(color),
-        m_int_color(interior),
-        m_text_color(text_color),
-        m_sel_text_color(text_color),
-        m_menu_data(m),
-        m_caret(-1)
+    Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
+    m_font(App::GetApp()->GetFont(font_filename, pts)),
+    m_border_color(color),
+    m_int_color(interior),
+    m_text_color(text_color),
+    m_sel_text_color(text_color),
+    m_menu_data(m),
+    m_caret(-1)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -171,26 +201,15 @@ MenuBar::MenuBar(const XMLElement& elem) :
 
     const XMLElement* curr_elem = &elem.Child("m_font").Child("GG::Font");
     string font_filename = curr_elem->Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Attribute("value"));
+    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Text());
     m_font = App::GetApp()->GetFont(font_filename, pts);
 
-    curr_elem = &elem.Child("m_border_color");
-    m_border_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_int_color");
-    m_int_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_text_color");
-    m_text_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_hilite_color");
-    m_hilite_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_sel_text_color");
-    m_sel_text_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_menu_data");
-    m_menu_data = MenuItem(curr_elem->Child("GG::MenuItem"));
+    m_border_color = Clr(elem.Child("m_border_color").Child("GG::Clr"));
+    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
+    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
+    m_hilite_color = Clr(elem.Child("m_hilite_color").Child("GG::Clr"));
+    m_sel_text_color = Clr(elem.Child("m_sel_text_color").Child("GG::Clr"));
+    m_menu_data = MenuItem(elem.Child("m_menu_data").Child("GG::MenuItem"));
 
     AdjustLayout();
 }
@@ -306,39 +325,29 @@ XMLElement MenuBar::XMLEncode() const
     retval.AppendChild(Control::XMLEncode());
 
     // remove children; they will be recreated at reload time
-    while (retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").NumChildren())
-        retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").RemoveChild(0);
+    retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").RemoveChildren();
 
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
+    retval.AppendChild(XMLElement("m_border_color", m_border_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_hilite_color", m_hilite_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_sel_text_color", m_sel_text_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_menu_data", m_menu_data.XMLEncode()));
+    return retval;
+}
 
-    temp = XMLElement("m_font");
-    temp.AppendChild(m_font->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_border_color");
-    temp.AppendChild(m_border_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_int_color");
-    temp.AppendChild(m_int_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_text_color");
-    temp.AppendChild(m_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_hilite_color");
-    temp.AppendChild(m_hilite_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_sel_text_color");
-    temp.AppendChild(m_sel_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_menu_data");
-    temp.AppendChild(m_menu_data.XMLEncode());
-    retval.AppendChild(temp);
-
+XMLElementValidator MenuBar::XMLValidator() const
+{
+    XMLElementValidator retval("GG::MenuBar");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_font", m_font->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_border_color", m_border_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_text_color", m_text_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_hilite_color", m_hilite_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_sel_text_color", m_sel_text_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_menu_data", m_menu_data.XMLValidator()));
     return retval;
 }
 
@@ -397,17 +406,37 @@ const int HORIZONTAL_MARGIN = 3; // distance to leave between edge of PopupMenu 
 
 PopupMenu::PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/,
                      Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
-        Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
-        m_font(font),
-        m_border_color(color),
-        m_int_color(interior),
-        m_text_color(text_color),
-        m_sel_text_color(text_color),
-        m_menu_data(m),
-        m_open_levels(),
-        m_caret(vector<int>(1, -1)),
-        m_origin(Pt(x, y)),
-        m_item_selected(0)
+    Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+    m_font(font),
+    m_border_color(color),
+    m_int_color(interior),
+    m_text_color(text_color),
+    m_sel_text_color(text_color),
+    m_menu_data(m),
+    m_open_levels(),
+    m_caret(vector<int>(1, -1)),
+    m_origin(Pt(x, y)),
+    m_item_selected(0)
+{
+    // use opaque interior color as hilite color
+    interior.a = 255;
+    m_hilite_color = interior;
+    m_open_levels.resize(1);
+}
+
+PopupMenu::PopupMenu(int x, int y, const string& font_filename, int pts, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/, 
+		     Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) : 
+    Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+    m_font(GG::App::GetApp()->GetFont(font_filename, pts)),
+    m_border_color(color),
+    m_int_color(interior),
+    m_text_color(text_color),
+    m_sel_text_color(text_color),
+    m_menu_data(m),
+    m_open_levels(),
+    m_caret(vector<int>(1, -1)),
+    m_origin(Pt(x, y)),
+    m_item_selected(0)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -503,6 +532,7 @@ int PopupMenu::Render()
                     glVertex2d(line_rect.lr.x - INDICATOR_HEIGHT / 2.0 - HORIZONTAL_MARGIN, line_rect.ul.y + m_font->Lineskip() - INDICATOR_VERTICAL_MARGIN);
                     glVertex2d(line_rect.lr.x - HORIZONTAL_MARGIN,                          line_rect.ul.y + m_font->Lineskip() / 2.0);
                     glEnd();
+                    glEnable(GL_TEXTURE_2D);
                 }
                 line_rect.ul.y += m_font->Lineskip();
             }

@@ -52,13 +52,29 @@ struct MenuItem
     //@}
       
     /** \name Structors */ //@{
-    MenuItem() : item_ID(0), disabled(false), checked(false), selected_signal(new SelectedSignalType()) {} ///< ctor
-    MenuItem(const string& str, int id, bool disable, bool check) : label(str), item_ID(id), disabled(disable), checked(check), selected_signal(new SelectedSignalType()) {} ///< ctor
+    MenuItem(); ///< default ctor
+    MenuItem(const string& str, int id, bool disable, bool check); ///< ctor
+    MenuItem(const string& str, int id, bool disable, bool check, const SelectedSlotType& slot); ///< ctor that allows direct attachment of this item's signal to a "slot" function or functor
+    virtual ~MenuItem(); ///< virtual dtor
+
+    /** ctor that allows direct attachment of this item's signal to a "slot" member function of a specific object */
+    template <class T>
+    MenuItem(const string& str, int id, bool disable, bool check, void (T::* slot)(int), T* obj) : 
+	label(str), 
+	item_ID(id), 
+	disabled(disable), 
+	checked(check), 
+	selected_signal(new SelectedSignalType())
+    {
+	selected_signal->connect(boost::bind(slot, obj, _1));
+    };
+
     MenuItem(const XMLElement& elem); ///< ctor that constructs an MenuItem object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a MenuItem object
     //@}
    
     /** \name Accessors */ //@{
-    XMLElement XMLEncode() const; ///< constructs an XMLElement from an MenuItem object
+    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an MenuItem object
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this MenuItem
 
     SelectedSignalType& SelectedSignal() const {return *selected_signal;} ///< returns the selected signal object for this MenuItem
     //@}
@@ -120,6 +136,8 @@ public:
     Clr               SelectedTextColor() const  {return m_sel_text_color;} ///< returns the color used to render a hilited menu item's text
    
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an MenuBar object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     BrowsedSignalType& BrowsedSignal() const     {return m_browsed_signal;} ///< returns the browsed signal object for this PopupMenu
     //@}
@@ -197,6 +215,7 @@ public:
     /** \name Structors */ //@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
     PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem& m, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW);
+    PopupMenu(int x, int y, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW);
     //@}
 
     /** \name Accessors */ //@{

@@ -46,7 +46,7 @@ public:
         bool retval = false;
         if (lr[sort_col] && rr[sort_col]) {
             retval = return_less ? lr[sort_col]->WindowText() < rr[sort_col]->WindowText() :
-                           lr[sort_col]->WindowText() > rr[sort_col]->WindowText();
+                lr[sort_col]->WindowText() > rr[sort_col]->WindowText();
         } else if (lr[sort_col] && !rr[sort_col]) {
             retval = return_less ? false : true;
         } else if (!lr[sort_col] && rr[sort_col]) {
@@ -993,6 +993,14 @@ Scroll* ListBox::NewHScroll(bool vert_scroll)
     Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
                 (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0))));
     return new Scroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
+}
+
+void ListBox::RecreateScrolls()
+{
+    delete m_vscroll;
+    delete m_hscroll;
+    m_vscroll = m_hscroll = 0;
+    AdjustScrolls();
 }
 
 void ListBox::ValidateStyle()

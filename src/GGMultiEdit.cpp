@@ -713,6 +713,14 @@ Scroll* MultiEdit::NewHScroll(bool vert_scroll)
     return new Scroll(-GAP, cl_sz.y + GAP - SCROLL_WIDTH, cl_sz.x + 2 * GAP - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
 }
 
+void MultiEdit::RecreateScrolls()
+{
+    delete m_vscroll;
+    delete m_hscroll;
+    m_vscroll = m_hscroll = 0;
+    AdjustScrolls();
+}
+
 void MultiEdit::Init()
 {
     ValidateStyle();

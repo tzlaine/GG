@@ -72,9 +72,12 @@ public:
     /** \name Accessors */ //@{
     pair<int,int>   PosnRange() const    {return pair<int,int>(m_posn, m_posn + m_page_sz);}   ///< range currently being viewed
     pair<int,int>   ScrollRange() const  {return pair<int,int>(m_range_min, m_range_max);}     ///< defined possible range of control
-    int             LineSize() const     {return m_line_sz;}                                   ///< returns the current line size
-    int             PageSize() const     {return m_page_sz;}                                   ///< returns the current page size
-   
+    int             LineSize() const     {return m_line_sz;}    ///< returns the current line size
+    int             PageSize() const     {return m_page_sz;}    ///< returns the current page size
+
+    Clr             InteriorColor() const       {return m_int_color;}   ///< returns the color used to render the interior of the Scroll
+    Orientation     ScrollOrientation() const   {return m_orientation;} ///< returns the orientation of the Scroll
+
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Scroll object
     //@}
    
@@ -108,9 +111,15 @@ public:
 protected:
     enum ScrollRegion {SBR_NONE, SBR_TAB, SBR_LINE_DN, SBR_LINE_UP, SBR_PAGE_DN, SBR_PAGE_UP};
    
+    /** \name Accessors */ //@{
     int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
     ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
+   
+    const shared_ptr<Button>    TabButton() const   {return m_tab;}     ///< returns the button representing the tab
+    const shared_ptr<Button>    IncrButton() const  {return m_incr;}    ///< returns the increase button (line down/line right)
+    const shared_ptr<Button>    DecrButton() const  {return m_decr;}    ///< returns the decrease button (line up/line left)
+    //@}
 
 private:
     void           UpdatePosn();              ///< adjusts m_posn due to a tab-drag

@@ -163,6 +163,16 @@ public:
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
     //@}
 
+protected:
+    /** \name Accessors */ //@{
+    int ButtonX() const     {return m_button_x;}    ///< returns the x coordinate of the button part of the control
+    int ButtonY() const     {return m_button_y;}    ///< returns the y coordinate of the button part of the control
+    int ButtonWd() const    {return m_button_wd;}   ///< returns the width of the button part of the control
+    int ButtonHt() const    {return m_button_ht;}   ///< returns the height of the button part of the control
+    int TextX() const       {return m_text_x;}      ///< returns the x coordinate of the text part of the control
+    int TextY() const       {return m_text_y;}      ///< returns the y coordinate of the text part of the control
+    //@}
+
 private:
     bool              m_checked;     ///< true when this button in a checked, active state
     Clr               m_int_color;   ///< color inside border
@@ -227,6 +237,12 @@ public:
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
     //@}
 
+protected:
+    /** \name Accessors */ //@{
+    const vector<StateButton*>&                 Buttons() const     {return m_buttons;}     ///< returns the state buttons in the group
+    const vector<boost::signals::connection>&   Connections() const {return m_connections;} ///< returns the connections to the state buttons
+    //@}
+
 private:
     class ButtonClickedFunctor // for catching button-click signals from the contained buttons
     {
@@ -241,7 +257,7 @@ private:
     void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active
    
     vector<StateButton*>               m_buttons;     ///< the state buttons in the group
-    vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be reomoved when manually unclicking the buttons
+    vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be removed when manually unclicking the buttons
 
     int  m_checked_button; ///< the insdex of the currently-checked button; -1 if none is clicked
    

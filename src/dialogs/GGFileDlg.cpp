@@ -403,8 +403,9 @@ void FileDlg::OkClicked()
     // parse contents of edit control to determine file names
     m_result.clear();
 
-    set<string> files;
+    vector<string> files;
     parse(m_files_edit->WindowText().c_str(), (+anychar_p)[append(files)], space_p);
+    std::sort(files.begin(), files.end());
 
     if (m_save) { // file save case
         if (m_ok_button->WindowText() != "Save") {
@@ -436,7 +437,7 @@ void FileDlg::OkClicked()
         if (files.empty()) {
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
-            for (set<string>::iterator it = files.begin(); it != files.end(); ++it) {
+            for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
                 fs::path p = s_working_dir / *it;
                 if (fs::exists(p)) {
                     m_result.insert(p.native_directory_string());

@@ -108,10 +108,10 @@ struct StringEnd
 }
 
 // static member definition(s)
-boost::filesystem::path FileDlg::m_working_dir = boost::filesystem::initial_path();
+boost::filesystem::path FileDlg::s_working_dir = boost::filesystem::initial_path();
 
 
-FileDlg::FileDlg(const string& filename, bool save, bool multi, const string& font_filename,
+FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const string& font_filename,
                  int pts, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/,
                  Button* ok/* = 0*/, Button* cancel/* = 0*/) :
         Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
@@ -131,10 +131,10 @@ FileDlg::FileDlg(const string& filename, bool save, bool multi, const string& fo
         m_file_types_label(0)
 {
     CreateChildren(filename, multi, font_filename, pts);
-    Init();
+    Init(directory);
 }
 
-FileDlg::FileDlg(const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
+FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
                  const string& font_filename, int pts, Clr color, Clr border_color,
                  Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) :
         Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
@@ -155,7 +155,7 @@ FileDlg::FileDlg(const string& filename, bool save, bool multi, const vector<pai
         m_file_types_label(0)
 {
     CreateChildren(filename, multi, font_filename, pts);
-    Init();
+    Init(directory);
 }
 
 FileDlg::FileDlg(const XMLElement& elem) :
@@ -217,7 +217,7 @@ FileDlg::FileDlg(const XMLElement& elem) :
     curr_elem = &elem.Child("m_file_types_label");
     m_file_types_label = new TextControl(curr_elem->Child("GG::TextControl"));
 
-    Init();
+    Init("");
 }
 
 XMLElement FileDlg::XMLEncode() const
@@ -337,13 +337,13 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     const int USABLE_WIDTH = Width() - 4 * H_SPACING;
     const int BUTTON_WIDTH = USABLE_WIDTH / 4;
 
-    m_files_edit = new Edit(0, 0, 100, filename, m_font, m_color); // use Edit's necessary-height calcs to determine height of the edit
-    m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_color);
+    m_files_edit = new Edit(0, 0, 100, filename, m_font, m_border_color); // use Edit's necessary-height calcs to determine height of the edit
+    m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LB_NOSORT);
 
     const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
 
-    m_curr_dir_text = new TextControl(H_SPACING, V_SPACING / 2, "", m_font, m_text_color );
+    m_curr_dir_text = new TextControl(H_SPACING, V_SPACING / 2, "", m_font, m_text_color);
     m_files_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, TF_RIGHT | TF_VCENTER, m_text_color);
     m_file_types_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, TF_RIGHT | TF_VCENTER, m_text_color);
 
@@ -357,13 +357,13 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     m_filter_list->SizeMove(labels_width, Height() - (BUTTON_HEIGHT + V_SPACING),     Width() - (BUTTON_WIDTH + 2 * H_SPACING), Height() - V_SPACING);
 
     if (!m_ok_button)
-        m_ok_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2, BUTTON_WIDTH, BUTTON_HEIGHT, m_save ? "Save" : "Open", font_filename, pts, m_button_color);
+        m_ok_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2, BUTTON_WIDTH, BUTTON_HEIGHT, m_save ? "Save" : "Open", font_filename, pts, m_button_color, m_text_color);
     if (!m_cancel_button)
-        m_cancel_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, "Cancel", font_filename, pts, m_button_color);
+        m_cancel_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, "Cancel", font_filename, pts, m_button_color, m_text_color);
 
     // finally, we can create the listbox with the files in it, sized to fill the available space
     int file_list_top = m_curr_dir_text->Height() + V_SPACING;
-    m_files_list = new ListBox(H_SPACING, file_list_top, Width() - 2 * H_SPACING, Height() - (BUTTON_HEIGHT + V_SPACING) * 2 - file_list_top - V_SPACING, m_color);
+    m_files_list = new ListBox(H_SPACING, file_list_top, Width() - 2 * H_SPACING, Height() - (BUTTON_HEIGHT + V_SPACING) * 2 - file_list_top - V_SPACING, m_border_color);
     m_files_list->SetStyle(LB_NOSORT | (multi ? 0 : LB_SINGLESEL));
 
 }
@@ -386,12 +386,15 @@ void FileDlg::DetachSignalChildren()
     DetachChild(m_files_list);
 }
 
-void FileDlg::Init()
+void FileDlg::Init(const string& directory)
 {
     AttachSignalChildren();
     AttachChild(m_curr_dir_text);
     AttachChild(m_files_label);
     AttachChild(m_file_types_label);
+
+    if (directory != "")
+        SetWorkingDirectory(boost::filesystem::initial_path() / directory);
 
     UpdateDirectoryText();
     PopulateFilters();
@@ -422,7 +425,7 @@ void FileDlg::OkClicked()
         } else if (files.size() == 1) {
             results_valid = true;
             string save_file = *files.begin();
-            fs::path p = m_working_dir / save_file;
+            fs::path p = s_working_dir / save_file;
             m_result.insert(p.native_directory_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
@@ -447,7 +450,7 @@ void FileDlg::OkClicked()
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
             for (set<string>::iterator it = files.begin(); it != files.end(); ++it) {
-                fs::path p = m_working_dir / *it;
+                fs::path p = s_working_dir / *it;
                 if (fs::exists(p)) {
                     m_result.insert(p.native_directory_string());
                     results_valid = true; // indicate validity only if at least one good file was found
@@ -507,7 +510,7 @@ void FileDlg::FilterChanged(int idx)
 void FileDlg::SetWorkingDirectory(const boost::filesystem::path& p)
 {
     m_files_edit->Clear();
-    m_working_dir = p;
+    s_working_dir = p;
     UpdateDirectoryText();
     UpdateList();
 }
@@ -574,20 +577,20 @@ void FileDlg::UpdateList()
         }
     }
 
-    if (m_working_dir.string() != m_working_dir.root_path().string() &&
-            m_working_dir.branch_path().string() != "") {
+    if (s_working_dir.string() != s_working_dir.root_path().string() &&
+            s_working_dir.branch_path().string() != "") {
         ListBox::Row* row = new ListBox::Row;
-        row->push_back("[..]", m_font);
+        row->push_back("[..]", m_font, m_text_color);
         m_files_list->Insert(row);
     }
-    for (fs::directory_iterator it(m_working_dir); it != end_it; ++it) {
+    for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
         if (fs::exists(*it) && fs::is_directory(*it) && it->leaf()[0] != '.') {
             ListBox::Row* row = new ListBox::Row;
-            row->push_back("[" + it->leaf() + "]", m_font);
+            row->push_back("[" + it->leaf() + "]", m_font, m_text_color);
             m_files_list->Insert(row);
         }
     }
-    for (fs::directory_iterator it(m_working_dir); it != end_it; ++it) {
+    for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
         if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
             bool meets_filters = file_filters.empty();
             for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
@@ -596,7 +599,7 @@ void FileDlg::UpdateList()
             }
             if (meets_filters) {
                 ListBox::Row* row = new ListBox::Row;
-                row->push_back(it->leaf(), m_font);
+                row->push_back(it->leaf(), m_font, m_text_color);
                 m_files_list->Insert(row);
             }
         }
@@ -605,7 +608,7 @@ void FileDlg::UpdateList()
 
 void FileDlg::UpdateDirectoryText()
 {
-    string str = m_working_dir.native_directory_string();
+    string str = s_working_dir.native_directory_string();
     const int H_SPACING = 10;
     while (m_font->TextExtent(str).x > Width() - 2 * H_SPACING) {
         unsigned int slash_idx = str.find('/', 1);
@@ -635,9 +638,9 @@ void FileDlg::OpenDirectory()
             return;
         directory = directory.substr(1, directory.size() - 2); // strip off '[' and ']'
         if (directory == "..") {
-            SetWorkingDirectory(m_working_dir.branch_path());
+            SetWorkingDirectory(s_working_dir.branch_path());
         } else {
-            SetWorkingDirectory(m_working_dir / directory);
+            SetWorkingDirectory(s_working_dir / directory);
         }
         if (m_save && m_ok_button->WindowText() != "Save")
             m_ok_button->SetText("Save");

@@ -39,8 +39,7 @@
 
 namespace GG {
 
-class StaticText;
-class DynamicText;
+class TextControl;
 class Edit;
 class DropDownList;
 class Button;
@@ -56,7 +55,7 @@ public:
 	is called in an app, and there is a current filename); \a save indicates whether this is a save or load dialog;
 	\a multi indicates whether multiple file selections are allowed.*/
     FileDlg(const string& filename, bool save, bool multi, const string& font_filename, int pts, Clr color, 
-	    Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+	        Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** ctor that allows specification of allowed file types.  Parameter \a filename passes an initial filename to the dialog, 
 	if desired (such as when "Save As" is called in an app, and there is a current filename); \a save indicates whether 
@@ -69,15 +68,15 @@ public:
 	together with the others, so passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  
 	Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.*/
     FileDlg(const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-	    const string& font_filename, int pts, Clr color, Clr border_color, 
-	    Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+	        const string& font_filename, int pts, Clr color, Clr border_color, 
+	        Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     FileDlg(const XMLElement& elem); ///< ctor that constructs a StateButton object from an FileDlg. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a FileDlg object
     //@}
 
     /** \name Accessors */ //@{
-    Clr ButtonColor() const {return m_button_color;}   ///< returns the color of the buttons in the dialog
-    set<string> Result() const {return m_result;}      ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
+    Clr ButtonColor() const     {return m_button_color;}    ///< returns the color of the buttons in the dialog
+    set<string> Result() const  {return m_result;}          ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a FileDlg object
     //@}
@@ -116,17 +115,17 @@ private:
    
     bool             m_save;
     vector<pair<string, string> > 
-    m_file_filters;
+                     m_file_filters;
     set<string>      m_result;
    
-    DynamicText*     m_curr_dir_text;
+    TextControl*     m_curr_dir_text;
     ListBox*         m_files_list;
     Edit*            m_files_edit;
     DropDownList*    m_filter_list;
     Button*          m_ok_button;
     Button*          m_cancel_button;
-    StaticText*      m_files_label;
-    StaticText*      m_file_types_label;
+    TextControl*     m_files_label;
+    TextControl*     m_file_types_label;
    
     static boost::filesystem::path m_working_dir; ///< declared static so each instance of FileDlg opens up the same directory
 };

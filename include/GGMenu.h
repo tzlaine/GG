@@ -34,7 +34,7 @@
 namespace GG {
 
 class Font;
-class StaticText;
+class TextControl;
 
 /** serves as a single menu entry in a GG::MenuBar or GG::PopupMenu; may include a submenu.  All legal item_IDs are positive
     (and so non-zero); any item_ID <= 0 is considered invlaid.  Each MenuItem has a signal that is emmitted with its 
@@ -151,9 +151,9 @@ private:
     Clr               m_hilite_color;   ///< color behind selected items
     Clr               m_sel_text_color; ///< color of selected text
    
-    MenuItem          m_menu_data;      ///< this is not just a single menu item; the next_level element represents the entire menu
-    vector<StaticText*> m_menu_labels;  ///< the text for each top-level menu item
-    int               m_caret;          ///< the currently indicated top-level menu (open or under the cursor)
+    MenuItem             m_menu_data;      ///< this is not just a single menu item; the next_level element represents the entire menu
+    vector<TextControl*> m_menu_labels;  ///< the text for each top-level menu item
+    int                  m_caret;          ///< the currently indicated top-level menu (open or under the cursor)
    
     BrowsedSignalType m_browsed_signal;
 };

@@ -54,8 +54,10 @@
    documentation will appear in the GG/doc/html directory.
    \section howto_build How To Build GG
    To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
-   boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  You will 
-   of course also need to build and make available all of the libraries listed in the requirements above.
+   boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  These two 
+   libraries and all the boost includes should be available in your path as well.  Unfortunately, boost has no installer, 
+   so you'll need to move the files manually, or specify their locations to configure below. You will of course also need 
+   to build and make available all of the libraries listed in the requirements above.
    
    Once this is done, Unix users can simply type
    \verbatim

@@ -101,11 +101,11 @@ public:
     //@}
    
 protected:
+    /** \name Accessors */ //@{
     const pair<int, int>&            CursorPosn() const      {return m_cursor_pos;}      ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
     int                              FirstCharShown() const  {return m_first_char_shown;}///< returns the index of the first character visible in the Edit
     const string&                    PreviousText() const    {return m_previous_text;}   ///< returns the text that was in the edit at the time fo the last focus gain
-    const vector<Font::LineData>&    LineData() const        {return m_line_data;}       ///< returns the Font-generated breakdown of lines in the text
-    const shared_ptr<Font>&          GetFont() const         {return m_font;}            ///< returns the font used in the Edit
+   //@}
 
     static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame
 
@@ -126,9 +126,6 @@ private:
     Clr         m_sel_text_color;       ///< color of selected text
 
     string      m_previous_text;    ///< the contents when the focus was last gained
-   
-    vector<Font::LineData>  m_line_data;
-    shared_ptr<Font>        m_font;
    
     EditedSignalType        m_edited_sig;
     FocusUpdateSignalType   m_focus_update_sig;

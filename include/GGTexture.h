@@ -31,12 +31,7 @@
 #include "GGBase.h"
 #endif
 
-class SDL_Surface;
-
 namespace GG {
-
-/// returns the power of two equal to or nearest to and above input
-int power_of_two(int input);
 
 /** This class encapsulates OpenGL texture objects.  Thanks to the SDL_image library, it is extremely easy to load an image of 
     virtually any format and create an SDL surface out of it in one step.  When initialized with Load(), Texture objects 
@@ -96,7 +91,6 @@ public:
     // intialization functions
     void Load(const string& filename, bool mipmap = false) {Load(filename.c_str(), mipmap);} ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
     void Load(const char* filename, bool mipmap = false); ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
-    void Init(SDL_Surface* surf, bool mipmap = false);    ///< frees any currently-held memory and creates a texture from SDL surface \a surf.  \throw TextureException May throw if the image cannot be used to create a texture.
     void Init(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap = false); ///< frees any currently-held memory and creates a texture from supplied array \a image.  \throw TextureException May throw if the texture creation fails.
     void Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap = false); ///< frees any currently-held memory and creates a texture from subarea of supplied array \a image.  \throw TextureException May throw if the texture creation fails.
    
@@ -199,10 +193,13 @@ public:
     void                FreeTexture(const string& name); ///< removes the manager's shared_ptr to the texture created from image file \a name, if it exists.  \note Due to shared_ptr semantics, the texture may not be deleted until much later.
     //@}
 
+   static void         InitDevIL(); ///< initializes DevIL image library, if it is not already initialized
+
 private:
     shared_ptr<Texture> LoadTexture(const string& filename, bool mipmap);
 
     static bool                         s_created;
+    static bool                         s_il_initialized;
     map<string, shared_ptr<Texture> >   m_textures;
 };
 

@@ -27,14 +27,12 @@
 #ifndef _GGBase_h_
 #define _GGBase_h_
 
-//namespace GG {
 typedef unsigned char Uint8;    ///< unsigned char from SDL.h; provided here in case GG is not being driven by SDL
 typedef signed char Sint8;      ///< signed char from SDL.h; provided here in case GG is not being driven by SDL
 typedef unsigned short Uint16;  ///< unsigned short from SDL.h; provided here in case GG is not being driven by SDL
 typedef signed short Sint16;    ///< signed short from SDL.h; provided here in case GG is not being driven by SDL
 typedef unsigned int Uint32;    ///< unsigned int from SDL.h; provided here in case GG is not being driven by SDL
 typedef signed int Sint32;      ///< signed int from SDL.h; provided here in case GG is not being driven by SDL
-//}
 
 // include OpenGL headers
 #include <GL/gl.h>

@@ -3,12 +3,19 @@ dnl Test for the Boost C++ libraries of a particular version (or newer)
 dnl based on AC_PATH_BOOST
 AC_DEFUN([YG_CHECK_BOOST], 
 [
-  boost_min_version=ifelse([$1], ,1.20.0,$1)
+  boost_min_version=[$1]
 
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
+  WANT_BOOST_MAJOR=`expr $boost_min_version : '\([[0-9]]*\)'`
+  WANT_BOOST_MINOR=`expr $boost_min_version : '[[0-9]]*\.\([[0-9]]*\)'`
+  WANT_BOOST_SUB_MINOR=`expr $boost_min_version : '[[0-9]]*\.[[0-9]]*\.\([[0-9]]*\)'`
+  if test x"$BOOST_CPPFLAGS" = x; then
+    BOOST_CPPFLAGS="-I/usr/local/include/boost-$WANT_BOOST_MAJOR""_$WANT_BOOST_MINOR"
+    CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+  fi
   OLD_CXX_FLAGS=$CXXFLAGS
-  CXXFLAGS="$CXXFLAGS $BOOST_CXXFLAGS"
+  CXXFLAGS="$CXXFLAGS $BOOST_CPPFLAGS"
   AC_MSG_CHECKING([for the Boost C++ libraries, version $boost_min_version or newer])
   AC_TRY_COMPILE(
     [
@@ -25,9 +32,6 @@ AC_DEFUN([YG_CHECK_BOOST],
     ])
 
   if test "$have_boost" = "yes"; then
-    WANT_BOOST_MAJOR=`expr $boost_min_version : '\([[0-9]]*\)'`
-    WANT_BOOST_MINOR=`expr $boost_min_version : '[[0-9]]*\.\([[0-9]]*\)'`
-    WANT_BOOST_SUB_MINOR=`expr $boost_min_version : '[[0-9]]*\.[[0-9]]*\.\([[0-9]]*\)'`
     WANT_BOOST_VERSION=`expr $WANT_BOOST_MAJOR \* 100000 \+ $WANT_BOOST_MINOR \* 100 \+ $WANT_BOOST_SUB_MINOR`
 
     AC_TRY_COMPILE(

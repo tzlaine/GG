@@ -41,7 +41,7 @@ libGiGiSDL_la_SOURCES = 			\
 SDL/SDLGGApp.cpp
 
 libGiGi_la_LDFLAGS = -no-undefined -version-info @GGAPI_CURRENT@:@GGAPI_REVISION@:@GGAPI_AGE@
-libGiGi_la_LIBADD = @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp -lexpat @DEVIL_LIBS@
+libGiGi_la_LIBADD = @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp @DEVIL_LIBS@ @LTLIBOBJS@
 
 libGiGiNet_la_LDFLAGS = -no-undefined -version-info @GGAPI_CURRENT@:@GGAPI_REVISION@:@GGAPI_AGE@
 libGiGiNet_la_LIBADD  = @SDL_LIBS@ @SDLNET_LIB@

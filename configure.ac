@@ -6,7 +6,11 @@ AC_INIT(libGiGi, 0.5.0.0)
 AC_CONFIG_LIBOBJ_DIR(lib)
 
 dnl YG_REMOVE(A,B) is equivalent to ${A/$B/} on bash
-AC_DEFUN([YG_REMOVE],[`echo "$$1"|sed -e \"s@$$2@@\"`])
+AC_DEFUN([YG_REMOVE],[`if test -z "$2"; then
+  echo $$1
+else
+  echo $$1|sed -e 's@$2@@'
+fi`])
 
 dnl From the libtool-infopage:
 dnl   Update the version information only immediately before a public
@@ -200,11 +204,15 @@ AC_SUBST(SDLNET_LIB)
 
 AM_CONDITIONAL([USE_BUILTIN_SDLNET],[test x$with_builtin_sdlnet = xyes])
 
+
 ### OpenGL check
 
 AC_CHECK_HEADERS([GL/gl.h GL/glu.h],,[AC_MSG_ERROR([I can't find the OpenGL headers.
 Make sure you have the OpenGL-developer-libraries installed and have given
 the correct include path!])])
+
+# Some OpenGL-libraries seem to need pthread!?
+AC_CHECK_LIB(pthread,pthread_create)
 
 SAVE_LIBS="$LIBS"
 YG_SEARCH_LIBS([OpenGl],[GL MesaGL opengl32],

@@ -18,7 +18,7 @@ AC_DEFUN([YG_SEARCH_LIBS],
     LIBS="$YG_LIBS_BAK"
     ifelse([$6], , :,[$6])
  else
-    LIBS="$YG_LIBS_BAK []AS_VAR_GET(YG_slib)"
+    LIBS="[]AS_VAR_GET(YG_slib) $YG_LIBS_BAK"
     ifelse([$5], , :,[$5])
  fi
  AS_VAR_POPDEF([YG_slib])

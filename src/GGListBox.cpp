@@ -346,8 +346,7 @@ bool ListBox::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
 
-    // clip rows to viewable area, and save old scissor state, if any
-    bool disable_scissor = !glIsEnabled(GL_SCISSOR_TEST);
+    // clip rows to viewable area, and save old scissor state
     glPushAttrib(GL_SCISSOR_BIT);
     glEnable(GL_SCISSOR_TEST);
     glScissor(ul.x + BORDER_THICK, App::GetApp()->AppHeight() - lr.y + 2 * BottomMargin() + BORDER_THICK,
@@ -361,25 +360,25 @@ bool ListBox::Render()
     int prev_sel = -1;
     int top = cl_ul.y, bottom = 0;
     for (std::set<int>::iterator  it = m_selections.begin(); it != m_selections.end(); ++it) {
-	int curr_sel = *it;
-	if (curr_sel >= m_first_row_shown && curr_sel <= last_visible_row){
-	    // no need to look for the current selection's height, if we just found it on the last iteration
-	    top = (prev_sel == curr_sel - 1) ? bottom : 0;
-	    if (!top) {
-		for (int i = m_first_row_shown; i < curr_sel; ++i)
-		    top += m_rows[i]->Height();
-	    }
-	    bottom = top + m_rows[curr_sel]->Height();
-	    if (bottom > cl_lr.y)
-		bottom = cl_lr.y;
-	    FlatRectangle(cl_ul.x, cl_ul.y + top, cl_lr.x, cl_ul.y + bottom, hilite_color_to_use, CLR_ZERO, 0);
-	    prev_sel = curr_sel;
-	}
+	    int curr_sel = *it;
+        if (curr_sel >= m_first_row_shown && curr_sel <= last_visible_row) {
+            // no need to look for the current selection's height, if we just found it on the last iteration
+            top = (prev_sel == curr_sel - 1) ? bottom : 0;
+            if (!top) {
+                for (int i = m_first_row_shown; i < curr_sel; ++i)
+                    top += m_rows[i]->Height();
+            }
+            bottom = top + m_rows[curr_sel]->Height();
+            if (bottom > cl_lr.y)
+                bottom = cl_lr.y;
+            FlatRectangle(cl_ul.x, cl_ul.y + top, cl_lr.x, cl_ul.y + bottom, hilite_color_to_use, CLR_ZERO, 0);
+            prev_sel = curr_sel;
+        }
     }
 
     // draw caret
     if (m_caret >= m_first_row_shown && m_caret <= last_visible_row &&
-	(App::GetApp()->FocusWnd() == this || App::GetApp()->FocusWnd() == m_vscroll || App::GetApp()->FocusWnd() == m_hscroll)) {
+	    (App::GetApp()->FocusWnd() == this || App::GetApp()->FocusWnd() == m_vscroll || App::GetApp()->FocusWnd() == m_hscroll)) {
         int top = cl_ul.y;
         for (int i = m_first_row_shown; i < m_caret; ++i)
             top += m_rows[i]->Height();
@@ -399,8 +398,6 @@ bool ListBox::Render()
     }
 
     // restore previous scissor-clipping state
-    if (disable_scissor)
-        glDisable(GL_SCISSOR_TEST);
     glPopAttrib();
 
     if (m_vscroll)
@@ -445,53 +442,53 @@ void ListBox::LButtonUp(const Pt& pt, Uint32 keys)
             // if no sorting is done on target listbox.
             int ins_row = drop_target_wnd->RowUnderPt(pt);
             if (m_selections.empty()) {
-		shared_ptr<Row> dragged_row = m_rows[m_old_sel_row];
-		bool delete_row = true;
+                shared_ptr<Row> dragged_row = m_rows[m_old_sel_row];
+                bool delete_row = true;
                 try {
-                    drop_target_wnd->Insert(m_rows[m_old_sel_row], ins_row, true);
+                    drop_target_wnd->Insert(dragged_row, ins_row, true);
                 } catch (const DontAcceptDropException& e) {
-                    AttachRowChildren(m_rows[m_old_sel_row].get());
-		    delete_row = false;
+                    AttachRowChildren(dragged_row.get());
+                    delete_row = false;
                 }
-		if (delete_row) {
-		    // application-space updates may have changed the position of our row, so be sure we still have the right one...
-		    if (dragged_row == m_rows[m_old_sel_row]) {
-			Delete(m_old_sel_row);
-		    } else { // ...or find it
-			for (unsigned int i = 0; i < m_rows.size(); ++i) {
-			    if (m_rows[i] == dragged_row) {
-				Delete(i);
-				break;
-			    }
-			}
-		    }
-		}
+                if (delete_row) {
+                    // application-space updates may have changed the position of our row, so be sure we still have the right one...
+                    if (dragged_row == m_rows[m_old_sel_row]) {
+                        Delete(m_old_sel_row);
+                    } else { // ...or find it
+                        for (unsigned int i = 0; i < m_rows.size(); ++i) {
+                            if (m_rows[i] == dragged_row) {
+                                Delete(i);
+                                break;
+                            }
+                        }
+                    }
+                }
             } else {
                 set<int> sels = m_selections;
-		map<int, shared_ptr<Row> > dragged_rows;
+                map<int, shared_ptr<Row> > dragged_rows;
                 for (set<int>::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
-		    dragged_rows[*it] = m_rows[*it];
-		}
-		for (std::map<int, shared_ptr<Row> >::iterator it = dragged_rows.begin(); it != dragged_rows.end(); ++it) {
+                    dragged_rows[*it] = m_rows[*it];
+                }
+                for (std::map<int, shared_ptr<Row> >::reverse_iterator it = dragged_rows.rbegin(); it != dragged_rows.rend(); ++it) {
                     try {
-                        drop_target_wnd->Insert(it->second, ins_row++, true);
+                        drop_target_wnd->Insert(it->second, ins_row, true);
                     } catch (const DontAcceptDropException& e) {
                         AttachRowChildren(it->second.get());
                         sels.erase(it->first);
                     }
                 }
                 for (set<int>::reverse_iterator it = sels.rbegin(); it != sels.rend(); ++it) {
-		    // application-space updates may have changed the position of our row, so be sure we still have the right one...
-		    if (*it < static_cast<int>(m_rows.size()) && dragged_rows[*it] == m_rows[*it]) {
-			Delete(*it);
-		    } else { // ...or find it
-			for (unsigned int i = 0; i < m_rows.size(); ++i) {
-			    if (m_rows[i] == dragged_rows[*it]) {
-				Delete(i);
-				break;
-			    }
-			}
-		    }
+                    // application-space updates may have changed the position of our row, so be sure we still have the right one...
+                    if (*it < static_cast<int>(m_rows.size()) && dragged_rows[*it] == m_rows[*it]) {
+                        Delete(*it);
+                    } else { // ...or find it
+                        for (unsigned int i = 0; i < m_rows.size(); ++i) {
+                            if (m_rows[i] == dragged_rows[*it]) {
+                                Delete(i);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             if (m_caret > static_cast<int>(m_rows.size()) - 1)
@@ -513,11 +510,30 @@ void ListBox::LClick(const Pt& pt, Uint32 keys)
                     ClickAtRow(sel_row, keys);
                 m_lclick_row = sel_row;
             } else if (m_row_drag_offset != Pt(-1, -1) && (m_style & LB_DRAGDROP) && (m_style & LB_NOSORT) && 
-                       (m_selections.empty() || (m_style & LB_SINGLESEL))) {
-                // allow arbitrary rearrangement of unsorted lists that have dragging and dropping enabled (NOSEL and SINGLESEL only)
+                       m_selections.size() <= 1) {
+                // allow arbitrary rearrangement of NOSORT lists that have dragging and dropping enabled (NOSEL and SINGLESEL only)
                 int old_sel_row = m_old_sel_row;
-                Insert(m_rows[old_sel_row], sel_row, true);
-                Delete(old_sel_row + (sel_row <= old_sel_row ? 1 : 0));
+                shared_ptr<Row> dragged_row = m_rows[old_sel_row];
+                bool delete_row = true;
+                try {
+                    Insert(dragged_row, sel_row, true);
+                } catch (const DontAcceptDropException& e) {
+                    AttachRowChildren(dragged_row.get());
+                    delete_row = false;
+                }
+                if (delete_row) {
+                    // application-space updates may have changed the position of our row, so be sure we have the right one
+                    // note that this assumes any application-space changes preserve the order of the old row and its dropped position
+                    int ct = 0;
+                    for (unsigned int i = 0; i < m_rows.size(); ++i) {
+                        if (m_rows[i] == dragged_row) {
+                            if (old_sel_row < sel_row || ++ct == 2) {
+                                Delete(i);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -530,6 +546,8 @@ void ListBox::LDoubleClick(const Pt& pt, Uint32 keys)
     int row = RowUnderPt(pt);
     if (!Disabled() && row >= 0 && row == m_lclick_row && InClient(pt)) {
         m_double_clicked_sig(row, m_rows[row].get());
+        m_old_sel_row = -1;
+        m_row_drag_offset = Pt(-1, -1);
     } else {
         LClick(pt, keys);
     }
@@ -681,16 +699,16 @@ void ListBox::Delete(int idx)
             }
         }
 
-	DetachRowChildren(m_rows[idx].get());
-	m_rows.erase(m_rows.begin() + idx);
+	    DetachRowChildren(m_rows[idx].get());
+	    m_rows.erase(m_rows.begin() + idx);
 
-	if (idx <= m_caret) // move caret up, if needed
-	    --m_caret;
+	    if (idx <= m_caret) // move caret up, if needed
+	        --m_caret;
 
-	AdjustScrolls();
+	    AdjustScrolls();
 
-	if (!m_suppress_delete_signal)
-	    m_deleted_sig(idx);
+	    if (!m_suppress_delete_signal)
+	        m_deleted_sig(idx);
     }
 }
 
@@ -1038,14 +1056,15 @@ int ListBox::Insert(const shared_ptr<Row>& row, int at, bool dropped)
     AdjustScrolls();
 
     if (dropped) {
-	// ensure that no one has a problem with this drop in user space (if so, they should throw)
+        // ensure that no one has a problem with this drop in user space (if so, they should throw)
         try {
             m_dropped_sig(retval, row.get());
         } catch (const DontAcceptDropException& e) {
-	    // if there is a problem, silently undo the drop
+            // if there is a problem, silently undo the drop
             m_suppress_delete_signal = true;
-	    Delete(retval);
+            Delete(retval);
             m_suppress_delete_signal = false;
+            AdjustScrolls();
             throw; // re-throw so that LButtonUp() of the source ListBox can react as well
         }
     } else {
@@ -1319,8 +1338,6 @@ void ListBox::NormalizeRow(Row* row)
 
 void ListBox::AttachRowChildren(Row* row)
 {
-    // attach controls in row to the list box, but hide them; we want to control how they're rendered,
-    // but want them to be fully interactive, just as they would be any where else
     for (unsigned int i = 0; i < row->size(); ++i) {
         AttachChild((*row)[i]);
     }    

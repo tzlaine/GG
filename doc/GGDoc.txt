@@ -4,7 +4,7 @@
 
 /** \page design Design
    \section design_purpose Purpose 
-   GG is designed to do achieve several goals:
+   GG is designed to achieve several goals:
    - Platform-independence: GG should be buildable on any platform that supports OpenGL
    - Driver-independence: GG should be a standalone GUI framework that does not require any particular application framework;
    though an SDL driver is supplied, GG should be usable with any driver code the user wishes to supply
@@ -40,7 +40,7 @@
    GG relies on a few other open-source libraries:
    - DevIL 1.6.6 - http://openil.sourceforge.net
    - FreeType 2.1.2 - http://www.freetype.org
-   - boost 1.30.0 - http://www.boost.org
+   - boost 1.30.2 - http://www.boost.org
    - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
 
    Optional libraries:
@@ -62,11 +62,7 @@
       ./configure
       make
       make install [as root]\endverbatim
-   from within the root of the GG directory tree.  Note that on some systems, the configure script may be unable to find your
-   OpenGL libs, so you may need to invoke configure something like:
-   \verbatim
-      LDFLAGS="-L/usr/X11R6/lib" ./configure\endverbatim
-   Type
+   from within the root of the GG directory tree.  Type
    \verbatim
       ./configure --help\endverbatim
    to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
@@ -96,7 +92,7 @@
    \subsection arch_UI_overview_example Example:
    Suppose the user clicks 
    the left mouse button at screen position (50, 37).  GG will receive a message from the underlying application framework that a 
-   left mouse click has occurred; it then determines what UI element if any is under that screen location.  If it turns out there is
+   left mouse click has occurred; it then determines what UI element is under that screen location, if any.  If it turns out there is
    a button under that spot, GG sets internal state indicating that the left mouse button is being held down, and that it is over the
    button.  GG then sends a message to the button that it is depressed.  The button sets its own internal state and returns.  All 
    processing is complete for this input; the next time the button is redrawn, it knows to draw itself in a depressed state.  Very
@@ -195,70 +191,58 @@
    text is created, then read back that type from the XML text later and correctly recreate objects of the right type 
    automatically.
    \section XML_IO_encode_parse XML Encoding and Parsing   
-   To encode an object, you need to provide an overload of GG::Wnd::XMLEncode() to create an GG::XMLElement.  To 
+   To encode an object, you need to provide an overload of GG::Wnd::XMLEncode() to create a GG::XMLElement.  To 
    construct an object from the XML encoding, you need to provide a constructor that accepts a GG::XMLElement.  In the
    sections below, it is assumed that we are trying to represent a single object in a GG::XMLElement.  This technique is 
    very flexible, so the sections below are only a suggestion.  The techniques outlined are the ones used in saving and 
    restoring GG objects.  To save objects to file or send them over a network connection, put them into a GG::XMLDoc and 
    send them to a file or stringstream (or any other kind of std::ostream, actually), using GG::XMLDoc::WriteDoc().
-   \subsection XML_IO_rep_integral_typ Representing Integral Type Members
-   Each member should be represented by a tag.  Integral type members should be represented by a tag with a single attribute,
-   "value".  The tag will generally look like this: 
+   \subsection XML_IO_rep_integral_types Representing Integral Type Members and Strings
+   Each member should be represented by a tag.  Integral type members should be represented by a tag and some text representing 
+   the integral-type value.  The tag will generally look like this: 
    \verbatim
-   <m_float_member value="3.14159"/>\endverbatim
+   <m_float_member>3.14159<m_float_member/>\endverbatim
    It is convenient to use boost::lexical_cast, to go from a value to a string, and from a string to a value.
    \subsection XML_IO_rep_class Representing Class and Struct Object Members
    Each class member should be enclosed within a tag for its name, and should be otherwise treated as a non-member object:
    \verbatim
    <m_point_class_member>
       <MyNameSpace::PointClass>
-         <m_x value="18"/>
-         <m_y value="36"/>
+         <m_x>18<m_x/>
+         <m_y>36<m_y/>
       </MyNameSpace::PointClass>
    </m_point_class_member>\endverbatim
-   \subsection XML_IO_rep_std_strings Representing std::strings
-   Since strings may contain newlines, quotes, and a whole host of other characters that will not work with the value=""
-   method above, a special method must be used to represent strings in a fully general way.  Each XMLElement has a text field,
-   which is designed specifically to hold strings of non-XML-tag text.  To store a string, simply set its text:
-   \verbatim
-   <m_string_member>"Anything can go here, even
-"newlines" and "quotes""</m_string_member>\endverbatim
-   Everything that goes between the outer quotes will be parsed as belonging to the text field of the XMLElement, so 
-   whitespace after a newline will be incorporated.  The final quote in the string must be either the last thing on its 
-   line or must be followed immediately by a tag.
    \subsection XML_IO_rep_heap_obj Representing Pointer Members
    Since we've defined constructors that take a GG:XMLElement for each class that will be serialized, saving pointers is very
    similar to saving other members.  The only difference is that you need to construct objects on the heap when recreating 
    them, as opposed to creating them on the stack: "m_ptr_to_point = new PointClass(xml_element)", instead of "m_ptr_to_point = 
    PointClass(xml_element)".
    \subsection XML_IO_rep_array Representing Arrays and Containers of Integral Types
-   Arrays should be represented just as regular integral types, except that each array element should be given an attribute.
-   The attribute for the ith element should be "indexi":
+   Arrays should be represented just as regular integral types, except that the array elements should be separated by whitespace.
    \verbatim
-   <m_float_arr index0="3.14159" index1="0.0" index2="1.0"/>\endverbatim
-   STL Containers that contain integral types can be done in the same manner, for simplicity.  In the alternative, each 
-   entry would be represented by an attribute in a new tag, similar to the containers in the next section.
+   <m_float_arr>3.14159 0.0 1.0<m_float_arr/>\endverbatim
+   STL Containers that contain integral types can be done in the same manner.  There are templated functions that convert 
+   STL containers to and from space-delimited lists automatically; see the free functions in XMLDoc.h for details.
    \subsection XML_IO_rep_containers Representing Other Container Members
    most containers can be treated as follows.  To encode the container, create a tag for the container variable, then 
    iterate through the elements of the container, and append the encoding of each one to the container tag.  To recreate 
    the container, read each contained object and create an object from it and add each created object to the container object
-   in the order read.  So containers will look like this in the case of a container of objects:
+   in the order read.  So containers will look like this in the case of a container of non-integral objects:
    \verbatim
    <m_point_vec>
       <MyNameSpace::PointClass>
-         <m_x value="18"/>
-         <m_y value="36"/>
+         <m_x>18<m_x/>
+         <m_y>36<m_y/>
       </MyNameSpace::PointClass>
       <MyNameSpace::PointClass>
-         <m_x value="18"/>
-         <m_y value="45"/>
+         <m_x>18<m_x/>
+         <m_y>45<m_y/>
       </MyNameSpace::PointClass>
       <MyNameSpace::PointClass>
-         <m_x value="18"/>
-         <m_y value="61"/>
+         <m_x>18<m_x/>
+         <m_y>61<m_y/>
       </MyNameSpace::PointClass>
    </m_point_vec>\endverbatim
-   For containers of integral types, the array representation method may be useful.
    \section XML_IO_examples Examples
    Examples of all the techniques outlined here can be found in the GG::Wnd-dervied classes, including those derived from
    GG::Control.

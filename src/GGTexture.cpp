@@ -27,19 +27,10 @@
 #include "GGTexture.h"
 #include "GGApp.h"
 
-#ifndef _IMG_h
-#include "SDL_image.h"
-#endif
+#include <IL/il.h>
+#include <IL/ilut.h>
 
 namespace GG {
-
-int power_of_two(int input)
-{
-    int value = 1;
-    while (value < input)
-        value <<= 1;
-    return value;
-}
 
 ///////////////////////////////////////
 // class GG::Texture
@@ -208,78 +199,33 @@ XMLElement Texture::XMLEncode() const
 
 void Texture::Load(const char* filename, bool mipmap/* = false*/)
 {
-    SDL_Surface* temp_surf = IMG_Load(filename);
-    if (!temp_surf)
-        throw TextureException((string("Could not create temporary SDL surface to convert file \'") + filename) + "\' to an OpenGL texture");
-    Init(temp_surf, mipmap);
-    m_filename = filename;
-    SDL_FreeSurface(temp_surf);
-}
-
-void Texture::Init(SDL_Surface* surf, bool mipmap/* = false*/)
-{
     if (m_opengl_id)
         Clear();
 
-    if (surf) {
-        int w, h;
-        SDL_Surface *image;
-        SDL_Rect area;
-        Uint32 saved_flags;
-        Uint8  saved_alpha;
+    TextureManager::InitDevIL();
 
-        // Use the surface width and height expanded to powers of 2, if not already
-        w = power_of_two(surf->w);
-        h = power_of_two(surf->h);
-
-        image = SDL_CreateRGBSurface(
-                    SDL_SWSURFACE,
-                    w, h,
-                    32,
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN // OpenGL RGBA masks
-                    0x000000FF,
-                    0x0000FF00,
-                    0x00FF0000,
-                    0xFF000000
-#else
-                    0xFF000000,
-                    0x00FF0000,
-                    0x0000FF00,
-                    0x000000FF
-#endif
-                );
-        if (!image)
-            throw TextureException("Could not create temporary SDL surface to convert SDL surface \"surf\" to an OpenGL texture");
-
-        // Save the alpha blending attributes
-        saved_flags = surf->flags&(SDL_SRCALPHA|SDL_RLEACCELOK);
-        saved_alpha = surf->format->alpha;
-        if ( (saved_flags & SDL_SRCALPHA) == SDL_SRCALPHA ) {
-            SDL_SetAlpha(surf, 0, 0);
-        }
-
-        // Copy the surface into the GL texture image
-        area.x = 0;
-        area.y = 0;
-        area.w = surf->w;
-        area.h = surf->h;
-        SDL_BlitSurface(surf, &area, image, &area);
-
-        // Restore the alpha blending attributes
-        if ( (saved_flags & SDL_SRCALPHA) == SDL_SRCALPHA )
-            SDL_SetAlpha(surf, saved_flags, saved_alpha);
-
-        Init(w, h, (unsigned char*)(image->pixels), 4, mipmap);
-        if (image != surf) // if we created this, delete it; it's no longer needed
-            SDL_FreeSurface(image);
-
-        // be sure to record these
-        m_mipmaps = mipmap;
-        m_default_width = surf->w;
-        m_default_height = surf->h;
-        m_tex_coords[2] = (GLfloat)m_default_width / w;    // Max X
-        m_tex_coords[3] = (GLfloat)m_default_height / h;   // Max Y
-    }
+    ILuint id, error;
+    ilGenImages(1, &id);
+    ilBindImage(id);
+    ilLoadImage(const_cast<char*>(filename));
+    if ((error = ilGetError()) != IL_NO_ERROR)
+        throw TextureException((string("Could not load temporary DevIL image from file \'") + filename) + "\'");
+   
+    if (mipmap)
+        m_opengl_id = ilutGLBindMipmaps();
+    else
+        m_opengl_id = ilutGLBindTexImage();
+    if (!m_opengl_id || (error = ilGetError()) != IL_NO_ERROR)
+        throw TextureException((string("Could not create OpenGL texture object from file \'") + filename) + "\'");
+   
+    // be sure to record these
+    m_filename = filename;
+    m_mipmaps = mipmap;
+    m_bytes_pp = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+    m_default_width = m_width = ilGetInteger(IL_IMAGE_WIDTH);
+    m_default_height = m_height = ilGetInteger(IL_IMAGE_HEIGHT);
+   
+    ilDeleteImages(1, &id);
 }
 
 void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap/* = false*/)
@@ -535,6 +481,7 @@ XMLElement SubTexture::XMLEncode() const
 ///////////////////////////////////////
 // static member(s)
 bool TextureManager::s_created = false;
+bool TextureManager::s_il_initialized = false;
 
 TextureManager::TextureManager()
 {
@@ -569,6 +516,22 @@ void TextureManager::FreeTexture(const string& name)
     std::map<string, shared_ptr<Texture> >::iterator it = m_textures.find(name);
     if (it != m_textures.end())
         m_textures.erase(it);
+}
+
+void TextureManager::InitDevIL()
+{
+    if (!s_il_initialized) {
+        ilInit();
+        iluInit();
+        ilutInit();
+        ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
+        ilutRenderer(ILUT_OPENGL);
+        GLint max_size;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
+        ilutSetInteger(ILUT_MAXTEX_WIDTH, max_size);
+        ilutSetInteger(ILUT_MAXTEX_HEIGHT, max_size);
+        s_il_initialized = true;
+    }
 }
 
 shared_ptr<Texture> TextureManager::LoadTexture(const string& filename, bool mipmap)

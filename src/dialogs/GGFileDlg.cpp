@@ -282,8 +282,8 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     const int USABLE_WIDTH = Width() - 4 * H_SPACING;
     const int BUTTON_WIDTH = USABLE_WIDTH / 4;
 
-    m_files_edit = new Edit(0, 0, 1, filename, m_font, m_color); // use Edit's necessary-height calcs to determine height of the edit
-    m_filter_list = new DropDownList(0, 0, 1, m_font->Lineskip(), m_font->Lineskip() * 3, m_color);
+    m_files_edit = new Edit(0, 0, 100, filename, m_font, m_color); // use Edit's necessary-height calcs to determine height of the edit
+    m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_color);
     m_filter_list->SetStyle(LB_NOSORT);
 
     const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well

@@ -372,7 +372,7 @@ RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
     for (list<Wnd*>::const_iterator it = Wnd::Children().begin(); it != Wnd::Children().end(); ++it) {
         if (StateButton* sb = dynamic_cast<StateButton*>(*it)) {
             m_buttons.push_back(sb);
-            m_connections.push_back(Connect(sb->CheckedSignal(), ButtonClickedFunctor(this, m_connections.size())));
+            m_connections.push_back(Connect(sb->CheckedSignal(), ButtonClickedFunctor(this, m_buttons.size() - 1)));
         } else {
             throw std::runtime_error("Attempted to use a non-StateButton object as a member of a GG::RadioButtonGroup");
         }
@@ -383,8 +383,27 @@ RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
     SetCheck(m_checked_button);
 }
 
+XMLElement RadioButtonGroup::XMLEncode() const
+{
+    XMLElement retval("GG::RadioButtonGroup");
+    retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_checked_button", lexical_cast<string>(m_checked_button)));
+    return retval;
+}
+
+XMLElementValidator RadioButtonGroup::XMLValidator() const
+{
+    XMLElementValidator retval("GG::RadioButtonGroup");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_checked_button", new Validator<int>()));
+    return retval;
+}
+
 void RadioButtonGroup::SetCheck(int idx)
 {
+    if (idx == m_checked_button)
+        return;
+
     if (idx < 0 || idx >= static_cast<int>(m_buttons.size()))
         idx = -1;
     // for buttons that are already checked, pass false to simulate the unchecking of a button for HandleRadioClick;
@@ -405,26 +424,10 @@ void RadioButtonGroup::DisableButton(int idx, bool b/* = true*/)
 void RadioButtonGroup::AddButton(StateButton* bn)
 {
     m_buttons.push_back(bn);
-    m_connections.push_back(Connect(m_buttons.back()->CheckedSignal(), ButtonClickedFunctor(this, m_connections.size())));
+    m_connections.push_back(Connect(m_buttons.back()->CheckedSignal(), ButtonClickedFunctor(this, m_buttons.size() - 1)));
     if (bn->LowerRight() >= Size()) // stretch group to encompass all its children
         Resize(bn->LowerRight());
     AttachChild(bn);
-}
-
-XMLElement RadioButtonGroup::XMLEncode() const
-{
-    XMLElement retval("GG::RadioButtonGroup");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_checked_button", lexical_cast<string>(m_checked_button)));
-    return retval;
-}
-
-XMLElementValidator RadioButtonGroup::XMLValidator() const
-{
-    XMLElementValidator retval("GG::RadioButtonGroup");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_checked_button", new Validator<int>()));
-    return retval;
 }
 
 void RadioButtonGroup::HandleRadioClick(bool checked, int index)
@@ -432,23 +435,18 @@ void RadioButtonGroup::HandleRadioClick(bool checked, int index)
     m_checked_button = index;
     if (checked) {
         for (unsigned int i = 0; i < m_connections.size(); ++i) {
-            if (static_cast<int>(i) == index) {
+            if (m_buttons[i]->Checked() != (static_cast<int>(i) == index)) {
                 m_connections[i].disconnect();
-                m_buttons[i]->SetCheck(true);
-                m_connections[i] = GG::Connect(m_buttons[i]->CheckedSignal(), ButtonClickedFunctor(this, i));
-            } else {
-                m_connections[i].disconnect();
-                m_buttons[i]->SetCheck(false);
-                m_connections[i] = GG::Connect(m_buttons[i]->CheckedSignal(), ButtonClickedFunctor(this, i));
+                m_buttons[i]->SetCheck(static_cast<int>(i) == index);
+                m_connections[i] = m_buttons[i]->CheckedSignal().connect(ButtonClickedFunctor(this, i), boost::signals::at_front);
             }
         }
         m_button_changed_sig(m_checked_button);
     } else {
         m_connections[index].disconnect();
         m_buttons[index]->SetCheck(true);
-        m_connections[index] = GG::Connect(m_buttons[index]->CheckedSignal(), ButtonClickedFunctor(this, index));
+        m_connections[index] = m_buttons[index]->CheckedSignal().connect(ButtonClickedFunctor(this, index), boost::signals::at_front);
     }
 }
 
 } // namespace GG
-

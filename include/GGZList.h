@@ -65,6 +65,8 @@ private:
     bool     NeedsRealignment() const;     ///< determines whether list needs rearranging
     void     Realign();                    ///< rearranges z-values of windows in list to compact range of z-values and maintain DESIRED_GAP_SIZE separation
     iterator FirstNonOnTop();              ///< returns iterator to first window in list that is non-on-top (returns end() if none found)
+
+    set<Wnd*> m_contents; ///< the contents of this list, fast-searchable
 };
 
 } // namespace GG

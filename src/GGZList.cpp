@@ -30,12 +30,12 @@
 namespace GG {
 
 namespace {
-const int DESIRED_GAP_SIZE = 5;        // leaves room for 4-deep nested child windows (and that should be plenty)
-const int DESIRED_LOWEST_Z = 1 << 30;  // start z-values at 1/4 of 32-bit int's range (2^32 / 4 = 2^30)
+const int DESIRED_GAP_SIZE = 10;       // leaves room for 10-deep nested child windows (and that should be plenty)
+const int DESIRED_LOWEST_Z = 1 << 30;  // start z-values at 1/4 of 32-bit int's positive range (2^32 / 4 = 2^30)
 const int MIN_Z = 1 << 29;             // set low end of z-value range at 1/8 of 32-bit int's range (2^32 / 8 = 2^29)
 const int MAX_Z = 7 * MIN_Z;           // set high end of z-value range at 7/8 of 32-bit int's range (7 * 2^32 / 8 = 7 * 2^29)
-const int MAX_AVG_GAP_SIZE = 10;       // if things get too spread out..
-const int MIN_AVG_GAP_SIZE = 2;        // ..or too packed, compresion may be needed
+const int MAX_AVG_GAP_SIZE = 15;       // if things get too spread out..
+const int MIN_AVG_GAP_SIZE = 5;        // ..or too packed, compresion may be needed
 const int MAX_SPAN = 1 << 31;          // windows should be laid out over no more than 1/2 of possible z-value range (2^32 / 2 = 2^31)
 };
 
@@ -60,28 +60,33 @@ Wnd* ZList::Pick(const Pt& pt, Wnd* modal) const
 
 void ZList::Add(Wnd* wnd)
 {
-    // add wnd to the end of the list...
-    if (empty()) { // list empty
-        wnd->m_zorder = DESIRED_LOWEST_Z; // by default, add first element at DESIRED_LOWEST_Z
-        insert(begin(), wnd);
-    } else { // list not empty
-        wnd->m_zorder = back()->m_zorder - DESIRED_GAP_SIZE - 1;
-        insert(end(), wnd);
+    if (m_contents.find(wnd) == m_contents.end()) {
+        // add wnd to the end of the list...
+        if (empty()) { // list empty
+            wnd->m_zorder = DESIRED_LOWEST_Z; // by default, add first element at DESIRED_LOWEST_Z
+            insert(begin(), wnd);
+        } else { // list not empty
+            wnd->m_zorder = back()->m_zorder - (DESIRED_GAP_SIZE + 1);
+            insert(end(), wnd);
+        }
+        m_contents.insert(wnd);
+        // then move it up to its proper place
+        MoveUp(wnd);
+        if (NeedsRealignment()) Realign();
     }
-    // then move it up to its proper place
-    MoveUp(wnd);
-    if (NeedsRealignment()) Realign();
 }
 
 bool ZList::Remove(Wnd* wnd)
 {
     bool retval = false;
-    iterator it = std::find(begin(), end(), wnd);
-    if (it != end()) {
-        erase(it);
+    if (m_contents.find(wnd) != m_contents.end()) {
+        iterator it = std::find(begin(), end(), wnd);
+        if (it != end())
+            erase(it);
+        if (NeedsRealignment()) Realign();
+        m_contents.erase(wnd);
         retval = true;
     }
-    if (NeedsRealignment()) Realign();
     return retval;
 }
 
@@ -125,7 +130,7 @@ bool ZList::MoveDown(Wnd* wnd)
     if (it != end()) {
         int bottom_z = back()->m_zorder;
         if (back()->OnTop() || !wnd->OnTop()) { // if there are only on-top windows, or wnd is not an on-top window..
-            (*it)->m_zorder = bottom_z - DESIRED_GAP_SIZE - 1; // ..just put wnd below the bottom element
+            (*it)->m_zorder = bottom_z - (DESIRED_GAP_SIZE + 1); // ..just put wnd below the bottom element
             splice(end(), *this, it);
         } else { // !back()->OnTop() && wnd->OnTop(), so only move wnd up to just below the bottom of the on-top range
             iterator first_non_ontop_it = FirstNonOnTop();
@@ -175,8 +180,8 @@ bool ZList::NeedsRealignment() const
         int back_z = back()->m_zorder;
         int range = front_z - back_z + 1;
         int empty_slots = range - sz;
-        double avg_gap = empty_slots / double(sz - 1); // empty slots over the number of spaces in between the elements
-        bool max_span_impossible = double(DESIRED_GAP_SIZE) * double(sz) > MAX_SPAN; // done with floats to avoid integer overflow
+        double avg_gap = empty_slots / static_cast<double>(sz - 1); // empty slots over the number of spaces in between the elements
+        bool max_span_impossible = DESIRED_GAP_SIZE * static_cast<double>(sz) > MAX_SPAN; // done with doubles to avoid integer overflow
         retval = ((range > MAX_SPAN && !max_span_impossible) ||
                   avg_gap > MAX_AVG_GAP_SIZE ||
                   avg_gap < MIN_AVG_GAP_SIZE ||

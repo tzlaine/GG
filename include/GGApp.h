@@ -116,12 +116,12 @@ public:
     void           operator()();                 ///< external interface to Run()
     virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
 
-    void           Register(Wnd* wnd);           ///< adds a GG::Wnd into the z-list
-    void           Remove(Wnd* wnd);             ///< removes a GG::Wnd from the z-list
+    void           Register(Wnd* wnd);           ///< adds a GG::Wnd into the z-list.  Registering a null pointer or registering the same window multiple times is a no-op.
+    void           Remove(Wnd* wnd);             ///< removes a GG::Wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.
     void           MoveUp(Wnd* wnd);             ///< moves a GG::Wnd to the top of the z-list
     void           MoveDown(Wnd* wnd);           ///< moves a GG::Wnd to the bottom of the z-list
-    virtual void   Enter2DMode() = 0;            ///< saves any current graphics subsystem states, sets up GG-friendly 2D drawing mode
-    virtual void   Exit2DMode() = 0;             ///< restores graphics states to their condition prior to Enter2DMode() call
+    virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode
+    virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
     virtual void   CalcuateFPS(bool b = true) = 0;///< turns FPS calulations on or off
     void           EnableMouseDragRepeat(int delay, int interval); ///< delay and interval are in ms; Setting delay to 0 disables mouse repeating completely.
     void           SetDoubleClickInterval(int interval); ///< sets the maximum interval allowed between clicks that is still considered a double-click, in ms

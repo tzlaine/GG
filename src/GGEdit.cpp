@@ -168,7 +168,7 @@ bool Edit::Render()
     // clip text to viewable area, and save old scissor state
     glPushAttrib(GL_SCISSOR_BIT);
     glEnable(GL_SCISSOR_TEST);
-    glScissor(ul.x + PIXEL_MARGIN, App::GetApp()->AppHeight() - lr.y, lr.x - ul.x - 2 * PIXEL_MARGIN, lr.y - ul.y);
+    glScissor(ul.x + (PIXEL_MARGIN - 1), App::GetApp()->AppHeight() - lr.y, lr.x - ul.x - 2 * (PIXEL_MARGIN - 1), lr.y - ul.y);
 
     const vector<int>& extents = GetLineData()[0].extents;
     int first_char_offset = FirstCharOffset();
@@ -305,7 +305,8 @@ void Edit::Keypress(Key key, Uint32 key_mods)
             AdjustView();
             break;
         default:
-            if (isprint(key)) { // only process it if it's a printable character
+            // only process it if it's a printable character, and no significant modifiers are in use
+            if (isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
                 if (MultiSelected()) ClearSelected();
                 Insert(m_cursor_pos.first, key);                // insert character after caret
                 m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd one
@@ -330,6 +331,25 @@ void Edit::LosingFocus()
 {
     if (m_previous_text != WindowText())
         m_focus_update_sig(WindowText());
+}
+
+void Edit::SelectAll()
+{
+    m_cursor_pos.first = Length(); 
+    m_cursor_pos.second = 0;
+    AdjustView();
+}
+
+void Edit::SelectRange(int from, int to)
+{
+    if (from < to) {
+        m_cursor_pos.first = std::max(0, from);
+        m_cursor_pos.second = std::min(to, Length());
+    } else {
+        m_cursor_pos.first = std::min(from, Length());
+        m_cursor_pos.second = std::max(0, to);
+    }
+    AdjustView();
 }
 
 void Edit::SetText(const string& str)

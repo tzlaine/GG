@@ -56,18 +56,33 @@ struct AppImplData;
     - registration into, removal from, and movement within a z-ordering of windows, including handling of "always-on-top" windows
     - handling of modal windows
     - inter-frame time updates and FPS calculations
+    - limits on FPS speed
     - access to the dimensions of the application window or screen
     - mouse state information
+    - keyboard accelerators
     - application-wide management of fonts and textures
     - creation of polymorphic Wnd-derived objects from XML-formatted text
     - logging of debug info to log files
-    
+    <p>
     The user is required to provide several functions.  The most vital functions the user is required to provide are: Enter2DMode(),
     Exit2DMode(), DeltaT(), PollAndRender() [virtual private], and Run() [virtual private].  Without these App is pretty useless.  
     In addition, HandleEvent() must be driven from PollAndRender().  The code driving HandleEvent() must interact with the hardware 
     and operating system, and supply the appropriate EventType's, key presses, and mouse position info to HandleEvent().  It is 
     the author's recommendation that the user use SDL to do this.  See http://www.libsdl.org for more info.
-   
+    <p>
+    Keyboard accelerators may be defined, as mentioned above.  Each defined accelerator has its own signal which is emitted each 
+    time the accelerator is detected.  Client code should listen to the appropriate signal to act on an accelerator invocation.
+    Each slot that is signalled with a keyboard accelerator should return true if it processed the accelerator, or false otherwise.
+    This lets App know whether or not it should create a keystroke event and process it normally, sending it to the Wnd that currently
+    has focus.  Note that since signals can be connected to multiple slots, if even one slot return true, no kestroke event is 
+    created.  It is perfectly legal to return false even if an accelerator is processed, as long as you also then want the focus 
+    Wnd to receive a keystroke event.  Also, note that all accelerators are processed before, and possbily instead of, any key events.  
+    So setting a plain "h" as a keyboard accelerator can (if it is processed normally by a slot) prevent any Wnd anywhere in your 
+    application from receiving "h" keystrokes.  To avoid this:
+    - Do not define accelerators without modifier keys like CTRL and ALT, or
+    - Have slots that process these accelerators return false, or
+    - Do not connect anything to such an accelerator, in which case it will return false.
+    <p>
     A note about "mouse drag repeat".  When you click on the down-button on a scroll-bar, you probably expect 
     the the button's action (scrolling down one increment) to repeat when you hold down the button, much like
     the way kestrokes are repeated when you hold down a keyboard key.  But if you just press the button and 
@@ -76,7 +91,24 @@ struct AppImplData;
 */
 class GG_API App
 {
-public: 
+private:
+    struct OrCombiner 
+    {
+        typedef bool result_type; 
+        template<class InIt> bool operator()(InIt first, InIt last) const;
+    };
+
+public:
+    /** \name Signal Types */ //@{
+    /** emitted when a keyboard accelerator is invoked. A return value of true indicates that the accelerator was processed 
+        by some slot; otherwise, a keystroke event is processed instead. */
+    typedef boost::signal<bool (), OrCombiner> AcceleratorSignalType;
+    //@}
+
+    /** \name Slot Types */ //@{
+    typedef AcceleratorSignalType::slot_type   AcceleratorSlotType; ///< type of functor(s) invoked on a AcceleratorSignalType
+    //@}
+
     /// these are the only events absolutely necessary for GG to function properly
     enum EventType {KEYPRESS,    ///< a down key press or key repeat, with or without modifiers like Alt, Ctrl, Meta, etc.
                     LPRESS,      ///< a left mouse button press
@@ -88,6 +120,8 @@ public:
                     MOUSEMOVE,   ///< movement of the mouse; may include relative motion in addition to absolute position
                     MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
                    };
+
+    typedef std::set<std::pair<Key, Uint32> >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
 
     /** \name Structors */ //@{
     virtual ~App(); ///< virtual dtor
@@ -103,6 +137,7 @@ public:
     virtual const string& FPSString() const = 0; ///< returns a string of the form "[m_FPS] frames per second"
     virtual int    AppWidth() const = 0;         ///< returns the width of the application window/screen
     virtual int    AppHeight() const = 0;        ///< returns the height of the application window/screen
+    double         MaxFPS() const;               ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
     int            MouseRepeatDelay() const;     ///< returns the \a delay value set by EnableMouseDragRepeat()
     int            MouseRepeatInterval() const;  ///< returns the \a interval value set by EnableMouseDragRepeat()
     int            DoubleClickInterval() const;  ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms
@@ -110,6 +145,15 @@ public:
     Pt             MousePosition() const;        ///< returns the absolute position of mouse based on last mouse motion event
     Pt             MouseMovement() const;        ///< returns the relative position of mouse based on last mouse motion event
     Wnd*           GenerateWnd(const XMLElement& elem) const; ///< returns a heap-allocated Wnd-subclass object of the Wnd subclass most appropriate to \a elem
+
+    const_accel_iterator accel_begin() const;    ///< returns an iterator to the first defined keyboard accelerator
+    const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
+
+    /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
+    AcceleratorSignalType& AcceleratorSignal(Key key, Uint32 key_mods) const;
+
+    /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
+    AcceleratorSignalType& AcceleratorSignal(Key key, bool shift, bool control, bool alt) const;
     //@}
 
     /** \name Mutators */ //@{
@@ -123,9 +167,22 @@ public:
     virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode
     virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
     virtual void   CalcuateFPS(bool b = true) = 0;///< turns FPS calulations on or off
+    void           SetMaxFPS(double max);        ///< sets the maximum allowed FPS, so the render loop does not act as a spinlock when it runs very quickly.  0 indicates no limit.
     void           EnableMouseDragRepeat(int delay, int interval); ///< delay and interval are in ms; Setting delay to 0 disables mouse repeating completely.
     void           SetDoubleClickInterval(int interval); ///< sets the maximum interval allowed between clicks that is still considered a double-click, in ms
-   
+
+    /** establishes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
+    void           SetAccelerator(Key key, Uint32 key_mods);
+
+    /** removes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
+    void           RemoveAccelerator(Key key, Uint32 key_mods);
+
+    /** establishes a keyboard accelerator.  Any combination of shift, control, and alt may be specified. */
+    void           SetAccelerator(Key key, bool shift, bool control, bool alt);
+
+    /** removes a keyboard accelerator.  Any combination of shift, control, and alt may be specified. */
+    void           RemoveAccelerator(Key key, bool shift, bool control, bool alt);
+
     shared_ptr<Font>    GetFont(const string& font_filename, int pts, Uint32 range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the desired font
     void                FreeFont(const string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
     shared_ptr<Texture> StoreTexture(Texture* texture, const string& texture_name); ///< adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that
@@ -161,6 +218,16 @@ private:
 
     friend class Wnd; ///< allows modal Wnds to call PollAndRender() and RegisterModal()
 };
+
+template<class InIt> 
+bool App::OrCombiner::operator()(InIt first, InIt last) const
+{
+    bool retval = false;
+    while (first != last)
+        retval |= *first++;
+    return retval;
+}
+
 
 } // namespace GG
 

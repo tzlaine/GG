@@ -37,7 +37,7 @@ class ModalListPicker : public Wnd
 {
 public:
    ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) : 
-     Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | DRAGABLE | MODAL),
+     Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
      m_drop_wnd(drop_wnd),
      m_lb_wnd(lb_wnd),
      m_old_lb_ul(m_lb_wnd->UpperLeft())
@@ -73,7 +73,7 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
    SetStyle(LB_SINGLESEL);
    // adjust size to keep correct height based on row height, etc.
    Resize(WindowDimensions().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-   m_LB->OffsetMove(0, Height());
+   m_LB->MoveTo(x, y + Height());
 }
 
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior, 
@@ -86,7 +86,7 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
    SetStyle(LB_SINGLESEL);
    // adjust size to keep correct height based on row height, etc.
    Resize(WindowDimensions().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-   m_LB->OffsetMove(0, Height());
+   m_LB->MoveTo(x, y + Height());
 }
 
 DropDownList::DropDownList(const XMLElement& elem) : 

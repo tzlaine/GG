@@ -21,18 +21,16 @@
    no message passing hierarchy imposed on the user
    
    \section design_features Features
-   windowed or full-screen
-   signals and slots
-   2d and 3d modes
-   always-on-top (stack) and modal windows
-   texture and font pools
-   XML UI elements
-   all buttons can have rollover, clicked, and unclicked states, and can have graphics
-   SDL net and SDL fastevents make it possible to receive network packets as SDL messages
+   GG has the following features and services:
+   - Communication of UI controls via signals and slots
+   - Support for 2D-, 3D-, and mixed-mode rendering
+   - Application-wide managment of textures and fonts
+   - XML serialization of UI elements
+   - Optional network support; SDL_net and Fastevents make it possible to receive network packets as SDL messages
+
    \section nonfeatures Non-Features
-   GG is not threadsafe, due to signals and slots
-   no sound support
-   optional network support
+   - GG is not threadsafe, due to signals and slots
+   - No sound support is provided
 */
 
 /** \page building Building GG

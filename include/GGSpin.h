@@ -376,8 +376,8 @@ public:
         m_edit->SizeMove(0, 0, Width() - Height(), Height());
         m_up_bn->SizeMove(BN_X_POS, BORDER_THICK,
                           BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2);
-        m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + m_up_bn->Wnd::Height(),
-                          BN_X_POS + BN_WIDTH, BORDER_THICK + m_up_bn->Wnd::Height() + BNS_HEIGHT - m_up_bn->Wnd::Height());
+        m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + m_up_bn->Height(),
+                          BN_X_POS + BN_WIDTH, BORDER_THICK + m_up_bn->Height() + BNS_HEIGHT - m_up_bn->Height());
     }
    
     virtual void Disable(bool b = true)

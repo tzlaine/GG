@@ -698,14 +698,14 @@ pair<int, int> MultiEdit::LowCursorPos() const
 Scroll* MultiEdit::NewVScroll(bool horz_scroll)
 {
     const int GAP = PIXEL_MARGIN - 2; // the space between the client area and the border
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = Edit::ClientLowerRight() - Edit::ClientUpperLeft();
     return new Scroll(cl_sz.x + GAP - SCROLL_WIDTH, -GAP, SCROLL_WIDTH, cl_sz.y + 2 * GAP - (horz_scroll ? SCROLL_WIDTH : 0), Scroll::VERTICAL, m_color, CLR_SHADOW);
 }
 
 Scroll* MultiEdit::NewHScroll(bool vert_scroll)
 {
     const int GAP = PIXEL_MARGIN - 2; // the space between the client area and the border
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = Edit::ClientLowerRight() - Edit::ClientUpperLeft();
     return new Scroll(-GAP, cl_sz.y + GAP - SCROLL_WIDTH, cl_sz.x + 2 * GAP - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
 }
 

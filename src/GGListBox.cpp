@@ -981,13 +981,15 @@ void ListBox::BringCaretIntoView()
 
 Scroll* ListBox::NewVScroll(bool horz_scroll)
 {
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
+                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0))));
     return new Scroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horz_scroll ? SCROLL_WIDTH : 0), Scroll::VERTICAL, m_color, CLR_SHADOW);
 }
 
 Scroll* ListBox::NewHScroll(bool vert_scroll)
 {
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
+                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row.size() ? m_header_row.Height() : 0))));
     return new Scroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
 }
 

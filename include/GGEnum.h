@@ -37,7 +37,7 @@
 
 namespace GG {
 /** A base type for all templated EnumMap types. */
-struct GG_API EnumMapBase
+struct EnumMapBase
 {
     enum {BAD_VALUE = -5000000};
 
@@ -73,7 +73,7 @@ template <class E> EnumMap<E> GetEnumMap()
         ...
     ENUM_MAP_END\endverbatim */
 #define ENUM_MAP_BEGIN( name )                                                  \
-template <> struct EnumMap< name > : EnumMapBase                                \
+template <> struct GG::EnumMap< name > : GG::EnumMapBase                        \
 {                                                                               \
     typedef name EnumType;                                                      \
     typedef std::map<EnumType, std::string> MapType;                            \
@@ -106,19 +106,19 @@ template <> struct EnumMap< name > : EnumMapBase                                
 
 /** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
 #define ENUM_STREAM_IN( name )                                                  \
-GG_API inline std::istream& operator>>(std::istream& is, name& v)               \
+inline std::istream& operator>>(std::istream& is, name& v)                      \
 {                                                                               \
     std::string str;                                                            \
     is >> str;                                                                  \
-    v = name (GetEnumMap< name >().FromString(str));                            \
+    v = name (GG::GetEnumMap< name >().FromString(str));                        \
     return is;                                                                  \
 }
 
 /** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
 #define ENUM_STREAM_OUT( name )                                                 \
-GG_API inline std::ostream& operator<<(std::ostream& os, name v)                \
+inline std::ostream& operator<<(std::ostream& os, name v)                       \
 {                                                                               \
-    os << GetEnumMap< name >().FromEnum(v);                                     \
+    os << GG::GetEnumMap< name >().FromEnum(v);                                 \
     return os;                                                                  \
 }
 

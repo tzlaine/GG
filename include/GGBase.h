@@ -27,10 +27,14 @@
 #ifndef _GGBase_h_
 #define _GGBase_h_
 
-namespace GG {
-typedef unsigned char Uint8; ///< unsigned char from SDL.h; provided here in case GG is not being driven by SDL
-typedef unsigned int Uint32; ///< unsigned int from SDL.h; provided here in case GG is not being driven by SDL
-}
+//namespace GG {
+typedef unsigned char Uint8;    ///< unsigned char from SDL.h; provided here in case GG is not being driven by SDL
+typedef signed char Sint8;      ///< signed char from SDL.h; provided here in case GG is not being driven by SDL
+typedef unsigned short Uint16;  ///< unsigned short from SDL.h; provided here in case GG is not being driven by SDL
+typedef signed short Sint16;    ///< signed short from SDL.h; provided here in case GG is not being driven by SDL
+typedef unsigned int Uint32;    ///< unsigned int from SDL.h; provided here in case GG is not being driven by SDL
+typedef signed int Sint32;      ///< signed int from SDL.h; provided here in case GG is not being driven by SDL
+//}
 
 // include OpenGL headers
 #include <GL/gl.h>
@@ -137,7 +141,18 @@ public: \
 };
 
 /** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/
-enum WndRegion {WR_NONE = -1, WR_TOPLEFT = 0, WR_TOP, WR_TOPRIGHT, WR_MIDLEFT, WR_MIDDLE, WR_MIDRIGHT, WR_BOTTOMLEFT, WR_BOTTOM, WR_BOTTOMRIGHT};
+enum WndRegion {
+    WR_NONE = -1, 
+    WR_TOPLEFT = 0, 
+    WR_TOP, 
+    WR_TOPRIGHT, 
+    WR_MIDLEFT, 
+    WR_MIDDLE, 
+    WR_MIDRIGHT, 
+    WR_BOTTOMLEFT, 
+    WR_BOTTOM, 
+    WR_BOTTOMRIGHT
+};
 
 /** These flags are packed (via logical or) into a 32-bit unsigned int.  Bits 16-23 of the uint specify the number of 
    characters for each tab. The default number of characters per tab is 8.*/

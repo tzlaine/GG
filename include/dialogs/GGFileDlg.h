@@ -38,6 +38,9 @@
 
 #include <boost/filesystem/path.hpp>
 
+/** \file GGileDlg.h
+    Contains the standard GG file dialog. */
+
 namespace GG {
 
 class TextControl;

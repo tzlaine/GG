@@ -22,6 +22,9 @@
 
 /* $Id$ */
 
+/** \file SDL_net.h
+    Part of the SDL_Net2/Fastevents libs. */
+
 #ifndef _SDLnet_h
 #define _SDLnet_h
 

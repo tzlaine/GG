@@ -26,6 +26,9 @@
     Bob@Pendleton.com
 */
 
+/** \file queue.h
+    Part of the SDL_Net2/Fastevents libs. */
+
 //
 // simple fixed length queue
 //

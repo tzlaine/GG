@@ -26,6 +26,9 @@
     Bob@Pendleton.com
 */
 
+/** \file net2.h
+    Part of the SDL_Net2/Fastevents libs. */
+
 #include "SDL.h"
 #include "SDL_net.h"
 

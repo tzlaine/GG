@@ -6,6 +6,9 @@
 //
 ////////////////////////////////////////////////////////////////
 
+/** \file trace.h
+    Part of the SDL_Net2/Fastevents libs. */
+
 #ifndef __TRACE_H__
 extern int TRACE_FLAG;
 #define traceOn() (TRACE_FLAG = 1)

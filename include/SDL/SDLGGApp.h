@@ -49,6 +49,9 @@
 #include "SDL.h"
 #endif
 
+/** \file SDLGGApp.h
+    Contains SDLGGApp, the input driver for using SDL with GG. */
+
 /** This is an abstract singleton class that represents the application framework of an SDL OpenGL 
     application. By default, it includes Bob Pendleton's fastevents/net2 library.
     <p>

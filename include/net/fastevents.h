@@ -26,6 +26,9 @@
     Bob@Pendleton.com
 */
 
+/** \file fastevents.h
+    Part of the SDL_Net2/Fastevents libs. */
+
 #include "SDL.h"
 
 #ifdef __cplusplus

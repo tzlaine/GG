@@ -32,6 +32,9 @@
 #include "../GGWnd.h"
 #endif
 
+/** \file GGThreeButtonDlg.h
+    Contains the standard modal user-input/-notification dialog. */
+
 namespace GG {
 
 class Button;

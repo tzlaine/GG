@@ -47,7 +47,7 @@ namespace {
         {
             Connect(m_lb_wnd->SelChangedSignal(), &ModalListPicker::LBSelChangedSlot, this);
             Connect(m_lb_wnd->LeftClickedSignal(), &ModalListPicker::LBLeftClickSlot, this);
-            m_lb_wnd->OffsetMove(m_drop_wnd->Parent() ? m_drop_wnd->Parent()->UpperLeft() : Pt());
+            m_lb_wnd->OffsetMove(m_drop_wnd->ClientUpperLeft());
             AttachChild(m_lb_wnd);
         }
         ~ModalListPicker() {m_lb_wnd->MoveTo(m_old_lb_ul); DetachChild(m_lb_wnd);}
@@ -213,8 +213,7 @@ void DropDownList::SizeMove(int x1, int y1, int x2, int y2)
 {
     // adjust size to keep correct height based on row height, etc.
     Wnd::SizeMove(x1, y1, x2, y1 + m_LB->RowHeight() + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-    m_LB->Resize(Width(), m_LB->Height());
-    m_LB->MoveTo(x1, y1 + Height());
+    m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
 }
 
 int DropDownList::Insert(Row* row, int at/* = -1*/)

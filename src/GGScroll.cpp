@@ -25,9 +25,11 @@
 /* $Header$ */
 
 #include "GGScroll.h"
-#include "GGDrawUtil.h"
-#include "GGButton.h"
-#include "GGApp.h"
+
+#include <GGDrawUtil.h>
+#include <GGButton.h>
+#include <GGApp.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
@@ -40,18 +42,20 @@ const int MIN_TAB_SIZE = 5;
 ////////////////////////////////////////////////
 Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
                Button* decr/* = 0*/, Button* incr/* = 0*/, Button* tab/* = 0*/, Uint32 flags/* = CLICKABLE*/) :
-        Control(x, y, w, h, flags),
-        m_int_color(interior),
-        m_orientation(orientation),
-        m_posn(0),
-        m_range_min(0),
-        m_range_max(99),
-        m_line_sz(5),
-        m_page_sz(25),
-        m_tab(shared_ptr<Button>(tab)),
-        m_incr(shared_ptr<Button>(incr)),
-        m_decr(shared_ptr<Button>(decr)),
-        m_tab_drag_offset(-1)
+    Control(x, y, w, h, flags),
+    m_int_color(interior),
+    m_orientation(orientation),
+    m_posn(0),
+    m_range_min(0),
+    m_range_max(99),
+    m_line_sz(5),
+    m_page_sz(25),
+    m_tab(shared_ptr<Button>(tab)),
+    m_incr(shared_ptr<Button>(incr)),
+    m_decr(shared_ptr<Button>(decr)),
+    m_tab_drag_offset(-1), 
+    m_initial_depressed_area(SBR_NONE),
+    m_depressed_area(SBR_NONE)
 {
     SetColor(color);
     if (m_orientation == VERTICAL) {
@@ -66,60 +70,41 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
 }
 
 Scroll::Scroll(const XMLElement& elem) :
-        Control(elem.Child("GG::Control")),
-        m_orientation(Orientation(lexical_cast<int>(elem.Child("m_orientation").Attribute("value"))))
+    Control(elem.Child("GG::Control")),
+    m_orientation(lexical_cast<Orientation>(elem.Child("m_orientation").Text()))
 {
     if (elem.Tag() != "GG::Scroll")
         throw std::invalid_argument("Attempted to construct a GG::Scroll from an XMLElement that had a tag other than \"GG::Scroll\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_int_color");
-    m_int_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_posn");
-    m_posn = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_range_min");
-    m_range_min = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_range_max");
-    m_range_max = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_line_sz");
-    m_line_sz = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_page_sz");
-    m_page_sz = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
+    m_posn = lexical_cast<int>(elem.Child("m_posn").Text());
+    m_range_min = lexical_cast<int>(elem.Child("m_range_min").Text());
+    m_range_max = lexical_cast<int>(elem.Child("m_range_max").Text());
+    m_line_sz = lexical_cast<int>(elem.Child("m_line_sz").Text());
+    m_page_sz = lexical_cast<int>(elem.Child("m_page_sz").Text());
 
     // these three may be any Button-derived class
-    curr_elem = &elem.Child("m_tab");
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))) {
+    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_tab").Child(0)))) {
         m_tab.reset(b);
     } else {
         throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the tab.");
     }
 
-    curr_elem = &elem.Child("m_incr");
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))) {
+    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_incr").Child(0)))) {
         m_incr.reset(b);
     } else {
         throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the increment button.");
     }
 
-    curr_elem = &elem.Child("m_decr");
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))) {
+    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_decr").Child(0)))) {
         m_decr.reset(b);
     } else {
         throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the decrement button.");
     }
 
-    curr_elem = &elem.Child("m_tab_drag_offset");
-    m_tab_drag_offset = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_initial_depressed_area");
-    m_initial_depressed_area = ScrollRegion(lexical_cast<int>(curr_elem->Attribute("value")));
-
-    curr_elem = &elem.Child("m_depressed_area");
-    m_depressed_area = ScrollRegion(lexical_cast<int>(curr_elem->Attribute("value")));
+    m_tab_drag_offset = lexical_cast<int>(elem.Child("m_tab_drag_offset").Text());
+    m_initial_depressed_area = lexical_cast<ScrollRegion>(elem.Child("m_initial_depressed_area").Text());
+    m_depressed_area = lexical_cast<ScrollRegion>(elem.Child("m_depressed_area").Text());
 
     MoveTabToPosn(); // correct initial placement of tab, if necessary
 }
@@ -334,61 +319,39 @@ XMLElement Scroll::XMLEncode() const
 {
     XMLElement retval("GG::Scroll");
     retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_orientation", lexical_cast<string>(m_orientation)));
+    retval.AppendChild(XMLElement("m_posn", lexical_cast<string>(m_posn)));
+    retval.AppendChild(XMLElement("m_range_min", lexical_cast<string>(m_range_min)));
+    retval.AppendChild(XMLElement("m_range_max", lexical_cast<string>(m_range_max)));
+    retval.AppendChild(XMLElement("m_line_sz", lexical_cast<string>(m_line_sz)));
+    retval.AppendChild(XMLElement("m_page_sz", lexical_cast<string>(m_page_sz)));
+    retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
+    retval.AppendChild(XMLElement("m_incr", m_incr->XMLEncode()));
+    retval.AppendChild(XMLElement("m_decr", m_decr->XMLEncode()));
+    retval.AppendChild(XMLElement("m_tab_drag_offset", lexical_cast<string>(m_tab_drag_offset)));
+    retval.AppendChild(XMLElement("m_initial_depressed_area", lexical_cast<string>(m_initial_depressed_area)));
+    retval.AppendChild(XMLElement("m_depressed_area", lexical_cast<string>(m_depressed_area)));
+    return retval;
+}
 
-    XMLElement temp;
-
-    temp = XMLElement("m_int_color");
-    temp.AppendChild(m_int_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_orientation");
-    temp.SetAttribute("value", lexical_cast<string>(int(m_orientation)));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_posn");
-    temp.SetAttribute("value", lexical_cast<string>(m_posn));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_range_min");
-    temp.SetAttribute("value", lexical_cast<string>(m_range_min));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_range_max");
-    temp.SetAttribute("value", lexical_cast<string>(m_range_max));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_line_sz");
-    temp.SetAttribute("value", lexical_cast<string>(m_line_sz));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_page_sz");
-    temp.SetAttribute("value", lexical_cast<string>(m_page_sz));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_tab");
-    temp.AppendChild(m_tab->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_incr");
-    temp.AppendChild(m_incr->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_decr");
-    temp.AppendChild(m_decr->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_tab_drag_offset");
-    temp.SetAttribute("value", lexical_cast<string>(m_tab_drag_offset));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_initial_depressed_area");
-    temp.SetAttribute("value", lexical_cast<string>(int(m_initial_depressed_area)));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_depressed_area");
-    temp.SetAttribute("value", lexical_cast<string>(int(m_depressed_area)));
-    retval.AppendChild(temp);
-
+XMLElementValidator Scroll::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Scroll");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_orientation", new MappedEnumValidator<Orientation>()));
+    retval.AppendChild(XMLElementValidator("m_posn", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_range_min", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_range_max", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_line_sz", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_page_sz", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_incr", m_incr->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_decr", m_decr->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_tab_drag_offset", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_initial_depressed_area", new MappedEnumValidator<ScrollRegion>()));
+    retval.AppendChild(XMLElementValidator("m_depressed_area", new MappedEnumValidator<ScrollRegion>()));
     return retval;
 }
 
@@ -429,7 +392,7 @@ void Scroll::UpdatePosn()
     int before_tab = (m_orientation == VERTICAL ?            // the tabspace before the tab's lower-value side
                       m_tab->UpperLeft().y - m_decr->WindowDimensions().y :
                       m_tab->UpperLeft().x - m_decr->WindowDimensions().x );
-    int tab_space = TabSpace() - (m_orientation == VERTICAL ? m_tab->WindowDimensions().y : m_tab->WindowDimensions().x); // all the tabspace
+    int tab_space = TabSpace();
     m_posn = int(m_range_min + double(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
     m_posn = std::min(m_range_max - m_page_sz + 1, std::max(m_range_min, m_posn));
     m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);   // notify interested parties whenever m_posn changes
@@ -438,11 +401,11 @@ void Scroll::UpdatePosn()
 void Scroll::MoveTabToPosn()
 {
     int start_tabspace = (m_orientation==VERTICAL ?      // what is the tab's lowest posible extent?
-                          m_decr->WindowDimensions().y:
+                          m_decr->WindowDimensions().y :
                           m_decr->WindowDimensions().x);
     int end_tabspace = (m_orientation==VERTICAL ?      // what is its highest?
-                        WindowDimensions().y - m_incr->WindowDimensions().y - m_tab->WindowDimensions().y:
-                        WindowDimensions().x - m_incr->WindowDimensions().x - m_tab->WindowDimensions().x);
+                        WindowDimensions().y - m_incr->WindowDimensions().y :
+                        WindowDimensions().x - m_incr->WindowDimensions().x);
 
     m_tab->MoveTo(m_orientation==VERTICAL ?
                   Pt(m_tab->UpperLeft().x,

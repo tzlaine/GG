@@ -53,8 +53,9 @@ class Scroll : public Control
 public:
     using Wnd::SizeMove;
 
-    enum Orientation {VERTICAL, HORIZONTAL}; ///< the orientation of the scrollbar must be one of these two values
-   
+    enum Orientation  {VERTICAL, HORIZONTAL}; ///< the orientation of the scrollbar must be one of these two values
+    enum ScrollRegion {SBR_NONE, SBR_TAB, SBR_LINE_DN, SBR_LINE_UP, SBR_PAGE_DN, SBR_PAGE_UP}; ///< the clickable regions of a Scroll
+
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int, int, int, int)> ScrolledSignalType; ///< emitted whenever the scrollbar is moved; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     //@}
@@ -80,6 +81,8 @@ public:
     Orientation     ScrollOrientation() const   {return m_orientation;} ///< returns the orientation of the Scroll
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Scroll object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     ScrolledSignalType& ScrolledSignal() const  {return m_scrolled_sig;} ///< returns the scrolled signal object for this Scroll
     //@}
@@ -110,8 +113,6 @@ public:
     //@}
 
 protected:
-    enum ScrollRegion {SBR_NONE, SBR_TAB, SBR_LINE_DN, SBR_LINE_UP, SBR_PAGE_DN, SBR_PAGE_UP};
-   
     /** \name Accessors */ //@{
     int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
@@ -142,6 +143,28 @@ private:
 
     mutable ScrolledSignalType m_scrolled_sig;
 };
+
+// define EnumMap and stream operators for Scroll::Orientation
+ENUM_MAP_BEGIN(Scroll::Orientation)
+    ENUM_MAP_INSERT(Scroll::VERTICAL)
+    ENUM_MAP_INSERT(Scroll::HORIZONTAL)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Scroll::Orientation)
+ENUM_STREAM_OUT(Scroll::Orientation)
+
+// define EnumMap and stream operators for Scroll::ScrollRegion
+ENUM_MAP_BEGIN(Scroll::ScrollRegion)
+    ENUM_MAP_INSERT(Scroll::SBR_NONE)
+    ENUM_MAP_INSERT(Scroll::SBR_TAB)
+    ENUM_MAP_INSERT(Scroll::SBR_LINE_DN)
+    ENUM_MAP_INSERT(Scroll::SBR_LINE_UP)
+    ENUM_MAP_INSERT(Scroll::SBR_PAGE_DN)
+    ENUM_MAP_INSERT(Scroll::SBR_PAGE_UP)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Scroll::ScrollRegion)
+ENUM_STREAM_OUT(Scroll::ScrollRegion)
 
 } // namespace GG
 

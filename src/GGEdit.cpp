@@ -165,7 +165,7 @@ bool Edit::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, 2);
 
-    BeginClipping();
+    BeginScissorClipping(client_ul.x - 1, client_ul.y, client_lr.x, client_lr.y);
     
     const vector<int>& extents = GetLineData()[0].extents;
     int first_char_offset = FirstCharOffset();
@@ -208,7 +208,7 @@ bool Edit::Render()
         }
     }
 
-    EndClipping();
+    EndScissorClipping();
 
     return true;
 }
@@ -393,7 +393,7 @@ int Edit::FirstCharOffset() const
 int Edit::ScreenPosOfChar(int idx) const
 {
     int first_char_offset = FirstCharOffset();
-    return UpperLeft().x + PIXEL_MARGIN + ((idx ? int(GetLineData()[0].extents[idx - 1]) : 0) - first_char_offset);
+    return UpperLeft().x + PIXEL_MARGIN + ((idx ? static_cast<int>(GetLineData()[0].extents[idx - 1]) : 0) - first_char_offset);
 }
 
 int Edit::LastVisibleChar() const

@@ -31,8 +31,8 @@
 #include "GGBase.h"
 #endif
 
-#ifndef _GGText_h_
-#include "GGText.h"
+#ifndef _GGFont_h_
+#include "GGFont.h"
 #endif
 
 #ifndef _LOG4CPP_CATEGORY_HH
@@ -84,7 +84,7 @@ public:
                     LRELEASE,    ///< a left mouse button release
                     MRELEASE,    ///< a middle mouse button release
                     RRELEASE,    ///< a right mouse button release
-                    MOUSEMOVE,   ///< movement of the mouse
+                    MOUSEMOVE,   ///< movement of the mouse; may include relative motion in addition to absolute position
                     MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
                    };
 

@@ -457,14 +457,12 @@ int Wnd::Run()
     int retval = 0;
     if (m_flags & MODAL) {
         App* app = App::GetApp();
-        Wnd* old_focus_wnd = app->FocusWnd();
         app->RegisterModal(this);
 
         ModalEventPump pump(m_done);
         pump();
 
         app->Remove(this);
-        app->SetFocusWnd(old_focus_wnd);
 
         retval = 1;
     }

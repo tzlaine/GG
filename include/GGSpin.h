@@ -84,7 +84,7 @@ public:
 
     /** \name Signal Types */ //@{
     // HACK! have to use the boost.signals portable syntax, since GCC 3.2 doesn't like "boost::signal<void (T)>"
-    typedef boost::signal1<void, T> ValueChangedSignalType;  ///< emitted whenever the value of the Spin has changed
+    typedef typename boost::signal<void (T)> ValueChangedSignalType;  ///< emitted whenever the value of the Spin has changed
     //@}
 
     /** \name Slot Types */ //@{

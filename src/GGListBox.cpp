@@ -448,6 +448,7 @@ int ListBox::LButtonDown(const Pt& pt, Uint32 keys)
 
 int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
 {
+    m_row_drag_offset = Pt(-1, -1);
     if (!Disabled() && (m_style & LB_DRAGDROP) && m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
         Wnd* tmp = App::GetApp()->GetWindowUnder(pt);
         ListBox* drop_target_wnd;
@@ -473,7 +474,6 @@ int ListBox::LButtonUp(const Pt& pt, Uint32 keys)
         }
     }
     m_old_sel_row = -1;
-    m_row_drag_offset = Pt(-1, -1);
     return 1;
 }
 

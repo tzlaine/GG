@@ -49,7 +49,10 @@ SDLGGApp* SDLGGApp::GetApp()
 
 void SDLGGApp::Exit(int code)
 {
-    Logger().fatalStream() << "Initiating Exit (code " << code << " - " << (code ? "error" : "normal") << " termination)";
+    if (code)
+        Logger().fatalStream() << "Initiating Exit (code " << code << " - error termination)";
+    else
+        Logger().debugStream() << "Initiating Exit (normal termination)";
     SDLQuit();
     exit(code);
 }

@@ -216,84 +216,85 @@ int Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 
 int Edit::Keypress(Key key, Uint32 key_mods)
 {
-    bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
-    bool emit_signal = false;
-
-    switch (key) {
-    case GGK_HOME:
-        m_first_char_shown = 0;
-        if (shift_down)
-            m_cursor_pos.second = 0;
-        else
-            m_cursor_pos.second = m_cursor_pos.first = 0;
-        break;
-    case GGK_LEFT:
-        if (MultiSelected() && !shift_down) {
-            m_cursor_pos.second = m_cursor_pos.first = m_cursor_pos.first < m_cursor_pos.second ? m_cursor_pos.first : m_cursor_pos.second;
-        } else if (m_cursor_pos.second > 0) {
-            --m_cursor_pos.second;
-            int extent = GetLineData()[0].extents[m_cursor_pos.second];
-            while (m_cursor_pos.second > 0 && extent == GetLineData()[0].extents[m_cursor_pos.second - 1])
+    if (!Disabled()) {
+        bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
+        bool emit_signal = false;
+    
+        switch (key) {
+        case GGK_HOME:
+            m_first_char_shown = 0;
+            if (shift_down)
+                m_cursor_pos.second = 0;
+            else
+                m_cursor_pos.second = m_cursor_pos.first = 0;
+            break;
+        case GGK_LEFT:
+            if (MultiSelected() && !shift_down) {
+                m_cursor_pos.second = m_cursor_pos.first = m_cursor_pos.first < m_cursor_pos.second ? m_cursor_pos.first : m_cursor_pos.second;
+            } else if (m_cursor_pos.second > 0) {
                 --m_cursor_pos.second;
-            if (!shift_down)
-                m_cursor_pos.first = m_cursor_pos.second;
+                int extent = GetLineData()[0].extents[m_cursor_pos.second];
+                while (m_cursor_pos.second > 0 && extent == GetLineData()[0].extents[m_cursor_pos.second - 1])
+                    --m_cursor_pos.second;
+                if (!shift_down)
+                    m_cursor_pos.first = m_cursor_pos.second;
+            }
+            AdjustView();
+            break;
+        case GGK_RIGHT:
+            if (MultiSelected() && !shift_down) {
+                m_cursor_pos.second = m_cursor_pos.first = m_cursor_pos.first < m_cursor_pos.second ? m_cursor_pos.second : m_cursor_pos.first;
+            } else if (m_cursor_pos.second < Length()) {
+                int extent = GetLineData()[0].extents[m_cursor_pos.second];
+                while (extent == GetLineData()[0].extents[++m_cursor_pos.second]) ;
+                if (!shift_down)
+                    m_cursor_pos.first = m_cursor_pos.second;
+            }
+            AdjustView();
+            break;
+        case GGK_END:
+            if (shift_down)
+                m_cursor_pos.second = Length();
+            else
+                m_cursor_pos.second = m_cursor_pos.first = Length();
+            AdjustView();
+            break;
+        case GGK_BACKSPACE:
+            if (MultiSelected()) {
+                ClearSelected();
+                emit_signal = true;
+            } else if (m_cursor_pos.first > 0) {
+                m_cursor_pos.second = --m_cursor_pos.first;
+                Erase(m_cursor_pos.first);
+                emit_signal = true;
+            }
+            AdjustView();
+            break;
+        case GGK_DELETE:
+            if (MultiSelected()) {
+                ClearSelected();
+                emit_signal = true;
+            } else if (m_cursor_pos.first < Length()) {
+                Erase(m_cursor_pos.first);
+                emit_signal = true;
+            }
+            AdjustView();
+            break;
+        default:
+            if (isprint(key)) { // only process it if it's a printable character
+                if (MultiSelected()) ClearSelected();
+                Insert(m_cursor_pos.first, key);                // insert character after caret
+                m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd one
+                emit_signal = true;                             // notify parent that text has changed
+                if (m_cursor_pos.first >= LastVisibleChar())    // when we over-run our writing space with typing, scroll the window
+                    AdjustView();
+            } else if (Parent()) {
+                Parent()->Keypress(key, key_mods);
+            }
+            break;
         }
-        AdjustView();
-        break;
-    case GGK_RIGHT:
-        if (MultiSelected() && !shift_down) {
-            m_cursor_pos.second = m_cursor_pos.first = m_cursor_pos.first < m_cursor_pos.second ? m_cursor_pos.second : m_cursor_pos.first;
-        } else if (m_cursor_pos.second < Length()) {
-            int extent = GetLineData()[0].extents[m_cursor_pos.second];
-            while (extent == GetLineData()[0].extents[++m_cursor_pos.second]) ;
-            if (!shift_down)
-                m_cursor_pos.first = m_cursor_pos.second;
-        }
-        AdjustView();
-        break;
-    case GGK_END:
-        if (shift_down)
-            m_cursor_pos.second = Length();
-        else
-            m_cursor_pos.second = m_cursor_pos.first = Length();
-        AdjustView();
-        break;
-    case GGK_BACKSPACE:
-        if (MultiSelected()) {
-            ClearSelected();
-            emit_signal = true;
-        } else if (m_cursor_pos.first > 0) {
-            m_cursor_pos.second = --m_cursor_pos.first;
-            Erase(m_cursor_pos.first);
-            emit_signal = true;
-        }
-        AdjustView();
-        break;
-    case GGK_DELETE:
-        if (MultiSelected()) {
-            ClearSelected();
-            emit_signal = true;
-        } else if (m_cursor_pos.first < Length()) {
-            Erase(m_cursor_pos.first);
-            emit_signal = true;
-        }
-        AdjustView();
-        break;
-    default:
-        if (isprint(key)) { // only process it if it's a printable character
-            if (MultiSelected()) ClearSelected();
-            Insert(m_cursor_pos.first, key);                // insert character after caret
-            m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd one
-            emit_signal = true;                             // notify parent that text has changed
-            if (m_cursor_pos.first >= LastVisibleChar())    // when we over-run our writing space with typing, scroll the window
-                AdjustView();
-        } else if (Parent()) {
-            Parent()->Keypress(key, key_mods);
-        }
-        break;
+        if (emit_signal) m_edited_sig(m_text);
     }
-    if (emit_signal) m_edited_sig(m_text);
-
     return 1;
 }
 

@@ -34,17 +34,16 @@
 
 namespace GG {
 
-/** This class encapsulates OpenGL texture objects.  Thanks to the SDL_image library, it is extremely easy to load an image of 
-    virtually any format and create an SDL surface out of it in one step.  When initialized with Load(), Texture objects 
-    create such an SDL surface from a file, then convert it to an OpenGL texture, then free the surface.  If the dimensions of the 
+/** This class encapsulates OpenGL texture objects.  When initialized with Load(), Texture objects 
+    create an OpenGL texture from the given image file.  If the dimensions of the 
     file image were not both powers of two, the created OpenGL texture is created with dimensions to the next largest powers
     of two; the original image size and corresponding texture coords are saved in m_default_width, m_default_height, and
     m_tex_coords, respectively.  These are kept so that only the originally-loaded-image part of the texture can be used, if desired.  
-    The same thing happens when the texture is initailized using Init(SDL_Surface*...).  However, when using Init(int width...), 
+    However, when using Init(int width...), 
     the user must ensure that the image provided has power-of-two dimensions; no default parameters are recorded (other than the 
-    default texture coords (0,0) to (1,1).  All five initialization functions first free the OpenGL texture currently in use (if 
-    any) and create a new one.  All initialization functions fail silently, performing no initialization and allocating no 
-    memory or OpenGL texture when the load filename is "" or the surf or image parameters are 0.  
+    default texture coords (0,0) to (1,1).  All five initialization functions first free the OpenGL texture currently in use by
+    the texture (if any) and create a new one.  All initialization functions fail silently, performing no initialization and
+    allocating no memory or OpenGL texture when the load filename is "" or the image parameter is 0.
     \note It is important to remember that OpenGL does 
     not support the alteration of textures once loaded.  Texture therefore also does not provide any such support.  Also,
     since a texture saved as an XMLElement is recreated from the filename associated with the texture, creating a texture from
@@ -61,18 +60,18 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    inline GLenum           WrapS() const     {return m_wrap_s;}      ///< returns S-wrap mode associated with this opengl texture
-    inline GLenum           WrapT() const     {return m_wrap_t;}      ///< returns T-wrap mode associated with this opengl texture
-    inline GLenum           MinFilter() const {return m_min_filter;}  ///< returns minimization filter modes associated with this opengl texture
-    inline GLenum           MagFilter() const {return m_mag_filter;}  ///< returns maximization filter modes associated with this opengl texture
-    inline int              BytesPP() const   {return m_bytes_pp;}    ///< returns the image's color depth in bytes
-    inline int              Width() const     {return m_width;}       ///< returns width of entire texture
-    inline int              Height() const    {return m_height;}      ///< returns height of entire texture
-    inline bool             MipMapped() const {return m_mipmaps;}     ///< returns true if the texture has mipmaps
-    inline GLuint           OpenGLId() const  {return m_opengl_id;}   ///< GLuint "name" of the opengl texture object associated with this object
-    inline const GLfloat*   DefaultTexCoords() const   {return m_tex_coords;}     ///< texture coordinates to use by default when blitting this texture
-    inline int              DefaultWidth() const       {return m_default_width;}  ///< returns width in pixels, based on initial surface (0 if texture was not loaded)
-    inline int              DefaultHeight() const      {return m_default_height;} ///< returns height in pixels, based on initial surface (0 if texture was not loaded)
+    GLenum           WrapS() const              {return m_wrap_s;}         ///< returns S-wrap mode associated with this opengl texture
+    GLenum           WrapT() const              {return m_wrap_t;}         ///< returns T-wrap mode associated with this opengl texture
+    GLenum           MinFilter() const          {return m_min_filter;}     ///< returns minimization filter modes associated with this opengl texture
+    GLenum           MagFilter() const          {return m_mag_filter;}     ///< returns maximization filter modes associated with this opengl texture
+    int              BytesPP() const            {return m_bytes_pp;}       ///< returns the image's color depth in bytes
+    int              Width() const              {return m_width;}          ///< returns width of entire texture
+    int              Height() const             {return m_height;}         ///< returns height of entire texture
+    bool             MipMapped() const          {return m_mipmaps;}        ///< returns true if the texture has mipmaps
+    GLuint           OpenGLId() const           {return m_opengl_id;}      ///< GLuint "name" of the opengl texture object associated with this object
+    const GLfloat*   DefaultTexCoords() const   {return m_tex_coords;}     ///< texture coordinates to use by default when blitting this texture
+    int              DefaultWidth() const       {return m_default_width;}  ///< returns width in pixels, based on initial image (0 if texture was not loaded)
+    int              DefaultHeight() const      {return m_default_height;} ///< returns height in pixels, based on initial image (0 if texture was not loaded)
    
     /** blit any portion of texture to any place on screen, scaling as necessary*/
     void OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords = 0, bool enter_2d_mode = true) const {OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, tex_coords, enter_2d_mode);}
@@ -148,11 +147,11 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    inline bool             Empty() const     {return !m_texture;}     ///< returns true if this object has no associated GG::Texture
-    inline const GLfloat*   TexCoords() const {return m_tex_coords;}   ///< texture coordinates to use when blitting this sub-texture
-    inline int              Width() const     {return m_width;}        ///< width of sub-texture in pixels
-    inline int              Height() const    {return m_height;}       ///< height of sub-texture in pixels
-    inline const Texture*   GetTexture()const {return m_texture.get();}///< returns the texture the SubTexture is a part of
+    bool             Empty() const     {return !m_texture;}     ///< returns true if this object has no associated GG::Texture
+    const GLfloat*   TexCoords() const {return m_tex_coords;}   ///< texture coordinates to use when blitting this sub-texture
+    int              Width() const     {return m_width;}        ///< width of sub-texture in pixels
+    int              Height() const    {return m_height;}       ///< height of sub-texture in pixels
+    const Texture*   GetTexture()const {return m_texture.get();}///< returns the texture the SubTexture is a part of
    
     /** blit sub-texture to any place on screen, scaling as necessary \see GG::Texture::OrthoBlit*/
     void OrthoBlit(const Pt& pt1, const Pt& pt2, bool enter_2d_mode = true) const {OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, enter_2d_mode);}

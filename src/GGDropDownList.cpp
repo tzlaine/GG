@@ -86,7 +86,7 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
     Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-    m_LB->MoveTo(x, y + Height());
+    m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
 }
 
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior,
@@ -101,7 +101,7 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
     Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-    m_LB->MoveTo(x, y + Height());
+    m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
 }
 
 DropDownList::DropDownList(const XMLElement& elem) :

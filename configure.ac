@@ -111,10 +111,10 @@ SDL was not found, did you specify the correct paths
     LIBS="$OLD_LIBS"
   else
      # Unix target, we require sdl-config here (at least for now, to eliminate strange linking errors)
-     AM_PATH_SDL([1.2.5],[],[AC_MSG_ERROR([SDL is required])])
+     AM_PATH_SDL([1.2.0],[],[AC_MSG_ERROR([SDL is required])])
   fi
 else
-  AM_PATH_SDL([1.2.5],[],[AC_MSG_ERROR([SDL is required])])
+  AM_PATH_SDL([1.2.0],[],[AC_MSG_ERROR([SDL is required])])
 fi
 
 AC_CACHE_SAVE

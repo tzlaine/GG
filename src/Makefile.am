@@ -67,6 +67,8 @@ endif
 
 TESTS = testy
 check_PROGRAMS= testy
-testy_SOURCES = ../test.cpp 
+testy_SOURCES = $(top_srcdir)/test.cpp 
 testy_LDADD = libGiGiSDL.la
-testy_CPPFLAGS = -I../include -I../include/dialogs -I../include/net -I../include/SDL @SDL_CFLAGS@ @FT2_CFLAGS@
+testy_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/include/dialogs -I$(top_srcdir)/include/net -I$(top_srcdir)/include/SDL @SDL_CFLAGS@ @FT2_CFLAGS@
+
+DISTCLEANFILES = GG.log

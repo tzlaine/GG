@@ -61,10 +61,12 @@ public:
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int, int, int, int)> ScrolledSignalType; ///< emitted whenever the scrollbar is moved; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
+    typedef boost::signal<void (int, int, int, int)> ScrolledAndStoppedSignalType; ///< emitted when the scrollbar's tab is stopped after being dragged, the scrollbar is adjusted using the keyboard, or the scrollbar is moved programmatically; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     //@}
    
     /** \name Slot Types */ //@{
     typedef ScrolledSignalType::slot_type ScrolledSlotType; ///< type of functor(s) invoked on a ScrolledSignalType
+    typedef ScrolledAndStoppedSignalType::slot_type ScrolledAndStoppedSlotType; ///< type of functor(s) invoked on a ScrolledAndStoppedSignalType
     //@}
    
     /** \name Structors */ //@{
@@ -87,7 +89,8 @@ public:
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    ScrolledSignalType& ScrolledSignal() const  {return m_scrolled_sig;} ///< returns the scrolled signal object for this Scroll
+    ScrolledSignalType&           ScrolledSignal() const           {return m_scrolled_sig;} ///< returns the scrolled signal object for this Scroll
+    ScrolledAndStoppedSignalType& ScrolledAndStoppedSignal() const {return m_scrolled_and_stopped_sig;} ///< returns the scrolled-and-stopped signal object for this Scroll
     //@}
    
     /** \name Mutators */ //@{
@@ -145,7 +148,8 @@ private:
     ScrollRegion         m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
     ScrollRegion         m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
 
-    mutable ScrolledSignalType m_scrolled_sig;
+    mutable ScrolledSignalType           m_scrolled_sig;
+    mutable ScrolledAndStoppedSignalType m_scrolled_and_stopped_sig;
 };
 
 // define EnumMap and stream operators for Scroll::Orientation

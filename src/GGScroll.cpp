@@ -71,7 +71,10 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
 
 Scroll::Scroll(const XMLElement& elem) :
     Control(elem.Child("GG::Control")),
-    m_orientation(lexical_cast<Orientation>(elem.Child("m_orientation").Text()))
+    m_orientation(lexical_cast<Orientation>(elem.Child("m_orientation").Text())),
+    m_tab_drag_offset(-1), 
+    m_initial_depressed_area(SBR_NONE),
+    m_depressed_area(SBR_NONE)
 {
     if (elem.Tag() != "GG::Scroll")
         throw std::invalid_argument("Attempted to construct a GG::Scroll from an XMLElement that had a tag other than \"GG::Scroll\"");
@@ -102,10 +105,6 @@ Scroll::Scroll(const XMLElement& elem) :
         throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the decrement button.");
     }
 
-    m_tab_drag_offset = lexical_cast<int>(elem.Child("m_tab_drag_offset").Text());
-    m_initial_depressed_area = lexical_cast<ScrollRegion>(elem.Child("m_initial_depressed_area").Text());
-    m_depressed_area = lexical_cast<ScrollRegion>(elem.Child("m_depressed_area").Text());
-
     MoveTabToPosn(); // correct initial placement of tab, if necessary
 }
 
@@ -132,7 +131,6 @@ void Scroll::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         // when a button is pressed, record the region of the control the cursor is over
-        m_tab_drag_offset = -1;   // until we know the tab is being dragged, clear the offset
         switch(RegionUnder(pt))
         {
         case SBR_TAB:
@@ -217,6 +215,9 @@ void Scroll::LButtonUp(const Pt& pt, Uint32 keys)
         m_incr->SetState(Button::BN_UNPRESSED);
         m_initial_depressed_area = SBR_NONE;
         m_depressed_area = SBR_NONE;
+        if (m_tab_drag_offset != -1)
+            m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_tab_drag_offset = -1;
     }
 }
 
@@ -254,7 +255,10 @@ void Scroll::SizeScroll(int min, int max, int line, int page)
     Pt(tab_ul.x + TabWidth(), m_tab->LowerRight().y);
     m_tab->SizeMove(tab_ul, tab_lr);
     MoveTabToPosn();
-    if (old_posn != m_posn) m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 void Scroll::ScrollTo(int p)
@@ -267,7 +271,10 @@ void Scroll::ScrollTo(int p)
     else
         m_posn = p;
     MoveTabToPosn();
-    if (old_posn != m_posn) m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 void Scroll::ScrollLineIncr()
@@ -278,7 +285,10 @@ void Scroll::ScrollLineIncr()
     else
         m_posn = m_range_max - (m_page_sz - 1);
     MoveTabToPosn();
-    if (old_posn != m_posn) m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 void Scroll::ScrollLineDecr()
@@ -289,7 +299,10 @@ void Scroll::ScrollLineDecr()
     else
         m_posn = m_range_min;
     MoveTabToPosn();
-    if (old_posn != m_posn) m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 void Scroll::ScrollPageIncr()
@@ -300,7 +313,10 @@ void Scroll::ScrollPageIncr()
     else
         m_posn = m_range_max - (m_page_sz - 1);
     MoveTabToPosn();
-    if (old_posn != m_posn) m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 void Scroll::ScrollPageDecr()
@@ -311,7 +327,10 @@ void Scroll::ScrollPageDecr()
     else
         m_posn = m_range_min;
     MoveTabToPosn();
-    if (old_posn != m_posn) m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 XMLElement Scroll::XMLEncode() const
@@ -328,9 +347,6 @@ XMLElement Scroll::XMLEncode() const
     retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
     retval.AppendChild(XMLElement("m_incr", m_incr->XMLEncode()));
     retval.AppendChild(XMLElement("m_decr", m_decr->XMLEncode()));
-    retval.AppendChild(XMLElement("m_tab_drag_offset", lexical_cast<string>(m_tab_drag_offset)));
-    retval.AppendChild(XMLElement("m_initial_depressed_area", lexical_cast<string>(m_initial_depressed_area)));
-    retval.AppendChild(XMLElement("m_depressed_area", lexical_cast<string>(m_depressed_area)));
     return retval;
 }
 
@@ -348,9 +364,6 @@ XMLElementValidator Scroll::XMLValidator() const
     retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
     retval.AppendChild(XMLElementValidator("m_incr", m_incr->XMLValidator()));
     retval.AppendChild(XMLElementValidator("m_decr", m_decr->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_tab_drag_offset", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_initial_depressed_area", new MappedEnumValidator<ScrollRegion>()));
-    retval.AppendChild(XMLElementValidator("m_depressed_area", new MappedEnumValidator<ScrollRegion>()));
     return retval;
 }
 
@@ -388,13 +401,16 @@ Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
 
 void Scroll::UpdatePosn()
 {
+    int old_posn = m_posn;
     int before_tab = (m_orientation == VERTICAL ?            // the tabspace before the tab's lower-value side
                       m_tab->UpperLeft().y - m_decr->Size().y :
                       m_tab->UpperLeft().x - m_decr->Size().x );
     int tab_space = TabSpace();
-    m_posn = int(m_range_min + double(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
+    m_posn = static_cast<int>(m_range_min + static_cast<double>(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
     m_posn = std::min(m_range_max - m_page_sz + 1, std::max(m_range_min, m_posn));
-    m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);   // notify interested parties whenever m_posn changes
+    if (old_posn != m_posn) {
+        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
 }
 
 void Scroll::MoveTabToPosn()
@@ -408,8 +424,8 @@ void Scroll::MoveTabToPosn()
 
     m_tab->MoveTo(m_orientation==VERTICAL ?
                   Pt(m_tab->UpperLeft().x,
-                     int((double(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace)) :
-                  Pt(int((double(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace),
+                     static_cast<int>((static_cast<double>(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace)) :
+                  Pt(static_cast<int>((static_cast<double>(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace),
                      m_tab->UpperLeft().y));
 }
 

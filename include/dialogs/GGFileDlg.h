@@ -65,7 +65,7 @@ public:
         multiple file selections are allowed.  \throw GG::InitialDirectoryDoesNotExistException Will throw 
         GG::InitialDirectoryDoesNotExistException when \a directory is invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const shared_ptr<Font>& font, Clr color, 
-	    Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+            Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, 
         if desired (such as when "Save As" is called in an app, and there is a current filename).  If \a directory is "", 
@@ -74,7 +74,7 @@ public:
         multiple file selections are allowed.  \throw GG::InitialDirectoryDoesNotExistException Will throw 
         GG::InitialDirectoryDoesNotExistException when \a directory is invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const string& font_filename, int pts, Clr color, 
-	    Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+            Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial directory 
         and filename to the dialog, if desired (such as when "Save As" is called in an app, and there is a 
@@ -91,7 +91,7 @@ public:
         \throw GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory 
         is invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-	    const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+            const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial directory 
         and filename to the dialog, if desired (such as when "Save As" is called in an app, and there is a 
@@ -108,7 +108,7 @@ public:
         \throw GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory is 
         invalid. */
     FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-	    const string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+            const string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     FileDlg(const XMLElement& elem); ///< ctor that constructs a StateButton object from an FileDlg. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a FileDlg object
     //@}
@@ -124,23 +124,30 @@ public:
     virtual bool Render();
     virtual void Keypress(Key key, Uint32 key_mods);
 
-    void SetButtonColor(Clr color);  ///< sets the color used to render the dialog's buttons
+    void SetButtonColor(Clr color);                              ///< sets the color used to render the dialog's buttons
+    void SetFilesString(const std::string& files_str);           ///< sets the text label next to the files edit box to \a files_str (this is "File(s):" by default)
+    void SetFileTypesString(const std::string& files_types_str); ///< sets the text label next to the file types dropdown list to \a file_types_str (this is "Type(s):" by default)
+    void SetSaveString(const std::string& save_str);             ///< sets the text of the ok button in its "save" state to \a save_str (this is "Save" by default)
+    void SetOpenString(const std::string& open_str);             ///< sets the text of the ok button in its "open" state to \a open_str (this is "Open" by default)
+    void SetCancelString(const std::string& cancel_str);         ///< sets the text of the cancel button to \a cancel_str (this is "Cancel" by default)
     //@}
 
     /** returns the current directory (the one that will be used by default on the next invocation of FileDlg::Run()) */
     static const boost::filesystem::path& WorkingDirectory() {return s_working_dir;}
 
-private:
+protected:
     enum {WIDTH = 400, HEIGHT = 350}; ///< default width and height values for the dialog, in pixels
-   
+
+private:
     void CreateChildren(const string& filename, bool multi, const string& font_filename, int pts);
+    void PlaceLabelsAndEdits(int button_width, int button_height);
     void AttachSignalChildren();
     void DetachSignalChildren();
     void Init(const string& directory);
     void OkClicked();
     void CancelClicked() {m_done = true; m_result.clear();}
     void FileSetChanged(const set<int>& files);
-    void FileDoubleClicked(int n, const ListBox::Row* row);
+    void FileDoubleClicked(int n, const shared_ptr<ListBox::Row>& row);
     void FilesEditChanged(const string& str);
     void FilterChanged(int idx);
     void SetWorkingDirectory(const boost::filesystem::path& p);
@@ -159,6 +166,10 @@ private:
     vector<pair<string, string> > 
                      m_file_filters;
     set<string>      m_result;
+
+    string           m_save_str;
+    string           m_open_str;
+    string           m_cancel_str;
    
     TextControl*     m_curr_dir_text;
     ListBox*         m_files_list;

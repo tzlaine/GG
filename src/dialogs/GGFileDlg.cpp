@@ -35,6 +35,11 @@
 
 #include "GGThreeButtonDlg.h"
 
+// HACK! MSVC #defines int64_t to be __int64, which breaks the code in boost's cstdint.hpp
+#ifdef int64_t
+#undef int64_t
+#endif
+
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/spirit.hpp>
@@ -43,64 +48,67 @@
 namespace GG {
 
 namespace {
-using namespace boost::spirit;
-// these functors are used by the if_p, while_p, and for_p parsers in UpdateList()
-struct LeadingWildcard
-{
-    LeadingWildcard(const string& str) : m_value(!str.empty() && *str.begin() == '*') {}
-    bool operator()() const {return m_value;}
-    bool m_value;
-};
-struct TrailingWildcard
-{
-    TrailingWildcard(const string& str) : m_value(!str.empty() && *str.rbegin() == '*') {}
-    bool operator()() const {return m_value;}
-    bool m_value;
-};
+    using namespace boost::spirit;
+    // these functors are used by the if_p, while_p, and for_p parsers in UpdateList()
+    struct LeadingWildcard
+    {
+        LeadingWildcard(const string& str) : m_value(!str.empty() && *str.begin() == '*') {}
+        bool operator()() const {return m_value;}
+        bool m_value;
+    };
+    struct TrailingWildcard
+    {
+        TrailingWildcard(const string& str) : m_value(!str.empty() && *str.rbegin() == '*') {}
+        bool operator()() const {return m_value;}
+        bool m_value;
+    };
 
-struct Index
-{
-    Index(int i = 0) : m_initial_value(i) {}
-    void operator()() const {value = m_initial_value;}
-    int m_initial_value;
-    static int value;
-};
-int Index::value;
-struct IndexLess
-{
-    IndexLess(int val) : m_value(val) {}
-    bool operator()() const {return Index::value <  m_value;}
-    int m_value;
-};
-struct IndexIncr  
-{
-    void operator()() const {++Index::value;}
-};
+    struct Index
+    {
+        Index(int i = 0) : m_initial_value(i) {}
+        void operator()() const {value = m_initial_value;}
+        int m_initial_value;
+        static int value;
+    };
+    int Index::value;
+    struct IndexLess
+    {
+        IndexLess(int val) : m_value(val) {}
+        bool operator()() const {return Index::value <  m_value;}
+        int m_value;
+    };
+    struct IndexIncr  
+    {
+        void operator()() const {++Index::value;}
+    };
 
-struct FrontStringBegin
-{
-    FrontStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
-    const char* operator()() const {return m_strings->front().c_str();}
-    shared_ptr<vector<string> > m_strings;
-};
-struct FrontStringEnd
-{
-    FrontStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
-    const char* operator()() const {return m_strings->front().c_str() + m_strings->front().size();}
-    shared_ptr<vector<string> > m_strings;
-};
-struct IndexedStringBegin
-{
-    IndexedStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
-    const char* operator()() const {return (*m_strings)[Index::value].c_str();}
-    shared_ptr<vector<string> > m_strings;
-};
-struct IndexedStringEnd
-{
-    IndexedStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
-    const char* operator()() const {return (*m_strings)[Index::value].c_str() + (*m_strings)[Index::value].size();}
-    shared_ptr<vector<string> > m_strings;
-};
+    struct FrontStringBegin
+    {
+        FrontStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        const char* operator()() const {return m_strings->front().c_str();}
+        shared_ptr<vector<string> > m_strings;
+    };
+    struct FrontStringEnd
+    {
+        FrontStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        const char* operator()() const {return m_strings->front().c_str() + m_strings->front().size();}
+        shared_ptr<vector<string> > m_strings;
+    };
+    struct IndexedStringBegin
+    {
+        IndexedStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        const char* operator()() const {return (*m_strings)[Index::value].c_str();}
+        shared_ptr<vector<string> > m_strings;
+    };
+    struct IndexedStringEnd
+    {
+        IndexedStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        const char* operator()() const {return (*m_strings)[Index::value].c_str() + (*m_strings)[Index::value].size();}
+        shared_ptr<vector<string> > m_strings;
+    };
+
+    const int H_SPACING = 10;
+    const int V_SPACING = 10;
 }
 
 // static member definition(s)
@@ -116,6 +124,9 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     m_button_color(color),
     m_font(font),
     m_save(save),
+    m_save_str("Save"),
+    m_open_str("Open"),
+    m_cancel_str("Cancel"),
     m_curr_dir_text(0),
     m_files_list(0),
     m_files_edit(0),
@@ -139,6 +150,9 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     m_button_color(color),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_save(save),
+    m_save_str("Save"),
+    m_open_str("Open"),
+    m_cancel_str("Cancel"),
     m_curr_dir_text(0),
     m_files_list(0),
     m_files_edit(0),
@@ -163,6 +177,9 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     m_font(font),
     m_save(save),
     m_file_filters(types),
+    m_save_str("Save"),
+    m_open_str("Open"),
+    m_cancel_str("Cancel"),
     m_curr_dir_text(0),
     m_files_list(0),
     m_files_edit(0),
@@ -187,6 +204,9 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_save(save),
     m_file_filters(types),
+    m_save_str("Save"),
+    m_open_str("Open"),
+    m_cancel_str("Cancel"),
     m_curr_dir_text(0),
     m_files_list(0),
     m_files_edit(0),
@@ -308,13 +328,45 @@ void FileDlg::SetButtonColor(Clr color)
     m_cancel_button->SetColor(color);
 }
 
+void FileDlg::SetFilesString(const std::string& files_str)
+{
+    m_files_label->SetText(files_str);
+    PlaceLabelsAndEdits(Width() / 4 - H_SPACING, m_files_edit->Height());
+}
+
+void FileDlg::SetFileTypesString(const std::string& files_types_str)
+{
+    m_file_types_label->SetText(files_types_str);
+    PlaceLabelsAndEdits(Width() / 4 - H_SPACING, m_files_edit->Height());
+}
+
+void FileDlg::SetSaveString(const std::string& save_str)
+{
+    bool set_button_text = m_ok_button->WindowText() == m_save_str;
+    m_save_str = save_str;
+    if (set_button_text)
+        m_ok_button->SetText(m_save_str);
+}
+
+void FileDlg::SetOpenString(const std::string& open_str)
+{
+    bool set_button_text = m_ok_button->WindowText() == m_open_str;
+    m_open_str = open_str;
+    if (set_button_text)
+        m_ok_button->SetText(m_open_str);
+}
+
+void FileDlg::SetCancelString(const std::string& cancel_str)
+{
+    m_cancel_str = cancel_str;
+    m_cancel_button->SetText(m_cancel_str);
+}
+
 void FileDlg::CreateChildren(const string& filename, bool multi, const string& font_filename, int pts)
 {
     if (m_save)
         multi = false;
 
-    const int H_SPACING = 10;
-    const int V_SPACING = 10;
     const int USABLE_WIDTH = Width() - 4 * H_SPACING;
     const int BUTTON_WIDTH = USABLE_WIDTH / 4;
 
@@ -329,25 +381,29 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     m_files_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, m_text_color, TF_RIGHT | TF_VCENTER);
     m_file_types_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, m_text_color, TF_RIGHT | TF_VCENTER);
 
-    // determine the space needed to display both text labels in the chosen font; use this to expand the
-    // edit as far as possible
-    int labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
-                                m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
-    m_files_label->OffsetMove(labels_width - m_files_label->Width() - H_SPACING / 2, 0);
-    m_file_types_label->OffsetMove(labels_width - m_file_types_label->Width() - H_SPACING / 2, 0);
-    m_files_edit->SizeMove(labels_width, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (BUTTON_WIDTH + 2 * H_SPACING), Height() - (BUTTON_HEIGHT + 2 * V_SPACING));
-    m_filter_list->SizeMove(labels_width, Height() - (BUTTON_HEIGHT + V_SPACING),     Width() - (BUTTON_WIDTH + 2 * H_SPACING), Height() - V_SPACING);
+    PlaceLabelsAndEdits(BUTTON_WIDTH, BUTTON_HEIGHT);
 
     if (!m_ok_button)
-        m_ok_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2, BUTTON_WIDTH, BUTTON_HEIGHT, m_save ? "Save" : "Open", font_filename, pts, m_button_color, m_text_color);
+        m_ok_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2, BUTTON_WIDTH, BUTTON_HEIGHT, m_save ? m_save_str : m_open_str, font_filename, pts, m_button_color, m_text_color);
     if (!m_cancel_button)
-        m_cancel_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, "Cancel", font_filename, pts, m_button_color, m_text_color);
+        m_cancel_button = new Button(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, m_cancel_str, font_filename, pts, m_button_color, m_text_color);
 
     // finally, we can create the listbox with the files in it, sized to fill the available space
     int file_list_top = m_curr_dir_text->Height() + V_SPACING;
     m_files_list = new ListBox(H_SPACING, file_list_top, Width() - 2 * H_SPACING, Height() - (BUTTON_HEIGHT + V_SPACING) * 2 - file_list_top - V_SPACING, m_border_color);
     m_files_list->SetStyle(LB_NOSORT | (multi ? 0 : LB_SINGLESEL));
+}
 
+void FileDlg::PlaceLabelsAndEdits(int button_width, int button_height)
+{
+    // determine the space needed to display both text labels in the chosen font; use this to expand the
+    // edit as far as possible
+    int labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
+                                m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
+    m_files_label->Resize(labels_width - H_SPACING / 2, m_files_label->Height());
+    m_file_types_label->Resize(labels_width - H_SPACING / 2, m_file_types_label->Height());
+    m_files_edit->SizeMove(labels_width, Height() - (button_height + V_SPACING) * 2, Width() - (button_width + 2 * H_SPACING), Height() - (button_height + 2 * V_SPACING));
+    m_filter_list->SizeMove(labels_width, Height() - (button_height + V_SPACING),    Width() - (button_width + 2 * H_SPACING), Height() - V_SPACING);
 }
 
 void FileDlg::AttachSignalChildren()
@@ -409,7 +465,7 @@ void FileDlg::OkClicked()
     std::sort(files.begin(), files.end());
 
     if (m_save) { // file save case
-        if (m_ok_button->WindowText() != "Save") {
+        if (m_ok_button->WindowText() != m_save_str) {
             OpenDirectory();
         } else if (files.size() == 1) {
             results_valid = true;
@@ -477,13 +533,13 @@ void FileDlg::FileSetChanged(const set<int>& files)
         }
     }
     *m_files_edit << all_files;
-    if (m_save && !dir_selected && m_ok_button->WindowText() != "Save")
-        m_ok_button->SetText("Save");
-    else if (m_save && dir_selected && m_ok_button->WindowText() == "Save")
-        m_ok_button->SetText("Open");
+    if (m_save && !dir_selected && m_ok_button->WindowText() != m_save_str)
+        m_ok_button->SetText(m_save_str);
+    else if (m_save && dir_selected && m_ok_button->WindowText() == m_save_str)
+        m_ok_button->SetText(m_open_str);
 }
 
-void FileDlg::FileDoubleClicked(int n, const ListBox::Row* row)
+void FileDlg::FileDoubleClicked(int n, const shared_ptr<ListBox::Row>& row)
 {
     string filename = (*row)[0]->WindowText();
     m_files_list->ClearSelection();
@@ -493,8 +549,8 @@ void FileDlg::FileDoubleClicked(int n, const ListBox::Row* row)
 
 void FileDlg::FilesEditChanged(const string& str)
 {
-    if (m_save && m_ok_button->WindowText() != "Save")
-        m_ok_button->SetText("Save");
+    if (m_save && m_ok_button->WindowText() != m_save_str)
+        m_ok_button->SetText(m_save_str);
 }
 
 void FileDlg::FilterChanged(int idx)
@@ -633,8 +689,8 @@ void FileDlg::OpenDirectory()
         } else {
             SetWorkingDirectory(s_working_dir / directory);
         }
-        if (m_save && m_ok_button->WindowText() != "Save")
-            m_ok_button->SetText("Save");
+        if (m_save && m_ok_button->WindowText() != m_save_str)
+            m_ok_button->SetText(m_save_str);
     }
 }
 

@@ -21,7 +21,7 @@ WARN_CCFLAGS = -Wall
 CCFLAGS = $(DEBUG_LEVEL) $(WARN_CCFLAGS)
 CXXFLAGS = -c $(CCFLAGS) $(INCLUDE)
 
-INCLUDE = -I/c/boost_1_30_0 \
+INCLUDE = -I/c/boost-1.30.2 \
 	-I/c/Dev-Cpp/include/freetype2 \
 	-I/c/Dev-Cpp/include/SDL \
 	-I/c/DevIL/include \

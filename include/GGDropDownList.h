@@ -37,6 +37,8 @@
 #endif
 
 namespace GG {
+    class DropDownList;
+}
 
 /** displays a single choice, and allows the user to select items from a pop-up list.  DropDownList is based upon 
     GG::ListBox, but has significant restrictions over the functionality of GG::ListBox.  Specifically, all list items
@@ -51,7 +53,7 @@ namespace GG {
     DropDownList.  Though you can still set the alignment, indentation, etc. of individual rows, as in ListBox, the 
     currently-selected row will have the same alignment, indentation, etc. when displayed in the control in its 
     unopened state.  This may look quite ugly.*/
-class GG_API DropDownList : public Control
+class GG_API GG::DropDownList : public GG::Control
 {
 public:
     using Wnd::SizeMove;
@@ -141,8 +143,6 @@ private:
    
     mutable SelChangedSignalType m_sel_changed_sig;
 };
-
-} // namespace GG
 
 #endif // _GGDropDownList_h_
 

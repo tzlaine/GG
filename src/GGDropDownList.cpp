@@ -31,41 +31,47 @@
 #include <GGDrawUtil.h>
 #include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 namespace {
-const int BORDER_THICK = 2; // should be the same as the BORDER_THICK value in GGListBox.h
-class ModalListPicker : public Wnd
-{
-public:
-    ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-        Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
-        m_drop_wnd(drop_wnd),
-        m_lb_wnd(lb_wnd),
-        m_old_lb_ul(m_lb_wnd->UpperLeft())
-    {
-        Connect(m_lb_wnd->SelChangedSignal(), &ModalListPicker::LBSelChangedSlot, this);
-        m_lb_wnd->OffsetMove(m_drop_wnd->Parent() ? m_drop_wnd->Parent()->UpperLeft() : Pt());
-        AttachChild(m_lb_wnd);
-    }
-    ~ModalListPicker() {m_lb_wnd->MoveTo(m_old_lb_ul); DetachChild(m_lb_wnd);}
+    const int BORDER_THICK = 2; // should be the same as the BORDER_THICK value in GGListBox.h
 
-protected:
-    virtual void LClick(const Pt& pt, Uint32 keys) {m_done = true;}
-
-private:
-    void LBSelChangedSlot(const set<int>& rows)
+    class ModalListPicker : public Wnd
     {
-        if (!rows.empty()) {
-            m_drop_wnd->Select(*rows.begin());
+    public:
+        ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
+            Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+            m_drop_wnd(drop_wnd),
+            m_lb_wnd(lb_wnd),
+            m_old_lb_ul(m_lb_wnd->UpperLeft())
+        {
+            Connect(m_lb_wnd->SelChangedSignal(), &ModalListPicker::LBSelChangedSlot, this);
+            Connect(m_lb_wnd->LeftClickedSignal(), &ModalListPicker::LBLeftClickSlot, this);
+            m_lb_wnd->OffsetMove(m_drop_wnd->Parent() ? m_drop_wnd->Parent()->UpperLeft() : Pt());
+            AttachChild(m_lb_wnd);
+        }
+        ~ModalListPicker() {m_lb_wnd->MoveTo(m_old_lb_ul); DetachChild(m_lb_wnd);}
+
+    protected:
+        virtual void LClick(const Pt& pt, Uint32 keys) {m_done = true;}
+
+    private:
+        void LBSelChangedSlot(const set<int>& rows)
+        {
+            if (!rows.empty()) {
+                m_drop_wnd->Select(*rows.begin());
+                m_done = true;
+            }
+        }
+        void LBLeftClickSlot(int, const ListBox::Row*, const Pt&)
+        {
             m_done = true;
         }
-    }
 
-    DropDownList*  m_drop_wnd;
-    ListBox*       m_lb_wnd;
-    Pt             m_old_lb_ul;
-};
+        DropDownList*  m_drop_wnd;
+        ListBox*       m_lb_wnd;
+        Pt             m_old_lb_ul;
+    };
 }
 
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb/* = 0*/,
@@ -153,17 +159,13 @@ bool DropDownList::Render()
 
 void DropDownList::LClick(const Pt& pt, Uint32 keys)
 {
+    ModalListPicker picker(this, m_LB);
     const set<int>& LB_sels = m_LB->Selections();
     if (!LB_sels.empty()) {
         if (m_LB->m_vscroll)
             m_LB->m_vscroll->ScrollTo(*LB_sels.begin() * m_LB->RowHeight());
-    } else {
-        m_LB->m_first_row_shown = 0;
     }
-
     m_LB->m_first_col_shown = 0;
-
-    ModalListPicker picker(this, m_LB);
     picker.Run();
 }
 
@@ -274,6 +276,3 @@ XMLElementValidator DropDownList::XMLValidator() const
     retval.AppendChild(XMLElementValidator("m_LB", m_LB->XMLValidator()));
     return retval;
 }
-
-} // namespace GG
-

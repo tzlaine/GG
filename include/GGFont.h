@@ -107,7 +107,7 @@ public:
     {
         Tag() : close_tag(false), char_length(0) {} ///< default ctor
  
-        vector<string> tokens;        ///< the tokens of the tag (tokens are broken up by ' ' and '\t' whitespace characters)
+        vector<string> tokens;        ///< the tokens of the tag (tokens are broken up by ' ' and '\\t' whitespace characters)
         bool           close_tag;     ///< true if this is a "close" tag (eg "</i>")
         int            char_length;   ///< the total number of characters that comprise the tag, including brackets and whitespace.  0 indicates that this is not a valid tag.
     };
@@ -118,7 +118,7 @@ public:
     {
         RenderState() : ignore_tags(false), use_italics(false), draw_underline(false), color_set(false) {} ///< default ctor
 
-        bool    ignore_tags;        ///< set to true upon encountering a <pre> tag, and to false when a </pre> tag is seen
+        bool    ignore_tags;        ///< set to true upon encountering a \<pre> tag, and to false when a \</pre> tag is seen
         bool    use_italics;        ///< set to true upon encountering an \<i> tag, and to false when an \</i> tag is seen
         bool    draw_underline;     ///< set to true upon encountering an \<u> tag, and to false when an \</u> tag is seen
         bool    color_set;          ///< true when a tag has set the current color

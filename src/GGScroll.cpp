@@ -190,7 +190,7 @@ int Scroll::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
         if (m_tab_drag_offset != -1) // if tab is being dragged
         {
             int click_pos;
-            int scroll_width;   // "width" in these is not necessarily in the x direction, it means more like "extent" in horiz or vert direction
+            int scroll_width;   // "width" in these is not necessarily in the x direction, it means more like "extent" in horz or vert direction
             int tab_width;
             int decr_width;
             int incr_width;
@@ -429,8 +429,8 @@ void Scroll::UpdatePosn()
     int before_tab = (m_orientation == VERTICAL ?            // the tabspace before the tab's lower-value side
                       m_tab->UpperLeft().y - m_decr->WindowDimensions().y :
                       m_tab->UpperLeft().x - m_decr->WindowDimensions().x );
-    int tab_space = TabSpace(); // all the tabspace
-    m_posn = int(m_range_min + double(before_tab) / tab_space * (m_range_max - m_range_min + 1));
+    int tab_space = TabSpace() - (m_orientation == VERTICAL ? m_tab->WindowDimensions().y : m_tab->WindowDimensions().x); // all the tabspace
+    m_posn = int(m_range_min + double(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
     m_posn = std::min(m_range_max - m_page_sz + 1, std::max(m_range_min, m_posn));
     m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);   // notify interested parties whenever m_posn changes
 }
@@ -441,8 +441,8 @@ void Scroll::MoveTabToPosn()
                           m_decr->WindowDimensions().y:
                           m_decr->WindowDimensions().x);
     int end_tabspace = (m_orientation==VERTICAL ?      // what is its highest?
-                        WindowDimensions().y - m_incr->WindowDimensions().y:
-                        WindowDimensions().x - m_incr->WindowDimensions().x);
+                        WindowDimensions().y - m_incr->WindowDimensions().y - m_tab->WindowDimensions().y:
+                        WindowDimensions().x - m_incr->WindowDimensions().x - m_tab->WindowDimensions().x);
 
     m_tab->MoveTo(m_orientation==VERTICAL ?
                   Pt(m_tab->UpperLeft().x,

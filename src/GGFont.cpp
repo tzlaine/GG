@@ -79,18 +79,12 @@ const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 /
 Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
         m_font_filename(font_filename),
         m_pt_sz(pts),
-        m_glyph_range(range),
-        m_use_italics(false),
-        m_underline_start(-1),
-        m_ignore_tags(false)
+        m_glyph_range(range)
 {
     Init(font_filename, pts, range);
 }
 
-Font::Font(const XMLElement& elem) :
-        m_use_italics(false),
-        m_underline_start(-1),
-        m_ignore_tags(false)
+Font::Font(const XMLElement& elem)
 {
     if (elem.Tag() != "GG::Font")
         throw std::invalid_argument("Attempted to construct a GG::Font from an XMLElement that had a tag other than \"GG::Font\"");
@@ -107,47 +101,36 @@ Font::Font(const XMLElement& elem) :
     Init(font_filename, pts, range);
 }
 
-inline int Font::RenderGlyph(int x, int y, char c) const
+int Font::RenderGlyph(int x, int y, char c) const
 {
     std::map<char, Glyph>::const_iterator it = m_glyphs.find(c);
     if (it == m_glyphs.end())
         it = m_glyphs.find(' '); // print a space when an unrendered glyph is requested
-    return RenderGlyph(x, y, it->second);
+    return RenderGlyph(x, y, it->second, 0);
 }
 
-int Font::RenderText(int x, int y, const string& text, bool tags/* = false*/) const
+int Font::RenderText(int x, int y, const string& text) const
 {
-    double orig_color[4];
-    glGetDoublev(GL_CURRENT_COLOR, orig_color);
     int orig_x = x;
     for (unsigned int i = 0; i < text.length(); ++i) {
-        Tag tag;
-        if (tags)
-            FindFormatTag(text, i, tag, m_ignore_tags);
-        if (tag.char_length) {
-            HandleTag(tag, x, y, orig_color);
-            i += tag.char_length - 1;
-        } else {
-            x += RenderGlyph(x, y, text[i]);
-        }
+        x += RenderGlyph(x, y, text[i]);
     }
-
-    if (m_underline_start != -1) // if there was no underline close-tag, draw underline now
-        DrawUnderline(x, y);
-
-    // reset these so the next iteration starts fresh
-    m_use_italics = false;
-    m_underline_start = -1;
-    m_ignore_tags = false;
-    glColor4dv(orig_color);
-
     return x - orig_x;
 }
 
-void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/, bool tags/* = false*/) const
+void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/, 
+                      bool tags/* = false*/, Font::RenderState* render_state/* = 0*/) const
 {
+    RenderState state;
+    if (!render_state) {
+        render_state = &state;
+    }
+
     double orig_color[4];
     glGetDoublev(GL_CURRENT_COLOR, orig_color);
+    
+    if (render_state->color_set)
+        glColor4ubv(render_state->curr_color.v);
 
     // get breakdown of how text is divided into lines
     vector<LineData> lines;
@@ -167,63 +150,19 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
     int tab_pixel_width = tab_width * m_space_width;  // get the length of a tab stop
 
     int rows_rendered = 0;
-    int y_origin = y1; // default value for TF_LEFT
+    int y_origin = y1; // default value for TF_TOP
     if (format & TF_BOTTOM)
-        y_origin = y2 - int(line_data->size() * m_lineskip);
+        y_origin = y2 - static_cast<int>(line_data->size() * m_lineskip);
     else if (format & TF_VCENTER)
-        y_origin = y1 + int(((y2 - y1) - ((int(line_data->size()) - 1) * m_lineskip + m_height)) / 2.0 + 0.5);
+        y_origin = y1 + static_cast<int>(((y2 - y1) - (static_cast<int>((line_data->size())) * m_lineskip)) / 2.0);
     int x = x1, y = y_origin;
-    Uint32 orig_just = format & (TF_LEFT | TF_CENTER | TF_RIGHT); // original justification as comes from the format
-    Uint32 curr_just = orig_just; // current justification
     for (std::vector<LineData>::const_iterator cit = line_data->begin(); cit != line_data->end(); ++cit) {
         const LineData& curr_line = *cit;
-
-        // search for justification tag(s) on this line
-        bool last_line_of_curr_just = false; // is this the last line of the current justification? (as in when a </right> tag is encountered)
-        int idx = curr_line.begin_idx;
-        if (tags) {
-            while (idx < curr_line.end_idx) {
-                idx = text.find_first_of('<', idx);
-                if (idx != static_cast<int>(string::npos) && idx < curr_line.end_idx) {
-                    Tag tag;
-                    FindFormatTag(text, idx, tag, m_ignore_tags);
-                    if (tag.tokens[0] == "left") {
-                        if (tag.close_tag) {
-                            if (curr_just == TF_LEFT)
-                                last_line_of_curr_just = true;
-                        } else {
-                            curr_just = TF_LEFT;
-                            last_line_of_curr_just = false;
-                        }
-                    } else if (tag.tokens[0] == "center") {
-                        if (tag.close_tag) {
-                            if (curr_just == TF_CENTER)
-                                last_line_of_curr_just = true;
-                        } else {
-                            curr_just = TF_CENTER;
-                            last_line_of_curr_just = false;
-                        }
-                    } else if (tag.tokens[0] == "right") {
-                        if (tag.close_tag) {
-                            if (curr_just == TF_RIGHT)
-                                last_line_of_curr_just = true;
-                        } else {
-                            curr_just = TF_RIGHT;
-                            last_line_of_curr_just = false;
-                        }
-                    }
-                    idx += tag.char_length;
-                } else { // idx == string::pos
-                    break;
-                }
-            }
-        }
-
         x = x1; // default value for TF_LEFT
-        if (curr_just == TF_RIGHT)
+        if (curr_line.justification == TF_RIGHT)
             x = x2 - curr_line.Width();
-        else if (curr_just == TF_CENTER)
-            x = x1 + int(((x2 - x1) - curr_line.Width()) / 2.0 + 0.5);
+        else if (curr_line.justification == TF_CENTER)
+            x = x1 + static_cast<int>(((x2 - x1) - curr_line.Width()) / 2.0);
         y = y_origin + rows_rendered * m_lineskip;
         for (int i = curr_line.begin_idx; i < curr_line.end_idx; ++i) {
             char c = text[i];
@@ -233,41 +172,27 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
             } else {
                 Tag tag;
                 if (tags)
-                    FindFormatTag(text, i, tag, m_ignore_tags);
+                    FindFormatTag(text, i, tag, render_state->ignore_tags);
                 if (tag.char_length) {
-                    HandleTag(tag, x, y, orig_color);
+                    HandleTag(tag, x, y, orig_color, *render_state);
                     i += tag.char_length - 1;
                 } else {
                     it = m_glyphs.find(c);
                     if (it == m_glyphs.end())
                         it = m_glyphs.find(' '); // print a space when an unrendered glyph is requested
-                    x += RenderGlyph(x, y, it->second);
+                    x += RenderGlyph(x, y, it->second, render_state);
                 }
             }
         }
-        if (m_underline_start != -1) { // if there was no underline close-tag, draw underline now
-            DrawUnderline(x, y);
-            m_underline_start = x1;
-        }
         ++rows_rendered;
-        if (last_line_of_curr_just)
-            curr_just = orig_just;
     }
 
-    // reset these so the next iteration starts fresh
-    m_use_italics = false;
-    m_underline_start = -1;
-    m_ignore_tags = false;
     glColor4dv(orig_color);
 }
 
 Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& line_data, bool tags/* = false*/) const
 {
     Pt retval;
-
-    line_data.clear();
-    line_data.push_back(LineData());
-    line_data.back().begin_idx = 0;
 
     // correct any disagreements in the format flags
     int dup_ct = 0;   // duplication count
@@ -289,11 +214,19 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
     if ((format & TF_WORDBREAK) && (format & TF_LINEWRAP))   // only one of these can be picked; TF_WORDBREAK overrides TF_LINEWRAP
         format &= ~TF_LINEWRAP;
 
+    RenderState render_state;
     int tab_width = (format >> 16) & 0xFF; // width of tabs is embedded in bits 16-23
     if (!tab_width) tab_width = 8;            // default tab width
     int tab_pixel_width = tab_width * m_space_width;   // get the length of a tab stop
     int x = 0;
     bool expand_tabs = format & TF_LEFT; // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
+    Uint32 orig_just = format & (TF_LEFT | TF_CENTER | TF_RIGHT); // original justification as comes from the format
+    bool last_line_of_curr_just = false; // is this the last line of the current justification? (for instance when a </right> tag is encountered)
+
+    line_data.clear();
+    line_data.push_back(LineData());
+    line_data.back().begin_idx = 0;
+    line_data.back().justification = orig_just;
 
     for (unsigned int i = 0; i < text.size(); ++i) {
         char c = text[i];
@@ -301,6 +234,12 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
             line_data.back().end_idx = i;       // end the current line
             line_data.push_back(LineData());    // start a new one
             line_data.back().begin_idx = i + 1;
+            if (last_line_of_curr_just) {
+                line_data.back().justification = orig_just;
+                last_line_of_curr_just = false;
+            } else {
+                line_data.back().justification = line_data[line_data.size() - 2].justification;
+            }
             x = 0;                              // reset the x-position to 0
         } else if (c == '\t' && expand_tabs) {
             int curr_tab_location = x / tab_pixel_width;                         // find the nearest previous tab stop
@@ -311,11 +250,23 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                     line_data.push_back(LineData());    // and then start a new one
                     line_data.back().begin_idx = i + 1;
                     x = 0;                              // and reset the x-position to 0
+                    if (last_line_of_curr_just) {
+                        line_data.back().justification = orig_just;
+                        last_line_of_curr_just = false;
+                    } else {
+                        line_data.back().justification = line_data[line_data.size() - 2].justification;
+                    }
                 } else { // otherwise start a new line and put the tab there:
                     line_data.back().end_idx = i;             // end the current line
                     line_data.push_back(LineData());          // start a new one
                     line_data.back().begin_idx = i;
                     line_data.back().extents.push_back(x = tab_pixel_width); // advance the x-position to the first tab stop
+                    if (last_line_of_curr_just) {
+                        line_data.back().justification = orig_just;
+                        last_line_of_curr_just = false;
+                    } else {
+                        line_data.back().justification = line_data[line_data.size() - 2].justification;
+                    }
                 }
             } else { // there's room for the tab, or we're not using linewrap
                 line_data.back().extents.push_back(x = next_tab_position);
@@ -323,10 +274,35 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
         } else if (c != '\r' && c != '\f') { // c is a letter, number, symbol (whether included in the pre-rendered range of this font or not (see constructor)), or unexpanded tab (a space is substituted), except linefeed or carriage return
             if (tags) {
                 Tag tag;
-                FindFormatTag(text, i, tag, m_ignore_tags);
+                FindFormatTag(text, i, tag, render_state.ignore_tags);
                 if (tag.char_length) {
-                    HandleTag(tag, 0, 0, 0);
-                    i += tag.char_length - 1; // "- 1" because i gets incremented at the end of the loop iteration
+                    HandleTag(tag, 0, 0, 0, render_state);
+                    if (tag.tokens[0] == "left") {
+                        if (tag.close_tag) {
+                            if (line_data.back().justification == TF_LEFT)
+                                last_line_of_curr_just = true;
+                        } else {
+                            line_data.back().justification = TF_LEFT;
+                            last_line_of_curr_just = false;
+                        }
+                    } else if (tag.tokens[0] == "center") {
+                        if (tag.close_tag) {
+                            if (line_data.back().justification == TF_CENTER)
+                                last_line_of_curr_just = true;
+                        } else {
+                            line_data.back().justification = TF_CENTER;
+                            last_line_of_curr_just = false;
+                        }
+                    } else if (tag.tokens[0] == "right") {
+                        if (tag.close_tag) {
+                            if (line_data.back().justification == TF_RIGHT)
+                                last_line_of_curr_just = true;
+                        } else {
+                            line_data.back().justification = TF_RIGHT;
+                            last_line_of_curr_just = false;
+                        }
+                    }
+                    i += tag.char_length - 1; // "- 1" because i gets incremented at the end of each loop iteration
                     // now represent all these skipped characters with the same extent value
                     int extent = line_data.back().extents.empty() ? 0 : line_data.back().extents.back();
                     for (int j = 0; j < tag.char_length; ++j) {
@@ -349,6 +325,12 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                     line_data.push_back(LineData());                      // start a new one
                     line_data.back().begin_idx = i;
                     line_data.back().extents.push_back(x = char_advance); // advance the x-position the width of the character
+                    if (last_line_of_curr_just) {
+                        line_data.back().justification = orig_just;
+                        last_line_of_curr_just = false;
+                    } else {
+                        line_data.back().justification = line_data[line_data.size() - 2].justification;
+                    }
                 } else { // the symbol will fit on the rest of this line
                     line_data.back().extents.push_back(x += char_advance);
                 }
@@ -386,9 +368,16 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                     line_data.back().begin_idx = word_start;
                     line_data.back().extents.insert(line_data.back().extents.end(), word_extents.begin(), word_extents.end());
                     x = word_advance;                      // advance the x-position the width of the character
+                    if (last_line_of_curr_just) {
+                        line_data.back().justification = orig_just;
+                        last_line_of_curr_just = false;
+                    } else {
+                        line_data.back().justification = line_data[line_data.size() - 2].justification;
+                    }
                 } else {
-                    for (unsigned int i = 0; i < word_extents.size(); ++i)
+                    for (unsigned int i = 0; i < word_extents.size(); ++i) {
                         line_data.back().extents.push_back(x + word_extents[i]); // must add x, since the extents start with 0 being the start of the word
+                    }
                     x += word_advance;
                 }
                 if (word_advance) // if we found the end of a word, the last character after the last character of the word was not really processed
@@ -406,16 +395,13 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
         if (!line_data[i].extents.empty() && line_data[i].extents.back() > retval.x)
             retval.x = line_data[i].extents.back();
 
-    // reset so the next iteration starts fresh
-    m_ignore_tags = false;
-
     return retval;
 }
 
 Pt Font::TextExtent(const string& text, Uint32 format/* = TF_NONE*/, int box_width/* = 0*/, bool tags/* = false*/) const
 {
     vector<LineData> lines;
-    return DetermineLines(text, format, box_width ? box_width : 1 << 31, lines, tags);
+    return DetermineLines(text, format, box_width ? box_width : 1 << 15, lines, tags);
 }
 
 XMLElement Font::XMLEncode() const
@@ -478,15 +464,12 @@ void Font::FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags
                 for (tok::iterator it = tokens.begin(); it != tokens.end(); ++it)
                     tag.tokens.push_back(*it);
                 if (s_known_tags.find(tag.tokens[0]) != s_known_tags.end() &&
-                        (!ignore_tags || (tag.tokens[0] == "pre" && tag.close_tag))) // a known tag
+                    (!ignore_tags || (tag.tokens[0] == "pre" && tag.close_tag))) // a known tag
                     tag.char_length = close_brace_posn - idx + 1;
             }
         }
     }
 }
-
-
-
 
 void Font::Init(const string& font_filename, int pts, Uint32 range)
 {
@@ -524,7 +507,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
         m_underline_height = 1.0;
     }
     // italics info
-    m_italics_offset = ITALICS_FACTOR * m_height;
+    m_italics_offset = ITALICS_FACTOR * m_height / 2.0;
 
     // these are the ranges of interest in the ASCII table that correspond to the values of GlyphRange
     enum {NUMBER_START = 0x30, NUMBER_STOP = 0x3A, ALPHA_UPPER_START = 0x41, ALPHA_UPPER_STOP = 0x5B, ALPHA_LOWER_START = 0x61,
@@ -613,19 +596,19 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
                 Uint16* dst_start = buffer_vec.back() + y * BUF_WIDTH + x;
 
                 int glyph_ht = face->glyph->metrics.horiBearingY >> 6; // take floor of 26.6-format fixed point value
-                int y_offset = m_ascent - glyph_ht;
+                int y_offset = m_lineskip + m_descent - glyph_ht;
 
                 for (int row = 0; row < glyph_bitmap.rows; ++row) {
                     Uint8*  src = src_start + row * glyph_bitmap.pitch;
                     Uint16* dst = dst_start + (row + y_offset) * BUF_WIDTH;
                     for (int col = 0; col < glyph_bitmap.width; ++col)
-                        *dst++ = (*src++ << 8) | 255; // alpha is the value from glyph_bitmap; luminance is always white
+                        *dst++ = (*src++ << 8) | 255; // alpha is the value from glyph_bitmap; luminance is always 100% white
                 }
 
                 // record info on how to find and use this glyph later
-                temp_glyph_data[c] = TempGlyphData(int(buffer_vec.size() - 1),
+                temp_glyph_data[c] = TempGlyphData(static_cast<int>(buffer_vec.size()) - 1,
                                                    x, y, x + glyph_bitmap.width, y + m_height,
-                                                   int(std::ceil(face->glyph->metrics.horiAdvance / 64.0))); // convert from 26.6 fixed point format and round up
+                                                   static_cast<int>((std::ceil(face->glyph->metrics.horiAdvance / 64.0)))); // convert from 26.6 fixed point format and round up
 
                 // advance buffer write-position
                 x += glyph_bitmap.width;
@@ -658,9 +641,6 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
     m_space_width = glyph_it->second.advance;
 }
 
-
-
-
 bool Font::GenerateGlyph(FT_Face face, char ch)
 {
     bool retval = true;
@@ -686,9 +666,9 @@ bool Font::GenerateGlyph(FT_Face face, char ch)
     return retval;
 }
 
-inline int Font::RenderGlyph(int x, int y, const Glyph& glyph) const
+int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState* render_state) const
 {
-    if (m_use_italics) {
+    if (render_state && render_state->use_italics) {
         // render subtexture to tilted rhombus instead of rectangle
         glBindTexture(GL_TEXTURE_2D, glyph.sub_texture.GetTexture()->OpenGLId());
         glBegin(GL_TRIANGLE_STRIP);
@@ -697,34 +677,48 @@ inline int Font::RenderGlyph(int x, int y, const Glyph& glyph) const
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[1]);
         glVertex2d(x + m_italics_offset + glyph.sub_texture.Width(), y);
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[3]);
-        glVertex2d(x, y + glyph.sub_texture.Height());
+        glVertex2d(x - m_italics_offset, y + glyph.sub_texture.Height());
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[3]);
-        glVertex2d(x + glyph.sub_texture.Width(), y + glyph.sub_texture.Height());
+        glVertex2d(x - m_italics_offset + glyph.sub_texture.Width(), y + glyph.sub_texture.Height());
         glEnd();
     } else {
         glyph.sub_texture.OrthoBlit(x, y, false);
     }
+    if (render_state && render_state->draw_underline) {
+        double x1 = x;
+        double y1 = y + m_lineskip + m_descent - m_underline_offset;
+        double x2 = x1 + glyph.advance;
+        double y2 = y1 + m_underline_height;
+        glDisable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+        glVertex2d(x1, y2);
+        glVertex2d(x1, y1);
+        glVertex2d(x2, y1);
+        glVertex2d(x2, y2);
+        glEnd();
+        glEnable(GL_TEXTURE_2D);
+    }
     return glyph.advance;
 }
 
-void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color) const
+void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color, Font::RenderState& render_state) const
 {
     bool rendering = orig_color; // if orig_color == 0, we're not rendering the text, just getting lines and extents
     if (tag.tokens[0] == "i" && rendering) {
-        if (!m_use_italics && !tag.close_tag)
-            m_use_italics = true;
-        else if (m_use_italics && tag.close_tag)
-            m_use_italics = false;
+        if (!render_state.use_italics && !tag.close_tag)
+            render_state.use_italics = true;
+        else if (render_state.use_italics && tag.close_tag)
+            render_state.use_italics = false;
     } else if (tag.tokens[0] == "u" && rendering) {
-        if (m_underline_start == -1 && !tag.close_tag) {
-            m_underline_start = x;
-        } else if (m_underline_start != -1 && tag.close_tag) {
-            DrawUnderline(x, y);
-            m_underline_start = -1;
+        if (!tag.close_tag) {
+            render_state.draw_underline = true;
+        } else {
+            render_state.draw_underline = false;
         }
     } else if (tag.tokens[0] == "rgba" && rendering) {
         if (tag.close_tag) {
             glColor4dv(orig_color);
+            render_state.color_set = false;
         } else {
             bool well_formed_tag = true;
             if (5 <= tag.tokens.size()) {
@@ -736,12 +730,14 @@ void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color) con
                     temp_color[2] = lexical_cast<int>(tag.tokens[3]);
                     temp_color[3] = lexical_cast<int>(tag.tokens[4]);
                     if (0 <= temp_color[0] && temp_color[0] <= 255 && 0 <= temp_color[1] && temp_color[1] <= 255 &&
-                            0 <= temp_color[2] && temp_color[2] <= 255 && 0 <= temp_color[3] && temp_color[3] <= 255) {
+                        0 <= temp_color[2] && temp_color[2] <= 255 && 0 <= temp_color[3] && temp_color[3] <= 255) {
                         color[0] = temp_color[0];
                         color[1] = temp_color[1];
                         color[2] = temp_color[2];
                         color[3] = temp_color[3];
                         glColor4ubv(color);
+                        render_state.curr_color = Clr(color);
+                        render_state.color_set = true;
                     } else {
                         well_formed_tag = false;
                     }
@@ -753,10 +749,13 @@ void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color) con
                         color[2] = lexical_cast<double>(tag.tokens[3]);
                         color[3] = lexical_cast<double>(tag.tokens[4]);
                         if (0.0 <= color[0] && color[0] <= 1.0 && 0.0 <= color[1] && color[1] <= 1.0 &&
-                                0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0)
+                            0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0) {
                             glColor4dv(color);
-                        else
+                            render_state.curr_color = Clr(color);
+                            render_state.color_set = true;
+                        } else {
                             well_formed_tag = false;
+                        }
                     } catch (boost::bad_lexical_cast) {
                         well_formed_tag = false;
                     }
@@ -777,23 +776,8 @@ void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color) con
             }
         }
     } else if (tag.tokens[0] == "pre") {
-        m_ignore_tags = !tag.close_tag;
+        render_state.ignore_tags = !tag.close_tag;
     }
-}
-
-void Font::DrawUnderline(int x, int y) const
-{
-    // draw line representing the underlining based on info from font
-    double y2 = y + m_ascent - m_descent - m_underline_offset,
-                y1 = y2 - m_underline_height;
-    glDisable(GL_TEXTURE_2D);
-    glBegin(GL_QUADS);
-    glVertex2d(m_underline_start, y2);
-    glVertex2d(m_underline_start, y1);
-    glVertex2d(x, y1);
-    glVertex2d(x, y2);
-    glEnd();
-    glEnable(GL_TEXTURE_2D);
 }
 
 

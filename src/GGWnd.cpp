@@ -360,13 +360,13 @@ int Wnd::RClick(const Pt& pt, Uint32 keys) {return 1;}
 
 int Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {return 1;}
 
-int Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {return 1;}
-
 int Wnd::MouseEnter(const Pt& pt, Uint32 keys) {return 1;}
 
 int Wnd::MouseHere(const Pt& pt, Uint32 keys) {return 1;}
 
 int Wnd::MouseLeave(const Pt& pt, Uint32 keys) {return 1;}
+
+int Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {return 1;}
 
 int Wnd::Keypress(Key key, Uint32 key_mods) {return 1;}
 

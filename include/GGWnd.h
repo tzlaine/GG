@@ -62,7 +62,7 @@ public:
          DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
          RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
          ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
-         MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and need not be flagged as ONTOP.
+         MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
          }; 
          
    GGEXCEPTION(WndException);   ///< exception class \see GG::GGEXCEPTION
@@ -142,10 +142,10 @@ public:
    virtual int    RButtonDown(const Pt& pt, Uint32 keys);           ///< respond to right button down msg. \see LButtonDown()
    virtual int    RClick(const Pt& pt, Uint32 keys);                ///< respond to release of right mouse button over window, if it was also originally depressed over window. \see LButtonUp()
    virtual int    RDoubleClick(const Pt& pt, Uint32 keys);          ///< respond to second right click in window within the time limit.  A window will receive an RButtonUp() message instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that was r-clicked within a double-click time interval  Note that this means a double click is always preceded by a click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in during the interval.
-   virtual int    MouseWheel(const Pt& pt, int move, Uint32 keys);  ///< respond to movement of the mouse wheel
    virtual int    MouseEnter(const Pt& pt, Uint32 keys);            ///< respond to cursor entering window's coords
    virtual int    MouseHere(const Pt& pt, Uint32 keys);             ///< respond to cursor moving about in window's coords.  A MouseHere() message will not be generated the first time the cursor enters the window's area.  In that case, a MouseEnter() message is generated.
    virtual int    MouseLeave(const Pt& pt, Uint32 keys);            ///< respond to cursor leaving window's coords
+   virtual int    MouseWheel(const Pt& pt, int move, Uint32 keys);  ///< respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down)
    virtual int    Keypress(Key key, Uint32 key_mods);               ///< respond to keystrokes (focus window only).  A window may receive Keypress() messages passed up to it from its children.  For instance, many Control-derived classes pass Keypress() messages to their Parent() windows by default.
    virtual int    GainingFocus();                                   ///< respond to this window gaining the input focus
    virtual int    LosingFocus();                                    ///< respond to this window losing the input focus

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGScroll.h
+    Contains the Scroll scrollbar control class. */
+
 #ifndef _GGScroll_h_
 #define _GGScroll_h_
 

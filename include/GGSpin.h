@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file GGSpin.h
+    Contains the Spin class template, which provides a spin-box control that allows the user to select a value from a 
+    range an arbitrary type (int, double, an enum, etc.). */
+
 #ifndef _GGSpin_h_
 #define _GGSpin_h_
 

@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file GGSlider.h
+    Contains the Slider class, which provides a slider control that allows the user to select a value from a range 
+    if integers. */
+
 #ifndef _GGSlider_h_
 #define _GGSlider_h_
 

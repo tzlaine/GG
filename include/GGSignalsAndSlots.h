@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGSignalsAndSlots.h
+    Contains the convenience functions that allow easy creation of signal-slot connections. */
+
 #ifndef _GGSignalsAndSlots_h_
 #define _GGSignalsAndSlots_h_
 

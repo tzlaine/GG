@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGStaticGraphic.h
+    Contains the StaticGraphic class, a fixed image control. */
+
 #ifndef _GGStaticGraphic_h_
 #define _GGStaticGraphic_h_
 

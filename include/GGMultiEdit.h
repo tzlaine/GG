@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGMultiEdit.h
+    Contains the MultiEdit class, a multi-line text box control. */
+
 #ifndef _GGMultiEdit_h_
 #define _GGMultiEdit_h_
 

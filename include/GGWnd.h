@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGWnd.h
+    Contains the Wnd class, upon which all GG GUI elements are based. */
+
 #ifndef _GGWnd_h_
 #define _GGWnd_h_
 

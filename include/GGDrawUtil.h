@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGDrawUtil.h
+    Contains numerous 2D rendering convenience functions, for rendering rectangles, circles, etc. */
+
 #ifndef _GGDrawUtil_h_
 #define _GGDrawUtil_h_
 

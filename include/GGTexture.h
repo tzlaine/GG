@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file GGTexture.h
+    Contains the Texture class, which encapsulates an OpenGL texture object; the SubTexture class, which represents a portion 
+    of an OpenGL texture object; and the TextureManager class, which provides application-wide management of Texture objects. */
+
 #ifndef _GGTexture_h_
 #define _GGTexture_h_
 

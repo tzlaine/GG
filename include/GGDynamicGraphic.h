@@ -27,6 +27,9 @@
 
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 
+/** \file GGDynamicGraphic.h
+    Contains the DynamicGraphic class, a control that allows display of a slideshow or animated sequence of images. */
+
 #ifndef _GGDynamicGraphic_h_
 #define _GGDynamicGraphic_h_
 

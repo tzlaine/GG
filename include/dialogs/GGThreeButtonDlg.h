@@ -25,15 +25,15 @@
 
 /* $Header$ */
 
+/** \file GGThreeButtonDlg.h
+    Contains the standard modal user-input/-notification dialog. */
+
 #ifndef _GGThreeButtonDlg_h_
 #define _GGThreeButtonDlg_h_
 
 #ifndef _GGWnd_h_
 #include "../GGWnd.h"
 #endif
-
-/** \file GGThreeButtonDlg.h
-    Contains the standard modal user-input/-notification dialog. */
 
 namespace GG {
 

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGTextControl.h
+    Contains the TextControl class, a control which represents a certain text string in a certain font, justification, etc. */
+
 #ifndef _GGTextControl_h_
 #define _GGTextControl_h_
 

@@ -25,6 +25,9 @@
    
 /* $Header$ */
 
+/** \file GGApp.h
+    Contains App class, which encapsulates the state and behavior of the entire GG GUI. */
+
 #ifndef _GGApp_h_ 
 #define _GGApp_h_
 

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGPtRect.h
+    Contains the utility classes Pt and Rect. */
+
 #ifndef _GGPtRect_h_
 #define _GGPtRect_h_
 

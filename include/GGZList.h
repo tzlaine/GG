@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGZList.h
+    Contains the ZList class, which maintains the Z-/depth-position of Wnds for App. */
+
 #ifndef _GGZList_h_
 #define _GGZList_h_
 

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGControl.h
+    Contains the Control class, the base class for all GG controls. */
+
 #ifndef _GGControl_h_
 #define _GGControl_h_
 

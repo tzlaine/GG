@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file XMLDoc.h
+    Contains the XMLElement and XMLDoc classes and numerous free functions, which are used to encode GG elements into 
+    XML descriptions. */
+
 #ifndef _XMLDoc_h_
 #define _XMLDoc_h_
 

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGClr.h
+    Contains the utility class Clr, which represents colors in GG. */
+
 #ifndef _GGClr_h_
 #define _GGClr_h_
 

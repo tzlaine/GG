@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGListBox.h
+    Contains the ListBox class, a control that contains rows of other controls, commonly TextControls. */
+
 #ifndef _GGListBox_h_
 #define _GGListBox_h_
 

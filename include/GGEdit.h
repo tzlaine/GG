@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGEdit.h
+    Contains the Edit class, a single-line editable text-box control. */
+
 #ifndef _GGEdit_h_
 #define _GGEdit_h_
 

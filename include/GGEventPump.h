@@ -25,6 +25,10 @@
    
 /* $Header$ */
 
+/** \file GGEventPump.h
+    Contains the EventPump class and its helper classes.  An EventPump encapsulates the behavior of a GG processing loop, 
+    such as the one associated with the singleton App object, or one associated with a modal Wnd. */
+
 #ifndef _GGEventPump_h_
 #define _GGEventPump_h_
 

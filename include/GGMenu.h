@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file GGMenu.h
+    Contains the MenuItem class, which represents menu data; the MenuBar control class; and the PopupMenu class, which is 
+    used to provide immediate context menus. */
+
 #ifndef _GGMenu_h_
 #define _GGMenu_h_
 

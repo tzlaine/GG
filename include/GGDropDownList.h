@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file GGDropDownList.h
+    Contains the DropDownList class, a control that displays a current selection, and allows the user to select one 
+    of several options from a list that drops down when the control is clicked. */
+
 #ifndef _GGDropDownList_h_
 #define _GGDropDownList_h_
 

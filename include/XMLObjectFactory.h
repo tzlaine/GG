@@ -25,6 +25,10 @@
 
 /* $Header$ */
 
+/** \file XMLObjectFactory.h
+    Contains the XMLObjectFactory class template, which allows the user to register object-creation functions and then 
+    automatically create objects from XML encodings. */
+
 #ifndef _XMLObjectFactory_h_
 #define _XMLObjectFactory_h_
 

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file XMLValidators.h
+    Contains validator classes used to validate the XML encodings of GG elements. */
+
 #ifndef _XMLValidators_h_
 #define _XMLValidators_h_
 

@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGBase.h
+    Contains numerous enums, utility classes, and free functions used throughout the other GG headers. */
+
 #ifndef _GGBase_h_
 #define _GGBase_h_
 

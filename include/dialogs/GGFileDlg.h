@@ -25,6 +25,9 @@
 
 /* $Header$ */
 
+/** \file GGFileDlg.h
+    Contains the standard GG file dialog. */
+
 #ifndef _GGFileDlg_h_
 #define _GGFileDlg_h_
 
@@ -37,9 +40,6 @@
 #endif
 
 #include <boost/filesystem/path.hpp>
-
-/** \file GGileDlg.h
-    Contains the standard GG file dialog. */
 
 namespace GG {
 

@@ -360,6 +360,9 @@ void Edit::SetText(const string& str)
     TextControl::SetText(str);
     m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
 
+    if (str.empty())
+        m_first_char_shown = 0;
+
     // make sure the change in text did not make the cursor or view position invalid
     if (GetLineData().empty() || m_cursor_pos.first  > static_cast<int>(GetLineData()[0].extents.size())) {
         m_cursor_pos = pair<int,int>(0,0);

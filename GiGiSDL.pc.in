@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/GG
+
+Name: GiGiSDL
+Description: [description pending]
+Requires: GiGi @GIGINET_DEP@
+Version: @VERSION@
+Libs: -L${libdir} -lGiGiSDL @SDL_LIBS@
+Cflags:-I${includedir}/SDL

@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/GG
+
+Name: GiGi
+Description: [description pending]
+Version: @VERSION@
+Libs: -L${libdir} -lGiGi @FT2_LIBS@ @GL_LIBS@ @BOOST_LIBS@ -llog4cpp -lexpat @DEVIL_LIBS@
+Cflags: -I${includedir} -I${includedir}/dialogs

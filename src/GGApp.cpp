@@ -32,6 +32,7 @@
 #include "GGEdit.h"
 #include "GGListBox.h"
 #include "GGMenu.h"
+#include "GGMultiEdit.h"
 #include "GGScroll.h"
 #include "GGSlider.h"
 #include "GGSpin.h"
@@ -60,6 +61,7 @@ Wnd* NewEdit(const XMLElement& elem)              {return new Edit(elem);}
 Wnd* NewScroll(const XMLElement& elem)            {return new Scroll(elem);}
 Wnd* NewListBox(const XMLElement& elem)           {return new ListBox(elem);}
 Wnd* NewMenuBar(const XMLElement& elem)           {return new MenuBar(elem);}
+Wnd* NewMultiEdit(const XMLElement& elem)         {return new MultiEdit(elem);}
 Wnd* NewDropDownList(const XMLElement& elem)      {return new DropDownList(elem);}
 Wnd* NewSpinInt(const XMLElement& elem)           {return new Spin<int>(elem);}
 Wnd* NewSpinDouble(const XMLElement& elem)        {return new Spin<double>(elem);}
@@ -103,6 +105,7 @@ struct AppImplData
         wnd_factory.AddGenerator("GG::Scroll", &NewScroll);
         wnd_factory.AddGenerator("GG::ListBox", &NewListBox);
         wnd_factory.AddGenerator("GG::MenuBar", &NewMenuBar);
+        wnd_factory.AddGenerator("GG::MultiEdit", &NewMultiEdit);
         wnd_factory.AddGenerator("GG::DropDownList", &NewDropDownList);
         wnd_factory.AddGenerator(Spin<int>::XMLTypeName(), &NewSpinInt);
         wnd_factory.AddGenerator(Spin<double>::XMLTypeName(), &NewSpinDouble);

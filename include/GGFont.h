@@ -188,7 +188,7 @@ private:
             sub_texture(texture, x1, y1, x2, y2), left_bearing(lb), advance(adv), width(x2 - x1) {} ///< ctor
 
         SubTexture  sub_texture;   ///< the subtexture containing just this glyph
-        int	    left_bearing;  ///< the space that should remain before the glyph
+        int	        left_bearing;  ///< the space that should remain before the glyph
         int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
         int         width;         ///< the width of the glyph only
     };

@@ -47,6 +47,8 @@
 #include <log4cpp/PatternLayout.hh>
 #include <log4cpp/FileAppender.hh>
 
+#include <cassert>
+
 namespace GG {
 
 namespace {
@@ -148,12 +150,15 @@ struct AppImplData
 
 // static member(s)
 App*                     App::s_app = 0;
-shared_ptr<AppImplData>  App::s_impl(new AppImplData());
+shared_ptr<AppImplData>  App::s_impl;
 
 // member functions
-App::App(App* app, const string& app_name)
+App::App(const string& app_name)
 {
-    s_app = app;
+    assert(!s_app);
+    s_app = this;
+    assert(!s_impl);
+    s_impl.reset(new AppImplData());
     s_impl->app_name = app_name;
 
     const string GG_LOG_FILENAME(s_impl->app_name + ".log");

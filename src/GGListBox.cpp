@@ -527,7 +527,7 @@ int ListBox::RClick(const Pt& pt, Uint32 keys)
     int row = RowUnderPt(pt);
     if (!Disabled() && row >= 0 && row == m_old_rdown_row && InClient(pt)) {
         m_rclick_row = row;
-        m_rclicked_sig(row, m_rows[row]);
+        m_rclicked_sig(row, m_rows[row], pt);
     }
     m_old_rdown_row = -1;
     return 1;

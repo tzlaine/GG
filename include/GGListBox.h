@@ -117,7 +117,8 @@ public:
     typedef boost::signal<void (const set<int>&)>          SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
     typedef boost::signal<void (int, const ListBox::Row*)> InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
     typedef boost::signal<void (int, const ListBox::Row*)> DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
-    typedef boost::signal<void (int, const ListBox::Row*)> RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
+    typedef boost::signal<void (int, const ListBox::Row*, const Pt&)>
+                                                           RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
     typedef boost::signal<void (int, const ListBox::Row*)> DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
     typedef boost::signal<void (int)>                      DeletedSignalType;        ///< emitted when a row in the listbox is deleted; provides the index of the deletion point
     typedef boost::signal<void (int)>                      BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row

@@ -118,5 +118,13 @@ XMLElementValidator Clr::XMLValidator() const
     return retval;
 }
 
+////////////////////////////////////////////////
+// free function(s)
+////////////////////////////////////////////////
+bool operator==(const Clr& rhs, const Clr& lhs) 
+{
+    return rhs.i == lhs.i;
+}
+
 } // namespace GG
 

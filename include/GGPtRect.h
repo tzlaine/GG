@@ -47,20 +47,10 @@ struct GG_API Pt
     //@}
 
     /** \name Accessors */ //@{
-    Pt   operator+(const Pt& rhs) const {return Pt(x + rhs.x, y + rhs.y);} ///< returns the vector sum of *this and \a rhs
-    Pt   operator-(const Pt& rhs) const {return Pt(x - rhs.x, y - rhs.y);} ///< returns the vector difference of *this and \a rhs
-   
     /** returns true if x < \a rhs.x or returns true if x == \a rhs.x and y <\a rhs.y.  This is useful for sorting Pts 
         in STL containers and algorithms*/
     bool Less(const Pt& rhs) const {return x < rhs.x ? true : (x == rhs.x ? (y < rhs.y ? true : false) : false);}
 
-    bool operator==(const Pt& rhs) const {return x == rhs.x && y == rhs.y;} ///< returns true if *this is identical to \a rhs
-    bool operator!=(const Pt& rhs) const {return !(*this == rhs);}          ///< returns true if *this differs from \a rhs
-    bool operator<(const Pt& rhs) const  {return x < rhs.x && y < rhs.y;}   ///< returns true if x and y are both less than the corresponding components of \a rhs
-    bool operator>(const Pt& rhs) const  {return x > rhs.x && y > rhs.y;}   ///< returns true if x and y are both greater than the corresponding components of \a rhs
-    bool operator<=(const Pt& rhs) const {return x <= rhs.x && y <= rhs.y;} ///< returns true if x and y are both less than or equal to the corresponding components of \a rhs
-    bool operator>=(const Pt& rhs) const {return x >= rhs.x && y >= rhs.y;} ///< returns true if x and y are both greater than or equal to the corresponding components of \a rhs
-   
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Pt
     XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Pt
     //@}
@@ -94,17 +84,8 @@ struct GG_API Rect
     Pt    LowerRight() const   {return lr;}          ///< returns the lower-right corner of the Rect
     int   Width() const        {return lr.x - ul.x;} ///< returns the width of the Rect
     int   Height() const       {return lr.y - ul.y;} ///< returns the height of the Rect
-   
-    bool  Contains(const Pt& pt) const {return (ul <= pt && pt < lr);} ///< returns true iff \a pt falls inside the Rect
-   
-    Rect operator+(const Pt& pt) const {return Rect(ul + pt, lr + pt);} ///< returns Rect shifted by adding \a pt to each corner
-    Rect operator-(const Pt& pt) const {return Rect(ul - pt, lr - pt);} ///< returns Rect shifted by subtracting \a pt from each corner
 
-    /** returns true if *this is identical to \a rhs */
-    bool operator==(const Rect& rhs) const {return ul.x == rhs.ul.x && lr.x == rhs.lr.x && lr.x == rhs.lr.x && lr.y == rhs.lr.y;}
-   
-    /** returns true if *this differs from \a rhs */
-    bool operator!=(const Rect& rhs) const {return !(*this == rhs);}
+    bool  Contains(const Pt& pt) const; ///< returns true iff \a pt falls inside the Rect
 
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Rect
     XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Rect
@@ -119,6 +100,23 @@ struct GG_API Rect
     Pt lr; ///< the lower-right corner of the Rect
 };
 
+GG_API inline bool operator==(const Pt& lhs, const Pt& rhs) {return lhs.x == rhs.x && lhs.y == rhs.y;} ///< returns true if \a lhs is identical to \a rhs
+GG_API inline bool operator!=(const Pt& lhs, const Pt& rhs) {return !(lhs == rhs);}                    ///< returns true if \a lhs differs from \a rhs
+GG_API inline bool operator<(const Pt& lhs, const Pt& rhs)  {return lhs.x < rhs.x && lhs.y < rhs.y;}   ///< returns true if \a lhs.x and \a lhs.y are both less than the corresponding components of \a rhs
+GG_API inline bool operator>(const Pt& lhs, const Pt& rhs)  {return lhs.x > rhs.x && lhs.y > rhs.y;}   ///< returns true if \a lhs.x and \a lhs.y are both greater than the corresponding components of \a rhs
+GG_API inline bool operator<=(const Pt& lhs, const Pt& rhs) {return lhs.x <= rhs.x && lhs.y <= rhs.y;} ///< returns true if \a lhs.x and \a lhs.y are both less than or equal to the corresponding components of \a rhs
+GG_API inline bool operator>=(const Pt& lhs, const Pt& rhs) {return lhs.x >= rhs.x && lhs.y >= rhs.y;} ///< returns true if \a lhs.x and \a lhs.y are both greater than or equal to the corresponding components of \a rhs
+GG_API inline Pt   operator+(const Pt& lhs, const Pt& rhs)  {return Pt(lhs.x + rhs.x, lhs.y + rhs.y);} ///< returns the vector sum of \a lhs and \a rhs
+GG_API inline Pt   operator-(const Pt& lhs, const Pt& rhs)  {return Pt(lhs.x - rhs.x, lhs.y - rhs.y);} ///< returns the vector difference of \a lhs and \a rhs
+
+/** returns true if \a lhs is identical to \a rhs */
+GG_API inline bool operator==(const Rect& lhs, const Rect& rhs) {return lhs.ul.x == rhs.ul.x && lhs.lr.x == rhs.lr.x && lhs.lr.x == rhs.lr.x && lhs.lr.y == rhs.lr.y;}
+
+/** returns true if \a lhs differs from \a rhs */
+GG_API inline bool operator!=(const Rect& lhs, const Rect& rhs) {return !(lhs == rhs);}
+
+GG_API inline Rect operator+(const Rect& rect, const Pt& pt) {return Rect(rect.ul + pt, rect.lr + pt);} ///< returns \a rect shifted by adding \a pt to each corner
+GG_API inline Rect operator-(const Rect& rect, const Pt& pt) {return Rect(rect.ul - pt, rect.lr - pt);} ///< returns \a rect shifted by subtracting \a pt from each corner
 GG_API inline Rect operator+(const Pt& pt, const Rect& rect) {return rect + pt;} ///< returns \a rect shifted by adding \a pt to each corner
 GG_API inline Rect operator-(const Pt& pt, const Rect& rect) {return rect - pt;} ///< returns \a rect shifted by subtracting \a pt from each corner
 

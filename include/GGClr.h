@@ -54,8 +54,6 @@ struct GG_API Clr
     //@}
    
     /** \name Accessors */ //@{
-    bool operator==(const Clr& rhs) {return i == rhs.i;} ///< returns true iff *this and rhs are identical
-
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Clr
     XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Clr
     //@}
@@ -71,6 +69,8 @@ struct GG_API Clr
         };
     };
 };
+
+GG_API inline bool operator==(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are identical
 
 // some useful color constants
 extern GG_API const Clr CLR_ZERO;

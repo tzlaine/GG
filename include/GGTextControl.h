@@ -38,20 +38,19 @@
 
 namespace GG {
 
-/** This is an abstract interface class for StaticText and DynamicText.
-    This class is provides a uniform interface to StaticText and DynamicText, so all text can be treated the same, without
-    consideration being given to implementation. All TextControl objects know how to center, left- or right-justify, etc. themselves within 
+/** The name says it all.
+    All TextControl objects know how to center, left- or right-justify, etc. themselves within 
     their window areas.  The format flags used with TextControl are defined in enum GG::TextFormat in GGBase.h. TextControl has std::string-like operators 
     and functions that allow the m_text member string to be manipulated directly.  In addition, the << and >> operators allow virtually 
-    any type (int, float, char, etc.) to be read from a Text object as if it were an input or output stream, thanks to boost::lexical_cast 
-    and std::stringstream.  Note that the Text stream operators only read the first instance of the specified type from m_text, and overwrite
+    any type (int, float, char, etc.) to be read from a Text object as if it were an input or output stream, thanks to boost::lexical_cast.  
+    Note that the Text stream operators only read the first instance of the specified type from m_text, and overwrite
     the entire m_text string when writing to it; both operators may throw.
     This is a text control based on pre-rendered font glyphs.
-    This class is inherited from TextImage; the text is rendered character by character from a prerendered font. The font used is 
+    The text is rendered character by character from a prerendered font. The font used is 
     gotten from the application's font manager.  Since a shared_ptr to the font is kept, the font is guaranteed to live at least as long
-    as the DynamicText object that refers to it.  This also means that if the font is explicitly released from the font manager but is
-    still held by at least one DynamicText object, it will not be destroyed, due to the shared_ptr.  Note that if "" is supplied as the 
-    font_filename parameter, no text will be rendered, but a valid DynamicText object will be constructed, which may later contain
+    as the TextControl object that refers to it.  This also means that if the font is explicitly released from the font manager but is
+    still held by at least one TextControl object, it will not be destroyed, due to the shared_ptr.  Note that if "" is supplied as the 
+    font_filename parameter, no text will be rendered, but a valid TextControl object will be constructed, which may later contain
     renderable text. DynamicText objects support text with formatting tags. See GG::Font for details.*/
 class GG_API TextControl : public Control
 {

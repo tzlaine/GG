@@ -29,7 +29,7 @@
 #include "GGBase.h"
 
 #include <cmath>
-#include <boost/tokenizer.hpp>
+#include <boost/spirit.hpp>
 
 
 namespace GG {
@@ -470,11 +470,8 @@ void Font::FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags
             string tag_str;
             if (tag_text_start_posn < close_brace_posn) {
                 tag_str = text.substr(tag_text_start_posn, close_brace_posn - tag_text_start_posn);
-                typedef boost::tokenizer<boost::char_separator<char> > tok;
-                boost::char_separator<char> sep(" \t");
-                tok tokens(tag_str, sep);
-                for (tok::iterator it = tokens.begin(); it != tokens.end(); ++it)
-                    tag.tokens.push_back(*it);
+                using namespace boost::spirit;
+                parse(tag_str.c_str(), *(*space_p >> (+(anychar_p - space_p))[append(tag.tokens)]));
                 if (s_known_tags.find(tag.tokens[0]) != s_known_tags.end() &&
                     (!ignore_tags || (tag.tokens[0] == "pre" && tag.close_tag))) // a known tag
                     tag.char_length = close_brace_posn - idx + 1;

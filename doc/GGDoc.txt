@@ -62,12 +62,14 @@
       ./configure
       make
       make install [as root]\endverbatim
-   from within the root of the GG directory tree.  Type
+   from within the root of the GG directory tree.  (If this does not work for you, you may wish to execute the autogen.sh script, 
+   which will rebuild configure amd a few other files.)  Type
    \verbatim
       ./configure --help\endverbatim
    to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
    be especially useful on Windows systems.  Also, be aware that GG will install itself in /usr/local/lib by default; to change 
-   this, use the --prefix=[LIB_PATH] command-line option when invoking configure.
+   this, use the --prefix=[LIB_PATH] command-line option when invoking configure.  Note that if you do not intend to use 
+   the static version of GG, you should specify the --disable-static option, which will cut your build time roughly in half.
    GG is not designed to work with the unlcean toolsets put forth by some unmentionable Windows-oriented firms.  However, GG 
    does work quite well with GCC on Windows, under MinGW or Cygwin.  In case the autotools build system fails to work for you
    in MinGW, there is a makefile called Makefile.mingw that is set up for my personal system, but that is easily altered to work 

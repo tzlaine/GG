@@ -30,7 +30,7 @@ namespace GG {
 
 namespace { // file-scope constants and functions
 const double   PI = 3.14159426;
-const double   SQRT2OVER2 = sqrt(2) / 2;
+const double   SQRT2OVER2 = std::sqrt(2.0) / 2.0;
 
 /// whenever points on the unit circle are calculated with expensive sin() and cos() calls, the results are cached here
 map<int, valarray<double> > unit_circle_coords;

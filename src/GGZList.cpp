@@ -32,8 +32,8 @@ namespace GG {
 namespace {
 const int DESIRED_GAP_SIZE = 10;       // leaves room for 10-deep nested child windows (and that should be plenty)
 const int DESIRED_LOWEST_Z = 1 << 30;  // start z-values at 1/4 of 32-bit int's positive range (2^32 / 4 = 2^30)
-const int MIN_Z = 1 << 29;             // set low end of z-value range at 1/8 of 32-bit int's range (2^32 / 8 = 2^29)
-const int MAX_Z = 7 * MIN_Z;           // set high end of z-value range at 7/8 of 32-bit int's range (7 * 2^32 / 8 = 7 * 2^29)
+const int MIN_Z = 1 << 28;             // set low end of z-value range at 1/16 of 32-bit int's range (2^32 / 16 = 2^28)
+const int MAX_Z = 7 * MIN_Z;           // set high end of z-value range at 7/16 of 32-bit int's range (7 * 2^32 / 16 = 7 * 2^28)
 const int MAX_AVG_GAP_SIZE = 15;       // if things get too spread out..
 const int MIN_AVG_GAP_SIZE = 5;        // ..or too packed, compresion may be needed
 const int MAX_SPAN = 1 << 31;          // windows should be laid out over no more than 1/2 of possible z-value range (2^32 / 2 = 2^31)

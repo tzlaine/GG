@@ -30,6 +30,18 @@
 
 namespace GG {
 
+extern const Clr CLR_ZERO(0, 0, 0, 0);
+extern const Clr CLR_BLACK(0, 0, 0, 255);
+extern const Clr CLR_WHITE(255, 255, 255, 255);
+extern const Clr CLR_GRAY(127, 127, 127, 255);
+extern const Clr CLR_SHADOW(127, 127, 127, 127);
+extern const Clr CLR_RED(255, 0, 0, 255);
+extern const Clr CLR_GREEN(0, 255, 0, 255);
+extern const Clr CLR_BLUE(0, 0, 255, 255);
+extern const Clr CLR_CYAN(0, 255, 255, 255);
+extern const Clr CLR_YELLOW(255, 255, 0, 255);
+extern const Clr CLR_MAGENTA(255, 0, 255, 255);
+
 ////////////////////////////////////////////////
 // GG::Clr
 ////////////////////////////////////////////////

@@ -108,13 +108,22 @@ dnl    AC_TRY_LINK([#include "SDL.h"],[SDL_Init(SDL_INIT_VIDEO);],[],[AC_MSG_ERR
     AC_CHECK_LIB([SDL],[SDL_Init],[],[AC_MSG_FAILURE([dnl
 SDL was not found, did you specify the correct paths
 (--with-sdl-include,--with-sdl-libdir)? See ./configure --help])])
+    AC_MSG_CHECKING([if SDL version is at least 1.2.5])
+    AC_EGREP_CPP([choke me, incorrect version!],[
+#include "SDL_version.h"
+#if SDL_VERSION_ATLEAST(1,2,5)
+  Okay Dokey!
+#else
+  choke me, incorrect version!
+#endif],[AC_MSG_RESULT(no)
+AC_MSG_ERROR([Your SDL version is too old, you need at least 1.2.5])],[AC_MSG_RESULT(yes)])
     LIBS="$OLD_LIBS"
   else
      # Unix target, we require sdl-config here (at least for now, to eliminate strange linking errors)
-     AM_PATH_SDL([1.2.0],[],[AC_MSG_ERROR([SDL is required])])
+     AM_PATH_SDL([1.2.5],[],[AC_MSG_FAILURE([SDL is required])])
   fi
 else
-  AM_PATH_SDL([1.2.0],[],[AC_MSG_ERROR([SDL is required])])
+  AM_PATH_SDL([1.2.5],[],[AC_MSG_FAILURE([SDL is required])])
 fi
 
 AC_CACHE_SAVE

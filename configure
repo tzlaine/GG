@@ -20432,6 +20432,36 @@ See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }
 fi
 
+    echo "$as_me:$LINENO: checking if SDL version is at least 1.2.5" >&5
+echo $ECHO_N "checking if SDL version is at least 1.2.5... $ECHO_C" >&6
+    cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include "SDL_version.h"
+#if SDL_VERSION_ATLEAST(1,2,5)
+  Okay Dokey!
+#else
+  choke me, incorrect version!
+#endif
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "choke me, incorrect version!" >/dev/null 2>&1; then
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+{ { echo "$as_me:$LINENO: error: Your SDL version is too old, you need at least 1.2.5" >&5
+echo "$as_me: error: Your SDL version is too old, you need at least 1.2.5" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+fi
+rm -f conftest*
+
     LIBS="$OLD_LIBS"
   else
      # Unix target, we require sdl-config here (at least for now, to eliminate strange linking errors)
@@ -20514,7 +20544,7 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-  min_sdl_version=1.2.0
+  min_sdl_version=1.2.5
   echo "$as_me:$LINENO: checking for SDL - version >= $min_sdl_version" >&5
 echo $ECHO_N "checking for SDL - version >= $min_sdl_version... $ECHO_C" >&6
   no_sdl=""
@@ -20711,8 +20741,10 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
      fi
      SDL_CFLAGS=""
      SDL_LIBS=""
-     { { echo "$as_me:$LINENO: error: SDL is required" >&5
-echo "$as_me: error: SDL is required" >&2;}
+     { { echo "$as_me:$LINENO: error: SDL is required
+See \`config.log' for more details." >&5
+echo "$as_me: error: SDL is required
+See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }
   fi
 
@@ -20800,7 +20832,7 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-  min_sdl_version=1.2.0
+  min_sdl_version=1.2.5
   echo "$as_me:$LINENO: checking for SDL - version >= $min_sdl_version" >&5
 echo $ECHO_N "checking for SDL - version >= $min_sdl_version... $ECHO_C" >&6
   no_sdl=""
@@ -20997,8 +21029,10 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
      fi
      SDL_CFLAGS=""
      SDL_LIBS=""
-     { { echo "$as_me:$LINENO: error: SDL is required" >&5
-echo "$as_me: error: SDL is required" >&2;}
+     { { echo "$as_me:$LINENO: error: SDL is required
+See \`config.log' for more details." >&5
+echo "$as_me: error: SDL is required
+See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }
   fi
 

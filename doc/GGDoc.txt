@@ -35,7 +35,7 @@
 
 /** \page building Building GG
    \section building_reqs Requirements
-   GG requires gcc 3.2 or later.
+   GG requires GCC 3.2 or later, or MSVC++ 7.1 or later.  Note that both are available for free download.
    <p>
    GG relies on a few other open-source libraries:
    - DevIL 1.6.6 - http://openil.sourceforge.net

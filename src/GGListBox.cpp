@@ -959,6 +959,18 @@ void ListBox::BringCaretIntoView()
     }
 }
 
+Scroll* ListBox::NewVScroll(bool horz_scroll)
+{
+    Pt cl_sz = ClientDimensions();
+    return new Scroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horz_scroll ? SCROLL_WIDTH : 0), Scroll::VERTICAL, m_color, CLR_SHADOW);
+}
+
+Scroll* ListBox::NewHScroll(bool vert_scroll)
+{
+    Pt cl_sz = ClientDimensions();
+    return new Scroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
+}
+
 void ListBox::ValidateStyle()
 {
     int dup_ct = 0;   // duplication count
@@ -1011,10 +1023,12 @@ void ListBox::AdjustScrolls()
             m_vscroll = 0;
         } else { // ensure vertical scroll has the right logical and physcal dimensions
             m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
-            //m_vscroll->ScrollTo(posn);
+            int scroll_x = cl_sz.x - SCROLL_WIDTH;
+            int scroll_y = 0;
+            m_vscroll->SizeMove(scroll_x, scroll_y, scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
         }
     } else if (!m_vscroll && vertical_needed) { // if scroll doesn't exist but is needed
-        m_vscroll = new Scroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0), Scroll::VERTICAL, m_color, CLR_SHADOW);
+        m_vscroll = NewVScroll(horizontal_needed);
         m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
         AttachChild(m_vscroll);
         Connect(m_vscroll->ScrolledSignal(), &ListBox::VScrolled, this);
@@ -1026,10 +1040,12 @@ void ListBox::AdjustScrolls()
             m_hscroll = 0;
         } else { // ensure horizontal scroll has the right logical and physcal dimensions
             m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
-            //m_hscroll->ScrollTo(posn);
+            int scroll_x = 0;
+            int scroll_y = cl_sz.y - SCROLL_WIDTH;
+            m_hscroll->SizeMove(scroll_x, scroll_y, scroll_x + cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH);
         }
     } else if (!m_hscroll && horizontal_needed) { // if scroll doesn't exist but is needed
-        m_hscroll = new Scroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
+        m_hscroll = NewHScroll(vertical_needed);
         m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
         AttachChild(m_hscroll);
         Connect(m_hscroll->ScrolledSignal(), &ListBox::HScrolled, this);

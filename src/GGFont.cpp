@@ -36,22 +36,9 @@
 #include <boost/spirit.hpp>
 
 
+#define DEBUG_DETERMINELINES 0
+
 namespace GG {
-
-string RgbaTag(const Clr& c)
-{
-    stringstream stream;
-    stream << "<rgba " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << " " << 
-        static_cast<int>(c.b) << " " << static_cast<int>(c.a) << ">";
-    return stream.str();
-}
-
-
-///////////////////////////////////////
-// class GG::Font
-///////////////////////////////////////
-set<string> Font::s_action_tags;
-set<string> Font::s_known_tags;
 
 namespace {
     int NextPowerOfTwo(int input)
@@ -91,9 +78,237 @@ namespace {
         FT_Library library;
     } g_library;
 
+    struct AppendToken
+    {
+        AppendToken(vector<string>& token_vec) : tokens(token_vec) {}
+        void operator()(const char* first, const char* last) const {tokens.push_back(string(first, last));}
+    private:
+        vector<string>& tokens;
+    };
+
+    struct HandlePreTagFunctor
+    {
+        HandlePreTagFunctor(vector<shared_ptr<Font::TextElement> >& text_elements, bool& ignore_tag_status, bool close_tag) :
+            elements(text_elements), ignore_tags(ignore_tag_status), close(close_tag) {}
+        void operator()(const char* first, const char* last) const
+            {
+                if (ignore_tags && !close) {
+                    shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
+                    element->text = string(first, last);
+                    elements.push_back(element);
+                } else {
+                    shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
+                    element->text = "pre";
+                    element->original_tag_text = string(first, last);
+                    elements.push_back(element);
+                    ignore_tags = !close;
+                }
+            }
+    private:
+        vector<shared_ptr<Font::TextElement> >& elements;
+        bool& ignore_tags;
+        const bool close;
+    };
+
+    struct HandleTextFunctor
+    {
+        HandleTextFunctor(vector<shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
+        void operator()(const char* first, const char* last) const
+            {
+                shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
+                element->text = string(first, last);
+                elements.push_back(element);
+            }
+    private:
+        vector<shared_ptr<Font::TextElement> >& elements;
+    };
+
+    struct HandleWhitespaceFunctor
+    {
+        HandleWhitespaceFunctor(vector<shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
+        void operator()(const char* first, const char* last) const
+            {
+                vector<string> string_vec;
+                using namespace boost::spirit;
+                rule<> ws_parser = *(((*blank_p >> eol_p) | +blank_p)[AppendToken(string_vec)]);
+                string ws_str = string(first, last);
+                parse(ws_str.c_str(), ws_parser);
+                for (unsigned int i = 0; i < string_vec.size(); ++i) {
+                    shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
+                    element->text = string(first, last);
+                    elements.push_back(element);
+                    if (string_vec[i][string_vec[i].size() - 1] == '\n') {
+                        shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
+                        elements.push_back(element);
+                    }
+                }
+            }
+    private:
+        vector<shared_ptr<Font::TextElement> >& elements;
+    };
+
+    void SetJustification(bool& last_line_of_curr_just, Font::LineData& line_data, Uint32 orig_just, Uint32 prev_just)
+    {
+        if (last_line_of_curr_just) {
+            line_data.justification = orig_just;
+            last_line_of_curr_just = false;
+        } else {
+            line_data.justification = prev_just;
+        }
+    }
+
     const double ITALICS_SLANT_ANGLE = 12; // degrees
     const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 / 180.0); // factor used to shear glyphs ITALICS_SLANT_ANGLE degrees CW from straight up
 }
+
+
+///////////////////////////////////////
+// function GG::RgbaTag
+///////////////////////////////////////
+string RgbaTag(const Clr& c)
+{
+    stringstream stream;
+    stream << "<rgba " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << " " << 
+        static_cast<int>(c.b) << " " << static_cast<int>(c.a) << ">";
+    return stream.str();
+}
+
+
+///////////////////////////////////////
+// class GG::Font::TextElement
+///////////////////////////////////////
+Font::TextElement::TextElement(bool ws, bool nl) :
+    whitespace(ws),
+    newline(nl)
+{
+}
+
+Font::TextElement::~TextElement()
+{
+}
+
+int Font::TextElement::Width() const
+{
+    return std::accumulate(widths.begin(), widths.end(), 0);
+}
+
+Font::TextElement::TextElementType Font::TextElement::Type() const
+{
+    return newline ? NEWLINE : (whitespace ? WHITESPACE : TEXT);
+}
+
+int Font::TextElement::OriginalStringChars() const
+{
+    return text.size();
+}
+
+
+///////////////////////////////////////
+// class GG::Font::FormattingTag
+///////////////////////////////////////
+Font::FormattingTag::FormattingTag(bool close) :
+    TextElement(false, false),
+    close_tag(close)
+{
+}
+
+Font::FormattingTag::TextElementType Font::FormattingTag::Type() const
+{
+    return close_tag ? CLOSE_TAG : OPEN_TAG;
+}
+
+int Font::FormattingTag::OriginalStringChars() const
+{
+    return original_tag_text.size();
+}
+
+
+///////////////////////////////////////
+// class GG::Font::LineData
+///////////////////////////////////////
+int Font::LineData::Width() const
+{
+    return char_data.empty() ? 0 : char_data.back().extent;
+}
+
+bool Font::LineData::Empty() const
+{
+    return char_data.empty();
+}
+
+///////////////////////////////////////
+// class GG::Font::RenderState
+///////////////////////////////////////
+Font::RenderState::RenderState() :
+    ignore_tags(false),
+    use_italics(false),
+    draw_underline(false),
+    color_set(false)
+{}
+
+
+///////////////////////////////////////
+// class GG::Font::LineData::CharData
+///////////////////////////////////////
+Font::LineData::CharData::CharData() :
+    extent(0),
+    original_char_index(0)
+{
+}
+
+Font::LineData::CharData::CharData(int extent_, int original_index, const vector<shared_ptr<TextElement> >& tags_) :
+    extent(extent_),
+    original_char_index(original_index),
+    tags()
+{
+    for (unsigned int i = 0; i < tags_.size(); ++i) {
+        tags.push_back(boost::dynamic_pointer_cast<FormattingTag>(tags_[i]));
+    }
+}
+
+
+///////////////////////////////////////
+// struct GG::Font::HandleTagFunctor
+///////////////////////////////////////
+struct Font::HandleTagFunctor
+{
+    HandleTagFunctor(vector<shared_ptr<Font::TextElement> >& text_elements, const bool& ignore_tag_status, bool close_tag) :
+        elements(text_elements), ignore_tags(ignore_tag_status), close(close_tag) {}
+    void operator()(const char* first, const char* last) const
+        {
+            string tag_str = string(first, last);
+            using namespace boost::spirit;
+            vector<string> param_vec;
+            rule<> tag_begin = ch_p('<');
+            if (close)
+                tag_begin = str_p("</");
+            rule<> tag_token_parser = tag_begin >> +(*space_p >> (+(anychar_p - (space_p | '>')))[AppendToken(param_vec)]) >> '>';
+            parse(tag_str.c_str(), tag_token_parser);
+            if (!ignore_tags && Font::s_known_tags.find(param_vec.front()) != Font::s_known_tags.end()) {
+                shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
+                element->text = param_vec.front();
+                if (!close)
+                    element->params.insert(element->params.end(), param_vec.begin() + 1, param_vec.end());
+                element->original_tag_text = tag_str;
+                elements.push_back(element);
+            } else {
+                shared_ptr<Font::TextElement> text_element(new Font::TextElement(false, false));
+                text_element->text = tag_str;
+                elements.push_back(text_element);
+            }
+        }
+private:
+    vector<shared_ptr<Font::TextElement> >& elements;
+    const bool& ignore_tags;
+    const bool close;
+};
+
+
+///////////////////////////////////////
+// class GG::Font
+///////////////////////////////////////
+set<string> Font::s_action_tags;
+set<string> Font::s_known_tags;
 
 Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
     m_font_filename(font_filename),
@@ -101,7 +316,7 @@ Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RA
     m_glyph_range(range)
 {
     if (font_filename != "")
-	Init(font_filename, pts, range);
+        Init(font_filename, pts, range);
 }
 
 Font::Font(const XMLElement& elem)
@@ -114,12 +329,12 @@ Font::Font(const XMLElement& elem)
     int range = lexical_cast<int>(elem.Child("m_glyph_range").Text());
 
     if (font_filename != "")
-	Init(font_filename, pts, range);
+        Init(font_filename, pts, range);
 }
 
 int Font::RenderGlyph(int x, int y, char c) const
 {
-    std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(c));
+    map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(c));
     if (it == m_glyphs.end())
         it = m_glyphs.find(CharToFT_ULong(' ')); // print a space when an unrendered glyph is requested
     return RenderGlyph(x, y, it->second, 0);
@@ -134,80 +349,79 @@ int Font::RenderText(int x, int y, const string& text) const
     return x - orig_x;
 }
 
-void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/, 
-                      bool tags/* = false*/, Font::RenderState* render_state/* = 0*/) const
+void Font::RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/,
+                      RenderState* render_state/* = 0*/) const
+{
+    RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state);
+}
+
+void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/,
+                      RenderState* render_state/* = 0*/) const
 {
     RenderState state;
-    if (!render_state) {
+    if (!render_state)
         render_state = &state;
-    }
-
-    double orig_color[4];
-    glGetDoublev(GL_CURRENT_COLOR, orig_color);
-    
-    if (render_state->color_set)
-        glColor4ubv(render_state->curr_color.v);
 
     // get breakdown of how text is divided into lines
     vector<LineData> lines;
     if (!line_data) {
-        DetermineLines(text, format, x2 - x1, lines, tags);
+        DetermineLines(text, format, x2 - x1, lines);
         line_data = &lines;
     }
 
-    // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
-    bool expand_tabs = format & TF_LEFT;
+    RenderText(x1, y1, x2, y2, text, format, *line_data, *render_state, 0, 0, line_data->size(), line_data->back().char_data.size());
+}
 
-    // get the width of a space character in pixels, and the spacing of tab stops in spaces and pixels
-    std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(' '));
-    int tab_width = (format >> 16) & 0xFF; // width of tabs is embedded in bits 16-23
-    if (!tab_width)
-        tab_width = 8; // default tab width
-    int tab_pixel_width = tab_width * m_space_width;  // get the length of a tab stop
+void Font::RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>& line_data, RenderState& render_state,
+                      int begin_line, int begin_char, int end_line, int end_char) const
+{
+    RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state, begin_line, begin_char, end_line, end_char);
+}
 
-    int rows_rendered = 0;
+void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>& line_data, RenderState& render_state,
+                      int begin_line, int begin_char, int end_line, int end_char) const
+{
+    double orig_color[4];
+    glGetDoublev(GL_CURRENT_COLOR, orig_color);
+    
+    if (render_state.color_set)
+        glColor4ubv(render_state.curr_color.v);
+
     int y_origin = y1; // default value for TF_TOP
     if (format & TF_BOTTOM)
-	y_origin = y2 - ((static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height);
+        y_origin = y2 - ((end_line - begin_line - 1) * m_lineskip + m_height);
     else if (format & TF_VCENTER)
-        y_origin = y1 + static_cast<int>(((y2 - y1) - ((static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height)) / 2.0);
-    int x = x1, y = y_origin;
+        y_origin = y1 + static_cast<int>(((y2 - y1) - ((end_line - begin_line - 1) * m_lineskip + m_height)) / 2.0);
 
-    for (std::vector<LineData>::const_iterator cit = line_data->begin(); cit != line_data->end(); ++cit) {
-        const LineData& curr_line = *cit;
-        x = x1; // default value for TF_LEFT
-        if (curr_line.justification == TF_RIGHT)
-            x = x2 - curr_line.Width();
-        else if (curr_line.justification == TF_CENTER)
-            x = x1 + static_cast<int>(((x2 - x1) - curr_line.Width()) / 2.0);
-        y = y_origin + rows_rendered * m_lineskip;
-        for (int i = curr_line.begin_idx; i < curr_line.end_idx; ++i) {
-            FT_ULong c = CharToFT_ULong(text[i]);
-            if (c == '\t' && expand_tabs) {
-                int curr_tab_location = (x - x1) / tab_pixel_width;   // find the nearest previous tab stop
-                x = x1 + (curr_tab_location + 1) * tab_pixel_width;   // then find the location of the next tab stop
-            } else {
-                Tag tag;
-                if (tags)
-                    FindFormatTag(text, i, tag, render_state->ignore_tags);
-                if (tag.char_length) {
-                    HandleTag(tag, x, y, orig_color, *render_state);
-                    i += tag.char_length - 1;
-                } else {
-                    it = m_glyphs.find(c);
-                    if (it == m_glyphs.end())
-                        it = m_glyphs.find(CharToFT_ULong(' ')); // print a space when an unrendered glyph is requested
-                    x += RenderGlyph(x, y, it->second, render_state);
-                }
+    for (int i = begin_line; i < end_line; ++i) {
+        const LineData& line = line_data[i];
+        int x_origin = x1; // default value for TF_LEFT
+        if (line.justification == TF_RIGHT)
+            x_origin = x2 - line.Width();
+        else if (line.justification == TF_CENTER)
+            x_origin = x1 + static_cast<int>(((x2 - x1) - line.Width()) / 2.0);
+        int y = y_origin + (i - begin_line) * m_lineskip;
+        int x = x_origin;
+
+        for (int j = ((i == begin_line) ? begin_char : 0); j < ((i == end_line - 1) ? end_char : static_cast<int>(line.char_data.size())); ++j) {
+            for (unsigned int k = 0; k < line.char_data[j].tags.size(); ++k) {
+                HandleTag(line.char_data[j].tags[k], orig_color, render_state);
             }
+            if (text[line.char_data[j].original_char_index] == '\n')
+                continue;
+            FT_ULong c = CharToFT_ULong(text[line.char_data[j].original_char_index]);
+            map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
+            if (it == m_glyphs.end())
+                x = x_origin + line.char_data[j].extent; // move forward by the extent of the character when a whitespace or unprintable glyph is requested
+            else
+                x += RenderGlyph(x, y, it->second, &render_state);
         }
-        ++rows_rendered;
     }
 
     glColor4dv(orig_color);
 }
 
-Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& line_data, bool tags/* = false*/) const
+Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& line_data) const
 {
     Pt retval;
 
@@ -231,194 +445,220 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
     if ((format & TF_WORDBREAK) && (format & TF_LINEWRAP))   // only one of these can be picked; TF_WORDBREAK overrides TF_LINEWRAP
         format &= ~TF_LINEWRAP;
 
+#if DEBUG_DETERMINELINES
+    std::cout << "Font::DetermineLines(text=\"" << text << "\" format=" << format << " box_width=" << box_width << ")" << std::endl;
+#endif
+
+    vector<shared_ptr<TextElement> > text_elements;
+    using namespace boost::spirit;
+    rule<> open_pre_tag_p = str_p("<pre>");
+    rule<> close_pre_tag_p = str_p("</pre>");
+    rule<> close_tag_p = str_p("</") >> +(anychar_p - '>') >> '>';
+    rule<> open_tag_p = ch_p('<') >> +(anychar_p - '>') >> '>';
+    rule<> text_p = +(anychar_p - (close_tag_p | open_tag_p | space_p));
+    rule<> ws_p = +space_p;
+    if (format & TF_IGNORETAGS) {
+        text_p = +(anychar_p - space_p);
+        rule<> lines_parser = *(text_p[HandleTextFunctor(text_elements)] |
+                                ws_p[HandleWhitespaceFunctor(text_elements)]);
+        parse(text.c_str(), lines_parser);
+    } else {
+        bool ignore_tags = false;
+        rule<> lines_parser = *(open_pre_tag_p[HandlePreTagFunctor(text_elements, ignore_tags, false)] |
+                                close_pre_tag_p[HandlePreTagFunctor(text_elements, ignore_tags, true)] |
+                                close_tag_p[HandleTagFunctor(text_elements, ignore_tags, true)] |
+                                open_tag_p[HandleTagFunctor(text_elements, ignore_tags, false)] |
+                                text_p[HandleTextFunctor(text_elements)] |
+                                ws_p[HandleWhitespaceFunctor(text_elements)]);
+        parse(text.c_str(), lines_parser);
+    }
+
+    // fill in the widths of characters in the element strings
+    for (unsigned int i = 0; i < text_elements.size(); ++i) {
+        text_elements[i]->widths.resize(text_elements[i]->text.size());
+        for (unsigned int j = 0; j < text_elements[i]->text.size(); ++j) {
+            if (text_elements[i]->text[j] == '\n') {
+                text_elements[i]->widths[j] = 0;
+                continue;
+            }
+            FT_ULong c = text_elements[i]->text[j];
+            map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
+            if (it == m_glyphs.end())
+                it = m_glyphs.find(CharToFT_ULong(' ')); // use a space when an unrendered glyph is requested (the space chararacter is always renderable)
+            text_elements[i]->widths[j] = it->second.advance;
+        }
+    }
+
+#if DEBUG_DETERMINELINES
+    std::cout << "parsing results:\n";
+    for (unsigned int i = 0; i < text_elements.size(); ++i) {
+        if (shared_ptr<FormattingTag> tag_elem = boost::dynamic_pointer_cast<FormattingTag>(text_elements[i])) {
+            std::cout << "FormattingTag\n    text=\"" << tag_elem->text << "\"\n    widths=" << StringFromContainer(tag_elem->widths)
+                      << "\n    whitespace=" << tag_elem->whitespace << "\n    newline=" << tag_elem->newline << "\n    params=\n";
+            for (unsigned int j = 0; j < tag_elem->params.size(); ++j) {
+                std::cout << "        \"" << tag_elem->params[j] << "\"\n";
+            }
+            std::cout << "    original_tag_text=\"" << tag_elem->original_tag_text << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
+        } else {
+            shared_ptr<TextElement> elem = text_elements[i];
+            std::cout << "TextElement\n    text=\"" << elem->text << "\"\n    widths=" << StringFromContainer(elem->widths)
+                      << "\n    whitespace=" << elem->whitespace << "\n    newline=" << elem->newline << "\n";
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
+#endif
+
     RenderState render_state;
     int tab_width = (format >> 16) & 0xFF; // width of tabs is embedded in bits 16-23
-    if (!tab_width) tab_width = 8;            // default tab width
-    int tab_pixel_width = tab_width * m_space_width;   // get the length of a tab stop
-    int x = 0;
+    if (!tab_width)
+        tab_width = 8; // default tab width
+    int tab_pixel_width = tab_width * m_space_width; // get the length of a tab stop
     bool expand_tabs = format & TF_LEFT; // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
     Uint32 orig_just = format & (TF_LEFT | TF_CENTER | TF_RIGHT); // original justification as comes from the format
     bool last_line_of_curr_just = false; // is this the last line of the current justification? (for instance when a </right> tag is encountered)
 
     line_data.clear();
     line_data.push_back(LineData());
-    line_data.back().begin_idx = 0;
     line_data.back().justification = orig_just;
 
-    for (unsigned int i = 0; i < text.size(); ++i) {
-        FT_ULong c = CharToFT_ULong(text[i]);
-        if (c == '\n') {                // if a newline is explicitly requested,
-            line_data.back().end_idx = i;       // end the current line
-            line_data.push_back(LineData());    // start a new one
-            line_data.back().begin_idx = i + 1;
-            if (last_line_of_curr_just) {
-                line_data.back().justification = orig_just;
-                last_line_of_curr_just = false;
+    int x = 0;
+    int original_string_offset = 0; // the position within the original string of the current TextElement
+    vector<shared_ptr<TextElement> > pending_formatting_tags;
+    for (unsigned int i = 0; i < text_elements.size(); ++i) {
+        shared_ptr<TextElement> elem = text_elements[i];
+        if (elem->Type() == TextElement::NEWLINE) { // if a newline is explicitly requested, start a new one
+            line_data.push_back(LineData());
+            SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+            x = 0; // reset the x-position to 0
+        } else if (elem->Type() == TextElement::WHITESPACE) {
+            for (unsigned int j = 0; j < elem->text.size(); ++j) {
+                FT_ULong c = CharToFT_ULong(elem->text[j]);
+                if (c != '\r' && c != '\f') {
+                    int advance_position = x + m_space_width;
+                    if (c == '\t' && expand_tabs) {
+                        advance_position = (((x / tab_pixel_width) + 1) * tab_pixel_width);
+                    } else if (c == '\n') {
+                        advance_position = x;
+                    }
+                    int advance = advance_position - x;
+                    if ((format & TF_LINEWRAP) && box_width < advance_position) { // if we're using linewrap and this space won't fit on this line,
+                        if (!x && box_width < advance) {
+                            // if the space is larger than the line and alone on the line, let the space overrun this
+                            // line and then start a new one
+                            line_data.push_back(LineData());
+                            x = 0; // reset the x-position to 0
+                            SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+                        } else { // otherwise start a new line and put the space there:
+                            line_data.push_back(LineData());
+                            x = advance;
+                            line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + j, pending_formatting_tags));
+                            pending_formatting_tags.clear();
+                            SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+                        }
+                    } else { // there's room for the space, or we're not using linewrap
+                        x += advance;
+                        line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + j, pending_formatting_tags));
+                        pending_formatting_tags.clear();
+                    }
+                }
+            }
+        } else if (elem->Type() == TextElement::TEXT) {
+            if (format & TF_WORDBREAK) {
+                if (box_width < x + elem->Width() && x) { // if the text "word" overruns this line, and isn't alone on this line, move it down to the next line
+                    line_data.push_back(LineData());
+                    x = 0;
+                    SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+                }
+                for (unsigned int j = 0; j < elem->text.size(); ++j) {
+                    x += elem->widths[j];
+                    line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + j, pending_formatting_tags));
+                    pending_formatting_tags.clear();
+                }
             } else {
-                line_data.back().justification = line_data[line_data.size() - 2].justification;
-            }
-            x = 0;                              // reset the x-position to 0
-        } else if (c == '\t' && expand_tabs) {
-            int curr_tab_location = x / tab_pixel_width;                         // find the nearest previous tab stop
-            int next_tab_position = (curr_tab_location + 1) * tab_pixel_width;   // then find the location of the next tab stop
-            if ((format & TF_LINEWRAP) && next_tab_position > box_width) { // if we're using linewrap and this tab won't fit on this line,
-                if (!x && tab_pixel_width > box_width) { // if the tab is larger than the line and alone on the line,
-                    line_data.back().end_idx = i + 1;   // let the tab overrun this line (so we don't skip a blank line, then have the tab overrun the next line anyway)
-                    line_data.push_back(LineData());    // and then start a new one
-                    line_data.back().begin_idx = i + 1;
-                    x = 0;                              // and reset the x-position to 0
-                    if (last_line_of_curr_just) {
-                        line_data.back().justification = orig_just;
-                        last_line_of_curr_just = false;
-                    } else {
-                        line_data.back().justification = line_data[line_data.size() - 2].justification;
-                    }
-                } else { // otherwise start a new line and put the tab there:
-                    line_data.back().end_idx = i;             // end the current line
-                    line_data.push_back(LineData());          // start a new one
-                    line_data.back().begin_idx = i;
-                    line_data.back().extents.push_back(x = tab_pixel_width); // advance the x-position to the first tab stop
-                    if (last_line_of_curr_just) {
-                        line_data.back().justification = orig_just;
-                        last_line_of_curr_just = false;
-                    } else {
-                        line_data.back().justification = line_data[line_data.size() - 2].justification;
+                for (unsigned int j = 0; j < elem->text.size(); ++j) {
+                    if ((format & TF_LINEWRAP) && box_width < x + elem->widths[j] && x) { // if the char overruns this line, and isn't alone on this line, move it down to the next line
+                        line_data.push_back(LineData());
+                        x = elem->widths[j];
+                        line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + j, pending_formatting_tags));
+                        pending_formatting_tags.clear();
+                        SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+                    } else { // there's room for this char on this line, or there's no wrapping in use
+                        x += elem->widths[j];
+                        line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + j, pending_formatting_tags));
+                        pending_formatting_tags.clear();
                     }
                 }
-            } else { // there's room for the tab, or we're not using linewrap
-                line_data.back().extents.push_back(x = next_tab_position);
             }
-        } else if (c != '\r' && c != '\f') { // c is a letter, number, symbol (whether included in the pre-rendered range of this font or not (see constructor)), or unexpanded tab (a space is substituted), except linefeed or carriage return
-            if (tags) {
-                Tag tag;
-                FindFormatTag(text, i, tag, render_state.ignore_tags);
-                if (tag.char_length) {
-                    HandleTag(tag, 0, 0, 0, render_state);
-                    if (tag.tokens[0] == "left") {
-                        if (tag.close_tag) {
-                            if (line_data.back().justification == TF_LEFT)
-                                last_line_of_curr_just = true;
-                        } else {
-                            line_data.back().justification = TF_LEFT;
-                            last_line_of_curr_just = false;
-                        }
-                    } else if (tag.tokens[0] == "center") {
-                        if (tag.close_tag) {
-                            if (line_data.back().justification == TF_CENTER)
-                                last_line_of_curr_just = true;
-                        } else {
-                            line_data.back().justification = TF_CENTER;
-                            last_line_of_curr_just = false;
-                        }
-                    } else if (tag.tokens[0] == "right") {
-                        if (tag.close_tag) {
-                            if (line_data.back().justification == TF_RIGHT)
-                                last_line_of_curr_just = true;
-                        } else {
-                            line_data.back().justification = TF_RIGHT;
-                            last_line_of_curr_just = false;
-                        }
-                    }
-                    i += tag.char_length - 1; // "- 1" because i gets incremented at the end of each loop iteration
-                    // now represent all these skipped characters with the same extent value
-                    int extent = line_data.back().extents.empty() ? 0 : line_data.back().extents.back();
-                    for (int j = 0; j < tag.char_length; ++j) {
-                        line_data.back().extents.push_back(extent);
-                    }
-                    continue;
-                }
-            }
+        } else if (elem->Type() == TextElement::OPEN_TAG) {
+            if (elem->text == "left")
+                line_data.back().justification = TF_LEFT;
+            else if (elem->text == "center")
+                line_data.back().justification = TF_CENTER;
+            else if (elem->text == "right")
+                line_data.back().justification = TF_RIGHT;
+            else if (elem->text != "pre")
+                pending_formatting_tags.push_back(elem);
+            last_line_of_curr_just = false;
+        } else if (elem->Type() == TextElement::CLOSE_TAG) {
+            if ((elem->text == "left" && line_data.back().justification == TF_LEFT) ||
+                (elem->text == "center" && line_data.back().justification == TF_CENTER) ||
+                (elem->text == "right" && line_data.back().justification == TF_RIGHT))
+                last_line_of_curr_just = true;
+            else if (elem->text != "pre")
+                pending_formatting_tags.push_back(elem);
+        }
+        original_string_offset += elem->OriginalStringChars();
+    }
+    // disregard the final pending formatting tag, if any, since this is the end of the text, and so it cannot have any effect
 
-            std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
-            if (it == m_glyphs.end()) {
-                it = m_glyphs.find(CharToFT_ULong(' '));   // use a space when an unrendered glyph is requested (the space char is always rendered)
-                c = CharToFT_ULong(' ');                   // and reflect this choice in the value of c
-            }
-            int char_advance = it->second.advance;
-            int char_width = it->second.width;
-            if (format & TF_LINEWRAP) { // any symbol that doesn't fit on the rest of the current line gets moved down to the next line*
-                if (x + char_width > box_width && (x || char_width <= box_width)) {// *unless it's greater than the box width and alone on the line (so we don't skip a blank line, then have the character overrun the next line anyway)
-                    line_data.back().end_idx = i;                         // end the current line
-                    line_data.push_back(LineData());                      // start a new one
-                    line_data.back().begin_idx = i;
-                    line_data.back().extents.push_back(x = char_advance); // advance the x-position the width of the character
-                    if (last_line_of_curr_just) {
-                        line_data.back().justification = orig_just;
-                        last_line_of_curr_just = false;
-                    } else {
-                        line_data.back().justification = line_data[line_data.size() - 2].justification;
+#if DEBUG_DETERMINELINES
+    std::cout << "Line breakdown:\n";
+    for (unsigned int i = 0; i < line_data.size(); ++i) {
+        std::cout << "Line " << i << ":\n    extents=";
+        for (unsigned int j = 0; j < line_data[i].char_data.size(); ++j) {
+            std::cout << line_data[i].char_data[j].extent << " ";
+        }
+        std::cout << "\n    chars on line: \"";
+        for (unsigned int j = 0; j < line_data[i].char_data.size(); ++j) {
+            std::cout << text[line_data[i].char_data[j].original_char_index];
+        }
+        std::cout << "\"\n" << std::endl;
+        for (unsigned int j = 0; j < line_data[i].char_data.size(); ++j) {
+            for (unsigned int k = 0; k < line_data[i].char_data[j].tags.size(); ++k) {
+                if (shared_ptr<FormattingTag> tag_elem = line_data[i].char_data[j].tags[k]) {
+                    std::cout << "FormattingTag @" << j << "\n    text=\"" << tag_elem->text << "\"\n    widths="
+                              << StringFromContainer(tag_elem->widths) << "\n    whitespace=" << tag_elem->whitespace
+                              << "\n    newline=" << tag_elem->newline << "\n    params=\n";
+                    for (unsigned int l = 0; l < tag_elem->params.size(); ++l) {
+                        std::cout << "        \"" << tag_elem->params[l] << "\"\n";
                     }
-                } else { // the symbol will fit on the rest of this line
-                    line_data.back().extents.push_back(x += char_advance);
+                    std::cout << "    original_tag_text=\"" << tag_elem->original_tag_text << "\"\n    close_tag="
+                              << tag_elem->close_tag << std::endl;
                 }
-            } else if (format & TF_WORDBREAK) { // lines are wrapped, but words are not broken
-                int word_start = i;
-                int word_advance = 0;
-                int word_width = 0;
-                vector<int> word_extents;
-                // first get the characters of the word itself
-                while (i < text.size() && !isspace(c = text[i])) {
-                    it = m_glyphs.find(c);
-                    if (it == m_glyphs.end()) {
-                        it = m_glyphs.find(CharToFT_ULong(' '));
-                        c = CharToFT_ULong(' ');
-                    }
-                    word_extents.push_back(word_advance += it->second.advance);
-                    word_width = word_advance - (it->second.advance - it->second.width);
-                    ++i;
-                }
-                // then get all the spaces after the word (but not tabs and newlines, unless tabs are being treated as spaces)
-                while (i < text.size() && ((c = text[i]) == ' ' || (!expand_tabs && c == '\t'))) {
-                    it = m_glyphs.find(c);
-                    if (it == m_glyphs.end()) {
-                        it = m_glyphs.find(CharToFT_ULong(' '));
-                        c = CharToFT_ULong(' ');
-                    }
-                    word_extents.push_back(word_advance += it->second.advance);
-                    ++i;
-                }
-                // if the word exceeds the rest of the space on the line AND it's not alone on the line, or it could fit all on one line,
-                // move the word to the next line
-                if (x + word_width > box_width && (x || word_width <= box_width)) {
-                    line_data.back().end_idx = word_start; // end the current line before this word
-                    line_data.push_back(LineData());       // start a new one
-                    line_data.back().begin_idx = word_start;
-                    line_data.back().extents.insert(line_data.back().extents.end(), word_extents.begin(), word_extents.end());
-                    x = word_advance;                      // advance the x-position the width of the character
-                    if (last_line_of_curr_just) {
-                        line_data.back().justification = orig_just;
-                        last_line_of_curr_just = false;
-                    } else {
-                        line_data.back().justification = line_data[line_data.size() - 2].justification;
-                    }
-                } else {
-                    for (unsigned int i = 0; i < word_extents.size(); ++i) {
-                        line_data.back().extents.push_back(x + word_extents[i]); // must add x, since the extents start with 0 being the start of the word
-                    }
-                    x += word_advance;
-                }
-                if (word_advance) // if we found the end of a word, the last character after the last character of the word was not really processed
-                    --i;
-            } else { // no wrapping at all; everything goes on a single line unless there are '\n' characters in the text
-                line_data.back().extents.push_back(x += char_advance);
             }
         }
+        std::cout << "\n    justification=" << line_data[i].justification << std::endl;
     }
-    line_data.back().end_idx = text.size();
+#endif
 
-    // find text height, and longest line for width
+    for (unsigned int i = 0; i < line_data.size(); ++i) {
+        if (retval.x < line_data[i].Width())
+            retval.x = line_data[i].Width();
+    }
     retval.y = (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
-    for (unsigned int i = 0; i < line_data.size(); ++i)
-        if (!line_data[i].extents.empty() && line_data[i].extents.back() > retval.x)
-            retval.x = line_data[i].extents.back();
+
+#if DEBUG_DETERMINELINES
+    std::cout << "String Size:(" << retval.x << ", " << retval.y << ")\n" << std::endl;
+#endif
 
     return retval;
 }
 
-Pt Font::TextExtent(const string& text, Uint32 format/* = TF_NONE*/, int box_width/* = 0*/, bool tags/* = false*/) const
+Pt Font::TextExtent(const string& text, Uint32 format/* = TF_NONE*/, int box_width/* = 0*/) const
 {
     vector<LineData> lines;
-    return DetermineLines(text, format, box_width ? box_width : 1 << 15, lines, tags);
+    return DetermineLines(text, format, box_width ? box_width : 1 << 15, lines);
 }
 
 XMLElement Font::XMLEncode() const
@@ -461,27 +701,6 @@ void Font::ClearKnownTags()
     s_action_tags.insert("right");
     s_action_tags.insert("pre");
     s_known_tags = s_action_tags;
-}
-
-void Font::FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags/* = false*/)
-{
-    tag = Tag();
-    if (text[idx] == '<') {
-        int close_brace_posn = text.find('>', idx);
-        if (close_brace_posn != static_cast<int>(string::npos)) {
-            tag.close_tag = text[idx + 1] == '/';
-            int tag_text_start_posn = idx + (tag.close_tag ? 2 : 1);
-            string tag_str;
-            if (tag_text_start_posn < close_brace_posn) {
-                tag_str = text.substr(tag_text_start_posn, close_brace_posn - tag_text_start_posn);
-                using namespace boost::spirit;
-                parse(tag_str.c_str(), *(*space_p >> (+(anychar_p - space_p))[append(tag.tokens)]));
-                if (s_known_tags.find(tag.tokens[0]) != s_known_tags.end() &&
-                    (!ignore_tags || (tag.tokens[0] == "pre" && tag.close_tag))) // a known tag
-                    tag.char_length = close_brace_posn - idx + 1;
-            }
-        }
-    }
 }
 
 void Font::Init(const string& font_filename, int pts, Uint32 range)
@@ -651,11 +870,11 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
     }
 
     // create Glyph objects from temp glyph data
-    for (std::map<FT_ULong, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
+    for (map<FT_ULong, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
         m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.x1, it->second.y1, it->second.x2, it->second.y2, it->second.left_b, it->second.adv);
 
     // record the width of the space character
-    std::map<FT_ULong, Glyph>::const_iterator glyph_it = m_glyphs.find(CharToFT_ULong(' '));
+    map<FT_ULong, Glyph>::const_iterator glyph_it = m_glyphs.find(CharToFT_ULong(' '));
     m_space_width = glyph_it->second.advance;
 }
 
@@ -721,34 +940,26 @@ int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState*
     return glyph.advance;
 }
 
-void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color, Font::RenderState& render_state) const
+void Font::HandleTag(const shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const
 {
-    bool rendering = orig_color; // if orig_color == 0, we're not rendering the text, just getting lines and extents
-    if (tag.tokens[0] == "i" && rendering) {
-        if (!render_state.use_italics && !tag.close_tag)
-            render_state.use_italics = true;
-        else if (render_state.use_italics && tag.close_tag)
-            render_state.use_italics = false;
-    } else if (tag.tokens[0] == "u" && rendering) {
-        if (!tag.close_tag) {
-            render_state.draw_underline = true;
-        } else {
-            render_state.draw_underline = false;
-        }
-    } else if (tag.tokens[0] == "rgba" && rendering) {
-        if (tag.close_tag) {
+    if (tag->text == "i") {
+        render_state.use_italics = !tag->close_tag;
+    } else if (tag->text == "u") {
+        render_state.draw_underline = !tag->close_tag;
+    } else if (tag->text == "rgba") {
+        if (tag->close_tag) {
             glColor4dv(orig_color);
             render_state.color_set = false;
         } else {
             bool well_formed_tag = true;
-            if (5 <= tag.tokens.size()) {
+            if (4 <= tag->params.size()) {
                 try {
                     int temp_color[4];
                     Uint8 color[4];
-                    temp_color[0] = lexical_cast<int>(tag.tokens[1]);
-                    temp_color[1] = lexical_cast<int>(tag.tokens[2]);
-                    temp_color[2] = lexical_cast<int>(tag.tokens[3]);
-                    temp_color[3] = lexical_cast<int>(tag.tokens[4]);
+                    temp_color[0] = lexical_cast<int>(tag->params[0]);
+                    temp_color[1] = lexical_cast<int>(tag->params[1]);
+                    temp_color[2] = lexical_cast<int>(tag->params[2]);
+                    temp_color[3] = lexical_cast<int>(tag->params[3]);
                     if (0 <= temp_color[0] && temp_color[0] <= 255 && 0 <= temp_color[1] && temp_color[1] <= 255 &&
                         0 <= temp_color[2] && temp_color[2] <= 255 && 0 <= temp_color[3] && temp_color[3] <= 255) {
                         color[0] = temp_color[0];
@@ -764,10 +975,10 @@ void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color, Fon
                 } catch (boost::bad_lexical_cast) {
                     try {
                         double color[4];
-                        color[0] = lexical_cast<double>(tag.tokens[1]);
-                        color[1] = lexical_cast<double>(tag.tokens[2]);
-                        color[2] = lexical_cast<double>(tag.tokens[3]);
-                        color[3] = lexical_cast<double>(tag.tokens[4]);
+                        color[0] = lexical_cast<double>(tag->params[0]);
+                        color[1] = lexical_cast<double>(tag->params[1]);
+                        color[2] = lexical_cast<double>(tag->params[2]);
+                        color[3] = lexical_cast<double>(tag->params[3]);
                         if (0.0 <= color[0] && color[0] <= 1.0 && 0.0 <= color[1] && color[1] <= 1.0 &&
                             0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0) {
                             glColor4dv(color);
@@ -784,22 +995,11 @@ void Font::HandleTag(const Tag& tag, int x, int y, const double* orig_color, Fon
                 well_formed_tag = false;
             }
             if (!well_formed_tag) {
-                string error_msg = "GG::Font : Encountered malformed <rgba> formatting tag: ";
-                error_msg += (tag.close_tag ? "</" : "<");
-                for (unsigned int i = 0; i < tag.tokens.size(); ++i) {
-                    error_msg += tag.tokens[i];
-                    if (i < tag.tokens.size() - 1)
-                        error_msg += " ";
-                }
-                error_msg += ">";
-                App::GetApp()->Logger().error(error_msg);
+                App::GetApp()->Logger().error("GG::Font : Encountered malformed <rgba> formatting tag: " + tag->original_tag_text);
             }
         }
-    } else if (tag.tokens[0] == "pre") {
-        render_state.ignore_tags = !tag.close_tag;
     }
 }
-
 
 
 ///////////////////////////////////////
@@ -819,7 +1019,7 @@ shared_ptr<Font> FontManager::GetFont(const string& font_filename, int pts, Uint
 {
     static const shared_ptr<Font> EMPTY_FONT(new Font("", 0));
     FontKey key(font_filename, pts);
-    std::map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
+    map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
     if (it == m_rendered_fonts.end()) { // if no such font has been created, create it now
         if (font_filename == "")
             return EMPTY_FONT; // keeps this function from throwing; "" is the only invalid font filename that shouldn't throw
@@ -838,7 +1038,7 @@ shared_ptr<Font> FontManager::GetFont(const string& font_filename, int pts, Uint
 void FontManager::FreeFont(const string& font_filename, int pts)
 {
     FontKey key(font_filename, pts);
-    std::map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
+    map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
     if (it != m_rendered_fonts.end())
         m_rendered_fonts.erase(it);
 }

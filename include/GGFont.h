@@ -87,41 +87,81 @@ GG_API string RgbaTag(const Clr& c);
     Users of Font may wish to create their own tags as well.  Though Font will not be able to handle new tags without reworking
     the Font code, it is possible to let Font know about other tags, in order for Font to render them invisible as it does 
     with the tags listed above.  See the static methods RegisterKnownTag(), RemoveKnownTag(), and ClearKnownTags() for details.
-    It is not possible to accidentally or intentionally remove the built-in tags using these methods.  If you wish not to use 
-    tags at all, call DetermineLines() and RenderText() with the parameter tags set to false (this is the default value), or 
-    include a \<pre\> tag at the beginning of the text to be rendered.
+    It is not possible to remove the built-in tags using these methods.  If you wish not to use tags at all, call DetermineLines()
+    and RenderText() with the parameter format containing TF_IGNORETAGS, or include a \<pre\> tag at the beginning of the text
+    to be rendered.
    */
 class GG_API Font
 {
 public:
-    /** This struct is used to render GG:Font text.  
-        It holds vital data on each line that a string occupies when rendered with given format flags.  Each value 
-        extents[i] is the furthest that the right side of the i-th character extends from the beginning of the line.*/
+    /** Used to encapsulate a token-like piece of text to be rendered using GG::Font. */
+    struct TextElement
+    {
+        /** The types of token-like entities that can be represented by a TextElement. */
+        enum TextElementType {
+            OPEN_TAG,   ///< An opening text formatting tag (eg "<rgba 0 0 0 255>").
+            CLOSE_TAG,  ///< A closing text formatting tag (eg "</rgba>").
+            TEXT,       ///< Some non-whitespace text (eg "The").
+            WHITESPACE, ///< Some whitespace text (eg "  \n").
+            NEWLINE     ///< A newline.  Newline TextElements represent the newline character when it is encountered in a rendered string, though they do not contain the actual newline character -- their \a text members are always "").
+        };
+
+        TextElement(bool ws, bool nl); ///< Ctor.  \a ws indicates that the element contains only whitespace; \a nl indicates that it is a newline element.
+        virtual ~TextElement(); ///< Virtual dtor.
+
+        int Width() const;                       ///< Returns the width of the element, in pixels
+        virtual TextElementType Type() const;    ///< Returns the TextElementType of the element.
+        virtual int OriginalStringChars() const; ///< Returns the number of characters in the original string that the element represents.
+
+        string      text;       ///< The text represented by the element, or the name of the tag, if the element is a FormattingTag.
+        vector<int> widths;     ///< The widths of the characters in \a text.
+        const bool  whitespace; ///< True iff this is a whitespace element.
+        const bool  newline;    ///< True iff this is a newline element.
+    };
+
+    /** The type of TextElement that represents a text formatting tag. */
+    struct FormattingTag : TextElement
+    {
+        FormattingTag(bool close); ///< Ctor.  \a close indicates that the tag is a close-tag (e.g. "</rgba>").
+
+        virtual TextElementType Type() const;
+        virtual int OriginalStringChars() const;
+
+        vector<string> params;            ///< The parameter strings within the tag, eg "0", "0", "0", and "255" for the tag "<rgba 0 0 0 255>".
+        string         original_tag_text; ///< The text as it appears in the original string.
+        const bool     close_tag;         ///< True iff this is a close-tag.
+    };
+
+    /** Holds the essential data on each line that a string occupies when rendered with given format flags.
+        \a char_data contains the visible characters for each line, plus any text formatting tags present
+        on that line as well. */
     struct GG_API LineData
     {
-        int Width() const {return (!extents.empty() ? extents.back() : 0);}; ///< returns the width of the line, in pixels
+        /** Contains the extent in pixels, the index into the original string, and the text formatting tags that should
+            be applied before rendering of a visible character. */
+        struct CharData
+        {
+            CharData(); ///< Defauilt ctor.
+            CharData(int extent_, int original_index, const vector<shared_ptr<TextElement> >& tags_); ///< Ctor.
 
-        int         begin_idx;      ///< the index into the text string of the first character of the line
-        int         end_idx;        ///< the index of the last + 1 character of the line
-        vector<int> extents;        ///< the cummulative extents of the characters on this line of the text (0 extent is the left side)
-        Uint32      justification;  ///< TF_LEFT, TF_CENTER, or TF_RIGHT; derived from text format flags and/or formatting tags in the text
+            int extent;              ///< The furthest-right extent in pixels of this character as it appears on the line.
+            int original_char_index; ///< The position in the original string of this character.
+            vector<shared_ptr<FormattingTag> >
+            tags;                    ///< The text formatting tags that should be applied before rendering this character.
+        };
+
+        int         Width() const; ///< returns the width of the line, in pixels
+        bool        Empty() const; ///< returns true iff char_data has size 0
+
+        vector<CharData> char_data;     ///< 
+        Uint32           justification; ///< TF_LEFT, TF_CENTER, or TF_RIGHT; derived from text format flags and/or formatting tags in the text
     };
 
-    /** This just holds the essential data necessary to represent a text formatting tag.*/
-    struct GG_API Tag
-    {
-        Tag() : close_tag(false), char_length(0) {} ///< default ctor
- 
-        vector<string> tokens;        ///< the tokens of the tag (tokens are broken up by ' ' and '\\t' whitespace characters)
-        bool           close_tag;     ///< true if this is a "close" tag (eg "</i>")
-        int            char_length;   ///< the total number of characters that comprise the tag, including brackets and whitespace.  0 indicates that this is not a valid tag.
-    };
-
-    /** This holds the state of tags during rendering of text.  By keeping track of this state across multiple calls to
+    /** Holds the state of tags during rendering of text.  By keeping track of this state across multiple calls to
         RenderText(), the user can preserve the functionality of the text formatting tags, if present.*/
     struct GG_API RenderState
     {
-        RenderState() : ignore_tags(false), use_italics(false), draw_underline(false), color_set(false) {} ///< default ctor
+        RenderState(); ///< default ctor
 
         bool    ignore_tags;        ///< set to true upon encountering a \<pre\> tag, and to false when a \</pre\> tag is seen
         bool    use_italics;        ///< set to true upon encountering an \<i> tag, and to false when an \</i> tag is seen
@@ -134,13 +174,14 @@ public:
     GGEXCEPTION(FontException);
 
     /** the ranges of character glyphs to be rendered in this font*/
-    enum GlyphRange {NUMBER = 1,                ///< only the numbers ('0' - '9')
-                     ALPHA_UPPER = 2,           ///< only the uppercase alphabet ('A' - 'Z')
-                     ALPHA_LOWER = 4,           ///< only the lowercase alphabet ('a' - 'z')
-                     SYMBOL = 8,                ///< everything printable not covered above
-                     ALL_DEFINED_RANGES = 15,   ///< everything above (all printable characters)
-                     ALL_CHARS = 31             ///< all characters (0x00 - 0xFF)
-                    };
+    enum GlyphRange {
+        NUMBER =             1 << 0,    ///< only the numbers ('0' - '9')
+        ALPHA_UPPER =        1 << 1,    ///< only the uppercase alphabet ('A' - 'Z')
+        ALPHA_LOWER =        1 << 2,    ///< only the lowercase alphabet ('a' - 'z')
+        SYMBOL =             1 << 3,    ///< everything printable not covered above
+        ALL_DEFINED_RANGES = NUMBER | ALPHA_UPPER | ALPHA_LOWER | SYMBOL, ///< everything above (all printable characters)
+        ALL_CHARS =          (1 << 5) - 1 ///< all characters (0x00 - 0xFF)
+    };
       
     /** \name Structors */ //@{
     Font(const string& font_filename, int pts, Uint32 range = ALL_DEFINED_RANGES); ///< ctor. \throw FontException This constructor may throw if a valid font file is not found, or a Font cannot be created for some other reason.
@@ -162,21 +203,22 @@ public:
     int               SpaceWidth() const   {return m_space_width;}    ///< returns the width in pixels of the glyph for the space character
     int               RenderGlyph(const Pt& pt, char c) const {return RenderGlyph(pt.x, pt.y, c);}   ///< renders glyph for \a c and returns advance of glyph rendered
     int               RenderGlyph(int x, int y, char c) const;     ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderText(const Pt& pt, const string& text) const {return RenderText(pt.x, pt.y, text);}  ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
-    int               RenderText(int x, int y, const string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string; treats formatting tags as regular text unless \a tags == true
-    void              RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, bool tags = false, RenderState* render_state = 0) const {RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, tags, render_state);} ///< formatted text rendering; treats formatting tags as regular text unless \a tags == true
-    void              RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, bool tags = false, RenderState* render_state = 0) const; ///< formatted text rendering; treats formatting tags as regular text unless \a tags == true
-    Pt                DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& lines, bool tags = false) const; ///< returns the maximum dimensions of the string in x and y; treats formatting tags as regular text unless \a tags == true
-    Pt                TextExtent(const string& text, Uint32 format = TF_NONE, int box_width = 0, bool tags = false) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
+    int               RenderText(const Pt& pt, const string& text) const {return RenderText(pt.x, pt.y, text);}  ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
+    int               RenderText(int x, int y, const string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
+    void              RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
+    void              RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
+    void              RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
+    void              RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
+    Pt                DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& lines) const; ///< returns the maximum dimensions of the string in x and y
+    Pt                TextExtent(const string& text, Uint32 format = TF_NONE, int box_width = 0) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Font object
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Font
     //@}
    
     static void       RegisterKnownTag(const string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
-    static void       RemoveKnownTag(const string& tag);     ///< removes \a tag from the known tag list
+    static void       RemoveKnownTag(const string& tag);     ///< removes \a tag from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
     static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
-    static void       FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags = false); ///< fills \a tag with the data on the first tag found from location \a idx in \a text
 
 private:
     /** This just holds the essential data necessary to render a glyph from the OpenGL texture(s) 
@@ -192,11 +234,12 @@ private:
         int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
         int         width;         ///< the width of the glyph only
     };
+    struct HandleTagFunctor;
 
     void              Init(const string& font_filename, int pts, Uint32 range);
     bool              GenerateGlyph(FT_Face font, FT_ULong ch);
     inline int        RenderGlyph(int x, int y, const Glyph& glyph, const RenderState* render_state) const;
-    void              HandleTag(const Tag& tag, int x, int y, const double* orig_color, RenderState& render_state) const;
+    void              HandleTag(const shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const;
 
     string               m_font_filename;
     int                  m_pt_sz;
@@ -215,6 +258,8 @@ private:
    
     static set<string>   s_action_tags; ///< embedded tags that Font must act upon when rendering are stored here
     static set<string>   s_known_tags;  ///< embedded tags that Font knows about but should not act upon are stored here
+
+    friend struct HandleTagFunctor;
 };
 
 

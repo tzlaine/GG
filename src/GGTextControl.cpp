@@ -45,7 +45,8 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const sh
 {
     ValidateFormat();
     Control::m_text = str;
-    if (m_font) m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
+    if (m_font)
+        m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
 }
 
 TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
@@ -58,7 +59,8 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const st
 {
     ValidateFormat();
     Control::m_text = str;
-    if (m_font) m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
+    if (m_font)
+        m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
 }
 
 TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
@@ -72,7 +74,7 @@ TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>
     ValidateFormat();
     Control::m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
         Resize(text_sz);
     }
 }
@@ -88,7 +90,7 @@ TextControl::TextControl(int x, int y, const string& str, const string& font_fil
     ValidateFormat();
     Control::m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
         Resize(text_sz);
     }
 }
@@ -112,7 +114,7 @@ TextControl::TextControl(const XMLElement& elem) :
     m_fit_to_text = lexical_cast<bool>(elem.Child("m_fit_to_text").Text());
 
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
         if (m_fit_to_text)
             Resize(text_sz);
     }
@@ -122,7 +124,6 @@ XMLElement TextControl::XMLEncode() const
 {
     XMLElement retval("GG::TextControl");
     retval.AppendChild(Control::XMLEncode());
-
     retval.AppendChild(XMLElement("m_format", StringFromFlags<GG::TextFormat>(m_format)));
     retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
     retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
@@ -145,7 +146,8 @@ bool TextControl::Render()
 {
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor4ubv(clr_to_use.v);
-    if (m_font) m_font->RenderText(UpperLeft(), LowerRight(), m_text, m_format, &m_line_data, true);
+    if (m_font)
+        m_font->RenderText(UpperLeft(), LowerRight(), m_text, m_format, &m_line_data);
     return true;
 }
 
@@ -153,7 +155,7 @@ void TextControl::SetText(const string& str)
 {
     Control::m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
+        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
         if (m_fit_to_text)
             Resize(text_sz);
     }

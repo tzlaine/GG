@@ -89,7 +89,6 @@ MultiEdit::MultiEdit(const XMLElement& elem) :
     curr_elem = &elem.Child("m_max_lines_history");
     m_max_lines_history = lexical_cast<int>(curr_elem->Attribute("value"));
 
-    SetText(m_text);
     Init();
 }
 
@@ -456,6 +455,9 @@ void MultiEdit::SelectAll()
 
 void MultiEdit::SetText(const string& str)
 {
+     bool scroll_to_end = (m_style & TERMINAL_STYLE) &&
+          (!m_vscroll || m_vscroll->PosnRange().second == m_vscroll->ScrollRange().second + 1);
+
     // trim the rows, if required by m_max_lines_history
     Pt cl_sz = ClientDimensions();
     Uint32 format = TextFormat();
@@ -522,6 +524,8 @@ void MultiEdit::SetText(const string& str)
 
     AdjustScrolls();
     AdjustView();
+     if (scroll_to_end && m_vscroll)
+          m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
     EditedSignal()(str);
 }
 
@@ -713,6 +717,7 @@ void MultiEdit::Init()
 {
     ValidateStyle();
     SetTextFormat(m_style);
+     SetText(m_text);
     SizeMove(UpperLeft(), LowerRight()); // do this to set up the scrolls, and in case INTEGRAL_HEIGHT is in effect
 }
 

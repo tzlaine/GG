@@ -131,7 +131,7 @@ public:
     void  operator+=(const string& str)    {SetText(Control::m_text + str);}   ///< appends \a str to text string by way of SetText()
     void  operator+=(const char* str)      {SetText(Control::m_text + str);}   ///< appends \a str to text string by way of SetText()
     void  operator+=(char ch)              {SetText(Control::m_text + ch);}    ///< appends \a ch to text string by way of SetText()
-    void  Clear()                          {Control::m_text = "";}             ///< sets text string to ""
+    void  Clear()                          {SetText("");}                      ///< sets text string to ""
     void  Insert(int pos, char ch)         {Control::m_text.insert(pos, 1, ch); SetText(Control::m_text);}   ///< allows access to text string much as a std::string
     void  Erase(int pos, int num = 1)      {Control::m_text.erase(pos, num); SetText(Control::m_text);}      ///< allows access to text string much as a std::string
     //@}

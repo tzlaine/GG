@@ -36,17 +36,17 @@ namespace GG {
 ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const string& msg, const string& font_filename,
                                int pts, Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/,
                                int buttons/* = 3*/, Button* zero/* = 0*/, Button* one/* = 0*/, Button* two/* = 0*/) :
-        Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
-        m_color(color),
-        m_border_color(border_color),
-        m_text_color(text_color),
-        m_button_color(button_color),
-        m_default(0),
-        m_escape(buttons - 1),
-        m_result(0),
-        m_button_0(zero),
-        m_button_1(one),
-        m_button_2(two)
+    Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(button_color),
+    m_default(0),
+    m_escape(buttons - 1),
+    m_result(0),
+    m_button_0(zero),
+    m_button_1(one),
+    m_button_2(two)
 {
     Init(msg, font_filename, pts, buttons);
 }
@@ -54,17 +54,17 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const string& msg, co
 ThreeButtonDlg::ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts,
                                Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/, int buttons/* = 3*/,
                                Button* zero/* = 0*/, Button* one/* = 0*/, Button* two/* = 0*/) :
-        Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
-        m_color(color),
-        m_border_color(border_color),
-        m_text_color(text_color),
-        m_button_color(button_color),
-        m_default(0),
-        m_escape(buttons - 1),
-        m_result(0),
-        m_button_0(zero),
-        m_button_1(one),
-        m_button_2(two)
+    Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(button_color),
+    m_default(0),
+    m_escape(buttons - 1),
+    m_result(0),
+    m_button_0(zero),
+    m_button_1(one),
+    m_button_2(two)
 {
     Init(msg, font_filename, pts, buttons);
 }
@@ -73,17 +73,17 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const string& msg, co
                                int pts, Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const string& zero, const string& one/* = ""*/,
                                const string& two/* = ""*/) :
-        Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
-        m_color(color),
-        m_border_color(border_color),
-        m_text_color(text_color),
-        m_button_color(button_color),
-        m_default(0),
-        m_escape(buttons - 1),
-        m_result(0),
-        m_button_0(0),
-        m_button_1(0),
-        m_button_2(0)
+    Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(button_color),
+    m_default(0),
+    m_escape(buttons - 1),
+    m_result(0),
+    m_button_0(0),
+    m_button_1(0),
+    m_button_2(0)
 {
     Init(msg, font_filename, pts, buttons, zero, one, two);
 }
@@ -91,49 +91,38 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const string& msg, co
 ThreeButtonDlg::ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const string& zero, const string& one/* = ""*/, const string& two/* = ""*/) :
-        Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
-        m_color(color),
-        m_border_color(border_color),
-        m_text_color(text_color),
-        m_button_color(button_color),
-        m_default(0),
-        m_escape(buttons - 1),
-        m_result(0),
-        m_button_0(0),
-        m_button_1(0),
-        m_button_2(0)
+    Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(button_color),
+    m_default(0),
+    m_escape(buttons - 1),
+    m_result(0),
+    m_button_0(0),
+    m_button_1(0),
+    m_button_2(0)
 {
     Init(msg, font_filename, pts, buttons, zero, one, two);
 }
 
 ThreeButtonDlg::ThreeButtonDlg(const XMLElement& elem) :
-        Wnd(elem.Child("GG::Wnd")),
-        m_result(0),
-        m_button_1(0),
-        m_button_2(0)
+    Wnd(elem.Child("GG::Wnd")),
+    m_result(0),
+    m_button_1(0),
+    m_button_2(0)
 {
     if (elem.Tag() != "GG::ThreeButtonDlg")
         throw std::invalid_argument("Attempted to construct a GG::ThreeButtonDlg from an XMLElement that had a tag other than \"GG::ThreeButtonDlg\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_color");
-    m_color = Clr(curr_elem->Child("GG::Clr"));
+    m_color = Clr(elem.Child("m_color").Child("GG::Clr"));
+    m_border_color = Clr(elem.Child("m_border_color").Child("GG::Clr"));
+    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
+    m_button_color = Clr(elem.Child("m_button_color").Child("GG::Clr"));
+    m_default = lexical_cast<int>(elem.Child("m_default").Text());
+    m_escape = lexical_cast<int>(elem.Child("m_escape").Text());
 
-    curr_elem = &elem.Child("m_border_color");
-    m_border_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_text_color");
-    m_text_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_button_color");
-    m_button_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_default");
-    m_default = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_escape");
-    m_escape = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_button_0");
+    const XMLElement* curr_elem = &elem.Child("m_button_0");
     if (!(m_button_0 = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
         throw std::runtime_error("ThreeButtonDlg::ThreeButtonDlg : Attempted to use a non-Button object as the ok button.");
 
@@ -159,45 +148,23 @@ XMLElement ThreeButtonDlg::XMLEncode() const
     const_cast<ThreeButtonDlg*>(this)->DetachSignalChildren();
     retval.AppendChild(Wnd::XMLEncode());
 
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_color", m_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_border_color", m_border_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_button_color", m_button_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_default", lexical_cast<string>(m_default)));
+    retval.AppendChild(XMLElement("m_escape", lexical_cast<string>(m_escape)));
+    retval.AppendChild(XMLElement("m_button_0", m_button_0->XMLEncode()));
 
-    temp = XMLElement("m_color");
-    temp.AppendChild(m_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_border_color");
-    temp.AppendChild(m_border_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_text_color");
-    temp.AppendChild(m_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_color");
-    temp.AppendChild(m_button_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_default");
-    temp.SetAttribute("value", lexical_cast<string>(m_default));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_escape");
-    temp.SetAttribute("value", lexical_cast<string>(m_escape));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_0");
-    temp.AppendChild(m_button_0->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_1");
+    XMLElement temp("m_button_1");
     if (m_button_1)
         temp.AppendChild(m_button_1->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement());
 
     temp = XMLElement("m_button_2");
     if (m_button_2)
         temp.AppendChild(m_button_2->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement());
 
     const_cast<ThreeButtonDlg*>(this)->AttachSignalChildren();
 

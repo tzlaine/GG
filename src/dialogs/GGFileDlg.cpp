@@ -111,111 +111,139 @@ struct StringEnd
 boost::filesystem::path FileDlg::s_working_dir = boost::filesystem::initial_path();
 
 
+FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const shared_ptr<Font>& font, Clr color, 
+		 Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) : 
+    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(color),
+    m_font(font),
+    m_save(save),
+    m_curr_dir_text(0),
+    m_files_list(0),
+    m_files_edit(0),
+    m_filter_list(0),
+    m_ok_button(ok),
+    m_cancel_button(cancel),
+    m_files_label(0),
+    m_file_types_label(0)
+{
+    CreateChildren(filename, multi, font->FontName(), font->PointSize());
+    Init(directory);
+}
+
 FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const string& font_filename,
                  int pts, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/,
                  Button* ok/* = 0*/, Button* cancel/* = 0*/) :
-        Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
-        m_color(color),
-        m_border_color(border_color),
-        m_text_color(text_color),
-        m_button_color(color),
-        m_font(App::GetApp()->GetFont(font_filename, pts)),
-        m_save(save),
-        m_curr_dir_text(0),
-        m_files_list(0),
-        m_files_edit(0),
-        m_filter_list(0),
-        m_ok_button(ok),
-        m_cancel_button(cancel),
-        m_files_label(0),
-        m_file_types_label(0)
+    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(color),
+    m_font(App::GetApp()->GetFont(font_filename, pts)),
+    m_save(save),
+    m_curr_dir_text(0),
+    m_files_list(0),
+    m_files_edit(0),
+    m_filter_list(0),
+    m_ok_button(ok),
+    m_cancel_button(cancel),
+    m_files_label(0),
+    m_file_types_label(0)
 {
     CreateChildren(filename, multi, font_filename, pts);
     Init(directory);
 }
 
 FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
+                 const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, 
+		 Button* cancel/* = 0*/) :
+    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(color),
+    m_font(font),
+    m_save(save),
+    m_file_filters(types),
+    m_curr_dir_text(0),
+    m_files_list(0),
+    m_files_edit(0),
+    m_filter_list(0),
+    m_ok_button(ok),
+    m_cancel_button(cancel),
+    m_files_label(0),
+    m_file_types_label(0)
+{
+    CreateChildren(filename, multi, font->FontName(), font->PointSize());
+    Init(directory);
+}
+
+FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
                  const string& font_filename, int pts, Clr color, Clr border_color,
                  Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) :
-        Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
-        m_color(color),
-        m_border_color(border_color),
-        m_text_color(text_color),
-        m_button_color(color),
-        m_font(App::GetApp()->GetFont(font_filename, pts)),
-        m_save(save),
-        m_file_filters(types),
-        m_curr_dir_text(0),
-        m_files_list(0),
-        m_files_edit(0),
-        m_filter_list(0),
-        m_ok_button(ok),
-        m_cancel_button(cancel),
-        m_files_label(0),
-        m_file_types_label(0)
+    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
+    m_color(color),
+    m_border_color(border_color),
+    m_text_color(text_color),
+    m_button_color(color),
+    m_font(App::GetApp()->GetFont(font_filename, pts)),
+    m_save(save),
+    m_file_filters(types),
+    m_curr_dir_text(0),
+    m_files_list(0),
+    m_files_edit(0),
+    m_filter_list(0),
+    m_ok_button(ok),
+    m_cancel_button(cancel),
+    m_files_label(0),
+    m_file_types_label(0)
 {
     CreateChildren(filename, multi, font_filename, pts);
     Init(directory);
 }
 
 FileDlg::FileDlg(const XMLElement& elem) :
-        Wnd(elem.Child("GG::Wnd"))
+    Wnd(elem.Child("GG::Wnd"))
 {
     if (elem.Tag() != "GG::FileDlg")
         throw std::invalid_argument("Attempted to construct a GG::FileDlg from an XMLElement that had a tag other than \"GG::FileDlg\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_color");
-    m_color = Clr(curr_elem->Child("GG::Clr"));
+    m_color = Clr(elem.Child("m_color").Child("GG::Clr"));
+    m_border_color = Clr(elem.Child("m_border_color").Child("GG::Clr"));
+    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
+    m_button_color = Clr(elem.Child("m_button_color").Child("GG::Clr"));
 
-    curr_elem = &elem.Child("m_border_color");
-    m_border_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_text_color");
-    m_text_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_button_color");
-    m_button_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_font").Child("GG::Font");
+    const XMLElement* curr_elem = &elem.Child("m_font").Child("GG::Font");
     string font_filename = curr_elem->Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Attribute("value"));
+    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Text());
     m_font = App::GetApp()->GetFont(font_filename, pts);
 
-    curr_elem = &elem.Child("m_save");
-    m_save = lexical_cast<bool>(curr_elem->Attribute("value"));
+    m_save = lexical_cast<bool>(elem.Child("m_save").Text());
 
     curr_elem = &elem.Child("m_file_filters");
     for (int i = 0; i < curr_elem->NumChildren(); i += 2)
         m_file_filters.push_back(std::make_pair(curr_elem->Child(i).Text(), curr_elem->Child(i + 1).Text()));
 
-    curr_elem = &elem.Child("m_curr_dir_text");
-    m_curr_dir_text = new TextControl(curr_elem->Child("GG::TextControl"));
-
-    curr_elem = &elem.Child("m_files_list");
-    if (!(m_files_list = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
-        throw std::runtime_error("FileDlg::FileDlg : Attempted to use a non-ListBox object as the files list box.");
-
-    curr_elem = &elem.Child("m_files_edit");
-    if (!(m_files_edit = dynamic_cast<Edit*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
-        throw std::runtime_error("FileDlg::FileDlg : Attempted to use a non-Edit object as the filename edit box when constructing a GG::FileDlg");
-
-    curr_elem = &elem.Child("m_filter_list");
-    if (!(m_filter_list = dynamic_cast<DropDownList*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
-        throw std::runtime_error("FileDlg::FileDlg : Attempted to use a non-DropDownList object as the file filters drop list.");
-
-    curr_elem = &elem.Child("m_ok_button");
-    if (!(m_ok_button = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
-        throw std::runtime_error("FileDlg::FileDlg : Attempted to use a non-Button object as the ok button.");
-
-    curr_elem = &elem.Child("m_cancel_button");
-    if (!(m_cancel_button = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
-        throw std::runtime_error("FileDlg::FileDlg : Attempted to use a non-Button object as the cancel button.");
-
-    curr_elem = &elem.Child("m_files_label");
-    m_files_label = new TextControl(curr_elem->Child("GG::TextControl"));
-
-    curr_elem = &elem.Child("m_file_types_label");
-    m_file_types_label = new TextControl(curr_elem->Child("GG::TextControl"));
+    m_curr_dir_text = new TextControl(elem.Child("m_curr_dir_text").Child("GG::TextControl"));
+    if (!(m_files_list = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(elem.Child("m_files_list").Child(0))))) {
+        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-ListBox object as the files list box.");
+    }
+    if (!(m_files_edit = dynamic_cast<Edit*>(App::GetApp()->GenerateWnd(elem.Child("m_files_edit").Child(0))))) {
+        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-Edit object as the filename edit box when constructing a GG::FileDlg");
+    }
+    if (!(m_filter_list = dynamic_cast<DropDownList*>(App::GetApp()->GenerateWnd(elem.Child("m_filter_list").Child(0))))) {
+        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-DropDownList object as the file filters drop list.");
+    }
+    if (!(m_ok_button = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_ok_button").Child(0))))) {
+        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-Button object as the ok button.");
+    }
+    if (!(m_cancel_button = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_cancel_button").Child(0))))) {
+        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-Button object as the cancel button.");
+    }
+    m_files_label = new TextControl(elem.Child("m_files_label").Child("GG::TextControl"));
+    m_file_types_label = new TextControl(elem.Child("m_file_types_label").Child("GG::TextControl"));
 
     Init("");
 }
@@ -226,79 +254,37 @@ XMLElement FileDlg::XMLEncode() const
     const_cast<FileDlg*>(this)->DetachSignalChildren();
     retval.AppendChild(Wnd::XMLEncode());
 
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_color", m_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_border_color", m_border_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_button_color", m_button_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
+    retval.AppendChild(XMLElement("m_save", lexical_cast<string>(m_save)));
 
-    temp = XMLElement("m_color");
-    temp.AppendChild(m_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_border_color");
-    temp.AppendChild(m_border_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_text_color");
-    temp.AppendChild(m_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_color");
-    temp.AppendChild(m_button_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_font");
-    temp.AppendChild(m_font->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_save");
-    temp.SetAttribute("value", lexical_cast<string>(m_save));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_file_filters");
+    XMLElement temp("m_file_filters");
     for (unsigned int i = 0; i < m_file_filters.size(); ++i) {
-        XMLElement loop_temp("first");
-        loop_temp.SetText(m_file_filters[i].first);
-        temp.AppendChild(loop_temp);
-        loop_temp = XMLElement("second");
-        loop_temp.SetText(m_file_filters[i].second);
-        temp.AppendChild(loop_temp);
+        temp.AppendChild(XMLElement("first", m_file_filters[i].first));
+        temp.AppendChild(XMLElement("second", m_file_filters[i].second));
     }
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_curr_dir_text");
-    temp.AppendChild(m_curr_dir_text->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_curr_dir_text", m_curr_dir_text->XMLEncode()));
 
-    temp = XMLElement("m_files_list");
     m_files_list->Clear();
-    temp.AppendChild(m_files_list->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_files_list", m_files_list->XMLEncode()));
     const_cast<FileDlg*>(this)->UpdateList();
 
-    temp = XMLElement("m_files_edit");
     m_files_edit->Clear();
-    temp.AppendChild(m_files_edit->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_files_edit", m_files_edit->XMLEncode()));
 
-    temp = XMLElement("m_filter_list");
     m_filter_list->Clear();
-    temp.AppendChild(m_filter_list->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_filter_list", m_filter_list->XMLEncode()));
     const_cast<FileDlg*>(this)->PopulateFilters();
 
-    temp = XMLElement("m_ok_button");
-    temp.AppendChild(m_ok_button->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_cancel_button");
-    temp.AppendChild(m_cancel_button->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_files_label");
-    temp.AppendChild(m_files_label->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_file_types_label");
-    temp.AppendChild(m_file_types_label->XMLEncode());
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_ok_button", m_ok_button->XMLEncode()));
+    retval.AppendChild(XMLElement("m_cancel_button", m_cancel_button->XMLEncode()));
+    retval.AppendChild(XMLElement("m_files_label", m_files_label->XMLEncode()));
+    retval.AppendChild(XMLElement("m_file_types_label", m_file_types_label->XMLEncode()));
 
     const_cast<FileDlg*>(this)->AttachSignalChildren();
 
@@ -337,7 +323,8 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     const int USABLE_WIDTH = Width() - 4 * H_SPACING;
     const int BUTTON_WIDTH = USABLE_WIDTH / 4;
 
-    m_files_edit = new Edit(0, 0, 100, filename, m_font, m_border_color); // use Edit's necessary-height calcs to determine height of the edit
+    boost::filesystem::path filename_path(filename);
+    m_files_edit = new Edit(0, 0, 100, filename_path.leaf(), m_font, m_border_color); // use Edit's necessary-height calcs to determine height of the edit
     m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LB_NOSORT);
 

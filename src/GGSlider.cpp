@@ -153,7 +153,7 @@ int Slider::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-    int tab_width = m_tab->Wnd::Width();
+    int tab_width = m_tab->Width();
     int x_start, x_end, y_start, y_end;
     if (m_orientation == VERTICAL) {
         x_start = (lr.x + ul.x) / 2 - m_line_width / 2;

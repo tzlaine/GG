@@ -248,6 +248,9 @@ public:
     void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
     void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
 
+    void           SetInteriorColor(Clr c)      {m_int_color = c;}          ///< sets the color painted into the client area of the control
+    void           SetHiliteColor(Clr c)        {m_hilite_color = c;}       ///< sets the color behind selected line items
+
     /** sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle */
     void           SetStyle(Uint32 s);
 

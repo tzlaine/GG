@@ -99,6 +99,7 @@ public:
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the buttons and tab as needed
     virtual void   Disable(bool b = true);
 
+    void           SetInteriorColor(Clr c){m_int_color = c;}         ///< sets the color painted into the client area of the control
     void           SizeScroll(int min, int max, int line, int page); ///< sets the logical ranges of the control, and the logical increment values
     void           SetMax(int max)        {SizeScroll(m_range_min, max, m_line_sz, m_page_sz);}    ///< sets the maximum value of the scroll
     void           SetMin(int min)        {SizeScroll(min, m_range_max, m_line_sz, m_page_sz);}    ///< sets the minimum value of the scroll
@@ -114,7 +115,7 @@ public:
 
 protected:
     /** \name Accessors */ //@{
-    int             TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
+    int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
     ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
 

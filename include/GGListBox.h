@@ -86,13 +86,13 @@ public:
         //@}
 
         /** \name Mutators */ //@{
-        void push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, bool dynamic_text = true); ///< overload of push_back that creates a DynamicText or StaticText Control and adds it to the Row
-        void push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, bool dynamic_text = true); ///< overload of push_back that creates a DynamicText or StaticText Control and adds it to the Row
+        void push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
+        void push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
         void push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
         //@}
 
         // these two generate graphics and text controls from basic text or subtextures
-        static Control* CreateControl(const string& str, const shared_ptr<Font>& font, Clr color, bool dynamic_text); ///< creates a "shrink-fit" DynamicText or StaticText Control from text, font, and color parameters
+        static Control* CreateControl(const string& str, const shared_ptr<Font>& font, Clr color); ///< creates a "shrink-fit" TextControl from text, font, and color parameters
         static Control* CreateControl(const SubTexture& st); ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
 
         string          data_type;     ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is

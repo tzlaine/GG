@@ -134,7 +134,7 @@ FileDlg::FileDlg(const XMLElement& elem) :
         m_file_filters.push_back(std::make_pair(curr_elem->Child(i).Text(), curr_elem->Child(i + 1).Text()));
 
     curr_elem = &elem.Child("m_curr_dir_text");
-    m_curr_dir_text = new DynamicText(curr_elem->Child("GG::DynamicText"));
+    m_curr_dir_text = new TextControl(curr_elem->Child("GG::TextControl"));
 
     curr_elem = &elem.Child("m_files_list");
     if (!(m_files_list = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
@@ -157,10 +157,10 @@ FileDlg::FileDlg(const XMLElement& elem) :
         throw std::runtime_error("FileDlg::FileDlg : Attempted to use a non-Button object as the cancel button.");
 
     curr_elem = &elem.Child("m_files_label");
-    m_files_label = new StaticText(curr_elem->Child("GG::StaticText"));
+    m_files_label = new TextControl(curr_elem->Child("GG::TextControl"));
 
     curr_elem = &elem.Child("m_file_types_label");
-    m_file_types_label = new StaticText(curr_elem->Child("GG::StaticText"));
+    m_file_types_label = new TextControl(curr_elem->Child("GG::TextControl"));
 
     Init();
 }
@@ -288,15 +288,16 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
 
     const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
 
-    m_curr_dir_text = new DynamicText(H_SPACING, V_SPACING / 2, "", m_font, m_text_color );
-    m_files_label = new StaticText(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", font_filename, pts, TF_RIGHT | TF_VCENTER, m_text_color);
-    m_file_types_label = new StaticText(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", font_filename, pts, TF_RIGHT | TF_VCENTER, m_text_color);
+    m_curr_dir_text = new TextControl(H_SPACING, V_SPACING / 2, "", m_font, m_text_color );
+    m_files_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, TF_RIGHT | TF_VCENTER, m_text_color);
+    m_file_types_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, TF_RIGHT | TF_VCENTER, m_text_color);
 
     // determine the space needed to display both text labels in the chosen font; use this to expand the
     // edit as far as possible
-    int labels_width = std::max(m_files_label->TextWidth(), m_file_types_label->TextWidth()) + H_SPACING;
-    m_files_label->OffsetMove(labels_width - m_files_label->Wnd::Width() - H_SPACING / 2, 0);
-    m_file_types_label->OffsetMove(labels_width - m_file_types_label->Wnd::Width() - H_SPACING / 2, 0);
+    int labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
+                                m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
+    m_files_label->OffsetMove(labels_width - m_files_label->Width() - H_SPACING / 2, 0);
+    m_file_types_label->OffsetMove(labels_width - m_file_types_label->Width() - H_SPACING / 2, 0);
     m_files_edit->SizeMove(labels_width, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (BUTTON_WIDTH + 2 * H_SPACING), Height() - (BUTTON_HEIGHT + 2 * V_SPACING));
     m_filter_list->SizeMove(labels_width, Height() - (BUTTON_HEIGHT + V_SPACING),     Width() - (BUTTON_WIDTH + 2 * H_SPACING), Height() - V_SPACING);
 

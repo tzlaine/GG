@@ -37,7 +37,7 @@ namespace GG {
     Has three states: BN_UNPRESSED, BN_PRESSED, and BN_ROLLOVER.  BN_ROLLOVER is when the cursor "rolls over" the button, without 
     depressing it, allowing rollover effects on the button.  To create a bitmap button, simply set the unpressed, pressed, and/or 
     rollover graphics to the desired SubTextures. \see GG::SubTexture */
-class Button : public StaticText
+class Button : public TextControl
 {
 public:
     /// the states of being for a GG::Button
@@ -116,7 +116,7 @@ private:
     is too small, the button and text are positioned in their default spots (button on left, text on right, centered 
     vertically).  If no text format flags are provided, the default text orientation is TF_VCENTER | TF_LEFT.  Note that the 
     bn_x and bn_y paramters are taken to be relative to the control's x and y position.*/
-class StateButton : public StaticText
+class StateButton : public TextControl
 {
 public:
     /// the built-in visual styles of state buttons

@@ -50,10 +50,11 @@ class SubTexture;
     ListBox without worrying about setting up the ListBox in any way ahead of time.  Use LockColWidths() to prevent 
     empty ListBoxes from taking on a new row's number of columns.  To create a ListBox with user-defined widths, 
     use the ctor designed for that, or call SetNumCols(), set individual widths with SetColWidth(), and lock the 
-    column widths with LockColWidths().  Note that while a ListBox can contain arbitrary Control-derived controls,
-    in order for such controls to be automatically saved and loaded using XML encoding, any user-defined Control
-    subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory 
-    for details.*/
+    column widths with LockColWidths().  If non-standard Scrolls are desired, subclasses can create their own 
+    Scroll-derived scrolls by overriding NewVScroll() and NewHScroll().  Note that while a ListBox can contain 
+    arbitrary Control-derived controls, in order for such controls to be automatically saved and loaded using XML 
+    encoding, any user-defined Control subclasses must be added to the App's XMLObjectFactory.  See 
+    GG::App::AddWndGenerator() and GG::XMLObjectFactory for details.*/
 class ListBox : public Control
 {
 public:
@@ -218,10 +219,12 @@ protected:
     int            LastVisibleCol() const;  ///< last column that could be drawn, taking into account the contents and the size of client area
     int            RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (it may be < 0 or >= NumRows())
     //@}
-   
+
     /** \name Mutators */ //@{
-    int            Insert(const Row& row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
-    void           BringCaretIntoView();    ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
+    int             Insert(const Row& row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
+    void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
+    virtual Scroll* NewVScroll(bool horz_scroll);   ///< creates and returns a new vertical scroll, allowing subclasses to use Scroll-derived scrolls
+    virtual Scroll* NewHScroll(bool vert_scroll);   ///< creates and returns a new horizontal scroll, allowing subclasses to use Scroll-derived scrolls
     //@}
 
 private:

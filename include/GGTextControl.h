@@ -54,7 +54,7 @@ namespace GG {
     as the TextControl object that refers to it.  This also means that if the font is explicitly released from the font manager but is
     still held by at least one TextControl object, it will not be destroyed, due to the shared_ptr.  Note that if "" is supplied as the 
     font_filename parameter, no text will be rendered, but a valid TextControl object will be constructed, which may later contain
-    renderable text. DynamicText objects support text with formatting tags. See GG::Font for details.*/
+    renderable text. TextControl objects support text with formatting tags. See GG::Font for details.*/
 class GG_API TextControl : public Control
 {
 public:

@@ -80,7 +80,7 @@ void EventPumpBase::LoopBody(App* app, EventPumpState& state, bool do_non_render
             double min_ms_per_frame = 1000.0 * 1.0 / max_FPS;
             double ms_to_wait = min_ms_per_frame - (state.time - state.last_frame_time);
             if (0.0 < ms_to_wait)
-                app->Wait(ms_to_wait);
+                app->Wait(static_cast<int>(ms_to_wait));
         }
         state.last_frame_time = state.time;
 

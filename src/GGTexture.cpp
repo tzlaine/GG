@@ -170,11 +170,11 @@ namespace {
 // class GG::Texture
 ///////////////////////////////////////
 Texture::Texture() :
-    m_opengl_id(0),
     m_wrap_s(GL_REPEAT),
     m_wrap_t(GL_REPEAT),
     m_min_filter(GL_NEAREST_MIPMAP_LINEAR),
-    m_mag_filter(GL_LINEAR)
+    m_mag_filter(GL_LINEAR),
+    m_opengl_id(0)
 {
     Clear();
 }

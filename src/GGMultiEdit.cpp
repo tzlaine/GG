@@ -48,9 +48,9 @@ namespace {
                     bad_cast = true;
                 }
 
-                if (bad_cast || val1 == EnumMap<MultiEdit::Styles>::BAD_VALUE) {
+                if (bad_cast || val1 == MultiEdit::Styles(EnumMap<MultiEdit::Styles>::BAD_VALUE)) {
                     ListBoxStyle val2 = boost::lexical_cast<ListBoxStyle>(str);
-                    if (val2 == EnumMap<ListBoxStyle>::BAD_VALUE || 
+                    if (val2 == ListBoxStyle(EnumMap<ListBoxStyle>::BAD_VALUE) || 
                         (val2 != static_cast<int>(TF_WORDBREAK) && val2 != static_cast<int>(TF_LINEWRAP) && 
                         val2 != static_cast<int>(TF_LEFT) && val2 != static_cast<int>(TF_CENTER) && 
                         val2 != static_cast<int>(TF_RIGHT))) {

@@ -105,7 +105,7 @@ bool PluginInterface::Load(const std::string& lib_name)
 
     int err = 0;
     if (m_handle) {
-        if (err = lt_dlclose(m_handle)) {
+        if ((err = lt_dlclose(m_handle))) {
             retval = false;
             GG::App::GetApp()->Logger().errorStream() 
                 << "PluginInterface::Load : lt_dlclose() call failed; load of new dynamic library aborted (error #" 

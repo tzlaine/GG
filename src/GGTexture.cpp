@@ -174,7 +174,7 @@ Texture::Texture() :
     m_wrap_s(GL_REPEAT),
     m_wrap_t(GL_REPEAT),
     m_min_filter(GL_NEAREST_MIPMAP_LINEAR),
-    m_mag_filter(GL_NEAREST_MIPMAP_LINEAR)
+    m_mag_filter(GL_LINEAR)
 {
     Clear();
 }
@@ -241,10 +241,22 @@ void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coord
         if (!tex_coords) // use default texture coords when not given any others
             tex_coords = m_tex_coords;
 
-        if (enter_2d_mode) App::GetApp()->Enter2DMode(); // enter 2D mode, if needed
+        if (enter_2d_mode)
+            App::GetApp()->Enter2DMode(); // enter 2D mode, if needed
+
+        glBindTexture(GL_TEXTURE_2D, m_opengl_id);
+
+        // HACK! This code ensures that unscaled textures are reproduced exactly, even
+        // though they theoretically should be even when using non-GL_NEAREST* scaling.
+        bool render_scaled = (x2 - x1) != m_default_width || (y2 - y1) != m_default_height;
+        bool need_min_filter_change = !render_scaled && m_min_filter != (m_mipmaps ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+        bool need_mag_filter_change = !render_scaled && m_mag_filter != GL_NEAREST;
+        if (need_min_filter_change)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_mipmaps ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+        if (need_mag_filter_change)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         // render texture
-        glBindTexture(GL_TEXTURE_2D, m_opengl_id);
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2f(tex_coords[0], tex_coords[1]); glVertex2i(x1, y1);
         glTexCoord2f(tex_coords[2], tex_coords[1]); glVertex2i(x2, y1);
@@ -252,7 +264,13 @@ void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coord
         glTexCoord2f(tex_coords[2], tex_coords[3]); glVertex2i(x2, y2);
         glEnd();
 
-        if (enter_2d_mode) App::GetApp()->Exit2DMode(); // exit 2D mode, if needed
+        if (need_min_filter_change)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
+        if (need_mag_filter_change)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
+
+        if (enter_2d_mode)
+            App::GetApp()->Exit2DMode(); // exit 2D mode, if needed
     }
 }
 
@@ -361,7 +379,12 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
         m_opengl_id = ilutGLBindTexImage();
     if (!m_opengl_id || (error = ilGetError()) != IL_NO_ERROR)
         throw TextureException((string("Could not create OpenGL texture object from file \'") + filename) + "\'");
-   
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
+
     // be sure to record these
     m_filename = filename;
     m_mipmaps = mipmap;

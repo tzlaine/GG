@@ -95,7 +95,7 @@ private:
     void AttachSignalChildren();
     void DetachSignalChildren();
     void Init(const string& msg, const string& font_filename, int pts, int buttons,
-	      const string& zero = "", const string& one = "", const string& two = "");
+              const string& zero = "", const string& one = "", const string& two = "");
     void Button0Clicked()   {m_done = true; m_result = 0;}
     void Button1Clicked()   {m_done = true; m_result = 1;}
     void Button2Clicked()   {m_done = true; m_result = 2;}
@@ -115,6 +115,4 @@ private:
 } // namespace GG
 
 #endif // _GGThreeButtonDlg_h_
-
-
 

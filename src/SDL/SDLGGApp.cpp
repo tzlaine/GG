@@ -30,7 +30,7 @@ using std::string;
 
 // member functions
 SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
-    GG::App(this, app_name),
+    GG::App(app_name),
     m_app_width(w),
     m_app_height(h),
     m_delta_t(1),
@@ -59,7 +59,8 @@ void SDLGGApp::Exit(int code)
 void SDLGGApp::CalcuateFPS(bool b/* = true*/)
 {
     m_calc_FPS = b;
-    if (!b) m_FPS = -1.0f;
+    if (!b) 
+        m_FPS = -1.0f;
 }
 
 const string& SDLGGApp::FPSString() const

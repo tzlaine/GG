@@ -46,9 +46,7 @@ GG_API string RgbaTag(const Clr& c);
 /** This class creates one or more 16-bpp OpenGL textures that contain rendered text from a requested font file at the 
     requested point size, including only the requested ranges of characters.  
     Once the textures have been created, text is rendered to the display by rendering polygons textured with portions of the 
-    rendered textures that contain individual character images.  So four vertices are processed per character rendered, making 
-    this class useful primarily for dynamic text; for faster rendering of static text, use TextImage.  The characters 
-    are rendered 
+    rendered textures that contain individual character images.  The characters are rendered 
     to the textures in white, with alpha blending used for antialiasing.  The user should set the desired text color with a 
     call to glColor*() before any call to RenderText().  When text is rendered, DetermineLines() is called to determine 
     where the line breaks are, so that text can be rendered centered, right-justified, or whatever.  To cut down on this 
@@ -80,11 +78,12 @@ GG_API string RgbaTag(const Clr& c);
     - \verbatim<center></center>\endverbatim       Centered text.
     - \verbatim<right></right>\endverbatim         Right-justified text.
     - \verbatim<pre></pre>\endverbatim             Preformatted.  Similar to HTML \<pre\> tag, except this one only causes all tags to be ignored until a subsequent \</pre\> tag is seen.
+    <p>
     Users of Font may wish to create their own tags as well.  Though Font will not be able to handle new tags without reworking
     the Font code, it is possible to let Font know about other tags, in order for Font to render them invisible as it does 
     with the tags listed above.  See the static methods RegisterKnownTag(), RemoveKnownTag(), and ClearKnownTags() for details.
     It is not possible to accidentally or intentionally remove the built-in tags using these methods.  If you wish not to use 
-    tags at all, call DetermineLines() and RenderText() with the parameter tags == false (this is the default value), or 
+    tags at all, call DetermineLines() and RenderText() with the parameter tags set to false (this is the default value), or 
     include a \<pre\> tag at the beginning of the text to be rendered.
    */
 class GG_API Font

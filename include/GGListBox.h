@@ -66,7 +66,7 @@ class SubTexture;
     controls, in order for such controls to be automatically saved and loaded using XML encoding, any user-defined 
     Control subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and 
     GG::XMLObjectFactory for details. */
-class GG_API GG::ListBox : public GG::Control
+class GG_API ListBox : public Control
 {
 public:
     using Wnd::SizeMove;

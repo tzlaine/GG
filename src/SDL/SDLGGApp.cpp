@@ -276,7 +276,7 @@ void SDLGGApp::PollAndRender()
     }
 
     // update time and track FPS if needed
-    time = SDL_GetTicks();
+    time = Ticks();
     m_delta_t = time - most_recent_time;
     if (m_calc_FPS) {
         ++frames;

@@ -156,6 +156,8 @@ struct GG::AppImplData
     Wnd*       drag_wnds[3];            // GUI window currently being clicked or dragged by each button (on a mouse)
     WndRegion  wnd_region;              // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
 
+    map<Wnd*, Pt> drag_drop_wnds;       // the Wnds (and their offsets) that are being dragged and dropped between Wnds
+
     std::set<std::pair<Key, Uint32> >
                accelerators;            // the keyboard accelerators
 
@@ -369,10 +371,11 @@ void App::Remove(Wnd* wnd)
             s_impl->wnd_region = WR_NONE;
         }
         if (MatchesOrContains(wnd, s_impl->double_click_wnd)) {
-	    s_impl->double_click_wnd = 0;
-	    s_impl->double_click_start_time = -1;
-	    s_impl->double_click_time = -1;
-	}
+            s_impl->double_click_wnd = 0;
+            s_impl->double_click_start_time = -1;
+            s_impl->double_click_time = -1;
+        }
+        s_impl->drag_drop_wnds.erase(wnd);
     }
 }
 
@@ -398,6 +401,21 @@ void App::MoveUp(Wnd* wnd)
 void App::MoveDown(Wnd* wnd)
 {
     if (wnd) s_impl->zlist.MoveDown(wnd);
+}
+
+void App::RegisterDragDropWnd(Wnd* wnd, const Pt& offset)
+{
+    s_impl->drag_drop_wnds[wnd] = offset;
+}
+
+void App::RemoveDragDropWnd(Wnd* wnd)
+{
+    s_impl->drag_drop_wnds.erase(wnd);
+}
+
+void App::ClearDragDropWnds()
+{
+    s_impl->drag_drop_wnds.clear();
 }
 
 void App::EnableMouseDragRepeat(int delay, int interval)
@@ -634,6 +652,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 s_impl->double_click_wnd = 0;
                 s_impl->double_click_time = -1;
             }
+            s_impl->drag_drop_wnds.clear();
             s_impl->button_state[0] = false;
             drag_wnds[0] = 0;       // if the mouse button is released, stop the tracking the drag window
             wnd_region = WR_NONE;   // and clear this, just in case
@@ -700,6 +719,21 @@ void App::Render()
     for (std::list<Wnd*>::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
         if ((*it)->Visible())
             RenderWindow(*it);
+    }
+    // render drag-drop windows in arbitrary order (sorted by pointer value)
+    for (map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {
+        if (it->first->Visible()) {
+            Pt parent_offset = (it->first->Parent() ? it->first->Parent()->ClientUpperLeft() : Pt(0, 0));
+            Pt old_pos = it->first->UpperLeft() - parent_offset;
+//std::cout << "it->first->UpperLeft()=" << it->first->UpperLeft().x << "," << it->first->UpperLeft().y << "\n";
+            it->first->MoveTo(s_impl->mouse_pos - parent_offset - it->second);
+/*std::cout << "    s_impl->mouse_pos=" << s_impl->mouse_pos.x << "," << s_impl->mouse_pos.y << " it->second=" 
+          << it->second.x << "," << it->second.y << " it->first->UpperLeft()=" 
+          << it->first->UpperLeft().x << "," << it->first->UpperLeft().y << "\n";*/
+            RenderWindow(it->first);
+            it->first->MoveTo(old_pos);
+//std::cout << "it->first->UpperLeft()=" << it->first->UpperLeft().x << "," << it->first->UpperLeft().y << "\n\n";
+        }
     }
     Exit2DMode();
 }

@@ -173,6 +173,9 @@ public:
     void           Remove(Wnd* wnd);             ///< removes \a wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.
     void           MoveUp(Wnd* wnd);             ///< moves \a wnd to the top of the z-list
     void           MoveDown(Wnd* wnd);           ///< moves \a wnd to the bottom of the z-list
+    void           RegisterDragDropWnd(Wnd* wnd, const Pt& offset); ///< adds \a wnd to the set of current drag-and-drop Wnds, to be rendered \a offset pixels from the cursor position
+    void           RemoveDragDropWnd(Wnd* wnd);  ///< removes \a wnd from the set of current drag-and-drop Wnds
+    void           ClearDragDropWnds();          ///< clears the set of current drag-and-drop Wnds
     virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode
     virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
     void           EnableFPS(bool b = true);     ///< turns FPS calulations on or off

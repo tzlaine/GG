@@ -36,8 +36,11 @@ namespace GG {
 
 /** This is a GUI window class.
     Window boundaries are from m_upperleft to m_lowerright - Pt(1,1).
-    It is assumed that a child window exists within the boundaries of its parent, and that "sibling" child windows do not 
-    overlap (unless they can without interfering, as in the case of a bounding box, etc.).
+    It is assumed that a child window exists within the boundaries of its parent, although this is not required.
+    However, all clicks that land on a child that are also outside of the parent will not reach the child.
+    Ideally, "sibling" child windows should not overlap (unless they can without interfering, as in the case of a 
+    bounding box, etc.).  If this is impossible or undesirable and control is needed over the order in which 
+    children are rendered, MoveChildUp() and MoveChildDown() provide such control.
     Always-on-top windows are drawn after all others, to ensure that they remain on top.  This means that other 
     non-on-top windows that are moved to the top of the z-order stop at some z-value below the lowest z-valued on-top 
     window.  On-topness is useful for 
@@ -128,6 +131,8 @@ public:
     void           SetMinDimensions(const Pt& sz){m_min_size = sz;}///< sets the minimum allowable dimensions of window
     void           SetMaxDimensions(const Pt& sz){m_max_size = sz;}///< sets the maximum allowable dimensions of window
     void           AttachChild(Wnd* wnd);  ///< places \a wnd in child ptr list, sets's child's \a m_parent member to \a this
+    void           MoveChildUp(Wnd* wnd);  ///< places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children)
+    void           MoveChildDown(Wnd* wnd);///< places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children)
     void           DetachChild(Wnd* wnd);  ///< removes \a wnd from child ptr list, sets child's m_parent = 0
     void           DetachChildren();       ///< removes all Wnds from child ptr list, sets childrens' m_parent = 0
     void           DeleteChild(Wnd* wnd);  ///< removes, detaches, and deletes \a wnd; does nothing if wnd is not in the child list

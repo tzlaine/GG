@@ -282,20 +282,24 @@ void Wnd::AttachChild(Wnd* wnd)
         // remove from previous parent, if any
         if (wnd->Parent())
             wnd->Parent()->DetachChild(wnd);
-
-        // maintain sorted order of decreasing size
-        // this increases expectation that the window containing a given point gets reached early in a traversal of the child list
-        std::list<Wnd*>::iterator it = m_children.begin();
-        Pt wnd_range = wnd->LowerRight() - wnd->UpperLeft();
-        int wnd_area = wnd_range.x * wnd_range.y;
-        for (; it != m_children.end(); ++it) {
-            Pt it_range = (*it)->LowerRight() - (*it)->UpperLeft();
-            int it_area = it_range.x * it_range.y;
-            if (wnd_area > it_area)
-                break;
-        }
-        m_children.insert(it, wnd);
+        m_children.push_back(wnd);
         wnd->m_parent = this;
+    }
+}
+
+void Wnd::MoveChildUp(Wnd* wnd)
+{
+    if (wnd) {
+        m_children.remove(wnd);
+        m_children.push_back(wnd);
+    }
+}
+ 
+void Wnd::MoveChildDown(Wnd* wnd)
+{
+    if (wnd) {
+        m_children.remove(wnd);
+        m_children.push_front(wnd);
     }
 }
 

@@ -171,7 +171,7 @@ int MultiEdit::Render()
     glPushAttrib(GL_SCISSOR_BIT);
     glEnable(GL_SCISSOR_TEST);
     const int GAP = PIXEL_MARGIN - 2;
-    glScissor(ul.x + 2, App::GetApp()->AppHeight() - (lr.y - BottomMargin() - 2), ClientDimensions().x + 2 * GAP, ClientDimensions().y + 2 * GAP);
+    glScissor(ul.x + 2, App::GetApp()->AppHeight() - (lr.y - BottomMargin() - 2), ClientSize().x + 2 * GAP, ClientSize().y + 2 * GAP);
 
     Font::RenderState state;
     int first_visible_row = FirstVisibleRow();
@@ -258,8 +258,8 @@ int MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
         Pt click_pos = ScreenToClient(pt); // coord of click within text space
         m_cursor_end = CharAt(click_pos);
         // if we're dragging past the currently visible text, adjust the view so more text can be selected
-        if (click_pos.x < 0 || click_pos.x > ClientDimensions().x || 
-            click_pos.y < 0 || click_pos.y > ClientDimensions().y) 
+        if (click_pos.x < 0 || click_pos.x > ClientSize().x || 
+            click_pos.y < 0 || click_pos.y > ClientSize().y) 
             AdjustView();
     }
     return 1;
@@ -508,7 +508,7 @@ void MultiEdit::SetText(const string& str)
           (!m_vscroll || m_vscroll->PosnRange().second == m_vscroll->ScrollRange().second + 1);
 
     // trim the rows, if required by m_max_lines_history
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = ClientSize();
     Uint32 format = TextFormat();
     if (0 < m_max_lines_history) {
         vector<Font::LineData> lines;
@@ -654,7 +654,7 @@ int MultiEdit::RowStartX(int row) const
 {
     int retval = -m_first_col_shown;
 
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = ClientSize();
     int excess_width = m_contents_sz.x - cl_sz.x;
     if (m_style & TF_RIGHT)
         retval -= excess_width;
@@ -688,7 +688,7 @@ int MultiEdit::RowAt(int y) const
         retval = y / GetFont()->Lineskip();
     } else { // TF_BOTTOM
         retval = (static_cast<int>(GetLineData().size()) - 1) - 
-            (ClientDimensions().y + (m_vscroll && m_hscroll ? BottomMargin() : 0) - y - 1) / GetFont()->Lineskip();
+            (ClientSize().y + (m_vscroll && m_hscroll ? BottomMargin() : 0) - y - 1) / GetFont()->Lineskip();
     }
     return retval;
 }
@@ -715,7 +715,7 @@ int MultiEdit::FirstVisibleRow() const
 
 int MultiEdit::LastVisibleRow() const
 {
-    return std::max(0, std::min(RowAt(ClientDimensions().y), static_cast<int>(GetLineData().size()) - 1));
+    return std::max(0, std::min(RowAt(ClientSize().y), static_cast<int>(GetLineData().size()) - 1));
 }
 
 int MultiEdit::FirstFullyVisibleRow() const
@@ -728,8 +728,8 @@ int MultiEdit::FirstFullyVisibleRow() const
 
 int MultiEdit::LastFullyVisibleRow() const
 {
-    int retval = RowAt(ClientDimensions().y);
-    if ((m_first_row_shown + ClientDimensions().y + BottomMargin()) % GetFont()->Lineskip())
+    int retval = RowAt(ClientSize().y);
+    if ((m_first_row_shown + ClientSize().y + BottomMargin()) % GetFont()->Lineskip())
         --retval;
     return std::max(0, std::min(retval, static_cast<int>(GetLineData().size()) - 1));
 }
@@ -741,7 +741,7 @@ int MultiEdit::FirstVisibleChar(int row) const
 
 int MultiEdit::LastVisibleChar(int row) const
 {
-    return std::max(0, std::min(CharAt(row, ClientDimensions().x), GetLineData()[row].end_idx));
+    return std::max(0, std::min(CharAt(row, ClientSize().x), GetLineData()[row].end_idx));
 }
 
 pair<int, int> MultiEdit::HighCursorPos() const
@@ -820,7 +820,7 @@ void MultiEdit::ClearSelected()
 
 void MultiEdit::AdjustView()
 {
-    Pt cl_sz = ClientDimensions();
+    Pt cl_sz = ClientSize();
     Uint32 format = TextFormat();
     int excess_width = m_contents_sz.x - cl_sz.x;
     int excess_height = m_contents_sz.y - cl_sz.y;
@@ -909,7 +909,7 @@ void MultiEdit::AdjustScrolls()
     need_horz = (!(m_style & NO_HSCROLL) && (contents_sz.x > cl_sz.x ||
                  (contents_sz.x > cl_sz.x - SCROLL_WIDTH && contents_sz.y > cl_sz.y - SCROLL_WIDTH)));
 
-    Pt orig_cl_sz = ClientDimensions();
+    Pt orig_cl_sz = ClientSize();
 
     const int GAP = PIXEL_MARGIN - 2; // the space between the client area and the border
 
@@ -959,7 +959,7 @@ void MultiEdit::AdjustScrolls()
 
     // if the new client dimensions changed after adjusting the scrolls, they are unequal to the extent of the text,
     // and there is some kind of wrapping going on, we need to re-SetText()
-    Pt new_cl_sz = ClientDimensions();
+    Pt new_cl_sz = ClientSize();
     if (orig_cl_sz != new_cl_sz && (new_cl_sz.x != contents_sz.x || new_cl_sz.y != contents_sz.y) && 
         (m_style & (TF_WORDBREAK | TF_LINEWRAP))) {
         SetText(m_text);

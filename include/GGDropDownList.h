@@ -89,7 +89,7 @@ public:
     bool           Selected(int n) const      {return m_LB->Selected(n);}   ///< returns true if row \a n is selected
     Uint32         Style() const              {return m_LB->Style();}       ///< returns the style flags of the list \see GG::ListBoxStyle
     int            RowHeight() const          {return m_LB->RowHeight();}   ///< returns the default row height. \note Unlike a ListBox, every row has the same height.
-    int            Size() const               {return m_LB->NumRows();}     //< returns the total number of items in the list
+    int            NumRows() const            {return m_LB->NumRows();}     //< returns the total number of items in the list
     int            NumCols() const            {return m_LB->NumCols();}     ///< returns the total number of columns in each list item
     int            SortCol() const            {return m_LB->SortCol();}     ///< returns the index of the column used to sort items, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
     int            ColWidth(int n) const      {return m_LB->ColWidth(n);}   ///< returns the width of column \a n in pixels; not range-checked

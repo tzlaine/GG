@@ -89,19 +89,19 @@ public:
     int            Width() const              {return m_lowerright.x - m_upperleft.x;} ///< returns width of window in pixels
     int            Height() const             {return m_lowerright.y - m_upperleft.y;} ///< returns width of window in pixels
     int            ZOrder() const             {return m_zorder;}       ///< returns the position of this window in the z-order (root (non-child) windows only)
-    Pt             WindowDimensions() const   {return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y);} ///< returns a \a Pt packed with width in \a x and height in \a y
-    Pt             MinDimensions() const      {return m_min_size;} ///< returns the minimum allowable dimensions of window
-    Pt             MaxDimensions() const      {return m_max_size;} ///< returns the maximum allowable dimensions of window
+    Pt             Size() const {return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y);} ///< returns a \a Pt packed with width in \a x and height in \a y
+    Pt             MinSize() const            {return m_min_size;} ///< returns the minimum allowable size of window
+    Pt             MaxSize() const            {return m_max_size;} ///< returns the maximum allowable size of window
    
     /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/
-    virtual Pt     ClientUpperLeft() const       {return UpperLeft();}
+    virtual Pt     ClientUpperLeft() const    {return UpperLeft();}
    
     /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/
-    virtual Pt     ClientLowerRight() const      {return LowerRight();}
+    virtual Pt     ClientLowerRight() const   {return LowerRight();}
    
-    Pt             ClientDimensions() const      {return ClientLowerRight() - ClientUpperLeft();} ///< \see WindowDimensions()
+    Pt             ClientSize() const         {return ClientLowerRight() - ClientUpperLeft();} ///< \see Size()
    
     Pt             ScreenToWindow(const Pt& pt) const   {return pt - UpperLeft();}       ///< returns \a pt translated from screen- to window-coordinates
     Pt             ScreenToClient(const Pt& pt) const   {return pt - ClientUpperLeft();} ///< returns \a pt translated from screen- to client-coordinates
@@ -118,8 +118,8 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual void   SetText(const string& str)    {m_text = str;}   ///< set window text
-    virtual void   SetText(const char* str)      {m_text = str;}   ///< set window text
+    virtual void   SetText(const string& str) {m_text = str;}      ///< set window text
+    virtual void   SetText(const char* str)   {m_text = str;}      ///< set window text
     void           Hide(bool children = true);                     ///< suppresses rendering of this window (and possibly its children) during render loop
     void           Show(bool children = true);                     ///< enables rendering of this window (and possibly its children) during render loop
     void           MoveTo(int x, int y);                           ///< moves upper-left corner of window to \a x,\a y
@@ -130,8 +130,8 @@ public:
     virtual void   SizeMove(int x1, int y1, int x2, int y2);       ///< resizes and/or moves window to new upper-left and lower right boundaries
     void           Resize(const Pt& sz);                           ///< resizes window without moving upper-left corner
     void           Resize(int x, int y);                           ///< resizes window without moving upper-left corner
-    void           SetMinDimensions(const Pt& sz){m_min_size = sz;}///< sets the minimum allowable dimensions of window
-    void           SetMaxDimensions(const Pt& sz){m_max_size = sz;}///< sets the maximum allowable dimensions of window
+    void           SetMinSize(const Pt& sz) {m_min_size = sz;}     ///< sets the minimum allowable size of window
+    void           SetMaxSize(const Pt& sz) {m_max_size = sz;}     ///< sets the maximum allowable size of window
     void           AttachChild(Wnd* wnd);  ///< places \a wnd in child ptr list, sets's child's \a m_parent member to \a this
     void           MoveChildUp(Wnd* wnd);  ///< places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children)
     void           MoveChildDown(Wnd* wnd);///< places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children)

@@ -77,7 +77,7 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
     m_LB->SetRowHeight(row_ht);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
-    Resize(WindowDimensions().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
+    Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
     m_LB->MoveTo(x, y + Height());
 }
 
@@ -92,7 +92,7 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
     m_LB->SetRowHeight(row_ht);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
-    Resize(WindowDimensions().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
+    Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
     m_LB->MoveTo(x, y + Height());
 }
 

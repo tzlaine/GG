@@ -267,7 +267,7 @@ void Wnd::SizeMove(const Pt& ul, const Pt& lr)
 
 void Wnd::SizeMove(int x1, int y1, int x2, int y2)
 {
-    Pt min_sz = MinDimensions();
+    Pt min_sz = MinSize();
     if (x1 > x2 - min_sz.x) {
         if (x1 != m_upperleft.x)
             x1 = x2 - min_sz.x;

@@ -407,7 +407,7 @@ void RadioButtonGroup::AddButton(StateButton* bn)
 {
     m_buttons.push_back(bn);
     m_connections.push_back(Connect(m_buttons.back()->CheckedSignal(), ButtonClickedFunctor(this, m_connections.size())));
-    if (bn->LowerRight() >= WindowDimensions()) // stretch group to encompass all its children
+    if (bn->LowerRight() >= Size()) // stretch group to encompass all its children
         Resize(bn->LowerRight());
     AttachChild(bn);
 }

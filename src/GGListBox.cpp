@@ -590,14 +590,14 @@ int ListBox::Keypress(Key key, Uint32 key_mods)
         break;
     case GGK_PAGEUP: // page up key (not numpad key)
         if (m_caret != -1) {
-            int space = ClientDimensions().y;
+            int space = ClientSize().y;
             while (m_caret >= 1 && (space -= m_rows[m_caret - 1]->Height()) > 0)
                 --m_caret;
         }
         break;
     case GGK_PAGEDOWN: // page down key (not numpad key)
         if (m_caret != -1) {
-            int space = ClientDimensions().y;
+            int space = ClientSize().y;
             while (m_caret < static_cast<int>(m_rows.size()) - 1 && (space -= m_rows[m_caret]->Height()) > 0)
                 ++m_caret;
         }
@@ -620,7 +620,7 @@ int ListBox::Keypress(Key key, Uint32 key_mods)
         break;
     case GGK_RIGHT:{ // right key (not numpad)
 	int last_fully_visible_col = LastVisibleCol();
-	if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientDimensions().x)
+	if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientSize().x)
 	    --last_fully_visible_col;
 	if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
 	    ++m_first_col_shown;
@@ -789,9 +789,9 @@ void ListBox::SetColHeaders(Row* r)
     // if this column header is being added to an empty listbox, the listbox takes on some of the
     // attributes of the header, similarly to the insertion of a row into an empty listbox; see Insert()
     if (m_rows.empty() && m_col_widths.empty()) {
-        m_col_widths.resize(m_header_row->size(), (ClientDimensions().x - SCROLL_WIDTH) / m_header_row->size());
-        // put the remainder in the last column, so the total width == ClientDimensions().x - SCROLL_WIDTH
-        m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % m_header_row->size();
+        m_col_widths.resize(m_header_row->size(), (ClientSize().x - SCROLL_WIDTH) / m_header_row->size());
+        // put the remainder in the last column, so the total width == ClientSize().x - SCROLL_WIDTH
+        m_col_widths.back() += (ClientSize().x - SCROLL_WIDTH) % m_header_row->size();
         m_col_alignments.resize(m_header_row->size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         AttachRowChildren(m_header_row);
         NormalizeRow(m_header_row);
@@ -805,8 +805,8 @@ void ListBox::SetNumCols(int n)
             m_col_widths.resize(n);
             m_col_alignments.resize(n);
         } else {
-            m_col_widths.resize(n, ClientDimensions().x / n);
-            m_col_widths.back() += ClientDimensions().x % n;
+            m_col_widths.resize(n, ClientSize().x / n);
+            m_col_widths.back() += ClientSize().x % n;
             m_col_alignments.resize(n, ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         }
         if (m_sort_col <= n)
@@ -950,7 +950,7 @@ bool ListBox::AcceptsDropType(const string& str) const
 
 int ListBox::LastVisibleRow() const
 {
-    int visible_pixels = ClientDimensions().y;
+    int visible_pixels = ClientSize().y;
     int acc = 0, i;
     for (i = m_first_row_shown; i < static_cast<int>(m_rows.size()); ++i) {
         acc += m_rows[i]->Height();
@@ -964,7 +964,7 @@ int ListBox::LastVisibleRow() const
 int ListBox::LastVisibleCol() const
 {
     int retval = m_first_col_shown;
-    int right_boundary = m_col_widths.empty() ? ClientDimensions().x : m_col_widths[m_first_col_shown];
+    int right_boundary = m_col_widths.empty() ? ClientSize().x : m_col_widths[m_first_col_shown];
     while (right_boundary <= ClientLowerRight().x && retval < static_cast<int>(m_col_widths.size()) - 1)
         right_boundary += m_col_widths[++retval];
     return retval;
@@ -1007,9 +1007,9 @@ int ListBox::Insert(const shared_ptr<Row>& row, int at, bool dropped)
 
     // the first row inserted into an empty list box defines the number of columns, and initializes the column widths
     if (m_rows.empty() && (m_col_widths.empty() || !m_keep_col_widths)) {
-        m_col_widths.resize(row->size(), (ClientDimensions().x - SCROLL_WIDTH) / row->size());
-        // put the remainder in the last column, so the total width == ClientDimensions().x - SCROLL_WIDTH
-        m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % row->size();
+        m_col_widths.resize(row->size(), (ClientSize().x - SCROLL_WIDTH) / row->size());
+        // put the remainder in the last column, so the total width == ClientSize().x - SCROLL_WIDTH
+        m_col_widths.back() += (ClientSize().x - SCROLL_WIDTH) % row->size();
         m_col_alignments.resize(row->size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         if (m_header_row->size())
             NormalizeRow(m_header_row);
@@ -1072,8 +1072,8 @@ void ListBox::BringCaretIntoView()
     int old_first_row = m_first_row_shown;
     if (m_caret >= 0 && m_caret < m_first_row_shown) {
         m_first_row_shown = m_caret;
-    } else if (m_caret > LastVisibleRow()) { // find the row that preceeds the caret by about ClientDimensions().y pixels, and make it the first row shown
-        int avail_space = ClientDimensions().y - m_rows[m_caret]->Height();
+    } else if (m_caret > LastVisibleRow()) { // find the row that preceeds the caret by about ClientSize().y pixels, and make it the first row shown
+        int avail_space = ClientSize().y - m_rows[m_caret]->Height();
         m_first_row_shown = m_caret;
         while (m_first_row_shown > 0 && (avail_space -= m_rows[m_first_row_shown - 1]->Height()) > 0)
             --m_first_row_shown;
@@ -1228,7 +1228,7 @@ void ListBox::RenderSubRow(const Row* subrow, int left, int top, int last_col)
             left = right;
             right += m_col_widths[i];
             int x = 0, y = 0;
-            Pt control_sz = (*subrow)[i]->WindowDimensions();
+            Pt control_sz = (*subrow)[i]->Size();
             Uint32 alignment = subrow->alignment | m_col_alignments[i];
 
             if (alignment & LB_LEFT) {

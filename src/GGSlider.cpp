@@ -178,12 +178,12 @@ int Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
         int tab_width;
         if (m_orientation == VERTICAL) {
             click_pos = ScreenToWindow(pt).y;
-            slide_width = WindowDimensions().y;
-            tab_width = m_tab->WindowDimensions().y;
+            slide_width = Size().y;
+            tab_width = m_tab->Size().y;
         } else {
             click_pos = ScreenToWindow(pt).x;
-            slide_width = WindowDimensions().x;
-            tab_width = m_tab->WindowDimensions().x;
+            slide_width = Size().x;
+            tab_width = m_tab->Size().x;
         }
         if (click_pos - m_tab_drag_offset < 0)
             m_orientation == VERTICAL ? m_tab->MoveTo(0, 0) : m_tab->MoveTo(0, 0);

@@ -237,7 +237,7 @@ int Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
         // when a drag occurs, move m_cursor_pos.second to where the mouse is, which selects a range of characters
         int click_xpos = ScreenToWindow(pt).x - PIXEL_MARGIN; // screen-pixel x coord for click
         m_cursor_pos.second = CharIndexOf(click_xpos);
-        if (click_xpos < 0 || click_xpos > WindowDimensions().x - 2 * PIXEL_MARGIN) // if we're dragging past the currently visible text
+        if (click_xpos < 0 || click_xpos > Size().x - 2 * PIXEL_MARGIN) // if we're dragging past the currently visible text
             AdjustView();
     }
     return 1;
@@ -387,7 +387,7 @@ int Edit::LastVisibleChar() const
     int first_char_offset = FirstCharOffset();
     int retval;
     for (retval = m_first_char_shown; retval < Length(); ++retval)
-        if ((retval ? GetLineData()[0].extents[retval - 1] : 0) - first_char_offset >= WindowDimensions().x - 2 * PIXEL_MARGIN)
+        if ((retval ? GetLineData()[0].extents[retval - 1] : 0) - first_char_offset >= Size().x - 2 * PIXEL_MARGIN)
             break;
     return retval;
 }
@@ -408,7 +408,7 @@ void Edit::ClearSelected()
 
 void Edit::AdjustView()
 {
-    int text_space = WindowDimensions().x - 2 * PIXEL_MARGIN;
+    int text_space = Size().x - 2 * PIXEL_MARGIN;
     int first_char_offset = FirstCharOffset();
     if (m_cursor_pos.second < m_first_char_shown) { // if the caret is at a place left of the current visible area
         if (m_first_char_shown - m_cursor_pos.second < 5) // if the caret is less than five characters before m_first_char_shown

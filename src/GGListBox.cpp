@@ -33,25 +33,25 @@
 #include <GGDrawUtil.h>
 #include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 namespace {
-const int SCROLL_WIDTH = 14;
+    const int SCROLL_WIDTH = 14;
 
-class RowSorter // used to sort rows by a certain column (which may contain some empty cells)
-{
-public:
-    RowSorter(int col, bool less) : sort_col(col), return_less(less) {}
-
-    bool operator()(const shared_ptr<ListBox::Row>& lr, const shared_ptr<ListBox::Row>& rr)
+    class RowSorter // used to sort rows by a certain column (which may contain some empty cells)
     {
-        return return_less ? lr->SortKey(sort_col) < rr->SortKey(sort_col) : lr->SortKey(sort_col) > rr->SortKey(sort_col);
-    }
+    public:
+        RowSorter(int col, bool less) : sort_col(col), return_less(less) {}
 
-private:
-    const int  sort_col;
-    const bool return_less;
-};
+        bool operator()(const shared_ptr<ListBox::Row>& lr, const shared_ptr<ListBox::Row>& rr)
+        {
+            return return_less ? lr->SortKey(sort_col) < rr->SortKey(sort_col) : lr->SortKey(sort_col) > rr->SortKey(sort_col);
+        }
+
+    private:
+        const int  sort_col;
+        const bool return_less;
+    };
 }
 
 ////////////////////////////////////////////////
@@ -509,6 +509,7 @@ void ListBox::LClick(const Pt& pt, Uint32 keys)
                 if (!(m_style & LB_NOSEL))
                     ClickAtRow(sel_row, keys);
                 m_lclick_row = sel_row;
+                m_lclicked_sig(sel_row, m_rows[sel_row].get(), pt);
             } else if (m_row_drag_offset != Pt(-1, -1) && (m_style & LB_DRAGDROP) && (m_style & LB_NOSORT) && 
                        m_selections.size() <= 1) {
                 // allow arbitrary rearrangement of NOSORT lists that have dragging and dropping enabled (NOSEL and SINGLESEL only)
@@ -1353,7 +1354,3 @@ void ListBox::DetachRowChildren(Row* row)
     for (unsigned int i = 0; i < row->sub_rows.size(); ++i)
         DetachRowChildren(row->sub_rows[i]);
 }
-
-
-} // namespace GG
-

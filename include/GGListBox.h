@@ -33,10 +33,12 @@
 #endif
 
 namespace GG {
+    class Font;
+    class ListBox;
+    class Scroll;
+    class SubTexture;
+}
 
-class Scroll;
-class Font;
-class SubTexture;
 
 /** ListBox provides a flexible control that can contain rows and columns of other controls, even other ListBoxes.
     A ListBox consists of rows of controls, usually text or graphics.  Each row represents one item; rows can be 
@@ -65,7 +67,7 @@ class SubTexture;
     controls, in order for such controls to be automatically saved and loaded using XML encoding, any user-defined 
     Control subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and 
     GG::XMLObjectFactory for details. */
-class GG_API ListBox : public Control
+class GG_API GG::ListBox : public GG::Control
 {
 public:
     using Wnd::SizeMove;
@@ -129,6 +131,8 @@ public:
     typedef boost::signal<void (int, const ListBox::Row*)> InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
     typedef boost::signal<void (int, const ListBox::Row*)> DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
     typedef boost::signal<void (int, const ListBox::Row*, const Pt&)>
+                                                           LeftClickedSignalType;    ///< emitted when a row in the listbox is clicked; provides the index of the row right-clicked and the Row contents right-clicked
+    typedef boost::signal<void (int, const ListBox::Row*, const Pt&)>
                                                            RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
     typedef boost::signal<void (int, const ListBox::Row*)> DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
     typedef boost::signal<void (int)>                      DeletedSignalType;        ///< emitted when a row in the listbox is deleted; provides the index of the deletion point
@@ -139,8 +143,9 @@ public:
     typedef ClearedSignalType::slot_type       ClearedSlotType;      ///< type of functor(s) invoked on a ClearedSignalType
     typedef SelChangedSignalType::slot_type    SelChangedSlotType;   ///< type of functor(s) invoked on a SelChangedSignalType
     typedef InsertedSignalType::slot_type      InsertedSlotType;     ///< type of functor(s) invoked on a InsertedSignalType
+    typedef LeftClickedSignalType::slot_type   LeftClickedSlotType;  ///< type of functor(s) invoked on a LeftClickedSignalType
     typedef RightClickedSignalType::slot_type  RightClickedSlotType; ///< type of functor(s) invoked on a RightClickedSignalType
-    typedef DoubleClickedSignalType::slot_type DoubleClickedSlotType;///< type of functor(s) invoked on a RightClickedSignalType
+    typedef DoubleClickedSignalType::slot_type DoubleClickedSlotType;///< type of functor(s) invoked on a DoubleClickedSignalType
     typedef DeletedSignalType::slot_type       DeletedSlotType;      ///< type of functor(s) invoked on a DeletedSignalType
     typedef DroppedSignalType::slot_type       DroppedSlotType;      ///< type of functor(s) invoked on a DroppedSignalType
     typedef BrowsedSignalType::slot_type       BrowsedSlotType;      ///< type of functor(s) invoked on a BrowsedSignalType
@@ -192,8 +197,9 @@ public:
     SelChangedSignalType&    SelChangedSignal() const    {return m_sel_changed_sig;}    ///< returns the selection change signal object for this ListBox
     InsertedSignalType&      InsertedSignal() const      {return m_inserted_sig;}       ///< returns the inserted signal object for this ListBox
     DroppedSignalType&       DroppedSignal() const       {return m_dropped_sig;}        ///< returns the dropped signal object for this ListBox
+    LeftClickedSignalType&   LeftClickedSignal() const   {return m_lclicked_sig;}       ///< returns the left click signal object for this ListBox
     RightClickedSignalType&  RightClickedSignal() const  {return m_rclicked_sig;}       ///< returns the right click signal object for this ListBox
-    DoubleClickedSignalType& DoubleClickedSignal() const {return m_double_clicked_sig;} ///< returns the right click signal object for this ListBox
+    DoubleClickedSignalType& DoubleClickedSignal() const {return m_double_clicked_sig;} ///< returns the double click signal object for this ListBox
     DeletedSignalType&       DeletedSignal() const       {return m_deleted_sig;}        ///< returns the deleted signal object for this ListBox
     BrowsedSignalType&       BrowsedSignal() const       {return m_browsed_sig;}        ///< returns the browsed signal object for this ListBox
     //@}
@@ -320,6 +326,7 @@ private:
     mutable SelChangedSignalType    m_sel_changed_sig;
     mutable InsertedSignalType      m_inserted_sig;
     mutable DroppedSignalType       m_dropped_sig;
+    mutable LeftClickedSignalType   m_lclicked_sig;
     mutable RightClickedSignalType  m_rclicked_sig;
     mutable DoubleClickedSignalType m_double_clicked_sig;
     mutable DeletedSignalType       m_deleted_sig;
@@ -327,8 +334,6 @@ private:
    
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
 };
-
-} // namespace GG
 
 #endif // _GGListBox_h_
 

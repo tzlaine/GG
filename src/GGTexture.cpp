@@ -57,7 +57,114 @@
 
 #include <IL/ilut.h>
 
-namespace GG {
+#include <iomanip>
+
+using namespace GG;
+
+namespace {
+    int PowerOfTwo(int input)
+    {
+        int value = 1;
+        while (value < input)
+            value <<= 1;
+        return value;
+    }
+    void EncodeBase64(const vector<unsigned char>& data, string& str)
+    {
+        char table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'}; // the 65th character used for padding is '=' 
+
+        int len = data.size();
+        int groups = len / 3;
+        if (groups * 3 < len)
+            ++groups;
+        str.resize(groups * 4, ' ');
+
+        int data_posn = 0;
+        int str_posn = 0;
+        for (int i = 0; i < groups - 1; ++i) {
+            Uint32 group_value = (data[data_posn + 0] << 16) | (data[data_posn + 1] << 8) | (data[data_posn + 2] << 0);
+            str[str_posn + 0] = table[group_value << 8 >> 26];
+            str[str_posn + 1] = table[group_value << 14 >> 26];
+            str[str_posn + 2] = table[group_value << 20 >> 26];
+            str[str_posn + 3] = table[group_value << 26 >> 26];
+            data_posn += 3;
+            str_posn += 4;
+        }
+
+        // the last group may be a special case if the data size isn't divisible by 3
+        if (len - data_posn == 3) { // divisible by 3
+            Uint32 group_value = (data[data_posn + 0] << 16) | (data[data_posn + 1] << 8) | (data[data_posn + 2] << 0);
+            str[str_posn + 0] = table[group_value << 8 >> 26];
+            str[str_posn + 1] = table[group_value << 14 >> 26];
+            str[str_posn + 2] = table[group_value << 20 >> 26];
+            str[str_posn + 3] = table[group_value << 26 >> 26];
+        } else if (len - data_posn == 2) { // not divisible by 3; two leftovers
+            Uint32 group_value = (data[data_posn + 0] << 16) | (data[data_posn + 1] << 8);
+            str[str_posn + 0] = table[group_value << 8 >> 26];
+            str[str_posn + 1] = table[group_value << 14 >> 26];
+            str[str_posn + 2] = table[group_value << 20 >> 26];
+            str[str_posn + 3] = '=';
+        } else if (len - data_posn == 1) { // not divisible by 3; one leftover
+            Uint32 group_value = data[data_posn + 0] << 16;
+            str[str_posn + 0] = table[group_value << 8 >> 26];
+            str[str_posn + 1] = table[group_value << 14 >> 26];
+            str[str_posn + 2] = '=';
+            str[str_posn + 3] = '=';
+        }
+    }
+    void DecodeBase64(vector<unsigned char>& data, const string& str)
+    {
+        static vector<unsigned int> table(256, 0);
+
+        if (!table['A']) {
+            for (unsigned char c = 'A'; c <= 'Z'; ++c) {
+                table[c] = c - 'A';
+            }
+            for (unsigned char c = 'a'; c <= 'z'; ++c) {
+                table[c] = 26 + c - 'a';
+            }
+            for (unsigned char c = '0'; c <= '9'; ++c) {
+                table[c] = 52 + c - '0';
+            }
+            table['+'] = 62;
+            table['/'] = 63;
+        }
+
+        int len = str.size();
+        int groups = len / 4;
+        data.resize(groups * 3);
+
+        int data_posn = 0;
+        int str_posn = 0;
+        for (int i = 0; i < groups - 1; ++i) {
+            Uint32 group_value = (table[str[str_posn + 0]] << 18)
+                | (table[str[str_posn + 1]] << 12)
+                | (table[str[str_posn + 2]] << 6)
+                | (table[str[str_posn + 3]] << 0);
+            data[data_posn + 0] = group_value << 8 >> 24;
+            data[data_posn + 1] = group_value << 16 >> 24;
+            data[data_posn + 2] = group_value << 24 >> 24;
+            data_posn += 3;
+            str_posn += 4;
+        }
+        Uint32 group_value = (table[str[str_posn + 0]] << 18)
+            | (table[str[str_posn + 1]] << 12)
+            | (table[str[str_posn + 2]] << 6)
+            | (table[str[str_posn + 3]] << 0);
+        if (data.size() - data_posn == 3) {
+            data[data_posn + 0] = group_value << 8 >> 24;
+            data[data_posn + 1] = group_value << 16 >> 24;
+            data[data_posn + 2] = group_value << 24 >> 24;
+        } else if (data.size() - data_posn == 2) {
+            data[data_posn + 0] = group_value << 8 >> 24;
+            data[data_posn + 1] = group_value << 16 >> 24;
+        } else if (data.size() - data_posn == 1) {
+            data[data_posn + 0] = group_value << 8 >> 24;
+        }
+    }
+}
 
 ///////////////////////////////////////
 // class GG::Texture
@@ -86,17 +193,23 @@ Texture::Texture(const XMLElement& elem) :
     m_mag_filter = lexical_cast<GLenum>(elem.Child("m_mag_filter").Text());
     m_mipmaps = lexical_cast<bool>(elem.Child("m_mipmaps").Text());
 
-    const XMLElement* curr_elem = &elem.Child("m_tex_coords");
-    m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem->Attribute("u1"));
-    m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem->Attribute("v1"));
-    m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem->Attribute("u2"));
-    m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("v2"));
+    const XMLElement& curr_elem = elem.Child("m_tex_coords");
+    m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem.Attribute("u1"));
+    m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem.Attribute("v1"));
+    m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem.Attribute("u2"));
+    m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem.Attribute("v2"));
 
     m_default_width = lexical_cast<int>(elem.Child("m_default_width").Text());
     m_default_height = lexical_cast<int>(elem.Child("m_default_height").Text());
 
-    if (m_filename != "")
+    if (m_filename != "") {
         Load(m_filename, m_mipmaps);
+    } else if (elem.ContainsChild("raw_data")) {
+        const XMLElement& raw_data = elem.Child("raw_data");
+        vector<unsigned char> bytes;
+        DecodeBase64(bytes, raw_data.Text());
+        Init(0, 0, m_default_width, m_default_height, m_width, reinterpret_cast<unsigned char*>(&bytes[0]), m_bytes_pp, m_mipmaps);
+    }
 
     SetWrap(m_wrap_s, m_wrap_t);
     SetFilters(m_min_filter, m_mag_filter);
@@ -141,9 +254,7 @@ void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coord
 
 void Texture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
 {
-    int w = m_default_width ? m_default_width : m_width;
-    int h = m_default_height ? m_default_height : m_height;
-    OrthoBlit(x, y, x + w, y + h, m_tex_coords, enter_2d_mode);
+    OrthoBlit(x, y, x + m_default_width, y + m_default_height, m_tex_coords, enter_2d_mode);
 }
 
 XMLElement Texture::XMLEncode() const
@@ -168,6 +279,36 @@ XMLElement Texture::XMLEncode() const
 
     retval.AppendChild(XMLElement("m_default_width", lexical_cast<string>(m_default_width)));
     retval.AppendChild(XMLElement("m_default_height", lexical_cast<string>(m_default_height)));
+
+    if (m_filename == "" && m_opengl_id) {
+        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+        glPixelStorei(GL_PACK_SWAP_BYTES, false);
+        glPixelStorei(GL_PACK_LSB_FIRST, false);
+        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+        glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+        // get pixel data
+        std::vector<unsigned char> bytes(m_width * m_height * m_bytes_pp);
+        GLenum mode = 0;
+        switch (m_bytes_pp) {
+        case 1:   mode = GL_LUMINANCE;       break;
+        case 2:   mode = GL_LUMINANCE_ALPHA; break;
+        case 3:   mode = GL_RGB;             break;
+        case 4:   mode = GL_RGBA;            break;
+        default: throw TextureException("Attempted to encode a GG::Texture with an invalid number of bytes per pixel");
+        }
+        glGetTexImage(GL_TEXTURE_2D, 0, mode, GL_UNSIGNED_BYTE, reinterpret_cast<unsigned char*>(&bytes[0]));
+
+        // save it to a string
+        string str;
+        EncodeBase64(bytes, str);
+        retval.AppendChild(XMLElement("raw_data", str));
+
+        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+    }
+
     return retval;
 }
 
@@ -221,70 +362,54 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
     m_filename = filename;
     m_mipmaps = mipmap;
     m_bytes_pp = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
-    m_default_width = m_width = ilGetInteger(IL_IMAGE_WIDTH);
-    m_default_height = m_height = ilGetInteger(IL_IMAGE_HEIGHT);
-   
+    m_default_width = ilGetInteger(IL_IMAGE_WIDTH);
+    m_default_height = ilGetInteger(IL_IMAGE_HEIGHT);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
+    m_tex_coords[2] = m_default_width / double(m_width);
+    m_tex_coords[3] = m_default_height / double(m_height);
+    
     ilDeleteImages(1, &id);
 }
 
 void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, x);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, y);
+    glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
+    glPixelStorei(GL_UNPACK_LSB_FIRST, false);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, image_width);
-    Init(width, height, image, channels, mipmap);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, y);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, x);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    try {
+        InitFromRawData(width, height, image, channels, mipmap);
+    } catch (...) {
+        glPopClientAttrib();
+        throw;
+    }
+
     glPopClientAttrib();
 }
 
 void Texture::Init(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap/* = false*/)
 {
-    if (m_opengl_id)
-        Clear();
+    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+    glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
+    glPixelStorei(GL_UNPACK_LSB_FIRST, false);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if (image) {
-        GLenum mode = 0;
-        switch (channels) {
-        case 1:   mode = GL_LUMINANCE;       break;
-        case 2:   mode = GL_LUMINANCE_ALPHA; break;
-        case 3:   mode = GL_RGB;             break;
-        case 4:   mode = GL_RGBA;            break;
-        default: throw TextureException("Attempted to initialize a GG::Texture with an invalid number of color channels");
-        }
-
-        glGenTextures(1, &m_opengl_id);
-        glBindTexture(GL_TEXTURE_2D, m_opengl_id);                     // set this texture as the current opengl texture
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);   // set some relevant opengl texture parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
-
-        if (mipmap) { // creating mipmapped texture
-            // check to see if this texture can be created with available resources
-            gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, channels, width, height, mode, GL_UNSIGNED_BYTE, image);
-            GLint format;
-            glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
-            if (format) // if yes, build it
-                gluBuild2DMipmaps(GL_TEXTURE_2D, channels, width, height, mode, GL_UNSIGNED_BYTE, image);
-            else // if no, throw
-                throw TextureException("Insufficient resources to create requested mipmapped OpenGL texture");
-        } else { // creating non-mipmapped texture
-            glTexImage2D(GL_PROXY_TEXTURE_2D, 0, channels, width, height, 0, mode, GL_UNSIGNED_BYTE, image);
-            GLint format;
-            glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
-            if (format)
-                glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, mode, GL_UNSIGNED_BYTE, image);
-            else
-                throw TextureException("Insufficient resources to create requested OpenGL texture");
-        }
-
-        // be sure to record these
-        m_mipmaps = mipmap;
-        m_bytes_pp = channels;
-        m_width = width;
-        m_height = height;
+    try {
+        InitFromRawData(width, height, image, channels, mipmap);
+    } catch (...) {
+        glPopClientAttrib();
+        throw;
     }
+
+    glPopClientAttrib();
 }
 
 void Texture::SetWrap(GLenum s, GLenum t)
@@ -321,8 +446,8 @@ void Texture::Clear()
     m_filename = "";
 
     m_bytes_pp = 4;
-    m_width = 0;
-    m_height = 0;
+    m_default_width = m_width = 0;
+    m_default_height = m_height = 0;
 
     m_wrap_s = m_wrap_t = GL_REPEAT;
     m_min_filter = m_mag_filter = GL_NEAREST;
@@ -333,10 +458,64 @@ void Texture::Clear()
 
     m_tex_coords[0] = m_tex_coords[1] = 0.0f;   // min x, y
     m_tex_coords[2] = m_tex_coords[3] = 1.0f;   // max x, y
-
-    m_default_width = 0;
-    m_default_height = 0;
 }
+
+void Texture::InitFromRawData(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap)
+{
+    if (m_opengl_id)
+        Clear();
+
+    if (image) {
+        GLenum mode = 0;
+        switch (channels) {
+        case 1:   mode = GL_LUMINANCE;       break;
+        case 2:   mode = GL_LUMINANCE_ALPHA; break;
+        case 3:   mode = GL_RGB;             break;
+        case 4:   mode = GL_RGBA;            break;
+        default: throw TextureException("Attempted to initialize a GG::Texture with an invalid number of color channels");
+        }
+
+        glGenTextures(1, &m_opengl_id);
+        glBindTexture(GL_TEXTURE_2D, m_opengl_id);                     // set this texture as the current opengl texture
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);   // set some relevant opengl texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
+
+        if (mipmap) { // creating mipmapped texture
+            // check to see if this texture can be created with available resources
+            int GL_texture_width = PowerOfTwo(width);
+            int GL_texture_height = PowerOfTwo(height);
+            gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, channels, GL_texture_width, GL_texture_height, mode, GL_UNSIGNED_BYTE, image);
+            GLint format;
+            glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
+            if (format) // if yes, build it
+                gluBuild2DMipmaps(GL_TEXTURE_2D, channels, GL_texture_width, GL_texture_height, mode, GL_UNSIGNED_BYTE, image);
+            else // if no, throw
+                throw TextureException("Insufficient resources to create requested mipmapped OpenGL texture");
+        } else { // creating non-mipmapped texture
+            int GL_texture_width = PowerOfTwo(width);
+            int GL_texture_height = PowerOfTwo(height);
+            glTexImage2D(GL_PROXY_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
+            GLint format;
+            glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
+            if (format)
+                glTexImage2D(GL_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
+            else
+                throw TextureException("Insufficient resources to create requested OpenGL texture");
+        }
+
+        // be sure to record these
+        m_mipmaps = mipmap;
+        m_bytes_pp = channels;
+        m_default_width = width;
+        m_default_height = height;
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
+    }
+}
+
 
 
 ///////////////////////////////////////
@@ -356,10 +535,10 @@ SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
     if (!m_texture) throw SubTextureException("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw SubTextureException("Attempted to contruct subtexture from invalid coordinates");
 
-    m_tex_coords[0] = static_cast<double>(x1) / texture->Width();
-    m_tex_coords[1] = static_cast<double>(y1) / texture->Height();
-    m_tex_coords[2] = static_cast<double>(x2) / texture->Width();
-    m_tex_coords[3] = static_cast<double>(y2) / texture->Height();
+    m_tex_coords[0] = static_cast<double>(x1) / texture->DefaultWidth();
+    m_tex_coords[1] = static_cast<double>(y1) / texture->DefaultHeight();
+    m_tex_coords[2] = static_cast<double>(x2) / texture->DefaultWidth();
+    m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
 }
 
 SubTexture::SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
@@ -370,10 +549,10 @@ SubTexture::SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1,
     if (!m_texture) throw SubTextureException("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw SubTextureException("Attempted to contruct subtexture from invalid coordinates");
 
-    m_tex_coords[0] = static_cast<double>(x1) / texture->Width();
-    m_tex_coords[1] = static_cast<double>(y1) / texture->Height();
-    m_tex_coords[2] = static_cast<double>(x2) / texture->Width();
-    m_tex_coords[3] = static_cast<double>(y2) / texture->Height();
+    m_tex_coords[0] = static_cast<double>(x1) / texture->DefaultWidth();
+    m_tex_coords[1] = static_cast<double>(y1) / texture->DefaultHeight();
+    m_tex_coords[2] = static_cast<double>(x2) / texture->DefaultWidth();
+    m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
 }
 
 SubTexture::SubTexture(const XMLElement& elem) :
@@ -553,6 +732,3 @@ shared_ptr<Texture> TextureManager::LoadTexture(const string& filename, bool mip
     temp->Load(filename, mipmap);
     return (m_textures[filename] = temp);
 }
-
-} // namespace GG
-

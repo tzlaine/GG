@@ -33,22 +33,26 @@
 #endif
 
 namespace GG {
+    class Texture;
+    class SubTexture;
+    class TextureManager;
+}
 
-/** This class encapsulates OpenGL texture objects.  When initialized with Load(), Texture objects 
-    create an OpenGL texture from the given image file.  If the dimensions of the 
-    file image were not both powers of two, the created OpenGL texture is created with dimensions to the next largest powers
-    of two; the original image size and corresponding texture coords are saved in m_default_width, m_default_height, and
-    m_tex_coords, respectively.  These are kept so that only the originally-loaded-image part of the texture can be used, if desired.  
-    However, when using Init(int width...), 
-    the user must ensure that the image provided has power-of-two dimensions; no default parameters are recorded (other than the 
-    default texture coords (0,0) to (1,1).  All five initialization functions first free the OpenGL texture currently in use by
-    the texture (if any) and create a new one.  All initialization functions fail silently, performing no initialization and
-    allocating no memory or OpenGL texture when the load filename is "" or the image parameter is 0.
-    \note It is important to remember that OpenGL does 
-    not support the alteration of textures once loaded.  Texture therefore also does not provide any such support.  Also,
-    since a texture saved as an XMLElement is recreated from the filename associated with the texture, creating a texture from
-    a programmatically created or altered image requires that the recreation of the Texture be handled by the user explicitly. */
-class GG_API Texture
+/** This class encapsulates OpenGL texture objects.  When initialized with Load(), Texture objects create an OpenGL texture 
+    from the given image file.  If the dimensions of the file image were not both powers of two, the created OpenGL texture 
+    is created with dimensions to the next largest powers of two; the original image size and corresponding texture coords 
+    are saved, and can be accessed through DefaultWidth(), DefaultHeight(), and DefaultTexCoords(), respectively.  These are 
+    kept so that only the originally-loaded-image part of the texture can be used, if desired.  All initialization functions 
+    first free the OpenGL texture currently in use by the texture (if any) and create a new one.  All initialization functions 
+    fail silently, performing no initialization and allocating no memory or OpenGL texture when the load filename is "" or the 
+    image parameter is 0.  XMLEncode()d Textures save the filename associated with the texture when available, so the 
+    originally loaded file can be reloaded again later.  If no such file exists, such as when a Texture is created from 
+    in-memory image data, the contents of the Texture are read from video memory, base-64 encoded, and saved as text in the 
+    XMLElement for the Texture.  A default-constructed Texture will have niether a filename nor raw image data stored in its
+    XML encoding.
+    \note It is important to remember that OpenGL does not support the alteration of textures once loaded.  Texture therefore 
+    also does not provide any such support. */
+class GG_API GG::Texture
 {
 public:
     GGEXCEPTION(TextureException);   ///< exception class \see GG::GGEXCEPTION
@@ -93,8 +97,17 @@ public:
     // intialization functions
     void Load(const string& filename, bool mipmap = false) {Load(filename.c_str(), mipmap);} ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
     void Load(const char* filename, bool mipmap = false); ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
-    void Init(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap = false); ///< frees any currently-held memory and creates a texture from supplied array \a image.  \throw TextureException May throw if the texture creation fails.
-    void Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap = false); ///< frees any currently-held memory and creates a texture from subarea of supplied array \a image.  \throw TextureException May throw if the texture creation fails.
+
+    /** frees any currently-held memory and creates a texture from supplied array \a image.  The data in the \a image parameter is unpacked using
+        all the GL default pixel storage parameters, except that GL_UNPACK_ALIGNMENT is set to 1.
+        \throw TextureException May throw if the texture creation fails. */
+    void Init(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap = false);
+
+    /** frees any currently-held memory and creates a texture from subarea of supplied array \a image.  The data in the \a image parameter is 
+        unpacked using all the GL default pixel storage parameters (except the ones that are used to specify the image subarea), except that 
+        GL_UNPACK_ALIGNMENT is set to 1.
+        \throw TextureException May throw if the texture creation fails. */
+    void Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap = false);
    
     void SetWrap(GLenum s, GLenum t);         ///< sets the opengl texture wrap modes associated with opengl texture m_opengl_id
     void SetFilters(GLenum min, GLenum mag);  ///< sets the opengl min/mag filter modes associated with opengl texture m_opengl_id
@@ -104,6 +117,7 @@ public:
 private:
     Texture(const Texture& rhs);             ///< disabled
     Texture& operator=(const Texture& rhs);  ///< disabled
+    void InitFromRawData(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap);
    
     string   m_filename;   ///< filename from which this Texture was constructed ("" if not loaded from a file)
 
@@ -125,7 +139,7 @@ private:
 };
 
 /** This class is a convenient way to store the info needed to use a portion of an OpenGL texture.*/
-class GG_API SubTexture
+class GG_API GG::SubTexture
 {
 public:
     GGEXCEPTION(SubTextureException);   ///< exception class \see GG::GGEXCEPTION
@@ -180,7 +194,7 @@ private:
 /** This singleton class is essentially a very thin wrapper around a map of Texture smart pointers, keyed on std::string texture names.  
     The user need only request a texture through GetTexture(); if the texture is not already resident, it will be loaded.  If the user would 
     like to create her own images and store them in the manager, that can be accomplished via StoreTexture() calls.*/
-class GG_API TextureManager
+class GG_API GG::TextureManager
 {
 public:
     GGEXCEPTION(TextureManagerException);   ///< exception class \see GG::GGEXCEPTION
@@ -206,7 +220,4 @@ private:
     map<string, shared_ptr<Texture> >   m_textures;
 };
 
-} // namespace GG
-
 #endif // _GGTexture_h_
-

@@ -39,6 +39,7 @@ Wnd::Wnd() :
    m_zorder(0), 
    m_visible(true), 
    m_ontop(false), 
+   m_max_size(1 << 30, 1 << 30),
    m_flags(0)
 {
 }
@@ -49,8 +50,9 @@ Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
    m_zorder(0), 
    m_visible(true), 
    m_ontop(false), 
-   m_upperleft(Pt(x, y)), 
-   m_lowerright(Pt(x + w, y + h)), 
+   m_upperleft(x, y), 
+   m_lowerright(x + w, y + h), 
+   m_max_size(1 << 30, 1 << 30),
    m_flags(flags)
 {
 }
@@ -61,6 +63,7 @@ Wnd::Wnd(const XMLElement& elem) :
    m_zorder(0), 
    m_visible(true), 
    m_ontop(false), 
+   m_max_size(1 << 30, 1 << 30),
    m_flags(0)
 {
    if (elem.Tag() != "GG::Wnd")
@@ -365,6 +368,8 @@ int Wnd::RButtonDown(const Pt& pt, Uint32 keys) {return 1;}
 int Wnd::RClick(const Pt& pt, Uint32 keys) {return 1;}
 
 int Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {return 1;}
+
+int Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {return 1;}
 
 int Wnd::MouseEnter(const Pt& pt, Uint32 keys) {return 1;}
 

@@ -85,6 +85,8 @@ public:
       LRELEASE,    ///< a left mouse button release
       MRELEASE,    ///< a middle mouse button release
       RRELEASE,    ///< a right mouse button release
+      WHEELUP,     ///< a rolling up of the mouse wheel
+      WHEELDOWN,   ///< a rolling down of the mouse wheel
       MOUSEMOVE    ///< a movement of the mouse
       };
 

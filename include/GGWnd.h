@@ -138,6 +138,7 @@ public:
    virtual int    RButtonDown(const Pt& pt, Uint32 keys);           ///< respond to right button down msg. \see LButtonDown()
    virtual int    RClick(const Pt& pt, Uint32 keys);                ///< respond to release of right mouse button over window, if it was also originally depressed over window. \see LButtonUp()
    virtual int    RDoubleClick(const Pt& pt, Uint32 keys);          ///< respond to second right click in window within the time limit.  A window will receive an RButtonUp() message instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that was r-clicked within a double-click time interval  Note that this means a double click is always preceded by a click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in during the interval.
+   virtual int    MouseWheel(const Pt& pt, int move, Uint32 keys);  ///< respond to movement of the mouse wheel
    virtual int    MouseEnter(const Pt& pt, Uint32 keys);            ///< respond to cursor entering window's coords
    virtual int    MouseHere(const Pt& pt, Uint32 keys);             ///< respond to cursor moving about in window's coords.  A MouseHere() message will not be generated the first time the cursor enters the window's area.  In that case, a MouseEnter() message is generated.
    virtual int    MouseLeave(const Pt& pt, Uint32 keys);            ///< respond to cursor leaving window's coords
@@ -172,8 +173,8 @@ private:
    bool           m_ontop;          ///< is this an always-on-top window (drawn after all others)?
    Pt             m_upperleft;      ///< upper left point of window
    Pt             m_lowerright;     ///< lower right point of window
-   Pt             m_min_size;       ///< minimum window size Pt(0,0) (= none) by default
-   Pt             m_max_size;       ///< maximum window size Pt(0,0) (= none) by default
+   Pt             m_min_size;       ///< minimum window size Pt(0, 0) (= none) by default
+   Pt             m_max_size;       ///< maximum window size Pt(1 << 30, 1 << 30) (= none) by default
    
    Uint32         m_flags;          ///< flags supplied at window creation for clickability, dragability, drag-keeperness, and resizability
 

@@ -207,6 +207,8 @@ void SDLGGApp::HandleSDLEvent(const SDL_Event& event)
       case SDL_BUTTON_LEFT:   gg_event = GG::App::LPRESS; break;
       case SDL_BUTTON_MIDDLE: gg_event = GG::App::MPRESS; break;
       case SDL_BUTTON_RIGHT:  gg_event = GG::App::RPRESS; break;
+      //case SDL_BUTTON_WHEELUP:    gg_event = GG::App::WHEELUP; break;
+      //case SDL_BUTTON_WHEELDOWN:  gg_event = GG::App::WHEELDOWN; break;
       }
       key_mods = SDL_GetModState();
       break;

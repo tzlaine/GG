@@ -98,8 +98,8 @@ public:
    
    Pt             ScreenToWindow(const Pt& pt) const   {return pt - UpperLeft();}       ///< returns \a pt translated from screen- to window-coordinates
    Pt             ScreenToClient(const Pt& pt) const   {return pt - ClientUpperLeft();} ///< returns \a pt translated from screen- to client-coordinates
-   bool           InWindow(const Pt& pt) const         {return pt >= UpperLeft() && pt < LowerRight();} ///< returns true if screen-coordinate point \a pt falls within the window
-   bool           InClient(const Pt& pt) const         {return pt >= ClientUpperLeft() && pt < ClientLowerRight();} ///< returns true if screen-coordinate point \a pt falls within the window's client area
+   virtual bool   InWindow(const Pt& pt) const         {return pt >= UpperLeft() && pt < LowerRight();} ///< returns true if screen-coordinate point \a pt falls within the window
+   virtual bool   InClient(const Pt& pt) const         {return pt >= ClientUpperLeft() && pt < ClientLowerRight();} ///< returns true if screen-coordinate point \a pt falls within the window's client area
    
    Wnd*           Parent() const {return m_parent;}  ///< returns the window's parent (may be null)
    Wnd*           RootParent() const;                ///< returns the earliest ancestor window (may be null)

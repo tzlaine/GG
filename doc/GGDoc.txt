@@ -5,7 +5,9 @@
 /** \page design Design
    \section design_purpose Purpose 
    GG is designed to do achieve several goals:
-   - Platform-independence: GG should be buildable on any platform that supports OpenGL and SDL
+   - Platform-independence: GG should be buildable on any platform that supports OpenGL
+   - Driver-independence: GG should be a standalone GUI framework that does not require any particular application framework;
+   though an SDL driver is supplied, GG should be usable with any driver code the user wishes to supply
    - Easy extensibility: new controls and GUI behavior should be easy to incorporate
    - Complete graphical control for the user/designer: the user should not be limited by the authors' lack of artistic skill!
    - Independence of UI elements from the source code: GG UI elements should be configurable as text files, so that UI design 
@@ -30,7 +32,7 @@
    \section nonfeatures Non-Features
    GG is not threadsafe, due to signals and slots
    no sound support
-   unimplemented network support
+   optional network support
 */
 
 /** \page building Building GG
@@ -38,21 +40,48 @@
    GG requires gcc 3.2 or later.
    <p>
    GG relies on several other open-source libraries:
-   - SDL 1.2 - http://www.libsdl.org
-   - SDL_image 1.2.3 - http://www.libsdl.org/projects/SDL_image
+   - DevIL 1.6.5 - http://openil.sourceforge.net
    - FreeType 2.1.2 - http://www.freetype.org
-   - boost 1.30.0 - http://www.boost.org (requires build of boost.signals library)
-   - Expat 1.95.5 - http://www.libexpat.org (1.95.6 does not appear to work, so plaease use the right version)
+   - boost 1.30.0 - http://www.boost.org
+   - Expat 1.95.5 - http://www.libexpat.org (1.95.6 does not appear to work, so please use this version)
    - log4cpp 0.2.7 - http://log4cpp.sourceforge.net
 
-   Also required, but distributed with GG:
+   Optional libraries:
+   - SDL 1.2.5 - http://www.libsdl.org
+
+   Also optional, but distributed with GG:
    - SDL_net 1.2.5 - http://www.libsdl.org/projects/SDL_net
    - fastevents & SDL_net2 - http://gameprogrammer.com/game.html
-   - SDL_ttf 2.0.6 - http://www.libsdl.org/projects/SDL_ttf
    
    GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
-   documentation will appear in a the GG/doc/html directory.
+   documentation will appear in the GG/doc/html directory.
    \section howto_build How To Build GG
+   To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
+   boost.signals, boost.regex, and boost.filesystem libraries are needed.  You will of course also need to build and 
+   make available all of the libraries listed in the requirements above.  See www.boost.org for details on building 
+   boost.
+   
+   Once this is done, Unix users can simply type
+   \verbatim
+      ./configure
+      make
+      make install [as root]\endverbatim
+   from within the root of the GG directory tree.  Note that on some systems, the configure script may be unable to find your
+   OpenGL libs, so you may need to invoke configure something like:
+   \verbatim
+      LDFLAGS="-L/usr/X11R6/lib" ./configure\endverbatim
+   Type
+   \verbatim
+      ./configure --help\endverbatim
+   to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
+   be especially useful on Windows systems.  Also, be aware that GG will install itself in /usr/local/lib by default; to change 
+   this, use the --prefix=[LIB_PATH] command-line option when invoking configure.
+   GG is not designed to work with the unlcean toolsets put forth by some unmentionable Windows-oriented firms.  However, GG 
+   does work quite well with GCC on Windows, under MinGW or Cygwin.  In case the autotools build system fails to work for you
+   in MinGW, there is a makefile called Makefile.mingw that is set up for my personal system, but that is easily altered to work 
+   on yours.  Just replace all references to the locations of the directories where the required libs are stored on my system
+   with where they are located on yours, and you're on your way.  You may also need to grab the .dlls that this makefile includes
+   in the build from somewhere other than "..".
 */
 
 /** \page architecture Architecture
@@ -93,10 +122,10 @@
    GG::App does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
    GG::App provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the app is rendering, 
    and how long it has been since the last frame was rendered.  There is also a font manager, an application-wide font "pool",
-   from which the user can request fonts.  The font pool loads and renders the fonts as needed by the application, and multiple 
+   from which the user can request fonts.  The font pool loads and stores the fonts as needed by the application, and multiple 
    requests for the same font at the same size will result in the creation of only one rendered font object.  A texture manager
    exists which does a similar job with textures.  If the user wants to programmatically create textures, she can also add them
-   to the texture pool, provide a name, and request that texture as many times as needed.  OpenGL texture objects are used in
+   to the texture pool, provide a name, and request that texture as many times as needed.  OpenGL texture objects are used as
    the underlying texture rendering method.
 */
 
@@ -111,7 +140,7 @@
    Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to 
    call a Command() function, which passed to the caller an integer representing the type of message (button click, scroll, or
    whatever), an ID number associated with the calling control, and a single integer parameter.  It could have been made more 
-   general and a lot less typesafe by replacing the int parameter with a void pointer, but in either case it suffers from three
+   general and even less typesafe by replacing the int parameter with a void pointer, but in either case it suffers from three
    huge limitations.  First, the type of message and the paramter must be known to both caller and callee; this means that, for
    example, the user must keep track of the integer value representing a button click message, and make sure that separate 
    sections of code are using the same value to represent it.  Second, each control must call its parent and tell it about 
@@ -128,7 +157,7 @@
    of kludges to get messages to the sections of code that need them.
    \subsection sigs_n_slots_soln The Solution
    Now, each control emits a signal every time a significant event occurs.  If no processing needs to be associated with such
-   an event, its signal need not be connected to anything.  On the other hand, no matter how many modules need to react to a 
+   an event, its signal need not be connected to anything.  Futhermore, no matter how many modules need to react to a 
    certain signal, they can all be connected.  In the case of our previous example, the list box-clearing button in the dialog 
    can just create a temporary connection between the dialog and the list box, then clear the list box (so then when the list 
    box signals it has been cleared, the dialog will do the appropriate processing).  When the list box is cleared with a 
@@ -136,11 +165,11 @@
    \section sigs_n_slots_use Using Signals and Slots
    \subsection sigs_n_slots_connecting Connecting Signals To Slots
    There are two types of connections between signals and slots.  The first type of connection is between a signal and a 
-   slot, which may be a functor (which may be a boost::bind object), a free function or a static member function.  Just call 
-   Connect(sig, slot).  The second type is between a signal and a non-static member function.  In this case, the call to 
-   Connect() requires a third parameter: a pointer to the object whose member function is to be called.  For instance, if I 
-   have a class Foo and an object foo of class Foo, I cannot call foo.bar() by simply knowing the address of bar().  I need 
-   to call Connect(sig, &Foo::bar, &foo) so that the signal knows which object's bar() to call.  Both versions of Connect()
+   slot, which may be a functor (which in turn may be a boost::bind object), a free function or a static member function.  
+   Just call Connect(sig, slot).  The second type is between a signal and a non-static member function.  In this case, the 
+   call to Connect() requires a third parameter: a pointer to the object whose member function is to be called.  For instance, 
+   if I have a class Foo and an object foo1 of class Foo, I cannot call foo1.bar() by simply knowing the address of bar().  I 
+   need to call Connect(sig, &Foo::bar, &foo1) so that the signal knows which object's bar() to call.  Both versions of Connect()
    return a connection object.  By keeping this connection object, you can later disconnect() the connection you made.
    \subsection sigs_n_slots_emitting Emitting Signals
    To emit a signal, just call its () operator, like this: sig();
@@ -148,7 +177,8 @@
    If you kept the connection object returned by Connect(), a connection_obj.disconnect() call will disconnect the associated 
    signal and slot.  Also, consider this: what happens if a non-static member function slot and signal are connected, the 
    object owning the slot is destructed, and the signal is emitted?  A segfault, unless the object's class inherits from 
-   boost::trackable, which auto-disconnects slots on object destruction.  See the boost tutorial below for details.
+   boost::trackable, which auto-disconnects slots on object destruction.  GG::Wnd is derived from boost::trackable, so all 
+   GG::Wnd-derived classes should handle such situations gracefully.  See the boost tutorial below for details.
    \see http://boost.org/libs/signals/doc/tutorial.html for a tutorial on other aspects of signals and slots; you can create 
    connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
    the return values of such slots (take the first return value, the last, the average of all of them, etc.).
@@ -169,19 +199,18 @@
    text is created, then read back that type from the XML text later and correctly recreate objects of the right type 
    automatically.
    \section XML_IO_encode_parse XML Encoding and Parsing   
-   To encode an object, you need to provide a function similar to GG::Wnd::XMLEncode() to create an GG::XMLElement.  To 
+   To encode an object, you need to provide an overload of GG::Wnd::XMLEncode() to create an GG::XMLElement.  To 
    construct an object from the XML encoding, you need to provide a constructor that accepts a GG::XMLElement.  In the
    sections below, it is assumed that we are trying to represent a single object in a GG::XMLElement.  This technique is 
-   very flexible, so the sections below are only a suggestion.  The techniques outlined are used in saving and restoring 
-   GG objects.  To save objects to file or send them over a network connection, put them into a GG::XMLDoc and send them 
-   to a file or stringstream (or any other kind of std::ostream, actually), using GG::XMLDoc::WriteDoc().
+   very flexible, so the sections below are only a suggestion.  The techniques outlined are the ones used in saving and 
+   restoring GG objects.  To save objects to file or send them over a network connection, put them into a GG::XMLDoc and 
+   send them to a file or stringstream (or any other kind of std::ostream, actually), using GG::XMLDoc::WriteDoc().
    \subsection XML_IO_rep_integral_typ Representing Integral Type Members
    Each member should be represented by a tag.  Integral type members should be represented by a tag with a single attribute,
    "value".  The tag will generally look like this: 
    \verbatim
    <m_float_member value="3.14159"/>\endverbatim
-   It is convenient to use boost::lexical_cast, which is defined on all integral types, to go from a value to a string, and 
-   from a string to a value.
+   It is convenient to use boost::lexical_cast, to go from a value to a string, and from a string to a value.
    \subsection XML_IO_rep_class Representing Class and Struct Object Members
    Each class member should be enclosed within a tag for its name, and should be otherwise treated as a non-member object:
    \verbatim
@@ -217,7 +246,7 @@
    most containers can be treated as follows.  To encode the container, create a tag for the container variable, then 
    iterate through the elements of the container, and append the encoding of each one to the container tag.  To recreate 
    the container, read each contained object and create an object from it and add each created object to the container object
-   in the order read.  So containers will look like this in the case of a container of class objects:
+   in the order read.  So containers will look like this in the case of a container of objects:
    \verbatim
    <m_point_vec>
       <MyNameSpace::PointClass>
@@ -239,21 +268,21 @@
    GG::Control.
    \section XML_IO_using_factory Using the GG::XMLObjectFactory
    GG::XMLObjectFactory is very simple to use.  For each class in the hierarchy, just create a function that creates a new 
-   object and returns a pointer to it; the pointer's type should be the base class of the hierarchy.  Pass a name for each 
-   class and a pointer to each function to the factory via GG::XMLObjectFactory::AddGenerator(), and later you can call 
-   GG::XMLObjectFactory::GenerateObject(name) to create an object of that type.  For instance, if you create a subclass of 
-   GG::Scroll called GG::Slider, you can create this function:
+   object and returns a base-class pointer to it; the pointer's type should be the base class of the hierarchy.  Pass a name 
+   for each class and a pointer to each function to the factory via GG::XMLObjectFactory::AddGenerator(), and later you can 
+   call GG::XMLObjectFactory::GenerateObject(name) to create an object of that type.  For instance, the class GG::Slider, is 
+   represented in the ObjectFactory by this function:
    \verbatim
    Wnd* NewSlider(const XMLElement& elem) {return new Slider(elem);}\endverbatim
    and make this call, using GG::App's GG::Wnd factory:
    \verbatim
    GG:App::GetApp()->AddWndGenerator("GG::Slider", &NewSlider);\endverbatim
-   If you have a GG::Slider in the child list of any window, after this call any call to the window's XMLEncode() or the its 
-   contructor will correctly encode or recreate the GG::Slider automatically.
+   If you have a GG::Slider in the child list of any window, after this AddWndGenerator() call any "GG::Slider" tag encountered
+   in a stream will be correctly created as a GG::Slider.
    <p>
    Since GG::XMLObjectFactory is templated, you can create factories that construct objects from any polymorphic 
    class hierarchy.  The use of GG::XMLObjectFactory is not limited to the GG::Wnd-based class hierarchy.  
-   \see Refer to GGApp.cpp for an example.
+   \see Refer to GGApp.cpp for an example based on GG::Wnd.
 */
 
 /** \page tutorial Tutorial

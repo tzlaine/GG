@@ -290,16 +290,20 @@ void Wnd::AttachChild(Wnd* wnd)
 void Wnd::MoveChildUp(Wnd* wnd)
 {
     if (wnd) {
-        m_children.remove(wnd);
-        m_children.push_back(wnd);
+        if (std::find(m_children.begin(), m_children.end(), wnd) != m_children.end()) {
+            m_children.remove(wnd);
+            m_children.push_back(wnd);
+        }
     }
 }
  
 void Wnd::MoveChildDown(Wnd* wnd)
 {
     if (wnd) {
-        m_children.remove(wnd);
-        m_children.push_front(wnd);
+        if (std::find(m_children.begin(), m_children.end(), wnd) != m_children.end()) {
+            m_children.remove(wnd);
+            m_children.push_front(wnd);
+        }
     }
 }
 

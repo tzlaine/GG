@@ -55,6 +55,7 @@ using std::istream;
 using std::ofstream;
 using std::ostream;
 using std::map;
+using std::multimap;
 using std::pair;
 using std::string;
 using std::vector;
@@ -329,6 +330,41 @@ GG_API vector<string> Tokenize(const string& str);
     one for keys and one for values. */
 GG_API pair<vector<string>, vector<string> > TokenizeMapString(const string& str);
 
+/** Takes an unsigned integer that is the result of the bitwise OR-ing of enumerated values of type T, and generates a
+    string of the form "value1 value2 value3 ...".  This function will yield the zero-value of enum type T (e.g. "TF_NONE")
+    if no nonzero flags are specified.  If no such zero-value exists, the returned string will be empty.  
+    \note This function depends on EnumMap<T> being defined. */
+template <class T>
+string StringFromFlags(unsigned int flags)
+{
+    string retval;
+    const EnumMap<T>& enum_map = GetEnumMap<T>();
+    T zero_value = T(-1); // if this value remains -1, we never found a zero value; otherwise it will be equal to 0
+    for (typename EnumMap<T>::MapType::const_iterator it = enum_map.map_.begin(); it != enum_map.map_.end(); ++it) {
+        if (zero_value && !it->first) // take only the first zero-value, in case there are multiple such values
+            zero_value = it->first;
+        if (flags & it->first)
+            retval += it->second + " ";
+    }
+    if (retval.empty() && !zero_value)
+        retval = enum_map.FromEnum(zero_value) + " ";
+    return retval;
+}
+
+/** Takes a string of the form "value1 value2 value3 ..." and returns an unsigned integer that is the result of the bitwise
+    OR-ing of the enumerated values of type T in the string. \note This function depends on EnumMap<T> being defined. */
+template <class T>
+unsigned int FlagsFromString(const string& str)
+{
+    unsigned int retval;
+    const EnumMap<T>& enum_map = GetEnumMap<T>();
+    vector<string> tokens = Tokenize(str);
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+        retval |= enum_map.FromString(tokens[i]);
+    }
+    return retval;
+}
+
 /** Takes any simple STL container (vector, set, etc.) and puts its contents into a whitespace-delimited list.  
     Due to the key-value pair organization of STL maps, this function does not work with them.  Use StringFromMap() 
     instead. */
@@ -337,7 +373,7 @@ string StringFromContainer(const Cont& container)
 {
     string retval;
     for (typename Cont::const_iterator it = container.begin(); it != container.end(); ++it) {
-	retval += boost::lexical_cast<string>(*it) + " ";
+        retval += boost::lexical_cast<string>(*it) + " ";
     }
     return retval;
 }
@@ -348,7 +384,18 @@ string StringFromMap(const map<T1, T2>& container)
 {
     string retval;
     for (typename map<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
-	retval += "(" + boost::lexical_cast<string>(it->first) + ", " + boost::lexical_cast<string>(it->second) + ") ";
+        retval += "(" + boost::lexical_cast<string>(it->first) + ", " + boost::lexical_cast<string>(it->second) + ") ";
+    }
+    return retval;
+}
+
+/** Takes an STL multimap and puts its contents into a whitespace-delimited list, in the format "(first, second) (first, second) ...". */
+template <class T1, class T2>
+string StringFromMultimap(const multimap<T1, T2>& container)
+{
+    string retval;
+    for (typename multimap<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
+        retval += "(" + boost::lexical_cast<string>(it->first) + ", " + boost::lexical_cast<string>(it->second) + ") ";
     }
     return retval;
 }
@@ -364,7 +411,7 @@ Cont ContainerFromString(const string& str)
     std::insert_iterator<Cont> ins_it = std::inserter(retval, retval.begin());
     typedef typename Cont::value_type T;
     for (unsigned int i = 0; i < tokens.size(); ++i) {
-	ins_it = boost::lexical_cast<T>(tokens[i]);
+        ins_it = boost::lexical_cast<T>(tokens[i]);
     }
     return retval;
 }
@@ -376,7 +423,19 @@ map<T1, T2> MapFromString(const string& str)
     map<T1, T2> retval;
     pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
     for (unsigned int i = 0; i < tokens.first.size(); ++i) {
-	retval[boost::lexical_cast<T1>(tokens.first[i])] = boost::lexical_cast<T2>(tokens.second[i]);
+        retval[boost::lexical_cast<T1>(tokens.first[i])] = boost::lexical_cast<T2>(tokens.second[i]);
+    }
+    return retval;
+}
+
+/** Creates an STL multimap from a string consisting whitespace-delimited list of elements in the format "(first, second) (first, second) ...". */
+template <class T1, class T2>
+multimap<T1, T2> MultimapFromString(const string& str)
+{
+    multimap<T1, T2> retval;
+    pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
+    for (unsigned int i = 0; i < tokens.first.size(); ++i) {
+        retval.insert(std::make_pair(boost::lexical_cast<T1>(tokens.first[i]), boost::lexical_cast<T2>(tokens.second[i])));
     }
     return retval;
 }

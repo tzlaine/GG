@@ -79,19 +79,19 @@ inline bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd)
 struct AppImplData
 {
     AppImplData() :
-            focus_wnd(0),
-            mouse_pos(0,0),
-            mouse_rel(0,0),
-            mouse_repeat_delay(0),
-            mouse_repeat_interval(0),
-            double_click_interval(500),
-            prev_wnd_under_cursor(0),
-            curr_wnd_under_cursor(0),
-            wnd_region(WR_NONE),
-            double_click_wnd(0),
-            double_click_start_time(-1) ,
-            double_click_time(-1),
-            log_category(log4cpp::Category::getRoot())
+	focus_wnd(0),
+	mouse_pos(0,0),
+	mouse_rel(0,0),
+	mouse_repeat_delay(0),
+	mouse_repeat_interval(0),
+	double_click_interval(500),
+	prev_wnd_under_cursor(0),
+	curr_wnd_under_cursor(0),
+	wnd_region(WR_NONE),
+	double_click_wnd(0),
+	double_click_start_time(-1) ,
+	double_click_time(-1),
+	log_category(log4cpp::Category::getRoot())
     {
         button_state[0] = button_state[1] = button_state[2] = false;
         drag_wnds[0] = drag_wnds[1] = drag_wnds[2] = 0;
@@ -240,6 +240,7 @@ void App::Remove(Wnd* wnd)
         } else { // if it's not a modal window, remove it from the z-order
             s_impl->zlist.Remove(wnd);
         }
+
         // ensure that GUI state variables don't become dangling pointers when a Wnd is removed
         if (MatchesOrContains(wnd, s_impl->focus_wnd))
             s_impl->focus_wnd = 0;
@@ -259,6 +260,11 @@ void App::Remove(Wnd* wnd)
             s_impl->drag_wnds[2] = 0;
             s_impl->wnd_region = WR_NONE;
         }
+        if (MatchesOrContains(wnd, s_impl->double_click_wnd)) {
+	    s_impl->double_click_wnd = 0;
+	    s_impl->double_click_start_time = -1;
+	    s_impl->double_click_time = -1;
+	}
     }
 }
 
@@ -535,10 +541,11 @@ void App::Render()
 
 void App::RenderWindow(Wnd* wnd)
 {
-    wnd->Render();
-    for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
-        if ((*it)->Visible())
-            RenderWindow(*it);
+    if (wnd->Render() == 1) {
+	for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
+	    if ((*it)->Visible())
+		RenderWindow(*it);
+	}
     }
 }
 

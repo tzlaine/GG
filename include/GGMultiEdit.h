@@ -86,6 +86,8 @@ public:
     int MaxLinesOfHistory() const {return m_max_lines_history;}
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an MultiEdit object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
 
     /** \name Mutators */ //@{
@@ -157,6 +159,21 @@ private:
     Scroll*     m_vscroll;
     Scroll*     m_hscroll;
 };
+
+
+// define EnumMap and stream operators for MultiEdit::Style
+ENUM_MAP_BEGIN(MultiEdit::Styles)
+    ENUM_MAP_INSERT(MultiEdit::READ_ONLY)
+    ENUM_MAP_INSERT(MultiEdit::TERMINAL_STYLE)
+    ENUM_MAP_INSERT(MultiEdit::INTEGRAL_HEIGHT)
+    ENUM_MAP_INSERT(MultiEdit::NO_VSCROLL)
+    ENUM_MAP_INSERT(MultiEdit::NO_HSCROLL)
+    ENUM_MAP_INSERT(MultiEdit::NO_SCROLL)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(MultiEdit::Styles)
+ENUM_STREAM_OUT(MultiEdit::Styles)
+
 
 } // namespace GG
 

@@ -26,6 +26,8 @@
 
 #include "GGClr.h"
 
+#include <XMLValidators.h>
+
 namespace GG {
 
 ////////////////////////////////////////////////
@@ -78,31 +80,29 @@ Clr::Clr(const XMLElement& elem)
     if (elem.Tag() != "GG::Clr")
         throw std::invalid_argument("Attempted to construct a GG::Clr from an XMLElement that had a tag other than \"GG::Clr\"");
 
-    const XMLElement& r_elem = elem.Child("red");
-    const XMLElement& g_elem = elem.Child("green");
-    const XMLElement& b_elem = elem.Child("blue");
-    const XMLElement& a_elem = elem.Child("alpha");
-    r = lexical_cast<int>(r_elem.Attribute("value"));
-    g = lexical_cast<int>(g_elem.Attribute("value"));
-    b = lexical_cast<int>(b_elem.Attribute("value"));
-    a = lexical_cast<int>(a_elem.Attribute("value"));
+    r = lexical_cast<int>(elem.Child("red").Text());
+    g = lexical_cast<int>(elem.Child("green").Text());
+    b = lexical_cast<int>(elem.Child("blue").Text());
+    a = lexical_cast<int>(elem.Child("alpha").Text());
 }
 
 XMLElement Clr::XMLEncode() const
 {
     XMLElement retval("GG::Clr");
-    XMLElement temp("red");
-    temp.SetAttribute("value", boost::lexical_cast<string>(int(r)));
-    retval.AppendChild(temp);
-    temp = XMLElement("green");
-    temp.SetAttribute("value", boost::lexical_cast<string>(int(g)));
-    retval.AppendChild(temp);
-    temp = XMLElement("blue");
-    temp.SetAttribute("value", boost::lexical_cast<string>(int(b)));
-    retval.AppendChild(temp);
-    temp = XMLElement("alpha");
-    temp.SetAttribute("value", boost::lexical_cast<string>(int(a)));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("red", boost::lexical_cast<string>(int(r))));
+    retval.AppendChild(XMLElement("green", boost::lexical_cast<string>(int(g))));
+    retval.AppendChild(XMLElement("blue", boost::lexical_cast<string>(int(b))));
+    retval.AppendChild(XMLElement("alpha", boost::lexical_cast<string>(int(a))));
+    return retval;
+}
+
+XMLElementValidator Clr::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Clr");
+    retval.AppendChild(XMLElementValidator("red", new RangedValidator<int>(0, 255)));
+    retval.AppendChild(XMLElementValidator("green", new RangedValidator<int>(0, 255)));
+    retval.AppendChild(XMLElementValidator("blue", new RangedValidator<int>(0, 255)));
+    retval.AppendChild(XMLElementValidator("alpha", new RangedValidator<int>(0, 255)));
     return retval;
 }
 

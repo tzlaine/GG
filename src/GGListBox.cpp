@@ -25,11 +25,13 @@
 /* $Header$ */
 
 #include "GGListBox.h"
-#include "GGApp.h"
-#include "GGScroll.h"
-#include "GGTextControl.h"
-#include "GGStaticGraphic.h"
-#include "GGDrawUtil.h"
+
+#include <GGApp.h>
+#include <GGScroll.h>
+#include <GGTextControl.h>
+#include <GGStaticGraphic.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
@@ -60,19 +62,12 @@ ListBox::Row::Row(const XMLElement& elem)
     if (elem.Tag() != "GG::ListBox::Row")
         throw std::invalid_argument("Attempted to construct a GG::ListBox::Row from an XMLElement that had a tag other than \"GG::ListBox::Row\"");
 
-    const XMLElement* curr_elem = &elem.Child("data_type");
-    data_type = curr_elem->Text();
+    data_type = elem.Child("data_type").Text();
+    height = lexical_cast<int>(elem.Child("height").Text());
+    alignment = lexical_cast<ListBoxStyle>(elem.Child("alignment").Text());
+    indentation = lexical_cast<int>(elem.Child("indentation").Text());
 
-    curr_elem = &elem.Child("height");
-    height = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("alignment");
-    alignment = lexical_cast<Uint32>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("indentation");
-    indentation = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("cells");
+    const XMLElement* curr_elem = &elem.Child("cells");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
         if (curr_elem->Child(i).Tag() == "GG::Control" && !curr_elem->Child(i).NumChildren())
             push_back(0);
@@ -110,25 +105,13 @@ const string& ListBox::Row::SortKey(int column) const
 XMLElement ListBox::Row::XMLEncode() const
 {
     XMLElement retval("GG::ListBox::Row");
+    retval.AppendChild(XMLElement("data_type", data_type));
+    retval.LastChild().SetAttribute("edit", "always");
+    retval.AppendChild(XMLElement("height", lexical_cast<string>(height)));
+    retval.AppendChild(XMLElement("alignment", lexical_cast<string>(alignment)));
+    retval.AppendChild(XMLElement("indentation", lexical_cast<string>(indentation)));
 
-    XMLElement temp;
-
-    temp = XMLElement("data_type", data_type);
-    retval.AppendChild(temp);
-
-    temp = XMLElement("height");
-    temp.SetAttribute("value", lexical_cast<string>(height));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("alignment");
-    temp.SetAttribute("value", lexical_cast<string>(alignment));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("indentation");
-    temp.SetAttribute("value", lexical_cast<string>(indentation));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("cells");
+    XMLElement temp("cells");
     for (unsigned int i = 0; i < size(); ++i) {
         if (operator[](i))
             temp.AppendChild(operator[](i)->XMLEncode());
@@ -140,6 +123,34 @@ XMLElement ListBox::Row::XMLEncode() const
     temp = XMLElement("sub_rows");
     for (std::vector<Row*>::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
         temp.AppendChild((*it)->XMLEncode());
+    }
+    retval.AppendChild(temp);
+
+    return retval;
+}
+
+XMLElementValidator ListBox::Row::XMLValidator() const
+{
+    XMLElementValidator retval("GG::ListBox::Row");
+
+    retval.AppendChild(XMLElementValidator("data_type"));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("height", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("alignment", new Validator<ListBoxStyle>()));
+    retval.AppendChild(XMLElementValidator("indentation", new Validator<int>()));
+
+    XMLElementValidator temp("cells");
+    for (unsigned int i = 0; i < size(); ++i) {
+        if (operator[](i))
+            temp.AppendChild(operator[](i)->XMLValidator());
+        else
+            temp.AppendChild(XMLElementValidator("GG::Control"));
+    }
+    retval.AppendChild(temp);
+
+    temp = XMLElementValidator("sub_rows");
+    for (std::vector<Row*>::const_iterator it = sub_rows.begin(); it != sub_rows.end(); ++it) {
+        temp.AppendChild((*it)->XMLValidator());
     }
     retval.AppendChild(temp);
 
@@ -168,7 +179,7 @@ Control* ListBox::Row::CreateControl(const string& str, const shared_ptr<Font>& 
 
 Control* ListBox::Row::CreateControl(const SubTexture& st)
 {
-    return new StaticGraphic(0, 0, st.Width(), st.Height(), st, SG_SHRINKFIT);
+    return new StaticGraphic(0, 0, st.Width(), st.Height(), st, GR_SHRINKFIT);
 }
 
 ////////////////////////////////////////////////
@@ -179,28 +190,28 @@ const int ListBox::BORDER_THICK = 2;
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
                  Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-        Control(x, y, w, h, flags),
-        m_vscroll(0),
-        m_hscroll(0),
-        m_caret(-1),
-        m_old_sel_row(-1),
-        m_old_rdown_row(-1),
-        m_lclick_row(-1),
-        m_rclick_row(-1),
-        m_row_drag_offset(Pt(-1, -1)),
-        m_last_row_browsed(-1),
-        m_suppress_delete_signal(false),
-        m_first_row_shown(0),
-        m_first_col_shown(0),
-        m_cell_margin(2),
-        m_int_color(interior),
-        m_hilite_color(CLR_SHADOW),
-        m_style(0),
-        m_header_row(0),
-        m_row_height(22),
-        m_keep_col_widths(false),
-        m_clip_cells(false),
-        m_sort_col(0)
+    Control(x, y, w, h, flags),
+    m_vscroll(0),
+    m_hscroll(0),
+    m_caret(-1),
+    m_old_sel_row(-1),
+    m_old_rdown_row(-1),
+    m_lclick_row(-1),
+    m_rclick_row(-1),
+    m_row_drag_offset(Pt(-1, -1)),
+    m_last_row_browsed(-1),
+    m_suppress_delete_signal(false),
+    m_first_row_shown(0),
+    m_first_col_shown(0),
+    m_cell_margin(2),
+    m_int_color(interior),
+    m_hilite_color(CLR_SHADOW),
+    m_style(0),
+    m_header_row(0),
+    m_row_height(22),
+    m_keep_col_widths(false),
+    m_clip_cells(false),
+    m_sort_col(0)
 {
     SetColor(color);
     ValidateStyle();
@@ -209,96 +220,71 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_widths,
                  Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-        Control(x, y, w, h, flags),
-        m_vscroll(0),
-        m_hscroll(0),
-        m_caret(-1),
-        m_old_sel_row(-1),
-        m_old_rdown_row(-1),
-        m_lclick_row(-1),
-        m_rclick_row(-1),
-        m_row_drag_offset(Pt(-1, -1)),
-        m_last_row_browsed(-1),
-        m_suppress_delete_signal(false),
-        m_first_row_shown(0),
-        m_first_col_shown(0),
-        m_col_widths(col_widths),
-        m_cell_margin(2),
-        m_int_color(interior),
-        m_hilite_color(CLR_SHADOW),
-        m_style(0),
-        m_header_row(0),
-        m_row_height(22),
-        m_keep_col_widths(false),
-        m_clip_cells(false),
-        m_sort_col(0)
+    Control(x, y, w, h, flags),
+    m_vscroll(0),
+    m_hscroll(0),
+    m_caret(-1),
+    m_old_sel_row(-1),
+    m_old_rdown_row(-1),
+    m_lclick_row(-1),
+    m_rclick_row(-1),
+    m_row_drag_offset(Pt(-1, -1)),
+    m_last_row_browsed(-1),
+    m_suppress_delete_signal(false),
+    m_first_row_shown(0),
+    m_first_col_shown(0),
+    m_col_widths(col_widths),
+    m_cell_margin(2),
+    m_int_color(interior),
+    m_hilite_color(CLR_SHADOW),
+    m_style(0),
+    m_header_row(0),
+    m_row_height(22),
+    m_keep_col_widths(true),
+    m_clip_cells(false),
+    m_sort_col(0)
 {
     SetColor(color);
     ValidateStyle();
+    m_col_alignments.resize(m_col_widths.size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
     m_header_row = new Row;
 }
 
 ListBox::ListBox(const XMLElement& elem) :
-        Control(elem.Child("GG::Control")),
-        m_vscroll(0),
-        m_hscroll(0),
-        m_old_sel_row(-1),
-        m_old_rdown_row(-1),
-        m_lclick_row(-1),
-        m_rclick_row(-1),
-        m_row_drag_offset(Pt(-1, -1)),
-        m_last_row_browsed(-1),
-        m_suppress_delete_signal(false),
-        m_header_row(0)
+    Control(elem.Child("GG::Control")),
+    m_vscroll(0),
+    m_hscroll(0),
+    m_old_sel_row(-1),
+    m_old_rdown_row(-1),
+    m_lclick_row(-1),
+    m_rclick_row(-1),
+    m_row_drag_offset(Pt(-1, -1)),
+    m_last_row_browsed(-1),
+    m_suppress_delete_signal(false),
+    m_style(0),
+    m_header_row(0)
 {
     if (elem.Tag() != "GG::ListBox")
         throw std::invalid_argument("Attempted to construct a GG::ListBox from an XMLElement that had a tag other than \"GG::ListBox\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_caret");
-    m_caret = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_caret = lexical_cast<int>(elem.Child("m_caret").Text());
+    m_selections = ContainerFromString<set<int> >(elem.Child("m_selections").Text());
 
-    curr_elem = &elem.Child("m_selections");
-    for (int i = 0; i < curr_elem->NumAttributes(); ++i) {
-        m_selections.insert(lexical_cast<int>(curr_elem->Attribute("index" + lexical_cast<string>(i))));
+    m_first_row_shown = lexical_cast<int>(elem.Child("m_first_row_shown").Text());
+    m_first_col_shown = lexical_cast<int>(elem.Child("m_first_col_shown").Text());
+    m_col_widths = ContainerFromString<vector<int> >(elem.Child("m_col_widths").Text());
+    m_col_alignments = ContainerFromString<vector<ListBoxStyle> >(elem.Child("m_col_alignments").Text());
+    m_cell_margin = lexical_cast<int>(elem.Child("m_cell_margin").Text());
+    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
+    m_hilite_color = Clr(elem.Child("m_hilite_color").Child("GG::Clr"));
+
+    vector<string> tokens = Tokenize(elem.Child("m_style").Text());
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+	m_style |= GetEnumMap<ListBoxStyle>().FromString(tokens[i]);
     }
+    ValidateStyle();
 
-    curr_elem = &elem.Child("m_rows");
-    for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-        if (Row* row = dynamic_cast<Row*>(App::GetApp()->GenerateWnd(curr_elem->Child(i))))
-            m_rows.push_back(row);
-        else
-            throw std::runtime_error("ListBox::ListBox : Attempted to use a non-Row object as a ListBox row.");
-    }
-
-    curr_elem = &elem.Child("m_first_row_shown");
-    m_first_row_shown = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_first_col_shown");
-    m_first_col_shown = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_col_widths");
-    for (int i = 0; i < curr_elem->NumAttributes(); ++i) {
-        m_col_widths.push_back(lexical_cast<int>(curr_elem->Attribute("index" + lexical_cast<string>(i))));
-    }
-
-    curr_elem = &elem.Child("m_col_alignments");
-    for (int i = 0; i < curr_elem->NumAttributes(); ++i) {
-        m_col_alignments.push_back(lexical_cast<Uint32>(curr_elem->Attribute("index" + lexical_cast<string>(i))));
-    }
-
-    curr_elem = &elem.Child("m_cell_margin");
-    m_cell_margin = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_int_color");
-    m_int_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_hilite_color");
-    m_hilite_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_style");
-    m_style = lexical_cast<Uint32>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_header_row");
+    const XMLElement* curr_elem = &elem.Child("m_header_row");
     if (curr_elem->NumChildren()) {
         if (Row* row = dynamic_cast<Row*>(App::GetApp()->GenerateWnd(curr_elem->Child(0))))
             m_header_row = row;
@@ -308,21 +294,18 @@ ListBox::ListBox(const XMLElement& elem) :
         m_header_row = new Row;
     }
 
-    curr_elem = &elem.Child("m_row_height");
-    m_row_height = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_row_height = lexical_cast<int>(elem.Child("m_row_height").Text());
+    m_keep_col_widths = lexical_cast<bool>(elem.Child("m_keep_col_widths").Text());
+    m_clip_cells = lexical_cast<bool>(elem.Child("m_clip_cells").Text());
+    m_sort_col = lexical_cast<int>(elem.Child("m_sort_col").Text());
+    m_allowed_types = ContainerFromString<set<string> >(elem.Child("m_allowed_types").Text());
 
-    curr_elem = &elem.Child("m_keep_col_widths");
-    m_keep_col_widths = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_clip_cells");
-    m_clip_cells = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_sort_col");
-    m_sort_col = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_allowed_types");
+    curr_elem = &elem.Child("m_rows");
     for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-        m_allowed_types.insert(curr_elem->Child("index" + lexical_cast<string>(i)).Text());
+        if (Row* row = dynamic_cast<Row*>(App::GetApp()->GenerateWnd(curr_elem->Child(i))))
+            m_rows.push_back(row);
+        else
+            throw std::runtime_error("ListBox::ListBox : Attempted to use a non-Row object as a ListBox row.");
     }
 
     for (unsigned int i = 0; i < m_rows.size(); ++i)
@@ -370,7 +353,7 @@ int ListBox::Render()
     bool disable_scissor = !glIsEnabled(GL_SCISSOR_TEST);
     glPushAttrib(GL_SCISSOR_BIT);
     glEnable(GL_SCISSOR_TEST);
-    glScissor(ul.x + BORDER_THICK, App::GetApp()->AppHeight() - lr.y + BORDER_THICK,
+    glScissor(ul.x + BORDER_THICK, App::GetApp()->AppHeight() - lr.y + 2 * BottomMargin() + BORDER_THICK,
               lr.x - ul.x - 2 * BORDER_THICK - RightMargin(),
               lr.y - ul.y - 2 * BORDER_THICK - BottomMargin());
 
@@ -381,25 +364,25 @@ int ListBox::Render()
     int prev_sel = -1;
     int top = cl_ul.y, bottom = 0;
     for (std::set<int>::iterator  it = m_selections.begin(); it != m_selections.end(); ++it) {
-            int curr_sel = *it;
-            if (curr_sel >= m_first_row_shown && curr_sel <= last_visible_row){
-                // no need to look for the current selection's height, if we just found it on the last iteration
-                top = (prev_sel == curr_sel - 1) ? bottom : 0;
-                if (!top) {
-                    for (int i = m_first_row_shown; i < curr_sel; ++i)
-                        top += m_rows[i]->Height();
-                }
-                bottom = top + m_rows[curr_sel]->Height();
-                if (bottom > cl_lr.y)
-                    bottom = cl_lr.y;
-                FlatRectangle(cl_ul.x, cl_ul.y + top, cl_lr.x, cl_ul.y + bottom, hilite_color_to_use, CLR_ZERO, 0);
-                prev_sel = curr_sel;
-            }
-        }
+	int curr_sel = *it;
+	if (curr_sel >= m_first_row_shown && curr_sel <= last_visible_row){
+	    // no need to look for the current selection's height, if we just found it on the last iteration
+	    top = (prev_sel == curr_sel - 1) ? bottom : 0;
+	    if (!top) {
+		for (int i = m_first_row_shown; i < curr_sel; ++i)
+		    top += m_rows[i]->Height();
+	    }
+	    bottom = top + m_rows[curr_sel]->Height();
+	    if (bottom > cl_lr.y)
+		bottom = cl_lr.y;
+	    FlatRectangle(cl_ul.x, cl_ul.y + top, cl_lr.x, cl_ul.y + bottom, hilite_color_to_use, CLR_ZERO, 0);
+	    prev_sel = curr_sel;
+	}
+    }
 
     // draw caret
     if (m_caret >= m_first_row_shown && m_caret <= last_visible_row &&
-            (App::GetApp()->FocusWnd() == this || App::GetApp()->FocusWnd() == m_vscroll || App::GetApp()->FocusWnd() == m_hscroll)) {
+	(App::GetApp()->FocusWnd() == this || App::GetApp()->FocusWnd() == m_vscroll || App::GetApp()->FocusWnd() == m_hscroll)) {
         int top = cl_ul.y;
         for (int i = m_first_row_shown; i < m_caret; ++i)
             top += m_rows[i]->Height();
@@ -423,13 +406,18 @@ int ListBox::Render()
         glDisable(GL_SCISSOR_TEST);
     glPopAttrib();
 
+    if (m_vscroll)
+	m_vscroll->Render();
+    if (m_hscroll)
+	m_hscroll->Render();
+
     // draw dragged line item, if one exists
     if (m_old_sel_row != -1 && m_row_drag_offset != Pt(-1, -1)) {
         Pt drag_row_ul = App::GetApp()->MousePosition() - m_row_drag_offset;
         RenderRow(m_rows[m_old_sel_row], drag_row_ul.x, drag_row_ul.y, last_visible_col);
     }
 
-    return 1;
+    return 0;
 }
 
 int ListBox::LButtonDown(const Pt& pt, Uint32 keys)
@@ -605,14 +593,14 @@ int ListBox::Keypress(Key key, Uint32 key_mods)
         }
         break;
     case GGK_RIGHT:{ // right key (not numpad)
-            int last_fully_visible_col = LastVisibleCol();
-            if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientDimensions().x)
-                --last_fully_visible_col;
-            if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
-                ++m_first_col_shown;
-                m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
-            }
-            break;}
+	int last_fully_visible_col = LastVisibleCol();
+	if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientDimensions().x)
+	    --last_fully_visible_col;
+	if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
+	    ++m_first_col_shown;
+	    m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
+	}
+	break;}
 
         // any other key gets passed along to the parent
     default:
@@ -775,7 +763,7 @@ void ListBox::SetColHeaders(Row* r)
         m_col_widths.resize(m_header_row->size(), (ClientDimensions().x - SCROLL_WIDTH) / m_header_row->size());
         // put the remainder in the last column, so the total width == ClientDimensions().x - SCROLL_WIDTH
         m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % m_header_row->size();
-        m_col_alignments.resize(m_header_row->size(), (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+        m_col_alignments.resize(m_header_row->size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         AttachRowChildren(m_header_row);
         NormalizeRow(m_header_row);
     }
@@ -790,7 +778,7 @@ void ListBox::SetNumCols(int n)
         } else {
             m_col_widths.resize(n, ClientDimensions().x / n);
             m_col_widths.back() += ClientDimensions().x % n;
-            m_col_alignments.resize(n, (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+            m_col_alignments.resize(n, ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         }
         if (m_sort_col <= n)
             m_sort_col = 0;
@@ -810,21 +798,53 @@ XMLElement ListBox::XMLEncode() const
     retval.AppendChild(Control::XMLEncode());
 
     // remove children; they will be recreated at reload time
-    while (retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").NumChildren())
-        retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").RemoveChild(0);
+    retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").RemoveChildren();
 
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_caret", lexical_cast<string>(m_caret)));
+    retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_selections", StringFromContainer(m_selections)));
+    retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_first_row_shown", lexical_cast<string>(m_first_row_shown)));
+    retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_first_col_shown", lexical_cast<string>(m_first_col_shown)));
+    retval.LastChild().SetAttribute("edit", "never");
+    retval.AppendChild(XMLElement("m_col_widths", StringFromContainer(m_col_widths)));
+    retval.LastChild().SetAttribute("edit", "always");
+    retval.AppendChild(XMLElement("m_col_alignments", StringFromContainer(m_col_alignments)));
+    retval.LastChild().SetAttribute("edit", "always");
+    retval.AppendChild(XMLElement("m_cell_margin", lexical_cast<string>(m_cell_margin)));
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_hilite_color", m_hilite_color.XMLEncode()));
 
-    temp = XMLElement("m_caret");
-    temp.SetAttribute("value", lexical_cast<string>(m_caret));
+    string style_str;
+    if (!m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_NONE) + " ";
+    if (LB_VCENTER & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_VCENTER) + " ";
+    if (LB_TOP & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_TOP) + " ";
+    if (LB_BOTTOM & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_BOTTOM) + " ";
+    if (LB_CENTER & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_CENTER) + " ";
+    if (LB_LEFT & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_LEFT) + " ";
+    if (LB_RIGHT & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_RIGHT) + " ";
+    if (LB_NOSORT & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_NOSORT) + " ";
+    if (LB_SORTDESCENDING & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_SORTDESCENDING) + " ";
+    if (LB_NOSEL & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_NOSEL) + " ";
+    if (LB_SINGLESEL & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_SINGLESEL) + " ";
+    if (LB_QUICKSEL & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_QUICKSEL) + " ";
+    if (LB_DRAGDROP & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_DRAGDROP) + " ";
+    if (LB_USERDELETE & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_USERDELETE) + " ";
+    if (LB_BROWSEUPDATES & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_BROWSEUPDATES) + " ";
+    retval.AppendChild(XMLElement("m_style", style_str));
+
+    XMLElement temp("m_header_row");
+    if (m_header_row)
+        temp.AppendChild(m_header_row->XMLEncode());
     retval.AppendChild(temp);
 
-    int i = 0;
-    temp = XMLElement("m_selections");
-    for (std::set<int>::const_iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
-            temp.SetAttribute("index" + lexical_cast<string>(i++), lexical_cast<string>(*it));
-        }
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_row_height", lexical_cast<string>(m_row_height)));
+    retval.AppendChild(XMLElement("m_keep_col_widths", lexical_cast<string>(m_keep_col_widths)));
+    retval.AppendChild(XMLElement("m_clip_cells", lexical_cast<string>(m_clip_cells)));
+    retval.AppendChild(XMLElement("m_sort_col", lexical_cast<string>(m_sort_col)));
+    retval.AppendChild(XMLElement("m_allowed_types", StringFromContainer(m_allowed_types)));
+    retval.LastChild().SetAttribute("edit", "always");
 
     temp = XMLElement("m_rows");
     for (std::vector<Row*>::const_iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
@@ -832,70 +852,46 @@ XMLElement ListBox::XMLEncode() const
     }
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_first_row_shown");
-    temp.SetAttribute("value", lexical_cast<string>(m_first_row_shown));
-    retval.AppendChild(temp);
+    return retval;
+}
 
-    temp = XMLElement("m_first_col_shown");
-    temp.SetAttribute("value", lexical_cast<string>(m_first_col_shown));
-    retval.AppendChild(temp);
+XMLElementValidator ListBox::XMLValidator() const
+{
+    XMLElementValidator retval("GG::ListBox");
+    retval.AppendChild(Control::XMLValidator());
 
-    i = 0;
-    temp = XMLElement("m_col_widths");
-    for (std::vector<int>::const_iterator it = m_col_widths.begin(); it != m_col_widths.end(); ++it) {
-        temp.SetAttribute("index" + lexical_cast<string>(i++), lexical_cast<string>(*it));
-    }
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElementValidator("m_caret", new Validator<int>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_selections", new ListValidator<int>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_first_row_shown", new Validator<int>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_first_col_shown", new Validator<int>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_col_widths", new ListValidator<int>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_col_alignments", new ListValidator<ListBoxStyle>()));
+    retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_cell_margin", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_hilite_color", m_hilite_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_style", new ListValidator<ListBoxStyle>()));
 
-    i = 0;
-    temp = XMLElement("m_col_alignments");
-    for (std::vector<Uint32>::const_iterator it = m_col_alignments.begin(); it != m_col_alignments.end(); ++it) {
-        temp.SetAttribute("index" + lexical_cast<string>(i++), lexical_cast<string>(*it));
-    }
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_cell_margin");
-    temp.SetAttribute("value", lexical_cast<string>(m_cell_margin));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_int_color");
-    temp.AppendChild(m_int_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_hilite_color");
-    temp.AppendChild(m_hilite_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_style");
-    temp.SetAttribute("value", lexical_cast<string>(m_style));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_header_row");
+    XMLElementValidator temp("m_header_row");
     if (m_header_row)
-        temp.AppendChild(m_header_row->XMLEncode());
+        temp.AppendChild(m_header_row->XMLValidator());
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_row_height");
-    temp.SetAttribute("value", lexical_cast<string>(m_row_height));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElementValidator("m_row_height", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_keep_col_widths", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_clip_cells", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_sort_col", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_allowed_types", 0));
+    retval.LastChild().SetAttribute("edit", 0);
 
-    temp = XMLElement("m_keep_col_widths");
-    temp.SetAttribute("value", lexical_cast<string>(m_keep_col_widths));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_clip_cells");
-    temp.SetAttribute("value", lexical_cast<string>(m_clip_cells));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_sort_col");
-    temp.SetAttribute("value", lexical_cast<string>(m_sort_col));
-    retval.AppendChild(temp);
-
-    i = 0;
-    temp = XMLElement("m_allowed_types");
-    for (std::set<string>::const_iterator it = m_allowed_types.begin(); it != m_allowed_types.end(); ++it) {
-            XMLElement child("index" + lexical_cast<string>(i++), *it);
-            temp.AppendChild(child);
+    temp = XMLElementValidator("m_rows");
+    for (std::vector<Row*>::const_iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
+        temp.AppendChild((*it)->XMLValidator());
     }
     retval.AppendChild(temp);
 
@@ -985,7 +981,7 @@ int ListBox::Insert(Row* row, int at, bool dropped)
         m_col_widths.resize(row->size(), (ClientDimensions().x - SCROLL_WIDTH) / row->size());
         // put the remainder in the last column, so the total width == ClientDimensions().x - SCROLL_WIDTH
         m_col_widths.back() += (ClientDimensions().x - SCROLL_WIDTH) % row->size();
-        m_col_alignments.resize(row->size(), (m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+        m_col_alignments.resize(row->size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         if (m_header_row->size())
             NormalizeRow(m_header_row);
     }
@@ -1009,7 +1005,7 @@ int ListBox::Insert(Row* row, int at, bool dropped)
     AttachRowChildren(m_rows[retval]);
     NormalizeRow(m_rows[retval]);
 
-    // "bump" the hiliting down one row
+    // "bump" the selections on lower rows down one row
     if (retval != -1) {
         for (int i = NumRows() - 1; i > retval; --i) {
             if (m_selections.find(i - 1) != m_selections.end()) {
@@ -1109,9 +1105,6 @@ void ListBox::ValidateStyle()
 
 void ListBox::AdjustScrolls()
 {
-    bool vertical_needed = false;
-    bool horizontal_needed = false;
-
     // this client area calculation disregards the thickness of scrolls
     Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
                 (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->size() ? m_header_row->Height() : 0))));
@@ -1122,10 +1115,10 @@ void ListBox::AdjustScrolls()
     for (unsigned int i = 0; i < m_rows.size(); ++i)
         total_y_extent += m_rows[i]->Height();
 
-    vertical_needed = (total_y_extent > cl_sz.y ||
-                       (total_y_extent > cl_sz.y - SCROLL_WIDTH && total_x_extent > cl_sz.x - SCROLL_WIDTH));
-    horizontal_needed = (total_x_extent > cl_sz.x ||
-                         (total_x_extent > cl_sz.x - SCROLL_WIDTH && total_y_extent > cl_sz.y - SCROLL_WIDTH));
+    bool vertical_needed = (total_y_extent > cl_sz.y ||
+			    (total_y_extent > cl_sz.y - SCROLL_WIDTH && total_x_extent > cl_sz.x - SCROLL_WIDTH));
+    bool horizontal_needed = (total_x_extent > cl_sz.x ||
+			      (total_x_extent > cl_sz.x - SCROLL_WIDTH && total_y_extent > cl_sz.y - SCROLL_WIDTH));
 
     if (m_vscroll) { // if scroll already exists...
         if (!vertical_needed) { // remove scroll
@@ -1311,7 +1304,6 @@ void ListBox::AttachRowChildren(Row* row)
     // but want them to be fully interactive, just as they would be any where else
     for (unsigned int i = 0; i < row->size(); ++i) {
         AttachChild((*row)[i]);
-        (*row)[i]->Hide();
     }    
     for (unsigned int i = 0; i < row->sub_rows.size(); ++i) {
         AttachRowChildren(row->sub_rows[i]);

@@ -26,20 +26,22 @@
 
 #include "GGPtRect.h"
 
+#include <XMLValidators.h>
+
 namespace GG {
 
 ////////////////////////////////////////////////
 // GG::Pt
 ////////////////////////////////////////////////
 Pt::Pt() :
-        x(0),
-        y(0)
+    x(0),
+    y(0)
 {
 }
 
 Pt::Pt(int x_, int y_) :
-        x(x_),
-        y(y_)
+    x(x_),
+    y(y_)
 {
 }
 
@@ -48,21 +50,23 @@ Pt::Pt(const XMLElement& elem)
     if (elem.Tag() != "GG::Pt")
         throw std::invalid_argument("Attempted to construct a GG::Pt from an XMLElement that had a tag other than \"GG::Pt\"");
 
-    const XMLElement& x_elem = elem.Child("x");
-    const XMLElement& y_elem = elem.Child("y");
-    x = lexical_cast<int>(x_elem.Attribute("value"));
-    y = lexical_cast<int>(y_elem.Attribute("value"));
+    x = lexical_cast<int>(elem.Child("x").Text());
+    y = lexical_cast<int>(elem.Child("y").Text());
 }
 
 XMLElement Pt::XMLEncode() const
 {
     XMLElement retval("GG::Pt");
-    XMLElement temp("x");
-    temp.SetAttribute("value", boost::lexical_cast<string>(x));
-    retval.AppendChild(temp);
-    temp = XMLElement("y");
-    temp.SetAttribute("value", boost::lexical_cast<string>(y));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("x", boost::lexical_cast<string>(x)));
+    retval.AppendChild(XMLElement("y", boost::lexical_cast<string>(y)));
+    return retval;
+}
+
+XMLElementValidator Pt::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Pt");
+    retval.AppendChild(XMLElementValidator("x", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("y", new Validator<int>()));
     return retval;
 }
 
@@ -82,8 +86,8 @@ Rect::Rect(const Pt& pt1, const Pt& pt2)
 }
 
 Rect::Rect(int x1, int y1, int x2, int y2) :
-        ul(Pt(x1, y1)),
-        lr(Pt(x2, y2))
+    ul(Pt(x1, y1)),
+    lr(Pt(x2, y2))
 {
 }
 
@@ -92,19 +96,23 @@ Rect::Rect(const XMLElement& elem)
     if (elem.Tag() != "GG::Rect")
         throw std::invalid_argument("Attempted to construct a GG::Rect from an XMLElement that had a tag other than \"GG::Rect\"");
 
-    const XMLElement& ul_pt_elem = elem.Child("ul");
-    const XMLElement& lr_pt_elem = elem.Child("lr");
-    ul = Pt(ul_pt_elem.Child(0));
-    lr = Pt(lr_pt_elem.Child(0));
+    ul = Pt(elem.Child("ul").Child(0));
+    lr = Pt(elem.Child("lr").Child(0));
 }
 
 XMLElement Rect::XMLEncode() const
 {
     XMLElement retval("GG::Rect");
-    retval.AppendChild("ul");
-    retval.Child(0).AppendChild(ul.XMLEncode());
-    retval.AppendChild("lr");
-    retval.Child(1).AppendChild(lr.XMLEncode());
+    retval.AppendChild(XMLElement("ul", ul.XMLEncode()));
+    retval.AppendChild(XMLElement("lr", lr.XMLEncode()));
+    return retval;
+}
+
+XMLElementValidator Rect::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Rect");
+    retval.AppendChild(XMLElementValidator("ul", ul.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("lr", lr.XMLValidator()));
     return retval;
 }
 

@@ -86,6 +86,7 @@ public:
     void OrthoBlit(int x, int y, bool enter_2d_mode = true) const; 
    
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Texture object
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Texture
     //@}
 
     /** \name Mutators */ //@{
@@ -166,6 +167,7 @@ public:
     void OrthoBlit(int x, int y, bool enter_2d_mode = true) const;
    
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a SubTexture object
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this SubTexture
     //@}
 
 private:

@@ -25,8 +25,10 @@
 /* $Header$ */
 
 #include "GGTextControl.h"
-#include "GGApp.h"
-#include "GGDrawUtil.h"
+
+#include <GGApp.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
@@ -35,11 +37,11 @@ namespace GG {
 ////////////////////////////////////////////////
 TextControl::TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Uint32 text_fmt/* = 0*/,
                          Clr color/* = CLR_BLACK*/, Uint32 flags/* = 0*/) :
-        Control(x, y, w, h, flags),
-        m_format(text_fmt),
-        m_text_color(color),
-        m_font(font),
-        m_fit_to_text(false)
+    Control(x, y, w, h, flags),
+    m_format(text_fmt),
+    m_text_color(color),
+    m_font(font),
+    m_fit_to_text(false)
 {
     ValidateFormat();
     Control::m_text = str;
@@ -48,11 +50,11 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const sh
 
 TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts,
                          Uint32 text_fmt/* = 0*/, Clr color/* = CLR_BLACK*/, Uint32 flags/* = 0*/) :
-        Control(x, y, w, h, flags),
-        m_format(text_fmt),
-        m_text_color(color),
-        m_font(App::GetApp()->GetFont(font_filename, pts)),
-        m_fit_to_text(false)
+    Control(x, y, w, h, flags),
+    m_format(text_fmt),
+    m_text_color(color),
+    m_font(App::GetApp()->GetFont(font_filename, pts)),
+    m_fit_to_text(false)
 {
     ValidateFormat();
     Control::m_text = str;
@@ -61,11 +63,11 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const st
 
 TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                          Uint32 flags/* = 0*/) :
-        Control(x, y, 0, 0, flags),
-        m_format(0),
-        m_text_color(color),
-        m_font(font),
-        m_fit_to_text(true)
+    Control(x, y, 0, 0, flags),
+    m_format(0),
+    m_text_color(color),
+    m_font(font),
+    m_fit_to_text(true)
 {
     ValidateFormat();
     Control::m_text = str;
@@ -77,11 +79,11 @@ TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>
 
 TextControl::TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
                          Uint32 flags/* = 0*/) :
-        Control(x, y, 0, 0, flags),
-        m_format(0),
-        m_text_color(color),
-        m_font(App::GetApp()->GetFont(font_filename, pts)),
-        m_fit_to_text(true)
+    Control(x, y, 0, 0, flags),
+    m_format(0),
+    m_text_color(color),
+    m_font(App::GetApp()->GetFont(font_filename, pts)),
+    m_fit_to_text(true)
 {
     ValidateFormat();
     Control::m_text = str;
@@ -92,24 +94,25 @@ TextControl::TextControl(int x, int y, const string& str, const string& font_fil
 }
 
 TextControl::TextControl(const XMLElement& elem) :
-        Control(elem.Child("GG::Control"))
+    Control(elem.Child("GG::Control")),
+    m_format(0)
 {
     if (elem.Tag() != "GG::TextControl")
         throw std::invalid_argument("Attempted to construct a GG::TextControl from an XMLElement that had a tag other than \"GG::TextControl\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_format");
-    m_format = lexical_cast<Uint32>(curr_elem->Attribute("value"));
+    vector<string> tokens = Tokenize(elem.Child("m_format").Text());
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+	m_format |= GetEnumMap<GG::TextFormat>().FromString(tokens[i]);
+    }
+    ValidateFormat();
 
-    curr_elem = &elem.Child("m_text_color");
-    m_text_color = Clr(curr_elem->Child("GG::Clr"));
+    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
 
-    curr_elem = &elem.Child("m_font").Child("GG::Font");
-    string font_filename = curr_elem->Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Attribute("value"));
+    string font_filename = elem.Child("m_font").Child("GG::Font").Child("m_font_filename").Text();
+    int pts = lexical_cast<int>(elem.Child("m_font").Child("GG::Font").Child("m_pt_sz").Text());
     m_font = App::GetApp()->GetFont(font_filename, pts);
 
-    curr_elem = &elem.Child("m_fit_to_text");
-    m_fit_to_text = lexical_cast<bool>(curr_elem->Attribute("value"));
+    m_fit_to_text = lexical_cast<bool>(elem.Child("m_fit_to_text").Text());
 
     if (m_font) {
         Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientDimensions().x, m_line_data, true);
@@ -123,24 +126,32 @@ XMLElement TextControl::XMLEncode() const
     XMLElement retval("GG::TextControl");
     retval.AppendChild(Control::XMLEncode());
 
-    XMLElement temp;
+    string format_str;
+    if (!m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_NONE) + " ";
+    if (TF_VCENTER & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_VCENTER) + " ";
+    if (TF_TOP & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_TOP) + " ";
+    if (TF_BOTTOM & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_BOTTOM) + " ";
+    if (TF_CENTER & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_CENTER) + " ";
+    if (TF_LEFT & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LEFT) + " ";
+    if (TF_RIGHT & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_RIGHT) + " ";
+    if (TF_WORDBREAK & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_WORDBREAK) + " ";
+    if (TF_LINEWRAP & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LINEWRAP) + " ";
+    retval.AppendChild(XMLElement("m_format", format_str));
 
-    temp = XMLElement("m_format");
-    temp.SetAttribute("value", lexical_cast<string>(m_format));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
+    retval.AppendChild(XMLElement("m_fit_to_text", lexical_cast<string>(m_fit_to_text)));
+    return retval;
+}
 
-    temp = XMLElement("m_text_color");
-    temp.AppendChild(m_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_font");
-    temp.AppendChild(m_font->XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_fit_to_text");
-    temp.SetAttribute("value", lexical_cast<string>(m_fit_to_text));
-    retval.AppendChild(temp);
-
+XMLElementValidator TextControl::XMLValidator() const
+{
+    XMLElementValidator retval("GG::TextControl");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_format", new ListValidator<GG::TextFormat>()));
+    retval.AppendChild(XMLElementValidator("m_text_color", m_text_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_font", m_font->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_fit_to_text", new Validator<bool>()));
     return retval;
 }
 

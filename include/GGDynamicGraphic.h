@@ -109,6 +109,8 @@ public:
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a DynamicGraphic object
 
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
+
     StoppedSignalType&   StoppedSignal() const  {return m_stopped_sig;}    ///< returns the stopped signal object for this DynamicGraphic
     EndFrameSignalType&  EndFrameSignal() const {return m_end_frame_sig;}  ///< returns the end-frame signal object for this DynamicGraphic
     //@}

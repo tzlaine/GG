@@ -54,6 +54,7 @@ struct Clr
     bool operator==(const Clr& rhs) {return i == rhs.i;} ///< returns true iff *this and rhs are identical
 
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Clr
+    XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Clr
     //@}
    
     union {

@@ -107,6 +107,8 @@ public:
     int   Length() const                   {return Control::m_text.length();}  ///< returns length of text string
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a TextControl object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
    
     /** \name Mutators */ //@{

@@ -81,6 +81,8 @@ public:
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an Edit object
 
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
+
     EditedSignalType&       EditedSignal() const      {return m_edited_sig;}        ///< returns the edited signal object for this Edit
     FocusUpdateSignalType&  FocusUpdateSignal() const {return m_focus_update_sig;}  ///< returns the focus update signal object for this Edit
     //@}

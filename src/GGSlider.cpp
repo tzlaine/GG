@@ -25,25 +25,27 @@
 /* $Header$ */
 
 #include "GGSlider.h"
-#include "GGButton.h"
-#include "GGDrawUtil.h"
-#include "GGApp.h"
+
+#include <GGApp.h>
+#include <GGButton.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
 Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color,
                int tab_width, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
-        Control(x, y, w, h, flags),
-        m_posn(min),
-        m_range_min(min),
-        m_range_max(max),
-        m_orientation(orientation),
-        m_line_width(line_width),
-        m_tab_width(tab_width),
-        m_line_style(style),
-        m_tab_drag_offset(-1),
-        m_tab(new Button(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
-                         m_orientation == VERTICAL ? m_tab_width : Height(), "", "", 0, color))
+    Control(x, y, w, h, flags),
+    m_posn(min),
+    m_range_min(min),
+    m_range_max(max),
+    m_orientation(orientation),
+    m_line_width(line_width),
+    m_tab_width(tab_width),
+    m_line_style(style),
+    m_tab_drag_offset(-1),
+    m_tab(new Button(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
+		     m_orientation == VERTICAL ? m_tab_width : Height(), "", "", 0, color))
 {
     SetColor(color);
     SizeMove(UpperLeft(), LowerRight());
@@ -51,16 +53,16 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
 
 Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color,
                Button* tab/* = 0*/, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
-Control(x, y, w, h, flags),
-m_posn(min),
-m_range_min(min),
-m_range_max(max),
-m_orientation(orientation),
-m_line_width(line_width),
-m_tab_width(-1),
-m_line_style(style),
-m_tab_drag_offset(-1),
-m_tab(tab)
+    Control(x, y, w, h, flags),
+    m_posn(min),
+    m_range_min(min),
+    m_range_max(max),
+    m_orientation(orientation),
+    m_line_width(line_width),
+    m_tab_width(-1),
+    m_line_style(style),
+    m_tab_drag_offset(-1),
+    m_tab(tab)
 {
     SetColor(color);
     if (!m_tab)
@@ -70,36 +72,21 @@ m_tab(tab)
 }
 
 Slider::Slider(const XMLElement& elem) :
-        Control(elem.Child("GG::Control")),
-        m_tab_drag_offset(-1)
+    Control(elem.Child("GG::Control")),
+    m_tab_drag_offset(-1)
 {
     if (elem.Tag() != "GG::Slider")
         throw std::invalid_argument("Attempted to construct a GG::Slider from an XMLElement that had a tag other than \"GG::Slider\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_posn");
-    m_posn = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_posn = lexical_cast<int>(elem.Child("m_posn").Text());
+    m_range_min = lexical_cast<int>(elem.Child("m_range_min").Text());
+    m_range_max = lexical_cast<int>(elem.Child("m_range_max").Text());
+    m_orientation = lexical_cast<Orientation>(elem.Child("m_orientation").Text());
+    m_line_width = lexical_cast<int>(elem.Child("m_line_width").Text());
+    m_tab_width = lexical_cast<int>(elem.Child("m_tab_width").Text());
+    m_line_style = lexical_cast<LineStyleType>(elem.Child("m_line_style").Text());
 
-    curr_elem = &elem.Child("m_range_min");
-    m_range_min = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_range_max");
-    m_range_max = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_orientation");
-    m_orientation = Orientation(lexical_cast<int>(curr_elem->Attribute("value")));
-
-    curr_elem = &elem.Child("m_line_width");
-    m_line_width = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_tab_width");
-    m_tab_width = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_line_style");
-    m_line_style = LineStyleType(lexical_cast<int>(curr_elem->Attribute("value")));
-
-    curr_elem = &elem.Child("m_tab");
-    Wnd* w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
-    if (Button* b = dynamic_cast<Button*>(w))
+    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_tab").Child(0))))
         m_tab.reset(b);
     else
         throw std::runtime_error("Slider::Slider : Attempted to use a non-Button object as the tab for a GG::Slider.");
@@ -111,41 +98,29 @@ XMLElement Slider::XMLEncode() const
 {
     XMLElement retval("GG::Slider");
     retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_posn", lexical_cast<string>(m_posn)));
+    retval.AppendChild(XMLElement("m_range_min", lexical_cast<string>(m_range_min)));
+    retval.AppendChild(XMLElement("m_range_max", lexical_cast<string>(m_range_max)));
+    retval.AppendChild(XMLElement("m_orientation", lexical_cast<string>(m_orientation)));
+    retval.AppendChild(XMLElement("m_line_width", lexical_cast<string>(m_line_width)));
+    retval.AppendChild(XMLElement("m_tab_width", lexical_cast<string>(m_tab_width)));
+    retval.AppendChild(XMLElement("m_line_style", lexical_cast<string>(m_line_style)));
+    retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
+    return retval;
+}
 
-    XMLElement temp;
-
-    temp = XMLElement("m_posn");
-    temp.SetAttribute("value", lexical_cast<string>(m_posn));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_range_min");
-    temp.SetAttribute("value", lexical_cast<string>(m_range_min));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_range_max");
-    temp.SetAttribute("value", lexical_cast<string>(m_range_max));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_orientation");
-    temp.SetAttribute("value", lexical_cast<string>(m_orientation));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_line_width");
-    temp.SetAttribute("value", lexical_cast<string>(m_line_width));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_tab_width");
-    temp.SetAttribute("value", lexical_cast<string>(m_tab_width));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_line_style");
-    temp.SetAttribute("value", lexical_cast<string>(m_line_style));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_tab");
-    temp.AppendChild(m_tab->XMLEncode());
-    retval.AppendChild(temp);
-
+XMLElementValidator Slider::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Slider");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_posn", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_range_min", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_range_max", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_orientation", new MappedEnumValidator<Orientation>()));
+    retval.AppendChild(XMLElementValidator("m_line_width", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_tab_width", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_line_style", new MappedEnumValidator<LineStyleType>()));
+    retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
     return retval;
 }
 
@@ -153,17 +128,17 @@ int Slider::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-    int tab_width = m_tab->Width();
+    int tab_width = m_orientation == VERTICAL ? m_tab->Height() : m_tab->Width();
     int x_start, x_end, y_start, y_end;
     if (m_orientation == VERTICAL) {
-        x_start = (lr.x + ul.x) / 2 - m_line_width / 2;
+        x_start = ((lr.x + ul.x) - m_line_width) / 2;
         x_end   = x_start + m_line_width;
         y_start = ul.y + tab_width / 2;
-        y_end   = lr.y - (tab_width - tab_width / 2);
+        y_end   = lr.y - tab_width / 2;
     } else {
         x_start = ul.x + tab_width / 2;
-        x_end   = lr.x - (tab_width - tab_width / 2);
-        y_start = (lr.y + ul.y) / 2 - m_line_width / 2;
+        x_end   = lr.x - tab_width / 2;
+        y_start = ((lr.y + ul.y) - m_line_width) / 2;
         y_end   = y_start + m_line_width;
     }
     switch (m_line_style) {

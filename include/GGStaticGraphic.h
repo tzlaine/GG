@@ -64,6 +64,8 @@ public:
     void     SetStyle(Uint32 style)  {m_style = style; ValidateStyle();} ///< sets the style flags, and perfroms sanity checking \see StaticGraphicStyle
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticGraphic object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
 
 private:

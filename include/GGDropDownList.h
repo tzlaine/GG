@@ -93,10 +93,12 @@ public:
     int            NumCols() const            {return m_LB->NumCols();}     ///< returns the total number of columns in each list item
     int            SortCol() const            {return m_LB->SortCol();}     ///< returns the index of the column used to sort items, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
     int            ColWidth(int n) const      {return m_LB->ColWidth(n);}   ///< returns the width of column \a n in pixels; not range-checked
-    Uint32         ColAlignment(int n) const  {return m_LB->ColAlignment(n);}///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    Uint32         RowAlignment(int n) const  {return m_LB->RowAlignment(n);}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    ListBoxStyle   ColAlignment(int n) const  {return m_LB->ColAlignment(n);}///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
+    ListBoxStyle   RowAlignment(int n) const  {return m_LB->RowAlignment(n);}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an DropDownList object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     SelChangedSignalType& SelChangedSignal() const {return m_sel_changed_sig;}///< returns the selection change signal object for this DropDownList
     //@}
@@ -122,9 +124,9 @@ public:
     void           SetColWidth(int n, int w)  {m_LB->SetColWidth(n, w);} ///< sets the width of column \n to \a w; not range-checked
     void           LockColWidths()            {m_LB->LockColWidths();}   ///< fixes the column widths; by default, an empty list will take on the number of columns of its first added row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called.
     void           UnLockColWidths()          {m_LB->UnLockColWidths();} ///< allows the number of columns to be determined by the first row added to an empty ListBox
-    void           SetColAlignment(int n, Uint32 align) 
+    void           SetColAlignment(int n, ListBoxStyle align) 
                                               {m_LB->SetColAlignment(n, align);} ///< sets the alignment of column \a n to \a align; not range-checked
-    void           SetRowAlignment(int n, Uint32 align) 
+    void           SetRowAlignment(int n, ListBoxStyle align) 
                                               {m_LB->SetRowAlignment(n, align);} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
     //@}
 

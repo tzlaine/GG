@@ -56,6 +56,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
+    Button(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
     Button(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
     Button(const XMLElement& elem); ///< ctor that constructs a Button object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Button object
     //@}
@@ -70,6 +71,8 @@ public:
     void              SetRolloverGraphic(const SubTexture& st)  {m_rollover_graphic = st;}    ///< sets a SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Button object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     ClickedSignalType& ClickedSignal() const                    {return m_clicked_sig;} ///< returns the clicked signal object for this Button
     //@}
@@ -108,6 +111,17 @@ private:
 };
 
 
+// define EnumMap and stream operators for Button::ButtonState
+ENUM_MAP_BEGIN(Button::ButtonState)
+    ENUM_MAP_INSERT(Button::BN_PRESSED)
+    ENUM_MAP_INSERT(Button::BN_UNPRESSED)
+    ENUM_MAP_INSERT(Button::BN_ROLLOVER)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Button::ButtonState)
+ENUM_STREAM_OUT(Button::ButtonState)
+
+
 
 /** This is a basic state button control.
     This class is for checkboxes and radio buttons, etc.  The button/checkbox area can be provided via the bn_* contructor
@@ -138,6 +152,9 @@ public:
     //@}
 
     /** \name Structors */ //@{
+    StateButton(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Uint32 text_fmt, 
+                Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
+                int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
     StateButton(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
@@ -150,6 +167,8 @@ public:
     StateButtonStyle Style() const                  {return m_style;}      ///< returns the visual style of the button \see StateButtonStyle
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     CheckedSignalType& CheckedSignal() const        {return m_checked_sig;} ///< returns the checked signal object for this StaticButton
     //@}
@@ -176,6 +195,8 @@ protected:
     //@}
 
 private:
+    void Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int bn_w, int bn_h);
+
     bool              m_checked;     ///< true when this button in a checked, active state
     Clr               m_int_color;   ///< color inside border
     StateButtonStyle  m_style;       ///< style of appearance to use when rendering button
@@ -186,6 +207,19 @@ private:
    
     mutable CheckedSignalType m_checked_sig;
 };
+
+
+// define EnumMap and stream operators for Button::ButtonState
+ENUM_MAP_BEGIN(StateButton::StateButtonStyle)
+    ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_XBOX)
+    ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_CHECKBOX)
+    ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_RADIO)
+    ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_BUTTON)
+    ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_ROUND_BUTTON)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(StateButton::StateButtonStyle)
+ENUM_STREAM_OUT(StateButton::StateButtonStyle)
 
 
 
@@ -210,7 +244,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    RadioButtonGroup(int x, int y) : Control(x, y, 1, 1), m_checked_button(-1) {} ///< ctor
+    RadioButtonGroup(int x, int y) : Control(x, y, 10, 10), m_checked_button(-1) {} ///< ctor
     RadioButtonGroup(const XMLElement& elem); ///< ctor that constructs a StateButton object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a RadioButtonGroup object
     //@}
 
@@ -222,6 +256,8 @@ public:
     int              CheckedButton() const   {return m_checked_button;}
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     ButtonChangedSignalType& ButtonChangedSignal() const {return m_button_changed_sig;} ///< returns the button changed signal object for this RadioButtonGroup
     //@}

@@ -29,34 +29,40 @@
 #define _GGSpin_h_
 
 #ifndef _GGEdit_h_
-#include "GGEdit.h"
+#include <GGEdit.h>
 #endif
 
 #ifndef _GGButton_h_
-#include "GGButton.h"
+#include <GGButton.h>
 #endif
 
 #ifndef _GGApp_h_
-#include "GGApp.h"
+#include <GGApp.h>
 #endif
 
 #ifndef _GGDrawUtil_h_
-#include "GGDrawUtil.h"
+#include <GGDrawUtil.h>
 #endif
+
+#ifndef _XMLValidators_h_
+#include <XMLValidators.h>
+#endif
+
 
 #include <limits>
 
 namespace GG {
 
-// forward declaration of details::mod and details::div
-namespace details {
+// forward declaration of spin_details::mod and spin_details::div
+namespace spin_details {
 template <class T> T mod(T, T);
 template <class T> T div(T, T);
 }
 
+
 /** a spin box control.  This control class is templated so that arbitrary data types can be used with Spin.  All the 
     built-in numeric types are supported by the code here.  If you want to use some other type, such as an enum type,
-    you need to define operator+(), operator-(), and template specializations of details::mod() and details::div().  
+    you need to define operator+(), operator-(), and template specializations of spin_details::mod() and spin_details::div().  
     Spin controls are optionally directly editable by the user.  When the user inputs a value that is not valid for the
     Spin's parameters (not on a step boundary, or outside the allowed range), the input gets locked to the nearest
     valid value.  The user is responsible for selecting a min, max, and step size that make sense.  For instance, 
@@ -98,8 +104,8 @@ public:
         m_editable(edits),
         m_up_bn(up),
         m_dn_bn(down),
-        m_initial_depressed_area(NONE),
-        m_depressed_area(NONE)
+        m_initial_depressed_area(SR_NONE),
+        m_depressed_area(SR_NONE)
     {
         Init(font, color, text_color, interior, flags);
     }
@@ -116,8 +122,8 @@ public:
         m_editable(edits),
         m_up_bn(up),
         m_dn_bn(down),
-        m_initial_depressed_area(NONE),
-        m_depressed_area(NONE)
+        m_initial_depressed_area(SR_NONE),
+        m_depressed_area(SR_NONE)
     {
         Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
     }
@@ -134,8 +140,8 @@ public:
         m_editable(edits),
         m_up_bn(up),
         m_dn_bn(down),
-        m_initial_depressed_area(NONE),
-        m_depressed_area(NONE)
+        m_initial_depressed_area(SR_NONE),
+        m_depressed_area(SR_NONE)
     {
         Init(font, color, text_color, interior, flags);
     }
@@ -152,8 +158,8 @@ public:
         m_editable(edits),
         m_up_bn(up),
         m_dn_bn(down),
-        m_initial_depressed_area(NONE),
-        m_depressed_area(NONE)
+        m_initial_depressed_area(SR_NONE),
+        m_depressed_area(SR_NONE)
     {
         Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
     }
@@ -162,28 +168,19 @@ public:
         std::invalid_argument if \a elem does not encode a Spin object*/
     Spin(const XMLElement& elem) : 
         Control(elem.Child("GG::Control")),
-        m_initial_depressed_area(NONE),
-        m_depressed_area(NONE)
+        m_initial_depressed_area(SR_NONE),
+        m_depressed_area(SR_NONE)
     {
         if (elem.Tag() != XMLTypeName())
             throw std::invalid_argument("Attempted to construct a " + XMLTypeName() + " from an XMLElement that had a tag other than \"" + XMLTypeName() + "\"");
 
-        const XMLElement* curr_elem = &elem.Child("m_value");
-        m_value = lexical_cast<T>(curr_elem->Attribute("value"));
-   
-        curr_elem = &elem.Child("m_step_size");
-        m_step_size = lexical_cast<T>(curr_elem->Attribute("value"));
-   
-        curr_elem = &elem.Child("m_min_value");
-        m_min_value = lexical_cast<T>(curr_elem->Attribute("value"));
-   
-        curr_elem = &elem.Child("m_max_value");
-        m_max_value = lexical_cast<T>(curr_elem->Attribute("value"));
-   
-        curr_elem = &elem.Child("m_editable");
-        m_editable = lexical_cast<bool>(curr_elem->Attribute("value"));
-   
-        curr_elem = &elem.Child("m_edit");
+        m_value = lexical_cast<T>(elem.Child("m_value").Text());
+        m_step_size = lexical_cast<T>(elem.Child("m_step_size").Text());
+        m_min_value = lexical_cast<T>(elem.Child("m_min_value").Text());
+        m_max_value = lexical_cast<T>(elem.Child("m_max_value").Text());
+        m_editable = lexical_cast<bool>(elem.Child("m_editable").Text());
+
+        const XMLElement* curr_elem = &elem.Child("m_edit");
         m_edit = new Edit(curr_elem->Child("GG::Edit"));
         if (m_editable) {
             AttachChild(m_edit);
@@ -227,47 +224,44 @@ public:
     virtual XMLElement XMLEncode() const
     {
         XMLElement retval(XMLTypeName());
+
         if (m_editable)
-            const_cast<Spin*>(this)->DetachChildren();
+            const_cast<Spin*>(this)->DetachChild(m_edit);
         retval.AppendChild(Control::XMLEncode());
         if (m_editable)
             const_cast<Spin*>(this)->AttachChild(m_edit);
    
-        XMLElement temp;
-   
-        temp = XMLElement("m_value");
-        temp.SetAttribute("value", lexical_cast<string>(m_value));
-        retval.AppendChild(temp);
-   
-        temp = XMLElement("m_step_size");
-        temp.SetAttribute("value", lexical_cast<string>(m_step_size));
-        retval.AppendChild(temp);
-   
-        temp = XMLElement("m_min_value");
-        temp.SetAttribute("value", lexical_cast<string>(m_min_value));
-        retval.AppendChild(temp);
-
-        temp = XMLElement("m_max_value");
-        temp.SetAttribute("value", lexical_cast<string>(m_max_value));
-        retval.AppendChild(temp);
-   
-        temp = XMLElement("m_editable");
-        temp.SetAttribute("value", lexical_cast<string>(m_editable));
-        retval.AppendChild(temp);
-   
-        temp = XMLElement("m_edit");
-        temp.AppendChild(m_edit->XMLEncode());
-        retval.AppendChild(temp);
-   
-        temp = XMLElement("m_up_bn");
-        temp.AppendChild(m_up_bn->XMLEncode());
-        retval.AppendChild(temp);
-   
-        temp = XMLElement("m_dn_bn");
-        temp.AppendChild(m_dn_bn->XMLEncode());
-        retval.AppendChild(temp);
-
+        retval.AppendChild(XMLElement("m_value", lexical_cast<string>(m_value)));
+        retval.AppendChild(XMLElement("m_step_size", lexical_cast<string>(m_step_size)));
+        retval.AppendChild(XMLElement("m_min_value", lexical_cast<string>(m_min_value)));
+        retval.AppendChild(XMLElement("m_max_value", lexical_cast<string>(m_max_value)));
+        retval.AppendChild(XMLElement("m_editable", lexical_cast<string>(m_editable)));
+        retval.AppendChild(XMLElement("m_edit", m_edit->XMLEncode()));
+        retval.AppendChild(XMLElement("m_up_bn", m_up_bn->XMLEncode()));
+        retval.AppendChild(XMLElement("m_dn_bn", m_dn_bn->XMLEncode()));
         return retval;
+    }
+
+    /** creates a Validator object that can validate changes in the XML representation of this object */
+    virtual XMLElementValidator XMLValidator() const
+    {
+	XMLElementValidator retval(XMLTypeName());
+
+        if (m_editable)
+            const_cast<Spin*>(this)->DetachChild(m_edit);
+        retval.AppendChild(Control::XMLValidator());
+        if (m_editable)
+            const_cast<Spin*>(this)->AttachChild(m_edit);
+
+        retval.AppendChild(XMLElementValidator("m_value", new Validator<T>()));
+        retval.AppendChild(XMLElementValidator("m_step_size", new Validator<T>()));
+        retval.AppendChild(XMLElementValidator("m_min_value", new Validator<T>()));
+        retval.AppendChild(XMLElementValidator("m_max_value", new Validator<T>()));
+        retval.AppendChild(XMLElementValidator("m_editable", new Validator<bool>()));
+        retval.AppendChild(XMLElementValidator("m_edit", m_edit->XMLValidator()));
+        retval.AppendChild(XMLElementValidator("m_up_bn", m_up_bn->XMLValidator()));
+        retval.AppendChild(XMLElementValidator("m_dn_bn", m_dn_bn->XMLValidator()));
+	return retval;
     }
 
     ValueChangedSignalType& ValueChangedSignal() const {return m_value_changed_sig;} ///< returns the value changed signal object for this DynamicGraphic
@@ -299,18 +293,18 @@ public:
         if (!Disabled()) {
             Pt ul = UpperLeft();
             if (m_up_bn->InWindow(pt - ul)) {
-                m_initial_depressed_area = UP_BN;
-                m_depressed_area = UP_BN;
+                m_initial_depressed_area = SR_UP_BN;
+                m_depressed_area = SR_UP_BN;
                 m_up_bn->SetState(Button::BN_PRESSED);
                 Incr();
             } else if (m_dn_bn->InWindow(pt - ul)) {
-                m_initial_depressed_area = DN_BN;
-                m_depressed_area = DN_BN;
+                m_initial_depressed_area = SR_DN_BN;
+                m_depressed_area = SR_DN_BN;
                 m_dn_bn->SetState(Button::BN_PRESSED);
                 Decr();
             } else {
-                m_initial_depressed_area = NONE;
-                m_depressed_area = NONE;
+                m_initial_depressed_area = SR_NONE;
+                m_depressed_area = SR_NONE;
             }
         }
         return 1;
@@ -333,14 +327,14 @@ public:
     {
         m_up_bn->SetState(Button::BN_UNPRESSED);
         m_dn_bn->SetState(Button::BN_UNPRESSED);
-        m_initial_depressed_area = NONE;
-        m_depressed_area = NONE;
+        m_initial_depressed_area = SR_NONE;
+        m_depressed_area = SR_NONE;
         return 1;
     }
    
     virtual int LClick(const Pt& pt, Uint32 keys)      {return LButtonUp(pt, keys);}
     virtual int MouseHere(const Pt& pt, Uint32 keys)   {return LButtonUp(pt, keys);}
-    virtual int MouseLeave(const Pt& pt, Uint32 keys)  {m_depressed_area = NONE; return 1;}
+    virtual int MouseLeave(const Pt& pt, Uint32 keys)  {m_depressed_area = SR_NONE; return 1;}
    
     virtual int Keypress(Key key, Uint32 key_mods)
     {
@@ -404,9 +398,9 @@ public:
             m_value = m_max_value;
         } else {
             // if the value supplied does not equal a valid value
-            if (std::abs(details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
+            if (std::abs(spin_details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
                 // find nearest valid value to the one supplied
-                T closest_below = details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
+                T closest_below = spin_details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
                 T closest_above = closest_below + m_step_size;
                 m_value = ((value - closest_below) < (closest_above - value) ? closest_below : closest_above);
             } else {
@@ -422,7 +416,7 @@ public:
     void           SetMinValue(T value)    {m_min_value = value;}  ///< sets the minimum value of the control to \a value
     void           SetMaxValue(T value)    {m_max_value = value;}  ///< sets the maximum value of the control to \a value
    
-    /** turns on or off the mode that allows the user to edit the value in the spinbox directly*/
+    /** turns on or off the mode that allows the user to edit the value in the spinbox directly. */
     void AllowEdits(bool b = true)
     {
         DetachChildren();
@@ -456,14 +450,14 @@ protected:
     enum {BORDER_THICK = 2, PIXEL_MARGIN = 5};
 
     /** the regions of the control that a click may fall within; used to catch clicks on the contained Buttons */
-    enum Region {NONE, UP_BN, DN_BN};
+    enum SpinRegion {SR_NONE, SR_UP_BN, SR_DN_BN};
 
     /** \name Accessors */ //@{
     const shared_ptr<Button>&   UpButton() const    {return m_up_bn;} ///< returns a pointer to the Button control used as this control's up button
     const shared_ptr<Button>&   DownButton() const  {return m_dn_bn;} ///< returns a pointer to the Button control used as this control's down button
 
-    Region  InitialDepressedRegion() const  {return m_initial_depressed_area;}  ///< returns the part of the control originally under cursor in LButtonDown msg
-    Region  DepressedRegion() const         {return m_depressed_area;}          ///< returns the part of the control currently being "depressed" by held-down mouse button
+    SpinRegion  InitialDepressedRegion() const  {return m_initial_depressed_area;}  ///< returns the part of the control originally under cursor in LButtonDown msg
+    SpinRegion  DepressedRegion() const         {return m_depressed_area;}          ///< returns the part of the control currently being "depressed" by held-down mouse button
 
     boost::signals::connection EditConnection() const {return m_edit_connection;} ///< returns the connection to the internal edit control's FocusUpdateSignal() signal
     //@}
@@ -511,15 +505,16 @@ private:
     shared_ptr<Button>   m_up_bn;
     shared_ptr<Button>   m_dn_bn;
 
-    Region   m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
-    Region   m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
+    SpinRegion   m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
+    SpinRegion   m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
    
     boost::signals::connection m_edit_connection;
 
     mutable ValueChangedSignalType m_value_changed_sig;
 };
 
-namespace details {
+
+namespace spin_details {
 // provides a typesafe mod function
 template <class T> inline 
 T mod (T dividend, T divisor) {return dividend % divisor;}
@@ -543,7 +538,7 @@ template <> inline
 double div<double> (double dividend, double divisor) {return std::floor(dividend / divisor);}
 template <> inline 
 long double div<long double> (long double dividend, long double divisor) {return std::floor(dividend / divisor);}
-} // namespace details
+} // namespace spin_details
 
 } // namespace GG
 

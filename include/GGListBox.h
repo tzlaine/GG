@@ -82,7 +82,7 @@ public:
 
         /** \name Structors */ //@{
         Row() : height(0), alignment(LB_VCENTER), indentation(0) {} ///< default ctor
-        Row(const string& data, int ht, Uint32 align = LB_VCENTER, int indent = 0, int rows = 0) : 
+        Row(const string& data, int ht, ListBoxStyle align = LB_VCENTER, int indent = 0, int rows = 0) : 
             vector<Control*>(rows), data_type(data), height(ht), alignment(align), indentation(indent) {} ///< ctor. \a rows is the number of cells the row should have
         Row(const XMLElement& elem);
         virtual ~Row();
@@ -93,6 +93,7 @@ public:
         virtual const string& SortKey(int column) const; ///< returns the string by which this row may be sorted
 
         virtual XMLElement    XMLEncode() const;         ///< constructs an XMLElement from an Row object
+	virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Row
         //@}
 
         /** \name Mutators */ //@{
@@ -107,12 +108,12 @@ public:
 
         string          data_type;     ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
         int             height;        ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
-        Uint32          alignment;     ///< one of LB_TOP, LB_VCENTER, LB_BOTTOM
+        ListBoxStyle    alignment;     ///< one of LB_TOP, LB_VCENTER, LB_BOTTOM
         int             indentation;   ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
         vector<Row*>    sub_rows;      ///< for making multiple-line rows
     };
 
-    /** thrown by a ListBox that does not wish to accept a recevied drop, for whatever reason. This may be throw at any 
+    /** thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any 
         time during the receipt of a drop -- even in a function called by a DroppedSignalType signal. */
     class DontAcceptDropException : public GGException {};
 
@@ -172,12 +173,14 @@ public:
     bool            KeepColWidths() const      {return m_keep_col_widths;}   ///< returns true iff column widths are fixed \see LockColWidths()
     int             SortCol() const;                                         ///< returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
     int             ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
-    Uint32          ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    Uint32          RowAlignment(int n) const  {return m_rows[n]->alignment;}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    ListBoxStyle    ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
+    ListBoxStyle    RowAlignment(int n) const  {return m_rows[n]->alignment;}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
     const set<string>&   
                     AllowedDropTypes() const   {return m_allowed_types;}     ///< returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains "", all drop types are allowed.
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an ListBox object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     ClearedSignalType&       ClearedSignal() const       {return m_cleared_sig;}        ///< returns the cleared signal object for this ListBox
     SelChangedSignalType&    SelChangedSignal() const    {return m_sel_changed_sig;}    ///< returns the selection change signal object for this ListBox
@@ -223,8 +226,8 @@ public:
     void           SetColWidth(int n, int w)  {m_col_widths[n] = w;}        ///< sets the width of column \n to \a w; not range-checked
     void           LockColWidths()            {m_keep_col_widths = true;}   ///< fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called.
     void           UnLockColWidths()          {m_keep_col_widths = false;}  ///< allows the number of columns to be determined by the first row added to an empty ListBox
-    void           SetColAlignment(int n, Uint32 align) {m_col_alignments[n] = align;}  ///< sets the alignment of column \a n to \a align; not range-checked
-    void           SetRowAlignment(int n, Uint32 align) {m_rows[n]->alignment = align;} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
+    void           SetColAlignment(int n, ListBoxStyle align) {m_col_alignments[n] = align;}  ///< sets the alignment of column \a n to \a align; not range-checked
+    void           SetRowAlignment(int n, ListBoxStyle align) {m_rows[n]->alignment = align;} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
     void           AllowDropType(const string& str)     {m_allowed_types.insert(str);}  ///< allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing "" enables all drop types.
     void           DisallowDropType(const string& str)  {m_allowed_types.erase(str);}   ///< disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If "" is still an allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to this function.
     //@}
@@ -286,7 +289,8 @@ private:
     int            m_first_row_shown;  ///< index of row at top of visible area (always 0 for LB_NOSCROLL)
     int            m_first_col_shown;  ///< like above, but index of column at left
     vector<int>    m_col_widths;       ///< the width of each of the columns goes here
-    vector<Uint32> m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
+    vector<ListBoxStyle> 
+                   m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
     int            m_cell_margin;      ///< the amount of space left between each edge of the cell and its contents
 
     Clr            m_int_color;        ///< color painted into the client area of the control

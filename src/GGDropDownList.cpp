@@ -25,9 +25,11 @@
 /* $Header$ */
 
 #include "GGDropDownList.h"
-#include "GGScroll.h"
-#include "GGApp.h"
-#include "GGDrawUtil.h"
+
+#include <GGScroll.h>
+#include <GGApp.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
@@ -37,10 +39,10 @@ class ModalListPicker : public Wnd
 {
 public:
     ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-            Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
-            m_drop_wnd(drop_wnd),
-            m_lb_wnd(lb_wnd),
-            m_old_lb_ul(m_lb_wnd->UpperLeft())
+	Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+	m_drop_wnd(drop_wnd),
+	m_lb_wnd(lb_wnd),
+	m_old_lb_ul(m_lb_wnd->UpperLeft())
     {
         Connect(m_lb_wnd->SelChangedSignal(), &ModalListPicker::LBSelChangedSlot, this);
         m_lb_wnd->OffsetMove(m_drop_wnd->Parent() ? m_drop_wnd->Parent()->UpperLeft() : Pt());
@@ -66,9 +68,9 @@ private:
 
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb/* = 0*/,
                            Uint32 flags/* = CLICKABLE*/) :
-        Control(x, y, w, row_ht, flags),
-        m_current_item_idx(-1),
-        m_LB(lb)
+    Control(x, y, w, row_ht, flags),
+    m_current_item_idx(-1),
+    m_LB(lb)
 {
     if (!m_LB)
         m_LB = new ListBox(x, y, w, drop_ht, color, color, flags);
@@ -81,9 +83,9 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
 
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior,
                            ListBox* lb/* = 0*/, Uint32 flags/* = CLICKABLE*/) :
-        Control(x, y, w, row_ht, flags),
-        m_current_item_idx(-1),
-        m_LB(lb)
+    Control(x, y, w, row_ht, flags),
+    m_current_item_idx(-1),
+    m_LB(lb)
 {
     if (!m_LB)
         m_LB = new ListBox(x, y, w, drop_ht, color, interior, flags);
@@ -95,16 +97,14 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
 }
 
 DropDownList::DropDownList(const XMLElement& elem) :
-        Control(elem.Child("GG::Control"))
+    Control(elem.Child("GG::Control"))
 {
     if (elem.Tag() != "GG::DropDownList")
         throw std::invalid_argument("Attempted to construct a GG::DropDownList from an XMLElement that had a tag other than \"GG::DropDownList\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_current_item_idx");
-    m_current_item_idx = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_current_item_idx = lexical_cast<int>(elem.Child("m_current_item_idx").Text());
 
-    curr_elem = &elem.Child("m_LB");
-    if (ListBox* lb = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))) {
+    if (ListBox* lb = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(elem.Child("m_LB").Child(0)))) {
         m_LB = lb;
     } else {
         throw std::runtime_error("DropDownList::DropDownList : Attempted to use a non-ListBox object as the drop-down list.");
@@ -267,17 +267,17 @@ XMLElement DropDownList::XMLEncode() const
 {
     XMLElement retval("GG::DropDownList");
     retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_current_item_idx", lexical_cast<string>(m_current_item_idx)));
+    retval.AppendChild(XMLElement("m_LB", m_LB->XMLEncode()));
+    return retval;
+}
 
-    XMLElement temp;
-
-    temp = XMLElement("m_current_item_idx");
-    temp.SetAttribute("value", lexical_cast<string>(m_current_item_idx));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_LB");
-    temp.AppendChild(m_LB->XMLEncode());
-    retval.AppendChild(temp);
-
+XMLElementValidator DropDownList::XMLValidator() const
+{
+    XMLElementValidator retval("GG::DropDownList");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_current_item_idx", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_LB", m_LB->XMLValidator()));
     return retval;
 }
 

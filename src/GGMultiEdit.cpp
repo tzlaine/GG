@@ -25,11 +25,48 @@
 /* $Header$ */
 
 #include "GGMultiEdit.h"
-#include "GGApp.h"
-#include "GGScroll.h"
-#include "GGDrawUtil.h"
+ 
+#include <GGApp.h>
+#include <GGScroll.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
+
+namespace {
+struct MultiEditStyleValidator : public ValidatorBase
+{
+    virtual void Validate(const std::string& str) const
+    {
+	vector<string> tokens = Tokenize(str);
+	for (unsigned int i = 0; i < tokens.size(); ++i) {
+	    bool bad_cast = false;
+	    MultiEdit::Styles val1;
+	    try {
+		val1 = boost::lexical_cast<MultiEdit::Styles>(str);
+	    } catch (boost::bad_lexical_cast& e) {
+		bad_cast = true;
+	    }
+
+	    if (bad_cast || val1 == EnumMap<MultiEdit::Styles>::BAD_VALUE) {
+		ListBoxStyle val2 = boost::lexical_cast<ListBoxStyle>(str);
+		if (val2 == EnumMap<ListBoxStyle>::BAD_VALUE || 
+		    (val2 != static_cast<int>(TF_WORDBREAK) && val2 != static_cast<int>(TF_LINEWRAP) && 
+		     val2 != static_cast<int>(TF_LEFT) && val2 != static_cast<int>(TF_CENTER) && 
+		     val2 != static_cast<int>(TF_RIGHT))) {
+		    throw std::runtime_error("MultiEditStyleValidator::Validate() : String \"" + str + "\" does not match any "
+					     "value in the MultiEdit::Styles or ListBoxStyle enumerated types.");
+		}
+	    }
+	}
+    }
+
+    virtual MultiEditStyleValidator *Clone() const
+    {
+        return new MultiEditStyleValidator();
+    }
+};
+}
 
 ////////////////////////////////////////////////
 // GG::MultiEdit
@@ -40,15 +77,15 @@ const int MultiEdit::SCROLL_WIDTH = 14;
 MultiEdit::MultiEdit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color, 
               Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-        Edit(x, y, w, h, str, font, color, text_color, interior, flags),
-        m_style(style),
-        m_cursor_begin(0, 0),
-        m_cursor_end(0, 0),
-        m_first_col_shown(0),
-        m_first_row_shown(0),
-        m_max_lines_history(0),
-        m_vscroll(0),
-        m_hscroll(0)
+    Edit(x, y, w, h, str, font, color, text_color, interior, flags),
+    m_style(style),
+    m_cursor_begin(0, 0),
+    m_cursor_end(0, 0),
+    m_first_col_shown(0),
+    m_first_row_shown(0),
+    m_max_lines_history(0),
+    m_vscroll(0),
+    m_hscroll(0)
 {
     SetColor(color);
     Init();
@@ -57,37 +94,49 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const string& str, const shared
 MultiEdit::MultiEdit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, 
               Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-        Edit(x, y, w, h, str, font_filename, pts, color, text_color, interior, flags),
-        m_style(style),
-        m_cursor_begin(0, 0),
-        m_cursor_end(0, 0),
-        m_first_col_shown(0),
-        m_first_row_shown(0),
-        m_max_lines_history(0),
-        m_vscroll(0),
-        m_hscroll(0)
+    Edit(x, y, w, h, str, font_filename, pts, color, text_color, interior, flags),
+    m_style(style),
+    m_cursor_begin(0, 0),
+    m_cursor_end(0, 0),
+    m_first_col_shown(0),
+    m_first_row_shown(0),
+    m_max_lines_history(0),
+    m_vscroll(0),
+    m_hscroll(0)
 {
     SetColor(color);
     Init();
 }
 
 MultiEdit::MultiEdit(const XMLElement& elem) :
-        Edit(elem.Child("GG::Edit")),
-        m_cursor_begin(0, 0),
-        m_cursor_end(0, 0),
-        m_first_col_shown(0),
-        m_first_row_shown(0),
-        m_vscroll(0),
-        m_hscroll(0)
+    Edit(elem.Child("GG::Edit")),
+    m_style(0),
+    m_cursor_begin(0, 0),
+    m_cursor_end(0, 0),
+    m_first_col_shown(0),
+    m_first_row_shown(0),
+    m_vscroll(0),
+    m_hscroll(0)
 {
     if (elem.Tag() != "GG::MultiEdit")
         throw std::invalid_argument("Attempted to construct a GG::MultiEdit from an XMLElement that had a tag other than \"GG::MultiEdit\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_style");
-    m_style = lexical_cast<Uint32>(curr_elem->Attribute("value"));
+    vector<string> tokens = Tokenize(elem.Child("m_style").Text());
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+	int s = GetEnumMap<Styles>().FromString(tokens[i]);
+	if (s != EnumMap<Styles>::BAD_VALUE) {
+	    m_style |= s;
+	}
+	int lbs = GetEnumMap<ListBoxStyle>().FromString(tokens[i]);
+	if (lbs != EnumMap<ListBoxStyle>::BAD_VALUE || 
+	    (lbs != TF_WORDBREAK && lbs != TF_LINEWRAP && 
+	     lbs != TF_LEFT && lbs != TF_CENTER && lbs != TF_RIGHT)) {
+	    m_style |= lbs;
+	}
+    }
+    ValidateStyle();
 
-    curr_elem = &elem.Child("m_max_lines_history");
-    m_max_lines_history = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_max_lines_history = lexical_cast<int>(elem.Child("m_max_lines_history").Text());
 
     Init();
 }
@@ -534,16 +583,30 @@ XMLElement MultiEdit::XMLEncode() const
     XMLElement retval("GG::MultiEdit");
     retval.AppendChild(Edit::XMLEncode());
 
-    XMLElement temp;
+    string style_str;
+    if (READ_ONLY & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::READ_ONLY) + " ";
+    if (TERMINAL_STYLE & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::TERMINAL_STYLE) + " ";
+    if (INTEGRAL_HEIGHT & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::INTEGRAL_HEIGHT) + " ";
+    if (NO_VSCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_VSCROLL) + " ";
+    if (NO_HSCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_HSCROLL) + " ";
+    if (NO_SCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_SCROLL) + " ";
+    if (TF_WORDBREAK & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_WORDBREAK) + " ";
+    if (TF_LINEWRAP & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LINEWRAP) + " ";
+    if (TF_LEFT & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LEFT) + " ";
+    if (TF_CENTER & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_CENTER) + " ";
+    if (TF_RIGHT & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_RIGHT) + " ";
+    retval.AppendChild(XMLElement("m_style", style_str));
 
-    temp = XMLElement("m_style");
-    temp.SetAttribute("value", lexical_cast<string>(m_style));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_max_lines_history", lexical_cast<string>(m_max_lines_history)));
+    return retval;
+}
 
-    temp = XMLElement("m_max_lines_history");
-    temp.SetAttribute("value", lexical_cast<string>(m_max_lines_history));
-    retval.AppendChild(temp);
-
+XMLElementValidator MultiEdit::XMLValidator() const
+{
+    XMLElementValidator retval("GG::MultiEdit");
+    retval.AppendChild(Edit::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_style", new MultiEditStyleValidator()));
+    retval.AppendChild(XMLElementValidator("m_max_lines_history", new Validator<int>()));
     return retval;
 }
 
@@ -725,7 +788,7 @@ void MultiEdit::Init()
 {
     ValidateStyle();
     SetTextFormat(m_style);
-     SetText(m_text);
+    SetText(m_text);
     SizeMove(UpperLeft(), LowerRight()); // do this to set up the scrolls, and in case INTEGRAL_HEIGHT is in effect
 }
 

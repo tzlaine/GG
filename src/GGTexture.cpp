@@ -25,7 +25,9 @@
 /* $Header$ */
 
 #include "GGTexture.h"
-#include "GGApp.h"
+
+#include <GGApp.h>
+#include <XMLValidators.h>
 
 #include <IL/il.h>
 #include <IL/ilut.h>
@@ -36,57 +38,37 @@ namespace GG {
 // class GG::Texture
 ///////////////////////////////////////
 Texture::Texture() :
-        m_opengl_id(0)
+    m_opengl_id(0)
 {
     Clear();
 }
 
 Texture::Texture(const XMLElement& elem) :
-        m_opengl_id(0)
+    m_opengl_id(0)
 {
     if (elem.Tag() != "GG::Texture")
         throw std::invalid_argument("Attempted to construct a GG::Texture from an XMLElement that had a tag other than \"GG::Texture\"");
 
     Clear();
 
-    const XMLElement* curr_elem = &elem.Child("m_filename");
-    m_filename = curr_elem->Text();
+    m_filename = elem.Child("m_filename").Text();
+    m_bytes_pp = lexical_cast<int>(elem.Child("m_bytes_pp").Text());
+    m_width = lexical_cast<int>(elem.Child("m_width").Text());
+    m_height = lexical_cast<int>(elem.Child("m_height").Text());
+    m_wrap_s = lexical_cast<GLenum>(elem.Child("m_wrap_s").Text());
+    m_wrap_t = lexical_cast<GLenum>(elem.Child("m_wrap_t").Text());
+    m_min_filter = lexical_cast<GLenum>(elem.Child("m_min_filter").Text());
+    m_mag_filter = lexical_cast<GLenum>(elem.Child("m_mag_filter").Text());
+    m_mipmaps = lexical_cast<bool>(elem.Child("m_mipmaps").Text());
 
-    curr_elem = &elem.Child("m_bytes_pp");
-    m_bytes_pp = lexical_cast<int>(curr_elem->Attribute("value"));
+    const XMLElement* curr_elem = &elem.Child("m_tex_coords");
+    m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem->Attribute("u1"));
+    m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem->Attribute("v1"));
+    m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem->Attribute("u2"));
+    m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("v2"));
 
-    curr_elem = &elem.Child("m_width");
-    m_width = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_height");
-    m_height = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_wrap_s");
-    m_wrap_s = lexical_cast<GLenum>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_wrap_t");
-    m_wrap_t = lexical_cast<GLenum>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_min_filter");
-    m_min_filter = lexical_cast<GLenum>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_mag_filter");
-    m_mag_filter = lexical_cast<GLenum>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_mipmaps");
-    m_mipmaps = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_tex_coords");
-    m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem->Attribute("index0"));
-    m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem->Attribute("index1"));
-    m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem->Attribute("index2"));
-    m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("index3"));
-
-    curr_elem = &elem.Child("m_default_width");
-    m_default_width = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_default_height");
-    m_default_height = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_default_width = lexical_cast<int>(elem.Child("m_default_width").Text());
+    m_default_height = lexical_cast<int>(elem.Child("m_default_height").Text());
 
     if (m_filename != "")
         Load(m_filename, m_mipmaps);
@@ -142,58 +124,50 @@ void Texture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
 XMLElement Texture::XMLEncode() const
 {
     XMLElement retval("GG::Texture");
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_filename", m_filename));
+    retval.AppendChild(XMLElement("m_bytes_pp", lexical_cast<string>(m_bytes_pp)));
+    retval.AppendChild(XMLElement("m_width", lexical_cast<string>(m_width)));
+    retval.AppendChild(XMLElement("m_height", lexical_cast<string>(m_height)));
+    retval.AppendChild(XMLElement("m_wrap_s", lexical_cast<string>(m_wrap_s)));
+    retval.AppendChild(XMLElement("m_wrap_t", lexical_cast<string>(m_wrap_t)));
+    retval.AppendChild(XMLElement("m_min_filter", lexical_cast<string>(m_min_filter)));
+    retval.AppendChild(XMLElement("m_mag_filter", lexical_cast<string>(m_mag_filter)));
+    retval.AppendChild(XMLElement("m_mipmaps", lexical_cast<string>(m_mipmaps)));
 
-    temp = XMLElement("m_filename", m_filename);
+    XMLElement temp("m_tex_coords");
+    temp.SetAttribute("u1", lexical_cast<string>(m_tex_coords[0]));
+    temp.SetAttribute("v1", lexical_cast<string>(m_tex_coords[1]));
+    temp.SetAttribute("u2", lexical_cast<string>(m_tex_coords[2]));
+    temp.SetAttribute("v2", lexical_cast<string>(m_tex_coords[3]));
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_bytes_pp");
-    temp.SetAttribute("value", lexical_cast<string>(m_bytes_pp));
+    retval.AppendChild(XMLElement("m_default_width", lexical_cast<string>(m_default_width)));
+    retval.AppendChild(XMLElement("m_default_height", lexical_cast<string>(m_default_height)));
+    return retval;
+}
+
+XMLElementValidator Texture::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Texture");
+    retval.AppendChild(XMLElementValidator("m_filename"));
+    retval.AppendChild(XMLElementValidator("m_bytes_pp", new RangedValidator<int>(1, 4)));
+    retval.AppendChild(XMLElementValidator("m_width", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_height", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_wrap_s", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_wrap_t", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_min_filter", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_mag_filter", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_mipmaps", new Validator<bool>()));
+
+    XMLElementValidator temp("m_tex_coords");
+    temp.SetAttribute("u1", new Validator<float>());
+    temp.SetAttribute("v1", new Validator<float>());
+    temp.SetAttribute("u2", new Validator<float>());
+    temp.SetAttribute("v2", new Validator<float>());
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_width");
-    temp.SetAttribute("value", lexical_cast<string>(m_width));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_height");
-    temp.SetAttribute("value", lexical_cast<string>(m_height));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_wrap_s");
-    temp.SetAttribute("value", lexical_cast<string>(m_wrap_s));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_wrap_t");
-    temp.SetAttribute("value", lexical_cast<string>(m_wrap_t));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_min_filter");
-    temp.SetAttribute("value", lexical_cast<string>(m_min_filter));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_mag_filter");
-    temp.SetAttribute("value", lexical_cast<string>(m_mag_filter));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_mipmaps");
-    temp.SetAttribute("value", lexical_cast<string>(m_mipmaps));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_tex_coords");
-    temp.SetAttribute("index0", lexical_cast<string>(m_tex_coords[0]));
-    temp.SetAttribute("index1", lexical_cast<string>(m_tex_coords[1]));
-    temp.SetAttribute("index2", lexical_cast<string>(m_tex_coords[2]));
-    temp.SetAttribute("index3", lexical_cast<string>(m_tex_coords[3]));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_default_width");
-    temp.SetAttribute("value", lexical_cast<string>(m_default_width));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_default_height");
-    temp.SetAttribute("value", lexical_cast<string>(m_default_height));
-    retval.AppendChild(temp);
-
+    retval.AppendChild(XMLElementValidator("m_default_width", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_default_height", new Validator<int>()));
     return retval;
 }
 
@@ -344,15 +318,15 @@ void Texture::Clear()
 // class GG::SubTexture
 ///////////////////////////////////////
 SubTexture::SubTexture() :
-        m_width(0),
-        m_height(0)
+    m_width(0),
+    m_height(0)
 {
 }
 
 SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
-        m_texture(shared_ptr<const Texture>(texture)),
-        m_width(x2 - x1),
-        m_height(y2 - y1)
+    m_texture(shared_ptr<const Texture>(texture)),
+    m_width(x2 - x1),
+    m_height(y2 - y1)
 {
     if (!m_texture) throw SubTextureException("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw SubTextureException("Attempted to contruct subtexture from invalid coordinates");
@@ -364,9 +338,9 @@ SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
 }
 
 SubTexture::SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
-        m_texture(texture),
-        m_width(x2 - x1),
-        m_height(y2 - y1)
+    m_texture(texture),
+    m_width(x2 - x1),
+    m_height(y2 - y1)
 {
     if (!m_texture) throw SubTextureException("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw SubTextureException("Attempted to contruct subtexture from invalid coordinates");
@@ -378,8 +352,8 @@ SubTexture::SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1,
 }
 
 SubTexture::SubTexture(const XMLElement& elem) :
-        m_width(0),
-        m_height(0)
+    m_width(0),
+    m_height(0)
 {
     if (elem.Tag() != "GG::SubTexture")
         throw std::invalid_argument("Attempted to construct a GG::SubTexture from an XMLElement that had a tag other than \"GG::SubTexture\"");
@@ -404,17 +378,14 @@ SubTexture::SubTexture(const XMLElement& elem) :
     }
 
     if (m_texture) {
-        curr_elem = &elem.Child("m_width");
-        m_width = lexical_cast<int>(curr_elem->Attribute("value"));
-
-        curr_elem = &elem.Child("m_height");
-        m_height = lexical_cast<int>(curr_elem->Attribute("value"));
+        m_width = lexical_cast<int>(elem.Child("m_width").Text());
+        m_height = lexical_cast<int>(elem.Child("m_height").Text());
 
         curr_elem = &elem.Child("m_tex_coords");
-        m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem->Attribute("index0"));
-        m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem->Attribute("index1"));
-        m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem->Attribute("index2"));
-        m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("index3"));
+        m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem->Attribute("u1"));
+        m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem->Attribute("v1"));
+        m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem->Attribute("u2"));
+        m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("v2"));
     }
 }
 
@@ -457,19 +428,36 @@ XMLElement SubTexture::XMLEncode() const
         temp.AppendChild(m_texture->XMLEncode());
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_width");
-    temp.SetAttribute("value", lexical_cast<string>(m_width));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_height");
-    temp.SetAttribute("value", lexical_cast<string>(m_height));
-    retval.AppendChild(temp);
+    retval.AppendChild(XMLElement("m_width", lexical_cast<string>(m_width)));
+    retval.AppendChild(XMLElement("m_height", lexical_cast<string>(m_height)));
 
     temp = XMLElement("m_tex_coords");
-    temp.SetAttribute("index0", lexical_cast<string>(m_tex_coords[0]));
-    temp.SetAttribute("index1", lexical_cast<string>(m_tex_coords[1]));
-    temp.SetAttribute("index2", lexical_cast<string>(m_tex_coords[2]));
-    temp.SetAttribute("index3", lexical_cast<string>(m_tex_coords[3]));
+    temp.SetAttribute("u1", lexical_cast<string>(m_tex_coords[0]));
+    temp.SetAttribute("v1", lexical_cast<string>(m_tex_coords[1]));
+    temp.SetAttribute("u2", lexical_cast<string>(m_tex_coords[2]));
+    temp.SetAttribute("v2", lexical_cast<string>(m_tex_coords[3]));
+    retval.AppendChild(temp);
+
+    return retval;
+}
+
+XMLElementValidator SubTexture::XMLValidator() const
+{
+    XMLElementValidator retval("GG::SubTexture");
+
+    XMLElementValidator temp("m_texture");
+    if (m_texture)
+	temp.AppendChild(m_texture->XMLValidator());
+    retval.AppendChild(temp);
+
+    retval.AppendChild(XMLElementValidator("m_width", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_height", new Validator<int>()));
+
+    temp = XMLElementValidator("m_tex_coords");
+    temp.SetAttribute("u1", new Validator<float>());
+    temp.SetAttribute("v1", new Validator<float>());
+    temp.SetAttribute("u2", new Validator<float>());
+    temp.SetAttribute("v2", new Validator<float>());
     retval.AppendChild(temp);
 
     return retval;

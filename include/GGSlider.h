@@ -59,7 +59,7 @@ public:
     /** \name Structors */ //@{
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab = 0, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-    Slider(const XMLElement& elem); ///< ctor that constructs a Scroll object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Scroll object
+    Slider(const XMLElement& elem); ///< ctor that constructs a Slider object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Slider object
     //@}
 
     /** \name Accessors */ //@{
@@ -71,6 +71,8 @@ public:
     LineStyleType  LineStyle() const    {return m_line_style;}  ///< returns the style of line used to render the control
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     SlidSignalType& SlidSignal() const  {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
     //@}
@@ -120,6 +122,25 @@ private:
 
     mutable SlidSignalType m_slid_sig;
 };
+
+// define EnumMap and stream operators for Slider::Orientation
+ENUM_MAP_BEGIN(Slider::Orientation)
+    ENUM_MAP_INSERT(Slider::VERTICAL)
+    ENUM_MAP_INSERT(Slider::HORIZONTAL)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Slider::Orientation)
+ENUM_STREAM_OUT(Slider::Orientation)
+
+// define EnumMap and stream operators for Slider::LineStyleType
+ENUM_MAP_BEGIN(Slider::LineStyleType)
+    ENUM_MAP_INSERT(Slider::FLAT)
+    ENUM_MAP_INSERT(Slider::RAISED)
+    ENUM_MAP_INSERT(Slider::GROOVED)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Slider::LineStyleType)
+ENUM_STREAM_OUT(Slider::LineStyleType)
 
 } // namespace GG
 

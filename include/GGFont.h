@@ -144,13 +144,13 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    const string&     FontName() const  {return m_font_filename;}  ///< returns the name of the file from which this font was created
-    int               PointSize() const {return m_pt_sz;}          ///< returns the point size in which the characters in the font object are rendered
-    int               GlyphRange() const{return m_glyph_range;}    ///< returns the range(s) of characters rendered in the font \see GlyphRange
-    int               Ascent() const    {return m_ascent;}         ///< returns the maximum amount above the baseline the text can go, in pixels
-    int               Descent() const   {return m_descent;}        ///< returns the maximum amount below the baseline the text can go, in pixels
-    int               Height() const    {return m_height;}         ///< returns (Ascent() - Descent()), in pixels
-    int               Lineskip() const  {return m_lineskip;}       ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
+    const string&     FontName() const     {return m_font_filename;}  ///< returns the name of the file from which this font was created
+    int               PointSize() const    {return m_pt_sz;}          ///< returns the point size in which the characters in the font object are rendered
+    int               GetGlyphRange() const{return m_glyph_range;}    ///< returns the range(s) of characters rendered in the font \see GlyphRange
+    int               Ascent() const       {return m_ascent;}         ///< returns the maximum amount above the baseline the text can go, in pixels
+    int               Descent() const      {return m_descent;}        ///< returns the maximum amount below the baseline the text can go, in pixels
+    int               Height() const       {return m_height;}         ///< returns (Ascent() - Descent()), in pixels
+    int               Lineskip() const     {return m_lineskip;}       ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
     int               SpaceWidth() const{return m_space_width;}    ///< returns the width in pixels of the glyph for the space character
     int               RenderGlyph(const Pt& pt, char c) const {return RenderGlyph(pt.x, pt.y, c);}   ///< renders glyph for \a c and returns advance of glyph rendered
     int               RenderGlyph(int x, int y, char c) const;     ///< renders glyph for \a c and returns advance of glyph rendered
@@ -162,6 +162,7 @@ public:
     Pt                TextExtent(const string& text, Uint32 format = TF_NONE, int box_width = 0, bool tags = false) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Font object
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Font
     //@}
    
     static void       RegisterKnownTag(const string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", <foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
@@ -179,7 +180,7 @@ private:
             sub_texture(texture, x1, y1, x2, y2), left_bearing(lb), advance(adv), width(x2 - x1) {} ///< ctor
 
         SubTexture  sub_texture;   ///< the subtexture containing just this glyph
-        int	        left_bearing;  ///< the space that should remain before the glyph
+        int	    left_bearing;  ///< the space that should remain before the glyph
         int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
         int         width;         ///< the width of the glyph only
     };
@@ -207,6 +208,20 @@ private:
     static set<string>   s_action_tags; ///< embedded tags that Font must act upon when rendering are stored here
     static set<string>   s_known_tags;  ///< embedded tags that Font knows about but should not act upon are stored here
 };
+
+
+// define EnumMap and stream operators for Font::GlyphRange
+ENUM_MAP_BEGIN(Font::GlyphRange)
+    ENUM_MAP_INSERT(Font::NUMBER)
+    ENUM_MAP_INSERT(Font::ALPHA_UPPER)
+    ENUM_MAP_INSERT(Font::ALPHA_LOWER)
+    ENUM_MAP_INSERT(Font::SYMBOL)
+    ENUM_MAP_INSERT(Font::ALL_DEFINED_RANGES)
+    ENUM_MAP_INSERT(Font::ALL_CHARS)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Font::GlyphRange)
+ENUM_STREAM_OUT(Font::GlyphRange)
 
 
 /** This singleton class is essentially a very thin wrapper around a map of Font smart pointers, keyed on font filename/point size pairs.  

@@ -27,9 +27,11 @@
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 
 #include "GGDynamicGraphic.h"
-#include "GGTexture.h"
-#include "GGDrawUtil.h"
-#include "GGApp.h"
+
+#include <GGTexture.h>
+#include <GGDrawUtil.h>
+#include <GGApp.h>
+#include <XMLValidators.h>
 
 #include <cmath>
 
@@ -41,21 +43,21 @@ const double DEFAULT_FPS = 15.0;
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture,
                                Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
-        Control(x, y, w, h, flags),
-        m_margin(margin),
-        m_frame_width(w),
-        m_frame_height(h),
-        m_FPS(DEFAULT_FPS),
-        m_playing(true),
-        m_looping(loop),
-        m_curr_texture(0),
-        m_curr_subtexture(0),
-        m_frames(0),
-        m_curr_frame(0),
-        m_first_frame_time(-1),
-        m_last_frame_time(-1),
-        m_first_frame_idx(0),
-        m_style(style)
+    Control(x, y, w, h, flags),
+    m_margin(margin),
+    m_frame_width(w),
+    m_frame_height(h),
+    m_FPS(DEFAULT_FPS),
+    m_playing(true),
+    m_looping(loop),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(style)
 {
     ValidateStyle();
     SetColor(CLR_WHITE);
@@ -65,21 +67,21 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const shared_ptr<Texture>& texture,
                                Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
-        Control(x, y, w, h, flags),
-        m_margin(margin),
-        m_frame_width(w),
-        m_frame_height(h),
-        m_FPS(DEFAULT_FPS),
-        m_playing(true),
-        m_looping(loop),
-        m_curr_texture(0),
-        m_curr_subtexture(0),
-        m_frames(0),
-        m_curr_frame(0),
-        m_first_frame_time(-1),
-        m_last_frame_time(-1),
-        m_first_frame_idx(0),
-        m_style(style)
+    Control(x, y, w, h, flags),
+    m_margin(margin),
+    m_frame_width(w),
+    m_frame_height(h),
+    m_FPS(DEFAULT_FPS),
+    m_playing(true),
+    m_looping(loop),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(style)
 {
     ValidateStyle();
     SetColor(CLR_WHITE);
@@ -89,21 +91,21 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures,
                                Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
-        Control(x, y, w, h, flags),
-        m_margin(margin),
-        m_frame_width(w),
-        m_frame_height(h),
-        m_FPS(DEFAULT_FPS),
-        m_playing(true),
-        m_looping(loop),
-        m_curr_texture(0),
-        m_curr_subtexture(0),
-        m_frames(0),
-        m_curr_frame(0),
-        m_first_frame_time(-1),
-        m_last_frame_time(-1),
-        m_first_frame_idx(0),
-        m_style(style)
+    Control(x, y, w, h, flags),
+    m_margin(margin),
+    m_frame_width(w),
+    m_frame_height(h),
+    m_FPS(DEFAULT_FPS),
+    m_playing(true),
+    m_looping(loop),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(style)
 {
     ValidateStyle();
     SetColor(CLR_WHITE);
@@ -112,12 +114,13 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
 }
 
 DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
-        Control(elem.Child("GG::Control")),
-        m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Attribute("value"))),
-        m_frame_width(boost::lexical_cast<int>(elem.Child("m_frame_width").Attribute("value"))),
-        m_frame_height(boost::lexical_cast<int>(elem.Child("m_frame_height").Attribute("value"))),
-        m_first_frame_time(-1),
-        m_last_frame_time(-1)
+    Control(elem.Child("GG::Control")),
+    m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Text())),
+    m_frame_width(boost::lexical_cast<int>(elem.Child("m_frame_width").Text())),
+    m_frame_height(boost::lexical_cast<int>(elem.Child("m_frame_height").Text())),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_style(0)
 {
     if (elem.Tag() != "GG::DynamicGraphic")
         throw std::invalid_argument("Attempted to construct a GG::DynamicGraphic from an XMLElement that had a tag other than \"GG::DynamicGraphic\"");
@@ -143,33 +146,23 @@ DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
         } else { // if this is not the case, we're not the first ones to load the texture, so just keep it.
             fs.texture = temp_texture;
         }
-        fs.frames = lexical_cast<int>(curr_elem->Child(i + 1).Attribute("value"));
+        fs.frames = lexical_cast<int>(curr_elem->Child(i + 1).Text());
         m_textures.push_back(fs);
     }
 
-    curr_elem = &elem.Child("m_FPS");
-    m_FPS = lexical_cast<double>(curr_elem->Attribute("value"));
+    m_FPS = lexical_cast<double>(elem.Child("m_FPS").Text());
+    m_playing = lexical_cast<bool>(elem.Child("m_playing").Text());
+    m_looping = lexical_cast<bool>(elem.Child("m_looping").Text());
+    m_frames = lexical_cast<int>(elem.Child("m_frames").Text());
+    m_curr_frame = lexical_cast<int>(elem.Child("m_curr_frame").Text());
+    m_first_frame_idx = lexical_cast<int>(elem.Child("m_first_frame_idx").Text());
+    m_last_frame_idx = lexical_cast<int>(elem.Child("m_last_frame_idx").Text());
 
-    curr_elem = &elem.Child("m_playing");
-    m_playing = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_looping");
-    m_looping = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_frames");
-    m_frames = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_curr_frame");
-    m_curr_frame = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_first_frame_idx");
-    m_first_frame_idx = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_last_frame_idx");
-    m_last_frame_idx = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_style");
-    m_style = lexical_cast<Uint32>(curr_elem->Attribute("value"));
+    vector<string> tokens = Tokenize(elem.Child("m_style").Text());
+    for (unsigned int i = 0; i < tokens.size(); ++i) {
+	m_style |= GetEnumMap<GraphicStyle>().FromString(tokens[i]);
+    }
+    ValidateStyle();
 
     SetFrameIndex(m_curr_frame);
 }
@@ -178,67 +171,64 @@ XMLElement DynamicGraphic::XMLEncode() const
 {
     XMLElement retval("GG::DynamicGraphic");
     retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_margin", lexical_cast<string>(m_margin)));
+    retval.AppendChild(XMLElement("m_frame_width", lexical_cast<string>(m_frame_width)));
+    retval.AppendChild(XMLElement("m_frame_height", lexical_cast<string>(m_frame_height)));
 
-    XMLElement temp;
-
-    temp = XMLElement("m_margin");
-    temp.SetAttribute("value", lexical_cast<string>(m_margin));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_frame_width");
-    temp.SetAttribute("value", lexical_cast<string>(m_frame_width));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_frame_height");
-    temp.SetAttribute("value", lexical_cast<string>(m_frame_height));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_textures");
+    XMLElement temp("m_textures");
     for (unsigned int i = 0; i < m_textures.size(); ++i) {
-        XMLElement local_temp;
-
-        local_temp = XMLElement("texture");
-        local_temp.AppendChild(m_textures[i].texture->XMLEncode());
-        temp.AppendChild(local_temp);
-
-        local_temp = XMLElement("frames");
-        local_temp.SetAttribute("value", lexical_cast<string>(m_textures[i].frames));
-        temp.AppendChild(local_temp);
+        temp.AppendChild(XMLElement("texture", m_textures[i].texture->XMLEncode()));
+        temp.AppendChild(XMLElement("frames", lexical_cast<string>(m_textures[i].frames)));
     }
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_FPS");
-    temp.SetAttribute("value", lexical_cast<string>(m_FPS));
+    retval.AppendChild(XMLElement("m_FPS", lexical_cast<string>(m_FPS)));
+    retval.AppendChild(XMLElement("m_playing", lexical_cast<string>(m_playing)));
+    retval.AppendChild(XMLElement("m_looping", lexical_cast<string>(m_looping)));
+    retval.AppendChild(XMLElement("m_frames", lexical_cast<string>(m_frames)));
+    retval.AppendChild(XMLElement("m_curr_frame", lexical_cast<string>(m_curr_frame)));
+    retval.AppendChild(XMLElement("m_first_frame_idx", lexical_cast<string>(m_first_frame_idx)));
+    retval.AppendChild(XMLElement("m_last_frame_idx", lexical_cast<string>(m_last_frame_idx)));
+
+    string style_str;
+    if (!m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_NONE) + " ";
+    if (GR_VCENTER & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_VCENTER) + " ";
+    if (GR_TOP & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_TOP) + " ";
+    if (GR_BOTTOM & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_BOTTOM) + " ";
+    if (GR_CENTER & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_CENTER) + " ";
+    if (GR_LEFT & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_LEFT) + " ";
+    if (GR_RIGHT & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_RIGHT) + " ";
+    if (GR_FITGRAPHIC & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_FITGRAPHIC) + " ";
+    if (GR_SHRINKFIT & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_SHRINKFIT) + " ";
+    if (GR_PROPSCALE & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_PROPSCALE) + " ";
+    retval.AppendChild(XMLElement("m_style", style_str));
+
+    return retval;
+}
+
+XMLElementValidator DynamicGraphic::XMLValidator() const
+{
+    XMLElementValidator retval("GG::DynamicGraphic");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_margin", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_frame_width", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_frame_height", new Validator<int>()));
+
+    XMLElementValidator temp("m_textures");
+    for (unsigned int i = 0; i < m_textures.size(); ++i) {
+        temp.AppendChild(XMLElementValidator("texture", m_textures[i].texture->XMLValidator()));
+        temp.AppendChild(XMLElementValidator("frames", new Validator<int>()));
+    }
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_playing");
-    temp.SetAttribute("value", lexical_cast<string>(m_playing));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_looping");
-    temp.SetAttribute("value", lexical_cast<string>(m_looping));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_frames");
-    temp.SetAttribute("value", lexical_cast<string>(m_frames));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_curr_frame");
-    temp.SetAttribute("value", lexical_cast<string>(m_curr_frame));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_first_frame_idx");
-    temp.SetAttribute("value", lexical_cast<string>(m_first_frame_idx));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_last_frame_idx");
-    temp.SetAttribute("value", lexical_cast<string>(m_last_frame_idx));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_style");
-    temp.SetAttribute("value", lexical_cast<string>(m_style));
-    retval.AppendChild(temp);
-
+    retval.AppendChild(XMLElementValidator("m_FPS", new Validator<double>()));
+    retval.AppendChild(XMLElementValidator("m_playing", new Validator<bool>()));
+    retval.AppendChild(XMLElementValidator("m_looping", new Validator<bool>()));
+    retval.AppendChild(XMLElementValidator("m_frames", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_curr_frame", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_first_frame_idx", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_last_frame_idx", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_style", new ListValidator<GraphicStyle>()));
     return retval;
 }
 
@@ -288,8 +278,8 @@ int DynamicGraphic::Render()
         Pt window_sz(lr - ul);
         Pt graphic_sz(m_frame_width, m_frame_height);
         Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
-        if (m_style & SG_FITGRAPHIC) {
-            if (m_style & SG_PROPSCALE) {
+        if (m_style & GR_FITGRAPHIC) {
+            if (m_style & GR_PROPSCALE) {
                 double scale_x = window_sz.x / double(graphic_sz.x),
                     scale_y = window_sz.y / double(graphic_sz.y);
                 double scale = (scale_x < scale_y) ? scale_x : scale_y;
@@ -298,8 +288,8 @@ int DynamicGraphic::Render()
             } else {
                 pt2 = window_sz;
             }
-        } else if (m_style & SG_SHRINKFIT) {
-            if (m_style & SG_PROPSCALE) {
+        } else if (m_style & GR_SHRINKFIT) {
+            if (m_style & GR_PROPSCALE) {
                 double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
                     scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
                 double scale = (scale_x < scale_y) ? scale_x : scale_y;
@@ -311,21 +301,21 @@ int DynamicGraphic::Render()
         }
 
         int shift = 0;
-        if (m_style & SG_LEFT) {
+        if (m_style & GR_LEFT) {
             shift = ul.x;
-        } else if (m_style & SG_CENTER) {
+        } else if (m_style & GR_CENTER) {
             shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
-        } else { // m_style & SG_RIGHT
+        } else { // m_style & GR_RIGHT
             shift = lr.x - (pt2.x - pt1.x);
         }
         pt1.x += shift;
         pt2.x += shift;
 
-        if (m_style & SG_TOP) {
+        if (m_style & GR_TOP) {
             shift = ul.y;
-        } else if (m_style & SG_VCENTER) {
+        } else if (m_style & GR_VCENTER) {
             shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
-        } else { // m_style & SG_BOTTOM
+        } else { // m_style & GR_BOTTOM
             shift = lr.y - (pt2.y - pt1.y);
         }
         pt1.y += shift;
@@ -520,6 +510,11 @@ void DynamicGraphic::SetEndFrame(int idx)
         SetFrameIndex(m_last_frame_idx);
 }
 
+void DynamicGraphic::SetStyle(Uint32 style)
+{
+    m_style = style; ValidateStyle();
+}
+
 int DynamicGraphic::FramesInTexture(const Texture* t) const
 {
     int cols = t->DefaultWidth() / (Width() + m_margin);
@@ -530,27 +525,27 @@ int DynamicGraphic::FramesInTexture(const Texture* t) const
 void DynamicGraphic::ValidateStyle()
 {
     int dup_ct = 0;   // duplication count
-    if (m_style & SG_LEFT) ++dup_ct;
-    if (m_style & SG_RIGHT) ++dup_ct;
-    if (m_style & SG_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use SG_CENTER by default
-        m_style &= ~(SG_RIGHT | SG_LEFT);
-        m_style |= SG_CENTER;
+    if (m_style & GR_LEFT) ++dup_ct;
+    if (m_style & GR_RIGHT) ++dup_ct;
+    if (m_style & GR_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GR_CENTER by default
+        m_style &= ~(GR_RIGHT | GR_LEFT);
+        m_style |= GR_CENTER;
     }
     dup_ct = 0;
-    if (m_style & SG_TOP) ++dup_ct;
-    if (m_style & SG_BOTTOM) ++dup_ct;
-    if (m_style & SG_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use SG_VCENTER by default
-        m_style &= ~(SG_TOP | SG_BOTTOM);
-        m_style |= SG_VCENTER;
+    if (m_style & GR_TOP) ++dup_ct;
+    if (m_style & GR_BOTTOM) ++dup_ct;
+    if (m_style & GR_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GR_VCENTER by default
+        m_style &= ~(GR_TOP | GR_BOTTOM);
+        m_style |= GR_VCENTER;
     }
     dup_ct = 0;
-    if (m_style & SG_FITGRAPHIC) ++dup_ct;
-    if (m_style & SG_SHRINKFIT) ++dup_ct;
-    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use SG_SHRINKFIT by default
-        m_style &= ~SG_FITGRAPHIC;
-        m_style |= SG_SHRINKFIT;
+    if (m_style & GR_FITGRAPHIC) ++dup_ct;
+    if (m_style & GR_SHRINKFIT) ++dup_ct;
+    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use GR_SHRINKFIT by default
+        m_style &= ~GR_FITGRAPHIC;
+        m_style |= GR_SHRINKFIT;
     }
 }
 

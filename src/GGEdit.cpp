@@ -25,8 +25,10 @@
 /* $Header$ */
 
 #include "GGEdit.h"
-#include "GGApp.h"
-#include "GGDrawUtil.h"
+
+#include <GGApp.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
@@ -38,58 +40,58 @@ const int Edit::PIXEL_MARGIN = 5;
 
 Edit::Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-        TextControl(x, y, w, h, str, font, TF_LEFT, text_color, flags),
-        m_cursor_pos(0, 0),
-        m_first_char_shown(0),
-        m_int_color(interior),
-        m_hilite_color(CLR_SHADOW),
-        m_sel_text_color(CLR_WHITE),
-        m_previous_text(str)
+    TextControl(x, y, w, h, str, font, TF_LEFT, text_color, flags),
+    m_cursor_pos(0, 0),
+    m_first_char_shown(0),
+    m_int_color(interior),
+    m_hilite_color(CLR_SHADOW),
+    m_sel_text_color(CLR_WHITE),
+    m_previous_text(str)
 {
     SetColor(color);
 }
 
 Edit::Edit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-        TextControl(x, y, w, h, str, font_filename, pts, TF_LEFT, text_color, flags),
-        m_cursor_pos(0, 0),
-        m_first_char_shown(0),
-        m_int_color(interior),
-        m_hilite_color(CLR_SHADOW),
-        m_sel_text_color(CLR_WHITE),
-        m_previous_text(str)
+    TextControl(x, y, w, h, str, font_filename, pts, TF_LEFT, text_color, flags),
+    m_cursor_pos(0, 0),
+    m_first_char_shown(0),
+    m_int_color(interior),
+    m_hilite_color(CLR_SHADOW),
+    m_sel_text_color(CLR_WHITE),
+    m_previous_text(str)
 {
     SetColor(color);
 }
 
 Edit::Edit(int x, int y, int w, const string& str, const shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-        TextControl(x, y, w, font->Height() + 2 * PIXEL_MARGIN, str, font, TF_LEFT, text_color, flags),
-        m_cursor_pos(0, 0),
-        m_first_char_shown(0),
-        m_int_color(interior),
-        m_hilite_color(CLR_SHADOW),
-        m_sel_text_color(CLR_WHITE),
-        m_previous_text(str)
+    TextControl(x, y, w, font->Height() + 2 * PIXEL_MARGIN, str, font, TF_LEFT, text_color, flags),
+    m_cursor_pos(0, 0),
+    m_first_char_shown(0),
+    m_int_color(interior),
+    m_hilite_color(CLR_SHADOW),
+    m_sel_text_color(CLR_WHITE),
+    m_previous_text(str)
 {
     SetColor(color);
 }
 
 Edit::Edit(int x, int y, int w, const string& str, const string& font_filename, int pts, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-        TextControl(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN, str, font_filename, pts, TF_LEFT, text_color, flags),
-        m_cursor_pos(0, 0),
-        m_first_char_shown(0),
-        m_int_color(interior),
-        m_hilite_color(CLR_SHADOW),
-        m_sel_text_color(CLR_WHITE),
-        m_previous_text(str)
+    TextControl(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN, str, font_filename, pts, TF_LEFT, text_color, flags),
+    m_cursor_pos(0, 0),
+    m_first_char_shown(0),
+    m_int_color(interior),
+    m_hilite_color(CLR_SHADOW),
+    m_sel_text_color(CLR_WHITE),
+    m_previous_text(str)
 {
     SetColor(color);
 }
 
 Edit::Edit(const XMLElement& elem) :
-        TextControl(elem.Child("GG::TextControl"))
+    TextControl(elem.Child("GG::TextControl"))
 {
     if (elem.Tag() != "GG::Edit")
         throw std::invalid_argument("Attempted to construct a GG::Edit from an XMLElement that had a tag other than \"GG::Edit\"");
@@ -98,17 +100,10 @@ Edit::Edit(const XMLElement& elem) :
     m_cursor_pos.first = lexical_cast<int>(curr_elem->Attribute("first"));
     m_cursor_pos.second = lexical_cast<int>(curr_elem->Attribute("second"));
 
-    curr_elem = &elem.Child("m_first_char_shown");
-    m_first_char_shown = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_int_color");
-    m_int_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_hilite_color");
-    m_hilite_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_sel_text_color");
-    m_sel_text_color = Clr(curr_elem->Child("GG::Clr"));
+    m_first_char_shown = lexical_cast<int>(elem.Child("m_first_char_shown").Text());
+    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
+    m_hilite_color = Clr(elem.Child("m_hilite_color").Child("GG::Clr"));
+    m_sel_text_color = Clr(elem.Child("m_sel_text_color").Child("GG::Clr"));
 
     m_previous_text = WindowText();
 }
@@ -128,29 +123,32 @@ XMLElement Edit::XMLEncode() const
     XMLElement retval("GG::Edit");
     retval.AppendChild(TextControl::XMLEncode());
 
-    XMLElement temp;
-
-    temp = XMLElement("m_cursor_pos");
+    XMLElement temp("m_cursor_pos");
     temp.SetAttribute("first", lexical_cast<string>(m_cursor_pos.first));
     temp.SetAttribute("second", lexical_cast<string>(m_cursor_pos.second));
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_first_char_shown");
-    temp.SetAttribute("value", lexical_cast<string>(m_first_char_shown));
+    retval.AppendChild(XMLElement("m_first_char_shown", lexical_cast<string>(m_first_char_shown)));
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_hilite_color", m_hilite_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_sel_text_color", m_sel_text_color.XMLEncode()));
+    return retval;
+}
+
+XMLElementValidator Edit::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Edit");
+    retval.AppendChild(TextControl::XMLValidator());
+
+    XMLElementValidator temp("m_cursor_pos");
+    temp.SetAttribute("first", new Validator<int>());
+    temp.SetAttribute("second", new Validator<int>());
     retval.AppendChild(temp);
 
-    temp = XMLElement("m_int_color");
-    temp.AppendChild(m_int_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_hilite_color");
-    temp.AppendChild(m_hilite_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_sel_text_color");
-    temp.AppendChild(m_sel_text_color.XMLEncode());
-    retval.AppendChild(temp);
-
+    retval.AppendChild(XMLElementValidator("m_first_char_shown", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_hilite_color", m_hilite_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_sel_text_color", m_sel_text_color.XMLValidator()));
     return retval;
 }
 

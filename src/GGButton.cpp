@@ -25,39 +25,42 @@
 /* $Header$ */
 
 #include "GGButton.h"
-#include "GGApp.h"
-#include "GGDrawUtil.h"
+
+#include <GGApp.h>
+#include <GGDrawUtil.h>
+#include <XMLValidators.h>
 
 namespace GG {
 
 ////////////////////////////////////////////////
 // GG::Button
 ////////////////////////////////////////////////
+Button::Button(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Clr color, 
+	       Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
+    TextControl(x, y, w, h, str, font, TF_NONE, text_color, flags),
+    m_state(BN_UNPRESSED)
+{
+    m_color = color;
+}
+
 Button::Button(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color,
                Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
-        TextControl(x, y, w, h, str, font_filename, pts, TF_NONE, text_color, flags),
-        m_state(BN_UNPRESSED)
+    TextControl(x, y, w, h, str, font_filename, pts, TF_NONE, text_color, flags),
+    m_state(BN_UNPRESSED)
 {
     m_color = color;
 }
 
 Button::Button(const XMLElement& elem) :
-        TextControl(elem.Child("GG::TextControl"))
+    TextControl(elem.Child("GG::TextControl"))
 {
     if (elem.Tag() != "GG::Button")
         throw std::invalid_argument("Attempted to construct a GG::Button from an XMLElement that had a tag other than \"GG::Button\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_state");
-    m_state = ButtonState(lexical_cast<int>(curr_elem->Attribute("value")));
-
-    curr_elem = &elem.Child("m_unpressed_graphic");
-    m_unpressed_graphic = SubTexture(curr_elem->Child("GG::SubTexture"));
-
-    curr_elem = &elem.Child("m_pressed_graphic");
-    m_pressed_graphic = SubTexture(curr_elem->Child("GG::SubTexture"));
-
-    curr_elem = &elem.Child("m_rollover_graphic");
-    m_rollover_graphic = SubTexture(curr_elem->Child("GG::SubTexture"));
+    m_state = lexical_cast<ButtonState>(elem.Child("m_state").Text());
+    m_unpressed_graphic = SubTexture(elem.Child("m_unpressed_graphic").Child("GG::SubTexture"));
+    m_pressed_graphic = SubTexture(elem.Child("m_pressed_graphic").Child("GG::SubTexture"));
+    m_rollover_graphic = SubTexture(elem.Child("m_rollover_graphic").Child("GG::SubTexture"));
 }
 
 int Button::Render()
@@ -82,25 +85,21 @@ XMLElement Button::XMLEncode() const
 {
     XMLElement retval("GG::Button");
     retval.AppendChild(TextControl::XMLEncode());
+    retval.AppendChild(XMLElement("m_state", lexical_cast<string>(m_state)));
+    retval.AppendChild(XMLElement("m_unpressed_graphic", m_unpressed_graphic.XMLEncode()));
+    retval.AppendChild(XMLElement("m_pressed_graphic", m_pressed_graphic.XMLEncode()));
+    retval.AppendChild(XMLElement("m_rollover_graphic", m_rollover_graphic.XMLEncode()));
+    return retval;
+}
 
-    XMLElement temp;
-
-    temp = XMLElement("m_state");
-    temp.SetAttribute("value", lexical_cast<string>(m_state));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_unpressed_graphic");
-    temp.AppendChild(m_unpressed_graphic.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_pressed_graphic");
-    temp.AppendChild(m_pressed_graphic.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_rollover_graphic");
-    temp.AppendChild(m_rollover_graphic.XMLEncode());
-    retval.AppendChild(temp);
-
+XMLElementValidator Button::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Button");
+    retval.AppendChild(TextControl::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_state", new MappedEnumValidator<ButtonState>()));
+    retval.AppendChild(XMLElementValidator("m_unpressed_graphic", m_unpressed_graphic.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_pressed_graphic", m_pressed_graphic.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_rollover_graphic", m_rollover_graphic.XMLValidator()));
     return retval;
 }
 
@@ -168,63 +167,36 @@ void Button::RenderDefault()
 ////////////////////////////////////////////////
 // GG::StateButton
 ////////////////////////////////////////////////
+StateButton::StateButton(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Uint32 text_fmt, 
+			 Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
+			 int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/, Uint32 flags/* = CLICKABLE*/) :
+    TextControl(x, y, w, h, str, font, text_fmt, text_color, flags),
+    m_checked(false),
+    m_int_color(interior),
+    m_style(style),
+    m_button_x(0),
+    m_button_y(0),
+    m_text_x(0),
+    m_text_y(0)
+{
+    Init(w, h, font->PointSize(), color, bn_w, bn_h, bn_x, bn_y);
+}
+
 StateButton::StateButton(int x, int y, int w, int h, const string& str, const string& font_filename,
                          int pts, Uint32 text_fmt, Clr color, Clr text_color/* = CLR_BLACK*/,
                          Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/,
                          Uint32 flags/* = CLICKABLE*/) :
-        TextControl(x, y, w, h, str, font_filename, pts, text_fmt, text_color, flags),
-        m_checked(false),
-        m_int_color(interior),
-        m_style(style),
-        m_button_x(0),
-        m_button_y(0),
-        m_text_x(0),
-        m_text_y(0)
+    TextControl(x, y, w, h, str, font_filename, pts, text_fmt, text_color, flags),
+    m_checked(false),
+    m_int_color(interior),
+    m_style(style),
+    m_button_x(0),
+    m_button_y(0),
+    m_text_x(0),
+    m_text_y(0)
 {
-    m_color = color;
-
-    if (bn_w == -1 || bn_h == -1)       // if one of these is not specified
-        bn_w = bn_h = pts;               // set button width and height to text height
-
-    double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
-    if (bn_x == -1 || bn_y == -1) {
-        Uint32 format = TextFormat();
-        if (format & TF_VCENTER)       // center button vertically
-            bn_y = int((h - bn_h) / 2.0 + 0.5);
-        if (format & TF_TOP) {         // put button at top, text just below
-            bn_y = 0;
-            m_text_y = bn_h;
-        }
-        if (format & TF_BOTTOM) {      // put button at bottom, text just above
-            bn_y = (h - bn_h);
-            m_text_y = int(h - (bn_h * (1 + SPACING)) - GetLineData().size() * GetFont()->Lineskip() + 0.5);
-        }
-
-        if (format & TF_CENTER) {      // center button horizontally
-            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
-                format &= ~TF_CENTER;
-            } else {
-                bn_x = int((w - bn_x) / 2.0 - bn_w / 2.0 + 0.5);
-            }
-        }
-        if (format & TF_LEFT) {        // put button at left, text just to the right
-            bn_x = 0;
-            if (format & TF_VCENTER)
-                m_text_x = int(bn_w * (1 + SPACING) + 0.5);
-        }
-        if (format & TF_RIGHT) {       // put button at right, text just to the left
-            bn_x = (w - bn_w);
-            if (format & TF_VCENTER)
-                m_text_x = int(-bn_w * (1 + SPACING) + 0.5);
-        }
-        SetTextFormat(format);
-    }
-    m_button_x = bn_x;
-    m_button_y = bn_y;
-    m_button_wd = bn_w;
-    m_button_ht = bn_h;
+    Init(w, h, pts, color, bn_w, bn_h, bn_x, bn_y);
 }
 
 StateButton::StateButton(const XMLElement& elem) :
@@ -233,32 +205,15 @@ StateButton::StateButton(const XMLElement& elem) :
     if (elem.Tag() != "GG::StateButton")
         throw std::invalid_argument("Attempted to construct a GG::StateButton from an XMLElement that had a tag other than \"GG::StateButton\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_checked");
-    m_checked = lexical_cast<bool>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_int_color");
-    m_int_color = Clr(curr_elem->Child("GG::Clr"));
-
-    curr_elem = &elem.Child("m_style");
-    m_style = StateButtonStyle(lexical_cast<int>(curr_elem->Attribute("value")));
-
-    curr_elem = &elem.Child("m_button_x");
-    m_button_x = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_button_y");
-    m_button_y = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_button_wd");
-    m_button_wd = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_button_ht");
-    m_button_ht = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_text_x");
-    m_text_x = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_text_y");
-    m_text_y = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_checked = lexical_cast<bool>(elem.Child("m_checked").Text());
+    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
+    m_style = lexical_cast<StateButtonStyle>(elem.Child("m_style").Text());
+    m_button_x = lexical_cast<int>(elem.Child("m_button_x").Text());
+    m_button_y = lexical_cast<int>(elem.Child("m_button_y").Text());
+    m_button_wd = lexical_cast<int>(elem.Child("m_button_wd").Text());
+    m_button_ht = lexical_cast<int>(elem.Child("m_button_ht").Text());
+    m_text_x = lexical_cast<int>(elem.Child("m_text_x").Text());
+    m_text_y = lexical_cast<int>(elem.Child("m_text_y").Text());
 }
 
 
@@ -330,46 +285,79 @@ XMLElement StateButton::XMLEncode() const
 {
     XMLElement retval("GG::StateButton");
     retval.AppendChild(TextControl::XMLEncode());
-
-    XMLElement temp;
-
-    temp = XMLElement("m_checked");
-    temp.SetAttribute("value", lexical_cast<string>(m_checked));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_int_color");
-    temp.AppendChild(m_int_color.XMLEncode());
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_style");
-    temp.SetAttribute("value", lexical_cast<string>(m_style));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_x");
-    temp.SetAttribute("value", lexical_cast<string>(m_button_x));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_y");
-    temp.SetAttribute("value", lexical_cast<string>(m_button_y));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_wd");
-    temp.SetAttribute("value", lexical_cast<string>(m_button_wd));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_button_ht");
-    temp.SetAttribute("value", lexical_cast<string>(m_button_ht));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_text_x");
-    temp.SetAttribute("value", lexical_cast<string>(m_text_x));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_text_y");
-    temp.SetAttribute("value", lexical_cast<string>(m_text_y));
-    retval.AppendChild(temp);
-
+    retval.AppendChild(XMLElement("m_checked", lexical_cast<string>(m_checked)));
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_style", lexical_cast<string>(m_style)));
+    retval.AppendChild(XMLElement("m_button_x", lexical_cast<string>(m_button_x)));
+    retval.AppendChild(XMLElement("m_button_y", lexical_cast<string>(m_button_y)));
+    retval.AppendChild(XMLElement("m_button_wd", lexical_cast<string>(m_button_wd)));
+    retval.AppendChild(XMLElement("m_button_ht", lexical_cast<string>(m_button_ht)));
+    retval.AppendChild(XMLElement("m_text_x", lexical_cast<string>(m_text_x)));
+    retval.AppendChild(XMLElement("m_text_y", lexical_cast<string>(m_text_y)));
     return retval;
+}
+
+XMLElementValidator StateButton::XMLValidator() const
+{
+    XMLElementValidator retval("GG::StateButton");
+    retval.AppendChild(TextControl::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_checked", new Validator<bool>()));
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_style", new MappedEnumValidator<StateButtonStyle>()));
+    retval.AppendChild(XMLElementValidator("m_button_x", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_button_y", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_button_wd", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_button_ht", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_text_x", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_text_y", new Validator<int>()));
+    return retval;
+}
+
+void StateButton::Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int bn_w, int bn_h)
+{
+    m_color = color;
+
+    if (bn_w == -1 || bn_h == -1)       // if one of these is not specified
+        bn_w = bn_h = pts;              // set button width and height to text height
+
+    double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
+    if (bn_x == -1 || bn_y == -1) {
+        Uint32 format = TextFormat();
+        if (format & TF_VCENTER)       // center button vertically
+            bn_y = int((h - bn_h) / 2.0 + 0.5);
+        if (format & TF_TOP) {         // put button at top, text just below
+            bn_y = 0;
+            m_text_y = bn_h;
+        }
+        if (format & TF_BOTTOM) {      // put button at bottom, text just above
+            bn_y = (h - bn_h);
+            m_text_y = int(h - (bn_h * (1 + SPACING)) - GetLineData().size() * GetFont()->Lineskip() + 0.5);
+        }
+
+        if (format & TF_CENTER) {      // center button horizontally
+            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
+                format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
+                format &= ~TF_CENTER;
+            } else {
+                bn_x = int((w - bn_x) / 2.0 - bn_w / 2.0 + 0.5);
+            }
+        }
+        if (format & TF_LEFT) {        // put button at left, text just to the right
+            bn_x = 0;
+            if (format & TF_VCENTER)
+                m_text_x = int(bn_w * (1 + SPACING) + 0.5);
+        }
+        if (format & TF_RIGHT) {       // put button at right, text just to the left
+            bn_x = (w - bn_w);
+            if (format & TF_VCENTER)
+                m_text_x = int(-bn_w * (1 + SPACING) + 0.5);
+        }
+        SetTextFormat(format);
+    }
+    m_button_x = bn_x;
+    m_button_y = bn_y;
+    m_button_wd = bn_w;
+    m_button_ht = bn_h;
 }
 
 
@@ -377,7 +365,7 @@ XMLElement StateButton::XMLEncode() const
 // GG::RadioButtonGroup
 ////////////////////////////////////////////////
 RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
-        Control(elem.Child("GG::Control"))
+    Control(elem.Child("GG::Control"))
 {
     if (elem.Tag() != "GG::RadioButtonGroup")
         throw std::invalid_argument("Attempted to construct a GG::RadioButtonGroup from an XMLElement that had a tag other than \"GG::RadioButtonGroup\"");
@@ -391,8 +379,7 @@ RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
         }
     }
 
-    const XMLElement* curr_elem = &elem.Child("m_checked_button");
-    m_checked_button = lexical_cast<int>(curr_elem->Attribute("value"));
+    m_checked_button = lexical_cast<int>(elem.Child("m_checked_button").Text());
 
     SetCheck(m_checked_button);
 }
@@ -429,11 +416,15 @@ XMLElement RadioButtonGroup::XMLEncode() const
 {
     XMLElement retval("GG::RadioButtonGroup");
     retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_checked_button", lexical_cast<string>(m_checked_button)));
+    return retval;
+}
 
-    XMLElement temp("m_checked_button");
-    temp.SetAttribute("value", lexical_cast<string>(m_checked_button));
-    retval.AppendChild(temp);
-
+XMLElementValidator RadioButtonGroup::XMLValidator() const
+{
+    XMLElementValidator retval("GG::RadioButtonGroup");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_checked_button", new Validator<int>()));
     return retval;
 }
 

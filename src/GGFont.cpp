@@ -25,8 +25,10 @@
 /* $Header$ */
 
 #include "GGFont.h"
-#include "GGApp.h"
-#include "GGBase.h"
+
+#include <GGApp.h>
+#include <GGBase.h>
+#include <XMLValidators.h>
 
 #include <cmath>
 #include <boost/spirit.hpp>
@@ -83,16 +85,16 @@ struct FTLibraryWrapper
 } g_library;
 
 const double ITALICS_SLANT_ANGLE = 12; // degrees
-const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 / 180.0); // factor used to shear glyphs 12 degrees CW from straight up
+const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 / 180.0); // factor used to shear glyphs ITALICS_SLANT_ANGLE degrees CW from straight up
 }
 
 Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
-        m_font_filename(font_filename),
-        m_pt_sz(pts),
-        m_glyph_range(range)
+    m_font_filename(font_filename),
+    m_pt_sz(pts),
+    m_glyph_range(range)
 {
-	if (font_filename != "")
-		Init(font_filename, pts, range);
+    if (font_filename != "")
+	Init(font_filename, pts, range);
 }
 
 Font::Font(const XMLElement& elem)
@@ -100,17 +102,12 @@ Font::Font(const XMLElement& elem)
     if (elem.Tag() != "GG::Font")
         throw std::invalid_argument("Attempted to construct a GG::Font from an XMLElement that had a tag other than \"GG::Font\"");
 
-    const XMLElement* curr_elem = &elem.Child("m_font_filename");
-    string font_filename = curr_elem->Text();
-
-    curr_elem = &elem.Child("m_pt_sz");
-    int pts = lexical_cast<int>(curr_elem->Attribute("value"));
-
-    curr_elem = &elem.Child("m_glyph_range");
-    int range = lexical_cast<int>(curr_elem->Attribute("value"));
+    string font_filename = elem.Child("m_font_filename").Text();
+    int pts = lexical_cast<int>(elem.Child("m_pt_sz").Text());
+    int range = lexical_cast<int>(elem.Child("m_glyph_range").Text());
 
     if (font_filename != "")
-		Init(font_filename, pts, range);
+	Init(font_filename, pts, range);
 }
 
 int Font::RenderGlyph(int x, int y, char c) const
@@ -419,19 +416,18 @@ Pt Font::TextExtent(const string& text, Uint32 format/* = TF_NONE*/, int box_wid
 XMLElement Font::XMLEncode() const
 {
     XMLElement retval("GG::Font");
-    XMLElement temp;
+    retval.AppendChild(XMLElement("m_font_filename", m_font_filename));
+    retval.AppendChild(XMLElement("m_pt_sz", lexical_cast<string>(m_pt_sz)));
+    retval.AppendChild(XMLElement("m_glyph_range", lexical_cast<string>(m_glyph_range)));
+    return retval;
+}
 
-    temp = XMLElement("m_font_filename", m_font_filename);
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_pt_sz");
-    temp.SetAttribute("value", lexical_cast<string>(m_pt_sz));
-    retval.AppendChild(temp);
-
-    temp = XMLElement("m_glyph_range");
-    temp.SetAttribute("value", lexical_cast<string>(m_glyph_range));
-    retval.AppendChild(temp);
-
+XMLElementValidator Font::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Font");
+    retval.AppendChild(XMLElementValidator("m_font_filename"));
+    retval.AppendChild(XMLElementValidator("m_pt_sz", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_glyph_range", new Validator<int>()));
     return retval;
 }
 
@@ -817,8 +813,8 @@ shared_ptr<Font> FontManager::GetFont(const string& font_filename, int pts, Uint
         else
             return (m_rendered_fonts[key] = shared_ptr<Font>(new Font(font_filename, pts, range)));
         // if a font like this has been created, but it doesn't have all the right glyphs, release it and create a new one
-    } else if ((it->second->GlyphRange() & range) != range) {
-        range |= it->second->GlyphRange();
+    } else if ((it->second->GetGlyphRange() & range) != range) {
+        range |= it->second->GetGlyphRange();
         m_rendered_fonts.erase(it);
         return (m_rendered_fonts[key] = shared_ptr<Font>(new Font(font_filename, pts, range)));
     } else { // otherwise, the font we found works, so just return it

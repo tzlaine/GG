@@ -47,6 +47,8 @@ public:
     bool           Disabled() const           {return m_disabled;} ///< returns true if the control is disabled, false otherwise
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Control object
+
+    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
    
     /** \name Mutators */ //@{

@@ -59,6 +59,7 @@ struct Pt
     bool operator>=(const Pt& rhs) const {return x >= rhs.x && y >= rhs.y;} ///< returns true if x and y are both greater than or equal to the corresponding components of \a rhs
    
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Pt
+    XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Pt
     //@}
 
     /** \name Mutators */ //@{
@@ -103,6 +104,7 @@ struct Rect
     bool operator!=(const Rect& rhs) const {return !(*this == rhs);}
 
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Rect
+    XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Rect
     //@}
 
     /** \name Mutators */ //@{

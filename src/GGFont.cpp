@@ -34,6 +34,15 @@
 
 namespace GG {
 
+string RgbaTag(const Clr& c)
+{
+    stringstream stream;
+    stream << "<rgba " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << " " << 
+        static_cast<int>(c.b) << " " << static_cast<int>(c.a) << ">";
+    return stream.str();
+}
+
+
 ///////////////////////////////////////
 // class GG::Font
 ///////////////////////////////////////

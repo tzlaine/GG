@@ -38,6 +38,10 @@
 
 namespace GG {
 
+/** returns a string of the form "<rgba r g b a>" from a Clr object with color channels r, b, g, a.*/
+string RgbaTag(const Clr& c);
+
+
 /** This class creates one or more 16-bpp OpenGL textures that contain rendered text from a requested font file at the 
     requested point size, including only the requested ranges of characters.  
     Once the textures have been created, text is rendered to the display by rendering polygons textured with portions of the 

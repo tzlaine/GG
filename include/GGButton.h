@@ -214,6 +214,9 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    /** returns the number of buttons in this control */
+    int              NumButtons() const      {return m_buttons.size();}
+
     /** returns the index of the currently checked button, or -1 if none are checked */
     int              CheckedButton() const   {return m_checked_button;}
     //@}

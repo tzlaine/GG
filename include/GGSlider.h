@@ -53,42 +53,47 @@ public:
     enum LineStyleType   {FLAT, RAISED, GROOVED};   ///< the rendering styles of the line the tab slides over
 
     /** \name Signal Types */ //@{
-    typedef boost::signal<void (int, int, int)> SlidSignalType; ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
+    typedef boost::signal<void (int, int, int)> SlidSignalType;           ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
+    typedef boost::signal<void (int, int, int)> SlidAndStoppedSignalType; ///< emitted when the slider's tab is stopped after being dragged, the slider is adjusted using the keyboard, or the slider is moved programmatically; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
     //@}
 
     /** \name Slot Types */ //@{
-    typedef SlidSignalType::slot_type SlidSlotType;   ///< type of functor(s) invoked on a SlidSignalType
+    typedef SlidSignalType::slot_type SlidSlotType;           ///< type of functor(s) invoked on a SlidSignalType
+    typedef SlidSignalType::slot_type SlidAndStoppedSlotType; ///< type of functor(s) invoked on a SlidAndStoppedSignalType
     //@}
 
     /** \name Structors */ //@{
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab = 0, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
+    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
     Slider(const XMLElement& elem); ///< ctor that constructs a Slider object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Slider object
     //@}
 
     /** \name Accessors */ //@{
-    int            Posn() const         {return m_posn;}        ///< returns the current tab position
-    pair<int,int>  SliderRange() const  {return pair<int,int>(m_range_min, m_range_max);}  ///< returns the defined possible range of control
+    int            Posn() const          {return m_posn;}        ///< returns the current tab position
+    pair<int,int>  SliderRange() const   {return pair<int,int>(m_range_min, m_range_max);}  ///< returns the defined possible range of control
     Orientation    GetOrientation() const{return m_orientation;} ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
-    int            TabWidth() const     {return m_tab_width;} ///< returns the width of the slider's tab, in pixels
-    int            LineWidth() const    {return m_line_width;} ///< returns the width of the line along which the tab slides, in pixels
-    LineStyleType  LineStyle() const    {return m_line_style;}  ///< returns the style of line used to render the control
+    int            TabWidth() const      {return m_tab_width;} ///< returns the width of the slider's tab, in pixels
+    int            LineWidth() const     {return m_line_width;} ///< returns the width of the line along which the tab slides, in pixels
+    LineStyleType  LineStyle() const     {return m_line_style;}  ///< returns the style of line used to render the control
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    SlidSignalType& SlidSignal() const  {return m_slid_sig;} ///< returns the slid signal object for this DynamicGraphic
+    SlidSignalType& SlidSignal() const {return m_slid_sig;} ///< returns the slid signal object for this Slider
+    SlidAndStoppedSignalType& SlidAndStoppedSignal() const {return m_slid_and_stopped_sig;} ///< returns the slid-and-stopped signal object for this Slider
     //@}
 
     /** \name Mutators */ //@{
     virtual bool   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+    virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   MouseHere(const Pt& pt, Uint32 keys)              {m_tab_drag_offset = -1;}
     virtual void   Keypress(Key key, Uint32 key_mods);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the tab as needed
+    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the control, then resizes the tab as needed
     virtual void   Disable(bool b = true);
 
     void           SizeSlider(int min, int max);                      ///< sets the logical range of the control
@@ -124,7 +129,8 @@ private:
     int                  m_tab_drag_offset;
     shared_ptr<Button>   m_tab;
 
-    mutable SlidSignalType m_slid_sig;
+    mutable SlidSignalType           m_slid_sig;
+    mutable SlidAndStoppedSignalType m_slid_and_stopped_sig;
 };
 
 // define EnumMap and stream operators for Slider::Orientation

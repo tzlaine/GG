@@ -52,22 +52,19 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
 }
 
 Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color,
-               Button* tab/* = 0*/, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
+               Button* tab, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_posn(min),
     m_range_min(min),
     m_range_max(max),
     m_orientation(orientation),
     m_line_width(line_width),
-    m_tab_width(-1),
+    m_tab_width(m_orientation == VERTICAL ? tab->Width() : tab->Height()),
     m_line_style(style),
     m_tab_drag_offset(-1),
     m_tab(tab)
 {
     SetColor(color);
-    if (!m_tab)
-        m_tab.reset(new Button(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
-                               m_orientation == VERTICAL ? m_tab_width : Height(), "", "", 0, color));
     SizeMove(UpperLeft(), LowerRight());
 }
 
@@ -194,6 +191,18 @@ void Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     }
 }
 
+void Slider::LButtonUp(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled() && m_tab_drag_offset != -1)
+        m_slid_and_stopped_sig(m_posn, m_range_min, m_range_max);
+    m_tab_drag_offset = -1;
+}
+
+void Slider::LClick(const Pt& pt, Uint32 keys)
+{
+    LButtonUp(pt, keys);
+}
+
 void Slider::Keypress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
@@ -277,8 +286,10 @@ void Slider::SlideTo(int p)
     else
         m_posn = p;
     MoveTabToPosn();
-    if (m_posn != old_posn)
+    if (m_posn != old_posn) {
         m_slid_sig(m_posn, m_range_min, m_range_max);
+        m_slid_and_stopped_sig(m_posn, m_range_min, m_range_max);
+    }
 }
 
 void Slider::MoveTabToPosn()

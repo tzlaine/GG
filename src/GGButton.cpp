@@ -66,9 +66,6 @@ int Button::Render()
     {
     case BN_PRESSED:
         RenderPressed();
-        OffsetMove(1,1);
-        TextControl::Render();
-        OffsetMove(-1,-1);
         break;
     case BN_UNPRESSED:
     case BN_ROLLOVER:
@@ -76,15 +73,6 @@ int Button::Render()
             RenderUnpressed();
         else
             RenderRollover();
-        // draw text shadow
-        Clr temp = TextColor();  // save original color
-        SetTextColor(CLR_SHADOW); // shadow color
-        OffsetMove(2,2);
-        TextControl::Render();
-        OffsetMove(-2,-2);
-        SetTextColor(temp);    // restore original color
-        // draw text
-        TextControl::Render();
         break;
     }
     return 1;
@@ -124,6 +112,9 @@ void Button::RenderPressed()
     } else {
         RenderDefault();
     }
+    OffsetMove(1,1);
+    TextControl::Render();
+    OffsetMove(-1,-1);
 }
 
 void Button::RenderUnpressed()
@@ -134,6 +125,15 @@ void Button::RenderUnpressed()
     } else {
         RenderDefault();
     }
+    // draw text shadow
+    Clr temp = TextColor();  // save original color
+    SetTextColor(CLR_SHADOW); // shadow color
+    OffsetMove(2,2);
+    TextControl::Render();
+    OffsetMove(-2,-2);
+    SetTextColor(temp);    // restore original color
+    // draw text
+    TextControl::Render();
 }
 
 void Button::RenderRollover()
@@ -144,6 +144,15 @@ void Button::RenderRollover()
     } else {
         RenderDefault();
     }
+    // draw text shadow
+    Clr temp = TextColor();  // save original color
+    SetTextColor(CLR_SHADOW); // shadow color
+    OffsetMove(2,2);
+    TextControl::Render();
+    OffsetMove(-2,-2);
+    SetTextColor(temp);    // restore original color
+    // draw text
+    TextControl::Render();
 }
 
 void Button::RenderDefault()

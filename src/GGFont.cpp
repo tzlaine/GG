@@ -161,9 +161,9 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
     int rows_rendered = 0;
     int y_origin = y1; // default value for TF_TOP
     if (format & TF_BOTTOM)
-        y_origin = y2 - static_cast<int>(line_data->size() * m_lineskip);
+	y_origin = y2 - (static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height;
     else if (format & TF_VCENTER)
-        y_origin = y1 + static_cast<int>(((y2 - y1) - (static_cast<int>((line_data->size())) * m_lineskip)) / 2.0);
+        y_origin = y1 + static_cast<int>(((y2 - y1) - ((static_cast<int>(line_data->size()) - 1) * m_lineskip + m_height)) / 2.0);
     int x = x1, y = y_origin;
     for (std::vector<LineData>::const_iterator cit = line_data->begin(); cit != line_data->end(); ++cit) {
         const LineData& curr_line = *cit;
@@ -600,8 +600,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
                 Uint8*  src_start = glyph_bitmap.buffer;
                 Uint16* dst_start = buffer_vec.back() + y * BUF_WIDTH + x;
 
-                int glyph_ht = face->glyph->metrics.horiBearingY >> 6; // take floor of 26.6-format fixed point value
-                int y_offset = m_lineskip + m_descent - glyph_ht;
+                int y_offset = m_height - 1 + m_descent - face->glyph->bitmap_top;
 
                 for (int row = 0; row < glyph_bitmap.rows; ++row) {
                     Uint8*  src = src_start + row * glyph_bitmap.pitch;
@@ -693,7 +692,7 @@ int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState*
     }
     if (render_state && render_state->draw_underline) {
         double x1 = x;
-        double y1 = y + m_lineskip + m_descent - m_underline_offset;
+	double y1 = y + m_height + m_descent - m_underline_offset;
         double x2 = x1 + glyph.advance;
         double y2 = y1 + m_underline_height;
         glDisable(GL_TEXTURE_2D);

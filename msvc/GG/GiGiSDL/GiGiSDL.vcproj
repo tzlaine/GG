@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\freetype-2.1.7\include&quot;;&quot;C:\log4cpp-0.3.4b\include&quot;;C:\DevIL\include;&quot;C:\boost-1.30.2&quot;;..\..\..\include\net;..\..\..\include\SDL;..\..\..\include\dialogs;..\..\..\include;&quot;C:\SDL-1.2.7\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\freetype-2.1.7\include&quot;;&quot;C:\log4cpp-0.3.4b\include&quot;;C:\DevIL\include;&quot;C:\Boost\include\boost-1_32&quot;;..\..\..\include\net;..\..\..\include\SDL;..\..\..\include\dialogs;..\..\..\include;&quot;C:\SDL-1.2.7\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;GIGI_EXPORTS"
 				RuntimeLibrary="2"
 				ForceConformanceInForLoopScope="TRUE"
@@ -84,7 +84,7 @@
 				AdditionalDependencies="opengl32.lib glu32.lib SDL.lib log4cpp.lib"
 				OutputFile="$(OutDir)/GiGiSDL.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\SDL-1.2.7\lib&quot;;&quot;C:\log4cpp-0.3.4b\msvc6\log4cppDLL\Release&quot;"
+				AdditionalLibraryDirectories="&quot;C:\SDL-1.2.7\lib&quot;;&quot;C:\log4cpp-0.3.4b\msvc6\log4cppDLL\Release&quot;;C:\Boost\lib"
 				GenerateDebugInformation="FALSE"
 				SubSystem="2"
 				OptimizeReferences="2"

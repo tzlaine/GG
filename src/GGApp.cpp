@@ -654,8 +654,10 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         break;}
     case MOUSEWHEEL:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
-        if (curr_wnd_under_cursor && rel.y) // don't send out 0-movement wheel messages
+        // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
+        if (curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2])) {
             curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseWheel, pos, rel.y, key_mods));
+        }
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     default:

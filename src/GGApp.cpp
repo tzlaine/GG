@@ -170,12 +170,10 @@ App::App(App* app, const string& app_name)
     s_impl->log_category.setAppender(appender);
     s_impl->log_category.setAdditivity(true);   // ...but allow the addition of others later
     s_impl->log_category.setPriority(log4cpp::Priority::DEBUG);
-    s_impl->log_category.debug(s_impl->app_name + " logger initialized.");
 }
 
 App::~App()
 {
-    s_impl->log_category.debug("Shutting down " + s_impl->app_name + " logger...");
     log4cpp::Category::shutdown();
 }
 

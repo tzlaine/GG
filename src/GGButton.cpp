@@ -35,14 +35,14 @@ namespace GG {
 ////////////////////////////////////////////////
 Button::Button(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color,
                Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
-        StaticText(x, y, w, h, str, font_filename, pts, TF_NONE, text_color, flags),
+        TextControl(x, y, w, h, str, font_filename, pts, TF_NONE, text_color, flags),
         m_state(BN_UNPRESSED)
 {
     m_color = color;
 }
 
 Button::Button(const XMLElement& elem) :
-        StaticText(elem.Child("GG::StaticText"))
+        TextControl(elem.Child("GG::TextControl"))
 {
     if (elem.Tag() != "GG::Button")
         throw std::invalid_argument("Attempted to construct a GG::Button from an XMLElement that had a tag other than \"GG::Button\"");
@@ -67,7 +67,7 @@ int Button::Render()
     case BN_PRESSED:
         RenderPressed();
         OffsetMove(1,1);
-        StaticText::Render();
+        TextControl::Render();
         OffsetMove(-1,-1);
         break;
     case BN_UNPRESSED:
@@ -77,14 +77,14 @@ int Button::Render()
         else
             RenderRollover();
         // draw text shadow
-        Clr temp = m_text_color;  // save original color
-        m_text_color = CLR_SHADOW; // shadow color
+        Clr temp = TextColor();  // save original color
+        SetTextColor(CLR_SHADOW); // shadow color
         OffsetMove(2,2);
-        StaticText::Render();
+        TextControl::Render();
         OffsetMove(-2,-2);
-        m_text_color = temp;    // restore original color
+        SetTextColor(temp);    // restore original color
         // draw text
-        StaticText::Render();
+        TextControl::Render();
         break;
     }
     return 1;
@@ -93,7 +93,7 @@ int Button::Render()
 XMLElement Button::XMLEncode() const
 {
     XMLElement retval("GG::Button");
-    retval.AppendChild(StaticText::XMLEncode());
+    retval.AppendChild(TextControl::XMLEncode());
 
     XMLElement temp;
 
@@ -164,7 +164,7 @@ StateButton::StateButton(int x, int y, int w, int h, const string& str, const st
                          Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/,
                          Uint32 flags/* = CLICKABLE*/) :
-        StaticText(x, y, w, h, str, font_filename, pts, text_fmt, text_color, flags),
+        TextControl(x, y, w, h, str, font_filename, pts, text_fmt, text_color, flags),
         m_checked(false),
         m_int_color(interior),
         m_style(style),
@@ -178,37 +178,39 @@ StateButton::StateButton(int x, int y, int w, int h, const string& str, const st
     if (bn_w == -1 || bn_h == -1)       // if one of these is not specified
         bn_w = bn_h = pts;               // set button width and height to text height
 
-    double SPACING = 0.5f; // the space to leave between the button and text, as a factor of the button's size (width or height)
+    double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
     if (bn_x == -1 || bn_y == -1) {
-        if (m_format & TF_VCENTER)       // center button vertically
-            bn_y = int((h - bn_h) / 2.0f + 0.5f);
-        if (m_format & TF_TOP) {         // put button at top, text just below
+        Uint32 format = TextFormat();
+        if (format & TF_VCENTER)       // center button vertically
+            bn_y = int((h - bn_h) / 2.0 + 0.5);
+        if (format & TF_TOP) {         // put button at top, text just below
             bn_y = 0;
             m_text_y = bn_h;
         }
-        if (m_format & TF_BOTTOM) {      // put button at bottom, text just above
+        if (format & TF_BOTTOM) {      // put button at bottom, text just above
             bn_y = (h - bn_h);
-            m_text_y = int(h - (bn_h * (1 + SPACING)) - TextImage::DefaultHeight() + 0.5f);
+            m_text_y = int(h - (bn_h * (1 + SPACING)) - GetLineData().size() * GetFont()->Lineskip() + 0.5);
         }
 
-        if (m_format & TF_CENTER) {      // center button horizontally
-            if (m_format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                m_format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
-                m_format &= ~TF_CENTER;
+        if (format & TF_CENTER) {      // center button horizontally
+            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
+                format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
+                format &= ~TF_CENTER;
             } else {
-                bn_x = int((w - bn_x) / 2.0f - bn_w / 2.0f + 0.5f);
+                bn_x = int((w - bn_x) / 2.0 - bn_w / 2.0 + 0.5);
             }
         }
-        if (m_format & TF_LEFT) {        // put button at left, text just to the right
+        if (format & TF_LEFT) {        // put button at left, text just to the right
             bn_x = 0;
-            if (m_format & TF_VCENTER)
-                m_text_x = int(bn_w * (1 + SPACING) + 0.5f);
+            if (format & TF_VCENTER)
+                m_text_x = int(bn_w * (1 + SPACING) + 0.5);
         }
-        if (m_format & TF_RIGHT) {       // put button at right, text just to the left
+        if (format & TF_RIGHT) {       // put button at right, text just to the left
             bn_x = (w - bn_w);
-            if (m_format & TF_VCENTER)
-                m_text_x = int(-bn_w * (1 + SPACING) + 0.5f);
+            if (format & TF_VCENTER)
+                m_text_x = int(-bn_w * (1 + SPACING) + 0.5);
         }
+        SetTextFormat(format);
     }
     m_button_x = bn_x;
     m_button_y = bn_y;
@@ -217,7 +219,7 @@ StateButton::StateButton(int x, int y, int w, int h, const string& str, const st
 }
 
 StateButton::StateButton(const XMLElement& elem) :
-        StaticText(elem.Child("GG::StaticText"))
+        TextControl(elem.Child("GG::TextControl"))
 {
     if (elem.Tag() != "GG::StateButton")
         throw std::invalid_argument("Attempted to construct a GG::StateButton from an XMLElement that had a tag other than \"GG::StateButton\"");
@@ -302,7 +304,7 @@ int StateButton::Render()
     }
 
     OffsetMove(m_text_x, m_text_y);
-    StaticText::Render();
+    TextControl::Render();
     OffsetMove(-m_text_x, -m_text_y);
 
     return 1;
@@ -318,7 +320,7 @@ int StateButton::LClick(const Pt& pt, Uint32 keys)
 XMLElement StateButton::XMLEncode() const
 {
     XMLElement retval("GG::StateButton");
-    retval.AppendChild(StaticText::XMLEncode());
+    retval.AppendChild(TextControl::XMLEncode());
 
     XMLElement temp;
 

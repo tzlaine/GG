@@ -346,8 +346,8 @@ void MenuBar::AdjustLayout()
 {
     // create any needed labels
     for (unsigned int i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
-        m_menu_labels.push_back(new StaticText(0, 0, m_menu_data.next_level[i].label, m_font->FontName(), m_font->PointSize(), m_text_color));
-        m_menu_labels.back()->Resize(m_menu_labels.back()->Wnd::Width() + 2 * MENU_SEPARATION, m_font->Lineskip());
+        m_menu_labels.push_back(new TextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));
+        m_menu_labels.back()->Resize(m_menu_labels.back()->Width() + 2 * MENU_SEPARATION, m_font->Lineskip());
         AttachChild(m_menu_labels.back());
     }
 
@@ -355,7 +355,7 @@ void MenuBar::AdjustLayout()
     vector<int> menu_rows; // each element is the last + 1 index displayable on that row
     int space = Width();
     for (unsigned int i = 0; i < m_menu_labels.size(); ++i) {
-        space -= m_menu_labels[i]->Wnd::Width();
+        space -= m_menu_labels[i]->Width();
         if (space < 0) { // if this menu's text won't fit in the available space
             space = Width();
             // if moving this menu to the next row would leave an empty row, leave it here even though it won't quite fit
@@ -363,7 +363,7 @@ void MenuBar::AdjustLayout()
                 menu_rows.push_back(i + 1);
             } else {
                 menu_rows.push_back(i);
-                space -= m_menu_labels[i]->Wnd::Width();
+                space -= m_menu_labels[i]->Width();
             }
         }
     }
@@ -376,14 +376,14 @@ void MenuBar::AdjustLayout()
         int x = 0;
         for (; label_i < menu_rows[row]; ++label_i) {
             m_menu_labels[label_i]->MoveTo(x, row * m_font->Lineskip());
-            x += m_menu_labels[label_i]->Wnd::Width();
+            x += m_menu_labels[label_i]->Width();
         }
     }
 
     // resize MenuBar if needed
     int desired_ht = std::max(1u, menu_rows.size()) * m_font->Lineskip();
-    if (Wnd::Height() != desired_ht)
-        Resize(Wnd::Width(), desired_ht);
+    if (Height() != desired_ht)
+        Resize(Width(), desired_ht);
 }
 
 

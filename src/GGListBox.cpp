@@ -144,14 +144,14 @@ XMLElement ListBox::Row::XMLEncode() const
     return retval;
 }
 
-void ListBox::Row::push_back(const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, bool dynamic_text/* = true*/)
+void ListBox::Row::push_back(const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/)
 {
-    push_back(CreateControl(str, font, color, dynamic_text));
+    push_back(CreateControl(str, font, color));
 }
 
-void ListBox::Row::push_back(const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/, bool dynamic_text/* = true*/)
+void ListBox::Row::push_back(const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/)
 {
-    push_back(CreateControl(str, App::GetApp()->GetFont(font_filename, pts), color, dynamic_text));
+    push_back(CreateControl(str, App::GetApp()->GetFont(font_filename, pts), color));
 }
 
 void ListBox::Row::push_back(const SubTexture& st)
@@ -159,12 +159,9 @@ void ListBox::Row::push_back(const SubTexture& st)
     push_back(CreateControl(st));
 }
 
-Control* ListBox::Row::CreateControl(const string& str, const shared_ptr<Font>& font, Clr color, bool dynamic_text)
+Control* ListBox::Row::CreateControl(const string& str, const shared_ptr<Font>& font, Clr color)
 {
-    if (dynamic_text)
-        return new DynamicText(0, 0, str, font, color);
-    else
-        return new StaticText(0, 0, str, font->FontName(), font->PointSize(), color);
+    return new TextControl(0, 0, str, font, color);
 }
 
 Control* ListBox::Row::CreateControl(const SubTexture& st)

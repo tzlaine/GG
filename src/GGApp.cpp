@@ -50,8 +50,7 @@ namespace GG {
 
 namespace {
 // these generate Wnd-subclass objects for the Wnd factory
-Wnd* NewStaticText(const XMLElement& elem)        {return new StaticText(elem);}
-Wnd* NewDynamicText(const XMLElement& elem)       {return new DynamicText(elem);}
+Wnd* NewTextControl(const XMLElement& elem)       {return new TextControl(elem);}
 Wnd* NewStaticGraphic(const XMLElement& elem)     {return new StaticGraphic(elem);}
 Wnd* NewDynamicGraphic(const XMLElement& elem)    {return new DynamicGraphic(elem);}
 Wnd* NewButton(const XMLElement& elem)            {return new Button(elem);}
@@ -94,8 +93,7 @@ struct AppImplData
         button_state[0] = button_state[1] = button_state[2] = false;
         drag_wnds[0] = drag_wnds[1] = drag_wnds[2] = 0;
 
-        wnd_factory.AddGenerator("GG::StaticText", &NewStaticText);
-        wnd_factory.AddGenerator("GG::DynamicText", &NewDynamicText);
+        wnd_factory.AddGenerator("GG::TextControl", &NewTextControl);
         wnd_factory.AddGenerator("GG::StaticGraphic", &NewStaticGraphic);
         wnd_factory.AddGenerator("GG::DynamicGraphic", &NewDynamicGraphic);
         wnd_factory.AddGenerator("GG::Button", &NewButton);
@@ -118,8 +116,8 @@ struct AppImplData
     list<Wnd*>   modal_wnds;            // modal GUI windows (only the one in back is active, simulating a stack but allowing traversal of the list)
 
     bool   button_state[3];             // the up/down states of the three buttons on the mouse are kept here
-    Pt     mouse_pos;                   // absolute position of mouse based on last SDL_MOUSEMOTION event
-    Pt     mouse_rel;                   // relative position of mouse based on last SDL_MOUSEMOTION event
+    Pt     mouse_pos;                   // absolute position of mouse based on last MOUSEMOVE event
+    Pt     mouse_rel;                   // relative position of mouse based on last MOUSEMOVE event
 
     int mouse_repeat_delay;             // see note above class definition
     int mouse_repeat_interval;

@@ -68,10 +68,7 @@ StaticGraphic::StaticGraphic(const XMLElement& elem) :
 
     m_graphic = SubTexture(elem.Child("m_graphic").Child("GG::SubTexture"));
 
-    vector<string> tokens = Tokenize(elem.Child("m_style").Text());
-    for (unsigned int i = 0; i < tokens.size(); ++i) {
-	m_style |= GetEnumMap<GraphicStyle>().FromString(tokens[i]);
-    }
+    m_style = FlagsFromString<GraphicStyle>(elem.Child("m_style").Text());
     ValidateStyle();
 }
 
@@ -137,20 +134,7 @@ XMLElement StaticGraphic::XMLEncode() const
     XMLElement retval("GG::StaticGraphic");
     retval.AppendChild(Control::XMLEncode());
     retval.AppendChild(XMLElement("m_graphic", m_graphic.XMLEncode()));
-
-    string style_str;
-    if (!m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_NONE) + " ";
-    if (GR_VCENTER & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_VCENTER) + " ";
-    if (GR_TOP & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_TOP) + " ";
-    if (GR_BOTTOM & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_BOTTOM) + " ";
-    if (GR_CENTER & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_CENTER) + " ";
-    if (GR_LEFT & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_LEFT) + " ";
-    if (GR_RIGHT & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_RIGHT) + " ";
-    if (GR_FITGRAPHIC & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_FITGRAPHIC) + " ";
-    if (GR_SHRINKFIT & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_SHRINKFIT) + " ";
-    if (GR_PROPSCALE & m_style) style_str += GetEnumMap<GraphicStyle>().FromEnum(GR_PROPSCALE) + " ";
-    retval.AppendChild(XMLElement("m_style", style_str));
-
+    retval.AppendChild(XMLElement("m_style", StringFromFlags<GraphicStyle>(m_style)));
     return retval;
 }
 

@@ -100,10 +100,7 @@ TextControl::TextControl(const XMLElement& elem) :
     if (elem.Tag() != "GG::TextControl")
         throw std::invalid_argument("Attempted to construct a GG::TextControl from an XMLElement that had a tag other than \"GG::TextControl\"");
 
-    vector<string> tokens = Tokenize(elem.Child("m_format").Text());
-    for (unsigned int i = 0; i < tokens.size(); ++i) {
-	m_format |= GetEnumMap<GG::TextFormat>().FromString(tokens[i]);
-    }
+    m_format = FlagsFromString<GG::TextFormat>(elem.Child("m_format").Text());
     ValidateFormat();
 
     m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
@@ -126,18 +123,7 @@ XMLElement TextControl::XMLEncode() const
     XMLElement retval("GG::TextControl");
     retval.AppendChild(Control::XMLEncode());
 
-    string format_str;
-    if (!m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_NONE) + " ";
-    if (TF_VCENTER & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_VCENTER) + " ";
-    if (TF_TOP & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_TOP) + " ";
-    if (TF_BOTTOM & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_BOTTOM) + " ";
-    if (TF_CENTER & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_CENTER) + " ";
-    if (TF_LEFT & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LEFT) + " ";
-    if (TF_RIGHT & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_RIGHT) + " ";
-    if (TF_WORDBREAK & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_WORDBREAK) + " ";
-    if (TF_LINEWRAP & m_format) format_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LINEWRAP) + " ";
-    retval.AppendChild(XMLElement("m_format", format_str));
-
+    retval.AppendChild(XMLElement("m_format", StringFromFlags<GG::TextFormat>(m_format)));
     retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
     retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
     retval.AppendChild(XMLElement("m_fit_to_text", lexical_cast<string>(m_fit_to_text)));

@@ -278,10 +278,7 @@ ListBox::ListBox(const XMLElement& elem) :
     m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
     m_hilite_color = Clr(elem.Child("m_hilite_color").Child("GG::Clr"));
 
-    vector<string> tokens = Tokenize(elem.Child("m_style").Text());
-    for (unsigned int i = 0; i < tokens.size(); ++i) {
-	m_style |= GetEnumMap<ListBoxStyle>().FromString(tokens[i]);
-    }
+    m_style = FlagsFromString<ListBoxStyle>(elem.Child("m_style").Text());
     ValidateStyle();
 
     const XMLElement* curr_elem = &elem.Child("m_header_row");
@@ -861,24 +858,7 @@ XMLElement ListBox::XMLEncode() const
     retval.AppendChild(XMLElement("m_cell_margin", lexical_cast<string>(m_cell_margin)));
     retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
     retval.AppendChild(XMLElement("m_hilite_color", m_hilite_color.XMLEncode()));
-
-    string style_str;
-    if (!m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_NONE) + " ";
-    if (LB_VCENTER & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_VCENTER) + " ";
-    if (LB_TOP & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_TOP) + " ";
-    if (LB_BOTTOM & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_BOTTOM) + " ";
-    if (LB_CENTER & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_CENTER) + " ";
-    if (LB_LEFT & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_LEFT) + " ";
-    if (LB_RIGHT & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_RIGHT) + " ";
-    if (LB_NOSORT & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_NOSORT) + " ";
-    if (LB_SORTDESCENDING & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_SORTDESCENDING) + " ";
-    if (LB_NOSEL & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_NOSEL) + " ";
-    if (LB_SINGLESEL & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_SINGLESEL) + " ";
-    if (LB_QUICKSEL & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_QUICKSEL) + " ";
-    if (LB_DRAGDROP & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_DRAGDROP) + " ";
-    if (LB_USERDELETE & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_USERDELETE) + " ";
-    if (LB_BROWSEUPDATES & m_style) style_str += GetEnumMap<ListBoxStyle>().FromEnum(LB_BROWSEUPDATES) + " ";
-    retval.AppendChild(XMLElement("m_style", style_str));
+    retval.AppendChild(XMLElement("m_style", StringFromFlags<ListBoxStyle>(m_style)));
 
     XMLElement temp("m_header_row");
     if (m_header_row)

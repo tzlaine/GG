@@ -109,12 +109,7 @@ Wnd::Wnd(const XMLElement& elem) :
     m_lowerright = Pt(elem.Child("m_lowerright").Child("GG::Pt"));
     m_min_size = Pt(elem.Child("m_min_size").Child("GG::Pt"));
     m_max_size = Pt(elem.Child("m_max_size").Child("GG::Pt"));
-
-    string flags_str = elem.Child("m_flags").Text();
-    vector<string> tokens = Tokenize(flags_str);
-    for (unsigned int i = 0; i < tokens.size(); ++i) {
-        m_flags |= GetEnumMap<Wnd::WndFlag>().FromString(tokens[i]);
-    }
+    m_flags = FlagsFromString<Wnd::WndFlag>(elem.Child("m_flags").Text());
 }
 
 Wnd::~Wnd()
@@ -213,15 +208,7 @@ XMLElement Wnd::XMLEncode() const
     retval.AppendChild(XMLElement("m_lowerright", m_lowerright.XMLEncode()));
     retval.AppendChild(XMLElement("m_min_size", m_min_size.XMLEncode()));
     retval.AppendChild(XMLElement("m_max_size", m_max_size.XMLEncode()));
-
-    string flags_str;
-    if (CLICKABLE & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(CLICKABLE) + " ";
-    if (DRAGABLE & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(DRAGABLE) + " ";
-    if (DRAG_KEEPER & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(DRAG_KEEPER) + " ";
-    if (RESIZABLE & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(RESIZABLE) + " ";
-    if (ONTOP & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(ONTOP) + " ";
-    if (MODAL & m_flags) flags_str += GetEnumMap<Wnd::WndFlag>().FromEnum(MODAL) + " ";
-    retval.AppendChild(XMLElement("m_flags", flags_str));
+    retval.AppendChild(XMLElement("m_flags", StringFromFlags<Wnd::WndFlag>(m_flags)));
     retval.LastChild().SetAttribute("edit", "never");
 
     return retval;
@@ -247,6 +234,7 @@ XMLElementValidator Wnd::XMLValidator() const
     retval.LastChild().SetAttribute("edit", 0);
     retval.AppendChild(XMLElementValidator("m_visible", new Validator<bool>()));
     retval.LastChild().SetAttribute("edit", 0);
+    retval.AppendChild(XMLElementValidator("m_clip_children", new Validator<bool>()));
     retval.AppendChild(XMLElementValidator("m_upperleft", m_upperleft.XMLValidator()));
     retval.AppendChild(XMLElementValidator("m_lowerright", m_lowerright.XMLValidator()));
     retval.AppendChild(XMLElementValidator("m_min_size", m_min_size.XMLValidator()));

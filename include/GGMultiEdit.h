@@ -44,7 +44,7 @@ class Scroll;
     TF_WORDBREAK are in use, NO_HSCROLL must be in use as well.  TF_VCENTER is not an allowed style; if it is specified, 
     TF_TOP will be used in its place.  The justification introduced by text formatting tags is very different from that 
     introduced by the TF_* styles.  The former justifies lines within the space taken up by the text.  The latter justifies 
-    the entire block of text within the client area of the control.  So if you specify TF_LEFT and use <right> formatting 
+    the entire block of text within the client area of the control.  So if you specify TF_LEFT and use \<right> formatting 
     tags on the entire text, the text will appear to be right-justified, but you will probably only see the extreme left 
     of the text area without scrolling.  If none of the no-scroll style flags are in use, the scrolls are created and 
     destroyed automatically, as needed.  If non-standard Scrolls are desired, subclasses can create their own Scroll-derived 

@@ -164,10 +164,10 @@ public:
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Font
     //@}
    
-    static void       RegisterKnownTag(const string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", <foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
+    static void       RegisterKnownTag(const string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
     static void       RemoveKnownTag(const string& tag);     ///< removes \a tag from the known tag list
-    static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: <i>, <u>, <rgba r g b a>, and <pre>.
-    static void       FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags = false); ///< fills \a tag with the data on the first tag found from location \idx in \a text
+    static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre>.
+    static void       FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags = false); ///< fills \a tag with the data on the first tag found from location \a idx in \a text
 
 private:
     /** This just holds the essential data necessary to render a glyph from the OpenGL texture(s) 

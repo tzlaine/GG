@@ -65,6 +65,7 @@ public:
     inline GLenum           WrapT() const     {return m_wrap_t;}      ///< returns T-wrap mode associated with this opengl texture
     inline GLenum           MinFilter() const {return m_min_filter;}  ///< returns minimization filter modes associated with this opengl texture
     inline GLenum           MagFilter() const {return m_mag_filter;}  ///< returns maximization filter modes associated with this opengl texture
+    inline int              BytesPP() const   {return m_bytes_pp;}    ///< returns the image's color depth in bytes
     inline int              Width() const     {return m_width;}       ///< returns width of entire texture
     inline int              Height() const    {return m_height;}      ///< returns height of entire texture
     inline bool             MipMapped() const {return m_mipmaps;}     ///< returns true if the texture has mipmaps

@@ -63,12 +63,15 @@ all: $(GG) $(NET) $(SDL)
 
 $(GG): $(GG_O_FILES)
 	g++ -shared -o $(GG) $(GG_O_FILES) $(GG_LIBRARIES) -Wl,--export-all-symbols,--no-undefined
+	/bin/mv -f $(GG) ..
 
 $(NET): $(NET_O_FILES)
 	g++ -shared -o $(NET) $(NET_O_FILES) $(NET_LIBRARIES) -Wl,--export-all-symbols,--no-undefined
+	/bin/mv -f $(NET) ..
 
 $(SDL): $(SDL_O_FILES)
 	g++ -shared -o $(SDL) $(SDL_O_FILES) $(SDL_LIBRARIES) -Wl,--export-all-symbols,--no-undefined
+	/bin/mv -f $(SDL) ..
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@

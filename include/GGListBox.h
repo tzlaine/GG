@@ -173,20 +173,34 @@ public:
     bool            Selected(int n) const      {return m_selections.find(n) != m_selections.end();} ///< returns true if row \a n is selected
     Clr             InteriorColor() const      {return m_int_color;}         ///< returns the color painted into the client area of the control
     Clr             HiliteColor() const        {return m_hilite_color;}      ///< returns the color behind selected line items
-    Uint32          Style() const              {return m_style;}             ///< returns the style flags of the listbox \see GG::ListBoxStyle
+
+    /** returns the style flags of the listbox \see GG::ListBoxStyle */
+    Uint32          Style() const              {return m_style;}
+
     const Row&      ColHeaders() const         {return *m_header_row;}       ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
     int             FirstRowShown() const      {return m_first_row_shown;}   ///< returns the index of the first row visible in the listbox
     int             FirstColShown() const      {return m_first_col_shown;}   ///< returns the index of the first column visible in the listbox
-    int             RowHeight() const          {return m_row_height;}        ///< returns the default row height. \note Each row may have its own height, diferent from the one returned by this function.
+
+    /** returns the default row height. \note Each row may have its own height, diferent from the one returned by this function. */
+    int             RowHeight() const          {return m_row_height;}
+
     int             NumRows() const            {return int(m_rows.size());}  ///< returns the total number of rows in the ListBox
     int             NumCols() const            {return m_col_widths.size();} ///< returns the total number of columns in the ListBox
-    bool            KeepColWidths() const      {return m_keep_col_widths;}   ///< returns true iff column widths are fixed \see LockColWidths()
-    int             SortCol() const;                                         ///< returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
+
+    /** returns true iff column widths are fixed \see LockColWidths() */
+    bool            KeepColWidths() const      {return m_keep_col_widths;}
+
+    /** returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked 
+        when it is set by the user; it may be < 0 or >= NumCols(). */
+    int             SortCol() const;
+
     int             ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
     ListBoxStyle    ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
     ListBoxStyle    RowAlignment(int n) const  {return m_rows[n]->alignment;}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
-    const set<string>&   
-                    AllowedDropTypes() const   {return m_allowed_types;}     ///< returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains "", all drop types are allowed.
+
+    /** returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains 
+        "", all drop types are allowed. */
+    const set<string>& AllowedDropTypes() const   {return m_allowed_types;}
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an ListBox object
 
@@ -214,6 +228,7 @@ public:
     virtual void   Keypress(Key key, Uint32 key_mods);
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   MouseLeave(const Pt& pt, Uint32 keys);
+    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, then resizes the scrollbars as needed
 
@@ -232,22 +247,38 @@ public:
 
     void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
     void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
-    void           SetStyle(Uint32 s);                                      ///< sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle
+
+    /** sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle */
+    void           SetStyle(Uint32 s);
+
     void           SetColHeaders(Row* r);                                   ///< sets the row used as headings for the columns
     void           RemoveColHeaders()         {m_header_row->clear();}      ///< removes any columns headings set
-    void           SetRowHeight(int h)        {m_row_height = h;}           ///< sets the default row height \note Each row may have its own height, diferent from the one set by this function.
+
+    /** sets the default row height \note Each row may have its own height, diferent from the one set by this function. */
+    void           SetRowHeight(int h)        {m_row_height = h;}
+
     void           SetNumCols(int n);                                       ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);                                       ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
     void           SetColWidth(int n, int w)  {m_col_widths[n] = w;}        ///< sets the width of column \n to \a w; not range-checked
-    void           LockColWidths()            {m_keep_col_widths = true;}   ///< fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called.
+
+    /** fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added row. \note The 
+        number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called. */
+    void           LockColWidths()            {m_keep_col_widths = true;}
+
     void           UnLockColWidths()          {m_keep_col_widths = false;}  ///< allows the number of columns to be determined by the first row added to an empty ListBox
     void           SetColAlignment(int n, ListBoxStyle align) {m_col_alignments[n] = align;}  ///< sets the alignment of column \a n to \a align; not range-checked
     void           SetRowAlignment(int n, ListBoxStyle align) {m_rows[n]->alignment = align;} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
-    void           AllowDropType(const string& str)     {m_allowed_types.insert(str);}  ///< allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing "" enables all drop types.
-    void           DisallowDropType(const string& str)  {m_allowed_types.erase(str);}   ///< disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If "" is still an allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to this function.
+
+    /** allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing "" enables all 
+        drop types. */
+    void           AllowDropType(const string& str)     {m_allowed_types.insert(str);}
+
+    /** disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If "" is still an 
+        allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to this function. */
+    void           DisallowDropType(const string& str)  {m_allowed_types.erase(str);}
     //@}
 
-    static const int ListBox::BORDER_THICK; ///< the thickness with which to render the border of the control
+    static const int BORDER_THICK; ///< the thickness with which to render the border of the control
 
 protected:
     /** \name Accessors */ //@{

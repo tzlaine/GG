@@ -630,13 +630,13 @@ void ListBox::Keypress(Key key, Uint32 key_mods)
         }
         break;
     case GGK_RIGHT:{ // right key (not numpad)
-	int last_fully_visible_col = LastVisibleCol();
-	if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientSize().x)
-	    --last_fully_visible_col;
-	if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
-	    ++m_first_col_shown;
-	    m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
-	}
+	    int last_fully_visible_col = LastVisibleCol();
+	    if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, 0) > ClientSize().x)
+	        --last_fully_visible_col;
+	    if (last_fully_visible_col < static_cast<int>(m_col_widths.size()) - 1) {
+	        ++m_first_col_shown;
+	        m_hscroll->ScrollTo(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, 0));
+	    }
 	break;}
 
         // any other key gets passed along to the parent
@@ -665,6 +665,16 @@ void ListBox::MouseLeave(const Pt& pt, Uint32 keys)
     if (!Disabled() && (m_style & LB_BROWSEUPDATES)) {
         if (m_last_row_browsed != -1)
             m_browsed_sig(m_last_row_browsed = -1);
+    }
+}
+
+void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
+{
+    if (m_vscroll) {
+        for (int i = 0; i < move; ++i)
+            m_vscroll->ScrollLineDecr();
+        for (int i = 0; i < -move; ++i)
+            m_vscroll->ScrollLineIncr();
     }
 }
 

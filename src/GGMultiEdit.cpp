@@ -260,6 +260,16 @@ void MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     }
 }
 
+void MultiEdit::MouseWheel(const Pt& pt, int move, Uint32 keys)
+{
+    if (m_vscroll) {
+        for (int i = 0; i < move; ++i)
+            m_vscroll->ScrollLineDecr();
+        for (int i = 0; i < -move; ++i)
+            m_vscroll->ScrollLineIncr();
+    }
+}
+
 void MultiEdit::Keypress(Key key, Uint32 key_mods)
 {
     if (!Disabled() && !(m_style & READ_ONLY)) {

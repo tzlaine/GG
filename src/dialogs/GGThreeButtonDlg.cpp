@@ -259,8 +259,8 @@ void ThreeButtonDlg::Init(const string& msg, const string& font_filename, int pt
     const int BUTTON_WIDTH = (Width() - (buttons + 1) * SPACING) / buttons;
     const int BUTTON_HEIGHT = pts + 8;
 
-    AttachChild(new TextControl(0, 0, Width(), Height() - BUTTON_HEIGHT - 2 * SPACING, msg, font_filename, pts,
-                                TF_CENTER | TF_VCENTER | TF_WORDBREAK, m_text_color));
+    AttachChild(new TextControl(0, 0, Width(), Height() - BUTTON_HEIGHT - 2 * SPACING, msg, font_filename, pts, m_text_color,
+                                TF_CENTER | TF_VCENTER | TF_WORDBREAK));
 
     if (!m_button_0) {
         m_button_0 = new Button(SPACING + (BUTTON_WIDTH + SPACING) * 0,

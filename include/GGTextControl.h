@@ -59,8 +59,8 @@ class GG_API TextControl : public Control
 {
 public:
     /** \name Structors */ //@{
-    TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Uint32 text_fmt = 0, Clr color = CLR_BLACK, Uint32 flags = 0); ///< ctor taking a font directly
-    TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt = 0, Clr color = CLR_BLACK, Uint32 flags = 0); ///< ctor taking a font filename and font point size
+    TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
+    TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font filename and font point size
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 

@@ -172,9 +172,9 @@ extern "C" {
     }
 
     GG_PLUGIN_API
-    TextControl* CreateTextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt, Clr color, Uint32 flags)
+    TextControl* CreateTextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, Uint32 text_fmt, Uint32 flags)
     {
-        return new TextControl(x, y, w, h, str, font_filename, pts, text_fmt, color, flags);
+        return new TextControl(x, y, w, h, str, font_filename, pts, color, text_fmt, flags);
     }
 
 

@@ -37,7 +37,7 @@ namespace GG {
 ////////////////////////////////////////////////
 Button::Button(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Clr color, 
 	       Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font, TF_NONE, text_color, flags),
+    TextControl(x, y, w, h, str, font, text_color, TF_NONE, flags),
     m_state(BN_UNPRESSED)
 {
     m_color = color;
@@ -45,7 +45,7 @@ Button::Button(int x, int y, int w, int h, const string& str, const shared_ptr<G
 
 Button::Button(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color,
                Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font_filename, pts, TF_NONE, text_color, flags),
+    TextControl(x, y, w, h, str, font_filename, pts, text_color, TF_NONE, flags),
     m_state(BN_UNPRESSED)
 {
     m_color = color;
@@ -170,7 +170,7 @@ void Button::RenderDefault()
 StateButton::StateButton(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Uint32 text_fmt, 
 			 Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
 			 int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/, Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font, text_fmt, text_color, flags),
+    TextControl(x, y, w, h, str, font, text_color, text_fmt, flags),
     m_checked(false),
     m_int_color(interior),
     m_style(style),
@@ -187,7 +187,7 @@ StateButton::StateButton(int x, int y, int w, int h, const string& str, const st
                          Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/,
                          Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font_filename, pts, text_fmt, text_color, flags),
+    TextControl(x, y, w, h, str, font_filename, pts, text_color, text_fmt, flags),
     m_checked(false),
     m_int_color(interior),
     m_style(style),

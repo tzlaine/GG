@@ -35,8 +35,8 @@ namespace GG {
 ////////////////////////////////////////////////
 // GG::TextControl
 ////////////////////////////////////////////////
-TextControl::TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Uint32 text_fmt/* = 0*/,
-                         Clr color/* = CLR_BLACK*/, Uint32 flags/* = 0*/) :
+TextControl::TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
+                         Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_format(text_fmt),
     m_text_color(color),
@@ -48,8 +48,8 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const sh
     if (m_font) m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data, true);
 }
 
-TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts,
-                         Uint32 text_fmt/* = 0*/, Clr color/* = CLR_BLACK*/, Uint32 flags/* = 0*/) :
+TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
+                         Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_format(text_fmt),
     m_text_color(color),

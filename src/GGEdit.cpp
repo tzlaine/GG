@@ -40,7 +40,7 @@ const int Edit::PIXEL_MARGIN = 5;
 
 Edit::Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, h, str, font, TF_LEFT, text_color, flags),
+    TextControl(x, y, w, h, str, font, text_color, TF_LEFT, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),
     m_int_color(interior),
@@ -53,7 +53,7 @@ Edit::Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>
 
 Edit::Edit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, h, str, font_filename, pts, TF_LEFT, text_color, flags),
+    TextControl(x, y, w, h, str, font_filename, pts, text_color, TF_LEFT, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),
     m_int_color(interior),
@@ -66,7 +66,7 @@ Edit::Edit(int x, int y, int w, int h, const string& str, const string& font_fil
 
 Edit::Edit(int x, int y, int w, const string& str, const shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, font->Height() + 2 * PIXEL_MARGIN, str, font, TF_LEFT, text_color, flags),
+    TextControl(x, y, w, font->Height() + 2 * PIXEL_MARGIN, str, font, text_color, TF_LEFT, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),
     m_int_color(interior),
@@ -79,7 +79,7 @@ Edit::Edit(int x, int y, int w, const string& str, const shared_ptr<Font>& font,
 
 Edit::Edit(int x, int y, int w, const string& str, const string& font_filename, int pts, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN, str, font_filename, pts, TF_LEFT, text_color, flags),
+    TextControl(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN, str, font_filename, pts, text_color, TF_LEFT, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),
     m_int_color(interior),

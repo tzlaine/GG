@@ -326,8 +326,8 @@ void FileDlg::CreateChildren(const string& filename, bool multi, const string& f
     const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
 
     m_curr_dir_text = new TextControl(H_SPACING, V_SPACING / 2, "", m_font, m_text_color);
-    m_files_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, TF_RIGHT | TF_VCENTER, m_text_color);
-    m_file_types_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, TF_RIGHT | TF_VCENTER, m_text_color);
+    m_files_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, m_text_color, TF_RIGHT | TF_VCENTER);
+    m_file_types_label = new TextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, m_text_color, TF_RIGHT | TF_VCENTER);
 
     // determine the space needed to display both text labels in the chosen font; use this to expand the
     // edit as far as possible

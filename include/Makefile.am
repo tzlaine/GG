@@ -16,6 +16,7 @@ GGFont.h					\
 GGListBox.h					\
 GGMenu.h					\
 GGMultiEdit.h					\
+GGPluginInterface.h				\
 GGPtRect.h					\
 GGScroll.h					\
 GGSignalsAndSlots.h				\

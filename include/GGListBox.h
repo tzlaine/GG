@@ -164,16 +164,15 @@ public:
     typedef boost::signal<void ()>                ClearedSignalType;        ///< emitted when the list box is cleared
     typedef boost::signal<void (const set<int>&)> SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
     typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&)>
-                                                  InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
-    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&)>
-                                                  DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
+                                                  RowSignalType;            ///< the signature of row-change-notification signals
     typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&, const Pt&)>
-                                                  LeftClickedSignalType;    ///< emitted when a row in the listbox is clicked; provides the index of the row right-clicked and the Row contents right-clicked
-    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&, const Pt&)>
-                                                  RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
-    typedef boost::signal<void (int, const shared_ptr<ListBox::Row>&)>
-                                                  DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
-    typedef boost::signal<void (int)>             DeletedSignalType;        ///< emitted when a row in the listbox is deleted; provides the index of the deletion point
+                                                  RowClickSignalType;       ///< the signature of row-click-notification signals
+    typedef RowSignalType                         InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
+    typedef RowSignalType                         DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
+    typedef RowClickSignalType                    LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the index of the row left-clicked and the Row contents left-clicked
+    typedef RowClickSignalType                    RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
+    typedef RowSignalType                         DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
+    typedef RowSignalType                         DeletedSignalType;        ///< emitted when a row in the listbox is deleted; provides the index of the deletion point
     typedef boost::signal<void (int)>             BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row
     //@}
 
@@ -376,7 +375,7 @@ private:
     int            m_last_row_browsed; ///< the last row sent out as having been browsed (used to prevent duplicate browse signals)
     bool           m_suppress_delete_signal; ///< needed to use delete internally-only when a drop is refused
 
-    vector<shared_ptr<Row> >   
+    vector<shared_ptr<Row> >
                    m_rows;             ///< line item data
 
     int            m_first_row_shown;  ///< index of row at top of visible area (always 0 for LB_NOSCROLL)

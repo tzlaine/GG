@@ -644,6 +644,8 @@ void ListBox::LClick(const Pt& pt, Uint32 keys)
             if (sel_row == m_old_sel_row) {
                 if (!(m_style & LB_NOSEL))
                     ClickAtRow(sel_row, keys);
+                else
+                    m_caret = sel_row;
                 m_lclick_row = sel_row;
                 m_lclicked_sig(sel_row, m_rows[sel_row], pt);
             } else if (m_row_drag_offset != Pt(-1, -1) && (m_style & LB_DRAGDROP) && (m_style & LB_NOSORT) && 
@@ -725,9 +727,14 @@ void ListBox::Keypress(Key key, Uint32 key_mods)
         case GGK_DELETE: // delete key
             if (m_style & LB_USERDELETE) {
                 set<int>::reverse_iterator r_it;
-                while ((r_it = m_selections.rbegin()) != m_selections.rend())
-                    Delete(*r_it);
-                m_selections.clear();
+                if (m_style & LB_NOSEL) {
+                    if (m_caret != -1)
+                        Delete(m_caret);
+                } else {
+                    while ((r_it = m_selections.rbegin()) != m_selections.rend())
+                        Delete(*r_it);
+                    m_selections.clear();
+                }
             }
             break;
 
@@ -856,6 +863,7 @@ void ListBox::Delete(int idx)
         }
 
 	    DetachRowChildren(m_rows[idx]);
+        boost::shared_ptr<Row> row = m_rows[idx];
 	    m_rows.erase(m_rows.begin() + idx);
 
 	    if (idx <= m_caret) // move caret up, if needed
@@ -864,7 +872,7 @@ void ListBox::Delete(int idx)
 	    AdjustScrolls();
 
 	    if (!m_suppress_delete_signal)
-	        m_deleted_sig(idx);
+	        m_deleted_sig(idx, row);
     }
 }
 

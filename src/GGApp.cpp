@@ -354,18 +354,15 @@ void App::Remove(Wnd* wnd)
         }
 
         // ensure that GUI state variables don't become dangling pointers when a Wnd is removed
-        if (s_impl->modal_wnds.empty()) {
-            if (MatchesOrContains(wnd, s_impl->focus_wnd))
-                s_impl->focus_wnd = 0;
-        } else {
-            for (list<pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
-                if (MatchesOrContains(wnd, it->second)) {
-                    if (MatchesOrContains(wnd, it->first)) {
-                        it->second = 0;
-                    } else { // if the modal window for the removed window's focus level is available, revert focus to the modal window
-                        if (it->second = it->first)
-                            it->first->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
-                    }
+        if (MatchesOrContains(wnd, s_impl->focus_wnd))
+            s_impl->focus_wnd = 0;
+        for (list<pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
+            if (MatchesOrContains(wnd, it->second)) {
+                if (MatchesOrContains(wnd, it->first)) {
+                    it->second = 0;
+                } else { // if the modal window for the removed window's focus level is available, revert focus to the modal window
+                    if (it->second = it->first)
+                        it->first->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
                 }
             }
         }

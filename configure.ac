@@ -360,6 +360,8 @@ AC_CONFIG_FILES([Makefile
                  GiGiNet.pc
                  GiGiSDL.pc
                 ])
+AC_CONFIG_SUBDIRS(libltdl)
+
 AC_OUTPUT
 if test x$DO_BROKEN_DEVIL_WARNING = xyes; then
   AC_MSG_WARN([
@@ -387,5 +389,3 @@ if test x$DO_ALLEGRO_WARNING = xnohack; then
 *** function.])
 fi
 AC_MSG_NOTICE([Now, do a 'make' followed by an 'make install'])
-
-AC_CONFIG_SUBDIRS(libltdl)

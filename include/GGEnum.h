@@ -88,7 +88,9 @@ template <> struct EnumMap< name > : EnumMapBase                                
     }                                                                           \
     virtual const std::string& FromEnum(int i) const                            \
     {                                                                           \
-        return map_.find(EnumType(i))->second;                                  \
+        static const std::string error_str;                                     \
+        std::map<EnumType, std::string>::const_iterator it = map_.find(EnumType(i));  \
+        return it == map_.end() ? error_str : it->second;                       \
     }                                                                           \
     int FromString (const std::string &str) const                               \
     {                                                                           \

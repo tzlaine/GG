@@ -613,8 +613,13 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
                 for (int row = 0; row < glyph_bitmap.rows; ++row) {
                     Uint8*  src = src_start + row * glyph_bitmap.pitch;
                     Uint16* dst = dst_start + (row + y_offset) * BUF_WIDTH;
-                    for (int col = 0; col < glyph_bitmap.width; ++col)
+                    for (int col = 0; col < glyph_bitmap.width; ++col) {
+#ifdef __BIG_ENDIAN__
+                        *dst++ = *src++ | (255 << 8); // big-endian uses different byte ordering
+#else
                         *dst++ = (*src++ << 8) | 255; // alpha is the value from glyph_bitmap; luminance is always 100% white
+#endif
+                    }
                 }
 
                 // record info on how to find and use this glyph later

@@ -1,7 +1,15 @@
-MAIN_TARGET = GiGi.dll
+GG = GiGi.dll
+NET = GiGiNet.dll
+SDL = GiGiSDL.dll
 
-SRC_FILES = $(wildcard src/*.cpp) $(wildcard src/dialogs/*.cpp)
-GCC_FILES = $(wildcard src/*.c) $(wildcard src/net/*.c)
+GG_SRC_FILES = $(wildcard src/*.cpp) $(wildcard src/dialogs/*.cpp)
+GG_GCC_FILES = $(wildcard src/*.c)
+
+NET_SRC_FILES = 
+NET_GCC_FILES = $(wildcard src/net/*.c)
+
+SDL_SRC_FILES = $(wildcard src/SDL/*.cpp)
+SDL_GCC_FILES = 
 
 GCC = gcc
 CXX = g++
@@ -16,23 +24,51 @@ CXXFLAGS = -c $(CCFLAGS) $(INCLUDE)
 INCLUDE = -I/c/boost_1_30_0 \
 	-I/c/Dev-Cpp/include/freetype2 \
 	-I/c/Dev-Cpp/include/SDL \
+	-I/c/DevIL/include \
 	-I/c/Expat-1.95.5/Source/lib \
 	-I/c/log4cpp-0.2.7/include \
 	-Iinclude \
 	-Iinclude/net \
-	-Iinclude/dialogs
+	-Iinclude/dialogs \
+	-Iinclude/SDL
 
-LIBDIRS =  -L"C:/Dev-Cpp/lib" -L"C:/Expat-1.95.5/StaticLibs" 
-LIBRARIES = -lwsock32 -lopengl32 -lglu32 $(LIBDIRS) -lboost_signals -lboost_filesystem -lboost_regex -llog4cpp ../freetype-6.dll ../libexpat.dll ../SDL.dll ../SDL_image.dll
+GG_LIBDIRS =  -L"C:/Dev-Cpp/lib" -L"C:/Expat-1.95.5/StaticLibs" -L"C:/DevIL/lib"
+GG_LIBRARIES = -lopengl32 -lglu32 $(GG_LIBDIRS) -lboost_signals -lboost_filesystem -lboost_regex -llog4cpp ../freetype-6.dll ../libexpat.dll -ldevil -lilu -lilut
 
-OCXX_FILES = $(SRC_FILES:%.cpp=%.o)
-OGCC_FILES = $(GCC_FILES:%.c=%.o)
-O_FILES = $(OCXX_FILES) $(OGCC_FILES)
+NET_LIBDIRS = -L"C:/Dev-Cpp/lib"
+NET_LIBRARIES = -lwsock32 $(NET_LIBDIRS) ../SDL.dll
 
-all: $(MAIN_TARGET)
+SDL_LIBDIRS =  -L"C:/Dev-Cpp/lib"
+SDL_LIBRARIES = -lopengl32 -lglu32 $(SDL_LIBDIRS) -llog4cpp ../SDL.dll ../GiGi.dll
 
-$(MAIN_TARGET): $(O_FILES)
-	g++ -shared -o $(MAIN_TARGET) $(O_FILES) $(LIBRARIES) -Wl,--export-all-symbols,--no-undefined,--out-implib,libGiGi.a
+ifdef DISABLE_NET
+CXXFLAGS += -DGG_USE_NET=0
+else
+SDL_LIBRARIES += -lwsock32 ../GiGiNet.dll
+endif
+
+GG_OCXX_FILES = $(GG_SRC_FILES:%.cpp=%.o)
+GG_OGCC_FILES = $(GG_GCC_FILES:%.c=%.o)
+GG_O_FILES = $(GG_OCXX_FILES) $(GG_OGCC_FILES)
+
+NET_OCXX_FILES = $(NET_SRC_FILES:%.cpp=%.o)
+NET_OGCC_FILES = $(NET_GCC_FILES:%.c=%.o)
+NET_O_FILES = $(NET_OCXX_FILES) $(NET_OGCC_FILES)
+
+SDL_OCXX_FILES = $(SDL_SRC_FILES:%.cpp=%.o)
+SDL_OGCC_FILES = $(SDL_GCC_FILES:%.c=%.o)
+SDL_O_FILES = $(SDL_OCXX_FILES) $(SDL_OGCC_FILES)
+
+all: $(GG) $(NET) $(SDL)
+
+$(GG): $(GG_O_FILES)
+	g++ -shared -o $(GG) $(GG_O_FILES) $(GG_LIBRARIES) -Wl,--export-all-symbols,--no-undefined
+
+$(NET): $(NET_O_FILES)
+	g++ -shared -o $(NET) $(NET_O_FILES) $(NET_LIBRARIES) -Wl,--export-all-symbols,--no-undefined
+
+$(SDL): $(SDL_O_FILES)
+	g++ -shared -o $(SDL) $(SDL_O_FILES) $(SDL_LIBRARIES) -Wl,--export-all-symbols,--no-undefined
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@
@@ -43,8 +79,4 @@ $(MAIN_TARGET): $(O_FILES)
 .PHONY: clean
 
 clean:
-	rm -f $(MAIN_TARGET) $(O_FILES)
-
-
-
-
+	rm -f $(GG) $(NET) $(SDL) $(GG_O_FILES) $(NET_O_FILES) $(SDL_O_FILES)

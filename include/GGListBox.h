@@ -52,10 +52,14 @@ class SubTexture;
     empty ListBoxes from taking on a new row's number of columns.  To create a ListBox with user-defined widths, 
     use the ctor designed for that, or call SetNumCols(), set individual widths with SetColWidth(), and lock the 
     column widths with LockColWidths().  If non-standard Scrolls are desired, subclasses can create their own 
-    Scroll-derived scrolls by overriding NewVScroll() and NewHScroll().  Note that while a ListBox can contain 
-    arbitrary Control-derived controls, in order for such controls to be automatically saved and loaded using XML 
-    encoding, any user-defined Control subclasses must be added to the App's XMLObjectFactory.  See 
-    GG::App::AddWndGenerator() and GG::XMLObjectFactory for details.*/
+    Scroll-derived scrolls by overriding NewVScroll() and NewHScroll().    When overriding NewVScroll() and 
+    NewHScroll() in subclasses, call RecreateScrolls() at the end of the subclass's constructor, to ensure that 
+    the correct type of Scrolls are created; if scrolls are created in the MultiEdit base constructor, the virtual 
+    function table may not be complete yet, so GG::Scrolls may be created instead of the types used in the 
+    overloaded New*Scroll() functions. Note that while a ListBox can contain arbitrary Control-derived controls, 
+    in order for such controls to be automatically saved and loaded using XML encoding, any user-defined Control 
+    subclasses must be added to the App's XMLObjectFactory.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory
+    for details.*/
 class ListBox : public Control
 {
 public:
@@ -238,6 +242,7 @@ protected:
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     virtual Scroll* NewVScroll(bool horz_scroll);   ///< creates and returns a new vertical scroll, allowing subclasses to use Scroll-derived scrolls
     virtual Scroll* NewHScroll(bool vert_scroll);   ///< creates and returns a new horizontal scroll, allowing subclasses to use Scroll-derived scrolls
+    void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.  Subclasses that override NewVScroll or NewHScroll should call this at the end of their ctor.
     //@}
 
 private:

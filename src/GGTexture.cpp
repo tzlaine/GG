@@ -170,7 +170,11 @@ namespace {
 // class GG::Texture
 ///////////////////////////////////////
 Texture::Texture() :
-    m_opengl_id(0)
+    m_opengl_id(0),
+    m_wrap_s(GL_REPEAT),
+    m_wrap_t(GL_REPEAT),
+    m_min_filter(GL_NEAREST_MIPMAP_LINEAR),
+    m_mag_filter(GL_NEAREST_MIPMAP_LINEAR)
 {
     Clear();
 }
@@ -306,7 +310,7 @@ XMLElement Texture::XMLEncode() const
         EncodeBase64(bytes, str);
         retval.AppendChild(XMLElement("raw_data", str));
 
-        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+        glPopClientAttrib();
     }
 
     return retval;
@@ -417,11 +421,9 @@ void Texture::SetWrap(GLenum s, GLenum t)
     m_wrap_s = s;
     m_wrap_t = t;
     if (m_opengl_id) {
-        glPushAttrib(GL_TEXTURE_BIT);
         glBindTexture(GL_TEXTURE_2D, m_opengl_id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
-        glPopAttrib();
     }
 }
 
@@ -430,11 +432,9 @@ void Texture::SetFilters(GLenum min, GLenum mag)
     m_min_filter = min;
     m_mag_filter = mag;
     if (m_opengl_id) {
-        glPushAttrib(GL_TEXTURE_BIT);
         glBindTexture(GL_TEXTURE_2D, m_opengl_id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
-        glPopAttrib();
     }
 }
 

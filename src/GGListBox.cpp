@@ -203,8 +203,8 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
 ListBox::ListBox(int x, int y, int w, int h, Clr color, const vector<int>& col_widths,
                  Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
         Control(x, y, w, h, flags),
-        m_vscroll(),
-        m_hscroll(),
+        m_vscroll(0),
+        m_hscroll(0),
         m_caret(-1),
         m_old_sel_row(-1),
         m_old_rdown_row(-1),

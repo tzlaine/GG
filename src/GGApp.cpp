@@ -509,11 +509,14 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     switch (event) {
     case KEYPRESS:{
         bool processed = false;
-        // the focus_wnd may care about the state of the numlock and capslock, or which side of the keyboard's 
-        // CTRL, SHIFT, etc. was pressed, but the accelerators don't
-        Uint32 massaged_mods = MassagedAccelKeyMods(key_mods);
-        if (s_impl->accelerators.find(std::make_pair(key, massaged_mods)) != s_impl->accelerators.end())
-            processed = AcceleratorSignal(key, massaged_mods)();
+        // only process accelerators when there are no modal windows active; otherwise, accelerators would be an end-run around modality
+        if (s_impl->modal_wnds.empty()) {
+            // the focus_wnd may care about the state of the numlock and capslock, or which side of the keyboard's 
+            // CTRL, SHIFT, etc. was pressed, but the accelerators don't
+            Uint32 massaged_mods = MassagedAccelKeyMods(key_mods);
+            if (s_impl->accelerators.find(std::make_pair(key, massaged_mods)) != s_impl->accelerators.end())
+                processed = AcceleratorSignal(key, massaged_mods)();
+        }
         if (!processed && s_impl->focus_wnd)
             s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::Keypress, key, key_mods));
         break;}

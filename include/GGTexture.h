@@ -61,6 +61,7 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    string           Filename() const           {return m_filename;}       ///< returns the filename from which this texture was loaded ("" if this texture was not loaded from a file)
     GLenum           WrapS() const              {return m_wrap_s;}         ///< returns S-wrap mode associated with this opengl texture
     GLenum           WrapT() const              {return m_wrap_t;}         ///< returns T-wrap mode associated with this opengl texture
     GLenum           MinFilter() const          {return m_min_filter;}     ///< returns minimization filter modes associated with this opengl texture

@@ -193,8 +193,8 @@ MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, cons
 }
 
 MenuBar::MenuBar(const XMLElement& elem) :
-        Control(elem.Child("GG::Control")),
-        m_caret(-1)
+    Control(elem.Child("GG::Control")),
+    m_caret(-1)
 {
     if (elem.Tag() != "GG::MenuBar")
         throw std::invalid_argument("Attempted to construct a GG::MenuBar from an XMLElement that had a tag other than \"GG::MenuBar\"");
@@ -423,7 +423,7 @@ PopupMenu::PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem&
 }
 
 PopupMenu::PopupMenu(int x, int y, const string& font_filename, int pts, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/, 
-		     Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) : 
+                     Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) : 
     Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
     m_font(GG::App::GetApp()->GetFont(font_filename, pts)),
     m_border_color(color),

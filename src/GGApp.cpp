@@ -505,11 +505,10 @@ void App::HandleEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, 
       }
       prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
       break;}
-   case WHEELUP:
-   case WHEELDOWN:{
+   case MOUSEWHEEL:{
       curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
       if (curr_wnd_under_cursor)
-          curr_wnd_under_cursor->MouseWheel(pos, event == WHEELUP ? 1 : -1, key_mods);
+          curr_wnd_under_cursor->MouseWheel(pos, rel.y, key_mods);
       prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
       break;}
    default: 

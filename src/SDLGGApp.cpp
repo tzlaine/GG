@@ -204,11 +204,11 @@ void SDLGGApp::HandleSDLEvent(const SDL_Event& event)
    case SDL_MOUSEBUTTONDOWN:
       send_to_gg = true;
       switch (event.button.button) {
-      case SDL_BUTTON_LEFT:   gg_event = GG::App::LPRESS; break;
-      case SDL_BUTTON_MIDDLE: gg_event = GG::App::MPRESS; break;
-      case SDL_BUTTON_RIGHT:  gg_event = GG::App::RPRESS; break;
-      //case SDL_BUTTON_WHEELUP:    gg_event = GG::App::WHEELUP; break;
-      //case SDL_BUTTON_WHEELDOWN:  gg_event = GG::App::WHEELDOWN; break;
+      case SDL_BUTTON_LEFT:      gg_event = GG::App::LPRESS; break;
+      case SDL_BUTTON_MIDDLE:    gg_event = GG::App::MPRESS; break;
+      case SDL_BUTTON_RIGHT:     gg_event = GG::App::RPRESS; break;
+      case SDL_BUTTON_WHEELUP:   gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
+      case SDL_BUTTON_WHEELDOWN: gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
       }
       key_mods = SDL_GetModState();
       break;
@@ -266,7 +266,7 @@ void SDLGGApp::PollAndRender()
    // handle events
    SDL_Event event;
    while (0 < FE_PollEvent(&event)) {
-      if (event.type  == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEMOTION || event.type  == SDL_MOUSEBUTTONUP)
+      if (event.type  == SDL_MOUSEBUTTONDOWN || event.type  == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEMOTION)
          last_mouse_event_time = time;
       HandleSDLEvent(event);
    }

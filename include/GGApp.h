@@ -85,9 +85,8 @@ public:
       LRELEASE,    ///< a left mouse button release
       MRELEASE,    ///< a middle mouse button release
       RRELEASE,    ///< a right mouse button release
-      WHEELUP,     ///< a rolling up of the mouse wheel
-      WHEELDOWN,   ///< a rolling down of the mouse wheel
-      MOUSEMOVE    ///< a movement of the mouse
+      MOUSEMOVE,   ///< movement of the mouse
+      MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
       };
 
    /** \name Structors */ //@{

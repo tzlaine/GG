@@ -10,6 +10,7 @@ GGDrawUtil.h					\
 GGDropDownList.h				\
 GGDynamicGraphic.h				\
 GGEdit.h					\
+GGEventPump.h					\
 GGFont.h					\
 GGListBox.h					\
 GGMenu.h					\

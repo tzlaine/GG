@@ -13,6 +13,7 @@ GGDrawUtil.cpp					\
 GGDropDownList.cpp				\
 GGDynamicGraphic.cpp				\
 GGEdit.cpp					\
+GGEventPump.cpp					\
 GGFont.cpp					\
 GGListBox.cpp					\
 GGMenu.cpp					\

@@ -242,8 +242,7 @@ public:
         }
 
         if (!match) {
-            throw std::runtime_error("FlagEnumValidator::Validate() : String \"" + str + "\" has a value that is not a power of two " +
-                                     boost::lexical_cast<std::string>(m_min) + ".");
+            throw std::runtime_error("FlagEnumValidator::Validate() : String \"" + str + "\" has a value that is not a power of two.");
         }
     }
 
@@ -282,10 +281,10 @@ struct MapListValidator : public ValidatorBase
     virtual void Validate(const std::string& str) const
     {
         pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
-        for (unsigned int i = 0; i < tokens.size(); ++i) {
+        for (unsigned int i = 0; i < tokens.first.size(); ++i) {
             boost::lexical_cast<T1>(tokens.first[i]);
         }
-        for (unsigned int i = 0; i < tokens.size(); ++i) {
+        for (unsigned int i = 0; i < tokens.second.size(); ++i) {
             boost::lexical_cast<T2>(tokens.second[i]);
         }
     }

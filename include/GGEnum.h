@@ -73,7 +73,7 @@ template <class E> EnumMap<E> GetEnumMap()
         ...
     ENUM_MAP_END\endverbatim */
 #define ENUM_MAP_BEGIN( name )                                                  \
-template <> struct GG::EnumMap< name > : GG::EnumMapBase                        \
+template <> struct EnumMap< name > : EnumMapBase                                \
 {                                                                               \
     typedef name EnumType;                                                      \
     typedef std::map<EnumType, std::string> MapType;                            \

@@ -152,7 +152,7 @@ bool DropDownList::Render()
     const Row* current_item = CurrentItem();
     if (current_item) {
         BeginClipping();
-        m_LB->RenderRow(current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->LastVisibleCol());
+        m_LB->RenderRow(current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->FirstColShown(), m_LB->LastVisibleCol());
         EndClipping();
     }
 

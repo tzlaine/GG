@@ -85,42 +85,72 @@ public:
         like tree-views, etc.  A Row may include several subrows; each subrow is considered to be part of its Row.  Note 
         that Rows are stored in ListBoxes by reference, not copy; this means that you can subclass from Row to create your 
         own custom Row types.  This is the recommended method for associating a row with the non-GUI object that it 
-        represents. */
-    struct GG_API Row : public vector<Control*>, public Wnd
+        represents.  \note The \a margin member and the \a col_alignment and \a width Cell members are included so that each
+        Row has all the necessary information with which to render itself (this is primarily needed to facilitate drag-and-drop);
+        these data are duplicates of the margin, alignment, and column widths data found in the owning ListBox, and may be
+        overwritten by the ListBox at any time. */
+    struct GG_API Row : public Wnd
     {
-        using vector<Control*>::push_back; // this brings push_back into this subclass, even though we've overloaded it locally
+        /** A cell in a GG::ListBox::Row, consisting of a single Control, a column alignment and a width. */
+        struct Cell
+        {
+            Cell(); ///< default ctor
+            Cell(const XMLElement& elem); ///< XML ctor
+
+            XMLElement          XMLEncode() const;    ///< constructs an XMLElement from an Cell object
+            XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Cell
+
+            Control*     control;
+            ListBoxStyle col_alignment;
+            int          width;
+        };
 
         /** \name Structors */ //@{
-        Row() : height(0), alignment(LB_VCENTER), indentation(0) {} ///< default ctor
-        Row(const string& data, int ht, ListBoxStyle align = LB_VCENTER, int indent = 0, int rows = 0) : 
-            vector<Control*>(rows), data_type(data), height(ht), alignment(align), indentation(indent) {} ///< ctor. \a rows is the number of cells the row should have
-        Row(const XMLElement& elem);
+        Row(); ///< default ctor
+        Row(const string& data, int ht, ListBoxStyle align = LB_VCENTER, int indent = 0, int margin_ = 2); ///< ctor
+        Row(const XMLElement& elem); ///< XML ctor
         virtual ~Row();
         //@}
 
         /** \name Accessors */ //@{
-        int                   Height() const;            ///< returns the height of this row, considering height and/or contents of sub_rows
-        virtual const string& SortKey(int column) const; ///< returns the string by which this row may be sorted
+        int                   Height() const;             ///< returns the height of this row, considering height and/or contents of sub_rows
+        virtual const string& SortKey(int column) const;  ///< returns the string by which this row may be sorted
+        size_t                size() const;               ///< returns the number of Controls in this Row
+        Control*              operator[](size_t n) const; ///< returns the Control in the \a nth cell of this Row; not range checked
+        Control*              at(size_t n) const;         ///< returns the Control in the \a nth cell of this Row \throw std::range_error throws when size() <= \a n
+        ListBoxStyle          ColAlignment(int n) const;  ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
+        int                   ColWidth(int n) const;      ///< returns the width of the \a nth cell of this Row; not range checked
 
-        virtual XMLElement    XMLEncode() const;         ///< constructs an XMLElement from an Row object
+        virtual XMLElement          XMLEncode() const;    ///< constructs an XMLElement from an Row object
         virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Row
         //@}
 
         /** \name Mutators */ //@{
-        void push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
-        void push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
-        void push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
+        virtual bool   Render();
+
+        void     push_back(Control* c); ///< adds a given Control to the end of the Row
+        void     push_back(const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
+        void     push_back(const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
+        void     push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
+        void     clear(); ///< removes all cells in this Row
+        void     resize(size_t n); ///< resizes the Row to have \a n cells
+        void     SetColAlignment(int n, ListBoxStyle align); ///< sets the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
+        void     SetColWidth(int n, int width); ///< sets the width of the \a nth cell of this Row; not range checked
+        void     SetColAlignments(const vector<ListBoxStyle>& aligns); ///< sets the horizontal alignment of all the Controls in this Row; not range checked
+        void     SetColWidths(const vector<int>& widths); ///< sets all the widths of the cells of this Row; not range checked
         //@}
 
         // these two generate graphics and text controls from basic text or subtextures
         static Control* CreateControl(const string& str, const shared_ptr<Font>& font, Clr color); ///< creates a "shrink-fit" TextControl from text, font, and color parameters
         static Control* CreateControl(const SubTexture& st); ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
 
-        string          data_type;     ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
-        int             height;        ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
-        ListBoxStyle    alignment;     ///< one of LB_TOP, LB_VCENTER, LB_BOTTOM
-        int             indentation;   ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
-        vector<Row*>    sub_rows;      ///< for making multiple-line rows
+        string               data_type;      ///< for labeling non-text rows, and dragging and dropping; a string value representing the type of data this row is
+        int                  height;         ///< height of this row, == 0 if undefined; rows already in a ListBox will never have a 0 height
+        ListBoxStyle         row_alignment;  ///< vertical row alignment, one of LB_TOP, LB_VCENTER, or LB_BOTTOM
+        int                  indentation;    ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
+        vector<Cell>         cells;          ///< the Controls on the top level of this Row; .second is horizontal alignment, one of LB_LEFT, LB_CENTER, or LB_RIGHT
+        int                  margin;         ///< the amount of space left between each edge of the cell and its contents, in pixels
+        vector<Row*>         sub_rows;       ///< for making multi-line rows
     };
 
     /** thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any 
@@ -199,7 +229,7 @@ public:
 
     int             ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
     ListBoxStyle    ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    ListBoxStyle    RowAlignment(int n) const  {return m_rows[n]->alignment;}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    ListBoxStyle    RowAlignment(int n) const  {return m_rows[n]->row_alignment;} ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
     /** returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains 
         "", all drop types are allowed. */
@@ -272,8 +302,8 @@ public:
     void           LockColWidths()            {m_keep_col_widths = true;}
 
     void           UnLockColWidths()          {m_keep_col_widths = false;}  ///< allows the number of columns to be determined by the first row added to an empty ListBox
-    void           SetColAlignment(int n, ListBoxStyle align) {m_col_alignments[n] = align;}  ///< sets the alignment of column \a n to \a align; not range-checked
-    void           SetRowAlignment(int n, ListBoxStyle align) {m_rows[n]->alignment = align;} ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
+    void           SetColAlignment(int n, ListBoxStyle align);              ///< sets the alignment of column \a n to \a align; not range-checked
+    void           SetRowAlignment(int n, ListBoxStyle align);              ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
 
     /** allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing "" enables all 
         drop types. */
@@ -312,17 +342,19 @@ protected:
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.  Subclasses that override NewVScroll or NewHScroll should call this at the end of their ctor.
     //@}
 
+    static void    RenderRow(const Row* row, int left, int top, int first_col, int last_col);       ///< renders a single row of data at (left, top)
+
 private:
     void           ValidateStyle(); ///< reconciles inconsistencies in the style flags
     void           AdjustScrolls(); ///< creates, destroys, or resizes scrolls to reflect size of data in listbox
     void           VScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the vertical scroll bar are caught here
     void           HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
-    void           RenderRow(const Row* row, int left, int top, int last_col);       ///< renders a single row of data
-    void           RenderSubRow(const Row* subrow, int left, int top, int last_col); ///< renders a subrow of data
     int            ClickAtRow(int row, Uint32 keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys
     void           NormalizeRow(Row* row); ///< adjusts a Row so that it has the same number of cells as other rows, and each subrow's height is defined
     void           AttachRowChildren(Row* row); ///< adds all the Controls in \a row (and its subrows) to the child list of the ListBox
     void           DetachRowChildren(Row* row); ///< removes all the Controls in \a row (and its subrows) from the child list of the ListBox
+
+    static void    RenderSubRow(const Row* subrow, int left, int top, int first_col, int last_col); ///< renders a subrow of data
 
     Scroll*        m_vscroll;          ///< vertical scroll bar on right
     Scroll*        m_hscroll;          ///< horizontal scroll bar at bottom
@@ -345,7 +377,7 @@ private:
     vector<int>    m_col_widths;       ///< the width of each of the columns goes here
     vector<ListBoxStyle> 
                    m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
-    int            m_cell_margin;      ///< the amount of space left between each edge of the cell and its contents
+    int            m_cell_margin;      ///< the amount of space left between each edge of the cell and its contents, in pixels
 
     Clr            m_int_color;        ///< color painted into the client area of the control
     Clr            m_hilite_color;     ///< color behind selected line items

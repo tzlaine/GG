@@ -42,14 +42,14 @@ namespace GG {
     from the given image file.  If the dimensions of the file image were not both powers of two, the created OpenGL texture 
     is created with dimensions to the next largest powers of two; the original image size and corresponding texture coords 
     are saved, and can be accessed through DefaultWidth(), DefaultHeight(), and DefaultTexCoords(), respectively.  These are 
-    kept so that only the originally-loaded-image part of the texture can be used, if desired.  All initialization functions 
-    first free the OpenGL texture currently in use by the texture (if any) and create a new one.  All initialization functions 
-    fail silently, performing no initialization and allocating no memory or OpenGL texture when the load filename is "" or the 
-    image parameter is 0.  XMLEncode()d Textures save the filename associated with the texture when available, so the 
-    originally loaded file can be reloaded again later.  If no such file exists, such as when a Texture is created from 
-    in-memory image data, the contents of the Texture are read from video memory, base-64 encoded, and saved as text in the 
-    XMLElement for the Texture.  A default-constructed Texture will have niether a filename nor raw image data stored in its
-    XML encoding.
+    kept so that only the originally-loaded-image part of the texture can be used, if desired.  Textures that are created
+    from memory must have power-of-two sides, as is required by GL. All initialization functions first free the OpenGL texture
+    currently in use by the texture (if any) and create a new one.  When the load filename is "" or the image parameter is 0,
+    all initialization functions fail silently, performing no initialization and allocating no memory or OpenGL texture.
+    XMLEncode()d Textures save the filename associated with the texture when available, so the originally loaded file can be
+    reloaded again later.  If no such file exists, such as when a Texture is created from in-memory image data, the contents
+    of the Texture are read from video memory, base-64 encoded, and saved as text in the XMLElement for the Texture.  A
+    default-constructed Texture will have niether a filename nor raw image data stored in its XML encoding.
     \note It is important to remember that OpenGL does not support the alteration of textures once loaded.  Texture therefore 
     also does not provide any such support. */
 class GG_API Texture

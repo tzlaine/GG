@@ -498,6 +498,11 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
         default: throw TextureException("Attempted to initialize a GG::Texture with an invalid number of color channels");
         }
 
+        int GL_texture_width = PowerOfTwo(width);
+        int GL_texture_height = PowerOfTwo(height);
+        if (width != GL_texture_width || height != GL_texture_height)
+            throw TextureException("Attempted to create a texture whose sides are not powers of two");
+
         glGenTextures(1, &m_opengl_id);
         glBindTexture(GL_TEXTURE_2D, m_opengl_id);                     // set this texture as the current opengl texture
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);   // set some relevant opengl texture parameters
@@ -508,8 +513,6 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
 
         if (mipmap) { // creating mipmapped texture
             // check to see if this texture can be created with available resources
-            int GL_texture_width = PowerOfTwo(width);
-            int GL_texture_height = PowerOfTwo(height);
             gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, channels, GL_texture_width, GL_texture_height, mode, GL_UNSIGNED_BYTE, image);
             GLint format;
             glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
@@ -518,8 +521,6 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
             else // if no, throw
                 throw TextureException("Insufficient resources to create requested mipmapped OpenGL texture");
         } else { // creating non-mipmapped texture
-            int GL_texture_width = PowerOfTwo(width);
-            int GL_texture_height = PowerOfTwo(height);
             glTexImage2D(GL_PROXY_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
             GLint format;
             glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);

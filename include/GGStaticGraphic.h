@@ -55,13 +55,15 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    Uint32   Style() const  {return m_style;}   ///< returns the style of the StaticGraphic \see StaticGraphicStyle
+    /** returns the style of the StaticGraphic \see StaticGraphicStyle */
+    Uint32   Style() const  {return m_style;}
     //@}
    
     /** \name Mutators */ //@{
     virtual bool Render();
 
-    void     SetStyle(Uint32 style)  {m_style = style; ValidateStyle();} ///< sets the style flags, and perfroms sanity checking \see StaticGraphicStyle
+    /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
+    void  SetStyle(Uint32 style)  {m_style = style; ValidateStyle();}
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticGraphic object
 

@@ -33,10 +33,6 @@
 #endif
 
 namespace GG {
-    class Texture;
-    class SubTexture;
-    class TextureManager;
-}
 
 /** This class encapsulates OpenGL texture objects.  When initialized with Load(), Texture objects create an OpenGL texture 
     from the given image file.  If the dimensions of the file image were not both powers of two, the created OpenGL texture 
@@ -52,10 +48,11 @@ namespace GG {
     XML encoding.
     \note It is important to remember that OpenGL does not support the alteration of textures once loaded.  Texture therefore 
     also does not provide any such support. */
-class GG_API GG::Texture
+class GG_API Texture
 {
 public:
-    GGEXCEPTION(TextureException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(TextureException);
 
     /** \name Structors */ //@{
     Texture();                       ///< ctor
@@ -139,10 +136,11 @@ private:
 };
 
 /** This class is a convenient way to store the info needed to use a portion of an OpenGL texture.*/
-class GG_API GG::SubTexture
+class GG_API SubTexture
 {
 public:
-    GGEXCEPTION(SubTextureException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(SubTextureException);
 
     /** \name Structors */ //@{
     SubTexture(); ///< default ctor
@@ -194,20 +192,30 @@ private:
 /** This singleton class is essentially a very thin wrapper around a map of Texture smart pointers, keyed on std::string texture names.  
     The user need only request a texture through GetTexture(); if the texture is not already resident, it will be loaded.  If the user would 
     like to create her own images and store them in the manager, that can be accomplished via StoreTexture() calls.*/
-class GG_API GG::TextureManager
+class GG_API TextureManager
 {
 public:
-    GGEXCEPTION(TextureManagerException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(TextureManagerException);
 
     /** \name Structors */ //@{
     TextureManager(); ///< ctor
     //@}
 
     /** \name Mutators */ //@{
-    shared_ptr<Texture> StoreTexture(Texture* texture, const string& texture_name); ///< stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of the manager, which will eventually delete it.
-    shared_ptr<Texture> StoreTexture(shared_ptr<Texture> texture, const string& texture_name); ///< stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of the manager, which will eventually delete it.
+    /** stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> 
+        delete \a texture; \a texture becomes the property of the manager, which will eventually delete it. */
+    shared_ptr<Texture> StoreTexture(Texture* texture, const string& texture_name);
+
+    /** stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> 
+        delete \a texture; \a texture becomes the property of the manager, which will eventually delete it. */
+    shared_ptr<Texture> StoreTexture(shared_ptr<Texture> texture, const string& texture_name);
+
     shared_ptr<Texture> GetTexture(const string& name, bool mipmap = false);  ///< returns a shared_ptr to the texture created from image file \a name; mipmapped textures are generated if \a mimap is true.  If the texture is not present in the manager's pool, it will be loaded from disk.
-    void                FreeTexture(const string& name); ///< removes the manager's shared_ptr to the texture created from image file \a name, if it exists.  \note Due to shared_ptr semantics, the texture may not be deleted until much later.
+
+    /** removes the manager's shared_ptr to the texture created from image file \a name, if it exists.  \note Due to shared_ptr semantics, 
+        the texture may not be deleted until much later. */
+    void                FreeTexture(const string& name);
     //@}
 
    static void         InitDevIL(); ///< initializes DevIL image library, if it is not already initialized
@@ -219,5 +227,7 @@ private:
     static bool                         s_il_initialized;
     map<string, shared_ptr<Texture> >   m_textures;
 };
+
+} // namespace GG
 
 #endif // _GGTexture_h_

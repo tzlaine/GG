@@ -41,13 +41,12 @@
 #endif
 
 namespace GG {
-    class Wnd;
-    class EventPumpBase;
-    class Texture;
-    class XMLElement;
-    struct AppImplData;
-    class App;
-}
+
+class Wnd;
+class EventPumpBase;
+class Texture;
+class XMLElement;
+struct AppImplData;
 
 /** An abstract base for an application framework class to drive the GG GUI.  
     This class has all the essential services that GG requires: 
@@ -91,7 +90,7 @@ namespace GG {
     keep the mouse perfectly still, there will probably be no events sent to the scrollbar control after the first 
     button-down event.  When enabled, mouse drag repeat sends messages to the scrollbar when there otherwise would be none.
 */
-class GG_API GG::App
+class GG_API App
 {
 private:
     struct OrCombiner 
@@ -186,7 +185,10 @@ public:
 
     shared_ptr<Font>    GetFont(const string& font_filename, int pts, Uint32 range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the desired font
     void                FreeFont(const string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
-    shared_ptr<Texture> StoreTexture(Texture* texture, const string& texture_name); ///< adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that
+
+    /** adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that. */
+    shared_ptr<Texture> StoreTexture(Texture* texture, const string& texture_name);
+
     shared_ptr<Texture> StoreTexture(shared_ptr<Texture> texture, const string& texture_name); ///< adds an already-constructed texture to the managed pool
     shared_ptr<Texture> GetTexture(const string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                FreeTexture(const string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
@@ -224,12 +226,14 @@ private:
 };
 
 template<class InIt> 
-bool GG::App::OrCombiner::operator()(InIt first, InIt last) const
+bool App::OrCombiner::operator()(InIt first, InIt last) const
 {
     bool retval = false;
     while (first != last)
         retval |= *first++;
     return retval;
 }
+
+} // namespace GG
 
 #endif // _GGApp_h_

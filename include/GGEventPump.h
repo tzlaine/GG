@@ -33,14 +33,10 @@
 #endif
 
 namespace GG {
-    struct EventPumpState;
-    class EventPumpBase;
-    class EventPump;
-}
 
 /** encapsulates the state of GG event pumping.  A single state object is shared by all EventPumps, 
     to ensure state consistency. */
-struct GG_API GG::EventPumpState
+struct GG_API EventPumpState
 {
     EventPumpState(); ///< default ctor.
 
@@ -60,7 +56,7 @@ struct GG_API GG::EventPumpState
 
 /** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::App functionality; 
     users who wish to define a new type of event pump should do so by inheriting from EventPump instead of this class. */
-class GG_API GG::EventPumpBase
+class GG_API EventPumpBase
 {
 protected:
     /** executes everything but the system event handling portion of the event handling and rendering cycle. 
@@ -85,11 +81,13 @@ protected:
     \note Modal Wnds use EventPumps to implement their modality.  This means that you must write your App-derived 
     class's HandleSystemEvents() in such a way that it can handle modal Wnd events to your satisfaction, since the 
     type of EventPump that modal Wnds use is fixed. */
-class GG_API GG::EventPump : public GG::EventPumpBase
+class GG_API EventPump : public EventPumpBase
 {
 public:
     /** cycles through event-handling and rendering, calling App::HandleSystemEvents() and then EventPumpBase::LoopBody(). */
     virtual void operator()();
 };
+
+} // namespace GG
 
 #endif // _GGEventPump_h_

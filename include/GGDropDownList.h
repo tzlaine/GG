@@ -87,11 +87,20 @@ public:
     bool           Empty() const              {return m_LB->Empty();}       ///< returns true when the list is empty
     const Row&     GetItem(int n) const       {return m_LB->GetRow(n);}     ///< returns a const reference to the row at index \a n; not range-checked
     bool           Selected(int n) const      {return m_LB->Selected(n);}   ///< returns true if row \a n is selected
-    Uint32         Style() const              {return m_LB->Style();}       ///< returns the style flags of the list \see GG::ListBoxStyle
-    int            RowHeight() const          {return m_LB->RowHeight();}   ///< returns the default row height. \note Unlike a ListBox, every row has the same height.
+
+    /** returns the style flags of the list \see GG::ListBoxStyle */
+    Uint32         Style() const              {return m_LB->Style();}
+
+    /** returns the default row height. \note Unlike a ListBox, every row has the same height. */
+    int            RowHeight() const          {return m_LB->RowHeight();}
+
     int            NumRows() const            {return m_LB->NumRows();}     //< returns the total number of items in the list
     int            NumCols() const            {return m_LB->NumCols();}     ///< returns the total number of columns in each list item
-    int            SortCol() const            {return m_LB->SortCol();}     ///< returns the index of the column used to sort items, when sorting is enabled.  \note The sort column is not range checked when it is set by the user; it may be < 0 or >= NumCols().
+
+    /** returns the index of the column used to sort items, when sorting is enabled.  \note The sort column is not range checked when 
+        it is set by the user; it may be < 0 or >= NumCols(). */
+    int            SortCol() const            {return m_LB->SortCol();}
+
     int            ColWidth(int n) const      {return m_LB->ColWidth(n);}   ///< returns the width of column \a n in pixels; not range-checked
     ListBoxStyle   ColAlignment(int n) const  {return m_LB->ColAlignment(n);}///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
     ListBoxStyle   RowAlignment(int n) const  {return m_LB->RowAlignment(n);}///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
@@ -117,12 +126,19 @@ public:
     Row&           GetRow(int n) {return m_LB->GetRow(n);}      ///< returns a reference to the Row at row index \a n; not range-checked
    
     void           Select(int row);                                      ///< selects row-item \a row in the list
-    void           SetStyle(Uint32 s);                                   ///< sets the style flags for the list to \a s (invalidates currently selected item). \see GG::ListBoxStyle
+
+    /** sets the style flags for the list to \a s (invalidates currently selected item). \see GG::ListBoxStyle */
+    void           SetStyle(Uint32 s);
+
     void           SetRowHeight(int h)        {m_LB->SetRowHeight(h);};  ///< sets the row height
     void           SetNumCols(int n)          {m_LB->SetNumCols(n);}     ///< sets the number of columns in each list item to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);                                    ///< sets the index of the column used to sort rows when sorting is enabled (invalidates currently selected item); not range-checked
     void           SetColWidth(int n, int w)  {m_LB->SetColWidth(n, w);} ///< sets the width of column \n to \a w; not range-checked
-    void           LockColWidths()            {m_LB->LockColWidths();}   ///< fixes the column widths; by default, an empty list will take on the number of columns of its first added row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called.
+
+    /** fixes the column widths; by default, an empty list will take on the number of columns of its first added row. \note The number 
+        of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called. */
+    void           LockColWidths()            {m_LB->LockColWidths();}
+
     void           UnLockColWidths()          {m_LB->UnLockColWidths();} ///< allows the number of columns to be determined by the first row added to an empty ListBox
     void           SetColAlignment(int n, ListBoxStyle align) 
                                               {m_LB->SetColAlignment(n, align);} ///< sets the alignment of column \a n to \a align; not range-checked

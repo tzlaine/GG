@@ -51,7 +51,8 @@ class Font;
 class GG_API FileDlg : public Wnd
 {
 public:
-    GGEXCEPTION(InitialDirectoryDoesNotExistException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(InitialDirectoryDoesNotExistException);
 
     /** \name Structors */ //@{
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, 

@@ -44,7 +44,8 @@ class Wnd;
 class GG_API ZList : public list<Wnd*>
 {
 public:
-    GGEXCEPTION(ZListException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(ZListException);
 
     /** \name Accessors */ //@{
     Wnd* Pick(const Pt& pt, Wnd* modal) const;  ///< returns pointer to the window under the point pt; constrains pick to modal if nonzero

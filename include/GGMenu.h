@@ -126,7 +126,10 @@ public:
     const MenuItem&   AllMenus() const {return m_menu_data;}                   ///< returns a const reference to the MenuItem that contains all the menus and their contents
     bool              ContainsMenu(const string& str) const;                   ///< returns true if there is a top-level menu in the MenuBar whose label is \a str
     int               NumMenus() const {return m_menu_data.next_level.size();} ///< returns the number of top-level menus in the MenuBar
-    const MenuItem&   GetMenu(const string& str) const;                        ///< returns a const reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists.
+
+    /** returns a const reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists. */
+    const MenuItem&   GetMenu(const string& str) const;
+
     const MenuItem&   GetMenu(int n) const;                                    ///< returns a const reference to the \a nth menu in the MenuBar; not range-checked
    
     Clr               BorderColor() const        {return m_border_color;}   ///< returns the color used to render the border of the control
@@ -151,7 +154,10 @@ public:
     virtual void   SizeMove(int x1, int y1, int x2, int y2);
 
     MenuItem&      AllMenus() {return m_menu_data;}                   ///< returns a reference to the MenuItem that contains all the menus and their contents
-    MenuItem&      GetMenu(const string& str);                        ///< returns a reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists.
+
+    /** returns a reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists. */
+    MenuItem&      GetMenu(const string& str);
+
     MenuItem&      GetMenu(int n) {return m_menu_data.next_level[n];} ///< returns a reference to the \a nth menu in the MenuBar; not range-checked
     void           AddMenu(const MenuItem& menu);                     ///< adds \a menu to the end of the top level of menus
    

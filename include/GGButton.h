@@ -62,7 +62,9 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    ButtonState       State() const                             {return m_state;}             ///< returns button state \see ButtonState
+    /** returns button state \see ButtonState */
+    ButtonState       State() const                             {return m_state;}
+
     const SubTexture& UnpressedGraphic() const                  {return m_unpressed_graphic;} ///< sets a SubTexture to be used as the image of the button when unpressed
     const SubTexture& PressedGraphic() const                    {return m_pressed_graphic;}   ///< sets a SubTexture to be used as the image of the button when pressed
     const SubTexture& RolloverGraphic() const                   {return m_rollover_graphic;}  ///< sets a SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
@@ -87,7 +89,9 @@ public:
     virtual void   MouseLeave(const Pt& pt, Uint32 keys)           {if (!Disabled()) m_state = BN_UNPRESSED;}
 
     virtual void   SetColor(Clr c)                                 {Control::SetColor(c);}   ///< sets the control's color; does not affect the text color
-    void           SetState(ButtonState state)                     {m_state = state;}      ///< sets button state programmatically \see ButtonState
+
+    /** sets button state programmatically \see ButtonState */
+    void           SetState(ButtonState state)                     {m_state = state;}
     //@}
 
 protected:
@@ -163,7 +167,9 @@ public:
     /** \name Accessors */ //@{
     bool             Checked() const                {return m_checked;}    ///< returns true if button is checked
     Clr              InteriorColor() const          {return m_int_color;}  ///< returns the interior color of the box, circle, or other enclosing shape
-    StateButtonStyle Style() const                  {return m_style;}      ///< returns the visual style of the button \see StateButtonStyle
+
+    /** returns the visual style of the button \see StateButtonStyle */
+    StateButtonStyle Style() const                  {return m_style;}
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
 
@@ -177,7 +183,9 @@ public:
     void             SetCheck(bool b = true)        {m_checked_sig(m_checked = b);} ///< (un)checks button
     virtual void     SetColor(Clr c)                {Control::SetColor(c);} ///< sets the color of the button; does not affect text color
     void             SetInteriorColor(Clr c)        {m_int_color = c;}     ///< sets the interior color of the box, circle, or other enclosing shape
-    void             SetStyle(StateButtonStyle bs)  {m_style = bs;}        ///< sets the visual style of the button \see StateButtonStyle
+
+    /** sets the visual style of the button \see StateButtonStyle */
+    void             SetStyle(StateButtonStyle bs)  {m_style = bs;}
     //@}
 
 protected:

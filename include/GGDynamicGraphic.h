@@ -117,12 +117,19 @@ public:
     double   FPS() const          {return m_FPS;}               ///< returns the number of frames playing per second; may be positive, 0, or negative
     int      FrameIndex() const   {return m_curr_frame;}        ///< returns the index of the currently-shown frame; -1 if none
     int      TimeIndex() const    {return m_last_frame_time;}   ///< returns the time in ms (measured from the time of the first frame); -1 if none
-    int      StartFrame() const   {return m_first_frame_idx;}   ///< returns the index of the earliest frame to be shown during playback.  \note when playing backwards this will be the last frame shown.
-    int      EndFrame() const     {return m_last_frame_idx;}    ///< returns the index of the latest frame to be shown during playback.  \note when playing backwards this will be the first frame shown.
+
+    /** returns the index of the earliest frame to be shown during playback.  \note when playing backwards this will be the last frame shown. */
+    int      StartFrame() const   {return m_first_frame_idx;}
+
+    /** returns the index of the latest frame to be shown during playback.  \note when playing backwards this will be the first frame shown. */
+    int      EndFrame() const     {return m_last_frame_idx;}
+
     int      Margin() const       {return m_margin;}            ///< returns the number of pixels placed between frames and between the frames and the Texture edges
     int      FrameWidth() const   {return m_frame_width;}       ///< returns the original width of the control (and the width of the frame images)
     int      FrameHeight() const  {return m_frame_height;}      ///< returns the original height of the control (and the height of the frame images)
-    Uint32   Style() const        {return m_style;}             ///< returns the style of the DynamicGraphic \see StaticGraphicStyle
+
+    /** returns the style of the DynamicGraphic \see StaticGraphicStyle */
+    Uint32   Style() const        {return m_style;}
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a DynamicGraphic object
 
@@ -160,12 +167,29 @@ public:
     void  PrevFrame();               ///< decrements the frame index by 1.  If Looping() == true and the next frame would be be past the first, the last frame is shown.  Pauses playback.
     void  Stop();                    ///< stops playback and resets the frame index to 0
     void  Loop(bool b = true);       ///< turns looping of playback on or off
-    void  SetFPS(double fps);        ///< sets the frames per second playback speed (default is 15.0 FPS).  Negative rates indicate reverse playback.  \note Calling SetFPS(0.0) is equivalent to calling Pause().
+
+    /** sets the frames per second playback speed (default is 15.0 FPS).  Negative rates indicate reverse playback.  \note Calling SetFPS(0.0) 
+        is equivalent to calling Pause(). */
+    void  SetFPS(double fps);
+
     void  SetFrameIndex(int idx);    ///< sets the frame index to \a idx ( value is locked to range [0, Frames()] )
-    void  SetTimeIndex(int idx);     ///< sets the frame index to the frame nearest time index \a idx, where \a idx measures time in ms from the beginning of the animation ( value is locked to range [0, Frames() * FPS()) ).  \note If looping is enabled, the time index may be any value >= 0.0, and values will "wrap" around the length of a loop.  If looping is disabled, any time index \a idx that is later than Frames() * FPS() is mapped to the last frame.
-    void  SetStartFrame(int idx);    ///< sets the index of the first frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards this will be the last frame shown.
-    void  SetEndFrame(int idx);      ///< sets the index of the last frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards this will be the first frame shown.
-    void  SetStyle(Uint32 style);    ///< sets the style flags, and perfroms sanity checking \see StaticGraphicStyle
+
+    /** sets the frame index to the frame nearest time index \a idx, where \a idx measures time in ms from the beginning of the animation 
+        ( value is locked to range [0, Frames() * FPS()) ).  \note If looping is enabled, the time index may be any value >= 0.0, and values 
+        will "wrap" around the length of a loop.  If looping is disabled, any time index \a idx that is later than Frames() * FPS() is mapped 
+        to the last frame. */
+    void  SetTimeIndex(int idx);
+
+    /** sets the index of the first frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards 
+        this will be the last frame shown. */
+    void  SetStartFrame(int idx);
+
+    /** sets the index of the last frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards 
+        this will be the first frame shown. */
+    void  SetEndFrame(int idx);
+
+    /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
+    void  SetStyle(Uint32 style);
     //@}
 
 protected:

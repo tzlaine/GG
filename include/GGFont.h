@@ -118,14 +118,15 @@ public:
     {
         RenderState() : ignore_tags(false), use_italics(false), draw_underline(false), color_set(false) {} ///< default ctor
 
-        bool    ignore_tags;        ///< set to true upon encountering a \<pre> tag, and to false when a \</pre> tag is seen
+        bool    ignore_tags;        ///< set to true upon encountering a \<pre\> tag, and to false when a \</pre\> tag is seen
         bool    use_italics;        ///< set to true upon encountering an \<i> tag, and to false when an \</i> tag is seen
         bool    draw_underline;     ///< set to true upon encountering an \<u> tag, and to false when an \</u> tag is seen
         bool    color_set;          ///< true when a tag has set the current color
         Clr     curr_color;         ///< the current text color (as set by a tag)
     };
 
-    GGEXCEPTION(FontException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(FontException);
 
     /** the ranges of character glyphs to be rendered in this font*/
     enum GlyphRange {NUMBER = 1,                ///< only the numbers ('0' - '9')
@@ -145,7 +146,10 @@ public:
     /** \name Accessors */ //@{
     const string&     FontName() const     {return m_font_filename;}  ///< returns the name of the file from which this font was created
     int               PointSize() const    {return m_pt_sz;}          ///< returns the point size in which the characters in the font object are rendered
-    int               GetGlyphRange() const{return m_glyph_range;}    ///< returns the range(s) of characters rendered in the font \see GlyphRange
+
+    /** returns the range(s) of characters rendered in the font \see GlyphRange */
+    int               GetGlyphRange() const{return m_glyph_range;}
+
     int               Ascent() const       {return m_ascent;}         ///< returns the maximum amount above the baseline the text can go, in pixels
     int               Descent() const      {return m_descent;}        ///< returns the maximum amount below the baseline the text can go, in pixels
     int               Height() const       {return m_height;}         ///< returns (Ascent() - Descent()), in pixels
@@ -166,7 +170,7 @@ public:
    
     static void       RegisterKnownTag(const string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
     static void       RemoveKnownTag(const string& tag);     ///< removes \a tag from the known tag list
-    static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre>.
+    static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
     static void       FindFormatTag(const string& text, int idx, Tag& tag, bool ignore_tags = false); ///< fills \a tag with the data on the first tag found from location \a idx in \a text
 
 private:
@@ -245,7 +249,8 @@ private:
     };
 
 public:
-    GGEXCEPTION(FontManagerException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(FontManagerException);
 
     /** \name Structors */ //@{
     FontManager(); ///< ctor

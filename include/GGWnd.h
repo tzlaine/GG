@@ -82,7 +82,8 @@ public:
                   MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
                  };
 
-    GGEXCEPTION(WndException);   ///< exception class \see GG::GGEXCEPTION
+    /** exception class \see GG::GGEXCEPTION */
+    GGEXCEPTION(WndException);
 
     /** \name Structors */ //@{
     virtual ~Wnd(); ///< virtual dtor
@@ -115,7 +116,8 @@ public:
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/
     virtual Pt     ClientLowerRight() const   {return LowerRight();}
 
-    Pt             ClientSize() const         {return ClientLowerRight() - ClientUpperLeft();} ///< \see Size()
+    /** returns the size of the client area \see Size() */
+    Pt             ClientSize() const         {return ClientLowerRight() - ClientUpperLeft();}
 
     Pt             ScreenToWindow(const Pt& pt) const   {return pt - UpperLeft();}       ///< returns \a pt translated from screen- to window-coordinates
     Pt             ScreenToClient(const Pt& pt) const   {return pt - ClientUpperLeft();} ///< returns \a pt translated from screen- to client-coordinates
@@ -165,8 +167,13 @@ public:
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);             ///< respond to release of left mouse button outside window, if it was originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not currently over the window when this happens.
     virtual void   LClick(const Pt& pt, Uint32 keys);                ///< respond to release of left mouse button over window, if it was also originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well.
     virtual void   LDoubleClick(const Pt& pt, Uint32 keys);          ///< respond to second left click in window within the time limit.  A window will receive an LButtonUp() message instead of an LButtonDown() or LClick() message if the left input device button is pressed over a window that was l-clicked within a double-click time interval.  Note that this means a double click is always preceded by a click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in during the interval.
-    virtual void   RButtonDown(const Pt& pt, Uint32 keys);           ///< respond to right button down msg. \see LButtonDown()
-    virtual void   RClick(const Pt& pt, Uint32 keys);                ///< respond to release of right mouse button over window, if it was also originally depressed over window. \see LButtonUp()
+
+    /** respond to right button down msg. \see LButtonDown() */
+    virtual void   RButtonDown(const Pt& pt, Uint32 keys);
+
+    /** respond to release of right mouse button over window, if it was also originally depressed over window. \see LButtonUp() */
+    virtual void   RClick(const Pt& pt, Uint32 keys);
+
     virtual void   RDoubleClick(const Pt& pt, Uint32 keys);          ///< respond to second right click in window within the time limit.  A window will receive an RButtonUp() message instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that was r-clicked within a double-click time interval  Note that this means a double click is always preceded by a click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in during the interval.
     virtual void   MouseEnter(const Pt& pt, Uint32 keys);            ///< respond to cursor entering window's coords
     virtual void   MouseHere(const Pt& pt, Uint32 keys);             ///< respond to cursor moving about in window's coords.  A MouseHere() message will not be generated the first time the cursor enters the window's area.  In that case, a MouseEnter() message is generated.

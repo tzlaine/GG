@@ -25,17 +25,15 @@
 /* $Header$ */
 
 #include "SDL/SDLGGApp.h"
+#include "GGEventPump.h"
 
 using std::string;
 
 // member functions
 SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
-    GG::App(app_name),
+    App(app_name),
     m_app_width(w),
-    m_app_height(h),
-    m_delta_t(1),
-    m_FPS(-1.0),
-    m_calc_FPS(calc_FPS)
+    m_app_height(h)
 {
 }
 
@@ -46,7 +44,7 @@ SDLGGApp::~SDLGGApp()
 
 SDLGGApp* SDLGGApp::GetApp()
 {
-    return dynamic_cast<SDLGGApp*>(GG::App::GetApp());
+    return dynamic_cast<SDLGGApp*>(App::GetApp());
 }
 
 void SDLGGApp::Exit(int code)
@@ -56,20 +54,9 @@ void SDLGGApp::Exit(int code)
     exit(code);
 }
 
-void SDLGGApp::CalcuateFPS(bool b/* = true*/)
+void SDLGGApp::Wait(int ms)
 {
-    m_calc_FPS = b;
-    if (!b) 
-        m_FPS = -1.0f;
-}
-
-const string& SDLGGApp::FPSString() const
-{
-    static string retval;
-    char buf[64];
-    sprintf(buf, "%.2f frames per second", m_FPS);
-    retval = buf;
-    return retval;
+    SDL_Delay(ms);
 }
 
 GG::Key SDLGGApp::GGKeyFromSDLKey(const SDL_keysym& key)
@@ -182,51 +169,71 @@ void SDLGGApp::GLInit()
     Logger().debugStream() << "GLInit() complete.";
 }
 
-void SDLGGApp::HandleSDLEvent(const SDL_Event& event)
+void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
 {
-    bool send_to_gg = false;
-    GG::App::EventType gg_event;
-    GG::Key key = GGKeyFromSDLKey(event.key.keysym);
-    Uint32 key_mods = SDL_GetModState();
-    GG::Pt mouse_pos(event.motion.x, event.motion.y);
-    GG::Pt mouse_rel(event.motion.xrel, event.motion.yrel);
+    // handle events
+    SDL_Event event;
+#if defined(GG_USE_NET) && GG_USE_NET
+    while (0 < FE_PollEvent(&event)) {
+#else
+    while (0 < SDL_PollEvent(&event)) {
+#endif // GG_USE_NET
+        if (event.type  == SDL_MOUSEBUTTONDOWN || event.type  == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEMOTION)
+            last_mouse_event_time = Ticks();
 
-    switch(event.type) {
-    case SDL_KEYDOWN:
-        if (key < GG::GGK_NUMLOCK)
+        bool send_to_gg = false;
+        EventType gg_event;
+        GG::Key key = GGKeyFromSDLKey(event.key.keysym);
+        Uint32 key_mods = SDL_GetModState();
+        GG::Pt mouse_pos(event.motion.x, event.motion.y);
+        GG::Pt mouse_rel(event.motion.xrel, event.motion.yrel);
+
+        switch (event.type) {
+        case SDL_KEYDOWN:
+            if (key < GG::GGK_NUMLOCK)
+                send_to_gg = true;
+            gg_event = KEYPRESS;
+            break;
+        case SDL_MOUSEMOTION:
             send_to_gg = true;
-        gg_event = GG::App::KEYPRESS;
-        break;
-    case SDL_MOUSEMOTION:
-        send_to_gg = true;
-        gg_event = GG::App::MOUSEMOVE;
-        break;
-    case SDL_MOUSEBUTTONDOWN:
-        send_to_gg = true;
-        switch (event.button.button) {
-        case SDL_BUTTON_LEFT:      gg_event = GG::App::LPRESS; break;
-        case SDL_BUTTON_MIDDLE:    gg_event = GG::App::MPRESS; break;
-        case SDL_BUTTON_RIGHT:     gg_event = GG::App::RPRESS; break;
-        case SDL_BUTTON_WHEELUP:   gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
-        case SDL_BUTTON_WHEELDOWN: gg_event = GG::App::MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
+            gg_event = MOUSEMOVE;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            send_to_gg = true;
+            switch (event.button.button) {
+                case SDL_BUTTON_LEFT:      gg_event = LPRESS; break;
+                case SDL_BUTTON_MIDDLE:    gg_event = MPRESS; break;
+                case SDL_BUTTON_RIGHT:     gg_event = RPRESS; break;
+                case SDL_BUTTON_WHEELUP:   gg_event = MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
+                case SDL_BUTTON_WHEELDOWN: gg_event = MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
+            }
+            key_mods = SDL_GetModState();
+            break;
+        case SDL_MOUSEBUTTONUP:
+            send_to_gg = true;
+            switch (event.button.button) {
+                case SDL_BUTTON_LEFT:   gg_event = LRELEASE; break;
+                case SDL_BUTTON_MIDDLE: gg_event = MRELEASE; break;
+                case SDL_BUTTON_RIGHT:  gg_event = RRELEASE; break;
+            }
+            key_mods = SDL_GetModState();
+            break;
         }
-        key_mods = SDL_GetModState();
-        break;
-    case SDL_MOUSEBUTTONUP:
-        send_to_gg = true;
-        switch (event.button.button) {
-        case SDL_BUTTON_LEFT:   gg_event = GG::App::LRELEASE; break;
-        case SDL_BUTTON_MIDDLE: gg_event = GG::App::MRELEASE; break;
-        case SDL_BUTTON_RIGHT:  gg_event = GG::App::RRELEASE; break;
-        }
-        key_mods = SDL_GetModState();
-        break;
+
+        if (send_to_gg)
+            HandleGGEvent(gg_event, key, key_mods, mouse_pos, mouse_rel);
+        else
+            HandleNonGGEvent(event);
+    }
+}
+
+void SDLGGApp::HandleNonGGEvent(const SDL_Event& event)
+{
+    switch (event.type) {
     case SDL_QUIT:
         Exit(0);
         break;
     }
-    if (send_to_gg)
-        GG::App::HandleEvent(gg_event, key, key_mods, mouse_pos, mouse_rel);
 }
 
 void SDLGGApp::RenderBegin()
@@ -251,103 +258,13 @@ void SDLGGApp::SDLQuit()
     Logger().debugStream() << "SDLQuit() complete.";
 }
 
-void SDLGGApp::PollAndRender()
-{
-    static int last_FPS_time = 0;
-    static int last_frame_time = 0;
-    static int most_recent_time = 0;
-    static int time = 0;
-    static int frames = 0;
-
-    static int last_mouse_event_time = 0;
-    static int mouse_drag_repeat_start_time = 0;
-    static int last_mouse_drag_repeat_time = 0;
-    static int old_mouse_repeat_delay = MouseRepeatDelay();
-    static int old_mouse_repeat_interval = MouseRepeatInterval();
-
-    // handle events
-    SDL_Event event;
-#if defined(GG_USE_NET) && GG_USE_NET
-    while (0 < FE_PollEvent(&event)) {
-#else
-    while (0 < SDL_PollEvent(&event)) {
-#endif // GG_USE_NET
-        if (event.type  == SDL_MOUSEBUTTONDOWN || event.type  == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEMOTION)
-            last_mouse_event_time = time;
-        HandleSDLEvent(event);
-    }
-
-    // handle mouse drag repeats
-    if (old_mouse_repeat_delay != MouseRepeatDelay() || old_mouse_repeat_interval != MouseRepeatInterval()) { // if there's a change in the values, zero everything out and start the counting over
-        old_mouse_repeat_delay = MouseRepeatDelay();
-        old_mouse_repeat_interval = MouseRepeatInterval();
-        mouse_drag_repeat_start_time = 0;
-        last_mouse_drag_repeat_time = 0;
-    }
-    int x, y;
-    // if drag repeat is enabled, the left mouse button is depressed (a drag is ocurring), and the last event processed wasn't too recent
-    if (MouseRepeatDelay() && SDL_GetMouseState(&x, &y) & SDL_BUTTON_LEFT && time - last_mouse_event_time > old_mouse_repeat_interval) {
-        if (!mouse_drag_repeat_start_time) { // if we're just starting the drag, mark the time we started
-            mouse_drag_repeat_start_time = time;
-        } else if (mouse_drag_repeat_start_time == MouseRepeatDelay()) { // if we're counting repeat intervals
-            if (time - last_mouse_drag_repeat_time > MouseRepeatInterval()) {
-                last_mouse_drag_repeat_time = time;
-                event.type = SDL_MOUSEMOTION;
-                event.motion.x = x;
-                event.motion.y = y;
-                event.motion.xrel = event.motion.yrel = 0; // this is just an update, so set the motion to 0
-                HandleSDLEvent(event);
-            }
-        } else if (time - mouse_drag_repeat_start_time > MouseRepeatDelay()) { // if we're done waiting for the initial delay period
-            mouse_drag_repeat_start_time = MouseRepeatDelay(); // set this as equal so we know later that we've passed the delay interval
-            last_mouse_drag_repeat_time = time;
-            event.type = SDL_MOUSEMOTION;
-            event.motion.x = x;
-            event.motion.y = y;
-            event.motion.xrel = event.motion.yrel = 0;
-            HandleSDLEvent(event);
-        }
-    } else { // otherwise, reset the mouse drag repeat start time to zero
-        mouse_drag_repeat_start_time = 0;
-    }
-
-    time = Ticks();
-
-    // govern FPS speed if needed
-    if (double max_FPS = MaxFPS()) {
-        double min_ms_per_frame = 1000.0 * 1.0 / max_FPS;
-        double ms_to_wait = min_ms_per_frame - (time - last_frame_time);
-        if (0.0 < ms_to_wait)
-            SDL_Delay(ms_to_wait);
-    }
-    last_frame_time = time;
-
-    // track FPS if needed
-    m_delta_t = time - most_recent_time;
-    if (m_calc_FPS) {
-        ++frames;
-        if (1000 < time - last_FPS_time) { // calculate FPS at most once a second
-            m_FPS = frames / ((time - last_FPS_time) / 1000.0);
-            last_FPS_time = time;
-            frames = 0;
-        }
-    }
-    most_recent_time = time;
-
-    // do one iteration of the render loop
-    Update();
-    RenderBegin();
-    Render();
-    RenderEnd();
-}
-
 void SDLGGApp::Run()
 {
     try {
         SDLInit();
         Initialize();
-        while (1)
-            PollAndRender();
+        GG::EventPump pump;
+        pump();
     } catch (const std::invalid_argument& exception) {
         Logger().fatal("std::invalid_argument Exception caught in App::Run(): " + string(exception.what()));
         Exit(1);

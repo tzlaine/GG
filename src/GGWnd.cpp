@@ -27,10 +27,31 @@
 #include "GGWnd.h"
 
 #include <GGApp.h>
+#include <GGEventPump.h>
 #include <XMLValidators.h>
 
 
-namespace GG {
+using namespace GG;
+
+namespace {
+    // an EventPump that terminates when its m_done reference member is true
+    class ModalEventPump : public EventPump
+    {
+    public:
+        ModalEventPump(const bool& done) : m_done(done) {}
+        virtual void operator()()
+        {
+            App* app = App::GetApp();
+            EventPumpState& state = State();
+            while (!m_done) {
+                app->HandleSystemEvents(state.last_mouse_event_time);
+                LoopBody(app, state, true, true);
+            }
+        }
+    private:
+        const bool& m_done;
+    };
+}
 
 ///////////////////////////////////////
 // class GG::Wnd
@@ -87,7 +108,7 @@ Wnd::Wnd(const XMLElement& elem) :
     string flags_str = elem.Child("m_flags").Text();
     vector<string> tokens = Tokenize(flags_str);
     for (unsigned int i = 0; i < tokens.size(); ++i) {
-	m_flags |= GetEnumMap<Wnd::WndFlag>().FromString(tokens[i]);
+        m_flags |= GetEnumMap<Wnd::WndFlag>().FromString(tokens[i]);
     }
 }
 
@@ -426,15 +447,15 @@ int Wnd::Run()
 {
     int retval = 0;
     if (m_flags & MODAL) {
-        App& app = *App::GetApp();
-        Wnd* old_focus_wnd = app.FocusWnd();
-        app.RegisterModal(this);
+        App* app = App::GetApp();
+        Wnd* old_focus_wnd = app->FocusWnd();
+        app->RegisterModal(this);
 
-        while (!m_done)
-            app.PollAndRender();
+        ModalEventPump pump(m_done);
+        pump();
 
-        app.Remove(this);
-        app.SetFocusWnd(old_focus_wnd);
+        app->Remove(this);
+        app->SetFocusWnd(old_focus_wnd);
 
         retval = 1;
     }
@@ -508,6 +529,3 @@ void Wnd::HandleEvent(const Event& event)
 	    break;
     }
 }
-
-} // namespace GG
-

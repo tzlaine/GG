@@ -49,53 +49,53 @@
 
 #include <cassert>
 
-namespace GG {
+using namespace GG;
 
 namespace {
-// these generate Wnd-subclass objects for the Wnd factory
-Wnd* NewTextControl(const XMLElement& elem)       {return new TextControl(elem);}
-Wnd* NewStaticGraphic(const XMLElement& elem)     {return new StaticGraphic(elem);}
-Wnd* NewDynamicGraphic(const XMLElement& elem)    {return new DynamicGraphic(elem);}
-Wnd* NewButton(const XMLElement& elem)            {return new Button(elem);}
-Wnd* NewStateButton(const XMLElement& elem)       {return new StateButton(elem);}
-Wnd* NewRadioButtonGroup(const XMLElement& elem)  {return new RadioButtonGroup(elem);}
-Wnd* NewEdit(const XMLElement& elem)              {return new Edit(elem);}
-Wnd* NewScroll(const XMLElement& elem)            {return new Scroll(elem);}
-Wnd* NewListBox(const XMLElement& elem)           {return new ListBox(elem);}
-Wnd* NewListBoxRow(const XMLElement& elem)        {return new ListBox::Row(elem);}
-Wnd* NewMenuBar(const XMLElement& elem)           {return new MenuBar(elem);}
-Wnd* NewMultiEdit(const XMLElement& elem)         {return new MultiEdit(elem);}
-Wnd* NewDropDownList(const XMLElement& elem)      {return new DropDownList(elem);}
-Wnd* NewSpinInt(const XMLElement& elem)           {return new Spin<int>(elem);}
-Wnd* NewSpinDouble(const XMLElement& elem)        {return new Spin<double>(elem);}
-Wnd* NewSlider(const XMLElement& elem)            {return new Slider(elem);}
+    // these generate Wnd-subclass objects for the Wnd factory
+    Wnd* NewTextControl(const XMLElement& elem)       {return new TextControl(elem);}
+    Wnd* NewStaticGraphic(const XMLElement& elem)     {return new StaticGraphic(elem);}
+    Wnd* NewDynamicGraphic(const XMLElement& elem)    {return new DynamicGraphic(elem);}
+    Wnd* NewButton(const XMLElement& elem)            {return new Button(elem);}
+    Wnd* NewStateButton(const XMLElement& elem)       {return new StateButton(elem);}
+    Wnd* NewRadioButtonGroup(const XMLElement& elem)  {return new RadioButtonGroup(elem);}
+    Wnd* NewEdit(const XMLElement& elem)              {return new Edit(elem);}
+    Wnd* NewScroll(const XMLElement& elem)            {return new Scroll(elem);}
+    Wnd* NewListBox(const XMLElement& elem)           {return new ListBox(elem);}
+    Wnd* NewListBoxRow(const XMLElement& elem)        {return new ListBox::Row(elem);}
+    Wnd* NewMenuBar(const XMLElement& elem)           {return new MenuBar(elem);}
+    Wnd* NewMultiEdit(const XMLElement& elem)         {return new MultiEdit(elem);}
+    Wnd* NewDropDownList(const XMLElement& elem)      {return new DropDownList(elem);}
+    Wnd* NewSpinInt(const XMLElement& elem)           {return new Spin<int>(elem);}
+    Wnd* NewSpinDouble(const XMLElement& elem)        {return new Spin<double>(elem);}
+    Wnd* NewSlider(const XMLElement& elem)            {return new Slider(elem);}
 
-// returns true if lwnd == rwnd or if lwnd contains rwnd
-inline bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd)
-{
-    return (rwnd == lwnd || (rwnd && rwnd->RootParent() == lwnd));
-}
+    // returns true if lwnd == rwnd or if lwnd contains rwnd
+    inline bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd)
+    {
+        return (rwnd == lwnd || (rwnd && rwnd->RootParent() == lwnd));
+    }
 
-/* returns the storage value of key_mods that should be used with keyboard accelerators
-    the accelerators don't care which side of the keyboard you use for CTRL, SHIFT, etc.,
-    and whether or not the numlock or capslock are engaged.*/
-Uint32 MassagedAccelKeyMods(Uint32 key_mods)
-{
-    key_mods &= ~(GGKMOD_NUM | GGKMOD_CAPS);
-    if (key_mods & GGKMOD_CTRL)
-        key_mods |= GGKMOD_CTRL;
-    if (key_mods & GGKMOD_SHIFT)
-        key_mods |= GGKMOD_SHIFT;
-    if (key_mods & GGKMOD_ALT)
-        key_mods |= GGKMOD_ALT;
-    if (key_mods & GGKMOD_META)
-        key_mods |= GGKMOD_META;
-    return key_mods;
-}
+    /* returns the storage value of key_mods that should be used with keyboard accelerators
+        the accelerators don't care which side of the keyboard you use for CTRL, SHIFT, etc.,
+        and whether or not the numlock or capslock are engaged.*/
+    Uint32 MassagedAccelKeyMods(Uint32 key_mods)
+    {
+        key_mods &= ~(GGKMOD_NUM | GGKMOD_CAPS);
+        if (key_mods & GGKMOD_CTRL)
+            key_mods |= GGKMOD_CTRL;
+        if (key_mods & GGKMOD_SHIFT)
+            key_mods |= GGKMOD_SHIFT;
+        if (key_mods & GGKMOD_ALT)
+            key_mods |= GGKMOD_ALT;
+        if (key_mods & GGKMOD_META)
+            key_mods |= GGKMOD_META;
+        return key_mods;
+    }
 }
 
 // implementation data types
-struct AppImplData
+struct GG::AppImplData
 {
     AppImplData() :
 	focus_wnd(0),
@@ -107,6 +107,9 @@ struct AppImplData
 	prev_wnd_under_cursor(0),
 	curr_wnd_under_cursor(0),
 	wnd_region(WR_NONE),
+    delta_t(0),
+    FPS(-1.0),
+    calc_FPS(false),
     max_FPS(0.0),
 	double_click_wnd(0),
 	double_click_start_time(-1),
@@ -159,7 +162,11 @@ struct AppImplData
     std::map<std::pair<Key, Uint32>, shared_ptr<App::AcceleratorSignalType> >
                accelerator_sigs;        // the signals emitted by the keyboard accelerators
 
+    int        delta_t;                 // the number of ms since the last frame
+    double     FPS;                     // the most recent calculation of the frames per second rendering speed (-1.0 if calcs are disabled)
+    bool       calc_FPS;                // true iff FPS calcs are to be done
     double     max_FPS;                 // the maximum allowed frames per second rendering speed
+
     Wnd*       double_click_wnd;        // GUI window most recently clicked
     int        double_click_button;     // the index of the mouse button used in the last click
     int        double_click_start_time; // the time from which we started measuring double_click_time, in ms
@@ -168,9 +175,9 @@ struct AppImplData
     FontManager       font_manager;
     TextureManager    texture_manager;
 
-    XMLObjectFactory<Wnd> wnd_factory; // object that creates Wnd-subclass objects from XML-formatted text
+    XMLObjectFactory<Wnd> wnd_factory;  // object that creates Wnd-subclass objects from XML-formatted text
 
-    log4cpp::Category&   log_category; // log4cpp object used to log events to file
+    log4cpp::Category&    log_category; // log4cpp object used to log events to file
 };
 
 // static member(s)
@@ -215,6 +222,28 @@ Wnd* App::FocusWnd() const
 Wnd* App::GetWindowUnder(const Pt& pt) const
 {
     return s_impl->zlist.Pick(pt, ModalWindow());
+}
+
+int App::DeltaT() const
+{
+    return s_impl->delta_t;
+}
+
+bool App::FPSEnabled() const
+{
+    return s_impl->calc_FPS;
+}
+
+double App::FPS() const
+{
+    return s_impl->FPS;
+}
+
+string App::FPSString() const
+{
+    char buf[128];
+    sprintf(buf, "%.2f frames per second", s_impl->FPS);
+    return string(buf);
 }
 
 double App::MaxFPS() const
@@ -277,23 +306,39 @@ App::AcceleratorSignalType& App::AcceleratorSignal(Key key, Uint32 key_mods) con
     return *sig_ptr;
 }
 
-App::AcceleratorSignalType& App::AcceleratorSignal(Key key, bool shift, bool control, bool alt) const
-{
-    Uint32 mods = 0;
-    if (shift) mods |= GGKMOD_SHIFT;
-    if (control) mods |= GGKMOD_CTRL;
-    if (alt) mods |= GGKMOD_ALT;
-    return AcceleratorSignal(key, mods);
-}
-
 void App::operator()()
 {
     Run();
 }
 
+void App::SetFocusWnd(Wnd* wnd)
+{
+    // inform old focus wnd that it is losing focus
+    if (s_impl->focus_wnd)
+        s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::LosingFocus));
+
+    s_impl->focus_wnd = wnd;
+
+    // inform new focus wnd that it is gaining focus
+    if (s_impl->focus_wnd)
+        s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
+}
+
+void App::Wait(int ms)
+{
+}
+
 void App::Register(Wnd* wnd)
 {
     if (wnd) s_impl->zlist.Add(wnd);
+}
+
+void App::RegisterModal(Wnd* wnd)
+{
+    if (wnd && wnd->Modal()) {
+        SetFocusWnd(wnd);
+        s_impl->modal_wnds.push_back(wnd);
+    }
 }
 
 void App::Remove(Wnd* wnd)
@@ -330,6 +375,13 @@ void App::Remove(Wnd* wnd)
 	    s_impl->double_click_time = -1;
 	}
     }
+}
+
+void App::EnableFPS(bool b/* = true*/)
+{
+    s_impl->calc_FPS = b;
+    if (!b) 
+        s_impl->FPS = -1.0f;
 }
 
 void App::SetMaxFPS(double max)
@@ -377,24 +429,6 @@ void App::RemoveAccelerator(Key key, Uint32 key_mods)
     s_impl->accelerators.erase(std::make_pair(key, key_mods));
 }
 
-void App::SetAccelerator(Key key, bool shift, bool control, bool alt)
-{
-    Uint32 mods = 0;
-    if (shift) mods |= GGKMOD_SHIFT;
-    if (control) mods |= GGKMOD_CTRL;
-    if (alt) mods |= GGKMOD_ALT;
-    SetAccelerator(key, mods);
-}
-
-void App::RemoveAccelerator(Key key, bool shift, bool control, bool alt)
-{
-    Uint32 mods = 0;
-    if (shift) mods |= GGKMOD_SHIFT;
-    if (control) mods |= GGKMOD_CTRL;
-    if (alt) mods |= GGKMOD_ALT;
-    RemoveAccelerator(key, mods);
-}
-
 shared_ptr<Font> App::GetFont(const string& font_filename, int pts, Uint32 range/* = Font::ALL_DEFINED_RANGES*/)
 {
     return s_impl->font_manager.GetFont(font_filename, pts, range);
@@ -440,7 +474,7 @@ App* App::GetApp()
     return s_app;
 }
 
-void App::HandleEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
+void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
     Wnd*&       prev_wnd_under_cursor = s_impl->prev_wnd_under_cursor;
     Wnd*&       curr_wnd_under_cursor = s_impl->curr_wnd_under_cursor;
@@ -460,8 +494,8 @@ void App::HandleEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, 
     switch (event) {
     case KEYPRESS:{
         bool processed = false;
-        // the focus_wnd may care about the state of the numlock and capslock, or which side's 
-        // CTRL, CHIFT, etc. was pressed, but the accelerators don't
+        // the focus_wnd may care about the state of the numlock and capslock, or which side of the keyboard's 
+        // CTRL, SHIFT, etc. was pressed, but the accelerators don't
         Uint32 massaged_mods = MassagedAccelKeyMods(key_mods);
         if (s_impl->accelerators.find(std::make_pair(key, massaged_mods)) != s_impl->accelerators.end())
             processed = AcceleratorSignal(key, massaged_mods)();
@@ -647,11 +681,12 @@ void App::Render()
 
 void App::RenderWindow(Wnd* wnd)
 {
-    if (wnd->Render() == 1) {
-	for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
-	    if ((*it)->Visible())
-		RenderWindow(*it);
-	}
+    if (wnd->Render() == true) {
+        for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
+            if ((*it)->Visible()) {
+                RenderWindow(*it);
+            }
+        }
     }
 }
 
@@ -663,26 +698,12 @@ Wnd* App::ModalWindow() const
     return retval;
 }
 
-void App::RegisterModal(Wnd* wnd)
+void App::SetFPS(double FPS)
 {
-    if (wnd) {
-        SetFocusWnd(wnd);
-        s_impl->modal_wnds.push_back(wnd);
-    }
+    s_impl->FPS = FPS;
 }
 
-void App::SetFocusWnd(Wnd* wnd)
+void App::SetDeltaT(int delta_t)
 {
-    // inform old focus wnd that it is losing focus
-    if (s_impl->focus_wnd)
-        s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::LosingFocus));
-
-    s_impl->focus_wnd = wnd;
-
-    // inform new focus wnd that it is gaining focus
-    if (s_impl->focus_wnd)
-        s_impl->focus_wnd->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
+    s_impl->delta_t = delta_t;
 }
-
-} // namespace GG
-

@@ -41,11 +41,13 @@
 #endif
 
 namespace GG {
-
-class Wnd;
-class Texture;
-class XMLElement;
-struct AppImplData;
+    class Wnd;
+    class EventPumpBase;
+    class Texture;
+    class XMLElement;
+    struct AppImplData;
+    class App;
+}
 
 /** An abstract base for an application framework class to drive the GG GUI.  
     This class has all the essential services that GG requires: 
@@ -89,7 +91,7 @@ struct AppImplData;
     keep the mouse perfectly still, there will probably be no events sent to the scrollbar control after the first 
     button-down event.  When enabled, mouse drag repeat sends messages to the scrollbar when there otherwise would be none.
 */
-class GG_API App
+class GG_API GG::App
 {
 private:
     struct OrCombiner 
@@ -131,13 +133,14 @@ public:
     const string&  AppName() const;              ///< returns the user-defined name of the application
     Wnd*           FocusWnd() const;             ///< returns the GG::Wnd that currently has the input focus
     Wnd*           GetWindowUnder(const Pt& pt) const; ///< returns the GG::Wnd under the point pt
-    virtual int    DeltaT() const = 0;           ///< returns ms since last frame was rendered
+    int            DeltaT() const;               ///< returns ms since last frame was rendered
     virtual int    Ticks() const = 0;            ///< returns ms since the app started running
-    virtual double FPS() const = 0;              ///< returns the approximate number of frames per second at which the application is rendering
-    virtual const string& FPSString() const = 0; ///< returns a string of the form "[m_FPS] frames per second"
+    bool           FPSEnabled() const;           ///< returns true iff FPS calulations are turned on
+    double         FPS() const;                  ///< returns the frames per second at which the application is rendering
+    string         FPSString() const;            ///< returns a string of the form "[m_FPS] frames per second"
+    double         MaxFPS() const;               ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
     virtual int    AppWidth() const = 0;         ///< returns the width of the application window/screen
     virtual int    AppHeight() const = 0;        ///< returns the height of the application window/screen
-    double         MaxFPS() const;               ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
     int            MouseRepeatDelay() const;     ///< returns the \a delay value set by EnableMouseDragRepeat()
     int            MouseRepeatInterval() const;  ///< returns the \a interval value set by EnableMouseDragRepeat()
     int            DoubleClickInterval() const;  ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms
@@ -151,22 +154,26 @@ public:
 
     /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
     AcceleratorSignalType& AcceleratorSignal(Key key, Uint32 key_mods) const;
-
-    /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
-    AcceleratorSignalType& AcceleratorSignal(Key key, bool shift, bool control, bool alt) const;
     //@}
 
     /** \name Mutators */ //@{
     void           operator()();                 ///< external interface to Run()
     virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
+    
+    /** handles all waiting system events (from SDL, DirectInput, etc.).  This function should set last_mouse_event_time to the current 
+        time (using Ticks()) if mouse events are processed.  This function should only be called from custom EventPump event handlers. */
+    virtual void   HandleSystemEvents(int& last_mouse_event_time) = 0;
 
-    void           Register(Wnd* wnd);           ///< adds a GG::Wnd into the z-list.  Registering a null pointer or registering the same window multiple times is a no-op.
-    void           Remove(Wnd* wnd);             ///< removes a GG::Wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.
-    void           MoveUp(Wnd* wnd);             ///< moves a GG::Wnd to the top of the z-list
-    void           MoveDown(Wnd* wnd);           ///< moves a GG::Wnd to the bottom of the z-list
+    void           SetFocusWnd(Wnd* wnd);        ///< sets the input focus window to \a wnd
+    virtual void   Wait(int ms);                 ///< suspends the app thread for \a ms milliseconds.  Singlethreaded App subclasses may do nothing here, or may pause for \a ms milliseconds; the default implementation does nothing.
+    void           Register(Wnd* wnd);           ///< adds \a wnd into the z-list.  Registering a null pointer or registering the same window multiple times is a no-op.
+    void           RegisterModal(Wnd* wnd);      ///< adds \a wnd onto the modal windows "stack"
+    void           Remove(Wnd* wnd);             ///< removes \a wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.
+    void           MoveUp(Wnd* wnd);             ///< moves \a wnd to the top of the z-list
+    void           MoveDown(Wnd* wnd);           ///< moves \a wnd to the bottom of the z-list
     virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode
     virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
-    virtual void   CalcuateFPS(bool b = true) = 0;///< turns FPS calulations on or off
+    void           EnableFPS(bool b = true);     ///< turns FPS calulations on or off
     void           SetMaxFPS(double max);        ///< sets the maximum allowed FPS, so the render loop does not act as a spinlock when it runs very quickly.  0 indicates no limit.
     void           EnableMouseDragRepeat(int delay, int interval); ///< delay and interval are in ms; Setting delay to 0 disables mouse repeating completely.
     void           SetDoubleClickInterval(int interval); ///< sets the maximum interval allowed between clicks that is still considered a double-click, in ms
@@ -176,12 +183,6 @@ public:
 
     /** removes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
     void           RemoveAccelerator(Key key, Uint32 key_mods);
-
-    /** establishes a keyboard accelerator.  Any combination of shift, control, and alt may be specified. */
-    void           SetAccelerator(Key key, bool shift, bool control, bool alt);
-
-    /** removes a keyboard accelerator.  Any combination of shift, control, and alt may be specified. */
-    void           RemoveAccelerator(Key key, bool shift, bool control, bool alt);
 
     shared_ptr<Font>    GetFont(const string& font_filename, int pts, Uint32 range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the desired font
     void                FreeFont(const string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
@@ -201,26 +202,29 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    void           HandleEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
-    virtual void   Render();   ///< renders the windows in the z-list
+    void           HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
+    virtual void   RenderBegin() = 0;      ///< clears the backbuffer, etc.
+    virtual void   Render();               ///< renders the windows in the z-list
+    virtual void   RenderEnd() = 0;        ///< swaps buffers, etc.
+
+    // EventPumpBase interface
+    void SetFPS(double FPS);               ///< sets the FPS value based on the most recent calculation
+    void SetDeltaT(int delta_t);           ///< sets the time between the most recent frame and the one before it, in ms
     //@}
 
 private:
-    virtual void   PollAndRender() = 0;          // handles all waiting messages, then renders once
     virtual void   Run() = 0;                    // initializes app state, then executes main event handler/render loop (PollAndRender())
-    void           RenderWindow(Wnd* wnd);       // renders wnd and then recursivley renders all its children
+    void           RenderWindow(Wnd* wnd);       // renders a window and (optionally) all its descendents
     Wnd*           ModalWindow() const;          // returns the currently modal window, if any
-    void           RegisterModal(Wnd* wnd);      // adds a GUI window onto the modal windows "stack"
-    void           SetFocusWnd(Wnd* wnd);        // sets focus window to \a wnd; used by modal Wnds
 
     static App*                    s_app;
     static shared_ptr<AppImplData> s_impl;
 
-    friend class Wnd; ///< allows modal Wnds to call PollAndRender() and RegisterModal()
+    friend class EventPumpBase; ///< allows EventPumpBase types to drive App
 };
 
 template<class InIt> 
-bool App::OrCombiner::operator()(InIt first, InIt last) const
+bool GG::App::OrCombiner::operator()(InIt first, InIt last) const
 {
     bool retval = false;
     while (first != last)
@@ -228,8 +232,4 @@ bool App::OrCombiner::operator()(InIt first, InIt last) const
     return retval;
 }
 
-
-} // namespace GG
-
 #endif // _GGApp_h_
-

@@ -227,9 +227,9 @@ AC_CACHE_SAVE
 SAVE_LIBS="$LIBS"
 YG_GET_PATH(boost)
 YG_CHECK_BOOST([1.30.0],,[FAILED=yes])
-AC_CHECK_LIB(boost_filesystem,main,[],[
+AC_CHECK_LIB(boost_filesystem-gcc,main,[],[
     AC_CHECK_LIB(boost_filesystem-gcc,main,[],[FAILED=yes])])
-AC_CHECK_LIB(boost_signals,main,[],[
+AC_CHECK_LIB(boost_signals-gcc,main,[],[
     AC_CHECK_LIB(boost_signals-gcc,main,[],[FAILED=yes])])
 
 BOOST_LIBS="YG_REMOVE(LIBS,SAVE_LIBS)"

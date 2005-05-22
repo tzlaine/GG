@@ -41,6 +41,7 @@
 #endif
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/dynamic.hpp>
@@ -475,12 +476,12 @@ void FileDlg::OkClicked()
         } else if (files.size() == 1) {
             results_valid = true;
             string save_file = *files.begin();
-	    if (!fs::path::default_name_check()(save_file)) {
-		ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
-		dlg.Run();
-		return;
-	    }
-	    fs::path p = s_working_dir / save_file;
+            if (!fs::path::default_name_check()(save_file)) {
+                ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                dlg.Run();
+                return;
+            }
+            fs::path p = s_working_dir / save_file;
             m_result.insert(p.native_directory_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
@@ -494,20 +495,20 @@ void FileDlg::OkClicked()
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
             for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
-		if (!fs::path::default_name_check()(*it)) {
-		    ThreeButtonDlg dlg(300, 125, "\"" + (*it) + "\"\nis an invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
-		    dlg.Run();
+                if (!fs::path::default_name_check()(*it)) {
+                    ThreeButtonDlg dlg(300, 125, "\"" + (*it) + "\"\nis an invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                    dlg.Run();
                     results_valid = false;
                     break;
-		}
+                }
                 fs::path p = s_working_dir / *it;
                 if (fs::exists(p)) {
-		    if (fs::is_directory(p)) {
-			ThreeButtonDlg dlg(300, 75, "\"" + (*it) + "\"\nis a directory.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
-			dlg.Run();
-			results_valid = false;
-			break;
-		    }
+                    if (fs::is_directory(p)) {
+                        ThreeButtonDlg dlg(300, 75, "\"" + (*it) + "\"\nis a directory.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                        dlg.Run();
+                        results_valid = false;
+                        break;
+                    }
                     m_result.insert(p.native_directory_string());
                     results_valid = true; // indicate validity only if at least one good file was found
                 } else {
@@ -636,24 +637,36 @@ void FileDlg::UpdateList()
         m_files_list->Insert(row);
     }
     for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
-        if (fs::exists(*it) && fs::is_directory(*it) && it->leaf()[0] != '.') {
-            ListBox::Row* row = new ListBox::Row;
-            row->push_back("[" + it->leaf() + "]", m_font, m_text_color);
-            m_files_list->Insert(row);
+        try {
+            if (fs::exists(*it) && fs::is_directory(*it) && it->leaf()[0] != '.') {
+                ListBox::Row* row = new ListBox::Row;
+                row->push_back("[" + it->leaf() + "]", m_font, m_text_color);
+                m_files_list->Insert(row);
+            }
+        } catch (const fs::filesystem_error& e) {
+            // ignore files for which permission is denied, and rethrow other exceptions
+            if (e.error() != fs::security_error)
+                throw;
         }
     }
     for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
-        if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
-            bool meets_filters = file_filters.empty();
-            for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
-                if (parse(it->leaf().c_str(), file_filters[i]).full)
-                    meets_filters = true;
+        try {
+            if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
+                bool meets_filters = file_filters.empty();
+                for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
+                    if (parse(it->leaf().c_str(), file_filters[i]).full)
+                        meets_filters = true;
+                }
+                if (meets_filters) {
+                    ListBox::Row* row = new ListBox::Row;
+                    row->push_back(it->leaf(), m_font, m_text_color);
+                    m_files_list->Insert(row);
+                }
             }
-            if (meets_filters) {
-                ListBox::Row* row = new ListBox::Row;
-                row->push_back(it->leaf(), m_font, m_text_color);
-                m_files_list->Insert(row);
-            }
+        } catch (const fs::filesystem_error& e) {
+            // ignore files for which permission is denied, and rethrow other exceptions
+            if (e.error() != fs::security_error)
+                throw;
         }
     }
 }

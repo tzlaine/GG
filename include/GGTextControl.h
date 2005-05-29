@@ -58,6 +58,8 @@ namespace GG {
 class GG_API TextControl : public Control
 {
 public:
+    using Wnd::SizeMove;
+
     /** \name Structors */ //@{
     TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
     TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font filename and font point size
@@ -108,6 +110,14 @@ public:
     bool  Empty() const                    {return Control::m_text.empty();}   ///< returns true when text string equals ""
     int   Length() const                   {return Control::m_text.length();}  ///< returns length of text string
 
+    /** returns the upper-left corner of the text as it is would be rendered if it were not bound to the dimensions of
+        this control. */
+    Pt    TextUpperLeft() const;
+
+    /** returns the lower-right corner of the text as it is would be rendered if it were not bound to the dimensions of
+        this control. */
+    Pt    TextLowerRight() const;
+
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a TextControl object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
@@ -121,6 +131,7 @@ public:
         text occupies. */
     virtual void   SetText(const string& str);
     virtual void   SetText(const char* str)         {SetText(string(str));}
+    virtual void   SizeMove(int x1, int y1, int x2, int y2);
     void           SetTextFormat(Uint32 format)     {m_format = format; ValidateFormat();}    ///< sets the text format; ensures that the flags are sane
     void           SetTextColor(Clr color)          {m_text_color = color;}                   ///< sets the text color
     virtual void   SetColor(Clr c)                  {Control::SetColor(c); m_text_color = c;} ///< just like Control::SetColor(), except that this one also adjusts the text color
@@ -148,12 +159,15 @@ protected:
 
 private:
     void ValidateFormat();  ///< ensures that the format flags are consistent
+    void RecomputeTextBounds(); ///< recalculates m_text_ul and m_text_lr
     
     Uint32                  m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
     Clr                     m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
     vector<Font::LineData>  m_line_data;
     shared_ptr<Font>        m_font;
     bool                    m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
+    Pt                      m_text_ul;     ///< stored relative to the control's UpperLeft()
+    Pt                      m_text_lr;     ///< stored relative to the control's UpperLeft()
 };
 
 } // namespace GG

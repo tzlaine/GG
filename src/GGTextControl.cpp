@@ -44,9 +44,7 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const sh
     m_fit_to_text(false)
 {
     ValidateFormat();
-    Control::m_text = str;
-    if (m_font)
-        m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
+    SetText(str);
 }
 
 TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
@@ -58,9 +56,7 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const st
     m_fit_to_text(false)
 {
     ValidateFormat();
-    Control::m_text = str;
-    if (m_font)
-        m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
+    SetText(str);
 }
 
 TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
@@ -72,11 +68,7 @@ TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>
     m_fit_to_text(true)
 {
     ValidateFormat();
-    Control::m_text = str;
-    if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
-        Resize(text_sz);
-    }
+    SetText(str);
 }
 
 TextControl::TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
@@ -88,11 +80,7 @@ TextControl::TextControl(int x, int y, const string& str, const string& font_fil
     m_fit_to_text(true)
 {
     ValidateFormat();
-    Control::m_text = str;
-    if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
-        Resize(text_sz);
-    }
+    SetText(str);
 }
 
 TextControl::TextControl(const XMLElement& elem) :
@@ -113,11 +101,17 @@ TextControl::TextControl(const XMLElement& elem) :
 
     m_fit_to_text = lexical_cast<bool>(elem.Child("m_fit_to_text").Text());
 
-    if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
-        if (m_fit_to_text)
-            Resize(text_sz);
-    }
+    SetText(Control::m_text);
+}
+
+Pt TextControl::TextUpperLeft() const
+{
+    return UpperLeft() + m_text_ul;
+}
+
+Pt TextControl::TextLowerRight() const
+{
+    return UpperLeft() + m_text_lr;
 }
 
 XMLElement TextControl::XMLEncode() const
@@ -156,9 +150,20 @@ void TextControl::SetText(const string& str)
     Control::m_text = str;
     if (m_font) {
         Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
-        if (m_fit_to_text)
+        if (m_fit_to_text) {
             Resize(text_sz);
+            m_text_ul = Pt();
+            m_text_lr = text_sz;
+        } else {
+            RecomputeTextBounds();
+        }
     }
+}
+
+void TextControl::SizeMove(int x1, int y1, int x2, int y2)
+{
+    Wnd::SizeMove(x1, y1, x2, y2);
+    RecomputeTextBounds();
 }
 
 void TextControl::ValidateFormat()
@@ -181,6 +186,22 @@ void TextControl::ValidateFormat()
     }
     if ((m_format & TF_WORDBREAK) && (m_format & TF_LINEWRAP))   // only one of these can be picked; TF_WORDBREAK overrides TF_LINEWRAP
         m_format &= ~TF_LINEWRAP;
+}
+
+void TextControl::RecomputeTextBounds()
+{
+    Pt text_sz = TextLowerRight() - TextUpperLeft();
+    m_text_ul.y = 0; // default value for TF_TOP
+    if (m_format & TF_BOTTOM)
+        m_text_ul.y = Size().y - text_sz.y;
+    else if (m_format & TF_VCENTER)
+        m_text_ul.y = static_cast<int>((Size().y - text_sz.y) / 2.0);
+    m_text_ul.x = 0; // default for TF_LEFT
+    if (m_format & TF_RIGHT)
+        m_text_ul.x = Size().x - text_sz.x;
+    else if (m_format & TF_CENTER)
+        m_text_ul.x = static_cast<int>((Size().x - text_sz.x) / 2.0);
+    m_text_lr = m_text_ul + text_sz;
 }
 
 } // namespace GG

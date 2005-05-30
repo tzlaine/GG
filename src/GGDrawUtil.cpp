@@ -49,45 +49,35 @@ map<int, valarray<Clr> > color_arrays;
 void Rectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr border_color2, int bevel_thick)
 {
     glDisable(GL_TEXTURE_2D);
+    glEnableClientState(GL_VERTEX_ARRAY);
 
     int inner_x1 = x1 + bevel_thick, inner_y1 = y1 + bevel_thick,
-                   inner_x2 = x2 - bevel_thick, inner_y2 = y2 - bevel_thick;
+        inner_x2 = x2 - bevel_thick, inner_y2 = y2 - bevel_thick;
+
+    int vertices[] = {inner_x2, inner_y1, x2, y1, inner_x1, inner_y1, x1, y1, inner_x1, inner_y2, x1, y2,
+                      inner_x2, inner_y2, x2, y2, inner_x2, inner_y1, x2, y1};
 
     // draw beveled edges
-    if (bevel_thick) {
-        glBegin(GL_QUADS);
+    if (bevel_thick && (border_color1.i != CLR_ZERO.i || border_color2.i != CLR_ZERO.i)) {
+        glVertexPointer(2, GL_INT, 0, vertices);
         glColor4ubv(border_color1.v);
-        glVertex2i(inner_x2, inner_y1);
-        glVertex2i(x2, y1);
-        glVertex2i(x1, y1);
-        glVertex2i(inner_x1, inner_y1);
-        glVertex2i(inner_x1, inner_y1);
-        glVertex2i(x1, y1);
-        glVertex2i(x1, y2);
-        glVertex2i(inner_x1, inner_y2);
-        glEnd();
-
-        glBegin(GL_QUADS);
-        glColor4ubv(border_color2.v);
-        glVertex2i(x2, y1);
-        glVertex2i(inner_x2, inner_y1);
-        glVertex2i(inner_x2, inner_y2);
-        glVertex2i(x2, y2);
-        glVertex2i(x2, y2);
-        glVertex2i(inner_x2, inner_y2);
-        glVertex2i(inner_x1, inner_y2);
-        glVertex2i(x1, y2);
-        glEnd();
+        if (border_color1.i == border_color2.i) {
+            glDrawArrays(GL_QUAD_STRIP, 0, 10);
+        } else {
+            glDrawArrays(GL_QUAD_STRIP, 0, 6);
+            glColor4ubv(border_color2.v);
+            glDrawArrays(GL_QUAD_STRIP, 4, 6);
+        }
     }
 
     // draw interior of rectangle
-    glColor4ubv(color.v);
-    glBegin(GL_QUADS);
-    glVertex2i(inner_x1, inner_y1);
-    glVertex2i(inner_x1, inner_y2);
-    glVertex2i(inner_x2, inner_y2);
-    glVertex2i(inner_x2, inner_y1);
-    glEnd();
+    if (color.i != CLR_ZERO.i) {
+        glVertexPointer(2, GL_INT, 2 * 2 * sizeof(GL_INT), vertices);
+        glColor4ubv(color.v);
+        glDrawArrays(GL_QUADS, 0, 4);
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
 }
 

@@ -150,10 +150,10 @@ void TextControl::SetText(const string& str)
     Control::m_text = str;
     if (m_font) {
         Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
+        m_text_ul = Pt();
+        m_text_lr = text_sz;
         if (m_fit_to_text) {
             Resize(text_sz);
-            m_text_ul = Pt();
-            m_text_lr = text_sz;
         } else {
             RecomputeTextBounds();
         }

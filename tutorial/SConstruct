@@ -1,0 +1,56 @@
+# -*- Python -*-
+
+import os
+platform_str = "%s" % Platform()
+
+# posix -- not yet implemented
+
+# windows
+if platform_str == 'win32':
+    print 'Win32 platform detected ...'
+    gg_dir = '../'
+    cpppath = ['C:/Boost/include/boost-1_32',
+               'C:/SDL-1.2.7/include',
+               'C:/log4cpp-0.3.4b/include',
+               'C:/freetype-2.1.7/include',
+               'C:/zlib/include',
+               gg_dir + 'include',
+               gg_dir + 'include/dialogs',
+               gg_dir + 'include/net',
+               gg_dir + 'include/SDL']
+    libs = ['GiGiNet',
+            'GiGiSDL',
+            'GiGi',
+            'opengl32',
+            'glu32',
+            'wsock32',
+            'kernel32',
+            'user32',
+            'gdi32.lib',
+            'winspool.lib',
+            'comdlg32.lib',
+            'zdll',
+            'SDL',
+            'SDLmain',
+            'log4cpp',
+            'freetype214MT']
+    libpath = ['C:/Boost/lib',
+               'C:/log4cpp-0.3.4b/msvc6/log4cppDLL/Release',
+               'C:/freetype-2.1.7/objs',
+               'C:/zlib/lib',
+               'C:/SDL-1.2.7/lib',
+               gg_dir + 'msvc/GG/GiGi/Release',
+               gg_dir + 'msvc/GG/GiGiNet/Release',
+               gg_dir + 'msvc/GG/GiGiSDL/Release']
+    ccflags = '/D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "BOOST_SIGNALS_STATIC_LINK" /D "_MBCS" /FD /EHsc /MD /GS /Zc:forScope /GR /W3 /nologo /c /Wp64 /Zi /wd4099 /wd4251 /wd4800 /wd4267 /wd4275 /wd4244 /wd4101 /wd4258'
+    env = Environment(CCFLAGS = '',
+                      CPPPATH = cpppath,
+                      LIBS = libs,
+                      LIBPATH = libpath,
+                      LINKFLAGS = '/INCREMENTAL:NO /NOLOGO /NODEFAULTLIB:"LIBCMT" /DEBUG /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /MACHINE:X86')
+
+minimal_source = ['minimal.cpp']
+minimal_objects = Flatten([Object(x, CCFLAGS=ccflags, CPPPATH=cpppath) for x in minimal_source])
+
+
+env.Program('minimal', minimal_objects)

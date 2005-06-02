@@ -1,0 +1,17 @@
+These tutorials require SCons to be built, unless of course you'd like to set up your own build environment for them.
+
+1) Obtaining/Installing SCons
+
+To get SCons, go to:
+http://www.scons.org/
+Do *not* go to scons.org, which is an unrelated site.  Note that you will need Python installed and in your path in order to use SCons.
+
+
+2) Running SCons
+
+Just type "scons" from within GG's tutorial directory.  If SCons can't find something, such as boost or log4cpp, edit the include and link paths in the SConstruct file to indicate where things are on your system.
+
+A note for Windows users who are not aware of how to path set the environment variable:
+Go to: Start -> Control Panel -> System -> Advanced -> Environment Variables
+Add c:\Python24 (or wherever you installed Python) to the front of the variable called "Path".
+You will need to run scons from a Visual Studio .NET Command Prompt, or the equivalent; the important part is that your compiler and linker be in your path in order for SCons to find them.

@@ -164,7 +164,7 @@ void SDLGGApp::GLInit()
     glEnable(GL_BLEND);
     glShadeModel(GL_SMOOTH);
     glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, m_app_width - 1, m_app_height - 1);
+    glViewport(0, 0, m_app_width, m_app_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(50.0, ratio, 1.0, 10.0);

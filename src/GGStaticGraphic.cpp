@@ -64,8 +64,6 @@ StaticGraphic::StaticGraphic(const XMLElement& elem) :
     if (elem.Tag() != "GG::StaticGraphic")
         throw std::invalid_argument("Attempted to construct a GG::StaticGraphic from an XMLElement that had a tag other than \"GG::StaticGraphic\"");
 
-    SetColor(CLR_WHITE);
-
     m_graphic = SubTexture(elem.Child("m_graphic").Child("GG::SubTexture"));
 
     m_style = FlagsFromString<GraphicStyle>(elem.Child("m_style").Text());

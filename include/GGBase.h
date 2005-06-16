@@ -169,22 +169,49 @@ enum WndRegion {
     WR_BOTTOMRIGHT
 };
 
+
+/** Generic alignment flags, used by value in text format alignment flags, graphic alignment flags, etc. */
+enum Alignment {
+    ALIGN_NONE =       0,
+    ALIGN_VCENTER =    1 << 0,     ///< Vertically-centered.
+    ALIGN_TOP =        1 << 1,     ///< Aligned to top.
+    ALIGN_BOTTOM =     1 << 2,     ///< Aligned to bottom.
+    ALIGN_CENTER =     1 << 3,     ///< Horizontally-centered.
+    ALIGN_LEFT =       1 << 4,     ///< Aligned to left.
+    ALIGN_RIGHT =      1 << 5,     ///< Aligned to right.
+};
+
+// define EnumMap and stream operators for Alignment
+ENUM_MAP_BEGIN(Alignment)
+    ENUM_MAP_INSERT(ALIGN_NONE)
+    ENUM_MAP_INSERT(ALIGN_VCENTER)
+    ENUM_MAP_INSERT(ALIGN_TOP)
+    ENUM_MAP_INSERT(ALIGN_BOTTOM)
+    ENUM_MAP_INSERT(ALIGN_CENTER)
+    ENUM_MAP_INSERT(ALIGN_LEFT)
+    ENUM_MAP_INSERT(ALIGN_RIGHT)
+ENUM_MAP_END
+
+ENUM_STREAM_IN(Alignment)
+ENUM_STREAM_OUT(Alignment)
+
+
 /** These flags are packed (via logical or) into a 32-bit unsigned int.  Bits 16-23 of the uint specify the number of 
    characters for each tab. The default number of characters per tab is 8.*/
 enum TextFormat {
     TF_NONE =       0,
-    TF_VCENTER =    1 << 0,     ///< Centers text vertically.
-    TF_TOP =        1 << 1,     ///< Top-justifies text.
-    TF_BOTTOM =     1 << 2,     ///< Justifies the text to the bottom of the rectangle.
+    TF_VCENTER =    ALIGN_VCENTER, ///< Centers text vertically.
+    TF_TOP =        ALIGN_TOP,     ///< Top-justifies text.
+    TF_BOTTOM =     ALIGN_BOTTOM,  ///< Justifies the text to the bottom of the rectangle.
     
-    TF_CENTER =     1 << 3,     ///< Centers text horizontally in the rectangle. 
-    TF_LEFT =       1 << 4,     ///< Aligns text to the left. 
-    TF_RIGHT =      1 << 5,     ///< Aligns text to the right. 
+    TF_CENTER =     ALIGN_CENTER,  ///< Centers text horizontally in the rectangle. 
+    TF_LEFT =       ALIGN_LEFT,    ///< Aligns text to the left. 
+    TF_RIGHT =      ALIGN_RIGHT,   ///< Aligns text to the right. 
 
-    TF_WORDBREAK =  1 << 6,     ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
-    TF_LINEWRAP =   1 << 7,     ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
+    TF_WORDBREAK =  1 << 6,        ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
+    TF_LINEWRAP =   1 << 7,        ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
 
-    TF_IGNORETAGS = 1 << 8      ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
+    TF_IGNORETAGS = 1 << 8         ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
 };
 
 // define EnumMap and stream operators for TextFormat
@@ -208,17 +235,17 @@ ENUM_STREAM_OUT(TextFormat)
 /** styles for StaticGraphic controls*/
 enum GraphicStyle {
     GR_NONE =      0,
-    GR_VCENTER =   1 << 0,     ///< Centers graphic vertically.
-    GR_TOP =       1 << 1,     ///< Top-justifies graphic.
-    GR_BOTTOM =    1 << 2,     ///< Justifies the graphic to the bottom of the rectangle.
+    GR_VCENTER =   ALIGN_VCENTER, ///< Centers graphic vertically.
+    GR_TOP =       ALIGN_TOP,     ///< Top-justifies graphic.
+    GR_BOTTOM =    ALIGN_BOTTOM,  ///< Justifies the graphic to the bottom of the rectangle.
 
-    GR_CENTER =    1 << 3,     ///< Centers graphic horizontally in the rectangle.
-    GR_LEFT =      1 << 4,     ///< Aligns graphic to the left.
-    GR_RIGHT =     1 << 5,     ///< Aligns graphic to the right.
+    GR_CENTER =    ALIGN_CENTER,  ///< Centers graphic horizontally in the rectangle.
+    GR_LEFT =      ALIGN_LEFT,    ///< Aligns graphic to the left.
+    GR_RIGHT =     ALIGN_RIGHT,   ///< Aligns graphic to the right.
 
-    GR_FITGRAPHIC =1 << 6,     ///< Scales graphic to fit within the StaticGraphic's window dimensions.
-    GR_SHRINKFIT = 1 << 7,     ///< Like GR_FITGRAPHIC, but this one only scales the image if it otherwise would not fit in the window.
-    GR_PROPSCALE = 1 << 8      ///< If GR_FITGRAPHIC or GR_SHRINKFIT is used, this ensures scaling is done proportionally.
+    GR_FITGRAPHIC =1 << 6,        ///< Scales graphic to fit within the StaticGraphic's window dimensions.
+    GR_SHRINKFIT = 1 << 7,        ///< Like GR_FITGRAPHIC, but this one only scales the image if it otherwise would not fit in the window.
+    GR_PROPSCALE = 1 << 8         ///< If GR_FITGRAPHIC or GR_SHRINKFIT is used, this ensures scaling is done proportionally.
 };
 
 // define EnumMap and stream operators for GraphicStyle
@@ -242,25 +269,25 @@ ENUM_STREAM_OUT(GraphicStyle)
 /** styles for ListBox controls*/
 enum ListBoxStyle {
     LB_NONE =            0,
-    LB_VCENTER =         1 << 0,  ///< Cells are aligned with the top of the list box control.
-    LB_TOP =             1 << 1,  ///< Cells are aligned with the top of the list box control. This is the default.
-    LB_BOTTOM =          1 << 2,  ///< Cells are aligned with the bottom of the list box control.
+    LB_VCENTER =         ALIGN_VCENTER, ///< Cells are aligned with the top of the list box control.
+    LB_TOP =             ALIGN_TOP,     ///< Cells are aligned with the top of the list box control. This is the default.
+    LB_BOTTOM =          ALIGN_BOTTOM,  ///< Cells are aligned with the bottom of the list box control.
 
-    LB_CENTER =          1 << 3,  ///< Cells are center-aligned.
-    LB_LEFT =            1 << 4,  ///< Cells are left-aligned. This is the default.
-    LB_RIGHT =           1 << 5,  ///< Cells are right-aligned.
+    LB_CENTER =          ALIGN_CENTER,  ///< Cells are center-aligned.
+    LB_LEFT =            ALIGN_LEFT,    ///< Cells are left-aligned. This is the default.
+    LB_RIGHT =           ALIGN_RIGHT,   ///< Cells are right-aligned.
 
-    LB_NOSORT =          1 << 10, ///< List items are not sorted. Items are sorted by default.  When combined with LB_DRAGDROP, this style allows arbitrary rearrangement of list elements by dragging.
-    LB_SORTDESCENDING =  1 << 11, ///< Items are sorted based on item text in ascending order. Ascending order is the default.
+    LB_NOSORT =          1 << 10,       ///< List items are not sorted. Items are sorted by default.  When combined with LB_DRAGDROP, this style allows arbitrary rearrangement of list elements by dragging.
+    LB_SORTDESCENDING =  1 << 11,       ///< Items are sorted based on item text in ascending order. Ascending order is the default.
 
-    LB_NOSEL =           1 << 13, ///< No selection, dragging, or dropping allowed.  This makes the list box effectively read-only.
-    LB_SINGLESEL =       1 << 14, ///< Only one item at a time can be selected. By default, multiple items may be selected.
-    LB_QUICKSEL =        1 << 15, ///< Each click toggles an item without affecting any others; ignored when used with LB_SINGLESEL.
+    LB_NOSEL =           1 << 13,       ///< No selection, dragging, or dropping allowed.  This makes the list box effectively read-only.
+    LB_SINGLESEL =       1 << 14,       ///< Only one item at a time can be selected. By default, multiple items may be selected.
+    LB_QUICKSEL =        1 << 15,       ///< Each click toggles an item without affecting any others; ignored when used with LB_SINGLESEL.
 
-    LB_DRAGDROP =        1 << 16, ///< Items can be dragged from or dropped into the list box.  Only specified drop types are allowed, but anything can be dragged.  By default drag-n-drop is disabled.   When combined with LB_NOSORT, this style allows arbitrary rearrangement of list elements by dragging.
-    LB_USERDELETE =      1 << 18, ///< Allows user to remove selected items by pressing the delete key.
+    LB_DRAGDROP =        1 << 16,       ///< Items can be dragged from or dropped into the list box.  Only specified drop types are allowed, but anything can be dragged.  By default drag-n-drop is disabled.   When combined with LB_NOSORT, this style allows arbitrary rearrangement of list elements by dragging.
+    LB_USERDELETE =      1 << 18,       ///< Allows user to remove selected items by pressing the delete key.
 
-    LB_BROWSEUPDATES =   1 << 19, ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
+    LB_BROWSEUPDATES =   1 << 19,       ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
 };   
 
 // define EnumMap and stream operators for ListBoxStyle

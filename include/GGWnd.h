@@ -39,7 +39,7 @@ namespace GG {
 
 /** This is the basic GG window class.
     Window boundaries are from m_upperleft to m_lowerright - Pt(1,1).
-    It is assumed that childs window exists within the boundaries of their parents, although this is not required.
+    It is assumed that child windows exists within the boundaries of their parents, although this is not required.
     By default, Wnds do not clip their children; child clipping can be turned on or off using EnableChildClipping(),
     which clips all children to the client area of the Wnd.  Subclasses can override BeginClipping() and EndClipping() 
     if the clipping desired is something other than the client area of the Wnd, or if the Wnd is not rectangular.  
@@ -77,13 +77,14 @@ class GG_API Wnd : public boost::signals::trackable
 {
 public:
     /// window creation flags
-    enum WndFlag {CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
-                  DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
-                  DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
-                  RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
-                  ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
-                  MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
-                 };
+    enum WndFlag {
+        CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
+        DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
+        DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
+        RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
+        ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
+        MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
+    };
 
     /** exception class \see GG::GGEXCEPTION */
     GGEXCEPTION(WndException);
@@ -93,43 +94,44 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    bool           Clickable() const   {return m_flags & CLICKABLE;}   ///< does a click over this window pass through?
-    bool           Dragable() const    {return m_flags & DRAGABLE;}    ///< does a click here become a drag? 
-    bool           DragKeeper() const  {return m_flags & DRAG_KEEPER;} ///< when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway?
-    bool           ClipChildren() const {return m_clip_children;}      ///< is child clipping enabled?
-    bool           Visible() const     {return m_visible;}             ///< is the window visible?
-    bool           Resizable() const   {return m_flags & RESIZABLE;}   ///< can this window be resized using the mouse?
-    bool           OnTop() const       {return m_flags & ONTOP;}       ///< is this an on-top window?
-    bool           Modal() const       {return m_flags & MODAL;}       ///< is this a modal window?
-    const string&  WindowText() const  {return m_text;}                ///< returns text associated with this window
-    Pt             UpperLeft() const;                                  ///< returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
-    Pt             LowerRight() const;                                 ///< returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
-    int            Width() const              {return m_lowerright.x - m_upperleft.x;} ///< returns width of window in pixels
-    int            Height() const             {return m_lowerright.y - m_upperleft.y;} ///< returns width of window in pixels
-    int            ZOrder() const             {return m_zorder;}       ///< returns the position of this window in the z-order (root (non-child) windows only)
-    Pt             Size() const {return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y);} ///< returns a \a Pt packed with width in \a x and height in \a y
-    Pt             MinSize() const            {return m_min_size;} ///< returns the minimum allowable size of window
-    Pt             MaxSize() const            {return m_max_size;} ///< returns the maximum allowable size of window
+    bool           Clickable() const;    ///< does a click over this window pass through?
+    bool           Dragable() const;     ///< does a click here become a drag? 
+    bool           DragKeeper() const;   ///< when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway?
+    bool           ClipChildren() const; ///< is child clipping enabled?
+    bool           Visible() const;      ///< is the window visible?
+    bool           Resizable() const;    ///< can this window be resized using the mouse?
+    bool           OnTop() const;        ///< is this an on-top window?
+    bool           Modal() const;        ///< is this a modal window?
+    const string&  WindowText() const;   ///< returns text associated with this window
+    Pt             UpperLeft() const;    ///< returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
+    Pt             LowerRight() const;   ///< returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
+    int            Width() const;        ///< returns width of window in pixels
+    int            Height() const;       ///< returns width of window in pixels
+    int            ZOrder() const;       ///< returns the position of this window in the z-order (root (non-child) windows only)
+    Pt             Size() const;         ///< returns a \a Pt packed with width in \a x and height in \a y
+    Pt             MinSize() const;      ///< returns the minimum allowable size of window
+    Pt             MaxSize() const;      ///< returns the maximum allowable size of window
 
     /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/
-    virtual Pt     ClientUpperLeft() const    {return UpperLeft();}
+    virtual Pt     ClientUpperLeft() const;
 
     /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
         virtual b/c different windows have different shapes (and so ways of calculating client area)*/
-    virtual Pt     ClientLowerRight() const   {return LowerRight();}
+    virtual Pt     ClientLowerRight() const;
 
     /** returns the size of the client area \see Size() */
-    Pt             ClientSize() const         {return ClientLowerRight() - ClientUpperLeft();}
+    Pt             ClientSize() const;
 
-    Pt             ScreenToWindow(const Pt& pt) const   {return pt - UpperLeft();}       ///< returns \a pt translated from screen- to window-coordinates
-    Pt             ScreenToClient(const Pt& pt) const   {return pt - ClientUpperLeft();} ///< returns \a pt translated from screen- to client-coordinates
-    virtual bool   InWindow(const Pt& pt) const         {return pt >= UpperLeft() && pt < LowerRight();} ///< returns true if screen-coordinate point \a pt falls within the window
-    virtual bool   InClient(const Pt& pt) const         {return pt >= ClientUpperLeft() && pt < ClientLowerRight();} ///< returns true if screen-coordinate point \a pt falls within the window's client area
+    Pt             ScreenToWindow(const Pt& pt) const;  ///< returns \a pt translated from screen- to window-coordinates
+    Pt             ScreenToClient(const Pt& pt) const;  ///< returns \a pt translated from screen- to client-coordinates
+    virtual bool   InWindow(const Pt& pt) const;        ///< returns true if screen-coordinate point \a pt falls within the window
+    virtual bool   InClient(const Pt& pt) const;        ///< returns true if screen-coordinate point \a pt falls within the window's client area
 
-    Wnd*           Parent() const {return m_parent;}     ///< returns the window's parent (may be null)
-    Wnd*           RootParent() const;                   ///< returns the earliest ancestor window (may be null)
-    virtual WndRegion WindowRegion(const Pt& pt) const;  ///< also virtual b/c of different window shapes
+    Wnd*           Parent() const;                      ///< returns the window's parent (may be null)
+    Wnd*           RootParent() const;                  ///< returns the earliest ancestor window (may be null)
+
+    virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Wnd object
 
@@ -137,36 +139,36 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual void   SetText(const string& str) {m_text = str;}      ///< set window text
-    virtual void   SetText(const char* str)   {m_text = str;}      ///< set window text
-    void           Hide(bool children = true);                     ///< suppresses rendering of this window (and possibly its children) during render loop
-    void           Show(bool children = true);                     ///< enables rendering of this window (and possibly its children) during render loop
-    virtual void   ModalInit();                                    ///< called during Run(), after a modal window is registered, this is the place that subclasses should put specialized modal window initialization, such as setting focus to child controls
-    void           EnableChildClipping(bool enable = true);        ///< enables or disables clipping of child windows to the boundaries of this Wnd
-    virtual void   BeginClipping();                                ///< sets up child clipping for this window
-    virtual void   EndClipping();                                  ///< restores state to what it was before BeginClipping() was called
-    void           MoveTo(int x, int y);                           ///< moves upper-left corner of window to \a x,\a y
-    void           MoveTo(const Pt& pt);                           ///< moves upper-left corner of window to \a pt
-    void           OffsetMove(int x, int y);                       ///< moves window by \a x, \a y pixels
-    void           OffsetMove(const Pt& pt);                       ///< moves window by \a pt pixels
-    void           SizeMove(const Pt& ul, const Pt& lr);           ///< resizes and/or moves window to new upper-left and lower right boundaries
-    virtual void   SizeMove(int x1, int y1, int x2, int y2);       ///< resizes and/or moves window to new upper-left and lower right boundaries
-    void           Resize(const Pt& sz);                           ///< resizes window without moving upper-left corner
-    void           Resize(int x, int y);                           ///< resizes window without moving upper-left corner
-    void           SetMinSize(const Pt& sz) {m_min_size = sz;}     ///< sets the minimum allowable size of window
-    void           SetMaxSize(const Pt& sz) {m_max_size = sz;}     ///< sets the maximum allowable size of window
-    void           AttachChild(Wnd* wnd);  ///< places \a wnd in child ptr list, sets's child's \a m_parent member to \a this
-    void           MoveChildUp(Wnd* wnd);  ///< places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children)
-    void           MoveChildDown(Wnd* wnd);///< places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children)
-    void           DetachChild(Wnd* wnd);  ///< removes \a wnd from child ptr list, sets child's m_parent = 0
-    void           DetachChildren();       ///< removes all Wnds from child ptr list, sets childrens' m_parent = 0
-    void           DeleteChild(Wnd* wnd);  ///< removes, detaches, and deletes \a wnd; does nothing if wnd is not in the child list
-    void           DeleteChildren();       ///< removes, detaches, and deletes all Wnds in the child list
-    void           InstallEventFilter(Wnd* wnd);  ///< adds \a wnd to the front of the event filtering chain
-    void           RemoveEventFilter(Wnd* wnd);   ///< removes \a wnd from the filter chain
+    virtual void   SetText(const string& str);               ///< set window text
+    virtual void   SetText(const char* str);                 ///< set window text
+    void           Hide(bool children = true);               ///< suppresses rendering of this window (and possibly its children) during render loop
+    void           Show(bool children = true);               ///< enables rendering of this window (and possibly its children) during render loop
+    virtual void   ModalInit();                              ///< called during Run(), after a modal window is registered, this is the place that subclasses should put specialized modal window initialization, such as setting focus to child controls
+    void           EnableChildClipping(bool enable = true);  ///< enables or disables clipping of child windows to the boundaries of this Wnd
+    virtual void   BeginClipping();                          ///< sets up child clipping for this window
+    virtual void   EndClipping();                            ///< restores state to what it was before BeginClipping() was called
+    void           MoveTo(int x, int y);                     ///< moves upper-left corner of window to \a x,\a y
+    void           MoveTo(const Pt& pt);                     ///< moves upper-left corner of window to \a pt
+    void           OffsetMove(int x, int y);                 ///< moves window by \a x, \a y pixels
+    void           OffsetMove(const Pt& pt);                 ///< moves window by \a pt pixels
+    void           SizeMove(const Pt& ul, const Pt& lr);     ///< resizes and/or moves window to new upper-left and lower right boundaries
+    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes and/or moves window to new upper-left and lower right boundaries
+    void           Resize(const Pt& sz);                     ///< resizes window without moving upper-left corner
+    void           Resize(int x, int y);                     ///< resizes window without moving upper-left corner
+    void           SetMinSize(const Pt& sz);                 ///< sets the minimum allowable size of window
+    void           SetMaxSize(const Pt& sz);                 ///< sets the maximum allowable size of window
+    void           AttachChild(Wnd* wnd);                    ///< places \a wnd in child ptr list, sets's child's \a m_parent member to \a this
+    void           MoveChildUp(Wnd* wnd);                    ///< places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children)
+    void           MoveChildDown(Wnd* wnd);                  ///< places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children)
+    void           DetachChild(Wnd* wnd);                    ///< removes \a wnd from child ptr list, sets child's m_parent = 0
+    void           DetachChildren();                         ///< removes all Wnds from child ptr list, sets childrens' m_parent = 0
+    void           DeleteChild(Wnd* wnd);                    ///< removes, detaches, and deletes \a wnd; does nothing if wnd is not in the child list
+    void           DeleteChildren();                         ///< removes, detaches, and deletes all Wnds in the child list
+    void           InstallEventFilter(Wnd* wnd);             ///< adds \a wnd to the front of the event filtering chain
+    void           RemoveEventFilter(Wnd* wnd);              ///< removes \a wnd from the filter chain
 
-    virtual bool   Render();                                         ///< draws this Wnd in scene; a return value of false that children should be skipped in subsequent rendering
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);           ///< respond to left button down msg.  A window receives this whenever any input device button changes from up to down while over the window.
+    virtual bool   Render();                                 ///< draws this Wnd in scene; a return value of false that children should be skipped in subsequent rendering
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);   ///< respond to left button down msg.  A window receives this whenever any input device button changes from up to down while over the window.
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys); ///< respond to drag msg (even if this Wnd is not dragable).   Drag messages are only sent to the window over which the button was dressed at teh beginning of the drag. A window receives this whenever any input device button is down and the mouse is moving while over the window.  If a window has the DRAG_KEEPER flag set, the window will also receive drag messages when the mouse is being dragged outside the window's area.
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);             ///< respond to release of left mouse button outside window, if it was originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not currently over the window when this happens.
     virtual void   LClick(const Pt& pt, Uint32 keys);                ///< respond to release of left mouse button over window, if it was also originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well.
@@ -199,43 +201,49 @@ protected:
         parameters to a Wnd message function call.  Therefore, not all of Event's accessors will return sensical results, 
         depending on the EventType of the Event.  Note that Wnd events may be filtered before they actually reach the target 
         Wnd \see Wnd */
-    class Event
+    class GG_API Event
     {
     public:
         /** the types of Wnd events.  Each of these corresponds to a Wnd member function of the same name. */
-	    enum EventType {LButtonDown, LDrag, LButtonUp, LClick, LDoubleClick, 
-                        RButtonDown, RClick, RDoubleClick, 
-                        MouseEnter, MouseHere, MouseLeave, 
-                        MouseWheel, 
-                        Keypress,
-                        GainingFocus, LosingFocus};
+	    enum EventType {
+            LButtonDown,
+            LDrag,
+            LButtonUp,
+            LClick,
+            LDoubleClick,
+            RButtonDown,
+            RClick,
+            RDoubleClick,
+            MouseEnter,
+            MouseHere,
+            MouseLeave,
+            MouseWheel,
+            Keypress,
+            GainingFocus,
+            LosingFocus
+        };
 
         /** constructs an Event that is used to invoke a function taking parameters (const GG::Pt& pt, Uint32 keys), eg LButtonDown(). */
-        Event(EventType type, const GG::Pt& pt, Uint32 keys) :
-            m_type(type), m_point(pt), m_key_mods(keys), m_wheel_move(0) {}
+        Event(EventType type, const GG::Pt& pt, Uint32 keys);
 
         /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const Pt& move, Uint32 keys), eg LDrag(). */
-        Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys) :
-            m_type(type), m_point(pt), m_key_mods(keys), m_drag_move(move), m_wheel_move(0) {}
+        Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys);
 
         /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, int move, Uint32 keys), eg MouseWheel(). */
-        Event(EventType type, const Pt& pt, int move, Uint32 keys) :
-            m_type(type), m_point(pt), m_key_mods(keys), m_wheel_move(move) {}
+        Event(EventType type, const Pt& pt, int move, Uint32 keys);
 
         /** constructs an Event that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg Keypress(). */
-        Event(EventType type, Key key, Uint32 key_mods) :
-            m_type(type), m_keypress(key), m_key_mods(key_mods), m_wheel_move(0) {}
+        Event(EventType type, Key key, Uint32 key_mods);
 
         /** constructs an Event that is used to invoke a function taking no parameters, eg GainingFocus(). */
-        Event(EventType type) :
-            m_type(type), m_key_mods(0), m_wheel_move(0) {}
+        Event(EventType type);
 
-        EventType      Type() const       {return m_type;}       ///< returns the type of the Event
-        const GG::Pt&  Point() const      {return m_point;}      ///< returns the point at which the event took place, if any
-        Key            KeyPress() const   {return m_keypress;}   ///< returns the keypress represented by the Event, if any
-        Uint32         KeyMods() const    {return m_key_mods;}   ///< returns the modifiers to the Event's keypress, if any
-        const GG::Pt&  DragMove() const   {return m_drag_move;}  ///< returns the amount of drag movement represented by the Event, if any
-        int            WheelMove() const  {return m_wheel_move;} ///< returns the ammount of mouse wheel movement represented by the Event, if any
+        EventType      Type() const;      ///< returns the type of the Event
+        const GG::Pt&  Point() const;     ///< returns the point at which the event took place, if any
+        Key            KeyPress() const;  ///< returns the keypress represented by the Event, if any
+        Uint32         KeyMods() const;   ///< returns the modifiers to the Event's keypress, if any
+        const GG::Pt&  DragMove() const;  ///< returns the amount of drag movement represented by the Event, if any
+        int            WheelMove() const; ///< returns the ammount of mouse wheel movement represented by the Event, if any
 
     private:
         EventType  m_type;
@@ -253,15 +261,15 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    const list<Wnd*>& Children() {return m_children;} ///< returns child list; the list is const, but the children may be manipulated
+    const list<Wnd*>& Children(); ///< returns child list; the list is const, but the children may be manipulated
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   EventFilter(Wnd* w, const Event& event);          ///< handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this filter processed the message.
+    virtual bool   EventFilter(Wnd* w, const Event& event); ///< handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this filter processed the message.
     //@}
 
-    string         m_text;           ///< text associated with the window, such as a window title or button label, etc.
-    bool           m_done;           ///< derived modal Wnd's set this to true to stop modal loop
+    string         m_text; ///< text associated with the window, such as a window title or button label, etc.
+    bool           m_done; ///< derived modal Wnd's set this to true to stop modal loop
 
 private:
     void ValidateFlags();                 ///< sanity-checks the window creation flags

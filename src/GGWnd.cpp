@@ -57,6 +57,73 @@ namespace {
 ///////////////////////////////////////
 // class GG::Wnd
 ///////////////////////////////////////
+// Wnd::Event
+Wnd::Event::Event(EventType type, const GG::Pt& pt, Uint32 keys) :
+    m_type(type),
+    m_point(pt),
+    m_key_mods(keys),
+    m_wheel_move(0)
+{}
+
+Wnd::Event::Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys) :
+    m_type(type),
+    m_point(pt),
+    m_key_mods(keys),
+    m_drag_move(move),
+    m_wheel_move(0)
+{}
+
+Wnd::Event::Event(EventType type, const Pt& pt, int move, Uint32 keys) :
+    m_type(type),
+    m_point(pt),
+    m_key_mods(keys),
+    m_wheel_move(move)
+{}
+
+Wnd::Event::Event(EventType type, Key key, Uint32 key_mods) :
+    m_type(type),
+    m_keypress(key),
+    m_key_mods(key_mods),
+    m_wheel_move(0)
+{}
+
+Wnd::Event::Event(EventType type) :
+    m_type(type),
+    m_key_mods(0), 
+    m_wheel_move(0)
+{}
+
+Wnd::Event::EventType Wnd::Event::Type() const
+{
+    return m_type;
+}
+
+const GG::Pt& Wnd::Event::Point() const
+{
+    return m_point;
+}
+
+Key Wnd::Event::KeyPress() const
+{
+    return m_keypress;
+}
+
+Uint32 Wnd::Event::KeyMods() const
+{
+    return m_key_mods;
+}
+
+const GG::Pt& Wnd::Event::DragMove() const
+{
+    return m_drag_move;
+}
+
+int Wnd::Event::WheelMove() const
+{
+    return m_wheel_move;
+}
+
+// Wnd
 Wnd::Wnd() :
     m_done(false),
     m_parent(0),
@@ -135,6 +202,51 @@ Wnd::~Wnd()
     DeleteChildren();
 }
 
+bool Wnd::Clickable() const
+{
+    return m_flags & CLICKABLE;
+}
+
+bool Wnd::Dragable() const
+{
+    return m_flags & DRAGABLE;
+}
+
+bool Wnd::DragKeeper() const
+{
+    return m_flags & DRAG_KEEPER;
+}
+
+bool Wnd::ClipChildren() const
+{
+    return m_clip_children;
+}
+
+bool Wnd::Visible() const
+{
+    return m_visible;
+}
+
+bool Wnd::Resizable() const
+{
+    return m_flags & RESIZABLE;
+}
+
+bool Wnd::OnTop() const
+{
+    return m_flags & ONTOP;
+}
+
+bool Wnd::Modal() const
+{
+    return m_flags & MODAL;
+}
+
+const string& Wnd::WindowText() const
+{
+    return m_text;
+}
+
 Pt Wnd::UpperLeft() const
 {
     Pt retval = m_upperleft;
@@ -149,6 +261,76 @@ Pt Wnd::LowerRight() const
     if (m_parent)
         retval += m_parent->ClientUpperLeft();
     return retval;
+}
+
+int Wnd::Width() const
+{
+    return m_lowerright.x - m_upperleft.x;
+}
+
+int Wnd::Height() const
+{
+    return m_lowerright.y - m_upperleft.y;
+}
+
+int Wnd::ZOrder() const
+{
+    return m_zorder;
+}
+
+Pt Wnd::Size() const
+{
+    return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y);
+}
+
+Pt Wnd::MinSize() const
+{
+    return m_min_size;
+}
+
+Pt Wnd::MaxSize() const
+{
+    return m_max_size;
+}
+
+Pt Wnd::ClientUpperLeft() const
+{
+    return UpperLeft();
+}
+
+Pt Wnd::ClientLowerRight() const
+{
+    return LowerRight();
+}
+
+Pt Wnd::ClientSize() const
+{
+    return ClientLowerRight() - ClientUpperLeft();
+}
+
+Pt Wnd::ScreenToWindow(const Pt& pt) const
+{
+    return pt - UpperLeft();
+}
+
+Pt Wnd::ScreenToClient(const Pt& pt) const
+{
+    return pt - ClientUpperLeft();
+}
+
+bool Wnd::InWindow(const Pt& pt) const
+{
+    return pt >= UpperLeft() && pt < LowerRight();
+}
+
+bool Wnd::InClient(const Pt& pt) const
+{
+    return pt >= ClientUpperLeft() && pt < ClientLowerRight();
+}
+
+Wnd* Wnd::Parent() const
+{
+    return m_parent;
 }
 
 Wnd* Wnd::RootParent() const
@@ -242,6 +424,16 @@ XMLElementValidator Wnd::XMLValidator() const
     retval.AppendChild(XMLElementValidator("m_flags", new ListValidator<Wnd::WndFlag>()));
     retval.LastChild().SetAttribute("edit", 0);
     return retval;
+}
+
+void Wnd::SetText(const string& str)
+{
+    m_text = str;
+}
+
+void Wnd::SetText(const char* str)
+{
+    m_text = str;
 }
 
 void Wnd::Hide(bool children/* = true*/)
@@ -338,6 +530,16 @@ void Wnd::Resize(const Pt& sz)
 void Wnd::Resize(int x, int y)
 {
     SizeMove(m_upperleft.x, m_upperleft.y, m_upperleft.x + x, m_upperleft.y + y);
+}
+
+void Wnd::SetMinSize(const Pt& sz)
+{
+    m_min_size = sz;
+}
+
+void Wnd::SetMaxSize(const Pt& sz)
+{
+    m_max_size = sz;
 }
 
 void Wnd::AttachChild(Wnd* wnd)
@@ -471,7 +673,15 @@ int Wnd::Run()
     return retval;
 }
 
-bool Wnd::EventFilter(Wnd* w, const Event& event) {return false;}
+const list<Wnd*>& Wnd::Children()
+{
+    return m_children;
+}
+
+bool Wnd::EventFilter(Wnd* w, const Event& event)
+{
+    return false;
+}
 
 void Wnd::ValidateFlags()
 {

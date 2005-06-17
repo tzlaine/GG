@@ -185,7 +185,7 @@ void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
             last_mouse_event_time = Ticks();
 
         bool send_to_gg = false;
-        EventType gg_event;
+        EventType gg_event = MOUSEMOVE;
         GG::Key key = GGKeyFromSDLKey(event.key.keysym);
         Uint32 key_mods = SDL_GetModState();
 #ifdef __APPLE__

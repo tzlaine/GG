@@ -154,7 +154,8 @@ struct GG::AppImplData
 
     Wnd*       prev_wnd_under_cursor;   // GUI window most recently under the input cursor; may be 0
     Wnd*       curr_wnd_under_cursor;   // GUI window currently under the input cursor; may be 0
-    Wnd*       drag_wnds[3];            // GUI window currently being clicked or dragged by each button (on a mouse)
+    Wnd*       drag_wnds[3];            // GUI window currently being clicked or dragged by each mouse button
+    Pt         wnd_resize_offset;       // offset from the cursor of either the upper-left or lowe-right corner of the GUI window currently being resized
     WndRegion  wnd_region;              // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
 
     map<Wnd*, Pt> drag_drop_wnds;       // the Wnds (and their offsets) that are being dragged and dropped between Wnds
@@ -361,7 +362,7 @@ void App::Remove(Wnd* wnd)
                 if (MatchesOrContains(wnd, it->first)) {
                     it->second = 0;
                 } else { // if the modal window for the removed window's focus level is available, revert focus to the modal window
-                    if (it->second = it->first)
+                    if ((it->second = it->first))
                         it->first->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
                 }
             }
@@ -529,6 +530,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     Wnd*&       prev_wnd_under_cursor = s_impl->prev_wnd_under_cursor;
     Wnd*&       curr_wnd_under_cursor = s_impl->curr_wnd_under_cursor;
     Wnd**       drag_wnds = s_impl->drag_wnds;
+    Pt&         wnd_resize_offset = s_impl->wnd_resize_offset;
     WndRegion&  wnd_region = s_impl->wnd_region;
 
     // track double-click time and time-out any pending double-click that has outlived its interval
@@ -567,24 +569,41 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             if (wnd_region == WR_MIDDLE || wnd_region == WR_NONE) { // send move message to window
                 drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, rel, key_mods));
             } else if (drag_wnds[0]->Resizable()) { // send appropriate resize message to window
+                Pt offset_pos = pos + wnd_resize_offset;
                 switch (wnd_region)
                 {
-                case WR_TOPLEFT:     drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft() + rel,
-                                                            drag_wnds[0]->LowerRight()); break;
-                case WR_TOP:         drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, drag_wnds[0]->UpperLeft().y + rel.y,
-                                                            drag_wnds[0]->LowerRight().x, drag_wnds[0]->LowerRight().y); break;
-                case WR_TOPRIGHT:    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, drag_wnds[0]->UpperLeft().y + rel.y,
-                                                            drag_wnds[0]->LowerRight().x + rel.x, drag_wnds[0]->LowerRight().y); break;
-                case WR_MIDLEFT:     drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x + rel.x, drag_wnds[0]->UpperLeft().y,
-                                                            drag_wnds[0]->LowerRight().x, drag_wnds[0]->LowerRight().y); break;
-                case WR_MIDRIGHT:    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, drag_wnds[0]->UpperLeft().y,
-                                                            drag_wnds[0]->LowerRight().x + rel.x, drag_wnds[0]->LowerRight().y); break;
-                case WR_BOTTOMLEFT:  drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x + rel.x, drag_wnds[0]->UpperLeft().y,
-                                                            drag_wnds[0]->LowerRight().x, drag_wnds[0]->LowerRight().y + rel.y); break;
-                case WR_BOTTOM:      drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, drag_wnds[0]->UpperLeft().y,
-                                                            drag_wnds[0]->LowerRight().x, drag_wnds[0]->LowerRight().y + rel.y); break;
-                case WR_BOTTOMRIGHT: drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft(), drag_wnds[0]->LowerRight() + Pt(rel.x, rel.y)); break;
-                default: break;
+                case WR_TOPLEFT:
+                    drag_wnds[0]->SizeMove(offset_pos, drag_wnds[0]->LowerRight());
+                    break;
+                case WR_TOP:
+                    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, offset_pos.y,
+                                           drag_wnds[0]->LowerRight().x, drag_wnds[0]->LowerRight().y);
+                    break;
+                case WR_TOPRIGHT:
+                    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, offset_pos.y,
+                                           offset_pos.x, drag_wnds[0]->LowerRight().y);
+                    break;
+                case WR_MIDLEFT:
+                    drag_wnds[0]->SizeMove(offset_pos.x, drag_wnds[0]->UpperLeft().y,
+                                           drag_wnds[0]->LowerRight().x, drag_wnds[0]->LowerRight().y);
+                    break;
+                case WR_MIDRIGHT:
+                    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, drag_wnds[0]->UpperLeft().y,
+                                           offset_pos.x, drag_wnds[0]->LowerRight().y);
+                    break;
+                case WR_BOTTOMLEFT:
+                    drag_wnds[0]->SizeMove(offset_pos.x, drag_wnds[0]->UpperLeft().y,
+                                           drag_wnds[0]->LowerRight().x, offset_pos.y);
+                    break;
+                case WR_BOTTOM:
+                    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft().x, drag_wnds[0]->UpperLeft().y,
+                                           drag_wnds[0]->LowerRight().x, offset_pos.y);
+                    break;
+                case WR_BOTTOMRIGHT:
+                    drag_wnds[0]->SizeMove(drag_wnds[0]->UpperLeft(), offset_pos);
+                    break;
+                default:
+                    break;
                 }
             } else if (drag_wnds[0]->DragKeeper()) {
                 drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, rel, key_mods));
@@ -611,6 +630,14 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 SetFocusWnd(drag_wnds[0]);
             if (drag_wnds[0]) {
                 wnd_region = drag_wnds[0]->WindowRegion(pos); // and determine whether a resize-region of it is being dragged
+                if (wnd_region % 3 == 0) // left regions
+                    wnd_resize_offset.x = drag_wnds[0]->UpperLeft().x - pos.x;
+                else
+                    wnd_resize_offset.x = drag_wnds[0]->LowerRight().x - pos.x;
+                if (wnd_region < 3) // top regions
+                    wnd_resize_offset.y = drag_wnds[0]->UpperLeft().y - pos.y;
+                else
+                    wnd_resize_offset.y = drag_wnds[0]->LowerRight().y - pos.y;
                 Wnd* drag_wnds_root_parent = drag_wnds[0]->RootParent();
                 MoveUp(drag_wnds_root_parent ? drag_wnds_root_parent : drag_wnds[0]); // move root window up to top of z-order
                 drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LButtonDown, pos, key_mods));

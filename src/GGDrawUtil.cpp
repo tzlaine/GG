@@ -546,9 +546,9 @@ Clr DarkColor(Clr clr)
 {
     const double scale_factor = 2.0;   // factor by which the color is darkened
     Clr retval = clr;
-    retval.r /= scale_factor;
-    retval.g /= scale_factor;
-    retval.b /= scale_factor;
+    retval.r = static_cast<int>(retval.r / scale_factor);
+    retval.g = static_cast<int>(retval.g / scale_factor);
+    retval.b = static_cast<int>(retval.b / scale_factor);
     return retval;
 }
 
@@ -556,9 +556,9 @@ Clr DisabledColor(Clr clr)
 {
     Clr retval = clr;
     const double gray_factor = 0.75; // amount to move clr in the direction of gray
-    retval.r += (CLR_GRAY.r - retval.r) * gray_factor;
-    retval.g += (CLR_GRAY.g - retval.g) * gray_factor;
-    retval.b += (CLR_GRAY.b - retval.b) * gray_factor;
+    retval.r = static_cast<int>(retval.r + (CLR_GRAY.r - retval.r) * gray_factor);
+    retval.g = static_cast<int>(retval.g + (CLR_GRAY.g - retval.g) * gray_factor);
+    retval.b = static_cast<int>(retval.b + (CLR_GRAY.b - retval.b) * gray_factor);
     return retval;
 }
 

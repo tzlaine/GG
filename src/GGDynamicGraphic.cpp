@@ -304,7 +304,7 @@ bool DynamicGraphic::Render()
             if (m_first_frame_time == -1) {
                 m_last_frame_time = m_first_frame_time = App::GetApp()->Ticks();
                 if (0.0 != m_FPS) // needed if a start index was set
-                    m_first_frame_time -= 1000.0 / m_FPS * m_curr_frame;
+                    m_first_frame_time = static_cast<int>(m_first_frame_time - 1000.0 / m_FPS * m_curr_frame);
             } else {
                 int old_frame = m_curr_frame;
                 int curr_time = App::GetApp()->Ticks();

@@ -37,41 +37,80 @@
 
 namespace GG {
 
+class Layout;
+
 /** This is the basic GG window class.
-    Window boundaries are from m_upperleft to m_lowerright - Pt(1,1).
-    It is assumed that child windows exists within the boundaries of their parents, although this is not required.
+
+    <p>Window Geometry
+    <br>The coordinates of Wnd boundaries are STL-style, as are most range-values throughout GG, meaning that
+    LowerRight() denotes the "last + 1" pixel of a Wnd.  The on-screen representation of a rectangular Wnd covers the
+    pixels from UpperLeft() to LowerRight() - Pt(1, 1), \a not UpperLeft() to LowerRight().  Each Wnd has a client area
+    from ClientUpperLeft() to ClientLowerRight().  These two methods are virtual, and may return anything the user
+    likes; the default implementation is to return UpperLeft() and LowerRight(), respectively, meaning that the client
+    area is the entire window.
+
+    <p>Child Windows
+    <br>It is assumed that child windows exists within the boundaries of their parents, although this is not required.
     By default, Wnds do not clip their children; child clipping can be turned on or off using EnableChildClipping(),
-    which clips all children to the client area of the Wnd.  Subclasses can override BeginClipping() and EndClipping() 
-    if the clipping desired is something other than the client area of the Wnd, or if the Wnd is not rectangular.  
-    Regardless of clipping, all clicks that land on a child but outside of the parent will not reach the child, since 
+    which clips all children to the client area of the Wnd.  Subclasses can override BeginClipping() and EndClipping()
+    if the clipping desired is something other than the client area of the Wnd, or if the Wnd is not rectangular.
+    Regardless of clipping, all clicks that land on a child but outside of the parent will not reach the child, since
     clicks are detected by seaching the top-level Wnds and then searching the children within the ones that are hit.
-    Ideally, "sibling" child windows should not overlap (unless they can without interfering, as in the case of a 
-    bounding box, etc.).  If this is impossible or undesirable and control is needed over the order in which 
-    children are rendered, MoveChildUp() and MoveChildDown() provide such control.  Always-on-top windows are 
-    drawn after all others, to ensure that they remain on top.  This means that other non-on-top windows that are 
-    moved to the top of the z-order stop at some z-value below the lowest z-valued on-top window.  On-topness is 
-    useful for modeless dialog boxes, among other things. Modal windows are available (by setting the MODAL window 
-    creation flag), and are also always-on-top, but are handled differently and do not have ONTOP specified in 
-    their creation flags.  Modal windows are executed by calling Run(), which registers them as modal windows and 
-    starts the local execution of the application's event pump.  Execution of the code that calls Run() is 
-    effectively halted until Run() returns.  Derived classes that wish to use modal execution should set m_done = 
-    true to escape from the modal execution loop.  Wnd inherits from boost::signals::trackable.  This means that 
-    any slots contained in a Wnd object or Wnd-derived object will automatically be disconnected from any connected 
-    signals when the Wnd is destroyed.  Every Wnd responds to input as driven by the singleton App object.  Every 
-    Wnd can also have its incoming Events filtered by an arbitrary number of other Wnds.  Each such Wnds in a 
-    Wnd's "filter chain" gets an opportunity, one at a time, to process an incoming Event, or pass it on to the 
-    next filter in the chain.  If all EventFilter() calls in the chain return false, the filtered Wnd then gets the 
-    chance to process the Event as normal.  Filter Wnds are traversed in reverse order that they are installed, and 
-    no filter Wnd can be in a filter chain more than once.  Installing the same filter Wnd more than once removes 
-    the Wnd from the filter chain and re-adds it to the beginning of the chain.  Note that the default 
-    implementation of EventFilter() is to return false and do nothing else, so installing a Wnd-derived type with 
-    no overridden EventFilter() in a filter Wnd will have no effect.  Also note that just as it is legal for 
-    keyboard accelerator slots to do nontrivial work and still return false (causing a keystroke event to be 
-    generated), EventFilter() may return false even when it does nontrivial work, and the next filter in the chain
-    will get a chance to process the Event.  It is even possible to have an arbitrary number of filters that all
-    do processing on an Event, and finally let the filtered Wnd do its normal Event processing. Finally, note that 
-    while a Wnd can contain arbitrary Wnd-derived children, in order for such children to be automatically saved 
-    and loaded using XML encoding, any user-defined Wnd subclasses must be added to the App's XMLObjectFactory.  
+    Ideally, "sibling" child windows should not overlap (unless they can without interfering).  If this is impossible or
+    undesirable and control is needed over the order in which children are rendered, MoveChildUp() and MoveChildDown()
+    provide such control.
+
+    <p>Effects of Window-Creation Flags
+    <br>DragKeeper() windows are those that maintain cursor drags, even when they leave the bounds of the window, and
+    even though such windows are not themselves draggable.  This is useful for such controls as Edit and Scroll.
+    <br>Resizable() windows are able to be stretched by the user, by dragging the areas of the window outside the client
+    area.  So the RESIZABLE flag will have no effect on a window that does not have non-default ClientUpperLeft() and/or
+    ClientLowerRight().  The WindowRegion() method can also be overidden in derived classes, and can return regions that
+    are appropriate to nonrectangular windows, or those whose client area must cover the entire window.
+    <br>OnTop() windows are drawn after all others (except Modal() ones), to ensure that they remain on top.  This means
+    that other non-OnTop() windows that are moved to the top of the z-order stop at some z-value below the lowest
+    OnTop() window in the z-order.  On-topness is useful for modeless dialog boxes, among other things.
+    <br>Modal() windows are available (by setting the MODAL window creation flag), and are also always-on-top, but are
+    handled differently and do not have ONTOP specified in their creation flags.  Modal windows are executed by calling
+    Run(), which registers them as modal windows and starts the local execution of the application's event pump.
+    Execution of the code that calls Run() is effectively halted until Run() returns.  Derived classes that wish to use
+    modal execution should set m_done = true to escape from the modal execution loop.  EventPump has more information
+    about processing during modal dialog execution.
+
+    <p>Signal Considerations
+    <br>Wnd inherits from boost::signals::trackable.  This means that any slots contained in a Wnd object or Wnd-derived
+    object will automatically be disconnected from any connected signals when the Wnd is destroyed.  Every Wnd responds
+    to input as driven by the singleton App object.
+
+    <p>Event Filters
+    <br>Every Wnd can also have its incoming Events filtered by an arbitrary number of other Wnds.
+    Each such Wnds in a Wnd's "filter chain" gets an opportunity, one at a time, to process an incoming Event, or pass
+    it on to the next filter in the chain.  If all EventFilter() calls in the chain return false, the filtered Wnd then
+    gets the chance to process the Event as normal.  Filter Wnds are traversed in reverse order that they are installed,
+    and no filter Wnd can be in a filter chain more than once.  Installing the same filter Wnd more than once removes
+    the Wnd from the filter chain and re-adds it to the beginning of the chain.  Note that the default implementation of
+    EventFilter() is to return false and do nothing else, so installing a Wnd-derived type with no overridden
+    EventFilter() in a filter Wnd will have no effect.  Also note that just as it is legal for keyboard accelerator
+    slots to do nontrivial work and still return false (causing a keystroke event to be generated), EventFilter() may
+    return false even when it does nontrivial work, and the next filter in the chain will also get a chance to process
+    the Event.  It is even possible to have an arbitrary number of filters that all do processing on an Event, and
+    finally let the filtered Wnd do its normal Event processing.
+
+    <p>Layouts
+    <br>Layouts arrange children in the client area of a window, and can be assigned to a window in 4 ways.
+    HorizontalLayout(), VerticalLayout(), and GridLayout() all arrange the window's children automatically, and take
+    ownership of them as their own children, becoming the window's only child.  Any existing layout is removed first.
+    SetLayout() allows you to attach a pre-configured Layout object directly, without automatically arranging the
+    window's children.  Because SetLayout() does no auto-arrangement, it does not know how to place any children the
+    window may have at the time it is called; for this reason, it not only removes any previous layout, but deletes all
+    current children as well.  Therefore, SetLayout() should usually only be called before any children are attached to
+    a window; all children should be attached directly to the layout.
+    <br>When a window has an attached layout and is resized, it resizes its layout automatically.  Further, if a window
+    is part of a layout, it notifies its containing layout whenever it is moved, resized, or has its MinSize() changed.
+    This ensures that layouts are always current.
+
+    <p>Note that while a Wnd can contain arbitrary Wnd-derived children, in order for such children to be automatically
+    saved and loaded using XML encoding, any user-defined Wnd subclasses must be added to the App's XMLObjectFactory.
     See GG::App::AddWndGenerator() and GG::XMLObjectFactory for details. */
 class GG_API Wnd : public boost::signals::trackable
 {
@@ -97,11 +136,11 @@ public:
     bool           Clickable() const;    ///< does a click over this window pass through?
     bool           Dragable() const;     ///< does a click here become a drag? 
     bool           DragKeeper() const;   ///< when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway?
-    bool           ClipChildren() const; ///< is child clipping enabled?
-    bool           Visible() const;      ///< is the window visible?
     bool           Resizable() const;    ///< can this window be resized using the mouse?
     bool           OnTop() const;        ///< is this an on-top window?
     bool           Modal() const;        ///< is this a modal window?
+    bool           ClipChildren() const; ///< is child clipping enabled?
+    bool           Visible() const;      ///< is the window visible?
     const string&  WindowText() const;   ///< returns text associated with this window
     Pt             UpperLeft() const;    ///< returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
     Pt             LowerRight() const;   ///< returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
@@ -123,6 +162,9 @@ public:
     /** returns the size of the client area \see Size() */
     Pt             ClientSize() const;
 
+    int            ClientWidth() const;                 ///< returns the width of the client area
+    int            ClientHeight() const;                ///< returns the height of the client area
+
     Pt             ScreenToWindow(const Pt& pt) const;  ///< returns \a pt translated from screen- to window-coordinates
     Pt             ScreenToClient(const Pt& pt) const;  ///< returns \a pt translated from screen- to client-coordinates
     virtual bool   InWindow(const Pt& pt) const;        ///< returns true if screen-coordinate point \a pt falls within the window
@@ -130,6 +172,9 @@ public:
 
     Wnd*           Parent() const;                      ///< returns the window's parent (may be null)
     Wnd*           RootParent() const;                  ///< returns the earliest ancestor window (may be null)
+
+    const Layout* GetLayout() const;                    ///< returns the layout for the window, if any
+    const Layout* ContainingLayout() const;             ///< returns the layout containing the window, if any
 
     virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
 
@@ -147,16 +192,18 @@ public:
     void           EnableChildClipping(bool enable = true);  ///< enables or disables clipping of child windows to the boundaries of this Wnd
     virtual void   BeginClipping();                          ///< sets up child clipping for this window
     virtual void   EndClipping();                            ///< restores state to what it was before BeginClipping() was called
-    void           MoveTo(int x, int y);                     ///< moves upper-left corner of window to \a x,\a y
     void           MoveTo(const Pt& pt);                     ///< moves upper-left corner of window to \a pt
-    void           OffsetMove(int x, int y);                 ///< moves window by \a x, \a y pixels
+    void           MoveTo(int x, int y);                     ///< moves upper-left corner of window to \a x,\a y
     void           OffsetMove(const Pt& pt);                 ///< moves window by \a pt pixels
+    void           OffsetMove(int x, int y);                 ///< moves window by \a x, \a y pixels
     void           SizeMove(const Pt& ul, const Pt& lr);     ///< resizes and/or moves window to new upper-left and lower right boundaries
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes and/or moves window to new upper-left and lower right boundaries
     void           Resize(const Pt& sz);                     ///< resizes window without moving upper-left corner
     void           Resize(int x, int y);                     ///< resizes window without moving upper-left corner
-    void           SetMinSize(const Pt& sz);                 ///< sets the minimum allowable size of window
-    void           SetMaxSize(const Pt& sz);                 ///< sets the maximum allowable size of window
+    void           SetMinSize(const Pt& sz);                 ///< sets the minimum allowable size of window \a pt
+    void           SetMinSize(int x, int y);                 ///< sets the minimum allowable size of window to \a x,\a y
+    void           SetMaxSize(const Pt& sz);                 ///< sets the maximum allowable size of window \a pt
+    void           SetMaxSize(int x, int y);                 ///< sets the maximum allowable size of window to \a x,\a y
     void           AttachChild(Wnd* wnd);                    ///< places \a wnd in child ptr list, sets's child's \a m_parent member to \a this
     void           MoveChildUp(Wnd* wnd);                    ///< places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children)
     void           MoveChildDown(Wnd* wnd);                  ///< places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children)
@@ -166,6 +213,34 @@ public:
     void           DeleteChildren();                         ///< removes, detaches, and deletes all Wnds in the child list
     void           InstallEventFilter(Wnd* wnd);             ///< adds \a wnd to the front of the event filtering chain
     void           RemoveEventFilter(Wnd* wnd);              ///< removes \a wnd from the filter chain
+
+    /** places the window's children in a horizontal layout, handing ownership of the window's children over to the
+        layout.  Removes any current layout which may exist. */
+    void           HorizontalLayout();
+
+    /** places the window's children in a vertical layout, handing ownership of the window's children over to the
+        layout.  Removes any current layout which may exist. */
+    void           VerticalLayout();
+
+    /** places the window's children in a grid layout, handing ownership of the window's children over to the layout.
+        Removes any current layout which may exist. */
+    void           GridLayout();
+
+    /** sets \a layout as the layout for the window.  Removes any current layout which may exist, and deletes all child
+        windows. */
+    void           SetLayout(Layout* layout);
+
+    /** removes the window's layout, handing ownership of all children back to the window.  If no layout exists for the
+        window, no action is taken. */
+    void           RemoveLayout();
+
+    /** sets the margin that should exist between the outer edges of the windows in the layout and the edge of the
+        client area.  If no layout exists for the window, this has no effect. */
+    void           SetLayoutBorderMargin(int margin);
+
+    /** sets the margin that should exist between the windows in the layout.  If no layout exists for the window, this
+        has no effect. */
+    void           SetLayoutCellMargin(int margin);
 
     virtual bool   Render();                                 ///< draws this Wnd in scene; a return value of false that children should be skipped in subsequent rendering
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);   ///< respond to left button down msg.  A window receives this whenever any input device button changes from up to down while over the window.
@@ -261,11 +336,13 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    const list<Wnd*>& Children(); ///< returns child list; the list is const, but the children may be manipulated
+    const list<Wnd*>& Children() const; ///< returns child list; the list is const, but the children may be manipulated
     //@}
 
     /** \name Mutators */ //@{
     virtual bool   EventFilter(Wnd* w, const Event& event); ///< handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this filter processed the message.
+    Layout* GetLayout();        ///< returns the layout for the window, if any
+    Layout* ContainingLayout(); ///< returns the layout containing the window, if any
     //@}
 
     string         m_text; ///< text associated with the window, such as a window title or button label, etc.
@@ -275,22 +352,23 @@ private:
     void ValidateFlags();                 ///< sanity-checks the window creation flags
     void HandleEvent(const Event& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
 
-    Wnd*           m_parent;         ///< ptr to this window's parent; may be 0
-    list<Wnd*>     m_children;       ///< list of ptrs to child windows kept in order of decreasing area
-    int            m_zorder;         ///< where this window is in the z-order (root (non-child) windows only)
-    bool           m_visible;        ///< is this window drawn?
-    bool           m_clip_children;  ///< should the children of this window be clipped?
-    Pt             m_upperleft;      ///< upper left point of window
-    Pt             m_lowerright;     ///< lower right point of window
-    Pt             m_min_size;       ///< minimum window size Pt(0, 0) (= none) by default
-    Pt             m_max_size;       ///< maximum window size Pt(1 << 30, 1 << 30) (= none) by default
-    vector<Wnd*>   m_filters;        ///< the Wnds that are filtering this Wnd's events. These are in reverse order: top of the stack is back().
-    set<Wnd*>      m_filtering;      ///< the Wnds in whose filter chains this Wnd lies
+    Wnd*           m_parent;            ///< ptr to this window's parent; may be 0
+    list<Wnd*>     m_children;          ///< list of ptrs to child windows kept in order of decreasing area
+    int            m_zorder;            ///< where this window is in the z-order (root (non-child) windows only)
+    bool           m_visible;           ///< is this window drawn?
+    bool           m_clip_children;     ///< should the children of this window be clipped?
+    Pt             m_upperleft;         ///< upper left point of window
+    Pt             m_lowerright;        ///< lower right point of window
+    Pt             m_min_size;          ///< minimum window size Pt(0, 0) (= none) by default
+    Pt             m_max_size;          ///< maximum window size Pt(1 << 30, 1 << 30) (= none) by default
+    vector<Wnd*>   m_filters;           ///< the Wnds that are filtering this Wnd's events. These are in reverse order: top of the stack is back().
+    set<Wnd*>      m_filtering;         ///< the Wnds in whose filter chains this Wnd lies
+    Layout*        m_layout;            ///< the layout for this Wnd, if any
+    Layout*        m_containing_layout; ///< the layout that contains this Wnd, if any
+    Uint32         m_flags;             ///< flags supplied at window creation for clickability, dragability, drag-keeping, and resizability
 
-    Uint32         m_flags;          ///< flags supplied at window creation for clickability, dragability, drag-keeping, and resizability
-
-    friend class App;                ///< App needs access to \a m_zorder, m_children, etc.
-    friend class ZList;              ///< ZList needs access to \a m_zorder in order to order windows
+    friend class App;   ///< App needs access to \a m_zorder, m_children, etc.
+    friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
 };
 
 // define EnumMap and stream operators for Wnd::WndFlag

@@ -29,26 +29,99 @@
 #include <GGApp.h>
 #include <GGDrawUtil.h>
 #include <GGEventPump.h>
+#include <GGLayout.h>
 #include <XMLValidators.h>
 
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
 
 using namespace GG;
 
+#define DEBUG_GRID_LAYOUT 0
+
 namespace {
+    using namespace boost::multi_index;
+    struct GridLayoutWnd
+    {
+        GridLayoutWnd() : wnd(0) {}
+        GridLayoutWnd(Wnd* wnd_, const Pt& ul_, const Pt& lr_) : wnd(wnd_), ul(ul_), lr(lr_) {}
+        Wnd* wnd;
+        Pt ul;
+        Pt lr;
+    };
+    struct IsLeft
+    {
+        bool operator()(const Pt& lhs, const Pt& rhs) const {return lhs.x < rhs.x;}
+        bool operator()(int x, const Pt& pt) const          {return x < pt.x;}
+        bool operator()(const Pt& pt, int x) const          {return pt.x < x;}
+    };
+    struct IsTop
+    {
+        bool operator()(const Pt& lhs, const Pt& rhs) const {return lhs.y < rhs.y;}
+        bool operator()(int y, const Pt& pt) const          {return y < pt.y;}
+        bool operator()(const Pt& pt, int y) const          {return pt.y < y;}
+    };
+    struct IsRight
+    {
+        bool operator()(const Pt& lhs, const Pt& rhs) const {return rhs.x < lhs.x;}
+        bool operator()(int x, const Pt& pt) const          {return pt.x < x;}
+        bool operator()(const Pt& pt, int x) const          {return x < pt.x;}
+    };
+    struct IsBottom
+    {
+        bool operator()(const Pt& lhs, const Pt& rhs) const {return rhs.y < lhs.y;}
+        bool operator()(int y, const Pt& pt) const          {return pt.y < y;}
+        bool operator()(const Pt& pt, int y) const          {return y < pt.y;}
+    };
+    struct Pointer {};
+    struct Left {};
+    struct Top {};
+    struct Right {};
+    struct Bottom {};
+    typedef multi_index_container<
+        GridLayoutWnd,
+        indexed_by<
+            ordered_unique<tag<Pointer>, member<GridLayoutWnd, Wnd*, &GridLayoutWnd::wnd> >,
+            ordered_non_unique<tag<Left>, member<GridLayoutWnd, Pt, &GridLayoutWnd::ul>, IsLeft>,
+            ordered_non_unique<tag<Top>, member<GridLayoutWnd, Pt, &GridLayoutWnd::ul>, IsTop>,
+            ordered_non_unique<tag<Right>, member<GridLayoutWnd, Pt, &GridLayoutWnd::lr>, IsRight>,
+            ordered_non_unique<tag<Bottom>, member<GridLayoutWnd, Pt, &GridLayoutWnd::lr>, IsBottom>
+        >
+    > GridLayoutWndContainer;
+    typedef GridLayoutWndContainer::index<Pointer>::type::iterator PointerIter;
+    typedef GridLayoutWndContainer::index<Left>::type::iterator    LeftIter;
+    typedef GridLayoutWndContainer::index<Top>::type::iterator     TopIter;
+    typedef GridLayoutWndContainer::index<Right>::type::iterator   RightIter;
+    typedef GridLayoutWndContainer::index<Bottom>::type::iterator  BottomIter;
+
+    struct WndHorizontalLess
+    {
+        bool operator()(const Wnd* lhs, const Wnd* rhs) const {return lhs->UpperLeft().x < rhs->UpperLeft().x;}
+    };
+
+    struct WndVerticalLess
+    {
+        bool operator()(const Wnd* lhs, const Wnd* rhs) const {return lhs->UpperLeft().y < rhs->UpperLeft().y;}
+    };
+
+    const int DEFAULT_LAYOUT_BORDER_MARGIN = 0;
+    const int DEFAULT_LAYOUT_CELL_MARGIN = 5;
+
     // an EventPump that terminates when its m_done reference member is true
     class ModalEventPump : public EventPump
     {
     public:
         ModalEventPump(const bool& done) : m_done(done) {}
         virtual void operator()()
-        {
-            App* app = App::GetApp();
-            EventPumpState& state = State();
-            while (!m_done) {
-                app->HandleSystemEvents(state.last_mouse_event_time);
-                LoopBody(app, state, true, true);
+            {
+                App* app = App::GetApp();
+                EventPumpState& state = State();
+                while (!m_done) {
+                    app->HandleSystemEvents(state.last_mouse_event_time);
+                    LoopBody(app, state, true, true);
+                }
             }
-        }
     private:
         const bool& m_done;
     };
@@ -131,6 +204,8 @@ Wnd::Wnd() :
     m_visible(true),
     m_clip_children(false),
     m_max_size(1 << 30, 1 << 30),
+    m_layout(0),
+    m_containing_layout(0),
     m_flags(0)
 {
 }
@@ -144,6 +219,8 @@ Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
     m_upperleft(x, y),
     m_lowerright(x + w, y + h),
     m_max_size(1 << 30, 1 << 30),
+    m_layout(0),
+    m_containing_layout(0),
     m_flags(flags)
 {
     ValidateFlags();
@@ -156,6 +233,8 @@ Wnd::Wnd(const XMLElement& elem) :
     m_visible(true),
     m_clip_children(false),
     m_max_size(1 << 30, 1 << 30),
+    m_layout(0),
+    m_containing_layout(0),
     m_flags(0)
 {
     if (elem.Tag() != "GG::Wnd")
@@ -217,16 +296,6 @@ bool Wnd::DragKeeper() const
     return m_flags & DRAG_KEEPER;
 }
 
-bool Wnd::ClipChildren() const
-{
-    return m_clip_children;
-}
-
-bool Wnd::Visible() const
-{
-    return m_visible;
-}
-
 bool Wnd::Resizable() const
 {
     return m_flags & RESIZABLE;
@@ -240,6 +309,16 @@ bool Wnd::OnTop() const
 bool Wnd::Modal() const
 {
     return m_flags & MODAL;
+}
+
+bool Wnd::ClipChildren() const
+{
+    return m_clip_children;
+}
+
+bool Wnd::Visible() const
+{
+    return m_visible;
 }
 
 const string& Wnd::WindowText() const
@@ -308,6 +387,16 @@ Pt Wnd::ClientSize() const
     return ClientLowerRight() - ClientUpperLeft();
 }
 
+int Wnd::ClientWidth() const
+{
+    return ClientLowerRight().x - ClientUpperLeft().x;
+}
+
+int Wnd::ClientHeight() const
+{
+    return ClientLowerRight().y - ClientUpperLeft().y;
+}
+
 Pt Wnd::ScreenToWindow(const Pt& pt) const
 {
     return pt - UpperLeft();
@@ -340,6 +429,16 @@ Wnd* Wnd::RootParent() const
         retval = retval->Parent();
     }
     return retval;
+}
+
+const Layout* Wnd::GetLayout() const
+{
+    return m_layout;
+}
+
+const Layout* Wnd::ContainingLayout() const
+{
+    return m_containing_layout;
 }
 
 WndRegion Wnd::WindowRegion(const Pt& pt) const
@@ -475,6 +574,11 @@ void Wnd::EndClipping()
     EndScissorClipping();
 }
 
+void Wnd::MoveTo(const Pt& pt)
+{
+    MoveTo(pt.x, pt.y);
+}
+
 void Wnd::MoveTo(int x, int y)
 {
     m_lowerright.x = (m_lowerright.x - m_upperleft.x) + x;
@@ -483,19 +587,14 @@ void Wnd::MoveTo(int x, int y)
     m_upperleft.y = y;
 }
 
-void Wnd::MoveTo(const Pt& pt)
+void Wnd::OffsetMove(const Pt& pt)
 {
-    MoveTo(pt.x, pt.y);
+    OffsetMove(pt.x, pt.y);
 }
 
 void Wnd::OffsetMove(int x, int y)
 {
     SizeMove(m_upperleft.x + x, m_upperleft.y + y, m_lowerright.x + x, m_lowerright.y + y);
-}
-
-void Wnd::OffsetMove(const Pt& pt)
-{
-    OffsetMove(pt.x, pt.y);
 }
 
 void Wnd::SizeMove(const Pt& ul, const Pt& lr)
@@ -505,21 +604,43 @@ void Wnd::SizeMove(const Pt& ul, const Pt& lr)
 
 void Wnd::SizeMove(int x1, int y1, int x2, int y2)
 {
+    Pt original_sz = Size();
     Pt min_sz = MinSize();
-    if (x1 > x2 - min_sz.x) {
+    Pt max_sz = MaxSize();
+    if (m_layout) {
+        Pt layout_min_sz = m_layout->MinSize() + (Size() - ClientSize());
+        min_sz.x = std::max(min_sz.x, layout_min_sz.x);
+        min_sz.y = std::max(min_sz.y, layout_min_sz.y);
+    }
+    if (x2 - x1 < min_sz.x) {
         if (x1 != m_upperleft.x)
             x1 = x2 - min_sz.x;
         else if (x2 != m_lowerright.x)
             x2 = x1 + min_sz.x;
+    } else if (max_sz.x < x2 - x1) {
+        if (x2 != m_lowerright.x)
+            x2 = x1 + max_sz.x;
+        else
+            x1 = x2 - max_sz.x;
     }
-    if (y1 > y2 - min_sz.y) {
+    if (y2 - y1 < min_sz.y) {
         if (y1 != m_upperleft.y)
             y1 = y2 - min_sz.y;
         else if (y2 != m_lowerright.y)
             y2 = y1 + min_sz.y;
+    } else if (max_sz.y < y2 - y1) {
+        if (y2 != m_lowerright.y)
+            y2 = y1 + max_sz.y;
+        else
+            y1 = y2 - max_sz.y;
     }
     m_upperleft = Pt(x1, y1);
     m_lowerright = Pt(x2, y2);
+    bool size_changed = Size() != original_sz;
+    if (m_layout && size_changed)
+        m_layout->Resize(ClientSize());
+    if (m_containing_layout && size_changed && !dynamic_cast<Layout*>(this))
+        m_containing_layout->ChildSizeOrMinSizeOrMaxSizeChanged();
 }
 
 void Wnd::Resize(const Pt& sz)
@@ -534,12 +655,29 @@ void Wnd::Resize(int x, int y)
 
 void Wnd::SetMinSize(const Pt& sz)
 {
+    bool min_size_changed = m_min_size != sz;
     m_min_size = sz;
+    if (Width() < m_min_size.x || Height() < m_min_size.y)
+        Resize(std::max(Width(), m_min_size.x), std::max(Height(), m_min_size.y));
+    else if (m_containing_layout && min_size_changed && !dynamic_cast<Layout*>(this))
+        m_containing_layout->ChildSizeOrMinSizeOrMaxSizeChanged();
+}
+
+void Wnd::SetMinSize(int x, int y)
+{
+    SetMinSize(Pt(x, y));
 }
 
 void Wnd::SetMaxSize(const Pt& sz)
 {
     m_max_size = sz;
+    if (m_max_size.x < Width() || m_max_size.y < Height())
+        Resize(std::min(Width(), m_max_size.x), std::min(Height(), m_max_size.y));
+}
+
+void Wnd::SetMaxSize(int x, int y)
+{
+    SetMaxSize(Pt(x, y));
 }
 
 void Wnd::AttachChild(Wnd* wnd)
@@ -550,6 +688,8 @@ void Wnd::AttachChild(Wnd* wnd)
             wnd->Parent()->DetachChild(wnd);
         m_children.push_back(wnd);
         wnd->m_parent = this;
+        if (Layout* this_as_layout = dynamic_cast<Layout*>(this))
+            wnd->m_containing_layout = this_as_layout;
     }
 }
 
@@ -578,11 +718,13 @@ void Wnd::DetachChild(Wnd* wnd)
     if (wnd) {
         std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
         if (it != m_children.end()) {
-	    // though child windows are never Register()ed, this Remove() makes sure that any 
-	    // GG::App state pointers to the child do not outlive the child
-	    App::GetApp()->Remove(wnd);
+            // though child windows are never Register()ed, this Remove() makes sure that any 
+            // GG::App state pointers to the child do not outlive the child
+            App::GetApp()->Remove(wnd);
             m_children.erase(it);
             wnd->m_parent = 0;
+            if (dynamic_cast<Layout*>(this))
+                wnd->m_containing_layout = 0;
         }
     }
 }
@@ -599,14 +741,14 @@ void Wnd::DetachChildren()
 void Wnd::DeleteChild(Wnd* wnd)
 {
     if (wnd && std::find(m_children.begin(), m_children.end(), wnd) != m_children.end()) {
-	delete wnd;
+        delete wnd;
     }
 }
 
 void Wnd::DeleteChildren()
 {
     for (std::list<Wnd*>::iterator it = m_children.begin(); it != m_children.end();) {
-	Wnd* wnd = *it++;
+        Wnd* wnd = *it++;
         delete wnd;
     }
 }
@@ -626,6 +768,260 @@ void Wnd::RemoveEventFilter(Wnd* wnd)
     wnd->m_filtering.erase(this);
 }
 
+void Wnd::HorizontalLayout()
+{
+    RemoveLayout();
+
+    std::multiset<Wnd*, WndHorizontalLess> wnds;
+    for (list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+        wnds.insert(*it);
+    }
+
+    m_layout = new Layout(0, 0, ClientSize().x, ClientSize().y,
+                          1, wnds.size(),
+                          DEFAULT_LAYOUT_BORDER_MARGIN, DEFAULT_LAYOUT_CELL_MARGIN);
+    AttachChild(m_layout);
+
+    int i = 0;
+    for (std::multiset<Wnd*, WndHorizontalLess>::iterator it = wnds.begin(); it != wnds.end(); ++it) {
+        m_layout->Add(*it, 0, i++);
+    }
+}
+
+void Wnd::VerticalLayout()
+{
+    RemoveLayout();
+
+    std::multiset<Wnd*, WndVerticalLess> wnds;
+    for (list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+        wnds.insert(*it);
+    }
+
+    m_layout = new Layout(0, 0, ClientSize().x, ClientSize().y,
+                          wnds.size(), 1,
+                          DEFAULT_LAYOUT_BORDER_MARGIN, DEFAULT_LAYOUT_CELL_MARGIN);
+    AttachChild(m_layout);
+
+    int i = 0;
+    for (std::multiset<Wnd*, WndVerticalLess>::iterator it = wnds.begin(); it != wnds.end(); ++it) {
+        m_layout->Add(*it, i++, 0);
+    }
+}
+
+void Wnd::GridLayout()
+{
+#if DEBUG_GRID_LAYOUT
+    std::cerr << "********************************************************************************\n"
+              << "Wnd::GridLayout()";
+#endif
+
+    RemoveLayout();
+
+    Pt cl_ul = ClientUpperLeft(), cl_lr = ClientLowerRight();
+    Pt client_sz = ClientSize();
+
+    GridLayoutWndContainer grid_layout;
+
+    // validate existing children and place them in a grid with one cell per pixel
+    for (list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+        Wnd* wnd = *it;
+        Pt wnd_ul = wnd->UpperLeft(), wnd_lr = wnd->LowerRight();
+        if (wnd_ul < cl_ul || cl_lr < wnd_lr)
+            throw std::runtime_error("Wnd::GridLayout() : A child window lies at least partially outside the client area");
+
+        list<Wnd*>::const_iterator it2 = it;
+        ++it2;
+        for (; it2 != m_children.end(); ++it2) {
+            Rect other_wnd_rect((*it2)->UpperLeft(), (*it2)->LowerRight());
+            if (other_wnd_rect.Contains(wnd_ul) || other_wnd_rect.Contains(wnd_lr - Pt(1, 1)))
+                throw std::runtime_error("Wnd::GridLayout() : Two or more child windows overlap");
+        }
+
+        wnd_ul = ScreenToClient(wnd_ul);
+        wnd_lr = ScreenToClient(wnd_lr);
+        grid_layout.insert(GridLayoutWnd(wnd, wnd_ul, wnd_lr));
+#if DEBUG_GRID_LAYOUT
+        std::cerr << "  Adding window \"" << wnd->WindowText() << "\" @" << wnd << " (" << wnd_ul.x << ", " << wnd_ul.y << ") - (" << wnd_lr.x << ", " << wnd_lr.y << ")\n";
+#endif
+    }
+
+
+    // align left sides of windows
+#if DEBUG_GRID_LAYOUT
+    std::cerr << "  Expanding left...\n";
+#endif
+    for (LeftIter it = grid_layout.get<Left>().begin(); it != grid_layout.get<Left>().end(); ++it) {
+#if DEBUG_GRID_LAYOUT
+        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
+#endif
+        Pt ul = it->ul;
+        Pt lr = it->lr;
+        for (int x = ul.x - 1; x >= 0; --x) {
+            if (grid_layout.get<Right>().find(x + 1, IsRight()) != grid_layout.get<Right>().end()) {
+                break;
+            } else if (grid_layout.get<Left>().find(x, IsLeft()) != grid_layout.get<Left>().end()) {
+                GridLayoutWnd grid_wnd = *it;
+#if DEBUG_GRID_LAYOUT
+                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" left " << grid_wnd.ul.x << " -> " << x << "\n";
+#endif
+                grid_wnd.ul.x = x;
+                grid_layout.get<Left>().replace(it, grid_wnd);
+                break;
+            }
+        }
+    }
+
+    // align right sides of windows
+#if DEBUG_GRID_LAYOUT
+    std::cerr << "  Expanding right...\n";
+#endif
+    for (RightIter it = grid_layout.get<Right>().begin(); it != grid_layout.get<Right>().end(); ++it) {
+#if DEBUG_GRID_LAYOUT
+        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
+#endif
+        Pt ul = it->ul;
+        Pt lr = it->lr;
+        for (int x = lr.x + 1; x < client_sz.x; ++x) {
+            if (grid_layout.get<Left>().find(x - 1, IsLeft()) != grid_layout.get<Left>().end()) {
+                break;
+            } else if (grid_layout.get<Right>().find(x, IsRight()) != grid_layout.get<Right>().end()) {
+                GridLayoutWnd grid_wnd = *it;
+#if DEBUG_GRID_LAYOUT
+                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" right " << grid_wnd.lr.x << " -> " << x << "\n";
+#endif
+                grid_wnd.lr.x = x;
+                grid_layout.get<Right>().replace(it, grid_wnd);
+                break;
+            }
+        }
+    }
+
+    // align tops of windows
+#if DEBUG_GRID_LAYOUT
+    std::cerr << "  Expanding up...\n";
+#endif
+    for (TopIter it = grid_layout.get<Top>().begin(); it != grid_layout.get<Top>().end(); ++it) {
+#if DEBUG_GRID_LAYOUT
+        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
+#endif
+        Pt ul = it->ul;
+        Pt lr = it->lr;
+        for (int y = ul.y - 1; y >= 0; --y) {
+            if (grid_layout.get<Bottom>().find(y + 1, IsBottom()) != grid_layout.get<Bottom>().end()) {
+                break;
+            } else if (grid_layout.get<Top>().find(y, IsTop()) != grid_layout.get<Top>().end()) {
+                GridLayoutWnd grid_wnd = *it;
+#if DEBUG_GRID_LAYOUT
+                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" up " << grid_wnd.ul.y << " -> " << y << "\n";
+#endif
+                grid_wnd.ul.y = y;
+                grid_layout.get<Top>().replace(it, grid_wnd);
+                break;
+            }
+        }
+    }
+
+    // align bottoms of windows
+#if DEBUG_GRID_LAYOUT
+    std::cerr << "  Expanding down...\n";
+#endif
+    for (BottomIter it = grid_layout.get<Bottom>().begin(); it != grid_layout.get<Bottom>().end(); ++it) {
+#if DEBUG_GRID_LAYOUT
+        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
+#endif
+        Pt ul = it->ul;
+        Pt lr = it->lr;
+        for (int y = lr.y + 1; y < client_sz.y; ++y) {
+            if (grid_layout.get<Top>().find(y - 1, IsTop()) != grid_layout.get<Top>().end()) {
+                break;
+            } else if (grid_layout.get<Bottom>().find(y, IsBottom()) != grid_layout.get<Bottom>().end()) {
+                GridLayoutWnd grid_wnd = *it;
+#if DEBUG_GRID_LAYOUT
+                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" down " << grid_wnd.lr.y << " -> " << y << "\n";
+#endif
+                grid_wnd.lr.y = y;
+                grid_layout.get<Bottom>().replace(it, grid_wnd);
+                break;
+            }
+        }
+    }
+
+    // create an actual layout with a more reasonable number of cells from the pixel-grid layout
+    set<int> unique_lefts;
+    set<int> unique_tops;
+    for (LeftIter it = grid_layout.get<Left>().begin(); it != grid_layout.get<Left>().end(); ++it) {
+        unique_lefts.insert(it->ul.x);
+    }
+    for (TopIter it = grid_layout.get<Top>().begin(); it != grid_layout.get<Top>().end(); ++it) {
+        unique_tops.insert(it->ul.y);
+    }
+
+#if DEBUG_GRID_LAYOUT
+    std::cerr << "  Final left positions:\n";
+    for (set<int>::iterator it = unique_lefts.begin(); it != unique_lefts.end(); ++it) {
+        std::cerr << "    " << *it << "\n";
+    }
+    std::cerr << "  Final top positions:\n";
+    for (set<int>::iterator it = unique_tops.begin(); it != unique_tops.end(); ++it) {
+        std::cerr << "    " << *it << "\n";
+    }
+#endif
+
+    if (unique_lefts.empty() || unique_tops.empty())
+        return;
+
+    m_layout = new Layout(0, 0, ClientSize().x, ClientSize().y,
+                          unique_tops.size(), unique_lefts.size(),
+                          DEFAULT_LAYOUT_BORDER_MARGIN, DEFAULT_LAYOUT_CELL_MARGIN);
+    AttachChild(m_layout);
+
+    // populate this new layout with the child windows, based on their placements in the pixel-grid layout
+    for (PointerIter it = grid_layout.get<Pointer>().begin(); it != grid_layout.get<Pointer>().end(); ++it) {
+        Wnd* wnd = it->wnd;
+        Pt ul = it->ul;
+        Pt lr = it->lr;
+        int left = std::distance(unique_lefts.begin(), unique_lefts.find(ul.x));
+        int top = std::distance(unique_tops.begin(), unique_tops.find(ul.y));
+        int right = std::distance(unique_lefts.begin(), unique_lefts.lower_bound(lr.x));
+        int bottom = std::distance(unique_tops.begin(), unique_tops.lower_bound(lr.y));
+        m_layout->Add(wnd, top, left, bottom, right);
+    }
+}
+
+void Wnd::SetLayout(Layout* layout)
+{
+    if (layout == m_layout && layout == m_containing_layout)
+        throw std::runtime_error("Wnd::SetLayout() : Attempted to set a Wnd's layout to be its current layout or the layout that contains the wind");
+    RemoveLayout();
+    DeleteChildren();
+    AttachChild(layout);
+    m_layout = layout;
+}
+
+void Wnd::RemoveLayout()
+{
+    if (m_layout) {
+        list<Wnd*> layout_children = m_layout->Children();
+        for (list<Wnd*>::iterator it = layout_children.begin(); it != layout_children.end(); ++it) {
+            AttachChild(*it);
+        }
+        DeleteChild(m_layout);
+        m_layout = 0;
+    }
+}
+
+void Wnd::SetLayoutBorderMargin(int margin)
+{
+    if (m_layout)
+        m_layout->SetBorderMargin(margin);
+}
+
+void Wnd::SetLayoutCellMargin(int margin)
+{
+    if (m_layout)
+        m_layout->SetCellMargin(margin);
+}
+
 bool Wnd::Render() {return true;}
 
 void Wnd::LButtonDown(const Pt& pt, Uint32 keys) {}
@@ -638,7 +1034,7 @@ void Wnd::LClick(const Pt& pt, Uint32 keys) {}
 
 void Wnd::LDoubleClick(const Pt& pt, Uint32 keys) {}
 
-void Wnd::RButtonDown(const Pt& pt, Uint32 keys) {;}
+void Wnd::RButtonDown(const Pt& pt, Uint32 keys) {}
 
 void Wnd::RClick(const Pt& pt, Uint32 keys) {}
 
@@ -673,7 +1069,7 @@ int Wnd::Run()
     return retval;
 }
 
-const list<Wnd*>& Wnd::Children()
+const list<Wnd*>& Wnd::Children() const
 {
     return m_children;
 }
@@ -681,6 +1077,16 @@ const list<Wnd*>& Wnd::Children()
 bool Wnd::EventFilter(Wnd* w, const Event& event)
 {
     return false;
+}
+
+Layout* Wnd::GetLayout()
+{
+    return m_layout;
+}
+
+Layout* Wnd::ContainingLayout()
+{
+    return m_containing_layout;
 }
 
 void Wnd::ValidateFlags()

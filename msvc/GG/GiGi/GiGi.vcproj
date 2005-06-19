@@ -159,6 +159,9 @@
 				RelativePath="..\..\..\src\GGFont.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\src\GGLayout.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\src\GGListBox.cpp">
 			</File>
 			<File
@@ -261,6 +264,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\GGFont.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\GGLayout.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\GGListBox.h">

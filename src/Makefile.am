@@ -15,6 +15,7 @@ GGDynamicGraphic.cpp				\
 GGEdit.cpp					\
 GGEventPump.cpp					\
 GGFont.cpp					\
+GGLayout.cpp					\
 GGListBox.cpp					\
 GGMenu.cpp					\
 GGMultiEdit.cpp					\

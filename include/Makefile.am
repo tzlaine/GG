@@ -13,6 +13,7 @@ GGEdit.h					\
 GGEnum.h					\
 GGEventPump.h					\
 GGFont.h					\
+GGLayout.h					\
 GGListBox.h					\
 GGMenu.h					\
 GGMultiEdit.h					\

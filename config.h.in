@@ -45,9 +45,16 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `boost_filesystem' library
+   (-lboost_filesystem). */
+#undef HAVE_LIBBOOST_FILESYSTEM
+
 /* Define to 1 if you have the `boost_filesystem-gcc' library
    (-lboost_filesystem-gcc). */
 #undef HAVE_LIBBOOST_FILESYSTEM_GCC
+
+/* Define to 1 if you have the `boost_signals' library (-lboost_signals). */
+#undef HAVE_LIBBOOST_SIGNALS
 
 /* Define to 1 if you have the `boost_signals-gcc' library
    (-lboost_signals-gcc). */

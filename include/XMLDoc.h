@@ -367,7 +367,7 @@ string StringFromFlags(unsigned int flags)
 template <class T>
 unsigned int FlagsFromString(const string& str)
 {
-    unsigned int retval;
+    unsigned int retval = 0;
     const EnumMap<T>& enum_map = GetEnumMap<T>();
     vector<string> tokens = Tokenize(str);
     for (unsigned int i = 0; i < tokens.size(); ++i) {

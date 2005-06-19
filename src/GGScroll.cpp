@@ -108,6 +108,70 @@ Scroll::Scroll(const XMLElement& elem) :
     MoveTabToPosn(); // correct initial placement of tab, if necessary
 }
 
+pair<int, int> Scroll::PosnRange() const
+{
+    return pair<int,int>(m_posn, m_posn + m_page_sz);
+}
+
+pair<int, int> Scroll::ScrollRange() const
+{
+    return pair<int,int>(m_range_min, m_range_max);
+}
+
+int Scroll::LineSize() const
+{
+    return m_line_sz;
+}
+
+int Scroll::PageSize() const
+{
+    return m_page_sz;
+}
+    
+Clr Scroll::InteriorColor() const
+{
+    return m_int_color;
+}
+
+Scroll::Orientation Scroll::ScrollOrientation() const
+{
+    return m_orientation;
+}
+
+XMLElement Scroll::XMLEncode() const
+{
+    XMLElement retval("GG::Scroll");
+    retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_orientation", lexical_cast<string>(m_orientation)));
+    retval.AppendChild(XMLElement("m_posn", lexical_cast<string>(m_posn)));
+    retval.AppendChild(XMLElement("m_range_min", lexical_cast<string>(m_range_min)));
+    retval.AppendChild(XMLElement("m_range_max", lexical_cast<string>(m_range_max)));
+    retval.AppendChild(XMLElement("m_line_sz", lexical_cast<string>(m_line_sz)));
+    retval.AppendChild(XMLElement("m_page_sz", lexical_cast<string>(m_page_sz)));
+    retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
+    retval.AppendChild(XMLElement("m_incr", m_incr->XMLEncode()));
+    retval.AppendChild(XMLElement("m_decr", m_decr->XMLEncode()));
+    return retval;
+}
+
+XMLElementValidator Scroll::XMLValidator() const
+{
+    XMLElementValidator retval("GG::Scroll");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_orientation", new MappedEnumValidator<Orientation>()));
+    retval.AppendChild(XMLElementValidator("m_posn", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_range_min", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_range_max", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_line_sz", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_page_sz", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_incr", m_incr->XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_decr", m_decr->XMLValidator()));
+    return retval;
+}
+
 bool Scroll::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
@@ -216,9 +280,24 @@ void Scroll::LButtonUp(const Pt& pt, Uint32 keys)
         m_initial_depressed_area = SBR_NONE;
         m_depressed_area = SBR_NONE;
         if (m_tab_drag_offset != -1)
-            m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+            ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
         m_tab_drag_offset = -1;
     }
+}
+
+void Scroll::LClick(const Pt& pt, Uint32 keys)
+{
+    LButtonUp(pt, keys);
+}
+
+void Scroll::MouseHere(const Pt& pt, Uint32 keys)
+{
+    LButtonUp(pt, keys);
+}
+
+void Scroll::MouseLeave(const Pt& pt, Uint32 keys)
+{
+    m_depressed_area = SBR_NONE;
 }
 
 void Scroll::SizeMove(int x1, int y1, int x2, int y2)
@@ -240,6 +319,11 @@ void Scroll::Disable(bool b/* = true*/)
     m_decr->Disable(b);
 }
 
+void Scroll::SetInteriorColor(Clr c)
+{
+    m_int_color = c;
+}
+
 void Scroll::SizeScroll(int min, int max, int line, int page)
 {
     m_line_sz = line;
@@ -256,9 +340,29 @@ void Scroll::SizeScroll(int min, int max, int line, int page)
     m_tab->SizeMove(tab_ul, tab_lr);
     MoveTabToPosn();
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
+}
+
+void Scroll::SetMax(int max)        
+{
+    SizeScroll(m_range_min, max, m_line_sz, m_page_sz);
+}
+
+void Scroll::SetMin(int min)        
+{
+    SizeScroll(min, m_range_max, m_line_sz, m_page_sz);
+}
+
+void Scroll::SetLineSize(int line)
+{
+    SizeScroll(m_range_min, m_range_max, line, m_page_sz);
+}
+
+void Scroll::SetPageSize(int page)  
+{
+    SizeScroll(m_range_min, m_range_max, m_line_sz, page);
 }
 
 void Scroll::ScrollTo(int p)
@@ -272,8 +376,8 @@ void Scroll::ScrollTo(int p)
         m_posn = p;
     MoveTabToPosn();
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
 }
 
@@ -286,8 +390,8 @@ void Scroll::ScrollLineIncr()
         m_posn = m_range_max - (m_page_sz - 1);
     MoveTabToPosn();
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
 }
 
@@ -300,8 +404,8 @@ void Scroll::ScrollLineDecr()
         m_posn = m_range_min;
     MoveTabToPosn();
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
 }
 
@@ -314,8 +418,8 @@ void Scroll::ScrollPageIncr()
         m_posn = m_range_max - (m_page_sz - 1);
     MoveTabToPosn();
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
 }
 
@@ -328,43 +432,9 @@ void Scroll::ScrollPageDecr()
         m_posn = m_range_min;
     MoveTabToPosn();
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        m_scrolled_and_stopped_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
-}
-
-XMLElement Scroll::XMLEncode() const
-{
-    XMLElement retval("GG::Scroll");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_orientation", lexical_cast<string>(m_orientation)));
-    retval.AppendChild(XMLElement("m_posn", lexical_cast<string>(m_posn)));
-    retval.AppendChild(XMLElement("m_range_min", lexical_cast<string>(m_range_min)));
-    retval.AppendChild(XMLElement("m_range_max", lexical_cast<string>(m_range_max)));
-    retval.AppendChild(XMLElement("m_line_sz", lexical_cast<string>(m_line_sz)));
-    retval.AppendChild(XMLElement("m_page_sz", lexical_cast<string>(m_page_sz)));
-    retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
-    retval.AppendChild(XMLElement("m_incr", m_incr->XMLEncode()));
-    retval.AppendChild(XMLElement("m_decr", m_decr->XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator Scroll::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Scroll");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_orientation", new MappedEnumValidator<Orientation>()));
-    retval.AppendChild(XMLElementValidator("m_posn", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_range_min", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_range_max", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_line_sz", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_page_sz", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_incr", m_incr->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_decr", m_decr->XMLValidator()));
-    return retval;
 }
 
 int Scroll::TabSpace() const
@@ -399,6 +469,21 @@ Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
     return retval;
 }
 
+const shared_ptr<Button> Scroll::TabButton() const
+{
+    return m_tab;
+}
+
+const shared_ptr<Button> Scroll::IncrButton() const
+{
+    return m_incr;
+}
+
+const shared_ptr<Button> Scroll::DecrButton() const
+{
+    return m_decr;
+}
+
 void Scroll::UpdatePosn()
 {
     int old_posn = m_posn;
@@ -409,7 +494,7 @@ void Scroll::UpdatePosn()
     m_posn = static_cast<int>(m_range_min + static_cast<double>(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
     m_posn = std::min(m_range_max - m_page_sz + 1, std::max(m_range_min, m_posn));
     if (old_posn != m_posn) {
-        m_scrolled_sig(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
 }
 

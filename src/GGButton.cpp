@@ -36,7 +36,7 @@ namespace GG {
 // GG::Button
 ////////////////////////////////////////////////
 Button::Button(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Clr color, 
-	       Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
+               Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
     TextControl(x, y, w, h, str, font, text_color, TF_NONE, flags),
     m_state(BN_UNPRESSED)
 {
@@ -63,22 +63,39 @@ Button::Button(const XMLElement& elem) :
     m_rollover_graphic = SubTexture(elem.Child("m_rollover_graphic").Child("GG::SubTexture"));
 }
 
-bool Button::Render()
+Button::ButtonState Button::State() const
 {
-    switch (m_state)
-    {
-    case BN_PRESSED:
-        RenderPressed();
-        break;
-    case BN_UNPRESSED:
-    case BN_ROLLOVER:
-        if (m_state == BN_UNPRESSED)
-            RenderUnpressed();
-        else
-            RenderRollover();
-        break;
-    }
-    return true;
+    return m_state;
+}
+
+const SubTexture& Button::UnpressedGraphic() const
+{
+    return m_unpressed_graphic;
+}
+
+const SubTexture& Button::PressedGraphic() const
+{
+    return m_pressed_graphic;
+}
+
+const SubTexture& Button::RolloverGraphic() const
+{
+    return m_rollover_graphic;
+}
+
+void Button::SetUnpressedGraphic(const SubTexture& st)
+{
+    m_unpressed_graphic = st;
+}
+
+void Button::SetPressedGraphic(const SubTexture& st)
+{
+    m_pressed_graphic = st;
+}
+
+void Button::SetRolloverGraphic(const SubTexture& st)
+{
+    m_rollover_graphic = st;
 }
 
 XMLElement Button::XMLEncode() const
@@ -101,6 +118,73 @@ XMLElementValidator Button::XMLValidator() const
     retval.AppendChild(XMLElementValidator("m_pressed_graphic", m_pressed_graphic.XMLValidator()));
     retval.AppendChild(XMLElementValidator("m_rollover_graphic", m_rollover_graphic.XMLValidator()));
     return retval;
+}
+
+bool Button::Render()
+{
+    switch (m_state)
+    {
+    case BN_PRESSED:
+        RenderPressed();
+        break;
+    case BN_UNPRESSED:
+    case BN_ROLLOVER:
+        if (m_state == BN_UNPRESSED)
+            RenderUnpressed();
+        else
+            RenderRollover();
+        break;
+    }
+    return true;
+}
+
+void Button::LButtonDown(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled())
+        m_state = BN_PRESSED;
+}
+
+void Button::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+{
+    if (!Disabled())
+        m_state = BN_PRESSED;
+}
+
+void Button::LButtonUp(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled())
+        m_state = BN_UNPRESSED;
+}
+
+void Button::LClick(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled()) {
+        m_state = BN_UNPRESSED;
+        ClickedSignal();
+        m_state = BN_UNPRESSED;
+    }
+}
+
+void Button::MouseHere(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled())
+        m_state = BN_ROLLOVER;
+}
+
+void Button::MouseLeave(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled())
+        m_state = BN_UNPRESSED;
+}
+
+void Button::SetColor(Clr c)
+{
+    Control::SetColor(c);
+}
+
+void Button::SetState(ButtonState state)
+{
+    m_state = state;
 }
 
 void Button::RenderPressed()
@@ -168,8 +252,8 @@ void Button::RenderDefault()
 // GG::StateButton
 ////////////////////////////////////////////////
 StateButton::StateButton(int x, int y, int w, int h, const string& str, const shared_ptr<GG::Font>& font, Uint32 text_fmt, 
-			 Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
-			 int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/, Uint32 flags/* = CLICKABLE*/) :
+                         Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
+                         int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/, Uint32 flags/* = CLICKABLE*/) :
     TextControl(x, y, w, h, str, font, text_color, text_fmt, flags),
     m_checked(false),
     m_int_color(interior),
@@ -216,6 +300,108 @@ StateButton::StateButton(const XMLElement& elem) :
     m_text_y = lexical_cast<int>(elem.Child("m_text_y").Text());
 }
 
+
+bool StateButton::Checked() const
+{
+    return m_checked;
+}
+
+Clr StateButton::InteriorColor() const
+{
+    return m_int_color;
+}
+
+StateButton::StateButtonStyle StateButton::Style() const
+{
+    return m_style;
+}
+
+XMLElement StateButton::XMLEncode() const
+{
+    XMLElement retval("GG::StateButton");
+    retval.AppendChild(TextControl::XMLEncode());
+    retval.AppendChild(XMLElement("m_checked", lexical_cast<string>(m_checked)));
+    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
+    retval.AppendChild(XMLElement("m_style", lexical_cast<string>(m_style)));
+    retval.AppendChild(XMLElement("m_button_x", lexical_cast<string>(m_button_x)));
+    retval.AppendChild(XMLElement("m_button_y", lexical_cast<string>(m_button_y)));
+    retval.AppendChild(XMLElement("m_button_wd", lexical_cast<string>(m_button_wd)));
+    retval.AppendChild(XMLElement("m_button_ht", lexical_cast<string>(m_button_ht)));
+    retval.AppendChild(XMLElement("m_text_x", lexical_cast<string>(m_text_x)));
+    retval.AppendChild(XMLElement("m_text_y", lexical_cast<string>(m_text_y)));
+    return retval;
+}
+
+XMLElementValidator StateButton::XMLValidator() const
+{
+    XMLElementValidator retval("GG::StateButton");
+    retval.AppendChild(TextControl::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_checked", new Validator<bool>()));
+    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_style", new MappedEnumValidator<StateButtonStyle>()));
+    retval.AppendChild(XMLElementValidator("m_button_x", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_button_y", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_button_wd", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_button_ht", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_text_x", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_text_y", new Validator<int>()));
+    return retval;
+}
+
+void StateButton::Reset()
+{
+    SetCheck(false);
+}
+
+void StateButton::SetCheck(bool b/* = true*/)
+{
+    CheckedSignal(m_checked = b);
+}
+
+void StateButton::SetColor(Clr c)
+{
+    Control::SetColor(c);
+}
+
+void StateButton::SetInteriorColor(Clr c)
+{
+    m_int_color = c;
+}
+
+void StateButton::SetStyle(StateButtonStyle bs)
+{
+    m_style = bs;
+}
+
+int StateButton::ButtonX() const
+{
+    return m_button_x;
+}
+
+int StateButton::ButtonY() const
+{
+    return m_button_y;
+}
+
+int StateButton::ButtonWd() const
+{
+    return m_button_wd;
+}
+
+int StateButton::ButtonHt() const
+{
+    return m_button_ht;
+}
+
+int StateButton::TextX() const
+{
+    return m_text_x;
+}
+
+int StateButton::TextY() const
+{
+    return m_text_y;
+}
 
 bool StateButton::Render()
 {
@@ -280,38 +466,6 @@ void StateButton::LClick(const Pt& pt, Uint32 keys)
         SetCheck(!m_checked);
 }
 
-XMLElement StateButton::XMLEncode() const
-{
-    XMLElement retval("GG::StateButton");
-    retval.AppendChild(TextControl::XMLEncode());
-    retval.AppendChild(XMLElement("m_checked", lexical_cast<string>(m_checked)));
-    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_style", lexical_cast<string>(m_style)));
-    retval.AppendChild(XMLElement("m_button_x", lexical_cast<string>(m_button_x)));
-    retval.AppendChild(XMLElement("m_button_y", lexical_cast<string>(m_button_y)));
-    retval.AppendChild(XMLElement("m_button_wd", lexical_cast<string>(m_button_wd)));
-    retval.AppendChild(XMLElement("m_button_ht", lexical_cast<string>(m_button_ht)));
-    retval.AppendChild(XMLElement("m_text_x", lexical_cast<string>(m_text_x)));
-    retval.AppendChild(XMLElement("m_text_y", lexical_cast<string>(m_text_y)));
-    return retval;
-}
-
-XMLElementValidator StateButton::XMLValidator() const
-{
-    XMLElementValidator retval("GG::StateButton");
-    retval.AppendChild(TextControl::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_checked", new Validator<bool>()));
-    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_style", new MappedEnumValidator<StateButtonStyle>()));
-    retval.AppendChild(XMLElementValidator("m_button_x", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_button_y", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_button_wd", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_button_ht", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_text_x", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_text_y", new Validator<int>()));
-    return retval;
-}
-
 void StateButton::Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int bn_w, int bn_h)
 {
     m_color = color;
@@ -363,6 +517,25 @@ void StateButton::Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int
 ////////////////////////////////////////////////
 // GG::RadioButtonGroup
 ////////////////////////////////////////////////
+// ButtonClickedFunctor
+RadioButtonGroup::ButtonClickedFunctor::ButtonClickedFunctor(RadioButtonGroup* grp, int idx) :
+    m_grp(grp),
+    m_idx(idx)
+{
+}
+
+void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
+{
+    m_grp->HandleRadioClick(checked, m_idx);
+}
+
+// RadioButtonGroup
+RadioButtonGroup::RadioButtonGroup(int x, int y) :
+    Control(x, y, 10, 10),
+    m_checked_button(-1)
+{
+}
+
 RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
     Control(elem.Child("GG::Control"))
 {
@@ -372,7 +545,7 @@ RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
     for (list<Wnd*>::const_iterator it = Wnd::Children().begin(); it != Wnd::Children().end(); ++it) {
         if (StateButton* sb = dynamic_cast<StateButton*>(*it)) {
             m_buttons.push_back(sb);
-            m_connections.push_back(Connect(sb->CheckedSignal(), ButtonClickedFunctor(this, m_buttons.size() - 1)));
+            m_connections.push_back(Connect(sb->CheckedSignal, ButtonClickedFunctor(this, m_buttons.size() - 1)));
         } else {
             throw std::runtime_error("Attempted to use a non-StateButton object as a member of a GG::RadioButtonGroup");
         }
@@ -381,6 +554,16 @@ RadioButtonGroup::RadioButtonGroup(const XMLElement& elem) :
     m_checked_button = lexical_cast<int>(elem.Child("m_checked_button").Text());
 
     SetCheck(m_checked_button);
+}
+
+int RadioButtonGroup::NumButtons() const
+{
+    return m_buttons.size();
+}
+
+int RadioButtonGroup::CheckedButton() const
+{
+    return m_checked_button;
 }
 
 XMLElement RadioButtonGroup::XMLEncode() const
@@ -424,10 +607,25 @@ void RadioButtonGroup::DisableButton(int idx, bool b/* = true*/)
 void RadioButtonGroup::AddButton(StateButton* bn)
 {
     m_buttons.push_back(bn);
-    m_connections.push_back(Connect(m_buttons.back()->CheckedSignal(), ButtonClickedFunctor(this, m_buttons.size() - 1)));
+    m_connections.push_back(Connect(m_buttons.back()->CheckedSignal, ButtonClickedFunctor(this, m_buttons.size() - 1)));
     if (bn->LowerRight() >= Size()) // stretch group to encompass all its children
         Resize(bn->LowerRight());
     AttachChild(bn);
+}
+
+const vector<StateButton*>& RadioButtonGroup::Buttons() const
+{
+    return m_buttons;
+}
+
+const vector<boost::signals::connection>& RadioButtonGroup::Connections() const
+{
+    return m_connections;
+}
+
+bool RadioButtonGroup::Render()
+{
+    return true;
 }
 
 void RadioButtonGroup::HandleRadioClick(bool checked, int index)
@@ -438,14 +636,14 @@ void RadioButtonGroup::HandleRadioClick(bool checked, int index)
             if (m_buttons[i]->Checked() != (static_cast<int>(i) == index)) {
                 m_connections[i].disconnect();
                 m_buttons[i]->SetCheck(static_cast<int>(i) == index);
-                m_connections[i] = m_buttons[i]->CheckedSignal().connect(ButtonClickedFunctor(this, i), boost::signals::at_front);
+                m_connections[i] = m_buttons[i]->CheckedSignal.connect(ButtonClickedFunctor(this, i), boost::signals::at_front);
             }
         }
-        m_button_changed_sig(m_checked_button);
+        ButtonChangedSignal(m_checked_button);
     } else {
         m_connections[index].disconnect();
         m_buttons[index]->SetCheck(true);
-        m_connections[index] = m_buttons[index]->CheckedSignal().connect(ButtonClickedFunctor(this, index), boost::signals::at_front);
+        m_connections[index] = m_buttons[index]->CheckedSignal.connect(ButtonClickedFunctor(this, index), boost::signals::at_front);
     }
 }
 

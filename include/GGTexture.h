@@ -65,40 +65,40 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    string           Filename() const           {return m_filename;}       ///< returns the filename from which this texture was loaded ("" if this texture was not loaded from a file)
-    GLenum           WrapS() const              {return m_wrap_s;}         ///< returns S-wrap mode associated with this opengl texture
-    GLenum           WrapT() const              {return m_wrap_t;}         ///< returns T-wrap mode associated with this opengl texture
-    GLenum           MinFilter() const          {return m_min_filter;}     ///< returns minimization filter modes associated with this opengl texture
-    GLenum           MagFilter() const          {return m_mag_filter;}     ///< returns maximization filter modes associated with this opengl texture
-    int              BytesPP() const            {return m_bytes_pp;}       ///< returns the image's color depth in bytes
-    int              Width() const              {return m_width;}          ///< returns width of entire texture
-    int              Height() const             {return m_height;}         ///< returns height of entire texture
-    bool             MipMapped() const          {return m_mipmaps;}        ///< returns true if the texture has mipmaps
-    GLuint           OpenGLId() const           {return m_opengl_id;}      ///< GLuint "name" of the opengl texture object associated with this object
-    const GLfloat*   DefaultTexCoords() const   {return m_tex_coords;}     ///< texture coordinates to use by default when blitting this texture
-    int              DefaultWidth() const       {return m_default_width;}  ///< returns width in pixels, based on initial image (0 if texture was not loaded)
-    int              DefaultHeight() const      {return m_default_height;} ///< returns height in pixels, based on initial image (0 if texture was not loaded)
-   
+    string           Filename() const;         ///< returns the filename from which this texture was loaded ("" if this texture was not loaded from a file)
+    GLenum           WrapS() const;            ///< returns S-wrap mode associated with this opengl texture
+    GLenum           WrapT() const;            ///< returns T-wrap mode associated with this opengl texture
+    GLenum           MinFilter() const;        ///< returns minimization filter modes associated with this opengl texture
+    GLenum           MagFilter() const;        ///< returns maximization filter modes associated with this opengl texture
+    int              BytesPP() const;          ///< returns the image's color depth in bytes
+    int              Width() const;            ///< returns width of entire texture
+    int              Height() const;           ///< returns height of entire texture
+    bool             MipMapped() const;        ///< returns true if the texture has mipmaps
+    GLuint           OpenGLId() const;         ///< GLuint "name" of the opengl texture object associated with this object
+    const GLfloat*   DefaultTexCoords() const; ///< texture coordinates to use by default when blitting this texture
+    int              DefaultWidth() const;     ///< returns width in pixels, based on initial image (0 if texture was not loaded)
+    int              DefaultHeight() const;    ///< returns height in pixels, based on initial image (0 if texture was not loaded)
+
     /** blit any portion of texture to any place on screen, scaling as necessary*/
-    void OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords = 0, bool enter_2d_mode = true) const {OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, tex_coords, enter_2d_mode);}
-   
+    void OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords = 0, bool enter_2d_mode = true) const;
+
     /** blit any portion of texture to any place on screen, scaling as necessary*/
     void OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coords = 0, bool enter_2d_mode = true) const; 
-   
+
     /** blit default portion of texture unscaled to \a pt (upper left corner)*/
-    void OrthoBlit(const Pt& pt, bool enter_2d_mode = true) const {OrthoBlit(pt.x, pt.y, enter_2d_mode);}
-   
+    void OrthoBlit(const Pt& pt, bool enter_2d_mode = true) const;
+
     /** blit default portion of texture unscaled to \a x,\a y (upper left corner)*/
     void OrthoBlit(int x, int y, bool enter_2d_mode = true) const; 
-   
+
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Texture object
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Texture
     //@}
 
     /** \name Mutators */ //@{
     // intialization functions
-    void Load(const string& filename, bool mipmap = false) {Load(filename.c_str(), mipmap);} ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
-    void Load(const char* filename, bool mipmap = false); ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
+    void Load(const string& filename, bool mipmap = false); ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
+    void Load(const char* filename, bool mipmap = false);   ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
 
     /** frees any currently-held memory and creates a texture from supplied array \a image.  The data in the \a image parameter is unpacked using
         all the GL default pixel storage parameters, except that GL_UNPACK_ALIGNMENT is set to 1.
@@ -110,7 +110,7 @@ public:
         GL_UNPACK_ALIGNMENT is set to 1.
         \throw TextureException May throw if the texture creation fails. */
     void Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap = false);
-   
+
     void SetWrap(GLenum s, GLenum t);         ///< sets the opengl texture wrap modes associated with opengl texture m_opengl_id
     void SetFilters(GLenum min, GLenum mag);  ///< sets the opengl min/mag filter modes associated with opengl texture m_opengl_id
     void Clear();  ///< frees the opengl texture object associated with this object
@@ -120,7 +120,7 @@ private:
     Texture(const Texture& rhs);             ///< disabled
     Texture& operator=(const Texture& rhs);  ///< disabled
     void InitFromRawData(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap);
-   
+
     string   m_filename;   ///< filename from which this Texture was constructed ("" if not loaded from a file)
 
     int      m_bytes_pp;
@@ -129,7 +129,7 @@ private:
 
     GLenum   m_wrap_s, m_wrap_t;
     GLenum   m_min_filter, m_mag_filter;
-   
+
     bool     m_mipmaps;
 
     GLuint   m_opengl_id;   ///< OpenGL texture ID
@@ -149,40 +149,40 @@ public:
 
     /** \name Structors */ //@{
     SubTexture(); ///< default ctor
-   
+
     /** creates a SubTexture from a GG::Texture and coordinates into it. \warning Calling code <b>must not</b> delete 
         \a texture; \a texture becomes the property of a shared_ptr inside the SubTexture. \throw SubTextureException 
         May throw. */
     SubTexture(const Texture* texture, int x1, int y1, int x2, int y2); 
-   
+
     /** creates a SubTexture from a GG::Texture and coordinates into it \throw SubTextureException May throw. */
     SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2);  
-   
+
     SubTexture(const SubTexture& rhs); ///< copy ctor
     const SubTexture& operator=(const SubTexture& rhs); ///< assignment operator
     SubTexture(const XMLElement& elem); ///< ctor that constructs a SubTexture object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a SubTexture object
-    virtual ~SubTexture() {} ///< virtual dtor
+    virtual ~SubTexture(); ///< virtual dtor
     //@}
 
     /** \name Accessors */ //@{
-    bool             Empty() const     {return !m_texture;}     ///< returns true if this object has no associated GG::Texture
-    const GLfloat*   TexCoords() const {return m_tex_coords;}   ///< texture coordinates to use when blitting this sub-texture
-    int              Width() const     {return m_width;}        ///< width of sub-texture in pixels
-    int              Height() const    {return m_height;}       ///< height of sub-texture in pixels
-    const Texture*   GetTexture()const {return m_texture.get();}///< returns the texture the SubTexture is a part of
-   
+    bool             Empty() const;     ///< returns true if this object has no associated GG::Texture
+    const GLfloat*   TexCoords() const; ///< texture coordinates to use when blitting this sub-texture
+    int              Width() const;     ///< width of sub-texture in pixels
+    int              Height() const;    ///< height of sub-texture in pixels
+    const Texture*   GetTexture()const; ///< returns the texture the SubTexture is a part of
+
     /** blit sub-texture to any place on screen, scaling as necessary \see GG::Texture::OrthoBlit*/
-    void OrthoBlit(const Pt& pt1, const Pt& pt2, bool enter_2d_mode = true) const {OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, enter_2d_mode);}
-   
+    void OrthoBlit(const Pt& pt1, const Pt& pt2, bool enter_2d_mode = true) const;
+
     /** blit sub-texture to any place on screen, scaling as necessary \see GG::Texture::OrthoBlit*/
     void OrthoBlit(int x1, int y1, int x2, int y2, bool enter_2d_mode = true) const; 
-   
+
     /** blit sub-texture unscaled to \a pt (upper left corner) \see GG::Texture::OrthoBlit*/
-    void OrthoBlit(const Pt& pt, bool enter_2d_mode = true) const {OrthoBlit(pt.x, pt.y, enter_2d_mode);}
-   
+    void OrthoBlit(const Pt& pt, bool enter_2d_mode = true) const;
+
     /** blit sub-texture unscaled to \a x, \a y (upper left corner) \see GG::Texture::OrthoBlit*/
     void OrthoBlit(int x, int y, bool enter_2d_mode = true) const;
-   
+
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a SubTexture object
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this SubTexture
     //@}

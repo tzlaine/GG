@@ -77,10 +77,10 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    Clr ButtonColor() const    {return m_button_color;}///< returns the color of the buttons in the dialog
-    int Result() const         {return m_result;}      ///< returns 0, 1, or 2, depending on which buttoon was clicked
-    int DefaultButton() const  {return m_default;}     ///< returns the number of the button that will be chosen by default if the user hits enter (-1 if none)
-    int EscapeButton() const   {return m_escape;}      ///< returns the number of the button that will be chosen by default if the user hits ESC (-1 if none)
+    Clr ButtonColor() const;   ///< returns the color of the buttons in the dialog
+    int Result() const;        ///< returns 0, 1, or 2, depending on which buttoon was clicked
+    int DefaultButton() const; ///< returns the number of the button that will be chosen by default if the user hits enter (-1 if none)
+    int EscapeButton() const;  ///< returns the number of the button that will be chosen by default if the user hits ESC (-1 if none)
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an ThreeButtonDlg object
     //@}
@@ -100,9 +100,9 @@ private:
     void DetachSignalChildren();
     void Init(const string& msg, const string& font_filename, int pts, int buttons,
               const string& zero = "", const string& one = "", const string& two = "");
-    void Button0Clicked()   {m_done = true; m_result = 0;}
-    void Button1Clicked()   {m_done = true; m_result = 1;}
-    void Button2Clicked()   {m_done = true; m_result = 2;}
+    void Button0Clicked();
+    void Button1Clicked();
+    void Button2Clicked();
 
     Clr      m_color;
     Clr      m_border_color;

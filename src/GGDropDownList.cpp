@@ -45,8 +45,8 @@ namespace {
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
         {
-            Connect(m_lb_wnd->SelChangedSignal(), &ModalListPicker::LBSelChangedSlot, this);
-            Connect(m_lb_wnd->LeftClickedSignal(), &ModalListPicker::LBLeftClickSlot, this);
+            Connect(m_lb_wnd->SelChangedSignal, &ModalListPicker::LBSelChangedSlot, this);
+            Connect(m_lb_wnd->LeftClickedSignal, &ModalListPicker::LBLeftClickSlot, this);
             m_lb_wnd->OffsetMove(m_drop_wnd->ClientUpperLeft());
             AttachChild(m_lb_wnd);
         }
@@ -74,6 +74,9 @@ namespace {
     };
 }
 
+////////////////////////////////////////////////
+// GG::DropDownList
+////////////////////////////////////////////////
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb/* = 0*/,
                            Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, row_ht, flags),
@@ -129,6 +132,66 @@ const DropDownList::Row* DropDownList::CurrentItem() const
     return m_current_item_idx == -1 ? 0 : &m_LB->GetRow(m_current_item_idx);
 }
 
+int DropDownList::CurrentItemIndex() const
+{
+    return m_current_item_idx;
+}
+
+bool DropDownList::Empty() const
+{
+    return m_LB->Empty();
+}
+
+const DropDownList::Row& DropDownList::GetItem(int n) const
+{
+    return m_LB->GetRow(n);
+}
+
+bool DropDownList::Selected(int n) const
+{
+    return m_LB->Selected(n);
+}
+
+Uint32 DropDownList::Style() const
+{
+    return m_LB->Style();
+}
+
+int DropDownList::RowHeight() const
+{
+    return m_LB->RowHeight();
+}
+
+int DropDownList::NumRows() const
+{
+    return m_LB->NumRows();
+}
+
+int DropDownList::NumCols() const
+{
+    return m_LB->NumCols();
+}
+
+int DropDownList::SortCol() const
+{
+    return m_LB->SortCol();
+}
+
+int DropDownList::ColWidth(int n) const
+{
+    return m_LB->ColWidth(n);
+}
+
+ListBoxStyle DropDownList::ColAlignment(int n) const
+{
+    return m_LB->ColAlignment(n);
+}
+
+ListBoxStyle DropDownList::RowAlignment(int n) const
+{
+    return m_LB->RowAlignment(n);
+}
+
 Pt DropDownList::ClientUpperLeft() const
 {
     return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK);
@@ -137,6 +200,24 @@ Pt DropDownList::ClientUpperLeft() const
 Pt DropDownList::ClientLowerRight() const
 {
     return LowerRight() - Pt(BORDER_THICK, BORDER_THICK);
+}
+
+XMLElement DropDownList::XMLEncode() const
+{
+    XMLElement retval("GG::DropDownList");
+    retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_current_item_idx", lexical_cast<string>(m_current_item_idx)));
+    retval.AppendChild(XMLElement("m_LB", m_LB->XMLEncode()));
+    return retval;
+}
+
+XMLElementValidator DropDownList::XMLValidator() const
+{
+    XMLElementValidator retval("GG::DropDownList");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_current_item_idx", new Validator<int>()));
+    retval.AppendChild(XMLElementValidator("m_LB", m_LB->XMLValidator()));
+    return retval;
 }
 
 bool DropDownList::Render()
@@ -241,6 +322,16 @@ void DropDownList::Clear()
     m_LB->Clear();
 }
 
+void DropDownList::IndentRow(int n, int i)
+{
+    m_LB->IndentRow(n, i);
+}
+
+DropDownList::Row& DropDownList::GetRow(int n)
+{
+    return m_LB->GetRow(n);
+}
+
 void DropDownList::Select(int row)
 {
     int old_m_current_item_idx = m_current_item_idx;
@@ -253,7 +344,7 @@ void DropDownList::Select(int row)
     }
 
     if (m_current_item_idx != old_m_current_item_idx)
-        m_sel_changed_sig(m_current_item_idx);
+        SelChangedSignal(m_current_item_idx);
 }
 
 void DropDownList::SetStyle(Uint32 s)
@@ -264,26 +355,48 @@ void DropDownList::SetStyle(Uint32 s)
     m_current_item_idx = -1;
 }
 
+void DropDownList::SetRowHeight(int h)
+{
+    m_LB->SetRowHeight(h);
+}
+
+void DropDownList::SetNumCols(int n)
+{
+    m_LB->SetNumCols(n);
+}
+
 void DropDownList::SetSortCol(int n)
 {
     m_LB->SetSortCol(n);
     m_current_item_idx = -1;
 }
 
-XMLElement DropDownList::XMLEncode() const
+void DropDownList::SetColWidth(int n, int w)
 {
-    XMLElement retval("GG::DropDownList");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_current_item_idx", lexical_cast<string>(m_current_item_idx)));
-    retval.AppendChild(XMLElement("m_LB", m_LB->XMLEncode()));
-    return retval;
+    m_LB->SetColWidth(n, w);
 }
 
-XMLElementValidator DropDownList::XMLValidator() const
+void DropDownList::LockColWidths()
 {
-    XMLElementValidator retval("GG::DropDownList");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_current_item_idx", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_LB", m_LB->XMLValidator()));
-    return retval;
+    m_LB->LockColWidths();
+}
+
+void DropDownList::UnLockColWidths()
+{
+    m_LB->UnLockColWidths();
+}
+
+void DropDownList::SetColAlignment(int n, ListBoxStyle align) 
+{
+    m_LB->SetColAlignment(n, align);
+}
+
+void DropDownList::SetRowAlignment(int n, ListBoxStyle align) 
+{
+    m_LB->SetRowAlignment(n, align);
+}
+
+ListBox* DropDownList::LB()
+{
+    return m_LB;
 }

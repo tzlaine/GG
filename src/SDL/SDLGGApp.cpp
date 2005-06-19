@@ -42,9 +42,24 @@ SDLGGApp::~SDLGGApp()
     SDLQuit();
 }
 
-SDLGGApp* SDLGGApp::GetApp()
+int SDLGGApp::AppWidth() const
 {
-    return dynamic_cast<SDLGGApp*>(App::GetApp());
+    return m_app_width;
+}
+
+int SDLGGApp::AppHeight() const
+{
+    return m_app_height;
+}
+
+int SDLGGApp::Ticks() const
+{
+    return SDL_GetTicks();
+}
+
+void SDLGGApp::operator()()
+{
+    App::operator()();
 }
 
 void SDLGGApp::Exit(int code)
@@ -60,6 +75,11 @@ void SDLGGApp::Exit(int code)
 void SDLGGApp::Wait(int ms)
 {
     SDL_Delay(ms);
+}
+
+SDLGGApp* SDLGGApp::GetApp()
+{
+    return dynamic_cast<SDLGGApp*>(App::GetApp());
 }
 
 GG::Key SDLGGApp::GGKeyFromSDLKey(const SDL_keysym& key)
@@ -252,6 +272,10 @@ void SDLGGApp::RenderBegin()
 void SDLGGApp::RenderEnd()
 {
     SDL_GL_SwapBuffers();
+}
+
+void SDLGGApp::FinalCleanup()
+{
 }
 
 void SDLGGApp::SDLQuit()

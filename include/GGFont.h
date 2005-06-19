@@ -182,28 +182,28 @@ public:
         ALL_DEFINED_RANGES = NUMBER | ALPHA_UPPER | ALPHA_LOWER | SYMBOL, ///< everything above (all printable characters)
         ALL_CHARS =          (1 << 5) - 1 ///< all characters (0x00 - 0xFF)
     };
-      
+
     /** \name Structors */ //@{
     Font(const string& font_filename, int pts, Uint32 range = ALL_DEFINED_RANGES); ///< ctor. \throw FontException This constructor may throw if a valid font file is not found, or a Font cannot be created for some other reason.
     Font(const XMLElement& elem); ///< ctor that constructs a Font object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Font object
-    virtual ~Font() {} ///< virtual dtor
+    virtual ~Font(); ///< virtual dtor
     //@}
 
     /** \name Accessors */ //@{
-    const string&     FontName() const     {return m_font_filename;}  ///< returns the name of the file from which this font was created
-    int               PointSize() const    {return m_pt_sz;}          ///< returns the point size in which the characters in the font object are rendered
+    const string&     FontName() const;   ///< returns the name of the file from which this font was created
+    int               PointSize() const;  ///< returns the point size in which the characters in the font object are rendered
 
     /** returns the range(s) of characters rendered in the font \see GlyphRange */
-    int               GetGlyphRange() const{return m_glyph_range;}
+    int               GetGlyphRange() const;
 
-    int               Ascent() const       {return m_ascent;}         ///< returns the maximum amount above the baseline the text can go, in pixels
-    int               Descent() const      {return m_descent;}        ///< returns the maximum amount below the baseline the text can go, in pixels
-    int               Height() const       {return m_height;}         ///< returns (Ascent() - Descent()), in pixels
-    int               Lineskip() const     {return m_lineskip;}       ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
-    int               SpaceWidth() const   {return m_space_width;}    ///< returns the width in pixels of the glyph for the space character
-    int               RenderGlyph(const Pt& pt, char c) const {return RenderGlyph(pt.x, pt.y, c);}   ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderGlyph(int x, int y, char c) const;     ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderText(const Pt& pt, const string& text) const {return RenderText(pt.x, pt.y, text);}  ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
+    int               Ascent() const;     ///< returns the maximum amount above the baseline the text can go, in pixels
+    int               Descent() const;    ///< returns the maximum amount below the baseline the text can go, in pixels
+    int               Height() const;     ///< returns (Ascent() - Descent()), in pixels
+    int               Lineskip() const;   ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
+    int               SpaceWidth() const; ///< returns the width in pixels of the glyph for the space character
+    int               RenderGlyph(const Pt& pt, char c) const; ///< renders glyph for \a c and returns advance of glyph rendered
+    int               RenderGlyph(int x, int y, char c) const; ///< renders glyph for \a c and returns advance of glyph rendered
+    int               RenderText(const Pt& pt, const string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
     int               RenderText(int x, int y, const string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
     void              RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
     void              RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
@@ -215,7 +215,7 @@ public:
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Font object
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Font
     //@}
-   
+
     static void       RegisterKnownTag(const string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
     static void       RemoveKnownTag(const string& tag);     ///< removes \a tag from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
     static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
@@ -230,7 +230,7 @@ private:
             sub_texture(texture, x1, y1, x2, y2), left_bearing(lb), advance(adv), width(x2 - x1) {} ///< ctor
 
         SubTexture  sub_texture;   ///< the subtexture containing just this glyph
-        int	        left_bearing;  ///< the space that should remain before the glyph
+        int         left_bearing;  ///< the space that should remain before the glyph
         int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
         int         width;         ///< the width of the glyph only
     };
@@ -255,7 +255,7 @@ private:
     map<FT_ULong, Glyph> m_glyphs;      ///< the locations of the images of each glyph within the textures
     vector<shared_ptr<Texture> >
                          m_textures;    ///< the OpenGL texture objects in which the glyphs can be found
-   
+
     static set<string>   s_action_tags; ///< embedded tags that Font must act upon when rendering are stored here
     static set<string>   s_known_tags;  ///< embedded tags that Font knows about but should not act upon are stored here
 
@@ -291,8 +291,8 @@ private:
     /// This GG::FontManager-private struct is used as a key type for the map of rendered fonts.
     struct FontKey 
     {
-        FontKey(const string& str, int pts) : filename(str), points(pts) {} ///< ctor
-        bool operator<(const FontKey& rhs) const {return (filename < rhs.filename || (filename == rhs.filename && points < rhs.points));} ///< less-than operator
+        FontKey(const string& str, int pts); ///< ctor
+        bool operator<(const FontKey& rhs) const; ///< lexocograhpical ordering on filename then points
 
         string   filename;   ///< the name of the file from which this font was created
         int      points;     ///< the point size in which this font was rendered

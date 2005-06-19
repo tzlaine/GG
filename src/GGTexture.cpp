@@ -235,6 +235,76 @@ Texture& Texture::operator=(const Texture& rhs)
     return *this;
 }
 
+string Texture::Filename() const
+{
+    return m_filename;
+}
+
+GLenum Texture::WrapS() const
+{
+    return m_wrap_s;
+}
+
+GLenum Texture::WrapT() const
+{
+    return m_wrap_t;
+}
+
+GLenum Texture::MinFilter() const
+{
+return m_min_filter;
+}
+
+GLenum Texture::MagFilter() const
+{
+    return m_mag_filter;
+}
+
+int Texture::BytesPP() const
+{
+    return m_bytes_pp;
+}
+
+int Texture::Width() const
+{
+    return m_width;
+}
+
+int Texture::Height() const
+{
+    return m_height;
+}
+
+bool Texture::MipMapped() const
+{
+    return m_mipmaps;
+}
+
+GLuint Texture::OpenGLId() const
+{
+    return m_opengl_id;
+}
+
+const GLfloat* Texture::DefaultTexCoords() const
+{
+    return m_tex_coords;
+}
+
+int Texture::DefaultWidth() const
+{
+    return m_default_width;
+}
+
+int Texture::DefaultHeight() const
+{
+    return m_default_height;
+}
+
+void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/* = 0*/, bool enter_2d_mode/* = true*/) const
+{
+    OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, tex_coords, enter_2d_mode);
+}
+
 void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coords/* = 0*/, bool enter_2d_mode/* = true*/) const
 {
     if (m_opengl_id) {
@@ -272,6 +342,11 @@ void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coord
         if (enter_2d_mode)
             App::GetApp()->Exit2DMode(); // exit 2D mode, if needed
     }
+}
+
+void Texture::OrthoBlit(const Pt& pt, bool enter_2d_mode/* = true*/) const
+{
+    OrthoBlit(pt.x, pt.y, enter_2d_mode);
 }
 
 void Texture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
@@ -357,6 +432,11 @@ XMLElementValidator Texture::XMLValidator() const
     retval.AppendChild(XMLElementValidator("m_default_width", new Validator<int>()));
     retval.AppendChild(XMLElementValidator("m_default_height", new Validator<int>()));
     return retval;
+}
+
+void Texture::Load(const string& filename, bool mipmap/* = false*/)
+{
+    Load(filename.c_str(), mipmap);
 }
 
 void Texture::Load(const char* filename, bool mipmap/* = false*/)
@@ -617,6 +697,10 @@ SubTexture::SubTexture(const XMLElement& elem) :
     }
 }
 
+SubTexture::~SubTexture()
+{
+}
+
 SubTexture::SubTexture(const SubTexture& rhs)
 {
     *this = rhs;
@@ -636,9 +720,44 @@ const SubTexture& SubTexture::operator=(const SubTexture& rhs)
     return *this;
 }
 
+bool SubTexture::Empty() const
+{
+    return !m_texture;
+}
+
+const GLfloat* SubTexture::TexCoords() const
+{
+    return m_tex_coords;
+}
+
+int SubTexture::Width() const
+{
+    return m_width;
+}
+
+int SubTexture::Height() const
+{
+    return m_height;
+}
+
+const Texture* SubTexture::GetTexture()const
+{
+    return m_texture.get();
+}
+
+void SubTexture::OrthoBlit(const Pt& pt1, const Pt& pt2, bool enter_2d_mode/* = true*/) const
+{
+    OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, enter_2d_mode);
+}
+
 void SubTexture::OrthoBlit(int x1, int y1, int x2, int y2, bool enter_2d_mode/* = true*/) const
 {
     if (m_texture) m_texture->OrthoBlit(x1, y1, x2, y2, m_tex_coords, enter_2d_mode);
+}
+
+void SubTexture::OrthoBlit(const Pt& pt, bool enter_2d_mode/* = true*/) const
+{
+    OrthoBlit(pt.x, pt.y, enter_2d_mode);
 }
 
 void SubTexture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
@@ -675,7 +794,7 @@ XMLElementValidator SubTexture::XMLValidator() const
 
     XMLElementValidator temp("m_texture");
     if (m_texture)
-	temp.AppendChild(m_texture->XMLValidator());
+        temp.AppendChild(m_texture->XMLValidator());
     retval.AppendChild(temp);
 
     retval.AppendChild(XMLElementValidator("m_width", new Validator<int>()));

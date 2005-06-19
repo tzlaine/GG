@@ -114,12 +114,12 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    Clr ButtonColor() const     {return m_button_color;}    ///< returns the color of the buttons in the dialog
-    set<string> Result() const  {return m_result;}          ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
+    Clr ButtonColor() const;    ///< returns the color of the buttons in the dialog
+    set<string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a FileDlg object
     //@}
-   
+
     /** \name Mutators */ //@{
     virtual bool Render();
     virtual void Keypress(Key key, Uint32 key_mods);
@@ -133,7 +133,7 @@ public:
     //@}
 
     /** returns the current directory (the one that will be used by default on the next invocation of FileDlg::Run()) */
-    static const boost::filesystem::path& WorkingDirectory() {return s_working_dir;}
+    static const boost::filesystem::path& WorkingDirectory();
 
 protected:
     enum {WIDTH = 400, HEIGHT = 350}; ///< default width and height values for the dialog, in pixels
@@ -145,7 +145,7 @@ private:
     void DetachSignalChildren();
     void Init(const string& directory);
     void OkClicked();
-    void CancelClicked() {m_done = true; m_result.clear();}
+    void CancelClicked();
     void FileSetChanged(const set<int>& files);
     void FileDoubleClicked(int n, const shared_ptr<ListBox::Row>& row);
     void FilesEditChanged(const string& str);
@@ -161,7 +161,7 @@ private:
     Clr              m_text_color;
     Clr              m_button_color;
     shared_ptr<Font> m_font;
-   
+
     bool             m_save;
     vector<pair<string, string> > 
                      m_file_filters;
@@ -170,7 +170,7 @@ private:
     string           m_save_str;
     string           m_open_str;
     string           m_cancel_str;
-   
+
     TextControl*     m_curr_dir_text;
     ListBox*         m_files_list;
     Edit*            m_files_edit;
@@ -179,7 +179,7 @@ private:
     Button*          m_cancel_button;
     TextControl*     m_files_label;
     TextControl*     m_file_types_label;
-   
+
     static boost::filesystem::path s_working_dir; ///< declared static so each instance of FileDlg opens up the same directory
 };
 

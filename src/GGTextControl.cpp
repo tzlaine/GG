@@ -104,6 +104,31 @@ TextControl::TextControl(const XMLElement& elem) :
     SetText(Control::m_text);
 }
 
+Uint32 TextControl::TextFormat() const
+{
+    return m_format;
+}
+
+Clr TextControl::TextColor() const
+{
+    return m_text_color;
+}
+
+TextControl::operator const string&() const
+{
+    return Control::m_text;
+}
+
+bool TextControl::Empty() const
+{
+    return Control::m_text.empty();
+}
+
+int TextControl::Length() const
+{
+    return Control::m_text.length();
+}
+
 Pt TextControl::TextUpperLeft() const
 {
     return UpperLeft() + m_text_ul;
@@ -160,10 +185,78 @@ void TextControl::SetText(const string& str)
     }
 }
 
+void TextControl::SetText(const char* str)
+{
+    SetText(string(str));
+}
+
 void TextControl::SizeMove(int x1, int y1, int x2, int y2)
 {
     Wnd::SizeMove(x1, y1, x2, y2);
     RecomputeTextBounds();
+}
+
+void TextControl::SetTextFormat(Uint32 format)
+{
+    m_format = format; ValidateFormat();
+}
+
+void TextControl::SetTextColor(Clr color)
+{
+    m_text_color = color;
+}
+
+void TextControl::SetColor(Clr c)
+{
+    Control::SetColor(c);
+    m_text_color = c;
+}
+
+void TextControl::operator+=(const string& str)
+{
+    SetText(Control::m_text + str);
+}
+
+void TextControl::operator+=(const char* str)
+{
+    SetText(Control::m_text + str);
+}
+
+void TextControl::operator+=(char ch)
+{
+    SetText(Control::m_text + ch);
+}
+
+void TextControl::Clear()
+{
+    SetText("");
+}
+
+void TextControl::Insert(int pos, char ch)
+{
+    Control::m_text.insert(pos, 1, ch);
+    SetText(Control::m_text);
+}
+
+void TextControl::Erase(int pos, int num/* = 1*/)
+{
+    Control::m_text.erase(pos, num);
+    SetText(Control::m_text);
+}
+
+const vector<Font::LineData>& TextControl::GetLineData() const
+{
+    return m_line_data;
+}
+
+const shared_ptr<Font>& TextControl::GetFont() const
+{
+    return m_font;
+}
+
+bool TextControl::FitToText() const
+{
+    return m_fit_to_text;
 }
 
 void TextControl::ValidateFormat()

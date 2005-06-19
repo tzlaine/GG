@@ -45,7 +45,7 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     m_line_style(style),
     m_tab_drag_offset(-1),
     m_tab(new Button(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
-		     m_orientation == VERTICAL ? m_tab_width : Height(), "", "", 0, color))
+                     m_orientation == VERTICAL ? m_tab_width : Height(), "", "", 0, color))
 {
     SetColor(color);
     SizeMove(UpperLeft(), LowerRight());
@@ -89,6 +89,36 @@ Slider::Slider(const XMLElement& elem) :
         throw std::runtime_error("Slider::Slider : Attempted to use a non-Button object as the tab for a GG::Slider.");
 
     SizeMove(UpperLeft(), LowerRight());
+}
+
+int Slider::Posn() const
+{
+    return m_posn;
+}
+
+pair<int, int> Slider::SliderRange() const
+{
+    return pair<int,int>(m_range_min, m_range_max);
+}
+
+Slider::Orientation Slider::GetOrientation() const
+{
+    return m_orientation;
+}
+
+int Slider::TabWidth() const
+{
+    return m_tab_width;
+}
+
+int Slider::LineWidth() const
+{
+    return m_line_width;
+}
+
+Slider::LineStyleType Slider::LineStyle() const
+{
+    return m_line_style;
 }
 
 XMLElement Slider::XMLEncode() const
@@ -194,13 +224,18 @@ void Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 void Slider::LButtonUp(const Pt& pt, Uint32 keys)
 {
     if (!Disabled() && m_tab_drag_offset != -1)
-        m_slid_and_stopped_sig(m_posn, m_range_min, m_range_max);
+        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
     m_tab_drag_offset = -1;
 }
 
 void Slider::LClick(const Pt& pt, Uint32 keys)
 {
     LButtonUp(pt, keys);
+}
+
+void Slider::MouseHere(const Pt& pt, Uint32 keys)
+{
+    m_tab_drag_offset = -1;
 }
 
 void Slider::Keypress(Key key, Uint32 key_mods)
@@ -276,6 +311,16 @@ void Slider::SizeSlider(int min, int max)
         MoveTabToPosn();
 }
 
+void Slider::SetMax(int max)
+{
+    SizeSlider(m_range_min, max);
+}
+
+void Slider::SetMin(int min)
+{
+    SizeSlider(min, m_range_max);
+}
+
 void Slider::SlideTo(int p)
 {
     int old_posn = m_posn;
@@ -287,9 +332,24 @@ void Slider::SlideTo(int p)
         m_posn = p;
     MoveTabToPosn();
     if (m_posn != old_posn) {
-        m_slid_sig(m_posn, m_range_min, m_range_max);
-        m_slid_and_stopped_sig(m_posn, m_range_min, m_range_max);
+        SlidSignal(m_posn, m_range_min, m_range_max);
+        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
     }
+}
+
+void Slider::SetLineStyle(LineStyleType style)
+{
+    m_line_style = style;
+}
+
+int Slider::TabDragOffset() const
+{
+    return m_tab_drag_offset;
+}
+
+const shared_ptr<Button>& Slider::Tab() const
+{
+    return m_tab;
 }
 
 void Slider::MoveTabToPosn()
@@ -311,7 +371,7 @@ void Slider::UpdatePosn()
     double fractional_distance = static_cast<double>(tab_posn) / line_length;
     m_posn = static_cast<int>((m_range_max - m_range_min) * fractional_distance) + m_range_min;
     if (m_posn != old_posn)
-        m_slid_sig(m_posn, m_range_min, m_range_max);
+        SlidSignal(m_posn, m_range_min, m_range_max);
 }
 
 } // namespace GG

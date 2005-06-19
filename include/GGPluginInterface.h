@@ -107,11 +107,11 @@ public:
 
     /** \name Structors */ //@{
     PluginInterface(); ///< default ctor.
-    
+
     /** ctor that loads the plugin file \a lib_name.  The base filename should be provided, without the extension (i.e. "foo", 
         not "foo.so" or "foo.dll"). */
     PluginInterface(const std::string& lib_name);
-    
+
     ~PluginInterface(); ///< dtor.
     //@}
 

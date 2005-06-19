@@ -134,12 +134,32 @@ ThreeButtonDlg::ThreeButtonDlg(const XMLElement& elem) :
     if (curr_elem->NumChildren() && !(m_button_2 = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(curr_elem->Child(0)))))
         throw std::runtime_error("ThreeButtonDlg::ThreeButtonDlg : Attempted to use a non-Button object as the ok button.");
 
-    Connect(m_button_0->ClickedSignal(), &ThreeButtonDlg::Button0Clicked, this);
+    Connect(m_button_0->ClickedSignal, &ThreeButtonDlg::Button0Clicked, this);
     if (m_button_1)
-        Connect(m_button_1->ClickedSignal(), &ThreeButtonDlg::Button1Clicked, this);
+        Connect(m_button_1->ClickedSignal, &ThreeButtonDlg::Button1Clicked, this);
     if (m_button_2)
-        Connect(m_button_2->ClickedSignal(), &ThreeButtonDlg::Button2Clicked, this);
+        Connect(m_button_2->ClickedSignal, &ThreeButtonDlg::Button2Clicked, this);
     AttachSignalChildren();
+}
+
+Clr ThreeButtonDlg::ButtonColor() const
+{
+    return m_button_color;
+}
+
+int ThreeButtonDlg::Result() const
+{
+    return m_result;
+}
+
+int ThreeButtonDlg::DefaultButton() const
+{
+    return m_default;
+}
+
+int ThreeButtonDlg::EscapeButton() const
+{
+    return m_escape;
 }
 
 XMLElement ThreeButtonDlg::XMLEncode() const
@@ -284,12 +304,30 @@ void ThreeButtonDlg::Init(const string& msg, const string& font_filename, int pt
                                 font_filename, pts, m_button_color, m_text_color);
     }
 
-    Connect(m_button_0->ClickedSignal(), &ThreeButtonDlg::Button0Clicked, this);
+    Connect(m_button_0->ClickedSignal, &ThreeButtonDlg::Button0Clicked, this);
     if (m_button_1)
-        Connect(m_button_1->ClickedSignal(), &ThreeButtonDlg::Button1Clicked, this);
+        Connect(m_button_1->ClickedSignal, &ThreeButtonDlg::Button1Clicked, this);
     if (m_button_2)
-        Connect(m_button_2->ClickedSignal(), &ThreeButtonDlg::Button2Clicked, this);
+        Connect(m_button_2->ClickedSignal, &ThreeButtonDlg::Button2Clicked, this);
     AttachSignalChildren();
+}
+
+void ThreeButtonDlg::Button0Clicked()
+{
+    m_done = true;
+    m_result = 0;
+}
+
+void ThreeButtonDlg::Button1Clicked()
+{
+    m_done = true;
+    m_result = 1;
+}
+
+void ThreeButtonDlg::Button2Clicked()
+{
+    m_done = true;
+    m_result = 2;
 }
 
 } // namespace GG

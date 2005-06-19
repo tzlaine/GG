@@ -46,15 +46,16 @@ class GG_API Button : public TextControl
 {
 public:
     /// the states of being for a GG::Button
-    enum ButtonState {BN_PRESSED,    ///< the button is being pressed by the user, and the cursor is over the button
-                      BN_UNPRESSED,  ///< the button is unpressed
-                      BN_ROLLOVER    ///< the button has the cursor over it, but is unpressed
-                     };
+    enum ButtonState {
+        BN_PRESSED,    ///< the button is being pressed by the user, and the cursor is over the button
+        BN_UNPRESSED,  ///< the button is unpressed
+        BN_ROLLOVER    ///< the button has the cursor over it, but is unpressed
+    };
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void ()> ClickedSignalType; ///< emitted when the button is clicked by the user
     //@}
-   
+
     /** \name Slot Types */ //@{
     typedef ClickedSignalType::slot_type ClickedSlotType; ///< type of functor(s) invoked on a ClickedSignalType
     //@}
@@ -67,35 +68,36 @@ public:
 
     /** \name Accessors */ //@{
     /** returns button state \see ButtonState */
-    ButtonState       State() const                             {return m_state;}
+    ButtonState       State() const;
 
-    const SubTexture& UnpressedGraphic() const                  {return m_unpressed_graphic;} ///< sets a SubTexture to be used as the image of the button when unpressed
-    const SubTexture& PressedGraphic() const                    {return m_pressed_graphic;}   ///< sets a SubTexture to be used as the image of the button when pressed
-    const SubTexture& RolloverGraphic() const                   {return m_rollover_graphic;}  ///< sets a SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
-    void              SetUnpressedGraphic(const SubTexture& st) {m_unpressed_graphic = st;}   ///< sets a SubTexture to be used as the image of the button when unpressed
-    void              SetPressedGraphic(const SubTexture& st)   {m_pressed_graphic = st;}     ///< sets a SubTexture to be used as the image of the button when pressed
-    void              SetRolloverGraphic(const SubTexture& st)  {m_rollover_graphic = st;}    ///< sets a SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
+    const SubTexture& UnpressedGraphic() const; ///< returns the SubTexture to be used as the image of the button when unpressed
+    const SubTexture& PressedGraphic() const;   ///< returns the SubTexture to be used as the image of the button when pressed
+    const SubTexture& RolloverGraphic() const;  ///< returns the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Button object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    ClickedSignalType& ClickedSignal() const                    {return m_clicked_sig;} ///< returns the clicked signal object for this Button
+    mutable ClickedSignalType ClickedSignal; ///< the clicked signal object for this Button
     //@}
-   
+
     /** \name Mutators */ //@{
     virtual bool   Render();
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys)          {if (!Disabled()) m_state = BN_PRESSED;}
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys){if (!Disabled()) m_state = BN_PRESSED;}
-    virtual void   LButtonUp(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_UNPRESSED;}
-    virtual void   LClick(const Pt& pt, Uint32 keys)               {if (!Disabled()) {m_state = BN_UNPRESSED; m_clicked_sig(); m_state = BN_UNPRESSED;}}
-    virtual void   MouseHere(const Pt& pt, Uint32 keys)            {if (!Disabled()) m_state = BN_ROLLOVER;}
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys)           {if (!Disabled()) m_state = BN_UNPRESSED;}
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+    virtual void   LClick(const Pt& pt, Uint32 keys);
+    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
-    virtual void   SetColor(Clr c)                                 {Control::SetColor(c);}   ///< sets the control's color; does not affect the text color
+    virtual void   SetColor(Clr c); ///< sets the control's color; does not affect the text color
 
     /** sets button state programmatically \see ButtonState */
-    void           SetState(ButtonState state)                     {m_state = state;}
+    void           SetState(ButtonState state);
+
+    void           SetUnpressedGraphic(const SubTexture& st); ///< sets the SubTexture to be used as the image of the button when unpressed
+    void           SetPressedGraphic(const SubTexture& st);   ///< sets the SubTexture to be used as the image of the button when pressed
+    void           SetRolloverGraphic(const SubTexture& st);  ///< sets the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
     //@}
 
 protected:
@@ -113,8 +115,6 @@ private:
     SubTexture     m_unpressed_graphic; ///< graphic used to display button when it's unpressed
     SubTexture     m_pressed_graphic;   ///< graphic used to display button when it's depressed
     SubTexture     m_rollover_graphic;  ///< graphic used to display button when it's under the mouse and not pressed
-   
-    mutable ClickedSignalType m_clicked_sig;
 };
 
 
@@ -143,12 +143,13 @@ class GG_API StateButton : public TextControl
 {
 public:
     /// the built-in visual styles of state buttons
-    enum StateButtonStyle {SBSTYLE_3D_XBOX,        ///< draws a down-beveled box with a 3D x-mark inside
-                           SBSTYLE_3D_CHECKBOX,    ///< draws a down-beveled box with a 3D check-mark inside
-                           SBSTYLE_3D_RADIO,       ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
-                           SBSTYLE_3D_BUTTON,      ///< draws a button that toggles bewtween popped up and pushed down
-                           SBSTYLE_3D_ROUND_BUTTON ///< draws a down-beveled circle with an up-beveled circle inside
-                          };
+    enum StateButtonStyle {
+        SBSTYLE_3D_XBOX,        ///< draws a down-beveled box with a 3D x-mark inside
+        SBSTYLE_3D_CHECKBOX,    ///< draws a down-beveled box with a 3D check-mark inside
+        SBSTYLE_3D_RADIO,       ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
+        SBSTYLE_3D_BUTTON,      ///< draws a button that toggles bewtween popped up and pushed down
+        SBSTYLE_3D_ROUND_BUTTON ///< draws a down-beveled circle with an up-beveled circle inside
+    };
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void (bool)> CheckedSignalType; ///< emitted when the StateButton is checked or unchecked; the checked/unchecked status is indicated by the bool parameter
@@ -169,37 +170,37 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    bool             Checked() const                {return m_checked;}    ///< returns true if button is checked
-    Clr              InteriorColor() const          {return m_int_color;}  ///< returns the interior color of the box, circle, or other enclosing shape
+    bool             Checked() const;       ///< returns true if button is checked
+    Clr              InteriorColor() const; ///< returns the interior color of the box, circle, or other enclosing shape
 
     /** returns the visual style of the button \see StateButtonStyle */
-    StateButtonStyle Style() const                  {return m_style;}
+    StateButtonStyle Style() const;
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    CheckedSignalType& CheckedSignal() const        {return m_checked_sig;} ///< returns the checked signal object for this StaticButton
+    mutable CheckedSignalType CheckedSignal; ///< the checked signal object for this StaticButton
     //@}
-   
+
     /** \name Mutators */ //@{
-    void             Reset()                        {SetCheck(false);}     ///< unchecks button
-    void             SetCheck(bool b = true)        {m_checked_sig(m_checked = b);} ///< (un)checks button
-    virtual void     SetColor(Clr c)                {Control::SetColor(c);} ///< sets the color of the button; does not affect text color
-    void             SetInteriorColor(Clr c)        {m_int_color = c;}     ///< sets the interior color of the box, circle, or other enclosing shape
+    void             Reset();                 ///< unchecks button
+    void             SetCheck(bool b = true); ///< (un)checks button
+    virtual void     SetColor(Clr c);         ///< sets the color of the button; does not affect text color
+    void             SetInteriorColor(Clr c); ///< sets the interior color of the box, circle, or other enclosing shape
 
     /** sets the visual style of the button \see StateButtonStyle */
-    void             SetStyle(StateButtonStyle bs)  {m_style = bs;}
+    void             SetStyle(StateButtonStyle bs);
     //@}
 
 protected:
     /** \name Accessors */ //@{
-    int ButtonX() const     {return m_button_x;}    ///< returns the x coordinate of the button part of the control
-    int ButtonY() const     {return m_button_y;}    ///< returns the y coordinate of the button part of the control
-    int ButtonWd() const    {return m_button_wd;}   ///< returns the width of the button part of the control
-    int ButtonHt() const    {return m_button_ht;}   ///< returns the height of the button part of the control
-    int TextX() const       {return m_text_x;}      ///< returns the x coordinate of the text part of the control
-    int TextY() const       {return m_text_y;}      ///< returns the y coordinate of the text part of the control
+    int ButtonX() const;  ///< returns the x coordinate of the button part of the control
+    int ButtonY() const;  ///< returns the y coordinate of the button part of the control
+    int ButtonWd() const; ///< returns the width of the button part of the control
+    int ButtonHt() const; ///< returns the height of the button part of the control
+    int TextX() const;    ///< returns the x coordinate of the text part of the control
+    int TextY() const;    ///< returns the y coordinate of the text part of the control
     //@}
 
     /** \name Mutators */ //@{
@@ -217,8 +218,6 @@ private:
     int               m_button_x,  m_button_y;
     int               m_button_wd, m_button_ht;
     int               m_text_x,    m_text_y;
-   
-    mutable CheckedSignalType m_checked_sig;
 };
 
 
@@ -257,24 +256,24 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    RadioButtonGroup(int x, int y) : Control(x, y, 10, 10), m_checked_button(-1) {} ///< ctor
+    RadioButtonGroup(int x, int y); ///< ctor
     RadioButtonGroup(const XMLElement& elem); ///< ctor that constructs a StateButton object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a RadioButtonGroup object
     //@}
 
     /** \name Accessors */ //@{
     /** returns the number of buttons in this control */
-    int              NumButtons() const      {return m_buttons.size();}
+    int              NumButtons() const;
 
     /** returns the index of the currently checked button, or -1 if none are checked */
-    int              CheckedButton() const   {return m_checked_button;}
+    int              CheckedButton() const;
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StateButton object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    ButtonChangedSignalType& ButtonChangedSignal() const {return m_button_changed_sig;} ///< returns the button changed signal object for this RadioButtonGroup
+    mutable ButtonChangedSignalType ButtonChangedSignal; ///< the button changed signal object for this RadioButtonGroup
     //@}
-   
+
     /** \name Mutators */ //@{
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
         currently-checked button index is set to -1. */
@@ -291,34 +290,32 @@ public:
 
 protected:
     /** \name Accessors */ //@{
-    const vector<StateButton*>&                 Buttons() const     {return m_buttons;}     ///< returns the state buttons in the group
-    const vector<boost::signals::connection>&   Connections() const {return m_connections;} ///< returns the connections to the state buttons
+    const vector<StateButton*>&               Buttons() const;     ///< returns the state buttons in the group
+    const vector<boost::signals::connection>& Connections() const; ///< returns the connections to the state buttons
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render() {return true;}
+    virtual bool Render();
     //@}
 
 private:
     class ButtonClickedFunctor // for catching button-click signals from the contained buttons
     {
     public:
-        ButtonClickedFunctor(RadioButtonGroup* grp, int idx) : m_grp(grp), m_idx(idx) {}
-        void operator()(bool checked) {m_grp->HandleRadioClick(checked, m_idx);}
+        ButtonClickedFunctor(RadioButtonGroup* grp, int idx);
+        void operator()(bool checked);
     private:
         RadioButtonGroup* m_grp;
         int m_idx;
     };
-   
+
     void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active
-   
+
     vector<StateButton*>               m_buttons;     ///< the state buttons in the group
     vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be disconnected when programmatically unclicking the buttons
 
     int  m_checked_button; ///< the index of the currently-checked button; -1 if none is clicked
-   
-    mutable ButtonChangedSignalType m_button_changed_sig;
-   
+
     friend class ButtonClickedFunctor;
 };
 

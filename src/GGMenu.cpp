@@ -42,38 +42,34 @@ const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in 
 // GG::MenuItem
 ////////////////////////////////////////////////
 MenuItem::MenuItem() : 
+    SelectedSignal(new SelectedSignalType()),
     item_ID(0), 
     disabled(false), 
-    checked(false), 
-    selected_signal(new SelectedSignalType())
+    checked(false)
 {
 }
 
 MenuItem::MenuItem(const string& str, int id, bool disable, bool check) : 
+    SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
     disabled(disable), 
-    checked(check), 
-    selected_signal(new SelectedSignalType())
+    checked(check)
 {
 }
 
 MenuItem::MenuItem(const string& str, int id, bool disable, bool check, const MenuItem::SelectedSlotType& slot) : 
+    SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
     disabled(disable), 
-    checked(check), 
-    selected_signal(new SelectedSignalType())
+    checked(check)
 {
-    selected_signal->connect(slot);
-}
-
-MenuItem::~MenuItem()
-{
+    SelectedSignal->connect(slot);
 }
 
 MenuItem::MenuItem(const XMLElement& elem) :
-    selected_signal(new SelectedSignalType())
+    SelectedSignal(new SelectedSignalType())
 {
     if (elem.Tag() != "GG::MenuItem")
         throw std::invalid_argument("Attempted to construct a GG::MenuItem from an XMLElement that had a tag other than \"GG::MenuItem\"");
@@ -86,6 +82,10 @@ MenuItem::MenuItem(const XMLElement& elem) :
     const XMLElement* curr_elem = &elem.Child("next_level");
     for (int i = 0; i < curr_elem->NumChildren(); ++i)
         next_level.push_back(MenuItem(curr_elem->Child(i)));
+}
+
+MenuItem::~MenuItem()
+{
 }
 
 XMLElement MenuItem::XMLEncode() const
@@ -214,6 +214,11 @@ MenuBar::MenuBar(const XMLElement& elem) :
     AdjustLayout();
 }
 
+const MenuItem& MenuBar::AllMenus() const
+{
+    return m_menu_data;
+}
+
 bool MenuBar::ContainsMenu(const string& str) const
 {
     bool retval = false;
@@ -224,6 +229,11 @@ bool MenuBar::ContainsMenu(const string& str) const
         }
     }
     return retval;
+}
+
+int MenuBar::NumMenus() const
+{
+    return m_menu_data.next_level.size();
 }
 
 const MenuItem& MenuBar::GetMenu(const string& str) const
@@ -241,80 +251,29 @@ const MenuItem& MenuBar::GetMenu(int n) const
     return *(m_menu_data.next_level.begin() + n);
 }
 
-bool MenuBar::Render()
+Clr MenuBar::BorderColor() const        
 {
-    Pt ul = UpperLeft();
-    Pt lr = LowerRight();
-    FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_int_color, m_border_color, BORDER_THICKNESS);
-
-    // paint caret, if any
-    if (m_caret != -1) {
-        Pt caret_ul = m_menu_labels[m_caret]->UpperLeft() + Pt((!m_caret ? BORDER_THICKNESS : 0), BORDER_THICKNESS);
-        Pt caret_lr = m_menu_labels[m_caret]->LowerRight() - Pt((m_caret == static_cast<int>(m_menu_labels.size()) - 1 ? BORDER_THICKNESS : 0), BORDER_THICKNESS);
-        FlatRectangle(caret_ul.x, caret_ul.y, caret_lr.x, caret_lr.y, m_hilite_color, GG::CLR_ZERO, 0);
-    }
-
-    return true;
+    return m_border_color;
 }
 
-void MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
+Clr MenuBar::InteriorColor() const
 {
-    if (!Disabled()) {
-        for (int i = 0; i < static_cast<int>(m_menu_labels.size()); ++i) {
-            if (m_menu_labels[i]->InWindow(pt)) {
-                m_caret = -1;
-                m_browsed_signal(0);
-                // since a MenuBar is usually modeless, but becomes modal when a menu is opened, we do something kludgey here:
-                // we launch a PopupMenu whenever a menu item is selected, then use the ID returned from it to find the
-                // menu item that was chosen; we then emit a signal from that item
-                if (m_menu_data.next_level[i].next_level.empty()) {
-                    m_menu_data.next_level[i].SelectedSignal()(m_menu_data.next_level[i].item_ID);
-                } else {
-                    MenuItem popup_data;
-                    PopupMenu menu(m_menu_labels[i]->UpperLeft().x, m_menu_labels[i]->LowerRight().y, m_font, m_menu_data.next_level[i], m_text_color, m_border_color, m_int_color);
-                    menu.SetHiliteColor(m_hilite_color);
-                    menu.SetSelectedTextColor(m_sel_text_color);
-                    Connect(menu.BrowsedSignal(), &MenuBar::BrowsedSlot, this);
-                    menu.Run();
-                }
-            }
-        }
-    }
+    return m_int_color;
 }
 
-void MenuBar::MouseHere(const Pt& pt, Uint32 keys)
+Clr MenuBar::TextColor() const
 {
-    if (!Disabled()) {
-        m_caret = -1;
-        for (unsigned int i = 0; i < m_menu_data.next_level.size(); ++i) {
-            if (m_menu_labels[i]->InWindow(pt)) {
-                m_caret = i;
-                break;
-            }
-        }
-    }
+    return m_text_color;
 }
 
-void MenuBar::SizeMove(int x1, int y1, int x2, int y2)
+Clr MenuBar::HiliteColor() const
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
-    AdjustLayout();
+    return m_hilite_color;
 }
 
-MenuItem& MenuBar::GetMenu(const string& str)
+Clr MenuBar::SelectedTextColor() const
 {
-    vector<MenuItem>::iterator it = m_menu_data.next_level.begin();
-    for (; it != m_menu_data.next_level.end(); ++it) {
-        if (it->label == str)
-            break;
-    }
-    return *it;
-}
-
-void MenuBar::AddMenu(const MenuItem& menu)
-{
-    m_menu_data.next_level.push_back(menu);
-    AdjustLayout();
+    return m_sel_text_color;
 }
 
 XMLElement MenuBar::XMLEncode() const
@@ -347,6 +306,137 @@ XMLElementValidator MenuBar::XMLValidator() const
     retval.AppendChild(XMLElementValidator("m_sel_text_color", m_sel_text_color.XMLValidator()));
     retval.AppendChild(XMLElementValidator("m_menu_data", m_menu_data.XMLValidator()));
     return retval;
+}
+
+bool MenuBar::Render()
+{
+    Pt ul = UpperLeft();
+    Pt lr = LowerRight();
+    FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_int_color, m_border_color, BORDER_THICKNESS);
+
+    // paint caret, if any
+    if (m_caret != -1) {
+        Pt caret_ul = m_menu_labels[m_caret]->UpperLeft() + Pt((!m_caret ? BORDER_THICKNESS : 0), BORDER_THICKNESS);
+        Pt caret_lr = m_menu_labels[m_caret]->LowerRight() - Pt((m_caret == static_cast<int>(m_menu_labels.size()) - 1 ? BORDER_THICKNESS : 0), BORDER_THICKNESS);
+        FlatRectangle(caret_ul.x, caret_ul.y, caret_lr.x, caret_lr.y, m_hilite_color, GG::CLR_ZERO, 0);
+    }
+
+    return true;
+}
+
+void MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled()) {
+        for (int i = 0; i < static_cast<int>(m_menu_labels.size()); ++i) {
+            if (m_menu_labels[i]->InWindow(pt)) {
+                m_caret = -1;
+                BrowsedSignal(0);
+                // since a MenuBar is usually modeless, but becomes modal when a menu is opened, we do something kludgey here:
+                // we launch a PopupMenu whenever a menu item is selected, then use the ID returned from it to find the
+                // menu item that was chosen; we then emit a signal from that item
+                if (m_menu_data.next_level[i].next_level.empty()) {
+                    (*m_menu_data.next_level[i].SelectedSignal)(m_menu_data.next_level[i].item_ID);
+                } else {
+                    MenuItem popup_data;
+                    PopupMenu menu(m_menu_labels[i]->UpperLeft().x, m_menu_labels[i]->LowerRight().y, m_font, m_menu_data.next_level[i], m_text_color, m_border_color, m_int_color);
+                    menu.SetHiliteColor(m_hilite_color);
+                    menu.SetSelectedTextColor(m_sel_text_color);
+                    Connect(menu.BrowsedSignal, &MenuBar::BrowsedSlot, this);
+                    menu.Run();
+                }
+            }
+        }
+    }
+}
+
+void MenuBar::MouseHere(const Pt& pt, Uint32 keys)
+{
+    if (!Disabled()) {
+        m_caret = -1;
+        for (unsigned int i = 0; i < m_menu_data.next_level.size(); ++i) {
+            if (m_menu_labels[i]->InWindow(pt)) {
+                m_caret = i;
+                break;
+            }
+        }
+    }
+}
+
+void MenuBar::MouseLeave(const Pt& pt, Uint32 keys)
+{
+    m_caret = -1;
+}
+
+void MenuBar::SizeMove(int x1, int y1, int x2, int y2)
+{
+    Wnd::SizeMove(x1, y1, x2, y2);
+    AdjustLayout();
+}
+
+MenuItem& MenuBar::AllMenus()
+{
+    return m_menu_data;
+}
+
+MenuItem& MenuBar::GetMenu(const string& str)
+{
+    vector<MenuItem>::iterator it = m_menu_data.next_level.begin();
+    for (; it != m_menu_data.next_level.end(); ++it) {
+        if (it->label == str)
+            break;
+    }
+    return *it;
+}
+
+MenuItem& MenuBar::GetMenu(int n)
+{
+    return m_menu_data.next_level[n];
+}
+
+void MenuBar::AddMenu(const MenuItem& menu)
+{
+    m_menu_data.next_level.push_back(menu);
+    AdjustLayout();
+}
+
+void MenuBar::SetBorderColor(Clr clr)
+{
+    m_border_color = clr;
+}
+
+void MenuBar::SetInteriorColor(Clr clr)
+{
+    m_int_color = clr;
+}
+
+void MenuBar::SetTextColor(Clr clr)
+{
+    m_text_color = clr;
+}
+
+void MenuBar::SetHiliteColor(Clr clr)
+{
+    m_hilite_color = clr;
+}
+
+void MenuBar::SetSelectedTextColor(Clr clr)
+{
+    m_sel_text_color = clr;
+}
+
+const shared_ptr<Font>& MenuBar::GetFont() const
+{
+    return m_font;
+}
+
+const vector<TextControl*>& MenuBar::MenuLabels() const
+{
+    return m_menu_labels;
+}
+
+int MenuBar::Caret() const
+{
+    return m_caret;
 }
 
 void MenuBar::AdjustLayout()
@@ -393,6 +483,10 @@ void MenuBar::AdjustLayout()
         Resize(Width(), desired_ht);
 }
 
+void MenuBar::BrowsedSlot(int n)
+{
+    BrowsedSignal(n);
+}
 
 
 ////////////////////////////////////////////////
@@ -440,6 +534,41 @@ PopupMenu::PopupMenu(int x, int y, const string& font_filename, int pts, const M
     interior.a = 255;
     m_hilite_color = interior;
     m_open_levels.resize(1);
+}
+
+Pt PopupMenu::ClientUpperLeft() const
+{
+    return m_origin;
+}
+
+int PopupMenu::MenuID() const
+{
+    return (m_item_selected ? m_item_selected->item_ID : 0);
+}
+
+Clr PopupMenu::BorderColor() const
+{
+    return m_border_color;
+}
+
+Clr PopupMenu::InteriorColor() const
+{
+    return m_int_color;
+}
+
+Clr PopupMenu::TextColor() const
+{
+    return m_text_color;
+}
+
+Clr PopupMenu::HiliteColor() const
+{
+    return m_hilite_color;
+}
+
+Clr PopupMenu::SelectedTextColor() const
+{
+    return m_sel_text_color;
 }
 
 bool PopupMenu::Render()
@@ -550,8 +679,13 @@ void PopupMenu::LButtonUp(const Pt& pt, Uint32 keys)
             m_item_selected = menu_ptr;
         }
     }
-    m_browsed_signal(0);
+    BrowsedSignal(0);
     m_done = true;
+}
+
+void PopupMenu::LClick(const Pt& pt, Uint32 keys)
+{
+    LButtonUp(pt, keys);
 }
 
 void PopupMenu::LDrag(const Pt& pt, const GG::Pt& move, Uint32 keys)
@@ -593,15 +727,80 @@ void PopupMenu::LDrag(const Pt& pt, const GG::Pt& move, Uint32 keys)
             menu_ptr = &menu_ptr->next_level[m_caret[i]];
         update_ID = menu_ptr->item_ID;
     }
-    m_browsed_signal(update_ID);
+    BrowsedSignal(update_ID);
+}
+
+void PopupMenu::RButtonUp(const Pt& pt, Uint32 keys)
+{
+    LButtonUp(pt, keys);
+}
+
+void PopupMenu::RClick(const Pt& pt, Uint32 keys)
+{
+    LButtonUp(pt, keys);
+}
+
+void PopupMenu::MouseHere(const Pt& pt, Uint32 keys)
+{
+    LDrag(pt, Pt(), keys);
 }
 
 int PopupMenu::Run()
 {
     int retval = Wnd::Run();
     if (m_item_selected)
-        m_item_selected->SelectedSignal()(m_item_selected->item_ID);
+        (*m_item_selected->SelectedSignal)(m_item_selected->item_ID);
     return retval;
+}
+
+void PopupMenu::SetBorderColor(Clr clr)
+{
+    m_border_color = clr;
+}
+
+void PopupMenu::SetInteriorColor(Clr clr)     
+{
+    m_int_color = clr;
+}
+
+void PopupMenu::SetTextColor(Clr clr)         
+{
+    m_text_color = clr;
+}
+
+void PopupMenu::SetHiliteColor(Clr clr)       
+{
+    m_hilite_color = clr;
+}
+
+void PopupMenu::SetSelectedTextColor(Clr clr)
+{
+    m_sel_text_color = clr;
+}
+
+const shared_ptr<Font>& PopupMenu::GetFont() const     
+{
+    return m_font;
+}
+
+const MenuItem& PopupMenu::MenuData() const    
+{
+    return m_menu_data;
+}
+
+const vector<Rect>& PopupMenu::OpenLevels() const  
+{
+    return m_open_levels;
+}
+
+const vector<int>& PopupMenu::Caret() const       
+{
+    return m_caret;
+}
+
+const MenuItem* PopupMenu::ItemSelected() const
+{
+    return m_item_selected;
 }
 
 } // namespace GG

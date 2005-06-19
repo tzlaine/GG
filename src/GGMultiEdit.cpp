@@ -160,6 +160,43 @@ Pt MultiEdit::ClientLowerRight() const
     return Edit::ClientLowerRight() - Pt(RightMargin(), BottomMargin());
 }
 
+int MultiEdit::MaxLinesOfHistory() const
+{
+    return m_max_lines_history;
+}
+
+XMLElement MultiEdit::XMLEncode() const
+{
+    XMLElement retval("GG::MultiEdit");
+    retval.AppendChild(Edit::XMLEncode());
+
+    string style_str;
+    if (READ_ONLY & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::READ_ONLY) + " ";
+    if (TERMINAL_STYLE & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::TERMINAL_STYLE) + " ";
+    if (INTEGRAL_HEIGHT & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::INTEGRAL_HEIGHT) + " ";
+    if (NO_VSCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_VSCROLL) + " ";
+    if (NO_HSCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_HSCROLL) + " ";
+    if (NO_SCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_SCROLL) + " ";
+    if (TF_WORDBREAK & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_WORDBREAK) + " ";
+    if (TF_LINEWRAP & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LINEWRAP) + " ";
+    if (TF_LEFT & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LEFT) + " ";
+    if (TF_CENTER & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_CENTER) + " ";
+    if (TF_RIGHT & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_RIGHT) + " ";
+    retval.AppendChild(XMLElement("m_style", style_str));
+
+    retval.AppendChild(XMLElement("m_max_lines_history", lexical_cast<string>(m_max_lines_history)));
+    return retval;
+}
+
+XMLElementValidator MultiEdit::XMLValidator() const
+{
+    XMLElementValidator retval("GG::MultiEdit");
+    retval.AppendChild(Edit::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_style", new MultiEditStyleValidator()));
+    retval.AppendChild(XMLElementValidator("m_max_lines_history", new Validator<int>()));
+    return retval;
+}
+
 bool MultiEdit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -464,7 +501,7 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
             }
             AdjustView();
             if (emit_signal)
-                EditedSignal()(WindowText());
+                EditedSignal(WindowText());
         }
     } else {
         if (Parent())
@@ -553,39 +590,12 @@ void MultiEdit::SetText(const string& str)
     AdjustView();
     if (scroll_to_end && m_vscroll)
         m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
-    EditedSignal()(str);
+    EditedSignal(str);
 }
 
-XMLElement MultiEdit::XMLEncode() const
+void MultiEdit::SetMaxLinesOfHistory(int max)
 {
-    XMLElement retval("GG::MultiEdit");
-    retval.AppendChild(Edit::XMLEncode());
-
-    string style_str;
-    if (READ_ONLY & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::READ_ONLY) + " ";
-    if (TERMINAL_STYLE & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::TERMINAL_STYLE) + " ";
-    if (INTEGRAL_HEIGHT & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::INTEGRAL_HEIGHT) + " ";
-    if (NO_VSCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_VSCROLL) + " ";
-    if (NO_HSCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_HSCROLL) + " ";
-    if (NO_SCROLL & m_style) style_str += GetEnumMap<Styles>().FromEnum(MultiEdit::NO_SCROLL) + " ";
-    if (TF_WORDBREAK & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_WORDBREAK) + " ";
-    if (TF_LINEWRAP & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LINEWRAP) + " ";
-    if (TF_LEFT & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_LEFT) + " ";
-    if (TF_CENTER & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_CENTER) + " ";
-    if (TF_RIGHT & m_style) style_str += GetEnumMap<GG::TextFormat>().FromEnum(TF_RIGHT) + " ";
-    retval.AppendChild(XMLElement("m_style", style_str));
-
-    retval.AppendChild(XMLElement("m_max_lines_history", lexical_cast<string>(m_max_lines_history)));
-    return retval;
-}
-
-XMLElementValidator MultiEdit::XMLValidator() const
-{
-    XMLElementValidator retval("GG::MultiEdit");
-    retval.AppendChild(Edit::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_style", new MultiEditStyleValidator()));
-    retval.AppendChild(XMLElementValidator("m_max_lines_history", new Validator<int>()));
-    return retval;
+    m_max_lines_history = max; SetText(m_text);
 }
 
 bool MultiEdit::MultiSelected() const
@@ -937,7 +947,7 @@ void MultiEdit::AdjustScrolls()
         m_vscroll = NewVScroll(need_horz);
         m_vscroll->SizeScroll(vscroll_min, vscroll_max, cl_sz.y / 8, cl_sz.y - (need_horz ? SCROLL_WIDTH : 0));
         AttachChild(m_vscroll);
-        Connect(m_vscroll->ScrolledSignal(), &MultiEdit::VScrolled, this);
+        Connect(m_vscroll->ScrolledSignal, &MultiEdit::VScrolled, this);
     }
 
     if (m_hscroll) { // if scroll already exists...
@@ -954,7 +964,7 @@ void MultiEdit::AdjustScrolls()
         m_hscroll = NewHScroll(need_vert);
         m_hscroll->SizeScroll(hscroll_min, hscroll_max, cl_sz.x / 8, cl_sz.x - (need_vert ? SCROLL_WIDTH : 0));
         AttachChild(m_hscroll);
-        Connect(m_hscroll->ScrolledSignal(), &MultiEdit::HScrolled, this);
+        Connect(m_hscroll->ScrolledSignal, &MultiEdit::HScrolled, this);
     }
 
     // if the new client dimensions changed after adjusting the scrolls, they are unequal to the extent of the text,

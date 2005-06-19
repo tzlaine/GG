@@ -333,12 +333,66 @@ Font::Font(const XMLElement& elem)
         Init(font_filename, pts, range);
 }
 
+Font::~Font()
+{
+}
+
+const string& Font::FontName() const     
+{
+    return m_font_filename;
+}
+
+int Font::PointSize() const    
+{
+    return m_pt_sz;
+}
+
+int Font::GetGlyphRange() const
+{
+    return m_glyph_range;
+}
+
+int Font::Ascent() const       
+{
+    return m_ascent;
+}
+
+int Font::Descent() const      
+{
+    return m_descent;
+}
+
+int Font::Height() const       
+{
+    return m_height;
+}
+
+int Font::Lineskip() const     
+{
+    return m_lineskip;
+}
+
+int Font::SpaceWidth() const   
+{
+    return m_space_width;
+}
+
+int Font::RenderGlyph(const Pt& pt, char c) const
+{
+    return RenderGlyph(pt.x, pt.y, c);
+}
+
 int Font::RenderGlyph(int x, int y, char c) const
 {
     map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(c));
     if (it == m_glyphs.end())
         it = m_glyphs.find(CharToFT_ULong(' ')); // print a space when an unrendered glyph is requested
     return RenderGlyph(x, y, it->second, 0);
+}
+
+int Font::RenderText(const Pt& pt, const string& text) const
+{
+    return RenderText(pt.x, pt.y, text);
 }
 
 int Font::RenderText(int x, int y, const string& text) const
@@ -1005,6 +1059,19 @@ void Font::HandleTag(const shared_ptr<FormattingTag>& tag, double* orig_color, R
 ///////////////////////////////////////
 // class GG::FontManager
 ///////////////////////////////////////
+// FontKey 
+FontManager::FontKey::FontKey(const string& str, int pts) :
+    filename(str),
+    points(pts)
+{
+}
+
+bool FontManager::FontKey::operator<(const FontKey& rhs) const
+{
+    return (filename < rhs.filename || (filename == rhs.filename && points < rhs.points));
+}
+
+// FontManager
 // static member(s)
 bool FontManager::s_created = false;
 

@@ -70,6 +70,29 @@ StaticGraphic::StaticGraphic(const XMLElement& elem) :
     ValidateStyle();
 }
 
+XMLElement StaticGraphic::XMLEncode() const
+{
+    XMLElement retval("GG::StaticGraphic");
+    retval.AppendChild(Control::XMLEncode());
+    retval.AppendChild(XMLElement("m_graphic", m_graphic.XMLEncode()));
+    retval.AppendChild(XMLElement("m_style", StringFromFlags<GraphicStyle>(m_style)));
+    return retval;
+}
+
+XMLElementValidator StaticGraphic::XMLValidator() const
+{
+    XMLElementValidator retval("GG::StaticGraphic");
+    retval.AppendChild(Control::XMLValidator());
+    retval.AppendChild(XMLElementValidator("m_graphic", m_graphic.XMLValidator()));
+    retval.AppendChild(XMLElementValidator("m_style", new ListValidator<GraphicStyle>()));
+    return retval;
+}
+
+Uint32 StaticGraphic::Style() const
+{
+    return m_style;
+}
+
 bool StaticGraphic::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -127,22 +150,10 @@ bool StaticGraphic::Render()
     return true;
 }
 
-XMLElement StaticGraphic::XMLEncode() const
+void StaticGraphic::SetStyle(Uint32 style)
 {
-    XMLElement retval("GG::StaticGraphic");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_graphic", m_graphic.XMLEncode()));
-    retval.AppendChild(XMLElement("m_style", StringFromFlags<GraphicStyle>(m_style)));
-    return retval;
-}
-
-XMLElementValidator StaticGraphic::XMLValidator() const
-{
-    XMLElementValidator retval("GG::StaticGraphic");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_graphic", m_graphic.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_style", new ListValidator<GraphicStyle>()));
-    return retval;
+    m_style = style;
+    ValidateStyle();
 }
 
 void StaticGraphic::Init(const SubTexture& subtexture)

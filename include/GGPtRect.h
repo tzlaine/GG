@@ -60,7 +60,7 @@ struct GG_API Pt
     void  operator-=(const Pt& rhs)      {x -= rhs.x; y -= rhs.y;} ///< subtracts \a rhs to Pt
     Pt    operator-() const              {return Pt(-x, -y);}      ///< negates Pt
     //@}
-   
+
     int x; ///< the x component
     int y; ///< the y component
 };

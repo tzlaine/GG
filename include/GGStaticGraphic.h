@@ -59,18 +59,18 @@ public:
 
     /** \name Accessors */ //@{
     /** returns the style of the StaticGraphic \see StaticGraphicStyle */
-    Uint32   Style() const  {return m_style;}
-    //@}
-   
-    /** \name Mutators */ //@{
-    virtual bool Render();
-
-    /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
-    void  SetStyle(Uint32 style)  {m_style = style; ValidateStyle();}
+    Uint32   Style() const;
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticGraphic object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
+    //@}
+
+    /** \name Mutators */ //@{
+    virtual bool Render();
+
+    /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
+    void  SetStyle(Uint32 style);
     //@}
 
 private:

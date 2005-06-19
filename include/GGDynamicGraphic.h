@@ -114,32 +114,32 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    int      Frames() const       {return m_frames;}            ///< returns the total number of frames in all the Textures that make up the animated sequence
-    bool     Playing() const      {return m_playing;}           ///< returns true if the animation is running
-    bool     Looping() const      {return m_looping;}           ///< returns true if playback is looping instead of stopping when it reaches the end
-    double   FPS() const          {return m_FPS;}               ///< returns the number of frames playing per second; may be positive, 0, or negative
-    int      FrameIndex() const   {return m_curr_frame;}        ///< returns the index of the currently-shown frame; -1 if none
-    int      TimeIndex() const    {return m_last_frame_time;}   ///< returns the time in ms (measured from the time of the first frame); -1 if none
+    int     Frames() const;      ///< returns the total number of frames in all the Textures that make up the animated sequence
+    bool    Playing() const;     ///< returns true if the animation is running
+    bool    Looping() const;     ///< returns true if playback is looping instead of stopping when it reaches the end
+    double  FPS() const;         ///< returns the number of frames playing per second; may be positive, 0, or negative
+    int     FrameIndex() const;  ///< returns the index of the currently-shown frame; -1 if none
+    int     TimeIndex() const;   ///< returns the time in ms (measured from the time of the first frame); -1 if none
 
     /** returns the index of the earliest frame to be shown during playback.  \note when playing backwards this will be the last frame shown. */
-    int      StartFrame() const   {return m_first_frame_idx;}
+    int     StartFrame() const;
 
     /** returns the index of the latest frame to be shown during playback.  \note when playing backwards this will be the first frame shown. */
-    int      EndFrame() const     {return m_last_frame_idx;}
+    int     EndFrame() const;
 
-    int      Margin() const       {return m_margin;}            ///< returns the number of pixels placed between frames and between the frames and the Texture edges
-    int      FrameWidth() const   {return m_frame_width;}       ///< returns the original width of the control (and the width of the frame images)
-    int      FrameHeight() const  {return m_frame_height;}      ///< returns the original height of the control (and the height of the frame images)
+    int     Margin() const;      ///< returns the number of pixels placed between frames and between the frames and the Texture edges
+    int     FrameWidth() const;  ///< returns the original width of the control (and the width of the frame images)
+    int     FrameHeight() const; ///< returns the original height of the control (and the height of the frame images)
 
     /** returns the style of the DynamicGraphic \see StaticGraphicStyle */
-    Uint32   Style() const        {return m_style;}
+    Uint32  Style() const;
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a DynamicGraphic object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    StoppedSignalType&   StoppedSignal() const  {return m_stopped_sig;}    ///< returns the stopped signal object for this DynamicGraphic
-    EndFrameSignalType&  EndFrameSignal() const {return m_end_frame_sig;}  ///< returns the end-frame signal object for this DynamicGraphic
+    mutable StoppedSignalType  StoppedSignal;  ///< the stopped signal object for this DynamicGraphic
+    mutable EndFrameSignalType EndFrameSignal; ///< the end-frame signal object for this DynamicGraphic
     //@}
 
     /** \name Mutators */ //@{
@@ -203,24 +203,24 @@ protected:
     };
 
     /** \name Accessors */ //@{
-    int FramesInTexture(const Texture* t) const;                    ///< returns the maximum number of frames that could be stored in \a t given the size of the control and Margin()
+    int FramesInTexture(const Texture* t) const; ///< returns the maximum number of frames that could be stored in \a t given the size of the control and Margin()
 
-    const vector<FrameSet>& Textures() const {return m_textures;}   ///< returns the shared_ptrs to texture objects with all animation frames
+    const vector<FrameSet>& Textures() const;    ///< returns the shared_ptrs to texture objects with all animation frames
 
-    int CurrentTexture() const      {return m_curr_texture;}        ///< returns the current Texture being shown (part of it, anyway); -1 if none
-    int CurrentSubTexture() const   {return m_curr_texture;}        ///< returns the current frame being shown within Texture number CurrTexture(); -1 if none
-    int FirstFrameTime() const      {return m_first_frame_time;}    ///< returns the time index in ms that the first frame in the sequence was shown during the current playback; -1 if none
-    int LastFrameTime() const       {return m_last_frame_time;}     ///< returns the time index in ms of the most recent frame shown (should be m_curr_frame); -1 if none
+    int CurrentTexture() const;    ///< returns the current Texture being shown (part of it, anyway); -1 if none
+    int CurrentSubTexture() const; ///< returns the current frame being shown within Texture number CurrTexture(); -1 if none
+    int FirstFrameTime() const;    ///< returns the time index in ms that the first frame in the sequence was shown during the current playback; -1 if none
+    int LastFrameTime() const;     ///< returns the time index in ms of the most recent frame shown (should be m_curr_frame); -1 if none
     //@}
 
-    const int   m_margin;            ///< the number of pixels placed between frames and between the frames and the Texture edges
-    const int   m_frame_width;       ///< the width of each frame 
-    const int   m_frame_height;      ///< the height of each frame 
+    const int   m_margin;          ///< the number of pixels placed between frames and between the frames and the Texture edges
+    const int   m_frame_width;     ///< the width of each frame 
+    const int   m_frame_height;    ///< the height of each frame 
 
 private:
-    void  ValidateStyle();     ///< ensures that the style flags are consistent
+    void  ValidateStyle();         ///< ensures that the style flags are consistent
 
-    vector<FrameSet> m_textures;  ///< shared_ptrs to texture objects with all animation frames
+    vector<FrameSet> m_textures;   ///< shared_ptrs to texture objects with all animation frames
 
     double      m_FPS;               ///< current rate of playback in FPS
     bool        m_playing;           ///< set to true if playback is happening
@@ -235,9 +235,6 @@ private:
     int         m_last_frame_idx;    ///< the index of the last frame shown during playback. usually m_frames - 1
 
     Uint32      m_style;             ///< position of texture wrt the window area
-
-    mutable StoppedSignalType  m_stopped_sig;
-    mutable EndFrameSignalType m_end_frame_sig;
 };
 
 } // namespace GG

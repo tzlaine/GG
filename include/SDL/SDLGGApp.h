@@ -86,28 +86,28 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    virtual int    AppWidth() const     {return m_app_width;}
-    virtual int    AppHeight() const    {return m_app_height;}
-    virtual int    Ticks() const        {return SDL_GetTicks();}
+    virtual int    AppWidth() const;
+    virtual int    AppHeight() const;
+    virtual int    Ticks() const;
     //@}
-   
+
     /** \name Mutators */ //@{
-    void           operator()() {App::operator()();}///< external interface to Run()
-    virtual void   Exit(int code);                  ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
-    virtual void   Wait(int ms);                    ///< suspends the app thread for \a ms milliseconds
+    void           operator()();      ///< external interface to Run()
+    virtual void   Exit(int code);    ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
+    virtual void   Wait(int ms);      ///< suspends the app thread for \a ms milliseconds
 
-    virtual void   Enter2DMode() = 0;               ///< saves relevant OpenGL states, sets up ortho projection
-    virtual void   Exit2DMode() = 0;                ///< restores states saved in Enter2DMode()
+    virtual void   Enter2DMode() = 0; ///< saves relevant OpenGL states, sets up ortho projection
+    virtual void   Exit2DMode() = 0;  ///< restores states saved in Enter2DMode()
     //@}
 
-    static SDLGGApp* GetApp();                               ///< allows any code to access the app framework by calling SDLGGApp::GetApp()
-    static GG::Key GGKeyFromSDLKey(const SDL_keysym& key);   ///< gives the GGKey equivalent of key
+    static SDLGGApp* GetApp();                             ///< allows any code to access the app framework by calling SDLGGApp::GetApp()
+    static GG::Key GGKeyFromSDLKey(const SDL_keysym& key); ///< gives the GGKey equivalent of key
 
 private:
     // these are called at the beginning of the app's execution
-    virtual void   SDLInit();              ///< initializes SDL, FE, and SDL OpenGL functionality
-    virtual void   GLInit();               ///< allows user to specify OpenGL initialization code; called at the end of SDLInit()
-    virtual void   Initialize() = 0;       ///< provides one-time app initialization
+    virtual void   SDLInit();        ///< initializes SDL, FE, and SDL OpenGL functionality
+    virtual void   GLInit();         ///< allows user to specify OpenGL initialization code; called at the end of SDLInit()
+    virtual void   Initialize() = 0; ///< provides one-time app initialization
 
     virtual void   HandleSystemEvents(int& last_mouse_event_time);
     virtual void   HandleNonGGEvent(const SDL_Event& event); ///< event handler for all SDL events that are not GG-related
@@ -116,12 +116,12 @@ private:
     virtual void   RenderEnd();
 
     // these are called at the end of the app's execution
-    virtual void   FinalCleanup() {}       ///< provides one-time app cleanup
-    virtual void   SDLQuit();              ///< cleans up SDL and (if used) FE
+    virtual void   FinalCleanup();   ///< provides one-time app cleanup
+    virtual void   SDLQuit();        ///< cleans up SDL and (if used) FE
 
     virtual void   Run();
 
-    int            m_app_width;            ///< application width and height (defaults to 1024 x 768)
+    int            m_app_width;      ///< application width and height (defaults to 1024 x 768)
     int            m_app_height;
 };
 

@@ -237,6 +237,66 @@ DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
     SetFrameIndex(m_curr_frame);
 }
 
+int DynamicGraphic::Frames() const       
+{
+    return m_frames;
+}
+
+bool DynamicGraphic::Playing() const
+{
+    return m_playing;
+}
+
+bool DynamicGraphic::Looping() const
+{
+    return m_looping;
+}
+
+double DynamicGraphic::FPS() const
+{
+    return m_FPS;
+}
+
+int DynamicGraphic::FrameIndex() const
+{
+    return m_curr_frame;
+}
+
+int DynamicGraphic::TimeIndex() const
+{
+    return m_last_frame_time;
+}
+
+int DynamicGraphic::StartFrame() const
+{
+    return m_first_frame_idx;
+}
+
+int DynamicGraphic::EndFrame() const
+{
+    return m_last_frame_idx;
+}
+
+int DynamicGraphic::Margin() const
+{
+    return m_margin;
+}
+
+int DynamicGraphic::FrameWidth() const
+{
+    return m_frame_width;
+}
+
+int DynamicGraphic::FrameHeight() const
+{
+    return m_frame_height;
+}
+
+Uint32 DynamicGraphic::Style() const
+{
+    return m_style;
+}
+
 XMLElement DynamicGraphic::XMLEncode() const
 {
     XMLElement retval("GG::DynamicGraphic");
@@ -384,9 +444,9 @@ bool DynamicGraphic::Render()
         st.OrthoBlit(pt1, pt2, false);
 
         if (send_end_frame_signal)
-            m_end_frame_sig(final_frame_idx);
+            EndFrameSignal(final_frame_idx);
         if (send_stopped_signal)
-            m_stopped_sig(m_curr_frame);
+            StoppedSignal(m_curr_frame);
     }
     return true;
 }
@@ -586,6 +646,31 @@ int DynamicGraphic::FramesInTexture(const Texture* t) const
     int cols = t->DefaultWidth() / (m_frame_width + m_margin);
     int rows = t->DefaultHeight() / (m_frame_height + m_margin);
     return cols * rows;
+}
+
+const vector<DynamicGraphic::FrameSet>& DynamicGraphic::Textures() const
+{
+    return m_textures;
+}
+
+int DynamicGraphic::CurrentTexture() const
+{
+    return m_curr_texture;
+}
+
+int DynamicGraphic::CurrentSubTexture() const
+{
+    return m_curr_texture;
+}
+
+int DynamicGraphic::FirstFrameTime() const
+{
+    return m_first_frame_time;
+}
+
+int DynamicGraphic::LastFrameTime() const
+{
+    return m_last_frame_time;
 }
 
 void DynamicGraphic::ValidateStyle()

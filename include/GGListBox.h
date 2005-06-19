@@ -204,58 +204,58 @@ public:
     virtual Pt      ClientUpperLeft() const;
     virtual Pt      ClientLowerRight() const;
 
-    bool            Empty() const              {return m_rows.empty();}      ///< returns true when the ListBox is empty
-    const Row&      GetRow(int n) const        {return *m_rows.at(n);}       ///< returns a const reference to the row at index \a n; not range-checked
-    int             Caret() const              {return m_caret;}             ///< returns the index of the row that has the caret
-    const set<int>& Selections() const         {return m_selections;}        ///< returns a const reference to the set row indexes that is currently selected
-    bool            Selected(int n) const      {return m_selections.find(n) != m_selections.end();} ///< returns true if row \a n is selected
-    Clr             InteriorColor() const      {return m_int_color;}         ///< returns the color painted into the client area of the control
-    Clr             HiliteColor() const        {return m_hilite_color;}      ///< returns the color behind selected line items
+    bool            Empty() const;          ///< returns true when the ListBox is empty
+    const Row&      GetRow(int n) const;    ///< returns a const reference to the row at index \a n; not range-checked
+    int             Caret() const;          ///< returns the index of the row that has the caret
+    const set<int>& Selections() const;     ///< returns a const reference to the set row indexes that is currently selected
+    bool            Selected(int n) const;  ///< returns true if row \a n is selected
+    Clr             InteriorColor() const;  ///< returns the color painted into the client area of the control
+    Clr             HiliteColor() const;    ///< returns the color behind selected line items
 
     /** returns the style flags of the listbox \see GG::ListBoxStyle */
-    Uint32          Style() const              {return m_style;}
+    Uint32          Style() const;
 
-    const Row&      ColHeaders() const         {return *m_header_row;}       ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
-    int             FirstRowShown() const      {return m_first_row_shown;}   ///< returns the index of the first row visible in the listbox
-    int             FirstColShown() const      {return m_first_col_shown;}   ///< returns the index of the first column visible in the listbox
+    const Row&      ColHeaders() const;     ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
+    int             FirstRowShown() const;  ///< returns the index of the first row visible in the listbox
+    int             FirstColShown() const;  ///< returns the index of the first column visible in the listbox
 
-    int             LastVisibleRow() const;    ///< last row that could be drawn, taking into account the contents and the size of client area
-    int             LastVisibleCol() const;    ///< last column that could be drawn, taking into account the contents and the size of client area
+    int             LastVisibleRow() const; ///< last row that could be drawn, taking into account the contents and the size of client area
+    int             LastVisibleCol() const; ///< last column that could be drawn, taking into account the contents and the size of client area
 
     /** returns the default row height. \note Each row may have its own height, diferent from the one returned by this function. */
-    int             RowHeight() const          {return m_row_height;}
+    int             RowHeight() const;
 
-    int             NumRows() const            {return int(m_rows.size());}  ///< returns the total number of rows in the ListBox
-    int             NumCols() const            {return m_col_widths.size();} ///< returns the total number of columns in the ListBox
+    int             NumRows() const;        ///< returns the total number of rows in the ListBox
+    int             NumCols() const;        ///< returns the total number of columns in the ListBox
 
     /** returns true iff column widths are fixed \see LockColWidths() */
-    bool            KeepColWidths() const      {return m_keep_col_widths;}
+    bool            KeepColWidths() const;
 
     /** returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked 
         when it is set by the user; it may be < 0 or >= NumCols(). */
     int             SortCol() const;
 
-    int             ColWidth(int n) const      {return m_col_widths[n];}     ///< returns the width of column \a n in pixels; not range-checked
-    ListBoxStyle    ColAlignment(int n) const  {return m_col_alignments[n];} ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    ListBoxStyle    RowAlignment(int n) const  {return m_rows[n]->row_alignment;} ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    int             ColWidth(int n) const;     ///< returns the width of column \a n in pixels; not range-checked
+    ListBoxStyle    ColAlignment(int n) const; ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
+    ListBoxStyle    RowAlignment(int n) const; ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
     /** returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains 
         "", all drop types are allowed. */
-    const set<string>& AllowedDropTypes() const   {return m_allowed_types;}
+    const set<string>& AllowedDropTypes() const;
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an ListBox object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    ClearedSignalType&       ClearedSignal() const       {return m_cleared_sig;}        ///< returns the cleared signal object for this ListBox
-    SelChangedSignalType&    SelChangedSignal() const    {return m_sel_changed_sig;}    ///< returns the selection change signal object for this ListBox
-    InsertedSignalType&      InsertedSignal() const      {return m_inserted_sig;}       ///< returns the inserted signal object for this ListBox
-    DroppedSignalType&       DroppedSignal() const       {return m_dropped_sig;}        ///< returns the dropped signal object for this ListBox
-    LeftClickedSignalType&   LeftClickedSignal() const   {return m_lclicked_sig;}       ///< returns the left click signal object for this ListBox
-    RightClickedSignalType&  RightClickedSignal() const  {return m_rclicked_sig;}       ///< returns the right click signal object for this ListBox
-    DoubleClickedSignalType& DoubleClickedSignal() const {return m_double_clicked_sig;} ///< returns the double click signal object for this ListBox
-    DeletedSignalType&       DeletedSignal() const       {return m_deleted_sig;}        ///< returns the deleted signal object for this ListBox
-    BrowsedSignalType&       BrowsedSignal() const       {return m_browsed_sig;}        ///< returns the browsed signal object for this ListBox
+    mutable ClearedSignalType       ClearedSignal;       ///< the cleared signal object for this ListBox
+    mutable SelChangedSignalType    SelChangedSignal;    ///< the selection change signal object for this ListBox
+    mutable InsertedSignalType      InsertedSignal;      ///< the inserted signal object for this ListBox
+    mutable DroppedSignalType       DroppedSignal;       ///< the dropped signal object for this ListBox
+    mutable LeftClickedSignalType   LeftClickedSignal;   ///< the left click signal object for this ListBox
+    mutable RightClickedSignalType  RightClickedSignal;  ///< the right click signal object for this ListBox
+    mutable DoubleClickedSignalType DoubleClickedSignal; ///< the double click signal object for this ListBox
+    mutable DeletedSignalType       DeletedSignal;       ///< the deleted signal object for this ListBox
+    mutable BrowsedSignalType       BrowsedSignal;       ///< the browsed signal object for this ListBox
     //@}
 
     /** \name Mutators */ //@{
@@ -282,46 +282,45 @@ public:
     void           ClearRow(int n);                       ///< deselects row \a n
     void           SelectRow(int n);                      ///< selects row \a n
     void           IndentRow(int n, int i);               ///< sets the indentation of the row at index \a n to \a i; not range-checked
-    Row&           GetRow(int n) {return *m_rows.at(n);}  ///< returns a reference to the Row at row index \a n; not range-checked
-    const boost::shared_ptr<Row>&
-                   GetRowPtr(int n) {return m_rows.at(n);} ///< returns the actual boost::shared_ptr that holds the Row, so that Rows can be moved between ListBoxes by the user
+    Row&           GetRow(int n);                         ///< returns a reference to the Row at row index \a n; not range-checked
+    const boost::shared_ptr<Row>& GetRowPtr(int n);       ///< returns the actual boost::shared_ptr that holds the Row, so that Rows can be moved between ListBoxes by the user
 
-    void           SetSelections(const set<int>& s) {m_selections = s;}     ///< sets the set of selected rows to \a s
-    void           SetCaret(int idx)   {m_rows.at(idx); m_caret = idx;}     ///< sets the position of the caret to \a idx
-    void           BringRowIntoView(int n);                                 ///< moves the scrollbars so that row \a n is visible
+    void           SetSelections(const set<int>& s);      ///< sets the set of selected rows to \a s
+    void           SetCaret(int idx);                     ///< sets the position of the caret to \a idx
+    void           BringRowIntoView(int n);               ///< moves the scrollbars so that row \a n is visible
 
-    void           SetInteriorColor(Clr c)      {m_int_color = c;}          ///< sets the color painted into the client area of the control
-    void           SetHiliteColor(Clr c)        {m_hilite_color = c;}       ///< sets the color behind selected line items
+    void           SetInteriorColor(Clr c);               ///< sets the color painted into the client area of the control
+    void           SetHiliteColor(Clr c);                 ///< sets the color behind selected line items
 
     /** sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle */
     void           SetStyle(Uint32 s);
 
-    void           SetColHeaders(Row* r);                                   ///< sets the row used as headings for the columns; this Row becomes property of the ListBox and should not be deleted or inserted into any other ListBoxes
-    void           SetColHeaders(const shared_ptr<Row>& r);                 ///< sets the row used as headings for the columns
-    void           RemoveColHeaders()         {m_header_row->clear();}      ///< removes any columns headings set
+    void           SetColHeaders(Row* r);                   ///< sets the row used as headings for the columns; this Row becomes property of the ListBox and should not be deleted or inserted into any other ListBoxes
+    void           SetColHeaders(const shared_ptr<Row>& r); ///< sets the row used as headings for the columns
+    void           RemoveColHeaders();                      ///< removes any columns headings set
 
     /** sets the default row height \note Each row may have its own height, diferent from the one set by this function. */
-    void           SetRowHeight(int h)        {m_row_height = h;}
+    void           SetRowHeight(int h);
 
-    void           SetNumCols(int n);                                       ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
-    void           SetSortCol(int n);                                       ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
-    void           SetColWidth(int n, int w)  {m_col_widths[n] = w;}        ///< sets the width of column \n to \a w; not range-checked
+    void           SetNumCols(int n);                     ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
+    void           SetSortCol(int n);                     ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
+    void           SetColWidth(int n, int w);             ///< sets the width of column \n to \a w; not range-checked
 
     /** fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added row. \note The 
         number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called. */
-    void           LockColWidths()            {m_keep_col_widths = true;}
+    void           LockColWidths();
 
-    void           UnLockColWidths()          {m_keep_col_widths = false;}  ///< allows the number of columns to be determined by the first row added to an empty ListBox
-    void           SetColAlignment(int n, ListBoxStyle align);              ///< sets the alignment of column \a n to \a align; not range-checked
-    void           SetRowAlignment(int n, ListBoxStyle align);              ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
+    void           UnLockColWidths();                          ///< allows the number of columns to be determined by the first row added to an empty ListBox
+    void           SetColAlignment(int n, ListBoxStyle align); ///< sets the alignment of column \a n to \a align; not range-checked
+    void           SetRowAlignment(int n, ListBoxStyle align); ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
 
     /** allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing "" enables all 
         drop types. */
-    void           AllowDropType(const string& str)     {m_allowed_types.insert(str);}
+    void           AllowDropType(const string& str);
 
     /** disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If "" is still an 
         allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to this function. */
-    void           DisallowDropType(const string& str)  {m_allowed_types.erase(str);}
+    void           DisallowDropType(const string& str);
     //@}
 
     static const int BORDER_THICK; ///< the thickness with which to render the border of the control
@@ -336,10 +335,10 @@ protected:
     int            RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (it may be < 0 or >= NumRows())
     Pt             DragOffset(const Pt& pt) const; ///< returns offset of \a pt into the row \a pt falls in, or (-1,-1) if pt falls under no row
 
-    int            OldSelRow() const        {return m_old_sel_row;}   ///< returns the last row that was selected with a left-button mouse-down
-    int            OldRDownRow() const      {return m_old_rdown_row;} ///< returns the last row that was selected with a right-button mouse-down
-    int            LClickRow() const        {return m_lclick_row;}    ///< returns the last row that was left-clicked
-    int            RClickRow() const        {return m_rclick_row;}    ///< returns the last row that was right-clicked
+    int            OldSelRow() const;   ///< returns the last row that was selected with a left-button mouse-down
+    int            OldRDownRow() const; ///< returns the last row that was selected with a right-button mouse-down
+    int            LClickRow() const;   ///< returns the last row that was left-clicked
+    int            RClickRow() const;   ///< returns the last row that was right-clicked
     //@}
 
     /** \name Mutators */ //@{
@@ -397,17 +396,7 @@ private:
     bool           m_clip_cells;       ///< if true, the contents of each cell will be clipped to the visible area of that cell (TODO: currently unused)
     int            m_sort_col;         ///< the index of the column data used to sort the list
     set<string>    m_allowed_types;    ///< the line item types allowed for use in this listbox
-   
-    mutable ClearedSignalType       m_cleared_sig;
-    mutable SelChangedSignalType    m_sel_changed_sig;
-    mutable InsertedSignalType      m_inserted_sig;
-    mutable DroppedSignalType       m_dropped_sig;
-    mutable LeftClickedSignalType   m_lclicked_sig;
-    mutable RightClickedSignalType  m_rclicked_sig;
-    mutable DoubleClickedSignalType m_double_clicked_sig;
-    mutable DeletedSignalType       m_deleted_sig;
-    mutable BrowsedSignalType       m_browsed_sig;
-   
+
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
 };
 

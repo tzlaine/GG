@@ -51,7 +51,7 @@ struct EnumMapBase
 template <class E> struct EnumMap : EnumMapBase
 {
     virtual ~EnumMap() {}
-    virtual const std::string& FromEnum(int) const {return "";}
+    virtual const std::string& FromEnum(int) const {static std::string empty; return empty;}
     virtual int FromString (const std::string&) const {return 0;}
 };
 

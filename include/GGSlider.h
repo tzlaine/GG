@@ -49,8 +49,17 @@ class GG_API Slider : public Control
 public:
     using Wnd::SizeMove;
 
-    enum Orientation     {VERTICAL, HORIZONTAL};    ///< the orientation of the slider must be one of these two values
-    enum LineStyleType   {FLAT, RAISED, GROOVED};   ///< the rendering styles of the line the tab slides over
+    /// the orientation of the slider must be one of these two values
+    enum Orientation {
+        VERTICAL,
+        HORIZONTAL
+    };
+    /// the rendering styles of the line the tab slides over
+    enum LineStyleType {
+        FLAT,
+        RAISED,
+        GROOVED
+    };
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int, int, int)> SlidSignalType;           ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
@@ -69,19 +78,19 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    int            Posn() const          {return m_posn;}        ///< returns the current tab position
-    pair<int,int>  SliderRange() const   {return pair<int,int>(m_range_min, m_range_max);}  ///< returns the defined possible range of control
-    Orientation    GetOrientation() const{return m_orientation;} ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
-    int            TabWidth() const      {return m_tab_width;} ///< returns the width of the slider's tab, in pixels
-    int            LineWidth() const     {return m_line_width;} ///< returns the width of the line along which the tab slides, in pixels
-    LineStyleType  LineStyle() const     {return m_line_style;}  ///< returns the style of line used to render the control
+    int            Posn() const;           ///< returns the current tab position
+    pair<int, int> SliderRange() const;    ///< returns the defined possible range of control
+    Orientation    GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
+    int            TabWidth() const;       ///< returns the width of the slider's tab, in pixels
+    int            LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
+    LineStyleType  LineStyle() const;      ///< returns the style of line used to render the control
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    SlidSignalType& SlidSignal() const {return m_slid_sig;} ///< returns the slid signal object for this Slider
-    SlidAndStoppedSignalType& SlidAndStoppedSignal() const {return m_slid_and_stopped_sig;} ///< returns the slid-and-stopped signal object for this Slider
+    mutable SlidSignalType           SlidSignal;           ///< returns the slid signal object for this Slider
+    mutable SlidAndStoppedSignalType SlidAndStoppedSignal; ///< returns the slid-and-stopped signal object for this Slider
     //@}
 
     /** \name Mutators */ //@{
@@ -90,26 +99,26 @@ public:
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
     virtual void   LClick(const Pt& pt, Uint32 keys);
-    virtual void   MouseHere(const Pt& pt, Uint32 keys)              {m_tab_drag_offset = -1;}
+    virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   Keypress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the control, then resizes the tab as needed
     virtual void   Disable(bool b = true);
 
-    void           SizeSlider(int min, int max);                      ///< sets the logical range of the control
-    void           SetMax(int max)   {SizeSlider(m_range_min, max);}  ///< sets the maximum value of the control
-    void           SetMin(int min)   {SizeSlider(min, m_range_max);}  ///< sets the minimum value of the control
+    void           SizeSlider(int min, int max); ///< sets the logical range of the control
+    void           SetMax(int max);              ///< sets the maximum value of the control
+    void           SetMin(int min);              ///< sets the minimum value of the control
 
-    void           SlideTo(int p);  ///< slides the control to a certain spot
-   
-    void           SetLineStyle(LineStyleType style)   {m_line_style = style;}  ///< returns the style of line used to render the control
+    void           SlideTo(int p); ///< slides the control to a certain spot
+
+    void           SetLineStyle(LineStyleType style); ///< returns the style of line used to render the control
     //@}
 
 protected:
     /** \name Accessors */ //@{
-    int TabDragOffset() const {return m_tab_drag_offset;} ///< returns the offset from the cursor to the left edge of the tab; -1 when the tab is not being dragged
+    int TabDragOffset() const; ///< returns the offset from the cursor to the left edge of the tab; -1 when the tab is not being dragged
 
-    const shared_ptr<Button>& Tab() const {return m_tab;} ///< returns a pointer to the Button used as this control's sliding tab
+    const shared_ptr<Button>& Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
     //@}
 
 private:
@@ -128,9 +137,6 @@ private:
 
     int                  m_tab_drag_offset;
     shared_ptr<Button>   m_tab;
-
-    mutable SlidSignalType           m_slid_sig;
-    mutable SlidAndStoppedSignalType m_slid_and_stopped_sig;
 };
 
 // define EnumMap and stream operators for Slider::Orientation

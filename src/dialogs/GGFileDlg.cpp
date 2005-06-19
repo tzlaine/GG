@@ -117,7 +117,7 @@ boost::filesystem::path FileDlg::s_working_dir = boost::filesystem::initial_path
 
 
 FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const shared_ptr<Font>& font, Clr color, 
-		 Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) : 
+                 Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) : 
     Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
@@ -169,7 +169,7 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
 
 FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
                  const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, 
-		 Button* cancel/* = 0*/) :
+                 Button* cancel/* = 0*/) :
     Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
@@ -263,6 +263,16 @@ FileDlg::FileDlg(const XMLElement& elem) :
     m_file_types_label = new TextControl(elem.Child("m_file_types_label").Child("GG::TextControl"));
 
     Init("");
+}
+
+Clr FileDlg::ButtonColor() const
+{
+    return m_button_color;
+}
+
+set<string> FileDlg::Result() const
+{
+    return m_result;
 }
 
 XMLElement FileDlg::XMLEncode() const
@@ -363,6 +373,11 @@ void FileDlg::SetCancelString(const std::string& cancel_str)
     m_cancel_button->SetText(m_cancel_str);
 }
 
+const boost::filesystem::path& FileDlg::WorkingDirectory()
+{
+    return s_working_dir;
+}
+
 void FileDlg::CreateChildren(const string& filename, bool multi, const string& font_filename, int pts)
 {
     if (m_save)
@@ -450,12 +465,12 @@ void FileDlg::Init(const string& directory)
     PopulateFilters();
     UpdateList();
 
-    Connect(m_ok_button->ClickedSignal(), &FileDlg::OkClicked, this);
-    Connect(m_cancel_button->ClickedSignal(), &FileDlg::CancelClicked, this);
-    Connect(m_files_list->SelChangedSignal(), &FileDlg::FileSetChanged, this);
-    Connect(m_files_list->DoubleClickedSignal(), &FileDlg::FileDoubleClicked, this);
-    Connect(m_files_edit->EditedSignal(), &FileDlg::FilesEditChanged, this);
-    Connect(m_filter_list->SelChangedSignal(), &FileDlg::FilterChanged, this);
+    Connect(m_ok_button->ClickedSignal, &FileDlg::OkClicked, this);
+    Connect(m_cancel_button->ClickedSignal, &FileDlg::CancelClicked, this);
+    Connect(m_files_list->SelChangedSignal, &FileDlg::FileSetChanged, this);
+    Connect(m_files_list->DoubleClickedSignal, &FileDlg::FileDoubleClicked, this);
+    Connect(m_files_edit->EditedSignal, &FileDlg::FilesEditChanged, this);
+    Connect(m_filter_list->SelChangedSignal, &FileDlg::FilterChanged, this);
 }
 
 void FileDlg::OkClicked()
@@ -522,6 +537,12 @@ void FileDlg::OkClicked()
     }
     if (results_valid)
         m_done = true;
+}
+
+void FileDlg::CancelClicked()
+{
+    m_done = true;
+    m_result.clear();
 }
 
 void FileDlg::FileSetChanged(const set<int>& files)

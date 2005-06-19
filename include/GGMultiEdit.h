@@ -62,13 +62,14 @@ public:
 
     /** the styles of display and interaction for a MultiEdit.  The TF_WORDBREAK, TF_LINEWRAP, TF_LEFT, TF_CENTER, and 
         TF_RIGHT GG::TextFormat flags also apply.*/
-    enum Styles {READ_ONLY =       1 << 10, ///< the control is not user-interactive, only used to display text.  Text can still be programmatically altered and selected.
-                 TERMINAL_STYLE =  1 << 11, ///< the text in the control is displayed so that the bottom is visible, instead of the top
-                 INTEGRAL_HEIGHT = 1 << 12, ///< the height of the control will always be a multiple of the height of one row (fractions rounded down)
-                 NO_VSCROLL =      1 << 13, ///< vertical scrolling is not available, and there is no vertical scroll bar
-                 NO_HSCROLL =      1 << 14, ///< horizontal scrolling is not available, and there is no horizontal scroll bar
-                 NO_SCROLL = NO_VSCROLL | NO_HSCROLL ///< scrolls are not used for this control
-                };
+    enum Styles {
+        READ_ONLY =       1 << 10, ///< the control is not user-interactive, only used to display text.  Text can still be programmatically altered and selected.
+        TERMINAL_STYLE =  1 << 11, ///< the text in the control is displayed so that the bottom is visible, instead of the top
+        INTEGRAL_HEIGHT = 1 << 12, ///< the height of the control will always be a multiple of the height of one row (fractions rounded down)
+        NO_VSCROLL =      1 << 13, ///< vertical scrolling is not available, and there is no vertical scroll bar
+        NO_HSCROLL =      1 << 14, ///< horizontal scrolling is not available, and there is no horizontal scroll bar
+        NO_SCROLL = NO_VSCROLL | NO_HSCROLL ///< scrolls are not used for this control
+    };
 
     /** \name Structors */ //@{
     MultiEdit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color, 
@@ -86,7 +87,7 @@ public:
 
     /** returns the maximum number of lines of text that the control keeps. This number includes the lines that are 
         visible in the control.  A value <= 0 indicates that there is no limit.*/
-    int MaxLinesOfHistory() const {return m_max_lines_history;}
+    int MaxLinesOfHistory() const;
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an MultiEdit object
 
@@ -106,7 +107,7 @@ public:
     virtual void   SetText(const string& str);
 
     /** sets the maximum number of rows of text that the control will keep */
-    void           SetMaxLinesOfHistory(int max) {m_max_lines_history = max; SetText(m_text);}
+    void           SetMaxLinesOfHistory(int max);
     //@}
 
 protected:

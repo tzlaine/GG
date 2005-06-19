@@ -1103,52 +1103,52 @@ void Wnd::HandleEvent(const Event& event)
     }
 
     switch (event.Type()) {
-	case Event::LButtonDown:
-	    LButtonDown(event.Point(), event.KeyMods());
-	    break;
-	case Event::LDrag:
-	    LDrag(event.Point(), event.DragMove(), event.KeyMods());
-	    break;
-	case Event::LButtonUp:
-	    LButtonUp(event.Point(), event.KeyMods());
-	    break;
-	case Event::LClick:
-	    LClick(event.Point(), event.KeyMods());
-	    break;
-	case Event::LDoubleClick:
-	    LDoubleClick(event.Point(), event.KeyMods());
-	    break;
-	case Event::RButtonDown:
-	    RButtonDown(event.Point(), event.KeyMods());
-	    break;
-	case Event::RClick:
-	    RClick(event.Point(), event.KeyMods());
-	    break;
-	case Event::RDoubleClick:
-	    RDoubleClick(event.Point(), event.KeyMods());
-	    break;
-	case Event::MouseEnter:
-	    MouseEnter(event.Point(), event.KeyMods());
-	    break;
-	case Event::MouseHere:
-	    MouseHere(event.Point(), event.KeyMods());
-	    break;
-	case Event::MouseLeave:
-	    MouseLeave(event.Point(), event.KeyMods());
-	    break;
-	case Event::MouseWheel:
-	    MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());
-	    break;
-	case Event::Keypress:
-	    Keypress(event.KeyPress(), event.KeyMods());
-	    break;
-	case Event::GainingFocus:
-	    GainingFocus();
-	    break;
-	case Event::LosingFocus:
-	    LosingFocus();
-	    break;
-	default:
-	    break;
+    case Event::LButtonDown:
+        LButtonDown(event.Point(), event.KeyMods());
+        break;
+    case Event::LDrag:
+        LDrag(event.Point(), event.DragMove(), event.KeyMods());
+        break;
+    case Event::LButtonUp:
+        LButtonUp(event.Point(), event.KeyMods());
+        break;
+    case Event::LClick:
+        LClick(event.Point(), event.KeyMods());
+        break;
+    case Event::LDoubleClick:
+        LDoubleClick(event.Point(), event.KeyMods());
+        break;
+    case Event::RButtonDown:
+        RButtonDown(event.Point(), event.KeyMods());
+        break;
+    case Event::RClick:
+        RClick(event.Point(), event.KeyMods());
+        break;
+    case Event::RDoubleClick:
+        RDoubleClick(event.Point(), event.KeyMods());
+        break;
+    case Event::MouseEnter:
+        MouseEnter(event.Point(), event.KeyMods());
+        break;
+    case Event::MouseHere:
+        MouseHere(event.Point(), event.KeyMods());
+        break;
+    case Event::MouseLeave:
+        MouseLeave(event.Point(), event.KeyMods());
+        break;
+    case Event::MouseWheel:
+        MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());
+        break;
+    case Event::Keypress:
+        Keypress(event.KeyPress(), event.KeyMods());
+        break;
+    case Event::GainingFocus:
+        GainingFocus();
+        break;
+    case Event::LosingFocus:
+        LosingFocus();
+        break;
+    default:
+        break;
     }
 }

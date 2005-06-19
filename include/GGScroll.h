@@ -56,61 +56,73 @@ class GG_API Scroll : public Control
 public:
     using Wnd::SizeMove;
 
-    enum Orientation  {VERTICAL, HORIZONTAL}; ///< the orientation of the scrollbar must be one of these two values
-    enum ScrollRegion {SBR_NONE, SBR_TAB, SBR_LINE_DN, SBR_LINE_UP, SBR_PAGE_DN, SBR_PAGE_UP}; ///< the clickable regions of a Scroll
+    /// the orientation of the scrollbar must be one of these two values
+    enum Orientation {
+        VERTICAL,
+        HORIZONTAL
+    };
+    /// the clickable regions of a Scroll
+    enum ScrollRegion {
+        SBR_NONE,
+        SBR_TAB,
+        SBR_LINE_DN,
+        SBR_LINE_UP,
+        SBR_PAGE_DN,
+        SBR_PAGE_UP
+    };
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int, int, int, int)> ScrolledSignalType; ///< emitted whenever the scrollbar is moved; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     typedef boost::signal<void (int, int, int, int)> ScrolledAndStoppedSignalType; ///< emitted when the scrollbar's tab is stopped after being dragged, the scrollbar is adjusted using the keyboard, or the scrollbar is moved programmatically; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     //@}
-   
+
     /** \name Slot Types */ //@{
     typedef ScrolledSignalType::slot_type ScrolledSlotType; ///< type of functor(s) invoked on a ScrolledSignalType
     typedef ScrolledAndStoppedSignalType::slot_type ScrolledAndStoppedSlotType; ///< type of functor(s) invoked on a ScrolledAndStoppedSignalType
     //@}
-   
+
     /** \name Structors */ //@{
     /** ctor. \warning Calling code <b>must not</b> delete the buttons passed to this ctro, if any.  They become the 
         property of shared_ptrs inside the Scroll.*/
     Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Button* decr = 0, Button* incr = 0, Button* tab = 0, Uint32 flags = CLICKABLE);
     Scroll(const XMLElement& elem); ///< ctor that constructs a Scroll object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Scroll object
     //@}
-   
-    /** \name Accessors */ //@{
-    pair<int,int>   PosnRange() const    {return pair<int,int>(m_posn, m_posn + m_page_sz);}   ///< range currently being viewed
-    pair<int,int>   ScrollRange() const  {return pair<int,int>(m_range_min, m_range_max);}     ///< defined possible range of control
-    int             LineSize() const     {return m_line_sz;}    ///< returns the current line size
-    int             PageSize() const     {return m_page_sz;}    ///< returns the current page size
 
-    Clr             InteriorColor() const       {return m_int_color;}   ///< returns the color used to render the interior of the Scroll
-    Orientation     ScrollOrientation() const   {return m_orientation;} ///< returns the orientation of the Scroll
+    /** \name Accessors */ //@{
+    pair<int, int>  PosnRange() const;         ///< range currently being viewed
+    pair<int, int>  ScrollRange() const;       ///< defined possible range of control
+    int             LineSize() const;          ///< returns the current line size
+    int             PageSize() const;          ///< returns the current page size
+
+    Clr             InteriorColor() const;     ///< returns the color used to render the interior of the Scroll
+    Orientation     ScrollOrientation() const; ///< returns the orientation of the Scroll
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Scroll object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
-    ScrolledSignalType&           ScrolledSignal() const           {return m_scrolled_sig;} ///< returns the scrolled signal object for this Scroll
-    ScrolledAndStoppedSignalType& ScrolledAndStoppedSignal() const {return m_scrolled_and_stopped_sig;} ///< returns the scrolled-and-stopped signal object for this Scroll
+    mutable ScrolledSignalType           ScrolledSignal;           ///< the scrolled signal object for this Scroll
+    mutable ScrolledAndStoppedSignalType ScrolledAndStoppedSignal; ///< the scrolled-and-stopped signal object for this Scroll
     //@}
-   
+
     /** \name Mutators */ //@{
     virtual bool   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
-    virtual void   LClick(const Pt& pt, Uint32 keys)         {LButtonUp(pt, keys);}
-    virtual void   MouseHere(const Pt& pt, Uint32 keys)      {LButtonUp(pt, keys);}
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys)     {m_depressed_area = SBR_NONE;}
+    virtual void   LClick(const Pt& pt, Uint32 keys);
+    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the buttons and tab as needed
     virtual void   Disable(bool b = true);
 
-    void           SetInteriorColor(Clr c){m_int_color = c;}         ///< sets the color painted into the client area of the control
+    void           SetInteriorColor(Clr c); ///< sets the color painted into the client area of the control
     void           SizeScroll(int min, int max, int line, int page); ///< sets the logical ranges of the control, and the logical increment values
-    void           SetMax(int max)        {SizeScroll(m_range_min, max, m_line_sz, m_page_sz);}    ///< sets the maximum value of the scroll
-    void           SetMin(int min)        {SizeScroll(min, m_range_max, m_line_sz, m_page_sz);}    ///< sets the minimum value of the scroll
-    void           SetLineSize(int line)  {SizeScroll(m_range_min, m_range_max, line, m_page_sz);} ///< sets the size of a line in the scroll. This is the number of logical units the tab moves when either of the up or down buttons is pressed.
-    void           SetPageSize(int page)  {SizeScroll(m_range_min, m_range_max, m_line_sz, page);} ///< sets the maximum value of the scroll. This is the number of logical units the tab moves when either of the page-up or page-down areas is clicked.
+    void           SetMax(int max);         ///< sets the maximum value of the scroll
+    void           SetMin(int min);         ///< sets the minimum value of the scroll
+    void           SetLineSize(int line);   ///< sets the size of a line in the scroll. This is the number of logical units the tab moves when either of the up or down buttons is pressed.
+    void           SetPageSize(int page);   ///< sets the maximum value of the scroll. This is the number of logical units the tab moves when either of the page-up or page-down areas is clicked.
 
     void           ScrollTo(int p);  ///< scrolls the control to a certain spot
     void           ScrollLineIncr(); ///< scrolls the control down (or right) by a line
@@ -125,9 +137,9 @@ protected:
     int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
     ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
 
-    const shared_ptr<Button>    TabButton() const   {return m_tab;}     ///< returns the button representing the tab
-    const shared_ptr<Button>    IncrButton() const  {return m_incr;}    ///< returns the increase button (line down/line right)
-    const shared_ptr<Button>    DecrButton() const  {return m_decr;}    ///< returns the decrease button (line up/line left)
+    const shared_ptr<Button>    TabButton() const;     ///< returns the button representing the tab
+    const shared_ptr<Button>    IncrButton() const;    ///< returns the increase button (line down/line right)
+    const shared_ptr<Button>    DecrButton() const;    ///< returns the decrease button (line up/line left)
     //@}
 
 private:
@@ -147,9 +159,6 @@ private:
     int                  m_tab_drag_offset;         ///< the offset on the tab as it is dragged (like drag_offset in ProcessInput function)
     ScrollRegion         m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
     ScrollRegion         m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
-
-    mutable ScrolledSignalType           m_scrolled_sig;
-    mutable ScrolledAndStoppedSignalType m_scrolled_and_stopped_sig;
 };
 
 // define EnumMap and stream operators for Scroll::Orientation

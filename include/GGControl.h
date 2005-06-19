@@ -46,31 +46,31 @@ class GG_API Control : public Wnd
 {
 public:
     /** \name Accessors */ //@{
-    Clr            Color() const              {return m_color;}    ///< returns the color of the control
-    bool           Disabled() const           {return m_disabled;} ///< returns true if the control is disabled, false otherwise
+    Clr            Color() const    {return m_color;}    ///< returns the color of the control
+    bool           Disabled() const {return m_disabled;} ///< returns true if the control is disabled, false otherwise
 
     virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Control object
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
-   
+
     /** \name Mutators */ //@{
     virtual bool   Render() = 0;
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys) {if (Parent()) Parent()->MouseWheel(pt, move, keys);}
-    virtual void   Keypress(Key key, Uint32 key_mods) {if (Parent()) Parent()->Keypress(key, key_mods);}
+    virtual void   Keypress(Key key, Uint32 key_mods)              {if (Parent()) Parent()->Keypress(key, key_mods);}
 
-    virtual void   SetColor(Clr c)            {m_color = c;}       ///< sets the color of the control
-    virtual void   Disable(bool b = true)     {m_disabled = b;}    ///< disables/enables the control; disabled controls appear greyed
+    virtual void   SetColor(Clr c)        {m_color = c;}    ///< sets the color of the control
+    virtual void   Disable(bool b = true) {m_disabled = b;} ///< disables/enables the control; disabled controls appear greyed
     //@}
-   
+
 protected:
     /** \name Structors */ //@{
     Control(int x, int y, int w, int h, Uint32 flags = CLICKABLE) : Wnd(x, y, w, h, flags), m_disabled(false) {} ///< default ctor
     Control(const XMLElement& elem); ///< ctor that constructs a Control object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Control object
     //@}
 
-    Clr      m_color;      ///< the color of the control
-    bool     m_disabled;   ///< whether or not this control is disabled
+    Clr      m_color;    ///< the color of the control
+    bool     m_disabled; ///< whether or not this control is disabled
 };
 
 } // namespace GG

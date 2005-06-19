@@ -655,26 +655,26 @@ XMLElementValidator::XMLElementValidator(const XMLElementValidator& rhs)
     m_tag = rhs.m_tag;
     m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
     for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
-	m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
+        m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
     }
     for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
-	m_children.push_back(rhs.m_children[i]);
+        m_children.push_back(rhs.m_children[i]);
     }
 }
 
 const XMLElementValidator& XMLElementValidator::operator=(const XMLElementValidator& rhs)
 {
     if (this != &rhs) {
-	Clear();
-    
-	m_tag = rhs.m_tag;
-	m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
-	for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
-	    m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
-	}
-	for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
-	    m_children.push_back(rhs.m_children[i]);
-	}
+        Clear();
+
+        m_tag = rhs.m_tag;
+        m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
+        for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
+            m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
+        }
+        for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
+            m_children.push_back(rhs.m_children[i]);
+        }
     }
     return *this;
 }
@@ -691,30 +691,30 @@ void XMLElementValidator::Validate(const XMLElement& elem) const
 #endif
     if (m_text_validator) {
 #if DEBUG_OUTPUT    
-	std::cout << "  checking text \"" << elem.Text() << "\"" << std::endl;
+        std::cout << "  checking text \"" << elem.Text() << "\"" << std::endl;
 #endif
-	m_text_validator->Validate(elem.Text());
+        m_text_validator->Validate(elem.Text());
     }
 
     if (static_cast<unsigned int>(elem.NumAttributes()) != m_attribute_validators.size()) {
-	throw std::runtime_error("XMLElementValidator::Validate() : Encountered an XMLElement with a different number "
-				 "of children than this XMLElementValidator.");
+        throw std::runtime_error("XMLElementValidator::Validate() : Encountered an XMLElement with a different number "
+                                 "of children than this XMLElementValidator.");
     }
 
     XMLElement::const_attr_iterator attrib_it = elem.attr_begin();
     for (map<string, ValidatorBase*>::const_iterator it = m_attribute_validators.begin(); 
-	 it != m_attribute_validators.end(); 
-	 ++it, ++attrib_it) {
-	if (it->second) {
+         it != m_attribute_validators.end(); 
+         ++it, ++attrib_it) {
+        if (it->second) {
 #if DEBUG_OUTPUT    
-	    std::cout << "  checking attribute \"" << it->first << "\" value \"" << attrib_it->second << "\"" << std::endl;
+            std::cout << "  checking attribute \"" << it->first << "\" value \"" << attrib_it->second << "\"" << std::endl;
 #endif
-	    it->second->Validate(attrib_it->second);
-	}
+            it->second->Validate(attrib_it->second);
+        }
     }
 
     for (unsigned int i = 0; i < m_children.size(); ++i) {
-	m_children[i].Validate(elem.Child(i));
+        m_children[i].Validate(elem.Child(i));
     }
 #if DEBUG_OUTPUT    
     std::cout << std::endl;
@@ -759,7 +759,7 @@ void XMLElementValidator::Clear()
     delete m_text_validator;
     m_text_validator = 0;
     for (map<string, ValidatorBase*>::iterator it = m_attribute_validators.begin(); it != m_attribute_validators.end(); ++it) {
-	delete it->second;
+        delete it->second;
     }
     m_attribute_validators.clear();
     m_children.clear();
@@ -780,15 +780,15 @@ pair<vector<string>, vector<string> > TokenizeMapString(const string& str)
 {
     pair<vector<string>, vector<string> > retval;
     if (!parse(str.c_str(), 
-	       *space_p >> *(
-			     ch_p('(') >> *space_p >> 
-			     (+(anychar_p - space_p - ch_p(',')))[append(retval.first)] >> *space_p >> 
-			     ch_p(',') >> *space_p >> 
-			     (+(anychar_p - space_p - ch_p(')')))[append(retval.second)] >> *space_p >> 
-			     ch_p(')') >> *space_p
-		            )
-	       ).full) {
-	throw std::runtime_error("Tokenize() : The string \"" + str + "\" is not a well-formed map string.");
+               *space_p >> *(
+                   ch_p('(') >> *space_p >> 
+                   (+(anychar_p - space_p - ch_p(',')))[append(retval.first)] >> *space_p >> 
+                   ch_p(',') >> *space_p >> 
+                   (+(anychar_p - space_p - ch_p(')')))[append(retval.second)] >> *space_p >> 
+                   ch_p(')') >> *space_p
+                   )
+            ).full) {
+        throw std::runtime_error("Tokenize() : The string \"" + str + "\" is not a well-formed map string.");
     }
     return retval;
 }

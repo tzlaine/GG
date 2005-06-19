@@ -118,6 +118,26 @@ Pt Edit::ClientLowerRight() const
     return LowerRight() - Pt(PIXEL_MARGIN, PIXEL_MARGIN);
 }
 
+const pair<int, int>& Edit::CursorPosn() const
+{
+    return m_cursor_pos;
+}
+
+Clr Edit::InteriorColor() const
+{
+    return m_int_color;
+}
+
+Clr Edit::HiliteColor() const
+{
+    return m_hilite_color;
+}
+
+Clr Edit::SelectedTextColor() const
+{
+    return m_sel_text_color;
+}
+
 XMLElement Edit::XMLEncode() const
 {
     XMLElement retval("GG::Edit");
@@ -316,7 +336,7 @@ void Edit::Keypress(Key key, Uint32 key_mods)
             break;
         }
         if (emit_signal)
-            m_edited_sig(WindowText());
+            EditedSignal(WindowText());
     } else if (Parent()) {
         Parent()->Keypress(key, key_mods);
     }
@@ -330,7 +350,27 @@ void Edit::GainingFocus()
 void Edit::LosingFocus()
 {
     if (m_previous_text != WindowText())
-        m_focus_update_sig(WindowText());
+        FocusUpdateSignal(WindowText());
+}
+
+void Edit::SetColor(Clr c)
+{
+    Control::SetColor(c);
+}
+
+void Edit::SetInteriorColor(Clr c)
+{
+    m_int_color = c;
+}
+
+void Edit::SetHiliteColor(Clr c)
+{
+    m_hilite_color = c;
+}
+
+void Edit::SetSelectedTextColor(Clr c)
+{
+    m_sel_text_color = c;
 }
 
 void Edit::SelectAll()
@@ -366,7 +406,22 @@ void Edit::SetText(const string& str)
         AdjustView();
     }
 
-    m_edited_sig(str);
+    EditedSignal(str);
+}
+
+bool Edit::MultiSelected() const
+{
+    return m_cursor_pos.first != m_cursor_pos.second;
+}
+
+int Edit::FirstCharShown() const
+{
+    return m_first_char_shown;
+}
+
+const string& Edit::PreviousText() const
+{
+    return m_previous_text;
 }
 
 int Edit::CharIndexOf(int x) const

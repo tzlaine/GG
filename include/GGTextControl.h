@@ -68,19 +68,19 @@ public:
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
     TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
-   
+
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
     TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
-   
+
     TextControl(const XMLElement& elem); ///< ctor that constructs a TextControl object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a TextControl object
     //@}
 
     /** \name Accessors */ //@{
-    Uint32         TextFormat() const               {return m_format;}                     ///< returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.)
-    Clr            TextColor() const                {return m_text_color;}                 ///< returns the text color (may differ from the Control::Color() in some subclasses)
-   
+    Uint32         TextFormat() const; ///< returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.)
+    Clr            TextColor() const;  ///< returns the text color (may differ from the Control::Color() in some subclasses)
+
     /** sets the value of \a t to the interpreted value of the control's text.
         If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
         then the >> operator will do so.  Note that the return type is void, so multiple >> operations cannot be strung 
@@ -89,12 +89,8 @@ public:
         even though there is a perfectly valid 4.15 value that occurs first in the string.  \note boost::lexical_cast 
         usually throws boost::bad_lexical_cast when it cannot perform a requested cast, though >> will return a 
         default-constructed T if one cannot be deduced from the control's text. */
-    template <class T> void operator>>(T& t) const
-    {
-        try {t = boost::lexical_cast<T>(Control::m_text);}
-        catch (boost::bad_lexical_cast) {t = T();}
-    }
-   
+    template <class T> void operator>>(T& t) const;
+
     /** sets the value of \a t to the interpreted value of the control's text.
         If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
         then GetValue() will do so.  Because lexical_cast attempts to convert the entire contents of the string to a 
@@ -103,12 +99,12 @@ public:
         boost::bad_lexical_cast when it cannot perform a requested cast. This is handy for validating data in a dialog box;
         Otherwise, using operator>>(), you may get the default value, even though the text in the control may not be the 
         default value at all, but garbage. */
-    template <class T> void GetValue(T& t) const {t = boost::lexical_cast<T, string>(Control::m_text);}
-   
-    operator const string&() const         {return Control::m_text;}  ///< returns the control's text; allows TextControl's to be used as std::string's
+    template <class T> void GetValue(T& t) const;
 
-    bool  Empty() const                    {return Control::m_text.empty();}   ///< returns true when text string equals ""
-    int   Length() const                   {return Control::m_text.length();}  ///< returns length of text string
+    operator const string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
+
+    bool  Empty() const;   ///< returns true when text string equals ""
+    int   Length() const;  ///< returns length of text string
 
     /** returns the upper-left corner of the text as it is would be rendered if it were not bound to the dimensions of
         this control. */
@@ -122,7 +118,7 @@ public:
 
     virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
-   
+
     /** \name Mutators */ //@{
     virtual bool Render();
 
@@ -130,37 +126,37 @@ public:
         ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 
         text occupies. */
     virtual void   SetText(const string& str);
-    virtual void   SetText(const char* str)         {SetText(string(str));}
+    virtual void   SetText(const char* str);
     virtual void   SizeMove(int x1, int y1, int x2, int y2);
-    void           SetTextFormat(Uint32 format)     {m_format = format; ValidateFormat();}    ///< sets the text format; ensures that the flags are sane
-    void           SetTextColor(Clr color)          {m_text_color = color;}                   ///< sets the text color
-    virtual void   SetColor(Clr c)                  {Control::SetColor(c); m_text_color = c;} ///< just like Control::SetColor(), except that this one also adjusts the text color
+    void           SetTextFormat(Uint32 format); ///< sets the text format; ensures that the flags are sane
+    void           SetTextColor(Clr color);      ///< sets the text color
+    virtual void   SetColor(Clr c);              ///< just like Control::SetColor(), except that this one also adjusts the text color
 
     /** Sets the value of the control's text to the stringified version of t.
         If t can be converted to a string representation by a boost::lexical_cast (and thus by a stringstream), then the << operator
         will do so, eg double(4.15) to string("4.15").  Note that the return type is void, so multiple << operations cannot be 
         strung together.  \throw boost::bad_lexical_cast boost::lexical_cast throws boost::bad_lexical_cast when it is confused.*/
-    template <class T> void operator<<(T t) {SetText(boost::lexical_cast<string>(t));}
-   
-    void  operator+=(const string& str)    {SetText(Control::m_text + str);}   ///< appends \a str to text string by way of SetText()
-    void  operator+=(const char* str)      {SetText(Control::m_text + str);}   ///< appends \a str to text string by way of SetText()
-    void  operator+=(char ch)              {SetText(Control::m_text + ch);}    ///< appends \a ch to text string by way of SetText()
-    void  Clear()                          {SetText("");}                      ///< sets text string to ""
-    void  Insert(int pos, char ch)         {Control::m_text.insert(pos, 1, ch); SetText(Control::m_text);}   ///< allows access to text string much as a std::string
-    void  Erase(int pos, int num = 1)      {Control::m_text.erase(pos, num); SetText(Control::m_text);}      ///< allows access to text string much as a std::string
+    template <class T> void operator<<(T t);
+
+    void  operator+=(const string& str); ///< appends \a str to text string by way of SetText()
+    void  operator+=(const char* str);   ///< appends \a str to text string by way of SetText()
+    void  operator+=(char ch);           ///< appends \a ch to text string by way of SetText()
+    void  Clear();                       ///< sets text string to ""
+    void  Insert(int pos, char ch);      ///< allows access to text string much as a std::string
+    void  Erase(int pos, int num = 1);   ///< allows access to text string much as a std::string
     //@}
-   
+
 protected:
     /** \name Accessors */ //@{
-    const vector<Font::LineData>& GetLineData() const   {return m_line_data;}
-    const shared_ptr<Font>&       GetFont() const       {return m_font;}
-    bool                          FitToText() const     {return m_fit_to_text;}
+    const vector<Font::LineData>& GetLineData() const;
+    const shared_ptr<Font>&       GetFont() const;
+    bool                          FitToText() const;
     //@}
 
 private:
-    void ValidateFormat();  ///< ensures that the format flags are consistent
+    void ValidateFormat();      ///< ensures that the format flags are consistent
     void RecomputeTextBounds(); ///< recalculates m_text_ul and m_text_lr
-    
+
     Uint32                  m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
     Clr                     m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
     vector<Font::LineData>  m_line_data;
@@ -170,7 +166,30 @@ private:
     Pt                      m_text_lr;     ///< stored relative to the control's UpperLeft()
 };
 
+
+// template implementations
+template <class T>
+void TextControl::operator>>(T& t) const
+{
+    try {
+        t = boost::lexical_cast<T>(Control::m_text);
+    } catch (boost::bad_lexical_cast) {
+        t = T();
+    }
+}
+
+template <class T>
+void TextControl::GetValue(T& t) const
+{
+    t = boost::lexical_cast<T, string>(Control::m_text);
+}
+
+template <class T>
+void TextControl::operator<<(T t)
+{
+    SetText(boost::lexical_cast<string>(t));
+}
+
 } // namespace GG
 
 #endif // _GGTextControl_h_
-

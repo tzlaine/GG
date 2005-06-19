@@ -53,7 +53,7 @@ public:
     /** \name Accessors */ //@{
     Wnd* Pick(const Pt& pt, Wnd* modal) const;  ///< returns pointer to the window under the point pt; constrains pick to modal if nonzero
     //@}
-   
+
     /** \name Mutators */ //@{
     /** Add() places \a wnd in the list in front of the first entry with z-value <= wnd->ZOrder(), or at the end of the list, 
         whichever comes first. If wnd->ZOrder() == 0, Add() inserts \a wnd at the front of the list, and updates \a 

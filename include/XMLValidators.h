@@ -105,13 +105,13 @@ struct RangedValidator : public Validator<T>
         T val = boost::lexical_cast<T>(str);
         if (val < m_min) {
             throw std::runtime_error("RangedValidator::Validate() : String \"" + str + "\" has a value less than the allowed minimum of " +
-				     boost::lexical_cast<std::string>(m_min) + ".");
-	} else if (val > m_max) {
+                                     boost::lexical_cast<std::string>(m_min) + ".");
+        } else if (val > m_max) {
             throw std::runtime_error("RangedValidator::Validate() : String \"" + str + "\" has a value greater than the allowed maximum of " +
-				     boost::lexical_cast<std::string>(m_max) + ".");
-	}
+                                     boost::lexical_cast<std::string>(m_max) + ".");
+        }
     }
-	
+    
     virtual RangedValidator *Clone() const 
     {
         return new RangedValidator<T>(m_min, m_max);
@@ -127,16 +127,16 @@ template <class T>
 struct StepValidator : public Validator<T>
 {
     StepValidator(const T& step, const T& origin = T()) : m_step_size(step), m_origin(origin) {}
-	
+
     virtual void Validate(const std::string& str) const
     {
         T val = boost::lexical_cast<T>(str);
         if (std::abs(details::mod((val - m_origin), m_step_size)) > std::numeric_limits<T>::epsilon()) {
             throw std::runtime_error("StepValidator::Validate() : String \"" + str + "\" has a value that is not a step of the form " +
-				     boost::lexical_cast<std::string>(m_origin) + " +/- N * " + m_step_size + ".");
-	}
+                                     boost::lexical_cast<std::string>(m_origin) + " +/- N * " + m_step_size + ".");
+        }
     }
-	
+    
     virtual StepValidator *Clone() const
     {
         return new StepValidator<T>(m_step_size, m_origin);
@@ -159,14 +159,14 @@ public:
         T val = boost::lexical_cast<T>(str);
         if (val < m_min) {
             throw std::runtime_error("RangedStepValidator::Validate() : String \"" + str + "\" has a value less than the allowed minimum of " +
-				     boost::lexical_cast<std::string>(m_min) + ".");
-	} else if (val > m_max) {
+                                     boost::lexical_cast<std::string>(m_min) + ".");
+        } else if (val > m_max) {
             throw std::runtime_error("RangedStepValidator::Validate() : String \"" + str + "\" has a value greater than the allowed maximum of " +
-				     boost::lexical_cast<std::string>(m_max) + ".");
-	} else if (std::abs(details::mod<T>(val - m_origin, m_step_size)) > std::numeric_limits<T>::epsilon()) {
+                                     boost::lexical_cast<std::string>(m_max) + ".");
+        } else if (std::abs(details::mod<T>(val - m_origin, m_step_size)) > std::numeric_limits<T>::epsilon()) {
             throw std::runtime_error("RangedStepValidator::Validate() : String \"" + str + "\" has a value that is not a step of the form " +
-				     boost::lexical_cast<std::string>(m_origin) + " +/- N * " + m_step_size + ".");
-	}
+                                     boost::lexical_cast<std::string>(m_origin) + " +/- N * " + m_step_size + ".");
+        }
     }
 
     virtual RangedStepValidator *Clone() const
@@ -193,7 +193,7 @@ public:
 
         if (val == static_cast<int>(EnumMap<T>::BAD_VALUE)) {
             throw std::runtime_error("MappedEnumValidator::Validate() : String \"" + str + "\" does not match any value in the EnumMap for its type.");
-	}
+        }
     }
 
     virtual MappedEnumValidator *Clone() const

@@ -52,12 +52,12 @@ struct GG_API Clr
     Clr(double arr[]);                                        ///< ctor that constructs a Clr from an array of at least four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
     Clr(const XMLElement& elem); ///< ctor that creates a Clr as defined in XMLElement elem. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Clr object
     //@}
-   
+
     /** \name Accessors */ //@{
     XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Clr
     XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Clr
     //@}
-   
+
     union {
         Uint32 i;     ///< represents Clr as a packed RGBA color
         Uint8  v[4];  ///< represents Clr as a vector of RGBA components

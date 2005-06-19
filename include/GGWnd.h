@@ -280,7 +280,7 @@ protected:
     {
     public:
         /** the types of Wnd events.  Each of these corresponds to a Wnd member function of the same name. */
-	    enum EventType {
+        enum EventType {
             LButtonDown,
             LDrag,
             LButtonUp,

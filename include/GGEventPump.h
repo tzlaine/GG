@@ -88,6 +88,8 @@ protected:
 class GG_API EventPump : public EventPumpBase
 {
 public:
+    virtual ~EventPump() {} ///< virtual dtor
+
     /** cycles through event-handling and rendering, calling App::HandleSystemEvents() and then EventPumpBase::LoopBody(). */
     virtual void operator()();
 };

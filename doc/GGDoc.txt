@@ -3,109 +3,109 @@
 */
 
 /** \page design Design
-   \section design_purpose Purpose 
-   GG is designed to achieve several goals:
-   - Platform-independence: GG should be buildable on any platform that supports OpenGL
-   - Driver-independence: GG should be a standalone GUI framework that does not require any particular application framework;
-   though an SDL driver is supplied, GG should be usable with any driver code the user wishes to supply
-   - Easy extensibility: new controls and GUI behavior should be easy to incorporate
-   - Complete graphical control for the user/designer: the user should not be limited by the authors' lack of artistic skill!
-   - Independence of UI elements from the source code: GG UI elements should be configurable as text files, so that UI design 
-   and alteration should not require a recompilation
-   - Overall time efficiency: an application with a reasonable number of GG UI elements should not slow down significantly 
-   because of the rendering or handling of those elements
-   - Overall space efficiency: each GG UI element should have a reasonably small data size
-   - Efficient mixture of 2D and 3D graphical elements: it should be appropriate to use GG in any frame-based 3D application, 
-   even a realtime 3D video game
-   - Simplicity of use: GG UI elements should be able to send arbitrary messages when manipulated by the user; there should be 
-   no message passing hierarchy imposed on the user
-   
-   \section design_features Features
-   GG has the following features and services:
-   - Communication of UI controls via signals and slots
-   - Support for 2D-, 3D-, and mixed-mode rendering
-   - Application-wide managment of textures and fonts
-   - XML serialization of UI elements
-   - Optional network support; SDL_net and Fastevents make it possible to receive network packets as SDL messages
+    \section design_purpose Purpose 
+    GG is designed to achieve several goals:
+    - Platform-independence: GG should be buildable on any platform that supports OpenGL
+    - Driver-independence: GG should be a standalone GUI framework that does not require any particular application framework;
+    though an SDL driver is supplied, GG should be usable with any driver code the user wishes to supply
+    - Easy extensibility: new controls and GUI behavior should be easy to incorporate
+    - Complete graphical control for the user/designer: the user should not be limited by the authors' lack of artistic skill!
+    - Independence of UI elements from the source code: GG UI elements should be configurable as text files, so that UI design 
+    and alteration should not require a recompilation
+    - Overall time efficiency: an application with a reasonable number of GG UI elements should not slow down significantly 
+    because of the rendering or handling of those elements
+    - Overall space efficiency: each GG UI element should have a reasonably small data size
+    - Efficient mixture of 2D and 3D graphical elements: it should be appropriate to use GG in any frame-based 3D application, 
+    even a realtime 3D video game
+    - Simplicity of use: GG UI elements should be able to send arbitrary messages when manipulated by the user; there should be 
+    no message passing hierarchy imposed on the user
 
-   \section nonfeatures Non-Features
-   - GG is not fully threadsafe, due to its use of signals and slots
-   - No sound support is provided
+    \section design_features Features
+    GG has the following features and services:
+    - Communication of UI controls via signals and slots
+    - Support for 2D-, 3D-, and mixed-mode rendering
+    - Application-wide managment of textures and fonts
+    - XML serialization of UI elements
+    - Optional network support; SDL_net and Fastevents make it possible to receive network packets as SDL messages
+
+    \section nonfeatures Non-Features
+    - GG is not fully threadsafe, due to its use of signals and slots
+    - No sound support is provided
 */
 
 /** \page building Building GG
-   \section building_reqs Requirements
-   GG requires GCC 3.2 or later, or MSVC++ 7.1 or later.  Note that both are available for free download.
-   <p>
-   GG relies on a few other open-source libraries:
-   - DevIL 1.6.6 - http://openil.sourceforge.net
-   - FreeType 2.1.2 - http://www.freetype.org
-   - boost 1.32.0 - http://www.boost.org
-   - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
+    \section building_reqs Requirements
+    GG requires GCC 3.2 or later, or MSVC++ 7.1 or later.  Note that both are available for free download.
+    <p>
+    GG relies on a few other open-source libraries:
+    - DevIL 1.6.6 - http://openil.sourceforge.net
+    - FreeType 2.1.2 - http://www.freetype.org
+    - boost 1.32.0 - http://www.boost.org
+    - log4cpp 0.3.4b - http://log4cpp.sourceforge.net
 
-   Optional libraries:
-   - SDL 1.2.5 - http://www.libsdl.org
+    Optional libraries:
+    - SDL 1.2.5 - http://www.libsdl.org
 
-   Also optional, but distributed with GG:
-   - SDL_net 1.2.5 - http://www.libsdl.org/projects/SDL_net
-   - fastevents & SDL_net2 - http://gameprogrammer.com/game.html
+    Also optional, but distributed with GG:
+    - SDL_net 1.2.5 - http://www.libsdl.org/projects/SDL_net
+    - fastevents & SDL_net2 - http://gameprogrammer.com/game.html
    
-   GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
-   documentation will appear in the GG/doc/html directory.
-   <br>
+    GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
+    documentation will appear in the GG/doc/html directory.
+    <br>
 
-   \section howto_build How To Build GG
+    \section howto_build How To Build GG
 
-   \subsection howto_build_linux Linux
-   To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
-   boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  These two 
-   libraries and all the boost includes should be available in your path as well.  You will of course also need to build
-   and make available all of the libraries listed in the requirements above.
+    \subsection howto_build_linux Linux
+    To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
+    boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  These two 
+    libraries and all the boost includes should be available in your path as well.  You will of course also need to build
+    and make available all of the libraries listed in the requirements above.
    
-   Once this is done, Linux users can simply type
-   \verbatim
+    Once this is done, Linux users can simply type
+    \verbatim
       ./configure
       make
       make install [as root]\endverbatim
-   from within the root of the GG directory tree.  (If this does not work for you, you may wish to execute the autogen.sh script, 
-   which will rebuild the configure script and other files.)  Type
-   \verbatim
+    from within the root of the GG directory tree.  (If this does not work for you, you may wish to execute the autogen.sh script, 
+    which will rebuild the configure script and other files.)  Type
+    \verbatim
       ./configure --help\endverbatim
-   to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
-   be especially useful on Cygwin/MinGW systems.  GG will install itself in /usr/local/lib by default; to change 
-   this, use the --prefix=[LIB_PATH] command-line option when invoking configure.  Note that if you do not intend to use 
-   the static version of GG, you should specify the --disable-static option, which will cut your build time roughly in half.
+    to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
+    be especially useful on Cygwin/MinGW systems.  GG will install itself in /usr/local/lib by default; to change 
+    this, use the --prefix=[LIB_PATH] command-line option when invoking configure.  Note that if you do not intend to use 
+    the static version of GG, you should specify the --disable-static option, which will cut your build time roughly in half.
 
-   \subsection howto_build_win32_gcc Windows (GCC)
+    \subsection howto_build_win32_gcc Windows (GCC)
 
-   GG works quite well with GCC on Windows, under MinGW or Cygwin, using the autotools build system described in the Linux build 
-   section.  In case the autotools build system fails to work for you
-   in MinGW, there is a makefile called Makefile.mingw that is set up for my personal system, but that is easily altered to work 
-   on yours.  Just replace all references to the locations of the directories where the required libs are stored on my system
-   with where they are located on yours, and you're on your way.  You may also need to grab the DLLs that this makefile includes
-   in the build from somewhere other than "..".
-   <p>
-   The DLLs for all the required libraries except log4cpp and the boost libraries
-   can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since they're all C code, there will be no 
-   ABI compatibility issues.  You must compile boost.signals, boost.filesystem, and log4cpp yourself, since they are C++ code.  
-   I had the best results (in terms of ease of compilation) when using log4cpp 2.7, instead of the 3.4b version listed in the 
-   requirements.  Also, when building for MinGW, I would recommend making a simple makefile or Dev-C++ project for each of the 
-   needed boost libraries, instead of using the boost.jam make system, which doesn't seem to work perfectly for MinGW.
+    GG works quite well with GCC on Windows, under MinGW or Cygwin, using the autotools build system described in the Linux build 
+    section.  In case the autotools build system fails to work for you
+    in MinGW, there is a makefile called Makefile.mingw that is set up for my personal system, but that is easily altered to work 
+    on yours.  Just replace all references to the locations of the directories where the required libs are stored on my system
+    with where they are located on yours, and you're on your way.  You may also need to grab the DLLs that this makefile includes
+    in the build from somewhere other than "..".
+    <p>
+    The DLLs for all the required libraries except log4cpp and the boost libraries
+    can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since they're all C code, there will be no 
+    ABI compatibility issues.  You must compile boost.signals, boost.filesystem, and log4cpp yourself, since they are C++ code.  
+    I had the best results (in terms of ease of compilation) when using log4cpp 2.7, instead of the 3.4b version listed in the 
+    requirements.  Also, when building for MinGW, I would recommend making a simple makefile or Dev-C++ project for each of the 
+    needed boost libraries, instead of using the boost.jam make system, which doesn't seem to work perfectly for MinGW.
 
-   \subsection howto_build_win32_microsoft Windows (Microsoft C++)
+    \subsection howto_build_win32_microsoft Windows (Microsoft C++)
 
-   For those of you who use the Microsoft compiler, I have only been able to get GG to compile on MSVC++ 7.1, the version
-   that comes with .NET 2003.  As of the time of this writing, this is the latest MSVC version.  I have included a Visual Studio 
-   solution file under GG/msvc/GG.  Use the Release build configuration; the Debug one is not set up.  
-   Note that you can get precompiled MSVC 7.1-compatible DLLs for many of the required libraries.  DevIL's 1.6.5 pre-compiled 
-   library can be substituted for the latest one, 1.6.6, for which there is no pre-compiled version available.  When you compile 
-   log4cpp, remove the .mc file from the project before building; it builds fine without it, but I had trouble when it was included.
-   <p>
-   In order to build the boost.signals and boost.filesystem libraries, do the following, with the boost zipfile unzipped into your 
-   root directory:
-	- Unzip the boost zipfile into your root directory.
-	- Open a "Visual Studio .NET 2003 Command Prompt".
-	- Execute:\verbatim
+    For those of you who use the Microsoft compiler, I have only been able to get GG to compile on MSVC++ 7.1, the version
+    that comes with .NET 2003.  As of the time of this writing, this is the latest MSVC version.  I have included a Visual Studio 
+    solution file under GG/msvc/GG.  Use the Release build configuration; the Debug one is not set up.  
+    Note that you can get precompiled MSVC 7.1-compatible DLLs for many of the required libraries.  DevIL's 1.6.5 pre-compiled 
+    library can be substituted for the latest one, 1.6.6, for which there is no pre-compiled version available.  When you compile 
+    log4cpp, remove the .mc file from the project before building; it builds fine without it, but I had trouble when it was included.
+    <p>
+    In order to build the boost.signals and boost.filesystem libraries, do the following, with the boost zipfile unzipped into your 
+    root directory:
+    - Unzip the boost zipfile into your root directory.
+    - Open a "Visual Studio .NET 2003 Command Prompt".
+    - Execute:\verbatim
     cd [BOOST_DIR]\tools\build\jam_src
     build.bat
     copy bin.ntx86\bjam.exe ..\..\..\..
@@ -115,213 +115,152 @@
     Finally, note that the solution file is set up to grab all include and library directories rooted at c:\, not just the boost 
     ones.  If you'd like to keep them somewhere else, you'll need to change the project settings.
 
-   \subsection howto_build_macos Macintosh
-   It would be nice to have access to a Mac OS X and/or Classic Mac box, to be able to ensure that GG even compiles on such a 
-   thing.  Let me know if you have or are interested in testing out a Mac build, or even taking on porting duties.
+    \subsection howto_build_macos Macintosh
+    It would be nice to have access to a Mac OS X and/or Classic Mac box, to be able to ensure that GG even compiles on such a 
+    thing.  Let me know if you have or are interested in testing out a Mac build, or even taking on porting duties.
 */
 
 /** \page architecture Architecture
-   \section arch_rendering Rendering Overview
-   GG uses OpenGL to render its graphics; it is assumed that the entire application is being redrawn multiple times each second.  
-   Each GG UI element is draw using calls to OpenGL.  Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D 
-   mode graphic, or even a 3D mode rendering; the complexity of the graphics used to represent the UI elements is only limited
-   by the target rendering hardware and the user's skill.
-   \section arch_UI_overview UI Overview
-   \subsection arch_input_events Input Events
-   GG is organized as a layer on top of an existing user input framework.  GG has no way of determining that a mouse click, mouse move, 
-   or any other user input event, has taken place.  To use GG, one must subclass off of the abstract class GG::App, and define several 
-   of GG::App's pure virtual functions.  These functions poll the underlying operating system or input framework (by default the SDL),
-   and generate GG input messages from them.  Such messages are mouse moves and clicks, key presses and releases, joystick movement, 
-   etc. GG maintains internal state as to what part of the GUI is being dragged, clicked, etc.
-   \subsection arch_UI_overview_example Example:
-   Suppose the user clicks 
-   the left mouse button at screen position (50, 37).  GG will receive a message from the underlying application framework that a 
-   left mouse click has occurred; it then determines what UI element is under that screen location, if any.  If it turns out there is
-   a button under that spot, GG sets internal state indicating that the left mouse button is being held down, and that it is over the
-   button.  GG then sends a message to the button that it is depressed.  The button sets its own internal state and returns.  All 
-   processing is complete for this input; the next time the button is redrawn, it knows to draw itself in a depressed state.  Very
-   little computation is involved in processing a single user input event.  GG's performance is therefore usually limited only by the
-   application-defined processing that is associated with manipulating the controls (e.g., a button click may trigger disk IO).
+    \section arch_rendering Rendering Overview
+    GG uses OpenGL to render its graphics; it is assumed that the entire application is being redrawn multiple times each second.  
+    Each GG UI element is draw using calls to OpenGL.  Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D 
+    mode graphic, or even a 3D mode rendering; the complexity of the graphics used to represent the UI elements is only limited
+    by the target rendering hardware and the user's skill.
+    \section arch_UI_overview UI Overview
+    \subsection arch_input_events Input Events
+    GG is organized as a layer on top of an existing user input framework.  GG has no way of determining that a mouse click, mouse move, 
+    or any other user input event, has taken place.  To use GG, one must subclass off of the abstract class GG::App, and define several 
+    of GG::App's pure virtual functions.  These functions poll the underlying operating system or input framework (by default the SDL),
+    and generate GG input messages from them.  Such messages are mouse moves and clicks, key presses and releases, joystick movement, 
+    etc. GG maintains internal state as to what part of the GUI is being dragged, clicked, etc.
+    \subsection arch_UI_overview_example Example:
+    Suppose the user clicks 
+    the left mouse button at screen position (50, 37).  GG will receive a message from the underlying application framework that a 
+    left mouse click has occurred; it then determines what UI element is under that screen location, if any.  If it turns out there is
+    a button under that spot, GG sets internal state indicating that the left mouse button is being held down, and that it is over the
+    button.  GG then sends a message to the button that it is depressed.  The button sets its own internal state and returns.  All 
+    processing is complete for this input; the next time the button is redrawn, it knows to draw itself in a depressed state.  Very
+    little computation is involved in processing a single user input event.  GG's performance is therefore usually limited only by the
+    application-defined processing that is associated with manipulating the controls (e.g., a button click may trigger disk IO).
    \subsection arch_UI_element_conns UI Element Connections
-   GG UI elements are connected using signals and slots, using the boost.signals library implementation.  This allows arbitrary 
-   connections between one control and another, and between a control and other code; there is no hierarchy of passed messages 
-   as there is in some other GUIs, and there are no unsafe callbacks used.  Refer to the \ref sigs_n_slots documentation for details.
-   \subsection arch_app_services GG::App Services
-   The singleton GG::App object is globally available through a static member function, GG::App::GetApp().  This allows all code
-   in the application to rely on GG::App for certain essential services.  GUI-specific services include registering windows into
-   the GUI, registering windows as always-on-top or modal windows, moving windows up or down in the z-order layers of the GUI,
-   removing windows from the GUI, getting mouse state (position and button depression), setting mouse delay repeat (see GG::App 
-   for a description of this), entering and exiting from an orthographic projection (2D) rendering mode, and creating polymorphic
-   GUI elements from XML-formatted text.  Most of these services must be provided by the user when subclassing from GG::App; 
-   if SDLGGApp is used, these services are already implemented.
-   <p>
-   GG::App does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
-   GG::App provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the app is rendering, 
-   and how long it has been since the last frame was rendered.  There is also a font manager, an application-wide font "pool",
-   from which the user can request fonts.  The font pool loads and stores the fonts as needed by the application, and multiple 
-   requests for the same font at the same size will result in the creation of only one rendered font object.  A texture manager
-   exists which does a similar job with textures.  If the user wants to programmatically create textures, she can also add them
-   to the texture pool, provide a name, and request that texture as many times as needed.  OpenGL texture objects are used as
-   the underlying texture rendering method.
+    GG UI elements are connected using signals and slots, using the boost.signals library implementation.  This allows arbitrary 
+    connections between one control and another, and between a control and other code; there is no hierarchy of passed messages 
+    as there is in some other GUIs, and there are no unsafe callbacks used.  Refer to the \ref sigs_n_slots documentation for details.
+    \subsection arch_app_services GG::App Services
+    The singleton GG::App object is globally available through a static member function, GG::App::GetApp().  This allows all code
+    in the application to rely on GG::App for certain essential services.  GUI-specific services include registering windows into
+    the GUI, registering windows as always-on-top or modal windows, moving windows up or down in the z-order layers of the GUI,
+    removing windows from the GUI, getting mouse state (position and button depression), setting mouse delay repeat (see GG::App 
+    for a description of this), entering and exiting from an orthographic projection (2D) rendering mode, and creating polymorphic
+    GUI elements from XML-formatted text.  Most of these services must be provided by the user when subclassing from GG::App; 
+    if SDLGGApp is used, these services are already implemented.
+    <p>
+    GG::App does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
+    GG::App provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the app is rendering, 
+    and how long it has been since the last frame was rendered.  There is also a font manager, an application-wide font "pool",
+    from which the user can request fonts.  The font pool loads and stores the fonts as needed by the application, and multiple 
+    requests for the same font at the same size will result in the creation of only one rendered font object.  A texture manager
+    exists which does a similar job with textures.  If the user wants to programmatically create textures, she can also add them
+    to the texture pool, provide a name, and request that texture as many times as needed.  OpenGL texture objects are used as
+    the underlying texture rendering method.
 */
 
 /** \page sigs_n_slots Signals and Slots
-   \section sigs_n_slots_definition Sig-who? Slo-what?
-   If you've never been exposed to the signals and slots pattern before, it can be a little confusing.  Simply put, a slot is a
-   function or funtion object that is "listening" for a signal.  A slot "listening" to a certain signal is said to be connected 
-   to that signal.  When a signal is emitted, all slots that are connected to that signal invoke their function(s)/function 
-   object(s).  If a signal is emitted to which no slots are connected, nothing happens.
-   \section sigs_n_slots_motivation Motivation for the Signals and Slots Pattern
-   \subsection prob The Problem
-   Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to 
-   call a Command() function, which passed to the caller an integer representing the type of message (button click, scroll, or
-   whatever), an ID number associated with the calling control, and a single integer parameter.  It could have been made more 
-   general and even less typesafe by replacing the int parameter with a void pointer, but in either case it suffers from three
-   huge limitations.  First, the type of message and the paramter must be known to both caller and callee; this means that, for
-   example, the user must keep track of the integer value representing a button click message, and make sure that separate 
-   sections of code are using the same value to represent it.  Second, each control must call its parent and tell it about 
-   each event that occurs, meaning that the callee has to maintain state information.  For instance, consider a dialog that 
-   contains a list box.  Say the dialog does some lengthy bit of processing whenever the user clears the dialog box by pushing 
-   another button in the dialog.  With the simple Command()-call scheme, any list box will notify its parent (in this case, the 
-   dialog) whenever it is cleared.  Say also that if the user presses the "c" key, the dialog will catch the event and clear 
-   the list box.  Once cleared, the list box will dutifully send its cleared message to the dialog.  So to differentiate 
-   between messages from a button-cleared list box and a keystroke-cleared one, the dialog box has to enter a state indicating 
-   that it has just cleared its list box before doing so, if it doesn't want to do the lengthy button-cleared processing after 
-   a "c"-key press.  This is a simple example.  In reality, things get real hairy real fast.  Third, since the controls always 
-   call their parents, any code that doesn't contain a control, but that wants to know about button pushes, scrolling 
-   scrollbars, etc., must deal with that control's parent; this creates a lot of chains of passed messages, and a fair number 
-   of kludges to get messages to the sections of code that need them.
-   \subsection sigs_n_slots_soln The Solution
-   Now, each control emits a signal every time a significant event occurs.  If no processing needs to be associated with such
-   an event, its signal need not be connected to anything.  Futhermore, no matter how many modules need to react to a 
-   certain signal, they can all be connected.  In the case of our previous example, the list box-clearing button in the dialog 
-   can just create a temporary connection between the dialog and the list box, then clear the list box (so then when the list 
-   box signals it has been cleared, the dialog will do the appropriate processing).  When the list box is cleared with a 
-   "c"-key press, no such connection needs to be made.  No state information is needed in the dialog.
-   \section sigs_n_slots_use Using Signals and Slots
-   \subsection sigs_n_slots_connecting Connecting Signals To Slots
-   There are two types of connections between signals and slots.  The first type of connection is between a signal and a 
-   slot, which may be a functor (which in turn may be a boost::bind object), a free function or a static member function.  
-   Just call Connect(sig, slot).  The second type is between a signal and a non-static member function.  In this case, the 
-   call to Connect() requires a third parameter: a pointer to the object whose member function is to be called.  For instance, 
-   if I have a class Foo and an object foo1 of class Foo, I cannot call foo1.bar() by simply knowing the address of bar().  I 
-   need to call Connect(sig, &Foo::bar, &foo1) so that the signal knows which object's bar() to call.  Both versions of Connect()
-   return a connection object.  By keeping this connection object, you can later disconnect() the connection you made.
-   \subsection sigs_n_slots_emitting Emitting Signals
-   To emit a signal, just call its () operator, like this: sig();
-   \subsection disconnecting Disconnecting Signals and Slots
-   If you kept the connection object returned by Connect(), a connection_obj.disconnect() call will disconnect the associated 
-   signal and slot.  Also, consider this: what happens if a non-static member function slot and signal are connected, the 
-   object owning the slot is destructed, and the signal is emitted?  A segfault, unless the object's class inherits from 
-   boost::trackable, which auto-disconnects slots on object destruction.  GG::Wnd is derived from boost::trackable, so all 
-   GG::Wnd-derived classes should handle such situations gracefully.  See the boost tutorial below for details.
-   \see http://boost.org/libs/signals/doc/tutorial.html for a tutorial on other aspects of signals and slots; you can create 
-   connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
-   the return values of such slots (take the first return value, the last, the average of all of them, etc.).
+    \section sigs_n_slots_definition Sig-who? Slo-what?
+    If you've never been exposed to the signals and slots pattern before, it can be a little confusing.  Simply put, a slot is a
+    function or funtion object that is "listening" for a signal.  A slot "listening" to a certain signal is said to be connected 
+    to that signal.  When a signal is emitted, all slots that are connected to that signal invoke their function(s)/function 
+    object(s).  If a signal is emitted to which no slots are connected, nothing happens.
+    \section sigs_n_slots_motivation Motivation for the Signals and Slots Pattern
+    \subsection prob The Problem
+    Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to 
+    call a Command() function, which passed to the caller an integer representing the type of message (button click, scroll, or
+    whatever), an ID number associated with the calling control, and a single integer parameter.  It could have been made more 
+    general and even less typesafe by replacing the int parameter with a void pointer, but in either case it suffers from three
+    huge limitations.  First, the type of message and the paramter must be known to both caller and callee; this means that, for
+    example, the user must keep track of the integer value representing a button click message, and make sure that separate 
+    sections of code are using the same value to represent it.  Second, each control must call its parent and tell it about 
+    each event that occurs, meaning that the callee has to maintain state information.  For instance, consider a dialog that 
+    contains a list box.  Say the dialog does some lengthy bit of processing whenever the user clears the dialog box by pushing 
+    another button in the dialog.  With the simple Command()-call scheme, any list box will notify its parent (in this case, the 
+    dialog) whenever it is cleared.  Say also that if the user presses the "c" key, the dialog will catch the event and clear 
+    the list box.  Once cleared, the list box will dutifully send its cleared message to the dialog.  So to differentiate 
+    between messages from a button-cleared list box and a keystroke-cleared one, the dialog box has to enter a state indicating 
+    that it has just cleared its list box before doing so, if it doesn't want to do the lengthy button-cleared processing after 
+    a "c"-key press.  This is a simple example.  In reality, things get real hairy real fast.  Third, since the controls always 
+    call their parents, any code that doesn't contain a control, but that wants to know about button pushes, scrolling 
+    scrollbars, etc., must deal with that control's parent; this creates a lot of chains of passed messages, and a fair number 
+    of kludges to get messages to the sections of code that need them.
+    \subsection sigs_n_slots_soln The Solution
+    Now, each control emits a signal every time a significant event occurs.  If no processing needs to be associated with such
+    an event, its signal need not be connected to anything.  Futhermore, no matter how many modules need to react to a 
+    certain signal, they can all be connected.  In the case of our previous example, the list box-clearing button in the dialog 
+    can just create a temporary connection between the dialog and the list box, then clear the list box (so then when the list 
+     box signals it has been cleared, the dialog will do the appropriate processing).  When the list box is cleared with a 
+    "c"-key press, no such connection needs to be made.  No state information is needed in the dialog.
+    \section sigs_n_slots_use Using Signals and Slots
+    \subsection sigs_n_slots_connecting Connecting Signals To Slots
+    There are two types of connections between signals and slots.  The first type of connection is between a signal and a 
+     slot, which may be a functor (which in turn may be a boost::bind object), a free function or a static member function.  
+    Just call Connect(sig, slot).  The second type is between a signal and a non-static member function.  In this case, the 
+    call to Connect() requires a third parameter: a pointer to the object whose member function is to be called.  For instance, 
+    if I have a class Foo and an object foo1 of class Foo, I cannot call foo1.bar() by simply knowing the address of bar().  I 
+    need to call Connect(sig, &Foo::bar, &foo1) so that the signal knows which object's bar() to call.  Both versions of Connect()
+    return a connection object.  By keeping this connection object, you can later disconnect() the connection you made.
+    \subsection sigs_n_slots_emitting Emitting Signals
+    To emit a signal, just call its () operator, like this: sig();
+    \subsection disconnecting Disconnecting Signals and Slots
+    If you kept the connection object returned by Connect(), a connection_obj.disconnect() call will disconnect the associated 
+    signal and slot.  Also, consider this: what happens if a non-static member function slot and signal are connected, the 
+    object owning the slot is destructed, and the signal is emitted?  A segfault, unless the object's class inherits from 
+    boost::trackable, which auto-disconnects slots on object destruction.  GG::Wnd is derived from boost::trackable, so all 
+    GG::Wnd-derived classes should handle such situations gracefully.  See the boost tutorial below for details.
+    \see http://boost.org/libs/signals/doc/tutorial.html for a tutorial on other aspects of signals and slots; you can create 
+    connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
+    the return values of such slots (take the first return value, the last, the average of all of them, etc.).
 */
 
-/** \page XML_IO Object Serialization using XML
-   \section XML_IO_motivation Motivation
-   One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
-   capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
-   elements for network transmission and receipt.  To satisfy all these requirements, GG uses an object serialization 
-   approach based on XML.  XML objects are relatively easy to parse, and are even easier to create.  In addition,
-   they produce human-readable (if not always human-comprehensible) bytestreams.  When saved to files, these can be edited
-   by hand, obviating the need for a recompile just to change the appearance of a window or button.
-   \section XML_IO_approach Approach
-   GG's serialization approach is two-fold:  1) objects are converted to and constructed from GG::XMLElement objects 
-   by the user, and 2) if necessary, when objects from polymorphic class hierarchies are received in XML-formatted text, 
-   they can be created using GG::XMLObjectFactory.  This allows the user to specify the type of each object when the XML
-   text is created, then read back that type from the XML text later and correctly recreate objects of the right type 
-   automatically.
-   \section XML_IO_encode_parse XML Encoding and Parsing   
-   To encode an object, you need to provide an overload of GG::Wnd::XMLEncode() to create a GG::XMLElement.  To 
-   construct an object from the XML encoding, you need to provide a constructor that accepts a GG::XMLElement.  In the
-   sections below, it is assumed that we are trying to represent a single object in a GG::XMLElement.  This technique is 
-   very flexible, so the sections below are only a suggestion.  The techniques outlined are the ones used in saving and 
-   restoring GG objects.  To save objects to file or send them over a network connection, put them into a GG::XMLDoc and 
-   send them to a file or stringstream (or any other kind of std::ostream, actually), using GG::XMLDoc::WriteDoc().
-   \subsection XML_IO_rep_integral_types Representing Integral Type Members and Strings
-   Each member should be represented by a tag.  Integral type members should be represented by a tag and some text representing 
-   the integral-type value.  The tag will generally look like this: 
-   \verbatim
-   <m_float_member>3.14159<m_float_member/>\endverbatim
-   It is convenient to use boost::lexical_cast, to go from a value to a string, and from a string to a value.
-   \subsection XML_IO_rep_class Representing Class and Struct Object Members
-   Each class member should be enclosed within a tag for its name, and should be otherwise treated as a non-member object:
-   \verbatim
-   <m_point_class_member>
-      <MyNameSpace::PointClass>
-         <m_x>18<m_x/>
-         <m_y>36<m_y/>
-      </MyNameSpace::PointClass>
-   </m_point_class_member>\endverbatim
-   \subsection XML_IO_rep_heap_obj Representing Pointer Members
-   Since we've defined constructors that take a GG:XMLElement for each class that will be serialized, saving pointers is very
-   similar to saving other members.  The only difference is that you need to construct objects on the heap when recreating 
-   them, as opposed to creating them on the stack: "m_ptr_to_point = new PointClass(xml_element)", instead of "m_ptr_to_point = 
-   PointClass(xml_element)".
-   \subsection XML_IO_rep_array Representing Arrays and Containers of Integral Types
-   Arrays should be represented just as regular integral types, except that the array elements should be separated by whitespace.
-   \verbatim
-   <m_float_arr>3.14159 0.0 1.0<m_float_arr/>\endverbatim
-   STL Containers that contain integral types can be done in the same manner.  There are templated functions that convert 
-   STL containers to and from space-delimited lists automatically; see the free functions in XMLDoc.h for details.
-   \subsection XML_IO_rep_containers Representing Other Container Members
-   most containers can be treated as follows.  To encode the container, create a tag for the container variable, then 
-   iterate through the elements of the container, and append the encoding of each one to the container tag.  To recreate 
-   the container, read each contained object and create an object from it and add each created object to the container object
-   in the order read.  So containers will look like this in the case of a container of non-integral objects:
-   \verbatim
-   <m_point_vec>
-      <MyNameSpace::PointClass>
-         <m_x>18<m_x/>
-         <m_y>36<m_y/>
-      </MyNameSpace::PointClass>
-      <MyNameSpace::PointClass>
-         <m_x>18<m_x/>
-         <m_y>45<m_y/>
-      </MyNameSpace::PointClass>
-      <MyNameSpace::PointClass>
-         <m_x>18<m_x/>
-         <m_y>61<m_y/>
-      </MyNameSpace::PointClass>
-   </m_point_vec>\endverbatim
-   \section XML_IO_examples Examples
-   Examples of all the techniques outlined here can be found in the GG::Wnd-dervied classes, including those derived from
-   GG::Control.
-   \section XML_IO_using_factory Using the GG::XMLObjectFactory
-   GG::XMLObjectFactory is very simple to use.  For each class in the hierarchy, just create a function that creates a new 
-   object and returns a base-class pointer to it; the pointer's type should be the base class of the hierarchy.  Pass a name 
-   for each class and a pointer to each function to the factory via GG::XMLObjectFactory::AddGenerator(), and later you can 
-   call GG::XMLObjectFactory::GenerateObject(name) to create an object of that type.  For instance, the class GG::Slider, is 
-   represented in the ObjectFactory by this function:
-   \verbatim
-   Wnd* NewSlider(const XMLElement& elem) {return new Slider(elem);}\endverbatim
-   and make this call, using GG::App's GG::Wnd factory:
-   \verbatim
-   GG:App::GetApp()->AddWndGenerator("GG::Slider", &NewSlider);\endverbatim
-   If you have a GG::Slider in the child list of any window, after this AddWndGenerator() call any "GG::Slider" tag encountered
-   in a stream will be correctly created as a GG::Slider.
-   <p>
-   Since GG::XMLObjectFactory is templated, you can create factories that construct objects from any polymorphic 
-   class hierarchy.  The use of GG::XMLObjectFactory is not limited to the GG::Wnd-based class hierarchy.  
-   \see Refer to GGApp.cpp for an example based on GG::Wnd.
+/** \page serialization Serialization
+    \section serialization_motivation Motivation
+    One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
+    capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
+    elements for network transmission and receipt.  To satisfy all these requirements, GG uses the boost.serialization 
+    library to serialize Wnd-derived objects.  There was a previous home-grown version of XML serialization that is now
+    deprecated (the GG::XML* classes).
+    \section serialization_approach Details
+    GG does not contain any actual code that will serialize a Wnd.  Instead, each Wnd subclass contains a serialize() template
+    method which may be invoked by user code to perform serialization.  The user must then create a boost serialization
+    archive, and save/load the desired windows to/from the archive.  To be serializable, user-created subclasses need to define
+    a serialize method that first serializes its base class, then serializes any subclass-specific data; see any Wnd subclass
+    for example code.  For full details on how the serialization works, see the serialization tutorial and the
+    boost.serialization documentation.
+    \section caveats Caveats
+    Signals are not currently serializable.  This means that when a class is created from an input serialization
+    archive, all its signals must be reconnected to their slots (and any signals connected to it should be reconnected
+    as well).  Many of the built-in GG controls must reconnect signals when loaded; such classes have a private
+    ConnectSignals() method that is called at load time.  See RadioButtonGroup::serialize() in GGButton.h for an
+    example.  Another caveat: Font and Texture objects that were part of the App's FontManager and TextureManager when
+    saved will not be added back to these two structures when they are loaded.
 */
 
-/** \page tutorial Tutorial
-    TBD
+/** \page tutorials Tutorials
+    \section tut_using Using the Tutorials
+    The following tutorials are available in the tutorial directory.  You can build them all using SCons.  SCons can be
+    found at http://www.scons.org .  An MSVC solution file is also provided.
+    \section tut_1 Tutorial 1: Minimal (minimal.cpp)
+    This is the minimal interesting GG application, and uses the default input driver, SDL.
+    \section tut_2 Tutorial 2: Controls (controls.cpp)
+    This builds upon Tutorial 1 by adding one of every type of Control, and connecting some signals and slots.
+    \section tut_3 Tutorial 3: Serialization (serialization.cpp)
+    This builds upon Tutorial 2 by adding serialization code, and saving and loading all the controls at the start of the app's run.
 */
 
-/** \mainpage GG Documentation Overview
-   -# \ref design
-   -# \ref architecture
-   -# \ref sigs_n_slots
-   -# \ref XML_IO
-   -# \ref building
-   -# \ref tutorial
+/** \mainpage GG Documentation Overviews
+    \section Overviews
+    -# \ref design
+    -# \ref architecture
+    -# \ref sigs_n_slots
+    -# \ref serialization
+    -# \ref building
+    -# \ref tutorials
 */
-
-
-
-

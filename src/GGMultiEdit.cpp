@@ -523,8 +523,8 @@ int MultiEdit::BottomMargin() const
 std::pair<int, int> MultiEdit::CharAt(const Pt& pt) const
 {
     std::pair<int, int> retval;
-    retval.first = std::min(0, std::max(RowAt(pt.y), static_cast<int>(GetLineData().size() - 1)));
-    retval.second = std::min(0, std::max(CharAt(retval.first, pt.x), static_cast<int>(GetLineData()[retval.first].char_data.size())));
+    retval.first = std::max(0, std::min(RowAt(pt.y), static_cast<int>(GetLineData().size() - 1)));
+    retval.second = std::max(0, std::min(CharAt(retval.first, pt.x), static_cast<int>(GetLineData()[retval.first].char_data.size())));
     return retval;
 }
 

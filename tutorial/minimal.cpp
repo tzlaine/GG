@@ -1,5 +1,11 @@
 #include "SDLGGApp.h"
 #include "GGThreeButtonDlg.h"
+#include "GGFileDlg.h"
+
+// Tutorial 1: Minimal
+// This contains the minimal interesting GG application.  It contains 3D as well as GUI elements in the same scene, and
+// demonstrates how to use the default SDL input driver, SDLGGApp.
+
 
 // This is the minimal interface (or nearly so) to SDLGGApp required to produce a functional GG-over-SDL application.
 // Note that GG does not require SDL, and even when using SDL, it does not require you to use SDLGGApp.  However, using
@@ -161,12 +167,19 @@ void MinimalGGApp::GLInit()
 // when the application starts, if any.
 void MinimalGGApp::Initialize()
 {
+    // This sets the caption seen in the application's window, when operating in windowed mode.  Note that this is not
+    // related in any way to the app name set previously.  Typically this goes in SDLInit(), but since that was
+    // otherwise exactly what we want, I placed it here instead of copying the entire method here again just to add one
+    // function call.
+    SDL_WM_SetCaption("Minimal SDL GG App", "Minimal SDL GG App");
+
     // Create a modal dialog and execute it.  This will show GG operating on top of a "real 3D" scene.  Note that if you
     // want "real" 3D objects (i.e. drawn in a non-orthographic space) inside of GG windows, you can add whatever OpenGL
     // calls you like to a GG::Wnd's Render() method, sandwiched between Exit2DMode() and Enter2DMode().
-    GG::ThreeButtonDlg quit_dlg(200, 100, "Are we done yet?", "Vera.ttf", 12, GG::CLR_SHADOW, 
-                                GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
-    quit_dlg.Run();
+    GG::Wnd* quit_dlg =
+        new GG::ThreeButtonDlg(200, 100, "Are we done yet?", "Vera.ttf", 12, GG::CLR_SHADOW, 
+                               GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
+    quit_dlg->Run();
 
     // Now that we're back from the modal dialog, we can exit normally, since that's what closing the dialog indicates.
     // Exit() calls all the cleanup methods for GG::SDLGGApp.

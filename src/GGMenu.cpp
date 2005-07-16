@@ -29,13 +29,12 @@
 #include <GGApp.h>
 #include <GGTextControl.h>
 #include <GGDrawUtil.h>
-#include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 namespace {
-const int BORDER_THICKNESS = 1; // thickness with which to draw menu borders
-const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in pixels
+    const int BORDER_THICKNESS = 1; // thickness with which to draw menu borders
+    const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in pixels
 }
 
 ////////////////////////////////////////////////
@@ -49,7 +48,7 @@ MenuItem::MenuItem() :
 {
 }
 
-MenuItem::MenuItem(const string& str, int id, bool disable, bool check) : 
+MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check) : 
     SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
@@ -58,7 +57,7 @@ MenuItem::MenuItem(const string& str, int id, bool disable, bool check) :
 {
 }
 
-MenuItem::MenuItem(const string& str, int id, bool disable, bool check, const MenuItem::SelectedSlotType& slot) : 
+MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const MenuItem::SelectedSlotType& slot) : 
     SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
@@ -68,65 +67,20 @@ MenuItem::MenuItem(const string& str, int id, bool disable, bool check, const Me
     SelectedSignal->connect(slot);
 }
 
-MenuItem::MenuItem(const XMLElement& elem) :
-    SelectedSignal(new SelectedSignalType())
-{
-    if (elem.Tag() != "GG::MenuItem")
-        throw std::invalid_argument("Attempted to construct a GG::MenuItem from an XMLElement that had a tag other than \"GG::MenuItem\"");
-
-    label = elem.Child("label").Text();
-    item_ID = lexical_cast<int>(elem.Child("item_ID").Text());
-    disabled = lexical_cast<bool>(elem.Child("disabled").Text());
-    checked = lexical_cast<bool>(elem.Child("checked").Text());
-
-    const XMLElement* curr_elem = &elem.Child("next_level");
-    for (int i = 0; i < curr_elem->NumChildren(); ++i)
-        next_level.push_back(MenuItem(curr_elem->Child(i)));
-}
-
 MenuItem::~MenuItem()
 {
-}
-
-XMLElement MenuItem::XMLEncode() const
-{
-    XMLElement retval("GG::MenuItem");
-    retval.AppendChild(XMLElement("label", label));
-    retval.AppendChild(XMLElement("item_ID", lexical_cast<string>(item_ID)));
-    retval.AppendChild(XMLElement("disabled", lexical_cast<string>(disabled)));
-    retval.AppendChild(XMLElement("checked", lexical_cast<string>(checked)));
-
-    XMLElement temp("next_level");
-    for (unsigned int i = 0; i < next_level.size(); ++i) {
-        temp.AppendChild(next_level[i].XMLEncode());
-    }
-    retval.AppendChild(temp);
-
-    return retval;
-}
-
-XMLElementValidator MenuItem::XMLValidator() const
-{
-    XMLElementValidator retval("GG::MenuItem");
-
-    retval.AppendChild(XMLElementValidator("label"));
-    retval.AppendChild(XMLElementValidator("item_ID", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("disabled", new Validator<bool>()));
-    retval.AppendChild(XMLElementValidator("checked", new Validator<bool>()));
-
-    XMLElementValidator temp("next_level");
-    for (unsigned int i = 0; i < next_level.size(); ++i) {
-        temp.AppendChild(next_level[i].XMLValidator());
-    }
-    retval.AppendChild(temp);
-    return retval;
 }
 
 
 ////////////////////////////////////////////////
 // GG::MenuBar
 ////////////////////////////////////////////////
-MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, Clr text_color/* = GG::CLR_WHITE*/,
+MenuBar::MenuBar() :
+    Control()
+{
+}
+
+MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color/* = GG::CLR_WHITE*/,
                  Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
     Control(x, y, w, font->Lineskip()),
     m_font(font),
@@ -142,7 +96,7 @@ MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, Clr text_col
     AdjustLayout();
 }
 
-MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, Clr text_color/* = GG::CLR_WHITE*/,
+MenuBar::MenuBar(int x, int y, int w, const std::string& font_filename, int pts, Clr text_color/* = GG::CLR_WHITE*/,
                  Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
     Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
@@ -158,7 +112,7 @@ MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, Clr 
     AdjustLayout();
 }
 
-MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, const MenuItem& m,
+MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m,
                  Clr text_color/* = GG::CLR_WHITE*/, Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
     Control(x, y, w, font->Lineskip()),
     m_font(font),
@@ -175,7 +129,7 @@ MenuBar::MenuBar(int x, int y, int w, const shared_ptr<Font>& font, const MenuIt
     AdjustLayout();
 }
 
-MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, const MenuItem& m,
+MenuBar::MenuBar(int x, int y, int w, const std::string& font_filename, int pts, const MenuItem& m,
                  Clr text_color/* = GG::CLR_WHITE*/, Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
     Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
@@ -189,28 +143,6 @@ MenuBar::MenuBar(int x, int y, int w, const string& font_filename, int pts, cons
     // use opaque interior color as hilite color
     interior.a = 255;
     m_hilite_color = interior;
-    AdjustLayout();
-}
-
-MenuBar::MenuBar(const XMLElement& elem) :
-    Control(elem.Child("GG::Control")),
-    m_caret(-1)
-{
-    if (elem.Tag() != "GG::MenuBar")
-        throw std::invalid_argument("Attempted to construct a GG::MenuBar from an XMLElement that had a tag other than \"GG::MenuBar\"");
-
-    const XMLElement* curr_elem = &elem.Child("m_font").Child("GG::Font");
-    string font_filename = curr_elem->Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Text());
-    m_font = App::GetApp()->GetFont(font_filename, pts);
-
-    m_border_color = Clr(elem.Child("m_border_color").Child("GG::Clr"));
-    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
-    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
-    m_hilite_color = Clr(elem.Child("m_hilite_color").Child("GG::Clr"));
-    m_sel_text_color = Clr(elem.Child("m_sel_text_color").Child("GG::Clr"));
-    m_menu_data = MenuItem(elem.Child("m_menu_data").Child("GG::MenuItem"));
-
     AdjustLayout();
 }
 
@@ -219,10 +151,10 @@ const MenuItem& MenuBar::AllMenus() const
     return m_menu_data;
 }
 
-bool MenuBar::ContainsMenu(const string& str) const
+bool MenuBar::ContainsMenu(const std::string& str) const
 {
     bool retval = false;
-    for (vector<MenuItem>::const_iterator it = m_menu_data.next_level.begin(); it != m_menu_data.next_level.end(); ++it) {
+    for (std::vector<MenuItem>::const_iterator it = m_menu_data.next_level.begin(); it != m_menu_data.next_level.end(); ++it) {
         if (it->label == str) {
             retval = true;
             break;
@@ -236,9 +168,9 @@ int MenuBar::NumMenus() const
     return m_menu_data.next_level.size();
 }
 
-const MenuItem& MenuBar::GetMenu(const string& str) const
+const MenuItem& MenuBar::GetMenu(const std::string& str) const
 {
-    vector<MenuItem>::const_iterator it = m_menu_data.next_level.begin();
+    std::vector<MenuItem>::const_iterator it = m_menu_data.next_level.begin();
     for (; it != m_menu_data.next_level.end(); ++it) {
         if (it->label == str)
             break;
@@ -274,38 +206,6 @@ Clr MenuBar::HiliteColor() const
 Clr MenuBar::SelectedTextColor() const
 {
     return m_sel_text_color;
-}
-
-XMLElement MenuBar::XMLEncode() const
-{
-    XMLElement retval("GG::MenuBar");
-    retval.AppendChild(Control::XMLEncode());
-
-    // remove children; they will be recreated at reload time
-    retval.Child("GG::Control").Child("GG::Wnd").Child("m_children").RemoveChildren();
-
-    retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
-    retval.AppendChild(XMLElement("m_border_color", m_border_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_hilite_color", m_hilite_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_sel_text_color", m_sel_text_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_menu_data", m_menu_data.XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator MenuBar::XMLValidator() const
-{
-    XMLElementValidator retval("GG::MenuBar");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_font", m_font->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_border_color", m_border_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_text_color", m_text_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_hilite_color", m_hilite_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_sel_text_color", m_sel_text_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_menu_data", m_menu_data.XMLValidator()));
-    return retval;
 }
 
 bool MenuBar::Render()
@@ -378,9 +278,9 @@ MenuItem& MenuBar::AllMenus()
     return m_menu_data;
 }
 
-MenuItem& MenuBar::GetMenu(const string& str)
+MenuItem& MenuBar::GetMenu(const std::string& str)
 {
-    vector<MenuItem>::iterator it = m_menu_data.next_level.begin();
+    std::vector<MenuItem>::iterator it = m_menu_data.next_level.begin();
     for (; it != m_menu_data.next_level.end(); ++it) {
         if (it->label == str)
             break;
@@ -424,12 +324,12 @@ void MenuBar::SetSelectedTextColor(Clr clr)
     m_sel_text_color = clr;
 }
 
-const shared_ptr<Font>& MenuBar::GetFont() const
+const boost::shared_ptr<Font>& MenuBar::GetFont() const
 {
     return m_font;
 }
 
-const vector<TextControl*>& MenuBar::MenuLabels() const
+const std::vector<TextControl*>& MenuBar::MenuLabels() const
 {
     return m_menu_labels;
 }
@@ -449,7 +349,7 @@ void MenuBar::AdjustLayout()
     }
 
     // determine rows layout
-    vector<int> menu_rows; // each element is the last + 1 index displayable on that row
+    std::vector<int> menu_rows; // each element is the last + 1 index displayable on that row
     int space = Width();
     for (unsigned int i = 0; i < m_menu_labels.size(); ++i) {
         space -= m_menu_labels[i]->Width();
@@ -496,7 +396,7 @@ namespace {
 const int HORIZONTAL_MARGIN = 3; // distance to leave between edge of PopupMenu contents and the control's border
 }
 
-PopupMenu::PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/,
+PopupMenu::PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/,
                      Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) :
     Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
     m_font(font),
@@ -506,7 +406,7 @@ PopupMenu::PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem&
     m_sel_text_color(text_color),
     m_menu_data(m),
     m_open_levels(),
-    m_caret(vector<int>(1, -1)),
+    m_caret(std::vector<int>(1, -1)),
     m_origin(Pt(x, y)),
     m_item_selected(0)
 {
@@ -516,7 +416,7 @@ PopupMenu::PopupMenu(int x, int y, const shared_ptr<Font>& font, const MenuItem&
     m_open_levels.resize(1);
 }
 
-PopupMenu::PopupMenu(int x, int y, const string& font_filename, int pts, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/, 
+PopupMenu::PopupMenu(int x, int y, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color/* = GG::CLR_WHITE*/, 
                      Clr color/* = GG::CLR_BLACK*/, Clr interior/* = GG::CLR_SHADOW*/) : 
     Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
     m_font(GG::App::GetApp()->GetFont(font_filename, pts)),
@@ -526,7 +426,7 @@ PopupMenu::PopupMenu(int x, int y, const string& font_filename, int pts, const M
     m_sel_text_color(text_color),
     m_menu_data(m),
     m_open_levels(),
-    m_caret(vector<int>(1, -1)),
+    m_caret(std::vector<int>(1, -1)),
     m_origin(Pt(x, y)),
     m_item_selected(0)
 {
@@ -594,13 +494,13 @@ bool PopupMenu::Render()
             MenuItem& menu = *menu_ptr;
 
             // determine the total size of the menu, render it, and record its bounding rect
-            string str;
+            std::string str;
             for (unsigned int j = 0; j < menu.next_level.size(); ++j) {
                 str += menu.next_level[j].label + (static_cast<int>(j) < static_cast<int>(menu.next_level.size()) - 1 ? "\n" : "");
                 if (menu.next_level[j].next_level.size() || menu.next_level[j].checked)
                     needs_indicator = true;
             }
-            vector<Font::LineData> lines;
+            std::vector<Font::LineData> lines;
             Uint32 fmt = TF_LEFT | TF_TOP;
             Pt menu_sz = m_font->DetermineLines(str, fmt, 0, lines); // get dimensions of text in menu
             menu_sz.x += 2 * HORIZONTAL_MARGIN;
@@ -778,7 +678,7 @@ void PopupMenu::SetSelectedTextColor(Clr clr)
     m_sel_text_color = clr;
 }
 
-const shared_ptr<Font>& PopupMenu::GetFont() const     
+const boost::shared_ptr<Font>& PopupMenu::GetFont() const     
 {
     return m_font;
 }
@@ -788,12 +688,12 @@ const MenuItem& PopupMenu::MenuData() const
     return m_menu_data;
 }
 
-const vector<Rect>& PopupMenu::OpenLevels() const  
+const std::vector<Rect>& PopupMenu::OpenLevels() const  
 {
     return m_open_levels;
 }
 
-const vector<int>& PopupMenu::Caret() const       
+const std::vector<int>& PopupMenu::Caret() const       
 {
     return m_caret;
 }
@@ -802,6 +702,3 @@ const MenuItem* PopupMenu::ItemSelected() const
 {
     return m_item_selected;
 }
-
-} // namespace GG
-

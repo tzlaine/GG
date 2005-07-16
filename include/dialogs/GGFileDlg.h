@@ -64,7 +64,7 @@ public:
         boost::filesystem::initial_path().  \a save indicates whether this is a save or load dialog; \a multi indicates whether 
         multiple file selections are allowed.  \throw GG::InitialDirectoryDoesNotExistException Will throw 
         GG::InitialDirectoryDoesNotExistException when \a directory is invalid. */
-    FileDlg(const string& directory, const string& filename, bool save, bool multi, const shared_ptr<Font>& font, Clr color, 
+    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const boost::shared_ptr<Font>& font, Clr color, 
             Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, 
@@ -73,7 +73,7 @@ public:
         boost::filesystem::initial_path().  \a save indicates whether this is a save or load dialog; \a multi indicates whether 
         multiple file selections are allowed.  \throw GG::InitialDirectoryDoesNotExistException Will throw 
         GG::InitialDirectoryDoesNotExistException when \a directory is invalid. */
-    FileDlg(const string& directory, const string& filename, bool save, bool multi, const string& font_filename, int pts, Clr color, 
+    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::string& font_filename, int pts, Clr color, 
             Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial directory 
@@ -90,8 +90,8 @@ public:
         Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.  
         \throw GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory 
         is invalid. */
-    FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-            const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
+    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
+            const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
 
     /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial directory 
         and filename to the dialog, if desired (such as when "Save As" is called in an app, and there is a 
@@ -107,17 +107,14 @@ public:
         Note that an empty filter is considered to match all files, so ("All Files", "") is perfectly correct.  
         \throw GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory is 
         invalid. */
-    FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-            const string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
-
-    FileDlg(const XMLElement& elem); ///< ctor that constructs a StateButton object from an FileDlg. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a FileDlg object
+    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
+            const std::string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0);
     //@}
 
     /** \name Accessors */ //@{
-    Clr ButtonColor() const;    ///< returns the color of the buttons in the dialog
-    set<string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
+    Clr ButtonColor() const; ///< returns the color of the buttons in the dialog
 
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a FileDlg object
+    std::set<std::string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
     //@}
 
     /** \name Mutators */ //@{
@@ -138,17 +135,22 @@ public:
 protected:
     enum {WIDTH = 400, HEIGHT = 350}; ///< default width and height values for the dialog, in pixels
 
+    /** \name Structors */ //@{
+    FileDlg(); ///< default ctor
+    //@}
+
 private:
-    void CreateChildren(const string& filename, bool multi, const string& font_filename, int pts);
+    void CreateChildren(const std::string& filename, bool multi, const std::string& font_filename, int pts);
     void PlaceLabelsAndEdits(int button_width, int button_height);
     void AttachSignalChildren();
     void DetachSignalChildren();
-    void Init(const string& directory);
+    void Init(const std::string& directory);
+    void ConnectSignals();
     void OkClicked();
     void CancelClicked();
-    void FileSetChanged(const set<int>& files);
-    void FileDoubleClicked(int n, const shared_ptr<ListBox::Row>& row);
-    void FilesEditChanged(const string& str);
+    void FileSetChanged(const std::set<int>& files);
+    void FileDoubleClicked(int n, const boost::shared_ptr<ListBox::Row>& row);
+    void FilesEditChanged(const std::string& str);
     void FilterChanged(int idx);
     void SetWorkingDirectory(const boost::filesystem::path& p);
     void PopulateFilters();
@@ -160,16 +162,18 @@ private:
     Clr              m_border_color;
     Clr              m_text_color;
     Clr              m_button_color;
-    shared_ptr<Font> m_font;
+    boost::shared_ptr<Font>
+                     m_font;
 
     bool             m_save;
-    vector<pair<string, string> > 
+    std::vector<std::pair<std::string, std::string> > 
                      m_file_filters;
-    set<string>      m_result;
+    std::set<std::string>
+                     m_result;
 
-    string           m_save_str;
-    string           m_open_str;
-    string           m_cancel_str;
+    std::string      m_save_str;
+    std::string      m_open_str;
+    std::string      m_cancel_str;
 
     TextControl*     m_curr_dir_text;
     ListBox*         m_files_list;
@@ -181,11 +185,41 @@ private:
     TextControl*     m_file_types_label;
 
     static boost::filesystem::path s_working_dir; ///< declared static so each instance of FileDlg opens up the same directory
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
-} // namspace GG
+} // namespace GG
+
+// template implementations
+template <class Archive>
+void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_color)
+        & BOOST_SERIALIZATION_NVP(m_border_color)
+        & BOOST_SERIALIZATION_NVP(m_text_color)
+        & BOOST_SERIALIZATION_NVP(m_button_color)
+        & BOOST_SERIALIZATION_NVP(m_font)
+        & BOOST_SERIALIZATION_NVP(m_save)
+        & BOOST_SERIALIZATION_NVP(m_file_filters)
+        & BOOST_SERIALIZATION_NVP(m_result)
+        & BOOST_SERIALIZATION_NVP(m_save_str)
+        & BOOST_SERIALIZATION_NVP(m_open_str)
+        & BOOST_SERIALIZATION_NVP(m_cancel_str)
+        & BOOST_SERIALIZATION_NVP(m_curr_dir_text)
+        & BOOST_SERIALIZATION_NVP(m_files_list)
+        & BOOST_SERIALIZATION_NVP(m_files_edit)
+        & BOOST_SERIALIZATION_NVP(m_filter_list)
+        & BOOST_SERIALIZATION_NVP(m_ok_button)
+        & BOOST_SERIALIZATION_NVP(m_cancel_button)
+        & BOOST_SERIALIZATION_NVP(m_files_label)
+        & BOOST_SERIALIZATION_NVP(m_file_types_label);
+
+    if (Archive::is_loading::value)
+        ConnectSignals();
+}
 
 #endif // _GGFileDlg_h_
-
-
-

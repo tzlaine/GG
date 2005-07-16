@@ -35,6 +35,11 @@
 #include "GGBase.h"
 #endif
 
+#include <list>
+#include <set>
+
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
 class Layout;
@@ -110,8 +115,8 @@ class Layout;
     This ensures that layouts are always current.
 
     <p>Note that while a Wnd can contain arbitrary Wnd-derived children, in order for such children to be automatically
-    saved and loaded using XML encoding, any user-defined Wnd subclasses must be added to the App's XMLObjectFactory.
-    See GG::App::AddWndGenerator() and GG::XMLObjectFactory for details. */
+    serialized, any user-defined Wnd subclasses must be registered.  See the boost serialization documentation for
+    details. */
 class GG_API Wnd : public boost::signals::trackable
 {
 public:
@@ -141,7 +146,8 @@ public:
     bool           Modal() const;        ///< is this a modal window?
     bool           ClipChildren() const; ///< is child clipping enabled?
     bool           Visible() const;      ///< is the window visible?
-    const string&  WindowText() const;   ///< returns text associated with this window
+    const std::string&
+                   WindowText() const;   ///< returns text associated with this window
     Pt             UpperLeft() const;    ///< returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
     Pt             LowerRight() const;   ///< returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
     int            Width() const;        ///< returns width of window in pixels
@@ -177,14 +183,10 @@ public:
     const Layout* ContainingLayout() const;             ///< returns the layout containing the window, if any
 
     virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Wnd object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object.  This method is intended to be used in GG-Sketch.
     //@}
 
     /** \name Mutators */ //@{
-    virtual void   SetText(const string& str);               ///< set window text
+    virtual void   SetText(const std::string& str);          ///< set window text
     virtual void   SetText(const char* str);                 ///< set window text
     void           Hide(bool children = true);               ///< suppresses rendering of this window (and possibly its children) during render loop
     void           Show(bool children = true);               ///< enables rendering of this window (and possibly its children) during render loop
@@ -332,28 +334,28 @@ protected:
     /** \name Structors */ //@{
     Wnd(); ///< default ctor
     Wnd(int x, int y, int w, int h, Uint32 flags = CLICKABLE | DRAGABLE); ///< ctor that allows a size and position to be specified, as well as creation flags
-    Wnd(const XMLElement& elem); ///< ctor that constructs a Wnd object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Wnd object
     //@}
 
     /** \name Accessors */ //@{
-    const list<Wnd*>& Children() const; ///< returns child list; the list is const, but the children may be manipulated
+    const std::list<Wnd*>& Children() const; ///< returns child list; the list is const, but the children may be manipulated
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   EventFilter(Wnd* w, const Event& event); ///< handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this filter processed the message.
-    Layout* GetLayout();        ///< returns the layout for the window, if any
-    Layout* ContainingLayout(); ///< returns the layout containing the window, if any
+    virtual bool EventFilter(Wnd* w, const Event& event); ///< handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this filter processed the message.
+
+    Layout*      GetLayout();        ///< returns the layout for the window, if any
+    Layout*      ContainingLayout(); ///< returns the layout containing the window, if any
     //@}
 
-    string         m_text; ///< text associated with the window, such as a window title or button label, etc.
-    bool           m_done; ///< derived modal Wnd's set this to true to stop modal loop
+    std::string  m_text; ///< text associated with the window, such as a window title or button label, etc.
+    bool         m_done; ///< derived modal Wnd's set this to true to stop modal loop
 
 private:
     void ValidateFlags();                 ///< sanity-checks the window creation flags
     void HandleEvent(const Event& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
 
     Wnd*           m_parent;            ///< ptr to this window's parent; may be 0
-    list<Wnd*>     m_children;          ///< list of ptrs to child windows kept in order of decreasing area
+    std::list<Wnd*>m_children;          ///< list of ptrs to child windows kept in order of decreasing area
     int            m_zorder;            ///< where this window is in the z-order (root (non-child) windows only)
     bool           m_visible;           ///< is this window drawn?
     bool           m_clip_children;     ///< should the children of this window be clipped?
@@ -361,30 +363,56 @@ private:
     Pt             m_lowerright;        ///< lower right point of window
     Pt             m_min_size;          ///< minimum window size Pt(0, 0) (= none) by default
     Pt             m_max_size;          ///< maximum window size Pt(1 << 30, 1 << 30) (= none) by default
-    vector<Wnd*>   m_filters;           ///< the Wnds that are filtering this Wnd's events. These are in reverse order: top of the stack is back().
-    set<Wnd*>      m_filtering;         ///< the Wnds in whose filter chains this Wnd lies
+    std::vector<Wnd*>
+                   m_filters;           ///< the Wnds that are filtering this Wnd's events. These are in reverse order: top of the stack is back().
+    std::set<Wnd*> m_filtering;         ///< the Wnds in whose filter chains this Wnd lies
     Layout*        m_layout;            ///< the layout for this Wnd, if any
     Layout*        m_containing_layout; ///< the layout that contains this Wnd, if any
     Uint32         m_flags;             ///< flags supplied at window creation for clickability, dragability, drag-keeping, and resizability
 
     friend class App;   ///< App needs access to \a m_zorder, m_children, etc.
     friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 // define EnumMap and stream operators for Wnd::WndFlag
-ENUM_MAP_BEGIN(Wnd::WndFlag)
-    ENUM_MAP_INSERT(Wnd::CLICKABLE)
-    ENUM_MAP_INSERT(Wnd::DRAGABLE)
-    ENUM_MAP_INSERT(Wnd::DRAG_KEEPER)
-    ENUM_MAP_INSERT(Wnd::RESIZABLE)
-    ENUM_MAP_INSERT(Wnd::ONTOP)
-    ENUM_MAP_INSERT(Wnd::MODAL)
-ENUM_MAP_END
+GG_ENUM_MAP_BEGIN(Wnd::WndFlag)
+    GG_ENUM_MAP_INSERT(Wnd::CLICKABLE)
+    GG_ENUM_MAP_INSERT(Wnd::DRAGABLE)
+    GG_ENUM_MAP_INSERT(Wnd::DRAG_KEEPER)
+    GG_ENUM_MAP_INSERT(Wnd::RESIZABLE)
+    GG_ENUM_MAP_INSERT(Wnd::ONTOP)
+    GG_ENUM_MAP_INSERT(Wnd::MODAL)
+GG_ENUM_MAP_END
 
-ENUM_STREAM_IN(Wnd::WndFlag)
-ENUM_STREAM_OUT(Wnd::WndFlag)
+GG_ENUM_STREAM_IN(Wnd::WndFlag)
+GG_ENUM_STREAM_OUT(Wnd::WndFlag)
 
 } // namespace GG
 
-#endif // _GGWnd_h_
+// template implementations
+template <class Archive>
+void GG::Wnd::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(m_text)
+        & BOOST_SERIALIZATION_NVP(m_done)
+        & BOOST_SERIALIZATION_NVP(m_parent)
+        & BOOST_SERIALIZATION_NVP(m_children)
+        & BOOST_SERIALIZATION_NVP(m_zorder)
+        & BOOST_SERIALIZATION_NVP(m_visible)
+        & BOOST_SERIALIZATION_NVP(m_clip_children)
+        & BOOST_SERIALIZATION_NVP(m_upperleft)
+        & BOOST_SERIALIZATION_NVP(m_lowerright)
+        & BOOST_SERIALIZATION_NVP(m_min_size)
+        & BOOST_SERIALIZATION_NVP(m_max_size)
+        & BOOST_SERIALIZATION_NVP(m_filters)
+        & BOOST_SERIALIZATION_NVP(m_filtering)
+        & BOOST_SERIALIZATION_NVP(m_layout)
+        & BOOST_SERIALIZATION_NVP(m_containing_layout)
+        & BOOST_SERIALIZATION_NVP(m_flags);
+}
 
+#endif // _GGWnd_h_

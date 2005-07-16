@@ -35,29 +35,28 @@
 #include "GGTextControl.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
-/** This is a single-line text input control.
-   This is a simple edit box control.  It inherits from TextControl, so it 
-   can be treated in many ways very similarly to a std::string.  
-   Note that the second set of constructors determine the height of 
-   the control based on the height of the font used and the value of the constant PIXEL_MARGIN.  There are two
-   types of signals emitted by an Edit control.  The first is EditedSignal; this is emitted every time the
-   contents of the Edit change.  Sometimes, however, you don't want that.  For instance, say you want to keep
-   the value of the text in the Edit to between (numerical values) 100 and 300.  If the Edit currently reads "200", 
-   the user may decide to highlight the "2", hit delete, then type a "1".  If updates are immediate, you will
-   receive notification that the Edit says "00" (an invalid value), when that is just a temporary value you 
-   don't care about.  In such situations the other signal, FocusUpdateSignal, should be useful.  It is only 
-   emitted when the Edit is losing the input focus and the contents have changed since it gained the input 
-   focus.  So you would only receive a single update, namely "100", which is a valid number for that control, 
-   and you would receive it only when it is certain that the user is finished editing the text (when the focus
-   changes).  Note that both signals may be used at the same time, if desired.*/
+/** This is a single-line text input control.  This is a simple edit box control.  It inherits from TextControl, so it
+    can be treated in many ways very similarly to a std::string.  Note that the second set of constructors determine the
+    height of the control based on the height of the font used and the value of the constant PIXEL_MARGIN.  There are
+    two types of signals emitted by an Edit control.  The first is EditedSignal; this is emitted every time the contents
+    of the Edit change.  Sometimes, however, you don't want that.  For instance, say you want to keep the value of the
+    text in the Edit to between (numerical values) 100 and 300.  If the Edit currently reads "200", the user may decide
+    to highlight the "2", hit delete, then type a "1".  If updates are immediate, you will receive notification that the
+    Edit says "00" (an invalid value), when that is just a temporary value you don't care about.  In such situations the
+    other signal, FocusUpdateSignal, should be useful.  It is only emitted when the Edit is losing the input focus and
+    the contents have changed since it gained the input focus.  So you would only receive a single update, namely "100",
+    which is a valid number for that control, and you would receive it only when it is certain that the user is finished
+    editing the text (when the focus changes).  Note that both signals may be used at the same time, if desired.*/
 class GG_API Edit : public TextControl
 {
 public:
     /** \name Signal Types */ //@{
-    typedef boost::signal<void (const string&)> EditedSignalType; ///< emitted whenever the contents of the Edit are altered (keypresses, deletes, etc.); provides the new contents of the Edit
-    typedef boost::signal<void (const string&)> FocusUpdateSignalType; ///< emitted whenever the Edit loses the input focus, and its contents have changed since it gained the focus; provides the new contents of the Edit
+    typedef boost::signal<void (const std::string&)> EditedSignalType; ///< emitted whenever the contents of the Edit are altered (keypresses, deletes, etc.); provides the new contents of the Edit
+    typedef boost::signal<void (const std::string&)> FocusUpdateSignalType; ///< emitted whenever the Edit loses the input focus, and its contents have changed since it gained the focus; provides the new contents of the Edit
     //@}
 
     /** \name Slot Types */ //@{
@@ -66,25 +65,21 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor
-    Edit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor
-    Edit(int x, int y, int w, const string& str, const shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor that does not required height. Height is determined from the font and point size used.
-    Edit(int x, int y, int w, const string& str, const string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor that does not required height. Height is determined from the font and point size used.
-    Edit(const XMLElement& elem); ///< ctor that constructs an Edit object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Edit object
+    Edit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor
+    Edit(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor
+    Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor that does not required height. Height is determined from the font and point size used.
+    Edit(int x, int y, int w, const std::string& str, const std::string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor that does not required height. Height is determined from the font and point size used.
     //@}
 
     /** \name Accessors */ //@{
     virtual Pt     ClientUpperLeft() const;
     virtual Pt     ClientLowerRight() const;
 
-    const pair<int, int>& CursorPosn() const;         ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
-    Clr                   InteriorColor() const;      ///< returns the interior color of the control
-    Clr                   HiliteColor() const;        ///< returns the color used to render hiliting around selected text
-    Clr                   SelectedTextColor() const;  ///< returns the color used to render selected text
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an Edit object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
+    const std::pair<int, int>&
+                   CursorPosn() const;         ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
+    Clr            InteriorColor() const;      ///< returns the interior color of the control
+    Clr            HiliteColor() const;        ///< returns the color used to render hiliting around selected text
+    Clr            SelectedTextColor() const;  ///< returns the color used to render selected text
 
     mutable EditedSignalType      EditedSignal;       ///< returns the edited signal object for this Edit
     mutable FocusUpdateSignalType FocusUpdateSignal;  ///< returns the focus update signal object for this Edit
@@ -112,14 +107,18 @@ public:
     /** selects all text in the entire control.  This function leaves the beginning of the text in view; see SelectRange(). */
     virtual void   SelectAll();
 
-    virtual void   SetText(const string& str);
+    virtual void   SetText(const std::string& str);
     //@}
    
 protected:
+    /** \name Structors */ //@{
+    Edit(); ///< default ctor
+    //@}
+
     /** \name Accessors */ //@{
     virtual bool            MultiSelected() const;          ///< returns true if >= 1 characters selected
     int                     FirstCharShown() const;         ///< returns the index of the first character visible in the Edit
-    const string&           PreviousText() const;           ///< returns the text that was in the edit at the time of the last focus gain
+    const std::string&      PreviousText() const;           ///< returns the text that was in the edit at the time of the last focus gain
     int                     CharIndexOf(int x) const;       ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
     int                     FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
     int                     ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
@@ -134,17 +133,33 @@ private:
 
     /** if .first == .second, the caret is drawn before character at m_cursor_pos.first; otherwise, the range is
         selected (when range is selected, caret is considered at .second) */
-    pair<int, int> m_cursor_pos;
+    std::pair<int, int> m_cursor_pos;
 
     int         m_first_char_shown; ///< index into the string of the first character on the left end of the control's viewable area
     Clr         m_int_color;        ///< color of background inside text box
     Clr         m_hilite_color;     ///< color behind selected range
     Clr         m_sel_text_color;   ///< color of selected text
 
-    string      m_previous_text;    ///< the contents when the focus was last gained
+    std::string m_previous_text;    ///< the contents when the focus was last gained
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-#endif // _GGEdit_h_
+// template implementations
+template <class Archive>
+void GG::Edit::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextControl)
+        & BOOST_SERIALIZATION_NVP(m_cursor_pos)
+        & BOOST_SERIALIZATION_NVP(m_first_char_shown)
+        & BOOST_SERIALIZATION_NVP(m_int_color)
+        & BOOST_SERIALIZATION_NVP(m_hilite_color)
+        & BOOST_SERIALIZATION_NVP(m_sel_text_color)
+        & BOOST_SERIALIZATION_NVP(m_previous_text);
+}
 
+#endif // _GGEdit_h_

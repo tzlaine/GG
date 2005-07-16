@@ -93,11 +93,11 @@ public:
 
     /** \name Mutators */ //@{
     void           operator()();      ///< external interface to Run()
-    virtual void   Exit(int code);    ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
+    virtual void   Exit(int code);
     virtual void   Wait(int ms);      ///< suspends the app thread for \a ms milliseconds
 
-    virtual void   Enter2DMode() = 0; ///< saves relevant OpenGL states, sets up ortho projection
-    virtual void   Exit2DMode() = 0;  ///< restores states saved in Enter2DMode()
+    virtual void   Enter2DMode() = 0;
+    virtual void   Exit2DMode() = 0;
     //@}
 
     static SDLGGApp* GetApp();                             ///< allows any code to access the app framework by calling SDLGGApp::GetApp()

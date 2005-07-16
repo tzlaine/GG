@@ -28,6 +28,13 @@
 #ifndef _GGSignalsAndSlots_h_
 #define _GGSignalsAndSlots_h_
 
+#ifndef BOOST_BIND_HPP_INCLUDED
+#include <boost/bind.hpp>
+#endif
+
+/** \file GGSignalsAndSlots.h
+    Contains the Connect() functions, which simplify the connection of boost signals and slots. */
+
 namespace GG {
 
 /** connects a signal to a slot functor of the same type, putting \a _slot in slot group 0, at position \a at within group 0.

@@ -29,17 +29,22 @@
 #include <GGDrawUtil.h>
 #include <GGButton.h>
 #include <GGApp.h>
-#include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 namespace {
-const int MIN_TAB_SIZE = 5;
+    const int MIN_TAB_SIZE = 5;
 }
 
 ////////////////////////////////////////////////
 // GG::Scroll
 ////////////////////////////////////////////////
+Scroll::Scroll() :
+    Control(),
+    m_orientation(VERTICAL)
+{
+}
+
 Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
                Button* decr/* = 0*/, Button* incr/* = 0*/, Button* tab/* = 0*/, Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
@@ -50,72 +55,33 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
     m_range_max(99),
     m_line_sz(5),
     m_page_sz(25),
-    m_tab(shared_ptr<Button>(tab)),
-    m_incr(shared_ptr<Button>(incr)),
-    m_decr(shared_ptr<Button>(decr)),
+    m_tab(boost::shared_ptr<Button>(tab)),
+    m_incr(boost::shared_ptr<Button>(incr)),
+    m_decr(boost::shared_ptr<Button>(decr)),
     m_tab_drag_offset(-1), 
     m_initial_depressed_area(SBR_NONE),
     m_depressed_area(SBR_NONE)
 {
     SetColor(color);
     if (m_orientation == VERTICAL) {
-        if (!m_decr) m_decr = shared_ptr<Button>(new Button(0,     0, w, w,          "", "", 0, color));
-        if (!m_incr) m_incr = shared_ptr<Button>(new Button(0, h - w, w, w,          "", "", 0, color));
-        if (!m_tab)  m_tab  = shared_ptr<Button>(new Button(0,     w, w, TabWidth(), "", "", 0, color));
+        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, w, w,          "", "", 0, color));
+        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(0, h - w, w, w,          "", "", 0, color));
+        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(0,     w, w, TabWidth(), "", "", 0, color));
     } else {
-        if (!m_decr) m_decr = shared_ptr<Button>(new Button(0,     0, h,          h, "", "", 0, color));
-        if (!m_incr) m_incr = shared_ptr<Button>(new Button(w - h, 0, h,          h, "", "", 0, color));
-        if (!m_tab)  m_tab  = shared_ptr<Button>(new Button(h,     0, TabWidth(), h, "", "", 0, color));
+        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, h,          h, "", "", 0, color));
+        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(w - h, 0, h,          h, "", "", 0, color));
+        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(h,     0, TabWidth(), h, "", "", 0, color));
     }
 }
 
-Scroll::Scroll(const XMLElement& elem) :
-    Control(elem.Child("GG::Control")),
-    m_orientation(lexical_cast<Orientation>(elem.Child("m_orientation").Text())),
-    m_tab_drag_offset(-1), 
-    m_initial_depressed_area(SBR_NONE),
-    m_depressed_area(SBR_NONE)
+std::pair<int, int> Scroll::PosnRange() const
 {
-    if (elem.Tag() != "GG::Scroll")
-        throw std::invalid_argument("Attempted to construct a GG::Scroll from an XMLElement that had a tag other than \"GG::Scroll\"");
-
-    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
-    m_posn = lexical_cast<int>(elem.Child("m_posn").Text());
-    m_range_min = lexical_cast<int>(elem.Child("m_range_min").Text());
-    m_range_max = lexical_cast<int>(elem.Child("m_range_max").Text());
-    m_line_sz = lexical_cast<int>(elem.Child("m_line_sz").Text());
-    m_page_sz = lexical_cast<int>(elem.Child("m_page_sz").Text());
-
-    // these three may be any Button-derived class
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_tab").Child(0)))) {
-        m_tab.reset(b);
-    } else {
-        throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the tab.");
-    }
-
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_incr").Child(0)))) {
-        m_incr.reset(b);
-    } else {
-        throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the increment button.");
-    }
-
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_decr").Child(0)))) {
-        m_decr.reset(b);
-    } else {
-        throw std::runtime_error("Scroll::Scroll : Attempted to use a non-Button object as the decrement button.");
-    }
-
-    MoveTabToPosn(); // correct initial placement of tab, if necessary
+    return std::pair<int,int>(m_posn, m_posn + m_page_sz);
 }
 
-pair<int, int> Scroll::PosnRange() const
+std::pair<int, int> Scroll::ScrollRange() const
 {
-    return pair<int,int>(m_posn, m_posn + m_page_sz);
-}
-
-pair<int, int> Scroll::ScrollRange() const
-{
-    return pair<int,int>(m_range_min, m_range_max);
+    return std::pair<int,int>(m_range_min, m_range_max);
 }
 
 int Scroll::LineSize() const
@@ -136,40 +102,6 @@ Clr Scroll::InteriorColor() const
 Scroll::Orientation Scroll::ScrollOrientation() const
 {
     return m_orientation;
-}
-
-XMLElement Scroll::XMLEncode() const
-{
-    XMLElement retval("GG::Scroll");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_orientation", lexical_cast<string>(m_orientation)));
-    retval.AppendChild(XMLElement("m_posn", lexical_cast<string>(m_posn)));
-    retval.AppendChild(XMLElement("m_range_min", lexical_cast<string>(m_range_min)));
-    retval.AppendChild(XMLElement("m_range_max", lexical_cast<string>(m_range_max)));
-    retval.AppendChild(XMLElement("m_line_sz", lexical_cast<string>(m_line_sz)));
-    retval.AppendChild(XMLElement("m_page_sz", lexical_cast<string>(m_page_sz)));
-    retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
-    retval.AppendChild(XMLElement("m_incr", m_incr->XMLEncode()));
-    retval.AppendChild(XMLElement("m_decr", m_decr->XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator Scroll::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Scroll");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_orientation", new MappedEnumValidator<Orientation>()));
-    retval.AppendChild(XMLElementValidator("m_posn", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_range_min", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_range_max", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_line_sz", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_page_sz", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_incr", m_incr->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_decr", m_decr->XMLValidator()));
-    return retval;
 }
 
 bool Scroll::Render()
@@ -469,17 +401,17 @@ Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
     return retval;
 }
 
-const shared_ptr<Button> Scroll::TabButton() const
+const boost::shared_ptr<Button> Scroll::TabButton() const
 {
     return m_tab;
 }
 
-const shared_ptr<Button> Scroll::IncrButton() const
+const boost::shared_ptr<Button> Scroll::IncrButton() const
 {
     return m_incr;
 }
 
-const shared_ptr<Button> Scroll::DecrButton() const
+const boost::shared_ptr<Button> Scroll::DecrButton() const
 {
     return m_decr;
 }
@@ -513,6 +445,3 @@ void Scroll::MoveTabToPosn()
                   Pt(static_cast<int>((static_cast<double>(m_posn - m_range_min) / (m_range_max - m_range_min + 1)) * (end_tabspace - start_tabspace + 1) + start_tabspace),
                      m_tab->UpperLeft().y));
 }
-
-} // namespace GG
-

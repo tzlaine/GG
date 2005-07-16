@@ -31,14 +31,21 @@
 #include <GGTexture.h>
 #include <GGDrawUtil.h>
 #include <GGApp.h>
-#include <XMLValidators.h>
 
 #include <cmath>
 
-namespace GG {
+using namespace GG;
 
 namespace {
-const double DEFAULT_FPS = 15.0;
+    const double DEFAULT_FPS = 15.0;
+}
+
+DynamicGraphic::DynamicGraphic() :
+    Control(),
+    m_margin(0),
+    m_frame_width(0),
+    m_frame_height(0)
+{
 }
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture,
@@ -65,7 +72,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
     m_last_frame_idx = m_frames - 1;
 }
 
-DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const shared_ptr<Texture>& texture,
+DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const boost::shared_ptr<Texture>& texture,
                                Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
@@ -89,7 +96,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin
     m_last_frame_idx = m_frames - 1;
 }
 
-DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const vector<shared_ptr<Texture> >& textures,
+DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
                                Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
@@ -137,7 +144,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_
     m_last_frame_idx = m_frames - 1;
 }
 
-DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const shared_ptr<Texture>& texture,
+DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const boost::shared_ptr<Texture>& texture,
                                Uint32 style/* = 0*/, int frames/* = -1*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
@@ -162,7 +169,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_
 }
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, 
-                               const vector<shared_ptr<Texture> >& textures, Uint32 style/* = 0*/, int frames/* = -1*/, 
+                               const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style/* = 0*/, int frames/* = -1*/, 
                                Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
@@ -186,6 +193,7 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_
     m_last_frame_idx = m_frames - 1;
 }
 
+#if 0
 DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
     Control(elem.Child("GG::Control")),
     m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Text())),
@@ -200,13 +208,14 @@ DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
 
     SetColor(CLR_WHITE);
 
+    using boost::lexical_cast;
     const XMLElement* curr_elem = &elem.Child("m_textures");
     for (int i = 0; i < curr_elem->NumChildren(); i += 2) {
         FrameSet fs;
         // (borrowed from GG::SubTexture)
-        string texture_filename = curr_elem->Child(i).Child("GG::Texture").Child("m_filename").Text();
+        std::string texture_filename = curr_elem->Child(i).Child("GG::Texture").Child("m_filename").Text();
         // we need to ensure that the settings in the XML-encoded texture are preserved in the loaded texture; to do this:
-        shared_ptr<Texture> temp_texture = App::GetApp()->GetTexture(texture_filename);
+        boost::shared_ptr<Texture> temp_texture = App::GetApp()->GetTexture(texture_filename);
         // if no copy of this texture exists in the manager, GetTexture() will load it with default settings, and the
         // use_count will be 2: one for the shared_ptr in the manager, one for temp_texture.
         // if this is the case, dump the texture, reload it from the XML definition (which may have non-default settings),
@@ -236,6 +245,7 @@ DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
 
     SetFrameIndex(m_curr_frame);
 }
+#endif
 
 int DynamicGraphic::Frames() const       
 {
@@ -295,59 +305,6 @@ int DynamicGraphic::FrameHeight() const
 Uint32 DynamicGraphic::Style() const
 {
     return m_style;
-}
-
-XMLElement DynamicGraphic::XMLEncode() const
-{
-    XMLElement retval("GG::DynamicGraphic");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_margin", lexical_cast<string>(m_margin)));
-    retval.AppendChild(XMLElement("m_frame_width", lexical_cast<string>(m_frame_width)));
-    retval.AppendChild(XMLElement("m_frame_height", lexical_cast<string>(m_frame_height)));
-
-    XMLElement temp("m_textures");
-    for (unsigned int i = 0; i < m_textures.size(); ++i) {
-        temp.AppendChild(XMLElement("texture", m_textures[i].texture->XMLEncode()));
-        temp.AppendChild(XMLElement("frames", lexical_cast<string>(m_textures[i].frames)));
-    }
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElement("m_FPS", lexical_cast<string>(m_FPS)));
-    retval.AppendChild(XMLElement("m_playing", lexical_cast<string>(m_playing)));
-    retval.AppendChild(XMLElement("m_looping", lexical_cast<string>(m_looping)));
-    retval.AppendChild(XMLElement("m_frames", lexical_cast<string>(m_frames)));
-    retval.AppendChild(XMLElement("m_curr_frame", lexical_cast<string>(m_curr_frame)));
-    retval.AppendChild(XMLElement("m_first_frame_idx", lexical_cast<string>(m_first_frame_idx)));
-    retval.AppendChild(XMLElement("m_last_frame_idx", lexical_cast<string>(m_last_frame_idx)));
-    retval.AppendChild(XMLElement("m_style", StringFromFlags<GraphicStyle>(m_style)));
-
-    return retval;
-}
-
-XMLElementValidator DynamicGraphic::XMLValidator() const
-{
-    XMLElementValidator retval("GG::DynamicGraphic");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_margin", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_frame_width", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_frame_height", new Validator<int>()));
-
-    XMLElementValidator temp("m_textures");
-    for (unsigned int i = 0; i < m_textures.size(); ++i) {
-        temp.AppendChild(XMLElementValidator("texture", m_textures[i].texture->XMLValidator()));
-        temp.AppendChild(XMLElementValidator("frames", new Validator<int>()));
-    }
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElementValidator("m_FPS", new Validator<double>()));
-    retval.AppendChild(XMLElementValidator("m_playing", new Validator<bool>()));
-    retval.AppendChild(XMLElementValidator("m_looping", new Validator<bool>()));
-    retval.AppendChild(XMLElementValidator("m_frames", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_curr_frame", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_first_frame_idx", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_last_frame_idx", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_style", new ListValidator<GraphicStyle>()));
-    return retval;
 }
 
 bool DynamicGraphic::Render()
@@ -464,7 +421,7 @@ void DynamicGraphic::AddFrames(const Texture* texture, int frames/* = -1*/)
     m_frames += fs.frames;
 }
 
-void DynamicGraphic::AddFrames(const shared_ptr<Texture>& texture, int frames/* = -1*/)
+void DynamicGraphic::AddFrames(const boost::shared_ptr<Texture>& texture, int frames/* = -1*/)
 {
     int frames_in_texture = FramesInTexture(texture.get());
     if (!frames_in_texture)
@@ -477,7 +434,7 @@ void DynamicGraphic::AddFrames(const shared_ptr<Texture>& texture, int frames/* 
     m_frames += fs.frames;
 }
 
-void DynamicGraphic::AddFrames(const vector<shared_ptr<Texture> >& textures, int frames/* = -1*/)
+void DynamicGraphic::AddFrames(const std::vector<boost::shared_ptr<Texture> >& textures, int frames/* = -1*/)
 {
     if (!textures.empty()) {
         int old_frames = m_frames;
@@ -648,7 +605,7 @@ int DynamicGraphic::FramesInTexture(const Texture* t) const
     return cols * rows;
 }
 
-const vector<DynamicGraphic::FrameSet>& DynamicGraphic::Textures() const
+const std::vector<DynamicGraphic::FrameSet>& DynamicGraphic::Textures() const
 {
     return m_textures;
 }
@@ -671,6 +628,11 @@ int DynamicGraphic::FirstFrameTime() const
 int DynamicGraphic::LastFrameTime() const
 {
     return m_last_frame_time;
+}
+
+void DynamicGraphic::PostLoadTextureHandling()
+{
+    // TODO
 }
 
 void DynamicGraphic::ValidateStyle()
@@ -699,5 +661,3 @@ void DynamicGraphic::ValidateStyle()
         m_style |= GR_SHRINKFIT;
     }
 }
-
-} // namespace GG

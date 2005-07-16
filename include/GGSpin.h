@@ -48,10 +48,9 @@
 #include <GGDrawUtil.h>
 #endif
 
-#ifndef _XMLValidators_h_
-#include <XMLValidators.h>
-#endif
+#include <boost/serialization/access.hpp>
 
+#include <cmath>
 #include <limits>
 
 
@@ -59,8 +58,8 @@ namespace GG {
 
 // forward declaration of spin_details::mod and spin_details::div
 namespace spin_details {
-template <class T> T mod(T, T);
-template <class T> T div(T, T);
+    template <class T> T mod(T, T);
+    template <class T> T div(T, T);
 }
 
 
@@ -71,22 +70,19 @@ enum SpinRegion {
     SR_DN_BN
 };
 
-/** a spin box control.  This control class is templated so that arbitrary data types can be used with Spin.  All the 
+/** a spin box control.  This control class is templated so that arbitrary data types can be used with Spin.  All the
     built-in numeric types are supported by the code here.  If you want to use some other type, such as an enum type,
-    you need to define operator+(), operator-(), and template specializations of spin_details::mod() and spin_details::div().  
-    Spin controls are optionally directly editable by the user.  When the user inputs a value that is not valid for the
-    Spin's parameters (not on a step boundary, or outside the allowed range), the input gets locked to the nearest
-    valid value.  The user is responsible for selecting a min, max, and step size that make sense.  For instance, 
-    min = 0, max = 4, step = 3 may produce odd results if the user increments all the way to the top, then back down,
-    to produce the sequence 0, 3, 4, 1, 0.  To avoid this, choose the values so that (max - min) mod step == 0.  It is
-    possible to provide custom buttons for a Spin to use; if you choose to add custom buttons, make sure they look 
-    alright at arbitrary sizes, and note that Spin buttons are always H wide by H/2 tall, where H is the height of 
-    the Spin, less the thickness of the Spin's border.  Since spin is a templated class, it is impossible to add 
-    every possible instantiation to the app's XMLObjectFactory.  So if you want Spin controls to be automatically
-    loaded in your application, and you are instantiating them with some type other than Spin<int> or Spin<double>, 
-    you need to add them to the app yourself, using XMLTypeName().  See GG::App::AddWndGenerator() and 
-    GG::XMLObjectFactory for details on this topic in general, and see AppImplData::AppImplData() in GGApp.cpp for 
-    example code for adding Spins to the app's object factory.*/
+    you need to define operator+(), operator-(), and template specializations of spin_details::mod() and
+    spin_details::div().  Spin controls are optionally directly editable by the user.  When the user inputs a value that
+    is not valid for the Spin's parameters (not on a step boundary, or outside the allowed range), the input gets locked
+    to the nearest valid value.  The user is responsible for selecting a min, max, and step size that make sense.  For
+    instance, min = 0, max = 4, step = 3 may produce odd results if the user increments all the way to the top, then
+    back down, to produce the sequence 0, 3, 4, 1, 0.  To avoid this, choose the values so that (max - min) mod step ==
+    0.  It is possible to provide custom buttons for a Spin to use; if you choose to add custom buttons, make sure they
+    look alright at arbitrary sizes, and note that Spin buttons are always H wide by H/2 tall, where H is the height of
+    the Spin, less the thickness of the Spin's border.  Note that if you want Spin controls to be automatically
+    serialized in your application, you need to export each instantiation of Spin<> yourself (e.g. Spin<int> or
+    Spin<double>).  See the boost serialization documentation for details. */
 template <class T>
 class Spin : public Control
 {
@@ -103,28 +99,24 @@ public:
 
     /** \name Structors */ //@{
     /** ctor*/
-    Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const shared_ptr<Font>& font, Clr color, 
+    Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
          Uint32 flags = CLICKABLE | DRAG_KEEPER);
 
     /** ctor*/
-    Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const string& font_filename, int pts, Clr color, 
+    Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
          Uint32 flags = CLICKABLE | DRAG_KEEPER);
 
     /** ctor that does not required height. Height is determined from the font and point size used.*/
-    Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const shared_ptr<Font>& font, Clr color, 
+    Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
          Uint32 flags = CLICKABLE | DRAG_KEEPER);
 
     /** ctor that does not required height. Height is determined from the font and point size used.*/
-    Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const string& font_filename, int pts, Clr color, 
+    Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
          Uint32 flags = CLICKABLE | DRAG_KEEPER);
-
-    /** ctor that constructs an Spin object from an XMLElement. \throw std::invalid_argument May throw 
-        std::invalid_argument if \a elem does not encode a Spin object*/
-    Spin(const XMLElement& elem);
 
     ~Spin(); // dtor
     //@}
@@ -140,12 +132,6 @@ public:
     Clr   InteriorColor() const;      ///< returns the the interior color of the control
     Clr   HiliteColor() const;        ///< returns the color used to render hiliting around selected text
     Clr   SelectedTextColor() const;  ///< returns the color used to render selected text
-
-    /** constructs an XMLElement from a Spin object*/
-    virtual XMLElement XMLEncode() const;
-
-    /** creates a Validator object that can validate changes in the XML representation of this object */
-    virtual XMLElementValidator XMLValidator() const;
 
     mutable ValueChangedSignalType ValueChangedSignal; ///< the value changed signal object for this DynamicGraphic
     //@}
@@ -184,18 +170,18 @@ public:
     void           SetSelectedTextColor(Clr c);  ///< sets the color used to render selected text   
     //@}
 
-    /** returns a std::string representing this Spin's exact type, including the type of its data, to aid with automatic
-        XML saving and loading*/
-    static string XMLTypeName();
-
 protected:
     typedef T ValueType;
 
     enum {BORDER_THICK = 2, PIXEL_MARGIN = 5};
 
+    /** \name Structors */ //@{
+    Spin(); ///< default ctor
+    //@}
+
     /** \name Accessors */ //@{
-    const shared_ptr<Button>&   UpButton() const; ///< returns a pointer to the Button control used as this control's up button
-    const shared_ptr<Button>&   DownButton() const; ///< returns a pointer to the Button control used as this control's down button
+    const boost::shared_ptr<Button>&   UpButton() const; ///< returns a pointer to the Button control used as this control's up button
+    const boost::shared_ptr<Button>&   DownButton() const; ///< returns a pointer to the Button control used as this control's down button
 
     SpinRegion  InitialDepressedRegion() const;  ///< returns the part of the control originally under cursor in LButtonDown msg
     SpinRegion  DepressedRegion() const;         ///< returns the part of the control currently being "depressed" by held-down mouse button
@@ -208,8 +194,9 @@ protected:
     //@}
 
 private:
-    void Init(const shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags);
-    void ValueUpdated(const string& val_text);
+    void ConnectSignals();
+    void Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags);
+    void ValueUpdated(const std::string& val_text);
 
     T        m_value;
     T        m_step_size;
@@ -218,20 +205,30 @@ private:
 
     bool     m_editable;
 
-    Edit*                m_edit;
-    shared_ptr<Button>   m_up_bn;
-    shared_ptr<Button>   m_dn_bn;
+    Edit*                     m_edit;
+    boost::shared_ptr<Button> m_up_bn;
+    boost::shared_ptr<Button> m_dn_bn;
 
     SpinRegion   m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
     SpinRegion   m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
 
     boost::signals::connection m_edit_connection;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 
 // template implementations
 template<class T>
-Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const shared_ptr<Font>& font, Clr color, 
+Spin<T>::Spin() :
+    Control()
+{
+}
+
+template<class T>
+Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
               Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
     Control(x, y, w, h),
@@ -249,7 +246,7 @@ Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool ed
 }
 
 template<class T>
-Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const string& font_filename, int pts, Clr color, 
+Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
               Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
     Control(x, y, w, h),
@@ -267,7 +264,7 @@ Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool ed
 }
 
 template<class T>
-Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const shared_ptr<Font>& font, Clr color, 
+Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
               Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
     Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
@@ -285,7 +282,7 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
 }
 
 template<class T>
-Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const string& font_filename, int pts, Clr color, 
+Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
               Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
     Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN),
@@ -300,45 +297,6 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_depressed_area(SR_NONE)
 {
     Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
-}
-
-template<class T>
-Spin<T>::Spin(const XMLElement& elem) : 
-    Control(elem.Child("GG::Control")),
-    m_initial_depressed_area(SR_NONE),
-    m_depressed_area(SR_NONE)
-{
-    if (elem.Tag() != XMLTypeName())
-        throw std::invalid_argument("Attempted to construct a " + XMLTypeName() + " from an XMLElement that had a tag other than \"" + XMLTypeName() + "\"");
-
-    m_value = lexical_cast<T>(elem.Child("m_value").Text());
-    m_step_size = lexical_cast<T>(elem.Child("m_step_size").Text());
-    m_min_value = lexical_cast<T>(elem.Child("m_min_value").Text());
-    m_max_value = lexical_cast<T>(elem.Child("m_max_value").Text());
-    m_editable = lexical_cast<bool>(elem.Child("m_editable").Text());
-
-    const XMLElement* curr_elem = &elem.Child("m_edit");
-    m_edit = new Edit(curr_elem->Child("GG::Edit"));
-    if (m_editable) {
-        AttachChild(m_edit);
-        m_edit_connection = Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
-    }
-
-    curr_elem = &elem.Child("m_up_bn");
-    Wnd* w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
-    if (Button* b = dynamic_cast<Button*>(w)) {
-        m_up_bn.reset(b);
-    } else {
-        throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the increment button for a GG::Spin.");
-    }
-
-    curr_elem = &elem.Child("m_dn_bn");
-    w = App::GetApp()->GenerateWnd(curr_elem->Child(0));
-    if (Button* b = dynamic_cast<Button*>(w)) {
-        m_dn_bn.reset(b);
-    } else {
-        throw std::runtime_error("Spin::Spin : Attempted to use a non-Button object as the decrement button for a GG::Spin.");
-    }
 }
 
 template<class T>
@@ -400,50 +358,6 @@ template<class T>
 Clr Spin<T>::SelectedTextColor() const
 {
     return m_edit->SelectedTextColor();
-}
-
-template<class T>
-XMLElement Spin<T>::XMLEncode() const
-{
-    XMLElement retval(XMLTypeName());
-
-    if (m_editable)
-        const_cast<Spin*>(this)->DetachChild(m_edit);
-    retval.AppendChild(Control::XMLEncode());
-    if (m_editable)
-        const_cast<Spin*>(this)->AttachChild(m_edit);
-
-    retval.AppendChild(XMLElement("m_value", lexical_cast<string>(m_value)));
-    retval.AppendChild(XMLElement("m_step_size", lexical_cast<string>(m_step_size)));
-    retval.AppendChild(XMLElement("m_min_value", lexical_cast<string>(m_min_value)));
-    retval.AppendChild(XMLElement("m_max_value", lexical_cast<string>(m_max_value)));
-    retval.AppendChild(XMLElement("m_editable", lexical_cast<string>(m_editable)));
-    retval.AppendChild(XMLElement("m_edit", m_edit->XMLEncode()));
-    retval.AppendChild(XMLElement("m_up_bn", m_up_bn->XMLEncode()));
-    retval.AppendChild(XMLElement("m_dn_bn", m_dn_bn->XMLEncode()));
-    return retval;
-}
-
-template<class T>
-XMLElementValidator Spin<T>::XMLValidator() const
-{
-    XMLElementValidator retval(XMLTypeName());
-
-    if (m_editable)
-        const_cast<Spin*>(this)->DetachChild(m_edit);
-    retval.AppendChild(Control::XMLValidator());
-    if (m_editable)
-        const_cast<Spin*>(this)->AttachChild(m_edit);
-
-    retval.AppendChild(XMLElementValidator("m_value", new Validator<T>()));
-    retval.AppendChild(XMLElementValidator("m_step_size", new Validator<T>()));
-    retval.AppendChild(XMLElementValidator("m_min_value", new Validator<T>()));
-    retval.AppendChild(XMLElementValidator("m_max_value", new Validator<T>()));
-    retval.AppendChild(XMLElementValidator("m_editable", new Validator<bool>()));
-    retval.AppendChild(XMLElementValidator("m_edit", m_edit->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_up_bn", m_up_bn->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_dn_bn", m_dn_bn->XMLValidator()));
-    return retval;
 }
 
 template<class T>
@@ -677,22 +591,13 @@ void Spin<T>::SetSelectedTextColor(Clr c)
 }
 
 template<class T>
-string Spin<T>::XMLTypeName()
-{
-    string retval = "GG::Spin_";
-    retval += typeid(ValueType).name();
-    retval += "_";
-    return retval;
-}
-
-template<class T>
-const shared_ptr<Button>& Spin<T>::UpButton() const
+const boost::shared_ptr<Button>& Spin<T>::UpButton() const
 {
     return m_up_bn;
 }
 
 template<class T>
-const shared_ptr<Button>& Spin<T>::DownButton() const
+const boost::shared_ptr<Button>& Spin<T>::DownButton() const
 {
     return m_dn_bn;
 }
@@ -722,23 +627,29 @@ Edit* Spin<T>::GetEdit()
 }
 
 template<class T>
-void Spin<T>::Init(const shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
+void Spin<T>::ConnectSignals()
+{
+    if (m_editable)
+        m_edit_connection = Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
+}
+
+template<class T>
+void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
 {
     Control::SetColor(color);
-    m_edit = new Edit(0, 0, 1, 1, boost::lexical_cast<string>(m_value), font, CLR_ZERO, text_color, interior);
+    m_edit = new Edit(0, 0, 1, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
     if (!m_up_bn)
-        m_up_bn = shared_ptr<Button>(new Button(0, 0, 1, 1, "+", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
+        m_up_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "+", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
     if (!m_dn_bn)
-        m_dn_bn = shared_ptr<Button>(new Button(0, 0, 1, 1, "-", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
-    if (m_editable) {
+        m_dn_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "-", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
+    if (m_editable)
         AttachChild(m_edit);
-        m_edit_connection = Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
-    }
+    ConnectSignals();
     SizeMove(UpperLeft(), LowerRight());
 }
 
 template<class T>
-void Spin<T>::ValueUpdated(const string& val_text)
+void Spin<T>::ValueUpdated(const std::string& val_text)
 {
     T value;
     try {
@@ -750,30 +661,48 @@ void Spin<T>::ValueUpdated(const string& val_text)
     SetValue(value);
 }
 
+template <class T>
+template <class Archive>
+void Spin<T>::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_value)
+        & BOOST_SERIALIZATION_NVP(m_step_size)
+        & BOOST_SERIALIZATION_NVP(m_min_value)
+        & BOOST_SERIALIZATION_NVP(m_max_value)
+        & BOOST_SERIALIZATION_NVP(m_editable)
+        & BOOST_SERIALIZATION_NVP(m_edit)
+        & BOOST_SERIALIZATION_NVP(m_up_bn)
+        & BOOST_SERIALIZATION_NVP(m_dn_bn);
+
+    if (Archive::is_loading::value)
+        ConnectSignals();
+}
+
 namespace spin_details {
-// provides a typesafe mod function
-template <class T> inline 
-T mod (T dividend, T divisor) {return dividend % divisor;}
+    // provides a typesafe mod function
+    template <class T> inline 
+    T mod (T dividend, T divisor) {return dividend % divisor;}
 
-// template specializations
-template <> inline 
-float mod<float> (float dividend, float divisor) {return std::fmod(dividend, divisor);}
-template <> inline 
-double mod<double> (double dividend, double divisor) {return std::fmod(dividend, divisor);}
-template <> inline 
-long double mod<long double> (long double dividend, long double divisor) {return std::fmod(dividend, divisor);}
+    // template specializations
+    template <> inline 
+    float mod<float> (float dividend, float divisor) {return std::fmod(dividend, divisor);}
+    template <> inline 
+    double mod<double> (double dividend, double divisor) {return std::fmod(dividend, divisor);}
+    template <> inline 
+    long double mod<long double> (long double dividend, long double divisor) {return std::fmod(dividend, divisor);}
 
-// provides a typesafe div function
-template <class T> inline 
-T div (T dividend, T divisor) {return dividend / divisor;}
+    // provides a typesafe div function
+    template <class T> inline 
+    T div (T dividend, T divisor) {return dividend / divisor;}
 
-// template specializations
-template <> inline 
-float div<float> (float dividend, float divisor) {return std::floor(dividend / divisor);}
-template <> inline 
-double div<double> (double dividend, double divisor) {return std::floor(dividend / divisor);}
-template <> inline 
-long double div<long double> (long double dividend, long double divisor) {return std::floor(dividend / divisor);}
+    // template specializations
+    template <> inline 
+    float div<float> (float dividend, float divisor) {return std::floor(dividend / divisor);}
+    template <> inline 
+    double div<double> (double dividend, double divisor) {return std::floor(dividend / divisor);}
+    template <> inline 
+    long double div<long double> (long double dividend, long double divisor) {return std::floor(dividend / divisor);}
 } // namespace spin_details
 
 } // namespace GG

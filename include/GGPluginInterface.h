@@ -68,13 +68,13 @@ class MultiEdit;
 class StaticGraphic;
 class TextControl;
 
-/** the interface to custom-control plugins.  This class is used to access derived GG controls that are unknown until runtime, but are available for 
-    dynamic loading in shared libraries/DLLs.  The interface basically allows you to create custom controls (GG::Button subclasses, GG::ListBox 
-    subclasses, etc.) from one or more dynamic libraries, which in turn allows you to change the styles of the controls in an application without 
-    recompiling, or even relinking.  While the interface is in an unloaded 
-    state, the functions in the interface are all null, and calling any of them will crash your app.  Once a plugin has been loaded, all the 
-    functions in the interface should be valid (if the plugin author did her job).  Loading a plugin also adds all the XML generator functions provided
-    by the plugin to the singleton GG::App's XML object factory.  Unloading a plugin removes all such generators from the factory. */
+/** the interface to custom-control plugins.  This class is used to access derived GG controls that are unknown until
+    runtime, but are available for dynamic loading in shared libraries/DLLs.  The interface basically allows you to
+    create custom controls (GG::Button subclasses, GG::ListBox subclasses, etc.) from one or more dynamic libraries,
+    which in turn allows you to change the styles of the controls in an application without recompiling, or even
+    relinking.  While the interface is in an unloaded state, the functions in the interface are all null, and calling
+    any of them will crash your app.  Once a plugin has been loaded, all the functions in the interface should be valid
+    (if the plugin author did her job). */
 class GG_API PluginInterface
 {
 public:
@@ -148,17 +148,15 @@ public:
     CreateTextControlFn         CreateTextControl;      ///< returns a new GG::TextControl, or an instance of a plugin-specific subclass of GG::TextControl.
 
     DestroyControlFn            DestroyControl;         ///< destroys a new GG::Control-derived created by the plugin.
-
-    /** returns a map from XML tag names of plugin-specific Control classes to the names of the generator functions for those classes. */
-    FactoryGeneratorNamesFn     FactoryGeneratorNames;
     //@}
 
 private:
     lt_dlhandle m_handle;
 };
 
-/** This singleton class is essentially a very thin wrapper around a map of PluginInterface smart pointers, keyed on std::string plugin names.  
-    The user need only request a plugin through GetPlugin(); if the plugin is not already resident, it will be loaded.*/
+/** this singleton class is essentially a very thin wrapper around a map of PluginInterface smart pointers, keyed on
+    std::string plugin names.  The user need only request a plugin through GetPlugin(); if the plugin is not already
+    resident, it will be loaded.*/
 class GG_API PluginManager
 {
 public:
@@ -167,11 +165,11 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    shared_ptr<PluginInterface> GetPlugin(const string& name);  ///< returns a shared_ptr to the plugin interface created from plugin \a name. If the plugin is not present in the manager's pool, it will be loaded from disk.
+    boost::shared_ptr<PluginInterface> GetPlugin(const std::string& name);  ///< returns a shared_ptr to the plugin interface created from plugin \a name. If the plugin is not present in the manager's pool, it will be loaded from disk.
 
     /** removes the manager's shared_ptr to the plugin created from file \a name, if it exists.  \note Due to shared_ptr semantics, 
         the plugin may not be deleted until much later. */
-    void                FreePlugin(const string& name);
+    void                FreePlugin(const std::string& name);
     //@}
 
     /** initializes the dynamic loader system that loads and unloads plugins.  This is available as a convenience only; it will be called 
@@ -186,10 +184,10 @@ public:
     static void CleanupDynamicLoader();
 
 private:
+    std::map<std::string, boost::shared_ptr<PluginInterface> > m_plugins;
+
     static bool s_created;
     static bool s_lt_dl_initialized;
-    map<string, shared_ptr<PluginInterface> >
-                m_plugins;
 };
 
 } // namespace GG

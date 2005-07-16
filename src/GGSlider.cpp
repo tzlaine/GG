@@ -29,9 +29,13 @@
 #include <GGApp.h>
 #include <GGButton.h>
 #include <GGDrawUtil.h>
-#include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
+
+Slider::Slider() :
+    Control()
+{
+}
 
 Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color,
                int tab_width, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
@@ -68,37 +72,14 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     SizeMove(UpperLeft(), LowerRight());
 }
 
-Slider::Slider(const XMLElement& elem) :
-    Control(elem.Child("GG::Control")),
-    m_tab_drag_offset(-1)
-{
-    if (elem.Tag() != "GG::Slider")
-        throw std::invalid_argument("Attempted to construct a GG::Slider from an XMLElement that had a tag other than \"GG::Slider\"");
-
-    m_posn = lexical_cast<int>(elem.Child("m_posn").Text());
-    m_range_min = lexical_cast<int>(elem.Child("m_range_min").Text());
-    m_range_max = lexical_cast<int>(elem.Child("m_range_max").Text());
-    m_orientation = lexical_cast<Orientation>(elem.Child("m_orientation").Text());
-    m_line_width = lexical_cast<int>(elem.Child("m_line_width").Text());
-    m_tab_width = lexical_cast<int>(elem.Child("m_tab_width").Text());
-    m_line_style = lexical_cast<LineStyleType>(elem.Child("m_line_style").Text());
-
-    if (Button* b = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_tab").Child(0))))
-        m_tab.reset(b);
-    else
-        throw std::runtime_error("Slider::Slider : Attempted to use a non-Button object as the tab for a GG::Slider.");
-
-    SizeMove(UpperLeft(), LowerRight());
-}
-
 int Slider::Posn() const
 {
     return m_posn;
 }
 
-pair<int, int> Slider::SliderRange() const
+std::pair<int, int> Slider::SliderRange() const
 {
-    return pair<int,int>(m_range_min, m_range_max);
+    return std::pair<int,int>(m_range_min, m_range_max);
 }
 
 Slider::Orientation Slider::GetOrientation() const
@@ -119,36 +100,6 @@ int Slider::LineWidth() const
 Slider::LineStyleType Slider::LineStyle() const
 {
     return m_line_style;
-}
-
-XMLElement Slider::XMLEncode() const
-{
-    XMLElement retval("GG::Slider");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_posn", lexical_cast<string>(m_posn)));
-    retval.AppendChild(XMLElement("m_range_min", lexical_cast<string>(m_range_min)));
-    retval.AppendChild(XMLElement("m_range_max", lexical_cast<string>(m_range_max)));
-    retval.AppendChild(XMLElement("m_orientation", lexical_cast<string>(m_orientation)));
-    retval.AppendChild(XMLElement("m_line_width", lexical_cast<string>(m_line_width)));
-    retval.AppendChild(XMLElement("m_tab_width", lexical_cast<string>(m_tab_width)));
-    retval.AppendChild(XMLElement("m_line_style", lexical_cast<string>(m_line_style)));
-    retval.AppendChild(XMLElement("m_tab", m_tab->XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator Slider::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Slider");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_posn", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_range_min", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_range_max", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_orientation", new MappedEnumValidator<Orientation>()));
-    retval.AppendChild(XMLElementValidator("m_line_width", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_tab_width", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_line_style", new MappedEnumValidator<LineStyleType>()));
-    retval.AppendChild(XMLElementValidator("m_tab", m_tab->XMLValidator()));
-    return retval;
 }
 
 bool Slider::Render()
@@ -347,7 +298,7 @@ int Slider::TabDragOffset() const
     return m_tab_drag_offset;
 }
 
-const shared_ptr<Button>& Slider::Tab() const
+const boost::shared_ptr<Button>& Slider::Tab() const
 {
     return m_tab;
 }
@@ -373,6 +324,3 @@ void Slider::UpdatePosn()
     if (m_posn != old_posn)
         SlidSignal(m_posn, m_range_min, m_range_max);
 }
-
-} // namespace GG
-

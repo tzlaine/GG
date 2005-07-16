@@ -28,14 +28,18 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
-#include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 ////////////////////////////////////////////////
 // GG::TextControl
 ////////////////////////////////////////////////
-TextControl::TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
+TextControl::TextControl() :
+    Control()
+{
+}
+
+TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                          Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_format(text_fmt),
@@ -47,7 +51,7 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const sh
     SetText(str);
 }
 
-TextControl::TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
+TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
                          Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_format(text_fmt),
@@ -59,7 +63,7 @@ TextControl::TextControl(int x, int y, int w, int h, const string& str, const st
     SetText(str);
 }
 
-TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
+TextControl::TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
                          Uint32 flags/* = 0*/) :
     Control(x, y, 0, 0, flags),
     m_format(text_fmt),
@@ -71,7 +75,7 @@ TextControl::TextControl(int x, int y, const string& str, const shared_ptr<Font>
     SetText(str);
 }
 
-TextControl::TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
+TextControl::TextControl(int x, int y, const std::string& str, const std::string& font_filename, int pts, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
                          Uint32 flags/* = 0*/) :
     Control(x, y, 0, 0, flags),
     m_format(text_fmt),
@@ -81,27 +85,6 @@ TextControl::TextControl(int x, int y, const string& str, const string& font_fil
 {
     ValidateFormat();
     SetText(str);
-}
-
-TextControl::TextControl(const XMLElement& elem) :
-    Control(elem.Child("GG::Control")),
-    m_format(0)
-{
-    if (elem.Tag() != "GG::TextControl")
-        throw std::invalid_argument("Attempted to construct a GG::TextControl from an XMLElement that had a tag other than \"GG::TextControl\"");
-
-    m_format = FlagsFromString<GG::TextFormat>(elem.Child("m_format").Text());
-    ValidateFormat();
-
-    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
-
-    string font_filename = elem.Child("m_font").Child("GG::Font").Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(elem.Child("m_font").Child("GG::Font").Child("m_pt_sz").Text());
-    m_font = App::GetApp()->GetFont(font_filename, pts);
-
-    m_fit_to_text = lexical_cast<bool>(elem.Child("m_fit_to_text").Text());
-
-    SetText(Control::m_text);
 }
 
 Uint32 TextControl::TextFormat() const
@@ -114,7 +97,7 @@ Clr TextControl::TextColor() const
     return m_text_color;
 }
 
-TextControl::operator const string&() const
+TextControl::operator const std::string&() const
 {
     return Control::m_text;
 }
@@ -139,28 +122,6 @@ Pt TextControl::TextLowerRight() const
     return UpperLeft() + m_text_lr;
 }
 
-XMLElement TextControl::XMLEncode() const
-{
-    XMLElement retval("GG::TextControl");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_format", StringFromFlags<GG::TextFormat>(m_format)));
-    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
-    retval.AppendChild(XMLElement("m_fit_to_text", lexical_cast<string>(m_fit_to_text)));
-    return retval;
-}
-
-XMLElementValidator TextControl::XMLValidator() const
-{
-    XMLElementValidator retval("GG::TextControl");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_format", new ListValidator<GG::TextFormat>()));
-    retval.AppendChild(XMLElementValidator("m_text_color", m_text_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_font", m_font->XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_fit_to_text", new Validator<bool>()));
-    return retval;
-}
-
 bool TextControl::Render()
 {
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
@@ -170,7 +131,7 @@ bool TextControl::Render()
     return true;
 }
 
-void TextControl::SetText(const string& str)
+void TextControl::SetText(const std::string& str)
 {
     Control::m_text = str;
     if (m_font) {
@@ -187,7 +148,7 @@ void TextControl::SetText(const string& str)
 
 void TextControl::SetText(const char* str)
 {
-    SetText(string(str));
+    SetText(std::string(str));
 }
 
 void TextControl::SizeMove(int x1, int y1, int x2, int y2)
@@ -212,7 +173,7 @@ void TextControl::SetColor(Clr c)
     m_text_color = c;
 }
 
-void TextControl::operator+=(const string& str)
+void TextControl::operator+=(const std::string& str)
 {
     SetText(Control::m_text + str);
 }
@@ -244,12 +205,12 @@ void TextControl::Erase(int pos, int num/* = 1*/)
     SetText(Control::m_text);
 }
 
-const vector<Font::LineData>& TextControl::GetLineData() const
+const std::vector<Font::LineData>& TextControl::GetLineData() const
 {
     return m_line_data;
 }
 
-const shared_ptr<Font>& TextControl::GetFont() const
+const boost::shared_ptr<Font>& TextControl::GetFont() const
 {
     return m_font;
 }
@@ -296,6 +257,3 @@ void TextControl::RecomputeTextBounds()
         m_text_ul.x = static_cast<int>((Size().x - text_sz.x) / 2.0);
     m_text_lr = m_text_ul + text_sz;
 }
-
-} // namespace GG
-

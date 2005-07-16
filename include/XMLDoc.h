@@ -27,7 +27,8 @@
 
 /** \file XMLDoc.h
     Contains the XMLElement and XMLDoc classes and numerous free functions, which are used to encode GG elements into 
-    XML descriptions. */
+    XML descriptions.  Contents of this faile are deprecated and it will be removed upon the next major release.
+*/
 
 #ifndef _XMLDoc_h_
 #define _XMLDoc_h_
@@ -48,8 +49,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <fstream>       
-#include <iostream>       
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
@@ -58,17 +58,8 @@ namespace GG {
 
 class ValidatorBase;
 
-using std::ifstream;
-using std::istream;
-using std::ofstream;
-using std::ostream;
-using std::map;
-using std::multimap;
-using std::pair;
-using std::string;
-using std::vector;
-
-/** encapsulates an XML element (from a <> tag to a </> tag).  XMLElement is a simplified XML element, 
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    encapsulates an XML element (from a <> tag to a </> tag).  XMLElement is a simplified XML element, 
     consisting only of a tag, a single text string, attributes and child elements.  It is designed to represent 
     C++ objects to allow them to easily be saved to/loaded from disk and serialized to be sent over a network 
     connection. It is *not* designed to represent documents. So this:
@@ -126,26 +117,26 @@ using std::vector;
 class GG_API XMLElement
 {
 public:
-    typedef vector<XMLElement>::iterator         child_iterator;
-    typedef vector<XMLElement>::const_iterator   const_child_iterator;
-    typedef map<string, string>::iterator        attr_iterator;
-    typedef map<string, string>::const_iterator  const_attr_iterator;
+    typedef std::vector<XMLElement>::iterator                  child_iterator;
+    typedef std::vector<XMLElement>::const_iterator            const_child_iterator;
+    typedef std::map<std::string, std::string>::iterator       attr_iterator;
+    typedef std::map<std::string, std::string>::const_iterator const_attr_iterator;
 
     /** \name Structors */ //@{
     XMLElement() : m_root(false) {} ///< default ctor
-    XMLElement(const string& tag) : m_tag(tag), m_text(""), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag
-    XMLElement(const string& tag, const string& text) : m_tag(tag), m_text(text), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and text \a text
-    XMLElement(const string& tag, const XMLElement& body) : m_tag(tag), m_children(vector<XMLElement>(1, body)), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and a single child \a body
+    XMLElement(const std::string& tag) : m_tag(tag), m_text(""), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag
+    XMLElement(const std::string& tag, const std::string& text) : m_tag(tag), m_text(text), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and text \a text
+    XMLElement(const std::string& tag, const XMLElement& body) : m_tag(tag), m_children(std::vector<XMLElement>(1, body)), m_root(false) {}  ///< ctor that constructs an XMLElement with a tag-name \a tag and a single child \a body
     //@}
 
     /** \name Accessors */ //@{
-    const string& Tag() const;                          ///< returns the tag-name of the XMLElement
-    const string& Text() const;                         ///< returns the text of this XMLElement
-    int NumChildren() const;                            ///< returns the number of children in the XMLElement
-    int NumAttributes() const;                          ///< returns the number of attributes in the XMLElement
-    bool ContainsChild(const string& child) const;      ///< returns true if the element contains a child called \a name
-    bool ContainsAttribute(const string& attrib) const; ///< returns true if the element contains an attribute called \a name
-    int  ChildIndex(const string& child) const;         ///< returns the index of the child called \a name, or -1 if not found
+    const std::string& Tag() const;                          ///< returns the tag-name of the XMLElement
+    const std::string& Text() const;                         ///< returns the text of this XMLElement
+    int NumChildren() const;                                 ///< returns the number of children in the XMLElement
+    int NumAttributes() const;                               ///< returns the number of attributes in the XMLElement
+    bool ContainsChild(const std::string& child) const;      ///< returns true if the element contains a child called \a name
+    bool ContainsAttribute(const std::string& attrib) const; ///< returns true if the element contains an attribute called \a name
+    int  ChildIndex(const std::string& child) const;         ///< returns the index of the child called \a name, or -1 if not found
 
     /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
          An out of range index will cause an exception. */
@@ -153,17 +144,17 @@ public:
 
     /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \throw std::out_of_range
          An exception is thrown if no child named \a child exists. */   
-    const XMLElement& Child(const string& child) const;
+    const XMLElement& Child(const std::string& child) const;
 
     /**  returns the last child in child list of the XMLElement.  \throw std::out_of_range Calling this on an empty
          element will cause an exception. */   
     const XMLElement& LastChild() const;
 
     /** returns the value of the attribute with name \a key, or "" if no such named attribute is found */
-    const string& XMLElement::Attribute(const string& attrib) const;
+    const std::string& XMLElement::Attribute(const std::string& attrib) const;
 
     /** writes the XMLElement to an output stream; returns the stream */
-    ostream& WriteElement(ostream& os, int indent = 0, bool whitespace = true) const;
+    std::ostream& WriteElement(std::ostream& os, int indent = 0, bool whitespace = true) const;
 
     const_child_iterator child_begin() const; ///< const_iterator to the first child in the XMLElement
     const_child_iterator child_end() const;   ///< const_iterator to the last + 1 child in the XMLElement
@@ -178,23 +169,23 @@ public:
 
     /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \throw std::out_of_range
          An exception is thrown if no child named \a child exists. */   
-    XMLElement& Child(const string& child);
+    XMLElement& Child(const std::string& child);
 
     /**  returns the last child in child list of the XMLElement.  \throw std::out_of_range Calling this on an empty
          element will cause an exception. */   
     XMLElement& LastChild();
 
     /** sets (and possibly overwrites) an attribute \a attrib, with the value \a val. */
-    void SetAttribute(const string& attrib, const string& val);
+    void SetAttribute(const std::string& attrib, const std::string& val);
 
     /** sets the tag to \a tag */
-    void SetTag(const string& tag);
+    void SetTag(const std::string& tag);
 
     /** sets the text to \a text */
-    void SetText(const string& text);
+    void SetText(const std::string& text);
 
     /** removes attribute \a attrib from the XMLElement*/
-    void RemoveAttribute(const string& attrib);
+    void RemoveAttribute(const std::string& attrib);
 
     /** removes all attributes from the XMLElement*/
     void RemoveAttributes();
@@ -203,7 +194,7 @@ public:
     void AppendChild(const XMLElement& e);
 
     /** creates an empty XMLElement with tag-name \a child, and adds it to the end of the child list of the XMLElement */
-    void AppendChild(const string& child);
+    void AppendChild(const std::string& child);
 
     /** adds a child \a e in the \a idx-th position of the child list of the XMLElement. \throw std::out_of_range
          An out of range index will cause an exception. */
@@ -215,7 +206,7 @@ public:
 
     /** removes the child called \a shild from the XMLElement.  \throw std::out_of_range An exception is thrown if no
         child named \a child exists. */
-    void RemoveChild(const string& child);
+    void RemoveChild(const std::string& child);
 
     /** removes all children from the XMLElement*/
     void RemoveChildren();
@@ -229,43 +220,44 @@ public:
 private:
     /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
         in an XMLDoc document*/
-    XMLElement(const string& t, bool r);
+    XMLElement(const std::string& t, bool r);
 
-    string               m_tag;        ///< the tag-name of the XMLElement
-    string               m_text;       ///< the text of this XMLElement
-    map<string, string>  m_attributes; ///< the attributes of the XMLElement, stored as key-value pairs
-    vector<XMLElement>   m_children;   ///< the XMLElement children of this XMLElement
+    std::string                        m_tag;        ///< the tag-name of the XMLElement
+    std::string                        m_text;       ///< the text of this XMLElement
+    std::map<std::string, std::string> m_attributes; ///< the attributes of the XMLElement, stored as key-value pairs
+    std::vector<XMLElement>            m_children;   ///< the XMLElement children of this XMLElement
 
-    bool                 m_root;       ///< true if this XMLElement is the root element of an XMLDoc document
+    bool                               m_root;       ///< true if this XMLElement is the root element of an XMLDoc document
 
     /** allows XMLDoc to create root XMLElements and call the non-const overload of LastChild() */
     friend class XMLDoc;
 };
 
-/** encapsulates an entire XML document.  Each XMLDoc is assumed to take up an entire file, and to contain an arbitrary
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    encapsulates an entire XML document.  Each XMLDoc is assumed to take up an entire file, and to contain an arbitrary
     number of XMLElements within its root_node member. */
 class GG_API XMLDoc
 {
 public:
     /** \name Structors */ //@{
     /** ctor that constructs an empty XML document with a root node with tag-name \a root_tag */
-    XMLDoc(const string& root_tag = "GG::XMLDoc");
+    XMLDoc(const std::string& root_tag = "GG::XMLDoc");
 
     /** ctor that constructs an XML document from an input stream \a is */
-    XMLDoc(const istream& is);
+    XMLDoc(const std::istream& is);
     //@}
 
     /** \name Accessors */ //@{
     /** writes the XMLDoc to an output stream; returns the stream.  If \a whitespace is false, the document is written 
         without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in a 
         more standard human-readable form. */
-    ostream& WriteDoc(ostream& os, bool whitespace = true) const;
+    std::ostream& WriteDoc(std::ostream& os, bool whitespace = true) const;
     //@}
 
     /** \name Mutators */ //@{
     /** destroys the current contents of the XMLDoc, and replaces tham with the constents of the document in the input 
         stream \a is; returns the stream*/
-    istream& ReadDoc(istream& is);
+    std::istream& ReadDoc(std::istream& is);
     //@}
 
     XMLElement root_node;  ///< the single XMLElement in the document, under which all other XMLElement are children
@@ -278,10 +270,10 @@ private:
     static XMLDoc* s_curr_parsing_doc;
 
     /** maintains the current environment for reading XMLElements (the current enclosing XMLElement) */
-    static vector<XMLElement*> s_element_stack;
+    static std::vector<XMLElement*> s_element_stack;
 
     static XMLElement s_temp_elem;
-    static string s_temp_attr_name;
+    static std::string s_temp_attr_name;
 
     // these are used along with the static members above during XML parsing
     static void SetElemName(const char* first, const char* last);
@@ -293,12 +285,14 @@ private:
     static void AppendToText(const char* first, const char* last);
 };
 
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a validator that checks the values of an XML element, including all its attributes and children */
 class GG_API XMLElementValidator
 {
 public:
     /** \name Structors */ //@{
-    XMLElementValidator(const string& tag, ValidatorBase* text_validator = 0);
-    XMLElementValidator(const string& tag, const XMLElementValidator& body); ///< ctor that constructs an XMLElement with a tag-name \a tag and a single child \a body
+    XMLElementValidator(const std::string& tag, ValidatorBase* text_validator = 0);
+    XMLElementValidator(const std::string& tag, const XMLElementValidator& body); ///< ctor that constructs an XMLElement with a tag-name \a tag and a single child \a body
     XMLElementValidator(const XMLElementValidator& rhs);
     const XMLElementValidator& operator=(const XMLElementValidator& rhs);
     ~XMLElementValidator();
@@ -311,14 +305,14 @@ public:
     /** \name Mutators */ //@{
     /**  returns the child in the child list of the XMLElementValidator that has the tag-name \a child.  \throw std::out_of_range
          An exception is thrown if no child named \a child exists. */   
-    XMLElementValidator& Child(const string& child);
+    XMLElementValidator& Child(const std::string& child);
 
     /**  returns the last child in the child list of the XMLElementValidator.  \throw std::out_of_range Calling this on an empty
          element will cause an exception. */
     XMLElementValidator& LastChild();
 
     /** sets (and possibly overwrites) an attribute \a attrib, with the value \a val. */
-    void SetAttribute(const string& attrib, ValidatorBase* value_validator);
+    void SetAttribute(const std::string& attrib, ValidatorBase* value_validator);
 
     /** adds child XMLElementValidator \a ev to the end of the child list of the XMLElementValidator */
     void AppendChild(const XMLElementValidator& ev);
@@ -327,31 +321,35 @@ public:
 private:
     void Clear();
 
-    string                       m_tag;
-    ValidatorBase*               m_text_validator;
-    map<string, ValidatorBase*>  m_attribute_validators;
-    vector<XMLElementValidator>  m_children;
+    std::string                           m_tag;
+    ValidatorBase*                        m_text_validator;
+    std::map<std::string, ValidatorBase*> m_attribute_validators;
+    std::vector<XMLElementValidator>      m_children;
 };
 
 
-/** Breaks a given string up into tokens.  The resulting vector contains all the non-whitespace characters from \a str. */
-GG_API vector<string> Tokenize(const string& str);
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Breaks a given string up into tokens.  The resulting vector contains all the non-whitespace characters from \a
+    str. */
+GG_API std::vector<std::string> Tokenize(const std::string& str);
 
-/** Takes a string of the form "(first, second) (first, second) ..." and produces two vectors of token strings: 
-    one for keys and one for values. */
-GG_API pair<vector<string>, vector<string> > TokenizeMapString(const string& str);
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Takes a string of the form "(first, second) (first, second) ..." and produces two vectors of token strings: one for
+    keys and one for values. */
+GG_API std::pair<std::vector<std::string>, std::vector<std::string> > TokenizeMapString(const std::string& str);
 
-/** Takes an unsigned integer that is the result of the bitwise OR-ing of enumerated values of type T, and generates a
-    string of the form "value1 value2 value3 ...".  This function will yield the zero-value of enum type T (e.g. "TF_NONE")
-    if no nonzero flags are specified.  If no such zero-value exists, the returned string will be empty.  
-    \note This function depends on EnumMap<T> being defined. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Takes an unsigned integer that is the result of the bitwise OR-ing of enumerated values of type T, and generates a
+    string of the form "value1 value2 value3 ...".  This function will yield the zero-value of enum type T
+    (e.g. "TF_NONE") if no nonzero flags are specified.  If no such zero-value exists, the returned string will be
+    empty.  \note This function depends on EnumMap<T> being defined. */
 template <class T>
-string StringFromFlags(unsigned int flags)
+std::string StringFromFlags(unsigned int flags)
 {
-    string retval;
+    std::string retval;
     const EnumMap<T>& enum_map = GetEnumMap<T>();
     T zero_value = T(-1); // if this value remains -1, we never found a zero value; otherwise it will be equal to 0
-    for (typename EnumMap<T>::MapType::const_iterator it = enum_map.map_.begin(); it != enum_map.map_.end(); ++it) {
+    for (typename EnumMap<T>::MapType::const_iterator it = enum_map.m_map.begin(); it != enum_map.m_map.end(); ++it) {
         if (zero_value && !it->first) // take only the first zero-value, in case there are multiple such values
             zero_value = it->first;
         if (flags & it->first)
@@ -362,63 +360,70 @@ string StringFromFlags(unsigned int flags)
     return retval;
 }
 
-/** Takes a string of the form "value1 value2 value3 ..." and returns an unsigned integer that is the result of the bitwise
-    OR-ing of the enumerated values of type T in the string. \note This function depends on EnumMap<T> being defined. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Takes a string of the form "value1 value2 value3 ..." and returns an unsigned integer that is the result of the
+    bitwise OR-ing of the enumerated values of type T in the string. \note This function depends on EnumMap<T> being
+    defined. */
 template <class T>
-unsigned int FlagsFromString(const string& str)
+unsigned int FlagsFromString(const std::string& str)
 {
     unsigned int retval = 0;
     const EnumMap<T>& enum_map = GetEnumMap<T>();
-    vector<string> tokens = Tokenize(str);
+    std::vector<std::string> tokens = Tokenize(str);
     for (unsigned int i = 0; i < tokens.size(); ++i) {
         retval |= enum_map.FromString(tokens[i]);
     }
     return retval;
 }
 
-/** Takes any simple STL container (vector, set, etc.) and puts its contents into a whitespace-delimited list.  
-    Due to the key-value pair organization of STL maps, this function does not work with them.  Use StringFromMap() 
-    instead. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Takes any simple STL container (vector, set, etc.) and puts its contents into a whitespace-delimited list.  Due to
+    the key-value pair organization of STL maps, this function does not work with them.  Use StringFromMap() instead. */
 template <class Cont>
-string StringFromContainer(const Cont& container)
+std::string StringFromContainer(const Cont& container)
 {
-    string retval;
+    std::string retval;
     for (typename Cont::const_iterator it = container.begin(); it != container.end(); ++it) {
-        retval += boost::lexical_cast<string>(*it) + " ";
+        retval += boost::lexical_cast<std::string>(*it) + " ";
     }
     return retval;
 }
 
-/** Takes an STL map and puts its contents into a whitespace-delimited list, in the format "(first, second) (first, second) ...". */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Takes an STL map and puts its contents into a whitespace-delimited list, in the format "(first, second) (first,
+    second) ...". */
 template <class T1, class T2>
-string StringFromMap(const map<T1, T2>& container)
+std::string StringFromMap(const std::map<T1, T2>& container)
 {
-    string retval;
-    for (typename map<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
-        retval += "(" + boost::lexical_cast<string>(it->first) + ", " + boost::lexical_cast<string>(it->second) + ") ";
+    std::string retval;
+    for (typename std::map<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
+        retval += "(" + boost::lexical_cast<std::string>(it->first) + ", " + boost::lexical_cast<std::string>(it->second) + ") ";
     }
     return retval;
 }
 
-/** Takes an STL multimap and puts its contents into a whitespace-delimited list, in the format "(first, second) (first, second) ...". */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Takes an STL multimap and puts its contents into a whitespace-delimited list, in the format "(first, second) (first,
+    second) ...". */
 template <class T1, class T2>
-string StringFromMultimap(const multimap<T1, T2>& container)
+std::string StringFromMultimap(const std::multimap<T1, T2>& container)
 {
-    string retval;
-    for (typename multimap<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
-        retval += "(" + boost::lexical_cast<string>(it->first) + ", " + boost::lexical_cast<string>(it->second) + ") ";
+    std::string retval;
+    for (typename std::multimap<T1, T2>::const_iterator it = container.begin(); it != container.end(); ++it) {
+        retval += "(" + boost::lexical_cast<std::string>(it->first) + ", " + boost::lexical_cast<std::string>(it->second) + ") ";
     }
     return retval;
 }
 
-/** Creates a container of the specified type from a string consisting whitespace-delimited list of elements.  Due 
-    to the key-value pair organization of STL maps, this function does not work with them.  Use ContainerFromMapString() 
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Creates a container of the specified type from a string consisting whitespace-delimited list of elements.  Due to
+    the key-value pair organization of STL maps, this function does not work with them.  Use ContainerFromMapString()
     instead. */
 template <class Cont>
-Cont ContainerFromString(const string& str)
+Cont ContainerFromString(const std::string& str)
 {
     Cont retval;
-    vector<string> tokens = Tokenize(str);
+    std::vector<std::string> tokens = Tokenize(str);
     std::insert_iterator<Cont> ins_it = std::inserter(retval, retval.begin());
     typedef typename Cont::value_type T;
     for (unsigned int i = 0; i < tokens.size(); ++i) {
@@ -427,24 +432,28 @@ Cont ContainerFromString(const string& str)
     return retval;
 }
 
-/** Creates an STL map from a string consisting whitespace-delimited list of elements in the format "(first, second) (first, second) ...". */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Creates an STL map from a string consisting whitespace-delimited list of elements in the format "(first, second)
+    (first, second) ...". */
 template <class T1, class T2>
-map<T1, T2> MapFromString(const string& str)
+std::map<T1, T2> MapFromString(const std::string& str)
 {
-    map<T1, T2> retval;
-    pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
+    std::map<T1, T2> retval;
+    std::pair<std::vector<std::string>, std::vector<std::string> > tokens = TokenizeMapString(str);
     for (unsigned int i = 0; i < tokens.first.size(); ++i) {
         retval[boost::lexical_cast<T1>(tokens.first[i])] = boost::lexical_cast<T2>(tokens.second[i]);
     }
     return retval;
 }
 
-/** Creates an STL multimap from a string consisting whitespace-delimited list of elements in the format "(first, second) (first, second) ...". */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    Creates an STL multimap from a string consisting whitespace-delimited list of elements in the format "(first,
+    second) (first, second) ...". */
 template <class T1, class T2>
-multimap<T1, T2> MultimapFromString(const string& str)
+std::multimap<T1, T2> MultimapFromString(const std::string& str)
 {
-    multimap<T1, T2> retval;
-    pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
+    std::multimap<T1, T2> retval;
+    std::pair<std::vector<std::string>, std::vector<std::string> > tokens = TokenizeMapString(str);
     for (unsigned int i = 0; i < tokens.first.size(); ++i) {
         retval.insert(std::make_pair(boost::lexical_cast<T1>(tokens.first[i]), boost::lexical_cast<T2>(tokens.second[i])));
     }

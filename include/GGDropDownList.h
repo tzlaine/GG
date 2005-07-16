@@ -40,21 +40,22 @@
 #include "GGListBox.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
-/** displays a single choice, and allows the user to select items from a pop-up list.  DropDownList is based upon 
+/** displays a single choice, and allows the user to select items from a pop-up list.  DropDownList is based upon
     GG::ListBox, but has significant restrictions over the functionality of GG::ListBox.  Specifically, all list items
-    must have the same height, list items may not have subrows, and there is no dragging or dropping.  Though any 
-    Control-derived object may be placed in 
-    an item cell, the items are only interactive in the drop-down list; the currently selected item is displayed only.  
-    In the DropDownList constructor, there is no "h" height parameter as there is in the other Wnd-derived class 
-    contructors. The "row_ht" parameter takes the place of "h", but it has a slightly different meaning.  A cell-margin 
-    and the thickness of the border around the DropDownList are added to "row_ht" to determine the actual height of the 
-    control.  All subequent resizing calls will lock the height of the control to this calculated height.  The "drop_ht" 
-    parameter determines the vertical size of the drop-down list.  Most of the ListBox interface is duplicated in 
-    DropDownList.  Though you can still set the alignment, indentation, etc. of individual rows, as in ListBox, the 
-    currently-selected row will have the same alignment, indentation, etc. when displayed in the control in its 
-    unopened state.  This may look quite ugly.*/
+    must have the same height, list items may not have subrows, and there is no dragging or dropping.  Though any
+    Control-derived object may be placed in an item cell, the items are only interactive in the drop-down list; the
+    currently selected item is displayed only.  In the DropDownList constructor, there is no "h" height parameter as
+    there is in the other Wnd-derived class contructors. The "row_ht" parameter takes the place of "h", but it has a
+    slightly different meaning.  A cell-margin and the thickness of the border around the DropDownList are added to
+    "row_ht" to determine the actual height of the control.  All subequent resizing calls will lock the height of the
+    control to this calculated height.  The "drop_ht" parameter determines the vertical size of the drop-down list.
+    Most of the ListBox interface is duplicated in DropDownList.  Though you can still set the alignment, indentation,
+    etc. of individual rows, as in ListBox, the currently-selected row will have the same alignment, indentation,
+    etc. when displayed in the control in its unopened state.  This may look quite ugly.*/
 class GG_API DropDownList : public Control
 {
 public:
@@ -80,7 +81,6 @@ public:
         delete \a lb once it has been passed to the DropDownList ctor. */
     DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior, ListBox* lb = 0, Uint32 flags = CLICKABLE);
 
-    DropDownList(const XMLElement& elem); ///< ctor that constructs an DropDownList object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a DropDownList object
     ~DropDownList(); ///< dtor
     //@}
 
@@ -112,10 +112,6 @@ public:
     virtual Pt     ClientUpperLeft() const;
     virtual Pt     ClientLowerRight() const;
 
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an DropDownList object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
-
     mutable SelChangedSignalType SelChangedSignal; ///< the selection change signal object for this DropDownList
     //@}
 
@@ -126,7 +122,7 @@ public:
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
-    int            Insert(Row* row, int at = -1); ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point
+    int            Insert(Row* row, int at = -1); ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point.  This Row becomes the property of the DropDownList and should not be deleted or inserted into any other DropDownLists
     void           Delete(int idx);               ///< removes the row at index \a idx from the list
     void           Clear();                       ///< empties the list
     void           IndentRow(int n, int i);       ///< sets the indentation of the row at index \a n to \a i; not range-checked
@@ -154,6 +150,10 @@ public:
     //@}
 
 protected:
+    /** \name Structors */ //@{
+    DropDownList(); ///< default ctor
+    //@}
+
     /** \name Mutators */ //@{
     ListBox*       LB();                ///< returns the ListBox used to render the selected row and the popup list
     //@}
@@ -161,10 +161,21 @@ protected:
 private:
     int            m_current_item_idx;  ///< the index of the currently-selected list item (-1 if none is selected)
     ListBox*       m_LB;                ///< the ListBox used to render the selected row and the popup list
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
+// template implementations
+template <class Archive>
+void GG::DropDownList::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_current_item_idx)
+        & BOOST_SERIALIZATION_NVP(m_LB);
+}
+
 #endif // _GGDropDownList_h_
-
-

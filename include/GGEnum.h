@@ -36,6 +36,7 @@
 #include <string>
 
 namespace GG {
+
 /** A base type for all templated EnumMap types. */
 struct EnumMapBase
 {
@@ -46,12 +47,13 @@ struct EnumMapBase
     virtual int FromString (const std::string&) const = 0;
 };
 
-/** A mapping between the values of an enum and the string representations of the enum's values.  A 
-    specialization should be declared for each enumerated type for which an EnumMap is desired. */
+/** A mapping between the values of an enum and the string representations of the enum's values.  A specialization
+    should be declared for each enumerated type for which an EnumMap is desired. */
 template <class E> struct EnumMap : EnumMapBase
 {
     virtual ~EnumMap() {}
-    virtual const std::string& FromEnum(int) const {static std::string empty; return empty;}
+    virtual const std::string& FromEnum(int) const
+    { static std::string empty; return empty; }
     virtual int FromString (const std::string&) const {return 0;}
 };
 
@@ -61,18 +63,17 @@ template <class E> EnumMap<E> GetEnumMap()
     static EnumMap<E> enum_map;
     return enum_map;
 }
-}
 
 /** Declares the beginning of a template specialization of EnumMap, for enumerated type \a name.
     Text-to-enum conversion is one of those places that calls for macro magic.  To use these for 
     e.g. "enum Foo {FOO, BAR};", call: 
     \verbatim 
-    ENUM_MAP_BEGIN( Foo ) 
-        ENUM_MAP_INSERT( FOO )
-        ENUM_MAP_INSERT( BAR )
+    GG_ENUM_MAP_BEGIN( Foo ) 
+        GG_ENUM_MAP_INSERT( FOO )
+        GG_ENUM_MAP_INSERT( BAR )
         ...
-    ENUM_MAP_END\endverbatim */
-#define ENUM_MAP_BEGIN( name )                                                  \
+    GG_ENUM_MAP_END \endverbatim */
+#define GG_ENUM_MAP_BEGIN( name )                                               \
 template <> struct EnumMap< name > : EnumMapBase                                \
 {                                                                               \
     typedef name EnumType;                                                      \
@@ -81,21 +82,22 @@ template <> struct EnumMap< name > : EnumMapBase                                
     {
 
 /** Adds a single value from an enumerated type, and its corresponding string representation, to an EnumMap. */
-#define ENUM_MAP_INSERT( value ) map_[ value ] = #value ;
+#define GG_ENUM_MAP_INSERT( value ) m_map[ value ] = #value ;
 
 /** Declares the end of a template specialization of EnumMap, for enumerated type \a name. */
-#define ENUM_MAP_END                                                            \
+#define GG_ENUM_MAP_END                                                         \
     }                                                                           \
     virtual const std::string& FromEnum(int i) const                            \
     {                                                                           \
         static const std::string error_str;                                     \
-        std::map<EnumType, std::string>::const_iterator it = map_.find(EnumType(i));  \
-        return it == map_.end() ? error_str : it->second;                       \
+        std::map<EnumType, std::string>::const_iterator it =                    \
+            m_map.find(EnumType(i));                                            \
+        return it == m_map.end() ? error_str : it->second;                      \
     }                                                                           \
     int FromString (const std::string &str) const                               \
     {                                                                           \
-        for (MapType::const_iterator it = map_.begin();                         \
-             it != map_.end();                                                  \
+        for (MapType::const_iterator it = m_map.begin();                        \
+             it != m_map.end();                                                 \
              ++it) {                                                            \
             if (it->second == str) {                                            \
                 return it->first;                                               \
@@ -103,11 +105,11 @@ template <> struct EnumMap< name > : EnumMapBase                                
         }                                                                       \
         return BAD_VALUE;                                                       \
     }                                                                           \
-    MapType map_;                                                               \
+    MapType m_map;                                                              \
 };
 
 /** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
-#define ENUM_STREAM_IN( name )                                                  \
+#define GG_ENUM_STREAM_IN( name )                                               \
 inline std::istream& operator>>(std::istream& is, name& v)                      \
 {                                                                               \
     std::string str;                                                            \
@@ -117,13 +119,13 @@ inline std::istream& operator>>(std::istream& is, name& v)                      
 }
 
 /** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
-#define ENUM_STREAM_OUT( name )                                                 \
+#define GG_ENUM_STREAM_OUT( name )                                              \
 inline std::ostream& operator<<(std::ostream& os, name v)                       \
 {                                                                               \
     os << GG::GetEnumMap< name >().FromEnum(v);                                 \
     return os;                                                                  \
 }
 
+} // namespace GG
+
 #endif // _GGEnum_h_
-
-

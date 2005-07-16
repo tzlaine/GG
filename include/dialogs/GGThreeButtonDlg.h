@@ -54,26 +54,24 @@ class GG_API ThreeButtonDlg : public Wnd
 public:
     /** \name Structors */ //@{
     /** basic ctor*/
-    ThreeButtonDlg(int x, int y, int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
+    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
                    Button* one = 0, Button* two = 0);
 
     /** ctor that automatically centers the dialog in the app's area*/
-    ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
+    ThreeButtonDlg(int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
                    Button* one = 0, Button* two = 0);
 
     /** basic ctor*/
-    ThreeButtonDlg(int x, int y, int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
-                   Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
-                   const string& one = "", const string& two = "");
+    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
+                   Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero, 
+                   const std::string& one = "", const std::string& two = "");
 
     /** ctor that automatically centers the dialog in the app's area*/
-    ThreeButtonDlg(int w, int h, const string& msg, const string& font_filename, int pts, Clr color, 
-                   Clr border_color, Clr button_color, Clr text_color, int buttons, const string& zero, 
-                   const string& one = "", const string& two = "");
-
-    ThreeButtonDlg(const XMLElement& elem); ///< ctor that constructs an ThreeButtonDlg object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a ThreeButtonDlg object
+    ThreeButtonDlg(int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
+                   Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero, 
+                   const std::string& one = "", const std::string& two = "");
     //@}
 
     /** \name Accessors */ //@{
@@ -81,8 +79,6 @@ public:
     int Result() const;        ///< returns 0, 1, or 2, depending on which buttoon was clicked
     int DefaultButton() const; ///< returns the number of the button that will be chosen by default if the user hits enter (-1 if none)
     int EscapeButton() const;  ///< returns the number of the button that will be chosen by default if the user hits ESC (-1 if none)
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from an ThreeButtonDlg object
     //@}
 
     /** \name Mutators */ //@{
@@ -94,12 +90,16 @@ public:
     void SetEscapeButton(int i);     ///< sets the number of the button that will be chosen by default if the user hits ESC (-1 to disable)
     //@}
 
+protected:
+    /** \name Structors */ //@{
+    ThreeButtonDlg(); ///< default ctor
+    //@}
+
 private:
     int NumButtons() const;
-    void AttachSignalChildren();
-    void DetachSignalChildren();
-    void Init(const string& msg, const string& font_filename, int pts, int buttons,
-              const string& zero = "", const string& one = "", const string& two = "");
+    void Init(const std::string& msg, const std::string& font_filename, int pts, int buttons,
+              const std::string& zero = "", const std::string& one = "", const std::string& two = "");
+    void ConnectSignals();
     void Button0Clicked();
     void Button1Clicked();
     void Button2Clicked();
@@ -114,9 +114,32 @@ private:
     Button*  m_button_0;
     Button*  m_button_1;
     Button*  m_button_2;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-#endif // _GGThreeButtonDlg_h_
+// template implementations
+template <class Archive>
+void GG::ThreeButtonDlg::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_color)
+        & BOOST_SERIALIZATION_NVP(m_border_color)
+        & BOOST_SERIALIZATION_NVP(m_text_color)
+        & BOOST_SERIALIZATION_NVP(m_button_color)
+        & BOOST_SERIALIZATION_NVP(m_default)
+        & BOOST_SERIALIZATION_NVP(m_escape)
+        & BOOST_SERIALIZATION_NVP(m_result)
+        & BOOST_SERIALIZATION_NVP(m_button_0)
+        & BOOST_SERIALIZATION_NVP(m_button_1)
+        & BOOST_SERIALIZATION_NVP(m_button_2);
 
+    if (Archive::is_loading::value)
+        ConnectSignals();
+}
+
+#endif // _GGThreeButtonDlg_h_

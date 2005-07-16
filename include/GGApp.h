@@ -48,7 +48,6 @@ namespace GG {
 class Wnd;
 class EventPumpBase;
 class Texture;
-class XMLElement;
 struct AppImplData;
 
 /** An abstract base for an application framework class to drive the GG GUI.  
@@ -65,7 +64,6 @@ struct AppImplData;
     - mouse state information
     - keyboard accelerators
     - application-wide management of fonts and textures
-    - creation of polymorphic Wnd-derived objects from XML-formatted text
     - logging of debug info to log files
     <p>
     The user is required to provide several functions.  The most vital functions the user is required to provide are: Enter2DMode(),
@@ -114,16 +112,17 @@ public:
     //@}
 
     /// these are the only events absolutely necessary for GG to function properly
-    enum EventType {KEYPRESS,    ///< a down key press or key repeat, with or without modifiers like Alt, Ctrl, Meta, etc.
-                    LPRESS,      ///< a left mouse button press
-                    MPRESS,      ///< a middle mouse button press
-                    RPRESS,      ///< a right mouse button press
-                    LRELEASE,    ///< a left mouse button release
-                    MRELEASE,    ///< a middle mouse button release
-                    RRELEASE,    ///< a right mouse button release
-                    MOUSEMOVE,   ///< movement of the mouse; may include relative motion in addition to absolute position
-                    MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
-                   };
+    enum EventType {
+        KEYPRESS,    ///< a down key press or key repeat, with or without modifiers like Alt, Ctrl, Meta, etc.
+        LPRESS,      ///< a left mouse button press
+        MPRESS,      ///< a middle mouse button press
+        RPRESS,      ///< a right mouse button press
+        LRELEASE,    ///< a left mouse button release
+        MRELEASE,    ///< a middle mouse button release
+        RRELEASE,    ///< a right mouse button release
+        MOUSEMOVE,   ///< movement of the mouse; may include relative motion in addition to absolute position
+        MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
+    };
 
     typedef std::set<std::pair<Key, Uint32> >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
 
@@ -132,14 +131,15 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    const string&  AppName() const;              ///< returns the user-defined name of the application
+    const std::string&
+                   AppName() const;              ///< returns the user-defined name of the application
     Wnd*           FocusWnd() const;             ///< returns the GG::Wnd that currently has the input focus
     Wnd*           GetWindowUnder(const Pt& pt) const; ///< returns the GG::Wnd under the point pt
     int            DeltaT() const;               ///< returns ms since last frame was rendered
     virtual int    Ticks() const = 0;            ///< returns ms since the app started running
     bool           FPSEnabled() const;           ///< returns true iff FPS calulations are turned on
     double         FPS() const;                  ///< returns the frames per second at which the application is rendering
-    string         FPSString() const;            ///< returns a string of the form "[m_FPS] frames per second"
+    std::string    FPSString() const;            ///< returns a string of the form "[m_FPS] frames per second"
     double         MaxFPS() const;               ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
     virtual int    AppWidth() const = 0;         ///< returns the width of the application window/screen
     virtual int    AppHeight() const = 0;        ///< returns the height of the application window/screen
@@ -149,7 +149,6 @@ public:
     bool           MouseButtonDown(int bn) const;///< returns the up/down states of the mouse buttons
     Pt             MousePosition() const;        ///< returns the absolute position of mouse based on last mouse motion event
     Pt             MouseMovement() const;        ///< returns the relative position of mouse based on last mouse motion event
-    Wnd*           GenerateWnd(const XMLElement& elem) const; ///< returns a heap-allocated Wnd-subclass object of the Wnd subclass most appropriate to \a elem
 
     const_accel_iterator accel_begin() const;    ///< returns an iterator to the first defined keyboard accelerator
     const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
@@ -176,7 +175,7 @@ public:
     void           RegisterDragDropWnd(Wnd* wnd, const Pt& offset); ///< adds \a wnd to the set of current drag-and-drop Wnds, to be rendered \a offset pixels from the cursor position
     void           RemoveDragDropWnd(Wnd* wnd);  ///< removes \a wnd from the set of current drag-and-drop Wnds
     void           ClearDragDropWnds();          ///< clears the set of current drag-and-drop Wnds
-    virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode
+    virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode.  GG expects an orthographic projection, with the origin in the upper left corner, and with one unit of GL space equal to one pixel on the screen.
     virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
     void           EnableFPS(bool b = true);     ///< turns FPS calulations on or off
     void           SetMaxFPS(double max);        ///< sets the maximum allowed FPS, so the render loop does not act as a spinlock when it runs very quickly.  0 indicates no limit.
@@ -189,17 +188,16 @@ public:
     /** removes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
     void           RemoveAccelerator(Key key, Uint32 key_mods);
 
-    shared_ptr<Font>    GetFont(const string& font_filename, int pts, Uint32 range = Font::ALL_CHARS); ///< returns a shared_ptr to the desired font
-    void                FreeFont(const string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
+    boost::shared_ptr<Font>    GetFont(const std::string& font_filename, int pts, Uint32 range = Font::ALL_CHARS); ///< returns a shared_ptr to the desired font
+    void                       FreeFont(const std::string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
 
     /** adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that. */
-    shared_ptr<Texture> StoreTexture(Texture* texture, const string& texture_name);
+    boost::shared_ptr<Texture> StoreTexture(Texture* texture, const std::string& texture_name);
 
-    shared_ptr<Texture> StoreTexture(shared_ptr<Texture> texture, const string& texture_name); ///< adds an already-constructed texture to the managed pool
-    shared_ptr<Texture> GetTexture(const string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
-    void                FreeTexture(const string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
-    void                AddWndGenerator(const string& name, Wnd* (*fn)(const XMLElement&)); ///< adds or overrides a Wnd-subclass generator associated with \a name
-    void                RemoveWndGenerator(const string& name); ///< removes the Wnd-subclass generator associated with \a name
+    boost::shared_ptr<Texture> StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name); ///< adds an already-constructed texture to the managed pool
+    boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
+    void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
+
     log4cpp::Category&  Logger();
     //@}
 
@@ -208,7 +206,7 @@ public:
     
 protected:
     /** \name Structors */ //@{
-    App(const string& app_name); ///< protected ctor, called by derived classes
+    App(const std::string& app_name); ///< protected ctor, called by derived classes
     //@}
 
     /** \name Mutators */ //@{
@@ -226,21 +224,22 @@ private:
     virtual void   Run() = 0;                    // initializes app state, then executes main event handler/render loop (PollAndRender())
     Wnd*           ModalWindow() const;          // returns the currently modal window, if any
 
-    static App*                    s_app;
-    static shared_ptr<AppImplData> s_impl;
+    static App*                           s_app;
+    static boost::shared_ptr<AppImplData> s_impl;
 
     friend class EventPumpBase; ///< allows EventPumpBase types to drive App
 };
 
+} // namespace GG
+
+// template implementations
 template<class InIt> 
-bool App::OrCombiner::operator()(InIt first, InIt last) const
+bool GG::App::OrCombiner::operator()(InIt first, InIt last) const
 {
     bool retval = false;
     while (first != last)
         retval |= static_cast<bool>(*first++);
     return retval;
 }
-
-} // namespace GG
 
 #endif // _GGApp_h_

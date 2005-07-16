@@ -35,16 +35,18 @@
 #include "GGBase.h"
 #endif
 
+#include <list>
+#include <set>
+
 namespace GG {
+    class Wnd;
 
-class Wnd;
-
-/** a Z-ordering (depth-ordering) of the windows in the GUI. Windows being moved up, inserted, or added to the top of the list 
-    are checked against other windows at the insertion point and after; if any of these windows are modal or on-top windows, 
-    the inserted window is placed after them if it is not also modal or on-top. Z-values decrease into the screen.  Windows 
-    in the z-list are kept in front-to-back order.  No windows may share the same z-value.  Add, Remove, MoveUp, and MoveDown 
-    all also add/remove/move all descendent windows.*/
-class GG_API ZList : public list<Wnd*>
+/** a Z-ordering (depth-ordering) of the windows in the GUI. Windows being moved up, inserted, or added to the top of
+    the list are checked against other windows at the insertion point and after; if any of these windows are modal or
+    on-top windows, the inserted window is placed after them if it is not also modal or on-top. Z-values decrease into
+    the screen.  Windows in the z-list are kept in front-to-back order.  No windows may share the same z-value.  Add,
+    Remove, MoveUp, and MoveDown all also add/remove/move all descendent windows.*/
+class GG_API ZList : public std::list<Wnd*>
 {
 public:
     /** exception class \see GG::GGEXCEPTION */
@@ -70,10 +72,9 @@ private:
     void     Realign();                    ///< rearranges z-values of windows in list to compact range of z-values and maintain DESIRED_GAP_SIZE separation
     iterator FirstNonOnTop();              ///< returns iterator to first window in list that is non-on-top (returns end() if none found)
 
-    set<Wnd*> m_contents; ///< the contents of this list, fast-searchable
+    std::set<Wnd*> m_contents; ///< the contents of this list, fast-searchable
 };
 
 } // namespace GG
 
 #endif // _GGZList_h_
-

@@ -27,7 +27,6 @@
 #include "GGTexture.h"
 
 #include <GGApp.h>
-#include <XMLValidators.h>
 
 #include <IL/il.h>
 
@@ -69,7 +68,7 @@ namespace {
             value <<= 1;
         return value;
     }
-    void EncodeBase64(const vector<unsigned char>& data, string& str)
+    void EncodeBase64(const std::vector<unsigned char>& data, std::string& str)
     {
         char table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
@@ -114,9 +113,9 @@ namespace {
             str[str_posn + 3] = '=';
         }
     }
-    void DecodeBase64(vector<unsigned char>& data, const string& str)
+    void DecodeBase64(std::vector<unsigned char>& data, const std::string& str)
     {
-        static vector<unsigned int> table(256, 0);
+        static std::vector<unsigned int> table(256, 0);
 
         if (!table['A']) {
             for (unsigned char c = 'A'; c <= 'Z'; ++c) {
@@ -174,11 +173,13 @@ Texture::Texture() :
     m_wrap_t(GL_REPEAT),
     m_min_filter(GL_NEAREST_MIPMAP_LINEAR),
     m_mag_filter(GL_LINEAR),
-    m_opengl_id(0)
+    m_opengl_id(0),
+    m_tex_coords()
 {
     Clear();
 }
 
+#if 0
 Texture::Texture(const XMLElement& elem) :
     m_opengl_id(0)
 {
@@ -187,6 +188,7 @@ Texture::Texture(const XMLElement& elem) :
 
     Clear();
 
+    using boost::lexical_cast;
     m_filename = elem.Child("m_filename").Text();
     m_bytes_pp = lexical_cast<int>(elem.Child("m_bytes_pp").Text());
     m_width = lexical_cast<int>(elem.Child("m_width").Text());
@@ -210,7 +212,7 @@ Texture::Texture(const XMLElement& elem) :
         Load(m_filename, m_mipmaps);
     } else if (elem.ContainsChild("raw_data")) {
         const XMLElement& raw_data = elem.Child("raw_data");
-        vector<unsigned char> bytes;
+        std::vector<unsigned char> bytes;
         DecodeBase64(bytes, raw_data.Text());
         Init(0, 0, m_default_width, m_default_height, m_width, reinterpret_cast<unsigned char*>(&bytes[0]), m_bytes_pp, m_mipmaps);
     }
@@ -218,24 +220,14 @@ Texture::Texture(const XMLElement& elem) :
     SetWrap(m_wrap_s, m_wrap_t);
     SetFilters(m_min_filter, m_mag_filter);
 }
+#endif
 
 Texture::~Texture()
 {
     Clear();
 }
 
-Texture::Texture(const Texture& rhs)
-{
-    throw TextureException("Attempted to copy-construct a GG::Texture object");
-}
-
-Texture& Texture::operator=(const Texture& rhs)
-{
-    throw TextureException("Attempted to assign a GG::Texture object");
-    return *this;
-}
-
-string Texture::Filename() const
+std::string Texture::Filename() const
 {
     return m_filename;
 }
@@ -354,28 +346,30 @@ void Texture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
     OrthoBlit(x, y, x + m_default_width, y + m_default_height, m_tex_coords, enter_2d_mode);
 }
 
+#if 0
 XMLElement Texture::XMLEncode() const
 {
+    using boost::lexical_cast;
     XMLElement retval("GG::Texture");
     retval.AppendChild(XMLElement("m_filename", m_filename));
-    retval.AppendChild(XMLElement("m_bytes_pp", lexical_cast<string>(m_bytes_pp)));
-    retval.AppendChild(XMLElement("m_width", lexical_cast<string>(m_width)));
-    retval.AppendChild(XMLElement("m_height", lexical_cast<string>(m_height)));
-    retval.AppendChild(XMLElement("m_wrap_s", lexical_cast<string>(m_wrap_s)));
-    retval.AppendChild(XMLElement("m_wrap_t", lexical_cast<string>(m_wrap_t)));
-    retval.AppendChild(XMLElement("m_min_filter", lexical_cast<string>(m_min_filter)));
-    retval.AppendChild(XMLElement("m_mag_filter", lexical_cast<string>(m_mag_filter)));
-    retval.AppendChild(XMLElement("m_mipmaps", lexical_cast<string>(m_mipmaps)));
+    retval.AppendChild(XMLElement("m_bytes_pp", lexical_cast<std::string>(m_bytes_pp)));
+    retval.AppendChild(XMLElement("m_width", lexical_cast<std::string>(m_width)));
+    retval.AppendChild(XMLElement("m_height", lexical_cast<std::string>(m_height)));
+    retval.AppendChild(XMLElement("m_wrap_s", lexical_cast<std::string>(m_wrap_s)));
+    retval.AppendChild(XMLElement("m_wrap_t", lexical_cast<std::string>(m_wrap_t)));
+    retval.AppendChild(XMLElement("m_min_filter", lexical_cast<std::string>(m_min_filter)));
+    retval.AppendChild(XMLElement("m_mag_filter", lexical_cast<std::string>(m_mag_filter)));
+    retval.AppendChild(XMLElement("m_mipmaps", lexical_cast<std::string>(m_mipmaps)));
 
     XMLElement temp("m_tex_coords");
-    temp.SetAttribute("u1", lexical_cast<string>(m_tex_coords[0]));
-    temp.SetAttribute("v1", lexical_cast<string>(m_tex_coords[1]));
-    temp.SetAttribute("u2", lexical_cast<string>(m_tex_coords[2]));
-    temp.SetAttribute("v2", lexical_cast<string>(m_tex_coords[3]));
+    temp.SetAttribute("u1", lexical_cast<std::string>(m_tex_coords[0]));
+    temp.SetAttribute("v1", lexical_cast<std::string>(m_tex_coords[1]));
+    temp.SetAttribute("u2", lexical_cast<std::string>(m_tex_coords[2]));
+    temp.SetAttribute("v2", lexical_cast<std::string>(m_tex_coords[3]));
     retval.AppendChild(temp);
 
-    retval.AppendChild(XMLElement("m_default_width", lexical_cast<string>(m_default_width)));
-    retval.AppendChild(XMLElement("m_default_height", lexical_cast<string>(m_default_height)));
+    retval.AppendChild(XMLElement("m_default_width", lexical_cast<std::string>(m_default_width)));
+    retval.AppendChild(XMLElement("m_default_height", lexical_cast<std::string>(m_default_height)));
 
     if (m_filename == "" && m_opengl_id) {
         glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -399,7 +393,7 @@ XMLElement Texture::XMLEncode() const
         glGetTexImage(GL_TEXTURE_2D, 0, mode, GL_UNSIGNED_BYTE, reinterpret_cast<unsigned char*>(&bytes[0]));
 
         // save it to a string
-        string str;
+        std::string str;
         EncodeBase64(bytes, str);
         retval.AppendChild(XMLElement("raw_data", str));
 
@@ -408,33 +402,9 @@ XMLElement Texture::XMLEncode() const
 
     return retval;
 }
+#endif
 
-XMLElementValidator Texture::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Texture");
-    retval.AppendChild(XMLElementValidator("m_filename"));
-    retval.AppendChild(XMLElementValidator("m_bytes_pp", new RangedValidator<int>(1, 4)));
-    retval.AppendChild(XMLElementValidator("m_width", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_height", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_wrap_s", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_wrap_t", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_min_filter", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_mag_filter", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_mipmaps", new Validator<bool>()));
-
-    XMLElementValidator temp("m_tex_coords");
-    temp.SetAttribute("u1", new Validator<float>());
-    temp.SetAttribute("v1", new Validator<float>());
-    temp.SetAttribute("u2", new Validator<float>());
-    temp.SetAttribute("v2", new Validator<float>());
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElementValidator("m_default_width", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_default_height", new Validator<int>()));
-    return retval;
-}
-
-void Texture::Load(const string& filename, bool mipmap/* = false*/)
+void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 {
     Load(filename.c_str(), mipmap);
 }
@@ -451,14 +421,14 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
     ilBindImage(id);
     ilLoadImage(const_cast<char*>(filename));
     if ((error = ilGetError()) != IL_NO_ERROR)
-        throw TextureException((string("Could not load temporary DevIL image from file \'") + filename) + "\'");
+        throw TextureException((std::string("Could not load temporary DevIL image from file \'") + filename) + "\'");
    
     if (mipmap)
         m_opengl_id = ilutGLBindMipmaps();
     else
         m_opengl_id = ilutGLBindTexImage();
     if (!m_opengl_id || (error = ilGetError()) != IL_NO_ERROR)
-        throw TextureException((string("Could not create OpenGL texture object from file \'") + filename) + "\'");
+        throw TextureException((std::string("Could not create OpenGL texture object from file \'") + filename) + "\'");
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
@@ -620,6 +590,35 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
     }
 }
 
+unsigned char* Texture::GetRawBytes()
+{
+    unsigned char* retval = 0;
+    if (m_filename == "" && m_opengl_id) {
+        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+        glPixelStorei(GL_PACK_SWAP_BYTES, false);
+        glPixelStorei(GL_PACK_LSB_FIRST, false);
+        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+        glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+        // get pixel data
+        typedef unsigned char uchar;
+        retval = new uchar[m_width * m_height * m_bytes_pp];
+        GLenum mode = 0;
+        switch (m_bytes_pp) {
+        case 1:   mode = GL_LUMINANCE;       break;
+        case 2:   mode = GL_LUMINANCE_ALPHA; break;
+        case 3:   mode = GL_RGB;             break;
+        case 4:   mode = GL_RGBA;            break;
+        default: throw TextureException("Attempted to encode a GG::Texture with an invalid number of bytes per pixel");
+        }
+        glGetTexImage(GL_TEXTURE_2D, 0, mode, GL_UNSIGNED_BYTE, retval);
+        glPopClientAttrib();
+    }
+    return retval;
+}
+
 
 
 ///////////////////////////////////////
@@ -627,12 +626,13 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
 ///////////////////////////////////////
 SubTexture::SubTexture() :
     m_width(0),
-    m_height(0)
+    m_height(0),
+    m_tex_coords()
 {
 }
 
 SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
-    m_texture(shared_ptr<const Texture>(texture)),
+    m_texture(boost::shared_ptr<const Texture>(texture)),
     m_width(x2 - x1),
     m_height(y2 - y1)
 {
@@ -645,7 +645,7 @@ SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
     m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
 }
 
-SubTexture::SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
+SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
     m_texture(texture),
     m_width(x2 - x1),
     m_height(y2 - y1)
@@ -659,6 +659,7 @@ SubTexture::SubTexture(const shared_ptr<const Texture>& texture, int x1, int y1,
     m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
 }
 
+#if 0
 SubTexture::SubTexture(const XMLElement& elem) :
     m_width(0),
     m_height(0)
@@ -667,16 +668,16 @@ SubTexture::SubTexture(const XMLElement& elem) :
         throw std::invalid_argument("Attempted to construct a GG::SubTexture from an XMLElement that had a tag other than \"GG::SubTexture\"");
 
     const XMLElement* curr_elem = &elem.Child("m_texture");
-    string texture_filename = curr_elem->NumChildren() ? curr_elem->Child("GG::Texture").Child("m_filename").Text() : "";
+    std::string texture_filename = curr_elem->NumChildren() ? curr_elem->Child("GG::Texture").Child("m_filename").Text() : "";
     if (texture_filename != "") {
         // we need to ensure that the settings in the XML-encoded texture are preserved in the loaded texture; to do this:
-        shared_ptr<Texture> temp_texture = App::GetApp()->GetTexture(texture_filename);
+        boost::shared_ptr<Texture> temp_texture = App::GetApp()->GetTexture(texture_filename);
         // if no copy of this texture exists in the manager, GetTexture() will load it with default settings, and the
         // use_count will be 2: one for the shared_ptr in the manager, one for temp_texture.
         // if this is the case, dump the texture, reload it from the XML definition (which may have non-default settings),
         // and store the XML-loaded Texture in the manager.
         if (temp_texture.use_count() == 2) {
-            temp_texture = shared_ptr<Texture>(new Texture(curr_elem->Child("GG::Texture")));
+            temp_texture = boost::shared_ptr<Texture>(new Texture(curr_elem->Child("GG::Texture")));
             App::GetApp()->FreeTexture(texture_filename);
             App::GetApp()->StoreTexture(temp_texture, texture_filename);
             m_texture = temp_texture;
@@ -686,6 +687,7 @@ SubTexture::SubTexture(const XMLElement& elem) :
     }
 
     if (m_texture) {
+        using boost::lexical_cast;
         m_width = lexical_cast<int>(elem.Child("m_width").Text());
         m_height = lexical_cast<int>(elem.Child("m_height").Text());
 
@@ -696,6 +698,7 @@ SubTexture::SubTexture(const XMLElement& elem) :
         m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("v2"));
     }
 }
+#endif
 
 SubTexture::~SubTexture()
 {
@@ -765,49 +768,9 @@ void SubTexture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
     if (m_texture) m_texture->OrthoBlit(x, y, x + m_width, y + m_height, m_tex_coords, enter_2d_mode);
 }
 
-XMLElement SubTexture::XMLEncode() const
+void SubTexture::PostLoadTextureHandling()
 {
-    XMLElement retval("GG::SubTexture");
-    XMLElement temp;
-
-    temp = XMLElement("m_texture");
-    if (m_texture)
-        temp.AppendChild(m_texture->XMLEncode());
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElement("m_width", lexical_cast<string>(m_width)));
-    retval.AppendChild(XMLElement("m_height", lexical_cast<string>(m_height)));
-
-    temp = XMLElement("m_tex_coords");
-    temp.SetAttribute("u1", lexical_cast<string>(m_tex_coords[0]));
-    temp.SetAttribute("v1", lexical_cast<string>(m_tex_coords[1]));
-    temp.SetAttribute("u2", lexical_cast<string>(m_tex_coords[2]));
-    temp.SetAttribute("v2", lexical_cast<string>(m_tex_coords[3]));
-    retval.AppendChild(temp);
-
-    return retval;
-}
-
-XMLElementValidator SubTexture::XMLValidator() const
-{
-    XMLElementValidator retval("GG::SubTexture");
-
-    XMLElementValidator temp("m_texture");
-    if (m_texture)
-        temp.AppendChild(m_texture->XMLValidator());
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElementValidator("m_width", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_height", new Validator<int>()));
-
-    temp = XMLElementValidator("m_tex_coords");
-    temp.SetAttribute("u1", new Validator<float>());
-    temp.SetAttribute("v1", new Validator<float>());
-    temp.SetAttribute("u2", new Validator<float>());
-    temp.SetAttribute("v2", new Validator<float>());
-    retval.AppendChild(temp);
-
-    return retval;
+    // TODO
 }
 
 
@@ -825,20 +788,20 @@ TextureManager::TextureManager()
     s_created = true;
 }
 
-shared_ptr<Texture> TextureManager::StoreTexture(Texture* texture, const string& texture_name)
+boost::shared_ptr<Texture> TextureManager::StoreTexture(Texture* texture, const std::string& texture_name)
 {
-    shared_ptr<Texture> temp(texture);
+    boost::shared_ptr<Texture> temp(texture);
     return StoreTexture(temp, texture_name);
 }
 
-shared_ptr<Texture> TextureManager::StoreTexture(shared_ptr<Texture> texture, const string& texture_name)
+boost::shared_ptr<Texture> TextureManager::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
 {
     return (m_textures[texture_name] = texture);
 }
 
-shared_ptr<Texture> TextureManager::GetTexture(const string& name, bool mipmap/* = false*/)
+boost::shared_ptr<Texture> TextureManager::GetTexture(const std::string& name, bool mipmap/* = false*/)
 {
-    std::map<string, shared_ptr<Texture> >::iterator it = m_textures.find(name);
+    std::map<std::string, boost::shared_ptr<Texture> >::iterator it = m_textures.find(name);
     if (it == m_textures.end()) { // if no such texture was found, attempt to load it now, using name as the filename
         return (m_textures[name] = LoadTexture(name, mipmap));
     } else { // otherwise, just return the texture we found
@@ -846,9 +809,9 @@ shared_ptr<Texture> TextureManager::GetTexture(const string& name, bool mipmap/*
     }
 }
 
-void TextureManager::FreeTexture(const string& name)
+void TextureManager::FreeTexture(const std::string& name)
 {
-    std::map<string, shared_ptr<Texture> >::iterator it = m_textures.find(name);
+    std::map<std::string, boost::shared_ptr<Texture> >::iterator it = m_textures.find(name);
     if (it != m_textures.end())
         m_textures.erase(it);
 }
@@ -869,9 +832,9 @@ void TextureManager::InitDevIL()
     }
 }
 
-shared_ptr<Texture> TextureManager::LoadTexture(const string& filename, bool mipmap)
+boost::shared_ptr<Texture> TextureManager::LoadTexture(const std::string& filename, bool mipmap)
 {
-    shared_ptr<Texture> temp(new Texture());
+    boost::shared_ptr<Texture> temp(new Texture());
     temp->Load(filename, mipmap);
     return (m_textures[filename] = temp);
 }

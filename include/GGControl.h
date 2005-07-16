@@ -35,23 +35,22 @@
 #include "GGWnd.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/is_abstract.hpp>
+
 namespace GG {
 
-/** This is an abstract base class for all control classes.
-    Each control has (like all windows) coordinates offset from the upper-left corner of it's parent's client area.  
-    All controls may be disabled.  By default, a Control passes keyboard input to its parent Wnd.  Any class derived
-    from Control should do the same with any keyboard input it does not need for its own use.  For instance, an Edit
-    control needs to know about arrow key keyboard input, but it should pass other key presses like 'ESC' to its parent.*/
+/** This is an abstract base class for all control classes.  Each control has (like all windows) coordinates offset from
+    the upper-left corner of it's parent's client area.  All controls may be disabled.  By default, a Control passes
+    keyboard input to its parent Wnd.  Any class derived from Control should do the same with any keyboard input it does
+    not need for its own use.  For instance, an Edit control needs to know about arrow key keyboard input, but it should
+    pass other key presses like 'ESC' to its parent.*/
 class GG_API Control : public Wnd
 {
 public:
     /** \name Accessors */ //@{
     Clr            Color() const    {return m_color;}    ///< returns the color of the control
     bool           Disabled() const {return m_disabled;} ///< returns true if the control is disabled, false otherwise
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Control object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
 
     /** \name Mutators */ //@{
@@ -65,15 +64,30 @@ public:
 
 protected:
     /** \name Structors */ //@{
-    Control(int x, int y, int w, int h, Uint32 flags = CLICKABLE) : Wnd(x, y, w, h, flags), m_disabled(false) {} ///< default ctor
-    Control(const XMLElement& elem); ///< ctor that constructs a Control object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Control object
+    Control(); ///< default ctor
+    Control(int x, int y, int w, int h, Uint32 flags = CLICKABLE); ///< basic ctor
     //@}
 
     Clr      m_color;    ///< the color of the control
     bool     m_disabled; ///< whether or not this control is disabled
+
+private:
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-#endif // _GGControl_h_
+BOOST_IS_ABSTRACT(GG::Control);
 
+// template implementations
+template <class Archive>
+void GG::Control::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_color)
+        & BOOST_SERIALIZATION_NVP(m_disabled);
+}
+
+#endif // _GGControl_h_

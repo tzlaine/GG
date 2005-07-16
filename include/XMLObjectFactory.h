@@ -40,7 +40,8 @@ namespace GG {
 
 class XMLElement;
 
-/** This class creates polymorphic subclasses of base class T from XML-formatted text.  For any polymorphic class hierarchy,
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    This class creates polymorphic subclasses of base class T from XML-formatted text.  For any polymorphic class hierarchy,
     you can instantiate XMLObjectFactory with the type of the hierarchy's base class, and provide functions that can each 
     construct one specific class in the hierarchy.  By providing a string that identifies each class, and creating XML objects
     with that string as a tag, you can ensure a method for creating the correct polymorphic subclass object at run-time. */

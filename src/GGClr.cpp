@@ -26,32 +26,30 @@
 
 #include "GGClr.h"
 
-#include <XMLValidators.h>
+using namespace GG;
 
-namespace GG {
-
-extern const Clr CLR_ZERO(0, 0, 0, 0);
-extern const Clr CLR_BLACK(0, 0, 0, 255);
-extern const Clr CLR_WHITE(255, 255, 255, 255);
-extern const Clr CLR_GRAY(127, 127, 127, 255);
-extern const Clr CLR_SHADOW(127, 127, 127, 127);
-extern const Clr CLR_RED(255, 0, 0, 255);
-extern const Clr CLR_GREEN(0, 255, 0, 255);
-extern const Clr CLR_BLUE(0, 0, 255, 255);
-extern const Clr CLR_CYAN(0, 255, 255, 255);
-extern const Clr CLR_YELLOW(255, 255, 0, 255);
-extern const Clr CLR_MAGENTA(255, 0, 255, 255);
+extern const Clr GG::CLR_ZERO(0, 0, 0, 0);
+extern const Clr GG::CLR_BLACK(0, 0, 0, 255);
+extern const Clr GG::CLR_WHITE(255, 255, 255, 255);
+extern const Clr GG::CLR_GRAY(127, 127, 127, 255);
+extern const Clr GG::CLR_SHADOW(127, 127, 127, 127);
+extern const Clr GG::CLR_RED(255, 0, 0, 255);
+extern const Clr GG::CLR_GREEN(0, 255, 0, 255);
+extern const Clr GG::CLR_BLUE(0, 0, 255, 255);
+extern const Clr GG::CLR_CYAN(0, 255, 255, 255);
+extern const Clr GG::CLR_YELLOW(255, 255, 0, 255);
+extern const Clr GG::CLR_MAGENTA(255, 0, 255, 255);
 
 ////////////////////////////////////////////////
 // GG::Clr
 ////////////////////////////////////////////////
 Clr::Clr() :
-        i(0)
+    i(0)
 {
 }
 
 Clr::Clr(Uint32 clr) :
-        i(clr)
+    i(clr)
 {
 }
 
@@ -87,44 +85,10 @@ Clr::Clr(double arr[])
     a = Uint8(arr[3] * 255);
 }
 
-Clr::Clr(const XMLElement& elem)
-{
-    if (elem.Tag() != "GG::Clr")
-        throw std::invalid_argument("Attempted to construct a GG::Clr from an XMLElement that had a tag other than \"GG::Clr\"");
-
-    r = lexical_cast<int>(elem.Child("red").Text());
-    g = lexical_cast<int>(elem.Child("green").Text());
-    b = lexical_cast<int>(elem.Child("blue").Text());
-    a = lexical_cast<int>(elem.Child("alpha").Text());
-}
-
-XMLElement Clr::XMLEncode() const
-{
-    XMLElement retval("GG::Clr");
-    retval.AppendChild(XMLElement("red", boost::lexical_cast<string>(int(r))));
-    retval.AppendChild(XMLElement("green", boost::lexical_cast<string>(int(g))));
-    retval.AppendChild(XMLElement("blue", boost::lexical_cast<string>(int(b))));
-    retval.AppendChild(XMLElement("alpha", boost::lexical_cast<string>(int(a))));
-    return retval;
-}
-
-XMLElementValidator Clr::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Clr");
-    retval.AppendChild(XMLElementValidator("red", new RangedValidator<int>(0, 255)));
-    retval.AppendChild(XMLElementValidator("green", new RangedValidator<int>(0, 255)));
-    retval.AppendChild(XMLElementValidator("blue", new RangedValidator<int>(0, 255)));
-    retval.AppendChild(XMLElementValidator("alpha", new RangedValidator<int>(0, 255)));
-    return retval;
-}
-
 ////////////////////////////////////////////////
 // free function(s)
 ////////////////////////////////////////////////
-bool operator==(const Clr& rhs, const Clr& lhs) 
+bool GG::operator==(const Clr& rhs, const Clr& lhs) 
 {
     return rhs.i == lhs.i;
 }
-
-} // namespace GG
-

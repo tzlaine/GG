@@ -27,22 +27,18 @@
 #include "GGLayout.h"
 
 #include <cassert>
-
-#define DEBUG_LAYOUT 1
-#if DEBUG_LAYOUT
-#include <boost/format.hpp>
-#endif
+#include <cmath>
 
 namespace {
-int MinDueToMargin(int cell_margin, int num_rows_or_columns, int row_or_column)
-{
-    return (row_or_column == 0 || row_or_column == num_rows_or_columns - 1) ?
-        static_cast<int>(std::ceil(cell_margin / 2.0)) :
-        cell_margin;
-}
+    int MinDueToMargin(int cell_margin, int num_rows_or_columns, int row_or_column)
+    {
+        return (row_or_column == 0 || row_or_column == num_rows_or_columns - 1) ?
+            static_cast<int>(std::ceil(cell_margin / 2.0)) :
+            cell_margin;
+    }
 }
 
-namespace GG {
+using namespace GG;
 
 // RowColParams
 Layout::RowColParams::RowColParams() :
@@ -59,14 +55,19 @@ Layout::WndPosition::WndPosition(int first_row_, int first_column_, int last_row
 {}
 
 // Layout
+Layout::Layout() :
+    Wnd()
+{
+}
+
 Layout::Layout(int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
     Wnd(0, 0, 1, 1, 0),
-    m_cells(rows, vector<Wnd*>(columns)),
+    m_cells(rows, std::vector<Wnd*>(columns)),
     m_border_margin(border_margin),
     m_cell_margin(cell_margin < 0 ? border_margin : cell_margin),
     m_row_params(rows),
     m_column_params(columns),
-    mIgnoreChildResize(false)
+    m_ignore_child_resize(false)
 {
     if (m_border_margin < 0)
         throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
@@ -74,26 +75,13 @@ Layout::Layout(int rows, int columns, int border_margin/* = 0*/, int cell_margin
 
 Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
     Wnd(x, y, w, h, 0),
-    m_cells(rows, vector<Wnd*>(columns)),
+    m_cells(rows, std::vector<Wnd*>(columns)),
     m_border_margin(border_margin),
     m_cell_margin(cell_margin < 0 ? border_margin : cell_margin),
     m_row_params(rows),
     m_column_params(columns),
-    mIgnoreChildResize(false)
+    m_ignore_child_resize(false)
 {
-    if (m_border_margin < 0)
-        throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
-}
-
-Layout::Layout(const XMLElement& elem) :
-    Wnd(elem.Child("GG::Wnd")),
-    mIgnoreChildResize(false)
-{
-    if (elem.Tag() != "GG::Layout")
-        throw std::invalid_argument("Attempted to construct a GG::Layout from an XMLElement that had a tag other than \"GG::Layout\"");
-
-    // TODO
-
     if (m_border_margin < 0)
         throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
 }
@@ -110,7 +98,7 @@ int Layout::Columns() const
 
 Uint32 Layout::ChildAlignment(Wnd* wnd) const
 {
-    map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
+    std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
     if (it == m_wnd_positions.end())
         throw std::runtime_error("Layout::ChildAlignment() : Alignment of a nonexistent child was requested");
     return it->second.alignment;
@@ -146,14 +134,6 @@ int Layout::MinimumColumnWidth(int column) const
     return m_column_params[column].min;
 }
 
-XMLElement Layout::XMLEncode() const
-{
-    XMLElement retval("GG::Layout");
-    retval.AppendChild(Wnd::XMLEncode());
-    // TODO
-    return retval;
-}
-
 void Layout::SizeMove(int x1, int y1, int x2, int y2)
 {
     // reset effective_min values
@@ -165,41 +145,8 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         m_column_params[i].effective_min = std::max(m_column_params[i].min, MinDueToMargin(m_cell_margin, m_column_params.size(), i));
     }
 
-#if DEBUG_LAYOUT
-    std::cerr << "********************************************************************************\n"
-              << "Layout::SizeMove(" << x1 << ", " << y1 << ", " << x2 << ", " << y2 << ")\n"
-              << "  m_cell_margin=" << m_cell_margin << "\n"
-              << "  m_border_margin=" << m_border_margin << "\n"
-              << "\n"
-              << "  Minimum cell sizes due to margins and row & column mins:\n"
-              << "    column mins:    ";
-    for (unsigned int i = 0; i < m_column_params.size(); ++i) {
-        std::cerr << " " << m_column_params[i].min;
-    }
-    std::cerr << "\n"
-              << "    row mins:";
-    for (unsigned int i = 0; i < m_row_params.size(); ++i) {
-        if (i)
-            std::cerr << "             ";
-        std::cerr << m_row_params[i].min << "\n";
-    }
-    std::cerr << "\n"
-              << "    column effective_mins:    ";
-    for (unsigned int i = 0; i < m_column_params.size(); ++i) {
-        std::cerr << " " << m_column_params[i].effective_min;
-    }
-    std::cerr << "\n"
-              << "    row effective_mins:";
-    for (unsigned int i = 0; i < m_row_params.size(); ++i) {
-        if (i)
-            std::cerr << "                       ";
-        std::cerr << m_row_params[i].effective_min << "\n";
-    }
-    std::cerr << "\n";
-#endif
-
     // adjust effective minimums based on cell contents
-    for (map<Wnd*, WndPosition>::iterator it = m_wnd_positions.begin(); it != m_wnd_positions.end(); ++it) {
+    for (std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.begin(); it != m_wnd_positions.end(); ++it) {
         Pt min_space_needed = it->first->MinSize();
         if (0 < it->second.first_row && it->second.last_row < static_cast<int>(m_row_params.size()))
             min_space_needed.y += m_cell_margin;
@@ -243,22 +190,6 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         }
     }
 
-#if DEBUG_LAYOUT
-    std::cerr << "  Minimum cell sizes due to cell contents:\n"
-              << "    column effective_mins:    ";
-    for (unsigned int i = 0; i < m_column_params.size(); ++i) {
-        std::cerr << " " << m_column_params[i].effective_min;
-    }
-    std::cerr << "\n"
-              << "    row effective_mins:";
-    for (unsigned int i = 0; i < m_row_params.size(); ++i) {
-        if (i)
-            std::cerr << "                       ";
-        std::cerr << m_row_params[i].effective_min << "\n";
-    }
-    std::cerr << "\n";
-#endif
-
     // determine final effective minimums, preserving stretch ratios
     double greatest_min_over_stretch_ratio = 0.0;
     for (unsigned int i = 0; i < m_row_params.size(); ++i) {
@@ -277,43 +208,16 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         m_column_params[i].effective_min = std::max(m_column_params[i].effective_min, static_cast<int>(m_column_params[i].stretch * greatest_min_over_stretch_ratio));
     }
 
-#if DEBUG_LAYOUT
-    std::cerr << "  Minimum cell sizes due to stretch factors:\n"
-              << "    column effective_mins:    ";
-    for (unsigned int i = 0; i < m_column_params.size(); ++i) {
-        std::cerr << " " << m_column_params[i].effective_min;
-    }
-    std::cerr << "\n"
-              << "    row effective_mins:";
-    for (unsigned int i = 0; i < m_row_params.size(); ++i) {
-        if (i)
-            std::cerr << "                       ";
-        std::cerr << m_row_params[i].effective_min << "\n";
-    }
-    std::cerr << "\n";
-#endif
-
     bool size_or_min_size_changed = false;
     Pt new_min_size(TotalMinWidth(), TotalMinHeight());
     if (new_min_size != MinSize()) {
-#if DEBUG_LAYOUT
-        std::cerr << "  Calling SetMinSize(" << TotalMinWidth() << ", " << TotalMinHeight() << ")\n";
-#endif
         SetMinSize(new_min_size);
         size_or_min_size_changed = true;
     }
-#if DEBUG_LAYOUT
-    std::cerr << "  Calling Wnd::SizeMove(" << x1 << ", " << y1 << ", " << x2 << ", " << y2 << ")\n";
-#endif
     Pt original_size = Size();
     Wnd::SizeMove(x1, y1, x2, y2);
     if (Size() != original_size)
         size_or_min_size_changed = true;
-
-#if DEBUG_LAYOUT
-    std::cerr << "  Final size: (" << Width() << ", " << Height() << ")\n"
-              << "\n";
-#endif
 
     // determine row and column positions
     double total_stretch = TotalStretch(m_row_params);
@@ -378,23 +282,6 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         current_origin += m_column_params[i].current_width;
     }
 
-#if DEBUG_LAYOUT
-    std::cerr << "  column and row positions:\n"
-              << "    column positions:          ";
-    for (unsigned int i = 0; i < m_column_params.size(); ++i) {
-        std::cerr << " " << m_column_params[i].current_origin << "+" << m_column_params[i].current_width;
-    }
-    std::cerr << "\n"
-              << "    row positions: ";
-    for (unsigned int i = 0; i < m_row_params.size(); ++i) {
-        if (i)
-            std::cerr << "                   ";
-        std::cerr << m_row_params[i].current_origin << "+" << m_row_params[i].current_width << "\n";
-    }
-    std::cerr << "\n";
-    std::cerr << std::endl;
-#endif
-
     if (m_row_params.back().current_origin + m_row_params.back().current_width != Height() - m_border_margin)
         throw std::runtime_error("Layout::SizeMove() : calculated row positions do not sum to the height of the layout");
 
@@ -402,8 +289,8 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         throw std::runtime_error("Layout::SizeMove() : calculated column positions do not sum to the width of the layout");
 
     // resize cells and their contents
-    mIgnoreChildResize = true;
-    for (map<Wnd*, WndPosition>::iterator it = m_wnd_positions.begin(); it != m_wnd_positions.end(); ++it) {
+    m_ignore_child_resize = true;
+    for (std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.begin(); it != m_wnd_positions.end(); ++it) {
         Pt ul(m_column_params[it->second.first_column].current_origin,
               m_row_params[it->second.first_row].current_origin);
         Pt lr(m_column_params[it->second.last_column - 1].current_origin + m_column_params[it->second.last_column - 1].current_width,
@@ -418,47 +305,36 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
             lr.x -= static_cast<int>(m_cell_margin / 2.0 + 0.5);
 
         if (it->second.alignment == ALIGN_NONE) { // expand to fill available space
-            std::cerr << "  Wnd \"" << it->first->WindowText() << "\" is *un*-aligned:\n"
-                      << "    (" << ul.x << ", " << ul.y << ") - (" << lr.x << ", " << lr.y << ")\n";
             it->first->SizeMove(ul, lr);
         } else { // align as appropriate
-            std::cerr << "  Aligning wnd \"" << it->first->WindowText() << "\"\n";
             Pt available_space = lr - ul;
             Pt window_size(std::min(available_space.x, it->second.original_size.x),
                            std::min(available_space.y, it->second.original_size.y));
             Pt resize_ul, resize_lr;
             if (it->second.alignment & ALIGN_LEFT) {
-                std::cerr << "    " << ALIGN_LEFT << "\n";
                 resize_ul.x = ul.x;
                 resize_lr.x = resize_ul.x + window_size.x;
             } else if (it->second.alignment & ALIGN_CENTER) {
-                std::cerr << "    " << ALIGN_CENTER << "\n";
                 resize_ul.x = ul.x + (available_space.x - window_size.x) / 2;
                 resize_lr.x = resize_ul.x + window_size.x;
             } else { // it->second.alignment & ALIGN_RIGHT
-                std::cerr << "    " << ALIGN_RIGHT << "\n";
                 resize_lr.x = lr.x;
                 resize_ul.x = resize_lr.x - window_size.x;
             }
             if (it->second.alignment & ALIGN_TOP) {
-                std::cerr << "    " << ALIGN_TOP << "\n";
                 resize_ul.y = ul.y;
                 resize_lr.y = resize_ul.y + window_size.y;
             } else if (it->second.alignment & ALIGN_VCENTER) {
-                std::cerr << "    " << ALIGN_VCENTER << "\n";
                 resize_ul.y = ul.y + (available_space.y - window_size.y) / 2;
                 resize_lr.y = resize_ul.y + window_size.y;
             } else { // it->second.alignment & ALIGN_BOTTOM
-                std::cerr << "    " << ALIGN_BOTTOM << "\n";
                 resize_lr.y = lr.y;
                 resize_ul.y = resize_lr.y - window_size.y;
             }
-            std::cerr << "    resizing to (" << resize_ul.x << ", " << resize_ul.y << ") - (" << resize_lr.x << ", " << resize_lr.y << ")\n";
-            std::cerr << "    within (" << ul.x << ", " << ul.y << ") - (" << lr.x << ", " << lr.y << ")\n";
             it->first->SizeMove(resize_ul, resize_lr);
         }
     }
-    mIgnoreChildResize = false;
+    m_ignore_child_resize = false;
 
     if (ContainingLayout() && size_or_min_size_changed)
         ContainingLayout()->ChildSizeOrMinSizeOrMaxSizeChanged();
@@ -532,7 +408,7 @@ void Layout::ResizeLayout(int rows, int columns)
 
 void Layout::SetChildAlignment(Wnd* wnd, Uint32 alignment)
 {
-    map<Wnd*, WndPosition>::iterator it = m_wnd_positions.find(wnd);
+    std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.find(wnd);
     if (it != m_wnd_positions.end()) {
         ValidateAlignment(alignment);
         it->second.alignment = alignment;
@@ -580,7 +456,7 @@ void Layout::SetMinimumColumnWidth(int column, int width)
     RedoLayout();
 }
 
-double Layout::TotalStretch(const vector<RowColParams>& params_vec) const
+double Layout::TotalStretch(const std::vector<RowColParams>& params_vec) const
 {
     double retval = 0.0;
     for (unsigned int i = 0; i < params_vec.size(); ++i) {
@@ -638,8 +514,6 @@ void Layout::RedoLayout()
 
 void Layout::ChildSizeOrMinSizeOrMaxSizeChanged()
 {
-    if (!mIgnoreChildResize)
+    if (!m_ignore_child_resize)
         RedoLayout();
 }
-
-} // namespace GG

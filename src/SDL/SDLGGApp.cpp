@@ -27,8 +27,6 @@
 #include "SDL/SDLGGApp.h"
 #include "GGEventPump.h"
 
-using std::string;
-
 // member functions
 SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
     App(app_name),
@@ -298,13 +296,13 @@ void SDLGGApp::Run()
         GG::EventPump pump;
         pump();
     } catch (const std::invalid_argument& exception) {
-        Logger().fatal("std::invalid_argument Exception caught in App::Run(): " + string(exception.what()));
+        Logger().fatal("std::invalid_argument Exception caught in App::Run(): " + std::string(exception.what()));
         Exit(1);
     } catch (const std::runtime_error& exception) {
-        Logger().fatal("std::runtime_error Exception caught in App::Run(): " + string(exception.what()));
+        Logger().fatal("std::runtime_error Exception caught in App::Run(): " + std::string(exception.what()));
         Exit(1);
     } catch (const GG::GGException& exception) {
-        Logger().fatal("GG::GGException (subclass " + string(exception.what()) + ") caught in App::Run(): " + exception.Message());
+        Logger().fatal("GG::GGException (subclass " + std::string(exception.what()) + ") caught in App::Run(): " + exception.Message());
         Exit(1);
     }
 }

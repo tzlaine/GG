@@ -39,11 +39,13 @@
 #include "GGTexture.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
-/** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a 
-    StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the StaticGraphic's
-    window area. \see StaticGraphicStyle*/
+/** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a
+    StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the
+    StaticGraphic's window area. \see StaticGraphicStyle*/
 class GG_API StaticGraphic : public Control
 {
 public:
@@ -52,18 +54,13 @@ public:
         \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
         a SubTexture. */
     StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style = 0, Uint32 flags = 0);
-    StaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing Texture.
+    StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing Texture.
     StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing SubTexture.
-    StaticGraphic(const XMLElement& elem); ///< ctor that constructs a StaticGraphic object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a StaticGraphic object
     //@}
 
     /** \name Accessors */ //@{
     /** returns the style of the StaticGraphic \see StaticGraphicStyle */
     Uint32   Style() const;
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a StaticGraphic object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
 
     /** \name Mutators */ //@{
@@ -73,15 +70,32 @@ public:
     void  SetStyle(Uint32 style);
     //@}
 
+protected:
+    /** \name Structors */ //@{
+    StaticGraphic(); ///< default ctor
+    //@}
+
 private:
     void     Init(const SubTexture& subtexture); ///< initializes a StaticGraphic from a SubTexture
     void     ValidateStyle();   ///< ensures that the style flags are consistent
 
     SubTexture  m_graphic;
     Uint32      m_style;        ///< position of texture wrt the window area
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-#endif // _GGStaticGraphic_h_
+// template implementations
+template <class Archive>
+void GG::StaticGraphic::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_graphic)
+        & BOOST_SERIALIZATION_NVP(m_style);
+}
 
+#endif // _GGStaticGraphic_h_

@@ -68,48 +68,48 @@
 
 #define DEBUG_OUTPUT 0
 
-namespace GG {
+using namespace GG;
 
 namespace {
-const string INDENT_STR = "  "; // indents are 2 spaces
-string element_name;
-string attribute_name;
+    const std::string INDENT_STR = "  "; // indents are 2 spaces
+    std::string element_name;
+    std::string attribute_name;
 
-using namespace boost::spirit;
+    using namespace boost::spirit;
 
-typedef chset<unsigned char> chset_t;
-typedef chlit<unsigned char> chlit_t;
+    typedef chset<unsigned char> chset_t;
+    typedef chlit<unsigned char> chlit_t;
 
-// XML grammar rules
-rule<> document, prolog, element, Misc, Reference,CData, doctypedecl, 
+    // XML grammar rules
+    rule<> document, prolog, element, Misc, Reference,CData, doctypedecl, 
     XMLDecl, SDDecl, VersionInfo, EncodingDecl, VersionNum, Eq, 
     EmptyElemTag, STag, content, ETag, Attribute, AttValue, CharData, 
     Comment, CDSect, CharRef, EntityRef, EncName, Name, Comment1, S;
 
-// XML Character classes
-chset_t Char("\x9\xA\xD\x20-\xFF");
-chset_t Letter("\x41-\x5A\x61-\x7A\xC0-\xD6\xD8-\xF6\xF8-\xFF");
-chset_t Digit("0-9");
-chset_t Extender('\xB7');
-chset_t NameChar = Letter | Digit | chset_t("._:-") | Extender;
-chset_t Sch("\x20\x9\xD\xA");
+    // XML Character classes
+    chset_t Char("\x9\xA\xD\x20-\xFF");
+    chset_t Letter("\x41-\x5A\x61-\x7A\xC0-\xD6\xD8-\xF6\xF8-\xFF");
+    chset_t Digit("0-9");
+    chset_t Extender('\xB7');
+    chset_t NameChar = Letter | Digit | chset_t("._:-") | Extender;
+    chset_t Sch("\x20\x9\xD\xA");
 }
 
 ////////////////////////////////////////////////
 // GG::XMLElement
 ////////////////////////////////////////////////
-XMLElement::XMLElement(const string& t, bool r) :
+XMLElement::XMLElement(const std::string& t, bool r) :
     m_tag(t),
     m_root(r)
 {
 }
 
-const string& XMLElement::Tag() const
+const std::string& XMLElement::Tag() const
 {
     return m_tag;
 }
 
-const string& XMLElement::Text() const
+const std::string& XMLElement::Text() const
 {
     return m_text;
 }
@@ -124,17 +124,17 @@ int XMLElement::NumAttributes() const
     return m_attributes.size();
 }
 
-bool XMLElement::ContainsChild(const string& child) const
+bool XMLElement::ContainsChild(const std::string& child) const
 {
     return ChildIndex(child) != -1;
 }
 
-bool XMLElement::ContainsAttribute(const string& attrib) const
+bool XMLElement::ContainsAttribute(const std::string& attrib) const
 {
     return m_attributes.find(attrib) != m_attributes.end();
 }
 
-int XMLElement::ChildIndex(const string& child) const
+int XMLElement::ChildIndex(const std::string& child) const
 {
     int retval = -1;
     for (unsigned int i = 0; i < m_children.size(); ++i) {
@@ -151,7 +151,7 @@ const XMLElement& XMLElement::Child(unsigned int idx) const
     return m_children.at(idx);
 }
 
-const XMLElement& XMLElement::Child(const string& child) const
+const XMLElement& XMLElement::Child(const std::string& child) const
 {
     unsigned int i = 0;
     for (; i < m_children.size(); ++i) {
@@ -173,23 +173,23 @@ const XMLElement& XMLElement::LastChild() const
     return m_children.back();
 }
 
-const string& XMLElement::Attribute(const string& attrib) const
+const std::string& XMLElement::Attribute(const std::string& attrib) const
 {
-    static const string empty_str("");
-    map<string, string>::const_iterator it = m_attributes.find(attrib);
+    static const std::string empty_str("");
+    std::map<std::string, std::string>::const_iterator it = m_attributes.find(attrib);
     if (it != m_attributes.end())
         return it->second;
     else
         return empty_str;
 }
 
-ostream& XMLElement::WriteElement(ostream& os, int indent/* = 0*/, bool whitespace/* = true*/) const
+std::ostream& XMLElement::WriteElement(std::ostream& os, int indent/* = 0*/, bool whitespace/* = true*/) const
 {
     if (whitespace)
         for (int i = 0; i < indent; ++i)
             os << INDENT_STR;
     os << '<' << m_tag;
-    for (std::map<string, string>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+    for (std::map<std::string, std::string>::const_iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
         os << ' ' << it->first << "=\"" << it->second << "\"";
     if (m_children.empty() && m_text.empty() && !m_root) {
         os << "/>";
@@ -242,7 +242,7 @@ XMLElement& XMLElement::Child(unsigned int idx)
     return m_children.at(idx);
 }
 
-XMLElement& XMLElement::Child(const string& child)
+XMLElement& XMLElement::Child(const std::string& child)
 {
     unsigned int i = 0;
     for (; i < m_children.size(); ++i) {
@@ -264,22 +264,22 @@ XMLElement& XMLElement::LastChild()
     return m_children.back();
 }
 
-void XMLElement::SetAttribute(const string& attrib, const string& val)
+void XMLElement::SetAttribute(const std::string& attrib, const std::string& val)
 {
     m_attributes[attrib] = val;
 }
 
-void XMLElement::SetTag(const string& tag)
+void XMLElement::SetTag(const std::string& tag)
 {
     m_tag = tag;
 }
 
-void XMLElement::SetText(const string& text)
+void XMLElement::SetText(const std::string& text)
 {
     m_text = text;
 }
 
-void XMLElement::RemoveAttribute(const string& attrib)
+void XMLElement::RemoveAttribute(const std::string& attrib)
 {
     m_attributes.erase(attrib);
 }
@@ -294,7 +294,7 @@ void XMLElement::AppendChild(const XMLElement& e)
     m_children.push_back(e);
 }
 
-void XMLElement::AppendChild(const string& child)
+void XMLElement::AppendChild(const std::string& child)
 {
     m_children.push_back(XMLElement(child));
 }
@@ -302,7 +302,7 @@ void XMLElement::AppendChild(const string& child)
 void XMLElement::AddChildBefore(const XMLElement& e, unsigned int idx)
 {
     if (m_children.size() <= idx)
-        throw std::range_error("XMLElement::AddChildBefore(): Index " + lexical_cast<string>(idx) + " is out of range.");
+        throw std::range_error("XMLElement::AddChildBefore(): Index " + boost::lexical_cast<std::string>(idx) + " is out of range.");
 
     m_children.insert(m_children.begin() + idx, e);
 }
@@ -310,12 +310,12 @@ void XMLElement::AddChildBefore(const XMLElement& e, unsigned int idx)
 void XMLElement::RemoveChild(unsigned int idx)
 {
     if (m_children.size() <= idx)
-        throw std::range_error("XMLElement::RemoveChild(): Index " + lexical_cast<string>(idx) + " is out of range.");
+        throw std::range_error("XMLElement::RemoveChild(): Index " + boost::lexical_cast<std::string>(idx) + " is out of range.");
 
     m_children.erase(m_children.begin() + idx);
 }
 
-void XMLElement::RemoveChild(const string& child)
+void XMLElement::RemoveChild(const std::string& child)
 {
     int idx = ChildIndex(child);
 
@@ -355,36 +355,36 @@ XMLElement::attr_iterator XMLElement::attr_end()
 // GG::XMLDoc
 ////////////////////////////////////////////////
 // static(s)
-XMLDoc*              XMLDoc::s_curr_parsing_doc = 0;
-vector<XMLElement*>  XMLDoc::s_element_stack;
-XMLDoc::RuleDefiner  XMLDoc::s_rule_definer;
-XMLElement           XMLDoc::s_temp_elem;
-string               XMLDoc::s_temp_attr_name;
+XMLDoc*                  XMLDoc::s_curr_parsing_doc = 0;
+std::vector<XMLElement*> XMLDoc::s_element_stack;
+XMLDoc::RuleDefiner      XMLDoc::s_rule_definer;
+XMLElement               XMLDoc::s_temp_elem;
+std::string              XMLDoc::s_temp_attr_name;
 
-XMLDoc::XMLDoc(const string& root_tag/*= "GG::XMLDoc"*/) :
+XMLDoc::XMLDoc(const std::string& root_tag/*= "GG::XMLDoc"*/) :
     root_node(XMLElement(root_tag, true))
 {
 }
 
-XMLDoc::XMLDoc(const istream& is) :
+XMLDoc::XMLDoc(const std::istream& is) :
     root_node(XMLElement())
 {
 }
 
-ostream& XMLDoc::WriteDoc(ostream& os, bool whitespace/* = true*/) const
+std::ostream& XMLDoc::WriteDoc(std::ostream& os, bool whitespace/* = true*/) const
 {
     os << "<?xml version=\"1.0\"?>";
     if (whitespace) os << "\n";
     return root_node.WriteElement(os, 0, whitespace);
 }
 
-istream& XMLDoc::ReadDoc(istream& is)
+std::istream& XMLDoc::ReadDoc(std::istream& is)
 {
     root_node = XMLElement(); // clear doc contents
     s_element_stack.clear();  // clear this to start a fresh read
     s_curr_parsing_doc = this;  // indicate where to add elements
-    string parse_str;
-    string temp_str;
+    std::string parse_str;
+    std::string temp_str;
     while (is) {
         getline(is, temp_str);
         parse_str += temp_str + '\n';
@@ -396,17 +396,17 @@ istream& XMLDoc::ReadDoc(istream& is)
 
 void XMLDoc::SetElemName(const char* first, const char* last)
 {
-    s_temp_elem = XMLElement(string(first, last));
+    s_temp_elem = XMLElement(std::string(first, last));
 }
 
 void XMLDoc::SetAttributeName(const char* first, const char* last)
 {
-    s_temp_attr_name = string(first, last);
+    s_temp_attr_name = std::string(first, last);
 }
 
 void XMLDoc::AddAttribute(const char* first, const char* last)
 {
-    s_temp_elem.SetAttribute(s_temp_attr_name, string(first, last));
+    s_temp_elem.SetAttribute(s_temp_attr_name, std::string(first, last));
 }
 
 void XMLDoc::PushElem1(const char* first, const char* last)
@@ -442,11 +442,11 @@ void XMLDoc::PopElem(const char*, const char*)
 void XMLDoc::AppendToText(const char* first, const char* last)
 {
     if (!s_element_stack.empty()) {
-        string text(first, last);
+        std::string text(first, last);
         unsigned int first_good_posn = (text[0] != '\"') ? 0 : 1;
         unsigned int last_good_posn = text.find_last_not_of(" \t\n\"\r\f");
         // strip of leading quote and/or trailing quote, and/or trailing whitespace
-        if (last_good_posn != string::npos)
+        if (last_good_posn != std::string::npos)
             s_element_stack.back()->m_text += text.substr(first_good_posn, (last_good_posn + 1) - first_good_posn);
     }
 }
@@ -637,16 +637,16 @@ XMLDoc::RuleDefiner::RuleDefiner()
 ////////////////////////////////////////////////
 // GG::XMLElementValidator
 ////////////////////////////////////////////////
-XMLElementValidator::XMLElementValidator(const string& tag, ValidatorBase* text_validator/* = 0*/) : 
+XMLElementValidator::XMLElementValidator(const std::string& tag, ValidatorBase* text_validator/* = 0*/) : 
     m_tag(tag), 
     m_text_validator(text_validator)
 {
 }
 
-XMLElementValidator::XMLElementValidator(const string& tag, const XMLElementValidator& body) : 
+XMLElementValidator::XMLElementValidator(const std::string& tag, const XMLElementValidator& body) : 
     m_tag(tag), 
     m_text_validator(0), 
-    m_children(vector<XMLElementValidator>(1, body))
+    m_children(std::vector<XMLElementValidator>(1, body))
 {
 }
 
@@ -654,7 +654,7 @@ XMLElementValidator::XMLElementValidator(const XMLElementValidator& rhs)
 {
     m_tag = rhs.m_tag;
     m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
-    for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
+    for (std::map<std::string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
         m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
     }
     for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
@@ -669,7 +669,7 @@ const XMLElementValidator& XMLElementValidator::operator=(const XMLElementValida
 
         m_tag = rhs.m_tag;
         m_text_validator = rhs.m_text_validator ? rhs.m_text_validator->Clone() : 0;
-        for (map<string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
+        for (std::map<std::string, ValidatorBase*>::const_iterator it = rhs.m_attribute_validators.begin(); it != rhs.m_attribute_validators.end(); ++it) {
             m_attribute_validators[it->first] = it->second ? it->second->Clone() : 0;
         }
         for (unsigned int i = 0; i < rhs.m_children.size(); ++i) {
@@ -702,7 +702,7 @@ void XMLElementValidator::Validate(const XMLElement& elem) const
     }
 
     XMLElement::const_attr_iterator attrib_it = elem.attr_begin();
-    for (map<string, ValidatorBase*>::const_iterator it = m_attribute_validators.begin(); 
+    for (std::map<std::string, ValidatorBase*>::const_iterator it = m_attribute_validators.begin(); 
          it != m_attribute_validators.end(); 
          ++it, ++attrib_it) {
         if (it->second) {
@@ -721,7 +721,7 @@ void XMLElementValidator::Validate(const XMLElement& elem) const
 #endif
 }
 
-XMLElementValidator& XMLElementValidator::Child(const string& child)
+XMLElementValidator& XMLElementValidator::Child(const std::string& child)
 {
     unsigned int i = 0;
     for (; i < m_children.size(); ++i) {
@@ -743,7 +743,7 @@ XMLElementValidator& XMLElementValidator::LastChild()
     return m_children.back();
 }
 
-void XMLElementValidator::SetAttribute(const string& attrib, ValidatorBase* value_validator)
+void XMLElementValidator::SetAttribute(const std::string& attrib, ValidatorBase* value_validator)
 {
     delete m_attribute_validators[attrib];
     m_attribute_validators[attrib] = value_validator;
@@ -758,7 +758,7 @@ void XMLElementValidator::Clear()
 {
     delete m_text_validator;
     m_text_validator = 0;
-    for (map<string, ValidatorBase*>::iterator it = m_attribute_validators.begin(); it != m_attribute_validators.end(); ++it) {
+    for (std::map<std::string, ValidatorBase*>::iterator it = m_attribute_validators.begin(); it != m_attribute_validators.end(); ++it) {
         delete it->second;
     }
     m_attribute_validators.clear();
@@ -769,16 +769,16 @@ void XMLElementValidator::Clear()
 ////////////////////////////////////////////////
 // Free Functions
 ////////////////////////////////////////////////
-vector<string> Tokenize(const string& str)
+std::vector<std::string> GG::Tokenize(const std::string& str)
 {
-    vector<string> retval;
+    std::vector<std::string> retval;
     parse(str.c_str(), *space_p >> *((+(anychar_p - space_p))[append(retval)] >> *space_p));
     return retval;
 }
 
-pair<vector<string>, vector<string> > TokenizeMapString(const string& str)
+std::pair<std::vector<std::string>, std::vector<std::string> > GG::TokenizeMapString(const std::string& str)
 {
-    pair<vector<string>, vector<string> > retval;
+    std::pair<std::vector<std::string>, std::vector<std::string> > retval;
     if (!parse(str.c_str(), 
                *space_p >> *(
                    ch_p('(') >> *space_p >> 
@@ -792,7 +792,3 @@ pair<vector<string>, vector<string> > TokenizeMapString(const string& str)
     }
     return retval;
 }
-
-
-} // namespace GG
-

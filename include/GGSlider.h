@@ -36,14 +36,16 @@
 #include "GGControl.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
 class Button;
 
 /** a slider control.  This control allows the user to drag a tab to a desired setting; it is somewhat like a Scroll.
-   Sliders can be either vertical or horizontal, but cannot switch between the two.  Unlike vertical Scrolls, whose 
-   values increase downward, vertical Sliders increase upward by default.  Note that it is acceptible to define a range 
-   that increases from min to max, or one that decreases from min to max; both are legal. */
+    Sliders can be either vertical or horizontal, but cannot switch between the two.  Unlike vertical Scrolls, whose
+    values increase downward, vertical Sliders increase upward by default.  Note that it is acceptible to define a range
+    that increases from min to max, or one that decreases from min to max; both are legal. */
 class GG_API Slider : public Control
 {
 public:
@@ -74,20 +76,16 @@ public:
     /** \name Structors */ //@{
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-    Slider(const XMLElement& elem); ///< ctor that constructs a Slider object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Slider object
     //@}
 
     /** \name Accessors */ //@{
     int            Posn() const;           ///< returns the current tab position
-    pair<int, int> SliderRange() const;    ///< returns the defined possible range of control
+    std::pair<int, int>
+                   SliderRange() const;    ///< returns the defined possible range of control
     Orientation    GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
     int            TabWidth() const;       ///< returns the width of the slider's tab, in pixels
     int            LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
     LineStyleType  LineStyle() const;      ///< returns the style of line used to render the control
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Slider object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
 
     mutable SlidSignalType           SlidSignal;           ///< returns the slid signal object for this Slider
     mutable SlidAndStoppedSignalType SlidAndStoppedSignal; ///< returns the slid-and-stopped signal object for this Slider
@@ -115,50 +113,73 @@ public:
     //@}
 
 protected:
+    /** \name Structors */ //@{
+    Slider(); ///< default ctor
+    //@}
+
     /** \name Accessors */ //@{
     int TabDragOffset() const; ///< returns the offset from the cursor to the left edge of the tab; -1 when the tab is not being dragged
 
-    const shared_ptr<Button>& Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
+    const boost::shared_ptr<Button>& Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
     //@}
 
 private:
     void  MoveTabToPosn();
     void  UpdatePosn();
 
-    int                  m_posn;
-    int                  m_range_min;
-    int                  m_range_max;
+    int                       m_posn;
+    int                       m_range_min;
+    int                       m_range_max;
 
-    Orientation          m_orientation;
+    Orientation               m_orientation;
 
-    int                  m_line_width;
-    int                  m_tab_width;
-    LineStyleType        m_line_style;
+    int                       m_line_width;
+    int                       m_tab_width;
+    LineStyleType             m_line_style;
 
-    int                  m_tab_drag_offset;
-    shared_ptr<Button>   m_tab;
+    int                       m_tab_drag_offset;
+    boost::shared_ptr<Button> m_tab;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 // define EnumMap and stream operators for Slider::Orientation
-ENUM_MAP_BEGIN(Slider::Orientation)
-    ENUM_MAP_INSERT(Slider::VERTICAL)
-    ENUM_MAP_INSERT(Slider::HORIZONTAL)
-ENUM_MAP_END
+GG_ENUM_MAP_BEGIN(Slider::Orientation)
+    GG_ENUM_MAP_INSERT(Slider::VERTICAL)
+    GG_ENUM_MAP_INSERT(Slider::HORIZONTAL)
+GG_ENUM_MAP_END
 
-ENUM_STREAM_IN(Slider::Orientation)
-ENUM_STREAM_OUT(Slider::Orientation)
+GG_ENUM_STREAM_IN(Slider::Orientation)
+GG_ENUM_STREAM_OUT(Slider::Orientation)
 
 // define EnumMap and stream operators for Slider::LineStyleType
-ENUM_MAP_BEGIN(Slider::LineStyleType)
-    ENUM_MAP_INSERT(Slider::FLAT)
-    ENUM_MAP_INSERT(Slider::RAISED)
-    ENUM_MAP_INSERT(Slider::GROOVED)
-ENUM_MAP_END
+GG_ENUM_MAP_BEGIN(Slider::LineStyleType)
+    GG_ENUM_MAP_INSERT(Slider::FLAT)
+    GG_ENUM_MAP_INSERT(Slider::RAISED)
+    GG_ENUM_MAP_INSERT(Slider::GROOVED)
+GG_ENUM_MAP_END
 
-ENUM_STREAM_IN(Slider::LineStyleType)
-ENUM_STREAM_OUT(Slider::LineStyleType)
+GG_ENUM_STREAM_IN(Slider::LineStyleType)
+GG_ENUM_STREAM_OUT(Slider::LineStyleType)
 
 } // namespace GG
 
-#endif // _GGSlider_h_
+// template implementations
+template <class Archive>
+void GG::Slider::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_posn)
+        & BOOST_SERIALIZATION_NVP(m_range_min)
+        & BOOST_SERIALIZATION_NVP(m_range_max)
+        & BOOST_SERIALIZATION_NVP(m_orientation)
+        & BOOST_SERIALIZATION_NVP(m_line_width)
+        & BOOST_SERIALIZATION_NVP(m_tab_width)
+        & BOOST_SERIALIZATION_NVP(m_line_style)
+        & BOOST_SERIALIZATION_NVP(m_tab_drag_offset)
+        & BOOST_SERIALIZATION_NVP(m_tab);
+}
 
+#endif // _GGSlider_h_

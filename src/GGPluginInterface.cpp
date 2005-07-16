@@ -54,12 +54,6 @@ PluginInterface::PluginInterface(const std::string& lib_name) :
 PluginInterface::~PluginInterface()
 {
     if (m_handle) {
-        GG::App* app = GG::App::GetApp();
-        const std::map<std::string, std::string>& generator_names = FactoryGeneratorNames();
-        for (std::map<std::string, std::string>::const_iterator it = generator_names.begin(); it != generator_names.end(); ++it) {
-            app->RemoveWndGenerator(it->first);
-        }
-
         // plugin name
         PluginName = 0;
 
@@ -84,8 +78,6 @@ PluginInterface::~PluginInterface()
         CreateStaticGraphic = 0;
         CreateTextControl = 0;
         DestroyControl = 0;
-
-        FactoryGeneratorNames = 0;
 
         lt_dlclose(m_handle);
         m_handle = 0;
@@ -140,15 +132,6 @@ bool PluginInterface::Load(const std::string& lib_name)
             CreateStaticGraphic = (CreateStaticGraphicFn)(lt_dlsym(m_handle, "CreateStaticGraphic"));
             CreateTextControl = (CreateTextControlFn)(lt_dlsym(m_handle, "CreateTextControl"));
             DestroyControl = (DestroyControlFn)(lt_dlsym(m_handle, "DestroyControl"));
-
-            // get the names of the XML factory generator functions required to create GG::Wnd-derived classes included in the plugin from XML descriptions
-            FactoryGeneratorNames = (FactoryGeneratorNamesFn)(lt_dlsym(m_handle, "FactoryGeneratorNames"));
-            typedef GG::XMLObjectFactory<GG::Wnd>::Generator GeneratorFn;
-            GG::App* app = GG::App::GetApp();
-            const std::map<std::string, std::string>& generator_names = FactoryGeneratorNames();
-            for (std::map<std::string, std::string>::const_iterator it = generator_names.begin(); it != generator_names.end(); ++it) {
-                app->AddWndGenerator(it->first, (GeneratorFn)(lt_dlsym(m_handle, it->second.c_str())));
-            }
         } else {
             retval = false;
             GG::App::GetApp()->Logger().errorStream() 
@@ -172,9 +155,9 @@ PluginManager::PluginManager()
     s_created = true;
 }
 
-shared_ptr<PluginInterface> PluginManager::GetPlugin(const string& name)
+boost::shared_ptr<PluginInterface> PluginManager::GetPlugin(const std::string& name)
 {
-    std::map<string, shared_ptr<PluginInterface> >::iterator it = m_plugins.find(name);
+    std::map<std::string, boost::shared_ptr<PluginInterface> >::iterator it = m_plugins.find(name);
     if (it == m_plugins.end()) { // if no such plugin was found, attempt to load it now, using name as the filename
         m_plugins[name].reset(new PluginInterface);
         m_plugins[name]->Load(name);
@@ -184,9 +167,9 @@ shared_ptr<PluginInterface> PluginManager::GetPlugin(const string& name)
     }
 }
 
-void PluginManager::FreePlugin(const string& name)
+void PluginManager::FreePlugin(const std::string& name)
 {
-    std::map<string, shared_ptr<PluginInterface> >::iterator it = m_plugins.find(name);
+    std::map<std::string, boost::shared_ptr<PluginInterface> >::iterator it = m_plugins.find(name);
     if (it != m_plugins.end())
         m_plugins.erase(it);
 }

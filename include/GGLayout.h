@@ -35,6 +35,8 @@
 #include "GGWnd.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
 /** an invisible Wnd subclass whose only purpose is to arrange its child Wnds.  A Layout consists of a grid of cells.  A
@@ -89,11 +91,6 @@ public:
 
     /** ctor.  \throw std::invalid_argument May throw std::invalid_argument if \a m_border_margin is < 0. */
     Layout(int x, int y, int w, int h, int rows, int columns, int border_margin = 0, int cell_margin = -1);
-
-    /** ctor that constructs a Layout object from an XMLElement. \throw std::invalid_argument May throw
-        std::invalid_argument if \a elem does not encode a Layout object.  \throw std::invalid_argument May throw
-        std::invalid_argument if \a m_border_margin is < 0. */
-    Layout(const XMLElement& elem);
     //@}
 
     /** \name Accessors */ //@{
@@ -106,8 +103,6 @@ public:
     double ColumnStretch(int column) const;          ///< returns the stretch factor for column \a column.  Note that \a column is not range-checked.
     int    MinimumRowHeight(int row) const;          ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
     int    MinimumColumnWidth(int column) const;     ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Layout object
     //@}
    
     /** \name Mutators */ //@{
@@ -156,6 +151,11 @@ public:
     void SetMinimumColumnWidth(int column, int width);
     //@}
 
+protected:
+    /** \name Structors */ //@{
+    Layout(); ///< default ctor
+    //@}
+
 private:
     struct RowColParams
     {
@@ -166,6 +166,11 @@ private:
         int    effective_min;   ///< current effective minimum width of this row or column, based on min, layout margins, and layout cell contents
         int    current_origin;  ///< current position of top or left side
         int    current_width;   ///< current extent in downward or right direction
+
+    private:
+        friend class boost::serialization::access;
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
     };
 
     struct WndPosition
@@ -179,26 +184,70 @@ private:
         int    last_column;
         Uint32 alignment;
         Pt     original_size;
+
+    private:
+        friend class boost::serialization::access;
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
     };
 
-    double TotalStretch(const vector<RowColParams>& params_vec) const;
+    double TotalStretch(const std::vector<RowColParams>& params_vec) const;
     int    TotalMinWidth() const;
     int    TotalMinHeight() const;
     void   ValidateAlignment(Uint32& alignment);
     void   RedoLayout();
     void   ChildSizeOrMinSizeOrMaxSizeChanged();
 
-    vector<vector<Wnd*> >  m_cells;
-    int                    m_border_margin;
-    int                    m_cell_margin;
-    vector<RowColParams>   m_row_params;
-    vector<RowColParams>   m_column_params;
-    map<Wnd*, WndPosition> m_wnd_positions;
-    bool                   mIgnoreChildResize;
+    std::vector<std::vector<Wnd*> > m_cells;
+    int                             m_border_margin;
+    int                             m_cell_margin;
+    std::vector<RowColParams>       m_row_params;
+    std::vector<RowColParams>       m_column_params;
+    std::map<Wnd*, WndPosition>     m_wnd_positions;
+    bool                            m_ignore_child_resize;
 
     friend class Wnd;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
+
+// template implementations
+template <class Archive>
+void GG::Layout::RowColParams::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(stretch)
+        & BOOST_SERIALIZATION_NVP(min)
+        & BOOST_SERIALIZATION_NVP(effective_min)
+        & BOOST_SERIALIZATION_NVP(current_origin)
+        & BOOST_SERIALIZATION_NVP(current_width);
+}
+
+template <class Archive>
+void GG::Layout::WndPosition::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(first_row)
+        & BOOST_SERIALIZATION_NVP(first_column)
+        & BOOST_SERIALIZATION_NVP(last_row)
+        & BOOST_SERIALIZATION_NVP(last_column)
+        & BOOST_SERIALIZATION_NVP(alignment)
+        & BOOST_SERIALIZATION_NVP(original_size);
+}
+
+template <class Archive>
+void GG::Layout::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_cells)
+        & BOOST_SERIALIZATION_NVP(m_border_margin)
+        & BOOST_SERIALIZATION_NVP(m_cell_margin)
+        & BOOST_SERIALIZATION_NVP(m_row_params)
+        & BOOST_SERIALIZATION_NVP(m_column_params)
+        & BOOST_SERIALIZATION_NVP(m_wnd_positions)
+        & BOOST_SERIALIZATION_NVP(m_ignore_child_resize);
+}
 
 #endif // _GGLayout_h_

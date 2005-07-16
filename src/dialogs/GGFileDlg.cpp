@@ -46,20 +46,20 @@
 #include <boost/spirit.hpp>
 #include <boost/spirit/dynamic.hpp>
 
-namespace GG {
+using namespace GG;
 
 namespace {
     using namespace boost::spirit;
     // these functors are used by the if_p, while_p, and for_p parsers in UpdateList()
     struct LeadingWildcard
     {
-        LeadingWildcard(const string& str) : m_value(!str.empty() && *str.begin() == '*') {}
+        LeadingWildcard(const std::string& str) : m_value(!str.empty() && *str.begin() == '*') {}
         bool operator()() const {return m_value;}
         bool m_value;
     };
     struct TrailingWildcard
     {
-        TrailingWildcard(const string& str) : m_value(!str.empty() && *str.rbegin() == '*') {}
+        TrailingWildcard(const std::string& str) : m_value(!str.empty() && *str.rbegin() == '*') {}
         bool operator()() const {return m_value;}
         bool m_value;
     };
@@ -85,27 +85,27 @@ namespace {
 
     struct FrontStringBegin
     {
-        FrontStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        FrontStringBegin(const boost::shared_ptr<std::vector<std::string> >& strings) : m_strings(strings) {}
         const char* operator()() const {return m_strings->front().c_str();}
-        shared_ptr<vector<string> > m_strings;
+        boost::shared_ptr<std::vector<std::string> > m_strings;
     };
     struct FrontStringEnd
     {
-        FrontStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        FrontStringEnd(const boost::shared_ptr<std::vector<std::string> >& strings) : m_strings(strings) {}
         const char* operator()() const {return m_strings->front().c_str() + m_strings->front().size();}
-        shared_ptr<vector<string> > m_strings;
+        boost::shared_ptr<std::vector<std::string> > m_strings;
     };
     struct IndexedStringBegin
     {
-        IndexedStringBegin(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        IndexedStringBegin(const boost::shared_ptr<std::vector<std::string> >& strings) : m_strings(strings) {}
         const char* operator()() const {return (*m_strings)[Index::value].c_str();}
-        shared_ptr<vector<string> > m_strings;
+        boost::shared_ptr<std::vector<std::string> > m_strings;
     };
     struct IndexedStringEnd
     {
-        IndexedStringEnd(const shared_ptr<vector<string> >& strings) : m_strings(strings) {}
+        IndexedStringEnd(const boost::shared_ptr<std::vector<std::string> >& strings) : m_strings(strings) {}
         const char* operator()() const {return (*m_strings)[Index::value].c_str() + (*m_strings)[Index::value].size();}
-        shared_ptr<vector<string> > m_strings;
+        boost::shared_ptr<std::vector<std::string> > m_strings;
     };
 
     const int H_SPACING = 10;
@@ -116,7 +116,12 @@ namespace {
 boost::filesystem::path FileDlg::s_working_dir = boost::filesystem::initial_path();
 
 
-FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const shared_ptr<Font>& font, Clr color, 
+FileDlg::FileDlg() :
+    Wnd()
+{
+}
+
+FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const boost::shared_ptr<Font>& font, Clr color, 
                  Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) : 
     Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
@@ -141,7 +146,7 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     Init(directory);
 }
 
-FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const string& font_filename,
+FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::string& font_filename,
                  int pts, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/,
                  Button* ok/* = 0*/, Button* cancel/* = 0*/) :
     Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
@@ -167,8 +172,8 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     Init(directory);
 }
 
-FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-                 const shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, 
+FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
+                 const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, 
                  Button* cancel/* = 0*/) :
     Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
@@ -194,8 +199,8 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     Init(directory);
 }
 
-FileDlg::FileDlg(const string& directory, const string& filename, bool save, bool multi, const vector<pair<string, string> >& types,
-                 const string& font_filename, int pts, Clr color, Clr border_color,
+FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
+                 const std::string& font_filename, int pts, Clr color, Clr border_color,
                  Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/) :
     Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
@@ -221,101 +226,14 @@ FileDlg::FileDlg(const string& directory, const string& filename, bool save, boo
     Init(directory);
 }
 
-FileDlg::FileDlg(const XMLElement& elem) :
-    Wnd(elem.Child("GG::Wnd"))
-{
-    if (elem.Tag() != "GG::FileDlg")
-        throw std::invalid_argument("Attempted to construct a GG::FileDlg from an XMLElement that had a tag other than \"GG::FileDlg\"");
-
-    m_color = Clr(elem.Child("m_color").Child("GG::Clr"));
-    m_border_color = Clr(elem.Child("m_border_color").Child("GG::Clr"));
-    m_text_color = Clr(elem.Child("m_text_color").Child("GG::Clr"));
-    m_button_color = Clr(elem.Child("m_button_color").Child("GG::Clr"));
-
-    const XMLElement* curr_elem = &elem.Child("m_font").Child("GG::Font");
-    string font_filename = curr_elem->Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(curr_elem->Child("m_pt_sz").Text());
-    m_font = App::GetApp()->GetFont(font_filename, pts);
-
-    m_save = lexical_cast<bool>(elem.Child("m_save").Text());
-
-    curr_elem = &elem.Child("m_file_filters");
-    for (int i = 0; i < curr_elem->NumChildren(); i += 2)
-        m_file_filters.push_back(std::make_pair(curr_elem->Child(i).Text(), curr_elem->Child(i + 1).Text()));
-
-    m_curr_dir_text = new TextControl(elem.Child("m_curr_dir_text").Child("GG::TextControl"));
-    if (!(m_files_list = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(elem.Child("m_files_list").Child(0))))) {
-        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-ListBox object as the files list box.");
-    }
-    if (!(m_files_edit = dynamic_cast<Edit*>(App::GetApp()->GenerateWnd(elem.Child("m_files_edit").Child(0))))) {
-        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-Edit object as the filename edit box when constructing a GG::FileDlg");
-    }
-    if (!(m_filter_list = dynamic_cast<DropDownList*>(App::GetApp()->GenerateWnd(elem.Child("m_filter_list").Child(0))))) {
-        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-DropDownList object as the file filters drop list.");
-    }
-    if (!(m_ok_button = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_ok_button").Child(0))))) {
-        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-Button object as the ok button.");
-    }
-    if (!(m_cancel_button = dynamic_cast<Button*>(App::GetApp()->GenerateWnd(elem.Child("m_cancel_button").Child(0))))) {
-        throw std::runtime_error("FileDlg::FileDlg() : Attempted to use a non-Button object as the cancel button.");
-    }
-    m_files_label = new TextControl(elem.Child("m_files_label").Child("GG::TextControl"));
-    m_file_types_label = new TextControl(elem.Child("m_file_types_label").Child("GG::TextControl"));
-
-    Init("");
-}
-
 Clr FileDlg::ButtonColor() const
 {
     return m_button_color;
 }
 
-set<string> FileDlg::Result() const
+std::set<std::string> FileDlg::Result() const
 {
     return m_result;
-}
-
-XMLElement FileDlg::XMLEncode() const
-{
-    XMLElement retval("GG::FileDlg");
-    const_cast<FileDlg*>(this)->DetachSignalChildren();
-    retval.AppendChild(Wnd::XMLEncode());
-
-    retval.AppendChild(XMLElement("m_color", m_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_border_color", m_border_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_text_color", m_text_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_button_color", m_button_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_font", m_font->XMLEncode()));
-    retval.AppendChild(XMLElement("m_save", lexical_cast<string>(m_save)));
-
-    XMLElement temp("m_file_filters");
-    for (unsigned int i = 0; i < m_file_filters.size(); ++i) {
-        temp.AppendChild(XMLElement("first", m_file_filters[i].first));
-        temp.AppendChild(XMLElement("second", m_file_filters[i].second));
-    }
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElement("m_curr_dir_text", m_curr_dir_text->XMLEncode()));
-
-    m_files_list->Clear();
-    retval.AppendChild(XMLElement("m_files_list", m_files_list->XMLEncode()));
-    const_cast<FileDlg*>(this)->UpdateList();
-
-    m_files_edit->Clear();
-    retval.AppendChild(XMLElement("m_files_edit", m_files_edit->XMLEncode()));
-
-    m_filter_list->Clear();
-    retval.AppendChild(XMLElement("m_filter_list", m_filter_list->XMLEncode()));
-    const_cast<FileDlg*>(this)->PopulateFilters();
-
-    retval.AppendChild(XMLElement("m_ok_button", m_ok_button->XMLEncode()));
-    retval.AppendChild(XMLElement("m_cancel_button", m_cancel_button->XMLEncode()));
-    retval.AppendChild(XMLElement("m_files_label", m_files_label->XMLEncode()));
-    retval.AppendChild(XMLElement("m_file_types_label", m_file_types_label->XMLEncode()));
-
-    const_cast<FileDlg*>(this)->AttachSignalChildren();
-
-    return retval;
 }
 
 bool FileDlg::Render()
@@ -378,7 +296,7 @@ const boost::filesystem::path& FileDlg::WorkingDirectory()
     return s_working_dir;
 }
 
-void FileDlg::CreateChildren(const string& filename, bool multi, const string& font_filename, int pts)
+void FileDlg::CreateChildren(const std::string& filename, bool multi, const std::string& font_filename, int pts)
 {
     if (m_save)
         multi = false;
@@ -427,27 +345,13 @@ void FileDlg::PlaceLabelsAndEdits(int button_width, int button_height)
     m_filter_list->SizeMove(labels_width, Height() - (button_height + V_SPACING),    Width() - (button_width + 2 * H_SPACING), Height() - V_SPACING);
 }
 
-void FileDlg::AttachSignalChildren()
+void FileDlg::Init(const std::string& directory)
 {
     AttachChild(m_files_edit);
     AttachChild(m_filter_list);
     AttachChild(m_ok_button);
     AttachChild(m_cancel_button);
     AttachChild(m_files_list);
-}
-
-void FileDlg::DetachSignalChildren()
-{
-    DetachChild(m_files_edit);
-    DetachChild(m_filter_list);
-    DetachChild(m_ok_button);
-    DetachChild(m_cancel_button);
-    DetachChild(m_files_list);
-}
-
-void FileDlg::Init(const string& directory)
-{
-    AttachSignalChildren();
     AttachChild(m_curr_dir_text);
     AttachChild(m_files_label);
     AttachChild(m_file_types_label);
@@ -464,7 +368,11 @@ void FileDlg::Init(const string& directory)
     UpdateDirectoryText();
     PopulateFilters();
     UpdateList();
+    ConnectSignals();
+}
 
+void FileDlg::ConnectSignals()
+{
     Connect(m_ok_button->ClickedSignal, &FileDlg::OkClicked, this);
     Connect(m_cancel_button->ClickedSignal, &FileDlg::CancelClicked, this);
     Connect(m_files_list->SelChangedSignal, &FileDlg::FileSetChanged, this);
@@ -481,7 +389,7 @@ void FileDlg::OkClicked()
     // parse contents of edit control to determine file names
     m_result.clear();
 
-    vector<string> files;
+    std::vector<std::string> files;
     parse(m_files_edit->WindowText().c_str(), (+anychar_p)[append(files)], space_p);
     std::sort(files.begin(), files.end());
 
@@ -490,7 +398,7 @@ void FileDlg::OkClicked()
             OpenDirectory();
         } else if (files.size() == 1) {
             results_valid = true;
-            string save_file = *files.begin();
+            std::string save_file = *files.begin();
             if (!fs::path::default_name_check()(save_file)) {
                 ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
                 dlg.Run();
@@ -509,7 +417,7 @@ void FileDlg::OkClicked()
         if (files.empty()) {
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
-            for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
+            for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it) {
                 if (!fs::path::default_name_check()(*it)) {
                     ThreeButtonDlg dlg(300, 125, "\"" + (*it) + "\"\nis an invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
                     dlg.Run();
@@ -545,12 +453,12 @@ void FileDlg::CancelClicked()
     m_result.clear();
 }
 
-void FileDlg::FileSetChanged(const set<int>& files)
+void FileDlg::FileSetChanged(const std::set<int>& files)
 {
-    string all_files;
+    std::string all_files;
     bool dir_selected = false;
-    for (set<int>::const_iterator it = files.begin(); it != files.end(); ++it) {
-        string filename = m_files_list->GetRow(*it)[0]->WindowText();
+    for (std::set<int>::const_iterator it = files.begin(); it != files.end(); ++it) {
+        std::string filename = m_files_list->GetRow(*it)[0]->WindowText();
         if (filename[0] != '[') {
             if (!all_files.empty())
                 all_files += " ";
@@ -566,15 +474,15 @@ void FileDlg::FileSetChanged(const set<int>& files)
         m_ok_button->SetText(m_open_str);
 }
 
-void FileDlg::FileDoubleClicked(int n, const shared_ptr<ListBox::Row>& row)
+void FileDlg::FileDoubleClicked(int n, const boost::shared_ptr<ListBox::Row>& row)
 {
-    string filename = (*row)[0]->WindowText();
+    std::string filename = (*row)[0]->WindowText();
     m_files_list->ClearSelection();
     m_files_list->SelectRow(n);
     OkClicked();
 }
 
-void FileDlg::FilesEditChanged(const string& str)
+void FileDlg::FilesEditChanged(const std::string& str)
 {
     if (m_save && m_ok_button->WindowText() != m_save_str)
         m_ok_button->SetText(m_save_str);
@@ -619,15 +527,15 @@ void FileDlg::UpdateList()
     rule<> wildcard = anychar_p;
 
     // define file filters based on the filter strings in the filter drop list
-    vector<rule<> > file_filters;
+    std::vector<rule<> > file_filters;
 
     int idx = m_filter_list->CurrentItemIndex();
     if (idx != -1) {
-        vector<string> filter_specs; // the filter specifications (e.g. "*.png")
+        std::vector<std::string> filter_specs; // the filter specifications (e.g. "*.png")
         parse(m_file_filters[idx].second.c_str(), *(!ch_p(',') >> (+(anychar_p - ','))[append(filter_specs)]), space_p);
         file_filters.resize(filter_specs.size());
         for (unsigned int i = 0; i < filter_specs.size(); ++i) {
-            shared_ptr<vector<string> > non_wildcards(new vector<string>); // the parts of the filter spec that are not wildcards
+            boost::shared_ptr<std::vector<std::string> > non_wildcards(new std::vector<std::string>); // the parts of the filter spec that are not wildcards
             parse(filter_specs[i].c_str(), *(*ch_p('*') >> (+(anychar_p - '*'))[append(*non_wildcards)]));
 
             if (non_wildcards->empty()) {
@@ -694,15 +602,15 @@ void FileDlg::UpdateList()
 
 void FileDlg::UpdateDirectoryText()
 {
-    string str = s_working_dir.native_directory_string();
+    std::string str = s_working_dir.native_directory_string();
     const int H_SPACING = 10;
     while (m_font->TextExtent(str).x > Width() - 2 * H_SPACING) {
         unsigned int slash_idx = str.find('/', 1);
         unsigned int backslash_idx = str.find('\\', 1);
-        if (slash_idx != string::npos) {
+        if (slash_idx != std::string::npos) {
             slash_idx = str.find_first_not_of('/', slash_idx);
             str = "..." + str.substr(slash_idx);
-        } else if (backslash_idx != string::npos) {
+        } else if (backslash_idx != std::string::npos) {
             backslash_idx = str.find_first_not_of('\\', backslash_idx);
             str = "..." + str.substr(backslash_idx);
         } else {
@@ -716,8 +624,8 @@ void FileDlg::OpenDirectory()
 {
     // see if there is a directory selected; if so open the directory.
     // if more than one is selected, take the first one
-    const set<int>& sels = m_files_list->Selections();
-    string directory;
+    const std::set<int>& sels = m_files_list->Selections();
+    std::string directory;
     if (!sels.empty()) {
         directory = m_files_list->GetRow(*sels.begin())[0]->WindowText();
         if (directory.size() < 2 || directory[0] != '[')
@@ -732,5 +640,3 @@ void FileDlg::OpenDirectory()
             m_ok_button->SetText(m_save_str);
     }
 }
-
-} // namspace GG

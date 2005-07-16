@@ -29,7 +29,6 @@
 #include <GGScroll.h>
 #include <GGApp.h>
 #include <GGDrawUtil.h>
-#include <XMLValidators.h>
 
 using namespace GG;
 
@@ -56,14 +55,14 @@ namespace {
         virtual void LClick(const Pt& pt, Uint32 keys) {m_done = true;}
 
     private:
-        void LBSelChangedSlot(const set<int>& rows)
+        void LBSelChangedSlot(const std::set<int>& rows)
         {
             if (!rows.empty()) {
                 m_drop_wnd->Select(*rows.begin());
                 m_done = true;
             }
         }
-        void LBLeftClickSlot(int, const shared_ptr<ListBox::Row>&, const Pt&)
+        void LBLeftClickSlot(int, const boost::shared_ptr<ListBox::Row>&, const Pt&)
         {
             m_done = true;
         }
@@ -77,6 +76,11 @@ namespace {
 ////////////////////////////////////////////////
 // GG::DropDownList
 ////////////////////////////////////////////////
+DropDownList::DropDownList() :
+    Control()
+{
+}
+
 DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb/* = 0*/,
                            Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, row_ht, flags),
@@ -105,21 +109,6 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
     // adjust size to keep correct height based on row height, etc.
     Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
     m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
-}
-
-DropDownList::DropDownList(const XMLElement& elem) :
-    Control(elem.Child("GG::Control"))
-{
-    if (elem.Tag() != "GG::DropDownList")
-        throw std::invalid_argument("Attempted to construct a GG::DropDownList from an XMLElement that had a tag other than \"GG::DropDownList\"");
-
-    m_current_item_idx = lexical_cast<int>(elem.Child("m_current_item_idx").Text());
-
-    if (ListBox* lb = dynamic_cast<ListBox*>(App::GetApp()->GenerateWnd(elem.Child("m_LB").Child(0)))) {
-        m_LB = lb;
-    } else {
-        throw std::runtime_error("DropDownList::DropDownList : Attempted to use a non-ListBox object as the drop-down list.");
-    }
 }
 
 DropDownList::~DropDownList()
@@ -202,24 +191,6 @@ Pt DropDownList::ClientLowerRight() const
     return LowerRight() - Pt(BORDER_THICK, BORDER_THICK);
 }
 
-XMLElement DropDownList::XMLEncode() const
-{
-    XMLElement retval("GG::DropDownList");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_current_item_idx", lexical_cast<string>(m_current_item_idx)));
-    retval.AppendChild(XMLElement("m_LB", m_LB->XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator DropDownList::XMLValidator() const
-{
-    XMLElementValidator retval("GG::DropDownList");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_current_item_idx", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_LB", m_LB->XMLValidator()));
-    return retval;
-}
-
 bool DropDownList::Render()
 {
     // draw beveled rectangle around client area
@@ -244,7 +215,7 @@ void DropDownList::LClick(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         ModalListPicker picker(this, m_LB);
-        const set<int>& LB_sels = m_LB->Selections();
+        const std::set<int>& LB_sels = m_LB->Selections();
         if (!LB_sels.empty()) {
             if (m_LB->m_vscroll)
                 m_LB->m_vscroll->ScrollTo(*LB_sels.begin() * m_LB->RowHeight());

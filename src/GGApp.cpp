@@ -38,9 +38,7 @@
 #include "GGSpin.h"
 #include "GGStaticGraphic.h"
 #include "GGTextControl.h"
-#include "GGWnd.h"
 #include "GGZList.h"
-#include "XMLObjectFactory.h"
 
 #include <log4cpp/Appender.hh>
 #include <log4cpp/Category.hh>
@@ -48,28 +46,13 @@
 #include <log4cpp/FileAppender.hh>
 
 #include <cassert>
+#include <fstream>
+#include <list>
+
 
 using namespace GG;
 
 namespace {
-    // these generate Wnd-subclass objects for the Wnd factory
-    Wnd* NewTextControl(const XMLElement& elem)       {return new TextControl(elem);}
-    Wnd* NewStaticGraphic(const XMLElement& elem)     {return new StaticGraphic(elem);}
-    Wnd* NewDynamicGraphic(const XMLElement& elem)    {return new DynamicGraphic(elem);}
-    Wnd* NewButton(const XMLElement& elem)            {return new Button(elem);}
-    Wnd* NewStateButton(const XMLElement& elem)       {return new StateButton(elem);}
-    Wnd* NewRadioButtonGroup(const XMLElement& elem)  {return new RadioButtonGroup(elem);}
-    Wnd* NewEdit(const XMLElement& elem)              {return new Edit(elem);}
-    Wnd* NewScroll(const XMLElement& elem)            {return new Scroll(elem);}
-    Wnd* NewListBox(const XMLElement& elem)           {return new ListBox(elem);}
-    Wnd* NewListBoxRow(const XMLElement& elem)        {return new ListBox::Row(elem);}
-    Wnd* NewMenuBar(const XMLElement& elem)           {return new MenuBar(elem);}
-    Wnd* NewMultiEdit(const XMLElement& elem)         {return new MultiEdit(elem);}
-    Wnd* NewDropDownList(const XMLElement& elem)      {return new DropDownList(elem);}
-    Wnd* NewSpinInt(const XMLElement& elem)           {return new Spin<int>(elem);}
-    Wnd* NewSpinDouble(const XMLElement& elem)        {return new Spin<double>(elem);}
-    Wnd* NewSlider(const XMLElement& elem)            {return new Slider(elem);}
-
     // returns true if lwnd == rwnd or if lwnd contains rwnd
     inline bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd)
     {
@@ -118,30 +101,13 @@ struct GG::AppImplData
     {
         button_state[0] = button_state[1] = button_state[2] = false;
         drag_wnds[0] = drag_wnds[1] = drag_wnds[2] = 0;
-
-        wnd_factory.AddGenerator("GG::TextControl", &NewTextControl);
-        wnd_factory.AddGenerator("GG::StaticGraphic", &NewStaticGraphic);
-        wnd_factory.AddGenerator("GG::DynamicGraphic", &NewDynamicGraphic);
-        wnd_factory.AddGenerator("GG::Button", &NewButton);
-        wnd_factory.AddGenerator("GG::StateButton", &NewStateButton);
-        wnd_factory.AddGenerator("GG::RadioButtonGroup", &NewRadioButtonGroup);
-        wnd_factory.AddGenerator("GG::Edit", &NewEdit);
-        wnd_factory.AddGenerator("GG::Scroll", &NewScroll);
-        wnd_factory.AddGenerator("GG::ListBox", &NewListBox);
-        wnd_factory.AddGenerator("GG::ListBox::Row", &NewListBoxRow);
-        wnd_factory.AddGenerator("GG::MenuBar", &NewMenuBar);
-        wnd_factory.AddGenerator("GG::MultiEdit", &NewMultiEdit);
-        wnd_factory.AddGenerator("GG::DropDownList", &NewDropDownList);
-        wnd_factory.AddGenerator(Spin<int>::XMLTypeName(), &NewSpinInt);
-        wnd_factory.AddGenerator(Spin<double>::XMLTypeName(), &NewSpinDouble);
-        wnd_factory.AddGenerator("GG::Slider", &NewSlider);
     }
 
-    string       app_name;              // the user-defined name of the apllication
+    std::string  app_name;              // the user-defined name of the apllication
 
     ZList        zlist;                 // object that keeps the GUI windows in the correct depth ordering
     Wnd*         focus_wnd;             // GUI window that currently has the input focus (this is the base level focus window, used when no modal windows are active)
-    list<pair<Wnd*, Wnd*> >
+    std::list<std::pair<Wnd*, Wnd*> >
                  modal_wnds;            // modal GUI windows, and the window with focus for that modality (only the one in back is active, simulating a stack but allowing traversal of the list)
 
     bool   button_state[3];             // the up/down states of the three buttons on the mouse are kept here
@@ -158,12 +124,13 @@ struct GG::AppImplData
     Pt         wnd_resize_offset;       // offset from the cursor of either the upper-left or lowe-right corner of the GUI window currently being resized
     WndRegion  wnd_region;              // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
 
-    map<Wnd*, Pt> drag_drop_wnds;       // the Wnds (and their offsets) that are being dragged and dropped between Wnds
+    std::map<Wnd*, Pt>
+               drag_drop_wnds;          // the Wnds (and their offsets) that are being dragged and dropped between Wnds
 
     std::set<std::pair<Key, Uint32> >
                accelerators;            // the keyboard accelerators
 
-    std::map<std::pair<Key, Uint32>, shared_ptr<App::AcceleratorSignalType> >
+    std::map<std::pair<Key, Uint32>, boost::shared_ptr<App::AcceleratorSignalType> >
                accelerator_sigs;        // the signals emitted by the keyboard accelerators
 
     int        delta_t;                 // the number of ms since the last frame
@@ -179,17 +146,15 @@ struct GG::AppImplData
     FontManager       font_manager;
     TextureManager    texture_manager;
 
-    XMLObjectFactory<Wnd> wnd_factory;  // object that creates Wnd-subclass objects from XML-formatted text
-
     log4cpp::Category&    log_category; // log4cpp object used to log events to file
 };
 
 // static member(s)
-App*                     App::s_app = 0;
-shared_ptr<AppImplData>  App::s_impl;
+App*                           App::s_app = 0;
+boost::shared_ptr<AppImplData> App::s_impl;
 
 // member functions
-App::App(const string& app_name)
+App::App(const std::string& app_name)
 {
     assert(!s_app);
     s_app = this;
@@ -197,10 +162,10 @@ App::App(const string& app_name)
     s_impl.reset(new AppImplData());
     s_impl->app_name = app_name;
 
-    const string GG_LOG_FILENAME(s_impl->app_name + ".log");
+    const std::string GG_LOG_FILENAME(s_impl->app_name + ".log");
 
     // a platform-independent way to erase the old log
-    ofstream temp(GG_LOG_FILENAME.c_str());
+    std::ofstream temp(GG_LOG_FILENAME.c_str());
     temp.close();
 
     log4cpp::Appender* appender = new log4cpp::FileAppender("FileAppender", GG_LOG_FILENAME);
@@ -243,11 +208,11 @@ double App::FPS() const
     return s_impl->FPS;
 }
 
-string App::FPSString() const
+std::string App::FPSString() const
 {
     char buf[128];
     sprintf(buf, "%.2f frames per second", s_impl->FPS);
-    return string(buf);
+    return std::string(buf);
 }
 
 double App::MaxFPS() const
@@ -285,11 +250,6 @@ Pt App::MouseMovement() const
     return s_impl->mouse_rel;
 }
 
-Wnd* App::GenerateWnd(const XMLElement& elem) const
-{
-    return s_impl->wnd_factory.GenerateObject(elem);
-}
-
 App::const_accel_iterator App::accel_begin() const
 {
     const AppImplData* impl = s_impl.get();
@@ -304,7 +264,7 @@ App::const_accel_iterator App::accel_end() const
 
 App::AcceleratorSignalType& App::AcceleratorSignal(Key key, Uint32 key_mods) const
 {
-    shared_ptr<AcceleratorSignalType>& sig_ptr = s_impl->accelerator_sigs[std::make_pair(key, key_mods)];
+    boost::shared_ptr<AcceleratorSignalType>& sig_ptr = s_impl->accelerator_sigs[std::make_pair(key, key_mods)];
     if (!sig_ptr)
         sig_ptr.reset(new AcceleratorSignalType());
     return *sig_ptr;
@@ -348,16 +308,15 @@ void App::RegisterModal(Wnd* wnd)
 void App::Remove(Wnd* wnd)
 {
     if (wnd) {
-        if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back().first == wnd) { // if it's the current modal window, remove it from the modal list
+        if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back().first == wnd) // if it's the current modal window, remove it from the modal list
             s_impl->modal_wnds.pop_back();
-        } else { // if it's not a modal window, remove it from the z-order
+        else // if it's not a modal window, remove it from the z-order
             s_impl->zlist.Remove(wnd);
-        }
 
         // ensure that GUI state variables don't become dangling pointers when a Wnd is removed
         if (MatchesOrContains(wnd, s_impl->focus_wnd))
             s_impl->focus_wnd = 0;
-        for (list<pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
+        for (std::list<std::pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
             if (MatchesOrContains(wnd, it->second)) {
                 if (MatchesOrContains(wnd, it->first)) {
                     it->second = 0;
@@ -459,44 +418,34 @@ void App::RemoveAccelerator(Key key, Uint32 key_mods)
     s_impl->accelerators.erase(std::make_pair(key, key_mods));
 }
 
-shared_ptr<Font> App::GetFont(const string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
+boost::shared_ptr<Font> App::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
 {
     return s_impl->font_manager.GetFont(font_filename, pts, range);
 }
 
-void App::FreeFont(const string& font_filename, int pts)
+void App::FreeFont(const std::string& font_filename, int pts)
 {
     s_impl->font_manager.FreeFont(font_filename, pts);
 }
 
-shared_ptr<Texture> App::StoreTexture(Texture* texture, const string& texture_name)
+boost::shared_ptr<Texture> App::StoreTexture(Texture* texture, const std::string& texture_name)
 {
     return s_impl->texture_manager.StoreTexture(texture, texture_name);
 }
 
-shared_ptr<Texture> App::StoreTexture(shared_ptr<Texture> texture, const string& texture_name)
+boost::shared_ptr<Texture> App::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
 {
     return s_impl->texture_manager.StoreTexture(texture, texture_name);
 }
 
-shared_ptr<Texture> App::GetTexture(const string& name, bool mipmap/* = false*/)
+boost::shared_ptr<Texture> App::GetTexture(const std::string& name, bool mipmap/* = false*/)
 {
     return s_impl->texture_manager.GetTexture(name, mipmap);
 }
 
-void App::FreeTexture(const string& name)
+void App::FreeTexture(const std::string& name)
 {
     s_impl->texture_manager.FreeTexture(name);
-}
-
-void App::AddWndGenerator(const string& name, Wnd* (*fn)(const XMLElement&))
-{
-    s_impl->wnd_factory.AddGenerator(name, fn);
-}
-
-void App::RemoveWndGenerator(const string& name)
-{
-    s_impl->wnd_factory.RemoveGenerator(name);
 }
 
 log4cpp::Category& App::Logger()
@@ -516,9 +465,8 @@ void App::RenderWindow(Wnd* wnd)
         if (clip)
             wnd->BeginClipping();
         for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
-            if ((*it)->Visible()) {
+            if ((*it)->Visible())
                 RenderWindow(*it);
-            }
         }
         if (clip)
             wnd->EndClipping();
@@ -649,9 +597,8 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         case RPRESS:{
             s_impl->button_state[2] = true;
             drag_wnds[2] = curr_wnd_under_cursor;  // track this window as the one being dragged by the right mouse button
-            if (drag_wnds[2]) {
+            if (drag_wnds[2])
                 drag_wnds[2]->HandleEvent(Wnd::Event(Wnd::Event::RButtonDown, pos, key_mods));
-            }
             break;}
         default: break;
         }
@@ -673,12 +620,11 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 // the time limit -- it's a double-click, not a click
                 if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == click_wnd &&
                     s_impl->double_click_button == 0) {
-                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LDoubleClick, pos, key_mods));
                     s_impl->double_click_wnd = 0;
                     s_impl->double_click_start_time = -1;
                     s_impl->double_click_time = -1;
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LDoubleClick, pos, key_mods));
                 } else {
-                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LClick, pos, key_mods));
                     if (s_impl->double_click_time > 0) {
                         s_impl->double_click_wnd = 0;
                         s_impl->double_click_start_time = -1;
@@ -689,12 +635,13 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                         s_impl->double_click_wnd = click_wnd;
                         s_impl->double_click_button = 0;
                     }
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LClick, pos, key_mods));
                 }
             } else {
-                if (click_wnd)
-                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LButtonUp, pos, key_mods));
                 s_impl->double_click_wnd = 0;
                 s_impl->double_click_time = -1;
+                if (click_wnd)
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LButtonUp, pos, key_mods));
             }
             break;}
         case MRELEASE:{
@@ -711,11 +658,10 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 // the time limit -- it's a double-click, not a click
                 if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == click_wnd &&
                     s_impl->double_click_button == 2) {
-                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::RDoubleClick, pos, key_mods));
                     s_impl->double_click_wnd = 0;
                     s_impl->double_click_time = -1;
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::RDoubleClick, pos, key_mods));
                 } else {
-                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::RClick, pos, key_mods));
                     if (s_impl->double_click_time > 0) {
                         s_impl->double_click_wnd = 0;
                         s_impl->double_click_time = -1;
@@ -724,6 +670,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                         s_impl->double_click_wnd = click_wnd;
                         s_impl->double_click_button = 2;
                     }
+                    click_wnd->HandleEvent(Wnd::Event(Wnd::Event::RClick, pos, key_mods));
                 }
             } else {
                 s_impl->double_click_wnd = 0;
@@ -738,9 +685,8 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case MOUSEWHEEL:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
-        if (curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2])) {
+        if (curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2]))
             curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseWheel, pos, rel.y, key_mods));
-        }
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     default:
@@ -757,12 +703,12 @@ void App::Render()
             RenderWindow(*it);
     }
     // render modal windows back-to-front
-    for (list<pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
+    for (std::list<std::pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
         if (it->first->Visible())
             RenderWindow(it->first);
     }
     // render drag-drop windows in arbitrary order (sorted by pointer value)
-    for (map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {
+    for (std::map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {
         if (it->first->Visible()) {
             Pt parent_offset = (it->first->Parent() ? it->first->Parent()->ClientUpperLeft() : Pt(0, 0));
             Pt old_pos = it->first->UpperLeft() - parent_offset;

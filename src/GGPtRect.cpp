@@ -26,9 +26,7 @@
 
 #include "GGPtRect.h"
 
-#include <XMLValidators.h>
-
-namespace GG {
+using namespace GG;
 
 ////////////////////////////////////////////////
 // GG::Pt
@@ -43,31 +41,6 @@ Pt::Pt(int x_, int y_) :
     x(x_),
     y(y_)
 {
-}
-
-Pt::Pt(const XMLElement& elem)
-{
-    if (elem.Tag() != "GG::Pt")
-        throw std::invalid_argument("Attempted to construct a GG::Pt from an XMLElement that had a tag other than \"GG::Pt\"");
-
-    x = lexical_cast<int>(elem.Child("x").Text());
-    y = lexical_cast<int>(elem.Child("y").Text());
-}
-
-XMLElement Pt::XMLEncode() const
-{
-    XMLElement retval("GG::Pt");
-    retval.AppendChild(XMLElement("x", boost::lexical_cast<string>(x)));
-    retval.AppendChild(XMLElement("y", boost::lexical_cast<string>(y)));
-    return retval;
-}
-
-XMLElementValidator Pt::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Pt");
-    retval.AppendChild(XMLElementValidator("x", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("y", new Validator<int>()));
-    return retval;
 }
 
 ////////////////////////////////////////////////
@@ -91,35 +64,7 @@ Rect::Rect(int x1, int y1, int x2, int y2) :
 {
 }
 
-Rect::Rect(const XMLElement& elem)
-{
-    if (elem.Tag() != "GG::Rect")
-        throw std::invalid_argument("Attempted to construct a GG::Rect from an XMLElement that had a tag other than \"GG::Rect\"");
-
-    ul = Pt(elem.Child("ul").Child(0));
-    lr = Pt(elem.Child("lr").Child(0));
-}
-
 bool Rect::Contains(const Pt& pt) const 
 {
     return (ul <= pt && pt < lr);
 }
-
-XMLElement Rect::XMLEncode() const
-{
-    XMLElement retval("GG::Rect");
-    retval.AppendChild(XMLElement("ul", ul.XMLEncode()));
-    retval.AppendChild(XMLElement("lr", lr.XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator Rect::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Rect");
-    retval.AppendChild(XMLElementValidator("ul", ul.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("lr", lr.XMLValidator()));
-    return retval;
-}
-
-} // namespace GG
-

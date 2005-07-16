@@ -28,38 +28,18 @@
 
 #include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 ////////////////////////////////////////////////
 // GG::Control
 ////////////////////////////////////////////////
-Control::Control(const XMLElement& elem) :
-        Wnd(elem.Child("GG::Wnd"))
+Control::Control() :
+    Wnd ()
 {
-    if (elem.Tag() != "GG::Control")
-        throw std::invalid_argument("Attempted to construct a GG::Control from an XMLElement that had a tag other than \"GG::Control\"");
-
-    m_color = Clr(elem.Child("m_color").Child("GG::Clr"));
-    m_disabled = lexical_cast<bool>(elem.Child("m_disabled").Text());
 }
 
-XMLElement Control::XMLEncode() const
+Control::Control(int x, int y, int w, int h, Uint32 flags/* = CLICKABLE*/) :
+    Wnd(x, y, w, h, flags),
+    m_disabled(false)
 {
-    XMLElement retval("GG::Control");
-    retval.AppendChild(Wnd::XMLEncode());
-    retval.AppendChild(XMLElement("m_color", m_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_disabled", lexical_cast<string>(m_disabled)));
-    return retval;
 }
-
-XMLElementValidator Control::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Control");
-    retval.AppendChild(Wnd::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_color", m_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_disabled", new Validator<bool>()));
-    return retval;
-}
-
-} // namespace GG
-

@@ -28,17 +28,17 @@
 
 #include <GGApp.h>
 #include <GGBase.h>
-#include <XMLValidators.h>
-
 #include <GGDrawUtil.h>
 
-#include <cmath>
 #include <boost/spirit.hpp>
 
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 #define DEBUG_DETERMINELINES 0
 
-namespace GG {
+using namespace GG;
 
 namespace {
     int NextPowerOfTwo(int input)
@@ -80,72 +80,72 @@ namespace {
 
     struct AppendToken
     {
-        AppendToken(vector<string>& token_vec) : tokens(token_vec) {}
-        void operator()(const char* first, const char* last) const {tokens.push_back(string(first, last));}
+        AppendToken(std::vector<std::string>& token_vec) : tokens(token_vec) {}
+        void operator()(const char* first, const char* last) const {tokens.push_back(std::string(first, last));}
     private:
-        vector<string>& tokens;
+        std::vector<std::string>& tokens;
     };
 
     struct HandlePreTagFunctor
     {
-        HandlePreTagFunctor(vector<shared_ptr<Font::TextElement> >& text_elements, bool& ignore_tag_status, bool close_tag) :
+        HandlePreTagFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements, bool& ignore_tag_status, bool close_tag) :
             elements(text_elements), ignore_tags(ignore_tag_status), close(close_tag) {}
         void operator()(const char* first, const char* last) const
             {
                 if (ignore_tags && !close) {
-                    shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
-                    element->text = string(first, last);
+                    boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
+                    element->text = std::string(first, last);
                     elements.push_back(element);
                 } else {
-                    shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
+                    boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
                     element->text = "pre";
-                    element->original_tag_text = string(first, last);
+                    element->original_tag_text = std::string(first, last);
                     elements.push_back(element);
                     ignore_tags = !close;
                 }
             }
     private:
-        vector<shared_ptr<Font::TextElement> >& elements;
+        std::vector<boost::shared_ptr<Font::TextElement> >& elements;
         bool& ignore_tags;
         const bool close;
     };
 
     struct HandleTextFunctor
     {
-        HandleTextFunctor(vector<shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
+        HandleTextFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
         void operator()(const char* first, const char* last) const
             {
-                shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
-                element->text = string(first, last);
+                boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
+                element->text = std::string(first, last);
                 elements.push_back(element);
             }
     private:
-        vector<shared_ptr<Font::TextElement> >& elements;
+        std::vector<boost::shared_ptr<Font::TextElement> >& elements;
     };
 
     boost::spirit::rule<> ws_p = (*boost::spirit::blank_p >> (boost::spirit::eol_p | '\n' | '\r' | '\f')) | +boost::spirit::blank_p;
 
     struct HandleWhitespaceFunctor
     {
-        HandleWhitespaceFunctor(vector<shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
+        HandleWhitespaceFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
         void operator()(const char* first, const char* last) const
             {
-                vector<string> string_vec;
+                std::vector<std::string> string_vec;
                 using namespace boost::spirit;
-                string ws_str = string(first, last);
+                std::string ws_str = std::string(first, last);
                 parse(ws_str.c_str(), ws_p[AppendToken(string_vec)]);
                 for (unsigned int i = 0; i < string_vec.size(); ++i) {
-                    shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
-                    element->text = string(first, last);
+                    boost::shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
+                    element->text = std::string(first, last);
                     elements.push_back(element);
                     if (string_vec[i].substr(string_vec[i].size() - 1).find_first_of("\n\f\r") != std::string::npos) {
-                        shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
+                        boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
                         elements.push_back(element);
                     }
                 }
             }
     private:
-        vector<shared_ptr<Font::TextElement> >& elements;
+        std::vector<boost::shared_ptr<Font::TextElement> >& elements;
     };
 
     void SetJustification(bool& last_line_of_curr_just, Font::LineData& line_data, Uint32 orig_just, Uint32 prev_just)
@@ -166,9 +166,9 @@ namespace {
 ///////////////////////////////////////
 // function GG::RgbaTag
 ///////////////////////////////////////
-string RgbaTag(const Clr& c)
+std::string GG::RgbaTag(const Clr& c)
 {
-    stringstream stream;
+    std::stringstream stream;
     stream << "<rgba " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << " " << 
         static_cast<int>(c.b) << " " << static_cast<int>(c.a) << ">";
     return stream.str();
@@ -178,6 +178,12 @@ string RgbaTag(const Clr& c)
 ///////////////////////////////////////
 // class GG::Font::TextElement
 ///////////////////////////////////////
+Font::TextElement::TextElement() :
+    whitespace(false),
+    newline(false)
+{
+}
+
 Font::TextElement::TextElement(bool ws, bool nl) :
     whitespace(ws),
     newline(nl)
@@ -207,6 +213,12 @@ int Font::TextElement::OriginalStringChars() const
 ///////////////////////////////////////
 // class GG::Font::FormattingTag
 ///////////////////////////////////////
+Font::FormattingTag::FormattingTag() :
+    TextElement(),
+    close_tag(false)
+{
+}
+
 Font::FormattingTag::FormattingTag(bool close) :
     TextElement(false, false),
     close_tag(close)
@@ -257,7 +269,7 @@ Font::LineData::CharData::CharData() :
 {
 }
 
-Font::LineData::CharData::CharData(int extent_, int original_index, const vector<shared_ptr<TextElement> >& tags_) :
+Font::LineData::CharData::CharData(int extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_) :
     extent(extent_),
     original_char_index(original_index),
     tags()
@@ -273,33 +285,33 @@ Font::LineData::CharData::CharData(int extent_, int original_index, const vector
 ///////////////////////////////////////
 struct Font::HandleTagFunctor
 {
-    HandleTagFunctor(vector<shared_ptr<Font::TextElement> >& text_elements, const bool& ignore_tag_status, bool close_tag) :
+    HandleTagFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements, const bool& ignore_tag_status, bool close_tag) :
         elements(text_elements), ignore_tags(ignore_tag_status), close(close_tag) {}
     void operator()(const char* first, const char* last) const
         {
-            string tag_str = string(first, last);
+            std::string tag_str = std::string(first, last);
             using namespace boost::spirit;
-            vector<string> param_vec;
+            std::vector<std::string> param_vec;
             rule<> tag_begin = ch_p('<');
             if (close)
                 tag_begin = str_p("</");
             rule<> tag_token_parser = tag_begin >> +(*space_p >> (+(anychar_p - (space_p | '>')))[AppendToken(param_vec)]) >> '>';
             parse(tag_str.c_str(), tag_token_parser);
             if (!ignore_tags && Font::s_known_tags.find(param_vec.front()) != Font::s_known_tags.end()) {
-                shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
+                boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
                 element->text = param_vec.front();
                 if (!close)
                     element->params.insert(element->params.end(), param_vec.begin() + 1, param_vec.end());
                 element->original_tag_text = tag_str;
                 elements.push_back(element);
             } else {
-                shared_ptr<Font::TextElement> text_element(new Font::TextElement(false, false));
+                boost::shared_ptr<Font::TextElement> text_element(new Font::TextElement(false, false));
                 text_element->text = tag_str;
                 elements.push_back(text_element);
             }
         }
 private:
-    vector<shared_ptr<Font::TextElement> >& elements;
+    std::vector<boost::shared_ptr<Font::TextElement> >& elements;
     const bool& ignore_tags;
     const bool close;
 };
@@ -308,10 +320,14 @@ private:
 ///////////////////////////////////////
 // class GG::Font
 ///////////////////////////////////////
-set<string> Font::s_action_tags;
-set<string> Font::s_known_tags;
+std::set<std::string> Font::s_action_tags;
+std::set<std::string> Font::s_known_tags;
 
-Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
+Font::Font()
+{
+}
+
+Font::Font(const std::string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
     m_font_filename(font_filename),
     m_pt_sz(pts),
     m_glyph_range(range)
@@ -320,24 +336,11 @@ Font::Font(const string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RA
         Init(font_filename, pts, range);
 }
 
-Font::Font(const XMLElement& elem)
-{
-    if (elem.Tag() != "GG::Font")
-        throw std::invalid_argument("Attempted to construct a GG::Font from an XMLElement that had a tag other than \"GG::Font\"");
-
-    string font_filename = elem.Child("m_font_filename").Text();
-    int pts = lexical_cast<int>(elem.Child("m_pt_sz").Text());
-    int range = lexical_cast<int>(elem.Child("m_glyph_range").Text());
-
-    if (font_filename != "")
-        Init(font_filename, pts, range);
-}
-
 Font::~Font()
 {
 }
 
-const string& Font::FontName() const     
+const std::string& Font::FontName() const     
 {
     return m_font_filename;
 }
@@ -384,18 +387,18 @@ int Font::RenderGlyph(const Pt& pt, char c) const
 
 int Font::RenderGlyph(int x, int y, char c) const
 {
-    map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(c));
+    std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(CharToFT_ULong(c));
     if (it == m_glyphs.end())
         it = m_glyphs.find(CharToFT_ULong(' ')); // print a space when an unrendered glyph is requested
     return RenderGlyph(x, y, it->second, 0);
 }
 
-int Font::RenderText(const Pt& pt, const string& text) const
+int Font::RenderText(const Pt& pt, const std::string& text) const
 {
     return RenderText(pt.x, pt.y, text);
 }
 
-int Font::RenderText(int x, int y, const string& text) const
+int Font::RenderText(int x, int y, const std::string& text) const
 {
     int orig_x = x;
     for (unsigned int i = 0; i < text.length(); ++i) {
@@ -404,13 +407,13 @@ int Font::RenderText(int x, int y, const string& text) const
     return x - orig_x;
 }
 
-void Font::RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/,
+void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Uint32& format, const std::vector<LineData>* line_data/* = 0*/,
                       RenderState* render_state/* = 0*/) const
 {
     RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state);
 }
 
-void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>* line_data/* = 0*/,
+void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Uint32& format, const std::vector<LineData>* line_data/* = 0*/,
                       RenderState* render_state/* = 0*/) const
 {
     RenderState state;
@@ -418,7 +421,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
         render_state = &state;
 
     // get breakdown of how text is divided into lines
-    vector<LineData> lines;
+    std::vector<LineData> lines;
     if (!line_data) {
         DetermineLines(text, format, x2 - x1, lines);
         line_data = &lines;
@@ -427,13 +430,13 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
     RenderText(x1, y1, x2, y2, text, format, *line_data, *render_state, 0, 0, line_data->size(), line_data->back().char_data.size());
 }
 
-void Font::RenderText(const Pt& pt1, const Pt& pt2, const string& text, Uint32& format, const vector<LineData>& line_data, RenderState& render_state,
+void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Uint32& format, const std::vector<LineData>& line_data, RenderState& render_state,
                       int begin_line, int begin_char, int end_line, int end_char) const
 {
     RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state, begin_line, begin_char, end_line, end_char);
 }
 
-void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32& format, const vector<LineData>& line_data, RenderState& render_state,
+void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Uint32& format, const std::vector<LineData>& line_data, RenderState& render_state,
                       int begin_line, int begin_char, int end_line, int end_char) const
 {
     double orig_color[4];
@@ -465,7 +468,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
             if (text[line.char_data[j].original_char_index] == '\n')
                 continue;
             FT_ULong c = CharToFT_ULong(text[line.char_data[j].original_char_index]);
-            map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
+            std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
             if (it == m_glyphs.end())
                 x = x_origin + line.char_data[j].extent; // move forward by the extent of the character when a whitespace or unprintable glyph is requested
             else
@@ -476,7 +479,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const string& text, Uint32
     glColor4dv(orig_color);
 }
 
-Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vector<LineData>& line_data) const
+Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, std::vector<LineData>& line_data) const
 {
     Pt retval;
 
@@ -504,7 +507,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
     std::cout << "Font::DetermineLines(text=\"" << text << "\" format=" << format << " box_width=" << box_width << ")" << std::endl;
 #endif
 
-    vector<shared_ptr<TextElement> > text_elements;
+    std::vector<boost::shared_ptr<TextElement> > text_elements;
     using namespace boost::spirit;
     rule<> open_pre_tag_p = str_p("<pre>");
     rule<> close_pre_tag_p = str_p("</pre>");
@@ -527,7 +530,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
         parse(text.c_str(), lines_parser);
     }
 
-    // fill in the widths of characters in the element strings
+    // fill in the widths of characters in the element std::strings
     for (unsigned int i = 0; i < text_elements.size(); ++i) {
         text_elements[i]->widths.resize(text_elements[i]->text.size());
         for (unsigned int j = 0; j < text_elements[i]->text.size(); ++j) {
@@ -536,7 +539,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
                 continue;
             }
             FT_ULong c = text_elements[i]->text[j];
-            map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
+            std::map<FT_ULong, Glyph>::const_iterator it = m_glyphs.find(c);
             if (it == m_glyphs.end())
                 it = m_glyphs.find(CharToFT_ULong(' ')); // use a space when an unrendered glyph is requested (the space chararacter is always renderable)
             text_elements[i]->widths[j] = it->second.advance;
@@ -546,7 +549,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
 #if DEBUG_DETERMINELINES
     std::cout << "parsing results:\n";
     for (unsigned int i = 0; i < text_elements.size(); ++i) {
-        if (shared_ptr<FormattingTag> tag_elem = boost::dynamic_pointer_cast<FormattingTag>(text_elements[i])) {
+        if (boost::shared_ptr<FormattingTag> tag_elem = boost::dynamic_pointer_cast<FormattingTag>(text_elements[i])) {
             std::cout << "FormattingTag\n    text=\"" << tag_elem->text << "\"\n    widths=" << StringFromContainer(tag_elem->widths)
                       << "\n    whitespace=" << tag_elem->whitespace << "\n    newline=" << tag_elem->newline << "\n    params=\n";
             for (unsigned int j = 0; j < tag_elem->params.size(); ++j) {
@@ -554,7 +557,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
             }
             std::cout << "    original_tag_text=\"" << tag_elem->original_tag_text << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
         } else {
-            shared_ptr<TextElement> elem = text_elements[i];
+            boost::shared_ptr<TextElement> elem = text_elements[i];
             std::cout << "TextElement\n    text=\"" << elem->text << "\"\n    widths=" << StringFromContainer(elem->widths)
                       << "\n    whitespace=" << elem->whitespace << "\n    newline=" << elem->newline << "\n";
         }
@@ -578,9 +581,9 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
 
     int x = 0;
     int original_string_offset = 0; // the position within the original string of the current TextElement
-    vector<shared_ptr<TextElement> > pending_formatting_tags;
+    std::vector<boost::shared_ptr<TextElement> > pending_formatting_tags;
     for (unsigned int i = 0; i < text_elements.size(); ++i) {
-        shared_ptr<TextElement> elem = text_elements[i];
+        boost::shared_ptr<TextElement> elem = text_elements[i];
         if (elem->Type() == TextElement::NEWLINE) { // if a newline is explicitly requested, start a new one
             line_data.push_back(LineData());
             SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
@@ -680,7 +683,7 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
         std::cout << "\"\n" << std::endl;
         for (unsigned int j = 0; j < line_data[i].char_data.size(); ++j) {
             for (unsigned int k = 0; k < line_data[i].char_data[j].tags.size(); ++k) {
-                if (shared_ptr<FormattingTag> tag_elem = line_data[i].char_data[j].tags[k]) {
+                if (boost::shared_ptr<FormattingTag> tag_elem = line_data[i].char_data[j].tags[k]) {
                     std::cout << "FormattingTag @" << j << "\n    text=\"" << tag_elem->text << "\"\n    widths="
                               << StringFromContainer(tag_elem->widths) << "\n    whitespace=" << tag_elem->whitespace
                               << "\n    newline=" << tag_elem->newline << "\n    params=\n";
@@ -709,36 +712,18 @@ Pt Font::DetermineLines(const string& text, Uint32& format, int box_width, vecto
     return retval;
 }
 
-Pt Font::TextExtent(const string& text, Uint32 format/* = TF_NONE*/, int box_width/* = 0*/) const
+Pt Font::TextExtent(const std::string& text, Uint32 format/* = TF_NONE*/, int box_width/* = 0*/) const
 {
-    vector<LineData> lines;
+    std::vector<LineData> lines;
     return DetermineLines(text, format, box_width ? box_width : 1 << 15, lines);
 }
 
-XMLElement Font::XMLEncode() const
-{
-    XMLElement retval("GG::Font");
-    retval.AppendChild(XMLElement("m_font_filename", m_font_filename));
-    retval.AppendChild(XMLElement("m_pt_sz", lexical_cast<string>(m_pt_sz)));
-    retval.AppendChild(XMLElement("m_glyph_range", lexical_cast<string>(m_glyph_range)));
-    return retval;
-}
-
-XMLElementValidator Font::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Font");
-    retval.AppendChild(XMLElementValidator("m_font_filename"));
-    retval.AppendChild(XMLElementValidator("m_pt_sz", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_glyph_range", new Validator<int>()));
-    return retval;
-}
-
-void Font::RegisterKnownTag(const string& tag)
+void Font::RegisterKnownTag(const std::string& tag)
 {
     s_known_tags.insert(tag);
 }
 
-void Font::RemoveKnownTag(const string& tag)
+void Font::RemoveKnownTag(const std::string& tag)
 {
     if (s_action_tags.find(tag) == s_action_tags.end())
         s_known_tags.erase(tag);
@@ -757,7 +742,7 @@ void Font::ClearKnownTags()
     s_known_tags = s_action_tags;
 }
 
-void Font::Init(const string& font_filename, int pts, Uint32 range)
+void Font::Init(const std::string& font_filename, int pts, Uint32 range)
 {
     if (s_action_tags.empty()) // if this is the first Font to get initialized, it needs to initialize some static members
         ClearKnownTags();
@@ -800,7 +785,7 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
           ALPHA_LOWER_STOP = 0x7B, SYMBOL_START1 = 0x21, SYMBOL_STOP1 = 0x30, SYMBOL_START2 = 0x3A, SYMBOL_STOP2 = 0x41,
           SYMBOL_START3 = 0x5B, SYMBOL_STOP3 = 0x61, SYMBOL_START4 = 0x7B, SYMBOL_STOP4 = 0x7F};
 
-    vector<unsigned int> range_vec;
+    std::vector<unsigned int> range_vec;
     if (range < ALL_CHARS) { // if certain specified ranges of glyphs are to be used
         range_vec.push_back(0x20); // the space character is always needed
         range_vec.push_back(0x21);
@@ -836,10 +821,10 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
     const int BUF_HEIGHT = 256;
     const int BUF_SZ = BUF_WIDTH * BUF_HEIGHT;
 
-    // declare vector of image buffers into which we will copy glyph images and create first buffer
-    vector<Uint16*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
-    vector<Pt> buffer_sizes;
-    map<FT_ULong, TempGlyphData> temp_glyph_data;
+    // declare std::vector of image buffers into which we will copy glyph images and create first buffer
+    std::vector<Uint16*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
+    std::vector<Pt> buffer_sizes;
+    std::map<FT_ULong, TempGlyphData> temp_glyph_data;
     Uint16* temp_buf = new Uint16[BUF_SZ]; // 16 bpp: we are creating a luminance + alpha image
     for (int i = 0; i < BUF_SZ; ++i)
         temp_buf[i] = 0;
@@ -917,18 +902,18 @@ void Font::Init(const string& font_filename, int pts, Uint32 range)
 
     // create opengl texture from buffer(s) and release buffer(s)
     for (unsigned int i = 0; i < buffer_vec.size(); ++i) {
-        shared_ptr<Texture> temp_texture(new Texture);
+        boost::shared_ptr<Texture> temp_texture(new Texture);
         temp_texture->Init(0, 0, buffer_sizes[i].x, buffer_sizes[i].y, BUF_WIDTH, (unsigned char*)(buffer_vec[i]), 2);
         m_textures.push_back(temp_texture);
         delete [] buffer_vec[i];
     }
 
     // create Glyph objects from temp glyph data
-    for (map<FT_ULong, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
+    for (std::map<FT_ULong, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
         m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.x1, it->second.y1, it->second.x2, it->second.y2, it->second.left_b, it->second.adv);
 
     // record the width of the space character
-    map<FT_ULong, Glyph>::const_iterator glyph_it = m_glyphs.find(CharToFT_ULong(' '));
+    std::map<FT_ULong, Glyph>::const_iterator glyph_it = m_glyphs.find(CharToFT_ULong(' '));
     m_space_width = glyph_it->second.advance;
 }
 
@@ -940,18 +925,19 @@ bool Font::GenerateGlyph(FT_Face face, FT_ULong ch)
     if (!face)
         throw FontException("GG::Font::GetGlyphBitmap : invalid font or font face");
 
+    using boost::lexical_cast;
     FT_UInt index = FT_Get_Char_Index(face, ch);
     if (index) {
         if (FT_Load_Glyph(face, index, FT_LOAD_DEFAULT))
-            throw FontException((string("GG::Font::GetGlyphBitmap : Freetype could not load the glyph for character \'") + 
-                                 (ch < 256 ? lexical_cast<string>(char(ch)) : lexical_cast<string>(ch))) + "\'");
+            throw FontException((std::string("GG::Font::GetGlyphBitmap : Freetype could not load the glyph for character \'") + 
+                                 (ch < 256 ? lexical_cast<std::string>(char(ch)) : lexical_cast<std::string>(ch))) + "\'");
 
         FT_GlyphSlot glyph = face->glyph;
 
         // render the glyph
         if (FT_Render_Glyph(glyph, ft_render_mode_normal))
-            throw FontException((string("GG::Font::GetGlyphBitmap : Freetype could not render the glyph for character \'") + 
-                                 (ch < 256 ? lexical_cast<string>(char(ch)) : lexical_cast<string>(ch))) + "\'");
+            throw FontException((std::string("GG::Font::GetGlyphBitmap : Freetype could not render the glyph for character \'") + 
+                                 (ch < 256 ? lexical_cast<std::string>(char(ch)) : lexical_cast<std::string>(ch))) + "\'");
     } else {
         retval = false;
     }
@@ -994,8 +980,9 @@ int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState*
     return glyph.advance;
 }
 
-void Font::HandleTag(const shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const
+void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const
 {
+    using boost::lexical_cast;
     if (tag->text == "i") {
         render_state.use_italics = !tag->close_tag;
     } else if (tag->text == "u") {
@@ -1060,7 +1047,7 @@ void Font::HandleTag(const shared_ptr<FormattingTag>& tag, double* orig_color, R
 // class GG::FontManager
 ///////////////////////////////////////
 // FontKey 
-FontManager::FontKey::FontKey(const string& str, int pts) :
+FontManager::FontKey::FontKey(const std::string& str, int pts) :
     filename(str),
     points(pts)
 {
@@ -1082,33 +1069,30 @@ FontManager::FontManager()
     s_created = true;
 }
 
-shared_ptr<Font> FontManager::GetFont(const string& font_filename, int pts, Uint32 range/* = GGFont::ALL_DEFINED_RANGES*/)
+boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, int pts, Uint32 range/* = GGFont::ALL_DEFINED_RANGES*/)
 {
-    static const shared_ptr<Font> EMPTY_FONT(new Font("", 0));
+    static const boost::shared_ptr<Font> EMPTY_FONT(new Font("", 0));
     FontKey key(font_filename, pts);
-    map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
+    std::map<FontKey, boost::shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
     if (it == m_rendered_fonts.end()) { // if no such font has been created, create it now
         if (font_filename == "")
             return EMPTY_FONT; // keeps this function from throwing; "" is the only invalid font filename that shouldn't throw
         else
-            return (m_rendered_fonts[key] = shared_ptr<Font>(new Font(font_filename, pts, range)));
+            return (m_rendered_fonts[key] = boost::shared_ptr<Font>(new Font(font_filename, pts, range)));
         // if a font like this has been created, but it doesn't have all the right glyphs, release it and create a new one
     } else if ((it->second->GetGlyphRange() & range) != range) {
         range |= it->second->GetGlyphRange();
         m_rendered_fonts.erase(it);
-        return (m_rendered_fonts[key] = shared_ptr<Font>(new Font(font_filename, pts, range)));
+        return (m_rendered_fonts[key] = boost::shared_ptr<Font>(new Font(font_filename, pts, range)));
     } else { // otherwise, the font we found works, so just return it
         return it->second;
     }
 }
 
-void FontManager::FreeFont(const string& font_filename, int pts)
+void FontManager::FreeFont(const std::string& font_filename, int pts)
 {
     FontKey key(font_filename, pts);
-    map<FontKey, shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
+    std::map<FontKey, boost::shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
     if (it != m_rendered_fonts.end())
         m_rendered_fonts.erase(it);
 }
-
-} // namespace GG
-

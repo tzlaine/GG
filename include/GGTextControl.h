@@ -39,42 +39,42 @@
 #include "GGFont.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
-/** The name says it all.
-    All TextControl objects know how to center, left- or right-justify, etc. themselves within 
-    their window areas.  The format flags used with TextControl are defined in enum GG::TextFormat in GGBase.h. TextControl has std::string-like operators 
-    and functions that allow the m_text member string to be manipulated directly.  In addition, the << and >> operators allow virtually 
-    any type (int, float, char, etc.) to be read from a Text object as if it were an input or output stream, thanks to boost::lexical_cast.  
-    Note that the Text stream operators only read the first instance of the specified type from m_text, and overwrite
-    the entire m_text string when writing to it; both operators may throw.
-    This is a text control based on pre-rendered font glyphs.
-    The text is rendered character by character from a prerendered font. The font used is 
-    gotten from the application's font manager.  Since a shared_ptr to the font is kept, the font is guaranteed to live at least as long
-    as the TextControl object that refers to it.  This also means that if the font is explicitly released from the font manager but is
-    still held by at least one TextControl object, it will not be destroyed, due to the shared_ptr.  Note that if "" is supplied as the 
-    font_filename parameter, no text will be rendered, but a valid TextControl object will be constructed, which may later contain
-    renderable text. TextControl objects support text with formatting tags. See GG::Font for details.*/
+/** The name says it all.  All TextControl objects know how to center, left- or right-justify, etc. themselves within
+    their window areas.  The format flags used with TextControl are defined in enum GG::TextFormat in
+    GGBase.h. TextControl has std::string-like operators and functions that allow the m_text member string to be
+    manipulated directly.  In addition, the << and >> operators allow virtually any type (int, float, char, etc.) to be
+    read from a Text object as if it were an input or output stream, thanks to boost::lexical_cast.  Note that the Text
+    stream operators only read the first instance of the specified type from m_text, and overwrite the entire m_text
+    string when writing to it; both operators may throw.  This is a text control based on pre-rendered font glyphs.  The
+    text is rendered character by character from a prerendered font. The font used is gotten from the application's font
+    manager.  Since a shared_ptr to the font is kept, the font is guaranteed to live at least as long as the TextControl
+    object that refers to it.  This also means that if the font is explicitly released from the font manager but is
+    still held by at least one TextControl object, it will not be destroyed, due to the shared_ptr.  Note that if "" is
+    supplied as the font_filename parameter, no text will be rendered, but a valid TextControl object will be
+    constructed, which may later contain renderable text. TextControl objects support text with formatting tags. See
+    GG::Font for details.*/
 class GG_API TextControl : public Control
 {
 public:
     using Wnd::SizeMove;
 
     /** \name Structors */ //@{
-    TextControl(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
-    TextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font filename and font point size
+    TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
+    TextControl(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font filename and font point size
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const string& str, const shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
+    TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const string& str, const string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
-
-    TextControl(const XMLElement& elem); ///< ctor that constructs a TextControl object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a TextControl object
+    TextControl(int x, int y, const std::string& str, const std::string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
     //@}
 
     /** \name Accessors */ //@{
@@ -101,7 +101,7 @@ public:
         default value at all, but garbage. */
     template <class T> void GetValue(T& t) const;
 
-    operator const string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
+    operator const std::string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
 
     bool  Empty() const;   ///< returns true when text string equals ""
     int   Length() const;  ///< returns length of text string
@@ -113,10 +113,6 @@ public:
     /** returns the lower-right corner of the text as it is would be rendered if it were not bound to the dimensions of
         this control. */
     Pt    TextLowerRight() const;
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a TextControl object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
     //@}
 
     /** \name Mutators */ //@{
@@ -125,7 +121,7 @@ public:
     /** sets the text to \a str; may resize the window.  If the private member m_fit_to_text is true (i.e. if the second 
         ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 
         text occupies. */
-    virtual void   SetText(const string& str);
+    virtual void   SetText(const std::string& str);
     virtual void   SetText(const char* str);
     virtual void   SizeMove(int x1, int y1, int x2, int y2);
     void           SetTextFormat(Uint32 format); ///< sets the text format; ensures that the flags are sane
@@ -138,38 +134,47 @@ public:
         strung together.  \throw boost::bad_lexical_cast boost::lexical_cast throws boost::bad_lexical_cast when it is confused.*/
     template <class T> void operator<<(T t);
 
-    void  operator+=(const string& str); ///< appends \a str to text string by way of SetText()
-    void  operator+=(const char* str);   ///< appends \a str to text string by way of SetText()
-    void  operator+=(char ch);           ///< appends \a ch to text string by way of SetText()
-    void  Clear();                       ///< sets text string to ""
-    void  Insert(int pos, char ch);      ///< allows access to text string much as a std::string
-    void  Erase(int pos, int num = 1);   ///< allows access to text string much as a std::string
+    void  operator+=(const std::string& str); ///< appends \a str to text string by way of SetText()
+    void  operator+=(const char* str);        ///< appends \a str to text string by way of SetText()
+    void  operator+=(char ch);                ///< appends \a ch to text string by way of SetText()
+    void  Clear();                            ///< sets text string to ""
+    void  Insert(int pos, char ch);           ///< allows access to text string much as a std::string
+    void  Erase(int pos, int num = 1);        ///< allows access to text string much as a std::string
     //@}
 
 protected:
+    /** \name Structors */ //@{
+    TextControl(); ///< default ctor
+    //@}
+
     /** \name Accessors */ //@{
-    const vector<Font::LineData>& GetLineData() const;
-    const shared_ptr<Font>&       GetFont() const;
-    bool                          FitToText() const;
+    const std::vector<Font::LineData>&  GetLineData() const;
+    const boost::shared_ptr<Font>&      GetFont() const;
+    bool                                FitToText() const;
     //@}
 
 private:
     void ValidateFormat();      ///< ensures that the format flags are consistent
     void RecomputeTextBounds(); ///< recalculates m_text_ul and m_text_lr
 
-    Uint32                  m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
-    Clr                     m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
-    vector<Font::LineData>  m_line_data;
-    shared_ptr<Font>        m_font;
-    bool                    m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
-    Pt                      m_text_ul;     ///< stored relative to the control's UpperLeft()
-    Pt                      m_text_lr;     ///< stored relative to the control's UpperLeft()
+    Uint32                      m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
+    Clr                         m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
+    std::vector<Font::LineData> m_line_data;
+    boost::shared_ptr<Font>     m_font;
+    bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
+    Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
+    Pt                          m_text_lr;     ///< stored relative to the control's UpperLeft()
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
+} // namespace GG
 
 // template implementations
 template <class T>
-void TextControl::operator>>(T& t) const
+void GG::TextControl::operator>>(T& t) const
 {
     try {
         t = boost::lexical_cast<T>(Control::m_text);
@@ -179,17 +184,28 @@ void TextControl::operator>>(T& t) const
 }
 
 template <class T>
-void TextControl::GetValue(T& t) const
+void GG::TextControl::GetValue(T& t) const
 {
-    t = boost::lexical_cast<T, string>(Control::m_text);
+    t = boost::lexical_cast<T, std::string>(Control::m_text);
 }
 
 template <class T>
-void TextControl::operator<<(T t)
+void GG::TextControl::operator<<(T t)
 {
-    SetText(boost::lexical_cast<string>(t));
+    SetText(boost::lexical_cast<std::string>(t));
 }
 
-} // namespace GG
+template <class Archive>
+void GG::TextControl::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_format)
+        & BOOST_SERIALIZATION_NVP(m_text_color)
+        & BOOST_SERIALIZATION_NVP(m_line_data)
+        & BOOST_SERIALIZATION_NVP(m_font)
+        & BOOST_SERIALIZATION_NVP(m_fit_to_text)
+        & BOOST_SERIALIZATION_NVP(m_text_ul)
+        & BOOST_SERIALIZATION_NVP(m_text_lr);
+}
 
 #endif // _GGTextControl_h_

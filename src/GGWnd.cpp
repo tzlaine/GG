@@ -38,8 +38,6 @@
 
 using namespace GG;
 
-#define DEBUG_GRID_LAYOUT 0
-
 namespace {
     using namespace boost::multi_index;
     struct GridLayoutWnd
@@ -226,38 +224,6 @@ Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
     ValidateFlags();
 }
 
-Wnd::Wnd(const XMLElement& elem) :
-    m_done(false),
-    m_parent(0),
-    m_zorder(0),
-    m_visible(true),
-    m_clip_children(false),
-    m_max_size(1 << 30, 1 << 30),
-    m_layout(0),
-    m_containing_layout(0),
-    m_flags(0)
-{
-    if (elem.Tag() != "GG::Wnd")
-        throw std::invalid_argument("Attempted to construct a GG::Wnd from an XMLElement that had a tag other than \"GG::Wnd\"");
-
-    m_text = elem.Child("m_text").Text();
-
-    const XMLElement* curr_elem = &elem.Child("m_children");
-    for (int i = 0; i < curr_elem->NumChildren(); ++i) {
-        if (Wnd* w = GG::App::GetApp()->GenerateWnd(curr_elem->Child(i)))
-            AttachChild(w);
-    }
-
-    m_zorder = lexical_cast<int>(elem.Child("m_zorder").Text());
-    m_visible = lexical_cast<bool>(elem.Child("m_visible").Text());
-    m_clip_children = lexical_cast<bool>(elem.Child("m_clip_children").Text());
-    m_upperleft = Pt(elem.Child("m_upperleft").Child("GG::Pt"));
-    m_lowerright = Pt(elem.Child("m_lowerright").Child("GG::Pt"));
-    m_min_size = Pt(elem.Child("m_min_size").Child("GG::Pt"));
-    m_max_size = Pt(elem.Child("m_max_size").Child("GG::Pt"));
-    m_flags = FlagsFromString<Wnd::WndFlag>(elem.Child("m_flags").Text());
-}
-
 Wnd::~Wnd()
 {
     // remove this-references from Wnds that this Wnd filters
@@ -321,7 +287,7 @@ bool Wnd::Visible() const
     return m_visible;
 }
 
-const string& Wnd::WindowText() const
+const std::string& Wnd::WindowText() const
 {
     return m_text;
 }
@@ -468,64 +434,7 @@ WndRegion Wnd::WindowRegion(const Pt& pt) const
     return (Resizable() ? WndRegion(x_pos + 3 * y_pos) : WR_NONE);
 }
 
-XMLElement Wnd::XMLEncode() const
-{
-    XMLElement retval("GG::Wnd");
-    retval.AppendChild(XMLElement("m_text", m_text));
-    retval.LastChild().SetAttribute("edit", "always");
-
-    XMLElement temp("m_children");
-    for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
-        temp.AppendChild((*it)->XMLEncode());
-    }
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElement("m_zorder", boost::lexical_cast<string>(m_zorder)));
-    retval.LastChild().SetAttribute("edit", "never");
-    retval.AppendChild(XMLElement("m_visible", boost::lexical_cast<string>(m_visible)));
-    retval.LastChild().SetAttribute("edit", "never");
-    retval.AppendChild(XMLElement("m_clip_children", boost::lexical_cast<string>(m_clip_children)));
-    retval.AppendChild(XMLElement("m_upperleft", m_upperleft.XMLEncode()));
-    retval.AppendChild(XMLElement("m_lowerright", m_lowerright.XMLEncode()));
-    retval.AppendChild(XMLElement("m_min_size", m_min_size.XMLEncode()));
-    retval.AppendChild(XMLElement("m_max_size", m_max_size.XMLEncode()));
-    retval.AppendChild(XMLElement("m_flags", StringFromFlags<Wnd::WndFlag>(m_flags)));
-    retval.LastChild().SetAttribute("edit", "never");
-
-    return retval;
-}
-
-XMLElementValidator Wnd::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Wnd");
-    retval.AppendChild(XMLElementValidator("m_text"));
-    retval.LastChild().SetAttribute("edit", 0);
-
-#if 1
-    retval.AppendChild(XMLElementValidator("m_children")); // this will be filled in by subclasses as needed
-#else
-    XMLElementValidator temp("m_children");
-    for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
-        temp.AppendChild((*it)->XMLValidator());
-    }
-    retval.AppendChild(temp);
-#endif
-
-    retval.AppendChild(XMLElementValidator("m_zorder", new Validator<int>()));
-    retval.LastChild().SetAttribute("edit", 0);
-    retval.AppendChild(XMLElementValidator("m_visible", new Validator<bool>()));
-    retval.LastChild().SetAttribute("edit", 0);
-    retval.AppendChild(XMLElementValidator("m_clip_children", new Validator<bool>()));
-    retval.AppendChild(XMLElementValidator("m_upperleft", m_upperleft.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_lowerright", m_lowerright.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_min_size", m_min_size.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_max_size", m_max_size.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_flags", new ListValidator<Wnd::WndFlag>()));
-    retval.LastChild().SetAttribute("edit", 0);
-    return retval;
-}
-
-void Wnd::SetText(const string& str)
+void Wnd::SetText(const std::string& str)
 {
     m_text = str;
 }
@@ -773,7 +682,7 @@ void Wnd::HorizontalLayout()
     RemoveLayout();
 
     std::multiset<Wnd*, WndHorizontalLess> wnds;
-    for (list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+    for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
         wnds.insert(*it);
     }
 
@@ -793,7 +702,7 @@ void Wnd::VerticalLayout()
     RemoveLayout();
 
     std::multiset<Wnd*, WndVerticalLess> wnds;
-    for (list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+    for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
         wnds.insert(*it);
     }
 
@@ -810,11 +719,6 @@ void Wnd::VerticalLayout()
 
 void Wnd::GridLayout()
 {
-#if DEBUG_GRID_LAYOUT
-    std::cerr << "********************************************************************************\n"
-              << "Wnd::GridLayout()";
-#endif
-
     RemoveLayout();
 
     Pt cl_ul = ClientUpperLeft(), cl_lr = ClientLowerRight();
@@ -823,13 +727,13 @@ void Wnd::GridLayout()
     GridLayoutWndContainer grid_layout;
 
     // validate existing children and place them in a grid with one cell per pixel
-    for (list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+    for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
         Wnd* wnd = *it;
         Pt wnd_ul = wnd->UpperLeft(), wnd_lr = wnd->LowerRight();
         if (wnd_ul < cl_ul || cl_lr < wnd_lr)
             throw std::runtime_error("Wnd::GridLayout() : A child window lies at least partially outside the client area");
 
-        list<Wnd*>::const_iterator it2 = it;
+        std::list<Wnd*>::const_iterator it2 = it;
         ++it2;
         for (; it2 != m_children.end(); ++it2) {
             Rect other_wnd_rect((*it2)->UpperLeft(), (*it2)->LowerRight());
@@ -840,20 +744,11 @@ void Wnd::GridLayout()
         wnd_ul = ScreenToClient(wnd_ul);
         wnd_lr = ScreenToClient(wnd_lr);
         grid_layout.insert(GridLayoutWnd(wnd, wnd_ul, wnd_lr));
-#if DEBUG_GRID_LAYOUT
-        std::cerr << "  Adding window \"" << wnd->WindowText() << "\" @" << wnd << " (" << wnd_ul.x << ", " << wnd_ul.y << ") - (" << wnd_lr.x << ", " << wnd_lr.y << ")\n";
-#endif
     }
 
 
     // align left sides of windows
-#if DEBUG_GRID_LAYOUT
-    std::cerr << "  Expanding left...\n";
-#endif
     for (LeftIter it = grid_layout.get<Left>().begin(); it != grid_layout.get<Left>().end(); ++it) {
-#if DEBUG_GRID_LAYOUT
-        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
-#endif
         Pt ul = it->ul;
         Pt lr = it->lr;
         for (int x = ul.x - 1; x >= 0; --x) {
@@ -861,9 +756,6 @@ void Wnd::GridLayout()
                 break;
             } else if (grid_layout.get<Left>().find(x, IsLeft()) != grid_layout.get<Left>().end()) {
                 GridLayoutWnd grid_wnd = *it;
-#if DEBUG_GRID_LAYOUT
-                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" left " << grid_wnd.ul.x << " -> " << x << "\n";
-#endif
                 grid_wnd.ul.x = x;
                 grid_layout.get<Left>().replace(it, grid_wnd);
                 break;
@@ -872,13 +764,7 @@ void Wnd::GridLayout()
     }
 
     // align right sides of windows
-#if DEBUG_GRID_LAYOUT
-    std::cerr << "  Expanding right...\n";
-#endif
     for (RightIter it = grid_layout.get<Right>().begin(); it != grid_layout.get<Right>().end(); ++it) {
-#if DEBUG_GRID_LAYOUT
-        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
-#endif
         Pt ul = it->ul;
         Pt lr = it->lr;
         for (int x = lr.x + 1; x < client_sz.x; ++x) {
@@ -886,9 +772,6 @@ void Wnd::GridLayout()
                 break;
             } else if (grid_layout.get<Right>().find(x, IsRight()) != grid_layout.get<Right>().end()) {
                 GridLayoutWnd grid_wnd = *it;
-#if DEBUG_GRID_LAYOUT
-                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" right " << grid_wnd.lr.x << " -> " << x << "\n";
-#endif
                 grid_wnd.lr.x = x;
                 grid_layout.get<Right>().replace(it, grid_wnd);
                 break;
@@ -897,13 +780,7 @@ void Wnd::GridLayout()
     }
 
     // align tops of windows
-#if DEBUG_GRID_LAYOUT
-    std::cerr << "  Expanding up...\n";
-#endif
     for (TopIter it = grid_layout.get<Top>().begin(); it != grid_layout.get<Top>().end(); ++it) {
-#if DEBUG_GRID_LAYOUT
-        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
-#endif
         Pt ul = it->ul;
         Pt lr = it->lr;
         for (int y = ul.y - 1; y >= 0; --y) {
@@ -911,9 +788,6 @@ void Wnd::GridLayout()
                 break;
             } else if (grid_layout.get<Top>().find(y, IsTop()) != grid_layout.get<Top>().end()) {
                 GridLayoutWnd grid_wnd = *it;
-#if DEBUG_GRID_LAYOUT
-                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" up " << grid_wnd.ul.y << " -> " << y << "\n";
-#endif
                 grid_wnd.ul.y = y;
                 grid_layout.get<Top>().replace(it, grid_wnd);
                 break;
@@ -922,13 +796,7 @@ void Wnd::GridLayout()
     }
 
     // align bottoms of windows
-#if DEBUG_GRID_LAYOUT
-    std::cerr << "  Expanding down...\n";
-#endif
     for (BottomIter it = grid_layout.get<Bottom>().begin(); it != grid_layout.get<Bottom>().end(); ++it) {
-#if DEBUG_GRID_LAYOUT
-        std::cerr << "    \"" << it->wnd->WindowText() << "\"...\n";
-#endif
         Pt ul = it->ul;
         Pt lr = it->lr;
         for (int y = lr.y + 1; y < client_sz.y; ++y) {
@@ -936,9 +804,6 @@ void Wnd::GridLayout()
                 break;
             } else if (grid_layout.get<Bottom>().find(y, IsBottom()) != grid_layout.get<Bottom>().end()) {
                 GridLayoutWnd grid_wnd = *it;
-#if DEBUG_GRID_LAYOUT
-                std::cerr << "    Expanded \"" << grid_wnd.wnd->WindowText() << "\" down " << grid_wnd.lr.y << " -> " << y << "\n";
-#endif
                 grid_wnd.lr.y = y;
                 grid_layout.get<Bottom>().replace(it, grid_wnd);
                 break;
@@ -947,25 +812,14 @@ void Wnd::GridLayout()
     }
 
     // create an actual layout with a more reasonable number of cells from the pixel-grid layout
-    set<int> unique_lefts;
-    set<int> unique_tops;
+    std::set<int> unique_lefts;
+    std::set<int> unique_tops;
     for (LeftIter it = grid_layout.get<Left>().begin(); it != grid_layout.get<Left>().end(); ++it) {
         unique_lefts.insert(it->ul.x);
     }
     for (TopIter it = grid_layout.get<Top>().begin(); it != grid_layout.get<Top>().end(); ++it) {
         unique_tops.insert(it->ul.y);
     }
-
-#if DEBUG_GRID_LAYOUT
-    std::cerr << "  Final left positions:\n";
-    for (set<int>::iterator it = unique_lefts.begin(); it != unique_lefts.end(); ++it) {
-        std::cerr << "    " << *it << "\n";
-    }
-    std::cerr << "  Final top positions:\n";
-    for (set<int>::iterator it = unique_tops.begin(); it != unique_tops.end(); ++it) {
-        std::cerr << "    " << *it << "\n";
-    }
-#endif
 
     if (unique_lefts.empty() || unique_tops.empty())
         return;
@@ -1001,8 +855,8 @@ void Wnd::SetLayout(Layout* layout)
 void Wnd::RemoveLayout()
 {
     if (m_layout) {
-        list<Wnd*> layout_children = m_layout->Children();
-        for (list<Wnd*>::iterator it = layout_children.begin(); it != layout_children.end(); ++it) {
+        std::list<Wnd*> layout_children = m_layout->Children();
+        for (std::list<Wnd*>::iterator it = layout_children.begin(); it != layout_children.end(); ++it) {
             AttachChild(*it);
         }
         DeleteChild(m_layout);
@@ -1069,7 +923,7 @@ int Wnd::Run()
     return retval;
 }
 
-const list<Wnd*>& Wnd::Children() const
+const std::list<Wnd*>& Wnd::Children() const
 {
     return m_children;
 }

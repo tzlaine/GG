@@ -35,22 +35,22 @@
 #include "GGControl.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
 class Button;
 
-/** This is a basic scrollbar control.
-    The range of the values the scrollbar represents is [m_range_min, m_range_max].  However, m_posn can only range over 
-    [m_range_min, m_range_max - m_page_sz], because the tab has a logical width of m_page_sz.  So the region of the 
-    scrollbar's range being viewed at any one time is [m_posn, m_posn + m_page_sz].  (m_posn + m_page_sz is actually the 
-    last + 1 element of the range.)  The parent of the control is notified of a scroll via ScrolledSignalType signals; 
-    these are emitted from the Scroll*() functions and the UpdatePosn() function.  This should cover every instance 
-    in which m_posn is altered.  The parent can poll the control to get its current view area with a call to GetPosnRange().
-    An increase in a vertical scroll is down, and a decrease is up; since GG assumes the y-coordinates are downwardly 
-    increasing.  The rather plain default buttons and tab can be replaced by any Button-derived controls desired.
-    However, if you want to save and load a Scroll (using an XML encoding) that has custom buttons and/or tab, you 
-    must add the new derived types to the App's XMLObjectFactory.  Otherwise, Scroll's XMLElement ctor will not know 
-    how to create the custom controls at load-time.  See GG::App::AddWndGenerator() and GG::XMLObjectFactory for details.*/
+/** This is a basic scrollbar control.  The range of the values the scrollbar represents is [m_range_min, m_range_max].
+    However, m_posn can only range over [m_range_min, m_range_max - m_page_sz], because the tab has a logical width of
+    m_page_sz.  So the region of the scrollbar's range being viewed at any one time is [m_posn, m_posn + m_page_sz].
+    (m_posn + m_page_sz is actually the last + 1 element of the range.)  The parent of the control is notified of a
+    scroll via ScrolledSignalType signals; these are emitted from the Scroll*() functions and the UpdatePosn() function.
+    This should cover every instance in which m_posn is altered.  The parent can poll the control to get its current
+    view area with a call to GetPosnRange().  An increase in a vertical scroll is down, and a decrease is up; since GG
+    assumes the y-coordinates are downwardly increasing.  The rather plain default buttons and tab can be replaced by
+    any Button-derived controls desired.  However, if you want to serialize a Scroll that has custom buttons and/or tab,
+    you must make sure they are properly registered.  See the boost serialization documentation for details.*/
 class GG_API Scroll : public Control
 {
 public:
@@ -85,21 +85,16 @@ public:
     /** ctor. \warning Calling code <b>must not</b> delete the buttons passed to this ctro, if any.  They become the 
         property of shared_ptrs inside the Scroll.*/
     Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Button* decr = 0, Button* incr = 0, Button* tab = 0, Uint32 flags = CLICKABLE);
-    Scroll(const XMLElement& elem); ///< ctor that constructs a Scroll object from an XMLElement. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Scroll object
     //@}
 
     /** \name Accessors */ //@{
-    pair<int, int>  PosnRange() const;         ///< range currently being viewed
-    pair<int, int>  ScrollRange() const;       ///< defined possible range of control
-    int             LineSize() const;          ///< returns the current line size
-    int             PageSize() const;          ///< returns the current page size
+    std::pair<int, int>  PosnRange() const;         ///< range currently being viewed
+    std::pair<int, int>  ScrollRange() const;       ///< defined possible range of control
+    int                  LineSize() const;          ///< returns the current line size
+    int                  PageSize() const;          ///< returns the current page size
 
-    Clr             InteriorColor() const;     ///< returns the color used to render the interior of the Scroll
-    Orientation     ScrollOrientation() const; ///< returns the orientation of the Scroll
-
-    virtual XMLElement XMLEncode() const; ///< constructs an XMLElement from a Scroll object
-
-    virtual XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this object
+    Clr                  InteriorColor() const;     ///< returns the color used to render the interior of the Scroll
+    Orientation          ScrollOrientation() const; ///< returns the orientation of the Scroll
 
     mutable ScrolledSignalType           ScrolledSignal;           ///< the scrolled signal object for this Scroll
     mutable ScrolledAndStoppedSignalType ScrolledAndStoppedSignal; ///< the scrolled-and-stopped signal object for this Scroll
@@ -132,58 +127,85 @@ public:
     //@}
 
 protected:
+    /** \name Structors */ //@{
+    Scroll(); ///< defalt ctor
+    //@}
+
     /** \name Accessors */ //@{
     int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
     ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
 
-    const shared_ptr<Button>    TabButton() const;     ///< returns the button representing the tab
-    const shared_ptr<Button>    IncrButton() const;    ///< returns the increase button (line down/line right)
-    const shared_ptr<Button>    DecrButton() const;    ///< returns the decrease button (line up/line left)
+    const boost::shared_ptr<Button> TabButton() const;     ///< returns the button representing the tab
+    const boost::shared_ptr<Button> IncrButton() const;    ///< returns the increase button (line down/line right)
+    const boost::shared_ptr<Button> DecrButton() const;    ///< returns the decrease button (line up/line left)
     //@}
 
 private:
-    void           UpdatePosn();        ///< adjusts m_posn due to a tab-drag
-    void           MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
+    void                      UpdatePosn();        ///< adjusts m_posn due to a tab-drag
+    void                      MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
 
-    Clr                  m_int_color;   ///< color inside border of slide area
-    const Orientation    m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)
-    int                  m_posn;        ///< current position of tab in logical coords (will be in [m_range_min, m_range_max - m_page_sz])
-    int                  m_range_min;   ///< lowest value in range of scrollbar
-    int                  m_range_max;   ///< highest value "
-    int                  m_line_sz;     ///< logical units traversed in a line movement (such as a click on either end button)
-    int                  m_page_sz;     ///< logical units traversed for a page movement (such as a click in non-tab middle area, or PgUp/PgDn)
-    shared_ptr<Button>   m_tab;         ///< the button representing the tab
-    shared_ptr<Button>   m_incr;        ///< the increase button (line down/line right)
-    shared_ptr<Button>   m_decr;        ///< the decrease button (line up/line left)
-    int                  m_tab_drag_offset;         ///< the offset on the tab as it is dragged (like drag_offset in ProcessInput function)
-    ScrollRegion         m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
-    ScrollRegion         m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
+    Clr                       m_int_color;   ///< color inside border of slide area
+    const Orientation         m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)
+    int                       m_posn;        ///< current position of tab in logical coords (will be in [m_range_min, m_range_max - m_page_sz])
+    int                       m_range_min;   ///< lowest value in range of scrollbar
+    int                       m_range_max;   ///< highest value "
+    int                       m_line_sz;     ///< logical units traversed in a line movement (such as a click on either end button)
+    int                       m_page_sz;     ///< logical units traversed for a page movement (such as a click in non-tab middle area, or PgUp/PgDn)
+    boost::shared_ptr<Button> m_tab;         ///< the button representing the tab
+    boost::shared_ptr<Button> m_incr;        ///< the increase button (line down/line right)
+    boost::shared_ptr<Button> m_decr;        ///< the decrease button (line up/line left)
+    int                       m_tab_drag_offset;         ///< the offset on the tab as it is dragged (like drag_offset in ProcessInput function)
+    ScrollRegion              m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
+    ScrollRegion              m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 // define EnumMap and stream operators for Scroll::Orientation
-ENUM_MAP_BEGIN(Scroll::Orientation)
-    ENUM_MAP_INSERT(Scroll::VERTICAL)
-    ENUM_MAP_INSERT(Scroll::HORIZONTAL)
-ENUM_MAP_END
+GG_ENUM_MAP_BEGIN(Scroll::Orientation)
+    GG_ENUM_MAP_INSERT(Scroll::VERTICAL)
+    GG_ENUM_MAP_INSERT(Scroll::HORIZONTAL)
+GG_ENUM_MAP_END
 
-ENUM_STREAM_IN(Scroll::Orientation)
-ENUM_STREAM_OUT(Scroll::Orientation)
+GG_ENUM_STREAM_IN(Scroll::Orientation)
+GG_ENUM_STREAM_OUT(Scroll::Orientation)
 
 // define EnumMap and stream operators for Scroll::ScrollRegion
-ENUM_MAP_BEGIN(Scroll::ScrollRegion)
-    ENUM_MAP_INSERT(Scroll::SBR_NONE)
-    ENUM_MAP_INSERT(Scroll::SBR_TAB)
-    ENUM_MAP_INSERT(Scroll::SBR_LINE_DN)
-    ENUM_MAP_INSERT(Scroll::SBR_LINE_UP)
-    ENUM_MAP_INSERT(Scroll::SBR_PAGE_DN)
-    ENUM_MAP_INSERT(Scroll::SBR_PAGE_UP)
-ENUM_MAP_END
+GG_ENUM_MAP_BEGIN(Scroll::ScrollRegion)
+    GG_ENUM_MAP_INSERT(Scroll::SBR_NONE)
+    GG_ENUM_MAP_INSERT(Scroll::SBR_TAB)
+    GG_ENUM_MAP_INSERT(Scroll::SBR_LINE_DN)
+    GG_ENUM_MAP_INSERT(Scroll::SBR_LINE_UP)
+    GG_ENUM_MAP_INSERT(Scroll::SBR_PAGE_DN)
+    GG_ENUM_MAP_INSERT(Scroll::SBR_PAGE_UP)
+GG_ENUM_MAP_END
 
-ENUM_STREAM_IN(Scroll::ScrollRegion)
-ENUM_STREAM_OUT(Scroll::ScrollRegion)
+GG_ENUM_STREAM_IN(Scroll::ScrollRegion)
+GG_ENUM_STREAM_OUT(Scroll::ScrollRegion)
 
 } // namespace GG
 
-#endif // _GGScroll_h_
+// template implementations
+template <class Archive>
+void GG::Scroll::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_int_color)
+        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation))
+        & BOOST_SERIALIZATION_NVP(m_posn)
+        & BOOST_SERIALIZATION_NVP(m_range_min)
+        & BOOST_SERIALIZATION_NVP(m_range_max)
+        & BOOST_SERIALIZATION_NVP(m_line_sz)
+        & BOOST_SERIALIZATION_NVP(m_page_sz)
+        & BOOST_SERIALIZATION_NVP(m_tab)
+        & BOOST_SERIALIZATION_NVP(m_incr)
+        & BOOST_SERIALIZATION_NVP(m_decr)
+        & BOOST_SERIALIZATION_NVP(m_tab_drag_offset)
+        & BOOST_SERIALIZATION_NVP(m_initial_depressed_area)
+        & BOOST_SERIALIZATION_NVP(m_depressed_area);
+}
 
+#endif // _GGScroll_h_

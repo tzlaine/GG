@@ -69,7 +69,8 @@ template <> inline long double mod<long double>(long double dividend, long doubl
 }
 }
 
-/** base class for all OptionsDB validators. Simply provides the basic interface. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    base class for all OptionsDB validators. Simply provides the basic interface. */
 struct GG_API ValidatorBase
 {
     virtual ~ValidatorBase() {} ///< virtual dtor
@@ -81,7 +82,8 @@ struct GG_API ValidatorBase
     virtual ValidatorBase *Clone() const = 0;
 };
 
-/** determines if a string is a valid value for an OptionsDB option */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    determines if a string is a valid value for an OptionsDB option */
 template <class T> 
 struct Validator : public ValidatorBase
 {
@@ -96,7 +98,8 @@ struct Validator : public ValidatorBase
     }
 };
 
-/** a Validator that constrains the range of valid values */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator that constrains the range of valid values */
 template <class T>
 struct RangedValidator : public Validator<T>
 {
@@ -123,7 +126,8 @@ struct RangedValidator : public Validator<T>
     const T m_max;
 };
 
-/** a Validator that constrains valid values to certain step-values (eg: 0, 25, 50, ...).  The steps are assumed to
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator that constrains valid values to certain step-values (eg: 0, 25, 50, ...).  The steps are assumed to
     begin at the validated type's default-constructed value, unless another origin is specified. */
 template <class T>
 struct StepValidator : public Validator<T>
@@ -148,7 +152,8 @@ struct StepValidator : public Validator<T>
     const T m_origin;
 };
 
-/** a Validator similar to a StepValidator, but that further constrains the valid values to be within a certain range (eg: [25, 50, ..., 200]). */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator similar to a StepValidator, but that further constrains the valid values to be within a certain range (eg: [25, 50, ..., 200]). */
 template <class T>
 struct RangedStepValidator : public Validator<T>
 {
@@ -182,7 +187,8 @@ public:
     const T m_max;
 };
 
-/** a Validator that validates a string as belonging to an enumerated type for which there exists an EnumMap. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator that validates a string as belonging to an enumerated type for which there exists an EnumMap. */
 template <class T>
 struct MappedEnumValidator : public Validator<T>
 {
@@ -204,7 +210,8 @@ public:
     }
 };
 
-/** a Validator similar to a RangedValidator, but that further constrains the valid values to be power-of-two, 
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator similar to a RangedValidator, but that further constrains the valid values to be power-of-two, 
     between 1 (or 0) and \a max, inclusive.  This is intended to be used to validate flag enumeration types 
     (e.g. GG::Wnd::WndFlag), though it will work for any integral type.  If the enumeration includes 0, \a 
     include_zero should be passed into the ctor with a value of true.  Also, note that enumeration types 
@@ -258,13 +265,14 @@ public:
 };
 
 
-/** a Validator that validates zero or more values in a whitespace-delimited list. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator that validates zero or more values in a whitespace-delimited list. */
 template <class T> 
 struct ListValidator : public ValidatorBase
 {
     virtual void Validate(const std::string& str) const
     {
-        vector<string> tokens = Tokenize(str);
+        std::vector<std::string> tokens = Tokenize(str);
         for (unsigned int i = 0; i < tokens.size(); ++i) {
             boost::lexical_cast<T>(tokens[i]);
         }
@@ -276,13 +284,14 @@ struct ListValidator : public ValidatorBase
     }
 };
 
-/** a Validator that validates zero or more key-value pairs in a whitespace-delimited list. */
+/** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
+    a Validator that validates zero or more key-value pairs in a whitespace-delimited list. */
 template <class T1, class T2> 
 struct MapListValidator : public ValidatorBase
 {
     virtual void Validate(const std::string& str) const
     {
-        pair<vector<string>, vector<string> > tokens = TokenizeMapString(str);
+        std::pair<std::vector<std::string>, std::vector<std::string> > tokens = TokenizeMapString(str);
         for (unsigned int i = 0; i < tokens.first.size(); ++i) {
             boost::lexical_cast<T1>(tokens.first[i]);
         }

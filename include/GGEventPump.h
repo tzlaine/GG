@@ -38,8 +38,8 @@
 
 namespace GG {
 
-/** encapsulates the state of GG event pumping.  A single state object is shared by all EventPumps, 
-    to ensure state consistency. */
+/** encapsulates the state of GG event pumping.  A single state object is shared by all EventPumps, to ensure state
+    consistency. */
 struct GG_API EventPumpState
 {
     EventPumpState(); ///< default ctor.
@@ -58,8 +58,9 @@ struct GG_API EventPumpState
     int old_mouse_repeat_interval;
 };
 
-/** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::App functionality; 
-    users who wish to define a new type of event pump should do so by inheriting from EventPump instead of this class. */
+/** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::App
+    functionality; users who wish to define a new type of event pump should do so by inheriting from EventPump instead
+    of this class. */
 class GG_API EventPumpBase
 {
 protected:
@@ -77,15 +78,14 @@ protected:
 };
 
 /** encapsulates the GG event-pumping mechanism.  Events from the application framework (i.e. SDL, DirectInput, etc.) 
-    are received by an EventPump, and appropriate action is taken.  The default action is to call 
-    App::HandleSystemEvents(), but any action can be taken in a EventPump-derived type that overrides operator()().
-    For example, it might be useful to override operator()() with a function that gives all GG-relevant events to a 
-    GG event-hendler, and gives all other events to a system-specific handler, if your App-derived class does not 
-    already do so.
-    \note Modal Wnds use EventPumps to implement their modality.  This means that you must write your App-derived 
-    class's HandleSystemEvents() in such a way that it can handle modal Wnd events to your satisfaction, since the 
-    type of EventPump that modal Wnds use is fixed. */
-class GG_API EventPump : public EventPumpBase
+    are received by an EventPump, and appropriate action is taken.  The default action is to call
+    App::HandleSystemEvents(), but any action can be taken in a EventPump-derived type that overrides operator()().  For
+    example, it might be useful to override operator()() with a function that gives all GG-relevant events to a GG
+    event-hendler, and gives all other events to a system-specific handler, if your App-derived class does not already
+    do so.  \note Modal Wnds use EventPumps to implement their modality.  This means that you must write your
+    App-derived class's HandleSystemEvents() in such a way that it can handle modal Wnd events to your satisfaction,
+    since the type of EventPump that modal Wnds use is fixed. */
+class GG_API EventPump : public GG::EventPumpBase
 {
 public:
     virtual ~EventPump() {} ///< virtual dtor

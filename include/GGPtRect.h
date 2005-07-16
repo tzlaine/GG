@@ -35,6 +35,8 @@
 #include "GGBase.h"
 #endif
 
+#include <boost/serialization/access.hpp>
+
 namespace GG {
 
 /** a GG screen coordinate class */
@@ -43,16 +45,12 @@ struct GG_API Pt
     /** \name Structors */ //@{
     Pt();                       ///< default ctor
     Pt(int x_, int y_);         ///< ctor that creates a Pt ( \a _x , \a y )
-    Pt(const XMLElement& elem); ///< ctor that creates a Pt as defined in XMLElement elem. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Pt object
     //@}
 
     /** \name Accessors */ //@{
     /** returns true if x < \a rhs.x or returns true if x == \a rhs.x and y <\a rhs.y.  This is useful for sorting Pts 
         in STL containers and algorithms*/
     bool Less(const Pt& rhs) const {return x < rhs.x ? true : (x == rhs.x ? (y < rhs.y ? true : false) : false);}
-
-    XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Pt
-    XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Pt
     //@}
 
     /** \name Mutators */ //@{
@@ -63,6 +61,11 @@ struct GG_API Pt
 
     int x; ///< the x component
     int y; ///< the y component
+
+private:
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** a GG rectangle class. this is essentially just two points that bound the rectangle*/
@@ -72,7 +75,6 @@ struct GG_API Rect
     Rect();                                ///< default ctor
     Rect(const Pt& pt1, const Pt& pt2);    ///< ctor that constructs a Rect from two corners; any two opposing corners will do
     Rect(int x1, int y1, int x2, int y2);  ///< ctor taht constructs a Rect from its left, upper, right, and bottom boundaries
-    Rect(const XMLElement& elem);          ///< ctor that creates a Rect as defined in XMLElement elem. \throw std::invalid_argument May throw std::invalid_argument if \a elem does not encode a Rect object
     //@}
 
     /** \name Accessors */ //@{
@@ -86,9 +88,6 @@ struct GG_API Rect
     int   Height() const       {return lr.y - ul.y;} ///< returns the height of the Rect
 
     bool  Contains(const Pt& pt) const; ///< returns true iff \a pt falls inside the Rect
-
-    XMLElement XMLEncode() const; ///< returns an XMLElement that encodes this Rect
-    XMLElementValidator XMLValidator() const; ///< creates a Validator object that can validate changes in the XML representation of this Rect
     //@}
 
     /** \name Mutators */ //@{
@@ -98,6 +97,11 @@ struct GG_API Rect
 
     Pt ul; ///< the upper-left corner of the Rect
     Pt lr; ///< the lower-right corner of the Rect
+
+private:
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 GG_API inline bool operator==(const Pt& lhs, const Pt& rhs) {return lhs.x == rhs.x && lhs.y == rhs.y;} ///< returns true if \a lhs is identical to \a rhs
@@ -121,6 +125,21 @@ GG_API inline Rect operator+(const Pt& pt, const Rect& rect) {return rect + pt;}
 GG_API inline Rect operator-(const Pt& pt, const Rect& rect) {return rect - pt;} ///< returns \a rect shifted by subtracting \a pt from each corner
 
 } // namepace GG
+
+// template implementations
+template <class Archive>
+void GG::Pt::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(x)
+        & BOOST_SERIALIZATION_NVP(y);
+}
+
+template <class Archive>
+void GG::Rect::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(ul)
+        & BOOST_SERIALIZATION_NVP(lr);
+}
 
 #endif // _GGPtRect_h_
 

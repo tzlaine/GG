@@ -28,9 +28,8 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
-#include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 ////////////////////////////////////////////////
 // GG::Edit
@@ -38,7 +37,12 @@ namespace GG {
 // static(s)
 const int Edit::PIXEL_MARGIN = 5;
 
-Edit::Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>& font, Clr color,
+Edit::Edit() :
+    TextControl()
+{
+}
+
+Edit::Edit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
     TextControl(x, y, w, h, str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
@@ -51,7 +55,7 @@ Edit::Edit(int x, int y, int w, int h, const string& str, const shared_ptr<Font>
     SetColor(color);
 }
 
-Edit::Edit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color,
+Edit::Edit(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
     TextControl(x, y, w, h, str, font_filename, pts, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
@@ -64,7 +68,7 @@ Edit::Edit(int x, int y, int w, int h, const string& str, const string& font_fil
     SetColor(color);
 }
 
-Edit::Edit(int x, int y, int w, const string& str, const shared_ptr<Font>& font, Clr color,
+Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
     TextControl(x, y, w, font->Height() + 2 * PIXEL_MARGIN, str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
@@ -77,7 +81,7 @@ Edit::Edit(int x, int y, int w, const string& str, const shared_ptr<Font>& font,
     SetColor(color);
 }
 
-Edit::Edit(int x, int y, int w, const string& str, const string& font_filename, int pts, Clr color,
+Edit::Edit(int x, int y, int w, const std::string& str, const std::string& font_filename, int pts, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
     TextControl(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN, str, font_filename, pts, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
@@ -90,24 +94,6 @@ Edit::Edit(int x, int y, int w, const string& str, const string& font_filename, 
     SetColor(color);
 }
 
-Edit::Edit(const XMLElement& elem) :
-    TextControl(elem.Child("GG::TextControl"))
-{
-    if (elem.Tag() != "GG::Edit")
-        throw std::invalid_argument("Attempted to construct a GG::Edit from an XMLElement that had a tag other than \"GG::Edit\"");
-
-    const XMLElement* curr_elem = &elem.Child("m_cursor_pos");
-    m_cursor_pos.first = lexical_cast<int>(curr_elem->Attribute("first"));
-    m_cursor_pos.second = lexical_cast<int>(curr_elem->Attribute("second"));
-
-    m_first_char_shown = lexical_cast<int>(elem.Child("m_first_char_shown").Text());
-    m_int_color = Clr(elem.Child("m_int_color").Child("GG::Clr"));
-    m_hilite_color = Clr(elem.Child("m_hilite_color").Child("GG::Clr"));
-    m_sel_text_color = Clr(elem.Child("m_sel_text_color").Child("GG::Clr"));
-
-    m_previous_text = WindowText();
-}
-
 Pt Edit::ClientUpperLeft() const
 {
     return UpperLeft() + Pt(PIXEL_MARGIN, PIXEL_MARGIN);
@@ -118,7 +104,7 @@ Pt Edit::ClientLowerRight() const
     return LowerRight() - Pt(PIXEL_MARGIN, PIXEL_MARGIN);
 }
 
-const pair<int, int>& Edit::CursorPosn() const
+const std::pair<int, int>& Edit::CursorPosn() const
 {
     return m_cursor_pos;
 }
@@ -138,40 +124,6 @@ Clr Edit::SelectedTextColor() const
     return m_sel_text_color;
 }
 
-XMLElement Edit::XMLEncode() const
-{
-    XMLElement retval("GG::Edit");
-    retval.AppendChild(TextControl::XMLEncode());
-
-    XMLElement temp("m_cursor_pos");
-    temp.SetAttribute("first", lexical_cast<string>(m_cursor_pos.first));
-    temp.SetAttribute("second", lexical_cast<string>(m_cursor_pos.second));
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElement("m_first_char_shown", lexical_cast<string>(m_first_char_shown)));
-    retval.AppendChild(XMLElement("m_int_color", m_int_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_hilite_color", m_hilite_color.XMLEncode()));
-    retval.AppendChild(XMLElement("m_sel_text_color", m_sel_text_color.XMLEncode()));
-    return retval;
-}
-
-XMLElementValidator Edit::XMLValidator() const
-{
-    XMLElementValidator retval("GG::Edit");
-    retval.AppendChild(TextControl::XMLValidator());
-
-    XMLElementValidator temp("m_cursor_pos");
-    temp.SetAttribute("first", new Validator<int>());
-    temp.SetAttribute("second", new Validator<int>());
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElementValidator("m_first_char_shown", new Validator<int>()));
-    retval.AppendChild(XMLElementValidator("m_int_color", m_int_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_hilite_color", m_hilite_color.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_sel_text_color", m_sel_text_color.XMLValidator()));
-    return retval;
-}
-
 bool Edit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -187,7 +139,7 @@ bool Edit::Render()
 
     BeginScissorClipping(client_ul.x - 1, client_ul.y, client_lr.x, client_lr.y);
     
-    const vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
+    const std::vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
     int first_char_offset = FirstCharOffset();
     int text_y_pos = ul.y + static_cast<int>(((lr.y - ul.y) - GetFont()->Height()) / 2.0 + 0.5);
     int last_visible_char = LastVisibleChar();
@@ -392,7 +344,7 @@ void Edit::SelectRange(int from, int to)
     AdjustView();
 }
 
-void Edit::SetText(const string& str)
+void Edit::SetText(const std::string& str)
 {
     TextControl::SetText(str);
     m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
@@ -419,7 +371,7 @@ int Edit::FirstCharShown() const
     return m_first_char_shown;
 }
 
-const string& Edit::PreviousText() const
+const std::string& Edit::PreviousText() const
 {
     return m_previous_text;
 }
@@ -492,7 +444,7 @@ void Edit::AdjustView()
     } else if (text_space <= (m_cursor_pos.second ? GetLineData()[0].char_data[m_cursor_pos.second - 1].extent : 0) - first_char_offset) { // if the caret is moving to a place right of the current visible area
         // try to move the text by five characters, or to the end if caret is at a location before the end - 5th character
         int last_idx_to_use = (m_cursor_pos.second + 5 <= Length() - 1) ? m_cursor_pos.second + 5 : Length() - 1; // try to move the caret by five characters
-        const vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
+        const std::vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
         // number of pixels that the caret position overruns the right side of text area
         int pixels_to_move = (char_data[last_idx_to_use].extent - first_char_offset) - text_space;
         if (last_idx_to_use == Length() - 1) // if the caret is at the very end of the string, add the length of some spaces
@@ -503,6 +455,3 @@ void Edit::AdjustView()
         m_first_char_shown = move_to;
     }
 }
-
-} // namespace GG
-

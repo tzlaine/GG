@@ -27,13 +27,17 @@
 #include "GGStaticGraphic.h"
 
 #include <GGDrawUtil.h>
-#include <XMLValidators.h>
 
-namespace GG {
+using namespace GG;
 
 ////////////////////////////////////////////////
 // GG::StaticGraphic
 ////////////////////////////////////////////////
+StaticGraphic::StaticGraphic() :
+    Control()
+{
+}
+
 StaticGraphic::StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style/* = 0*/, Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
@@ -41,7 +45,7 @@ StaticGraphic::StaticGraphic(int x, int y, int w, int h, const Texture* texture,
     Init(SubTexture(texture, 0, 0, texture->DefaultWidth(), texture->DefaultHeight()));
 }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style/* = 0*/,
+StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style/* = 0*/,
                              Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
@@ -55,37 +59,6 @@ StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subte
     m_style(style)
 {
     Init(subtexture);
-}
-
-StaticGraphic::StaticGraphic(const XMLElement& elem) :
-    Control(elem.Child("GG::Control")), 
-    m_style(0)
-{
-    if (elem.Tag() != "GG::StaticGraphic")
-        throw std::invalid_argument("Attempted to construct a GG::StaticGraphic from an XMLElement that had a tag other than \"GG::StaticGraphic\"");
-
-    m_graphic = SubTexture(elem.Child("m_graphic").Child("GG::SubTexture"));
-
-    m_style = FlagsFromString<GraphicStyle>(elem.Child("m_style").Text());
-    ValidateStyle();
-}
-
-XMLElement StaticGraphic::XMLEncode() const
-{
-    XMLElement retval("GG::StaticGraphic");
-    retval.AppendChild(Control::XMLEncode());
-    retval.AppendChild(XMLElement("m_graphic", m_graphic.XMLEncode()));
-    retval.AppendChild(XMLElement("m_style", StringFromFlags<GraphicStyle>(m_style)));
-    return retval;
-}
-
-XMLElementValidator StaticGraphic::XMLValidator() const
-{
-    XMLElementValidator retval("GG::StaticGraphic");
-    retval.AppendChild(Control::XMLValidator());
-    retval.AppendChild(XMLElementValidator("m_graphic", m_graphic.XMLValidator()));
-    retval.AppendChild(XMLElementValidator("m_style", new ListValidator<GraphicStyle>()));
-    return retval;
 }
 
 Uint32 StaticGraphic::Style() const
@@ -189,6 +162,3 @@ void StaticGraphic::ValidateStyle()
         m_style |= GR_SHRINKFIT;
     }
 }
-
-} // namespace GG
-

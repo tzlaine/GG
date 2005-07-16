@@ -3,9 +3,9 @@
 import os
 platform_str = "%s" % Platform()
 
-# posix -- not yet implemented
+# posix
 if platform_str == 'posix':
-    print 'Win32 platform detected ...'
+    print 'Posix platform detected ...'
     gg_dir = '/usr/local/include/GG/'
     cpppath = ['/usr/local/include/boost-1_32',
                '/usr/include/SDL',
@@ -16,13 +16,14 @@ if platform_str == 'posix':
                gg_dir + 'SDL']
     libs = ['GiGiSDL',
             'GiGi',
-            'boost_signals-gcc-1_32',
-            'boost_filesystem-gcc-1_32']
-    ccflags = '-DHAVE_CONFIG_H -D_REENTRANT -Wall -g -O0 -fPIC -DPIC -DBOOST_SIGNALS_STATIC_LINK'
+            'boost_signals',
+            'boost_filesystem',
+            'boost_serialization']
+    ccflags = '-DHAVE_CONFIG_H -D_REENTRANT -Wall -O2'
     env = Environment(CCFLAGS = '',
                       CPPPATH = cpppath,
                       LIBS = libs,
-                      LIBPATH = '',#libpath,
+                      LIBPATH = '',
                       LINKFLAGS = '')
 
 # windows
@@ -72,3 +73,12 @@ if platform_str == 'win32':
 minimal_source = ['minimal.cpp']
 minimal_objects = Flatten([Object(x, CCFLAGS=ccflags, CPPPATH=cpppath) for x in minimal_source])
 env.Program('minimal', minimal_objects)
+
+controls_source = ['controls.cpp']
+controls_objects = Flatten([Object(x, CCFLAGS=ccflags, CPPPATH=cpppath) for x in controls_source])
+env.Program('controls', controls_objects)
+
+serialization_source = ['serialization.cpp',
+                        'saveload.cpp']
+serialization_objects = Flatten([Object(x, CCFLAGS=ccflags, CPPPATH=cpppath) for x in serialization_source])
+env.Program('serialization', serialization_objects)

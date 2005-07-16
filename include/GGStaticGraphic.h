@@ -96,6 +96,9 @@ void GG::StaticGraphic::serialize(Archive& ar, const unsigned int version)
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
         & BOOST_SERIALIZATION_NVP(m_graphic)
         & BOOST_SERIALIZATION_NVP(m_style);
+
+    if (Archive::is_loading::value)
+        ValidateStyle();
 }
 
 #endif // _GGStaticGraphic_h_

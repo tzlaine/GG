@@ -768,11 +768,6 @@ void SubTexture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
     if (m_texture) m_texture->OrthoBlit(x, y, x + m_width, y + m_height, m_tex_coords, enter_2d_mode);
 }
 
-void SubTexture::PostLoadTextureHandling()
-{
-    // TODO
-}
-
 
 ///////////////////////////////////////
 // class GG::TextureManager

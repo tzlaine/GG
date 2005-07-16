@@ -193,60 +193,6 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_
     m_last_frame_idx = m_frames - 1;
 }
 
-#if 0
-DynamicGraphic::DynamicGraphic(const XMLElement& elem) :
-    Control(elem.Child("GG::Control")),
-    m_margin(boost::lexical_cast<int>(elem.Child("m_margin").Text())),
-    m_frame_width(boost::lexical_cast<int>(elem.Child("m_frame_width").Text())),
-    m_frame_height(boost::lexical_cast<int>(elem.Child("m_frame_height").Text())),
-    m_first_frame_time(-1),
-    m_last_frame_time(-1),
-    m_style(0)
-{
-    if (elem.Tag() != "GG::DynamicGraphic")
-        throw std::invalid_argument("Attempted to construct a GG::DynamicGraphic from an XMLElement that had a tag other than \"GG::DynamicGraphic\"");
-
-    SetColor(CLR_WHITE);
-
-    using boost::lexical_cast;
-    const XMLElement* curr_elem = &elem.Child("m_textures");
-    for (int i = 0; i < curr_elem->NumChildren(); i += 2) {
-        FrameSet fs;
-        // (borrowed from GG::SubTexture)
-        std::string texture_filename = curr_elem->Child(i).Child("GG::Texture").Child("m_filename").Text();
-        // we need to ensure that the settings in the XML-encoded texture are preserved in the loaded texture; to do this:
-        boost::shared_ptr<Texture> temp_texture = App::GetApp()->GetTexture(texture_filename);
-        // if no copy of this texture exists in the manager, GetTexture() will load it with default settings, and the
-        // use_count will be 2: one for the shared_ptr in the manager, one for temp_texture.
-        // if this is the case, dump the texture, reload it from the XML definition (which may have non-default settings),
-        // and store the XML-loaded Texture in the manager.
-        if (temp_texture.use_count() == 2) {
-            temp_texture.reset(new Texture(curr_elem->Child(i).Child("GG::Texture")));
-            App::GetApp()->FreeTexture(texture_filename);
-            App::GetApp()->StoreTexture(temp_texture, texture_filename);
-            fs.texture = temp_texture;
-        } else { // if this is not the case, we're not the first ones to load the texture, so just keep it.
-            fs.texture = temp_texture;
-        }
-        fs.frames = lexical_cast<int>(curr_elem->Child(i + 1).Text());
-        m_textures.push_back(fs);
-    }
-
-    m_FPS = lexical_cast<double>(elem.Child("m_FPS").Text());
-    m_playing = lexical_cast<bool>(elem.Child("m_playing").Text());
-    m_looping = lexical_cast<bool>(elem.Child("m_looping").Text());
-    m_frames = lexical_cast<int>(elem.Child("m_frames").Text());
-    m_curr_frame = lexical_cast<int>(elem.Child("m_curr_frame").Text());
-    m_first_frame_idx = lexical_cast<int>(elem.Child("m_first_frame_idx").Text());
-    m_last_frame_idx = lexical_cast<int>(elem.Child("m_last_frame_idx").Text());
-
-    m_style = FlagsFromString<GraphicStyle>(elem.Child("m_style").Text());
-    ValidateStyle();
-
-    SetFrameIndex(m_curr_frame);
-}
-#endif
-
 int DynamicGraphic::Frames() const       
 {
     return m_frames;
@@ -595,7 +541,8 @@ void DynamicGraphic::SetEndFrame(int idx)
 
 void DynamicGraphic::SetStyle(Uint32 style)
 {
-    m_style = style; ValidateStyle();
+    m_style = style;
+    ValidateStyle();
 }
 
 int DynamicGraphic::FramesInTexture(const Texture* t) const
@@ -628,11 +575,6 @@ int DynamicGraphic::FirstFrameTime() const
 int DynamicGraphic::LastFrameTime() const
 {
     return m_last_frame_time;
-}
-
-void DynamicGraphic::PostLoadTextureHandling()
-{
-    // TODO
 }
 
 void DynamicGraphic::ValidateStyle()

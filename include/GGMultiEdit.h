@@ -171,6 +171,9 @@ private:
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
+    // true iff the ValidateFormat() call in the load-version of serialize() may have left the control in an
+    // inconsistent state; this must be remedied the next time Render() is called
+    bool m_dirty_load;
 };
 
 // define EnumMap and stream operators for MultiEdit::Style
@@ -202,6 +205,13 @@ void GG::MultiEdit::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_max_lines_history)
         & BOOST_SERIALIZATION_NVP(m_vscroll)
         & BOOST_SERIALIZATION_NVP(m_hscroll);
+
+    if (Archive::is_loading::value) {
+        Uint32 old_style = m_style;
+        ValidateStyle();
+        if (m_style != old_style)
+            m_dirty_load = true;
+    }
 }
 
 #endif // _GGMultiEdit_h_

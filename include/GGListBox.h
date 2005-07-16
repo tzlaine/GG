@@ -466,8 +466,10 @@ void GG::ListBox::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_sort_col)
         & BOOST_SERIALIZATION_NVP(m_allowed_types);
 
-    if (Archive::is_loading::value)
+    if (Archive::is_loading::value) {
+        ValidateStyle();
         ConnectSignals();
+    }
 }
 
 #endif // _GGListBox_h_

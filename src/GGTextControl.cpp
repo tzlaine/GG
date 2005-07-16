@@ -35,7 +35,8 @@ using namespace GG;
 // GG::TextControl
 ////////////////////////////////////////////////
 TextControl::TextControl() :
-    Control()
+    Control(),
+    m_dirty_load(false)
 {
 }
 
@@ -45,7 +46,8 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     m_format(text_fmt),
     m_text_color(color),
     m_font(font),
-    m_fit_to_text(false)
+    m_fit_to_text(false),
+    m_dirty_load(false)
 {
     ValidateFormat();
     SetText(str);
@@ -57,7 +59,8 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     m_format(text_fmt),
     m_text_color(color),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_fit_to_text(false)
+    m_fit_to_text(false),
+    m_dirty_load(false)
 {
     ValidateFormat();
     SetText(str);
@@ -69,7 +72,8 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
     m_format(text_fmt),
     m_text_color(color),
     m_font(font),
-    m_fit_to_text(true)
+    m_fit_to_text(true),
+    m_dirty_load(false)
 {
     ValidateFormat();
     SetText(str);
@@ -81,7 +85,8 @@ TextControl::TextControl(int x, int y, const std::string& str, const std::string
     m_format(text_fmt),
     m_text_color(color),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_fit_to_text(true)
+    m_fit_to_text(true),
+    m_dirty_load(false)
 {
     ValidateFormat();
     SetText(str);
@@ -124,6 +129,10 @@ Pt TextControl::TextLowerRight() const
 
 bool TextControl::Render()
 {
+    if (m_dirty_load) {
+        SetText(WindowText());
+        m_dirty_load = false;
+    }
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor4ubv(clr_to_use.v);
     if (m_font)

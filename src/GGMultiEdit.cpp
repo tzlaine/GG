@@ -50,7 +50,8 @@ namespace {
 const int MultiEdit::SCROLL_WIDTH = 14;
 
 MultiEdit::MultiEdit() :
-    Edit()
+    Edit(),
+    m_dirty_load(false)
 {
 }
 
@@ -65,7 +66,8 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const b
     m_first_row_shown(0),
     m_max_lines_history(0),
     m_vscroll(0),
-    m_hscroll(0)
+    m_hscroll(0),
+    m_dirty_load(false)
 {
     SetColor(color);
     Init();
@@ -82,7 +84,8 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const s
     m_first_row_shown(0),
     m_max_lines_history(0),
     m_vscroll(0),
-    m_hscroll(0)
+    m_hscroll(0),
+    m_dirty_load(false)
 {
     SetColor(color);
     Init();
@@ -106,6 +109,10 @@ int MultiEdit::MaxLinesOfHistory() const
 
 bool MultiEdit::Render()
 {
+    if (m_dirty_load) {
+        SetText(WindowText());
+        m_dirty_load = false;
+    }
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
     Clr sel_text_color_to_use = Disabled() ? DisabledColor(SelectedTextColor()) : SelectedTextColor();
@@ -503,7 +510,8 @@ void MultiEdit::SetText(const std::string& str)
 
 void MultiEdit::SetMaxLinesOfHistory(int max)
 {
-    m_max_lines_history = max; SetText(m_text);
+    m_max_lines_history = max;
+    SetText(m_text);
 }
 
 bool MultiEdit::MultiSelected() const

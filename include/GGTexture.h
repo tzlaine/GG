@@ -186,8 +186,6 @@ public:
     //@}
 
 private:
-    void PostLoadTextureHandling();  ///< handles serialization-loaded textures so that they only duplicate the contents of the texture manager if necessary
-
     boost::shared_ptr<const Texture> m_texture;        ///< shared_ptr to texture object with entire image
     int                              m_width;
     int                              m_height;
@@ -306,10 +304,8 @@ void GG::SubTexture::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_height)
         & BOOST_SERIALIZATION_NVP(m_tex_coords);
 
-    if (Archive::is_loading::value) {
+    if (Archive::is_loading::value)
         m_texture = boost::const_pointer_cast<const Texture>(non_const_texture);
-        PostLoadTextureHandling();
-    }
 }
 
 #endif // _GGTexture_h_

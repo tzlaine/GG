@@ -413,6 +413,9 @@ void GG::Wnd::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_layout)
         & BOOST_SERIALIZATION_NVP(m_containing_layout)
         & BOOST_SERIALIZATION_NVP(m_flags);
+
+    if (Archive::is_loading::value)
+        ValidateFlags();
 }
 
 #endif // _GGWnd_h_

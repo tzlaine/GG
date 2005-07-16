@@ -221,7 +221,6 @@ protected:
     const int   m_frame_height;    ///< the height of each frame 
 
 private:
-    void PostLoadTextureHandling();  ///< handles serialization-loaded textures so that they only duplicate the contents of the texture manager if necessary
     void ValidateStyle();            ///< ensures that the style flags are consistent
 
     std::vector<FrameSet> m_textures;///< shared_ptrs to texture objects with all animation frames
@@ -284,7 +283,7 @@ void GG::DynamicGraphic::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_style);
 
     if (Archive::is_loading::value)
-        PostLoadTextureHandling();
+        ValidateStyle();
 }
 
 #endif // _GGDynamicGraphic_h_

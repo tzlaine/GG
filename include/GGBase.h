@@ -892,6 +892,29 @@ GG_ENUM_MAP_END
 GG_ENUM_STREAM_IN(Mod)
 GG_ENUM_STREAM_OUT(Mod)
 
+
+/** Translates a printable key combination from a keypad press to the equivalent main-keyboard press.  \a key is \a only
+    modified if it is a keypad value, and numlock is taken into account.  For instance, with numlock on, a GGK_KP7
+    (which is equal to a nonprintable char value) becomes a GGK_7 (which equals '7', and is printable). */
+inline void KeypadKeyToPrintable(Key& key, Uint32 key_mods)
+{
+    if (GGK_KP0 <= key && key <= GGK_KP9 && (key_mods & GGKMOD_NUM)) {
+        key = Key(GGK_0 + (key - GGK_KP0));
+    } else {
+        switch (key) {
+        case GGK_KP_PERIOD:
+            if (key_mods & GGKMOD_NUM) key = GGK_PERIOD;
+            break;
+        case GGK_KP_DIVIDE:   key = GGK_SLASH;    break;
+        case GGK_KP_MULTIPLY: key = GGK_ASTERISK; break;
+        case GGK_KP_MINUS:    key = GGK_MINUS;    break;
+        case GGK_KP_PLUS:     key = GGK_PLUS;     break;
+        case GGK_KP_EQUALS:   key = GGK_EQUALS;   break;
+        default: break;
+        }
+    }
+}
+
 } // namespace GG
 
 #endif // _GGBase_h_

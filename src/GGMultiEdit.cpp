@@ -381,7 +381,8 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
 
             default: {
                 // only process it if it's a printable character, and no significant modifiers are in use
-                if (isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
+                KeypadKeyToPrintable(key, key_mods);
+                if (key < GGK_DELETE && isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
                     if (MultiSelected())
                         ClearSelected();
                     // insert the character to the right of the caret

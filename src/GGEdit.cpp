@@ -272,9 +272,16 @@ void Edit::Keypress(Key key, Uint32 key_mods)
             }
             AdjustView();
             break;
+        case GGK_RETURN:
+        case GGK_KP_ENTER:
+            FocusUpdateSignal(WindowText());
+            if (Parent())
+                Parent()->Keypress(key, key_mods);
+            break;
         default:
             // only process it if it's a printable character, and no significant modifiers are in use
-            if (isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
+            KeypadKeyToPrintable(key, key_mods);
+            if (key < GGK_DELETE && isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
                 if (MultiSelected())
                     ClearSelected();
                 Insert(m_cursor_pos.first, key);                // insert character after caret

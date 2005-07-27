@@ -36,8 +36,6 @@
 #include "GGTextControl.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 /** This is a basic button control.  Has three states: BN_UNPRESSED, BN_PRESSED, and BN_ROLLOVER.  BN_ROLLOVER is when
@@ -95,6 +93,8 @@ public:
     void           SetUnpressedGraphic(const SubTexture& st); ///< sets the SubTexture to be used as the image of the button when unpressed
     void           SetPressedGraphic(const SubTexture& st);   ///< sets the SubTexture to be used as the image of the button when pressed
     void           SetRolloverGraphic(const SubTexture& st);  ///< sets the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -182,6 +182,9 @@ public:
     //@}
 
     /** \name Mutators */ //@{
+    virtual bool     Render();
+    virtual void     LClick(const Pt& pt, Uint32 keys);
+
     void             Reset();                 ///< unchecks button
     void             SetCheck(bool b = true); ///< (un)checks button
     virtual void     SetColor(Clr c);         ///< sets the color of the button; does not affect text color
@@ -189,6 +192,8 @@ public:
 
     /** sets the visual style of the button \see StateButtonStyle */
     void             SetStyle(StateButtonStyle bs);
+
+    virtual void     DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -203,11 +208,6 @@ protected:
     int ButtonHt() const; ///< returns the height of the button part of the control
     int TextX() const;    ///< returns the x coordinate of the text part of the control
     int TextY() const;    ///< returns the y coordinate of the text part of the control
-    //@}
-
-    /** \name Mutators */ //@{
-    virtual bool     Render();
-    virtual void     LClick(const Pt& pt, Uint32 keys);
     //@}
 
 private:
@@ -273,6 +273,8 @@ public:
     //@}
 
     /** \name Mutators */ //@{
+    virtual bool Render();
+
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
         currently-checked button index is set to -1. */
     void SetCheck(int idx);
@@ -294,10 +296,6 @@ protected:
     /** \name Accessors */ //@{
     const std::vector<StateButton*>&               Buttons() const;     ///< returns the state buttons in the group
     const std::vector<boost::signals::connection>& Connections() const; ///< returns the connections to the state buttons
-    //@}
-
-    /** \name Mutators */ //@{
-    virtual bool Render();
     //@}
 
 private:

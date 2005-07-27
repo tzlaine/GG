@@ -31,6 +31,10 @@
 #ifndef _GGPluginInterface_h_
 #define _GGPluginInterface_h_
 
+#ifndef _GGApp_h_
+#include  <GGApp.h>
+#endif
+
 #ifndef _GGBase_h_
 #include  <GGBase.h>
 #endif
@@ -57,6 +61,11 @@
 
 #include <string>
 
+namespace boost { namespace archive {
+    class xml_oarchive;
+    class xml_iarchive;
+} }
+
 namespace GG {
 
 class DropDownList;
@@ -74,36 +83,38 @@ class TextControl;
     which in turn allows you to change the styles of the controls in an application without recompiling, or even
     relinking.  While the interface is in an unloaded state, the functions in the interface are all null, and calling
     any of them will crash your app.  Once a plugin has been loaded, all the functions in the interface should be valid
-    (if the plugin author did her job). */
+    (if the plugin author did everything correctly).  The plugin interface also provides Save- and LoadWnd() methods to
+    serialize all types in the GG::Wnd hierarchy.  Note that this means all types, not just the ones added by the
+    plugin; if Wnd is not serializable, none of its descendents are either. */
 class GG_API PluginInterface
 {
 public:
-    typedef const char*             (*PluginNameFn)();
+    typedef const char*         (*PluginNameFn)();
 
-    typedef const char*             (*DefaultFontNameFn)();
-    typedef int                     (*DefaultFontSizeFn)();
+    typedef const char*         (*DefaultFontNameFn)();
+    typedef int                 (*DefaultFontSizeFn)();
 
-    typedef GG::Button*             (*CreateButtonFn)(int, int, int, int, const std::string&, const std::string&, int, GG::Clr, GG::Clr, Uint32);
-    typedef GG::StateButton*        (*CreateStateButtonFn)(int, int, int, int, const std::string&, const std::string&, int, Uint32, 
-                                                           GG::Clr, GG::Clr, GG::Clr, GG::StateButton::StateButtonStyle, int, int, int, int, Uint32);
-    typedef GG::RadioButtonGroup*   (*CreateRadioButtonGroupFn)(int, int);
-    typedef GG::DropDownList*       (*CreateDropDownListFn)(int, int, int, int, int, GG::Clr, GG::Clr, Uint32);
-    typedef GG::DynamicGraphic*     (*CreateDynamicGraphicFn)(int, int, int, int, bool, int, int, int, const boost::shared_ptr<GG::Texture>&, Uint32, int, Uint32);
-    typedef GG::Edit*               (*CreateEditFn)(int, int, int, int, const std::string&, const std::string&, int, GG::Clr, GG::Clr, GG::Clr, Uint32);
-    typedef GG::ListBox*            (*CreateListBoxFn)(int, int, int, int, GG::Clr, GG::Clr, Uint32);
-    typedef GG::MenuBar*            (*CreateMenuBarFn)(int, int, int, const std::string&, int, GG::Clr, GG::Clr, GG::Clr);
-    typedef GG::MultiEdit*          (*CreateMultiEditFn)(int, int, int, int, const std::string&, const std::string&, int, GG::Clr, Uint32, GG::Clr, GG::Clr, Uint32);
-    typedef GG::Scroll*             (*CreateScrollFn)(int, int, int, int, GG::Scroll::Orientation, GG::Clr, GG::Clr, Uint32);
-    typedef GG::Slider*             (*CreateSliderFn)(int, int, int, int, int, int, GG::Slider::Orientation, GG::Slider::LineStyleType, GG::Clr, int, int, Uint32);
-    typedef GG::Spin<int>*          (*CreateIntSpinFn)(int, int, int, int, int, int, int, int, bool, const std::string&, int, GG::Clr, GG::Clr, GG::Clr, Uint32);
-    typedef GG::Spin<double>*       (*CreateDoubleSpinFn)(int, int, int, int, double, double, double, double, bool, const std::string&, int, GG::Clr, GG::Clr, GG::Clr, Uint32);
-    typedef GG::StaticGraphic*      (*CreateStaticGraphicFn)(int, int, int, int, const boost::shared_ptr<GG::Texture>&, Uint32, Uint32);
-    typedef GG::TextControl*        (*CreateTextControlFn)(int, int, int, int, const std::string&, const std::string&, int pts, Uint32, GG::Clr, Uint32);
+    typedef Button*             (*CreateButtonFn)(int, int, int, int, const std::string&, const std::string&, int, Clr, Clr, Uint32);
+    typedef StateButton*        (*CreateStateButtonFn)(int, int, int, int, const std::string&, const std::string&, int, Uint32, 
+                                                       Clr, Clr, Clr, StateButton::StateButtonStyle, int, int, int, int, Uint32);
+    typedef RadioButtonGroup*   (*CreateRadioButtonGroupFn)(int, int);
+    typedef DropDownList*       (*CreateDropDownListFn)(int, int, int, int, int, Clr, Clr, Uint32);
+    typedef DynamicGraphic*     (*CreateDynamicGraphicFn)(int, int, int, int, bool, int, int, int, const boost::shared_ptr<Texture>&, Uint32, int, Uint32);
+    typedef Edit*               (*CreateEditFn)(int, int, int, int, const std::string&, const std::string&, int, Clr, Clr, Clr, Uint32);
+    typedef ListBox*            (*CreateListBoxFn)(int, int, int, int, Clr, Clr, Uint32);
+    typedef MenuBar*            (*CreateMenuBarFn)(int, int, int, const std::string&, int, Clr, Clr, Clr);
+    typedef MultiEdit*          (*CreateMultiEditFn)(int, int, int, int, const std::string&, const std::string&, int, Clr, Uint32, Clr, Clr, Uint32);
+    typedef Scroll*             (*CreateScrollFn)(int, int, int, int, Scroll::Orientation, Clr, Clr, Uint32);
+    typedef Slider*             (*CreateSliderFn)(int, int, int, int, int, int, Slider::Orientation, Slider::LineStyleType, Clr, int, int, Uint32);
+    typedef Spin<int>*          (*CreateIntSpinFn)(int, int, int, int, int, int, int, int, bool, const std::string&, int, Clr, Clr, Clr, Uint32);
+    typedef Spin<double>*       (*CreateDoubleSpinFn)(int, int, int, int, double, double, double, double, bool, const std::string&, int, Clr, Clr, Clr, Uint32);
+    typedef StaticGraphic*      (*CreateStaticGraphicFn)(int, int, int, int, const boost::shared_ptr<Texture>&, Uint32, Uint32);
+    typedef TextControl*        (*CreateTextControlFn)(int, int, int, int, const std::string&, const std::string&, int pts, Uint32, Clr, Uint32);
 
-    typedef void                    (*DestroyControlFn)(GG::Wnd*);
+    typedef void                (*DestroyControlFn)(Wnd*);
 
-    typedef const std::map<std::string, std::string>& 
-                                    (*FactoryGeneratorNamesFn)();
+    typedef App::SaveWndFn      SaveWndFn;
+    typedef App::LoadWndFn      LoadWndFn;
 
     /** \name Structors */ //@{
     PluginInterface(); ///< default ctor.
@@ -131,27 +142,37 @@ public:
     DefaultFontNameFn           DefaultFontName;        ///< returns the default font name that should be used to create controls using this plugin.
     DefaultFontSizeFn           DefaultFontSize;        ///< returns the default font point size that should be used to create controls using this plugin.
 
-    CreateButtonFn              CreateButton;           ///< returns a new GG::Button, or an instance of a plugin-specific subclass of GG::Button.
-    CreateStateButtonFn         CreateStateButton;      ///< returns a new GG::StateButton, or an instance of a plugin-specific subclass of GG::StateButton.
-    CreateRadioButtonGroupFn    CreateRadioButtonGroup; ///< returns a new GG::DropDownList, or an instance of a plugin-specific subclass of GG::DropDownList.
-    CreateDropDownListFn        CreateDropDownList;     ///< returns a new GG::DropDownList, or an instance of a plugin-specific subclass of GG::DropDownList.
-    CreateDynamicGraphicFn      CreateDynamicGraphic;   ///< returns a new GG::DynamicGraphic, or an instance of a plugin-specific subclass of GG::DynamicGraphic.
-    CreateEditFn                CreateEdit;             ///< returns a new GG::Edit, or an instance of a plugin-specific subclass of GG::Edit.
-    CreateListBoxFn             CreateListBox;          ///< returns a new GG::ListBox, or an instance of a plugin-specific subclass of GG::ListBox.
-    CreateMenuBarFn             CreateMenuBar;          ///< returns a new GG::MenuBar, or an instance of a plugin-specific subclass of GG::MenuBar.
-    CreateMultiEditFn           CreateMultiEdit;        ///< returns a new GG::MultiEdit, or an instance of a plugin-specific subclass of GG::MultiEdit.
-    CreateScrollFn              CreateScroll;           ///< returns a new GG::Scroll, or an instance of a plugin-specific subclass of GG::Scroll.
-    CreateSliderFn              CreateSlider;           ///< returns a new GG::Slider, or an instance of a plugin-specific subclass of GG::Slider.
-    CreateIntSpinFn             CreateIntSpin;          ///< returns a new GG::Spin<int>, or an instance of a plugin-specific subclass of GG::Spin<int>.
-    CreateDoubleSpinFn          CreateDoubleSpin;       ///< returns a new GG::Spin<double>, or an instance of a plugin-specific subclass of GG::Spin<double>.
-    CreateStaticGraphicFn       CreateStaticGraphic;    ///< returns a new GG::StaticGraphic, or an instance of a plugin-specific subclass of GG::StaticGraphic.
-    CreateTextControlFn         CreateTextControl;      ///< returns a new GG::TextControl, or an instance of a plugin-specific subclass of GG::TextControl.
+    CreateButtonFn              CreateButton;           ///< returns a new Button, or an instance of a plugin-specific subclass of Button.
+    CreateStateButtonFn         CreateStateButton;      ///< returns a new StateButton, or an instance of a plugin-specific subclass of StateButton.
+    CreateRadioButtonGroupFn    CreateRadioButtonGroup; ///< returns a new DropDownList, or an instance of a plugin-specific subclass of DropDownList.
+    CreateDropDownListFn        CreateDropDownList;     ///< returns a new DropDownList, or an instance of a plugin-specific subclass of DropDownList.
+    CreateDynamicGraphicFn      CreateDynamicGraphic;   ///< returns a new DynamicGraphic, or an instance of a plugin-specific subclass of DynamicGraphic.
+    CreateEditFn                CreateEdit;             ///< returns a new Edit, or an instance of a plugin-specific subclass of Edit.
+    CreateListBoxFn             CreateListBox;          ///< returns a new ListBox, or an instance of a plugin-specific subclass of ListBox.
+    CreateMenuBarFn             CreateMenuBar;          ///< returns a new MenuBar, or an instance of a plugin-specific subclass of MenuBar.
+    CreateMultiEditFn           CreateMultiEdit;        ///< returns a new MultiEdit, or an instance of a plugin-specific subclass of MultiEdit.
+    CreateScrollFn              CreateScroll;           ///< returns a new Scroll, or an instance of a plugin-specific subclass of Scroll.
+    CreateSliderFn              CreateSlider;           ///< returns a new Slider, or an instance of a plugin-specific subclass of Slider.
+    CreateIntSpinFn             CreateIntSpin;          ///< returns a new Spin<int>, or an instance of a plugin-specific subclass of Spin<int>.
+    CreateDoubleSpinFn          CreateDoubleSpin;       ///< returns a new Spin<double>, or an instance of a plugin-specific subclass of Spin<double>.
+    CreateStaticGraphicFn       CreateStaticGraphic;    ///< returns a new StaticGraphic, or an instance of a plugin-specific subclass of StaticGraphic.
+    CreateTextControlFn         CreateTextControl;      ///< returns a new TextControl, or an instance of a plugin-specific subclass of TextControl.
 
-    DestroyControlFn            DestroyControl;         ///< destroys a new GG::Control-derived created by the plugin.
+    DestroyControlFn            DestroyControl;         ///< destroys a new Control-derived created by the plugin.
+
+    SaveWndFn                   SaveWnd;                ///< serializes a Wnd to the given XML archive.
+    LoadWndFn                   LoadWnd;                ///< creates a new Wnd from the next one found in the given XML archive.
+
+    /** Since LoadWnd() will only accept a referemce to a Wnd*, this method is provided to more conveniently accept
+        Wnd subclass pointers.  It unfortunately cannot overload the name of LoadWnd, which is a data member. */
+    template <class T>
+    void LoadWndT(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
     //@}
 
 private:
     lt_dlhandle m_handle;
+    boost::archive::xml_oarchive* m_out_archive;
+    boost::archive::xml_iarchive* m_in_archive;
 };
 
 /** this singleton class is essentially a very thin wrapper around a map of PluginInterface smart pointers, keyed on
@@ -169,7 +190,7 @@ public:
 
     /** removes the manager's shared_ptr to the plugin created from file \a name, if it exists.  \note Due to shared_ptr semantics, 
         the plugin may not be deleted until much later. */
-    void                FreePlugin(const std::string& name);
+    void FreePlugin(const std::string& name);
     //@}
 
     /** initializes the dynamic loader system that loads and unloads plugins.  This is available as a convenience only; it will be called 
@@ -189,6 +210,16 @@ private:
     static bool s_created;
     static bool s_lt_dl_initialized;
 };
+
+// template implementations
+template <class T>
+void PluginInterface::LoadWndT(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+{
+    Wnd* wnd_as_base = wnd;
+    LoadWnd(wnd_as_base, name, ar);
+    wnd = dynamic_cast<T*>(wnd_as_base);
+    assert(wnd);
+}
 
 } // namespace GG
 

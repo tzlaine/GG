@@ -394,10 +394,12 @@ void GG::Font::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_glyph_range);
 
     if (Archive::is_loading::value) {
-        try {
-            Init(m_font_filename, m_pt_sz, m_glyph_range);
-        } catch (const FontException& e) {
-            // take no action; the Font must have been uninitialized when saved
+        if (!m_font_filename.empty() && 0 < m_pt_sz) {
+            try {
+                Init(m_font_filename, m_pt_sz, m_glyph_range);
+            } catch (const FontException& e) {
+                // take no action; the Font must have been uninitialized when saved
+            }
         }
     }
 }

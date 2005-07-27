@@ -29,6 +29,7 @@
 #include <GGApp.h>
 #include <GGButton.h>
 #include <GGDrawUtil.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -291,6 +292,21 @@ void Slider::SlideTo(int p)
 void Slider::SetLineStyle(LineStyleType style)
 {
     m_line_style = style;
+}
+
+void Slider::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("Slider");
+    editor->Attribute("Position", m_posn);
+    editor->Attribute("Range Min", m_range_min);
+    editor->Attribute("Range Max", m_range_max);
+    editor->Attribute("Line Width", m_line_width);
+    editor->Attribute("Tab Width", m_tab_width);
+    editor->Attribute("Line Style", m_line_style,
+                      FLAT, GROOVED);
 }
 
 int Slider::TabDragOffset() const

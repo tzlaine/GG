@@ -32,23 +32,25 @@
 #ifndef _GGSpin_h_
 #define _GGSpin_h_
 
-#ifndef _GGEdit_h_
-#include <GGEdit.h>
+#ifndef _GGApp_h_
+#include <GGApp.h>
 #endif
 
 #ifndef _GGButton_h_
 #include <GGButton.h>
 #endif
 
-#ifndef _GGApp_h_
-#include <GGApp.h>
-#endif
-
 #ifndef _GGDrawUtil_h_
 #include <GGDrawUtil.h>
 #endif
 
-#include <boost/serialization/access.hpp>
+#ifndef _GGEdit_h_
+#include <GGEdit.h>
+#endif
+
+#ifndef _GGWndEditor_h_
+#include <GGWndEditor.h>
+#endif
 
 #include <cmath>
 #include <limits>
@@ -168,6 +170,8 @@ public:
     void           SetInteriorColor(Clr c);      ///< sets the interior color of the control
     void           SetHiliteColor(Clr c);        ///< sets the color used to render hiliting around selected text
     void           SetSelectedTextColor(Clr c);  ///< sets the color used to render selected text   
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -588,6 +592,25 @@ template<class T>
 void Spin<T>::SetSelectedTextColor(Clr c)
 {
     m_edit->SetSelectedTextColor(c);
+}
+
+template<class T>
+void Spin<T>::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    if (boost::is_same<T, int>::value)
+        editor->Label("Spin<int>");
+    else if (boost::is_same<T, double>::value)
+        editor->Label("Spin<double>");
+    else
+        editor->Label("Spin<T>");
+    editor->Attribute("Value", m_value);
+    editor->Attribute("Step Size", m_step_size);
+    editor->Attribute("Min Value", m_min_value);
+    editor->Attribute("Max Value", m_max_value);
+    editor->Attribute("Editable", m_editable);
 }
 
 template<class T>

@@ -41,12 +41,16 @@ using namespace GG;
 // class GG::PluginInterface
 ///////////////////////////////////////
 PluginInterface::PluginInterface() : 
-    m_handle(0) 
+    m_handle(0),
+    m_out_archive(0),
+    m_in_archive(0)
 {
 }
 
 PluginInterface::PluginInterface(const std::string& lib_name) : 
-    m_handle(0) 
+    m_handle(0),
+    m_out_archive(0),
+    m_in_archive(0)
 {
     Load(lib_name);
 }
@@ -78,6 +82,8 @@ PluginInterface::~PluginInterface()
         CreateStaticGraphic = 0;
         CreateTextControl = 0;
         DestroyControl = 0;
+        SaveWnd = 0;
+        LoadWnd = 0;
 
         lt_dlclose(m_handle);
         m_handle = 0;
@@ -132,6 +138,8 @@ bool PluginInterface::Load(const std::string& lib_name)
             CreateStaticGraphic = (CreateStaticGraphicFn)(lt_dlsym(m_handle, "CreateStaticGraphic"));
             CreateTextControl = (CreateTextControlFn)(lt_dlsym(m_handle, "CreateTextControl"));
             DestroyControl = (DestroyControlFn)(lt_dlsym(m_handle, "DestroyControl"));
+            SaveWnd = (SaveWndFn)(lt_dlsym(m_handle, "SaveWnd"));
+            LoadWnd = (LoadWndFn)(lt_dlsym(m_handle, "LoadWnd"));
         } else {
             retval = false;
             GG::App::GetApp()->Logger().errorStream() 
@@ -140,6 +148,7 @@ bool PluginInterface::Load(const std::string& lib_name)
     }
     return retval;
 }
+
 
 ///////////////////////////////////////
 // class GG::PluginManager

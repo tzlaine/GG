@@ -27,8 +27,9 @@
 #include "GGMenu.h"
 
 #include <GGApp.h>
-#include <GGTextControl.h>
 #include <GGDrawUtil.h>
+#include <GGTextControl.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -322,6 +323,21 @@ void MenuBar::SetHiliteColor(Clr clr)
 void MenuBar::SetSelectedTextColor(Clr clr)
 {
     m_sel_text_color = clr;
+}
+
+void MenuBar::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("MenuBar");
+    editor->Attribute("Font", m_font);
+    editor->Attribute("Border Color", m_border_color);
+    editor->Attribute("Interior Color", m_int_color);
+    editor->Attribute("Text Color", m_text_color);
+    editor->Attribute("Highlighting Color", m_hilite_color);
+    editor->Attribute("Selected Text Color", m_sel_text_color);
+    // TODO: handle assigning menu items
 }
 
 const boost::shared_ptr<Font>& MenuBar::GetFont() const

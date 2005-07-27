@@ -35,8 +35,6 @@
 #include "GGTextControl.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 /** This is a single-line text input control.  This is a simple edit box control.  It inherits from TextControl, so it
@@ -108,6 +106,8 @@ public:
     virtual void   SelectAll();
 
     virtual void   SetText(const std::string& str);
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
    
 protected:
@@ -118,7 +118,7 @@ protected:
     /** \name Accessors */ //@{
     virtual bool            MultiSelected() const;          ///< returns true if >= 1 characters selected
     int                     FirstCharShown() const;         ///< returns the index of the first character visible in the Edit
-    const std::string&      PreviousText() const;           ///< returns the text that was in the edit at the time of the last focus gain
+    bool                    RecentlyEdited() const;         ///< returns true iff the contents have been changed since the last time the focus was gained
     int                     CharIndexOf(int x) const;       ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
     int                     FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
     int                     ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
@@ -140,7 +140,7 @@ private:
     Clr         m_hilite_color;     ///< color behind selected range
     Clr         m_sel_text_color;   ///< color of selected text
 
-    std::string m_previous_text;    ///< the contents when the focus was last gained
+    bool        m_recently_edited;  ///< the contents when the focus was last gained
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -158,8 +158,7 @@ void GG::Edit::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_first_char_shown)
         & BOOST_SERIALIZATION_NVP(m_int_color)
         & BOOST_SERIALIZATION_NVP(m_hilite_color)
-        & BOOST_SERIALIZATION_NVP(m_sel_text_color)
-        & BOOST_SERIALIZATION_NVP(m_previous_text);
+        & BOOST_SERIALIZATION_NVP(m_sel_text_color);
 }
 
 #endif // _GGEdit_h_

@@ -43,10 +43,16 @@
 #include <log4cpp/Category.hh>
 #endif
 
+namespace boost { namespace archive {
+    class xml_oarchive;
+    class xml_iarchive;
+} }
+
 namespace GG {
 
 class Wnd;
 class EventPumpBase;
+class PluginInterface;
 class Texture;
 struct AppImplData;
 
@@ -126,6 +132,9 @@ public:
 
     typedef std::set<std::pair<Key, Uint32> >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
 
+    typedef void (*SaveWndFn)(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
+    typedef void (*LoadWndFn)(GG::Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
+
     /** \name Structors */ //@{
     virtual ~App(); ///< virtual dtor
     //@}
@@ -198,7 +207,26 @@ public:
     boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
 
-    log4cpp::Category&  Logger();
+    /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw std::runtime_error Throws
+        std::runtime_error if no Wnd-serializing function has ben defined by the user using SetSaveWndFunction(). */
+    void SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
+
+    /** loads \a wnd, with the xml tag \a name, from the archive \a ar.  \throw std::runtime_error Throws
+        std::runtime_error if no Wnd-serializing function has ben defined by the user using SetLoadWndFunction(). */
+    void LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
+
+    /** Since LoadWnd() will only accept a referemce to a GG::Wnd*, this method is provided to more conveniently accept
+        pointers to Wnd subclasses. */
+    template <class T>
+    void LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
+
+    void SetSaveWndFunction(SaveWndFn fn); ///< sets \a fn to be the function invoked when SaveWnd() is called.
+    void SetLoadWndFunction(LoadWndFn fn); ///< sets \a fn to be the function invoked when LoadWnd() is called.
+
+    /** sets all the SaveWnd() and LoadWnd() function pointers to be the functions provided by \a interface. */
+    void SetSaveLoadFunctions(const PluginInterface& interface);
+
+    log4cpp::Category& Logger();
     //@}
 
     static App*  GetApp();                ///< allows any GG code access to app framework by calling App::GetApp()
@@ -230,16 +258,25 @@ private:
     friend class EventPumpBase; ///< allows EventPumpBase types to drive App
 };
 
-} // namespace GG
-
 // template implementations
 template<class InIt> 
-bool GG::App::OrCombiner::operator()(InIt first, InIt last) const
+bool App::OrCombiner::operator()(InIt first, InIt last) const
 {
     bool retval = false;
     while (first != last)
         retval |= static_cast<bool>(*first++);
     return retval;
 }
+
+template <class T>
+void App::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+{
+    Wnd* wnd_as_base = wnd;
+    LoadWnd(wnd_as_base, name, ar);
+    wnd = dynamic_cast<T*>(wnd_as_base);
+    assert(wnd);
+}
+
+} // namespace GG
 
 #endif // _GGApp_h_

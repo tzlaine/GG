@@ -35,7 +35,6 @@
 #include "GGWnd.h"
 #endif
 
-#include <boost/serialization/access.hpp>
 #include <boost/serialization/is_abstract.hpp>
 
 namespace GG {
@@ -49,17 +48,19 @@ class GG_API Control : public Wnd
 {
 public:
     /** \name Accessors */ //@{
-    Clr            Color() const    {return m_color;}    ///< returns the color of the control
-    bool           Disabled() const {return m_disabled;} ///< returns true if the control is disabled, false otherwise
+    Clr            Color() const;    ///< returns the color of the control
+    bool           Disabled() const; ///< returns true if the control is disabled, false otherwise
     //@}
 
     /** \name Mutators */ //@{
     virtual bool   Render() = 0;
-    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys) {if (Parent()) Parent()->MouseWheel(pt, move, keys);}
-    virtual void   Keypress(Key key, Uint32 key_mods)              {if (Parent()) Parent()->Keypress(key, key_mods);}
+    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
+    virtual void   Keypress(Key key, Uint32 key_mods);
 
-    virtual void   SetColor(Clr c)        {m_color = c;}    ///< sets the color of the control
-    virtual void   Disable(bool b = true) {m_disabled = b;} ///< disables/enables the control; disabled controls appear greyed
+    virtual void   SetColor(Clr c);        ///< sets the color of the control
+    virtual void   Disable(bool b = true); ///< disables/enables the control; disabled controls appear greyed
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

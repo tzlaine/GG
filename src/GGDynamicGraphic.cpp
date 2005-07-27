@@ -28,9 +28,10 @@
 
 #include "GGDynamicGraphic.h"
 
-#include <GGTexture.h>
-#include <GGDrawUtil.h>
 #include <GGApp.h>
+#include <GGDrawUtil.h>
+#include <GGTexture.h>
+#include <GGWndEditor.h>
 
 #include <cmath>
 
@@ -543,6 +544,28 @@ void DynamicGraphic::SetStyle(Uint32 style)
 {
     m_style = style;
     ValidateStyle();
+}
+
+void DynamicGraphic::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("DynamicGraphic");
+    editor->Attribute("Frame Margin", const_cast<int&>(m_margin));
+    editor->Attribute("Frame Width", const_cast<int&>(m_frame_width));
+    editor->Attribute("Frame Height", const_cast<int&>(m_frame_height));
+    // TODO: handle setting frame(s)
+    editor->Attribute("Frames Per Second", m_FPS);
+    editor->Attribute("Playing", m_playing);
+    editor->Attribute("Looping", m_looping);
+    editor->BeginFlags(m_style);
+    editor->FlagGroup("V. Alignment", GR_VCENTER, GR_BOTTOM);
+    editor->FlagGroup("H. Alignment", GR_CENTER, GR_RIGHT);
+    editor->Flag("Fit Graphic to Size", GR_FITGRAPHIC);
+    editor->Flag("Shrink-to-Fit", GR_SHRINKFIT);
+    editor->Flag("Proportional Scaling", GR_PROPSCALE);
+    editor->EndFlags();
 }
 
 int DynamicGraphic::FramesInTexture(const Texture* t) const

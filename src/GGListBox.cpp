@@ -27,10 +27,11 @@
 #include "GGListBox.h"
 
 #include <GGApp.h>
-#include <GGScroll.h>
-#include <GGTextControl.h>
-#include <GGStaticGraphic.h>
 #include <GGDrawUtil.h>
+#include <GGScroll.h>
+#include <GGStaticGraphic.h>
+#include <GGTextControl.h>
+#include <GGWndEditor.h>
 
 #include <cmath>
 #include <numeric>
@@ -75,8 +76,7 @@ ListBox::Row::Row() :
     row_alignment(LB_VCENTER),
     indentation(0),
     margin(2)
-{
-}
+{}
 
 ListBox::Row::Row(const std::string& data, int ht, ListBoxStyle align/* = LB_VCENTER*/, int indent/* = 0*/, int margin_/* = 2*/) : 
     data_type(data),
@@ -84,8 +84,7 @@ ListBox::Row::Row(const std::string& data, int ht, ListBoxStyle align/* = LB_VCE
     row_alignment(align),
     indentation(indent),
     margin(margin_)
-{
-}
+{}
 
 ListBox::Row::~Row()
 {}
@@ -237,8 +236,7 @@ const int ListBox::BORDER_THICK = 2;
 
 ListBox::ListBox() :
     Control()
-{
-}
+{}
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
                  Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
@@ -301,8 +299,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const std::vector<int>& 
 }
 
 ListBox::~ListBox()
-{
-}
+{}
 
 Pt ListBox::ClientUpperLeft() const
 {
@@ -1051,6 +1048,37 @@ void ListBox::AllowDropType(const std::string& str)
 void ListBox::DisallowDropType(const std::string& str)  
 {
     m_allowed_types.erase(str);
+}
+
+void ListBox::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("ListBox");
+    // TODO: handle specifying column widths and alignments
+    editor->Attribute("Cell Margin", m_cell_margin);
+    editor->Attribute("Interior Color", m_int_color);
+    editor->Attribute("Highlighting Color", m_hilite_color);
+    editor->BeginFlags(m_style);
+    editor->FlagGroup("V. Alignment", LB_VCENTER, LB_BOTTOM);
+    editor->FlagGroup("H. Alignment", LB_CENTER, LB_RIGHT);
+    editor->Flag("Don not Sort", LB_NOSORT);
+    editor->Flag("Sort Descending", LB_SORTDESCENDING);
+    editor->Flag("No Selections", LB_NOSEL);
+    editor->Flag("Single-Selection", LB_SINGLESEL);
+    editor->Flag("Quick-Selection", LB_QUICKSEL);
+    editor->Flag("Drag-and-Drop", LB_DRAGDROP);
+    editor->Flag("User Deletions", LB_USERDELETE);
+    editor->Flag("Browse Updates", LB_BROWSEUPDATES);
+    editor->EndFlags();
+    // TODO: handle setting header row
+    editor->Attribute("Row Height", m_row_height);
+    editor->Attribute("Keep Column Widths", m_keep_col_widths);
+    editor->Attribute("Clip Cells", m_clip_cells);
+    editor->Attribute("Sort Column", m_sort_col,
+                      0, static_cast<int>(m_col_widths.size()));
+    // TODO: handle specifying allowed types
 }
 
 int ListBox::RightMargin() const

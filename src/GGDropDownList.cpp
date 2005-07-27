@@ -26,9 +26,10 @@
 
 #include "GGDropDownList.h"
 
-#include <GGScroll.h>
 #include <GGApp.h>
 #include <GGDrawUtil.h>
+#include <GGScroll.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -39,17 +40,26 @@ namespace {
     {
     public:
         ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-            Wnd(0, 0, GG::App::GetApp()->AppWidth() - 1, GG::App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+            Wnd(0, 0, GG::App::GetApp()->AppWidth(), GG::App::GetApp()->AppHeight(), CLICKABLE | MODAL),
             m_drop_wnd(drop_wnd),
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
         {
             Connect(m_lb_wnd->SelChangedSignal, &ModalListPicker::LBSelChangedSlot, this);
             Connect(m_lb_wnd->LeftClickedSignal, &ModalListPicker::LBLeftClickSlot, this);
-            m_lb_wnd->OffsetMove(m_drop_wnd->ClientUpperLeft());
+            m_lb_ul = m_old_lb_ul + m_drop_wnd->UpperLeft();
             AttachChild(m_lb_wnd);
         }
-        ~ModalListPicker() {m_lb_wnd->MoveTo(m_old_lb_ul); DetachChild(m_lb_wnd);}
+        virtual bool Render()
+        {
+            m_lb_wnd->MoveTo(m_lb_ul);
+            return true;
+        }
+        ~ModalListPicker()
+        {
+            m_lb_wnd->MoveTo(m_old_lb_ul);
+            DetachChild(m_lb_wnd);
+        }
 
     protected:
         virtual void LClick(const Pt& pt, Uint32 keys) {m_done = true;}
@@ -70,6 +80,7 @@ namespace {
         DropDownList*  m_drop_wnd;
         ListBox*       m_lb_wnd;
         Pt             m_old_lb_ul;
+        Pt             m_lb_ul;
     };
 }
 
@@ -365,6 +376,15 @@ void DropDownList::SetColAlignment(int n, ListBoxStyle align)
 void DropDownList::SetRowAlignment(int n, ListBoxStyle align) 
 {
     m_LB->SetRowAlignment(n, align);
+}
+
+void DropDownList::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("DropDownList");
+    editor->Attribute("Current Item", m_current_item_idx);
 }
 
 ListBox* DropDownList::LB()

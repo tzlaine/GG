@@ -36,8 +36,6 @@
 #include "GGControl.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 class Button;
@@ -110,6 +108,8 @@ public:
     void           SlideTo(int p); ///< slides the control to a certain spot
 
     void           SetLineStyle(LineStyleType style); ///< returns the style of line used to render the control
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

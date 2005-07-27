@@ -26,6 +26,8 @@
 
 #include "GGLayout.h"
 
+#include <GGWndEditor.h>
+
 #include <cassert>
 #include <cmath>
 
@@ -454,6 +456,17 @@ void Layout::SetMinimumColumnWidth(int column, int width)
     assert(static_cast<unsigned int>(column) < m_column_params.size());
     m_column_params[column].min = width;
     RedoLayout();
+}
+
+void Layout::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Wnd::DefineAttributes(editor);
+    editor->Label("Layout");
+    editor->Attribute("Border Margin", m_border_margin);
+    editor->Attribute("Cell Margin", m_cell_margin);
+    // TODO: handle setting the number of rows and columns
 }
 
 double Layout::TotalStretch(const std::vector<RowColParams>& params_vec) const

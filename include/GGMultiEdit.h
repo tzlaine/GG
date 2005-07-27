@@ -35,8 +35,6 @@
 #include "GGEdit.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 class Scroll;
@@ -105,6 +103,8 @@ public:
 
     /** sets the maximum number of rows of text that the control will keep */
     void           SetMaxLinesOfHistory(int max);
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -154,8 +154,8 @@ private:
 
     Uint32  m_style;
 
-    std::pair<int, int> m_cursor_begin;      ///< the row and character index of the first character in the hilited selection
-    std::pair<int, int> m_cursor_end;        ///< the row and character index + 1 of the last character in the hilited selection
+    std::pair<int, int> m_cursor_begin; ///< the row and character index of the first character in the hilited selection
+    std::pair<int, int> m_cursor_end;   ///< the row and character index + 1 of the last character in the hilited selection
                                         // if m_cursor_begin == m_cursor_end, the caret is draw at m_cursor_end
 
     Pt          m_contents_sz;          ///< the size of the entire text block in the control (not just the visible part)
@@ -171,9 +171,6 @@ private:
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
-    // true iff the ValidateFormat() call in the load-version of serialize() may have left the control in an
-    // inconsistent state; this must be remedied the next time Render() is called
-    bool m_dirty_load;
 };
 
 // define EnumMap and stream operators for MultiEdit::Style
@@ -206,12 +203,8 @@ void GG::MultiEdit::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_vscroll)
         & BOOST_SERIALIZATION_NVP(m_hscroll);
 
-    if (Archive::is_loading::value) {
-        Uint32 old_style = m_style;
+    if (Archive::is_loading::value)
         ValidateStyle();
-        if (m_style != old_style)
-            m_dirty_load = true;
-    }
 }
 
 #endif // _GGMultiEdit_h_

@@ -26,9 +26,10 @@
 
 #include "GGScroll.h"
 
-#include <GGDrawUtil.h>
-#include <GGButton.h>
 #include <GGApp.h>
+#include <GGButton.h>
+#include <GGDrawUtil.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -367,6 +368,20 @@ void Scroll::ScrollPageDecr()
         ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
         ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
+}
+
+void Scroll::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("Scroll");
+    editor->Attribute("Interior Color", m_int_color);
+    editor->Attribute("Position", m_posn);
+    editor->Attribute("Range Min", m_range_min);
+    editor->Attribute("Range Max", m_range_max);
+    editor->Attribute("Line Size", m_line_sz);
+    editor->Attribute("Page Size", m_page_sz);
 }
 
 int Scroll::TabSpace() const

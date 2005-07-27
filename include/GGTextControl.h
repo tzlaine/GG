@@ -39,8 +39,6 @@
 #include "GGFont.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 /** The name says it all.  All TextControl objects know how to center, left- or right-justify, etc. themselves within
@@ -140,6 +138,8 @@ public:
     void  Clear();                            ///< sets text string to ""
     void  Insert(int pos, char ch);           ///< allows access to text string much as a std::string
     void  Erase(int pos, int num = 1);        ///< allows access to text string much as a std::string
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -151,6 +151,7 @@ protected:
     const std::vector<Font::LineData>&  GetLineData() const;
     const boost::shared_ptr<Font>&      GetFont() const;
     bool                                FitToText() const;
+    bool                                DirtyLoad() const;
     //@}
 
 private:
@@ -168,8 +169,8 @@ private:
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
-    // true iff the ValidateFormat() call in the load-version of serialize() may have left the control in an
-    // inconsistent state; this must be remedied the next time Render() is called
+    // true iff the object has just been loaded from a serialized form, meaning changes may have been made that leave
+    // the control in an inconsistent state; this must be remedied the next time Render() is called
     bool m_dirty_load;
 };
 
@@ -211,10 +212,8 @@ void GG::TextControl::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_text_lr);
 
     if (Archive::is_loading::value) {
-        Uint32 old_format = m_format;
         ValidateFormat();
-        if (m_format != old_format)
-            m_dirty_load = true;
+        m_dirty_load = true;
     }
 }
 

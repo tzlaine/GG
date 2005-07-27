@@ -30,7 +30,7 @@
 #include <GGDrawUtil.h>
 #include <GGEventPump.h>
 #include <GGLayout.h>
-#include <XMLValidators.h>
+#include <GGWndEditor.h>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -105,6 +105,30 @@ namespace {
 
     const int DEFAULT_LAYOUT_BORDER_MARGIN = 0;
     const int DEFAULT_LAYOUT_CELL_MARGIN = 5;
+
+    struct WndSizeFunctor
+    {
+        std::string operator()(const Wnd* wnd)
+        {
+            if (!wnd)
+                return "";
+            std::stringstream stream;
+            stream << "(" << wnd->Width() << ", " << wnd->Height() << ")";
+            return stream.str();
+        }
+    };
+
+    struct WndClientSizeFunctor
+    {
+        std::string operator()(const Wnd* wnd)
+        {
+            if (!wnd)
+                return "";
+            std::stringstream stream;
+            stream << "(" << wnd->ClientWidth() << ", " << wnd->ClientHeight() << ")";
+            return stream.str();
+        }
+    };
 
     // an EventPump that terminates when its m_done reference member is true
     class ModalEventPump : public EventPump
@@ -490,10 +514,7 @@ void Wnd::MoveTo(const Pt& pt)
 
 void Wnd::MoveTo(int x, int y)
 {
-    m_lowerright.x = (m_lowerright.x - m_upperleft.x) + x;
-    m_lowerright.y = (m_lowerright.y - m_upperleft.y) + y;
-    m_upperleft.x = x;
-    m_upperleft.y = y;
+    SizeMove(x, y, x + (m_lowerright.x - m_upperleft.x), y + (m_lowerright.y - m_upperleft.y));
 }
 
 void Wnd::OffsetMove(const Pt& pt)
@@ -514,42 +535,47 @@ void Wnd::SizeMove(const Pt& ul, const Pt& lr)
 void Wnd::SizeMove(int x1, int y1, int x2, int y2)
 {
     Pt original_sz = Size();
-    Pt min_sz = MinSize();
-    Pt max_sz = MaxSize();
-    if (m_layout) {
-        Pt layout_min_sz = m_layout->MinSize() + (Size() - ClientSize());
-        min_sz.x = std::max(min_sz.x, layout_min_sz.x);
-        min_sz.y = std::max(min_sz.y, layout_min_sz.y);
-    }
-    if (x2 - x1 < min_sz.x) {
-        if (x1 != m_upperleft.x)
-            x1 = x2 - min_sz.x;
-        else if (x2 != m_lowerright.x)
-            x2 = x1 + min_sz.x;
-    } else if (max_sz.x < x2 - x1) {
-        if (x2 != m_lowerright.x)
-            x2 = x1 + max_sz.x;
-        else
-            x1 = x2 - max_sz.x;
-    }
-    if (y2 - y1 < min_sz.y) {
-        if (y1 != m_upperleft.y)
-            y1 = y2 - min_sz.y;
-        else if (y2 != m_lowerright.y)
-            y2 = y1 + min_sz.y;
-    } else if (max_sz.y < y2 - y1) {
-        if (y2 != m_lowerright.y)
-            y2 = y1 + max_sz.y;
-        else
-            y1 = y2 - max_sz.y;
+    bool resize_move = (original_sz.x != (x2 - x1)) || (original_sz.y != (y2 - y1));
+    if (resize_move) {
+        Pt min_sz = MinSize();
+        Pt max_sz = MaxSize();
+        if (m_layout) {
+            Pt layout_min_sz = m_layout->MinSize() + (Size() - ClientSize());
+            min_sz.x = std::max(min_sz.x, layout_min_sz.x);
+            min_sz.y = std::max(min_sz.y, layout_min_sz.y);
+        }
+        if (x2 - x1 < min_sz.x) {
+            if (x1 != m_upperleft.x)
+                x1 = x2 - min_sz.x;
+            else if (x2 != m_lowerright.x)
+                x2 = x1 + min_sz.x;
+        } else if (max_sz.x < x2 - x1) {
+            if (x2 != m_lowerright.x)
+                x2 = x1 + max_sz.x;
+            else
+                x1 = x2 - max_sz.x;
+        }
+        if (y2 - y1 < min_sz.y) {
+            if (y1 != m_upperleft.y)
+                y1 = y2 - min_sz.y;
+            else if (y2 != m_lowerright.y)
+                y2 = y1 + min_sz.y;
+        } else if (max_sz.y < y2 - y1) {
+            if (y2 != m_lowerright.y)
+                y2 = y1 + max_sz.y;
+            else
+                y1 = y2 - max_sz.y;
+        }
     }
     m_upperleft = Pt(x1, y1);
     m_lowerright = Pt(x2, y2);
-    bool size_changed = Size() != original_sz;
-    if (m_layout && size_changed)
-        m_layout->Resize(ClientSize());
-    if (m_containing_layout && size_changed && !dynamic_cast<Layout*>(this))
-        m_containing_layout->ChildSizeOrMinSizeOrMaxSizeChanged();
+    if (resize_move) {
+        bool size_changed = Size() != original_sz;
+        if (m_layout && size_changed)
+            m_layout->Resize(ClientSize());
+        if (m_containing_layout && size_changed && !dynamic_cast<Layout*>(this))
+            m_containing_layout->ChildSizeOrMinSizeOrMaxSizeChanged();
+    }
 }
 
 void Wnd::Resize(const Pt& sz)
@@ -921,6 +947,29 @@ int Wnd::Run()
         retval = 1;
     }
     return retval;
+}
+
+void Wnd::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    editor->Label("Wnd");
+    editor->Attribute("Window Text", m_text);
+    editor->ConstAttribute("Upper Left", m_upperleft);
+    editor->ConstAttribute("Lower Right", m_lowerright);
+    editor->CustomDisplay("Size", WndSizeFunctor());
+    editor->CustomDisplay("Client Size", WndClientSizeFunctor());
+    editor->Attribute("Min Size", m_min_size);
+    editor->Attribute("Max Size", m_max_size);
+    editor->Attribute("Clip Children", m_clip_children);
+    editor->BeginFlags(m_flags);
+    editor->Flag("Clickable", CLICKABLE);
+    editor->Flag("Dragable", DRAGABLE);
+    editor->Flag("Drag Keeper", DRAG_KEEPER);
+    editor->Flag("Resizable", RESIZABLE);
+    editor->Flag("Ontop", ONTOP);
+    editor->Flag("Modal", MODAL);
+    editor->EndFlags();
 }
 
 const std::list<Wnd*>& Wnd::Children() const

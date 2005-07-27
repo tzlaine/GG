@@ -43,6 +43,7 @@
 namespace GG {
 
 class Layout;
+class WndEditor;
 
 /** This is the basic GG window class.
 
@@ -269,6 +270,10 @@ public:
     /** this executes a modal window and gives it its modality.  For non-modal windows, this function is a no-op.
         It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
     virtual int    Run();
+
+    /** provides the attributes of this object that are appropriate for a user to edit in a WndEditor; see WndEditor for
+        details. */
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

@@ -1,3 +1,8 @@
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/vector.hpp>
+
 #include "saveload.h"
 
 #include "serialization.h"
@@ -16,11 +21,6 @@
 #include "GGStaticGraphic.h"
 #include "GGFileDlg.h"
 #include "GGThreeButtonDlg.h"
-
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/vector.hpp>
 
 #include <fstream>
 

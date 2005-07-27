@@ -36,6 +36,7 @@
 #include "GGBase.h"
 #endif
 
+#include <boost/serialization/access.hpp>
 #include <boost/serialization/binary_object.hpp>
 
 namespace GG {

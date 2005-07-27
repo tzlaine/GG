@@ -37,8 +37,6 @@
 #include "GGControl.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 class Texture;
 
@@ -187,6 +185,8 @@ public:
 
     /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
     void  SetStyle(Uint32 style);
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

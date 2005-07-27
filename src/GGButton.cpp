@@ -28,6 +28,7 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
+#include <GGWndEditor.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -75,21 +76,6 @@ const SubTexture& Button::PressedGraphic() const
 const SubTexture& Button::RolloverGraphic() const
 {
     return m_rollover_graphic;
-}
-
-void Button::SetUnpressedGraphic(const SubTexture& st)
-{
-    m_unpressed_graphic = st;
-}
-
-void Button::SetPressedGraphic(const SubTexture& st)
-{
-    m_pressed_graphic = st;
-}
-
-void Button::SetRolloverGraphic(const SubTexture& st)
-{
-    m_rollover_graphic = st;
 }
 
 bool Button::Render()
@@ -156,6 +142,29 @@ void Button::SetColor(Clr c)
 void Button::SetState(ButtonState state)
 {
     m_state = state;
+}
+
+void Button::SetUnpressedGraphic(const SubTexture& st)
+{
+    m_unpressed_graphic = st;
+}
+
+void Button::SetPressedGraphic(const SubTexture& st)
+{
+    m_pressed_graphic = st;
+}
+
+void Button::SetRolloverGraphic(const SubTexture& st)
+{
+    m_rollover_graphic = st;
+}
+
+void Button::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    TextControl::DefineAttributes(editor);
+    // TODO: handle setting graphics
 }
 
 void Button::RenderPressed()
@@ -274,61 +283,6 @@ StateButton::StateButtonStyle StateButton::Style() const
     return m_style;
 }
 
-void StateButton::Reset()
-{
-    SetCheck(false);
-}
-
-void StateButton::SetCheck(bool b/* = true*/)
-{
-    CheckedSignal(m_checked = b);
-}
-
-void StateButton::SetColor(Clr c)
-{
-    Control::SetColor(c);
-}
-
-void StateButton::SetInteriorColor(Clr c)
-{
-    m_int_color = c;
-}
-
-void StateButton::SetStyle(StateButtonStyle bs)
-{
-    m_style = bs;
-}
-
-int StateButton::ButtonX() const
-{
-    return m_button_x;
-}
-
-int StateButton::ButtonY() const
-{
-    return m_button_y;
-}
-
-int StateButton::ButtonWd() const
-{
-    return m_button_wd;
-}
-
-int StateButton::ButtonHt() const
-{
-    return m_button_ht;
-}
-
-int StateButton::TextX() const
-{
-    return m_text_x;
-}
-
-int StateButton::TextY() const
-{
-    return m_text_y;
-}
-
 bool StateButton::Render()
 {
     const Uint8 bevel = 2;
@@ -390,6 +344,79 @@ void StateButton::LClick(const Pt& pt, Uint32 keys)
 {
     if (!Disabled())
         SetCheck(!m_checked);
+}
+
+void StateButton::Reset()
+{
+    SetCheck(false);
+}
+
+void StateButton::SetCheck(bool b/* = true*/)
+{
+    CheckedSignal(m_checked = b);
+}
+
+void StateButton::SetColor(Clr c)
+{
+    Control::SetColor(c);
+}
+
+void StateButton::SetInteriorColor(Clr c)
+{
+    m_int_color = c;
+}
+
+void StateButton::SetStyle(StateButtonStyle bs)
+{
+    m_style = bs;
+}
+
+void StateButton::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    TextControl::DefineAttributes(editor);
+    editor->Label("StateButton");
+    editor->Attribute("Checked", m_checked);
+    editor->Attribute("Interior Color", m_int_color);
+    editor->Attribute("Button Style", m_style,
+                      SBSTYLE_3D_XBOX, SBSTYLE_3D_ROUND_BUTTON);
+    editor->Attribute("Button X", m_button_x);
+    editor->Attribute("Button Y", m_button_x);
+    editor->Attribute("Button Width", m_button_wd);
+    editor->Attribute("Button Height", m_button_ht);
+    editor->Attribute("Text X", m_text_x);
+    editor->Attribute("Text Y", m_text_y);
+}
+
+int StateButton::ButtonX() const
+{
+    return m_button_x;
+}
+
+int StateButton::ButtonY() const
+{
+    return m_button_y;
+}
+
+int StateButton::ButtonWd() const
+{
+    return m_button_wd;
+}
+
+int StateButton::ButtonHt() const
+{
+    return m_button_ht;
+}
+
+int StateButton::TextX() const
+{
+    return m_text_x;
+}
+
+int StateButton::TextY() const
+{
+    return m_text_y;
 }
 
 void StateButton::Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int bn_w, int bn_h)
@@ -477,6 +504,11 @@ int RadioButtonGroup::CheckedButton() const
     return m_checked_button;
 }
 
+bool RadioButtonGroup::Render()
+{
+    return true;
+}
+
 void RadioButtonGroup::SetCheck(int idx)
 {
     if (idx == m_checked_button)
@@ -516,11 +548,6 @@ const std::vector<StateButton*>& RadioButtonGroup::Buttons() const
 const std::vector<boost::signals::connection>& RadioButtonGroup::Connections() const
 {
     return m_connections;
-}
-
-bool RadioButtonGroup::Render()
-{
-    return true;
 }
 
 void RadioButtonGroup::ConnectSignals()

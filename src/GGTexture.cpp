@@ -36,7 +36,7 @@
    some C++-classes if it detects a C++ compiler. So, we need to
    include allegro before including ilut!
  
-   If GG_NO_ALLEGRO_HACK is not defined, we include an
+   If GG_NO_ALLEGRO_HACK is not defined, we include a
    _mangled_main_address variable with a dummy value; this would cause
    * Allegro programs to crash! Therefore, if GG_NO_ALLEGRO_HACK is
    defined, the developer has to use Allegro's END_OF_MAIN macro. */
@@ -68,101 +68,6 @@ namespace {
             value <<= 1;
         return value;
     }
-    void EncodeBase64(const std::vector<unsigned char>& data, std::string& str)
-    {
-        char table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'}; // the 65th character used for padding is '=' 
-
-        int len = data.size();
-        int groups = len / 3;
-        if (groups * 3 < len)
-            ++groups;
-        str.resize(groups * 4, ' ');
-
-        int data_posn = 0;
-        int str_posn = 0;
-        for (int i = 0; i < groups - 1; ++i) {
-            Uint32 group_value = (data[data_posn + 0] << 16) | (data[data_posn + 1] << 8) | (data[data_posn + 2] << 0);
-            str[str_posn + 0] = table[group_value << 8 >> 26];
-            str[str_posn + 1] = table[group_value << 14 >> 26];
-            str[str_posn + 2] = table[group_value << 20 >> 26];
-            str[str_posn + 3] = table[group_value << 26 >> 26];
-            data_posn += 3;
-            str_posn += 4;
-        }
-
-        // the last group may be a special case if the data size isn't divisible by 3
-        if (len - data_posn == 3) { // divisible by 3
-            Uint32 group_value = (data[data_posn + 0] << 16) | (data[data_posn + 1] << 8) | (data[data_posn + 2] << 0);
-            str[str_posn + 0] = table[group_value << 8 >> 26];
-            str[str_posn + 1] = table[group_value << 14 >> 26];
-            str[str_posn + 2] = table[group_value << 20 >> 26];
-            str[str_posn + 3] = table[group_value << 26 >> 26];
-        } else if (len - data_posn == 2) { // not divisible by 3; two leftovers
-            Uint32 group_value = (data[data_posn + 0] << 16) | (data[data_posn + 1] << 8);
-            str[str_posn + 0] = table[group_value << 8 >> 26];
-            str[str_posn + 1] = table[group_value << 14 >> 26];
-            str[str_posn + 2] = table[group_value << 20 >> 26];
-            str[str_posn + 3] = '=';
-        } else if (len - data_posn == 1) { // not divisible by 3; one leftover
-            Uint32 group_value = data[data_posn + 0] << 16;
-            str[str_posn + 0] = table[group_value << 8 >> 26];
-            str[str_posn + 1] = table[group_value << 14 >> 26];
-            str[str_posn + 2] = '=';
-            str[str_posn + 3] = '=';
-        }
-    }
-    void DecodeBase64(std::vector<unsigned char>& data, const std::string& str)
-    {
-        static std::vector<unsigned int> table(256, 0);
-
-        if (!table['A']) {
-            for (unsigned char c = 'A'; c <= 'Z'; ++c) {
-                table[c] = c - 'A';
-            }
-            for (unsigned char c = 'a'; c <= 'z'; ++c) {
-                table[c] = 26 + c - 'a';
-            }
-            for (unsigned char c = '0'; c <= '9'; ++c) {
-                table[c] = 52 + c - '0';
-            }
-            table['+'] = 62;
-            table['/'] = 63;
-        }
-
-        int len = str.size();
-        int groups = len / 4;
-        data.resize(groups * 3);
-
-        int data_posn = 0;
-        int str_posn = 0;
-        for (int i = 0; i < groups - 1; ++i) {
-            Uint32 group_value = (table[str[str_posn + 0]] << 18)
-                | (table[str[str_posn + 1]] << 12)
-                | (table[str[str_posn + 2]] << 6)
-                | (table[str[str_posn + 3]] << 0);
-            data[data_posn + 0] = group_value << 8 >> 24;
-            data[data_posn + 1] = group_value << 16 >> 24;
-            data[data_posn + 2] = group_value << 24 >> 24;
-            data_posn += 3;
-            str_posn += 4;
-        }
-        Uint32 group_value = (table[str[str_posn + 0]] << 18)
-            | (table[str[str_posn + 1]] << 12)
-            | (table[str[str_posn + 2]] << 6)
-            | (table[str[str_posn + 3]] << 0);
-        if (data.size() - data_posn == 3) {
-            data[data_posn + 0] = group_value << 8 >> 24;
-            data[data_posn + 1] = group_value << 16 >> 24;
-            data[data_posn + 2] = group_value << 24 >> 24;
-        } else if (data.size() - data_posn == 2) {
-            data[data_posn + 0] = group_value << 8 >> 24;
-            data[data_posn + 1] = group_value << 16 >> 24;
-        } else if (data.size() - data_posn == 1) {
-            data[data_posn + 0] = group_value << 8 >> 24;
-        }
-    }
 }
 
 ///////////////////////////////////////
@@ -178,49 +83,6 @@ Texture::Texture() :
 {
     Clear();
 }
-
-#if 0
-Texture::Texture(const XMLElement& elem) :
-    m_opengl_id(0)
-{
-    if (elem.Tag() != "GG::Texture")
-        throw std::invalid_argument("Attempted to construct a GG::Texture from an XMLElement that had a tag other than \"GG::Texture\"");
-
-    Clear();
-
-    using boost::lexical_cast;
-    m_filename = elem.Child("m_filename").Text();
-    m_bytes_pp = lexical_cast<int>(elem.Child("m_bytes_pp").Text());
-    m_width = lexical_cast<int>(elem.Child("m_width").Text());
-    m_height = lexical_cast<int>(elem.Child("m_height").Text());
-    m_wrap_s = lexical_cast<GLenum>(elem.Child("m_wrap_s").Text());
-    m_wrap_t = lexical_cast<GLenum>(elem.Child("m_wrap_t").Text());
-    m_min_filter = lexical_cast<GLenum>(elem.Child("m_min_filter").Text());
-    m_mag_filter = lexical_cast<GLenum>(elem.Child("m_mag_filter").Text());
-    m_mipmaps = lexical_cast<bool>(elem.Child("m_mipmaps").Text());
-
-    const XMLElement& curr_elem = elem.Child("m_tex_coords");
-    m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem.Attribute("u1"));
-    m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem.Attribute("v1"));
-    m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem.Attribute("u2"));
-    m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem.Attribute("v2"));
-
-    m_default_width = lexical_cast<int>(elem.Child("m_default_width").Text());
-    m_default_height = lexical_cast<int>(elem.Child("m_default_height").Text());
-
-    if (m_filename != "") {
-        Load(m_filename, m_mipmaps);
-    } else if (elem.ContainsChild("raw_data")) {
-        const XMLElement& raw_data = elem.Child("raw_data");
-        std::vector<unsigned char> bytes;
-        DecodeBase64(bytes, raw_data.Text());
-        Init(0, 0, m_default_width, m_default_height, m_width, reinterpret_cast<unsigned char*>(&bytes[0]), m_bytes_pp, m_mipmaps);
-    }
-
-    SetWrap(m_wrap_s, m_wrap_t);
-    SetFilters(m_min_filter, m_mag_filter);
-}
-#endif
 
 Texture::~Texture()
 {
@@ -345,64 +207,6 @@ void Texture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
 {
     OrthoBlit(x, y, x + m_default_width, y + m_default_height, m_tex_coords, enter_2d_mode);
 }
-
-#if 0
-XMLElement Texture::XMLEncode() const
-{
-    using boost::lexical_cast;
-    XMLElement retval("GG::Texture");
-    retval.AppendChild(XMLElement("m_filename", m_filename));
-    retval.AppendChild(XMLElement("m_bytes_pp", lexical_cast<std::string>(m_bytes_pp)));
-    retval.AppendChild(XMLElement("m_width", lexical_cast<std::string>(m_width)));
-    retval.AppendChild(XMLElement("m_height", lexical_cast<std::string>(m_height)));
-    retval.AppendChild(XMLElement("m_wrap_s", lexical_cast<std::string>(m_wrap_s)));
-    retval.AppendChild(XMLElement("m_wrap_t", lexical_cast<std::string>(m_wrap_t)));
-    retval.AppendChild(XMLElement("m_min_filter", lexical_cast<std::string>(m_min_filter)));
-    retval.AppendChild(XMLElement("m_mag_filter", lexical_cast<std::string>(m_mag_filter)));
-    retval.AppendChild(XMLElement("m_mipmaps", lexical_cast<std::string>(m_mipmaps)));
-
-    XMLElement temp("m_tex_coords");
-    temp.SetAttribute("u1", lexical_cast<std::string>(m_tex_coords[0]));
-    temp.SetAttribute("v1", lexical_cast<std::string>(m_tex_coords[1]));
-    temp.SetAttribute("u2", lexical_cast<std::string>(m_tex_coords[2]));
-    temp.SetAttribute("v2", lexical_cast<std::string>(m_tex_coords[3]));
-    retval.AppendChild(temp);
-
-    retval.AppendChild(XMLElement("m_default_width", lexical_cast<std::string>(m_default_width)));
-    retval.AppendChild(XMLElement("m_default_height", lexical_cast<std::string>(m_default_height)));
-
-    if (m_filename == "" && m_opengl_id) {
-        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-        glPixelStorei(GL_PACK_SWAP_BYTES, false);
-        glPixelStorei(GL_PACK_LSB_FIRST, false);
-        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-        glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-        glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-        // get pixel data
-        std::vector<unsigned char> bytes(m_width * m_height * m_bytes_pp);
-        GLenum mode = 0;
-        switch (m_bytes_pp) {
-        case 1:   mode = GL_LUMINANCE;       break;
-        case 2:   mode = GL_LUMINANCE_ALPHA; break;
-        case 3:   mode = GL_RGB;             break;
-        case 4:   mode = GL_RGBA;            break;
-        default: throw TextureException("Attempted to encode a GG::Texture with an invalid number of bytes per pixel");
-        }
-        glGetTexImage(GL_TEXTURE_2D, 0, mode, GL_UNSIGNED_BYTE, reinterpret_cast<unsigned char*>(&bytes[0]));
-
-        // save it to a string
-        std::string str;
-        EncodeBase64(bytes, str);
-        retval.AppendChild(XMLElement("raw_data", str));
-
-        glPopClientAttrib();
-    }
-
-    return retval;
-}
-#endif
 
 void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 {
@@ -658,47 +462,6 @@ SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, 
     m_tex_coords[2] = static_cast<double>(x2) / texture->DefaultWidth();
     m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
 }
-
-#if 0
-SubTexture::SubTexture(const XMLElement& elem) :
-    m_width(0),
-    m_height(0)
-{
-    if (elem.Tag() != "GG::SubTexture")
-        throw std::invalid_argument("Attempted to construct a GG::SubTexture from an XMLElement that had a tag other than \"GG::SubTexture\"");
-
-    const XMLElement* curr_elem = &elem.Child("m_texture");
-    std::string texture_filename = curr_elem->NumChildren() ? curr_elem->Child("GG::Texture").Child("m_filename").Text() : "";
-    if (texture_filename != "") {
-        // we need to ensure that the settings in the XML-encoded texture are preserved in the loaded texture; to do this:
-        boost::shared_ptr<Texture> temp_texture = App::GetApp()->GetTexture(texture_filename);
-        // if no copy of this texture exists in the manager, GetTexture() will load it with default settings, and the
-        // use_count will be 2: one for the shared_ptr in the manager, one for temp_texture.
-        // if this is the case, dump the texture, reload it from the XML definition (which may have non-default settings),
-        // and store the XML-loaded Texture in the manager.
-        if (temp_texture.use_count() == 2) {
-            temp_texture = boost::shared_ptr<Texture>(new Texture(curr_elem->Child("GG::Texture")));
-            App::GetApp()->FreeTexture(texture_filename);
-            App::GetApp()->StoreTexture(temp_texture, texture_filename);
-            m_texture = temp_texture;
-        } else { // if this is not the case, we're not the first ones to load the texture, so just keep it.
-            m_texture = temp_texture;
-        }
-    }
-
-    if (m_texture) {
-        using boost::lexical_cast;
-        m_width = lexical_cast<int>(elem.Child("m_width").Text());
-        m_height = lexical_cast<int>(elem.Child("m_height").Text());
-
-        curr_elem = &elem.Child("m_tex_coords");
-        m_tex_coords[0] = lexical_cast<GLfloat>(curr_elem->Attribute("u1"));
-        m_tex_coords[1] = lexical_cast<GLfloat>(curr_elem->Attribute("v1"));
-        m_tex_coords[2] = lexical_cast<GLfloat>(curr_elem->Attribute("u2"));
-        m_tex_coords[3] = lexical_cast<GLfloat>(curr_elem->Attribute("v2"));
-    }
-}
-#endif
 
 SubTexture::~SubTexture()
 {

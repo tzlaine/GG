@@ -28,6 +28,7 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -129,10 +130,8 @@ Pt TextControl::TextLowerRight() const
 
 bool TextControl::Render()
 {
-    if (m_dirty_load) {
+    if (m_dirty_load)
         SetText(WindowText());
-        m_dirty_load = false;
-    }
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor4ubv(clr_to_use.v);
     if (m_font)
@@ -153,6 +152,7 @@ void TextControl::SetText(const std::string& str)
             RecomputeTextBounds();
         }
     }
+    m_dirty_load = false;
 }
 
 void TextControl::SetText(const char* str)
@@ -214,6 +214,24 @@ void TextControl::Erase(int pos, int num/* = 1*/)
     SetText(Control::m_text);
 }
 
+void TextControl::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("TextControl");
+    editor->BeginFlags(m_format);
+    editor->FlagGroup("V. Alignment", TF_VCENTER, TF_BOTTOM);
+    editor->FlagGroup("H. Alignment", TF_CENTER, TF_RIGHT);
+    editor->Flag("Word-break", TF_WORDBREAK);
+    editor->Flag("Line-wrap", TF_LINEWRAP);
+    editor->Flag("Ignore Tags", TF_IGNORETAGS);
+    editor->EndFlags();
+    editor->Attribute("Text Color", m_text_color);
+    editor->Attribute("Font", m_font);
+    editor->Attribute("Fit Size to Text", m_fit_to_text);
+}
+
 const std::vector<Font::LineData>& TextControl::GetLineData() const
 {
     return m_line_data;
@@ -227,6 +245,11 @@ const boost::shared_ptr<Font>& TextControl::GetFont() const
 bool TextControl::FitToText() const
 {
     return m_fit_to_text;
+}
+
+bool TextControl::DirtyLoad() const
+{
+    return m_dirty_load;
 }
 
 void TextControl::ValidateFormat()

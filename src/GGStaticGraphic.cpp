@@ -27,6 +27,7 @@
 #include "GGStaticGraphic.h"
 
 #include <GGDrawUtil.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -127,6 +128,22 @@ void StaticGraphic::SetStyle(Uint32 style)
 {
     m_style = style;
     ValidateStyle();
+}
+
+void StaticGraphic::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("StaticGraphic");
+    // TODO: handle setting image
+    editor->BeginFlags(m_style);
+    editor->FlagGroup("V. Alignment", GR_VCENTER, GR_BOTTOM);
+    editor->FlagGroup("H. Alignment", GR_CENTER, GR_RIGHT);
+    editor->Flag("Fit Graphic to Size", GR_FITGRAPHIC);
+    editor->Flag("Shrink-to-Fit", GR_SHRINKFIT);
+    editor->Flag("Proportional Scaling", GR_PROPSCALE);
+    editor->EndFlags();
 }
 
 void StaticGraphic::Init(const SubTexture& subtexture)

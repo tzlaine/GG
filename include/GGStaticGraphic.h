@@ -39,8 +39,6 @@
 #include "GGTexture.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 /** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a
@@ -68,6 +66,8 @@ public:
 
     /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
     void  SetStyle(Uint32 style);
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

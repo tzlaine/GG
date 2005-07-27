@@ -27,8 +27,9 @@
 #include "GGMultiEdit.h"
  
 #include <GGApp.h>
-#include <GGScroll.h>
 #include <GGDrawUtil.h>
+#include <GGScroll.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -50,8 +51,7 @@ namespace {
 const int MultiEdit::SCROLL_WIDTH = 14;
 
 MultiEdit::MultiEdit() :
-    Edit(),
-    m_dirty_load(false)
+    Edit()
 {
 }
 
@@ -66,8 +66,7 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const b
     m_first_row_shown(0),
     m_max_lines_history(0),
     m_vscroll(0),
-    m_hscroll(0),
-    m_dirty_load(false)
+    m_hscroll(0)
 {
     SetColor(color);
     Init();
@@ -84,8 +83,7 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const s
     m_first_row_shown(0),
     m_max_lines_history(0),
     m_vscroll(0),
-    m_hscroll(0),
-    m_dirty_load(false)
+    m_hscroll(0)
 {
     SetColor(color);
     Init();
@@ -109,10 +107,8 @@ int MultiEdit::MaxLinesOfHistory() const
 
 bool MultiEdit::Render()
 {
-    if (m_dirty_load) {
+    if (DirtyLoad())
         SetText(WindowText());
-        m_dirty_load = false;
-    }
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
     Clr sel_text_color_to_use = Disabled() ? DisabledColor(SelectedTextColor()) : SelectedTextColor();
@@ -512,6 +508,27 @@ void MultiEdit::SetMaxLinesOfHistory(int max)
 {
     m_max_lines_history = max;
     SetText(m_text);
+}
+
+void MultiEdit::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Edit::DefineAttributes(editor);
+    editor->Label("MultiEdit");
+    editor->BeginFlags(m_style);
+    editor->FlagGroup("V. Alignment", TF_VCENTER, TF_BOTTOM);
+    editor->FlagGroup("H. Alignment", TF_CENTER, TF_RIGHT);
+    editor->Flag("Word-break", TF_WORDBREAK);
+    editor->Flag("Line-wrap", TF_LINEWRAP);
+    editor->Flag("Ignore Tags", TF_IGNORETAGS);
+    editor->Flag("Read Only", READ_ONLY);
+    editor->Flag("Terminal Style", TERMINAL_STYLE);
+    editor->Flag("Integral Height", INTEGRAL_HEIGHT);
+    editor->Flag("No V. Scrolling", NO_VSCROLL);
+    editor->Flag("No H. Scrolling", NO_HSCROLL);
+    editor->EndFlags();
+    editor->Attribute("Lines of History", m_max_lines_history);
 }
 
 bool MultiEdit::MultiSelected() const

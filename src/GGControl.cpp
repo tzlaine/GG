@@ -26,7 +26,7 @@
 
 #include "GGControl.h"
 
-#include <XMLValidators.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -42,4 +42,46 @@ Control::Control(int x, int y, int w, int h, Uint32 flags/* = CLICKABLE*/) :
     Wnd(x, y, w, h, flags),
     m_disabled(false)
 {
+}
+
+Clr Control::Color() const
+{
+    return m_color;
+}
+
+bool Control::Disabled() const
+{
+    return m_disabled;
+}
+
+void Control::MouseWheel(const Pt& pt, int move, Uint32 keys)
+{
+    if (Parent())
+        Parent()->MouseWheel(pt, move, keys);
+}
+
+void Control::Keypress(Key key, Uint32 key_mods)
+{
+    if (Parent())
+        Parent()->Keypress(key, key_mods);
+}
+
+void Control::SetColor(Clr c)
+{
+    m_color = c;
+}
+
+void Control::Disable(bool b/* = true*/)
+{
+    m_disabled = b;
+}
+
+void Control::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Wnd::DefineAttributes(editor);
+    editor->Label("Control");
+    editor->Attribute("Color", m_color);
+    editor->Attribute("Disabled", m_disabled);
 }

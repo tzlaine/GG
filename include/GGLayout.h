@@ -35,8 +35,6 @@
 #include "GGWnd.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 /** an invisible Wnd subclass whose only purpose is to arrange its child Wnds.  A Layout consists of a grid of cells.  A
@@ -149,6 +147,8 @@ public:
 
     /** sets the minimum width of column \a column to \a width.  Note that \a column is not range-checked. */
     void SetMinimumColumnWidth(int column, int width);
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

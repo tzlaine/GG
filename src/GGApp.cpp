@@ -33,6 +33,7 @@
 #include "GGListBox.h"
 #include "GGMenu.h"
 #include "GGMultiEdit.h"
+#include "GGPluginInterface.h"
 #include "GGScroll.h"
 #include "GGSlider.h"
 #include "GGSpin.h"
@@ -97,7 +98,9 @@ struct GG::AppImplData
         double_click_wnd(0),
         double_click_start_time(-1),
         double_click_time(-1),
-    log_category(log4cpp::Category::getRoot())
+        save_wnd_fn(0),
+        load_wnd_fn(0),
+        log_category(log4cpp::Category::getRoot())
     {
         button_state[0] = button_state[1] = button_state[2] = false;
         drag_wnds[0] = drag_wnds[1] = drag_wnds[2] = 0;
@@ -145,6 +148,9 @@ struct GG::AppImplData
 
     FontManager       font_manager;
     TextureManager    texture_manager;
+
+    App::SaveWndFn                save_wnd_fn;
+    App::LoadWndFn                load_wnd_fn;
 
     log4cpp::Category&    log_category; // log4cpp object used to log events to file
 };
@@ -446,6 +452,36 @@ boost::shared_ptr<Texture> App::GetTexture(const std::string& name, bool mipmap/
 void App::FreeTexture(const std::string& name)
 {
     s_impl->texture_manager.FreeTexture(name);
+}
+
+void App::SaveWnd(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
+{
+    if (!s_impl->save_wnd_fn)
+        throw std::runtime_error("App::SaveWnd() : Attempted call on null function pointer.");
+    s_impl->save_wnd_fn(wnd, name, ar);
+}
+
+void App::LoadWnd(GG::Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+{
+    if (!s_impl->load_wnd_fn)
+        throw std::runtime_error("App::LoadWnd() : Attempted call on null function pointer.");
+    s_impl->load_wnd_fn(wnd, name, ar);
+}
+
+void App::SetSaveWndFunction(SaveWndFn fn)
+{
+    s_impl->save_wnd_fn = fn;
+}
+
+void App::SetLoadWndFunction(LoadWndFn fn)
+{
+    s_impl->load_wnd_fn = fn;
+}
+
+void App::SetSaveLoadFunctions(const PluginInterface& interface)
+{
+    s_impl->save_wnd_fn = interface.SaveWnd;
+    s_impl->load_wnd_fn = interface.LoadWnd;
 }
 
 log4cpp::Category& App::Logger()

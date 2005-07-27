@@ -35,8 +35,6 @@
 #include "GGControl.h"
 #endif
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 class Button;
@@ -124,6 +122,8 @@ public:
     void           ScrollLineDecr(); ///< scrolls the control up (or left) by a line
     void           ScrollPageIncr(); ///< scrolls the control down (or right) by a page
     void           ScrollPageDecr(); ///< scrolls the control up (or left) by a page
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

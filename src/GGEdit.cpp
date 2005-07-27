@@ -28,6 +28,7 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
+#include <GGWndEditor.h>
 
 using namespace GG;
 
@@ -38,7 +39,8 @@ using namespace GG;
 const int Edit::PIXEL_MARGIN = 5;
 
 Edit::Edit() :
-    TextControl()
+    TextControl(),
+    m_recently_edited(false)
 {
 }
 
@@ -50,7 +52,7 @@ Edit::Edit(int x, int y, int w, int h, const std::string& str, const boost::shar
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_sel_text_color(CLR_WHITE),
-    m_previous_text(str)
+    m_recently_edited(false)
 {
     SetColor(color);
 }
@@ -63,7 +65,7 @@ Edit::Edit(int x, int y, int w, int h, const std::string& str, const std::string
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_sel_text_color(CLR_WHITE),
-    m_previous_text(str)
+    m_recently_edited(false)
 {
     SetColor(color);
 }
@@ -76,7 +78,7 @@ Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_sel_text_color(CLR_WHITE),
-    m_previous_text(str)
+    m_recently_edited(false)
 {
     SetColor(color);
 }
@@ -89,7 +91,7 @@ Edit::Edit(int x, int y, int w, const std::string& str, const std::string& font_
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_sel_text_color(CLR_WHITE),
-    m_previous_text(str)
+    m_recently_edited(false)
 {
     SetColor(color);
 }
@@ -277,6 +279,7 @@ void Edit::Keypress(Key key, Uint32 key_mods)
             FocusUpdateSignal(WindowText());
             if (Parent())
                 Parent()->Keypress(key, key_mods);
+            m_recently_edited = false;
             break;
         default:
             // only process it if it's a printable character, and no significant modifiers are in use
@@ -303,12 +306,12 @@ void Edit::Keypress(Key key, Uint32 key_mods)
 
 void Edit::GainingFocus()
 {
-    m_previous_text = WindowText();
+    m_recently_edited = false;
 }
 
 void Edit::LosingFocus()
 {
-    if (m_previous_text != WindowText())
+    if (m_recently_edited)
         FocusUpdateSignal(WindowText());
 }
 
@@ -365,7 +368,20 @@ void Edit::SetText(const std::string& str)
         AdjustView();
     }
 
+    m_recently_edited = true;
+
     EditedSignal(str);
+}
+
+void Edit::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    TextControl::DefineAttributes(editor);
+    editor->Label("Edit");
+    editor->Attribute("Interior Color", m_int_color);
+    editor->Attribute("Highlighting Color", m_hilite_color);
+    editor->Attribute("Selected Text Color", m_sel_text_color);
 }
 
 bool Edit::MultiSelected() const
@@ -378,9 +394,9 @@ int Edit::FirstCharShown() const
     return m_first_char_shown;
 }
 
-const std::string& Edit::PreviousText() const
+bool Edit::RecentlyEdited() const
 {
-    return m_previous_text;
+    return m_recently_edited;
 }
 
 int Edit::CharIndexOf(int x) const

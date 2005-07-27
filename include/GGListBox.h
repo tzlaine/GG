@@ -37,8 +37,6 @@
 
 #include <set>
 
-#include <boost/serialization/access.hpp>
-
 namespace GG {
 
 class Font;
@@ -320,6 +318,8 @@ public:
     /** disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If "" is still an 
         allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to this function. */
     void           DisallowDropType(const std::string& str);
+
+    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
     static const int BORDER_THICK; ///< the thickness with which to render the border of the control
@@ -381,27 +381,28 @@ private:
     bool           m_suppress_delete_signal; ///< needed to use delete internally-only when a drop is refused
 
     std::vector<boost::shared_ptr<Row> >
-    m_rows;             ///< line item data
+                   m_rows;             ///< line item data
 
     int            m_first_row_shown;  ///< index of row at top of visible area (always 0 for LB_NOSCROLL)
     int            m_first_col_shown;  ///< like above, but index of column at left
     std::vector<int>
-    m_col_widths;       ///< the width of each of the columns goes here
+                   m_col_widths;       ///< the width of each of the columns goes here
     std::vector<ListBoxStyle> 
-    m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
+                   m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
     int            m_cell_margin;      ///< the amount of space left between each edge of the cell and its contents, in pixels
 
     Clr            m_int_color;        ///< color painted into the client area of the control
     Clr            m_hilite_color;     ///< color behind selected line items
     Uint32         m_style;            ///< composed of ListBoxStyles enums (see GUIBase.h)
 
-    boost::shared_ptr<Row>m_header_row;///< row of header text/graphics
+    boost::shared_ptr<Row>
+                   m_header_row;       ///< row of header text/graphics
     int            m_row_height;       ///< default row height
     bool           m_keep_col_widths;  ///< should we keep the column widths, once set?
     bool           m_clip_cells;       ///< if true, the contents of each cell will be clipped to the visible area of that cell (TODO: currently unused)
     int            m_sort_col;         ///< the index of the column data used to sort the list
     std::set<std::string>
-    m_allowed_types;    ///< the line item types allowed for use in this listbox
+                   m_allowed_types;    ///< the line item types allowed for use in this listbox
 
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
 

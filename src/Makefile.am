@@ -27,6 +27,7 @@ GGStaticGraphic.cpp				\
 GGTextControl.cpp				\
 GGTexture.cpp					\
 GGWnd.cpp					\
+GGWndEditor.cpp					\
 GGZList.cpp					\
 XMLDoc.cpp					\
 dialogs/GGFileDlg.cpp				\

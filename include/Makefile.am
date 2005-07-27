@@ -27,6 +27,7 @@ GGStaticGraphic.h				\
 GGTextControl.h					\
 GGTexture.h					\
 GGWnd.h						\
+GGWndEditor.h						\
 GGZList.h					\
 XMLDoc.h					\
 XMLObjectFactory.h				\

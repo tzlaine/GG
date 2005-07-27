@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\freetype-2.1.7\include&quot;;&quot;C:\log4cpp-0.3.4b\include&quot;;C:\DevIL\include;&quot;C:\Boost\include\boost-1_32&quot;;..\..\..\include\net;..\..\..\include\SDL;..\..\..\include\dialogs;..\..\..\include;&quot;C:\SDL-1.2.7\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\freetype-2.1.7\include&quot;;&quot;C:\log4cpp-0.3.4b\include&quot;;C:\DevIL\include;&quot;C:\Boost\include\boost-1_32&quot;;..\..\..\include\net;..\..\..\include\SDL;..\..\..\include\dialogs;..\..\..\include;..\..\..\libltdl;&quot;C:\SDL-1.2.7\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;GIGI_EXPORTS;BOOST_SIGNALS_STATIC_LINK"
 				GeneratePreprocessedFile="0"
 				RuntimeLibrary="2"
@@ -204,6 +204,9 @@
 				RelativePath="..\..\..\src\GGWnd.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\src\GGWndEditor.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\src\GGZList.cpp">
 			</File>
 			<File
@@ -309,6 +312,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\GGWnd.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\GGWndEditor.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\GGZList.h">

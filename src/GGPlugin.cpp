@@ -24,10 +24,15 @@
 
 /* $Header$ */
 
+/** \file GGPlugin.cpp
+    This is a sample plugin implementation.  It can only create and serialize the default types of GG controls.  Extend
+    it to create a plugin suitable for a user-defned GG control a hierarchy. */
+
 #include <GGButton.h>
 #include <GGDropDownList.h>
 #include <GGDynamicGraphic.h>
 #include <GGEdit.h>
+#include <GGLayout.h>
 #include <GGListBox.h>
 #include <GGMenu.h>
 #include <GGMultiEdit.h>
@@ -37,16 +42,53 @@
 #include <GGStaticGraphic.h>
 #include <GGTextControl.h>
 
+// TODO : add include files for custom Wnd subclasses to be included in your plugin
+
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/export.hpp>
+
 #ifdef _MSC_VER
 # define GG_PLUGIN_API __declspec(dllexport)
 #else
 # define GG_PLUGIN_API
 #endif
 
-// TODO : add include files needed for your plugin
+// These typedefs exist only to ensure that '<' and '>' do not appear in the XML attribute strings, which chokes the
+// boost.serialization XML parser.
+typedef GG::Spin<int> Spin_int;
+typedef GG::Spin<double> Spin_double;
+GG_SHARED_POINTER_EXPORT(GG::Wnd)
+GG_SHARED_POINTER_EXPORT(GG::DropDownList)
+GG_SHARED_POINTER_EXPORT(GG::DynamicGraphic)
+GG_SHARED_POINTER_EXPORT(GG::Edit)
+GG_SHARED_POINTER_EXPORT(GG::Font)
+GG_SHARED_POINTER_EXPORT(GG::Layout)
+GG_SHARED_POINTER_EXPORT(GG::ListBox)
+GG_SHARED_POINTER_EXPORT(GG::ListBox::Row)
+GG_SHARED_POINTER_EXPORT(GG::MenuBar)
+GG_SHARED_POINTER_EXPORT(GG::MultiEdit)
+GG_SHARED_POINTER_EXPORT(GG::Scroll)
+GG_SHARED_POINTER_EXPORT(GG::Slider)
+GG_SHARED_POINTER_EXPORT(Spin_int)
+GG_SHARED_POINTER_EXPORT(Spin_double)
+GG_SHARED_POINTER_EXPORT(GG::StaticGraphic)
+GG_SHARED_POINTER_EXPORT(GG::TextControl)
+GG_SHARED_POINTER_EXPORT(GG::Button)
+GG_SHARED_POINTER_EXPORT(GG::StateButton)
+GG_SHARED_POINTER_EXPORT(GG::RadioButtonGroup)
+// TODO : add export declarations for all user-defined Wnd subclasses
 
-using namespace std;
 using namespace GG;
+using namespace boost;
+using namespace std;
+
+// TODO: add declarations for custom classes that must be serialized in SaveWnd() and LoadWnd().
+
 
 namespace {
     // TODO: edit these constants to reflect your plugin's requirements
@@ -183,24 +225,16 @@ extern "C" {
     void DestroyControl(Wnd* w) {delete w;}
 
 
-    // Subclass-specific XML factory functions
-    // TODO: If you want the users of this plugin to be able to load the GG subclasses in your plugin from XML descriptions 
-    // automatically, you need to define the generator functions here.  See the GG documentation or XMLObjectFactory.h for details 
-    // on generator functions.
-    // EXAMPLE: GG_PLUGIN_API Wnd* NewFoo(const XMLElement& elem) {return new Foo(elem);}
-
-
-    // Returns a list of names of subclass-specific XML factory functions.
-    // TODO: If you want the users of this plugin to be able to load your GG subclasses from XML descriptions automatically, you need to 
-    // put the names of the generator functions in the map returned by this function.  See the GG documentation or XMLObjectFactory.h for 
-    // details on generator functions.
+    // Serialization functions
     GG_PLUGIN_API
-    const map<string, string>& FactoryGeneratorNames()
+    void SaveWnd(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
     {
-        static map<string, string> function_names;
-        if (function_names.empty()) {
-            // EXAMPLE: function_names["Foo"] = "NewFoo";
-        }
-        return function_names;
+        ar & boost::serialization::make_nvp(name.c_str(), wnd);
+    }
+
+    GG_PLUGIN_API
+    void LoadWnd(GG::Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+    {
+        ar & boost::serialization::make_nvp(name.c_str(), wnd);
     }
 }

@@ -1,4 +1,3 @@
-/* @configure_input@ */
 /* GG is a GUI for SDL and OpenGL.
    Copyright (C) 2003 T. Zachary Laine
 
@@ -29,15 +28,14 @@
 #define _GGConfig_h_
 
 #ifndef GG_USE_NET
-#define GG_USE_NET @GG_USE_NET@
+#define GG_USE_NET %(gg_use_net)d
 #endif
 
 /* Define if DevIL was compiled with allegro */
-@GG_DEVIL_WITH_ALLEGRO@
+%(gg_devil_with_allegro)s
 
 /* In case GG_DEVIL_WITH_ALLEGRO is defined, define if you do not want the
    Allegro hack to be compiled in */
-@GG_NO_ALLEGRO_HACK@
+%(gg_no_allegro_hack)s
 
 #endif // _GGConfig_h_
-

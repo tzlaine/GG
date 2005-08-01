@@ -1,11 +1,10 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@/GG
+prefix=%(prefix)s
+includedir=%(incdir)s/GG
+version=%(version)s
 
 Name: GiGiSDL
-Description: [description pending]
-Requires: GiGi @GIGINET_DEP@
-Version: @VERSION@
-Libs: -L${libdir} -lGiGiSDL @SDL_LIBS@
-Cflags:-I${includedir}/SDL
+Description: An SDL-based input driver and application framework for use with libGiGi.
+Requires: GiGi = ${version}, GiGiNet = ${version}
+Version: ${version}
+Libs: -lGiGiSDL %(gigi_sdl_libs)s
+Cflags: -I${includedir}/SDL

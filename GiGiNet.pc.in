@@ -1,10 +1,10 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@/GG
+prefix=%(prefix)s
+includedir=%(incdir)s/GG
+version=%(version)s
 
 Name: GiGiNet
-Description: [description pending]
-Version: @VERSION@
-Libs: -L${libdir} -lGiGiNet @SDL_LIBS@ @SDLNET_LIB@
+Description: An SDL-based networking library for use by libGiGi.
+Requires: GiGi = ${version}
+Version: ${version}
+Libs: %(gigi_net_libs)s -lGiGiNet
 Cflags: -I${includedir}/net

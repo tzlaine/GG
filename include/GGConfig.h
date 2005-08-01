@@ -1,4 +1,3 @@
-/* include/GGConfig.h.  Generated from GGConfig.h.in by configure. */
 /* GG is a GUI for SDL and OpenGL.
    Copyright (C) 2003 T. Zachary Laine
 
@@ -40,4 +39,3 @@
 /* #undef GG_NO_ALLEGRO_HACK */
 
 #endif // _GGConfig_h_
-

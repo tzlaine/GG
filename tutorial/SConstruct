@@ -16,6 +16,7 @@ if platform_str == 'posix':
                gg_dir + 'SDL']
     libs = ['GiGiSDL',
             'GiGi',
+            'GiGiNet',
             'boost_signals',
             'boost_filesystem',
             'boost_serialization']

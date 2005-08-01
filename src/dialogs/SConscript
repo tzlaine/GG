@@ -1,0 +1,17 @@
+# -*- Python -*-
+
+Import('env', 'DirHeaders')
+
+sources = [
+    'GGFileDlg.cpp',
+    'GGThreeButtonDlg.cpp'
+    ]
+
+headers = ['dialogs'] + DirHeaders('../../include/dialogs')
+
+if env['dynamic']:
+    objects = env.SharedObject(sources)
+else:
+    objects = env.Object(sources)
+
+Return('objects', 'headers')

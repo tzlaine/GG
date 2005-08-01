@@ -1,0 +1,16 @@
+# -*- Python -*-
+
+Import('env', 'DirHeaders')
+
+sources = [
+    'ltdl.c'
+    ]
+
+headers = []
+
+if env['dynamic']:
+    objects = env.SharedObject(sources, CPPDEFINES = env['libltdl_defines'])
+else:
+    objects = env.Object(sources, CPPDEFINES = env['libltdl_defines'])
+
+Return('objects', 'headers')

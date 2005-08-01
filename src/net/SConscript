@@ -1,0 +1,39 @@
+# -*- Python -*-
+
+Import('env')
+
+if env['with_builtin_sdlnet']:
+    sources = [
+        'SDLnet.c',
+        'SDLnetTCP.c',
+        'SDLnetUDP.c',
+        'SDLnetselect.c'
+        ]
+    headers = [
+        'net',
+        'SDL_net.h',
+        'SDLnetsys.h'
+        ]
+else:
+    sources = []
+    headers = ['net']
+
+sources += [
+    'fastevents.c',
+    'net2.c',
+    'trace.c'
+    ]
+
+headers += [
+    'fastevents.h',
+    'net2.h',
+    'queue.h',
+    'trace.h'
+    ]
+
+if env['dynamic']:
+    objects = env.SharedObject(sources)
+else:
+    objects = env.Object(sources)
+
+Return('objects', 'headers')

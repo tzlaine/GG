@@ -311,22 +311,6 @@ fi
 AC_SUBST(GG_DEVIL_WITH_ALLEGRO)
 AC_SUBST(GG_NO_ALLEGRO_HACK)
 
-### expat and log4cpp check
-#YG_GET_PATH(expat)
-#SAVE_LIBS="$LIBS"
-#AC_CHECK_LIB(expat,XML_ParserCreate,[],[AC_MSG_FAILURE([You'll need expat])])
-#LIBS="$SAVE_LIBS"
-
-YG_GET_PATH(log4cpp)
-AC_LANG_CPLUSPLUS
-AC_CHECK_HEADERS([log4cpp/Category.hh],,[AC_MSG_FAILURE(log4cpp/Category.hh not found in include-path)])
-SAVE_LIBS="$LIBS"
-YG_SEARCH_LIBS([log4cpp],[log4cpp],
-               [#include <log4cpp/Category.hh>],[log4cpp::Category::shutdown();],
-               [],[AC_MSG_FAILURE(can't link log4cpp in)])
-LIBS="$SAVE_LIBS"
-dnl AC_CHECK_LIB(z,deflate,[],[AC_MSG_ERROR(Zlib is missing!)])
-
 AC_LANG_C
 if test x$with_builtin_sdlnet = xyes -a $WIN32 = yes; then
   # the windows version of sdlnet needs wsock32 linked in

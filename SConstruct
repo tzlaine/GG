@@ -50,9 +50,6 @@ options.Add('with_ft_libdir', 'Specify exact library dir for FreeType2 library')
 options.Add('with_devil', 'Root directory of DevIL installation')
 options.Add('with_devil_include', 'Specify exact include dir for DevIL headers')
 options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library')
-options.Add('with_log4cpp', 'Root directory of log4cpp installation')
-options.Add('with_log4cpp_include', 'Specify exact include dir for log4cpp headers')
-options.Add('with_log4cpp_libdir', 'Specify exact library dir for log4cpp library')
 
 
 ##################################################
@@ -97,10 +94,21 @@ if not force_configure:
             print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
     except Exception:
         None
+
 options.Update(env)
+
+if env.has_key('use_distcc') and env['use_distcc']:
+    env['CC'] = 'distcc %s' % env['CC']
+    env['CXX'] = 'distcc %s' % env['CXX']
+    if os.environ.has_key('HOME') and not env.has_key('HOME'):
+        env['ENV']['HOME'] = os.environ['HOME']
+    if os.environ.has_key('DISTCC_HOSTS') and not env.has_key('DISTCC_HOSTS'):
+        env['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
+
 # TODO: create a more readable help function
 Help(options.GenerateHelpText(env))
 options.Save('options.cache', env)
+
 if env['disable_sdl'] and not env['disable_net']:
     print 'Warning: since SDL is disabled, the GiGiNet build is disabled as well.'
     env['disable_net'] = 1
@@ -201,19 +209,6 @@ if not env.GetOption('clean'):
                 Exit(1)
         else:
             env.Append(LIBS = [ft_win32_lib_name])
-
-        # log4cpp
-        AppendPackagePaths('log4cpp', env)
-        version_regex = re.compile(r'LOG4CPP_VERSION\s*"(.*)"')
-        if not conf.CheckVersionHeader('log4cpp', 'log4cpp/config.h', version_regex, log4cpp_version, False):
-            Exit(1)
-        if not conf.CheckCXXHeader('log4cpp/Category.hh'):
-            Exit(1)
-        if str(Platform()) != 'win32':
-            if not conf.CheckLib('log4cpp', 'log4cpp::Category::getRoot', header = '#include <log4cpp/Category.hh>', language = 'C++'):
-                Exit(1)
-        else:
-            env.Append(LIBS = ['log4cpp'])
 
         # DevIL (aka IL)
         AppendPackagePaths('devil', env)
@@ -480,7 +475,7 @@ if not env['disable_sdl']:
 if not env['disable_net']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_net[0])))))
     if not mising_pkg_config:
-        deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_sdl_pc[0])))))
+        deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_net_pc[0])))))
 uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)
 Alias('uninstall', uninstall_cmd)
 

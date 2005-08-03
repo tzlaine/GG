@@ -27,6 +27,8 @@
 #include "SDL/SDLGGApp.h"
 #include "GGEventPump.h"
 
+#include <iostream>
+
 // member functions
 SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
     App(app_name),
@@ -63,9 +65,7 @@ void SDLGGApp::operator()()
 void SDLGGApp::Exit(int code)
 {
     if (code)
-        Logger().fatalStream() << "Initiating Exit (code " << code << " - error termination)";
-    else
-        Logger().debugStream() << "Initiating Exit (normal termination)";
+        std::cerr << "Initiating Exit (code " << code << " - error termination)";
     SDLQuit();
     exit(code);
 }
@@ -127,18 +127,18 @@ void SDLGGApp::SDLInit()
     const SDL_VideoInfo* vid_info = 0;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
-        Logger().errorStream() << "SDL initialization failed: " << SDL_GetError();
+        std::cerr << "SDL initialization failed: " << SDL_GetError();
         Exit(1);
     }
 
 #if defined(GG_USE_NET) && GG_USE_NET
     if (SDLNet_Init() < 0) {
-        Logger().errorStream() << "SDL Net initialization failed: " << SDLNet_GetError();
+        std::cerr << "SDL Net initialization failed: " << SDLNet_GetError();
         Exit(1);
     }
 
     if (FE_Init() < 0) {
-        Logger().errorStream() << "FastEvents initialization failed: " << FE_GetError();
+        std::cerr << "FastEvents initialization failed: " << FE_GetError();
         Exit(1);
     }
 #endif // GG_USE_NET
@@ -146,20 +146,20 @@ void SDLGGApp::SDLInit()
     vid_info = SDL_GetVideoInfo();
 
     if (!vid_info) {
-        Logger().errorStream() << "Video info query failed: " << SDL_GetError();
+        std::cerr << "Video info query failed: " << SDL_GetError();
         Exit(1);
     }
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     if (SDL_SetVideoMode(m_app_width, m_app_height, 16, SDL_OPENGL) == 0) {
-        Logger().errorStream() << "Video mode set failed: " << SDL_GetError();
+        std::cerr << "Video mode set failed: " << SDL_GetError();
         Exit(1);
     }
 
 #if defined(GG_USE_NET) && GG_USE_NET
     if (NET2_Init() < 0) {
-        Logger().errorStream() << "SDL Net2 initialization failed: " << NET2_GetError();
+        std::cerr << "SDL Net2 initialization failed: " << NET2_GetError();
         Exit(1);
     }
 #endif // GG_USE_NET
@@ -167,7 +167,6 @@ void SDLGGApp::SDLInit()
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
     EnableMouseDragRepeat(SDL_DEFAULT_REPEAT_DELAY / 2, SDL_DEFAULT_REPEAT_INTERVAL / 2);
 
-    Logger().debugStream() << "SDLInit() complete.";
     GLInit();
 }
 
@@ -186,8 +185,6 @@ void SDLGGApp::GLInit()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(50.0, ratio, 1.0, 10.0);
-
-    Logger().debugStream() << "GLInit() complete.";
 }
 
 void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
@@ -285,7 +282,6 @@ void SDLGGApp::SDLQuit()
     SDLNet_Quit();
 #endif // GG_USE_NET
     SDL_Quit();
-    Logger().debugStream() << "SDLQuit() complete.";
 }
 
 void SDLGGApp::Run()
@@ -296,13 +292,13 @@ void SDLGGApp::Run()
         GG::EventPump pump;
         pump();
     } catch (const std::invalid_argument& exception) {
-        Logger().fatal("std::invalid_argument Exception caught in App::Run(): " + std::string(exception.what()));
+        std::cerr << "std::invalid_argument Exception caught in App::Run(): " << exception.what();
         Exit(1);
     } catch (const std::runtime_error& exception) {
-        Logger().fatal("std::runtime_error Exception caught in App::Run(): " + std::string(exception.what()));
+        std::cerr << "std::runtime_error Exception caught in App::Run(): " << exception.what();
         Exit(1);
     } catch (const GG::GGException& exception) {
-        Logger().fatal("GG::GGException (subclass " + std::string(exception.what()) + ") caught in App::Run(): " + exception.Message());
+        std::cerr << "GG::GGException (subclass " << exception.what() << ") caught in App::Run(): " << exception.Message();
         Exit(1);
     }
 }

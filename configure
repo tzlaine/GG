@@ -465,7 +465,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all libltdl"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS GGAPI_CURRENT GGAPI_REVISION GGAPI_AGE build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os WIN32_TRUE WIN32_FALSE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL INCLTDL LIBLTDL SDL_CONFIG SDL_CPPFLAGS SDL_LDFLAGS SDL_CFLAGS SDL_LIBS FT_CONFIG FT_CPPFLAGS FT_LDFLAGS FT2_CFLAGS FT2_LIBS FT2_CONFIG SDLNET_CPPFLAGS SDLNET_LDFLAGS SDLNET_LIB USE_BUILTIN_SDLNET_TRUE USE_BUILTIN_SDLNET_FALSE GL_LIBS BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS DEVIL_CPPFLAGS DEVIL_LDFLAGS LIBOBJS DEVIL_LIBS GG_DEVIL_WITH_ALLEGRO GG_NO_ALLEGRO_HACK LOG4CPP_CPPFLAGS LOG4CPP_LDFLAGS DISABLE_NET_TRUE DISABLE_NET_FALSE GG_USE_NET GIGINET_DEP DEBUG_TRUE DEBUG_FALSE ACLOCAL_INCLUDE subdirs LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS GGAPI_CURRENT GGAPI_REVISION GGAPI_AGE build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os WIN32_TRUE WIN32_FALSE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL INCLTDL LIBLTDL SDL_CONFIG SDL_CPPFLAGS SDL_LDFLAGS SDL_CFLAGS SDL_LIBS FT_CONFIG FT_CPPFLAGS FT_LDFLAGS FT2_CFLAGS FT2_LIBS FT2_CONFIG SDLNET_CPPFLAGS SDLNET_LDFLAGS SDLNET_LIB USE_BUILTIN_SDLNET_TRUE USE_BUILTIN_SDLNET_FALSE GL_LIBS BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS DEVIL_CPPFLAGS DEVIL_LDFLAGS LIBOBJS DEVIL_LIBS GG_DEVIL_WITH_ALLEGRO GG_NO_ALLEGRO_HACK DISABLE_NET_TRUE DISABLE_NET_FALSE GG_USE_NET GIGINET_DEP DEBUG_TRUE DEBUG_FALSE ACLOCAL_INCLUDE subdirs LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1079,11 +1079,6 @@ Optional Packages:
   --with-devil-include=DIR
                           specify exact include dir for devil headers
   --with-devil-libdir=DIR specify exact library dir for devil library
-  --with-log4cpp=DIR      root directory of log4cpp installation
-  --with-log4cpp-include=DIR
-                          specify exact include dir for log4cpp headers
-  --with-log4cpp-libdir=DIR
-                          specify exact library dir for log4cpp library
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -4479,7 +4474,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4482 "configure"' > conftest.$ac_ext
+  echo '#line 4477 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5602,7 +5597,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5605:" \
+echo "$as_me:5600:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6700,11 +6695,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6703: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6698: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6707: \$? = $ac_status" >&5
+   echo "$as_me:6702: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -6962,11 +6957,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6965: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6960: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6969: \$? = $ac_status" >&5
+   echo "$as_me:6964: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7024,11 +7019,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7027: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7022: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7031: \$? = $ac_status" >&5
+   echo "$as_me:7026: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8409,7 +8404,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 8412 "configure"' > conftest.$ac_ext
+    echo '#line 8407 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9280,7 +9275,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9283 "configure"
+#line 9278 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -9378,7 +9373,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9381 "configure"
+#line 9376 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11626,11 +11621,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11629: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11624: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11633: \$? = $ac_status" >&5
+   echo "$as_me:11628: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11688,11 +11683,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11691: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11686: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11695: \$? = $ac_status" >&5
+   echo "$as_me:11690: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12203,7 +12198,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 12206 "configure"' > conftest.$ac_ext
+    echo '#line 12201 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -13074,7 +13069,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13077 "configure"
+#line 13072 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13172,7 +13167,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13175 "configure"
+#line 13170 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14057,11 +14052,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14060: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14055: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14064: \$? = $ac_status" >&5
+   echo "$as_me:14059: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14119,11 +14114,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14122: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14117: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14126: \$? = $ac_status" >&5
+   echo "$as_me:14121: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15484,7 +15479,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 15487 "configure"' > conftest.$ac_ext
+    echo '#line 15482 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -16257,11 +16252,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16260: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16255: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16264: \$? = $ac_status" >&5
+   echo "$as_me:16259: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16519,11 +16514,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16522: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16517: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16526: \$? = $ac_status" >&5
+   echo "$as_me:16521: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16581,11 +16576,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16584: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16579: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16588: \$? = $ac_status" >&5
+   echo "$as_me:16583: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17966,7 +17961,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 17969 "configure"' > conftest.$ac_ext
+    echo '#line 17964 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -18837,7 +18832,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18840 "configure"
+#line 18835 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18935,7 +18930,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18938 "configure"
+#line 18933 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25081,293 +25076,6 @@ fi
 
 
 
-### expat and log4cpp check
-#YG_GET_PATH(expat)
-#SAVE_LIBS="$LIBS"
-#AC_CHECK_LIB(expat,XML_ParserCreate,[],[AC_MSG_FAILURE([You'll need expat])])
-#LIBS="$SAVE_LIBS"
-
-
-# Check whether --with-log4cpp or --without-log4cpp was given.
-if test "${with_log4cpp+set}" = set; then
-  withval="$with_log4cpp"
-  with_log4cpp=$withval
-if test "${with_log4cpp}" != yes; then
-	log4cpp_include="$withval/include"
-	log4cpp_libdir="$withval/lib"
-fi
-fi;
-
-
-# Check whether --with-log4cpp-include or --without-log4cpp-include was given.
-if test "${with_log4cpp_include+set}" = set; then
-  withval="$with_log4cpp_include"
-  log4cpp_include="$withval"
-fi;
-
-
-if test x${log4cpp_include} != x; then
-  LOG4CPP_CPPFLAGS=-I${log4cpp_include}
-  CPPFLAGS="$CPPFLAGS -I${log4cpp_include}"
-else
-  LOG4CPP_CPPFLAGS=
-fi
-
-
-
-
-# Check whether --with-log4cpp-libdir or --without-log4cpp-libdir was given.
-if test "${with_log4cpp_libdir+set}" = set; then
-  withval="$with_log4cpp_libdir"
-  log4cpp_libdir="$withval"
-fi;
-
-
-if test x${log4cpp_libdir} != x; then
-  LOG4CPP_LDFLAGS=-L${log4cpp_libdir}
-  LDFLAGS="$LDFLAGS -L${log4cpp_libdir}"
-else
-  LOG4CPP_LDFLAGS=
-fi
-
-
-ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-
-for ac_header in log4cpp/Category.hh
-do
-as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo "$as_me:$LINENO: checking for $ac_header" >&5
-echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking $ac_header usability" >&5
-echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <$ac_header>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking $ac_header presence" >&5
-echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$ac_header>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
-echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ---------------------------------- ##
-## Report this to the libGiGi lists.  ##
-## ---------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for $ac_header" >&5
-echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  eval "$as_ac_Header=\$ac_header_preproc"
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
-
-fi
-if test `eval echo '${'$as_ac_Header'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-else
-  { { echo "$as_me:$LINENO: error: log4cpp/Category.hh not found in include-path
-See \`config.log' for more details." >&5
-echo "$as_me: error: log4cpp/Category.hh not found in include-path
-See \`config.log' for more details." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-done
-
-SAVE_LIBS="$LIBS"
- YG_LIBS_BAK="$LIBS"
- echo "$as_me:$LINENO: checking for log4cpp" >&5
-echo $ECHO_N "checking for log4cpp... $ECHO_C" >&6
-if test "${yg_cv_search_for_libs_log4cpp_log4cpp+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  yg_cv_search_for_libs_log4cpp_log4cpp=missing
-		for lib in log4cpp; do
-		  LIBS="-l$lib $YG_LIBS_BAK"
-		  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <log4cpp/Category.hh>
-int
-main ()
-{
-log4cpp::Category::shutdown();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  yg_cv_search_for_libs_log4cpp_log4cpp=-l$lib;break
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-                done
-fi
-echo "$as_me:$LINENO: result: $yg_cv_search_for_libs_log4cpp_log4cpp" >&5
-echo "${ECHO_T}$yg_cv_search_for_libs_log4cpp_log4cpp" >&6
- if test x$yg_cv_search_for_libs_log4cpp_log4cpp = xmissing; then
-    LIBS="$YG_LIBS_BAK"
-    { { echo "$as_me:$LINENO: error: can't link log4cpp in
-See \`config.log' for more details." >&5
-echo "$as_me: error: can't link log4cpp in
-See \`config.log' for more details." >&2;}
-   { (exit 1); exit 1; }; }
- else
-    LIBS="$yg_cv_search_for_libs_log4cpp_log4cpp $YG_LIBS_BAK"
-    :
- fi
-
-
-LIBS="$SAVE_LIBS"
-
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -26307,8 +26015,6 @@ s,@LIBOBJS@,$LIBOBJS,;t t
 s,@DEVIL_LIBS@,$DEVIL_LIBS,;t t
 s,@GG_DEVIL_WITH_ALLEGRO@,$GG_DEVIL_WITH_ALLEGRO,;t t
 s,@GG_NO_ALLEGRO_HACK@,$GG_NO_ALLEGRO_HACK,;t t
-s,@LOG4CPP_CPPFLAGS@,$LOG4CPP_CPPFLAGS,;t t
-s,@LOG4CPP_LDFLAGS@,$LOG4CPP_LDFLAGS,;t t
 s,@DISABLE_NET_TRUE@,$DISABLE_NET_TRUE,;t t
 s,@DISABLE_NET_FALSE@,$DISABLE_NET_FALSE,;t t
 s,@GG_USE_NET@,$GG_USE_NET,;t t

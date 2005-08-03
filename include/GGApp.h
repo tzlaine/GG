@@ -39,10 +39,6 @@
 #include "GGFont.h"
 #endif
 
-#ifndef _LOG4CPP_CATEGORY_HH
-#include <log4cpp/Category.hh>
-#endif
-
 namespace boost { namespace archive {
     class xml_oarchive;
     class xml_iarchive;
@@ -225,8 +221,6 @@ public:
 
     /** sets all the SaveWnd() and LoadWnd() function pointers to be the functions provided by \a interface. */
     void SetSaveLoadFunctions(const PluginInterface& interface);
-
-    log4cpp::Category& Logger();
     //@}
 
     static App*  GetApp();                ///< allows any GG code access to app framework by calling App::GetApp()

@@ -105,9 +105,8 @@ bool PluginInterface::Load(const std::string& lib_name)
     if (m_handle) {
         if ((err = lt_dlclose(m_handle))) {
             retval = false;
-            GG::App::GetApp()->Logger().errorStream() 
-                << "PluginInterface::Load : lt_dlclose() call failed; load of new dynamic library aborted (error #" 
-                << err << ": " << lt_dlerror() << ").";
+            std::cerr << "PluginInterface::Load : lt_dlclose() call failed; load of new dynamic library aborted (error #" 
+                      << err << ": " << lt_dlerror() << ").";
         }
     }
 
@@ -142,8 +141,7 @@ bool PluginInterface::Load(const std::string& lib_name)
             LoadWnd = (LoadWndFn)(lt_dlsym(m_handle, "LoadWnd"));
         } else {
             retval = false;
-            GG::App::GetApp()->Logger().errorStream() 
-                << "PluginInterface::Load : Failed to load dynamic library \"" << lib_name << "\" (error was: " << lt_dlerror() << ").";
+            std::cerr << "PluginInterface::Load : Failed to load dynamic library \"" << lib_name << "\" (error was: " << lt_dlerror() << ").";
         }
     }
     return retval;
@@ -190,8 +188,7 @@ void PluginManager::InitDynamicLoader()
 
     int err = lt_dlinit();
     if (err) {
-        GG::App::GetApp()->Logger().errorStream() 
-            << "PluginManager::InitDynamicLoader : lt_dlinit() call failed. (error #" << err << ": " << lt_dlerror() << ").";
+        std::cerr << "PluginManager::InitDynamicLoader : lt_dlinit() call failed. (error #" << err << ": " << lt_dlerror() << ").";
     } else {
         s_lt_dl_initialized = true;
     }
@@ -204,9 +201,8 @@ void PluginManager::AddSearchDirectory(const std::string& dir)
 
     int err = lt_dladdsearchdir(dir.c_str());
     if (err) {
-        GG::App::GetApp()->Logger().errorStream() 
-            << "PluginManager::AddSearchDirectory : lt_dladdsearchdir() call failed for directory \"" << dir << "\". (error #" << err 
-            << ": " << lt_dlerror() << ").";
+        std::cerr << "PluginManager::AddSearchDirectory : lt_dladdsearchdir() call failed for directory \"" << dir << "\". (error #" << err 
+                  << ": " << lt_dlerror() << ").";
     }
 }
 
@@ -217,8 +213,7 @@ void PluginManager::CleanupDynamicLoader()
 
     int err = lt_dlexit();
     if (err) {
-        GG::App::GetApp()->Logger().errorStream() 
-            << "PluginManager::CleanupDynamicLoader : lt_dlexit() call failed. (error #" << err << ": " << lt_dlerror() << ").";
+        std::cerr << "PluginManager::CleanupDynamicLoader : lt_dlexit() call failed. (error #" << err << ": " << lt_dlerror() << ").";
     } else {
         s_lt_dl_initialized = false;
     }

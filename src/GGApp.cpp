@@ -41,11 +41,6 @@
 #include "GGTextControl.h"
 #include "GGZList.h"
 
-#include <log4cpp/Appender.hh>
-#include <log4cpp/Category.hh>
-#include <log4cpp/PatternLayout.hh>
-#include <log4cpp/FileAppender.hh>
-
 #include <cassert>
 #include <fstream>
 #include <list>
@@ -99,8 +94,7 @@ struct GG::AppImplData
         double_click_start_time(-1),
         double_click_time(-1),
         save_wnd_fn(0),
-        load_wnd_fn(0),
-        log_category(log4cpp::Category::getRoot())
+        load_wnd_fn(0)
     {
         button_state[0] = button_state[1] = button_state[2] = false;
         drag_wnds[0] = drag_wnds[1] = drag_wnds[2] = 0;
@@ -151,8 +145,6 @@ struct GG::AppImplData
 
     App::SaveWndFn                save_wnd_fn;
     App::LoadWndFn                load_wnd_fn;
-
-    log4cpp::Category&    log_category; // log4cpp object used to log events to file
 };
 
 // static member(s)
@@ -167,26 +159,10 @@ App::App(const std::string& app_name)
     assert(!s_impl);
     s_impl.reset(new AppImplData());
     s_impl->app_name = app_name;
-
-    const std::string GG_LOG_FILENAME(s_impl->app_name + ".log");
-
-    // a platform-independent way to erase the old log
-    std::ofstream temp(GG_LOG_FILENAME.c_str());
-    temp.close();
-
-    log4cpp::Appender* appender = new log4cpp::FileAppender("FileAppender", GG_LOG_FILENAME);
-    log4cpp::PatternLayout* layout = new log4cpp::PatternLayout();
-    layout->setConversionPattern("%d %p : %m%n");
-    appender->setLayout(layout);
-    s_impl->log_category.setAdditivity(false);  // make appender the only appender used...
-    s_impl->log_category.setAppender(appender);
-    s_impl->log_category.setAdditivity(true);   // ...but allow the addition of others later
-    s_impl->log_category.setPriority(log4cpp::Priority::DEBUG);
 }
 
 App::~App()
 {
-    log4cpp::Category::shutdown();
 }
 
 Wnd* App::FocusWnd() const
@@ -482,11 +458,6 @@ void App::SetSaveLoadFunctions(const PluginInterface& interface)
 {
     s_impl->save_wnd_fn = interface.SaveWnd;
     s_impl->load_wnd_fn = interface.LoadWnd;
-}
-
-log4cpp::Category& App::Logger()
-{
-    return s_impl->log_category;
 }
 
 App* App::GetApp()

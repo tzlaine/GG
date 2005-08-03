@@ -1035,9 +1035,8 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
             } else {
                 well_formed_tag = false;
             }
-            if (!well_formed_tag) {
-                App::GetApp()->Logger().error("GG::Font : Encountered malformed <rgba> formatting tag: " + tag->original_tag_text);
-            }
+            if (!well_formed_tag)
+                std::cerr << "GG::Font : Encountered malformed <rgba> formatting tag: " << tag->original_tag_text;
         }
     }
 }

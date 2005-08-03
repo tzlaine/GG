@@ -1,6 +1,6 @@
 # -*- Python -*-
 
-Import('env', 'DirHeaders')
+Import('sdl_env', 'DirHeaders')
 
 sources = [
     'SDLGGApp.cpp'
@@ -8,9 +8,9 @@ sources = [
 
 headers = ['SDL'] + DirHeaders('../../include/SDL')
 
-if env['dynamic']:
-    objects = env.SharedObject(sources)
+if sdl_env['dynamic']:
+    objects = sdl_env.SharedObject(sources)
 else:
-    objects = env.Object(sources)
+    objects = sdl_env.Object(sources)
 
 Return('objects', 'headers')

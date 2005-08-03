@@ -1,8 +1,8 @@
 # -*- Python -*-
 
-Import('env')
+Import('net_env')
 
-if env['with_builtin_sdlnet']:
+if net_env['with_builtin_sdlnet']:
     sources = [
         'SDLnet.c',
         'SDLnetTCP.c',
@@ -31,9 +31,9 @@ headers += [
     'trace.h'
     ]
 
-if env['dynamic']:
-    objects = env.SharedObject(sources)
+if net_env['dynamic']:
+    objects = net_env.SharedObject(sources)
 else:
-    objects = env.Object(sources)
+    objects = net_env.Object(sources)
 
 Return('objects', 'headers')

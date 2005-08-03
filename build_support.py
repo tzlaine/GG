@@ -101,14 +101,14 @@ def AppendPackagePaths(package, env):
     root = OptionValue('with_' + package, env)
     inc = OptionValue('with_%s_include' % package, env)
     if not inc and root:
-        inc = os.path.join(root, 'include')
+        inc =  os.path.normpath(os.path.join(root, 'include'))
     lib = OptionValue('with_%s_libdir' % package, env)
     if not lib and root:
-        lib = os.path.join(root, 'lib')
+        lib = os.path.normpath(os.path.join(root, 'lib'))
     if inc:
-        env.Append(CPPPATH = inc)
+        env.Append(CPPPATH = [inc])
     if lib:
-        env.Append(LIBPATH = lib)
+        env.Append(LIBPATH = [lib])
 
 def CheckPkgConfig(context, version):
     context.Message('Checking for pkg-config... ')
@@ -142,13 +142,13 @@ def FindRegexMatchesInHeader(regex, filename, env = None):
     f = None
     for i in ['.', '/usr/include', '/usr/local/include']:
         try:
-            f = open(os.path.join(i, filename), 'r')
+            f = open(os.path.normpath(os.path.join(i, filename)), 'r')
         except Exception:
             None
-    if not f and env:
+    if not f and env and env.has_key('CPPPATH'):
         for i in env['CPPPATH']:
             try:
-                f = open(os.path.join(i, filename), 'r')
+                f = open(os.path.normpath(os.path.join(i, filename)), 'r')
             except Exception:
                 None
     if f:
@@ -194,8 +194,7 @@ def CheckBoostLib(context, lib_tuple, conf):
             ret = lib_name
     return ret
 
-def CheckBoost(context, required_version, lib_tuples, conf):
-    ret = []
+def CheckBoost(context, required_version, lib_tuples, conf, check_libs):
     AppendPackagePaths('boost', context.env)
     if not conf.CheckCXXHeader('boost/shared_ptr.hpp'):
         context.Message('Boost configuration... ')
@@ -206,19 +205,18 @@ def CheckBoost(context, required_version, lib_tuples, conf):
         context.Message('Boost configuration... ')
         context.Result(False)
         return False
-    for i in lib_tuples:
-        lib = CheckBoostLib(context, i, conf)
-        if lib:
-            ret.append(lib)
-        else:
-            context.Message('Boost configuration... ')
-            context.Result(False)
-            return False
+    if check_libs:
+        for i in lib_tuples:
+            lib = CheckBoostLib(context, i, conf)
+            if not lib:
+                context.Message('Boost configuration... ')
+                context.Result(False)
+                return False
     context.Message('Boost configuration... ')
-    context.Result(ret and 'ok' or 'failed')
-    return ret
+    context.Result('ok')
+    return True
 
-def CheckSDL(context, options, conf, sdl_config):
+def CheckSDL(context, options, conf, sdl_config, check_lib):
     ret = True
     AppendPackagePaths('sdl', context.env)
     context.Message('Checking for sdl-config... ')
@@ -232,7 +230,11 @@ def CheckSDL(context, options, conf, sdl_config):
         sdl_config_prefix_flag = sdl_root and ('--prefix=' + sdl_root) or ''
         context.env.ParseConfig('sdl-config ' + sdl_config_prefix_flag + ' --cflags ' + (build_dynamic and '--libs' or '--static-libs'))
     else:
-        if not CheckCHeader(context, 'SDL/SDL.h') or not CheckLib(context, 'SDL', 'SDL_Init'):
+        if not conf.CheckCHeader('SDL/SDL.h') and not conf.CheckCHeader('SDL.h'):
+            context.Message('SDL configuration... ')
+            context.Result(False)
+            return False
+        if check_lib and not conf.CheckLib('SDL', 'SDL_Init'):
             context.Message('SDL configuration... ')
             context.Result(False)
             return False
@@ -241,8 +243,9 @@ def CheckSDL(context, options, conf, sdl_config):
         context.Message('SDL configuration... ')
         context.Result(False)
         return False
-    context.Message('Linking SDL/OpenGL test app... ')
-    link_test_app = """
+    if check_lib:
+        context.Message('Linking SDL/OpenGL test app... ')
+        link_test_app = """
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 int main()
@@ -259,11 +262,11 @@ int main()
     return 0;
 }
 """
-    if context.TryLink(link_test_app, '.c'):
-        context.Result(True)
-    else:
-        context.Result(False)
-        ret = False
+        if context.TryLink(link_test_app, '.c'):
+            context.Result(True)
+        else:
+            context.Result(False)
+            ret = False
     context.Message('SDL configuration... ')
     context.Result(ret)
     return ret
@@ -291,12 +294,13 @@ def TraverseHeaderTree(dir, header_root, headers, current_path, op, nodes):
         current_path.append(headers[0])
     sub_path = ""
     for i in current_path:
-        sub_path = os.path.join(sub_path, i)
+        sub_path = os.path.normpath(os.path.join(sub_path, i))
     for i in range(1, len(headers)):
         if type(headers[i]) == types.ListType:
             TraverseHeaderTree(dir, header_root, headers[i], current_path, op, nodes)
         else:
-            nodes.append(op(os.path.join(dir, sub_path), os.path.join(header_root, sub_path, headers[i])))
+            nodes.append(op(os.path.normpath(os.path.join(dir, sub_path)),
+                            os.path.normpath(os.path.join(header_root, sub_path, headers[i]))))
     if headers[0]:
         current_path.pop()
 

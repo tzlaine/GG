@@ -25,8 +25,9 @@
 
 /* $Header$ */
 
-/** \file GGEdit.h
-    Contains the Edit class, a single-line editable text-box control. */
+/** \file GGWndEditor.h
+    Contains the GGWndEditor class, a window that contains controls that can alter the properties of a Wnd
+    interactively. */
 
 #ifndef _GGWndEditor_h_
 #define _GGWndEditor_h_

@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /* GG is a GUI for SDL and OpenGL.
    Copyright (C) 2003 T. Zachary Laine
 
@@ -21,8 +22,6 @@
     
    Zach Laine
    whatwasthataddress@hotmail.com */
-
-/* $Header$ */
 
 #ifndef _GGConfig_h_
 #define _GGConfig_h_

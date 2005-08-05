@@ -253,6 +253,7 @@ void Slider::Disable(bool b/* = true*/)
 
 void Slider::SizeSlider(int min, int max)
 {
+    assert(m_range_min != m_range_max);
     m_range_min = min;
     m_range_max = max;
     if (m_posn < m_range_min)

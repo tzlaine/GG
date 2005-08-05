@@ -260,8 +260,8 @@ void Scroll::SetInteriorColor(Clr c)
 void Scroll::SizeScroll(int min, int max, int line, int page)
 {
     m_line_sz = line;
-    m_range_min = min;
-    m_range_max = max;
+    m_range_min = std::min(min, max);
+    m_range_max = std::max(min, max);
     int old_posn = m_posn;
     m_page_sz = page;
     if (m_page_sz > (m_range_max - m_range_min + 1)) m_page_sz = (m_range_max - m_range_min + 1);

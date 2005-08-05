@@ -321,13 +321,13 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi, const std:
 
     fs::path filename_path = fs::complete(fs::path(filename, fs::native));
     if (!m_files_edit)
-        m_files_edit = new Edit(0, 0, 1, "", m_font, m_border_color, m_text_color); // use Edit's necessary-height calcs to determine height of the edit
+        m_files_edit = new Edit(0, 0, 1, 1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
     if (!m_filter_list)
         m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LB_NOSORT);
 
-    m_files_edit->Resize(100, m_files_edit->Height());
+    m_files_edit->Resize(100, m_font->Height() + 2 * 5);
     m_files_edit->MoveTo(0, 0);
     m_filter_list->Resize(100, m_filter_list->Height());
     m_filter_list->MoveTo(0, 0);

@@ -2,6 +2,8 @@
 #include "GGThreeButtonDlg.h"
 #include "GGFileDlg.h"
 
+#include <iostream>
+
 // Tutorial 1: Minimal
 // This contains the minimal interesting GG application.  It contains 3D as well as GUI elements in the same scene, and
 // demonstrates how to use the default SDL input driver, SDLGGApp.
@@ -203,11 +205,11 @@ int main(int argc, char* argv[])
         // This, however, is necessary.  This executes the GG event loop until the app is terminated.
         app();
     } catch (const std::invalid_argument& e) {
-        app.Logger().errorStream() << "main() caught exception(std::invalid_arg): " << e.what();
+        std::cerr << "main() caught exception(std::invalid_arg): " << e.what();
     } catch (const std::runtime_error& e) {
-        app.Logger().errorStream() << "main() caught exception(std::runtime_error): " << e.what();
+        std::cerr << "main() caught exception(std::runtime_error): " << e.what();
     } catch (const std::exception& e) {
-        app.Logger().errorStream() << "main() caught exception(std::exception): " << e.what();
+        std::cerr << "main() caught exception(std::exception): " << e.what();
     }
     return 0;
 }

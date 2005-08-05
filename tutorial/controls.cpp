@@ -385,11 +385,11 @@ int main(int argc, char* argv[])
     try {
         app();
     } catch (const std::invalid_argument& e) {
-        app.Logger().errorStream() << "main() caught exception(std::invalid_arg): " << e.what();
+        std::cerr << "main() caught exception(std::invalid_arg): " << e.what();
     } catch (const std::runtime_error& e) {
-        app.Logger().errorStream() << "main() caught exception(std::runtime_error): " << e.what();
+        std::cerr << "main() caught exception(std::runtime_error): " << e.what();
     } catch (const std::exception& e) {
-        app.Logger().errorStream() << "main() caught exception(std::exception): " << e.what();
+        std::cerr << "main() caught exception(std::exception): " << e.what();
     }
     return 0;
 }

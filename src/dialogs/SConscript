@@ -3,6 +3,7 @@
 Import('env', 'DirHeaders')
 
 sources = [
+    'GGColorDlg.cpp',
     'GGFileDlg.cpp',
     'GGThreeButtonDlg.cpp'
     ]

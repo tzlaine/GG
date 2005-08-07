@@ -35,6 +35,8 @@
 using namespace GG;
 
 namespace {
+    const double EPSILON = 0.0001;
+
     HSVClr Convert(const Clr& color)
     {
         HSVClr retval;
@@ -47,27 +49,31 @@ namespace {
 
         retval.v = max_channel;
 
-        if (!max_channel) {
+        if (max_channel < EPSILON) {
             retval.h = 0.0;
             retval.s = 0.0;
         } else {
             retval.s = channel_range / max_channel;
 
-            double delta_r = (((max_channel - r) / 6.0) + (channel_range / 2.0)) / channel_range;
-            double delta_g = (((max_channel - g) / 6.0) + (channel_range / 2.0)) / channel_range;
-            double delta_b = (((max_channel - b) / 6.0) + (channel_range / 2.0)) / channel_range;
+            if (channel_range) {
+                double delta_r = (((max_channel - r) / 6.0) + (channel_range / 2.0)) / channel_range;
+                double delta_g = (((max_channel - g) / 6.0) + (channel_range / 2.0)) / channel_range;
+                double delta_b = (((max_channel - b) / 6.0) + (channel_range / 2.0)) / channel_range;
 
-            if (r == max_channel)
-                retval.h = delta_b - delta_g;
-            else if (g == max_channel)
-                retval.h = (1.0 / 3.0) + delta_r - delta_b;
-            else if (b == max_channel)
-                retval.h = (2.0 / 3.0) + delta_g - delta_r;
+                if (r == max_channel)
+                    retval.h = delta_b - delta_g;
+                else if (g == max_channel)
+                    retval.h = (1.0 / 3.0) + delta_r - delta_b;
+                else if (b == max_channel)
+                    retval.h = (2.0 / 3.0) + delta_g - delta_r;
 
-            if (retval.h < 0.0)
-                retval.h += 1.0;
-            if (1.0 < retval.h)
-                retval.h -= 1.0;
+                if (retval.h < 0.0)
+                    retval.h += 1.0;
+                if (1.0 < retval.h)
+                    retval.h -= 1.0;
+            } else {
+                retval.h = 0.0;
+            }
         }
         return retval;
     }
@@ -77,7 +83,7 @@ namespace {
         Clr retval;
         retval.a = hsv_color.a;
 
-        if (!hsv_color.s) {
+        if (hsv_color.s < EPSILON) {
             retval.r = static_cast<Uint8>(hsv_color.v * 255);
             retval.g = static_cast<Uint8>(hsv_color.v * 255);
             retval.b = static_cast<Uint8>(hsv_color.v * 255);

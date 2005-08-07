@@ -167,6 +167,7 @@ public:
 
     /** \name Mutators */ //@{
     virtual bool Render();
+    virtual void Keypress(Key key, Uint32 key_mods);
     //@}
 
 protected:

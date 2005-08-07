@@ -492,6 +492,14 @@ bool ColorDlg::Render()
     return true;
 }
 
+void ColorDlg::Keypress(Key key, Uint32 key_mods)
+{
+    if (key == GGK_RETURN || key == GGK_KP_ENTER)
+        OkClicked();
+    else if (key == GGK_ESCAPE)
+        CancelClicked();
+}
+
 void ColorDlg::Init(const boost::shared_ptr<Font>& font)
 {
     m_current_color = m_original_color_specified ? Convert(m_original_color) : Convert(CLR_BLACK);

@@ -526,14 +526,14 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_value_picker->SetValue(m_current_color.v);
     const int HUE_SATURATION_PICKER_SIZE = 200;
     m_pickers_layout = new Layout(0, 0, HUE_SATURATION_PICKER_SIZE + 30, HUE_SATURATION_PICKER_SIZE,
-                                      1, 2, 0, 5);
+                                  1, 2, 0, 5);
     m_pickers_layout->SetColumnStretch(0, 1);
     m_pickers_layout->SetMinimumColumnWidth(1, 20);
     m_pickers_layout->Add(m_hue_saturation_picker, 0, 0);
     m_pickers_layout->Add(m_value_picker, 0, 1);
 
     m_color_squares_layout = new Layout(0, m_pickers_layout->LowerRight().y + 5, m_pickers_layout->Width(), 40,
-                                            1, 1, 0, 4);
+                                        1, 1, 0, 4);
     m_new_color_square = new ColorDisplay(color);
     if (m_original_color_specified) {
         m_color_squares_layout->Add(new TextControl(0, 0, 1, 1, "New", font, m_text_color, TF_RIGHT), 0, 0);
@@ -548,7 +548,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     }
 
     m_color_buttons_layout = new Layout(0, m_color_squares_layout->LowerRight().y + 5, m_pickers_layout->Width(), 80,
-                                            COLOR_BUTTON_ROWS, COLOR_BUTTON_COLS, 0, 4);
+                                        COLOR_BUTTON_ROWS, COLOR_BUTTON_COLS, 0, 4);
     for (int i = 0; i < COLOR_BUTTON_ROWS; ++i) {
         for (int j = 0; j < COLOR_BUTTON_COLS; ++j) {
             m_color_buttons.push_back(new ColorButton(m_color));
@@ -560,7 +560,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
 
     using boost::lexical_cast;
     m_sliders_ok_cancel_layout = new Layout(m_pickers_layout->LowerRight().x + 5, 0, 150, (25 + 5) * 8 - 5,
-                                                9, 3, 0, 5);
+                                            9, 3, 0, 5);
     m_sliders_ok_cancel_layout->SetMinimumColumnWidth(0, 15);
     m_sliders_ok_cancel_layout->SetMinimumColumnWidth(1, 30);
     m_sliders_ok_cancel_layout->SetColumnStretch(2, 1);
@@ -569,7 +569,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(color.r)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 0, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 255, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(color.r);
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::RedSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 0, 2);
@@ -579,7 +579,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(color.g)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 1, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 255, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(color.g);
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::GreenSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 1, 2);
@@ -589,7 +589,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(color.b)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 2, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 255, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(color.b);
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::BlueSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 2, 2);
@@ -599,7 +599,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(color.a)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 3, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 255, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(color.a);
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::AlphaSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 3, 2);
@@ -609,7 +609,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(m_current_color.h * 359)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 4, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 359, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(static_cast<int>(m_current_color.h * 359));
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::HueSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 4, 2);
@@ -619,7 +619,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(m_current_color.s * 255)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 5, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 255, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(static_cast<int>(m_current_color.s * 255));
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::SaturationSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 5, 2);
@@ -629,15 +629,15 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     m_slider_values.push_back(new TextControl(0, 0, 1, 1, lexical_cast<std::string>(static_cast<int>(m_current_color.v * 255)), font, m_text_color, TF_LEFT));
     m_sliders_ok_cancel_layout->Add(m_slider_values.back(), 6, 1);
     m_sliders.push_back(new Slider(0, 0, 1, 1, 0, 255, Slider::HORIZONTAL,
-                                       Slider::RAISED, m_color, 10));
+                                   Slider::RAISED, m_color, 10));
     m_sliders.back()->SlideTo(static_cast<int>(m_current_color.v * 255));
     Connect(m_sliders.back()->SlidSignal, &ColorDlg::ValueSliderChanged, this);
     m_sliders_ok_cancel_layout->Add(m_sliders.back(), 6, 2);
 
     m_ok = new Button(0, 0, 1, 1, "Ok", font, m_color, m_text_color);
-    m_sliders_ok_cancel_layout->Add(m_ok, 7, 0, 8, 3);
+    m_sliders_ok_cancel_layout->Add(m_ok, 7, 0, 1, 3);
     m_cancel = new Button(0, 0, 1, 1, "Cancel", font, m_color, m_text_color);
-    m_sliders_ok_cancel_layout->Add(m_cancel, 8, 0, 9, 3);
+    m_sliders_ok_cancel_layout->Add(m_cancel, 8, 0, 1, 3);
     Connect(m_ok->ClickedSignal, &ColorDlg::OkClicked, this);
     Connect(m_cancel->ClickedSignal, &ColorDlg::CancelClicked, this);
 
@@ -645,7 +645,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     Connect(m_hue_saturation_picker->ChangedSignal, &ColorDlg::HueSaturationPickerChanged, this);
     Connect(m_value_picker->ChangedSignal, &ColorDlg::ValuePickerChanged, this);
 
-    Layout* master_layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 3, 2, 5, 5);
+    Layout* master_layout = new Layout(3, 2, 5, 5);
     master_layout->SetColumnStretch(0, 1.25);
     master_layout->SetColumnStretch(1, 1);
     master_layout->SetRowStretch(0, 1.25);
@@ -654,7 +654,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     master_layout->Add(m_pickers_layout, 0, 0);
     master_layout->Add(m_color_squares_layout, 1, 0);
     master_layout->Add(m_color_buttons_layout, 2, 0);
-    master_layout->Add(m_sliders_ok_cancel_layout, 0, 1, 3, 2);
+    master_layout->Add(m_sliders_ok_cancel_layout, 0, 1, 3, 1);
     SetLayout(master_layout);
 }
 

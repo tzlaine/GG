@@ -39,7 +39,6 @@ namespace GG {
 
 class Font;
 class Slider;
-struct ColorButtonClickFunctor;
     
 /** contains the necessary data to represent a color in HSV space, with an alpha value thrown in to make conversions to
     and from GG::Clr possible. */

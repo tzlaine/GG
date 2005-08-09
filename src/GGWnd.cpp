@@ -864,7 +864,7 @@ void Wnd::GridLayout()
         int top = std::distance(unique_tops.begin(), unique_tops.find(ul.y));
         int right = std::distance(unique_lefts.begin(), unique_lefts.lower_bound(lr.x));
         int bottom = std::distance(unique_tops.begin(), unique_tops.lower_bound(lr.y));
-        m_layout->Add(wnd, top, left, bottom, right);
+        m_layout->Add(wnd, top, left, bottom - top, right - left);
     }
 }
 
@@ -876,6 +876,7 @@ void Wnd::SetLayout(Layout* layout)
     DeleteChildren();
     AttachChild(layout);
     m_layout = layout;
+    m_layout->SizeMove(0, 0, ClientWidth(), ClientHeight());
 }
 
 void Wnd::RemoveLayout()

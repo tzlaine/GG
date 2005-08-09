@@ -54,27 +54,28 @@ namespace GG {
     child will affect how much it can be stretched when the layout is resized.
 
     <p>Layouts are best used to arrange the children of another window, such as arranging the controls of a dialog box.
-    When used this way, the Layout becomes the sole child of it parent, and contains the parent's children as its own.
+    When used this way, the Layout becomes the sole child of its parent, and contains the parent's children as its own.
     This scheme allows Layouts to be easily nested, since all Layouts are Wnd-derived.  Like a Control, a Layout will
-    forward all MouseWheel() and Keypress() calls to its parent.
+    forward all MouseWheel() and Keypress() calls to its parent.  Clicks fall through as well, since Layouts are not
+    constructed with the Wnd::CLICKABLE flag.
 
     <p>There are two attributes that affect the spacing of all the layout's child windows: border margin and cell
     margin.  Border margin is the space left around the entire layout, between the outer edges of the children in the
     layout and the layout's outer edges.  Cell margin is the space left between individual Wnds in the layout, but does
     not add to the margin around the outside of the layout.
 
-    <p>A note about how layout minimum sizes are determined:
-    <br>The border margin adds to the minimum size of the layout.  Further, the cell margin will have an effect on the
-    minimum size of a cell, even an empty one, if it is \a greater than the row or column minimum for that cell.  So an
-    empty layout with 5 columns, a border margin of 3, and a cell margin of 2 will have a minumum width of 14.  This is
-    determined as follows: 5 columns means 4 cell margins between the columns, so 4 * 2 = 8.  The border margin is added
-    to both sides, which means the total minimum width is 8 + 2 * 3 = 14.  Also, the minimum size of each child in the
-    layout will affect the minimum sizes of the rows and columns it covers.  If a child covers more than one row/column,
-    its minimum size is distributed over the rows/columns it covers, proportional to the stretch factor for each
-    row/column.  Finally, the min values and stretch factors must both be satisfied simultaneously.  For example, if the
-    row mins are set to be [1 2 3] and the row stretch factors are set to be [1 2 3], the minimum width will be 6
-    (neglecting the margins).  However, if the mins were instead set to be [4 2 3], the stretch factors would lead to
-    effective minimums of [4 8 12] to maintain proportionality, making the minimum width 24.
+    <p>A note about how layout minimum sizes are determined: <br>The border margin adds to the minimum size of the
+    layout.  Further, the cell margin will have an effect on the minimum size of a cell, even an empty one, if it is \a
+    greater than the row or column minimum for that cell.  So an empty layout with 5 columns, a border margin of 3, and
+    a cell margin of 2 will have a minumum width of 14.  This is determined as follows: 5 columns means 4 cell margins
+    between the columns, so 4 * 2 = 8.  The border margin is added to both sides, which means the total minimum width is
+    8 + 2 * 3 = 14.  Also, the minimum size of each child in the layout will affect the minimum sizes of the rows and
+    columns it covers.  If a child covers more than one row/column, its minimum size is distributed over the
+    rows/columns it covers, proportional to the stretch factor for each row/column.  Finally, the min values and stretch
+    factors must both be satisfied simultaneously.  For example, if the row mins are set to be [1 2 3] and the row
+    stretch factors are set to be [1 2 3], the minimum width will be 6 (neglecting the margins).  However, if the mins
+    were instead set to be [4 2 3], the stretch factors would lead to effective minimums of [4 8 12] to maintain
+    proportionality, making the minimum width 24.
 
     \see The Wnd documentation has further information about layouts attached to Wnds.
 */
@@ -113,11 +114,10 @@ public:
     void Add(Wnd *w, int row, int column, Uint32 alignment = 0);
 
     /** inserts \a w into the layout, covering the indicated cell(s), expanding the layout grid as necessary.  The
-        row_end and column_end parameters are STL-style; that is, they indicate the last + 1 row or column,
-        respectively.  So Add(foo, 1, 2, 2, 3) only covers cell (1, 2).  \a row_end/\a column_end must be at least one
-        greater than \a row_begin/\a column_begin, though this is not checked.  Note that \a row_begin, \a column_begin,
-        \a row_end, and \a column_end must not be negative, though this is not checked. */
-    void Add(Wnd *w, int row_begin, int column_begin, int row_end, int column_end, Uint32 alignment = 0);
+        num_rows and num_columns indicate how many rows and columns \a w covers, respectively.  So Add(foo, 1, 2, 2, 3)
+        covers cells (1, 2) through (2, 4), inclusive.  Note that \a row, and \a column must be nonnegative and \a
+        num_rows and \a num_columns must be positive, though this is not checked. */
+    void Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
 
     /** resizes the layout to be \a rows by \a columns.  If the layout shrinks, any contained windows are deleted.  Each
         of \a rows and \a columns must be greater than 0, though this is not checked. */

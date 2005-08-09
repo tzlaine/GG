@@ -356,27 +356,29 @@ void Layout::Keypress(Key key, Uint32 key_mods)
 
 void Layout::Add(Wnd *w, int row, int column, Uint32 alignment/* = 0*/)
 {
-    Add(w, row, column, row + 1, column + 1, alignment);
+    Add(w, row, column, 1, 1, alignment);
 }
 
-void Layout::Add(Wnd *w, int first_row, int first_column, int last_row, int last_column, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uint32 alignment/* = 0*/)
 {
-    assert(0 <= first_row);
-    assert(0 <= first_column);
-    assert(first_row < last_row);
-    assert(first_column < last_column);
+    int last_row = row + num_rows;
+    int last_column = column + num_columns;
+    assert(0 <= row);
+    assert(0 <= column);
+    assert(row < last_row);
+    assert(column < last_column);
     ValidateAlignment(alignment);
     if (m_cells.size() < static_cast<unsigned int>(last_row) || m_cells[0].size() < static_cast<unsigned int>(last_column)) {
         ResizeLayout(std::max(last_row, Rows()), std::max(last_column, Columns()));
     }
-    for (int i = first_row; i < last_row; ++i) {
-        for (int j = first_column; j < last_column; ++j) {
+    for (int i = row; i < last_row; ++i) {
+        for (int j = column; j < last_column; ++j) {
             if (m_cells[i][j])
                 throw std::runtime_error("Layout::Add() : Attempted to add a Wnd to a layout cell that is already occupied");
             m_cells[i][j] = w;
         }
     }
-    m_wnd_positions[w] = WndPosition(first_row, first_column, last_row, last_column, alignment, w->Size());
+    m_wnd_positions[w] = WndPosition(row, column, last_row, last_column, alignment, w->Size());
     AttachChild(w);
     RedoLayout();
 }

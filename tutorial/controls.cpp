@@ -333,7 +333,7 @@ void ControlsTestGGApp::Initialize()
     GG::Scroll* scroll =
         new GG::Scroll(0, 0, 14, 200, GG::Scroll::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
     scroll->SetMaxSize(14, 1000);
-    layout->Add(scroll, 4, 1, 7, 2);
+    layout->Add(scroll, 4, 1, 3, 1);
 
     // These two lines load my crappy image of circles used for the next two controls, and then restores the state of
     // GL_TEXTURE_2D, which is changed in the process.

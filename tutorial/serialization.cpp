@@ -308,7 +308,7 @@ void ControlsTestGGApp::Initialize()
     GG::Scroll* scroll =
         new GG::Scroll(0, 0, 14, 200, GG::Scroll::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
     scroll->SetMaxSize(14, 1000);
-    layout->Add(scroll, 4, 1, 7, 2);
+    layout->Add(scroll, 4, 1, 3, 1);
 
     boost::shared_ptr<GG::Texture> circle_texture = GetTexture("hatchcircle.png");
     glDisable(GL_TEXTURE_2D);

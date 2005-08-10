@@ -30,6 +30,8 @@
 
 #include <IL/il.h>
 
+#include <iostream>
+
 /* some versions of libDevIL are linked with Allegro, which requires
    _mangled_main_address to be defined. Futhermore, ilut.h includes
    allegro.h as extern "C", which is wrong, because allegro defines
@@ -58,6 +60,8 @@
 
 #include <iomanip>
 
+#define VERBOSE_DEVIL_ERROR_REPORTING 0
+
 using namespace GG;
 
 namespace {
@@ -67,6 +71,17 @@ namespace {
         while (value < input)
             value <<= 1;
         return value;
+    }
+
+    void CheckILErrors(const std::string& function_call)
+    {
+        ILuint error;
+        while ((error = ilGetError()) != IL_NO_ERROR) {
+#if VERBOSE_DEVIL_ERROR_REPORTING
+            std::cerr << "IL call \"" << function_call << "\" failed with IL error \"" << iluErrorString(error)
+                      << "\" (code " << error << ")\n";
+#endif
+        }
     }
 }
 
@@ -222,15 +237,21 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
 
     ILuint id, error;
     ilGenImages(1, &id);
+    CheckILErrors("ilGenImages(1, &id)");
     ilBindImage(id);
+    CheckILErrors("ilBindImage(id)");
     ilLoadImage(const_cast<char*>(filename));
+    CheckILErrors("ilLoadImage(const_cast<char*>(filename))");
     if ((error = ilGetError()) != IL_NO_ERROR)
         throw TextureException((std::string("Could not load temporary DevIL image from file \'") + filename) + "\'");
    
-    if (mipmap)
+    if (mipmap) {
         m_opengl_id = ilutGLBindMipmaps();
-    else
+        CheckILErrors("ilutGLBindMipmaps()");
+    } else {
         m_opengl_id = ilutGLBindTexImage();
+        CheckILErrors("ilutGLBindTexImage()");
+    }
     if (!m_opengl_id || (error = ilGetError()) != IL_NO_ERROR)
         throw TextureException((std::string("Could not create OpenGL texture object from file \'") + filename) + "\'");
 
@@ -243,14 +264,18 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
     m_filename = filename;
     m_mipmaps = mipmap;
     m_bytes_pp = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+    CheckILErrors("ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL)");
     m_default_width = ilGetInteger(IL_IMAGE_WIDTH);
+    CheckILErrors("ilGetInteger(IL_IMAGE_WIDTH)");
     m_default_height = ilGetInteger(IL_IMAGE_HEIGHT);
+    CheckILErrors("ilGetInteger(IL_IMAGE_HEIGHT)");
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
     m_tex_coords[2] = m_default_width / double(m_width);
     m_tex_coords[3] = m_default_height / double(m_height);
     
     ilDeleteImages(1, &id);
+    CheckILErrors("ilDeleteImages(1, &id)");
 }
 
 void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap/* = false*/)
@@ -577,15 +602,24 @@ void TextureManager::FreeTexture(const std::string& name)
 void TextureManager::InitDevIL()
 {
     if (!s_il_initialized) {
+        // ensure we're starting with an empty error stack
+        while (ilGetError() != IL_NO_ERROR) ;
         ilInit();
+        CheckILErrors("ilInit()");
         iluInit();
+        CheckILErrors("iluInit()");
         ilutInit();
+        CheckILErrors("ilutInit()");
         ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
+        CheckILErrors("ilOriginFunc()");
         ilutRenderer(ILUT_OPENGL);
+        CheckILErrors("ilutRenderer()");
         GLint max_size;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
         ilutSetInteger(ILUT_MAXTEX_WIDTH, max_size);
+        CheckILErrors("ilutSetInteger(ILUT_MAXTEX_WIDTH, max_size)");
         ilutSetInteger(ILUT_MAXTEX_HEIGHT, max_size);
+        CheckILErrors("ilutSetInteger(ILUT_MAXTEX_HEIGHT, max_size)");
         s_il_initialized = true;
     }
 }

@@ -46,6 +46,8 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     Control(x, y, w, h, flags),
     m_format(text_fmt),
     m_text_color(color),
+    m_clip_text(false),
+    m_set_min_size(false),
     m_font(font),
     m_fit_to_text(false),
     m_dirty_load(false)
@@ -59,6 +61,8 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     Control(x, y, w, h, flags),
     m_format(text_fmt),
     m_text_color(color),
+    m_clip_text(false),
+    m_set_min_size(false),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_fit_to_text(false),
     m_dirty_load(false)
@@ -72,6 +76,8 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
     Control(x, y, 0, 0, flags),
     m_format(text_fmt),
     m_text_color(color),
+    m_clip_text(false),
+    m_set_min_size(false),
     m_font(font),
     m_fit_to_text(true),
     m_dirty_load(false)
@@ -85,6 +91,8 @@ TextControl::TextControl(int x, int y, const std::string& str, const std::string
     Control(x, y, 0, 0, flags),
     m_format(text_fmt),
     m_text_color(color),
+    m_clip_text(false),
+    m_set_min_size(false),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_fit_to_text(true),
     m_dirty_load(false)
@@ -101,6 +109,16 @@ Uint32 TextControl::TextFormat() const
 Clr TextControl::TextColor() const
 {
     return m_text_color;
+}
+
+bool TextControl::ClipText() const
+{
+    return m_clip_text;
+}
+
+bool TextControl::SetMinSize() const
+{
+    return m_set_min_size;
 }
 
 TextControl::operator const std::string&() const
@@ -134,8 +152,13 @@ bool TextControl::Render()
         SetText(WindowText());
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor4ubv(clr_to_use.v);
-    if (m_font)
+    if (m_font) {
+        if (m_clip_text)
+            BeginClipping();
         m_font->RenderText(UpperLeft(), LowerRight(), m_text, m_format, &m_line_data);
+        if (m_clip_text)
+            EndClipping();
+    }
     return true;
 }
 
@@ -146,6 +169,7 @@ void TextControl::SetText(const std::string& str)
         Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
         m_text_ul = Pt();
         m_text_lr = text_sz;
+        AdjustMinimumSize();
         if (m_fit_to_text) {
             Resize(text_sz);
         } else {
@@ -168,7 +192,9 @@ void TextControl::SizeMove(int x1, int y1, int x2, int y2)
 
 void TextControl::SetTextFormat(Uint32 format)
 {
-    m_format = format; ValidateFormat();
+    m_format = format;
+    ValidateFormat();
+    SetText(WindowText());
 }
 
 void TextControl::SetTextColor(Clr color)
@@ -180,6 +206,17 @@ void TextControl::SetColor(Clr c)
 {
     Control::SetColor(c);
     m_text_color = c;
+}
+
+void TextControl::ClipText(bool b)
+{
+    m_clip_text = b;
+}
+
+void TextControl::SetMinSize(bool b)
+{
+    m_set_min_size = b;
+    AdjustMinimumSize();
 }
 
 void TextControl::operator+=(const std::string& str)
@@ -272,6 +309,16 @@ void TextControl::ValidateFormat()
     }
     if ((m_format & TF_WORDBREAK) && (m_format & TF_LINEWRAP))   // only one of these can be picked; TF_WORDBREAK overrides TF_LINEWRAP
         m_format &= ~TF_LINEWRAP;
+}
+
+void TextControl::AdjustMinimumSize()
+{
+    if (m_set_min_size) {
+        Pt text_sz = TextLowerRight() - TextUpperLeft();
+        Pt curent_min = MinSize();
+        SetMinSize(std::max(text_sz.x, curent_min.x),
+                   std::max(text_sz.y, curent_min.y));
+    }
 }
 
 void TextControl::RecomputeTextBounds()

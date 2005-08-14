@@ -59,6 +59,7 @@ class GG_API TextControl : public Control
 {
 public:
     using Wnd::SizeMove;
+    using Wnd::SetMinSize;
 
     /** \name Structors */ //@{
     TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
@@ -76,8 +77,20 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    Uint32         TextFormat() const; ///< returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.)
-    Clr            TextColor() const;  ///< returns the text color (may differ from the Control::Color() in some subclasses)
+    /** returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.) */
+    Uint32         TextFormat() const;
+
+    /** returns the text color (this may differ from the Control::Color() in some subclasses) */
+    Clr            TextColor() const;
+
+    /** returns true iff the text control clips its text to its client area; by default this is not done */
+    bool           ClipText() const;
+
+    /** returns true iff the text control sets its MinSize() when the bounds of its text change because of a call to
+        SetText() or SetTextFormat(); by default this is not done.  The minimum size of the control in each dimension
+        will be the larger of the text size and the current MinSize(), if any has been set.  Note that this operates
+        independently of fit-to-text behavior, which sets the window size, not its minimum size. */
+    bool           SetMinSize() const;
 
     /** sets the value of \a t to the interpreted value of the control's text.
         If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
@@ -125,6 +138,8 @@ public:
     void           SetTextFormat(Uint32 format); ///< sets the text format; ensures that the flags are sane
     void           SetTextColor(Clr color);      ///< sets the text color
     virtual void   SetColor(Clr c);              ///< just like Control::SetColor(), except that this one also adjusts the text color
+    void           ClipText(bool b);             ///< enables/disables text clipping to the client area
+    void           SetMinSize(bool b);           ///< enables/disables setting the minimum size of the window to be the text size
 
     /** Sets the value of the control's text to the stringified version of t.
         If t can be converted to a string representation by a boost::lexical_cast (and thus by a stringstream), then the << operator
@@ -156,10 +171,13 @@ protected:
 
 private:
     void ValidateFormat();      ///< ensures that the format flags are consistent
+    void AdjustMinimumSize();
     void RecomputeTextBounds(); ///< recalculates m_text_ul and m_text_lr
 
     Uint32                      m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
     Clr                         m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
+    bool                        m_clip_text;
+    bool                        m_set_min_size;
     std::vector<Font::LineData> m_line_data;
     boost::shared_ptr<Font>     m_font;
     bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
@@ -205,6 +223,8 @@ void GG::TextControl::serialize(Archive& ar, const unsigned int version)
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
         & BOOST_SERIALIZATION_NVP(m_format)
         & BOOST_SERIALIZATION_NVP(m_text_color)
+        & BOOST_SERIALIZATION_NVP(m_clip_text)
+        & BOOST_SERIALIZATION_NVP(m_set_min_size)
         & BOOST_SERIALIZATION_NVP(m_line_data)
         & BOOST_SERIALIZATION_NVP(m_font)
         & BOOST_SERIALIZATION_NVP(m_fit_to_text)

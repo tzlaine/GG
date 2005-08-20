@@ -913,13 +913,13 @@ void Wnd::LButtonUp(const Pt& pt, Uint32 keys) {}
 
 void Wnd::LClick(const Pt& pt, Uint32 keys) {}
 
-void Wnd::LDoubleClick(const Pt& pt, Uint32 keys) {}
+void Wnd::LDoubleClick(const Pt& pt, Uint32 keys) {LClick(pt, keys);}
 
 void Wnd::RButtonDown(const Pt& pt, Uint32 keys) {}
 
 void Wnd::RClick(const Pt& pt, Uint32 keys) {}
 
-void Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {}
+void Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {RClick(pt, keys);}
 
 void Wnd::MouseEnter(const Pt& pt, Uint32 keys) {}
 

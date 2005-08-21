@@ -160,7 +160,7 @@ const XMLElement& XMLElement::Child(const std::string& child) const
     }
 
     if (i == m_children.size())
-        throw std::range_error("XMLElement::Child(): This XMLElement contains no child \"" + child + "\".");
+        throw std::range_error("XMLElement::Child(): The XMLElement \"" + Tag() + "\" contains no child \"" + child + "\".");
 
     return m_children[i];
 }
@@ -168,7 +168,7 @@ const XMLElement& XMLElement::Child(const std::string& child) const
 const XMLElement& XMLElement::LastChild() const
 {
     if (m_children.empty())
-        throw std::range_error("XMLElement::LastChild(): LastChild() was called on an empty XMLElement.");
+        throw std::range_error("XMLElement::LastChild(): LastChild() was called on empty XMLElement \"" + Tag() + "\".");
 
     return m_children.back();
 }
@@ -251,7 +251,7 @@ XMLElement& XMLElement::Child(const std::string& child)
     }
 
     if (i == m_children.size())
-        throw std::range_error("XMLElement::Child(): This XMLElement contains no child \"" + child + "\".");
+        throw std::range_error("XMLElement::Child(): The XMLElement \"" + Tag() + "\" contains no child \"" + child + "\".");
 
     return m_children[i];
 }
@@ -259,7 +259,7 @@ XMLElement& XMLElement::Child(const std::string& child)
 XMLElement& XMLElement::LastChild()
 {
     if (m_children.empty())
-        throw std::range_error("XMLElement::LastChild(): LastChild() was called on an empty XMLElement.");
+        throw std::range_error("XMLElement::LastChild(): LastChild() was called on empty XMLElement \"" + Tag() + "\".");
 
     return m_children.back();
 }
@@ -302,7 +302,7 @@ void XMLElement::AppendChild(const std::string& child)
 void XMLElement::AddChildBefore(const XMLElement& e, unsigned int idx)
 {
     if (m_children.size() <= idx)
-        throw std::range_error("XMLElement::AddChildBefore(): Index " + boost::lexical_cast<std::string>(idx) + " is out of range.");
+        throw std::range_error("XMLElement::AddChildBefore(): Index " + boost::lexical_cast<std::string>(idx) + " is out of range for XMLElement \"" + Tag() + "\".");
 
     m_children.insert(m_children.begin() + idx, e);
 }
@@ -310,7 +310,7 @@ void XMLElement::AddChildBefore(const XMLElement& e, unsigned int idx)
 void XMLElement::RemoveChild(unsigned int idx)
 {
     if (m_children.size() <= idx)
-        throw std::range_error("XMLElement::RemoveChild(): Index " + boost::lexical_cast<std::string>(idx) + " is out of range.");
+        throw std::range_error("XMLElement::RemoveChild(): Index " + boost::lexical_cast<std::string>(idx) + " is out of range for XMLElement \"" + Tag() + "\".");
 
     m_children.erase(m_children.begin() + idx);
 }
@@ -320,7 +320,7 @@ void XMLElement::RemoveChild(const std::string& child)
     int idx = ChildIndex(child);
 
     if (idx == -1)
-        throw std::range_error("XMLElement::RemoveChild(): This XMLElement contains no child \"" + child + "\".");
+        throw std::range_error("XMLElement::RemoveChild(): The XMLElement \"" + Tag() + "\" contains no child \"" + child + "\".");
 
     m_children.erase(m_children.begin() + idx);
 }

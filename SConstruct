@@ -23,6 +23,7 @@ if str(Platform()) == 'posix':
     options.Add('prefix', 'Location to install GG', '/usr/local')
 else:
     options.Add('prefix', 'Location to install GG', 'C:\\')
+options.Add('scons_cache_dir', 'Directory to use for SCons object file caching (specifying any directory will enable caching)')
 options.Add('incdir', 'Location to install headers', os.path.normpath(os.path.join('$prefix', 'include')))
 options.Add('bindir', 'Location to install executables', os.path.normpath(os.path.join('$prefix', 'bin')))
 options.Add('libdir', 'Location to install libraries', os.path.normpath(os.path.join('$prefix', 'lib')))
@@ -37,6 +38,8 @@ options.Add('with_boost', 'Root directory of boost installation')
 options.Add('with_boost_include', 'Specify exact include dir for boost headers')
 options.Add('with_boost_libdir', 'Specify exact library dir for boost library')
 options.Add('boost_lib_suffix', 'Specify the suffix placed on user-compiled Boost libraries (e.g. "-vc71-mt-gd-1_31")')
+options.Add('boost_signals_namespace',
+            'Specify alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost)')
 options.Add('with_sdl', 'Root directory of SDL installation')
 options.Add('with_sdl_include', 'Specify exact include dir for SDL headers')
 options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library')
@@ -100,13 +103,20 @@ options.Update(env)
 if env.has_key('use_distcc') and env['use_distcc']:
     env['CC'] = 'distcc %s' % env['CC']
     env['CXX'] = 'distcc %s' % env['CXX']
-    if os.environ.has_key('HOME') and not env.has_key('HOME'):
-        env['ENV']['HOME'] = os.environ['HOME']
-    if os.environ.has_key('DISTCC_HOSTS') and not env.has_key('DISTCC_HOSTS'):
-        env['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
+    for i in ['HOME',
+              'DISTCC_HOSTS',
+              'DISTCC_VERBOSE',
+              'DISTCC_LOG',
+              'DISTCC_FALLBACK',
+              'DISTCC_MMAP',
+              'DISTCC_SAVE_TEMPS',
+              'DISTCC_TCP_CORK',
+              'DISTCC_SSH'
+              ]:
+        if os.environ.has_key(i) and not env.has_key(i):
+            env['ENV'][i] = os.environ[i]
 
-# TODO: create a more readable help function
-Help(options.GenerateHelpText(env))
+Help(GenerateHelpText(options, env))
 options.Save('options.cache', env)
 
 if env['disable_sdl'] and not env['disable_net']:
@@ -148,7 +158,14 @@ if not env.GetOption('clean'):
         else:
             print 'Configuring unknown system (assuming the system is POSIX-like...'
 
-        boost_libs = [('boost_signals', 'boost::signals::connection', '#include <boost/signals.hpp>'),
+        if OptionValue('boost_signals_namespace', env):
+            signals_namespace = OptionValue('boost_signals_namespace', env)
+            env.Append(CPPDEFINES = [
+                ('BOOST_SIGNALS_NAMESPACE', signals_namespace),
+                ('signals', signals_namespace)
+                ])
+
+        boost_libs = [('boost_signals', 'boost::signalslib::connection', '#include <boost/signals.hpp>'),
                       ('boost_filesystem', 'boost::filesystem::initial_path', '#include <boost/filesystem/operations.hpp>')]
         if not conf.CheckBoost('1.32.0', boost_libs, conf, not ms_linker):
             Exit(1)
@@ -193,14 +210,14 @@ if not env.GetOption('clean'):
 
         # FreeType2
         AppendPackagePaths('ft', env)
-        ft_required_version = pkg_config and ft_pkgconfig_version or ft_version
+        found_it_with_pkg_config = False
         if pkg_config:
-            if not conf.CheckPkg('freetype2', ft_required_version):
-                Exit(1)
-            env.ParseConfig('pkg-config --cflags --libs freetype2')
-        else:
+            if conf.CheckPkg('freetype2', ft_pkgconfig_version):
+                env.ParseConfig('pkg-config --cflags --libs freetype2')
+                found_it_with_pkg_config = True
+        if not found_it_with_pkg_config:
             version_regex = re.compile(r'FREETYPE_MAJOR\s*(\d+).*FREETYPE_MINOR\s*(\d+).*FREETYPE_PATCH\s*(\d+)', re.DOTALL)
-            if not conf.CheckVersionHeader('FreeType2', 'freetype/freetype.h', version_regex, ft_required_version, True):
+            if not conf.CheckVersionHeader('freetype2', 'freetype/freetype.h', version_regex, ft_version, True):
                 Exit(1)
         if not conf.CheckCHeader('ft2build.h'):
             Exit(1)
@@ -296,7 +313,8 @@ int main() {
         for i in env_cache_keys:
             cache_dict[i] = env.has_key(i) and env.Dictionary(i) or []
         p.dump(cache_dict)
-
+        if 'configure' in command_line_args:
+            Exit(0)
 
 ##################################################
 # define targets                                 #
@@ -485,3 +503,6 @@ elif env['disable_net']:
     Default(lib_gigi, lib_gigi_sdl)
 else:
     Default(lib_gigi, lib_gigi_sdl, lib_gigi_net)
+
+if OptionValue('scons_cache_dir', env):
+    CacheDir(OptionValue('scons_cache_dir', env))

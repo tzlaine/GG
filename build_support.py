@@ -5,6 +5,28 @@ import re
 import types
 from build_config import *
 
+def OptionValue(key, env):
+    return env.subst('$' + key)
+
+def GenerateHelpText(options, env):
+    import textwrap
+    retval = ''
+    wrapped_text = textwrap.wrap('Each of the following options should be specified with an equals sign (e.g., foo=bar).  Dashes are not required.  Once an option has been specified, it is saved in options.cache for later use; this means an option only needs to be set once.  To change or remove a single option, edit the file.  To clear all options delete the file.',
+                                 width = 80)
+    for i in wrapped_text:
+        retval += i
+    for i in options.options:
+        retval += i.key
+        wrapped_text = textwrap.wrap(i.help,
+                                     width = 80,
+                                     initial_indent = '    ',
+                                     subsequent_indent = '    ')
+        for j in wrapped_text:
+            retval += j
+        retval += '    value=' + str(OptionValue(i.key, env))
+        retval += '    default=' + str(i.default) + '\n'
+    return retval
+
 def DirHeaders(dir):
     from fnmatch import fnmatchcase
     return [i for i in os.listdir(dir) if fnmatchcase(i, '*.h')]
@@ -94,9 +116,6 @@ def CreateGiGiNetPCFile(target, source, env):
         pc_in.close()
     return None
 
-def OptionValue(key, env):
-    return env.subst('$' + key)
-
 def AppendPackagePaths(package, env):
     root = OptionValue('with_' + package, env)
     inc = OptionValue('with_%s_include' % package, env)
@@ -140,15 +159,18 @@ def VersionLEQ(lhs, rhs):
 
 def FindRegexMatchesInHeader(regex, filename, env = None):
     f = None
-    for i in ['.', '/usr/include', '/usr/local/include']:
-        try:
-            f = open(os.path.normpath(os.path.join(i, filename)), 'r')
-        except Exception:
-            None
-    if not f and env and env.has_key('CPPPATH'):
+    if env and env.has_key('CPPPATH'):
         for i in env['CPPPATH']:
             try:
                 f = open(os.path.normpath(os.path.join(i, filename)), 'r')
+                break
+            except Exception:
+                None
+    if not f:
+        for i in ['.', '/usr/include', '/usr/local/include']:
+            try:
+                f = open(os.path.normpath(os.path.join(i, filename)), 'r')
+                break
             except Exception:
                 None
     if f:
@@ -226,10 +248,12 @@ def CheckSDL(context, options, conf, sdl_config, check_lib):
         context.Result('no')
     build_dynamic = OptionValue('dynamic', context.env)
     sdl_root = OptionValue('with_sdl', context.env)
+    found_it_with_sdl_config = False
     if sdl_config:
         sdl_config_prefix_flag = sdl_root and ('--prefix=' + sdl_root) or ''
         context.env.ParseConfig('sdl-config ' + sdl_config_prefix_flag + ' --cflags ' + (build_dynamic and '--libs' or '--static-libs'))
-    else:
+        found_it_with_sdl_config = True
+    if not found_it_with_sdl_config:
         if not conf.CheckCHeader('SDL/SDL.h') and not conf.CheckCHeader('SDL.h'):
             context.Message('SDL configuration... ')
             context.Result(False)

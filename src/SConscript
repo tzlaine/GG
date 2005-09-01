@@ -40,8 +40,9 @@ if env['dynamic']:
 else:
     objects = env.Object(sources)
 
-result_objects, result_headers = SConscript('dialogs/SConscript', exports = ['env'])
+result_objects, result_sources, result_headers = SConscript('dialogs/SConscript', exports = ['env'])
 objects += result_objects
+sources += result_sources
 headers.append(result_headers)
 
-Return('objects', 'headers')
+Return('objects', 'sources', 'headers')

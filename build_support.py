@@ -11,20 +11,47 @@ def OptionValue(key, env):
 def GenerateHelpText(options, env):
     import textwrap
     retval = ''
-    wrapped_text = textwrap.wrap('Each of the following options should be specified with an equals sign (e.g., foo=bar).  Dashes are not required.  Once an option has been specified, it is saved in options.cache for later use; this means an option only needs to be set once.  To change or remove a single option, edit the file.  To clear all options delete the file.',
-                                 width = 80)
-    for i in wrapped_text:
-        retval += i
+    lines = [
+        '',
+        'Targets:',
+        '========',
+        '',
+        'The default target builds GiGi, GiGiSDL, and GiGiNet based on the options you specify.  Not that some options force GiGiSDL and/or GiGiNet not to be built.',
+        '',
+        'install',
+        'Installs the default targets in the installation directory, building it first if needed.',
+        '',
+        'uninstall',
+        'Removes the files installed by the "install" targtet from the installation directory.',
+        '',
+##        'msvc_project',
+##        'Creates MSVC project files that can be used to build GiGi.  The project files will only be built with the code generation specified in the options (i.e. Multi-threaded Debug DLL and Multi-threaded DLL will not both be generated).',
+##        '',
+        '',
+        'Options:',
+        '========',
+        '',
+        'Each of the following options should be specified with an equals sign (e.g., foo=bar).  Dashes are not required.  Once an option has been specified, it is saved in options.cache for later use; this means an option only needs to be set once.  To change or remove a single option, edit the file.  To clear all options delete the file.',
+        ''
+        ]
+    for i in lines:
+        if not i:
+            retval += '\n'
+        else:
+            wrapped_text = textwrap.wrap(i,
+                                         width = 78)
+            for j in wrapped_text:
+                retval += j + '\n'
     for i in options.options:
-        retval += i.key
+        retval += i.key + '\n'
         wrapped_text = textwrap.wrap(i.help,
-                                     width = 80,
+                                     width = 78,
                                      initial_indent = '    ',
                                      subsequent_indent = '    ')
         for j in wrapped_text:
-            retval += j
-        retval += '    value=' + str(OptionValue(i.key, env))
-        retval += '    default=' + str(i.default) + '\n'
+            retval += j + '\n'
+        retval += '    value=' + str(OptionValue(i.key, env)) + '\n'
+        retval += '    default=' + str(i.default) + '\n\n'
     return retval
 
 def DirHeaders(dir):

@@ -13,4 +13,4 @@ if sdl_env['dynamic']:
 else:
     objects = sdl_env.Object(sources)
 
-Return('objects', 'headers')
+Return('objects', 'sources', 'headers')

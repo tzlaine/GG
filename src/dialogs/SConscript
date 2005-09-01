@@ -15,4 +15,4 @@ if env['dynamic']:
 else:
     objects = env.Object(sources)
 
-Return('objects', 'headers')
+Return('objects', 'sources', 'headers')

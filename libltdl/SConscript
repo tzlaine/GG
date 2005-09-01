@@ -13,4 +13,4 @@ if env['dynamic']:
 else:
     objects = env.Object(sources, CPPDEFINES = env['libltdl_defines'])
 
-Return('objects', 'headers')
+Return('objects', 'sources', 'headers')

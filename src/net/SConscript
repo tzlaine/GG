@@ -36,4 +36,4 @@ if net_env['dynamic']:
 else:
     objects = net_env.Object(sources)
 
-Return('objects', 'headers')
+Return('objects', 'sources', 'headers')

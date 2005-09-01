@@ -343,18 +343,19 @@ if str(Platform()) == 'win32':
         else:
             code_generation_flag = '/ML'
     flags = [
-        env['debug'] and '/Od' or '/Ox',
+        #env['debug'] and '/Od' or '/Ox',
         code_generation_flag,
         '/EHsc',
         '/W3',
         '/Zc:forScope',
         '/GR',
         '/Gd',
+        '/Zi',
         '/wd4099', '/wd4251', '/wd4800', '/wd4267', '/wd4275', '/wd4244', '/wd4101'
         ]
     env.Append(CCFLAGS = flags)
     env.Append(CPPDEFINES = [
-        env['debug'] and '_DEBUG' or 'NDEBUG',
+        '_DEBUG',
         'WIN32',
         '_WINDOWS'
         ])
@@ -364,7 +365,7 @@ if str(Platform()) == 'win32':
         '_USRDLL',
         '_WINDLL'
         ])
-    env.Append(LINKFLAGS = ['/NODEFAULTLIB:LIBCMT.lib'])
+    env.Append(LINKFLAGS = ['/NODEFAULTLIB:LIBCMT.lib', '/DEBUG'])
     env.Append(LIBS = [
         'kernel32',
         'user32',
@@ -408,11 +409,11 @@ if str(Platform()) == 'win32':
         ]
 if env.has_key('CPPDEFINES'):
     env['libltdl_defines'] += env['CPPDEFINES']
-result_objects, result_headers = SConscript(os.path.normpath('src/SConscript'))
-gigi_objects = result_objects
-install_headers = result_headers
-result_objects, result_headers = SConscript(os.path.normpath('libltdl/SConscript'))
+gigi_objects, gigi_sources, gigi_headers = SConscript(os.path.normpath('src/SConscript'))
+install_headers = gigi_headers
+result_objects, result_sources, result_headers = SConscript(os.path.normpath('libltdl/SConscript'))
 gigi_objects += result_objects
+gigi_sources += result_sources
 
 # define libGiGiSDL objects
 if not env['disable_sdl']:
@@ -421,18 +422,16 @@ if not env['disable_sdl']:
         sdl_env.Append(LIBS = ['SDL', 'GiGi'])
         if not env['disable_net']:
             sdl_env.Append(LIBS = ['GiGiNet'])
-    result_objects, result_headers = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
-    gigi_sdl_objects = result_objects
-    install_headers.append(result_headers)
+    gigi_sdl_objects, gigi_sdl_sources, gigi_sdl_headers = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
+    install_headers.append(gigi_sdl_headers)
 
 # define libGiGiNet objects
 if not env['disable_net']:
     net_env = env.Copy()
     if str(Platform()) == 'win32':
         net_env.Append(LIBS = ['SDL', 'wsock32'])
-    result_objects, result_headers = SConscript(os.path.normpath('src/net/SConscript'), exports = 'net_env')
-    gigi_net_objects = result_objects
-    install_headers.append(result_headers)
+    gigi_net_objects, gigi_net_sources, gigi_net_headers = SConscript(os.path.normpath('src/net/SConscript'), exports = 'net_env')
+    install_headers.append(gigi_net_headers)
 
 if env['dynamic']:
     lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
@@ -497,6 +496,56 @@ if not env['disable_net']:
 uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)
 Alias('uninstall', uninstall_cmd)
 
+# MSVC project target
+##if str(Platform()) == 'win32':
+##    variant_name = ''
+##    if env['multithreaded']:
+##        if env['dynamic']:
+##            if env['debug']:
+##                variant_name = 'Multi-threaded Debug DLL'
+##            else:
+##                variant_name = 'Multi-threaded Release DLL'
+##        else:
+##            if env['debug']:
+##                variant_name = 'Multi-threaded Debug'
+##            else:
+##                variant_name = 'Multi-threaded Release'
+##    else:
+##        if env['debug']:
+##            variant_name = 'Single-threaded Debug'
+##        else:
+##            variant_name = 'Single-threaded Release'
+##    gigi_project = MSVSProject(target = 'msvc/GiGi' + env['MSVSPROJECTSUFFIX'],
+##                               srcs = gigi_sources,
+##                               incs = '',
+##                               localincs = '',
+##                               resources = '',
+##                               misc = '',
+##                               buildtarget = lib_gigi,
+##                               variant = variant_name)
+##    Alias('msvc_project', gigi_project)
+##    if not env['disable_sdl']:
+##        gigi_sdl_project = MSVSProject(target = 'msvc/GiGiSDL' + env['MSVSPROJECTSUFFIX'],
+##                                       srcs = gigi_sources,
+##                                       incs = '',
+##                                       localincs = '',
+##                                       resources = '',
+##                                       misc = '',
+##                                       buildtarget = lib_gigi,
+##                                       variant = variant_name)
+##        Alias('msvc_project', gigi_sdl_project)
+##    if not env['disable_net']:
+##        gigi_net_project = MSVSProject(target = 'msvc/GiGiNet' + env['MSVSPROJECTSUFFIX'],
+##                                       srcs = gigi_sources,
+##                                       incs = '',
+##                                       localincs = '',
+##                                       resources = '',
+##                                       misc = '',
+##                                       buildtarget = lib_gigi,
+##                                       variant = variant_name)
+##        Alias('msvc_project', gigi_net_project)
+
+# default targets
 if env['disable_sdl']:
     Default(lib_gigi)
 elif env['disable_net']:
@@ -506,3 +555,4 @@ else:
 
 if OptionValue('scons_cache_dir', env):
     CacheDir(OptionValue('scons_cache_dir', env))
+

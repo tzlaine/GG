@@ -165,7 +165,7 @@ if not env.GetOption('clean'):
                 ('signals', signals_namespace)
                 ])
 
-        boost_libs = [('boost_signals', 'boost::signalslib::connection', '#include <boost/signals.hpp>'),
+        boost_libs = [('boost_signals', 'boost::signals::connection', '#include <boost/signals.hpp>'),
                       ('boost_filesystem', 'boost::filesystem::initial_path', '#include <boost/filesystem/operations.hpp>')]
         if not conf.CheckBoost('1.32.0', boost_libs, conf, not ms_linker):
             Exit(1)

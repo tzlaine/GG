@@ -876,7 +876,7 @@ void ListBox::ClearRow(int n)
 
 void ListBox::SelectRow(int n)
 {
-    if (n >= 0 && n < static_cast<int>(m_rows.size()) && m_selections.find(n) == m_selections.end()) {
+    if (!(m_style & LB_NOSEL) && n >= 0 && n < static_cast<int>(m_rows.size()) && m_selections.find(n) == m_selections.end()) {
         bool emit_signal = m_selections.find(n) == m_selections.end();
         if (m_style & LB_SINGLESEL)
             m_selections.clear();

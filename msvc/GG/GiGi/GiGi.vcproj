@@ -129,10 +129,16 @@
 				RelativePath="..\..\..\src\GGApp.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\src\GGBrowseInfoWnd.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\src\GGButton.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\src\GGClr.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\src\dialogs\GGColorDlg.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\src\GGControl.cpp">

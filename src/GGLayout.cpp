@@ -69,7 +69,8 @@ Layout::Layout(int rows, int columns, int border_margin/* = 0*/, int cell_margin
     m_cell_margin(cell_margin < 0 ? border_margin : cell_margin),
     m_row_params(rows),
     m_column_params(columns),
-    m_ignore_child_resize(false)
+    m_ignore_child_resize(false),
+    m_ignore_parent_resize(false)
 {
     if (m_border_margin < 0)
         throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
@@ -82,7 +83,8 @@ Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_mar
     m_cell_margin(cell_margin < 0 ? border_margin : cell_margin),
     m_row_params(rows),
     m_column_params(columns),
-    m_ignore_child_resize(false)
+    m_ignore_child_resize(false),
+    m_ignore_parent_resize(false)
 {
     if (m_border_margin < 0)
         throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
@@ -138,6 +140,9 @@ int Layout::MinimumColumnWidth(int column) const
 
 void Layout::SizeMove(int x1, int y1, int x2, int y2)
 {
+    if (m_ignore_parent_resize)
+        return;
+
     // reset effective_min values
     for (unsigned int i = 0; i < m_row_params.size(); ++i) {
         m_row_params[i].effective_min = std::max(m_row_params[i].min, MinDueToMargin(m_cell_margin, m_row_params.size(), i));
@@ -220,6 +225,16 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
     Wnd::SizeMove(x1, y1, x2, y2);
     if (Size() != original_size)
         size_or_min_size_changed = true;
+
+    // if this is the layout object for some Wnd, propogate the minimum size up to the owning Wnd
+    if (Wnd* parent = Parent()) {
+        if (const_cast<const Wnd*>(parent)->GetLayout() == this) {
+            Pt new_parent_min_size = MinSize() + parent->Size() - parent->ClientSize();
+            m_ignore_parent_resize = true;
+            parent->SetMinSize(new_parent_min_size.x, new_parent_min_size.y);
+            m_ignore_parent_resize = false;
+        }
+    }
 
     // determine row and column positions
     double total_stretch = TotalStretch(m_row_params);

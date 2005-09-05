@@ -205,6 +205,7 @@ private:
     std::vector<RowColParams>       m_column_params;
     std::map<Wnd*, WndPosition>     m_wnd_positions;
     bool                            m_ignore_child_resize;
+    bool                            m_ignore_parent_resize;
 
     friend class Wnd;
 

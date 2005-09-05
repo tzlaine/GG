@@ -27,6 +27,7 @@
 #include "GGWnd.h"
 
 #include <GGApp.h>
+#include <GGBrowseInfoWnd.h>
 #include <GGDrawUtil.h>
 #include <GGEventPump.h>
 #include <GGLayout.h>
@@ -219,6 +220,10 @@ int Wnd::Event::WheelMove() const
 }
 
 // Wnd
+// static(s)
+int Wnd::s_default_browse_time = 1500;
+boost::shared_ptr<BrowseInfoWnd> Wnd::s_default_browse_info_wnd;
+
 Wnd::Wnd() :
     m_done(false),
     m_parent(0),
@@ -230,6 +235,9 @@ Wnd::Wnd() :
     m_containing_layout(0),
     m_flags(0)
 {
+    m_browse_modes.resize(1);
+    m_browse_modes[0].time = s_default_browse_time;
+    m_browse_modes[0].wnd = s_default_browse_info_wnd;
 }
 
 Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
@@ -246,6 +254,9 @@ Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
     m_flags(flags)
 {
     ValidateFlags();
+    m_browse_modes.resize(1);
+    m_browse_modes[0].time = s_default_browse_time;
+    m_browse_modes[0].wnd = s_default_browse_info_wnd;
 }
 
 Wnd::~Wnd()
@@ -429,6 +440,16 @@ const Layout* Wnd::GetLayout() const
 const Layout* Wnd::ContainingLayout() const
 {
     return m_containing_layout;
+}
+
+const std::vector<Wnd::BrowseInfoMode>& Wnd::BrowseModes() const
+{
+    return m_browse_modes;
+}
+
+const std::string& Wnd::BrowseInfoText(int mode) const
+{
+    return m_browse_modes.at(mode).text;
 }
 
 WndRegion Wnd::WindowRegion(const Pt& pt) const
@@ -950,6 +971,40 @@ int Wnd::Run()
     return retval;
 }
 
+void Wnd::SetBrowseModeTime(int time, int mode/* = 0*/)
+{
+    if (static_cast<int>(m_browse_modes.size()) <= mode) {
+        if (m_browse_modes.empty()) {
+            m_browse_modes.resize(mode + 1);
+            for (unsigned int i = 0; i < m_browse_modes.size() - 1; ++i) {
+                m_browse_modes[i].time = time;
+            }
+        } else {
+            unsigned int original_size = m_browse_modes.size();
+            m_browse_modes.resize(mode + 1);
+            for (unsigned int i = original_size; i < m_browse_modes.size() - 1; ++i) {
+                m_browse_modes[i].time = m_browse_modes[original_size - 1].time;
+            }
+        }
+    }
+    m_browse_modes[mode].time = time;
+}
+
+void Wnd::SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, int mode/* = 0*/)
+{
+    m_browse_modes.at(mode).wnd = wnd;
+}
+
+void Wnd::SetBrowseText(const std::string& text, int mode/* = 0*/)
+{
+    m_browse_modes.at(mode).text = text;
+}
+
+void Wnd::SetBrowseModes(const std::vector<BrowseInfoMode>& modes)
+{
+    m_browse_modes = modes;
+}
+
 void Wnd::DefineAttributes(WndEditor* editor)
 {
     if (!editor)
@@ -971,6 +1026,26 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Flag("Ontop", ONTOP);
     editor->Flag("Modal", MODAL);
     editor->EndFlags();
+}
+
+int Wnd::DefaultBrowseTime()
+{
+    return s_default_browse_time;
+}
+
+void Wnd::SetDefaultBrowseTime(int time)
+{
+    s_default_browse_time = time;
+}
+
+const boost::shared_ptr<BrowseInfoWnd>& Wnd::DefaultBrowseInfoWnd()
+{
+    return s_default_browse_info_wnd;
+}
+
+void Wnd::SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd)
+{
+    s_default_browse_info_wnd = browse_info_wnd;
 }
 
 const std::list<Wnd*>& Wnd::Children() const

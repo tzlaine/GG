@@ -26,19 +26,8 @@
 
 #include "GGApp.h"
 
-#include "GGButton.h"
-#include "GGDropDownList.h"
-#include "GGDynamicGraphic.h"
-#include "GGEdit.h"
-#include "GGListBox.h"
-#include "GGMenu.h"
-#include "GGMultiEdit.h"
+#include "GGBrowseInfoWnd.h"
 #include "GGPluginInterface.h"
-#include "GGScroll.h"
-#include "GGSlider.h"
-#include "GGSpin.h"
-#include "GGStaticGraphic.h"
-#include "GGTextControl.h"
 #include "GGZList.h"
 
 #include <cassert>
@@ -52,12 +41,20 @@ namespace {
     // returns true if lwnd == rwnd or if lwnd contains rwnd
     inline bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd)
     {
-        return (rwnd == lwnd || (rwnd && rwnd->RootParent() == lwnd));
+        if (rwnd) {
+            for (const Wnd* w = rwnd; w; w = w->Parent()) {
+                if (w == lwnd)
+                    return true;
+            }
+        } else if (rwnd == lwnd) {
+            return true;
+        }
+        return false;
     }
 
-    /* returns the storage value of key_mods that should be used with keyboard accelerators
-        the accelerators don't care which side of the keyboard you use for CTRL, SHIFT, etc.,
-        and whether or not the numlock or capslock are engaged.*/
+    /* returns the storage value of key_mods that should be used with keyboard accelerators the accelerators don't care
+       which side of the keyboard you use for CTRL, SHIFT, etc., and whether or not the numlock or capslock are
+       engaged.*/
     Uint32 MassagedAccelKeyMods(Uint32 key_mods)
     {
         key_mods &= ~(GGKMOD_NUM | GGKMOD_CAPS);
@@ -83,6 +80,8 @@ struct GG::AppImplData
         mouse_repeat_delay(0),
         mouse_repeat_interval(0),
         double_click_interval(500),
+        min_drag_drop_time(500),
+        min_drag_drop_distance(5),
         prev_wnd_under_cursor(0),
         curr_wnd_under_cursor(0),
         wnd_region(WR_NONE),
@@ -107,19 +106,26 @@ struct GG::AppImplData
     std::list<std::pair<Wnd*, Wnd*> >
                  modal_wnds;            // modal GUI windows, and the window with focus for that modality (only the one in back is active, simulating a stack but allowing traversal of the list)
 
-    bool   button_state[3];             // the up/down states of the three buttons on the mouse are kept here
-    Pt     mouse_pos;                   // absolute position of mouse based on last MOUSEMOVE event
-    Pt     mouse_rel;                   // relative position of mouse based on last MOUSEMOVE event
+    bool         button_state[3];       // the up/down states of the three buttons on the mouse are kept here
+    Pt           mouse_pos;             // absolute position of mouse based on last MOUSEMOVE event
+    Pt           mouse_rel;             // relative position of mouse based on last MOUSEMOVE event
 
-    int mouse_repeat_delay;             // see note above class definition
-    int mouse_repeat_interval;
-    int double_click_interval;          // the maximum interval allowed between clicks that is still considered a double-click, in ms
+    int          mouse_repeat_delay;    // see note above App class definition
+    int          mouse_repeat_interval;
+    int          double_click_interval; // the maximum interval allowed between clicks that is still considered a double-click, in ms
+    int          min_drag_drop_time;
+    int          min_drag_drop_distance;
 
-    Wnd*       prev_wnd_under_cursor;   // GUI window most recently under the input cursor; may be 0
-    Wnd*       curr_wnd_under_cursor;   // GUI window currently under the input cursor; may be 0
-    Wnd*       drag_wnds[3];            // GUI window currently being clicked or dragged by each mouse button
-    Pt         wnd_resize_offset;       // offset from the cursor of either the upper-left or lowe-right corner of the GUI window currently being resized
-    WndRegion  wnd_region;              // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
+    Wnd*         prev_wnd_under_cursor; // GUI window most recently under the input cursor; may be 0
+    int          prev_wnd_under_cursor_time; // the time at which prev_wnd_under_cursor was initially set to its current value
+    Wnd*         curr_wnd_under_cursor; // GUI window currently under the input cursor; may be 0
+    Wnd*         drag_wnds[3];          // GUI window currently being clicked or dragged by each mouse button
+    Pt           wnd_resize_offset;     // offset from the cursor of either the upper-left or lowe-right corner of the GUI window currently being resized
+    WndRegion    wnd_region;            // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
+
+    boost::shared_ptr<BrowseInfoWnd>
+                 browse_info_wnd;       // the current browse info window, if any
+    int          browse_info_mode;      // the current browse info mode (only valid if browse_info_wnd is non-null)
 
     std::map<Wnd*, Pt>
                drag_drop_wnds;          // the Wnds (and their offsets) that are being dragged and dropped between Wnds
@@ -143,8 +149,8 @@ struct GG::AppImplData
     FontManager       font_manager;
     TextureManager    texture_manager;
 
-    App::SaveWndFn                save_wnd_fn;
-    App::LoadWndFn                load_wnd_fn;
+    App::SaveWndFn    save_wnd_fn;
+    App::LoadWndFn    load_wnd_fn;
 };
 
 // static member(s)
@@ -215,6 +221,16 @@ int App::MouseRepeatInterval() const
 int App::DoubleClickInterval() const
 {
     return s_impl->double_click_interval;
+}
+
+int App::MinDragDropTime() const
+{
+    return s_impl->min_drag_drop_time;
+}
+
+int App::MinDragDropDistance() const
+{
+    return s_impl->min_drag_drop_distance;
 }
 
 bool App::MouseButtonDown(int bn) const
@@ -388,6 +404,16 @@ void App::SetDoubleClickInterval(int interval)
     s_impl->double_click_interval = interval;
 }
 
+void App::SetMinDragDropTime(int time)
+{
+    s_impl->min_drag_drop_time = time;
+}
+
+void App::SetMinDragDropDistance(int distance)
+{
+    s_impl->min_drag_drop_distance = distance;
+}
+
 void App::SetAccelerator(Key key, Uint32 key_mods)
 {
     key_mods = MassagedAccelKeyMods(key_mods);
@@ -483,6 +509,7 @@ void App::RenderWindow(Wnd* wnd)
 void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
     Wnd*&       prev_wnd_under_cursor = s_impl->prev_wnd_under_cursor;
+    int&        prev_wnd_under_cursor_time = s_impl->prev_wnd_under_cursor_time;
     Wnd*&       curr_wnd_under_cursor = s_impl->curr_wnd_under_cursor;
     Wnd**       drag_wnds = s_impl->drag_wnds;
     Pt&         wnd_resize_offset = s_impl->wnd_resize_offset;
@@ -500,6 +527,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
 
     switch (event) {
     case KEYPRESS:{
+        s_impl->browse_info_wnd.reset();
         bool processed = false;
         // only process accelerators when there are no modal windows active; otherwise, accelerators would be an end-run around modality
         if (s_impl->modal_wnds.empty()) {
@@ -564,10 +592,26 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, rel, key_mods));
             }
         } else if (curr_wnd_under_cursor && prev_wnd_under_cursor == curr_wnd_under_cursor) { // if !drag_wnds[0] and we're moving over the same (valid) object we were during the last iteration
-            if (curr_wnd_under_cursor) curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseHere, pos, 0));
+            curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseHere, pos, 0));
+            if (s_impl->modal_wnds.empty() || curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
+                const std::vector<Wnd::BrowseInfoMode>& browse_modes = curr_wnd_under_cursor->BrowseModes();
+                int delta_t = Ticks() - prev_wnd_under_cursor_time;
+                for (unsigned int i = 0; i < browse_modes.size(); ++i) {
+                    if (browse_modes[i].time < delta_t && s_impl->browse_info_wnd != browse_modes[i].wnd) {
+                        s_impl->browse_info_wnd = browse_modes[i].wnd;
+                        s_impl->browse_info_mode = i;
+                        s_impl->browse_info_wnd->MoveTo(s_impl->mouse_pos);
+                        break;
+                    }
+                }
+            }
         } else { // if !drag_wnds[0] and prev_wnd_under_cursor != curr_wnd_under_cursor, we're just moving around
             if (prev_wnd_under_cursor) prev_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseLeave, pos, 0));
             if (curr_wnd_under_cursor) curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseEnter, pos, 0));
+        }
+        if (prev_wnd_under_cursor != curr_wnd_under_cursor) {
+            s_impl->browse_info_wnd.reset();
+            prev_wnd_under_cursor_time = Ticks();
         }
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
@@ -575,6 +619,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case MPRESS:
     case RPRESS:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
+        s_impl->browse_info_wnd.reset();
         switch (event) {
         case LPRESS:{
             s_impl->button_state[0] = true;
@@ -609,12 +654,15 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             break;}
         default: break;
         }
+        if (prev_wnd_under_cursor != curr_wnd_under_cursor)
+            prev_wnd_under_cursor_time = Ticks();
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     case LRELEASE:
     case MRELEASE:
     case RRELEASE:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
+        s_impl->browse_info_wnd.reset();
         switch (event) {
         case LRELEASE:{
             Wnd* click_wnd = drag_wnds[0];
@@ -687,13 +735,18 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         default:
             break;
         }
+        if (prev_wnd_under_cursor != curr_wnd_under_cursor)
+            prev_wnd_under_cursor_time = Ticks();
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     case MOUSEWHEEL:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
+        s_impl->browse_info_wnd.reset();
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
         if (curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2]))
             curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseWheel, pos, rel.y, key_mods));
+        if (prev_wnd_under_cursor != curr_wnd_under_cursor)
+            prev_wnd_under_cursor_time = Ticks();
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     default:
@@ -713,6 +766,11 @@ void App::Render()
     for (std::list<std::pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
         if (it->first->Visible())
             RenderWindow(it->first);
+    }
+    // render the active browse info window, if any
+    if (s_impl->browse_info_wnd) {
+        s_impl->browse_info_wnd->Update(s_impl->browse_info_mode, s_impl->curr_wnd_under_cursor);
+        RenderWindow(s_impl->browse_info_wnd.get());
     }
     // render drag-drop windows in arbitrary order (sorted by pointer value)
     for (std::map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {

@@ -151,6 +151,8 @@ public:
     int            MouseRepeatDelay() const;     ///< returns the \a delay value set by EnableMouseDragRepeat()
     int            MouseRepeatInterval() const;  ///< returns the \a interval value set by EnableMouseDragRepeat()
     int            DoubleClickInterval() const;  ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms
+    int            MinDragDropTime() const;      ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag-and-drop item
+    int            MinDragDropDistance() const;  ///< returns the minimum distance an item must be dragged before it is a valid drag-and-drop item
     bool           MouseButtonDown(int bn) const;///< returns the up/down states of the mouse buttons
     Pt             MousePosition() const;        ///< returns the absolute position of mouse based on last mouse motion event
     Pt             MouseMovement() const;        ///< returns the relative position of mouse based on last mouse motion event
@@ -186,6 +188,8 @@ public:
     void           SetMaxFPS(double max);        ///< sets the maximum allowed FPS, so the render loop does not act as a spinlock when it runs very quickly.  0 indicates no limit.
     void           EnableMouseDragRepeat(int delay, int interval); ///< delay and interval are in ms; Setting delay to 0 disables mouse repeating completely.
     void           SetDoubleClickInterval(int interval); ///< sets the maximum interval allowed between clicks that is still considered a double-click, in ms
+    void           SetMinDragDropTime(int time); ///< sets the minimum time (in ms) an item must be dragged before it is a valid drag-and-drop item
+    void           SetMinDragDropDistance(int distance); ///< sets the minimum distance an item must be dragged before it is a valid drag-and-drop item
 
     /** establishes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
     void           SetAccelerator(Key key, Uint32 key_mods);

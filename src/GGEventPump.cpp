@@ -47,8 +47,8 @@ EventPumpState::EventPumpState() :
 void EventPumpBase::LoopBody(App* app, EventPumpState& state, bool do_non_rendering, bool do_rendering)
 {
     if (do_non_rendering) {
-        // handle mouse drag repeats
-        if (state.old_mouse_repeat_delay != app->MouseRepeatDelay() || state.old_mouse_repeat_interval != app->MouseRepeatInterval()) { // if there's a change in the values, zero everything out and start the counting over
+        // handle mouse drag repeats; if there's a change in the values, zero everything out and start the counting over
+        if (state.old_mouse_repeat_delay != app->MouseRepeatDelay() || state.old_mouse_repeat_interval != app->MouseRepeatInterval()) {
             state.old_mouse_repeat_delay = app->MouseRepeatDelay();
             state.old_mouse_repeat_interval = app->MouseRepeatInterval();
             state.mouse_drag_repeat_start_time = 0;
@@ -57,7 +57,8 @@ void EventPumpBase::LoopBody(App* app, EventPumpState& state, bool do_non_render
 
         state.time = app->Ticks();
 
-        // if drag repeat is enabled, the left mouse button is depressed (a drag is ocurring), and the last event processed wasn't too recent
+        // if drag repeat is enabled, the left mouse button is depressed (a drag is ocurring), and the last event
+        // processed wasn't too recent
         if (app->MouseRepeatDelay() && app->MouseButtonDown(0) && state.time - state.last_mouse_event_time > state.old_mouse_repeat_interval) {
             if (!state.mouse_drag_repeat_start_time) { // if we're just starting the drag, mark the time we started
                 state.mouse_drag_repeat_start_time = state.time;
@@ -71,7 +72,10 @@ void EventPumpBase::LoopBody(App* app, EventPumpState& state, bool do_non_render
                 state.last_mouse_drag_repeat_time = state.time;
                 app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
             }
-        } else { // otherwise, reset the mouse drag repeat start time to zero
+        } else {
+            // otherwise, send a mouse-move message immediately, so that the app has timely updates for triggering
+            // browse info windows, and reset the mouse drag repeat start time to zero
+            app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
             state.mouse_drag_repeat_start_time = 0;
         }
 

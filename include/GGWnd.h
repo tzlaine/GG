@@ -42,6 +42,7 @@
 
 namespace GG {
 
+class BrowseInfoWnd;
 class Layout;
 class WndEditor;
 
@@ -115,20 +116,52 @@ class WndEditor;
     is part of a layout, it notifies its containing layout whenever it is moved, resized, or has its MinSize() changed.
     This ensures that layouts are always current.
 
+    <p>Browse Info
+    <br>Browse info is a non-interactive informational window that pops up after the user keeps the mouse over the Wnd
+    for a certain period of time.  This can reproduce "tooltip"-like functionality, but is not limited to displaying
+    only text.  An arbitrary BrowseInfoWnd-derived window can be displayed.  There can be multiple browse info modes,
+    numbered 0 through N.  Each mode has a time associated with it, and after the associated time has elapsed, that mode
+    is entered.  This is intended to allow different levels of detail to be shown for different lengths of mouse
+    presence.  For instance, hovering over a Wnd for 1 second might produce a box that says "FooWnd", but leaving it
+    there a total of 2 seconds might produce a box that says "FooWnd: currently doing nothing".  When the mouse leaves
+    the Wnd, a click occurs, etc., the Wnd reverts to browse mode -1, indicating that no browse info should be
+    displayed.  By default, every Wnd has a single browse info mode at time DefaultBrowseTime(), using the
+    DefaultBrowseInfoWnd(), with no associated text.  Note that DefaultBrowseInfoWnd() returns a null window unless it
+    is set by the user, and as this implies, it is legal to have no BrowseInfoWnd associated with a browse mode, in
+    which case nothing is shown.  Also note that it is legal to have no text associated with a browse mode. \see
+    BrowseInfoWnd
+
     <p>Note that while a Wnd can contain arbitrary Wnd-derived children, in order for such children to be automatically
     serialized, any user-defined Wnd subclasses must be registered.  See the boost serialization documentation for
-    details. */
+    details, and/or the serialization tutorial for examples. */
 class GG_API Wnd : public boost::signals::trackable
 {
 public:
+    /** The data necessary to represent a browse info mode.  Though \a browse_text will not apply to all browse info
+        schemes, it is nevertheless part of BrowseInfoMode, since it will surely be the most common data displayed in a
+        BrowseInfoWnd. */
+    struct BrowseInfoMode
+    {
+        int                              time; ///< the time the cursor must linger over the Wnd before this mode becomes active
+        boost::shared_ptr<BrowseInfoWnd> wnd;  ///< the BrowseInfoWnd used to display the browse info for this mode
+        std::string                      text; ///< the text to display in the BrowseInfoWnd shown for this mode
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
+    };
+
     /// window creation flags
     enum WndFlag {
         CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
         DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
         DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
         RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
-        ONTOP =        1 << 4,  ///< this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows
-        MODAL =        1 << 5   ///< this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above "on-top" windows, and should not be flagged as ONTOP.
+
+        /** this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows */
+        ONTOP =        1 << 4,
+
+        /** this window is modal; while it is active, no other windows are interactive.  Modal windows are considered
+            above "on-top" windows, and should not be flagged as ONTOP. */
+        MODAL =        1 << 5
     };
 
     /** exception class \see GG::GGEXCEPTION */
@@ -141,7 +174,10 @@ public:
     /** \name Accessors */ //@{
     bool           Clickable() const;    ///< does a click over this window pass through?
     bool           Dragable() const;     ///< does a click here become a drag? 
-    bool           DragKeeper() const;   ///< when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway?
+
+    /** when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway? */
+    bool           DragKeeper() const;
+
     bool           Resizable() const;    ///< can this window be resized using the mouse?
     bool           OnTop() const;        ///< is this an on-top window?
     bool           Modal() const;        ///< is this a modal window?
@@ -149,8 +185,15 @@ public:
     bool           Visible() const;      ///< is the window visible?
     const std::string&
                    WindowText() const;   ///< returns text associated with this window
-    Pt             UpperLeft() const;    ///< returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
-    Pt             LowerRight() const;   ///< returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account parent's screen position, if any)
+
+    /** returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen
+        position, if any) */
+    Pt             UpperLeft() const;
+
+    /** returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account
+        parent's screen position, if any) */
+    Pt             LowerRight() const;
+
     int            Width() const;        ///< returns width of window in pixels
     int            Height() const;       ///< returns width of window in pixels
     int            ZOrder() const;       ///< returns the position of this window in the z-order (root (non-child) windows only)
@@ -158,12 +201,14 @@ public:
     Pt             MinSize() const;      ///< returns the minimum allowable size of window
     Pt             MaxSize() const;      ///< returns the maximum allowable size of window
 
-    /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
-        virtual b/c different windows have different shapes (and so ways of calculating client area)*/
+    /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client
+        area is specified).  Virtual because different windows have different shapes (and so ways of calculating client
+        area) */
     virtual Pt     ClientUpperLeft() const;
 
-    /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire area, if no client area is specified). 
-        virtual b/c different windows have different shapes (and so ways of calculating client area)*/
+    /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire
+        area, if no client area is specified).  Virtual because different windows have different shapes (and so ways of
+        calculating client area)*/
     virtual Pt     ClientLowerRight() const;
 
     /** returns the size of the client area \see Size() */
@@ -175,47 +220,84 @@ public:
     Pt             ScreenToWindow(const Pt& pt) const;  ///< returns \a pt translated from screen- to window-coordinates
     Pt             ScreenToClient(const Pt& pt) const;  ///< returns \a pt translated from screen- to client-coordinates
     virtual bool   InWindow(const Pt& pt) const;        ///< returns true if screen-coordinate point \a pt falls within the window
-    virtual bool   InClient(const Pt& pt) const;        ///< returns true if screen-coordinate point \a pt falls within the window's client area
+
+    /** returns true if screen-coordinate point \a pt falls within the window's client area */
+    virtual bool   InClient(const Pt& pt) const;
 
     Wnd*           Parent() const;                      ///< returns the window's parent (may be null)
     Wnd*           RootParent() const;                  ///< returns the earliest ancestor window (may be null)
 
-    const Layout* GetLayout() const;                    ///< returns the layout for the window, if any
-    const Layout* ContainingLayout() const;             ///< returns the layout containing the window, if any
+    const Layout*  GetLayout() const;                   ///< returns the layout for the window, if any
+    const Layout*  ContainingLayout() const;            ///< returns the layout containing the window, if any
+
+    /** returns the browse modes for the Wnd, including time cutoffs (in milliseconds), the BrowseInfoWnds to be
+        displayed for each browse info mode, and the text (if any) to be displayed in each mode.  As the time that the
+        cursor is over this Wnd exceeds each mode's time, the corresponding Wnd is shown superimposed over this Wnd and
+        its children.  Set the first time cutoff to 0 for immediate browse info display. */
+    const std::vector<BrowseInfoMode>&  BrowseModes() const;
+
+    /** returns the text to display for browse info mode \a mode.  \throw std::out_of_range May throw
+        std::out_of_range if \a mode is not a valid browse mode. */
+    const std::string& BrowseInfoText(int mode) const;
 
     virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
     //@}
 
     /** \name Mutators */ //@{
-    virtual void   SetText(const std::string& str);          ///< set window text
-    virtual void   SetText(const char* str);                 ///< set window text
-    void           Hide(bool children = true);               ///< suppresses rendering of this window (and possibly its children) during render loop
-    void           Show(bool children = true);               ///< enables rendering of this window (and possibly its children) during render loop
-    virtual void   ModalInit();                              ///< called during Run(), after a modal window is registered, this is the place that subclasses should put specialized modal window initialization, such as setting focus to child controls
-    void           EnableChildClipping(bool enable = true);  ///< enables or disables clipping of child windows to the boundaries of this Wnd
-    virtual void   BeginClipping();                          ///< sets up child clipping for this window
-    virtual void   EndClipping();                            ///< restores state to what it was before BeginClipping() was called
-    void           MoveTo(const Pt& pt);                     ///< moves upper-left corner of window to \a pt
-    void           MoveTo(int x, int y);                     ///< moves upper-left corner of window to \a x,\a y
-    void           OffsetMove(const Pt& pt);                 ///< moves window by \a pt pixels
-    void           OffsetMove(int x, int y);                 ///< moves window by \a x, \a y pixels
-    void           SizeMove(const Pt& ul, const Pt& lr);     ///< resizes and/or moves window to new upper-left and lower right boundaries
-    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes and/or moves window to new upper-left and lower right boundaries
-    void           Resize(const Pt& sz);                     ///< resizes window without moving upper-left corner
-    void           Resize(int x, int y);                     ///< resizes window without moving upper-left corner
-    void           SetMinSize(const Pt& sz);                 ///< sets the minimum allowable size of window \a pt
-    void           SetMinSize(int x, int y);                 ///< sets the minimum allowable size of window to \a x,\a y
-    void           SetMaxSize(const Pt& sz);                 ///< sets the maximum allowable size of window \a pt
-    void           SetMaxSize(int x, int y);                 ///< sets the maximum allowable size of window to \a x,\a y
-    void           AttachChild(Wnd* wnd);                    ///< places \a wnd in child ptr list, sets's child's \a m_parent member to \a this
-    void           MoveChildUp(Wnd* wnd);                    ///< places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children)
-    void           MoveChildDown(Wnd* wnd);                  ///< places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children)
-    void           DetachChild(Wnd* wnd);                    ///< removes \a wnd from child ptr list, sets child's m_parent = 0
-    void           DetachChildren();                         ///< removes all Wnds from child ptr list, sets childrens' m_parent = 0
-    void           DeleteChild(Wnd* wnd);                    ///< removes, detaches, and deletes \a wnd; does nothing if wnd is not in the child list
-    void           DeleteChildren();                         ///< removes, detaches, and deletes all Wnds in the child list
-    void           InstallEventFilter(Wnd* wnd);             ///< adds \a wnd to the front of the event filtering chain
-    void           RemoveEventFilter(Wnd* wnd);              ///< removes \a wnd from the filter chain
+    virtual void   SetText(const std::string& str);     ///< set window text
+    virtual void   SetText(const char* str);            ///< set window text
+
+    /** suppresses rendering of this window (and possibly its children) during render loop */
+    void           Hide(bool children = true);
+
+    /** enables rendering of this window (and possibly its children) during render loop */
+    void           Show(bool children = true);
+
+    /** called during Run(), after a modal window is registered, this is the place that subclasses should put
+        specialized modal window initialization, such as setting focus to child controls */
+    virtual void   ModalInit();
+
+    /** enables or disables clipping of child windows to the boundaries of this Wnd */
+    void           EnableChildClipping(bool enable = true);
+
+    virtual void   BeginClipping();                     ///< sets up child clipping for this window
+    virtual void   EndClipping();                       ///< restores state to what it was before BeginClipping() was called
+    void           MoveTo(const Pt& pt);                ///< moves upper-left corner of window to \a pt
+    void           MoveTo(int x, int y);                ///< moves upper-left corner of window to \a x,\a y
+    void           OffsetMove(const Pt& pt);            ///< moves window by \a pt pixels
+    void           OffsetMove(int x, int y);            ///< moves window by \a x, \a y pixels
+
+    /** resizes and/or moves window to new upper-left and lower right boundaries */
+    void           SizeMove(const Pt& ul, const Pt& lr);
+
+    /** resizes and/or moves window to new upper-left and lower right boundaries */
+    virtual void   SizeMove(int x1, int y1, int x2, int y2);
+
+    void           Resize(const Pt& sz);                ///< resizes window without moving upper-left corner
+    void           Resize(int x, int y);                ///< resizes window without moving upper-left corner
+    void           SetMinSize(const Pt& sz);            ///< sets the minimum allowable size of window \a pt
+    void           SetMinSize(int x, int y);            ///< sets the minimum allowable size of window to \a x,\a y
+    void           SetMaxSize(const Pt& sz);            ///< sets the maximum allowable size of window \a pt
+    void           SetMaxSize(int x, int y);            ///< sets the maximum allowable size of window to \a x,\a y
+
+    /** places \a wnd in child ptr list, sets's child's \a m_parent member to \a this */
+    void           AttachChild(Wnd* wnd);
+
+    /** places \a wnd at the end of the child ptr list, so it is rendered last (on top of the other children) */
+    void           MoveChildUp(Wnd* wnd);
+
+    /** places \a wnd at the beginning of the child ptr list, so it is rendered first (below the other children) */
+    void           MoveChildDown(Wnd* wnd);
+
+    void           DetachChild(Wnd* wnd);               ///< removes \a wnd from child ptr list, sets child's m_parent = 0
+    void           DetachChildren();                    ///< removes all Wnds from child ptr list, sets childrens' m_parent = 0
+
+    /** removes, detaches, and deletes \a wnd; does nothing if wnd is not in the child list */
+    void           DeleteChild(Wnd* wnd);
+
+    void           DeleteChildren();                    ///< removes, detaches, and deletes all Wnds in the child list
+    void           InstallEventFilter(Wnd* wnd);        ///< adds \a wnd to the front of the event filtering chain
+    void           RemoveEventFilter(Wnd* wnd);         ///< removes \a wnd from the filter chain
 
     /** places the window's children in a horizontal layout, handing ownership of the window's children over to the
         layout.  Removes any current layout which may exist. */
@@ -245,44 +327,119 @@ public:
         has no effect. */
     void           SetLayoutCellMargin(int margin);
 
-    virtual bool   Render();                                 ///< draws this Wnd in scene; a return value of false that children should be skipped in subsequent rendering
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);   ///< respond to left button down msg.  A window receives this whenever any input device button changes from up to down while over the window.
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys); ///< respond to drag msg (even if this Wnd is not dragable).   Drag messages are only sent to the window over which the button was dressed at teh beginning of the drag. A window receives this whenever any input device button is down and the mouse is moving while over the window.  If a window has the DRAG_KEEPER flag set, the window will also receive drag messages when the mouse is being dragged outside the window's area.
-    virtual void   LButtonUp(const Pt& pt, Uint32 keys);             ///< respond to release of left mouse button outside window, if it was originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not currently over the window when this happens.
-    virtual void   LClick(const Pt& pt, Uint32 keys);                ///< respond to release of left mouse button over window, if it was also originally depressed over window.  A window will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well.
-    virtual void   LDoubleClick(const Pt& pt, Uint32 keys);          ///< respond to second left click in window within the time limit.  A window will receive an LButtonUp() message instead of an LButtonDown() or LClick() message if the left input device button is pressed over a window that was l-clicked within a double-click time interval.  Note that this means a double click is always preceded by a click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in during the interval.
+
+    /** draws this Wnd; a return value of false that children should be skipped in subsequent rendering */
+    virtual bool   Render();
+
+    /** respond to left button down msg.  A window receives this whenever any input device button changes from up to
+        down while over the window. */
+    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+
+    /** respond to drag msg (even if this Wnd is not dragable).  Drag messages are only sent to the window over which
+        the button was dressed at the beginning of the drag. A window receives this whenever any input device button is
+        down and the mouse is moving while over the window.  If a window has the DRAG_KEEPER flag set, the window will
+        also receive drag messages when the mouse is being dragged outside the window's area. */
+    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+
+    /** respond to release of left mouse button outside window, if it was originally depressed over window.  A window
+        will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not
+        currently over the window when this happens. */
+    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+
+    /** respond to release of left mouse button over window, if it was also originally depressed over window.  A window
+        will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well. */
+    virtual void   LClick(const Pt& pt, Uint32 keys);
+
+    /** respond to second left click in window within the time limit.  A window will receive an LButtonUp() message
+        instead of an LButtonDown() or LClick() message if the left input device button is pressed over a window that
+        was l-clicked within a double-click time interval.  Note that this means a double click is always preceded by a
+        click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in
+        during the interval. */
+    virtual void   LDoubleClick(const Pt& pt, Uint32 keys);
 
     /** respond to right button down msg. \see LButtonDown() */
     virtual void   RButtonDown(const Pt& pt, Uint32 keys);
 
-    /** respond to release of right mouse button over window, if it was also originally depressed over window. \see LButtonUp() */
+    /** respond to release of right mouse button over window, if it was also originally depressed over window. \see
+        LButtonUp() */
     virtual void   RClick(const Pt& pt, Uint32 keys);
 
-    virtual void   RDoubleClick(const Pt& pt, Uint32 keys);          ///< respond to second right click in window within the time limit.  A window will receive an RButtonUp() message instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that was r-clicked within a double-click time interval  Note that this means a double click is always preceded by a click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in during the interval.
-    virtual void   MouseEnter(const Pt& pt, Uint32 keys);            ///< respond to cursor entering window's coords
-    virtual void   MouseHere(const Pt& pt, Uint32 keys);             ///< respond to cursor moving about in window's coords.  A MouseHere() message will not be generated the first time the cursor enters the window's area.  In that case, a MouseEnter() message is generated.
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys);            ///< respond to cursor leaving window's coords
-    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);  ///< respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down)
-    virtual void   Keypress(Key key, Uint32 key_mods);               ///< respond to keystrokes (focus window only).  A window may receive Keypress() messages passed up to it from its children.  For instance, many Control-derived classes pass Keypress() messages to their Parent() windows by default.
-    virtual void   GainingFocus();                                   ///< respond to this window gaining the input focus
-    virtual void   LosingFocus();                                    ///< respond to this window losing the input focus
+    /** respond to second right click in window within the time limit.  A window will receive an RButtonUp() message
+        instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that
+        was r-clicked within a double-click time interval Note that this means a double click is always preceded by a
+        click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in
+        during the interval. */
+    virtual void   RDoubleClick(const Pt& pt, Uint32 keys);
+
+    virtual void   MouseEnter(const Pt& pt, Uint32 keys);  ///< respond to cursor entering window's coords
+
+    /** respond to cursor moving about in window's coords.  A MouseHere() message will not be generated the first time
+        the cursor enters the window's area.  In that case, a MouseEnter() message is generated. */
+    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+
+    virtual void   MouseLeave(const Pt& pt, Uint32 keys);  ///< respond to cursor leaving window's coords
+
+    /** respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down) */
+    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
+
+    /** respond to keystrokes (focus window only).  A window may receive Keypress() messages passed up to it from its
+        children.  For instance, many Control-derived classes pass Keypress() messages to their Parent() windows by
+        default. */
+    virtual void   Keypress(Key key, Uint32 key_mods);
+
+    virtual void   GainingFocus();                         ///< respond to this window gaining the input focus
+    virtual void   LosingFocus();                          ///< respond to this window losing the input focus
 
     /** this executes a modal window and gives it its modality.  For non-modal windows, this function is a no-op.
         It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
     virtual int    Run();
+
+    /** sets the time cutoff (in milliseconds) for a browse info mode.  If \a mode is not less than the current nubmer
+        of modes, extra modes will be created as needed.  The extra nodes will be set to the value of the last time at
+        the time the method is called, or \a time if there were initially no modes. */
+    void SetBrowseModeTime(int time, int mode = 0);
+
+    /** sets the Wnd that is used to show browse info about this Wnd in the browse info mode \a mode.  \throw
+        std::out_of_range May throw std::out_of_range if \a mode is not a valid browse mode. */
+    void SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, int mode = 0);
+
+    /** sets the browse info window for mode \a mode to a Wnd with the specified color and border color which contains
+        the specified text.  \throw std::out_of_range May throw std::out_of_range if \a mode is not a valid browse
+        mode. */
+    void SetBrowseText(const std::string& text, int mode = 0);
+
+    /** sets the browse modes for the Wnd, including time cutoffs (in milliseconds), the BrowseInfoWnds to be displayed
+        for each browse info mode, and the text (if any) to be displayed in each mode.  As the time that the cursor is
+        over this Wnd exceeds each mode's time, the corresponding Wnd is shown superimposed over this Wnd and its
+        children.  Set the first time cutoff to 0 for immediate browse info display. */
+    void SetBrowseModes(const std::vector<BrowseInfoMode>& modes);
 
     /** provides the attributes of this object that are appropriate for a user to edit in a WndEditor; see WndEditor for
         details. */
     virtual void DefineAttributes(WndEditor* editor);
     //@}
 
+
+    /** returns the single time to place in the browse modes during Wnd construction. */
+    static int DefaultBrowseTime();
+
+    /** sets the single time to place in the browse modes during Wnd construction. */
+    static void SetDefaultBrowseTime(int time);
+
+    /** returns the single BrowseInfoWnd to place in the browse modes during Wnd construction.  This returns a
+        TextBoxBrowseInfoWnd with a default parameterization. */
+    static const boost::shared_ptr<BrowseInfoWnd>& DefaultBrowseInfoWnd();
+
+    /** sets the single BrowseInfoWnd to place in the browse modes during Wnd construction. */
+    static void SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd);
+
 protected:
-    /** encapsulates a Wnd event that is passed from the singleton App to a Wnd.  The various types of Events correspond to 
-        the various message member functions of Wnd, some of which have different parameterizations.  Rather than have a
-        less-efficient but more-easily-extensible hierarchy of Event types, a single Event type exists that has all possible
-        parameters to a Wnd message function call.  Therefore, not all of Event's accessors will return sensical results, 
-        depending on the EventType of the Event.  Note that Wnd events may be filtered before they actually reach the target 
-        Wnd \see Wnd */
+    /** encapsulates a Wnd event that is passed from the singleton App to a Wnd.  The various types of Events correspond
+        to the various message member functions of Wnd, some of which have different parameterizations.  Rather than
+        have a less-efficient but more-easily-extensible hierarchy of Event types, a single Event type exists that has
+        all possible parameters to a Wnd message function call.  Therefore, not all of Event's accessors will return
+        sensical results, depending on the EventType of the Event.  Note that Wnd events may be filtered before they
+        actually reach the target Wnd \see Wnd */
     class GG_API Event
     {
     public:
@@ -305,27 +462,31 @@ protected:
             LosingFocus
         };
 
-        /** constructs an Event that is used to invoke a function taking parameters (const GG::Pt& pt, Uint32 keys), eg LButtonDown(). */
+        /** constructs an Event that is used to invoke a function taking parameters (const GG::Pt& pt, Uint32 keys), eg
+            LButtonDown(). */
         Event(EventType type, const GG::Pt& pt, Uint32 keys);
 
-        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const Pt& move, Uint32 keys), eg LDrag(). */
+        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const Pt& move,
+            Uint32 keys), eg LDrag(). */
         Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys);
 
-        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, int move, Uint32 keys), eg MouseWheel(). */
+        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, int move, Uint32
+            keys), eg MouseWheel(). */
         Event(EventType type, const Pt& pt, int move, Uint32 keys);
 
-        /** constructs an Event that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg Keypress(). */
+        /** constructs an Event that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg
+            Keypress(). */
         Event(EventType type, Key key, Uint32 key_mods);
 
         /** constructs an Event that is used to invoke a function taking no parameters, eg GainingFocus(). */
         Event(EventType type);
 
-        EventType      Type() const;      ///< returns the type of the Event
-        const GG::Pt&  Point() const;     ///< returns the point at which the event took place, if any
-        Key            KeyPress() const;  ///< returns the keypress represented by the Event, if any
-        Uint32         KeyMods() const;   ///< returns the modifiers to the Event's keypress, if any
-        const GG::Pt&  DragMove() const;  ///< returns the amount of drag movement represented by the Event, if any
-        int            WheelMove() const; ///< returns the ammount of mouse wheel movement represented by the Event, if any
+        EventType      Type() const;       ///< returns the type of the Event
+        const GG::Pt&  Point() const;      ///< returns the point at which the event took place, if any
+        Key            KeyPress() const;   ///< returns the keypress represented by the Event, if any
+        Uint32         KeyMods() const;    ///< returns the modifiers to the Event's keypress, if any
+        const GG::Pt&  DragMove() const;   ///< returns the amount of drag movement represented by the Event, if any
+        int            WheelMove() const;  ///< returns the ammount of mouse wheel movement represented by the Event, if any
 
     private:
         EventType  m_type;
@@ -338,7 +499,9 @@ protected:
 
     /** \name Structors */ //@{
     Wnd(); ///< default ctor
-    Wnd(int x, int y, int w, int h, Uint32 flags = CLICKABLE | DRAGABLE); ///< ctor that allows a size and position to be specified, as well as creation flags
+
+    /** ctor that allows a size and position to be specified, as well as creation flags */
+    Wnd(int x, int y, int w, int h, Uint32 flags = CLICKABLE | DRAGABLE);
     //@}
 
     /** \name Accessors */ //@{
@@ -346,34 +509,49 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool EventFilter(Wnd* w, const Event& event); ///< handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this filter processed the message.
+    /** handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this
+        filter processed the message. */
+    virtual bool EventFilter(Wnd* w, const Event& event);
 
     Layout*      GetLayout();        ///< returns the layout for the window, if any
     Layout*      ContainingLayout(); ///< returns the layout containing the window, if any
     //@}
 
-    std::string  m_text; ///< text associated with the window, such as a window title or button label, etc.
-    bool         m_done; ///< derived modal Wnd's set this to true to stop modal loop
+    std::string  m_text;            ///< text associated with the window, such as a window title or button label, etc.
+    bool         m_done;            ///< derived modal Wnd's set this to true to stop modal loop
 
 private:
     void ValidateFlags();                 ///< sanity-checks the window creation flags
     void HandleEvent(const Event& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
 
-    Wnd*           m_parent;            ///< ptr to this window's parent; may be 0
-    std::list<Wnd*>m_children;          ///< list of ptrs to child windows kept in order of decreasing area
-    int            m_zorder;            ///< where this window is in the z-order (root (non-child) windows only)
-    bool           m_visible;           ///< is this window drawn?
-    bool           m_clip_children;     ///< should the children of this window be clipped?
-    Pt             m_upperleft;         ///< upper left point of window
-    Pt             m_lowerright;        ///< lower right point of window
-    Pt             m_min_size;          ///< minimum window size Pt(0, 0) (= none) by default
-    Pt             m_max_size;          ///< maximum window size Pt(1 << 30, 1 << 30) (= none) by default
-    std::vector<Wnd*>
-                   m_filters;           ///< the Wnds that are filtering this Wnd's events. These are in reverse order: top of the stack is back().
-    std::set<Wnd*> m_filtering;         ///< the Wnds in whose filter chains this Wnd lies
-    Layout*        m_layout;            ///< the layout for this Wnd, if any
-    Layout*        m_containing_layout; ///< the layout that contains this Wnd, if any
-    Uint32         m_flags;             ///< flags supplied at window creation for clickability, dragability, drag-keeping, and resizability
+    Wnd*              m_parent;        ///< ptr to this window's parent; may be 0
+    std::list<Wnd*>   m_children;      ///< list of ptrs to child windows kept in order of decreasing area
+    int               m_zorder;        ///< where this window is in the z-order (root (non-child) windows only)
+    bool              m_visible;       ///< is this window drawn?
+    bool              m_clip_children; ///< should the children of this window be clipped?
+    Pt                m_upperleft;     ///< upper left point of window
+    Pt                m_lowerright;    ///< lower right point of window
+    Pt                m_min_size;      ///< minimum window size Pt(0, 0) (= none) by default
+    Pt                m_max_size;      ///< maximum window size Pt(1 << 30, 1 << 30) (= none) by default
+
+    /** the Wnds that are filtering this Wnd's events. These are in reverse order: top of the stack is back(). */
+    std::vector<Wnd*> m_filters;
+
+    std::set<Wnd*>    m_filtering;         ///< the Wnds in whose filter chains this Wnd lies
+    Layout*           m_layout;            ///< the layout for this Wnd, if any
+    Layout*           m_containing_layout; ///< the layout that contains this Wnd, if any
+    std::vector<BrowseInfoMode>
+                      m_browse_modes;      ///< the browse info modes for this window
+
+    /** flags supplied at window creation for clickability, dragability, drag-keeping, and resizability */
+    Uint32            m_flags;
+
+    /** the default time to set for the first (and only) value in m_browse_mode_times during Wnd contruction */
+    static int        s_default_browse_time;
+
+    /** the default BrowseInfoWmd to set for the first (and only) value in m_browse_mode_times during Wnd contruction */
+    static boost::shared_ptr<BrowseInfoWnd>
+                      s_default_browse_info_wnd;
 
     friend class App;   ///< App needs access to \a m_zorder, m_children, etc.
     friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
@@ -400,6 +578,14 @@ GG_ENUM_STREAM_OUT(Wnd::WndFlag)
 
 // template implementations
 template <class Archive>
+void GG::Wnd::BrowseInfoMode::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(time)
+        & BOOST_SERIALIZATION_NVP(wnd)
+        & BOOST_SERIALIZATION_NVP(text);
+}
+
+template <class Archive>
 void GG::Wnd::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_NVP(m_text)
@@ -417,6 +603,7 @@ void GG::Wnd::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_filtering)
         & BOOST_SERIALIZATION_NVP(m_layout)
         & BOOST_SERIALIZATION_NVP(m_containing_layout)
+        & BOOST_SERIALIZATION_NVP(m_browse_modes)
         & BOOST_SERIALIZATION_NVP(m_flags);
 
     if (Archive::is_loading::value)

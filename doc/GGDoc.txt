@@ -56,47 +56,43 @@
     \section howto_build How To Build GG
 
     \subsection howto_build_linux Linux
-    To build GG, you will need to have first built the buildable portions of the boost libraries.  Specifically, the 
-    boost.signals and boost.filesystem libraries are needed.  See www.boost.org for details on building boost.  These two 
-    libraries and all the boost includes should be available in your path as well.  You will of course also need to build
-    and make available all of the libraries listed in the requirements above.
+    To build GG, you will need to have SCons installed.  Also, you will need to have first built the buildable portions
+    of the boost libraries.  See www.boost.org for details on building boost.  These libraries and all the boost
+    includes should be available in your path as well.  You will of course also need to build and make available all of
+    the libraries listed in the requirements above.
    
-    Once this is done, Linux users can simply type
+    Once this is done, Linux, Cygwin, and MinGW users can simply type
     \verbatim
-      ./configure
-      make
-      make install [as root]\endverbatim
-    from within the root of the GG directory tree.  (If this does not work for you, you may wish to execute the autogen.sh script, 
-    which will rebuild the configure script and other files.)  Type
+      scons
+      scons install [as root, if necessary]\endverbatim
+    from within the root of the GG directory tree.  Type
     \verbatim
-      ./configure --help\endverbatim
-    to see all the options for configure, including specifying nonstandard locations for libraries required by GG, which may 
-    be especially useful on Cygwin/MinGW systems.  GG will install itself in /usr/local/lib by default; to change 
-    this, use the --prefix=[LIB_PATH] command-line option when invoking configure.  Note that if you do not intend to use 
-    the static version of GG, you should specify the --disable-static option, which will cut your build time roughly in half.
+      scons -h\endverbatim
+    to see all the options for the build, including specifying nonstandard locations for libraries required by GG, which may 
+    be especially useful on Cygwin/MinGW systems.
 
     \subsection howto_build_win32_gcc Windows (GCC)
 
-    GG works quite well with GCC on Windows, under MinGW or Cygwin, using the autotools build system described in the Linux build 
-    section.  In case the autotools build system fails to work for you
-    in MinGW, there is a makefile called Makefile.mingw that is set up for my personal system, but that is easily altered to work 
-    on yours.  Just replace all references to the locations of the directories where the required libs are stored on my system
-    with where they are located on yours, and you're on your way.  You may also need to grab the DLLs that this makefile includes
-    in the build from somewhere other than "..".
-    <p>
-    The DLLs for all the required libraries except the boost libraries
-    can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since they're all C code, there will be no 
-    ABI compatibility issues.  You must compile the boost libraries yourself, since they are C++ code.  
+    GG works quite well with GCC on Windows, under MinGW or Cygwin, using SCons.  See the SCons documentation for how to
+    force SCons to use Cygwin or MinGW on the Windows platform (this will probably only be necessary if you also have
+    the MSVC compiler), then refer to the Linux section above.  Also note that the DLLs for all the required libraries
+    except the boost libraries can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since
+    they're all C code, there will be no ABI compatibility issues.  You must compile the boost libraries yourself, since
+    they are C++ code.
 
     \subsection howto_build_win32_microsoft Windows (Microsoft C++)
 
-    For those of you who use the Microsoft compiler, I have only been able to get GG to compile on MSVC++ 7.1, the version
-    that comes with .NET 2003.  As of the time of this writing, this is the latest MSVC version.  I have included a Visual Studio 
-    solution file under GG/msvc/GG.  Use the Release build configuration; the Debug one is not set up.  
-    Note that you can get precompiled MSVC 7.1-compatible DLLs for many of the required libraries.  DevIL's 1.6.5 pre-compiled 
-    library can be substituted for the latest one, 1.6.6, for which there is no pre-compiled version available.
+    For those of you who use the Microsoft compiler, SCons will also work from the command line.  You need to install
+    SCons and Python, and make sure that python is in your path.  There is also a standalone version of SCons available
+    somewhere on the SCons site.  Then you just open up a command prompt window, cd to the root of the GG directory
+    tree, and type scons.
+    <p>I have only been able to get GG to compile on MSVC++ 7.1, the version that comes with .NET 2003.  As of the time
+    of this writing, this is the latest MSVC version.  I have included a Visual Studio solution file under GG/msvc/GG.
+    Use the Release build configuration; the Debug one is not set up.  Note that you can get precompiled MSVC
+    7.1-compatible DLLs for many of the required libraries.  DevIL's 1.6.5 pre-compiled library can be substituted for
+    the latest one, if there is no pre-compiled version available.
     <p>
-    In order to build the boost.signals and boost.filesystem libraries, do the following, with the boost zipfile unzipped into your 
+    In order to build the boost libraries, do the following, with the boost zipfile unzipped into your 
     root directory:
     - Unzip the boost zipfile into your root directory.
     - Open a "Visual Studio .NET 2003 Command Prompt".
@@ -168,40 +164,32 @@
     object(s).  If a signal is emitted to which no slots are connected, nothing happens.
     \section sigs_n_slots_motivation Motivation for the Signals and Slots Pattern
     \subsection prob The Problem
-    Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to 
-    call a Command() function, which passed to the caller an integer representing the type of message (button click, scroll, or
-    whatever), an ID number associated with the calling control, and a single integer parameter.  It could have been made more 
-    general and even less typesafe by replacing the int parameter with a void pointer, but in either case it suffers from three
-    huge limitations.  First, the type of message and the paramter must be known to both caller and callee; this means that, for
-    example, the user must keep track of the integer value representing a button click message, and make sure that separate 
-    sections of code are using the same value to represent it.  Second, each control must call its parent and tell it about 
-    each event that occurs, meaning that the callee has to maintain state information.  For instance, consider a dialog that 
-    contains a list box.  Say the dialog does some lengthy bit of processing whenever the user clears the dialog box by pushing 
-    another button in the dialog.  With the simple Command()-call scheme, any list box will notify its parent (in this case, the 
-    dialog) whenever it is cleared.  Say also that if the user presses the "c" key, the dialog will catch the event and clear 
-    the list box.  Once cleared, the list box will dutifully send its cleared message to the dialog.  So to differentiate 
-    between messages from a button-cleared list box and a keystroke-cleared one, the dialog box has to enter a state indicating 
-    that it has just cleared its list box before doing so, if it doesn't want to do the lengthy button-cleared processing after 
-    a "c"-key press.  This is a simple example.  In reality, things get real hairy real fast.  Third, since the controls always 
-    call their parents, any code that doesn't contain a control, but that wants to know about button pushes, scrolling 
-    scrollbars, etc., must deal with that control's parent; this creates a lot of chains of passed messages, and a fair number 
-    of kludges to get messages to the sections of code that need them.
+    Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to call a
+    Command() function, which passed to the callee an integer representing the type of message (button click, scroll, or
+    whatever), an ID number associated with the calling control, and a single integer parameter.  It could have been
+    made more general and even less typesafe by replacing the int parameter with a void pointer, but in either case it
+    suffers from two huge limitations.  First, the type of message and the parameter must be known to both caller and
+    callee; this means that, for example, the user must keep track of the integer value representing a button click
+    message, and make sure that separate sections of code are using the same value to represent it.  Second, any code
+    that doesn't contain a control, but that wants to know about button pushes, scrolling scrollbars, etc., must deal
+    with that control's parent (or break encapsulation).  This creates a lot of chains of passed messages, and a large
+    number of kludges to get messages to the sections of code that need them.
     \subsection sigs_n_slots_soln The Solution
-    Now, each control emits a signal every time a significant event occurs.  If no processing needs to be associated with such
-    an event, its signal need not be connected to anything.  Futhermore, no matter how many modules need to react to a 
-    certain signal, they can all be connected.  In the case of our previous example, the list box-clearing button in the dialog 
-    can just create a temporary connection between the dialog and the list box, then clear the list box (so then when the list 
-     box signals it has been cleared, the dialog will do the appropriate processing).  When the list box is cleared with a 
-    "c"-key press, no such connection needs to be made.  No state information is needed in the dialog.
+    Now, each control emits a signal every time a significant event occurs.  If no processing needs to be associated
+    with such an event, its signal need not be connected to anything.  Futhermore, no matter how many modules need to
+    react to a certain signal, they can all be connected.
     \section sigs_n_slots_use Using Signals and Slots
     \subsection sigs_n_slots_connecting Connecting Signals To Slots
-    There are two types of connections between signals and slots.  The first type of connection is between a signal and a 
-     slot, which may be a functor (which in turn may be a boost::bind object), a free function or a static member function.  
-    Just call Connect(sig, slot).  The second type is between a signal and a non-static member function.  In this case, the 
-    call to Connect() requires a third parameter: a pointer to the object whose member function is to be called.  For instance, 
-    if I have a class Foo and an object foo1 of class Foo, I cannot call foo1.bar() by simply knowing the address of bar().  I 
-    need to call Connect(sig, &Foo::bar, &foo1) so that the signal knows which object's bar() to call.  Both versions of Connect()
-    return a connection object.  By keeping this connection object, you can later disconnect() the connection you made.
+    There are two types of connections between signals and slots.  The first type of connection is between a signal and
+    a slot, which may be a functor (which in turn may be a boost::bind object), a free function or a static member
+    function or function object.  Just call Connect(sig, slot).  The second type is between a signal and a non-static
+    member function.  In this case, the call to Connect() requires a third parameter: a pointer to the object whose
+    member function is to be called.  For instance, if I have a class Foo and an object foo1 of class Foo, I cannot call
+    foo1.bar() by simply knowing the address of bar().  I need to call Connect(sig, &Foo::bar, &foo1) so that the signal
+    knows which object's bar() to call.  Both versions of Connect() return a connection object.  By keeping this
+    connection object, you can later disconnect() the connection you made.  In addition, signal-signal connections are
+    possible.  Calling Connect(sig1, sig2) forwards all sig1's signal emissions to sig2.  This is provided as a
+    convenience to avoid having to write dummy forwarding functions that do this.
     \subsection sigs_n_slots_emitting Emitting Signals
     To emit a signal, just call its () operator, like this: sig();
     \subsection disconnecting Disconnecting Signals and Slots
@@ -210,7 +198,7 @@
     object owning the slot is destructed, and the signal is emitted?  A segfault, unless the object's class inherits from 
     boost::trackable, which auto-disconnects slots on object destruction.  GG::Wnd is derived from boost::trackable, so all 
     GG::Wnd-derived classes should handle such situations gracefully.  See the boost tutorial below for details.
-    \see http://boost.org/libs/signals/doc/tutorial.html for a tutorial on other aspects of signals and slots; you can create 
+    \see http://boost.org/doc/html/signals.html for a tutorial on other aspects of signals and slots; you can create 
     connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
     the return values of such slots (take the first return value, the last, the average of all of them, etc.).
 */

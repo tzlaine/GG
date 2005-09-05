@@ -389,9 +389,10 @@ else:
 Export('env', 'DirHeaders')
 
 # define libGiGi objects
-env['libltdl_defines'] = ['HAVE_CONFIG_H']
-if str(Platform()) == 'win32':
-    env['libltdl_defines'] += [
+if str(Platform()) != 'win32':
+    env['libltdl_defines'] = ['HAVE_CONFIG_H']
+else:
+    env['libltdl_defines'] = [
         'error_t=int',
         'HAVE_STDIO_H',
         'HAVE_STDLIB_H',

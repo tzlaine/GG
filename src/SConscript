@@ -4,6 +4,7 @@ Import('env', 'DirHeaders')
 
 sources = [
     'GGApp.cpp',
+    'GGBrowseInfoWnd.cpp',
     'GGButton.cpp',
     'GGClr.cpp',
     'GGControl.cpp',

@@ -115,6 +115,7 @@ public:
 
     /// these are the only events absolutely necessary for GG to function properly
     enum EventType {
+        IDLE,        ///< nothing has changed since the last message, but the App might want to update some things anyway
         KEYPRESS,    ///< a down key press or key repeat, with or without modifiers like Alt, Ctrl, Meta, etc.
         LPRESS,      ///< a left mouse button press
         MPRESS,      ///< a middle mouse button press
@@ -237,6 +238,7 @@ protected:
 
     /** \name Mutators */ //@{
     void           HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
+    void           ProcessBrowseInfo();    ///< determines the current borwse info mode, if any
     virtual void   RenderBegin() = 0;      ///< clears the backbuffer, etc.
     virtual void   Render();               ///< renders the windows in the z-list
     virtual void   RenderEnd() = 0;        ///< swaps buffers, etc.

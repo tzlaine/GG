@@ -73,9 +73,9 @@ void EventPumpBase::LoopBody(App* app, EventPumpState& state, bool do_non_render
                 app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
             }
         } else {
-            // otherwise, send a mouse-move message immediately, so that the app has timely updates for triggering
-            // browse info windows, and reset the mouse drag repeat start time to zero
-            app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
+            // otherwise, send an idle message immediately, so that the app has timely updates for triggering browse
+            // info windows, etc., and reset the mouse drag repeat start time to zero
+            app->HandleGGEvent(App::IDLE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
             state.mouse_drag_repeat_start_time = 0;
         }
 

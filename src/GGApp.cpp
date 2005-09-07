@@ -526,6 +526,10 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     }
 
     switch (event) {
+    case IDLE:{
+        if (curr_wnd_under_cursor)
+            ProcessBrowseInfo();
+        break;}
     case KEYPRESS:{
         s_impl->browse_info_wnd.reset();
         bool processed = false;
@@ -593,18 +597,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             }
         } else if (curr_wnd_under_cursor && prev_wnd_under_cursor == curr_wnd_under_cursor) { // if !drag_wnds[0] and we're moving over the same (valid) object we were during the last iteration
             curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseHere, pos, 0));
-            if (s_impl->modal_wnds.empty() || curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
-                const std::vector<Wnd::BrowseInfoMode>& browse_modes = curr_wnd_under_cursor->BrowseModes();
-                int delta_t = Ticks() - prev_wnd_under_cursor_time;
-                for (unsigned int i = 0; i < browse_modes.size(); ++i) {
-                    if (browse_modes[i].time < delta_t && s_impl->browse_info_wnd != browse_modes[i].wnd) {
-                        s_impl->browse_info_wnd = browse_modes[i].wnd;
-                        s_impl->browse_info_mode = i;
-                        s_impl->browse_info_wnd->MoveTo(s_impl->mouse_pos);
-                        break;
-                    }
-                }
-            }
+            ProcessBrowseInfo();
         } else { // if !drag_wnds[0] and prev_wnd_under_cursor != curr_wnd_under_cursor, we're just moving around
             if (prev_wnd_under_cursor) prev_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseLeave, pos, 0));
             if (curr_wnd_under_cursor) curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseEnter, pos, 0));
@@ -751,6 +744,22 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         break;}
     default:
         break;
+    }
+}
+
+void App::ProcessBrowseInfo()
+{
+    if (s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
+        const std::vector<Wnd::BrowseInfoMode>& browse_modes = s_impl->curr_wnd_under_cursor->BrowseModes();
+        int delta_t = Ticks() - s_impl->prev_wnd_under_cursor_time;
+        for (unsigned int i = 0; i < browse_modes.size(); ++i) {
+            if (browse_modes[i].time < delta_t && s_impl->browse_info_wnd != browse_modes[i].wnd) {
+                s_impl->browse_info_wnd = browse_modes[i].wnd;
+                s_impl->browse_info_mode = i;
+                s_impl->browse_info_wnd->MoveTo(s_impl->mouse_pos);
+                break;
+            }
+        }
     }
 }
 

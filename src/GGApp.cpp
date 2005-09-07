@@ -532,6 +532,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         break;}
     case KEYPRESS:{
         s_impl->browse_info_wnd.reset();
+        s_impl->browse_info_mode = -1;
         bool processed = false;
         // only process accelerators when there are no modal windows active; otherwise, accelerators would be an end-run around modality
         if (s_impl->modal_wnds.empty()) {
@@ -613,6 +614,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case RPRESS:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
         s_impl->browse_info_wnd.reset();
+        prev_wnd_under_cursor_time = Ticks();
         switch (event) {
         case LPRESS:{
             s_impl->button_state[0] = true;
@@ -647,8 +649,6 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             break;}
         default: break;
         }
-        if (prev_wnd_under_cursor != curr_wnd_under_cursor)
-            prev_wnd_under_cursor_time = Ticks();
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     case LRELEASE:
@@ -656,6 +656,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case RRELEASE:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
         s_impl->browse_info_wnd.reset();
+        prev_wnd_under_cursor_time = Ticks();
         switch (event) {
         case LRELEASE:{
             Wnd* click_wnd = drag_wnds[0];
@@ -728,18 +729,15 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         default:
             break;
         }
-        if (prev_wnd_under_cursor != curr_wnd_under_cursor)
-            prev_wnd_under_cursor_time = Ticks();
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     case MOUSEWHEEL:{
         curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
         s_impl->browse_info_wnd.reset();
+        prev_wnd_under_cursor_time = Ticks();
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
         if (curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2]))
             curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseWheel, pos, rel.y, key_mods));
-        if (prev_wnd_under_cursor != curr_wnd_under_cursor)
-            prev_wnd_under_cursor_time = Ticks();
         prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
         break;}
     default:

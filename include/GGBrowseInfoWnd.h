@@ -43,7 +43,7 @@ class TextControl;
     Update() method is called.  The Wnd* parameter passed in this call is the window about which the BrowseInfoWnd is
     displaying info (the target Wnd); the BrowseInfoWnd can collect whatever information it requires from the target Wnd
     before it is rendered.  Note that a BrowseInfoWnd should never be CLICKABLE. */
-class BrowseInfoWnd : public Wnd
+class GG_API BrowseInfoWnd : public Wnd
 {
 public:
     /** \name Mutators */ //@{
@@ -73,7 +73,7 @@ private:
     TextBoxBrowseInfoWnd to get the appropriate text for the current mode by calling BrowseInfoText() on its target Wnd.
     It may also be used to display static text, by setting SetTextFromTarget(false) and setting the desired text with
     SetText(). */
-class TextBoxBrowseInfoWnd : public BrowseInfoWnd
+class GG_API TextBoxBrowseInfoWnd : public BrowseInfoWnd
 {
 public:
     /** \name Structors */ //@{

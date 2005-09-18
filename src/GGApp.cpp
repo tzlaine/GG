@@ -776,8 +776,14 @@ void App::Render()
     }
     // render the active browse info window, if any
     if (s_impl->browse_info_wnd) {
-        s_impl->browse_info_wnd->Update(s_impl->browse_info_mode, s_impl->curr_wnd_under_cursor);
-        RenderWindow(s_impl->browse_info_wnd.get());
+        if (!s_impl->curr_wnd_under_cursor) {
+            s_impl->browse_info_wnd.reset();
+            s_impl->browse_info_mode = -1;
+            s_impl->prev_wnd_under_cursor_time = Ticks();
+        } else {
+            s_impl->browse_info_wnd->Update(s_impl->browse_info_mode, s_impl->curr_wnd_under_cursor);
+            RenderWindow(s_impl->browse_info_wnd.get());
+        }
     }
     // render drag-drop windows in arbitrary order (sorted by pointer value)
     for (std::map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {

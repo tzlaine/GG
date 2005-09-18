@@ -357,7 +357,7 @@ protected:
 private:
     void           ConnectSignals();
     void           ValidateStyle(); ///< reconciles inconsistencies in the style flags
-    void           AdjustScrolls(); ///< creates, destroys, or resizes scrolls to reflect size of data in listbox
+    void           AdjustScrolls(bool adjust_for_resize); ///< creates, destroys, or resizes scrolls to reflect size of data in listbox
     void           VScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the vertical scroll bar are caught here
     void           HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
     int            ClickAtRow(int row, Uint32 keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys

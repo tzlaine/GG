@@ -265,6 +265,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     SetColor(color);
     ValidateStyle();
     m_header_row.reset(new Row);
+    SetText("ListBox");
 }
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, const std::vector<int>& col_widths,
@@ -296,6 +297,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, const std::vector<int>& 
     ValidateStyle();
     m_col_alignments.resize(m_col_widths.size(), ListBoxStyle(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
     m_header_row.reset(new Row);
+    SetText("ListBox");
 }
 
 ListBox::~ListBox()
@@ -788,11 +790,7 @@ void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
 void ListBox::SizeMove(int x1, int y1, int x2, int y2)
 {
     Wnd::SizeMove(x1, y1, x2, y2);
-    DeleteChild(m_vscroll);
-    m_vscroll = 0;
-    DeleteChild(m_hscroll);
-    m_hscroll = 0;
-    AdjustScrolls(); // fix those pesky scrollbars
+    AdjustScrolls(true); // fix those pesky scrollbars
 }
 
 int ListBox::Insert(Row* row, int at/*= -1*/)
@@ -824,7 +822,7 @@ void ListBox::Delete(int idx)
         if (idx <= m_caret) // move caret up, if needed
             --m_caret;
 
-        AdjustScrolls();
+        AdjustScrolls(false);
 
         if (!m_suppress_delete_signal)
             DeletedSignal(idx, row);
@@ -849,7 +847,7 @@ void ListBox::Clear()
         m_col_alignments.clear();
     }
 
-    AdjustScrolls();
+    AdjustScrolls(false);
 
     if (signal)
         ClearedSignal();
@@ -1199,7 +1197,7 @@ int ListBox::Insert(const boost::shared_ptr<Row>& row, int at, bool dropped)
     if (retval <= m_caret) // move caret down, if needed
         ++m_caret;
 
-    AdjustScrolls();
+    AdjustScrolls(false);
 
     if (dropped) {
         // ensure that no one has a problem with this drop in user space (if so, they should throw)
@@ -1210,7 +1208,7 @@ int ListBox::Insert(const boost::shared_ptr<Row>& row, int at, bool dropped)
             m_suppress_delete_signal = true;
             Delete(retval);
             m_suppress_delete_signal = false;
-            AdjustScrolls();
+            AdjustScrolls(false);
             throw; // re-throw so that LButtonUp() of the source ListBox can react as well
         }
     } else {
@@ -1244,7 +1242,7 @@ void ListBox::RecreateScrolls()
     delete m_vscroll;
     delete m_hscroll;
     m_vscroll = m_hscroll = 0;
-    AdjustScrolls();
+    AdjustScrolls(false);
 }
 
 void ListBox::RenderRow(const Row* row, int left, int top, int first_col, int last_col)
@@ -1291,7 +1289,7 @@ void ListBox::ValidateStyle()
         m_style &= ~(LB_NOSEL | LB_SINGLESEL | LB_QUICKSEL);
 }
 
-void ListBox::AdjustScrolls()
+void ListBox::AdjustScrolls(bool adjust_for_resize)
 {
     // this client area calculation disregards the thickness of scrolls
     Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
@@ -1313,7 +1311,8 @@ void ListBox::AdjustScrolls()
             DeleteChild(m_vscroll);
             m_vscroll = 0;
         } else { // ensure vertical scroll has the right logical and physcal dimensions
-            m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
+            if (!adjust_for_resize)
+                m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
             int scroll_x = cl_sz.x - SCROLL_WIDTH;
             int scroll_y = 0;
             m_vscroll->SizeMove(scroll_x, scroll_y, scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
@@ -1330,7 +1329,8 @@ void ListBox::AdjustScrolls()
             DeleteChild(m_hscroll);
             m_hscroll = 0;
         } else { // ensure horizontal scroll has the right logical and physcal dimensions
-            m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
+            if (!adjust_for_resize)
+                m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
             int scroll_x = 0;
             int scroll_y = cl_sz.y - SCROLL_WIDTH;
             m_hscroll->SizeMove(scroll_x, scroll_y, scroll_x + cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH);

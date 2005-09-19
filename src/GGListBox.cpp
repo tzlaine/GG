@@ -1346,9 +1346,10 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
 void ListBox::VScrolled(int tab_low, int tab_high, int low, int high)
 {
     m_first_row_shown = 0;
-    for (unsigned int i = 0; i < m_rows.size(); ++i) {
-        if (tab_low > 0) {
-            tab_low -= m_rows[i]->Height();
+    int accum = 0;
+    for (unsigned int i = 0; i < m_rows.size() && m_first_row_shown < static_cast<int>(m_rows.size()) - 1; ++i) {
+        if (accum + m_rows[i]->Height() / 2 < tab_low) {
+            accum += m_rows[i]->Height();
             ++m_first_row_shown;
         }
     }
@@ -1357,9 +1358,10 @@ void ListBox::VScrolled(int tab_low, int tab_high, int low, int high)
 void ListBox::HScrolled(int tab_low, int tab_high, int low, int high)
 {
     m_first_col_shown = 0;
-    for (unsigned int i = 0; i < m_col_widths.size(); ++i) {
-        if (tab_low > 0) {
-            tab_low -= m_col_widths[i];
+    int accum = 0;
+    for (unsigned int i = 0; i < m_col_widths.size() && m_first_col_shown < static_cast<int>(m_col_widths.size()) - 1; ++i) {
+        if (accum + m_col_widths[i] / 2 < tab_low) {
+            accum += m_col_widths[i];
             ++m_first_col_shown;
         }
     }

@@ -34,6 +34,16 @@
 #include "queue.h"
 #include "trace.h"
 
+static int PollMaskedEvent(SDL_Event *event, Uint32 mask)
+{
+  SDL_PumpEvents();
+
+  /* We can't return -1, just return 0 (no event) on error */
+  if ( SDL_PeepEvents(event, 1, SDL_GETEVENT, mask) <= 0 )
+    return 0;
+  return 1;
+}
+
 //----------------------------------------
 //
 // error handling code
@@ -123,6 +133,47 @@ int FE_WaitEvent(SDL_Event *event)
 
   SDL_LockMutex(eventLock);
   while (0 >= (val = SDL_PollEvent(event)))
+  {
+    SDL_CondWait(eventWait, eventLock);
+  }
+  SDL_UnlockMutex(eventLock);
+  SDL_CondSignal(eventWait);
+
+  return val;
+}
+
+//----------------------------------------
+//
+// 
+//
+
+int FE_PollMaskedEvent(SDL_Event *event, Uint32 mask)
+{
+  int val = 0;
+
+  SDL_LockMutex(eventLock);
+  val = PollMaskedEvent(event, mask);
+  SDL_UnlockMutex(eventLock);
+
+  if (0 < val)
+  {
+    SDL_CondSignal(eventWait);
+  }
+
+  return val;
+}
+
+//----------------------------------------
+//
+// Replacement for SDL_WaitEvent();
+//
+
+int FE_WaitMaskedEvent(SDL_Event *event, Uint32 mask)
+{
+  int val = 0;
+
+  SDL_LockMutex(eventLock);
+  while (0 >= (val = PollMaskedEvent(event, mask)))
   {
     SDL_CondWait(eventWait, eventLock);
   }

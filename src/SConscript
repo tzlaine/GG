@@ -33,8 +33,9 @@ sources = [
 
 headers = [None] + DirHeaders('../include')
 
-if env['need__vsnprintf_c']:
-    sources.append('_vsnprintf.c')
+# This is supposed to be detected during configuration, but sometimes isn't, and is harmless, so we're including it all the time now.
+#if env['need__vsnprintf_c']:
+sources.append('_vsnprintf.c')
 
 if env['dynamic']:
     objects = env.SharedObject(sources)

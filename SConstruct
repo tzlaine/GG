@@ -460,18 +460,45 @@ header_dir = os.path.normpath(os.path.join(env.subst(env['incdir']), 'GG'))
 lib_dir = os.path.normpath(env.subst(env['libdir']))
 
 # install target
+gigi_libname = str(lib_gigi[0])
+gigi_sdl_libname = str(lib_gigi_sdl[0])
+gigi_net_libname = str(lib_gigi_net[0])
+installed_gigi_libname = gigi_libname
+installed_gigi_sdl_libname = gigi_sdl_libname
+installed_gigi_net_libname = gigi_net_libname
+if str(Platform()) == 'posix' and env['dynamic']:
+    gigi_version_suffix = '.' + gigi_version
+    installed_gigi_libname += gigi_version_suffix
+    installed_gigi_sdl_libname += gigi_version_suffix
+    installed_gigi_net_libname += gigi_version_suffix
+
 Alias('install', InstallHeaderTree(header_dir, 'include', install_headers, [], Install))
 Alias('install', Install(header_dir, os.path.normpath('libltdl/ltdl.h')))
 Alias('install', Install(header_dir, os.path.normpath('libltdl/config.h')))
-Alias('install', Install(lib_dir, lib_gigi))
+Alias('install', InstallAs(lib_dir + '/' + installed_gigi_libname, lib_gigi))
+if str(Platform()) == 'posix' and env['dynamic']:
+    Alias('install',
+          env.Command(lib_dir + '/' + gigi_libname,
+                      lib_dir + '/' + installed_gigi_libname,
+                      'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
 if not mising_pkg_config:
     Alias('install', Install(env['pkgconfigdir'], gigi_pc))
 if not env['disable_sdl']:
-    Alias('install', Install(lib_dir, lib_gigi_sdl))
+    Alias('install', InstallAs(lib_dir + '/' + installed_gigi_sdl_libname, lib_gigi_sdl))
+    if str(Platform()) == 'posix' and env['dynamic']:
+        Alias('install',
+              env.Command(lib_dir + '/' + gigi_sdl_libname,
+                          lib_dir + '/' + installed_gigi_sdl_libname,
+                          'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
     if not mising_pkg_config:
         Alias('install', Install(env['pkgconfigdir'], gigi_sdl_pc))
 if not env['disable_net']:
-    Alias('install', Install(lib_dir, lib_gigi_net))
+    Alias('install', InstallAs(lib_dir + '/' + installed_gigi_net_libname, lib_gigi_net))
+    if str(Platform()) == 'posix' and env['dynamic']:
+        Alias('install',
+              env.Command(lib_dir + '/' + gigi_net_libname,
+                          lib_dir + '/' + installed_gigi_net_libname,
+                          'ln -s ' + lib_dir + '/' + installed_gigi_net_libname + ' ' + lib_dir + '/' + gigi_net_libname))
     if not mising_pkg_config:
         Alias('install', Install(env['pkgconfigdir'], gigi_net_pc))
 
@@ -484,14 +511,20 @@ deletions = [
     Delete(header_dir),
     Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi[0]))))
     ]
+if str(Platform()) == 'posix' and env['dynamic']:
+    deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_libname))))
 if not mising_pkg_config:
     deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_pc[0])))))
 if not env['disable_sdl']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_sdl[0])))))
+    if str(Platform()) == 'posix' and env['dynamic']:
+        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
     if not mising_pkg_config:
         deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_sdl_pc[0])))))
 if not env['disable_net']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_net[0])))))
+    if str(Platform()) == 'posix' and env['dynamic']:
+        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_net_libname))))
     if not mising_pkg_config:
         deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_net_pc[0])))))
 uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)

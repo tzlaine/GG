@@ -1,6 +1,6 @@
 # -*- Python -*-
 
-gigi_version = '0.6.0.0'
+gigi_version = '0.6.0'
 
 ft_pkgconfig_version = '9.0.0'
 ft_version = '2.1.2'

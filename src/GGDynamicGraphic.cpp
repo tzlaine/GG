@@ -359,7 +359,7 @@ void DynamicGraphic::AddFrames(const Texture* texture, int frames/* = -1*/)
 {
     int frames_in_texture = FramesInTexture(texture);
     if (!frames_in_texture)
-        throw std::invalid_argument("DynamicGraphic::AddFrames : attempted to add frames from a Texture not even large enough for one frame");
+        throw CannotAddFrame("DynamicGraphic::AddFrames : attempted to add frames from a Texture too small for even one frame");
 
     FrameSet fs;
     fs.texture.reset(texture);
@@ -372,7 +372,7 @@ void DynamicGraphic::AddFrames(const boost::shared_ptr<Texture>& texture, int fr
 {
     int frames_in_texture = FramesInTexture(texture.get());
     if (!frames_in_texture)
-        throw std::invalid_argument("DynamicGraphic::AddFrames : attempted to add frames from a Texture not even large enough for one frame");
+        throw CannotAddFrame("DynamicGraphic::AddFrames : attempted to add frames from a Texture too small for even one frame");
 
     FrameSet fs;
     fs.texture = texture;

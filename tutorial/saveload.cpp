@@ -7,6 +7,7 @@
 
 #include "serialization.h"
 
+#include "GGBrowseInfoWnd.h"
 #include "GGButton.h"
 #include "GGTextControl.h"
 #include "GGDropDownList.h"

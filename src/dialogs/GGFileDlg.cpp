@@ -128,8 +128,7 @@ fs::path FileDlg::s_working_dir = fs::initial_path();
 FileDlg::FileDlg() :
     Wnd(),
     m_in_win32_drive_selection(false)
-{
-}
+{}
 
 FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const boost::shared_ptr<Font>& font, Clr color, 
                  Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/, ListBox* files_list/* = 0*/,
@@ -385,11 +384,8 @@ void FileDlg::Init(const std::string& directory)
 
     if (directory != "") {
         fs::path dir_path = fs::complete(fs::path(directory, fs::native));
-        if (!fs::exists(dir_path)) {
-            throw InitialDirectoryDoesNotExistException("FileDlg::Init() : Initial directory \"" + 
-                                                        dir_path.native_directory_string() + 
-                                                        "\" does not exist.");
-        }
+        if (!fs::exists(dir_path))
+            throw BadInitialDirectory("FileDlg::Init() : Initial directory \"" + dir_path.native_directory_string() + "\" does not exist.");
         SetWorkingDirectory(dir_path);
     }
 

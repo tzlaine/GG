@@ -197,9 +197,6 @@ public:
         Clr     curr_color;         ///< the current text color (as set by a tag)
     };
 
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(FontException);
-
     /** the ranges of character glyphs to be rendered in this font*/
     enum GlyphRange {
         NUMBER =             1 << 0,    ///< only the numbers ('0' - '9')
@@ -211,7 +208,9 @@ public:
     };
 
     /** \name Structors */ //@{
-    Font(const std::string& font_filename, int pts, Uint32 range = ALL_DEFINED_RANGES); ///< ctor. \throw FontException This constructor may throw if a valid font file is not found, or a Font cannot be created for some other reason.
+    /** ctor. \throw Font::Exception Throws a subclass of Exception if one of the conditions specified for the
+        subclasses is met. */
+    Font(const std::string& font_filename, int pts, Uint32 range = ALL_DEFINED_RANGES);
     virtual ~Font(); ///< virtual dtor
     //@}
 
@@ -242,6 +241,32 @@ public:
     static void       RegisterKnownTag(const std::string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
     static void       RemoveKnownTag(const std::string& tag);     ///< removes \a tag from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
     static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
+
+    /** \name Exceptions */ //@{
+    /** The base class for Font exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when valid font data cannot be read from a file. */
+    GG_CONCRETE_EXCEPTION(BadFile, GG::Font, Exception);
+
+    /** Thrown when a nonpositive font size is requested. */
+    GG_CONCRETE_EXCEPTION(InvalidPointSize, GG::Font, Exception);
+
+    /** Thrown when an invalid glyph range flag is specified when creating a Font. */
+    GG_CONCRETE_EXCEPTION(InvalidRangeFlags, GG::Font, Exception);
+
+    /** Thrown when a FreeType font could be loaded, but the resulting font is not scalable, making it unusable by GG. */
+    GG_CONCRETE_EXCEPTION(UnscalableFont, GG::Font, Exception);
+
+    /** Thrown when an attempt is made to create a glyph from null font face object. */
+    GG_CONCRETE_EXCEPTION(BadFace, GG::Font, Exception);
+
+    /** Thrown when an attempt to set the size of a FreeType font face fails. */
+    GG_CONCRETE_EXCEPTION(BadPointSize, GG::Font, Exception);
+
+    /** Thrown when FreeType is unable to fulfill a request to load or render a glpyh. */
+    GG_CONCRETE_EXCEPTION(BadGlyph, GG::Font, Exception);
+    //@}
 
 protected:
     /** \name Structors */ //@{
@@ -322,7 +347,7 @@ class GG_API FontManager
 {
 private:
     /// This GG::FontManager-private struct is used as a key type for the map of rendered fonts.
-    struct FontKey 
+    struct FontKey
     {
         FontKey(const std::string& str, int pts); ///< ctor
         bool operator<(const FontKey& rhs) const; ///< lexocograhpical ordering on filename then points
@@ -332,23 +357,24 @@ private:
     };
 
 public:
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(FontManagerException);
-
-    /** \name Structors */ //@{
-    FontManager(); ///< ctor
-    //@}
-
     /** \name Mutators */ //@{
     boost::shared_ptr<Font> GetFont(const std::string& font_filename, int pts, Uint32 range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the requested font.  May load font if unavailable at time of request.
-    void             FreeFont(const std::string& font_filename, int pts); ///< removes the indicated font from the font manager.  Due to shared_ptr semantics, the font may not be deleted until much later.
+    void                    FreeFont(const std::string& font_filename, int pts); ///< removes the indicated font from the font manager.  Due to shared_ptr semantics, the font may not be deleted until much later.
     //@}
 
 private:
+    FontManager();
+
     std::map<FontKey, boost::shared_ptr<Font> > m_rendered_fonts;
 
-    static bool s_created;
+    friend FontManager& GetFontManager();
 };
+
+/** Returns the singleton FontManager instance. */
+FontManager& GetFontManager();
+
+/** Thrown when initialization of the FreeType library fails. */
+GG_EXCEPTION(FailedFTLibraryInit);
 
 } // template GG
 
@@ -397,7 +423,7 @@ void GG::Font::serialize(Archive& ar, const unsigned int version)
         if (!m_font_filename.empty() && 0 < m_pt_sz) {
             try {
                 Init(m_font_filename, m_pt_sz, m_glyph_range);
-            } catch (const FontException& e) {
+            } catch (const Exception& e) {
                 // take no action; the Font must have been uninitialized when saved
             }
         }

@@ -49,9 +49,6 @@ namespace GG {
 class GG_API ZList : public std::list<Wnd*>
 {
 public:
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(ZListException);
-
     /** \name Accessors */ //@{
     Wnd* Pick(const Pt& pt, Wnd* modal) const;  ///< returns pointer to the window under the point pt; constrains pick to modal if nonzero
     //@}

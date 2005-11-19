@@ -181,10 +181,6 @@ private:
 class GG_API PluginManager
 {
 public:
-    /** \name Structors */ //@{
-    PluginManager(); ///< ctor
-    //@}
-
     /** \name Mutators */ //@{
     boost::shared_ptr<PluginInterface> GetPlugin(const std::string& name);  ///< returns a shared_ptr to the plugin interface created from plugin \a name. If the plugin is not present in the manager's pool, it will be loaded from disk.
 
@@ -205,11 +201,17 @@ public:
     static void CleanupDynamicLoader();
 
 private:
+    PluginManager();
+
     std::map<std::string, boost::shared_ptr<PluginInterface> > m_plugins;
 
-    static bool s_created;
     static bool s_lt_dl_initialized;
+
+    friend PluginManager& GetPluginManager();
 };
+
+/** Returns the singleton PluginManager instance. */
+PluginManager& GetPluginManager();
 
 // template implementations
 template <class T>

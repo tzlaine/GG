@@ -57,9 +57,6 @@ namespace GG {
 class GG_API Texture
 {
 public:
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(TextureException);
-
     /** \name Structors */ //@{
     Texture();          ///< ctor
     virtual ~Texture(); ///< virtual dtor
@@ -95,23 +92,46 @@ public:
 
     /** \name Mutators */ //@{
     // intialization functions
-    void Load(const std::string& filename, bool mipmap = false); ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
-    void Load(const char* filename, bool mipmap = false);   ///< frees any currently-held memory and loads a texture from file \a filename.  \throw TextureException May throw if the texture creation fails.
+    /** frees any currently-held memory and loads a texture from file \a filename.  \throw GG::Texture::BadFile Throws
+        if the texture creation fails. */
+    void Load(const std::string& filename, bool mipmap = false);
 
-    /** frees any currently-held memory and creates a texture from supplied array \a image.  The data in the \a image parameter is unpacked using
-        all the GL default pixel storage parameters, except that GL_UNPACK_ALIGNMENT is set to 1.
-        \throw TextureException May throw if the texture creation fails. */
+    /** frees any currently-held memory and loads a texture from file \a filename.  \throw GG::Texture::BadFile Throws
+        if the texture creation fails. */
+    void Load(const char* filename, bool mipmap = false);
+
+    /** frees any currently-held memory and creates a texture from supplied array \a image.  The data in the \a image
+        parameter is unpacked using all the GL default pixel storage parameters, except that GL_UNPACK_ALIGNMENT is set
+        to 1.  \throw GG::Texture::Exception Throws applicable subclass if the texture creation fails in one of the
+        specified ways. */
     void Init(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap = false);
 
-    /** frees any currently-held memory and creates a texture from subarea of supplied array \a image.  The data in the \a image parameter is 
-        unpacked using all the GL default pixel storage parameters (except the ones that are used to specify the image subarea), except that 
-        GL_UNPACK_ALIGNMENT is set to 1.
-        \throw TextureException May throw if the texture creation fails. */
+    /** frees any currently-held memory and creates a texture from subarea of supplied array \a image.  The data in the
+        \a image parameter is unpacked using all the GL default pixel storage parameters (except the ones that are used
+        to specify the image subarea), except that GL_UNPACK_ALIGNMENT is set to 1.  \throw GG::Texture::Exception
+        Throws applicable subclass if the texture creation fails in one of the specified ways. */
     void Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap = false);
 
     void SetWrap(GLenum s, GLenum t);         ///< sets the opengl texture wrap modes associated with opengl texture m_opengl_id
     void SetFilters(GLenum min, GLenum mag);  ///< sets the opengl min/mag filter modes associated with opengl texture m_opengl_id
     void Clear();  ///< frees the opengl texture object associated with this object
+    //@}
+
+    /** \name Exceptions */ //@{
+    /** The base class for Texture exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when valid texture data cannot be read from a file. */
+    GG_CONCRETE_EXCEPTION(BadFile, GG::Texture, Exception);
+
+    /** Thrown when an unsupported number of color channels is requested. */
+    GG_CONCRETE_EXCEPTION(InvalidColorChannels, GG::Texture, Exception);
+
+    /** Thrown when an unsupported texture size is requested. */
+    GG_CONCRETE_EXCEPTION(BadSize, GG::Texture, Exception);
+
+    /** Thrown when GL fails to provide a requested texture object. */
+    GG_CONCRETE_EXCEPTION(InsufficientResources, GG::Texture, Exception);
     //@}
 
 private:
@@ -147,18 +167,18 @@ private:
 class GG_API SubTexture
 {
 public:
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(SubTextureException);
-
     /** \name Structors */ //@{
     SubTexture(); ///< default ctor
 
-    /** creates a SubTexture from a GG::Texture and coordinates into it. \warning Calling code <b>must not</b> delete 
-        \a texture; \a texture becomes the property of a shared_ptr inside the SubTexture. \throw SubTextureException 
-        May throw. */
+    /** creates a SubTexture from a GG::Texture and coordinates into it. \warning Calling code <b>must not</b> delete \a
+        texture; \a texture becomes the property of a shared_ptr inside the SubTexture.  \throw
+        GG::SubTexture::BadTexture Throws if the given Texture is null.  \throw
+        GG::SubTexture::InvalidTextureCoordinates Throws if the texture coordinates are not well formed.*/
     SubTexture(const Texture* texture, int x1, int y1, int x2, int y2); 
 
-    /** creates a SubTexture from a GG::Texture and coordinates into it \throw SubTextureException May throw. */
+    /** creates a SubTexture from a GG::Texture and coordinates into it.  \throw GG::SubTexture::BadTexture Throws if
+        the given Texture is null.  \throw GG::SubTexture::InvalidTextureCoordinates Throws if the texture coordinates
+        are not well formed.*/
     SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2);  
 
     SubTexture(const SubTexture& rhs); ///< copy ctor
@@ -186,6 +206,17 @@ public:
     void OrthoBlit(int x, int y, bool enter_2d_mode = true) const;
     //@}
 
+    /** \name Exceptions */ //@{
+    /** The base class for SubTexture exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when an attempt is made to create a SubTexture using a null texture. */
+    GG_CONCRETE_EXCEPTION(BadTexture, GG::SubTexture, Exception);
+
+    /** Thrown when invalid or out-of-order texture coordinates are supplied.*/
+    GG_CONCRETE_EXCEPTION(InvalidTextureCoordinates, GG::SubTexture, Exception);
+    //@}
+
 private:
     boost::shared_ptr<const Texture> m_texture;        ///< shared_ptr to texture object with entire image
     int                              m_width;
@@ -204,13 +235,6 @@ private:
 class GG_API TextureManager
 {
 public:
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(TextureManagerException);
-
-    /** \name Structors */ //@{
-    TextureManager(); ///< ctor
-    //@}
-
     /** \name Mutators */ //@{
     /** stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> 
         delete \a texture; \a texture becomes the property of the manager, which will eventually delete it. */
@@ -232,12 +256,18 @@ public:
     static void         InitDevIL(); ///< initializes DevIL image library, if it is not already initialized
 
 private:
+    TextureManager();
     boost::shared_ptr<Texture> LoadTexture(const std::string& filename, bool mipmap);
 
     static bool s_created;
     static bool s_il_initialized;
     std::map<std::string, boost::shared_ptr<Texture> > m_textures;
+
+    friend TextureManager& GetTextureManager();
 };
+
+/** Returns the singleton TextureManager instance. */
+TextureManager& GetTextureManager();
 
 } // namespace GG
 
@@ -281,7 +311,7 @@ void GG::Texture::serialize(Archive& ar, const unsigned int version)
         } else {
             try {
                 Load(m_filename, m_mipmaps);
-            } catch (const TextureException& e) {
+            } catch (const BadFile& e) {
                 // take no action; the Texture must have been uninitialized when saved
             }
         }

@@ -146,20 +146,16 @@ public:
         ListBoxStyle row_alignment;  ///< vertical row alignment, one of LB_TOP, LB_VCENTER, or LB_BOTTOM
         int          indentation;    ///< number of pixels that the \a first cell of the row is shifted to the right (subrows not affected)
         std::vector<Cell>
-        cells;          ///< the Controls on the top level of this Row; .second is horizontal alignment, one of LB_LEFT, LB_CENTER, or LB_RIGHT
+                     cells;          ///< the Controls on the top level of this Row; .second is horizontal alignment, one of LB_LEFT, LB_CENTER, or LB_RIGHT
         int          margin;         ///< the amount of space left between each edge of the cell and its contents, in pixels
         std::vector<boost::shared_ptr<Row> >
-        sub_rows;       ///< for making multi-line rows
+                     sub_rows;       ///< for making multi-line rows
 
     private:
         friend class boost::serialization::access;
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version);
     };
-
-    /** thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any 
-        time during the receipt of a drop -- even in a function called by a DroppedSignal. */
-    class GG_API DontAcceptDropException : public GGException {};
 
     /** \name Signal Types */ //@{
     typedef boost::signal<void ()>                ClearedSignalType;        ///< emitted when the list box is cleared
@@ -223,7 +219,8 @@ public:
     int             LastVisibleRow() const; ///< last row that could be drawn, taking into account the contents and the size of client area
     int             LastVisibleCol() const; ///< last column that could be drawn, taking into account the contents and the size of client area
 
-    /** returns the default row height. \note Each row may have its own height, diferent from the one returned by this function. */
+    /** returns the default row height. \note Each row may have its own height, diferent from the one returned by this
+        function. */
     int             RowHeight() const;
 
     int             NumRows() const;        ///< returns the total number of rows in the ListBox
@@ -232,16 +229,16 @@ public:
     /** returns true iff column widths are fixed \see LockColWidths() */
     bool            KeepColWidths() const;
 
-    /** returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range checked 
-        when it is set by the user; it may be < 0 or >= NumCols(). */
+    /** returns the index of the column used to sort rows, when sorting is enabled.  \note The sort column is not range
+        checked when it is set by the user; it may be < 0 or >= NumCols(). */
     int             SortCol() const;
 
     int             ColWidth(int n) const;     ///< returns the width of column \a n in pixels; not range-checked
     ListBoxStyle    ColAlignment(int n) const; ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
     ListBoxStyle    RowAlignment(int n) const; ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
-    /** returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If this set contains 
-        "", all drop types are allowed. */
+    /** returns the set of data types allowed to be dropped over this ListBox when drag-and-drop is enabled. \note If
+        this set contains "", all drop types are allowed. */
     const std::set<std::string>& AllowedDropTypes() const;
 
     mutable ClearedSignalType       ClearedSignal;       ///< the cleared signal object for this ListBox
@@ -296,33 +293,46 @@ public:
     void           SetColHeaders(const boost::shared_ptr<Row>& r);///< sets the row used as headings for the columns
     void           RemoveColHeaders();                      ///< removes any columns headings set
 
-    /** sets the default row height \note Each row may have its own height, diferent from the one set by this function. */
+    /** sets the default row height \note Each row may have its own height, diferent from the one set by this
+        function. */
     void           SetRowHeight(int h);
 
     void           SetNumCols(int n);                     ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);                     ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
     void           SetColWidth(int n, int w);             ///< sets the width of column \n to \a w; not range-checked
 
-    /** fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added row. \note The 
-        number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called. */
+    /** fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added
+        row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this
+        function has been called. */
     void           LockColWidths();
 
     void           UnLockColWidths();                          ///< allows the number of columns to be determined by the first row added to an empty ListBox
     void           SetColAlignment(int n, ListBoxStyle align); ///< sets the alignment of column \a n to \a align; not range-checked
     void           SetRowAlignment(int n, ListBoxStyle align); ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
 
-    /** allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing "" enables all 
-        drop types. */
+    /** allows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note Passing
+        "" enables all drop types. */
     void           AllowDropType(const std::string& str);
 
-    /** disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If "" is still an 
-        allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to this function. */
+    /** disallows Rows with data type \a str to be dropped over this ListBox when drag-and-drop is enabled. \note If ""
+        is still an allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to
+        this function. */
     void           DisallowDropType(const std::string& str);
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
     static const int BORDER_THICK; ///< the thickness with which to render the border of the control
+
+    /** \name Exceptions */ //@{
+    /** The base class for ListBox exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any
+        time during the receipt of a drop -- even in client code activated by a DroppedSignal, which is emitted after
+        the drop has been processed and the dropped item inserted. */
+    GG_CONCRETE_EXCEPTION(DontAcceptDrop, GG::ListBox, Exception);
+    //@}
 
 protected:
 /** \name Structors */ //@{

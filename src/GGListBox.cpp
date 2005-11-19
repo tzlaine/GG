@@ -537,7 +537,7 @@ void ListBox::LButtonUp(const Pt& pt, Uint32 keys)
                 bool delete_row = true;
                 try {
                     drop_target_wnd->Insert(dragged_row, ins_row, true);
-                } catch (const DontAcceptDropException& e) {
+                } catch (const DontAcceptDrop& e) {
                     AttachRowChildren(dragged_row);
                     delete_row = false;
                 }
@@ -563,7 +563,7 @@ void ListBox::LButtonUp(const Pt& pt, Uint32 keys)
                 for (std::map<int, boost::shared_ptr<Row> >::reverse_iterator it = dragged_rows.rbegin(); it != dragged_rows.rend(); ++it) {
                     try {
                         drop_target_wnd->Insert(it->second, ins_row, true);
-                    } catch (const DontAcceptDropException& e) {
+                    } catch (const DontAcceptDrop& e) {
                         AttachRowChildren(it->second);
                         sels.erase(it->first);
                     }
@@ -613,7 +613,7 @@ void ListBox::LClick(const Pt& pt, Uint32 keys)
                 bool delete_row = true;
                 try {
                     Insert(dragged_row, sel_row, true);
-                } catch (const DontAcceptDropException& e) {
+                } catch (const DontAcceptDrop& e) {
                     AttachRowChildren(dragged_row);
                     delete_row = false;
                 }
@@ -1203,7 +1203,7 @@ int ListBox::Insert(const boost::shared_ptr<Row>& row, int at, bool dropped)
         // ensure that no one has a problem with this drop in user space (if so, they should throw)
         try {
             DroppedSignal(retval, row);
-        } catch (const DontAcceptDropException& e) {
+        } catch (const DontAcceptDrop& e) {
             // if there is a problem, silently undo the drop
             m_suppress_delete_signal = true;
             Delete(retval);

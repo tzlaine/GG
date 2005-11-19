@@ -87,33 +87,8 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #endif
 
 /** \namespace GG
-    The namespace that encloses all GG classes, functions, typedefs, enums, etc.*/
+    The namespace that encloses all GG classes, functions, typedefs, enums, etc. */
 namespace GG {
-
-/** This is a base class for all GG exceptions.  It is based on the std::exception class.  Since it is preferable that exceptions
-    not throw other exceptions, "throw()" (which means "throws nothing") has been appended to every member function.*/
-class GG_API GGException : public std::exception
-{
-public:
-   GGException() throw() {}                                        ///< a default ctor
-   GGException(const std::string& msg) throw() : m_message(msg) {} ///< a ctor that allows the throwing code to include a text message
-   ~GGException() throw() {}                                       ///< dtor required by std::exception
-
-   const std::string& Message() const throw() {return m_message;}  ///< returns text message of this Exception
-
-private:
-   std::string m_message; ///< the text message associated with this Exception (may be "")
-};
-
-/** This macro makes all the GG exception classes uniform and simple.*/
-#define GGEXCEPTION( x ) class GG_API x : public GGException                    \
-{                                                                               \
-public:                                                                         \
-    x () throw() : GGException() {}                                             \
-    x (const std::string& msg) throw() : GGException(msg) {}                    \
-    virtual const char* what() const throw() {return #x ;}                      \
-};
-
 
 /** A metafucntion required for a reimplementation of BOOST_SHARED_POINTER_EXPORT_GUID */
 namespace detail {

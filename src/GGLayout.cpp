@@ -73,7 +73,7 @@ Layout::Layout(int rows, int columns, int border_margin/* = 0*/, int cell_margin
     m_ignore_parent_resize(false)
 {
     if (m_border_margin < 0)
-        throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
+        throw InvalidMargin("Layout::Layout() : m_border_margin may not be less than 0");
 }
 
 Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
@@ -87,7 +87,7 @@ Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_mar
     m_ignore_parent_resize(false)
 {
     if (m_border_margin < 0)
-        throw std::invalid_argument("Layout::Layout() : m_border_margin may not be less than 0");
+        throw InvalidMargin("Layout::Layout() : m_border_margin may not be less than 0");
 }
 
 int Layout::Rows() const
@@ -104,7 +104,7 @@ Uint32 Layout::ChildAlignment(Wnd* wnd) const
 {
     std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
     if (it == m_wnd_positions.end())
-        throw std::runtime_error("Layout::ChildAlignment() : Alignment of a nonexistent child was requested");
+        throw NoSuchChild("Layout::ChildAlignment() : Alignment of a nonexistent child was requested");
     return it->second.alignment;
 }
 
@@ -300,10 +300,10 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
     }
 
     if (m_row_params.back().current_origin + m_row_params.back().current_width != Height() - m_border_margin)
-        throw std::runtime_error("Layout::SizeMove() : calculated row positions do not sum to the height of the layout");
+        throw FailedCalculationCheck("Layout::SizeMove() : calculated row positions do not sum to the height of the layout");
 
     if (m_column_params.back().current_origin + m_column_params.back().current_width != Width() - m_border_margin)
-        throw std::runtime_error("Layout::SizeMove() : calculated column positions do not sum to the width of the layout");
+        throw FailedCalculationCheck("Layout::SizeMove() : calculated column positions do not sum to the width of the layout");
 
     // resize cells and their contents
     m_ignore_child_resize = true;
@@ -389,7 +389,7 @@ void Layout::Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uin
     for (int i = row; i < last_row; ++i) {
         for (int j = column; j < last_column; ++j) {
             if (m_cells[i][j])
-                throw std::runtime_error("Layout::Add() : Attempted to add a Wnd to a layout cell that is already occupied");
+                throw AttemptedOverwrite("Layout::Add() : Attempted to add a Wnd to a layout cell that is already occupied");
             m_cells[i][j] = w;
         }
     }

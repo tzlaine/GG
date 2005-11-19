@@ -291,14 +291,14 @@ void SDLGGApp::Run()
         Initialize();
         GG::EventPump pump;
         pump();
-    } catch (const std::invalid_argument& exception) {
-        std::cerr << "std::invalid_argument Exception caught in App::Run(): " << exception.what();
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "std::invalid_argument exception caught in App::Run(): " << e.what();
         Exit(1);
-    } catch (const std::runtime_error& exception) {
-        std::cerr << "std::runtime_error Exception caught in App::Run(): " << exception.what();
+    } catch (const std::runtime_error& e) {
+        std::cerr << "std::runtime_error exception caught in App::Run(): " << e.what();
         Exit(1);
-    } catch (const GG::GGException& exception) {
-        std::cerr << "GG::GGException (subclass " << exception.what() << ") caught in App::Run(): " << exception.Message();
+    } catch (const GG::ExceptionBase& e) {
+        std::cerr << "GG exception (subclass " << e.type() << ") caught in App::Run(): " << e.what();
         Exit(1);
     }
 }

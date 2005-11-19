@@ -146,9 +146,6 @@ struct GG::AppImplData
     int        double_click_start_time; // the time from which we started measuring double_click_time, in ms
     int        double_click_time;       // time elapsed since last click, in ms
 
-    FontManager       font_manager;
-    TextureManager    texture_manager;
-
     App::SaveWndFn    save_wnd_fn;
     App::LoadWndFn    load_wnd_fn;
 };
@@ -428,45 +425,45 @@ void App::RemoveAccelerator(Key key, Uint32 key_mods)
 
 boost::shared_ptr<Font> App::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
 {
-    return s_impl->font_manager.GetFont(font_filename, pts, range);
+    return GetFontManager().GetFont(font_filename, pts, range);
 }
 
 void App::FreeFont(const std::string& font_filename, int pts)
 {
-    s_impl->font_manager.FreeFont(font_filename, pts);
+    GetFontManager().FreeFont(font_filename, pts);
 }
 
 boost::shared_ptr<Texture> App::StoreTexture(Texture* texture, const std::string& texture_name)
 {
-    return s_impl->texture_manager.StoreTexture(texture, texture_name);
+    return GetTextureManager().StoreTexture(texture, texture_name);
 }
 
 boost::shared_ptr<Texture> App::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
 {
-    return s_impl->texture_manager.StoreTexture(texture, texture_name);
+    return GetTextureManager().StoreTexture(texture, texture_name);
 }
 
 boost::shared_ptr<Texture> App::GetTexture(const std::string& name, bool mipmap/* = false*/)
 {
-    return s_impl->texture_manager.GetTexture(name, mipmap);
+    return GetTextureManager().GetTexture(name, mipmap);
 }
 
 void App::FreeTexture(const std::string& name)
 {
-    s_impl->texture_manager.FreeTexture(name);
+    GetTextureManager().FreeTexture(name);
 }
 
 void App::SaveWnd(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
 {
     if (!s_impl->save_wnd_fn)
-        throw std::runtime_error("App::SaveWnd() : Attempted call on null function pointer.");
+        throw BadFunctionPointer("App::SaveWnd() : Attempted call on null function pointer.");
     s_impl->save_wnd_fn(wnd, name, ar);
 }
 
 void App::LoadWnd(GG::Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
 {
     if (!s_impl->load_wnd_fn)
-        throw std::runtime_error("App::LoadWnd() : Attempted call on null function pointer.");
+        throw BadFunctionPointer("App::LoadWnd() : Attempted call on null function pointer.");
     s_impl->load_wnd_fn(wnd, name, ar);
 }
 

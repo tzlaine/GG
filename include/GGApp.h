@@ -208,12 +208,14 @@ public:
     boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
 
-    /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw std::runtime_error Throws
-        std::runtime_error if no Wnd-serializing function has ben defined by the user using SetSaveWndFunction(). */
+    /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw GG::App::BadFunctionPointer Throws
+        GG::App::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using
+        SetSaveWndFunction(). */
     void SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
 
-    /** loads \a wnd, with the xml tag \a name, from the archive \a ar.  \throw std::runtime_error Throws
-        std::runtime_error if no Wnd-serializing function has ben defined by the user using SetLoadWndFunction(). */
+    /** loads \a wnd, with the xml tag \a name, from the archive \a ar.  \throw GG::App::BadFunctionPointer Throws
+        GG::App::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using
+        SetLoadWndFunction(). */
     void LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
 
     /** Since LoadWnd() will only accept a referemce to a GG::Wnd*, this method is provided to more conveniently accept
@@ -230,7 +232,15 @@ public:
 
     static App*  GetApp();                ///< allows any GG code access to app framework by calling App::GetApp()
     static void  RenderWindow(Wnd* wnd);  ///< renders a window and (conditionally) all its descendents
-    
+
+    /** \name Exceptions */ //@{
+    /** The base class for App exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when an attempt is made to invoke either of the save- or load-window functions before they have been set. */
+    GG_CONCRETE_EXCEPTION(BadFunctionPointer, GG::App, Exception);
+    //@}
+
 protected:
     /** \name Structors */ //@{
     App(const std::string& app_name); ///< protected ctor, called by derived classes

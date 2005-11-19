@@ -60,13 +60,13 @@ class GG_API DynamicGraphic : public Control
 {
 public:
     /** \name Signal Types */ //@{
-    /** emitted whenever playback ends because the last frame was reached and Looping() == false; the argument is the 
-        index of the last frame (may be the first frame, if playing in reverse).  \note Unlike most other signals, this 
+    /** emitted whenever playback ends because the last frame was reached and Looping() == false; the argument is the
+        index of the last frame (may be the first frame, if playing in reverse).  \note Unlike most other signals, this
         one is emitted during the execution of Render(), so keep this in mind when processing this signal.*/
     typedef boost::signal<void (int)> StoppedSignalType;
 
-    /** emitted whenever the last frame of animation is reached; the argument is the index of the last frame (may be the 
-        first frame, if playing in reverse).  \note Unlike most other signals, this one is emitted during the execution 
+    /** emitted whenever the last frame of animation is reached; the argument is the index of the last frame (may be the
+        first frame, if playing in reverse).  \note Unlike most other signals, this one is emitted during the execution
         of Render(), so keep this in mind when processing this signal.*/
     typedef boost::signal<void (int)> EndFrameSignalType;
     //@}
@@ -77,35 +77,35 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
-        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> 
-        delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.*/
+    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
+        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> delete
+        \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0); 
 
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
+    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
         indicates all possible area is considered to contain valid frames.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
 
-    /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1 
-        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
+    /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1
+        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
         Textures but the last are assumed to have the maximum number of frames based on their sizes.*/
     DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
 
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
-        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> 
-        delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.  This ctor 
-        allows specification of a frame size different from the size of the DynamicGraphic's size. */
+    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
+        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> delete
+        \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.  This ctor allows
+        specification of a frame size different from the size of the DynamicGraphic's size. */
     DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const Texture* texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0); 
 
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1 
-        indicates all possible area is considered to contain valid frames.  This ctor allows specification of a 
-        frame size different from the size of the DynamicGraphic's size. */
+    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
+        indicates all possible area is considered to contain valid frames.  This ctor allows specification of a frame
+        size different from the size of the DynamicGraphic's size. */
     DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
 
-    /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1 
-        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all 
-        Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor 
-        allows specification of a frame size different from the size of the DynamicGraphic's size. */
+    /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1
+        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
+        Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor allows
+        specification of a frame size different from the size of the DynamicGraphic's size. */
     DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
     //@}
 
@@ -137,23 +137,22 @@ public:
     /** \name Mutators */ //@{
     virtual bool Render();
 
-    /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to 
-        contain the maximum possible number of frames based on its size and the frame size.  \warning Calling code 
+    /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to
+        contain the maximum possible number of frames based on its size and the frame size.  \warning Calling code
         <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.
-        \throw std::invalid_argument May throw std::invalid_argument if \a texture is not large enough to contain
-        any frames.*/
+        \throw GG::DynamicGraphic::CannotAddFrame Throws if \a texture is not large enough to contain any frames.*/
     void AddFrames(const Texture* texture, int frames = -1);
 
-    /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to 
-        contain the maximum possible number of frames based on its size and the frame size.  \throw std::invalid_argument 
-        May throw std::invalid_argument if \a texture is not large enough to contain any frames.*/
+    /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to
+        contain the maximum possible number of frames based on its size and the frame size.  \throw
+        GG::DynamicGraphic::CannotAddFrame Throws if \a texture is not large enough to contain any frames.*/
     void AddFrames(const boost::shared_ptr<Texture>& texture, int frames = -1);
 
-    /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Textures are assumed to 
-        contain the maximum possible number of frames based on its size and the frame size.  Regardless of the value of 
+    /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Textures are assumed to
+        contain the maximum possible number of frames based on its size and the frame size.  Regardless of the value of
         \a frames, all Textures but the last are assumed to have the maximum number of frames based on their sizes.
-        \throw std::invalid_argument May throw std::invalid_argument if at least one element of \a textures is not large 
-        enough to contain any frames.*/
+        \throw GG::DynamicGraphic::CannotAddFrame Throws if no texture in \a textures is large enough to contain any
+        frames.*/
     void AddFrames(const std::vector<boost::shared_ptr<Texture> >& textures, int frames = -1);
 
     void  Play();                    ///< starts the animation of the image
@@ -163,30 +162,38 @@ public:
     void  Stop();                    ///< stops playback and resets the frame index to 0
     void  Loop(bool b = true);       ///< turns looping of playback on or off
 
-    /** sets the frames per second playback speed (default is 15.0 FPS).  Negative rates indicate reverse playback.  \note Calling SetFPS(0.0) 
-        is equivalent to calling Pause(). */
+    /** sets the frames per second playback speed (default is 15.0 FPS).  Negative rates indicate reverse playback.
+        \note Calling SetFPS(0.0) is equivalent to calling Pause(). */
     void  SetFPS(double fps);
 
     void  SetFrameIndex(int idx);    ///< sets the frame index to \a idx ( value is locked to range [0, Frames()] )
 
-    /** sets the frame index to the frame nearest time index \a idx, where \a idx measures time in ms from the beginning of the animation 
-        ( value is locked to range [0, Frames() * FPS()) ).  \note If looping is enabled, the time index may be any value >= 0.0, and values 
-        will "wrap" around the length of a loop.  If looping is disabled, any time index \a idx that is later than Frames() * FPS() is mapped 
-        to the last frame. */
+    /** sets the frame index to the frame nearest time index \a idx, where \a idx measures time in ms from the beginning
+        of the animation ( value is locked to range [0, Frames() * FPS()) ).  \note If looping is enabled, the time
+        index may be any value >= 0.0, and values will "wrap" around the length of a loop.  If looping is disabled, any
+        time index \a idx that is later than Frames() * FPS() is mapped to the last frame. */
     void  SetTimeIndex(int idx);
 
-    /** sets the index of the first frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards 
-        this will be the last frame shown. */
+    /** sets the index of the first frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note
+        when playing backwards this will be the last frame shown. */
     void  SetStartFrame(int idx);
 
-    /** sets the index of the last frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note when playing backwards 
-        this will be the first frame shown. */
+    /** sets the index of the last frame to be shown during playback ( value is locked to range [0, Frames()] ).  \note
+        when playing backwards this will be the first frame shown. */
     void  SetEndFrame(int idx);
 
     /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
     void  SetStyle(Uint32 style);
 
     virtual void DefineAttributes(WndEditor* editor);
+    //@}
+
+    /** \name Exceptions */ //@{
+    /** The base class for DynamicGraphic exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when an attempt is made to add a frame to a DynamicGraphic which has no storage allocated for frames. */
+    GG_CONCRETE_EXCEPTION(CannotAddFrame, GG::DynamicGraphic, Exception);
     //@}
 
 protected:

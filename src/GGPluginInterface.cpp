@@ -152,15 +152,10 @@ bool PluginInterface::Load(const std::string& lib_name)
 // class GG::PluginManager
 ///////////////////////////////////////
 // static member(s)
-bool PluginManager::s_created = false;
 bool PluginManager::s_lt_dl_initialized = false;
 
 PluginManager::PluginManager()
-{
-    if (s_created)
-        throw std::runtime_error("Attempted to create a second instance of GG::PluginManager");
-    s_created = true;
-}
+{}
 
 boost::shared_ptr<PluginInterface> PluginManager::GetPlugin(const std::string& name)
 {
@@ -217,4 +212,10 @@ void PluginManager::CleanupDynamicLoader()
     } else {
         s_lt_dl_initialized = false;
     }
+}
+
+PluginManager& GG::GetPluginManager()
+{
+    static PluginManager manager;
+    return manager;
 }

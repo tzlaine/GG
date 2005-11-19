@@ -40,6 +40,9 @@ namespace GG {
 
 class XMLElement;
 
+/** Thrown when a generated object is requested with an unknown tag. */
+GG_EXCEPTION(NoSuchGenerator);
+
 /** \deprecated All the GG XML classes are deprecated and will be removed upon the next major release.
     This class creates polymorphic subclasses of base class T from XML-formatted text.  For any polymorphic class hierarchy,
     you can instantiate XMLObjectFactory with the type of the hierarchy's base class, and provide functions that can each 
@@ -56,12 +59,14 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    /** returns a heap-allocated subclass object of the appropriate type \throw std::runtime_error If \a elem has an unknown tag, an exception is thrown. */
+    /** returns a heap-allocated subclass object of the appropriate type \throw GG::NoSuchGenerator Throws if \a elem
+        has an unknown tag. */
     T* GenerateObject(const XMLElement& elem) const;
     //@}
    
     /** \name Mutators */ //@{
-    /** adds a new generator (or replaces one that already exists) that can generate subclass objects described by \a name */
+    /** adds a new generator (or replaces one that already exists) that can generate subclass objects described by \a
+        name */
     void AddGenerator(const std::string& name, Generator gen);
 
     /** removes the generator that can generate subclass objects described by \a name, if one exists */
@@ -88,7 +93,7 @@ T* XMLObjectFactory<T>::GenerateObject(const XMLElement& elem) const ///< return
     typename GeneratorMap::const_iterator it = m_generators.find(elem.Tag());
 
     if (it == m_generators.end())
-        throw std::runtime_error("XMLObjectFactory::GenerateObject(): No generator exists for XMLElements with the tag \"" + elem.Tag() + "\".");
+        throw NoSuchGenerator("XMLObjectFactory::GenerateObject(): No generator exists for XMLElements with the tag \"" + elem.Tag() + "\".");
 
     return it->second(elem);
 }

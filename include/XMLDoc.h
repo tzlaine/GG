@@ -47,6 +47,10 @@
 #include "GGEnum.h"
 #endif
 
+#ifndef _GGException_h_
+#include "GGException.h"
+#endif
+
 #include <boost/lexical_cast.hpp>
 
 #include <iosfwd>
@@ -138,16 +142,16 @@ public:
     bool ContainsAttribute(const std::string& attrib) const; ///< returns true if the element contains an attribute called \a name
     int  ChildIndex(const std::string& child) const;         ///< returns the index of the child called \a name, or -1 if not found
 
-    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
-         An out of range index will cause an exception. */
+    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw
+         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
     const XMLElement& Child(unsigned int idx) const;
 
-    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \throw std::out_of_range
-         An exception is thrown if no child named \a child exists. */   
+    /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \throw
+         GG::XMLElement:NoSuchChild An exception is thrown if no child named \a child exists. */   
     const XMLElement& Child(const std::string& child) const;
 
-    /**  returns the last child in child list of the XMLElement.  \throw std::out_of_range Calling this on an empty
-         element will cause an exception. */   
+    /**  returns the last child in child list of the XMLElement.  \throw GG::XMLElement:NoSuchIndex Calling this on an
+         empty element will cause an exception. */   
     const XMLElement& LastChild() const;
 
     /** returns the value of the attribute with name \a key, or "" if no such named attribute is found */
@@ -163,16 +167,16 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
-         An out of range index will cause an exception. */
+    /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw
+         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
     XMLElement& Child(unsigned int idx);
 
-    /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \throw std::out_of_range
-         An exception is thrown if no child named \a child exists. */   
+    /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \throw
+         GG::XMLElement:NoSuchChild An exception is thrown if no child named \a child exists. */   
     XMLElement& Child(const std::string& child);
 
-    /**  returns the last child in child list of the XMLElement.  \throw std::out_of_range Calling this on an empty
-         element will cause an exception. */   
+    /**  returns the last child in child list of the XMLElement.  \throw GG::XMLElement:NoSuchIndex Calling this on an
+         empty element will cause an exception. */   
     XMLElement& LastChild();
 
     /** sets (and possibly overwrites) an attribute \a attrib, with the value \a val. */
@@ -193,19 +197,20 @@ public:
     /** adds child XMLElement \a e to the end of the child list of the XMLElement */
     void AppendChild(const XMLElement& e);
 
-    /** creates an empty XMLElement with tag-name \a child, and adds it to the end of the child list of the XMLElement */
+    /** creates an empty XMLElement with tag-name \a child, and adds it to the end of the child list of the
+        XMLElement */
     void AppendChild(const std::string& child);
 
-    /** adds a child \a e in the \a idx-th position of the child list of the XMLElement. \throw std::out_of_range
-         An out of range index will cause an exception. */
+    /** adds a child \a e in the \a idx-th position of the child list of the XMLElement. \throw
+         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
     void AddChildBefore(const XMLElement& e, unsigned int idx);
 
-    /** removes the child in the \a idx-th position of the child list of the XMLElement.  \throw std::out_of_range
-         An out of range index will cause an exception. */
+    /** removes the child in the \a idx-th position of the child list of the XMLElement.  \throw
+         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
     void RemoveChild(unsigned int idx);
 
-    /** removes the child called \a shild from the XMLElement.  \throw std::out_of_range An exception is thrown if no
-        child named \a child exists. */
+    /** removes the child called \a child from the XMLElement.  \throw GG::XMLElement:NoSuchChild An exception is thrown
+        if no child named \a child exists. */
     void RemoveChild(const std::string& child);
 
     /** removes all children from the XMLElement*/
@@ -217,9 +222,20 @@ public:
     attr_iterator  attr_end();     ///< iterator to the last + 1 attribute in the XMLElement
     //@}
 
+    /** \name Exceptions */ //@{
+    /** The base class for XMLElement exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when a request for a named child element cannot be fulfilled. */
+    GG_CONCRETE_EXCEPTION(NoSuchChild, GG::XMLElement, Exception);
+
+    /** Thrown when a request for an indexed child element cannot be fulfilled. */
+    GG_CONCRETE_EXCEPTION(NoSuchIndex, GG::XMLElement, Exception);
+    //@}
+
 private:
-    /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root XMLElement 
-        in an XMLDoc document*/
+    /** ctor that constructs an XMLElement from a tag-name \a t and a bool \a r indicating whether it is the root
+        XMLElement in an XMLDoc document*/
     XMLElement(const std::string& t, bool r);
 
     std::string                        m_tag;        ///< the tag-name of the XMLElement
@@ -248,14 +264,14 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    /** writes the XMLDoc to an output stream; returns the stream.  If \a whitespace is false, the document is written 
-        without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in a 
-        more standard human-readable form. */
+    /** writes the XMLDoc to an output stream; returns the stream.  If \a whitespace is false, the document is written
+        without whitespace (one long line with no spaces between XMLElements).  Otherwise, the document is formatted in
+        a more standard human-readable form. */
     std::ostream& WriteDoc(std::ostream& os, bool whitespace = true) const;
     //@}
 
     /** \name Mutators */ //@{
-    /** destroys the current contents of the XMLDoc, and replaces tham with the constents of the document in the input 
+    /** destroys the current contents of the XMLDoc, and replaces tham with the constents of the document in the input
         stream \a is; returns the stream*/
     std::istream& ReadDoc(std::istream& is);
     //@}
@@ -303,12 +319,12 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    /**  returns the child in the child list of the XMLElementValidator that has the tag-name \a child.  \throw std::out_of_range
-         An exception is thrown if no child named \a child exists. */   
+    /**  returns the child in the child list of the XMLElementValidator that has the tag-name \a child.  \throw
+         std::out_of_range An exception is thrown if no child named \a child exists. */   
     XMLElementValidator& Child(const std::string& child);
 
-    /**  returns the last child in the child list of the XMLElementValidator.  \throw std::out_of_range Calling this on an empty
-         element will cause an exception. */
+    /**  returns the last child in the child list of the XMLElementValidator.  \throw std::out_of_range Calling this on
+         an empty element will cause an exception. */
     XMLElementValidator& LastChild();
 
     /** sets (and possibly overwrites) an attribute \a attrib, with the value \a val. */

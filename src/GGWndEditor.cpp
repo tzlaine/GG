@@ -278,7 +278,7 @@ void AttributeRow<boost::shared_ptr<Font> >::FilenameChanged(const std::string& 
         m_value = font;
         m_filename_edit->SetTextColor(CLR_BLACK);
         ChangedSignal();
-    } catch (const Font::FontException& e) {
+    } catch (const Font::Exception& e) {
         m_filename_edit->SetTextColor(CLR_RED);
     }
 }
@@ -295,7 +295,7 @@ void AttributeRow<boost::shared_ptr<Font> >::PointsChanged(const std::string& po
         ChangedSignal();
     } catch (const boost::bad_lexical_cast& e) {
         m_points_edit->SetTextColor(CLR_RED);
-    } catch (const Font::FontException& e) {
+    } catch (const Font::Exception& e) {
         m_points_edit->SetTextColor(CLR_RED);
     }
 }

@@ -54,17 +54,13 @@ class Font;
 class GG_API FileDlg : public Wnd
 {
 public:
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(InitialDirectoryDoesNotExistException);
-
     /** \name Structors */ //@{
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, if
         desired (such as when "Save As" is called in an app, and there is a current filename).  If \a directory is
         specified, it is taken as-is if it is absolute, or relative to boost::filesystem::initial_path() if it is
         relative.  If \a directory is "", the initial directory is WorkingDirectory().  \a save indicates whether this
         is a save or load dialog; \a multi indicates whether multiple file selections are allowed.  \throw
-        GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory
-        is invalid. */
+        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const boost::shared_ptr<Font>& font,
             Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0, ListBox* files_list = 0,
             Edit* files_edit = 0, DropDownList* filter_list = 0);
@@ -74,8 +70,7 @@ public:
         specified, it is taken as-is if it is absolute, or relative to boost::filesystem::initial_path() if it is
         relative.  If \a directory is "", the initial directory is WorkingDirectory().  \a save indicates whether this
         is a save or load dialog; \a multi indicates whether multiple file selections are allowed.  \throw
-        GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory
-        is invalid. */
+        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::string& font_filename,
             int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0,
             ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
@@ -93,8 +88,7 @@ public:
         separated by a comma and exactly one space (", ").  Each filter is considered OR-ed together with the others, so
         passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  Note that an empty
         filter is considered to match all files, so ("All Files", "") is perfectly correct.  \throw
-        GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory
-        is invalid. */
+        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
             const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0,
             Button* cancel = 0, ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
@@ -112,8 +106,7 @@ public:
         separated by a comma and exactly one space (", ").  Each filter is considered OR-ed together with the others, so
         passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  Note that an empty
         filter is considered to match all files, so ("All Files", "") is perfectly correct.  \throw
-        GG::InitialDirectoryDoesNotExistException Will throw GG::InitialDirectoryDoesNotExistException when \a directory
-        is invalid. */
+        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
             const std::string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0,
             Button* cancel = 0, ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
@@ -139,6 +132,14 @@ public:
 
     /** returns the current directory (the one that will be used by default on the next invocation of FileDlg::Run()) */
     static const boost::filesystem::path& WorkingDirectory();
+
+    /** \name Exceptions */ //@{
+    /** The base class for FileDlg exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when the initial directory for the dialog is bad. */
+    GG_CONCRETE_EXCEPTION(BadInitialDirectory, GG::FileDlg, Exception);
+    //@}
 
 protected:
     enum {WIDTH = 400, HEIGHT = 350}; ///< default width and height values for the dialog, in pixels

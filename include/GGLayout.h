@@ -85,17 +85,17 @@ public:
     using Wnd::SizeMove;
 
     /** \name Structors */ //@{
-    /** ctor.  \throw std::invalid_argument May throw std::invalid_argument if \a border_margin is < 0. */
+    /** ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is negative. */
     Layout(int rows, int columns, int border_margin = 0, int cell_margin = -1);
 
-    /** ctor.  \throw std::invalid_argument May throw std::invalid_argument if \a m_border_margin is < 0. */
+    /** ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is negative. */
     Layout(int x, int y, int w, int h, int rows, int columns, int border_margin = 0, int cell_margin = -1);
     //@}
 
     /** \name Accessors */ //@{
     int    Rows() const;                             ///< returns the number of rows in the layout
     int    Columns() const;                          ///< returns the number of columns in the layout
-    Uint32 ChildAlignment(Wnd* wnd) const;           ///< returns the aligment of child \a wnd.  \throw std::runtime_error May throw std::runtime_error if no such child exists.
+    Uint32 ChildAlignment(Wnd* wnd) const;           ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
     int    BorderMargin() const;                     ///< returns the number of pixels that the layout will leave between its edges and the windows it contains
     int    CellMargin() const;                       ///< returns the number of pixels the layout leaves between the edges of windows in adjacent cells
     double RowStretch(int row) const;                ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.
@@ -110,13 +110,15 @@ public:
     virtual void Keypress(Key key, Uint32 key_mods);
 
     /** inserts \a w into the layout in the indicated cell, expanding the layout grid as necessary.  Note that \a row
-        and \a column must not be negative, though this is not checked. */
+        and \a column must not be negative, though this is not checked. \throw GG::Layout::AttemptedOverwrite Throws if
+        there is already a Wnd in the given cell. */
     void Add(Wnd *w, int row, int column, Uint32 alignment = 0);
 
     /** inserts \a w into the layout, covering the indicated cell(s), expanding the layout grid as necessary.  The
         num_rows and num_columns indicate how many rows and columns \a w covers, respectively.  So Add(foo, 1, 2, 2, 3)
         covers cells (1, 2) through (2, 4), inclusive.  Note that \a row, and \a column must be nonnegative and \a
-        num_rows and \a num_columns must be positive, though this is not checked. */
+        num_rows and \a num_columns must be positive, though this is not checked. \throw GG::Layout::AttemptedOverwrite
+        Throws if there is already a Wnd in one of the given cells. */
     void Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
 
     /** resizes the layout to be \a rows by \a columns.  If the layout shrinks, any contained windows are deleted.  Each
@@ -149,6 +151,23 @@ public:
     void SetMinimumColumnWidth(int column, int width);
 
     virtual void DefineAttributes(WndEditor* editor);
+    //@}
+
+    /** \name Exceptions */ //@{
+    /** The base class for Layout exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when a negative margin is provided. */
+    GG_CONCRETE_EXCEPTION(InvalidMargin, GG::Layout, Exception);
+
+    /** Thrown when a property of a nonexistent child is requested. */
+    GG_CONCRETE_EXCEPTION(NoSuchChild, GG::Layout, Exception);
+
+    /** Thrown when an internal check of calculations made by the layout algorithm fails. */
+    GG_CONCRETE_EXCEPTION(FailedCalculationCheck, GG::Layout, Exception);
+
+    /** Thrown when an attempt is made to place a Wnd in a nonempty layout cell. */
+    GG_CONCRETE_EXCEPTION(AttemptedOverwrite, GG::Layout, Exception);
     //@}
 
 protected:

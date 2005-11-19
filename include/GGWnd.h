@@ -164,9 +164,6 @@ public:
         MODAL =        1 << 5
     };
 
-    /** exception class \see GG::GGEXCEPTION */
-    GGEXCEPTION(WndException);
-
     /** \name Structors */ //@{
     virtual ~Wnd(); ///< virtual dtor
     //@}
@@ -432,6 +429,15 @@ public:
 
     /** sets the single BrowseInfoWnd to place in the browse modes during Wnd construction. */
     static void SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd);
+
+    /** \name Exceptions */ //@{
+    /** The base class for Wnd exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when a request to perform a layout fails due to child Wnds in illegal starting positions, or when a
+        SetLayout() call would result in an illegal state. */
+    GG_CONCRETE_EXCEPTION(BadLayout, GG::Wnd, Exception);
+    //@}
 
 protected:
     /** encapsulates a Wnd event that is passed from the singleton App to a Wnd.  The various types of Events correspond

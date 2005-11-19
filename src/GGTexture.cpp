@@ -243,7 +243,7 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
     ilLoadImage(const_cast<char*>(filename));
     CheckILErrors("ilLoadImage(const_cast<char*>(filename))");
     if ((error = ilGetError()) != IL_NO_ERROR)
-        throw TextureException((std::string("Could not load temporary DevIL image from file \'") + filename) + "\'");
+        throw BadFile((std::string("Could not load temporary DevIL image from file \'") + filename) + "\'");
    
     if (mipmap) {
         m_opengl_id = ilutGLBindMipmaps();
@@ -253,7 +253,7 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
         CheckILErrors("ilutGLBindTexImage()");
     }
     if (!m_opengl_id || (error = ilGetError()) != IL_NO_ERROR)
-        throw TextureException((std::string("Could not create OpenGL texture object from file \'") + filename) + "\'");
+        throw BadFile((std::string("Could not create OpenGL texture object from file \'") + filename) + "\'");
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
@@ -374,13 +374,13 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
         case 2:   mode = GL_LUMINANCE_ALPHA; break;
         case 3:   mode = GL_RGB;             break;
         case 4:   mode = GL_RGBA;            break;
-        default: throw TextureException("Attempted to initialize a GG::Texture with an invalid number of color channels");
+        default: throw InvalidColorChannels("Attempted to initialize a GG::Texture with an invalid number of color channels");
         }
 
         int GL_texture_width = PowerOfTwo(width);
         int GL_texture_height = PowerOfTwo(height);
         if (width != GL_texture_width || height != GL_texture_height)
-            throw TextureException("Attempted to create a texture whose sides are not powers of two");
+            throw BadSize("Attempted to create a texture whose sides are not powers of two");
 
         glGenTextures(1, &m_opengl_id);
         glBindTexture(GL_TEXTURE_2D, m_opengl_id);                     // set this texture as the current opengl texture
@@ -398,7 +398,7 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
             if (format) // if yes, build it
                 gluBuild2DMipmaps(GL_TEXTURE_2D, channels, GL_texture_width, GL_texture_height, mode, GL_UNSIGNED_BYTE, image);
             else // if no, throw
-                throw TextureException("Insufficient resources to create requested mipmapped OpenGL texture");
+                throw InsufficientResources("Insufficient resources to create requested mipmapped OpenGL texture");
         } else { // creating non-mipmapped texture
             glTexImage2D(GL_PROXY_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
             GLint format;
@@ -406,7 +406,7 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
             if (format)
                 glTexImage2D(GL_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
             else
-                throw TextureException("Insufficient resources to create requested OpenGL texture");
+                throw InsufficientResources("Insufficient resources to create requested OpenGL texture");
         }
 
         // be sure to record these
@@ -440,7 +440,7 @@ unsigned char* Texture::GetRawBytes()
         case 2:   mode = GL_LUMINANCE_ALPHA; break;
         case 3:   mode = GL_RGB;             break;
         case 4:   mode = GL_RGBA;            break;
-        default: throw TextureException("Attempted to encode a GG::Texture with an invalid number of bytes per pixel");
+        default: throw InvalidColorChannels("Attempted to encode a GG::Texture with an invalid number of bytes per pixel");
         }
         glGetTexImage(GL_TEXTURE_2D, 0, mode, GL_UNSIGNED_BYTE, retval);
         glPopClientAttrib();
@@ -465,8 +465,8 @@ SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
     m_width(x2 - x1),
     m_height(y2 - y1)
 {
-    if (!m_texture) throw SubTextureException("Attempted to contruct subtexture from invalid texture");
-    if (x2 < x1 || y2 < y1) throw SubTextureException("Attempted to contruct subtexture from invalid coordinates");
+    if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
+    if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");
 
     m_tex_coords[0] = static_cast<double>(x1) / texture->DefaultWidth();
     m_tex_coords[1] = static_cast<double>(y1) / texture->DefaultHeight();
@@ -479,8 +479,8 @@ SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, 
     m_width(x2 - x1),
     m_height(y2 - y1)
 {
-    if (!m_texture) throw SubTextureException("Attempted to contruct subtexture from invalid texture");
-    if (x2 < x1 || y2 < y1) throw SubTextureException("Attempted to contruct subtexture from invalid coordinates");
+    if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
+    if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");
 
     m_tex_coords[0] = static_cast<double>(x1) / texture->DefaultWidth();
     m_tex_coords[1] = static_cast<double>(y1) / texture->DefaultHeight();
@@ -561,15 +561,10 @@ void SubTexture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
 // class GG::TextureManager
 ///////////////////////////////////////
 // static member(s)
-bool TextureManager::s_created = false;
 bool TextureManager::s_il_initialized = false;
 
 TextureManager::TextureManager()
-{
-    if (s_created)
-        throw TextureManagerException("Attempted to create a second instance of GG::TextureManager");
-    s_created = true;
-}
+{}
 
 boost::shared_ptr<Texture> TextureManager::StoreTexture(Texture* texture, const std::string& texture_name)
 {
@@ -629,4 +624,10 @@ boost::shared_ptr<Texture> TextureManager::LoadTexture(const std::string& filena
     boost::shared_ptr<Texture> temp(new Texture());
     temp->Load(filename, mipmap);
     return (m_textures[filename] = temp);
+}
+
+TextureManager& GG::GetTextureManager()
+{
+    static TextureManager manager;
+    return manager;
 }

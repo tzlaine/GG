@@ -778,14 +778,14 @@ void Wnd::GridLayout()
         Wnd* wnd = *it;
         Pt wnd_ul = wnd->UpperLeft(), wnd_lr = wnd->LowerRight();
         if (wnd_ul < cl_ul || cl_lr < wnd_lr)
-            throw std::runtime_error("Wnd::GridLayout() : A child window lies at least partially outside the client area");
+            throw BadLayout("Wnd::GridLayout() : A child window lies at least partially outside the client area");
 
         std::list<Wnd*>::const_iterator it2 = it;
         ++it2;
         for (; it2 != m_children.end(); ++it2) {
             Rect other_wnd_rect((*it2)->UpperLeft(), (*it2)->LowerRight());
             if (other_wnd_rect.Contains(wnd_ul) || other_wnd_rect.Contains(wnd_lr - Pt(1, 1)))
-                throw std::runtime_error("Wnd::GridLayout() : Two or more child windows overlap");
+                throw BadLayout("Wnd::GridLayout() : Two or more child windows overlap");
         }
 
         wnd_ul = ScreenToClient(wnd_ul);
@@ -892,7 +892,7 @@ void Wnd::GridLayout()
 void Wnd::SetLayout(Layout* layout)
 {
     if (layout == m_layout && layout == m_containing_layout)
-        throw std::runtime_error("Wnd::SetLayout() : Attempted to set a Wnd's layout to be its current layout or the layout that contains the wind");
+        throw BadLayout("Wnd::SetLayout() : Attempted to set a Wnd's layout to be its current layout or the layout that contains the Wnd");
     RemoveLayout();
     DeleteChildren();
     AttachChild(layout);

@@ -68,11 +68,10 @@ namespace {
 
     struct FTLibraryWrapper
     {
-        GGEXCEPTION(FTLibraryWrapperException);   ///< exception class \see GG::GGEXCEPTION
         FTLibraryWrapper() : library(0)
         {
             if (!library && FT_Init_FreeType(&library)) // if no library exists and we can't create one...
-                throw FTLibraryWrapperException("Unable to initialize FreeType font library object");
+                throw FailedFTLibraryInit("Unable to initialize FreeType font library object");
         }
         ~FTLibraryWrapper() {FT_Done_FreeType(library);}
         FT_Library library;
@@ -754,16 +753,16 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
     // Open the font and create ancillary data
     error = FT_New_Face(g_library.library, font_filename.c_str(), 0, &face);
     if (error || !face)
-        throw FontException("Face object created from \'" + font_filename + "\' was invalid");
+        throw BadFile("Face object created from \'" + font_filename + "\' was invalid");
     if (pts <= 0)
-        throw FontException("Attempted to create font \'" + font_filename + "\' with non-positive point size");
+        throw InvalidPointSize("Attempted to create font \'" + font_filename + "\' with non-positive point size");
     if (range > ALL_CHARS)
-        throw FontException("Attempted to create font \'" + font_filename + "\' with invalid range flags");
+        throw InvalidRangeFlags("Attempted to create font \'" + font_filename + "\' with invalid range flags");
     if (!FT_IS_SCALABLE(face))
-        throw FontException("Attempted to create font \'" + font_filename + "\' with uscalable font face");
+        throw UnscalableFont("Attempted to create font \'" + font_filename + "\' with uscalable font face");
     // Set the character size and use default 72 DPI
     if (FT_Set_Char_Size(face, 0, pts * 64, 0, 0)) // if error is returned
-        throw FontException("Could not set font size while attempting to create font \'" + font_filename + "\'");
+        throw BadPointSize("Could not set font size while attempting to create font \'" + font_filename + "\'");
 
     // Get the scalable font metrics for this font
     scale = face->size->metrics.y_scale;
@@ -923,21 +922,21 @@ bool Font::GenerateGlyph(FT_Face face, FT_ULong ch)
 
     // load the glyph
     if (!face)
-        throw FontException("GG::Font::GetGlyphBitmap : invalid font or font face");
+        throw BadFace("GG::Font::GetGlyphBitmap : invalid font or font face");
 
     using boost::lexical_cast;
     FT_UInt index = FT_Get_Char_Index(face, ch);
     if (index) {
         if (FT_Load_Glyph(face, index, FT_LOAD_DEFAULT))
-            throw FontException((std::string("GG::Font::GetGlyphBitmap : Freetype could not load the glyph for character \'") + 
-                                 (ch < 256 ? lexical_cast<std::string>(char(ch)) : lexical_cast<std::string>(ch))) + "\'");
+            throw BadGlyph((std::string("GG::Font::GetGlyphBitmap : Freetype could not load the glyph for character \'") + 
+                            (ch < 256 ? lexical_cast<std::string>(char(ch)) : lexical_cast<std::string>(ch))) + "\'");
 
         FT_GlyphSlot glyph = face->glyph;
 
         // render the glyph
         if (FT_Render_Glyph(glyph, ft_render_mode_normal))
-            throw FontException((std::string("GG::Font::GetGlyphBitmap : Freetype could not render the glyph for character \'") + 
-                                 (ch < 256 ? lexical_cast<std::string>(char(ch)) : lexical_cast<std::string>(ch))) + "\'");
+            throw BadGlyph((std::string("GG::Font::GetGlyphBitmap : Freetype could not render the glyph for character \'") + 
+                            (ch < 256 ? lexical_cast<std::string>(char(ch)) : lexical_cast<std::string>(ch))) + "\'");
     } else {
         retval = false;
     }
@@ -1058,15 +1057,8 @@ bool FontManager::FontKey::operator<(const FontKey& rhs) const
 }
 
 // FontManager
-// static member(s)
-bool FontManager::s_created = false;
-
 FontManager::FontManager()
-{
-    if (s_created)
-        throw FontManagerException("Attempted to create a second instance of GG::FontManager");
-    s_created = true;
-}
+{}
 
 boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, int pts, Uint32 range/* = GGFont::ALL_DEFINED_RANGES*/)
 {
@@ -1094,4 +1086,10 @@ void FontManager::FreeFont(const std::string& font_filename, int pts)
     std::map<FontKey, boost::shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
     if (it != m_rendered_fonts.end())
         m_rendered_fonts.erase(it);
+}
+
+FontManager& GG::GetFontManager()
+{
+    static FontManager manager;
+    return manager;
 }

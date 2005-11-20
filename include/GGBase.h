@@ -90,7 +90,7 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
     The namespace that encloses all GG classes, functions, typedefs, enums, etc. */
 namespace GG {
 
-/** A metafucntion required for a reimplementation of BOOST_SHARED_POINTER_EXPORT_GUID */
+/** A metafunction required for a reimplementation of BOOST_SHARED_POINTER_EXPORT_GUID */
 namespace detail {
     template <class T>
     struct make_sp_counted_base_impl

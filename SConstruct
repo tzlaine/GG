@@ -59,7 +59,9 @@ options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library')
 # build vars                                     #
 ##################################################
 # important vars that need to be set for later use when generating and building certain targets
-env['need__vsnprintf_c'] = False
+# This is supposed to be detected during configuration, but sometimes isn't, and is harmless, so we're including it all
+# the time now on POSIX systems.
+env['need__vsnprintf_c'] = str(Platform()) == 'posix'
 env['devil_with_allegro'] = False
 
 
@@ -351,7 +353,7 @@ if str(Platform()) == 'win32':
         '/GR',
         '/Gd',
         '/Zi',
-        '/wd4099', '/wd4251', '/wd4800', '/wd4267', '/wd4275', '/wd4244', '/wd4101'
+        '/wd4099', '/wd4251', '/wd4800', '/wd4267', '/wd4275', '/wd4244', '/wd4101', '/wd4258'
         ]
     env.Append(CCFLAGS = flags)
     env.Append(CPPDEFINES = [
@@ -475,30 +477,40 @@ if str(Platform()) == 'posix' and env['dynamic']:
 Alias('install', InstallHeaderTree(header_dir, 'include', install_headers, [], Install))
 Alias('install', Install(header_dir, os.path.normpath('libltdl/ltdl.h')))
 Alias('install', Install(header_dir, os.path.normpath('libltdl/config.h')))
-Alias('install', InstallAs(lib_dir + '/' + installed_gigi_libname, lib_gigi))
-if str(Platform()) == 'posix' and env['dynamic']:
-    Alias('install',
-          env.Command(lib_dir + '/' + gigi_libname,
-                      lib_dir + '/' + installed_gigi_libname,
-                      'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
+
+if str(Platform()) == 'win32':
+    Alias('install', Install(lib_dir, lib_gigi))
+else:
+    Alias('install', InstallAs(lib_dir + '/' + installed_gigi_libname, lib_gigi))
+    if env['dynamic']:
+        Alias('install',
+              env.Command(lib_dir + '/' + gigi_libname,
+                          lib_dir + '/' + installed_gigi_libname,
+                          'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
 if not mising_pkg_config:
     Alias('install', Install(env['pkgconfigdir'], gigi_pc))
 if not env['disable_sdl']:
-    Alias('install', InstallAs(lib_dir + '/' + installed_gigi_sdl_libname, lib_gigi_sdl))
-    if str(Platform()) == 'posix' and env['dynamic']:
-        Alias('install',
-              env.Command(lib_dir + '/' + gigi_sdl_libname,
-                          lib_dir + '/' + installed_gigi_sdl_libname,
-                          'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
+    if str(Platform()) == 'win32':
+        Alias('install', Install(lib_dir, lib_gigi_sdl))
+    else:
+        Alias('install', InstallAs(lib_dir + '/' + installed_gigi_sdl_libname, lib_gigi_sdl))
+        if env['dynamic']:
+            Alias('install',
+                  env.Command(lib_dir + '/' + gigi_sdl_libname,
+                              lib_dir + '/' + installed_gigi_sdl_libname,
+                              'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
     if not mising_pkg_config:
         Alias('install', Install(env['pkgconfigdir'], gigi_sdl_pc))
 if not env['disable_net']:
-    Alias('install', InstallAs(lib_dir + '/' + installed_gigi_net_libname, lib_gigi_net))
-    if str(Platform()) == 'posix' and env['dynamic']:
-        Alias('install',
-              env.Command(lib_dir + '/' + gigi_net_libname,
-                          lib_dir + '/' + installed_gigi_net_libname,
-                          'ln -s ' + lib_dir + '/' + installed_gigi_net_libname + ' ' + lib_dir + '/' + gigi_net_libname))
+    if str(Platform()) == 'win32':
+        Alias('install', Install(lib_dir, lib_gigi_net))
+    else:
+        Alias('install', InstallAs(lib_dir + '/' + installed_gigi_net_libname, lib_gigi_net))
+        if env['dynamic']:
+            Alias('install',
+                  env.Command(lib_dir + '/' + gigi_net_libname,
+                              lib_dir + '/' + installed_gigi_net_libname,
+                              'ln -s ' + lib_dir + '/' + installed_gigi_net_libname + ' ' + lib_dir + '/' + gigi_net_libname))
     if not mising_pkg_config:
         Alias('install', Install(env['pkgconfigdir'], gigi_net_pc))
 

@@ -334,9 +334,12 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
             } else if (it->second.alignment & ALIGN_CENTER) {
                 resize_ul.x = ul.x + (available_space.x - window_size.x) / 2;
                 resize_lr.x = resize_ul.x + window_size.x;
-            } else { // it->second.alignment & ALIGN_RIGHT
+            } else if (it->second.alignment & ALIGN_RIGHT) {
                 resize_lr.x = lr.x;
                 resize_ul.x = resize_lr.x - window_size.x;
+            } else {
+                resize_ul.x = ul.x;
+                resize_lr.x = lr.x;
             }
             if (it->second.alignment & ALIGN_TOP) {
                 resize_ul.y = ul.y;
@@ -344,9 +347,12 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
             } else if (it->second.alignment & ALIGN_VCENTER) {
                 resize_ul.y = ul.y + (available_space.y - window_size.y) / 2;
                 resize_lr.y = resize_ul.y + window_size.y;
-            } else { // it->second.alignment & ALIGN_BOTTOM
+            } else if (it->second.alignment & ALIGN_BOTTOM) {
                 resize_lr.y = lr.y;
                 resize_ul.y = resize_lr.y - window_size.y;
+            } else {
+                resize_ul.y = ul.y;
+                resize_lr.y = lr.y;
             }
             it->first->SizeMove(resize_ul, resize_lr);
         }
@@ -546,4 +552,13 @@ void Layout::ChildSizeOrMinSizeOrMaxSizeChanged()
 {
     if (!m_ignore_child_resize)
         RedoLayout();
+}
+
+void Layout::DetachAndResetChildren()
+{
+    std::map<Wnd*, WndPosition> wnd_positions = m_wnd_positions;
+    DetachChildren();
+    for (std::map<Wnd*, WndPosition>::iterator it = wnd_positions.begin(); it != wnd_positions.end(); ++it) {
+        it->first->Resize(it->second.original_size);
+    }
 }

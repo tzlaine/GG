@@ -70,10 +70,7 @@ namespace {
             m_layout = new Layout(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, 1, 1);
             AttachChild(m_layout);
         }
-        virtual bool Render()
-        {
-            return true;
-        }
+        virtual void Render() {}
         void Add(Wnd* w)
         {
             m_layout->Add(w, 0, m_children++);
@@ -112,15 +109,14 @@ WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
     Init();
 }
 
-bool WndEditor::Render ()
+void WndEditor::Render ()
 {
     for (int i = 0; i < m_list_box->NumRows(); ++i) {
-        boost::shared_ptr<AttributeRowBase> row = 
-            boost::dynamic_pointer_cast<AttributeRowBase>(m_list_box->GetRowPtr(i));
+        AttributeRowBase* row = 
+            dynamic_cast<AttributeRowBase*>(&m_list_box->GetRow(i));
         if (row)
             row->Update();
     }
-    return true;
 }
 
 void WndEditor::SetWnd(Wnd* wnd)

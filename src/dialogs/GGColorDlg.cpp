@@ -168,7 +168,7 @@ HueSaturationPicker::HueSaturationPicker(int x, int y, int w, int h) :
     }
 }
 
-bool HueSaturationPicker::Render()
+void HueSaturationPicker::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Pt size = Size();
@@ -196,7 +196,6 @@ bool HueSaturationPicker::Render()
     glVertex2i(lr.x, color_position.y);
     glEnd();
     glEnable(GL_TEXTURE_2D);
-    return true;
 }
 
 void HueSaturationPicker::LButtonDown(const Pt& pt, Uint32 keys)
@@ -244,7 +243,7 @@ ValuePicker::ValuePicker(int x, int y, int w, int h, Clr arrow_color) :
     m_arrow_color(arrow_color)
 {}
 
-bool ValuePicker::Render()
+void ValuePicker::Render()
 {
     Pt eff_ul = UpperLeft(), eff_lr = LowerRight() - Pt(4, 0);
     int h = Height();
@@ -270,8 +269,7 @@ bool ValuePicker::Render()
     glVertex2i(eff_lr.x + 4, color_position + 3);
     glEnd();
     glEnable(GL_TEXTURE_2D);
-    return true;
-}
+ }
 
 void ValuePicker::LButtonDown(const Pt& pt, Uint32 keys)
 {
@@ -358,7 +356,7 @@ ColorDlg::ColorDisplay::ColorDisplay(Clr color) :
     SetColor(color);
 }
 
-bool ColorDlg::ColorDisplay::Render()
+void ColorDlg::ColorDisplay::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     const int SQUARE_SIZE = 7;
@@ -395,7 +393,6 @@ bool ColorDlg::ColorDisplay::Render()
     glVertex2i(lr.x, ul.y);
     glEnd();
     glEnable(GL_TEXTURE_2D);
-    return true;
 }
 
 
@@ -486,7 +483,7 @@ Clr ColorDlg::Result() const
     return Convert(m_current_color);
 }
 
-bool ColorDlg::Render()
+void ColorDlg::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_color, m_border_color, 1);
@@ -495,7 +492,6 @@ bool ColorDlg::Render()
         Pt button_lr = m_color_buttons[m_current_color_button]->LowerRight() + Pt(2, 2);
         FlatRectangle(button_ul.x, button_ul.y, button_lr.x, button_lr.y, CLR_ZERO, m_text_color, 2);
     }
-    return true;
 }
 
 void ColorDlg::Keypress(Key key, Uint32 key_mods)

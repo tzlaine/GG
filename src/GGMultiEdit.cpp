@@ -105,7 +105,7 @@ int MultiEdit::MaxLinesOfHistory() const
     return m_max_lines_history;
 }
 
-bool MultiEdit::Render()
+void MultiEdit::Render()
 {
     if (DirtyLoad())
         SetText(WindowText());
@@ -187,8 +187,6 @@ bool MultiEdit::Render()
     }
 
     EndScissorClipping();
-
-    return true;
 }
 
 void MultiEdit::LButtonDown(const Pt& pt, Uint32 keys)

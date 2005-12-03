@@ -61,7 +61,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<GG::Font>& font, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
+    Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
     Button(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
     //@}
 
@@ -77,7 +77,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   Render();
+    virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
@@ -163,7 +163,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<GG::Font>& font, Uint32 text_fmt, 
+    StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
     StateButton(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Uint32 text_fmt, 
@@ -182,7 +182,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool     Render();
+    virtual void     Render();
     virtual void     LClick(const Pt& pt, Uint32 keys);
 
     void             Reset();                 ///< unchecks button
@@ -273,7 +273,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render();
+    virtual void Render();
 
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
         currently-checked button index is set to -1. */

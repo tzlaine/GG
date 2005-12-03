@@ -60,13 +60,13 @@ struct AppImplData;
     - entry into and cleanup after a "2D" mode, in case the app also uses non-orthographic 3D projections
     - registration into, removal from, and movement within a z-ordering of windows, including handling of "always-on-top" windows
     - handling of modal windows
+    - drag-and-drop support
     - inter-frame time updates and FPS calculations
     - limits on FPS speed
     - access to the dimensions of the application window or screen
     - mouse state information
     - keyboard accelerators
     - application-wide management of fonts and textures
-    - logging of debug info to log files
     <p>
     The user is required to provide several functions.  The most vital functions the user is required to provide are: Enter2DMode(),
     Exit2DMode(), DeltaT(), PollAndRender() [virtual private], and Run() [virtual private].  Without these App is pretty useless.  
@@ -78,12 +78,12 @@ struct AppImplData;
     time the accelerator is detected.  Client code should listen to the appropriate signal to act on an accelerator invocation.
     Each slot that is signalled with a keyboard accelerator should return true if it processed the accelerator, or false otherwise.
     This lets App know whether or not it should create a keystroke event and process it normally, sending it to the Wnd that currently
-    has focus.  Note that since signals can be connected to multiple slots, if even one slot return true, no kestroke event is 
+    has focus.  Note that since signals can be connected to multiple slots, if even one slot returns true, no kestroke event is 
     created.  It is perfectly legal to return false even if an accelerator is processed, as long as you also then want the focus 
     Wnd to receive a keystroke event.  Also, note that all accelerators are processed before, and possbily instead of, any key events.  
     So setting a plain "h" as a keyboard accelerator can (if it is processed normally by a slot) prevent any Wnd anywhere in your 
     application from receiving "h" keystrokes.  To avoid this:
-    - Do not define accelerators without modifier keys like CTRL and ALT, or
+    - Define accelerators with modifier keys like CTRL and ALT, or
     - Have slots that process these accelerators return false, or
     - Do not connect anything to such an accelerator, in which case it will return false.
     <p>
@@ -129,8 +129,8 @@ public:
 
     typedef std::set<std::pair<Key, Uint32> >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
 
-    typedef void (*SaveWndFn)(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
-    typedef void (*LoadWndFn)(GG::Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
+    typedef void (*SaveWndFn)(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
+    typedef void (*LoadWndFn)(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
 
     /** \name Structors */ //@{
     virtual ~App(); ///< virtual dtor
@@ -152,8 +152,8 @@ public:
     int            MouseRepeatDelay() const;     ///< returns the \a delay value set by EnableMouseDragRepeat()
     int            MouseRepeatInterval() const;  ///< returns the \a interval value set by EnableMouseDragRepeat()
     int            DoubleClickInterval() const;  ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms
-    int            MinDragDropTime() const;      ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag-and-drop item
-    int            MinDragDropDistance() const;  ///< returns the minimum distance an item must be dragged before it is a valid drag-and-drop item
+    int            MinDragTime() const;          ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag
+    int            MinDragDistance() const;      ///< returns the minimum distance an item must be dragged before it is a valid drag
     bool           MouseButtonDown(int bn) const;///< returns the up/down states of the mouse buttons
     Pt             MousePosition() const;        ///< returns the absolute position of mouse based on last mouse motion event
     Pt             MouseMovement() const;        ///< returns the relative position of mouse based on last mouse motion event
@@ -178,19 +178,25 @@ public:
     void           Register(Wnd* wnd);           ///< adds \a wnd into the z-list.  Registering a null pointer or registering the same window multiple times is a no-op.
     void           RegisterModal(Wnd* wnd);      ///< adds \a wnd onto the modal windows "stack"
     void           Remove(Wnd* wnd);             ///< removes \a wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.
+    void           WndDying(Wnd* wnd);           ///< removes \a wnd from all App state variables, so that none of them point to a deleted object
     void           MoveUp(Wnd* wnd);             ///< moves \a wnd to the top of the z-list
     void           MoveDown(Wnd* wnd);           ///< moves \a wnd to the bottom of the z-list
-    void           RegisterDragDropWnd(Wnd* wnd, const Pt& offset); ///< adds \a wnd to the set of current drag-and-drop Wnds, to be rendered \a offset pixels from the cursor position
-    void           RemoveDragDropWnd(Wnd* wnd);  ///< removes \a wnd from the set of current drag-and-drop Wnds
-    void           ClearDragDropWnds();          ///< clears the set of current drag-and-drop Wnds
+
+    /** adds \a wnd to the set of current drag-and-drop Wnds, to be rendered \a offset pixels from the cursor
+        position. \a originating_wnd indicates the original owner of \a wnd before the drag-drop.  \throw
+        std::runtime_error May throw std::runtime_error if there are already other Wnds registered that belong to a
+        window other than \a originating_wnd. */
+    void           RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd);
+
+    void           CancelDragDrop();             ///< clears the set of current drag-and-drop Wnds
     virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode.  GG expects an orthographic projection, with the origin in the upper left corner, and with one unit of GL space equal to one pixel on the screen.
     virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
     void           EnableFPS(bool b = true);     ///< turns FPS calulations on or off
     void           SetMaxFPS(double max);        ///< sets the maximum allowed FPS, so the render loop does not act as a spinlock when it runs very quickly.  0 indicates no limit.
     void           EnableMouseDragRepeat(int delay, int interval); ///< delay and interval are in ms; Setting delay to 0 disables mouse repeating completely.
     void           SetDoubleClickInterval(int interval); ///< sets the maximum interval allowed between clicks that is still considered a double-click, in ms
-    void           SetMinDragDropTime(int time); ///< sets the minimum time (in ms) an item must be dragged before it is a valid drag-and-drop item
-    void           SetMinDragDropDistance(int distance); ///< sets the minimum distance an item must be dragged before it is a valid drag-and-drop item
+    void           SetMinDragTime(int time);     ///< sets the minimum time (in ms) an item must be dragged before it is a valid drag
+    void           SetMinDragDistance(int distance); ///< sets the minimum distance an item must be dragged before it is a valid drag
 
     /** establishes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
     void           SetAccelerator(Key key, Uint32 key_mods);
@@ -231,7 +237,7 @@ public:
     //@}
 
     static App*  GetApp();                ///< allows any GG code access to app framework by calling App::GetApp()
-    static void  RenderWindow(Wnd* wnd);  ///< renders a window and (conditionally) all its descendents
+    static void  RenderWindow(Wnd* wnd);  ///< renders a window (if it is visible) and all its visible descendents recursively
 
     /** \name Exceptions */ //@{
     /** The base class for App exceptions. */
@@ -248,7 +254,7 @@ protected:
 
     /** \name Mutators */ //@{
     void           HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
-    void           ProcessBrowseInfo();    ///< determines the current borwse info mode, if any
+    void           ProcessBrowseInfo();    ///< determines the current browse info mode, if any
     virtual void   RenderBegin() = 0;      ///< clears the backbuffer, etc.
     virtual void   Render();               ///< renders the windows in the z-list
     virtual void   RenderEnd() = 0;        ///< swaps buffers, etc.
@@ -267,6 +273,11 @@ private:
 
     friend class EventPumpBase; ///< allows EventPumpBase types to drive App
 };
+
+
+/** returns true if lwnd == rwnd or if lwnd contains rwnd */
+GG_API bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd);
+
 
 // template implementations
 template<class InIt> 

@@ -201,7 +201,7 @@ void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
 
         bool send_to_gg = false;
         EventType gg_event = MOUSEMOVE;
-        GG::Key key = GGKeyFromSDLKey(event.key.keysym);
+        GG::Key key = GG::GGK_UNKNOWN;
         Uint32 key_mods = SDL_GetModState();
 #ifdef __APPLE__
         GG::Pt mouse_pos(event.motion.x, m_app_height - event.motion.y);
@@ -213,6 +213,7 @@ void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
 
         switch (event.type) {
         case SDL_KEYDOWN:
+            key = GGKeyFromSDLKey(event.key.keysym);
             if (key < GG::GGK_NUMLOCK)
                 send_to_gg = true;
             gg_event = KEYPRESS;

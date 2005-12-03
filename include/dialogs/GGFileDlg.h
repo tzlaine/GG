@@ -119,7 +119,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render();
+    virtual void Render();
     virtual void Keypress(Key key, Uint32 key_mods);
 
     void SetButtonColor(Clr color);                              ///< sets the color used to render the dialog's buttons
@@ -158,7 +158,7 @@ private:
     void OkClicked();
     void CancelClicked();
     void FileSetChanged(const std::set<int>& files);
-    void FileDoubleClicked(int n, const boost::shared_ptr<ListBox::Row>& row);
+    void FileDoubleClicked(int n, ListBox::Row* row);
     void FilesEditChanged(const std::string& str);
     void FilterChanged(int idx);
     void SetWorkingDirectory(const boost::filesystem::path& p);

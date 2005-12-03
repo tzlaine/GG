@@ -140,7 +140,7 @@ public:
     /** The data necessary to represent a browse info mode.  Though \a browse_text will not apply to all browse info
         schemes, it is nevertheless part of BrowseInfoMode, since it will surely be the most common data displayed in a
         BrowseInfoWnd. */
-    struct BrowseInfoMode
+    struct GG_API BrowseInfoMode
     {
         int                              time; ///< the time the cursor must linger over the Wnd before this mode becomes active
         boost::shared_ptr<BrowseInfoWnd> wnd;  ///< the BrowseInfoWnd used to display the browse info for this mode
@@ -183,6 +183,11 @@ public:
     const std::string&
                    WindowText() const;   ///< returns text associated with this window
 
+    /** returns the string key that defines the type of data that this Wnd represents when used as a drag-drop Wnd.
+        Returns the empty string when this Wnd cannot be used as a drag-drop Wnd. */
+    const std::string&
+                   DragDropDataType() const;
+
     /** returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen
         position, if any) */
     Pt             UpperLeft() const;
@@ -190,6 +195,14 @@ public:
     /** returns (one pixel past) the lower-right corner of window in \a screen \a coordinates (taking into account
         parent's screen position, if any) */
     Pt             LowerRight() const;
+
+    /** returns the upper-left corner of window, relative to its parent's client area, or in screen coordinates if no
+        parent exists. */
+    Pt             RelativeUpperLeft() const;
+
+    /** returns (one pixel past) the lower-right corner of window, relative to its parent's client area, or in screen
+        coordinates if no parent exists. */
+    Pt             RelativeLowerRight() const;
 
     int            Width() const;        ///< returns width of window in pixels
     int            Height() const;       ///< returns width of window in pixels
@@ -241,8 +254,24 @@ public:
     //@}
 
     /** \name Mutators */ //@{
+    /** sets the string key that defines the type of data that this Wnd represents when used as a drag-drop Wnd.
+        This should be set to the empty string when this Wnd cannot be used as a drag-drop Wnd. */
+    void SetDragDropDataType(const std::string& data_type);
+
+    /** indicates to the Wnd that a child widget \a w is being drag-dropped, which gives it the opportunity to add other
+        associated drag-drop Wnds.  \a offset indicates the position of the mouse realtive to \a wnd's UpperLeft(). */
+    virtual void StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
+
+    /** handles a drop of a drag-drop wnd into this Wnd; returns true iff the drag was accepted.  This function will
+        will return false if any DontAcceptDropException occurs within it or any function called by it, and will stop
+        the propogation of the exception. */
+    virtual bool AcceptDrop(Wnd* wnd, const Pt& pt);
+
+    /** handles the removal of a child window that has been dropped onto another window which has accepted it as a drop.
+        The accepting window retains ownership, so this function must not delete the child. */
+    virtual void ChildDraggedAway(Wnd* child, const Wnd* destination);
+
     virtual void   SetText(const std::string& str);     ///< set window text
-    virtual void   SetText(const char* str);            ///< set window text
 
     /** suppresses rendering of this window (and possibly its children) during render loop */
     void           Hide(bool children = true);
@@ -312,8 +341,8 @@ public:
         windows. */
     void           SetLayout(Layout* layout);
 
-    /** removes the window's layout, handing ownership of all children back to the window.  If no layout exists for the
-        window, no action is taken. */
+    /** removes the window's layout, handing ownership of all children back to the window, with the sizes they had
+        before the layout resized them.  If no layout exists for the window, no action is taken. */
     void           RemoveLayout();
 
     /** sets the margin that should exist between the outer edges of the windows in the layout and the edge of the
@@ -325,8 +354,7 @@ public:
     void           SetLayoutCellMargin(int margin);
 
 
-    /** draws this Wnd; a return value of false that children should be skipped in subsequent rendering */
-    virtual bool   Render();
+    virtual void   Render(); ///< draws this Wnd
 
     /** respond to left button down msg.  A window receives this whenever any input device button changes from up to
         down while over the window. */
@@ -386,6 +414,7 @@ public:
 
     virtual void   GainingFocus();                         ///< respond to this window gaining the input focus
     virtual void   LosingFocus();                          ///< respond to this window losing the input focus
+
 
     /** this executes a modal window and gives it its modality.  For non-modal windows, this function is a no-op.
         It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
@@ -470,7 +499,7 @@ protected:
 
         /** constructs an Event that is used to invoke a function taking parameters (const GG::Pt& pt, Uint32 keys), eg
             LButtonDown(). */
-        Event(EventType type, const GG::Pt& pt, Uint32 keys);
+        Event(EventType type, const Pt& pt, Uint32 keys);
 
         /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const Pt& move,
             Uint32 keys), eg LDrag(). */
@@ -487,19 +516,19 @@ protected:
         /** constructs an Event that is used to invoke a function taking no parameters, eg GainingFocus(). */
         Event(EventType type);
 
-        EventType      Type() const;       ///< returns the type of the Event
-        const GG::Pt&  Point() const;      ///< returns the point at which the event took place, if any
-        Key            KeyPress() const;   ///< returns the keypress represented by the Event, if any
-        Uint32         KeyMods() const;    ///< returns the modifiers to the Event's keypress, if any
-        const GG::Pt&  DragMove() const;   ///< returns the amount of drag movement represented by the Event, if any
-        int            WheelMove() const;  ///< returns the ammount of mouse wheel movement represented by the Event, if any
+        EventType  Type() const;       ///< returns the type of the Event
+        const Pt&  Point() const;      ///< returns the point at which the event took place, if any
+        Key        KeyPress() const;   ///< returns the keypress represented by the Event, if any
+        Uint32     KeyMods() const;    ///< returns the modifiers to the Event's keypress, if any
+        const Pt&  DragMove() const;   ///< returns the amount of drag movement represented by the Event, if any
+        int        WheelMove() const;  ///< returns the ammount of mouse wheel movement represented by the Event, if any
 
     private:
         EventType  m_type;
-        GG::Pt     m_point;
+        Pt         m_point;
         Key        m_keypress;
         Uint32     m_key_mods;
-        GG::Pt     m_drag_move;
+        Pt         m_drag_move;
         int        m_wheel_move;
     };
 
@@ -534,6 +563,7 @@ private:
     std::list<Wnd*>   m_children;      ///< list of ptrs to child windows kept in order of decreasing area
     int               m_zorder;        ///< where this window is in the z-order (root (non-child) windows only)
     bool              m_visible;       ///< is this window drawn?
+    std::string       m_drag_drop_data_type; ///< the type of drag-drop data this Wnd represents, if any
     bool              m_clip_children; ///< should the children of this window be clipped?
     Pt                m_upperleft;     ///< upper left point of window
     Pt                m_lowerright;    ///< lower right point of window
@@ -600,6 +630,7 @@ void GG::Wnd::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_children)
         & BOOST_SERIALIZATION_NVP(m_zorder)
         & BOOST_SERIALIZATION_NVP(m_visible)
+        & BOOST_SERIALIZATION_NVP(m_drag_drop_data_type)
         & BOOST_SERIALIZATION_NVP(m_clip_children)
         & BOOST_SERIALIZATION_NVP(m_upperleft)
         & BOOST_SERIALIZATION_NVP(m_lowerright)

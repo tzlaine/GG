@@ -105,7 +105,7 @@ Scroll::Orientation Scroll::ScrollOrientation() const
     return m_orientation;
 }
 
-bool Scroll::Render()
+void Scroll::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Clr int_color_to_use = Disabled() ? DisabledColor(m_int_color) : m_int_color;
@@ -121,14 +121,13 @@ bool Scroll::Render()
         m_tab->Render();
         m_tab->OffsetMove(-UpperLeft());
     }
-    return true;
 }
 
 void Scroll::LButtonDown(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
         // when a button is pressed, record the region of the control the cursor is over
-        switch(RegionUnder(pt))
+        switch (RegionUnder(pt))
         {
         case SBR_TAB:
             m_initial_depressed_area = SBR_NONE; // tab can't be "depressed"
@@ -194,7 +193,7 @@ void Scroll::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
                 m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, click_pos - m_tab_drag_offset)) : m_tab->MoveTo(Pt(click_pos - m_tab_drag_offset, 0));
             UpdatePosn();
         } else { // otherwise, if there is dragging going on elsewhere, mark that area as "depressed", if it is the area we started in
-            switch(RegionUnder(pt)) { // figure out where cursor is now
+            switch (RegionUnder(pt)) { // figure out where cursor is now
             case SBR_LINE_DN: if (m_initial_depressed_area == SBR_LINE_DN) ScrollLineDecr(); break;
             case SBR_LINE_UP: if (m_initial_depressed_area == SBR_LINE_UP) ScrollLineIncr(); break;
             case SBR_PAGE_DN: if (m_initial_depressed_area == SBR_PAGE_DN) ScrollPageDecr(); break;

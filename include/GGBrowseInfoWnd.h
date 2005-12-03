@@ -47,7 +47,7 @@ class GG_API BrowseInfoWnd : public Wnd
 {
 public:
     /** \name Mutators */ //@{
-    virtual bool Render() = 0;
+    virtual void Render() = 0;
 
     /** collects data from \a target that is needed by Render().  Note that the one datum that is always available for
         any Wnd is the text to display for \a mode, accessible through Wnd::BrowseInfoText() (though this may be the
@@ -99,7 +99,7 @@ public:
 
     /** \name Mutators */ //@{
     void         SetText (const std::string& str);
-    virtual bool Render();
+    virtual void Render();
     virtual void Update(int mode, const Wnd* target);
 
     void SetTextFromTarget(bool b);                    ///< sets the text display mode to static (\a b == true) or dynamic (read from the target Wnd, \a b == false)

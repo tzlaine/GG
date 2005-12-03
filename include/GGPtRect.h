@@ -37,6 +37,8 @@
 
 #include <boost/serialization/access.hpp>
 
+#include <iosfwd>
+
 namespace GG {
 
 /** a GG screen coordinate class */
@@ -113,6 +115,8 @@ GG_API inline bool operator>=(const Pt& lhs, const Pt& rhs) {return lhs.x >= rhs
 GG_API inline Pt   operator+(const Pt& lhs, const Pt& rhs)  {return Pt(lhs.x + rhs.x, lhs.y + rhs.y);} ///< returns the vector sum of \a lhs and \a rhs
 GG_API inline Pt   operator-(const Pt& lhs, const Pt& rhs)  {return Pt(lhs.x - rhs.x, lhs.y - rhs.y);} ///< returns the vector difference of \a lhs and \a rhs
 
+GG_API std::ostream& operator<<(std::ostream& os, const Pt& pt); ///< Pt stream-output operator for debug output
+
 /** returns true if \a lhs is identical to \a rhs */
 GG_API inline bool operator==(const Rect& lhs, const Rect& rhs) {return lhs.ul.x == rhs.ul.x && lhs.lr.x == rhs.lr.x && lhs.lr.x == rhs.lr.x && lhs.lr.y == rhs.lr.y;}
 
@@ -123,6 +127,8 @@ GG_API inline Rect operator+(const Rect& rect, const Pt& pt) {return Rect(rect.u
 GG_API inline Rect operator-(const Rect& rect, const Pt& pt) {return Rect(rect.ul - pt, rect.lr - pt);} ///< returns \a rect shifted by subtracting \a pt from each corner
 GG_API inline Rect operator+(const Pt& pt, const Rect& rect) {return rect + pt;} ///< returns \a rect shifted by adding \a pt to each corner
 GG_API inline Rect operator-(const Pt& pt, const Rect& rect) {return rect - pt;} ///< returns \a rect shifted by subtracting \a pt from each corner
+
+GG_API std::ostream& operator<<(std::ostream& os, const Rect& rect); ///< Rect stream-output operator for debug output
 
 } // namepace GG
 

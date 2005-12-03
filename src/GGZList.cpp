@@ -42,16 +42,16 @@ namespace {
 ///////////////////////////////////////
 // class GG::ZList
 ///////////////////////////////////////
-Wnd* ZList::Pick(const Pt& pt, Wnd* modal) const
+Wnd* ZList::Pick(const Pt& pt, Wnd* modal, Wnd* ignore/* = 0*/) const
 {
     Wnd* retval = 0;
     if (modal) { // if a modal window is active, only look there
-        retval = modal->InWindow(pt) ? PickWithinWindow(pt, modal) : 0;
+        retval = modal->InWindow(pt) ? PickWithinWindow(pt, modal, ignore) : 0;
     } else { // otherwise, look in the z-list
         const_iterator end_it = end();
         for (const_iterator it = begin(); it != end_it; ++it) {
             Wnd* temp = 0;
-            if ((*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it))) {
+            if ((*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it, ignore))) {
                 retval = temp;
                 break;
             }
@@ -158,15 +158,15 @@ bool ZList::MoveDown(Wnd* wnd)
     return retval;
 }
 
-Wnd* ZList::PickWithinWindow(const Pt& pt, Wnd* wnd) const
+Wnd* ZList::PickWithinWindow(const Pt& pt, Wnd* wnd, Wnd* ignore) const
 {
     // if wnd is visible and clickable, return it if no child windows also catch pt
-    Wnd* retval = (wnd->Visible() && wnd->Clickable()) ? wnd : 0;
+    Wnd* retval = (wnd->Visible() && wnd->Clickable() && wnd != ignore) ? wnd : 0;
     // look through all the children of wnd, and determine whether pt lies in any of them (or their children)
     std::list<Wnd*>::reverse_iterator end_it = wnd->m_children.rend();
     for (std::list<Wnd*>::reverse_iterator it = wnd->m_children.rbegin(); it != end_it; ++it) {
         Wnd* temp = 0;
-        if ((*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it))) {
+        if ((*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it, ignore))) {
             retval = temp;
             break;
         }

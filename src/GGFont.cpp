@@ -238,6 +238,11 @@ int Font::FormattingTag::OriginalStringChars() const
 ///////////////////////////////////////
 // class GG::Font::LineData
 ///////////////////////////////////////
+Font::LineData::LineData() :
+    justification(TF_CENTER)
+{
+}
+
 int Font::LineData::Width() const
 {
     return char_data.empty() ? 0 : char_data.back().extent;
@@ -322,14 +327,32 @@ private:
 std::set<std::string> Font::s_action_tags;
 std::set<std::string> Font::s_known_tags;
 
-Font::Font()
+Font::Font() :
+    m_pt_sz(0),
+    m_glyph_range(0),
+    m_ascent(0),
+    m_descent(0),
+    m_height(0),
+    m_lineskip(0),
+    m_underline_offset(0.0),
+    m_underline_height(0.0),
+    m_italics_offset(0.0),
+    m_space_width(0)
 {
 }
 
 Font::Font(const std::string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
     m_font_filename(font_filename),
     m_pt_sz(pts),
-    m_glyph_range(range)
+    m_glyph_range(range),
+    m_ascent(0),
+    m_descent(0),
+    m_height(0),
+    m_lineskip(0),
+    m_underline_offset(0.0),
+    m_underline_height(0.0),
+    m_italics_offset(0.0),
+    m_space_width(0)
 {
     if (font_filename != "")
         Init(font_filename, pts, range);
@@ -702,7 +725,7 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
         if (retval.x < line_data[i].Width())
             retval.x = line_data[i].Width();
     }
-    retval.y = (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
+    retval.y = text.empty() ? 0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
 
 #if DEBUG_DETERMINELINES
     std::cout << "String Size:(" << retval.x << ", " << retval.y << ")\n" << std::endl;

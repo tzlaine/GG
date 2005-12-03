@@ -154,6 +154,8 @@ public:
         on that line as well. */
     struct GG_API LineData
     {
+        LineData(); ///< Default ctor.
+
         /** Contains the extent in pixels, the index into the original string, and the text formatting tags that should
             be applied before rendering of a visible character. */
         struct CharData
@@ -278,7 +280,7 @@ private:
         created at GG::Font creation time.*/
     struct Glyph
     {
-        Glyph() : advance(0) {} ///< default ctor
+        Glyph() : left_bearing(0), advance(0), width(0) {} ///< default ctor
         Glyph(const boost::shared_ptr<Texture>& texture, int x1, int y1, int x2, int y2, int lb, int adv) : 
             sub_texture(texture, x1, y1, x2, y2), left_bearing(lb), advance(adv), width(x2 - x1) {} ///< ctor
 

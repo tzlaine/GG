@@ -126,7 +126,7 @@ Clr Edit::SelectedTextColor() const
     return m_sel_text_color;
 }
 
-bool Edit::Render()
+void Edit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(m_int_color) : m_int_color;
@@ -183,8 +183,6 @@ bool Edit::Render()
     }
 
     EndScissorClipping();
-
-    return true;
 }
 
 void Edit::LButtonDown(const Pt& pt, Uint32 keys)

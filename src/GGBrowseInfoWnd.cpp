@@ -144,11 +144,10 @@ void TextBoxBrowseInfoWnd::SetText(const std::string& str)
     Resize(1, 1);
 }
 
-bool TextBoxBrowseInfoWnd::Render()
+void TextBoxBrowseInfoWnd::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_color, m_border_color, m_border_width);
-    return true;
 }
 
 void TextBoxBrowseInfoWnd::Update(int mode, const Wnd* target)

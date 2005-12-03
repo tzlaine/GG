@@ -139,7 +139,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render();
+    virtual void Render();
     virtual void LButtonDown(const Pt& pt, Uint32 keys);
     virtual void LDrag(const Pt& pt, const Pt& move, Uint32 keys);
     virtual void LButtonUp(const Pt& pt, Uint32 keys);
@@ -365,7 +365,7 @@ Clr Spin<T>::SelectedTextColor() const
 }
 
 template<class T>
-bool Spin<T>::Render()
+void Spin<T>::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
@@ -382,7 +382,6 @@ bool Spin<T>::Render()
     m_dn_bn->Render();
     m_up_bn->OffsetMove(-UpperLeft());
     m_dn_bn->OffsetMove(-UpperLeft());
-    return true;
 }
 
 template<class T>

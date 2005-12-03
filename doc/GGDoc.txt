@@ -203,6 +203,26 @@
     the return values of such slots (take the first return value, the last, the average of all of them, etc.).
 */
 
+/** \page drag_n_drop Drag and Drop
+    \section drag_n_drop_basics Basics
+    GG has drag and drop support that allows you to drag any Wnd and drop it onto any other Wnd.  The results of this
+    drop depend on the two Wnds involved.  Each Wnd has a DragDropDataType() method that returns a string describing
+    what kind of data the Wnd represents.  The string can be a MIME type or any arbitrary string the user likes.  Upon
+    the drop, the Wnd receiving the drop has its AcceptDrop() method called, in which it can examine the data type or
+    any other relevant aspects of the dropped Wnd and decide whether or not to accept it.  If the receiver accepts, the
+    dropped Wnd is removed from its parent, if it has one.  Note that only Wnds with non-empty-string
+    DragDropDataType()s may be dragged, and that such Wnds may be, but do not need to be, created with the DRAGABLE
+    flag.
+    \section drag_n_drop_advanced Advanced Use
+    Sometimes it is desirable to have the drop-receiving Wnd emit a signal to which clients may attach slots.  Further,
+    it may be desirable to allow the attached client slots to veto the drop.  If this is desired, the recommended means
+    of accomplishing this is to follow the pattern of ListBox.  ListBox catches ListBox::DontAcceptDrop exceptions that
+    are thrown in slots attached to its DroppedSignal signal.  The signal is emitted after the drop is completed, and if
+    DontAcceptDrop is caught, the stack is unwound in two steps.  First, the insertion of the dropped item is rolled
+    back, and then the exception is rethrown so that AcceptDrop() can return false.  See the ListBox implementation for
+    furhter details.
+*/
+
 /** \page serialization Serialization
     \section serialization_motivation Motivation
     One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
@@ -243,6 +263,7 @@
     -# \ref design
     -# \ref architecture
     -# \ref sigs_n_slots
+    -# \ref drag_n_drop
     -# \ref serialization
     -# \ref building
     -# \ref tutorials

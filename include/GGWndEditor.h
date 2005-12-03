@@ -61,7 +61,7 @@ public:
     /** basic ctor.  Note that WndEditor has an integral width. */
     WndEditor(int h, const boost::shared_ptr<Font>& font);
 
-    virtual bool Render ();
+    virtual void Render ();
 
     /** sets the edited window to \a wnd, and updates the contents of WndEditor's controls to contain the controls that
         edit the new Wnd. */

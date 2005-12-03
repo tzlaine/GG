@@ -154,7 +154,7 @@ namespace {
 // class GG::Wnd
 ///////////////////////////////////////
 // Wnd::Event
-Wnd::Event::Event(EventType type, const GG::Pt& pt, Uint32 keys) :
+Wnd::Event::Event(EventType type, const Pt& pt, Uint32 keys) :
     m_type(type),
     m_point(pt),
     m_key_mods(keys),
@@ -194,7 +194,7 @@ Wnd::Event::EventType Wnd::Event::Type() const
     return m_type;
 }
 
-const GG::Pt& Wnd::Event::Point() const
+const Pt& Wnd::Event::Point() const
 {
     return m_point;
 }
@@ -209,7 +209,7 @@ Uint32 Wnd::Event::KeyMods() const
     return m_key_mods;
 }
 
-const GG::Pt& Wnd::Event::DragMove() const
+const Pt& Wnd::Event::DragMove() const
 {
     return m_drag_move;
 }
@@ -273,11 +273,10 @@ Wnd::~Wnd()
         (*it1)->m_filtering.erase(this);
     }
 
-    if (Parent()) {
-        Parent()->DetachChild(this);
-    } else {
-        App::GetApp()->Remove(this);
-    }
+    if (Wnd* parent = Parent())
+        parent->DetachChild(this);
+
+    App::GetApp()->WndDying(this);
 
     DeleteChildren();
 }
@@ -327,6 +326,11 @@ const std::string& Wnd::WindowText() const
     return m_text;
 }
 
+const std::string& Wnd::DragDropDataType() const
+{
+    return m_drag_drop_data_type;
+}
+
 Pt Wnd::UpperLeft() const
 {
     Pt retval = m_upperleft;
@@ -341,6 +345,16 @@ Pt Wnd::LowerRight() const
     if (m_parent)
         retval += m_parent->ClientUpperLeft();
     return retval;
+}
+
+Pt Wnd::RelativeUpperLeft() const
+{
+    return m_upperleft;
+}
+
+Pt Wnd::RelativeLowerRight() const
+{
+    return m_lowerright;
 }
 
 int Wnd::Width() const
@@ -454,8 +468,8 @@ const std::string& Wnd::BrowseInfoText(int mode) const
 
 WndRegion Wnd::WindowRegion(const Pt& pt) const
 {
-    enum {LEFT=0, MIDDLE=1, RIGHT=2};
-    enum {TOP=0, BOTTOM=2};
+    enum {LEFT = 0, MIDDLE = 1, RIGHT = 2};
+    enum {TOP = 0, BOTTOM = 2};
 
     // window regions look like this:
     // 0111112
@@ -479,12 +493,25 @@ WndRegion Wnd::WindowRegion(const Pt& pt) const
     return (Resizable() ? WndRegion(x_pos + 3 * y_pos) : WR_NONE);
 }
 
-void Wnd::SetText(const std::string& str)
+void Wnd::SetDragDropDataType(const std::string& data_type)
 {
-    m_text = str;
+    m_drag_drop_data_type = data_type;
 }
 
-void Wnd::SetText(const char* str)
+void Wnd::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
+{}
+
+bool Wnd::AcceptDrop(Wnd* wnd, const Pt& pt)
+{
+    return false;
+}
+
+void Wnd::ChildDraggedAway(Wnd* child, const Wnd* destination)
+{
+    DetachChild(child);
+}
+
+void Wnd::SetText(const std::string& str)
 {
     m_text = str;
 }
@@ -642,6 +669,7 @@ void Wnd::AttachChild(Wnd* wnd)
         // remove from previous parent, if any
         if (wnd->Parent())
             wnd->Parent()->DetachChild(wnd);
+        App::GetApp()->Remove(wnd);
         m_children.push_back(wnd);
         wnd->m_parent = this;
         if (Layout* this_as_layout = dynamic_cast<Layout*>(this))
@@ -674,9 +702,6 @@ void Wnd::DetachChild(Wnd* wnd)
     if (wnd) {
         std::list<Wnd*>::iterator it = std::find(m_children.begin(), m_children.end(), wnd);
         if (it != m_children.end()) {
-            // though child windows are never Register()ed, this Remove() makes sure that any 
-            // GG::App state pointers to the child do not outlive the child
-            App::GetApp()->Remove(wnd);
             m_children.erase(it);
             wnd->m_parent = 0;
             if (dynamic_cast<Layout*>(this))
@@ -904,6 +929,7 @@ void Wnd::RemoveLayout()
 {
     if (m_layout) {
         std::list<Wnd*> layout_children = m_layout->Children();
+        m_layout->DetachAndResetChildren();
         for (std::list<Wnd*>::iterator it = layout_children.begin(); it != layout_children.end(); ++it) {
             AttachChild(*it);
         }
@@ -924,7 +950,7 @@ void Wnd::SetLayoutCellMargin(int margin)
         m_layout->SetCellMargin(margin);
 }
 
-bool Wnd::Render() {return true;}
+void Wnd::Render() {}
 
 void Wnd::LButtonDown(const Pt& pt, Uint32 keys) {}
 

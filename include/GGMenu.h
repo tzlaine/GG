@@ -111,10 +111,10 @@ public:
 
     /** \name Structors */ //@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
-    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW); ///< ctor
-    MenuBar(int x, int y, int w, const std::string& font_filename, int pts, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW); ///< ctor
-    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW); ///< ctor that takes a MenuItem containing the contents of the menus in the MenuBar
-    MenuBar(int x, int y, int w, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW); ///< ctor that takes a MenuItem containing the contents of the menus in the MenuBar
+    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
+    MenuBar(int x, int y, int w, const std::string& font_filename, int pts, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
+    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing the contents of the menus in the MenuBar
+    MenuBar(int x, int y, int w, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing the contents of the menus in the MenuBar
     //@}
 
     /** \name Accessors */ //@{
@@ -137,7 +137,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   Render();
+    virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   MouseLeave(const Pt& pt, Uint32 keys);
@@ -218,8 +218,8 @@ public:
 
     /** \name Structors */ //@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
-    PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW);
-    PopupMenu(int x, int y, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = GG::CLR_WHITE, Clr color = GG::CLR_BLACK, Clr interior = GG::CLR_SHADOW);
+    PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
+    PopupMenu(int x, int y, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
     //@}
 
     /** \name Accessors */ //@{
@@ -236,7 +236,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   Render();
+    virtual void   Render();
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
     virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);

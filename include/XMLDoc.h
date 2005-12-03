@@ -143,11 +143,11 @@ public:
     int  ChildIndex(const std::string& child) const;         ///< returns the index of the child called \a name, or -1 if not found
 
     /**  returns the child in the \a idx-th position of the child list of the XMLElement.  \throw
-         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
+         GG::XMLElement::NoSuchIndex An out of range index will cause an exception. */
     const XMLElement& Child(unsigned int idx) const;
 
     /**  returns the child in child list of the XMLElement that has the tag-name \a str.  \throw
-         GG::XMLElement:NoSuchChild An exception is thrown if no child named \a child exists. */   
+         GG::XMLElement::NoSuchChild An exception is thrown if no child named \a child exists. */   
     const XMLElement& Child(const std::string& child) const;
 
     /**  returns the last child in child list of the XMLElement.  \throw GG::XMLElement:NoSuchIndex Calling this on an
@@ -172,7 +172,7 @@ public:
     XMLElement& Child(unsigned int idx);
 
     /**  returns the child in child list of the XMLElement that has the tag-name \a child.  \throw
-         GG::XMLElement:NoSuchChild An exception is thrown if no child named \a child exists. */   
+         GG::XMLElement::NoSuchChild An exception is thrown if no child named \a child exists. */   
     XMLElement& Child(const std::string& child);
 
     /**  returns the last child in child list of the XMLElement.  \throw GG::XMLElement:NoSuchIndex Calling this on an
@@ -202,11 +202,11 @@ public:
     void AppendChild(const std::string& child);
 
     /** adds a child \a e in the \a idx-th position of the child list of the XMLElement. \throw
-         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
+         GG::XMLElement::NoSuchIndex An out of range index will cause an exception. */
     void AddChildBefore(const XMLElement& e, unsigned int idx);
 
     /** removes the child in the \a idx-th position of the child list of the XMLElement.  \throw
-         GG::XMLElement:NoSuchIndex An out of range index will cause an exception. */
+         GG::XMLElement::NoSuchIndex An out of range index will cause an exception. */
     void RemoveChild(unsigned int idx);
 
     /** removes the child called \a child from the XMLElement.  \throw GG::XMLElement:NoSuchChild An exception is thrown

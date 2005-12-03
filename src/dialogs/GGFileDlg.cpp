@@ -250,10 +250,9 @@ std::set<std::string> FileDlg::Result() const
     return m_result;
 }
 
-bool FileDlg::Render()
+void FileDlg::Render()
 {
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
-    return true;
 }
 
 void FileDlg::Keypress(Key key, Uint32 key_mods)
@@ -497,10 +496,10 @@ void FileDlg::FileSetChanged(const std::set<int>& files)
         m_ok_button->SetText(m_open_str);
 }
 
-void FileDlg::FileDoubleClicked(int n, const boost::shared_ptr<ListBox::Row>& row)
+void FileDlg::FileDoubleClicked(int n, ListBox::Row* row)
 {
     std::string filename = (*row)[0]->WindowText();
-    m_files_list->ClearSelection();
+    m_files_list->DeselectAll();
     m_files_list->SelectRow(n);
     OkClicked();
 }

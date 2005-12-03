@@ -131,10 +131,9 @@ int ThreeButtonDlg::EscapeButton() const
     return m_escape;
 }
 
-bool ThreeButtonDlg::Render()
+void ThreeButtonDlg::Render()
 {
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
-    return true;
 }
 
 void ThreeButtonDlg::Keypress(Key key, Uint32 key_mods)

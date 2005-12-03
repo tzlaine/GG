@@ -67,7 +67,7 @@ Uint32 StaticGraphic::Style() const
     return m_style;
 }
 
-bool StaticGraphic::Render()
+void StaticGraphic::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     glColor4ubv(color_to_use.v);
@@ -120,8 +120,6 @@ bool StaticGraphic::Render()
     pt2.y += shift;
 
     m_graphic.OrthoBlit(pt1, pt2, false);
-
-    return true;
 }
 
 void StaticGraphic::SetStyle(Uint32 style)

@@ -50,7 +50,8 @@ class GG_API ZList : public std::list<Wnd*>
 {
 public:
     /** \name Accessors */ //@{
-    Wnd* Pick(const Pt& pt, Wnd* modal) const;  ///< returns pointer to the window under the point pt; constrains pick to modal if nonzero
+    /** returns pointer to the window under the point pt; constrains pick to modal if nonzero, and ignores \a ignore if nonzero */
+    Wnd* Pick(const Pt& pt, Wnd* modal, Wnd* ignore = 0) const;
     //@}
 
     /** \name Mutators */ //@{
@@ -64,7 +65,7 @@ public:
     //@}
 
 private:
-    Wnd*     PickWithinWindow(const Pt& pt, Wnd* wnd) const; ///< returns pointer to the window under the point pt; constrains pick to wnd and its decendents
+    Wnd*     PickWithinWindow(const Pt& pt, Wnd* wnd, Wnd* ignore) const; ///< returns pointer to the window under the point pt; constrains pick to wnd and its decendents, and ignores \a ignore if nonzero
     bool     NeedsRealignment() const;     ///< determines whether list needs rearranging
     void     Realign();                    ///< rearranges z-values of windows in list to compact range of z-values and maintain DESIRED_GAP_SIZE separation
     iterator FirstNonOnTop();              ///< returns iterator to first window in list that is non-on-top (returns end() if none found)

@@ -54,6 +54,11 @@ bool Control::Disabled() const
     return m_disabled;
 }
 
+bool Control::AcceptDrop(Wnd* wnd, const Pt& pt)
+{
+    return Parent() ? Parent()->AcceptDrop(wnd, pt) : false;
+}
+
 void Control::MouseWheel(const Pt& pt, int move, Uint32 keys)
 {
     if (Parent())

@@ -231,14 +231,13 @@ enum ListBoxStyle {
     LB_LEFT =            ALIGN_LEFT,    ///< Cells are left-aligned. This is the default.
     LB_RIGHT =           ALIGN_RIGHT,   ///< Cells are right-aligned.
 
-    LB_NOSORT =          1 << 10,       ///< List items are not sorted. Items are sorted by default.  When combined with LB_DRAGDROP, this style allows arbitrary rearrangement of list elements by dragging.
+    LB_NOSORT =          1 << 10,       ///< List items are not sorted. Items are sorted by default.  When used with drag-and-drop, this style allows arbitrary rearrangement of list elements by dragging.
     LB_SORTDESCENDING =  1 << 11,       ///< Items are sorted based on item text in ascending order. Ascending order is the default.
 
     LB_NOSEL =           1 << 13,       ///< No selection, dragging, or dropping allowed.  This makes the list box effectively read-only.
     LB_SINGLESEL =       1 << 14,       ///< Only one item at a time can be selected. By default, multiple items may be selected.
     LB_QUICKSEL =        1 << 15,       ///< Each click toggles an item without affecting any others; ignored when used with LB_SINGLESEL.
 
-    LB_DRAGDROP =        1 << 16,       ///< Items can be dragged from or dropped into the list box.  Only specified drop types are allowed, but anything can be dragged.  By default drag-n-drop is disabled.   When combined with LB_NOSORT, this style allows arbitrary rearrangement of list elements by dragging.
     LB_USERDELETE =      1 << 18,       ///< Allows user to remove selected items by pressing the delete key.
 
     LB_BROWSEUPDATES =   1 << 19,       ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
@@ -258,7 +257,6 @@ GG_ENUM_MAP_BEGIN(ListBoxStyle)
     GG_ENUM_MAP_INSERT(LB_NOSEL)
     GG_ENUM_MAP_INSERT(LB_SINGLESEL)
     GG_ENUM_MAP_INSERT(LB_QUICKSEL)
-    GG_ENUM_MAP_INSERT(LB_DRAGDROP)
     GG_ENUM_MAP_INSERT(LB_USERDELETE)
     GG_ENUM_MAP_INSERT(LB_BROWSEUPDATES)
 GG_ENUM_MAP_END

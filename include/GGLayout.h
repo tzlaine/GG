@@ -216,6 +216,7 @@ private:
     void   ValidateAlignment(Uint32& alignment);
     void   RedoLayout();
     void   ChildSizeOrMinSizeOrMaxSizeChanged();
+    void   DetachAndResetChildren(); // resets children to their original sizes and detaches them, so that a removed Layout can leave the Wnds it lays out in their original configuration when it is removed from a Wnd it is laying out
 
     std::vector<std::vector<Wnd*> > m_cells;
     int                             m_border_margin;

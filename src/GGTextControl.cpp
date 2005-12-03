@@ -146,7 +146,7 @@ Pt TextControl::TextLowerRight() const
     return UpperLeft() + m_text_lr;
 }
 
-bool TextControl::Render()
+void TextControl::Render()
 {
     if (m_dirty_load)
         SetText(WindowText());
@@ -159,7 +159,6 @@ bool TextControl::Render()
         if (m_clip_text)
             EndClipping();
     }
-    return true;
 }
 
 void TextControl::SetText(const std::string& str)

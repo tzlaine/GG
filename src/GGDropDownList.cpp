@@ -40,7 +40,7 @@ namespace {
     {
     public:
         ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-            Wnd(0, 0, GG::App::GetApp()->AppWidth(), GG::App::GetApp()->AppHeight(), CLICKABLE | MODAL),
+            Wnd(0, 0, App::GetApp()->AppWidth(), App::GetApp()->AppHeight(), CLICKABLE | MODAL),
             m_drop_wnd(drop_wnd),
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
@@ -50,10 +50,9 @@ namespace {
             m_lb_ul = m_old_lb_ul + m_drop_wnd->UpperLeft();
             AttachChild(m_lb_wnd);
         }
-        virtual bool Render()
+        virtual void Render()
         {
             m_lb_wnd->MoveTo(m_lb_ul);
-            return true;
         }
         ~ModalListPicker()
         {
@@ -72,7 +71,7 @@ namespace {
                 m_done = true;
             }
         }
-        void LBLeftClickSlot(int, const boost::shared_ptr<ListBox::Row>&, const Pt&)
+        void LBLeftClickSlot(int, ListBox::Row*, const Pt&)
         {
             m_done = true;
         }
@@ -100,10 +99,9 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
 {
     if (!m_LB)
         m_LB = new ListBox(x, y, w, drop_ht, color, color, flags);
-    m_LB->SetRowHeight(row_ht);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
-    Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
+    Wnd::SizeMove(x, y, x + Size().x, y + row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
     m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
 }
 
@@ -115,10 +113,9 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
 {
     if (!m_LB)
         m_LB = new ListBox(x, y, w, drop_ht, color, interior, flags);
-    m_LB->SetRowHeight(row_ht);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
-    Resize(Size().x, row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
+    Wnd::SizeMove(x, y, x + Size().x, y + row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
     m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
 }
 
@@ -157,11 +154,6 @@ Uint32 DropDownList::Style() const
     return m_LB->Style();
 }
 
-int DropDownList::RowHeight() const
-{
-    return m_LB->RowHeight();
-}
-
 int DropDownList::NumRows() const
 {
     return m_LB->NumRows();
@@ -182,12 +174,12 @@ int DropDownList::ColWidth(int n) const
     return m_LB->ColWidth(n);
 }
 
-ListBoxStyle DropDownList::ColAlignment(int n) const
+Alignment DropDownList::ColAlignment(int n) const
 {
     return m_LB->ColAlignment(n);
 }
 
-ListBoxStyle DropDownList::RowAlignment(int n) const
+Alignment DropDownList::RowAlignment(int n) const
 {
     return m_LB->RowAlignment(n);
 }
@@ -202,7 +194,7 @@ Pt DropDownList::ClientLowerRight() const
     return LowerRight() - Pt(BORDER_THICK, BORDER_THICK);
 }
 
-bool DropDownList::Render()
+void DropDownList::Render()
 {
     // draw beveled rectangle around client area
     Pt ul = UpperLeft(), lr = LowerRight();
@@ -212,14 +204,20 @@ bool DropDownList::Render()
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
 
     // draw ListBox::Row of currently displayed item, if any
-    const Row* current_item = CurrentItem();
-    if (current_item) {
+    if (m_current_item_idx != -1) {
+        Row* current_item = &m_LB->GetRow(m_current_item_idx);
+        Pt offset = ClientUpperLeft() - current_item->UpperLeft();
+        bool visible = current_item->Visible();
+        current_item->OffsetMove(offset);
+        if (!visible)
+            current_item->Show();
         BeginClipping();
-        m_LB->RenderRow(current_item, ul.x + BORDER_THICK, ul.y + BORDER_THICK, m_LB->FirstColShown(), m_LB->LastVisibleCol());
+        App::GetApp()->RenderWindow(current_item);
         EndClipping();
+        current_item->OffsetMove(-offset);
+        if (!visible)
+            current_item->Hide();
     }
-
-    return true;
 }
 
 void DropDownList::LClick(const Pt& pt, Uint32 keys)
@@ -229,7 +227,7 @@ void DropDownList::LClick(const Pt& pt, Uint32 keys)
         const std::set<int>& LB_sels = m_LB->Selections();
         if (!LB_sels.empty()) {
             if (m_LB->m_vscroll)
-                m_LB->m_vscroll->ScrollTo(*LB_sels.begin() * m_LB->RowHeight());
+                m_LB->m_vscroll->ScrollTo(0);
         }
         m_LB->m_first_col_shown = 0;
         picker.Run();
@@ -277,36 +275,29 @@ void DropDownList::Keypress(Key key, Uint32 key_mods)
 void DropDownList::SizeMove(int x1, int y1, int x2, int y2)
 {
     // adjust size to keep correct height based on row height, etc.
-    Wnd::SizeMove(x1, y1, x2, y1 + m_LB->RowHeight() + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
+    Wnd::SizeMove(x1, y1, x2, y1 + Height());
     m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
 }
 
 int DropDownList::Insert(Row* row, int at/* = -1*/)
 {
-    row->height = m_LB->RowHeight();
-    row->sub_rows.clear();
     return m_LB->Insert(row, at);
 }
 
-void DropDownList::Delete(int idx)
+DropDownList::Row* DropDownList::Erase(int idx)
 {
     if (idx == m_current_item_idx)
         m_current_item_idx = -1;
     else if (idx < m_current_item_idx)
         --m_current_item_idx;
 
-    m_LB->Delete(idx);
+    return m_LB->Erase(idx);
 }
 
 void DropDownList::Clear()
 {
     m_current_item_idx = -1;
     m_LB->Clear();
-}
-
-void DropDownList::IndentRow(int n, int i)
-{
-    m_LB->IndentRow(n, i);
 }
 
 DropDownList::Row& DropDownList::GetRow(int n)
@@ -319,7 +310,7 @@ void DropDownList::Select(int row)
     int old_m_current_item_idx = m_current_item_idx;
     if (row <= -1 || m_LB->NumRows() <= row) {
         m_current_item_idx = -1;
-        m_LB->ClearSelection();
+        m_LB->DeselectAll();
     } else {
         m_current_item_idx = row;
         m_LB->SelectRow(m_current_item_idx);
@@ -331,15 +322,10 @@ void DropDownList::Select(int row)
 
 void DropDownList::SetStyle(Uint32 s)
 {
-    s &= ~(LB_NOSEL | LB_QUICKSEL | LB_DRAGDROP | LB_USERDELETE | LB_BROWSEUPDATES);
+    s &= ~(LB_NOSEL | LB_QUICKSEL | LB_USERDELETE | LB_BROWSEUPDATES);
     s |= LB_SINGLESEL;
     m_LB->SetStyle(s);
     m_current_item_idx = -1;
-}
-
-void DropDownList::SetRowHeight(int h)
-{
-    m_LB->SetRowHeight(h);
 }
 
 void DropDownList::SetNumCols(int n)
@@ -368,12 +354,12 @@ void DropDownList::UnLockColWidths()
     m_LB->UnLockColWidths();
 }
 
-void DropDownList::SetColAlignment(int n, ListBoxStyle align) 
+void DropDownList::SetColAlignment(int n, Alignment align) 
 {
     m_LB->SetColAlignment(n, align);
 }
 
-void DropDownList::SetRowAlignment(int n, ListBoxStyle align) 
+void DropDownList::SetRowAlignment(int n, Alignment align) 
 {
     m_LB->SetRowAlignment(n, align);
 }

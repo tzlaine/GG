@@ -103,7 +103,7 @@ Slider::LineStyleType Slider::LineStyle() const
     return m_line_style;
 }
 
-bool Slider::Render()
+void Slider::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -134,7 +134,6 @@ bool Slider::Render()
     m_tab->OffsetMove(UpperLeft());
     m_tab->Render();
     m_tab->OffsetMove(-UpperLeft());
-    return true;
 }
 
 void Slider::LButtonDown(const Pt& pt, Uint32 keys)

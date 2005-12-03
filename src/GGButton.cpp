@@ -42,7 +42,7 @@ Button::Button() :
 {
 }
 
-Button::Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<GG::Font>& font, Clr color, 
+Button::Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
                Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
     TextControl(x, y, w, h, str, font, text_color, TF_NONE, flags),
     m_state(BN_UNPRESSED)
@@ -78,7 +78,7 @@ const SubTexture& Button::RolloverGraphic() const
     return m_rollover_graphic;
 }
 
-bool Button::Render()
+void Button::Render()
 {
     switch (m_state)
     {
@@ -93,7 +93,6 @@ bool Button::Render()
             RenderRollover();
         break;
     }
-    return true;
 }
 
 void Button::LButtonDown(const Pt& pt, Uint32 keys)
@@ -106,6 +105,8 @@ void Button::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 {
     if (!Disabled())
         m_state = BN_PRESSED;
+    if (Dragable())
+        OffsetMove(move);
 }
 
 void Button::LButtonUp(const Pt& pt, Uint32 keys)
@@ -236,7 +237,7 @@ StateButton::StateButton() :
 {
 }
 
-StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<GG::Font>& font, Uint32 text_fmt, 
+StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                          Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/, Uint32 flags/* = CLICKABLE*/) :
     TextControl(x, y, w, h, str, font, text_color, text_fmt, flags),
@@ -283,7 +284,7 @@ StateButton::StateButtonStyle StateButton::Style() const
     return m_style;
 }
 
-bool StateButton::Render()
+void StateButton::Render()
 {
     const Uint8 bevel = 2;
 
@@ -336,8 +337,6 @@ bool StateButton::Render()
     OffsetMove(m_text_x, m_text_y);
     TextControl::Render();
     OffsetMove(-m_text_x, -m_text_y);
-
-    return true;
 }
 
 void StateButton::LClick(const Pt& pt, Uint32 keys)
@@ -504,10 +503,8 @@ int RadioButtonGroup::CheckedButton() const
     return m_checked_button;
 }
 
-bool RadioButtonGroup::Render()
-{
-    return true;
-}
+void RadioButtonGroup::Render()
+{}
 
 void RadioButtonGroup::SetCheck(int idx)
 {

@@ -127,7 +127,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render();
+    virtual void Render();
 
     /** sets the text to \a str; may resize the window.  If the private member m_fit_to_text is true (i.e. if the second 
         ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 

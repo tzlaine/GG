@@ -82,7 +82,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render();
+    virtual void Render();
     virtual void Keypress(Key key, Uint32 key_mods);
 
     void SetButtonColor(Clr color);  ///< sets the color used to render the dialog's buttons

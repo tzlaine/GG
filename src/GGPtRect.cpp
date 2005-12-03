@@ -26,6 +26,8 @@
 
 #include "GGPtRect.h"
 
+#include <iostream>
+
 using namespace GG;
 
 ////////////////////////////////////////////////
@@ -42,6 +44,13 @@ Pt::Pt(int x_, int y_) :
     y(y_)
 {
 }
+
+std::ostream& GG::operator<<(std::ostream& os, const Pt& pt)
+{
+    os << "(" << pt.x << ", " << pt.y << ")";
+    return os;
+}
+
 
 ////////////////////////////////////////////////
 // GG::Rect
@@ -67,4 +76,10 @@ Rect::Rect(int x1, int y1, int x2, int y2) :
 bool Rect::Contains(const Pt& pt) const 
 {
     return (ul <= pt && pt < lr);
+}
+
+std::ostream& GG::operator<<(std::ostream& os, const Rect& rect)
+{
+    os << "[" << rect.ul << " - " << rect.lr << "]";
+    return os;
 }

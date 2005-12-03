@@ -135,7 +135,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool Render();
+    virtual void Render();
 
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to
         contain the maximum possible number of frames based on its size and the frame size.  \warning Calling code

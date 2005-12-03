@@ -254,7 +254,7 @@ Uint32 DynamicGraphic::Style() const
     return m_style;
 }
 
-bool DynamicGraphic::Render()
+void DynamicGraphic::Render()
 {
     if (0 <= m_curr_texture && m_curr_texture < static_cast<int>(m_textures.size()) &&
         0 <= m_curr_subtexture && m_curr_subtexture < m_textures[m_curr_texture].frames) {
@@ -352,7 +352,6 @@ bool DynamicGraphic::Render()
         if (send_stopped_signal)
             StoppedSignal(m_curr_frame);
     }
-    return true;
 }
 
 void DynamicGraphic::AddFrames(const Texture* texture, int frames/* = -1*/)

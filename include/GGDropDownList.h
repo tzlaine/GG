@@ -47,9 +47,9 @@ namespace GG {
     slightly different meaning.  A cell-margin and the thickness of the border around the DropDownList are added to
     "row_ht" to determine the actual height of the control.  All subequent resizing calls will lock the height of the
     control to this calculated height.  The "drop_ht" parameter determines the vertical size of the drop-down list.
-    Most of the ListBox interface is duplicated in DropDownList.  Though you can still set the alignment, indentation,
-    etc. of individual rows, as in ListBox, the currently-selected row will have the same alignment, indentation,
-    etc. when displayed in the control in its unopened state.  This may look quite ugly.*/
+    Most of the ListBox interface is duplicated in DropDownList.  Though you can still set the alignment, etc. of
+    individual rows, as in ListBox, the currently-selected row will have the same alignment, etc. when displayed in the
+    control in its unopened state.  This may look quite ugly. */
 class GG_API DropDownList : public Control
 {
 public:
@@ -89,9 +89,6 @@ public:
     /** returns the style flags of the list \see GG::ListBoxStyle */
     Uint32         Style() const;
 
-    /** returns the default row height. \note Unlike a ListBox, every row has the same height. */
-    int            RowHeight() const;
-
     int            NumRows() const;          ///< returns the total number of items in the list
     int            NumCols() const;          ///< returns the total number of columns in each list item
 
@@ -100,8 +97,8 @@ public:
     int            SortCol() const;
 
     int            ColWidth(int n) const;     ///< returns the width of column \a n in pixels; not range-checked
-    ListBoxStyle   ColAlignment(int n) const; ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    ListBoxStyle   RowAlignment(int n) const; ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    Alignment      ColAlignment(int n) const; ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
+    Alignment      RowAlignment(int n) const; ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
 
     virtual Pt     ClientUpperLeft() const;
     virtual Pt     ClientLowerRight() const;
@@ -110,16 +107,15 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   Render();
+    virtual void   Render();
     virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   Keypress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
     int            Insert(Row* row, int at = -1); ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point.  This Row becomes the property of the DropDownList and should not be deleted or inserted into any other DropDownLists
-    void           Delete(int idx);               ///< removes the row at index \a idx from the list
+    Row*           Erase(int idx);                ///< removes and returns the row at index \a idx from the list, or 0 if no such row exists
     void           Clear();                       ///< empties the list
-    void           IndentRow(int n, int i);       ///< sets the indentation of the row at index \a n to \a i; not range-checked
     Row&           GetRow(int n);                 ///< returns a reference to the Row at row index \a n; not range-checked
 
     void           Select(int row);               ///< selects row-item \a row in the list
@@ -127,7 +123,6 @@ public:
     /** sets the style flags for the list to \a s (invalidates currently selected item). \see GG::ListBoxStyle */
     void           SetStyle(Uint32 s);
 
-    void           SetRowHeight(int h);       ///< sets the row height
     void           SetNumCols(int n);         ///< sets the number of columns in each list item to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);         ///< sets the index of the column used to sort rows when sorting is enabled (invalidates currently selected item); not range-checked
     void           SetColWidth(int n, int w); ///< sets the width of column \n to \a w; not range-checked
@@ -139,8 +134,8 @@ public:
     /** allows the number of columns to be determined by the first row added to an empty ListBox */
     void           UnLockColWidths();
 
-    void           SetColAlignment(int n, ListBoxStyle align); ///< sets the alignment of column \a n to \a align; not range-checked
-    void           SetRowAlignment(int n, ListBoxStyle align); ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
+    void           SetColAlignment(int n, Alignment align); ///< sets the alignment of column \a n to \a align; not range-checked
+    void           SetRowAlignment(int n, Alignment align); ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}

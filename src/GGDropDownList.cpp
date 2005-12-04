@@ -87,7 +87,9 @@ namespace {
 // GG::DropDownList
 ////////////////////////////////////////////////
 DropDownList::DropDownList() :
-    Control()
+    Control(),
+    m_current_item_idx(-1),
+    m_LB(0)
 {
 }
 

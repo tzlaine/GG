@@ -37,6 +37,10 @@ using namespace GG;
 ////////////////////////////////////////////////
 TextControl::TextControl() :
     Control(),
+    m_format(0),
+    m_clip_text(false),
+    m_set_min_size(false),
+    m_fit_to_text(false),
     m_dirty_load(false)
 {
 }

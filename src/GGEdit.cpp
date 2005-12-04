@@ -40,6 +40,7 @@ const int Edit::PIXEL_MARGIN = 5;
 
 Edit::Edit() :
     TextControl(),
+    m_first_char_shown(0),
     m_recently_edited(false)
 {
 }

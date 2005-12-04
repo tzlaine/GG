@@ -34,7 +34,15 @@
 using namespace GG;
 
 Slider::Slider() :
-    Control()
+    Control(),
+    m_posn(0),
+    m_range_min(0),
+    m_range_max(99),
+    m_orientation(VERTICAL),
+    m_line_width(5),
+    m_tab_width(5),
+    m_line_style(RAISED),
+    m_tab_drag_offset(-1)
 {
 }
 

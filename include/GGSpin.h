@@ -226,8 +226,18 @@ private:
 
 // template implementations
 template<class T>
-Spin<T>::Spin() :
-    Control()
+Spin<T>::Spin() : 
+    Control(),
+    m_value(),
+    m_step_size(),
+    m_min_value(),
+    m_max_value(),
+    m_editable(false),
+    m_edit(0),
+    m_up_bn(0),
+    m_dn_bn(0),
+    m_initial_depressed_area(SR_NONE),
+    m_depressed_area(SR_NONE)
 {
 }
 
@@ -241,6 +251,7 @@ Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool ed
     m_min_value(min),
     m_max_value(max),
     m_editable(edits),
+    m_edit(0),
     m_up_bn(up),
     m_dn_bn(down),
     m_initial_depressed_area(SR_NONE),
@@ -259,6 +270,7 @@ Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool ed
     m_min_value(min),
     m_max_value(max),
     m_editable(edits),
+    m_edit(0),
     m_up_bn(up),
     m_dn_bn(down),
     m_initial_depressed_area(SR_NONE),
@@ -277,6 +289,7 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_min_value(min),
     m_max_value(max),
     m_editable(edits),
+    m_edit(0),
     m_up_bn(up),
     m_dn_bn(down),
     m_initial_depressed_area(SR_NONE),
@@ -295,6 +308,7 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_min_value(min),
     m_max_value(max),
     m_editable(edits),
+    m_edit(0),
     m_up_bn(up),
     m_dn_bn(down),
     m_initial_depressed_area(SR_NONE),

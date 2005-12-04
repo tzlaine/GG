@@ -38,7 +38,8 @@ using namespace GG;
 // GG::Button
 ////////////////////////////////////////////////
 Button::Button() :
-    TextControl()
+    TextControl(),
+    m_state(BN_UNPRESSED)
 {
 }
 
@@ -233,7 +234,13 @@ void Button::RenderDefault()
 // GG::StateButton
 ////////////////////////////////////////////////
 StateButton::StateButton() :
-    TextControl()
+    TextControl(),
+    m_checked(false),
+    m_style(SBSTYLE_3D_XBOX),
+    m_button_x(0),
+    m_button_y(0),
+    m_text_x(0),
+    m_text_y(0)
 {
 }
 
@@ -483,7 +490,8 @@ void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
 
 // RadioButtonGroup
 RadioButtonGroup::RadioButtonGroup() :
-    Control()
+    Control(),
+    m_checked_button(-1)
 {
 }
 

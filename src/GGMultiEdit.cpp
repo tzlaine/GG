@@ -51,7 +51,12 @@ namespace {
 const int MultiEdit::SCROLL_WIDTH = 14;
 
 MultiEdit::MultiEdit() :
-    Edit()
+    Edit(),
+    m_first_col_shown(0),
+    m_first_row_shown(0),
+    m_max_lines_history(0),
+    m_vscroll(0),
+    m_hscroll(0)
 {
 }
 

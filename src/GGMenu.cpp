@@ -77,7 +77,8 @@ MenuItem::~MenuItem()
 // GG::MenuBar
 ////////////////////////////////////////////////
 MenuBar::MenuBar() :
-    Control()
+    Control(),
+    m_caret(-1)
 {
 }
 

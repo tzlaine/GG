@@ -262,7 +262,24 @@ Control* ListBox::Row::CreateControl(const SubTexture& st)
 const int ListBox::BORDER_THICK = 2;
 
 ListBox::ListBox() :
-    Control()
+    Control(),
+    m_vscroll(0),
+    m_hscroll(0),
+    m_caret(-1),
+    m_old_sel_row(-1),
+    m_old_rdown_row(-1),
+    m_lclick_row(-1),
+    m_rclick_row(-1),
+    m_last_row_browsed(-1),
+    m_suppress_erase_signal(false),
+    m_first_row_shown(0),
+    m_first_col_shown(0),
+    m_cell_margin(2),
+    m_style(0),
+    m_header_row(0),
+    m_keep_col_widths(false),
+    m_clip_cells(false),
+    m_sort_col(0)
 {}
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,

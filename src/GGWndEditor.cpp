@@ -94,7 +94,8 @@ WndEditor::WndEditor(int h, const std::string& font_filename, int pts) :
     m_wnd(0),
     m_list_box(new ListBox(0, 0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
     m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_label_font(App::GetApp()->GetFont(font_filename, pts + 4))
+    m_label_font(App::GetApp()->GetFont(font_filename, pts + 4)),
+    m_current_flags(0)
 {
     Init();
 }
@@ -104,7 +105,8 @@ WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
     m_wnd(0),
     m_list_box(new ListBox(0, 0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
     m_font(font),
-    m_label_font(App::GetApp()->GetFont(font->FontName(), font->PointSize() + 4))
+    m_label_font(App::GetApp()->GetFont(font->FontName(), font->PointSize() + 4)),
+    m_current_flags(0)
 {
     Init();
 }

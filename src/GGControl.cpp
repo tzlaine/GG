@@ -34,7 +34,8 @@ using namespace GG;
 // GG::Control
 ////////////////////////////////////////////////
 Control::Control() :
-    Wnd ()
+    Wnd (),
+    m_disabled(false)
 {
 }
 

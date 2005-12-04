@@ -44,21 +44,38 @@ using namespace GG;
 
 // RowColParams
 Layout::RowColParams::RowColParams() :
-    stretch(0), min(0), effective_min(0)
+    stretch(0),
+    min(0),
+    effective_min(0),
+    current_origin(0),
+    current_width(0)
 {}
 
 // WndPosition
 Layout::WndPosition::WndPosition() :
-    first_row(0), first_column(0), last_row(0), last_column(0), alignment(0)
+    first_row(0),
+    first_column(0),
+    last_row(0),
+    last_column(0),
+    alignment(0)
 {}
 
 Layout::WndPosition::WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_size_) :
-    first_row(first_row_), first_column(first_column_), last_row(last_row_), last_column(last_column_), alignment(alignment_), original_size(original_size_)
+    first_row(first_row_),
+    first_column(first_column_),
+    last_row(last_row_),
+    last_column(last_column_),
+    alignment(alignment_),
+    original_size(original_size_)
 {}
 
 // Layout
 Layout::Layout() :
-    Wnd()
+    Wnd(),
+    m_border_margin(0),
+    m_cell_margin(0),
+    m_ignore_child_resize(false),
+    m_ignore_parent_resize(false)
 {
 }
 

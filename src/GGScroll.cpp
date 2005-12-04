@@ -42,7 +42,15 @@ namespace {
 ////////////////////////////////////////////////
 Scroll::Scroll() :
     Control(),
-    m_orientation(VERTICAL)
+    m_orientation(VERTICAL),
+    m_posn(0),
+    m_range_min(0),
+    m_range_max(99),
+    m_line_sz(5),
+    m_page_sz(25),
+    m_tab_drag_offset(-1), 
+    m_initial_depressed_area(SBR_NONE),
+    m_depressed_area(SBR_NONE)
 {
 }
 

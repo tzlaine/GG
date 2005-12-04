@@ -45,7 +45,18 @@ DynamicGraphic::DynamicGraphic() :
     Control(),
     m_margin(0),
     m_frame_width(0),
-    m_frame_height(0)
+    m_frame_height(0),
+    m_FPS(DEFAULT_FPS),
+    m_playing(false),
+    m_looping(true),
+    m_curr_texture(0),
+    m_curr_subtexture(0),
+    m_frames(0),
+    m_curr_frame(0),
+    m_first_frame_time(-1),
+    m_last_frame_time(-1),
+    m_first_frame_idx(0),
+    m_style(0)
 {
 }
 

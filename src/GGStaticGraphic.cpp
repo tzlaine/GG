@@ -35,7 +35,8 @@ using namespace GG;
 // GG::StaticGraphic
 ////////////////////////////////////////////////
 StaticGraphic::StaticGraphic() :
-    Control()
+    Control(),
+    m_style(0)
 {
 }
 

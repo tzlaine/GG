@@ -53,7 +53,10 @@ void BrowseInfoWnd::Update(int mode, const Wnd* target)
 // GG::TextBoxBrowseInfoWnd
 ////////////////////////////////////////////////
 TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd() :
-    BrowseInfoWnd()
+    BrowseInfoWnd(),
+    m_text_from_target(true),
+    m_border_width(1),
+    m_text_control(0)
 {}
 
 TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,

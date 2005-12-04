@@ -89,12 +89,18 @@ namespace {
 // class GG::Texture
 ///////////////////////////////////////
 Texture::Texture() :
+    m_bytes_pp(0),
+    m_width(0),
+    m_height(0),
     m_wrap_s(GL_REPEAT),
     m_wrap_t(GL_REPEAT),
     m_min_filter(GL_NEAREST_MIPMAP_LINEAR),
     m_mag_filter(GL_LINEAR),
+    m_mipmaps(false),
     m_opengl_id(0),
-    m_tex_coords()
+    m_tex_coords(),
+    m_default_width(0),
+    m_default_height(0)
 {
     Clear();
 }
@@ -463,7 +469,8 @@ SubTexture::SubTexture() :
 SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
     m_texture(boost::shared_ptr<const Texture>(texture)),
     m_width(x2 - x1),
-    m_height(y2 - y1)
+    m_height(y2 - y1),
+    m_tex_coords()
 {
     if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");
@@ -477,7 +484,8 @@ SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
 SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
     m_texture(texture),
     m_width(x2 - x1),
-    m_height(y2 - y1)
+    m_height(y2 - y1),
+    m_tex_coords()
 {
     if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");

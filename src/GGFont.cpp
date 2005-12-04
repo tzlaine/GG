@@ -159,6 +159,8 @@ namespace {
 
     const double ITALICS_SLANT_ANGLE = 12; // degrees
     const double ITALICS_FACTOR = 1.0 / tan((90 - ITALICS_SLANT_ANGLE) * 3.1415926 / 180.0); // factor used to shear glyphs ITALICS_SLANT_ANGLE degrees CW from straight up
+
+    const int FT_MAGIC_NUMBER = 4; // taken from the ftview FreeType demo (I have no idea....)
 }
 
 
@@ -789,12 +791,12 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
 
     // Get the scalable font metrics for this font
     scale = face->size->metrics.y_scale;
-    m_ascent  = int(std::ceil(FT_MulFix(face->bbox.yMax, scale) / 64.0)); // convert from fixed-point 26.6 format
-    m_descent = int(std::ceil(FT_MulFix(face->bbox.yMin, scale) / 64.0));
+    m_ascent  = static_cast<int>(std::ceil(FT_MulFix(face->bbox.yMax, scale) / 64.0)); // convert from fixed-point 26.6 format
+    m_descent = static_cast<int>(std::floor(FT_MulFix(face->bbox.yMin, scale) / 64.0));
     m_height  = m_ascent - m_descent + 1;
-    m_lineskip = int(std::ceil(FT_MulFix(face->height, scale) / 64.0));
+    m_lineskip = static_cast<int>(std::ceil(FT_MulFix(face->height, scale) / 64.0));
     // underline info
-    m_underline_offset = std::ceil(FT_MulFix(face->underline_position, scale) / 64.0);
+    m_underline_offset = std::floor(FT_MulFix(face->underline_position, scale) / 64.0);
     m_underline_height = std::ceil(FT_MulFix(face->underline_thickness, scale) / 64.0);
     if (m_underline_height < 1.0) {
         m_underline_height = 1.0;
@@ -888,7 +890,7 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
                 Uint8*  src_start = glyph_bitmap.buffer;
                 Uint16* dst_start = buffer_vec.back() + y * BUF_WIDTH + x;
 
-                int y_offset = m_height - 1 + m_descent - face->glyph->bitmap_top;
+                int y_offset = m_height - 1 + m_descent - face->glyph->bitmap_top + FT_MAGIC_NUMBER;
 
                 for (int row = 0; row < glyph_bitmap.rows; ++row) {
                     Uint8*  src = src_start + row * glyph_bitmap.pitch;
@@ -904,7 +906,7 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
 
                 // record info on how to find and use this glyph later
                 temp_glyph_data[c] = TempGlyphData(static_cast<int>(buffer_vec.size()) - 1,
-                                                   x, y, x + glyph_bitmap.width, y + m_height,
+                                                   x, y + FT_MAGIC_NUMBER, x + glyph_bitmap.width, y + m_height + FT_MAGIC_NUMBER,
                                                    static_cast<int>((std::ceil(face->glyph->metrics.horiBearingX / 64.0))), // convert from 26.6 fixed point format and round up
                                                    static_cast<int>((std::ceil(face->glyph->metrics.horiAdvance / 64.0)))); // convert from 26.6 fixed point format and round up
 

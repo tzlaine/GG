@@ -319,7 +319,7 @@ void ValuePicker::SetValueFromPt(Pt pt)
 
 // ColorDlg::ColorButton
 ColorDlg::ColorButton::ColorButton(const Clr& color) :
-    Button(0, 0, 1, 1, "", "", 1, color),
+    Button(0, 0, 1, 1, "", boost::shared_ptr<Font>(), color),
     m_represented_color(CLR_BLACK)
 {}
 
@@ -442,31 +442,6 @@ ColorDlg::ColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
     Init(font);
 }
 
-ColorDlg::ColorDlg(int x, int y, const std::string& font_filename, int pts,
-                   Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) :
-    Wnd(x, y, 315, 300, Wnd::CLICKABLE | Wnd::DRAGABLE | Wnd::MODAL),
-    m_original_color(CLR_ZERO),
-    m_original_color_specified(false),
-    m_color_was_picked(false),
-    m_hue_saturation_picker(0),
-    m_value_picker(0),
-    m_pickers_layout(0),
-    m_new_color_square(0),
-    m_old_color_square(0),
-    m_color_squares_layout(0),
-    m_color_buttons_layout(0),
-    m_current_color_button(-1),
-    m_ignore_sliders(false),
-    m_ok(0),
-    m_cancel(0),
-    m_sliders_ok_cancel_layout(0),
-    m_color(dialog_color),
-    m_border_color(border_color),
-    m_text_color(text_color)
-{
-    Init(App::GetApp()->GetFont(font_filename, pts));
-}
-
 ColorDlg::ColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Font>& font,
                    Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) :
     Wnd(x, y, 315, 300, Wnd::CLICKABLE | Wnd::DRAGABLE | Wnd::MODAL),
@@ -490,31 +465,6 @@ ColorDlg::ColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Fon
     m_text_color(text_color)
 {
     Init(font);
-}
-
-ColorDlg::ColorDlg(int x, int y, Clr original_color, const std::string& font_filename, int pts,
-                   Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) :
-    Wnd(x, y, 315, 300, Wnd::CLICKABLE | Wnd::DRAGABLE | Wnd::MODAL),
-    m_original_color(original_color),
-    m_original_color_specified(true),
-    m_color_was_picked(false),
-    m_hue_saturation_picker(0),
-    m_value_picker(0),
-    m_pickers_layout(0),
-    m_new_color_square(0),
-    m_old_color_square(0),
-    m_color_squares_layout(0),
-    m_color_buttons_layout(0),
-    m_current_color_button(-1),
-    m_ignore_sliders(false),
-    m_ok(0),
-    m_cancel(0),
-    m_sliders_ok_cancel_layout(0),
-    m_color(dialog_color),
-    m_border_color(border_color),
-    m_text_color(text_color)
-{
-    Init(App::GetApp()->GetFont(font_filename, pts));
 }
 
 bool ColorDlg::ColorWasSelected() const
@@ -685,7 +635,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
     Connect(m_hue_saturation_picker->ChangedSignal, &ColorDlg::HueSaturationPickerChanged, this);
     Connect(m_value_picker->ChangedSignal, &ColorDlg::ValuePickerChanged, this);
 
-    Layout* master_layout = new Layout(3, 2, 5, 5);
+    Layout* master_layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 3, 2, 5, 5);
     master_layout->SetColumnStretch(0, 1.25);
     master_layout->SetColumnStretch(1, 1);
     master_layout->SetRowStretch(0, 1.25);

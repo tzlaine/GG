@@ -52,8 +52,6 @@ class Button;
 class GG_API Scroll : public Control
 {
 public:
-    using Wnd::SizeMove;
-
     /// the orientation of the scrollbar must be one of these two values
     enum Orientation {
         VERTICAL,
@@ -82,7 +80,8 @@ public:
     /** \name Structors */ //@{
     /** ctor. \warning Calling code <b>must not</b> delete the buttons passed to this ctro, if any.  They become the 
         property of shared_ptrs inside the Scroll.*/
-    Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Button* decr = 0, Button* incr = 0, Button* tab = 0, Uint32 flags = CLICKABLE);
+    Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
+           Button* decr = 0, Button* incr = 0, Button* tab = 0, Uint32 flags = CLICKABLE);
     //@}
 
     /** \name Accessors */ //@{
@@ -107,7 +106,7 @@ public:
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the conrol, then resizes the buttons and tab as needed
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
     virtual void   Disable(bool b = true);
 
     void           SetInteriorColor(Clr c); ///< sets the color painted into the client area of the control

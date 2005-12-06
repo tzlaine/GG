@@ -38,8 +38,8 @@ ThreeButtonDlg::ThreeButtonDlg() :
 {
 }
 
-ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const std::string& font_filename,
-                               int pts, Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/,
+ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
+                               Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/,
                                int buttons/* = 3*/, Button* zero/* = 0*/, Button* one/* = 0*/, Button* two/* = 0*/) :
     Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
@@ -53,10 +53,10 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& ms
     m_button_1(one),
     m_button_2(two)
 {
-    Init(msg, font_filename, pts, buttons);
+    Init(msg, font, buttons);
 }
 
-ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const std::string& font_filename, int pts,
+ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/, int buttons/* = 3*/,
                                Button* zero/* = 0*/, Button* one/* = 0*/, Button* two/* = 0*/) :
     Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
@@ -71,11 +71,11 @@ ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const std::
     m_button_1(one),
     m_button_2(two)
 {
-    Init(msg, font_filename, pts, buttons);
+    Init(msg, font, buttons);
 }
 
-ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const std::string& font_filename,
-                               int pts, Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
+ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
+                               Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const std::string& zero, const std::string& one/* = ""*/,
                                const std::string& two/* = ""*/) :
     Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
@@ -90,10 +90,10 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& ms
     m_button_1(0),
     m_button_2(0)
 {
-    Init(msg, font_filename, pts, buttons, zero, one, two);
+    Init(msg, font, buttons, zero, one, two);
 }
 
-ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const std::string& font_filename, int pts,
+ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const std::string& zero, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
     Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
@@ -108,7 +108,7 @@ ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const std::
     m_button_1(0),
     m_button_2(0)
 {
-    Init(msg, font_filename, pts, buttons, zero, one, two);
+    Init(msg, font, buttons, zero, one, two);
 }
 
 Clr ThreeButtonDlg::ButtonColor() const
@@ -192,7 +192,7 @@ int ThreeButtonDlg::NumButtons() const
     return retval;
 }
 
-void ThreeButtonDlg::Init(const std::string& msg, const std::string& font_filename, int pts, int buttons,
+void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>& font, int buttons,
                           const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/)
 {
     if (buttons < 1)
@@ -202,9 +202,9 @@ void ThreeButtonDlg::Init(const std::string& msg, const std::string& font_filena
 
     const int SPACING = 10;
     const int BUTTON_WIDTH = (Width() - (buttons + 1) * SPACING) / buttons;
-    const int BUTTON_HEIGHT = pts + 8;
+    const int BUTTON_HEIGHT = font->PointSize() + 8;
 
-    AttachChild(new TextControl(0, 0, Width(), Height() - BUTTON_HEIGHT - 2 * SPACING, msg, font_filename, pts, m_text_color,
+    AttachChild(new TextControl(0, 0, Width(), Height() - BUTTON_HEIGHT - 2 * SPACING, msg, font, m_text_color,
                                 TF_CENTER | TF_VCENTER | TF_WORDBREAK));
 
     if (!m_button_0) {
@@ -212,21 +212,21 @@ void ThreeButtonDlg::Init(const std::string& msg, const std::string& font_filena
                                 Height() - BUTTON_HEIGHT - SPACING,
                                 BUTTON_WIDTH, BUTTON_HEIGHT,
                                 (zero == "" ? (buttons < 3 ? "Ok" : "Yes") : zero),
-                                        font_filename, pts, m_button_color, m_text_color);
+                                        font, m_button_color, m_text_color);
     }
     if (!m_button_1 && 2 <= buttons) {
         m_button_1 = new Button(SPACING + (BUTTON_WIDTH + SPACING) * 1,
                                 Height() - BUTTON_HEIGHT - SPACING,
                                 BUTTON_WIDTH, BUTTON_HEIGHT,
                                 (one == "" ? (buttons < 3 ? "Cancel" : "No") : one),
-                                        font_filename, pts, m_button_color, m_text_color);
+                                        font, m_button_color, m_text_color);
     }
     if (!m_button_2 && 3 <= buttons) {
         m_button_2 = new Button(SPACING + (BUTTON_WIDTH + SPACING) * 2,
                                 Height() - BUTTON_HEIGHT - SPACING,
                                 BUTTON_WIDTH, BUTTON_HEIGHT,
                                 (two == "" ? "Cancel" : two),
-                                font_filename, pts, m_button_color, m_text_color);
+                                font, m_button_color, m_text_color);
     }
 
     AttachChild(m_button_0);

@@ -89,17 +89,6 @@ namespace GG { namespace detail {
 ////////////////////////////////////////////////
 // GG::WndEditor
 ////////////////////////////////////////////////
-WndEditor::WndEditor(int h, const std::string& font_filename, int pts) :
-    Wnd(0, 0, WND_EDITOR_WIDTH, h),
-    m_wnd(0),
-    m_list_box(new ListBox(0, 0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_label_font(App::GetApp()->GetFont(font_filename, pts + 4)),
-    m_current_flags(0)
-{
-    Init();
-}
-
 WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
     Wnd(0, 0, WND_EDITOR_WIDTH, h),
     m_wnd(0),
@@ -179,8 +168,8 @@ AttributeRow<Pt>::AttributeRow(const std::string& name, Pt& value, const boost::
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     MultiControlWrapper* edits = new MultiControlWrapper();
-    m_x_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_y_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_x_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_y_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     *m_x_edit << m_value.x;
     *m_y_edit << m_value.y;
     edits->Add(m_x_edit);
@@ -202,10 +191,10 @@ AttributeRow<Clr>::AttributeRow(const std::string& name, Clr& value, const boost
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     MultiControlWrapper* edits = new MultiControlWrapper();
-    m_red_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_green_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_blue_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_alpha_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_red_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_green_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_blue_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_alpha_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     *m_red_edit << static_cast<int>(m_value.r);
     *m_green_edit << static_cast<int>(m_value.g);
     *m_blue_edit << static_cast<int>(m_value.b);
@@ -229,7 +218,8 @@ AttributeRow<bool>::AttributeRow(const std::string& name, bool& value, const boo
     m_bool_drop_list(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_bool_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * 2 + 4, CLR_GRAY, CLR_WHITE);
+    m_bool_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * 2 + 4, CLR_GRAY);
+    m_bool_drop_list->SetInteriorColor(CLR_WHITE);
     m_bool_drop_list->SetStyle(LB_NOSORT);
     Row* row = new ListBox::Row();
     row->push_back(CreateControl("True", font, CLR_BLACK));
@@ -258,8 +248,8 @@ AttributeRow<boost::shared_ptr<Font> >::AttributeRow(const std::string& name, bo
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     MultiControlWrapper* edits = new MultiControlWrapper();
-    m_filename_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_points_edit = new Edit(0, 0, 1, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_filename_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_points_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     *m_filename_edit << m_value->FontName();
     *m_points_edit << m_value->PointSize();
     edits->Add(m_filename_edit);

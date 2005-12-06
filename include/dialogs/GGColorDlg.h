@@ -143,15 +143,7 @@ public:
              Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
 
     /** ctor */
-    ColorDlg(int x, int y, const std::string& font_filename, int pts,
-             Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
-
-    /** ctor */
     ColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Font>& font,
-             Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
-
-    /** ctor */
-    ColorDlg(int x, int y, Clr original_color, const std::string& font_filename, int pts,
              Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
     //@}
 

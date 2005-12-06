@@ -466,21 +466,6 @@ SubTexture::SubTexture() :
 {
 }
 
-SubTexture::SubTexture(const Texture* texture, int x1, int y1, int x2, int y2) :
-    m_texture(boost::shared_ptr<const Texture>(texture)),
-    m_width(x2 - x1),
-    m_height(y2 - y1),
-    m_tex_coords()
-{
-    if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
-    if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");
-
-    m_tex_coords[0] = static_cast<double>(x1) / texture->DefaultWidth();
-    m_tex_coords[1] = static_cast<double>(y1) / texture->DefaultHeight();
-    m_tex_coords[2] = static_cast<double>(x2) / texture->DefaultWidth();
-    m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
-}
-
 SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
     m_texture(texture),
     m_width(x2 - x1),

@@ -76,8 +76,6 @@ class SubTexture;
 class GG_API ListBox : public Control
 {
 public:
-    using Wnd::SizeMove;
-
     /** This is a single item in a listbox.  A Row is primarily a container for Controls.  Each cell in a Row contains
         pointer to a Control-derived object.  Each such Control can be connected to arbitrary functionality using
         signals and slots.  During dragging and dropping, the data type associated with a Row (DragDropDataType())
@@ -180,9 +178,6 @@ public:
     /** basic ctor */
     ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER);
 
-    /** ctor that allows the specification of column widths */
-    ListBox(int x, int y, int w, int h, Clr color, const std::vector<int>& col_widths, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER);
-
     virtual ~ListBox(); ///< virtual dtor
     //@}
 
@@ -246,7 +241,7 @@ public:
     virtual void   Keypress(Key key, Uint32 key_mods);
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, then resizes the scrollbars as needed
+    virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, then resizes the scrollbars as needed
 
     int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This Row becomes the property of the ListBox.
     Row*           Erase(int idx);                        ///< removes and returns the row at index \a idx from the ListBox, or 0 if no such row exists

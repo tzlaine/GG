@@ -47,8 +47,6 @@ class Button;
 class GG_API Slider : public Control
 {
 public:
-    using Wnd::SizeMove;
-
     /// the orientation of the slider must be one of these two values
     enum Orientation {
         VERTICAL,
@@ -98,7 +96,7 @@ public:
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   Keypress(Key key, Uint32 key_mods);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< sizes the control, then resizes the tab as needed
+    virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< sizes the control, then resizes the tab as needed
     virtual void   Disable(bool b = true);
 
     void           SizeSlider(int min, int max); ///< sets the logical range of the control; \a min must not equal \a max

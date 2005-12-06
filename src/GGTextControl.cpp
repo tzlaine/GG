@@ -60,21 +60,6 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     SetText(str);
 }
 
-TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color/* = CLR_BLACK*/,
-                         Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
-    Control(x, y, w, h, flags),
-    m_format(text_fmt),
-    m_text_color(color),
-    m_clip_text(false),
-    m_set_min_size(false),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_fit_to_text(false),
-    m_dirty_load(false)
-{
-    ValidateFormat();
-    SetText(str);
-}
-
 TextControl::TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
                          Uint32 flags/* = 0*/) :
     Control(x, y, 0, 0, flags),
@@ -83,21 +68,6 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
     m_clip_text(false),
     m_set_min_size(false),
     m_font(font),
-    m_fit_to_text(true),
-    m_dirty_load(false)
-{
-    ValidateFormat();
-    SetText(str);
-}
-
-TextControl::TextControl(int x, int y, const std::string& str, const std::string& font_filename, int pts, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
-                         Uint32 flags/* = 0*/) :
-    Control(x, y, 0, 0, flags),
-    m_format(text_fmt),
-    m_text_color(color),
-    m_clip_text(false),
-    m_set_min_size(false),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_fit_to_text(true),
     m_dirty_load(false)
 {
@@ -187,9 +157,9 @@ void TextControl::SetText(const char* str)
     SetText(std::string(str));
 }
 
-void TextControl::SizeMove(int x1, int y1, int x2, int y2)
+void TextControl::SizeMove(const Pt& ul, const Pt& lr)
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     RecomputeTextBounds();
 }
 
@@ -319,8 +289,8 @@ void TextControl::AdjustMinimumSize()
     if (m_set_min_size) {
         Pt text_sz = TextLowerRight() - TextUpperLeft();
         Pt curent_min = MinSize();
-        SetMinSize(std::max(text_sz.x, curent_min.x),
-                   std::max(text_sz.y, curent_min.y));
+        SetMinSize(Pt(std::max(text_sz.x, curent_min.x),
+                      std::max(text_sz.y, curent_min.y)));
     }
 }
 

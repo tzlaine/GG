@@ -89,8 +89,6 @@ template <class T>
 class Spin : public Control
 {
 public:
-    using Wnd::SizeMove;
-
     /** \name Signal Types */ //@{
     typedef typename boost::signal<void (T)> ValueChangedSignalType;  ///< emitted whenever the value of the Spin has changed
     //@}
@@ -100,23 +98,8 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    /** ctor*/
-    Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-         Uint32 flags = CLICKABLE | DRAG_KEEPER);
-
-    /** ctor*/
-    Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
-         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-         Uint32 flags = CLICKABLE | DRAG_KEEPER);
-
     /** ctor that does not required height. Height is determined from the font and point size used.*/
     Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-         Uint32 flags = CLICKABLE | DRAG_KEEPER);
-
-    /** ctor that does not required height. Height is determined from the font and point size used.*/
-    Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
          Uint32 flags = CLICKABLE | DRAG_KEEPER);
 
@@ -148,7 +131,7 @@ public:
     virtual void MouseLeave(const Pt& pt, Uint32 keys);
     virtual void Keypress(Key key, Uint32 key_mods);
 
-    virtual void SizeMove(int x1, int y1, int x2, int y2);
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
 
     virtual void Disable(bool b = true);
 
@@ -234,49 +217,11 @@ Spin<T>::Spin() :
     m_max_value(),
     m_editable(false),
     m_edit(0),
-    m_up_bn(0),
-    m_dn_bn(0),
+    m_up_bn(),
+    m_dn_bn(),
     m_initial_depressed_area(SR_NONE),
     m_depressed_area(SR_NONE)
 {
-}
-
-template<class T>
-Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
-              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-    Control(x, y, w, h),
-    m_value(value),
-    m_step_size(step),
-    m_min_value(min),
-    m_max_value(max),
-    m_editable(edits),
-    m_edit(0),
-    m_up_bn(up),
-    m_dn_bn(down),
-    m_initial_depressed_area(SR_NONE),
-    m_depressed_area(SR_NONE)
-{
-    Init(font, color, text_color, interior, flags);
-}
-
-template<class T>
-Spin<T>::Spin(int x, int y, int w, int h, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
-              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
-              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-    Control(x, y, w, h),
-    m_value(value),
-    m_step_size(step),
-    m_min_value(min),
-    m_max_value(max),
-    m_editable(edits),
-    m_edit(0),
-    m_up_bn(up),
-    m_dn_bn(down),
-    m_initial_depressed_area(SR_NONE),
-    m_depressed_area(SR_NONE)
-{
-    Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
 }
 
 template<class T>
@@ -296,25 +241,6 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_depressed_area(SR_NONE)
 {
     Init(font, color, text_color, interior, flags);
-}
-
-template<class T>
-Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const std::string& font_filename, int pts, Clr color, 
-              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
-              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-    Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN),
-    m_value(value),
-    m_step_size(step),
-    m_min_value(min),
-    m_max_value(max),
-    m_editable(edits),
-    m_edit(0),
-    m_up_bn(up),
-    m_dn_bn(down),
-    m_initial_depressed_area(SR_NONE),
-    m_depressed_area(SR_NONE)
-{
-    Init(App::GetApp()->GetFont(font_filename, pts), color, text_color, interior, flags);
 }
 
 template<class T>
@@ -488,17 +414,17 @@ void Spin<T>::Keypress(Key key, Uint32 key_mods)
 }
 
 template<class T>
-void Spin<T>::SizeMove(int x1, int y1, int x2, int y2)
+void Spin<T>::SizeMove(const Pt& ul, const Pt& lr)
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     const int BN_X_POS = Width() - (Height() - 2 * BORDER_THICK) - BORDER_THICK;
     const int BN_WIDTH = Height() - 2 * BORDER_THICK;
     const int BNS_HEIGHT = BN_WIDTH; // height of BOTH buttons
-    m_edit->SizeMove(0, 0, Width() - Height(), Height());
-    m_up_bn->SizeMove(BN_X_POS, BORDER_THICK,
-                      BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2);
-    m_dn_bn->SizeMove(BN_X_POS, BORDER_THICK + BNS_HEIGHT / 2,
-                      BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT);
+    m_edit->SizeMove(Pt(0, 0), Pt(Width() - Height(), Height()));
+    m_up_bn->SizeMove(Pt(BN_X_POS, BORDER_THICK),
+                      Pt(BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2));
+    m_dn_bn->SizeMove(Pt(BN_X_POS, BORDER_THICK + BNS_HEIGHT / 2),
+                      Pt(BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT));
 }
 
 template<class T>
@@ -673,11 +599,12 @@ template<class T>
 void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
 {
     Control::SetColor(color);
-    m_edit = new Edit(0, 0, 1, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
+    m_edit = new Edit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
+    boost::shared_ptr<Font> small_font = App::GetApp()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
     if (!m_up_bn)
-        m_up_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "+", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
+        m_up_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "+", small_font, color));
     if (!m_dn_bn)
-        m_dn_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "-", font->FontName(), static_cast<int>(font->PointSize() * 0.75), color));
+        m_dn_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "-", small_font, color));
     if (m_editable)
         AttachChild(m_edit);
     ConnectSignals();

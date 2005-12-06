@@ -178,8 +178,9 @@ void MinimalGGApp::Initialize()
     // Create a modal dialog and execute it.  This will show GG operating on top of a "real 3D" scene.  Note that if you
     // want "real" 3D objects (i.e. drawn in a non-orthographic space) inside of GG windows, you can add whatever OpenGL
     // calls you like to a GG::Wnd's Render() method, sandwiched between Exit2DMode() and Enter2DMode().
+
     GG::Wnd* quit_dlg =
-        new GG::ThreeButtonDlg(200, 100, "Are we done yet?", "Vera.ttf", 12, GG::CLR_SHADOW, 
+        new GG::ThreeButtonDlg(200, 100, "Are we done yet?", GetFont("Vera.ttf", 12), GG::CLR_SHADOW, 
                                GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
     quit_dlg->Run();
 

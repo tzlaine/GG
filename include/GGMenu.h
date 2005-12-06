@@ -99,8 +99,6 @@ private:
 class GG_API MenuBar : public Control
 {
 public:
-    using Wnd::SizeMove;
-
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int)> BrowsedSignalType; ///< emits the ID of an item in the menu when the cursor moves over it
     //@}
@@ -112,9 +110,7 @@ public:
     /** \name Structors */ //@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
     MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
-    MenuBar(int x, int y, int w, const std::string& font_filename, int pts, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
-    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing the contents of the menus in the MenuBar
-    MenuBar(int x, int y, int w, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing the contents of the menus in the MenuBar
+    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing menus with which to populate the MenuBar
     //@}
 
     /** \name Accessors */ //@{
@@ -142,7 +138,7 @@ public:
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2);
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
 
     MenuItem&      AllMenus();                    ///< returns a reference to the MenuItem that contains all the menus and their contents
 
@@ -219,7 +215,6 @@ public:
     /** \name Structors */ //@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
     PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
-    PopupMenu(int x, int y, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
     //@}
 
     /** \name Accessors */ //@{

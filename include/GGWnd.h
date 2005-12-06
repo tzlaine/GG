@@ -289,22 +289,14 @@ public:
     virtual void   BeginClipping();                     ///< sets up child clipping for this window
     virtual void   EndClipping();                       ///< restores state to what it was before BeginClipping() was called
     void           MoveTo(const Pt& pt);                ///< moves upper-left corner of window to \a pt
-    void           MoveTo(int x, int y);                ///< moves upper-left corner of window to \a x,\a y
     void           OffsetMove(const Pt& pt);            ///< moves window by \a pt pixels
-    void           OffsetMove(int x, int y);            ///< moves window by \a x, \a y pixels
 
     /** resizes and/or moves window to new upper-left and lower right boundaries */
-    void           SizeMove(const Pt& ul, const Pt& lr);
-
-    /** resizes and/or moves window to new upper-left and lower right boundaries */
-    virtual void   SizeMove(int x1, int y1, int x2, int y2);
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
 
     void           Resize(const Pt& sz);                ///< resizes window without moving upper-left corner
-    void           Resize(int x, int y);                ///< resizes window without moving upper-left corner
     void           SetMinSize(const Pt& sz);            ///< sets the minimum allowable size of window \a pt
-    void           SetMinSize(int x, int y);            ///< sets the minimum allowable size of window to \a x,\a y
     void           SetMaxSize(const Pt& sz);            ///< sets the maximum allowable size of window \a pt
-    void           SetMaxSize(int x, int y);            ///< sets the maximum allowable size of window to \a x,\a y
 
     /** places \a wnd in child ptr list, sets's child's \a m_parent member to \a this */
     void           AttachChild(Wnd* wnd);

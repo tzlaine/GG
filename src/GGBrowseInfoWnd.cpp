@@ -75,22 +75,6 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>&
     SetLayoutBorderMargin(text_margin);
 }
 
-TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const std::string& font_filename, int pts, Clr color, Clr border_color, Clr text_color,
-                                           Uint32 text_fmt/* = TF_LEFT | TF_WORDBREAK*/, int border_width/* = 2*/, int text_margin/* = 4*/) :
-    BrowseInfoWnd(0, 0, w, 1),
-    m_text_from_target(true),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_color(color),
-    m_border_color(border_color),
-    m_border_width(border_width),
-    m_text_control(new TextControl(0, 0, w, 1, "", m_font, text_color, text_fmt))
-{
-    m_text_control->SetMinSize(true);
-    AttachChild(m_text_control);
-    GridLayout();
-    SetLayoutBorderMargin(text_margin);
-}
-
 bool TextBoxBrowseInfoWnd::TextFromTarget() const
 {
     return m_text_from_target;
@@ -144,7 +128,7 @@ void TextBoxBrowseInfoWnd::SetText(const std::string& str)
         Hide();
     else
         Show();
-    Resize(1, 1);
+    Resize(Pt(1, 1));
 }
 
 void TextBoxBrowseInfoWnd::Render()

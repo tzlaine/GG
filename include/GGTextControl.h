@@ -58,22 +58,15 @@ namespace GG {
 class GG_API TextControl : public Control
 {
 public:
-    using Wnd::SizeMove;
     using Wnd::SetMinSize;
 
     /** \name Structors */ //@{
     TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
-    TextControl(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font filename and font point size
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
     TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
-
-    /** ctor that does not require window size.
-        Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
-        and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const std::string& str, const std::string& font_filename, int pts, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
     //@}
 
     /** \name Accessors */ //@{
@@ -134,7 +127,7 @@ public:
         text occupies. */
     virtual void   SetText(const std::string& str);
     virtual void   SetText(const char* str);
-    virtual void   SizeMove(int x1, int y1, int x2, int y2);
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
     void           SetTextFormat(Uint32 format); ///< sets the text format; ensures that the flags are sane
     void           SetTextColor(Clr color);      ///< sets the text color
     virtual void   SetColor(Clr c);              ///< just like Control::SetColor(), except that this one also adjusts the text color

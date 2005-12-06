@@ -103,22 +103,8 @@ DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr col
         m_LB = new ListBox(x, y, w, drop_ht, color, color, flags);
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
-    Wnd::SizeMove(x, y, x + Size().x, y + row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-    m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
-}
-
-DropDownList::DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior,
-                           ListBox* lb/* = 0*/, Uint32 flags/* = CLICKABLE*/) :
-    Control(x, y, w, row_ht, flags),
-    m_current_item_idx(-1),
-    m_LB(lb)
-{
-    if (!m_LB)
-        m_LB = new ListBox(x, y, w, drop_ht, color, interior, flags);
-    SetStyle(LB_SINGLESEL);
-    // adjust size to keep correct height based on row height, etc.
-    Wnd::SizeMove(x, y, x + Size().x, y + row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK);
-    m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
+    Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + row_ht + 2 * m_LB->CellMargin() + 2 * BORDER_THICK));
+    m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
 }
 
 DropDownList::~DropDownList()
@@ -149,6 +135,11 @@ const DropDownList::Row& DropDownList::GetItem(int n) const
 bool DropDownList::Selected(int n) const
 {
     return m_LB->Selected(n);
+}
+
+Clr DropDownList::InteriorColor() const
+{
+    return m_LB->InteriorColor();
 }
 
 Uint32 DropDownList::Style() const
@@ -274,11 +265,11 @@ void DropDownList::Keypress(Key key, Uint32 key_mods)
     }
 }
 
-void DropDownList::SizeMove(int x1, int y1, int x2, int y2)
+void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
 {
     // adjust size to keep correct height based on row height, etc.
-    Wnd::SizeMove(x1, y1, x2, y1 + Height());
-    m_LB->SizeMove(0, Height(), Width(), Height() + m_LB->Height());
+    Wnd::SizeMove(ul, Pt(lr.x, ul.y + Height()));
+    m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
 }
 
 int DropDownList::Insert(Row* row, int at/* = -1*/)
@@ -320,6 +311,11 @@ void DropDownList::Select(int row)
 
     if (m_current_item_idx != old_m_current_item_idx)
         SelChangedSignal(m_current_item_idx);
+}
+
+void DropDownList::SetInteriorColor(Clr c)
+{
+    m_LB->SetInteriorColor(c);
 }
 
 void DropDownList::SetStyle(Uint32 s)

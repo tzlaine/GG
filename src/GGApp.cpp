@@ -575,40 +575,40 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     s_impl->drag_wnds[0]->SizeMove(offset_pos, s_impl->drag_wnds[0]->LowerRight());
                     break;
                 case WR_TOP:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->UpperLeft().x,
-                                                   offset_pos.y,
-                                                   s_impl->drag_wnds[0]->LowerRight().x,
-                                                   s_impl->drag_wnds[0]->LowerRight().y);
+                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
+                                                      offset_pos.y),
+                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
+                                                      s_impl->drag_wnds[0]->LowerRight().y));
                     break;
                 case WR_TOPRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->UpperLeft().x,
-                                                   offset_pos.y,
-                                                   offset_pos.x,
-                                                   s_impl->drag_wnds[0]->LowerRight().y);
+                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
+                                                      offset_pos.y),
+                                                   Pt(offset_pos.x,
+                                                      s_impl->drag_wnds[0]->LowerRight().y));
                     break;
                 case WR_MIDLEFT:
-                    s_impl->drag_wnds[0]->SizeMove(offset_pos.x,
-                                                   s_impl->drag_wnds[0]->UpperLeft().y,
-                                                   s_impl->drag_wnds[0]->LowerRight().x,
-                                                   s_impl->drag_wnds[0]->LowerRight().y);
+                    s_impl->drag_wnds[0]->SizeMove(Pt(offset_pos.x,
+                                                      s_impl->drag_wnds[0]->UpperLeft().y),
+                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
+                                                      s_impl->drag_wnds[0]->LowerRight().y));
                     break;
                 case WR_MIDRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->UpperLeft().x,
-                                                   s_impl->drag_wnds[0]->UpperLeft().y,
-                                                   offset_pos.x,
-                                                   s_impl->drag_wnds[0]->LowerRight().y);
+                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
+                                                      s_impl->drag_wnds[0]->UpperLeft().y),
+                                                   Pt(offset_pos.x,
+                                                      s_impl->drag_wnds[0]->LowerRight().y));
                     break;
                 case WR_BOTTOMLEFT:
-                    s_impl->drag_wnds[0]->SizeMove(offset_pos.x,
-                                                   s_impl->drag_wnds[0]->UpperLeft().y,
-                                                   s_impl->drag_wnds[0]->LowerRight().x,
-                                                   offset_pos.y);
+                    s_impl->drag_wnds[0]->SizeMove(Pt(offset_pos.x,
+                                                      s_impl->drag_wnds[0]->UpperLeft().y),
+                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
+                                                      offset_pos.y));
                     break;
                 case WR_BOTTOM:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->UpperLeft().x,
-                                                   s_impl->drag_wnds[0]->UpperLeft().y,
-                                                   s_impl->drag_wnds[0]->LowerRight().x,
-                                                   offset_pos.y);
+                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
+                                                      s_impl->drag_wnds[0]->UpperLeft().y),
+                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
+                                                      offset_pos.y));
                     break;
                 case WR_BOTTOMRIGHT:
                     s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->UpperLeft(), offset_pos);

@@ -98,43 +98,10 @@ MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr t
     AdjustLayout();
 }
 
-MenuBar::MenuBar(int x, int y, int w, const std::string& font_filename, int pts, Clr text_color/* = CLR_WHITE*/,
-                 Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
-    Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_border_color(color),
-    m_int_color(interior),
-    m_text_color(text_color),
-    m_sel_text_color(text_color),
-    m_caret(-1)
-{
-    // use opaque interior color as hilite color
-    interior.a = 255;
-    m_hilite_color = interior;
-    AdjustLayout();
-}
-
 MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m,
                  Clr text_color/* = CLR_WHITE*/, Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
     Control(x, y, w, font->Lineskip()),
     m_font(font),
-    m_border_color(color),
-    m_int_color(interior),
-    m_text_color(text_color),
-    m_sel_text_color(text_color),
-    m_menu_data(m),
-    m_caret(-1)
-{
-    // use opaque interior color as hilite color
-    interior.a = 255;
-    m_hilite_color = interior;
-    AdjustLayout();
-}
-
-MenuBar::MenuBar(int x, int y, int w, const std::string& font_filename, int pts, const MenuItem& m,
-                 Clr text_color/* = CLR_WHITE*/, Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
-    Control(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Lineskip()),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_border_color(color),
     m_int_color(interior),
     m_text_color(text_color),
@@ -267,9 +234,9 @@ void MenuBar::MouseLeave(const Pt& pt, Uint32 keys)
     m_caret = -1;
 }
 
-void MenuBar::SizeMove(int x1, int y1, int x2, int y2)
+void MenuBar::SizeMove(const Pt& ul, const Pt& lr)
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     AdjustLayout();
 }
 
@@ -359,7 +326,7 @@ void MenuBar::AdjustLayout()
     // create any needed labels
     for (unsigned int i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
         m_menu_labels.push_back(new TextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));
-        m_menu_labels.back()->Resize(m_menu_labels.back()->Width() + 2 * MENU_SEPARATION, m_font->Lineskip());
+        m_menu_labels.back()->Resize(Pt(m_menu_labels.back()->Width() + 2 * MENU_SEPARATION, m_font->Lineskip()));
         AttachChild(m_menu_labels.back());
     }
 
@@ -387,7 +354,7 @@ void MenuBar::AdjustLayout()
     for (unsigned int row = 0; row < menu_rows.size(); ++row) {
         int x = 0;
         for (; label_i < menu_rows[row]; ++label_i) {
-            m_menu_labels[label_i]->MoveTo(x, row * m_font->Lineskip());
+            m_menu_labels[label_i]->MoveTo(Pt(x, row * m_font->Lineskip()));
             x += m_menu_labels[label_i]->Width();
         }
     }
@@ -395,7 +362,7 @@ void MenuBar::AdjustLayout()
     // resize MenuBar if needed
     int desired_ht = std::max(size_t(1), menu_rows.size()) * m_font->Lineskip();
     if (Height() != desired_ht)
-        Resize(Width(), desired_ht);
+        Resize(Pt(Width(), desired_ht));
 }
 
 void MenuBar::BrowsedSlot(int n)
@@ -415,26 +382,6 @@ PopupMenu::PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const Me
                      Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
     Wnd(0, 0, App::GetApp()->AppWidth() - 1, App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
     m_font(font),
-    m_border_color(color),
-    m_int_color(interior),
-    m_text_color(text_color),
-    m_sel_text_color(text_color),
-    m_menu_data(m),
-    m_open_levels(),
-    m_caret(std::vector<int>(1, -1)),
-    m_origin(Pt(x, y)),
-    m_item_selected(0)
-{
-    // use opaque interior color as hilite color
-    interior.a = 255;
-    m_hilite_color = interior;
-    m_open_levels.resize(1);
-}
-
-PopupMenu::PopupMenu(int x, int y, const std::string& font_filename, int pts, const MenuItem& m, Clr text_color/* = CLR_WHITE*/, 
-                     Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) : 
-    Wnd(0, 0, App::GetApp()->AppWidth() - 1, App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
     m_border_color(color),
     m_int_color(interior),
     m_text_color(text_color),

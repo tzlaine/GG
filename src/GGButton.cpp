@@ -51,14 +51,6 @@ Button::Button(int x, int y, int w, int h, const std::string& str, const boost::
     m_color = color;
 }
 
-Button::Button(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color,
-               Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font_filename, pts, text_color, TF_NONE, flags),
-    m_state(BN_UNPRESSED)
-{
-    m_color = color;
-}
-
 Button::ButtonState Button::State() const
 {
     return m_state;
@@ -177,9 +169,9 @@ void Button::RenderPressed()
     } else {
         RenderDefault();
     }
-    OffsetMove(1,1);
+    OffsetMove(Pt(1, 1));
     TextControl::Render();
-    OffsetMove(-1,-1);
+    OffsetMove(Pt(-1, -1));
 }
 
 void Button::RenderUnpressed()
@@ -193,9 +185,9 @@ void Button::RenderUnpressed()
     // draw text shadow
     Clr temp = TextColor();  // save original color
     SetTextColor(CLR_SHADOW); // shadow color
-    OffsetMove(2,2);
+    OffsetMove(Pt(2, 2));
     TextControl::Render();
-    OffsetMove(-2,-2);
+    OffsetMove(Pt(-2, -2));
     SetTextColor(temp);    // restore original color
     // draw text
     TextControl::Render();
@@ -212,9 +204,9 @@ void Button::RenderRollover()
     // draw text shadow
     Clr temp = TextColor();  // save original color
     SetTextColor(CLR_SHADOW); // shadow color
-    OffsetMove(2,2);
+    OffsetMove(Pt(2, 2));
     TextControl::Render();
-    OffsetMove(-2,-2);
+    OffsetMove(Pt(-2, -2));
     SetTextColor(temp);    // restore original color
     // draw text
     TextControl::Render();
@@ -257,23 +249,6 @@ StateButton::StateButton(int x, int y, int w, int h, const std::string& str, con
     m_text_y(0)
 {
     Init(w, h, font->PointSize(), color, bn_w, bn_h, bn_x, bn_y);
-}
-
-StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const std::string& font_filename,
-                         int pts, Uint32 text_fmt, Clr color, Clr text_color/* = CLR_BLACK*/,
-                         Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
-                         int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/,
-                         Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font_filename, pts, text_color, text_fmt, flags),
-    m_checked(false),
-    m_int_color(interior),
-    m_style(style),
-    m_button_x(0),
-    m_button_y(0),
-    m_text_x(0),
-    m_text_y(0)
-{
-    Init(w, h, pts, color, bn_w, bn_h, bn_x, bn_y);
 }
 
 bool StateButton::Checked() const
@@ -341,9 +316,9 @@ void StateButton::Render()
         break;
     }
 
-    OffsetMove(m_text_x, m_text_y);
+    OffsetMove(Pt(m_text_x, m_text_y));
     TextControl::Render();
-    OffsetMove(-m_text_x, -m_text_y);
+    OffsetMove(Pt(-m_text_x, -m_text_y));
 }
 
 void StateButton::LClick(const Pt& pt, Uint32 keys)

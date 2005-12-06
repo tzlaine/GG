@@ -80,9 +80,6 @@ public:
     /** basic ctor */
     TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
                          Uint32 text_fmt = TF_LEFT | TF_WORDBREAK, int border_width = 2, int text_margin = 4);
-    /** basic ctor */
-    TextBoxBrowseInfoWnd(int w, const std::string& font_filename, int pts, Clr color, Clr border_color, Clr text_color,
-                         Uint32 text_fmt = TF_LEFT | TF_WORDBREAK, int border_width = 2, int text_margin = 4);
     //@}
 
     /** \name Accessors */ //@{

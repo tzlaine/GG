@@ -45,48 +45,9 @@ Edit::Edit() :
 {
 }
 
-Edit::Edit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
-           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, h, str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
-    m_cursor_pos(0, 0),
-    m_first_char_shown(0),
-    m_int_color(interior),
-    m_hilite_color(CLR_SHADOW),
-    m_sel_text_color(CLR_WHITE),
-    m_recently_edited(false)
-{
-    SetColor(color);
-}
-
-Edit::Edit(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color,
-           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, h, str, font_filename, pts, text_color, TF_LEFT | TF_IGNORETAGS, flags),
-    m_cursor_pos(0, 0),
-    m_first_char_shown(0),
-    m_int_color(interior),
-    m_hilite_color(CLR_SHADOW),
-    m_sel_text_color(CLR_WHITE),
-    m_recently_edited(false)
-{
-    SetColor(color);
-}
-
 Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
     TextControl(x, y, w, font->Height() + 2 * PIXEL_MARGIN, str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
-    m_cursor_pos(0, 0),
-    m_first_char_shown(0),
-    m_int_color(interior),
-    m_hilite_color(CLR_SHADOW),
-    m_sel_text_color(CLR_WHITE),
-    m_recently_edited(false)
-{
-    SetColor(color);
-}
-
-Edit::Edit(int x, int y, int w, const std::string& str, const std::string& font_filename, int pts, Clr color,
-           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    TextControl(x, y, w, App::GetApp()->GetFont(font_filename, pts)->Height() + 2 * PIXEL_MARGIN, str, font_filename, pts, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),
     m_int_color(interior),

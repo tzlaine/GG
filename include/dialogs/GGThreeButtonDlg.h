@@ -38,6 +38,7 @@
 namespace GG {
 
 class Button;
+class Font;
 
 /** a general pop-up message or user input box with one, two, or three buttons.  This is designed to be used as a 
     generic message window, with just an "ok" button, or for any input consisting of only two or three choices, such 
@@ -54,22 +55,22 @@ class GG_API ThreeButtonDlg : public Wnd
 public:
     /** \name Structors */ //@{
     /** basic ctor*/
-    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
+    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
                    Button* one = 0, Button* two = 0);
 
     /** ctor that automatically centers the dialog in the app's area*/
-    ThreeButtonDlg(int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
+    ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
                    Button* one = 0, Button* two = 0);
 
     /** basic ctor*/
-    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
+    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero, 
                    const std::string& one = "", const std::string& two = "");
 
     /** ctor that automatically centers the dialog in the app's area*/
-    ThreeButtonDlg(int w, int h, const std::string& msg, const std::string& font_filename, int pts, Clr color, 
+    ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero, 
                    const std::string& one = "", const std::string& two = "");
     //@}
@@ -97,7 +98,7 @@ protected:
 
 private:
     int NumButtons() const;
-    void Init(const std::string& msg, const std::string& font_filename, int pts, int buttons,
+    void Init(const std::string& msg, const boost::shared_ptr<Font>& font, int buttons,
               const std::string& zero = "", const std::string& one = "", const std::string& two = "");
     void ConnectSignals();
     void Button0Clicked();

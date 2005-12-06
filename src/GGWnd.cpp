@@ -557,34 +557,20 @@ void Wnd::EndClipping()
 
 void Wnd::MoveTo(const Pt& pt)
 {
-    MoveTo(pt.x, pt.y);
-}
-
-void Wnd::MoveTo(int x, int y)
-{
-    SizeMove(x, y, x + (m_lowerright.x - m_upperleft.x), y + (m_lowerright.y - m_upperleft.y));
+    SizeMove(pt, pt + Size());
 }
 
 void Wnd::OffsetMove(const Pt& pt)
 {
-    OffsetMove(pt.x, pt.y);
+    SizeMove(m_upperleft + pt, m_lowerright + pt);
 }
 
-void Wnd::OffsetMove(int x, int y)
+void Wnd::SizeMove(const Pt& ul_, const Pt& lr_)
 {
-    SizeMove(m_upperleft.x + x, m_upperleft.y + y, m_lowerright.x + x, m_lowerright.y + y);
-}
-
-void Wnd::SizeMove(const Pt& ul, const Pt& lr)
-{
-    SizeMove(ul.x, ul.y, lr.x, lr.y);
-}
-
-void Wnd::SizeMove(int x1, int y1, int x2, int y2)
-{
+    Pt ul = ul_, lr = lr_;
     Pt original_sz = Size();
-    bool resize_move = (original_sz.x != (x2 - x1)) || (original_sz.y != (y2 - y1));
-    if (resize_move) {
+    bool resized = (original_sz.x != (lr.x - ul.x)) || (original_sz.y != (lr.y - ul.y));
+    if (resized) {
         Pt min_sz = MinSize();
         Pt max_sz = MaxSize();
         if (m_layout) {
@@ -592,32 +578,32 @@ void Wnd::SizeMove(int x1, int y1, int x2, int y2)
             min_sz.x = std::max(min_sz.x, layout_min_sz.x);
             min_sz.y = std::max(min_sz.y, layout_min_sz.y);
         }
-        if (x2 - x1 < min_sz.x) {
-            if (x1 != m_upperleft.x)
-                x1 = x2 - min_sz.x;
-            else if (x2 != m_lowerright.x)
-                x2 = x1 + min_sz.x;
-        } else if (max_sz.x < x2 - x1) {
-            if (x2 != m_lowerright.x)
-                x2 = x1 + max_sz.x;
+        if (lr.x - ul.x < min_sz.x) {
+            if (ul.x != m_upperleft.x)
+                ul.x = lr.x - min_sz.x;
+            else if (lr.x != m_lowerright.x)
+                lr.x = ul.x + min_sz.x;
+        } else if (max_sz.x < lr.x - ul.x) {
+            if (lr.x != m_lowerright.x)
+                lr.x = ul.x + max_sz.x;
             else
-                x1 = x2 - max_sz.x;
+                ul.x = lr.x - max_sz.x;
         }
-        if (y2 - y1 < min_sz.y) {
-            if (y1 != m_upperleft.y)
-                y1 = y2 - min_sz.y;
-            else if (y2 != m_lowerright.y)
-                y2 = y1 + min_sz.y;
-        } else if (max_sz.y < y2 - y1) {
-            if (y2 != m_lowerright.y)
-                y2 = y1 + max_sz.y;
+        if (lr.y - ul.y < min_sz.y) {
+            if (ul.y != m_upperleft.y)
+                ul.y = lr.y - min_sz.y;
+            else if (lr.y != m_lowerright.y)
+                lr.y = ul.y + min_sz.y;
+        } else if (max_sz.y < lr.y - ul.y) {
+            if (lr.y != m_lowerright.y)
+                lr.y = ul.y + max_sz.y;
             else
-                y1 = y2 - max_sz.y;
+                ul.y = lr.y - max_sz.y;
         }
     }
-    m_upperleft = Pt(x1, y1);
-    m_lowerright = Pt(x2, y2);
-    if (resize_move) {
+    m_upperleft = ul;
+    m_lowerright = lr;
+    if (resized) {
         bool size_changed = Size() != original_sz;
         if (m_layout && size_changed)
             m_layout->Resize(ClientSize());
@@ -628,12 +614,7 @@ void Wnd::SizeMove(int x1, int y1, int x2, int y2)
 
 void Wnd::Resize(const Pt& sz)
 {
-    Resize(sz.x, sz.y);
-}
-
-void Wnd::Resize(int x, int y)
-{
-    SizeMove(m_upperleft.x, m_upperleft.y, m_upperleft.x + x, m_upperleft.y + y);
+    SizeMove(m_upperleft, m_upperleft + sz);
 }
 
 void Wnd::SetMinSize(const Pt& sz)
@@ -641,26 +622,16 @@ void Wnd::SetMinSize(const Pt& sz)
     bool min_size_changed = m_min_size != sz;
     m_min_size = sz;
     if (Width() < m_min_size.x || Height() < m_min_size.y)
-        Resize(std::max(Width(), m_min_size.x), std::max(Height(), m_min_size.y));
+        Resize(Pt(std::max(Width(), m_min_size.x), std::max(Height(), m_min_size.y)));
     else if (m_containing_layout && min_size_changed && !dynamic_cast<Layout*>(this))
         m_containing_layout->ChildSizeOrMinSizeOrMaxSizeChanged();
-}
-
-void Wnd::SetMinSize(int x, int y)
-{
-    SetMinSize(Pt(x, y));
 }
 
 void Wnd::SetMaxSize(const Pt& sz)
 {
     m_max_size = sz;
     if (m_max_size.x < Width() || m_max_size.y < Height())
-        Resize(std::min(Width(), m_max_size.x), std::min(Height(), m_max_size.y));
-}
-
-void Wnd::SetMaxSize(int x, int y)
-{
-    SetMaxSize(Pt(x, y));
+        Resize(Pt(std::min(Width(), m_max_size.x), std::min(Height(), m_max_size.y)));
 }
 
 void Wnd::AttachChild(Wnd* wnd)
@@ -922,7 +893,7 @@ void Wnd::SetLayout(Layout* layout)
     DeleteChildren();
     AttachChild(layout);
     m_layout = layout;
-    m_layout->SizeMove(0, 0, ClientWidth(), ClientHeight());
+    m_layout->SizeMove(Pt(0, 0), Pt(ClientWidth(), ClientHeight()));
 }
 
 void Wnd::RemoveLayout()

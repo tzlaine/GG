@@ -65,16 +65,6 @@ public:
             Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0, ListBox* files_list = 0,
             Edit* files_edit = 0, DropDownList* filter_list = 0);
 
-    /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, if
-        desired (such as when "Save As" is called in an app, and there is a current filename).  If \a directory is
-        specified, it is taken as-is if it is absolute, or relative to boost::filesystem::initial_path() if it is
-        relative.  If \a directory is "", the initial directory is WorkingDirectory().  \a save indicates whether this
-        is a save or load dialog; \a multi indicates whether multiple file selections are allowed.  \throw
-        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
-    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::string& font_filename,
-            int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0,
-            ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
-
     /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial
         directory and filename to the dialog, if desired (such as when "Save As" is called in an app, and there is a
         current filename).  If \a directory is specified, it is taken as-is if it is absolute, or relative to
@@ -91,24 +81,6 @@ public:
         GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
             const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0,
-            Button* cancel = 0, ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
-
-    /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial
-        directory and filename to the dialog, if desired (such as when "Save As" is called in an app, and there is a
-        current filename).  If \a directory is specified, it is taken as-is if it is absolute, or relative to
-        boost::filesystem::initial_path() if it is relative.  If \a directory is "", the initial directory is
-        WorkingDirectory().  \a save indicates whether this is a save or load dialog; \a multi indicates whether
-        multiple file selections are allowed; \a types is a vector of pairs of strings containing the allowed file
-        types; \a user_edit_types indicates whether the user should be allowed to edit the file types.  Each pair in the
-        \a types parameter contains a description of the file type in its .first member, and wildcarded file types in
-        its .second member.  For example, an entry might be ("Text Files (*.txt)", "*.txt"). Only the '*' character is
-        supported as a wildcard.  More than one wildcard expression can be specified in a filter; if so, they must be
-        separated by a comma and exactly one space (", ").  Each filter is considered OR-ed together with the others, so
-        passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  Note that an empty
-        filter is considered to match all files, so ("All Files", "") is perfectly correct.  \throw
-        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
-    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
-            const std::string& font_filename, int pts, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0,
             Button* cancel = 0, ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
     //@}
 
@@ -149,7 +121,7 @@ protected:
     //@}
 
 private:
-    void CreateChildren(const std::string& filename, bool multi, const std::string& font_filename, int pts);
+    void CreateChildren(const std::string& filename, bool multi);
     void PlaceLabelsAndEdits(int button_width, int button_height);
     void AttachSignalChildren();
     void DetachSignalChildren();

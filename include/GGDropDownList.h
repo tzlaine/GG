@@ -53,8 +53,6 @@ namespace GG {
 class GG_API DropDownList : public Control
 {
 public:
-    using Wnd::SizeMove;
-
     /** This is a single item in a dropdown list. \see See GG::ListBox for details.*/
     typedef ListBox::Row Row;
 
@@ -71,10 +69,6 @@ public:
         delete \a lb once it has been passed to the DropDownList ctor. */
     DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb = 0, Uint32 flags = CLICKABLE);
 
-    /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null.  Client code should \a not attempt to 
-        delete \a lb once it has been passed to the DropDownList ctor. */
-    DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior, ListBox* lb = 0, Uint32 flags = CLICKABLE);
-
     ~DropDownList(); ///< dtor
     //@}
 
@@ -85,6 +79,7 @@ public:
     bool           Empty() const;            ///< returns true when the list is empty
     const Row&     GetItem(int n) const;     ///< returns a const reference to the row at index \a n; not range-checked
     bool           Selected(int n) const;    ///< returns true if row \a n is selected
+    Clr            InteriorColor() const;    ///< returns the color painted into the client area of the control
 
     /** returns the style flags of the list \see GG::ListBoxStyle */
     Uint32         Style() const;
@@ -111,7 +106,7 @@ public:
     virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   Keypress(Key key, Uint32 key_mods);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
+    virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
     int            Insert(Row* row, int at = -1); ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point.  This Row becomes the property of the DropDownList and should not be deleted or inserted into any other DropDownLists
     Row*           Erase(int idx);                ///< removes and returns the row at index \a idx from the list, or 0 if no such row exists
@@ -119,6 +114,8 @@ public:
     Row&           GetRow(int n);                 ///< returns a reference to the Row at row index \a n; not range-checked
 
     void           Select(int row);               ///< selects row-item \a row in the list
+
+    void           SetInteriorColor(Clr c);       ///< sets the color painted into the client area of the control
 
     /** sets the style flags for the list to \a s (invalidates currently selected item). \see GG::ListBoxStyle */
     void           SetStyle(Uint32 s);

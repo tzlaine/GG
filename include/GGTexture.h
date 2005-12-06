@@ -170,12 +170,6 @@ public:
     /** \name Structors */ //@{
     SubTexture(); ///< default ctor
 
-    /** creates a SubTexture from a GG::Texture and coordinates into it. \warning Calling code <b>must not</b> delete \a
-        texture; \a texture becomes the property of a shared_ptr inside the SubTexture.  \throw
-        GG::SubTexture::BadTexture Throws if the given Texture is null.  \throw
-        GG::SubTexture::InvalidTextureCoordinates Throws if the texture coordinates are not well formed.*/
-    SubTexture(const Texture* texture, int x1, int y1, int x2, int y2); 
-
     /** creates a SubTexture from a GG::Texture and coordinates into it.  \throw GG::SubTexture::BadTexture Throws if
         the given Texture is null.  \throw GG::SubTexture::InvalidTextureCoordinates Throws if the texture coordinates
         are not well formed.*/

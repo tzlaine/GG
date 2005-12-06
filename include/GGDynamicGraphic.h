@@ -77,31 +77,6 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
-        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> delete
-        \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.*/
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const Texture* texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0); 
-
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
-        indicates all possible area is considered to contain valid frames.*/
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
-
-    /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1
-        indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
-        Textures but the last are assumed to have the maximum number of frames based on their sizes.*/
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
-
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
-        indicates all possible area is considered to contain valid frames.  \warning Calling code <b>must not</b> delete
-        \a texture; \a texture becomes the property of a shared_ptr inside the DynamicGraphic.  This ctor allows
-        specification of a frame size different from the size of the DynamicGraphic's size. */
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const Texture* texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0); 
-
-    /** ctor taking a single GG::Texture and the number of frames in that Texture.  The default \a frames value -1
-        indicates all possible area is considered to contain valid frames.  This ctor allows specification of a frame
-        size different from the size of the DynamicGraphic's size. */
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
-
     /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
         Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor allows

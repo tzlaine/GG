@@ -20,7 +20,7 @@ if platform_str == 'posix':
             'boost_signals',
             'boost_filesystem',
             'boost_serialization']
-    ccflags = '-DHAVE_CONFIG_H -D_REENTRANT -Wall -O2'
+    ccflags = '-DHAVE_CONFIG_H -D_REENTRANT -Wall -g'
     env = Environment(CCFLAGS = '',
                       CPPPATH = cpppath,
                       LIBS = libs,

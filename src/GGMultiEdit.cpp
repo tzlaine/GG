@@ -63,7 +63,7 @@ MultiEdit::MultiEdit() :
 MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
               Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
               Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-    Edit(x, y, w, h, str, font, color, text_color, interior, flags),
+    Edit(x, y, w, str, font, color, text_color, interior, flags),
     m_style(style),
     m_cursor_begin(0, 0),
     m_cursor_end(0, 0),
@@ -74,23 +74,7 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const b
     m_hscroll(0)
 {
     SetColor(color);
-    Init();
-}
-
-MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color, 
-              Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
-              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
-    Edit(x, y, w, h, str, font_filename, pts, color, text_color, interior, flags),
-    m_style(style),
-    m_cursor_begin(0, 0),
-    m_cursor_end(0, 0),
-    m_first_col_shown(0),
-    m_first_row_shown(0),
-    m_max_lines_history(0),
-    m_vscroll(0),
-    m_hscroll(0)
-{
-    SetColor(color);
+    Resize(Pt(w, h));
     Init();
 }
 
@@ -423,11 +407,12 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
     }
 }
 
-void MultiEdit::SizeMove(int x1, int y1, int x2, int y2)
+void MultiEdit::SizeMove(const Pt& ul, const Pt& lr)
 {
+    Pt lower_right = lr;
     if (m_style & INTEGRAL_HEIGHT)
-        y2 -= ((y2 - y1) - (2 * PIXEL_MARGIN)) % GetFont()->Lineskip();
-    Edit::SizeMove(x1, y1, x2, y2);
+        lower_right.y -= ((lr.y - ul.y) - (2 * PIXEL_MARGIN)) % GetFont()->Lineskip();
+    Edit::SizeMove(ul, lower_right);
     AdjustScrolls();
     AdjustView();
 }
@@ -877,7 +862,7 @@ void MultiEdit::AdjustScrolls()
             m_vscroll->SizeScroll(vscroll_min, vscroll_max, cl_sz.y / 8, cl_sz.y - (need_horz ? SCROLL_WIDTH : 0));
             int scroll_x = cl_sz.x + GAP - SCROLL_WIDTH;
             int scroll_y = -GAP;
-            m_vscroll->SizeMove(scroll_x, scroll_y, scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0));
+            m_vscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0)));
         }
     } else if (!m_vscroll && need_vert) { // if scroll doesn't exist but is needed
         m_vscroll = NewVScroll(need_horz);
@@ -894,7 +879,7 @@ void MultiEdit::AdjustScrolls()
             m_hscroll->SizeScroll(hscroll_min, hscroll_max, cl_sz.x / 8, cl_sz.x - (need_vert ? SCROLL_WIDTH : 0));
             int scroll_x = -GAP;
             int scroll_y = cl_sz.y + GAP - SCROLL_WIDTH;
-            m_hscroll->SizeMove(scroll_x, scroll_y, scroll_x + cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH);
+            m_hscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH));
         }
     } else if (!m_hscroll && need_horz) { // if scroll doesn't exist but is needed
         m_hscroll = NewHScroll(need_vert);

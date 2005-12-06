@@ -56,9 +56,6 @@ class GG_API WndEditor : public Wnd
 {
 public:
     /** basic ctor.  Note that WndEditor has an integral width. */
-    WndEditor(int h, const std::string& font_filename, int pts);
-
-    /** basic ctor.  Note that WndEditor has an integral width. */
     WndEditor(int h, const boost::shared_ptr<Font>& font);
 
     virtual void Render ();
@@ -359,7 +356,8 @@ AttributeRow<T>::AttributeRow(const std::string& name, T& value, const boost::sh
     m_edit(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_edit = new Edit(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT));
     push_back(m_edit);
     *m_edit << value;
     Connect(m_edit->FocusUpdateSignal, &AttributeRow::TextChanged, this);
@@ -386,7 +384,8 @@ RangedAttributeRow<T, is_enum>::RangedAttributeRow(const std::string& name, T& v
     m_edit(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_edit = new Edit(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT));
     push_back(m_edit);
     *m_edit << value;
     Connect(m_edit->FocusUpdateSignal, &RangedAttributeRow::TextChanged, this);
@@ -414,7 +413,8 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
     m_enum_drop_list(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_enum_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * (max - min + 1) + 4, CLR_GRAY, CLR_WHITE);
+    m_enum_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * (max - min + 1) + 4, CLR_GRAY);
+    m_enum_drop_list->SetInteriorColor(CLR_WHITE);
     m_enum_drop_list->SetStyle(LB_NOSORT);
     for (T i = min; i <= max; i = T(i + 1)) {
         Row* row = new ListBox::Row();
@@ -490,7 +490,8 @@ FlagGroupAttributeRow<T>::FlagGroupAttributeRow(const std::string& name, Uint32&
     for (T i = min; i <= max; i = T(i * 2)) {
         m_group_values.push_back(T(i));
     }
-    m_flag_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY, CLR_WHITE);
+    m_flag_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY);
+    m_flag_drop_list->SetInteriorColor(CLR_WHITE);
     m_flag_drop_list->SetStyle(LB_NOSORT);
     for (unsigned int i = 0; i < m_group_values.size(); ++i) {
         Row* row = new ListBox::Row();

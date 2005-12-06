@@ -153,34 +153,7 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
     m_files_label(0),
     m_file_types_label(0)
 {
-    CreateChildren(filename, multi, font->FontName(), font->PointSize());
-    Init(directory);
-}
-
-FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::string& font_filename,
-                 int pts, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/, Button* cancel/* = 0*/,
-                 ListBox* files_list/* = 0*/, Edit* files_edit/* = 0*/, DropDownList* filter_list/* = 0*/) :
-    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
-    m_color(color),
-    m_border_color(border_color),
-    m_text_color(text_color),
-    m_button_color(color),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_save(save),
-    m_in_win32_drive_selection(false),
-    m_save_str("Save"),
-    m_open_str("Open"),
-    m_cancel_str("Cancel"),
-    m_curr_dir_text(0),
-    m_files_list(files_list),
-    m_files_edit(files_edit),
-    m_filter_list(filter_list),
-    m_ok_button(ok),
-    m_cancel_button(cancel),
-    m_files_label(0),
-    m_file_types_label(0)
-{
-    CreateChildren(filename, multi, font_filename, pts);
+    CreateChildren(filename, multi);
     Init(directory);
 }
 
@@ -208,35 +181,7 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
     m_files_label(0),
     m_file_types_label(0)
 {
-    CreateChildren(filename, multi, font->FontName(), font->PointSize());
-    Init(directory);
-}
-
-FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
-                 const std::string& font_filename, int pts, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/, Button* ok/* = 0*/,
-                 Button* cancel/* = 0*/, ListBox* files_list/* = 0*/, Edit* files_edit/* = 0*/, DropDownList* filter_list/* = 0*/) :
-    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
-    m_color(color),
-    m_border_color(border_color),
-    m_text_color(text_color),
-    m_button_color(color),
-    m_font(App::GetApp()->GetFont(font_filename, pts)),
-    m_save(save),
-    m_file_filters(types),
-    m_in_win32_drive_selection(false),
-    m_save_str("Save"),
-    m_open_str("Open"),
-    m_cancel_str("Cancel"),
-    m_curr_dir_text(0),
-    m_files_list(files_list),
-    m_files_edit(files_edit),
-    m_filter_list(filter_list),
-    m_ok_button(ok),
-    m_cancel_button(cancel),
-    m_files_label(0),
-    m_file_types_label(0)
-{
-    CreateChildren(filename, multi, font_filename, pts);
+    CreateChildren(filename, multi);
     Init(directory);
 }
 
@@ -309,7 +254,7 @@ const fs::path& FileDlg::WorkingDirectory()
     return s_working_dir;
 }
 
-void FileDlg::CreateChildren(const std::string& filename, bool multi, const std::string& font_filename, int pts)
+void FileDlg::CreateChildren(const std::string& filename, bool multi)
 {
     if (m_save)
         multi = false;
@@ -319,16 +264,16 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi, const std:
 
     fs::path filename_path = fs::complete(fs::path(filename, fs::native));
     if (!m_files_edit)
-        m_files_edit = new Edit(0, 0, 1, 1, "", m_font, m_border_color, m_text_color);
+        m_files_edit = new Edit(0, 0, 1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
     if (!m_filter_list)
         m_filter_list = new DropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LB_NOSORT);
 
-    m_files_edit->Resize(100, m_font->Height() + 2 * 5);
-    m_files_edit->MoveTo(0, 0);
-    m_filter_list->Resize(100, m_filter_list->Height());
-    m_filter_list->MoveTo(0, 0);
+    m_files_edit->Resize(Pt(100, m_font->Height() + 2 * 5));
+    m_files_edit->MoveTo(Pt(0, 0));
+    m_filter_list->Resize(Pt(100, m_filter_list->Height()));
+    m_filter_list->MoveTo(Pt(0, 0));
 
     const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
 
@@ -339,14 +284,14 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi, const std:
     PlaceLabelsAndEdits(BUTTON_WIDTH, BUTTON_HEIGHT);
 
     if (!m_ok_button)
-        m_ok_button = new Button(0, 0, 1, 1, m_save ? m_save_str : m_open_str, font_filename, pts, m_button_color, m_text_color);
+        m_ok_button = new Button(0, 0, 1, 1, m_save ? m_save_str : m_open_str, m_font, m_button_color, m_text_color);
     if (!m_cancel_button)
-        m_cancel_button = new Button(0, 0, 1, 1, m_cancel_str, font_filename, pts, m_button_color, m_text_color);
+        m_cancel_button = new Button(0, 0, 1, 1, m_cancel_str, m_font, m_button_color, m_text_color);
 
-    m_ok_button->Resize(BUTTON_WIDTH, BUTTON_HEIGHT);
-    m_ok_button->MoveTo(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2);
-    m_cancel_button->Resize(BUTTON_WIDTH, BUTTON_HEIGHT);
-    m_cancel_button->MoveTo(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING));
+    m_ok_button->Resize(Pt(BUTTON_WIDTH, BUTTON_HEIGHT));
+    m_ok_button->MoveTo(Pt(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2));
+    m_cancel_button->Resize(Pt(BUTTON_WIDTH, BUTTON_HEIGHT));
+    m_cancel_button->MoveTo(Pt(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING)));
 
     // finally, we can create the listbox with the files in it, sized to fill the available space
     int file_list_top = m_curr_dir_text->Height() + V_SPACING;
@@ -354,8 +299,8 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi, const std:
         m_files_list = new ListBox(0, 0, 1, 1, m_border_color);
     m_files_list->SetStyle(LB_NOSORT | (multi ? 0 : LB_SINGLESEL));
 
-    m_files_list->Resize(Width() - 2 * H_SPACING, Height() - (BUTTON_HEIGHT + V_SPACING) * 2 - file_list_top - V_SPACING);
-    m_files_list->MoveTo(H_SPACING, file_list_top);
+    m_files_list->Resize(Pt(Width() - 2 * H_SPACING, Height() - (BUTTON_HEIGHT + V_SPACING) * 2 - file_list_top - V_SPACING));
+    m_files_list->MoveTo(Pt(H_SPACING, file_list_top));
 }
 
 void FileDlg::PlaceLabelsAndEdits(int button_width, int button_height)
@@ -364,10 +309,12 @@ void FileDlg::PlaceLabelsAndEdits(int button_width, int button_height)
     // edit as far as possible
     int labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
                                 m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
-    m_files_label->Resize(labels_width - H_SPACING / 2, m_files_label->Height());
-    m_file_types_label->Resize(labels_width - H_SPACING / 2, m_file_types_label->Height());
-    m_files_edit->SizeMove(labels_width, Height() - (button_height + V_SPACING) * 2, Width() - (button_width + 2 * H_SPACING), Height() - (button_height + 2 * V_SPACING));
-    m_filter_list->SizeMove(labels_width, Height() - (button_height + V_SPACING),    Width() - (button_width + 2 * H_SPACING), Height() - V_SPACING);
+    m_files_label->Resize(Pt(labels_width - H_SPACING / 2, m_files_label->Height()));
+    m_file_types_label->Resize(Pt(labels_width - H_SPACING / 2, m_file_types_label->Height()));
+    m_files_edit->SizeMove(Pt(labels_width, Height() - (button_height + V_SPACING) * 2),
+                           Pt(Width() - (button_width + 2 * H_SPACING), Height() - (button_height + 2 * V_SPACING)));
+    m_filter_list->SizeMove(Pt(labels_width, Height() - (button_height + V_SPACING)),
+                            Pt(Width() - (button_width + 2 * H_SPACING), Height() - V_SPACING));
 }
 
 void FileDlg::Init(const std::string& directory)
@@ -422,7 +369,7 @@ void FileDlg::OkClicked()
             results_valid = true;
             std::string save_file = *files.begin();
             if (!fs::path::default_name_check()(save_file)) {
-                ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                ThreeButtonDlg dlg(150, 75, "Invalid file name.", m_font, m_color, m_border_color, m_button_color, m_text_color, 1);
                 dlg.Run();
                 return;
             }
@@ -430,7 +377,7 @@ void FileDlg::OkClicked()
             m_result.insert(p.native_directory_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
-                ThreeButtonDlg dlg(200, 125, save_file + " exists.\nOk to overwrite it?", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 2);
+                ThreeButtonDlg dlg(200, 125, save_file + " exists.\nOk to overwrite it?", m_font, m_color, m_border_color, m_button_color, m_text_color, 2);
                 dlg.Run();
                 results_valid = (dlg.Result() == 0);
             }
@@ -441,7 +388,7 @@ void FileDlg::OkClicked()
         } else { // ensure the file(s) are valid before returning them
             for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it) {
                 if (!fs::path::default_name_check()(*it)) {
-                    ThreeButtonDlg dlg(300, 125, "\"" + (*it) + "\"\nis an invalid file name.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                    ThreeButtonDlg dlg(300, 125, "\"" + (*it) + "\"\nis an invalid file name.", m_font, m_color, m_border_color, m_button_color, m_text_color, 1);
                     dlg.Run();
                     results_valid = false;
                     break;
@@ -449,7 +396,7 @@ void FileDlg::OkClicked()
                 fs::path p = s_working_dir / *it;
                 if (fs::exists(p)) {
                     if (fs::is_directory(p)) {
-                        ThreeButtonDlg dlg(300, 75, "\"" + (*it) + "\"\nis a directory.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                        ThreeButtonDlg dlg(300, 75, "\"" + (*it) + "\"\nis a directory.", m_font, m_color, m_border_color, m_button_color, m_text_color, 1);
                         dlg.Run();
                         results_valid = false;
                         break;
@@ -457,7 +404,7 @@ void FileDlg::OkClicked()
                     m_result.insert(p.native_directory_string());
                     results_valid = true; // indicate validity only if at least one good file was found
                 } else {
-                    ThreeButtonDlg dlg(300, 75, "File \"" + (*it) + "\" does not exist.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                    ThreeButtonDlg dlg(300, 75, "File \"" + (*it) + "\" does not exist.", m_font, m_color, m_border_color, m_button_color, m_text_color, 1);
                     dlg.Run();
                     results_valid = false;
                     break;
@@ -690,7 +637,7 @@ void FileDlg::OpenDirectory()
                         m_files_edit->Clear();
                         m_curr_dir_text->SetText("");
                         UpdateList();
-                        ThreeButtonDlg dlg(175, 75, "The device is not ready.", m_font->FontName(), m_font->PointSize(), m_color, m_border_color, m_button_color, m_text_color, 1);
+                        ThreeButtonDlg dlg(175, 75, "The device is not ready.", m_font, m_color, m_border_color, m_button_color, m_text_color, 1);
                         dlg.Run();
                     } else {
                         throw;

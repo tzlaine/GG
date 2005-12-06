@@ -79,20 +79,6 @@ Layout::Layout() :
 {
 }
 
-Layout::Layout(int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
-    Wnd(0, 0, 1, 1, 0),
-    m_cells(rows, std::vector<Wnd*>(columns)),
-    m_border_margin(border_margin),
-    m_cell_margin(cell_margin < 0 ? border_margin : cell_margin),
-    m_row_params(rows),
-    m_column_params(columns),
-    m_ignore_child_resize(false),
-    m_ignore_parent_resize(false)
-{
-    if (m_border_margin < 0)
-        throw InvalidMargin("Layout::Layout() : m_border_margin may not be less than 0");
-}
-
 Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
     Wnd(x, y, w, h, 0),
     m_cells(rows, std::vector<Wnd*>(columns)),
@@ -155,7 +141,7 @@ int Layout::MinimumColumnWidth(int column) const
     return m_column_params[column].min;
 }
 
-void Layout::SizeMove(int x1, int y1, int x2, int y2)
+void Layout::SizeMove(const Pt& ul, const Pt& lr)
 {
     if (m_ignore_parent_resize)
         return;
@@ -239,7 +225,7 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         size_or_min_size_changed = true;
     }
     Pt original_size = Size();
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     if (Size() != original_size)
         size_or_min_size_changed = true;
 
@@ -248,7 +234,7 @@ void Layout::SizeMove(int x1, int y1, int x2, int y2)
         if (const_cast<const Wnd*>(parent)->GetLayout() == this) {
             Pt new_parent_min_size = MinSize() + parent->Size() - parent->ClientSize();
             m_ignore_parent_resize = true;
-            parent->SetMinSize(new_parent_min_size.x, new_parent_min_size.y);
+            parent->SetMinSize(Pt(new_parent_min_size.x, new_parent_min_size.y));
             m_ignore_parent_resize = false;
         }
     }

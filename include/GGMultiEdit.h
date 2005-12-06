@@ -58,8 +58,6 @@ class Scroll;
 class GG_API MultiEdit : public Edit
 {
 public:
-    using Wnd::SizeMove;
-
     /** the styles of display and interaction for a MultiEdit.  The TF_WORDBREAK, TF_LINEWRAP, TF_LEFT, TF_CENTER, and 
         TF_RIGHT GG::TextFormat flags also apply.*/
     enum Styles {
@@ -73,9 +71,6 @@ public:
 
     /** \name Structors */ //@{
     MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
-              Uint32 style = TF_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
-              Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor
-    MultiEdit(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color, 
               Uint32 style = TF_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
               Uint32 flags = CLICKABLE | DRAG_KEEPER); ///< ctor
     virtual ~MultiEdit(); ///< dtor
@@ -96,7 +91,7 @@ public:
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
     virtual void   Keypress(Key key, Uint32 key_mods);
 
-    virtual void   SizeMove(int x1, int y1, int x2, int y2);
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
 
     virtual void   SelectAll();
     virtual void   SetText(const std::string& str);

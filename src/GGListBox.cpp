@@ -311,37 +311,6 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     EnableChildClipping();
 }
 
-ListBox::ListBox(int x, int y, int w, int h, Clr color, const std::vector<int>& col_widths,
-                 Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
-    Control(x, y, w, h, flags),
-    m_vscroll(0),
-    m_hscroll(0),
-    m_caret(-1),
-    m_old_sel_row(-1),
-    m_old_rdown_row(-1),
-    m_lclick_row(-1),
-    m_rclick_row(-1),
-    m_last_row_browsed(-1),
-    m_suppress_erase_signal(false),
-    m_first_row_shown(0),
-    m_first_col_shown(0),
-    m_col_widths(col_widths),
-    m_cell_margin(2),
-    m_int_color(interior),
-    m_hilite_color(CLR_SHADOW),
-    m_style(0),
-    m_header_row(new Row()),
-    m_keep_col_widths(true),
-    m_clip_cells(false),
-    m_sort_col(0)
-{
-    SetColor(color);
-    ValidateStyle();
-    m_col_alignments.resize(m_col_widths.size(), Alignment(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
-    SetText("ListBox");
-    EnableChildClipping();
-}
-
 ListBox::~ListBox()
 {
     delete m_header_row;
@@ -709,9 +678,9 @@ void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
     }
 }
 
-void ListBox::SizeMove(int x1, int y1, int x2, int y2)
+void ListBox::SizeMove(const Pt& ul, const Pt& lr)
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     AdjustScrolls(true);
 }
 
@@ -869,7 +838,7 @@ void ListBox::SetColHeaders(Row* r)
             m_col_alignments.resize(m_header_row->size(), Alignment(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
         }
         NormalizeRow(m_header_row);
-        m_header_row->MoveTo(0, -m_header_row->Height());
+        m_header_row->MoveTo(Pt(0, -m_header_row->Height()));
         AttachChild(m_header_row);
     } else {
         m_header_row = new Row();
@@ -1185,7 +1154,7 @@ int ListBox::Insert(Row* row, int at, bool dropped)
 
     // "bump" the positions of, and selections on, lower rows down one row
     for (int i = static_cast<int>(m_rows.size() - 1); i > retval; --i) {
-        m_rows[i]->OffsetMove(0, row_height);
+        m_rows[i]->OffsetMove(Pt(0, row_height));
         if (m_selections.find(i - 1) != m_selections.end()) {
             m_selections.insert(i);
             m_selections.erase(i - 1);
@@ -1242,7 +1211,7 @@ ListBox::Row* ListBox::Erase(int idx, bool removing_duplicate)
         // "bump" all the hiliting and positions up one row
         m_selections.erase(idx);
         for (unsigned int i = idx; i < m_rows.size(); ++i) {
-            m_rows[i]->OffsetMove(0, -row_height);
+            m_rows[i]->OffsetMove(Pt(0, -row_height));
             if (m_selections.find(i + 1) != m_selections.end()) {
                 m_selections.insert(i);
                 m_selections.erase(i + 1);
@@ -1348,7 +1317,7 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
             int scroll_x = cl_sz.x - SCROLL_WIDTH;
             int scroll_y = 0;
             if (adjust_for_resize)
-                m_vscroll->SizeMove(scroll_x, scroll_y, scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
+                m_vscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0)));
             m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
             MoveChildUp(m_vscroll);
         }
@@ -1367,7 +1336,7 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
             int scroll_x = 0;
             int scroll_y = cl_sz.y - SCROLL_WIDTH;
             if (adjust_for_resize)
-                m_hscroll->SizeMove(scroll_x, scroll_y, scroll_x + cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH);
+                m_hscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH));
             m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
             MoveChildUp(m_hscroll);
         }
@@ -1398,7 +1367,7 @@ void ListBox::VScrolled(int tab_low, int tab_high, int low, int high)
     }
     int initial_x = m_rows.empty() ? 0 : m_rows[0]->RelativeUpperLeft().x;
     for (unsigned int i = 0; i < m_rows.size(); ++i) {
-        m_rows[i]->MoveTo(initial_x, position);
+        m_rows[i]->MoveTo(Pt(initial_x, position));
         position += m_rows[i]->Height();
     }
 }
@@ -1418,9 +1387,9 @@ void ListBox::HScrolled(int tab_low, int tab_high, int low, int high)
         accum += col_width;
     }
     for (unsigned int i = 0; i < m_rows.size(); ++i) {
-        m_rows[i]->MoveTo(position, m_rows[i]->RelativeUpperLeft().y);
+        m_rows[i]->MoveTo(Pt(position, m_rows[i]->RelativeUpperLeft().y));
     }
-    m_header_row->MoveTo(position, m_header_row->RelativeUpperLeft().y);
+    m_header_row->MoveTo(Pt(position, m_header_row->RelativeUpperLeft().y));
 }
 
 void ListBox::ClickAtRow(int row, Uint32 keys)
@@ -1490,5 +1459,5 @@ void ListBox::NormalizeRow(Row* row)
     row->SetColWidths(m_col_widths);
     row->SetColAlignments(m_col_alignments);
     row->SetMargin(m_cell_margin);
-    row->Resize(std::accumulate(m_col_widths.begin(), m_col_widths.end(), 0), row->Height());
+    row->Resize(Pt(std::accumulate(m_col_widths.begin(), m_col_widths.end(), 0), row->Height()));
 }

@@ -72,14 +72,15 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
     m_depressed_area(SBR_NONE)
 {
     SetColor(color);
+    boost::shared_ptr<Font> null_font;
     if (m_orientation == VERTICAL) {
-        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, w, w,          "", "", 0, color));
-        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(0, h - w, w, w,          "", "", 0, color));
-        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(0,     w, w, TabWidth(), "", "", 0, color));
+        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, w, w,          "", null_font, color));
+        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(0, h - w, w, w,          "", null_font, color));
+        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(0,     w, w, TabWidth(), "", null_font, color));
     } else {
-        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, h,          h, "", "", 0, color));
-        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(w - h, 0, h,          h, "", "", 0, color));
-        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(h,     0, TabWidth(), h, "", "", 0, color));
+        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, h,          h, "", null_font, color));
+        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(w - h, 0, h,          h, "", null_font, color));
+        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(h,     0, TabWidth(), h, "", null_font, color));
     }
 }
 
@@ -240,11 +241,11 @@ void Scroll::MouseLeave(const Pt& pt, Uint32 keys)
     m_depressed_area = SBR_NONE;
 }
 
-void Scroll::SizeMove(int x1, int y1, int x2, int y2)
+void Scroll::SizeMove(const Pt& ul, const Pt& lr)
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     int bn_width = (m_orientation == VERTICAL) ? Size().x : Size().y;
-    m_decr->SizeMove(0, 0, bn_width, bn_width);
+    m_decr->SizeMove(Pt(0, 0), Pt(bn_width, bn_width));
     m_incr->SizeMove(Size() - Pt(bn_width, bn_width), Size());
     m_tab->SizeMove(m_tab->UpperLeft(), (m_orientation == VERTICAL) ? Pt(bn_width, m_tab->LowerRight().y) :
                     Pt(m_tab->LowerRight().x, bn_width));

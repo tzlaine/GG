@@ -58,7 +58,7 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     m_line_style(style),
     m_tab_drag_offset(-1),
     m_tab(new Button(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
-                     m_orientation == VERTICAL ? m_tab_width : Height(), "", "", 0, color))
+                     m_orientation == VERTICAL ? m_tab_width : Height(), "", boost::shared_ptr<Font>(), color))
 {
     SetColor(color);
     SizeMove(UpperLeft(), LowerRight());
@@ -171,7 +171,7 @@ void Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
             tab_width = m_tab->Size().x;
         }
         if (click_pos - m_tab_drag_offset < 0)
-            m_orientation == VERTICAL ? m_tab->MoveTo(0, 0) : m_tab->MoveTo(0, 0);
+            m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, 0)) : m_tab->MoveTo(Pt(0, 0));
         else if (click_pos - m_tab_drag_offset + tab_width > slide_width)
             m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, slide_width - tab_width)) : m_tab->MoveTo(Pt(slide_width - tab_width, 0));
         else
@@ -242,13 +242,13 @@ void Slider::Keypress(Key key, Uint32 key_mods)
     }
 }
 
-void Slider::SizeMove(int x1, int y1, int x2, int y2)
+void Slider::SizeMove(const Pt& ul, const Pt& lr)
 {
-    Wnd::SizeMove(x1, y1, x2, y2);
+    Wnd::SizeMove(ul, lr);
     if (m_orientation == VERTICAL)
-        m_tab->SizeMove(0, 0, x2 - x1, m_tab_width);
+        m_tab->SizeMove(Pt(0, 0), Pt(lr.x - ul.x, m_tab_width));
     else
-        m_tab->SizeMove(0, 0, m_tab_width, y2 - y1);
+        m_tab->SizeMove(Pt(0, 0), Pt(m_tab_width, lr.y - ul.y));
     MoveTabToPosn();
 }
 
@@ -333,9 +333,9 @@ void Slider::MoveTabToPosn()
     int line_length = (m_orientation == VERTICAL ? Height() : Width()) - m_tab_width;
     int pixel_distance = static_cast<int>(line_length * fractional_distance);
     if (m_orientation == VERTICAL)
-        m_tab->MoveTo(m_tab->UpperLeft().x, Height() - m_tab_width - pixel_distance);
+        m_tab->MoveTo(Pt(m_tab->UpperLeft().x, Height() - m_tab_width - pixel_distance));
     else
-        m_tab->MoveTo(pixel_distance, m_tab->UpperLeft().y);
+        m_tab->MoveTo(Pt(pixel_distance, m_tab->UpperLeft().y));
 }
 
 void Slider::UpdatePosn()

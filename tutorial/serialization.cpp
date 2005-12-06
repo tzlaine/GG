@@ -40,8 +40,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 void QuitButtonClicked()
 {
-    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", "Vera.ttf", 12, GG::CLR_GRAY,
-                                GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
+    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::App::GetApp()->GetFont("Vera.ttf", 12),
+                                GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
     quit_dlg.Run();
 
     if (quit_dlg.Result() == 0)
@@ -52,8 +52,8 @@ struct BrowseFilesFunctor
 {
     void operator()()
     {
-        GG::FileDlg file_dlg("", "", false, false, "Vera.ttf", 12, GG::CLR_GRAY,
-                             GG::CLR_GRAY);
+        GG::FileDlg file_dlg("", "", false, false, GG::App::GetApp()->GetFont("Vera.ttf", 12),
+                             GG::CLR_GRAY, GG::CLR_GRAY);
         file_dlg.Run();
     }
     void operator()(int)
@@ -248,7 +248,8 @@ void ControlsTestGGApp::Initialize()
 
     GG::ListBox::Row* row;
     GG::DropDownList* drop_down_list =
-        new GG::DropDownList(0, 0, 150, 25, 150, GG::CLR_GRAY, GG::CLR_GRAY);
+        new GG::DropDownList(0, 0, 150, 25, 150, GG::CLR_GRAY);
+    drop_down_list->SetInteriorColor(GG::CLR_GRAY);
     drop_down_list->SetStyle(GG::LB_NOSORT);
     row = new GG::ListBox::Row();
     row->push_back(GG::ListBox::Row::CreateControl("I always", font, GG::CLR_WHITE));
@@ -274,7 +275,8 @@ void ControlsTestGGApp::Initialize()
     drop_down_list->Select(0);
     layout->Add(drop_down_list, 2, 0);
 
-    GG::Edit* edit = new GG::Edit(0, 0, 100, 35, "Edit me.", font, GG::CLR_GRAY, GG::CLR_WHITE, GG::CLR_SHADOW);
+    GG::Edit* edit = new GG::Edit(0, 0, 100, "Edit me.", font, GG::CLR_GRAY, GG::CLR_WHITE, GG::CLR_SHADOW);
+    edit->Resize(GG::Pt(100, 35));
     layout->Add(edit, 2, 1);
 
     GG::ListBox* list_box = new GG::ListBox(0, 0, 300, 200, GG::CLR_GRAY);
@@ -296,25 +298,27 @@ void ControlsTestGGApp::Initialize()
     layout->Add(slider, 4, 0);
 
     GG::Spin<int>* spin_int =
-        new GG::Spin<int>(0, 0, 50, 30, 1, 1, -5, 5, false, font, GG::CLR_GRAY, GG::CLR_WHITE);
-    spin_int->SetMaxSize(75, 30);
+        new GG::Spin<int>(0, 0, 50, 1, 1, -5, 5, false, font, GG::CLR_GRAY, GG::CLR_WHITE);
+    spin_int->Resize(GG::Pt(50, 30));
+    spin_int->SetMaxSize(GG::Pt(75, 30));
     layout->Add(spin_int, 5, 0);
 
     GG::Spin<double>* spin_double =
-        new GG::Spin<double>(0, 0, 50, 30, 1.0, 1.5, -0.5, 16.0, true, font, GG::CLR_GRAY, GG::CLR_WHITE);
-    spin_double->SetMaxSize(75, 30);
+        new GG::Spin<double>(0, 0, 50, 1.0, 1.5, -0.5, 16.0, true, font, GG::CLR_GRAY, GG::CLR_WHITE);
+    spin_double->Resize(GG::Pt(50, 30));
+    spin_double->SetMaxSize(GG::Pt(75, 30));
     layout->Add(spin_double, 6, 0);
 
     GG::Scroll* scroll =
         new GG::Scroll(0, 0, 14, 200, GG::Scroll::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
-    scroll->SetMaxSize(14, 1000);
+    scroll->SetMaxSize(GG::Pt(14, 1000));
     layout->Add(scroll, 4, 1, 3, 1);
 
     boost::shared_ptr<GG::Texture> circle_texture = GetTexture("hatchcircle.png");
     glDisable(GL_TEXTURE_2D);
     GG::DynamicGraphic* dynamic_graphic =
-        new GG::DynamicGraphic(0, 0, 64, 64, true, 64, 64, 0, circle_texture);
-    dynamic_graphic->SetMaxSize(64, 64);
+        new GG::DynamicGraphic(0, 0, 64, 64, true, 64, 64, 0, std::vector<boost::shared_ptr<GG::Texture> >(1, circle_texture));
+    dynamic_graphic->SetMaxSize(GG::Pt(64, 64));
     layout->Add(dynamic_graphic, 7, 0);
     GG::StaticGraphic* static_graphic =
         new GG::StaticGraphic(0, 0, 320, 128, circle_texture);

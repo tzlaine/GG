@@ -61,8 +61,8 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
-    Button(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Clr color, Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
+    Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
+           Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
     //@}
 
     /** \name Accessors */ //@{
@@ -164,9 +164,6 @@ public:
 
     /** \name Structors */ //@{
     StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
-                Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
-                int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
-    StateButton(int x, int y, int w, int h, const std::string& str, const std::string& font_filename, int pts, Uint32 text_fmt, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
     //@}

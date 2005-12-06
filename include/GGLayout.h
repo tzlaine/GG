@@ -82,12 +82,7 @@ namespace GG {
 class GG_API Layout : public Wnd
 {
 public:
-    using Wnd::SizeMove;
-
     /** \name Structors */ //@{
-    /** ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is negative. */
-    Layout(int rows, int columns, int border_margin = 0, int cell_margin = -1);
-
     /** ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is negative. */
     Layout(int x, int y, int w, int h, int rows, int columns, int border_margin = 0, int cell_margin = -1);
     //@}
@@ -105,7 +100,7 @@ public:
     //@}
    
     /** \name Mutators */ //@{
-    virtual void SizeMove(int x1, int y1, int x2, int y2);
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void MouseWheel(const Pt& pt, int move, Uint32 keys);
     virtual void Keypress(Key key, Uint32 key_mods);
 

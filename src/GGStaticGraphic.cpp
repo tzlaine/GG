@@ -40,13 +40,6 @@ StaticGraphic::StaticGraphic() :
 {
 }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const Texture* texture, Uint32 style/* = 0*/, Uint32 flags/* = 0*/) :
-    Control(x, y, w, h, flags),
-    m_style(style)
-{
-    Init(SubTexture(texture, 0, 0, texture->DefaultWidth(), texture->DefaultHeight()));
-}
-
 StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style/* = 0*/,
                              Uint32 flags/* = 0*/) :
     Control(x, y, w, h, flags),

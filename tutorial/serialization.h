@@ -29,7 +29,13 @@ private:
 template <class Archive>
 void CustomTextRow::serialize(Archive& ar, const unsigned int version)
 {
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(GG::ListBox::Row);
+    // Note that we cannot use BOOST_SERIALIZATION_BASE_OBJECT_NVP(GG::ListBox::Row).  This is because this would create
+    // a tag called <GG::ListBox::Row>, which is malformed XML.  Instead, we declare the base-class subobject's name to
+    // be GG_ListBox_Row.  Also note that this does not apply to BOOST_CLASS_EXPORT declarations, which do not produce a
+    // tag of the same name; they produce a class name stored as an attribute string, which is fine (e.g.
+    // <TAG ... class_name="GG::Layout" ...>).
+    ar  & boost::serialization::make_nvp("GG_ListBox_Row",
+                                         boost::serialization::base_object<GG::ListBox::Row>(*this));
 }
 
 

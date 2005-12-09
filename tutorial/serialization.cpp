@@ -111,6 +111,8 @@ private:
 ControlsTestGGApp::ControlsTestGGApp() : 
     SDLGGApp(1024, 768, false, "Control-Test GG App")
 {
+    SetSaveWndFunction(&::SaveWnd);
+    SetLoadWndFunction(&::LoadWnd);
 }
 
 void ControlsTestGGApp::Enter2DMode()

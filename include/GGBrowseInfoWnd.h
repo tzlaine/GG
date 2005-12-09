@@ -34,6 +34,8 @@
 
 #include <GGWnd.h>
 
+#include <boost/serialization/is_abstract.hpp>
+
 namespace GG {
 
 class Font;

@@ -90,25 +90,6 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
     The namespace that encloses all GG classes, functions, typedefs, enums, etc. */
 namespace GG {
 
-/** A metafunction required for a reimplementation of BOOST_SHARED_POINTER_EXPORT_GUID */
-namespace detail {
-    template <class T>
-    struct make_sp_counted_base_impl
-    {
-        typedef boost::detail::sp_counted_base_impl<T *, boost::checked_deleter<T> > type;
-    };
-}
-
-/** A reimplementation of BOOST_SHARED_POINTER_EXPORT_GUID that handles namespace- and class-nested typenames
-    properly. */
-#define GG_SHARED_POINTER_EXPORT_GUID(T, K)                                                      \
-    BOOST_CLASS_EXPORT_GUID(GG::detail::make_sp_counted_base_impl<T>::type, "shared_ptr<" K ">") \
-    BOOST_CLASS_EXPORT_GUID(T, K)
-
-/** A reimplementation of BOOST_SHARED_POINTER_EXPORT that handles namespace- and class-nested typenames properly. */
-#define GG_SHARED_POINTER_EXPORT(T) GG_SHARED_POINTER_EXPORT_GUID(T, BOOST_PP_STRINGIZE(T))
-
-
 /** Wnd creation flags */
 enum WndFlag {
     CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it

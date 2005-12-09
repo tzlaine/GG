@@ -158,55 +158,6 @@ private:
 class GG_API ColorDlg : public Wnd
 {
 public:
-    /** \name Structors */ //@{
-    /** ctor */
-    ColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
-             Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
-
-    /** ctor */
-    ColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Font>& font,
-             Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
-    //@}
-
-    /** \name Accessors */ //@{
-    /** returns true iff the user selected a color and then clicked the "Ok" button.  Otherwise, the color returned by
-        Result() will be the original color if one was selected, or undefined if one was not. */
-    bool ColorWasSelected() const;
-
-    /** returns the color selected by the user, if the "Ok" button was used to close the dialog. */
-    Clr Result() const;
-
-    const std::string& NewString(const std::string& str) const;        ///< returns the text to use to label the new color to \a str Default: "New"
-    const std::string& OldString(const std::string& str) const;        ///< returns the text to use to label the old color to \a str Default: "Old"
-    const std::string& RedString(const std::string& str) const;        ///< returns the text to use to label the red slider to \a str Default: "R:"
-    const std::string& GreenString(const std::string& str) const;      ///< returns the text to use to label the green slider to \a str Default: "G:"
-    const std::string& BlueString(const std::string& str) const;       ///< returns the text to use to label the blue slider to \a str Default: "B:"
-    const std::string& HueString(const std::string& str) const;        ///< returns the text to use to label the hue slider to \a str Default: "H:"
-    const std::string& SaturationString(const std::string& str) const; ///< returns the text to use to label the saturation slider to \a str Default: "S:"
-    const std::string& ValueString(const std::string& str) const;      ///< returns the text to use to label the value slider to \a str Default: "V:"
-    const std::string& AlphaString(const std::string& str) const;      ///< returns the text to use to label the alpha slider to \a str Default: "A:"
-    const std::string& OkString(const std::string& str) const;         ///< returns the text to use to label the ok button to \a str Default: "Ok"
-    const std::string& CancelString(const std::string& str) const;     ///< returns the text to use to label the cancel button to \a str Default: "Cancel"
-    //@}
-
-    /** \name Mutators */ //@{
-    void SetNewString(const std::string& str);        ///< sets the text to use to label the new color to \a str Default: "New"
-    void SetOldString(const std::string& str);        ///< sets the text to use to label the old color to \a str Default: "Old"
-    void SetRedString(const std::string& str);        ///< sets the text to use to label the red slider to \a str Default: "R:"
-    void SetGreenString(const std::string& str);      ///< sets the text to use to label the green slider to \a str Default: "G:"
-    void SetBlueString(const std::string& str);       ///< sets the text to use to label the blue slider to \a str Default: "B:"
-    void SetHueString(const std::string& str);        ///< sets the text to use to label the hue slider to \a str Default: "H:"
-    void SetSaturationString(const std::string& str); ///< sets the text to use to label the saturation slider to \a str Default: "S:"
-    void SetValueString(const std::string& str);      ///< sets the text to use to label the value slider to \a str Default: "V:"
-    void SetAlphaString(const std::string& str);      ///< sets the text to use to label the alpha slider to \a str Default: "A:"
-    void SetOkString(const std::string& str);         ///< sets the text to use to label the ok button to \a str Default: "Ok"
-    void SetCancelString(const std::string& str);     ///< sets the text to use to label the cancel button to \a str Default: "Cancel"
-
-    virtual void Render();
-    virtual void Keypress(Key key, Uint32 key_mods);
-    //@}
-
-protected:
     /** the button used to select the custom colors in ColorDlg. */
     class GG_API ColorButton : public Button
     {
@@ -219,7 +170,7 @@ protected:
         /** returns the custom color represented by the button */
         Clr RepresentedColor() const;
         //@}
-        
+
         /** \name Mutators */ //@{
         /** sets the custom color represented by the button */
         void SetRepresentedColor(const Clr& color);
@@ -269,6 +220,55 @@ protected:
         void serialize(Archive& ar, const unsigned int version);
     };
 
+    /** \name Structors */ //@{
+    /** ctor */
+    ColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
+             Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
+
+    /** ctor */
+    ColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Font>& font,
+             Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
+    //@}
+
+    /** \name Accessors */ //@{
+    /** returns true iff the user selected a color and then clicked the "Ok" button.  Otherwise, the color returned by
+        Result() will be the original color if one was selected, or undefined if one was not. */
+    bool ColorWasSelected() const;
+
+    /** returns the color selected by the user, if the "Ok" button was used to close the dialog. */
+    Clr Result() const;
+
+    const std::string& NewString(const std::string& str) const;        ///< returns the text to use to label the new color to \a str Default: "New"
+    const std::string& OldString(const std::string& str) const;        ///< returns the text to use to label the old color to \a str Default: "Old"
+    const std::string& RedString(const std::string& str) const;        ///< returns the text to use to label the red slider to \a str Default: "R:"
+    const std::string& GreenString(const std::string& str) const;      ///< returns the text to use to label the green slider to \a str Default: "G:"
+    const std::string& BlueString(const std::string& str) const;       ///< returns the text to use to label the blue slider to \a str Default: "B:"
+    const std::string& HueString(const std::string& str) const;        ///< returns the text to use to label the hue slider to \a str Default: "H:"
+    const std::string& SaturationString(const std::string& str) const; ///< returns the text to use to label the saturation slider to \a str Default: "S:"
+    const std::string& ValueString(const std::string& str) const;      ///< returns the text to use to label the value slider to \a str Default: "V:"
+    const std::string& AlphaString(const std::string& str) const;      ///< returns the text to use to label the alpha slider to \a str Default: "A:"
+    const std::string& OkString(const std::string& str) const;         ///< returns the text to use to label the ok button to \a str Default: "Ok"
+    const std::string& CancelString(const std::string& str) const;     ///< returns the text to use to label the cancel button to \a str Default: "Cancel"
+    //@}
+
+    /** \name Mutators */ //@{
+    void SetNewString(const std::string& str);        ///< sets the text to use to label the new color to \a str Default: "New"
+    void SetOldString(const std::string& str);        ///< sets the text to use to label the old color to \a str Default: "Old"
+    void SetRedString(const std::string& str);        ///< sets the text to use to label the red slider to \a str Default: "R:"
+    void SetGreenString(const std::string& str);      ///< sets the text to use to label the green slider to \a str Default: "G:"
+    void SetBlueString(const std::string& str);       ///< sets the text to use to label the blue slider to \a str Default: "B:"
+    void SetHueString(const std::string& str);        ///< sets the text to use to label the hue slider to \a str Default: "H:"
+    void SetSaturationString(const std::string& str); ///< sets the text to use to label the saturation slider to \a str Default: "S:"
+    void SetValueString(const std::string& str);      ///< sets the text to use to label the value slider to \a str Default: "V:"
+    void SetAlphaString(const std::string& str);      ///< sets the text to use to label the alpha slider to \a str Default: "A:"
+    void SetOkString(const std::string& str);         ///< sets the text to use to label the ok button to \a str Default: "Ok"
+    void SetCancelString(const std::string& str);     ///< sets the text to use to label the cancel button to \a str Default: "Cancel"
+
+    virtual void Render();
+    virtual void Keypress(Key key, Uint32 key_mods);
+    //@}
+
+protected:
     /** \name Structors */ //@{
     ColorDlg(); ///< default ctor
     //@}

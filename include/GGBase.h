@@ -26,7 +26,7 @@
 /* $Header$ */
 
 /** \file GGBase.h
-    Contains numerous enums, utility classes, and free functions used throughout the other GG headers. */
+    Contains enums, utility classes, and free functions used throughout GG. */
 
 #ifndef _GGBase_h_
 #define _GGBase_h_
@@ -109,6 +109,21 @@ namespace detail {
 #define GG_SHARED_POINTER_EXPORT(T) GG_SHARED_POINTER_EXPORT_GUID(T, BOOST_PP_STRINGIZE(T))
 
 
+/** Wnd creation flags */
+enum WndFlag {
+    CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
+    DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
+    DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
+    RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
+
+    /** this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows */
+    ONTOP =        1 << 4,
+
+    /** this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above
+        "on-top" windows, and should not be flagged as ONTOP. */
+    MODAL =        1 << 5
+};
+
 /** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/
 enum WndRegion {
     WR_NONE = -1, 
@@ -123,7 +138,6 @@ enum WndRegion {
     WR_BOTTOMRIGHT
 };
 
-
 /** Generic alignment flags, used by value in text format alignment flags, graphic alignment flags, etc. */
 enum Alignment {
     ALIGN_NONE =       0,
@@ -135,20 +149,11 @@ enum Alignment {
     ALIGN_RIGHT =      1 << 5,     ///< Aligned to right.
 };
 
-// define EnumMap and stream operators for Alignment
-GG_ENUM_MAP_BEGIN(Alignment)
-    GG_ENUM_MAP_INSERT(ALIGN_NONE)
-    GG_ENUM_MAP_INSERT(ALIGN_VCENTER)
-    GG_ENUM_MAP_INSERT(ALIGN_TOP)
-    GG_ENUM_MAP_INSERT(ALIGN_BOTTOM)
-    GG_ENUM_MAP_INSERT(ALIGN_CENTER)
-    GG_ENUM_MAP_INSERT(ALIGN_LEFT)
-    GG_ENUM_MAP_INSERT(ALIGN_RIGHT)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(Alignment)
-GG_ENUM_STREAM_OUT(Alignment)
-
+/** The orientations for scrollbars, sliders, etc. */
+enum Orientation {
+    VERTICAL,
+    HORIZONTAL
+};
 
 /** These flags are packed (via logical or) into a 32-bit unsigned int.  Bits 16-23 of the uint specify the number of 
    characters for each tab. The default number of characters per tab is 8.*/
@@ -168,25 +173,7 @@ enum TextFormat {
     TF_IGNORETAGS = 1 << 8         ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
 };
 
-// define EnumMap and stream operators for TextFormat
-GG_ENUM_MAP_BEGIN(TextFormat)
-    GG_ENUM_MAP_INSERT(TF_NONE)
-    GG_ENUM_MAP_INSERT(TF_VCENTER)
-    GG_ENUM_MAP_INSERT(TF_TOP)
-    GG_ENUM_MAP_INSERT(TF_BOTTOM)
-    GG_ENUM_MAP_INSERT(TF_CENTER)
-    GG_ENUM_MAP_INSERT(TF_LEFT)
-    GG_ENUM_MAP_INSERT(TF_RIGHT)
-    GG_ENUM_MAP_INSERT(TF_WORDBREAK)
-    GG_ENUM_MAP_INSERT(TF_LINEWRAP)
-    GG_ENUM_MAP_INSERT(TF_IGNORETAGS)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(TextFormat)
-GG_ENUM_STREAM_OUT(TextFormat)
-
-
-/** styles for StaticGraphic controls*/
+/** Styles for StaticGraphic controls. */
 enum GraphicStyle {
     GR_NONE =      0,
     GR_VCENTER =   ALIGN_VCENTER, ///< Centers graphic vertically.
@@ -202,25 +189,23 @@ enum GraphicStyle {
     GR_PROPSCALE = 1 << 8         ///< If GR_FITGRAPHIC or GR_SHRINKFIT is used, this ensures scaling is done proportionally.
 };
 
-// define EnumMap and stream operators for GraphicStyle
-GG_ENUM_MAP_BEGIN(GraphicStyle)
-    GG_ENUM_MAP_INSERT(GR_NONE)
-    GG_ENUM_MAP_INSERT(GR_VCENTER)
-    GG_ENUM_MAP_INSERT(GR_TOP)
-    GG_ENUM_MAP_INSERT(GR_BOTTOM)
-    GG_ENUM_MAP_INSERT(GR_CENTER)
-    GG_ENUM_MAP_INSERT(GR_LEFT)
-    GG_ENUM_MAP_INSERT(GR_RIGHT)
-    GG_ENUM_MAP_INSERT(GR_FITGRAPHIC)
-    GG_ENUM_MAP_INSERT(GR_SHRINKFIT)
-    GG_ENUM_MAP_INSERT(GR_PROPSCALE)
-GG_ENUM_MAP_END
+/** The built-in visual styles of state buttons. */
+enum StateButtonStyle {
+    SBSTYLE_3D_XBOX,        ///< draws a down-beveled box with a 3D x-mark inside
+    SBSTYLE_3D_CHECKBOX,    ///< draws a down-beveled box with a 3D check-mark inside
+    SBSTYLE_3D_RADIO,       ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
+    SBSTYLE_3D_BUTTON,      ///< draws a button that toggles bewtween popped up and pushed down
+    SBSTYLE_3D_ROUND_BUTTON ///< draws a down-beveled circle with an up-beveled circle inside
+};
 
-GG_ENUM_STREAM_IN(GraphicStyle)
-GG_ENUM_STREAM_OUT(GraphicStyle)
+/** The rendering styles of the line the tab slides over in a Slider. */
+enum SliderLineStyle {
+    FLAT,
+    RAISED,
+    GROOVED
+};
 
-
-/** styles for ListBox controls*/
+/** Styles for ListBox controls. */
 enum ListBoxStyle {
     LB_NONE =            0,
     LB_VCENTER =         ALIGN_VCENTER, ///< Cells are aligned with the top of the list box control.
@@ -243,26 +228,26 @@ enum ListBoxStyle {
     LB_BROWSEUPDATES =   1 << 19,       ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
 };   
 
-// define EnumMap and stream operators for ListBoxStyle
-GG_ENUM_MAP_BEGIN(ListBoxStyle)
-    GG_ENUM_MAP_INSERT(LB_NONE)
-    GG_ENUM_MAP_INSERT(LB_VCENTER)
-    GG_ENUM_MAP_INSERT(LB_TOP)
-    GG_ENUM_MAP_INSERT(LB_BOTTOM)
-    GG_ENUM_MAP_INSERT(LB_CENTER)
-    GG_ENUM_MAP_INSERT(LB_LEFT)
-    GG_ENUM_MAP_INSERT(LB_RIGHT)
-    GG_ENUM_MAP_INSERT(LB_NOSORT)
-    GG_ENUM_MAP_INSERT(LB_SORTDESCENDING)
-    GG_ENUM_MAP_INSERT(LB_NOSEL)
-    GG_ENUM_MAP_INSERT(LB_SINGLESEL)
-    GG_ENUM_MAP_INSERT(LB_QUICKSEL)
-    GG_ENUM_MAP_INSERT(LB_USERDELETE)
-    GG_ENUM_MAP_INSERT(LB_BROWSEUPDATES)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(ListBoxStyle)
-GG_ENUM_STREAM_OUT(ListBoxStyle)
+/** Adpated from SDLKey enum in SDL_keysym.h of the SDL library; enumeration of valid key mods (possibly |'d together). */
+enum Mod {
+    GGKMOD_NONE       = 0x0000,
+    GGKMOD_LSHIFT     = 0x0001,
+    GGKMOD_RSHIFT     = 0x0002,
+    GGKMOD_LCTRL      = 0x0040,
+    GGKMOD_RCTRL      = 0x0080,
+    GGKMOD_LALT       = 0x0100,
+    GGKMOD_RALT       = 0x0200,
+    GGKMOD_LMETA      = 0x0400,
+    GGKMOD_RMETA      = 0x0800,
+    GGKMOD_NUM        = 0x1000,
+    GGKMOD_CAPS       = 0x2000,
+    GGKMOD_MODE       = 0x4000,
+    GGKMOD_RESERVED   = 0x8000,
+    GGKMOD_CTRL       = (GGKMOD_LCTRL | GGKMOD_RCTRL),    ///< either control key
+    GGKMOD_SHIFT      = (GGKMOD_LSHIFT | GGKMOD_RSHIFT),  ///< either shift key
+    GGKMOD_ALT        = (GGKMOD_LALT | GGKMOD_RALT),      ///< either alt key
+    GGKMOD_META       = (GGKMOD_LMETA | GGKMOD_RMETA)     ///< either meta key
+};
 
 /** adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added*/
 enum Key {
@@ -545,6 +530,146 @@ enum Key {
     GGK_LAST
 };
 
+/** Translates a printable key combination from a keypad press to the equivalent main-keyboard press.  \a key is \a only
+    modified if it is a keypad value, and numlock is taken into account.  For instance, with numlock on, a GGK_KP7
+    (which is equal to a nonprintable char value) becomes a GGK_7 (which equals '7', and is printable). */
+inline void KeypadKeyToPrintable(Key& key, Uint32 key_mods)
+{
+    if (GGK_KP0 <= key && key <= GGK_KP9 && (key_mods & GGKMOD_NUM)) {
+        key = Key(GGK_0 + (key - GGK_KP0));
+    } else {
+        switch (key) {
+        case GGK_KP_PERIOD:
+            if (key_mods & GGKMOD_NUM) key = GGK_PERIOD;
+            break;
+        case GGK_KP_DIVIDE:   key = GGK_SLASH;    break;
+        case GGK_KP_MULTIPLY: key = GGK_ASTERISK; break;
+        case GGK_KP_MINUS:    key = GGK_MINUS;    break;
+        case GGK_KP_PLUS:     key = GGK_PLUS;     break;
+        case GGK_KP_EQUALS:   key = GGK_EQUALS;   break;
+        default: break;
+        }
+    }
+}
+
+
+////////////////////////////////////////
+// EnumMaps and stream operators
+////////////////////////////////////////
+
+// define EnumMap and stream operators for Slider::LineStyleType
+GG_ENUM_MAP_BEGIN(SliderLineStyle)
+    GG_ENUM_MAP_INSERT(FLAT)
+    GG_ENUM_MAP_INSERT(RAISED)
+    GG_ENUM_MAP_INSERT(GROOVED)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(SliderLineStyle)
+GG_ENUM_STREAM_OUT(SliderLineStyle)
+
+// define EnumMap and stream operators for ListBoxStyle
+GG_ENUM_MAP_BEGIN(ListBoxStyle)
+    GG_ENUM_MAP_INSERT(LB_NONE)
+    GG_ENUM_MAP_INSERT(LB_VCENTER)
+    GG_ENUM_MAP_INSERT(LB_TOP)
+    GG_ENUM_MAP_INSERT(LB_BOTTOM)
+    GG_ENUM_MAP_INSERT(LB_CENTER)
+    GG_ENUM_MAP_INSERT(LB_LEFT)
+    GG_ENUM_MAP_INSERT(LB_RIGHT)
+    GG_ENUM_MAP_INSERT(LB_NOSORT)
+    GG_ENUM_MAP_INSERT(LB_SORTDESCENDING)
+    GG_ENUM_MAP_INSERT(LB_NOSEL)
+    GG_ENUM_MAP_INSERT(LB_SINGLESEL)
+    GG_ENUM_MAP_INSERT(LB_QUICKSEL)
+    GG_ENUM_MAP_INSERT(LB_USERDELETE)
+    GG_ENUM_MAP_INSERT(LB_BROWSEUPDATES)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(ListBoxStyle)
+GG_ENUM_STREAM_OUT(ListBoxStyle)
+
+// define EnumMap and stream operators for Wnd::WndFlag
+GG_ENUM_MAP_BEGIN(WndFlag)
+    GG_ENUM_MAP_INSERT(CLICKABLE)
+    GG_ENUM_MAP_INSERT(DRAGABLE)
+    GG_ENUM_MAP_INSERT(DRAG_KEEPER)
+    GG_ENUM_MAP_INSERT(RESIZABLE)
+    GG_ENUM_MAP_INSERT(ONTOP)
+    GG_ENUM_MAP_INSERT(MODAL)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(WndFlag)
+GG_ENUM_STREAM_OUT(WndFlag)
+
+// define EnumMap and stream operators for Alignment
+GG_ENUM_MAP_BEGIN(Alignment)
+    GG_ENUM_MAP_INSERT(ALIGN_NONE)
+    GG_ENUM_MAP_INSERT(ALIGN_VCENTER)
+    GG_ENUM_MAP_INSERT(ALIGN_TOP)
+    GG_ENUM_MAP_INSERT(ALIGN_BOTTOM)
+    GG_ENUM_MAP_INSERT(ALIGN_CENTER)
+    GG_ENUM_MAP_INSERT(ALIGN_LEFT)
+    GG_ENUM_MAP_INSERT(ALIGN_RIGHT)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(Alignment)
+GG_ENUM_STREAM_OUT(Alignment)
+
+// define EnumMap and stream operators for Orientation
+GG_ENUM_MAP_BEGIN(Orientation)
+    GG_ENUM_MAP_INSERT(VERTICAL)
+    GG_ENUM_MAP_INSERT(HORIZONTAL)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(Orientation)
+GG_ENUM_STREAM_OUT(Orientation)
+
+// define EnumMap and stream operators for TextFormat
+GG_ENUM_MAP_BEGIN(TextFormat)
+    GG_ENUM_MAP_INSERT(TF_NONE)
+    GG_ENUM_MAP_INSERT(TF_VCENTER)
+    GG_ENUM_MAP_INSERT(TF_TOP)
+    GG_ENUM_MAP_INSERT(TF_BOTTOM)
+    GG_ENUM_MAP_INSERT(TF_CENTER)
+    GG_ENUM_MAP_INSERT(TF_LEFT)
+    GG_ENUM_MAP_INSERT(TF_RIGHT)
+    GG_ENUM_MAP_INSERT(TF_WORDBREAK)
+    GG_ENUM_MAP_INSERT(TF_LINEWRAP)
+    GG_ENUM_MAP_INSERT(TF_IGNORETAGS)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(TextFormat)
+GG_ENUM_STREAM_OUT(TextFormat)
+
+// define EnumMap and stream operators for GraphicStyle
+GG_ENUM_MAP_BEGIN(GraphicStyle)
+    GG_ENUM_MAP_INSERT(GR_NONE)
+    GG_ENUM_MAP_INSERT(GR_VCENTER)
+    GG_ENUM_MAP_INSERT(GR_TOP)
+    GG_ENUM_MAP_INSERT(GR_BOTTOM)
+    GG_ENUM_MAP_INSERT(GR_CENTER)
+    GG_ENUM_MAP_INSERT(GR_LEFT)
+    GG_ENUM_MAP_INSERT(GR_RIGHT)
+    GG_ENUM_MAP_INSERT(GR_FITGRAPHIC)
+    GG_ENUM_MAP_INSERT(GR_SHRINKFIT)
+    GG_ENUM_MAP_INSERT(GR_PROPSCALE)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(GraphicStyle)
+GG_ENUM_STREAM_OUT(GraphicStyle)
+
+// define EnumMap and stream operators for StateButtonStyle
+GG_ENUM_MAP_BEGIN(StateButtonStyle)
+    GG_ENUM_MAP_INSERT(SBSTYLE_3D_XBOX)
+    GG_ENUM_MAP_INSERT(SBSTYLE_3D_CHECKBOX)
+    GG_ENUM_MAP_INSERT(SBSTYLE_3D_RADIO)
+    GG_ENUM_MAP_INSERT(SBSTYLE_3D_BUTTON)
+    GG_ENUM_MAP_INSERT(SBSTYLE_3D_ROUND_BUTTON)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(StateButtonStyle)
+GG_ENUM_STREAM_OUT(StateButtonStyle)
+
 // define EnumMap and stream operators for Mod
 GG_ENUM_MAP_BEGIN(Key)
     GG_ENUM_MAP_INSERT(GGK_UNKNOWN)
@@ -820,27 +945,6 @@ GG_ENUM_STREAM_IN(Key)
 GG_ENUM_STREAM_OUT(Key)
 
 
-/** adpated from SDLKey enum in SDL_keysym.h of the SDL library; enumeration of valid key mods (possibly |'d together)*/
-enum Mod {
-    GGKMOD_NONE       = 0x0000,
-    GGKMOD_LSHIFT     = 0x0001,
-    GGKMOD_RSHIFT     = 0x0002,
-    GGKMOD_LCTRL      = 0x0040,
-    GGKMOD_RCTRL      = 0x0080,
-    GGKMOD_LALT       = 0x0100,
-    GGKMOD_RALT       = 0x0200,
-    GGKMOD_LMETA      = 0x0400,
-    GGKMOD_RMETA      = 0x0800,
-    GGKMOD_NUM        = 0x1000,
-    GGKMOD_CAPS       = 0x2000,
-    GGKMOD_MODE       = 0x4000,
-    GGKMOD_RESERVED   = 0x8000,
-    GGKMOD_CTRL       = (GGKMOD_LCTRL | GGKMOD_RCTRL),    ///< either control key
-    GGKMOD_SHIFT      = (GGKMOD_LSHIFT | GGKMOD_RSHIFT),  ///< either shift key
-    GGKMOD_ALT        = (GGKMOD_LALT | GGKMOD_RALT),      ///< either alt key
-    GGKMOD_META       = (GGKMOD_LMETA | GGKMOD_RMETA)     ///< either meta key
-};
-
 // define EnumMap and stream operators for Mod
 GG_ENUM_MAP_BEGIN(Mod)
     GG_ENUM_MAP_INSERT(GGKMOD_NONE)
@@ -864,29 +968,6 @@ GG_ENUM_MAP_END
 
 GG_ENUM_STREAM_IN(Mod)
 GG_ENUM_STREAM_OUT(Mod)
-
-
-/** Translates a printable key combination from a keypad press to the equivalent main-keyboard press.  \a key is \a only
-    modified if it is a keypad value, and numlock is taken into account.  For instance, with numlock on, a GGK_KP7
-    (which is equal to a nonprintable char value) becomes a GGK_7 (which equals '7', and is printable). */
-inline void KeypadKeyToPrintable(Key& key, Uint32 key_mods)
-{
-    if (GGK_KP0 <= key && key <= GGK_KP9 && (key_mods & GGKMOD_NUM)) {
-        key = Key(GGK_0 + (key - GGK_KP0));
-    } else {
-        switch (key) {
-        case GGK_KP_PERIOD:
-            if (key_mods & GGKMOD_NUM) key = GGK_PERIOD;
-            break;
-        case GGK_KP_DIVIDE:   key = GGK_SLASH;    break;
-        case GGK_KP_MULTIPLY: key = GGK_ASTERISK; break;
-        case GGK_KP_MINUS:    key = GGK_MINUS;    break;
-        case GGK_KP_PLUS:     key = GGK_PLUS;     break;
-        case GGK_KP_EQUALS:   key = GGK_EQUALS;   break;
-        default: break;
-        }
-    }
-}
 
 } // namespace GG
 

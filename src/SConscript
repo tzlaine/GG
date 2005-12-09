@@ -23,6 +23,7 @@ sources = [
     'GGScroll.cpp',
     'GGSlider.cpp',
     'GGStaticGraphic.cpp',
+    'GGStyleFactory.cpp',
     'GGTextControl.cpp',
     'GGTexture.cpp',
     'GGWnd.cpp',

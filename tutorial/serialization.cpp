@@ -16,6 +16,7 @@
 #include "GGStaticGraphic.h"
 #include "GGTextControl.h"
 #include "GGFileDlg.h"
+#include "GGColorDlg.h"
 #include "GGThreeButtonDlg.h"
 #include "SDLGGApp.h"
 
@@ -234,10 +235,10 @@ void ControlsTestGGApp::Initialize()
     GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10);
     GG::StateButton* state_button8 =
         new GG::StateButton(0,   0, 100, 25, "Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::StateButton::SBSTYLE_3D_RADIO);
+                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
     GG::StateButton* state_button9 =
         new GG::StateButton(100, 0, 100, 25, "Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::StateButton::SBSTYLE_3D_RADIO);
+                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
     radio_button_group->AddButton(state_button8);
     radio_button_group->AddButton(state_button9);
     layout->Add(radio_button_group, 1, 0);
@@ -252,25 +253,25 @@ void ControlsTestGGApp::Initialize()
     drop_down_list->SetInteriorColor(GG::CLR_GRAY);
     drop_down_list->SetStyle(GG::LB_NOSORT);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("I always", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("I always", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("thought", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("thought", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("\"combo box\"", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("\"combo box\"", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("was a lousy", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("was a lousy", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("way to describe", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("way to describe", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("controls", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("controls", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("like this", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("like this", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     drop_down_list->Select(0);
     layout->Add(drop_down_list, 2, 0);
@@ -294,7 +295,7 @@ void ControlsTestGGApp::Initialize()
     layout->Add(multi_edit, 3, 1);
 
     GG::Slider* slider =
-        new GG::Slider(0, 0, 300, 14, 1, 100, GG::Slider::HORIZONTAL, GG::Slider::RAISED, GG::CLR_GRAY, 10);
+        new GG::Slider(0, 0, 300, 14, 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
     layout->Add(slider, 4, 0);
 
     GG::Spin<int>* spin_int =
@@ -310,7 +311,7 @@ void ControlsTestGGApp::Initialize()
     layout->Add(spin_double, 6, 0);
 
     GG::Scroll* scroll =
-        new GG::Scroll(0, 0, 14, 200, GG::Scroll::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
+        new GG::Scroll(0, 0, 14, 200, GG::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
     scroll->SetMaxSize(GG::Pt(14, 1000));
     layout->Add(scroll, 4, 1, 3, 1);
 
@@ -334,6 +335,9 @@ void ControlsTestGGApp::Initialize()
 ////////////////////////////////////////////////////////////////////////////////
 // End of old tutorial code.
 ////////////////////////////////////////////////////////////////////////////////
+
+    // this is not actually displayed; it's just here to make sure that ColorDlg serialization works
+    GG::ColorDlg* color_dlg = new GG::ColorDlg(100, 100, font, GG::CLR_GRAY, GG::CLR_GRAY);
 
     // Since we're saving to and then immediately reloading from test.xml, we need to enclose the serialiaztion code
     // inside of code blocks, so that the boost::archive::xml_*archive objects will be destroyed when they go out of
@@ -359,6 +363,9 @@ void ControlsTestGGApp::Initialize()
         SaveWnd(plan_text_control, "plan_text_control", oa);
         SaveWnd(files_button, "files_button", oa);
         SaveWnd(quit_button, "quit_button", oa);
+
+        // save a color dialog just to make sure it works
+        SaveWnd(color_dlg, "color_dialog", oa);
     }
 
     // Here, we delete the layout (which automatically causes all its children to be freed as well).  After doing this,
@@ -366,6 +373,9 @@ void ControlsTestGGApp::Initialize()
     delete layout;
     layout = 0;
     plan_text_control = 0;
+
+    delete color_dlg;
+    color_dlg = 0;
 
     {
         std::ifstream ifs("test.xml");
@@ -375,6 +385,9 @@ void ControlsTestGGApp::Initialize()
         LoadWnd(plan_text_control, "plan_text_control", ia);
         LoadWnd(files_button, "files_button", ia);
         LoadWnd(quit_button, "quit_button", ia);
+
+        // re-load the color dialog just to make sure it works
+        LoadWnd(color_dlg, "color_dialog", ia);
     }
 
 ////////////////////////////////////////////////////////////////////////////////

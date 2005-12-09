@@ -49,8 +49,13 @@ class DropDownList;
 class Button;
 class Font;
 
-/** the default file open/save dialog box.  This dialog, like all the common GG dialogs, is modal.  It asks the user
-    for one or more filenames, which the caller may retrieve with a call to Result() after the dialog is closed.*/
+/** the default file open/save dialog box.  This dialog, like all the common GG dialogs, is modal.  It asks the user for
+    one or more filenames, which the caller may retrieve with a call to Result() after the dialog is closed.  Note that
+    all strings displayed during the run of the FileDlg are customizable.  Sometimes, the FileDlg will pop up a message
+    box (a ThreeButtonDlg) and notify the user of something or ask for input.  These message strings are also
+    customizable.  Some of these strings include the filename as part of the message.  When replacing these strings with
+    your own, you need to include the placement of the filename in the message with the character sequence "%1%" (see
+    boost.format for details). */
 class GG_API FileDlg : public Wnd
 {
 public:
@@ -62,44 +67,55 @@ public:
         is a save or load dialog; \a multi indicates whether multiple file selections are allowed.  \throw
         GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const boost::shared_ptr<Font>& font,
-            Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0, Button* cancel = 0, ListBox* files_list = 0,
-            Edit* files_edit = 0, DropDownList* filter_list = 0);
-
-    /** ctor that allows specification of allowed file types.  Parameters \a directory and \a filename pass an initial
-        directory and filename to the dialog, if desired (such as when "Save As" is called in an app, and there is a
-        current filename).  If \a directory is specified, it is taken as-is if it is absolute, or relative to
-        boost::filesystem::initial_path() if it is relative.  If \a directory is "", the initial directory is
-        WorkingDirectory().  \a save indicates whether this is a save or load dialog; \a multi indicates whether
-        multiple file selections are allowed; \a types is a vector of pairs of strings containing the allowed file
-        types; \a user_edit_types indicates whether the user should be allowed to edit the file types.  Each pair in the
-        \a types parameter contains a description of the file type in its .first member, and wildcarded file types in
-        its .second member.  For example, an entry might be ("Text Files (*.txt)", "*.txt"). Only the '*' character is
-        supported as a wildcard.  More than one wildcard expression can be specified in a filter; if so, they must be
-        separated by a comma and exactly one space (", ").  Each filter is considered OR-ed together with the others, so
-        passing "*.tga, *.png" specifies listing any file that is either a Targa or a PNG file.  Note that an empty
-        filter is considered to match all files, so ("All Files", "") is perfectly correct.  \throw
-        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
-    FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const std::vector<std::pair<std::string, std::string> >& types,
-            const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color = CLR_BLACK, Button* ok = 0,
-            Button* cancel = 0, ListBox* files_list = 0, Edit* files_edit = 0, DropDownList* filter_list = 0);
+            Clr color, Clr border_color, Clr text_color = CLR_BLACK);
     //@}
 
     /** \name Accessors */ //@{
-    Clr ButtonColor() const; ///< returns the color of the buttons in the dialog
-
     std::set<std::string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
+
+    const std::string& FilesString() const;                ///< returns the text label next to the files edit box to \a str Default: "File(s):"
+    const std::string& FileTypesString() const;            ///< returns the text label next to the file types dropdown list to \a str Default: "Type(s):"
+    const std::string& SaveString() const;                 ///< returns the text of the ok button in its "save" state to \a str Default: "Save"
+    const std::string& OpenString() const;                 ///< returns the text of the ok button in its "open" state to \a str Default: "Open"
+    const std::string& CancelString() const;               ///< returns the text of the cancel button to \a str Default: "Cancel"
+
+    const std::string& MalformedFilenameString() const;    ///< returns the error message when a malformed filename is encountered to \a str Default: "Invalid file name."
+    const std::string& OverwritePromptString() const;      ///< returns the prompt message when a malformed file-overwrite is requested to \a str Default: "%1% exists.\nOk to overwrite it?"
+    const std::string& InvalidFilenameString() const;      ///< returns the error message when an invalid filename is encountered to \a str Default: "\"%1%\"\nis an invalid file name."
+    const std::string& FilenameIsADirectoryString() const; ///< returns the error message when a directory instead of a filename is specified to \a str Default: "\"%1%\"\nis a directory."
+    const std::string& FileDoesNotExistString() const;     ///< returns the error message when a nonexistent filename is encountered to \a str Default: "File \"%1%\"\ndoes not exist."
+    const std::string& DeviceIsNotReadyString() const;     ///< returns the error message when an unmounted drive is encountered to \a str Default: "The device is not ready."
+    const std::string& ThreeButtonDlgOKString() const;     ///< returns the text of the 3-button dialog's ok button to \a str Default: "Ok"
+    const std::string& ThreeButtonDlgCancelString() const; ///< returns the text of the 3-button dialog's cancel button to \a str Default: "Cancel"
     //@}
 
     /** \name Mutators */ //@{
     virtual void Render();
     virtual void Keypress(Key key, Uint32 key_mods);
 
-    void SetButtonColor(Clr color);                              ///< sets the color used to render the dialog's buttons
-    void SetFilesString(const std::string& files_str);           ///< sets the text label next to the files edit box to \a files_str (this is "File(s):" by default)
-    void SetFileTypesString(const std::string& files_types_str); ///< sets the text label next to the file types dropdown list to \a file_types_str (this is "Type(s):" by default)
-    void SetSaveString(const std::string& save_str);             ///< sets the text of the ok button in its "save" state to \a save_str (this is "Save" by default)
-    void SetOpenString(const std::string& open_str);             ///< sets the text of the ok button in its "open" state to \a open_str (this is "Open" by default)
-    void SetCancelString(const std::string& cancel_str);         ///< sets the text of the cancel button to \a cancel_str (this is "Cancel" by default)
+    /** sets the allowed file types.  Each pair in the \a types parameter contains a description of the file type in its
+        .first member, and wildcarded file types in its .second member.  For example, an entry might be ("Text Files
+        (*.txt)", "*.txt"). Only the '*' character is supported as a wildcard.  More than one wildcard expression can be
+        specified in a filter; if so, they must be separated by a comma and exactly one space (", ").  Each filter is
+        considered OR-ed together with the others, so passing "*.tga, *.png" specifies listing any file that is either a
+        Targa or a PNG file.  Note that an empty filter is considered to match all files, so ("All Files", "") is
+        perfectly correct. */
+    void SetFileFilters(const std::vector<std::pair<std::string, std::string> >& filters);
+
+    void SetFilesString(const std::string& str);                ///< sets the text label next to the files edit box to \a str Default: "File(s):"
+    void SetFileTypesString(const std::string& str);            ///< sets the text label next to the file types dropdown list to \a str Default: "Type(s):"
+    void SetSaveString(const std::string& str);                 ///< sets the text of the ok button in its "save" state to \a str Default: "Save"
+    void SetOpenString(const std::string& str);                 ///< sets the text of the ok button in its "open" state to \a str Default: "Open"
+    void SetCancelString(const std::string& str);               ///< sets the text of the cancel button to \a str Default: "Cancel"
+
+    void SetMalformedFilenameString(const std::string& str);    ///< sets the error message when a malformed filename is encountered to \a str Default: "Invalid file name."
+    void SetOverwritePromptString(const std::string& str);      ///< sets the prompt message when a malformed file-overwrite is requested to \a str Default: "%1% exists.\nOk to overwrite it?"
+    void SetInvalidFilenameString(const std::string& str);      ///< sets the error message when an invalid filename is encountered to \a str Default: "\"%1%\"\nis an invalid file name."
+    void SetFilenameIsADirectoryString(const std::string& str); ///< sets the error message when a directory instead of a filename is specified to \a str Default: "\"%1%\"\nis a directory."
+    void SetFileDoesNotExistString(const std::string& str);     ///< sets the error message when a nonexistent filename is encountered to \a str Default: "File \"%1%\"\ndoes not exist."
+    void SetDeviceIsNotReadyString(const std::string& str);     ///< sets the error message when an unmounted drive is encountered to \a str Default: "The device is not ready."
+    void SetThreeButtonDlgOKString(const std::string& str);     ///< sets the text of the 3-button dialog's ok button to \a str Default: "Ok"
+    void SetThreeButtonDlgCancelString(const std::string& str); ///< sets the text of the 3-button dialog's cancel button to \a str Default: "Cancel"
     //@}
 
     /** returns the current directory (the one that will be used by default on the next invocation of FileDlg::Run()) */
@@ -142,7 +158,6 @@ private:
     Clr              m_color;
     Clr              m_border_color;
     Clr              m_text_color;
-    Clr              m_button_color;
     boost::shared_ptr<Font>
                      m_font;
 
@@ -156,6 +171,15 @@ private:
     std::string      m_save_str;
     std::string      m_open_str;
     std::string      m_cancel_str;
+
+    std::string      m_malformed_filename_str;
+    std::string      m_overwrite_prompt_str;
+    std::string      m_invalid_filename_str;
+    std::string      m_filename_is_a_directory_str;
+    std::string      m_file_does_not_exist_str;
+    std::string      m_device_is_not_ready_str;
+    std::string      m_three_button_dlg_ok_str;
+    std::string      m_three_button_dlg_cancel_str;
 
     TextControl*     m_curr_dir_text;
     ListBox*         m_files_list;
@@ -183,7 +207,6 @@ void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_color)
         & BOOST_SERIALIZATION_NVP(m_border_color)
         & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_button_color)
         & BOOST_SERIALIZATION_NVP(m_font)
         & BOOST_SERIALIZATION_NVP(m_save)
         & BOOST_SERIALIZATION_NVP(m_file_filters)
@@ -191,6 +214,14 @@ void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_save_str)
         & BOOST_SERIALIZATION_NVP(m_open_str)
         & BOOST_SERIALIZATION_NVP(m_cancel_str)
+        & BOOST_SERIALIZATION_NVP(m_malformed_filename_str)
+        & BOOST_SERIALIZATION_NVP(m_overwrite_prompt_str)
+        & BOOST_SERIALIZATION_NVP(m_invalid_filename_str)
+        & BOOST_SERIALIZATION_NVP(m_filename_is_a_directory_str)
+        & BOOST_SERIALIZATION_NVP(m_file_does_not_exist_str)
+        & BOOST_SERIALIZATION_NVP(m_device_is_not_ready_str)
+        & BOOST_SERIALIZATION_NVP(m_three_button_dlg_ok_str)
+        & BOOST_SERIALIZATION_NVP(m_three_button_dlg_cancel_str)
         & BOOST_SERIALIZATION_NVP(m_curr_dir_text)
         & BOOST_SERIALIZATION_NVP(m_files_list)
         & BOOST_SERIALIZATION_NVP(m_files_edit)

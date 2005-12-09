@@ -52,11 +52,6 @@ class Button;
 class GG_API Scroll : public Control
 {
 public:
-    /// the orientation of the scrollbar must be one of these two values
-    enum Orientation {
-        VERTICAL,
-        HORIZONTAL
-    };
     /// the clickable regions of a Scroll
     enum ScrollRegion {
         SBR_NONE,
@@ -78,10 +73,9 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    /** ctor. \warning Calling code <b>must not</b> delete the buttons passed to this ctro, if any.  They become the 
-        property of shared_ptrs inside the Scroll.*/
+    /** ctor. */
     Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
-           Button* decr = 0, Button* incr = 0, Button* tab = 0, Uint32 flags = CLICKABLE);
+           Uint32 flags = CLICKABLE);
     //@}
 
     /** \name Accessors */ //@{
@@ -131,13 +125,13 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    int            TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
-    int            TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
-    ScrollRegion   RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
+    int           TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
+    int           TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
+    ScrollRegion  RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
 
-    const boost::shared_ptr<Button> TabButton() const;     ///< returns the button representing the tab
-    const boost::shared_ptr<Button> IncrButton() const;    ///< returns the increase button (line down/line right)
-    const boost::shared_ptr<Button> DecrButton() const;    ///< returns the decrease button (line up/line left)
+    Button*       TabButton() const;     ///< returns the button representing the tab
+    Button*       IncrButton() const;    ///< returns the increase button (line down/line right)
+    Button*       DecrButton() const;    ///< returns the decrease button (line up/line left)
     //@}
 
 private:
@@ -151,9 +145,9 @@ private:
     int                       m_range_max;   ///< highest value "
     int                       m_line_sz;     ///< logical units traversed in a line movement (such as a click on either end button)
     int                       m_page_sz;     ///< logical units traversed for a page movement (such as a click in non-tab middle area, or PgUp/PgDn)
-    boost::shared_ptr<Button> m_tab;         ///< the button representing the tab
-    boost::shared_ptr<Button> m_incr;        ///< the increase button (line down/line right)
-    boost::shared_ptr<Button> m_decr;        ///< the decrease button (line up/line left)
+    Button*                   m_tab;         ///< the button representing the tab
+    Button*                   m_incr;        ///< the increase button (line down/line right)
+    Button*                   m_decr;        ///< the decrease button (line up/line left)
     int                       m_tab_drag_offset;         ///< the offset on the tab as it is dragged (like drag_offset in ProcessInput function)
     ScrollRegion              m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
     ScrollRegion              m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
@@ -162,15 +156,6 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
-
-// define EnumMap and stream operators for Scroll::Orientation
-GG_ENUM_MAP_BEGIN(Scroll::Orientation)
-    GG_ENUM_MAP_INSERT(Scroll::VERTICAL)
-    GG_ENUM_MAP_INSERT(Scroll::HORIZONTAL)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(Scroll::Orientation)
-GG_ENUM_STREAM_OUT(Scroll::Orientation)
 
 // define EnumMap and stream operators for Scroll::ScrollRegion
 GG_ENUM_MAP_BEGIN(Scroll::ScrollRegion)

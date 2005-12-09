@@ -47,18 +47,6 @@ class Button;
 class GG_API Slider : public Control
 {
 public:
-    /// the orientation of the slider must be one of these two values
-    enum Orientation {
-        VERTICAL,
-        HORIZONTAL
-    };
-    /// the rendering styles of the line the tab slides over
-    enum LineStyleType {
-        FLAT,
-        RAISED,
-        GROOVED
-    };
-
     /** \name Signal Types */ //@{
     typedef boost::signal<void (int, int, int)> SlidSignalType;           ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
     typedef boost::signal<void (int, int, int)> SlidAndStoppedSignalType; ///< emitted when the slider's tab is stopped after being dragged, the slider is adjusted using the keyboard, or the slider is moved programmatically; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
@@ -70,18 +58,17 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color, Button* tab, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
+    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
+    ~Slider();
     //@}
 
     /** \name Accessors */ //@{
-    int            Posn() const;           ///< returns the current tab position
-    std::pair<int, int>
-                   SliderRange() const;    ///< returns the defined possible range of control
-    Orientation    GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
-    int            TabWidth() const;       ///< returns the width of the slider's tab, in pixels
-    int            LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
-    LineStyleType  LineStyle() const;      ///< returns the style of line used to render the control
+    int                  Posn() const;           ///< returns the current tab position
+    std::pair<int, int>  SliderRange() const;    ///< returns the defined possible range of control
+    Orientation          GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
+    int                  TabWidth() const;       ///< returns the width of the slider's tab, in pixels
+    int                  LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
+    SliderLineStyle      LineStyle() const;      ///< returns the style of line used to render the control
 
     mutable SlidSignalType           SlidSignal;           ///< returns the slid signal object for this Slider
     mutable SlidAndStoppedSignalType SlidAndStoppedSignal; ///< returns the slid-and-stopped signal object for this Slider
@@ -105,7 +92,7 @@ public:
 
     void           SlideTo(int p); ///< slides the control to a certain spot
 
-    void           SetLineStyle(LineStyleType style); ///< returns the style of line used to render the control
+    void           SetLineStyle(SliderLineStyle style); ///< returns the style of line used to render the control
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
@@ -118,7 +105,7 @@ protected:
     /** \name Accessors */ //@{
     int TabDragOffset() const; ///< returns the offset from the cursor to the left edge of the tab; -1 when the tab is not being dragged
 
-    const boost::shared_ptr<Button>& Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
+    Button* Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
     //@}
 
 private:
@@ -133,34 +120,15 @@ private:
 
     int                       m_line_width;
     int                       m_tab_width;
-    LineStyleType             m_line_style;
+    SliderLineStyle           m_line_style;
 
     int                       m_tab_drag_offset;
-    boost::shared_ptr<Button> m_tab;
+    Button*                   m_tab;
 
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
-
-// define EnumMap and stream operators for Slider::Orientation
-GG_ENUM_MAP_BEGIN(Slider::Orientation)
-    GG_ENUM_MAP_INSERT(Slider::VERTICAL)
-    GG_ENUM_MAP_INSERT(Slider::HORIZONTAL)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(Slider::Orientation)
-GG_ENUM_STREAM_OUT(Slider::Orientation)
-
-// define EnumMap and stream operators for Slider::LineStyleType
-GG_ENUM_MAP_BEGIN(Slider::LineStyleType)
-    GG_ENUM_MAP_INSERT(Slider::FLAT)
-    GG_ENUM_MAP_INSERT(Slider::RAISED)
-    GG_ENUM_MAP_INSERT(Slider::GROOVED)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(Slider::LineStyleType)
-GG_ENUM_STREAM_OUT(Slider::LineStyleType)
 
 } // namespace GG
 

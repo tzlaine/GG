@@ -44,12 +44,15 @@ class Slider;
     and from GG::Clr possible. */
 struct GG_API HSVClr
 {
-    HSVClr(); ///< ctor
+    HSVClr(); ///< default ctor
     HSVClr(double h_, double s_, double v_, Uint8 a_ = 255); ///< ctor
     double h;   ///< hue
     double s;   ///< saturation
     double v;   ///< value
     Uint8  a;   ///< alpha
+
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** a control specifically designed for ColorDlg that allows the user to select a point in the Hue-Saturation subspace
@@ -79,6 +82,11 @@ public:
 
     mutable ChangedSignalType ChangedSignal;
 
+protected:
+    /** \name Structors */ //@{
+    HueSaturationPicker(); ///< default ctor
+    //@}
+
 private:
     void SetHueSaturationFromPt(Pt pt);
 
@@ -86,6 +94,10 @@ private:
     double m_saturation;
     std::vector<std::vector<std::pair<double, double> > >  m_vertices;
     std::vector<std::vector<Clr> > m_colors;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -119,6 +131,11 @@ public:
 
     mutable ChangedSignalType ChangedSignal;
 
+protected:
+    /** \name Structors */ //@{
+    ValuePicker(); ///< default ctor
+    //@}
+
 private:
     void SetValueFromPt(Pt pt);
 
@@ -127,6 +144,10 @@ private:
     double  m_value;
 
     Clr m_arrow_color;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -154,9 +175,33 @@ public:
 
     /** returns the color selected by the user, if the "Ok" button was used to close the dialog. */
     Clr Result() const;
+
+    const std::string& NewString(const std::string& str) const;        ///< returns the text to use to label the new color to \a str Default: "New"
+    const std::string& OldString(const std::string& str) const;        ///< returns the text to use to label the old color to \a str Default: "Old"
+    const std::string& RedString(const std::string& str) const;        ///< returns the text to use to label the red slider to \a str Default: "R:"
+    const std::string& GreenString(const std::string& str) const;      ///< returns the text to use to label the green slider to \a str Default: "G:"
+    const std::string& BlueString(const std::string& str) const;       ///< returns the text to use to label the blue slider to \a str Default: "B:"
+    const std::string& HueString(const std::string& str) const;        ///< returns the text to use to label the hue slider to \a str Default: "H:"
+    const std::string& SaturationString(const std::string& str) const; ///< returns the text to use to label the saturation slider to \a str Default: "S:"
+    const std::string& ValueString(const std::string& str) const;      ///< returns the text to use to label the value slider to \a str Default: "V:"
+    const std::string& AlphaString(const std::string& str) const;      ///< returns the text to use to label the alpha slider to \a str Default: "A:"
+    const std::string& OkString(const std::string& str) const;         ///< returns the text to use to label the ok button to \a str Default: "Ok"
+    const std::string& CancelString(const std::string& str) const;     ///< returns the text to use to label the cancel button to \a str Default: "Cancel"
     //@}
 
     /** \name Mutators */ //@{
+    void SetNewString(const std::string& str);        ///< sets the text to use to label the new color to \a str Default: "New"
+    void SetOldString(const std::string& str);        ///< sets the text to use to label the old color to \a str Default: "Old"
+    void SetRedString(const std::string& str);        ///< sets the text to use to label the red slider to \a str Default: "R:"
+    void SetGreenString(const std::string& str);      ///< sets the text to use to label the green slider to \a str Default: "G:"
+    void SetBlueString(const std::string& str);       ///< sets the text to use to label the blue slider to \a str Default: "B:"
+    void SetHueString(const std::string& str);        ///< sets the text to use to label the hue slider to \a str Default: "H:"
+    void SetSaturationString(const std::string& str); ///< sets the text to use to label the saturation slider to \a str Default: "S:"
+    void SetValueString(const std::string& str);      ///< sets the text to use to label the value slider to \a str Default: "V:"
+    void SetAlphaString(const std::string& str);      ///< sets the text to use to label the alpha slider to \a str Default: "A:"
+    void SetOkString(const std::string& str);         ///< sets the text to use to label the ok button to \a str Default: "Ok"
+    void SetCancelString(const std::string& str);     ///< sets the text to use to label the cancel button to \a str Default: "Cancel"
+
     virtual void Render();
     virtual void Keypress(Key key, Uint32 key_mods);
     //@}
@@ -181,6 +226,10 @@ protected:
         //@}
 
     protected:
+        /** \name Structors */ //@{
+        ColorButton(); ///< default ctor
+        //@}
+
         /** \name Mutators */ //@{
         virtual void RenderUnpressed();
         virtual void RenderPressed();
@@ -189,6 +238,10 @@ protected:
 
     private:
         Clr m_represented_color;
+
+        friend class boost::serialization::access;
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** a simple control that only displays a rectangle filled with the given color.  The color is shown in full alpha
@@ -204,7 +257,21 @@ protected:
         /** \name Accessors */ //@{
         virtual void Render();
         //@}
+
+    protected:
+        /** \name Structors */ //@{
+        ColorDisplay(); ///< default ctor
+        //@}
+
+    private:
+        friend class boost::serialization::access;
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
     };
+
+    /** \name Structors */ //@{
+    ColorDlg(); ///< default ctor
+    //@}
 
 private:
     struct ColorButtonClickFunctor
@@ -218,6 +285,7 @@ private:
     enum {R, G, B, A, H, S, V};
 
     void Init(const boost::shared_ptr<Font>& font);
+    void ConnectSignals();
     void ColorChanged(HSVClr color);
     void HueSaturationPickerChanged(double hue, double saturation);
     void ValuePickerChanged(double value);
@@ -240,11 +308,25 @@ private:
     bool                      m_original_color_specified;
     bool                      m_color_was_picked;
 
+    std::string               m_new_str;
+    std::string               m_old_str;
+    std::string               m_red_str;
+    std::string               m_green_str;
+    std::string               m_blue_str;
+    std::string               m_hue_str;
+    std::string               m_saturation_str;
+    std::string               m_value_str;
+    std::string               m_alpha_str;
+    std::string               m_ok_str;
+    std::string               m_cancel_str;
+
     HueSaturationPicker*      m_hue_saturation_picker;
     ValuePicker*              m_value_picker;
     Layout*                   m_pickers_layout;
     ColorDisplay*             m_new_color_square;
     ColorDisplay*             m_old_color_square;
+    TextControl*              m_new_color_square_text;
+    TextControl*              m_old_color_square_text;
     Layout*                   m_color_squares_layout;
     std::vector<ColorButton*> m_color_buttons;
     Layout*                   m_color_buttons_layout;
@@ -264,8 +346,100 @@ private:
     static std::vector<Clr>   s_custom_colors;
 
     friend struct ColorButtonClickFunctor;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
+
+// template implementations
+template <class Archive>
+void GG::HSVClr::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(h)
+        & BOOST_SERIALIZATION_NVP(s)
+        & BOOST_SERIALIZATION_NVP(v)
+        & BOOST_SERIALIZATION_NVP(a);
+}
+
+template <class Archive>
+void GG::HueSaturationPicker::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_hue)
+        & BOOST_SERIALIZATION_NVP(m_saturation)
+        & BOOST_SERIALIZATION_NVP(m_vertices)
+        & BOOST_SERIALIZATION_NVP(m_colors);
+}
+
+template <class Archive>
+void GG::ValuePicker::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_hue)
+        & BOOST_SERIALIZATION_NVP(m_saturation)
+        & BOOST_SERIALIZATION_NVP(m_value)
+        & BOOST_SERIALIZATION_NVP(m_arrow_color);
+}
+
+template <class Archive>
+void GG::ColorDlg::ColorButton::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Button)
+        & BOOST_SERIALIZATION_NVP(m_represented_color);
+}
+
+template <class Archive>
+void GG::ColorDlg::ColorDisplay::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control);
+}
+
+template <class Archive>
+void GG::ColorDlg::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_current_color)
+        & BOOST_SERIALIZATION_NVP(m_original_color)
+        & BOOST_SERIALIZATION_NVP(m_original_color_specified)
+        & BOOST_SERIALIZATION_NVP(m_color_was_picked)
+        & BOOST_SERIALIZATION_NVP(m_new_str)
+        & BOOST_SERIALIZATION_NVP(m_old_str)
+        & BOOST_SERIALIZATION_NVP(m_red_str)
+        & BOOST_SERIALIZATION_NVP(m_green_str)
+        & BOOST_SERIALIZATION_NVP(m_blue_str)
+        & BOOST_SERIALIZATION_NVP(m_hue_str)
+        & BOOST_SERIALIZATION_NVP(m_saturation_str)
+        & BOOST_SERIALIZATION_NVP(m_value_str)
+        & BOOST_SERIALIZATION_NVP(m_alpha_str)
+        & BOOST_SERIALIZATION_NVP(m_ok_str)
+        & BOOST_SERIALIZATION_NVP(m_cancel_str)
+        & BOOST_SERIALIZATION_NVP(m_hue_saturation_picker)
+        & BOOST_SERIALIZATION_NVP(m_value_picker)
+        & BOOST_SERIALIZATION_NVP(m_pickers_layout)
+        & BOOST_SERIALIZATION_NVP(m_new_color_square)
+        & BOOST_SERIALIZATION_NVP(m_old_color_square)
+        & BOOST_SERIALIZATION_NVP(m_new_color_square_text)
+        & BOOST_SERIALIZATION_NVP(m_old_color_square_text)
+        & BOOST_SERIALIZATION_NVP(m_color_squares_layout)
+        & BOOST_SERIALIZATION_NVP(m_color_buttons)
+        & BOOST_SERIALIZATION_NVP(m_color_buttons_layout)
+        & BOOST_SERIALIZATION_NVP(m_current_color_button)
+        & BOOST_SERIALIZATION_NVP(m_slider_labels)
+        & BOOST_SERIALIZATION_NVP(m_slider_values)
+        & BOOST_SERIALIZATION_NVP(m_sliders)
+        & BOOST_SERIALIZATION_NVP(m_ignore_sliders)
+        & BOOST_SERIALIZATION_NVP(m_ok)
+        & BOOST_SERIALIZATION_NVP(m_cancel)
+        & BOOST_SERIALIZATION_NVP(m_sliders_ok_cancel_layout)
+        & BOOST_SERIALIZATION_NVP(m_color)
+        & BOOST_SERIALIZATION_NVP(m_border_color)
+        & BOOST_SERIALIZATION_NVP(m_text_color);
+
+    if (Archive::is_loading::value)
+        ConnectSignals();
+}
 
 #endif // _GGColorDlg_h_

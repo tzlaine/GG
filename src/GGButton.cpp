@@ -228,27 +228,20 @@ void Button::RenderDefault()
 StateButton::StateButton() :
     TextControl(),
     m_checked(false),
-    m_style(SBSTYLE_3D_XBOX),
-    m_button_x(0),
-    m_button_y(0),
-    m_text_x(0),
-    m_text_y(0)
+    m_style(SBSTYLE_3D_XBOX)
 {
 }
 
 StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                          Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
-                         int bn_x/* = -1*/, int bn_y/* = -1*/, int bn_w/* = -1*/, int bn_h/* = -1*/, Uint32 flags/* = CLICKABLE*/) :
+                         Uint32 flags/* = CLICKABLE*/) :
     TextControl(x, y, w, h, str, font, text_color, text_fmt, flags),
     m_checked(false),
     m_int_color(interior),
-    m_style(style),
-    m_button_x(0),
-    m_button_y(0),
-    m_text_x(0),
-    m_text_y(0)
+    m_style(style)
 {
-    Init(w, h, font->PointSize(), color, bn_w, bn_h, bn_x, bn_y);
+    m_color = color;
+    SetDefaultButtonPosition();
 }
 
 bool StateButton::Checked() const
@@ -261,7 +254,7 @@ Clr StateButton::InteriorColor() const
     return m_int_color;
 }
 
-StateButton::StateButtonStyle StateButton::Style() const
+StateButtonStyle StateButton::Style() const
 {
     return m_style;
 }
@@ -271,8 +264,8 @@ void StateButton::Render()
     const Uint8 bevel = 2;
 
     // draw button
-    Pt bn_ul = UpperLeft() + Pt(m_button_x, m_button_y);
-    Pt bn_lr = bn_ul + Pt(m_button_wd, m_button_ht);
+    Pt bn_ul = ClientUpperLeft() + m_button_ul;
+    Pt bn_lr = ClientUpperLeft() + m_button_lr;
 
     switch (m_style) {
     case SBSTYLE_3D_XBOX:
@@ -316,9 +309,9 @@ void StateButton::Render()
         break;
     }
 
-    OffsetMove(Pt(m_text_x, m_text_y));
+    OffsetMove(m_text_ul);
     TextControl::Render();
-    OffsetMove(Pt(-m_text_x, -m_text_y));
+    OffsetMove(-m_text_ul);
 }
 
 void StateButton::LClick(const Pt& pt, Uint32 keys)
@@ -335,6 +328,61 @@ void StateButton::Reset()
 void StateButton::SetCheck(bool b/* = true*/)
 {
     CheckedSignal(m_checked = b);
+}
+
+void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
+{
+    int w = Width();
+    int h = Height();
+    int bn_x = ul.x;
+    int bn_y = ul.y;
+    int bn_w = lr.x - ul.x;
+    int bn_h = lr.y - ul.y;
+
+    if (bn_w <= 0 || bn_h <= 0)            // if one of these is invalid
+        bn_w = bn_h = GetFont()->PointSize(); // set button width and height to text height
+
+    double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
+    if (bn_x == -1 || bn_y == -1) {
+        Uint32 format = TextFormat();
+        if (format & TF_VCENTER)       // center button vertically
+            bn_y = static_cast<int>((h - bn_h) / 2.0 + 0.5);
+        if (format & TF_TOP) {         // put button at top, text just below
+            bn_y = 0;
+            m_text_ul.y = bn_h;
+        }
+        if (format & TF_BOTTOM) {      // put button at bottom, text just above
+            bn_y = (h - bn_h);
+            m_text_ul.y = static_cast<int>(h - (bn_h * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
+        }
+
+        if (format & TF_CENTER) {      // center button horizontally
+            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
+                format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
+                format &= ~TF_CENTER;
+            } else {
+                bn_x = static_cast<int>((w - bn_x) / 2.0 - bn_w / 2.0 + 0.5);
+            }
+        }
+        if (format & TF_LEFT) {        // put button at left, text just to the right
+            bn_x = 0;
+            if (format & TF_VCENTER)
+                m_text_ul.x = static_cast<int>(bn_w * (1 + SPACING) + 0.5);
+        }
+        if (format & TF_RIGHT) {       // put button at right, text just to the left
+            bn_x = (w - bn_w);
+            if (format & TF_VCENTER)
+                m_text_ul.x = static_cast<int>(-bn_w * (1 + SPACING) + 0.5);
+        }
+        SetTextFormat(format);
+    }
+    m_button_ul = Pt(bn_x, bn_y);
+    m_button_lr = m_button_ul + Pt(bn_w, bn_h);
+}
+
+void StateButton::SetDefaultButtonPosition()
+{
+    SetButtonPosition(Pt(-1, -1), Pt(-1, -1));
 }
 
 void StateButton::SetColor(Clr c)
@@ -362,89 +410,24 @@ void StateButton::DefineAttributes(WndEditor* editor)
     editor->Attribute("Interior Color", m_int_color);
     editor->Attribute("Button Style", m_style,
                       SBSTYLE_3D_XBOX, SBSTYLE_3D_ROUND_BUTTON);
-    editor->Attribute("Button X", m_button_x);
-    editor->Attribute("Button Y", m_button_x);
-    editor->Attribute("Button Width", m_button_wd);
-    editor->Attribute("Button Height", m_button_ht);
-    editor->Attribute("Text X", m_text_x);
-    editor->Attribute("Text Y", m_text_y);
+    editor->Attribute("Button Upper Left", m_button_ul);
+    editor->Attribute("Button Lower Right", m_button_lr);
+    editor->Attribute("Text Upper Left", m_text_ul);
 }
 
-int StateButton::ButtonX() const
+Pt StateButton::ButtonUpperLeft() const
 {
-    return m_button_x;
+    return m_button_ul;
 }
 
-int StateButton::ButtonY() const
+Pt StateButton::ButtonLowerRight() const
 {
-    return m_button_y;
+    return m_button_lr;
 }
 
-int StateButton::ButtonWd() const
+Pt StateButton::TextUpperLeft() const
 {
-    return m_button_wd;
-}
-
-int StateButton::ButtonHt() const
-{
-    return m_button_ht;
-}
-
-int StateButton::TextX() const
-{
-    return m_text_x;
-}
-
-int StateButton::TextY() const
-{
-    return m_text_y;
-}
-
-void StateButton::Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int bn_w, int bn_h)
-{
-    m_color = color;
-
-    if (bn_w == -1 || bn_h == -1)       // if one of these is not specified
-        bn_w = bn_h = pts;              // set button width and height to text height
-
-    double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
-    if (bn_x == -1 || bn_y == -1) {
-        Uint32 format = TextFormat();
-        if (format & TF_VCENTER)       // center button vertically
-            bn_y = int((h - bn_h) / 2.0 + 0.5);
-        if (format & TF_TOP) {         // put button at top, text just below
-            bn_y = 0;
-            m_text_y = bn_h;
-        }
-        if (format & TF_BOTTOM) {      // put button at bottom, text just above
-            bn_y = (h - bn_h);
-            m_text_y = int(h - (bn_h * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
-        }
-
-        if (format & TF_CENTER) {      // center button horizontally
-            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
-                format &= ~TF_CENTER;
-            } else {
-                bn_x = int((w - bn_x) / 2.0 - bn_w / 2.0 + 0.5);
-            }
-        }
-        if (format & TF_LEFT) {        // put button at left, text just to the right
-            bn_x = 0;
-            if (format & TF_VCENTER)
-                m_text_x = int(bn_w * (1 + SPACING) + 0.5);
-        }
-        if (format & TF_RIGHT) {       // put button at right, text just to the left
-            bn_x = (w - bn_w);
-            if (format & TF_VCENTER)
-                m_text_x = int(-bn_w * (1 + SPACING) + 0.5);
-        }
-        SetTextFormat(format);
-    }
-    m_button_x = bn_x;
-    m_button_y = bn_y;
-    m_button_wd = bn_w;
-    m_button_ht = bn_h;
+    return m_text_ul;
 }
 
 

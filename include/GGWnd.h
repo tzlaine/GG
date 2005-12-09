@@ -44,6 +44,7 @@ namespace GG {
 
 class BrowseInfoWnd;
 class Layout;
+class StyleFactory;
 class WndEditor;
 
 /** This is the basic GG window class.
@@ -131,6 +132,12 @@ class WndEditor;
     which case nothing is shown.  Also note that it is legal to have no text associated with a browse mode. \see
     BrowseInfoWnd
 
+    <p>Style Factory
+    <br>A StyleFactory is responsible for creating controls and dialogs that other Wnds may need (e.g. when Slider needs
+    to create a Button for its sliding tab).  There is an app-wide StyleFactory available, but for complete
+    customization, each Wnd may have one installed as well.  The GetStyleFactory() method returns the one installed in
+    the Wnd, if one exists, or the app-wide one otherwise.
+
     <p>Note that while a Wnd can contain arbitrary Wnd-derived children, in order for such children to be automatically
     serialized, any user-defined Wnd subclasses must be registered.  See the boost serialization documentation for
     details, and/or the serialization tutorial for examples. */
@@ -147,21 +154,6 @@ public:
         std::string                      text; ///< the text to display in the BrowseInfoWnd shown for this mode
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version);
-    };
-
-    /// window creation flags
-    enum WndFlag {
-        CLICKABLE =    1 << 0,  ///< clicks hit this window, rather than passing through it
-        DRAGABLE =     1 << 1,  ///< this window can be dragged around independently
-        DRAG_KEEPER =  1 << 2,  ///< this window receives drag messages, even if it is not dragable
-        RESIZABLE =    1 << 3,  ///< this window can be resized by the user, with the mouse
-
-        /** this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows */
-        ONTOP =        1 << 4,
-
-        /** this window is modal; while it is active, no other windows are interactive.  Modal windows are considered
-            above "on-top" windows, and should not be flagged as ONTOP. */
-        MODAL =        1 << 5
     };
 
     /** \name Structors */ //@{
@@ -249,6 +241,8 @@ public:
     /** returns the text to display for browse info mode \a mode.  \throw std::out_of_range May throw
         std::out_of_range if \a mode is not a valid browse mode. */
     const std::string& BrowseInfoText(int mode) const;
+
+    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory if none exists, or the app-wide one otherwise
 
     virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
     //@}
@@ -432,6 +426,8 @@ public:
         children.  Set the first time cutoff to 0 for immediate browse info display. */
     void SetBrowseModes(const std::vector<BrowseInfoMode>& modes);
 
+    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory); ///< sets the currently-installed style factory
+
     /** provides the attributes of this object that are appropriate for a user to edit in a WndEditor; see WndEditor for
         details. */
     virtual void DefineAttributes(WndEditor* editor);
@@ -571,6 +567,9 @@ private:
     std::vector<BrowseInfoMode>
                       m_browse_modes;      ///< the browse info modes for this window
 
+    boost::shared_ptr<StyleFactory>
+                      m_style_factory;     ///< the style factory to use when creating dialogs or child controls
+
     /** flags supplied at window creation for clickability, dragability, drag-keeping, and resizability */
     Uint32            m_flags;
 
@@ -588,19 +587,6 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
-
-// define EnumMap and stream operators for Wnd::WndFlag
-GG_ENUM_MAP_BEGIN(Wnd::WndFlag)
-    GG_ENUM_MAP_INSERT(Wnd::CLICKABLE)
-    GG_ENUM_MAP_INSERT(Wnd::DRAGABLE)
-    GG_ENUM_MAP_INSERT(Wnd::DRAG_KEEPER)
-    GG_ENUM_MAP_INSERT(Wnd::RESIZABLE)
-    GG_ENUM_MAP_INSERT(Wnd::ONTOP)
-    GG_ENUM_MAP_INSERT(Wnd::MODAL)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(Wnd::WndFlag)
-GG_ENUM_STREAM_OUT(Wnd::WndFlag)
 
 } // namespace GG
 
@@ -633,6 +619,7 @@ void GG::Wnd::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_layout)
         & BOOST_SERIALIZATION_NVP(m_containing_layout)
         & BOOST_SERIALIZATION_NVP(m_browse_modes)
+        & BOOST_SERIALIZATION_NVP(m_style_factory)
         & BOOST_SERIALIZATION_NVP(m_flags);
 
     if (Archive::is_loading::value)

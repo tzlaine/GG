@@ -31,6 +31,7 @@
 #include <GGLayout.h>
 #include <GGScroll.h>
 #include <GGStaticGraphic.h>
+#include <GGStyleFactory.h>
 #include <GGTextControl.h>
 #include <GGWndEditor.h>
 
@@ -123,6 +124,16 @@ int ListBox::Row::ColWidth(int n) const
 int ListBox::Row::Margin() const
 {
     return m_margin;
+}
+
+Control* ListBox::Row::CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const
+{
+    return GetStyleFactory()->NewTextControl(0, 0, str, font, color);
+}
+
+Control* ListBox::Row::CreateControl(const SubTexture& st) const
+{
+    return new StaticGraphic(0, 0, st.Width(), st.Height(), st, GR_SHRINKFIT);
 }
 
 void ListBox::Row::Render()
@@ -243,16 +254,6 @@ void ListBox::Row::AdjustLayout(bool adjust_for_push_back/* = false*/)
             layout->Add(m_cells[i], 0, i, m_row_alignment | m_col_alignments[i]);
         }
     }
-}
-
-Control* ListBox::Row::CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color)
-{
-    return new TextControl(0, 0, str, font, color);
-}
-
-Control* ListBox::Row::CreateControl(const SubTexture& st)
-{
-    return new StaticGraphic(0, 0, st.Width(), st.Height(), st, GR_SHRINKFIT);
 }
 
 ////////////////////////////////////////////////
@@ -546,12 +547,10 @@ void ListBox::Render()
 
     // draw caret
     if (m_caret >= m_first_row_shown && m_caret <= last_visible_row &&
-        (App::GetApp()->FocusWnd() == this || App::GetApp()->FocusWnd() == m_vscroll || App::GetApp()->FocusWnd() == m_hscroll)) {
-        int top = cl_ul.y;
-        for (int i = m_first_row_shown; i < m_caret; ++i)
-            top += m_rows[i]->Height();
-        bottom = top + m_rows[m_caret]->Height();
-        FlatRectangle(cl_ul.x, top, cl_lr.x, bottom, CLR_ZERO, CLR_SHADOW, 2);
+        MatchesOrContains(this, App::GetApp()->FocusWnd())) {
+        Pt row_ul = m_rows[m_caret]->UpperLeft();
+        Pt row_lr = m_rows[m_caret]->LowerRight();
+        FlatRectangle(row_ul.x, row_ul.y, row_lr.x, row_lr.y, CLR_ZERO, CLR_SHADOW, 2);
     }
 
     EndClipping();
@@ -605,7 +604,7 @@ void ListBox::Keypress(Key key, Uint32 key_mods)
             }
             break;
 
-            // vertical scrolling keys
+        // vertical scrolling keys
         case GGK_UP: // arrow-up (not numpad arrow)
             if (m_caret > 0)
                 --m_caret;
@@ -637,7 +636,7 @@ void ListBox::Keypress(Key key, Uint32 key_mods)
                 m_caret = static_cast<int>(m_rows.size()) - 1;
             break;
 
-            // horizontal scrolling keys
+        // horizontal scrolling keys
         case GGK_LEFT: // left key (not numpad key)
             if (m_first_col_shown) {
                 --m_first_col_shown;
@@ -654,7 +653,7 @@ void ListBox::Keypress(Key key, Uint32 key_mods)
             }
             break;}
 
-            // any other key gets passed along to the parent
+        // any other key gets passed along to the parent
         default:
             if (Parent())
                 Parent()->Keypress(key, key_mods);
@@ -780,16 +779,12 @@ void ListBox::SetCaret(int idx)
 void ListBox::BringRowIntoView(int n)
 {
     if (0 <= n && n < static_cast<int>(m_rows.size())) {
-        int old_first_row = m_first_row_shown;
-        if (n >= 0 && n < m_first_row_shown) {
+        if (0 <= n && n < m_first_row_shown) {
             m_first_row_shown = n;
         } else if (LastVisibleRow() <= n) { // find the row that preceeds the target row by about ClientSize().y pixels, and make it the first row shown
-            int avail_space = ClientSize().y - m_rows[n]->Height();
-            m_first_row_shown = n;
-            while (0 < m_first_row_shown && 0 < (avail_space -= m_rows[m_first_row_shown - 1]->Height()))
-                --m_first_row_shown;
+            m_first_row_shown = FirstRowShownWhenBottomIs(n, ClientHeight());
         }
-        if (m_first_row_shown != old_first_row && m_vscroll) {
+        if (m_vscroll) {
             int acc = 0;
             for (int i = 0; i < m_first_row_shown; ++i)
                 acc += m_rows[i]->Height();
@@ -991,6 +986,28 @@ int ListBox::RClickRow() const
     return m_rclick_row;
 }
 
+int ListBox::VerticalScrollPadding(int client_height_without_horizontal_scroll)
+{
+    int first_row_shown_when_caret_at_bottom =
+        FirstRowShownWhenBottomIs(m_rows.size() - 1, client_height_without_horizontal_scroll);
+    int height_of_rows_visible_at_bottom = 0;
+    for (unsigned int i = first_row_shown_when_caret_at_bottom; i < m_rows.size(); ++i) {
+        height_of_rows_visible_at_bottom += m_rows[i]->Height();
+    }
+    return client_height_without_horizontal_scroll - height_of_rows_visible_at_bottom;
+}
+
+int ListBox::HorizontalScrollPadding(int client_width_without_vertical_scroll)
+{
+    int first_col_shown_when_caret_at_right =
+        FirstColShownWhenRightIs(m_col_widths.size() - 1, client_width_without_vertical_scroll);
+    int width_of_cols_visible_at_right = 0;
+    for (unsigned int i = first_col_shown_when_caret_at_right; i < m_col_widths.size(); ++i) {
+        width_of_cols_visible_at_right += m_col_widths[i];
+    }
+    return client_width_without_vertical_scroll - width_of_cols_visible_at_right;
+}
+
 bool ListBox::EventFilter(Wnd* w, const Event& event)
 {
     assert(dynamic_cast<Row*>(w));
@@ -1161,12 +1178,12 @@ int ListBox::Insert(Row* row, int at, bool dropped)
         }
     }
 
-    AdjustScrolls(false);
-
     Pt original_ul = row->RelativeUpperLeft();
     Wnd* original_parent = row->Parent();
     AttachChild(row);
     row->MoveTo(insertion_pt);
+
+    AdjustScrolls(false);
 
     if (dropped) {
         // ensure that no one has a problem with this drop in user space (if so, they should throw DontAcceptDrop)
@@ -1237,20 +1254,6 @@ void ListBox::BringCaretIntoView()
     BringRowIntoView(m_caret);
 }
 
-Scroll* ListBox::NewVScroll(bool horz_scroll)
-{
-    Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
-                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->empty() ? 0 : m_header_row->Height()))));
-    return new Scroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horz_scroll ? SCROLL_WIDTH : 0), Scroll::VERTICAL, m_color, CLR_SHADOW);
-}
-
-Scroll* ListBox::NewHScroll(bool vert_scroll)
-{
-    Pt cl_sz = ((LowerRight() - Pt(BORDER_THICK, BORDER_THICK)) -
-                (UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->empty() ? 0 : m_header_row->Height()))));
-    return new Scroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vert_scroll ? SCROLL_WIDTH : 0), SCROLL_WIDTH, Scroll::HORIZONTAL, m_color, CLR_SHADOW);
-}
-
 void ListBox::RecreateScrolls()
 {
     delete m_vscroll;
@@ -1309,6 +1312,8 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
     bool horizontal_needed = (total_x_extent > cl_sz.x ||
                               (total_x_extent > cl_sz.x - SCROLL_WIDTH && total_y_extent > cl_sz.y - SCROLL_WIDTH));
 
+    boost::shared_ptr<StyleFactory> style = GetStyleFactory();
+
     if (m_vscroll) { // if scroll already exists...
         if (!vertical_needed) { // remove scroll
             DeleteChild(m_vscroll);
@@ -1318,11 +1323,13 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
             int scroll_y = 0;
             if (adjust_for_resize)
                 m_vscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0)));
+            total_y_extent += VerticalScrollPadding(cl_sz.y);
             m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
             MoveChildUp(m_vscroll);
         }
     } else if (!m_vscroll && vertical_needed) { // if scroll doesn't exist but is needed
-        m_vscroll = NewVScroll(horizontal_needed);
+        m_vscroll = style->NewScroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0), VERTICAL, m_color, CLR_SHADOW);
+        total_y_extent += VerticalScrollPadding(cl_sz.y);
         m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
         AttachChild(m_vscroll);
         Connect(m_vscroll->ScrolledSignal, &ListBox::VScrolled, this);
@@ -1337,11 +1344,13 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
             int scroll_y = cl_sz.y - SCROLL_WIDTH;
             if (adjust_for_resize)
                 m_hscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH));
+            total_x_extent += HorizontalScrollPadding(cl_sz.x);
             m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
             MoveChildUp(m_hscroll);
         }
     } else if (!m_hscroll && horizontal_needed) { // if scroll doesn't exist but is needed
-        m_hscroll = NewHScroll(vertical_needed);
+        m_hscroll = style->NewScroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), SCROLL_WIDTH, HORIZONTAL, m_color, CLR_SHADOW);
+        total_x_extent += HorizontalScrollPadding(cl_sz.x);
         m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
         AttachChild(m_hscroll);
         Connect(m_hscroll->ScrolledSignal, &ListBox::HScrolled, this);
@@ -1460,4 +1469,24 @@ void ListBox::NormalizeRow(Row* row)
     row->SetColAlignments(m_col_alignments);
     row->SetMargin(m_cell_margin);
     row->Resize(Pt(std::accumulate(m_col_widths.begin(), m_col_widths.end(), 0), row->Height()));
+}
+
+int ListBox::FirstRowShownWhenBottomIs(int bottom_row, int client_height)
+{
+    int available_space = client_height - m_rows[bottom_row]->Height();
+    int i = bottom_row;
+    while (0 < i && m_rows[i - 1]->Height() <= available_space) {
+        available_space -= m_rows[--i]->Height();
+    }
+    return i;
+}
+
+int ListBox::FirstColShownWhenRightIs(int right_col, int client_width)
+{
+    int available_space = client_width - m_col_widths[right_col];
+    int i = right_col;
+    while (0 < i && m_col_widths[i - 1] <= available_space) {
+        available_space -= m_col_widths[--i];
+    }
+    return i;
 }

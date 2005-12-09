@@ -466,6 +466,11 @@ const std::string& Wnd::BrowseInfoText(int mode) const
     return m_browse_modes.at(mode).text;
 }
 
+const boost::shared_ptr<StyleFactory>& Wnd::GetStyleFactory() const
+{
+    return m_style_factory ? m_style_factory : App::GetApp()->GetStyleFactory();
+}
+
 WndRegion Wnd::WindowRegion(const Pt& pt) const
 {
     enum {LEFT = 0, MIDDLE = 1, RIGHT = 2};
@@ -1000,6 +1005,11 @@ void Wnd::SetBrowseText(const std::string& text, int mode/* = 0*/)
 void Wnd::SetBrowseModes(const std::vector<BrowseInfoMode>& modes)
 {
     m_browse_modes = modes;
+}
+
+void Wnd::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
+{
+    m_style_factory = factory;
 }
 
 void Wnd::DefineAttributes(WndEditor* editor)

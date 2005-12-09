@@ -40,6 +40,7 @@
 #include <GGSlider.h>
 #include <GGSpin.h>
 #include <GGStaticGraphic.h>
+#include <GGStyleFactory.h>
 #include <GGTextControl.h>
 
 // TODO : add include files for custom Wnd subclasses to be included in your plugin
@@ -120,110 +121,13 @@ extern "C" {
     }
 
 
-    //  Control creation functions
-    //  TODO: Override these with calls to ctors for the subclasses that you wish to use in the place of these GG control classes.
+    //  TODO: Override this with your own StyleFactory subclass.
     GG_PLUGIN_API
-    Button* CreateButton(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, Clr text_color, Uint32 flags)
+    Button* GetStyleFactory()
     {
-        return new Button(x, y, w, h, str, font_filename, pts, color, text_color, flags);
+        static boost::shared_ptr<StyleFactory> style_factory(new StyleFactory());
+        return style_factory;
     }
-
-    GG_PLUGIN_API
-    StateButton* CreateStateButton(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Uint32 text_fmt, 
-                                   Clr color, Clr text_color, Clr interior, StateButton::StateButtonStyle style,
-                                   int bn_x, int bn_y, int bn_w, int bn_h, Uint32 flags)
-    {
-        return new StateButton(x, y, w, h, str, font_filename, pts, text_fmt, color, text_color, interior, style, bn_x, bn_y, bn_w, bn_h, flags);
-    }
-
-    GG_PLUGIN_API
-    RadioButtonGroup* CreateRadioButtonGroup(int x, int y)
-    {
-        return new RadioButtonGroup(x, y);
-    }
-
-    GG_PLUGIN_API
-    DropDownList* CreateDropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Clr interior, Uint32 flags)
-    {
-        return new DropDownList(x, y, w, row_ht, drop_ht, color, interior, 0, flags);
-    }
-
-    GG_PLUGIN_API
-    DynamicGraphic* CreateDynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, 
-                                         const boost::shared_ptr<Texture>& texture, Uint32 style, int frames, Uint32 flags)
-    {
-        return new DynamicGraphic(x, y, w, h, loop, frame_width, frame_height, margin, texture, style, frames, flags);
-    }
-
-    GG_PLUGIN_API
-    Edit* CreateEdit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, Clr text_color, 
-                     Clr interior, Uint32 flags)
-    {
-        return new Edit(x, y, w, h, str, font_filename, pts, color, text_color, interior, flags);
-    }
-
-    GG_PLUGIN_API
-    ListBox* CreateListBox(int x, int y, int w, int h, Clr color, Clr interior, Uint32 flags)
-    {
-        return new ListBox(x, y, w, h, color, interior, flags);
-    }
-
-    GG_PLUGIN_API
-    MenuBar* CreateMenuBar(int x, int y, int w, const string& font_filename, int pts, Clr text_color, Clr color, Clr interior)
-    {
-        return new MenuBar(x, y, w, font_filename, pts, text_color, color, interior);
-    }
-
-    GG_PLUGIN_API
-    MultiEdit* CreateMultiEdit(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, 
-                               Uint32 style, Clr text_color, Clr interior, Uint32 flags)
-    {
-        return new MultiEdit(x, y, w, h, str, font_filename, pts, color, style, text_color, interior, flags);
-    }
-
-    GG_PLUGIN_API
-        Scroll* CreateScroll(int x, int y, int w, int h, Scroll::Orientation orientation, Clr color, Clr interior, Uint32 flags)
-    {
-        return new Scroll(x, y, w, h, orientation, color, interior, 0, 0, 0, flags);
-    }
-
-    GG_PLUGIN_API
-    Slider* CreateSlider(int x, int y, int w, int h, int min, int max, Slider::Orientation orientation, Slider::LineStyleType style, Clr color, int tab_width, int line_width, Uint32 flags)
-    {
-        return new Slider(x, y, w, h, min, max, orientation, style, color, tab_width, line_width, flags);
-    }
-
-    GG_PLUGIN_API
-    Spin<int>* CreateIntSpin(int x, int y, int w, int h, int value, int step, int min, int max, bool edits, const string& font_filename, int pts, Clr color, 
-                             Clr text_color, Clr interior, Uint32 flags)
-    {
-        return new Spin<int>(x, y, w, h, value, step, min, max, edits, font_filename, pts, color, text_color, interior, 0, 0, flags);
-    }
-
-    GG_PLUGIN_API
-    Spin<double>* CreateDoubleSpin(int x, int y, int w, int h, double value, double step, double min, double max, bool edits, const string& font_filename, int pts, Clr color, 
-                                   Clr text_color, Clr interior, Uint32 flags)
-    {
-        return new Spin<double>(x, y, w, h, value, step, min, max, edits, font_filename, pts, color, text_color, interior, 0, 0, flags);
-    }
-
-    GG_PLUGIN_API
-    StaticGraphic* CreateStaticGraphic(int x, int y, int w, int h, const shared_ptr<Texture>& texture, Uint32 style, Uint32 flags)
-    {
-        return new StaticGraphic(x, y, w, h, texture, style, flags);
-    }
-
-    GG_PLUGIN_API
-    TextControl* CreateTextControl(int x, int y, int w, int h, const string& str, const string& font_filename, int pts, Clr color, Uint32 text_fmt, Uint32 flags)
-    {
-        return new TextControl(x, y, w, h, str, font_filename, pts, color, text_fmt, flags);
-    }
-
-
-    // Destruction function
-    GG_PLUGIN_API
-    void DestroyControl(Wnd* w) {delete w;}
-
 
     // Serialization functions
     GG_PLUGIN_API

@@ -56,12 +56,8 @@ class SubTexture;
     taking on a new row's number of columns.  To create a ListBox with user-defined widths, use the ctor designed for
     that, or call SetNumCols(), set individual widths with SetColWidth(), and lock the column widths with
     LockColWidths().
-    <br>If non-standard Scrolls are desired, subclasses can create their own Scroll-derived scrolls by overriding
-    NewVScroll() and NewHScroll().  When overriding NewVScroll() and NewHScroll() in subclasses, call RecreateScrolls()
-    at the end of the subclass's constructor, to ensure that the correct type of Scrolls are created; if scrolls are
-    created in the ListBox base constructor, the virtual function table may not be complete yet, so GG::Scrolls may be
-    created instead of the types used in the overloaded New*Scroll() functions. Note that Rows are stored by pointer.
-    <br>If you want to move a Row from one ListBox to another, use GetRow(int) and Insert(Row*, int).
+    <br>Note that Rows are stored by pointer.  If you want to move a Row from one ListBox to another, use GetRow(int)
+    and Insert(Row*, int).
     <br>Note that drag-and-drop support is a key part of ListBox's functionality.  As such, special effort has been made
     to make its use as natural and flexible as possible.  This includes allowing arbitrary reordering of ListBox rows
     when the LB_NOSORT is in effect, and includes the use of the DontAcceptDrop exception.  The DontAcceptDrop exception
@@ -106,6 +102,9 @@ public:
         Alignment                  ColAlignment(int n) const;  ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
         int                        ColWidth(int n) const;      ///< returns the width of the \a nth cell of this Row; not range checked
         int                        Margin() const;             ///< returns the amount of space left between the contents of adjacent cells, in pixels
+
+        Control* CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const; ///< creates a "shrink-fit" TextControl from text, font, and color parameters
+        Control* CreateControl(const SubTexture& st) const; ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
         //@}
 
         /** \name Mutators */ //@{
@@ -126,10 +125,6 @@ public:
         void SetColWidths(const std::vector<int>& widths); ///< sets all the widths of the cells of this Row; not range checked
         void SetMargin(int margin); ///< sets the amount of space left between the contents of adjacent cells, in pixels
         //@}
-
-        // these two generate graphics and text controls from basic text or subtextures
-        static Control* CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color); ///< creates a "shrink-fit" TextControl from text, font, and color parameters
-        static Control* CreateControl(const SubTexture& st); ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
 
     private:
         void AdjustLayout(bool adjust_for_push_back = false);
@@ -318,6 +313,18 @@ protected:
     int             OldRDownRow() const; ///< returns the last row that was selected with a right-button mouse-down
     int             LClickRow() const;   ///< returns the last row that was left-clicked
     int             RClickRow() const;   ///< returns the last row that was right-clicked
+
+    /** Returns the amount of vertical padding it is necessary to add to the combined height of all rows to make the
+        vertical scroll the proper length to fully show the last row.  This is calculated by first determining the first
+        row when the last row is visible, then determining how much left over space would result if only the range
+        first-row-shown to last-row were visible. */
+    int VerticalScrollPadding(int client_height_without_horizontal_scroll);
+
+    /** Returns the amount of horizontal padding it is necessary to add to the combined width of all columns to make the
+        horizontal scroll the proper length to fully show the last column.  This is calculated by first determining the
+        first column when the last column is visible, then determining how much left over space would result if only the
+        range first-column-shown to last-column were visible. */
+    int HorizontalScrollPadding(int client_width_without_vertical_scroll);
     //@}
 
     /** \name Mutators */ //@{
@@ -326,9 +333,7 @@ protected:
     int             Insert(Row* row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
     ListBox::Row*   Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a dupliate removal (such as for drag-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
-    virtual Scroll* NewVScroll(bool horz_scroll);   ///< creates and returns a new vertical scroll, allowing subclasses to use Scroll-derived scrolls
-    virtual Scroll* NewHScroll(bool vert_scroll);   ///< creates and returns a new horizontal scroll, allowing subclasses to use Scroll-derived scrolls
-    void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.  Subclasses that override NewVScroll or NewHScroll should call this at the end of their ctor.
+    void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
     //@}
 
 private:
@@ -339,6 +344,8 @@ private:
     void            HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
     void            ClickAtRow(int row, Uint32 keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys
     void            NormalizeRow(Row* row); ///< adjusts a Row so that it has the same number of cells as other rows, and that each cell has the correct width and alignment
+    int             FirstRowShownWhenBottomIs(int bottom_row, int client_height); ///< Returns the index of the first row shown when the last row shown is \a bottom_row
+    int             FirstColShownWhenRightIs(int right_col, int client_width); ///< Returns the index of the first column shown when the last column shown is \a right_col
 
     Scroll*         m_vscroll;          ///< vertical scroll bar on right
     Scroll*         m_hscroll;          ///< horizontal scroll bar at bottom

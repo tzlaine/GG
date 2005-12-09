@@ -243,10 +243,10 @@ void ControlsTestGGApp::Initialize()
     // be hand-coded.
     GG::StateButton* state_button8 =
         new GG::StateButton(0,   0, 100, 25, "Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::StateButton::SBSTYLE_3D_RADIO);
+                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
     GG::StateButton* state_button9 =
         new GG::StateButton(100, 0, 100, 25, "Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::StateButton::SBSTYLE_3D_RADIO);
+                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
     radio_button_group->AddButton(state_button8);
     radio_button_group->AddButton(state_button9);
     layout->Add(radio_button_group, 1, 0);
@@ -264,25 +264,25 @@ void ControlsTestGGApp::Initialize()
     // Here we add the rows we want to appear in the DropDownList one at a time.
     drop_down_list->SetStyle(GG::LB_NOSORT);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("I always", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("I always", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("thought", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("thought", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("\"combo box\"", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("\"combo box\"", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("was a lousy", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("was a lousy", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("way to describe", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("way to describe", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("controls", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("controls", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     row = new GG::ListBox::Row();
-    row->push_back(GG::ListBox::Row::CreateControl("like this", font, GG::CLR_WHITE));
+    row->push_back(row->CreateControl("like this", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
     drop_down_list->Select(0);
     layout->Add(drop_down_list, 2, 0);
@@ -315,7 +315,7 @@ void ControlsTestGGApp::Initialize()
 
     // A numerical value slider control.
     GG::Slider* slider =
-        new GG::Slider(0, 0, 300, 14, 1, 100, GG::Slider::HORIZONTAL, GG::Slider::RAISED, GG::CLR_GRAY, 10);
+        new GG::Slider(0, 0, 300, 14, 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
     layout->Add(slider, 4, 0);
 
     // An integer spin box.
@@ -335,7 +335,7 @@ void ControlsTestGGApp::Initialize()
 
     // A scrollbar control
     GG::Scroll* scroll =
-        new GG::Scroll(0, 0, 14, 200, GG::Scroll::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
+        new GG::Scroll(0, 0, 14, 200, GG::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
     scroll->SetMaxSize(GG::Pt(14, 1000));
     layout->Add(scroll, 4, 1, 3, 1);
 

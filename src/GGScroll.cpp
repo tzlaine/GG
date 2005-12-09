@@ -29,6 +29,7 @@
 #include <GGApp.h>
 #include <GGButton.h>
 #include <GGDrawUtil.h>
+#include <GGStyleFactory.h>
 #include <GGWndEditor.h>
 
 using namespace GG;
@@ -48,14 +49,16 @@ Scroll::Scroll() :
     m_range_max(99),
     m_line_sz(5),
     m_page_sz(25),
+    m_tab(0),
+    m_incr(0),
+    m_decr(0),
     m_tab_drag_offset(-1), 
     m_initial_depressed_area(SBR_NONE),
     m_depressed_area(SBR_NONE)
 {
 }
 
-Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
-               Button* decr/* = 0*/, Button* incr/* = 0*/, Button* tab/* = 0*/, Uint32 flags/* = CLICKABLE*/) :
+Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_int_color(interior),
     m_orientation(orientation),
@@ -64,23 +67,24 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
     m_range_max(99),
     m_line_sz(5),
     m_page_sz(25),
-    m_tab(boost::shared_ptr<Button>(tab)),
-    m_incr(boost::shared_ptr<Button>(incr)),
-    m_decr(boost::shared_ptr<Button>(decr)),
+    m_tab(0),
+    m_incr(0),
+    m_decr(0),
     m_tab_drag_offset(-1), 
     m_initial_depressed_area(SBR_NONE),
     m_depressed_area(SBR_NONE)
 {
     SetColor(color);
     boost::shared_ptr<Font> null_font;
+    boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     if (m_orientation == VERTICAL) {
-        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, w, w,          "", null_font, color));
-        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(0, h - w, w, w,          "", null_font, color));
-        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(0,     w, w, TabWidth(), "", null_font, color));
+        m_decr = style->NewButton(0,     0, w, w,          "", null_font, color);
+        m_incr = style->NewButton(0, h - w, w, w,          "", null_font, color);
+        m_tab  = style->NewButton(0,     w, w, TabWidth(), "", null_font, color);
     } else {
-        if (!m_decr) m_decr = boost::shared_ptr<Button>(new Button(0,     0, h,          h, "", null_font, color));
-        if (!m_incr) m_incr = boost::shared_ptr<Button>(new Button(w - h, 0, h,          h, "", null_font, color));
-        if (!m_tab)  m_tab  = boost::shared_ptr<Button>(new Button(h,     0, TabWidth(), h, "", null_font, color));
+        m_decr = style->NewButton(0,     0, h,          h, "", null_font, color);
+        m_incr = style->NewButton(w - h, 0, h,          h, "", null_font, color);
+        m_tab  = style->NewButton(h,     0, TabWidth(), h, "", null_font, color);
     }
 }
 
@@ -109,7 +113,7 @@ Clr Scroll::InteriorColor() const
     return m_int_color;
 }
 
-Scroll::Orientation Scroll::ScrollOrientation() const
+Orientation Scroll::ScrollOrientation() const
 {
     return m_orientation;
 }
@@ -424,17 +428,17 @@ Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
     return retval;
 }
 
-const boost::shared_ptr<Button> Scroll::TabButton() const
+Button* Scroll::TabButton() const
 {
     return m_tab;
 }
 
-const boost::shared_ptr<Button> Scroll::IncrButton() const
+Button* Scroll::IncrButton() const
 {
     return m_incr;
 }
 
-const boost::shared_ptr<Button> Scroll::DecrButton() const
+Button* Scroll::DecrButton() const
 {
     return m_decr;
 }

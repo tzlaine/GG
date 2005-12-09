@@ -67,7 +67,7 @@ public:
     /** \name Structors */ //@{
     /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null.  Client code should \a not attempt to 
         delete \a lb once it has been passed to the DropDownList ctor. */
-    DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, ListBox* lb = 0, Uint32 flags = CLICKABLE);
+    DropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color, Uint32 flags = CLICKABLE);
 
     ~DropDownList(); ///< dtor
     //@}

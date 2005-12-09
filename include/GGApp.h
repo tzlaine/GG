@@ -49,6 +49,7 @@ namespace GG {
 class Wnd;
 class EventPumpBase;
 class PluginInterface;
+class StyleFactory;
 class Texture;
 struct AppImplData;
 
@@ -68,30 +69,36 @@ struct AppImplData;
     - keyboard accelerators
     - application-wide management of fonts and textures
     <p>
-    The user is required to provide several functions.  The most vital functions the user is required to provide are: Enter2DMode(),
-    Exit2DMode(), DeltaT(), PollAndRender() [virtual private], and Run() [virtual private].  Without these App is pretty useless.  
-    In addition, HandleEvent() must be driven from PollAndRender().  The code driving HandleEvent() must interact with the hardware 
-    and operating system, and supply the appropriate EventType's, key presses, and mouse position info to HandleEvent().  It is 
-    the author's recommendation that the user use SDL to do this.  See http://www.libsdl.org for more info.
+    The user is required to provide several functions.  The most vital functions the user is required to provide are:
+    Enter2DMode(), Exit2DMode(), DeltaT(), PollAndRender() [virtual private], and Run() [virtual private].  Without
+    these App is pretty useless.  In addition, HandleEvent() must be driven from PollAndRender().  The code driving
+    HandleEvent() must interact with the hardware and operating system, and supply the appropriate EventType's, key
+    presses, and mouse position info to HandleEvent().  It is the author's recommendation that the user use SDL to do
+    this.  See http://www.libsdl.org for more info.
     <p>
-    Keyboard accelerators may be defined, as mentioned above.  Each defined accelerator has its own signal which is emitted each 
-    time the accelerator is detected.  Client code should listen to the appropriate signal to act on an accelerator invocation.
-    Each slot that is signalled with a keyboard accelerator should return true if it processed the accelerator, or false otherwise.
-    This lets App know whether or not it should create a keystroke event and process it normally, sending it to the Wnd that currently
-    has focus.  Note that since signals can be connected to multiple slots, if even one slot returns true, no kestroke event is 
-    created.  It is perfectly legal to return false even if an accelerator is processed, as long as you also then want the focus 
-    Wnd to receive a keystroke event.  Also, note that all accelerators are processed before, and possbily instead of, any key events.  
-    So setting a plain "h" as a keyboard accelerator can (if it is processed normally by a slot) prevent any Wnd anywhere in your 
+    Keyboard accelerators may be defined, as mentioned above.  Each defined accelerator has its own signal which is
+    emitted each time the accelerator is detected.  Client code should listen to the appropriate signal to act on an
+    accelerator invocation.  Each slot that is signalled with a keyboard accelerator should return true if it processed
+    the accelerator, or false otherwise.  This lets App know whether or not it should create a keystroke event and
+    process it normally, sending it to the Wnd that currently has focus.  Note that since signals can be connected to
+    multiple slots, if even one slot returns true, no kestroke event is created.  It is perfectly legal to return false
+    even if an accelerator is processed, as long as you also then want the focus Wnd to receive a keystroke event.
+    Also, note that all accelerators are processed before, and possbily instead of, any key events.  So setting a plain
+    "h" as a keyboard accelerator can (if it is processed normally by a slot) prevent any Wnd anywhere in your
     application from receiving "h" keystrokes.  To avoid this:
     - Define accelerators with modifier keys like CTRL and ALT, or
     - Have slots that process these accelerators return false, or
     - Do not connect anything to such an accelerator, in which case it will return false.
     <p>
-    A note about "mouse drag repeat".  When you click on the down-button on a scroll-bar, you probably expect 
-    the the button's action (scrolling down one increment) to repeat when you hold down the button, much like
-    the way kestrokes are repeated when you hold down a keyboard key.  But if you just press the button and 
-    keep the mouse perfectly still, there will probably be no events sent to the scrollbar control after the first 
-    button-down event.  When enabled, mouse drag repeat sends messages to the scrollbar when there otherwise would be none.
+    An app-wide StyleFactory can be set; this controls the actual types of controls and dialogs that are created when a
+    control or dialog creates one (e.g. when FileDlg encounters an error and creates a ThreeButtonDlg).  This is
+    overridden by any StyleFactory that may be installed in an individual Wnd.
+    <p>
+    A note about "mouse drag repeat".  When you click on the down-button on a scroll-bar, you probably expect the the
+    button's action (scrolling down one increment) to repeat when you hold down the button, much like the way kestrokes
+    are repeated when you hold down a keyboard key.  But if you just press the button and keep the mouse perfectly
+    still, there will probably be no events sent to the scrollbar control after the first button-down event.  When
+    enabled, mouse drag repeat sends messages to the scrollbar when there otherwise would be none.
 */
 class GG_API App
 {
@@ -158,6 +165,8 @@ public:
     Pt             MousePosition() const;        ///< returns the absolute position of mouse based on last mouse motion event
     Pt             MouseMovement() const;        ///< returns the relative position of mouse based on last mouse motion event
 
+    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the app-wide currently-installed style factory
+
     const_accel_iterator accel_begin() const;    ///< returns an iterator to the first defined keyboard accelerator
     const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
 
@@ -213,6 +222,8 @@ public:
     boost::shared_ptr<Texture> StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name); ///< adds an already-constructed texture to the managed pool
     boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
+
+    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const; ///< sets the app-wide currently-installed style factory
 
     /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw GG::App::BadFunctionPointer Throws
         GG::App::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using

@@ -30,6 +30,7 @@
 #include <GGDrawUtil.h>
 #include <GGFont.h>
 #include <GGLayout.h>
+#include <GGStyleFactory.h>
 #include <GGTextControl.h>
 
 using namespace GG;
@@ -67,7 +68,7 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>&
     m_color(color),
     m_border_color(border_color),
     m_border_width(border_width),
-    m_text_control(new TextControl(0, 0, w, 1, "", m_font, text_color, text_fmt))
+    m_text_control(GetStyleFactory()->NewTextControl(0, 0, w, 1, "", m_font, text_color, text_fmt))
 {
     m_text_control->SetMinSize(true);
     AttachChild(m_text_control);

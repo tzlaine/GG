@@ -21,6 +21,7 @@
 #include "GGSpin.h"
 #include "GGStaticGraphic.h"
 #include "GGFileDlg.h"
+#include "GGColorDlg.h"
 #include "GGThreeButtonDlg.h"
 
 #include <fstream>
@@ -67,6 +68,7 @@ GG_SHARED_POINTER_EXPORT(GG::Button)
 GG_SHARED_POINTER_EXPORT(GG::StateButton)
 GG_SHARED_POINTER_EXPORT(GG::RadioButtonGroup)
 GG_SHARED_POINTER_EXPORT(GG::FileDlg)
+GG_SHARED_POINTER_EXPORT(GG::ColorDlg)
 GG_SHARED_POINTER_EXPORT(GG::ThreeButtonDlg)
 
 void SaveWnd(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)

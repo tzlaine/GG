@@ -145,15 +145,6 @@ GG_ENUM_STREAM_OUT(Button::ButtonState)
 class GG_API StateButton : public TextControl
 {
 public:
-    /// the built-in visual styles of state buttons
-    enum StateButtonStyle {
-        SBSTYLE_3D_XBOX,        ///< draws a down-beveled box with a 3D x-mark inside
-        SBSTYLE_3D_CHECKBOX,    ///< draws a down-beveled box with a 3D check-mark inside
-        SBSTYLE_3D_RADIO,       ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
-        SBSTYLE_3D_BUTTON,      ///< draws a button that toggles bewtween popped up and pushed down
-        SBSTYLE_3D_ROUND_BUTTON ///< draws a down-beveled circle with an up-beveled circle inside
-    };
-
     /** \name Signal Types */ //@{
     typedef boost::signal<void (bool)> CheckedSignalType; ///< emitted when the StateButton is checked or unchecked; the checked/unchecked status is indicated by the bool parameter
     //@}
@@ -165,7 +156,7 @@ public:
     /** \name Structors */ //@{
     StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
-                int bn_x = -1, int bn_y = -1, int bn_w = -1, int bn_h = -1, Uint32 flags = CLICKABLE); ///< ctor
+                Uint32 flags = CLICKABLE); ///< ctor
     //@}
 
     /** \name Accessors */ //@{
@@ -184,6 +175,8 @@ public:
 
     void             Reset();                 ///< unchecks button
     void             SetCheck(bool b = true); ///< (un)checks button
+    void             SetButtonPosition(const Pt& ul, const Pt& lr); ///< places the button within the control
+    void             SetDefaultButtonPosition(); ///< places the button to its default positionwithin the control
     virtual void     SetColor(Clr c);         ///< sets the color of the button; does not affect text color
     void             SetInteriorColor(Clr c); ///< sets the interior color of the box, circle, or other enclosing shape
 
@@ -199,41 +192,24 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    int ButtonX() const;  ///< returns the x coordinate of the button part of the control
-    int ButtonY() const;  ///< returns the y coordinate of the button part of the control
-    int ButtonWd() const; ///< returns the width of the button part of the control
-    int ButtonHt() const; ///< returns the height of the button part of the control
-    int TextX() const;    ///< returns the x coordinate of the text part of the control
-    int TextY() const;    ///< returns the y coordinate of the text part of the control
+    Pt  ButtonUpperLeft() const;  ///< returns the upper-left of the button part of the control
+    Pt  ButtonLowerRight() const; ///< returns the lower-right of the button part of the control
+    Pt  TextUpperLeft() const;    ///< returns the upper-left of the text part of the control
     //@}
 
 private:
-    void Init(int w, int h, int pts, Clr color, int bn_x, int bn_y, int bn_w, int bn_h);
-
     bool              m_checked;     ///< true when this button in a checked, active state
     Clr               m_int_color;   ///< color inside border
     StateButtonStyle  m_style;       ///< style of appearance to use when rendering button
 
-    int               m_button_x,  m_button_y;
-    int               m_button_wd, m_button_ht;
-    int               m_text_x,    m_text_y;
+    Pt                m_button_ul;
+    Pt                m_button_lr;
+    Pt                m_text_ul;
 
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
-
-// define EnumMap and stream operators for Button::ButtonState
-GG_ENUM_MAP_BEGIN(StateButton::StateButtonStyle)
-    GG_ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_XBOX)
-    GG_ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_CHECKBOX)
-    GG_ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_RADIO)
-    GG_ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_BUTTON)
-    GG_ENUM_MAP_INSERT(StateButton::SBSTYLE_3D_ROUND_BUTTON)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(StateButton::StateButtonStyle)
-GG_ENUM_STREAM_OUT(StateButton::StateButtonStyle)
 
 
 /** This is a class that encapsulates multiple GG::StateButtons into a single radio-button control.  The location of the
@@ -341,12 +317,9 @@ void GG::StateButton::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_checked)
         & BOOST_SERIALIZATION_NVP(m_int_color)
         & BOOST_SERIALIZATION_NVP(m_style)
-        & BOOST_SERIALIZATION_NVP(m_button_x)
-        & BOOST_SERIALIZATION_NVP(m_button_y)
-        & BOOST_SERIALIZATION_NVP(m_button_wd)
-        & BOOST_SERIALIZATION_NVP(m_button_ht)
-        & BOOST_SERIALIZATION_NVP(m_text_x)
-        & BOOST_SERIALIZATION_NVP(m_text_y);
+        & BOOST_SERIALIZATION_NVP(m_button_ul)
+        & BOOST_SERIALIZATION_NVP(m_button_lr)
+        & BOOST_SERIALIZATION_NVP(m_text_ul);
 }
 
 template <class Archive>

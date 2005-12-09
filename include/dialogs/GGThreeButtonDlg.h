@@ -40,38 +40,28 @@ namespace GG {
 class Button;
 class Font;
 
-/** a general pop-up message or user input box with one, two, or three buttons.  This is designed to be used as a 
-    generic message window, with just an "ok" button, or for any input consisting of only two or three choices, such 
-    as "yes" and "no", "abort", "retry", and "fail", etc.  The enter key can be pressed to select the default button;
-    the first button is always the default, unless the user sets a different one via SetDefaultButton().  Similarly, the 
+/** a general pop-up message or user input box with one, two, or three buttons.  This is designed to be used as a
+    generic message window, with just an "ok" button, or for any input consisting of only two or three choices, such as
+    "yes" and "no", "abort", "retry", and "fail", etc.  The enter key can be pressed to select the default button; the
+    first button is always the default, unless the user sets a different one via SetDefaultButton().  Similarly, the
     escape key can be pressed to select the button that will get the user out of the dialog without taking any action,
-    if one exists; the last button is always the escape button, unless a different
-    one is set via SetEscapeButton().  Note that this means that in a one-button dialog both enter and escape do the same 
-    thing.  The default labels for the buttons depends on the number of buttons.  For a one-button dialog, the default
-    label is "ok"; for a two-button dialog, the default labels are "ok" and "cancel"; and for a three-button dialog, the 
-    default labels are "yes", "no", and "cancel".*/
+    if one exists; the last button is always the escape button, unless a different one is set via SetEscapeButton().
+    Note that this means that in a one-button dialog both enter and escape do the same thing.  The default labels for
+    the buttons depends on the number of buttons.  For a one-button dialog, the default label is "ok"; for a two-button
+    dialog, the default labels are "ok" and "cancel"; and for a three-button dialog, the default labels are "yes", "no",
+    and "cancel".*/
 class GG_API ThreeButtonDlg : public Wnd
 {
 public:
     /** \name Structors */ //@{
     /** basic ctor*/
     ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
-                   Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
-                   Button* one = 0, Button* two = 0);
-
-    /** ctor that automatically centers the dialog in the app's area*/
-    ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
-                   Clr border_color, Clr button_color, Clr text_color = CLR_BLACK, int buttons = 3, Button* zero = 0, 
-                   Button* one = 0, Button* two = 0);
-
-    /** basic ctor*/
-    ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
-                   Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero, 
+                   Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero = "", 
                    const std::string& one = "", const std::string& two = "");
 
     /** ctor that automatically centers the dialog in the app's area*/
     ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
-                   Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero, 
+                   Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero = "", 
                    const std::string& one = "", const std::string& two = "");
     //@}
 

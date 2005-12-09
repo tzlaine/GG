@@ -48,6 +48,10 @@
 #include <GGEdit.h>
 #endif
 
+#ifndef _GGStyleFactory_h_
+#include <GGStyleFactory.h>
+#endif
+
 #ifndef _GGWndEditor_h_
 #include <GGWndEditor.h>
 #endif
@@ -100,8 +104,7 @@ public:
     /** \name Structors */ //@{
     /** ctor that does not required height. Height is determined from the font and point size used.*/
     Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Button* up = 0, Button* down = 0, 
-         Uint32 flags = CLICKABLE | DRAG_KEEPER);
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER);
 
     ~Spin(); // dtor
     //@}
@@ -167,8 +170,8 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    const boost::shared_ptr<Button>&   UpButton() const; ///< returns a pointer to the Button control used as this control's up button
-    const boost::shared_ptr<Button>&   DownButton() const; ///< returns a pointer to the Button control used as this control's down button
+    Button*     UpButton() const;   ///< returns a pointer to the Button control used as this control's up button
+    Button*     DownButton() const; ///< returns a pointer to the Button control used as this control's down button
 
     SpinRegion  InitialDepressedRegion() const;  ///< returns the part of the control originally under cursor in LButtonDown msg
     SpinRegion  DepressedRegion() const;         ///< returns the part of the control currently being "depressed" by held-down mouse button
@@ -185,19 +188,19 @@ private:
     void Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags);
     void ValueUpdated(const std::string& val_text);
 
-    T        m_value;
-    T        m_step_size;
-    T        m_min_value;
-    T        m_max_value;
+    T          m_value;
+    T          m_step_size;
+    T          m_min_value;
+    T          m_max_value;
 
-    bool     m_editable;
+    bool       m_editable;
 
-    Edit*                     m_edit;
-    boost::shared_ptr<Button> m_up_bn;
-    boost::shared_ptr<Button> m_dn_bn;
+    Edit*      m_edit;
+    Button*    m_up_bn;
+    Button*    m_dn_bn;
 
-    SpinRegion   m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
-    SpinRegion   m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
+    SpinRegion m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
+    SpinRegion m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
 
     boost::signals::connection m_edit_connection;
 
@@ -217,8 +220,8 @@ Spin<T>::Spin() :
     m_max_value(),
     m_editable(false),
     m_edit(0),
-    m_up_bn(),
-    m_dn_bn(),
+    m_up_bn(0),
+    m_dn_bn(0),
     m_initial_depressed_area(SR_NONE),
     m_depressed_area(SR_NONE)
 {
@@ -226,8 +229,7 @@ Spin<T>::Spin() :
 
 template<class T>
 Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Button* up/* = 0*/, Button* down/* = 0*/, 
-              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
+              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
     Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
     m_value(value),
     m_step_size(step),
@@ -235,8 +237,8 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_max_value(max),
     m_editable(edits),
     m_edit(0),
-    m_up_bn(up),
-    m_dn_bn(down),
+    m_up_bn(0),
+    m_dn_bn(0),
     m_initial_depressed_area(SR_NONE),
     m_depressed_area(SR_NONE)
 {
@@ -248,6 +250,8 @@ Spin<T>::~Spin()
 {
     DetachChildren();
     delete m_edit;
+    delete m_up_bn;
+    delete m_dn_bn;
 }
 
 template<class T>
@@ -553,13 +557,13 @@ void Spin<T>::DefineAttributes(WndEditor* editor)
 }
 
 template<class T>
-const boost::shared_ptr<Button>& Spin<T>::UpButton() const
+Button* Spin<T>::UpButton() const
 {
     return m_up_bn;
 }
 
 template<class T>
-const boost::shared_ptr<Button>& Spin<T>::DownButton() const
+Button* Spin<T>::DownButton() const
 {
     return m_dn_bn;
 }
@@ -598,13 +602,12 @@ void Spin<T>::ConnectSignals()
 template<class T>
 void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
 {
+    boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     Control::SetColor(color);
-    m_edit = new Edit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
+    m_edit = style->NewEdit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
     boost::shared_ptr<Font> small_font = App::GetApp()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
-    if (!m_up_bn)
-        m_up_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "+", small_font, color));
-    if (!m_dn_bn)
-        m_dn_bn = boost::shared_ptr<Button>(new Button(0, 0, 1, 1, "-", small_font, color));
+    m_up_bn = style->NewButton(0, 0, 1, 1, "+", small_font, color);
+    m_dn_bn = style->NewButton(0, 0, 1, 1, "-", small_font, color);
     if (m_editable)
         AttachChild(m_edit);
     ConnectSignals();

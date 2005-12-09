@@ -28,6 +28,7 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
+#include <GGStyleFactory.h>
 #include <GGTextControl.h>
 #include <GGWndEditor.h>
 
@@ -325,7 +326,7 @@ void MenuBar::AdjustLayout()
 {
     // create any needed labels
     for (unsigned int i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
-        m_menu_labels.push_back(new TextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));
+        m_menu_labels.push_back(GetStyleFactory()->NewTextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));
         m_menu_labels.back()->Resize(Pt(m_menu_labels.back()->Width() + 2 * MENU_SEPARATION, m_font->Lineskip()));
         AttachChild(m_menu_labels.back());
     }

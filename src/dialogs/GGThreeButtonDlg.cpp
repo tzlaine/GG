@@ -27,56 +27,28 @@
 #include "GGThreeButtonDlg.h"
 
 #include "../GGApp.h"
-#include "../GGTextControl.h"
 #include "../GGButton.h"
 #include "../GGDrawUtil.h"
+#include "../GGLayout.h"
+#include "../GGStyleFactory.h"
+#include "../GGTextControl.h"
 
 using namespace GG;
 
 ThreeButtonDlg::ThreeButtonDlg() :
-    Wnd()
-{
-}
-
-ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
-                               Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/,
-                               int buttons/* = 3*/, Button* zero/* = 0*/, Button* one/* = 0*/, Button* two/* = 0*/) :
-    Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
-    m_color(color),
-    m_border_color(border_color),
-    m_text_color(text_color),
-    m_button_color(button_color),
+    Wnd(),
     m_default(0),
-    m_escape(buttons - 1),
+    m_escape(0),
     m_result(0),
-    m_button_0(zero),
-    m_button_1(one),
-    m_button_2(two)
+    m_button_0(0),
+    m_button_1(0),
+    m_button_2(0)
 {
-    Init(msg, font, buttons);
-}
-
-ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
-                               Clr color, Clr border_color, Clr button_color, Clr text_color/* = CLR_BLACK*/, int buttons/* = 3*/,
-                               Button* zero/* = 0*/, Button* one/* = 0*/, Button* two/* = 0*/) :
-    Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
-    m_color(color),
-    m_border_color(border_color),
-    m_text_color(text_color),
-    m_button_color(button_color),
-    m_default(0),
-    m_escape(buttons - 1),
-    m_result(0),
-    m_button_0(zero),
-    m_button_1(one),
-    m_button_2(two)
-{
-    Init(msg, font, buttons);
 }
 
 ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
-                               const std::string& zero, const std::string& one/* = ""*/,
+                               const std::string& zero/* = ""*/, const std::string& one/* = ""*/,
                                const std::string& two/* = ""*/) :
     Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
@@ -95,7 +67,7 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& ms
 
 ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
-                               const std::string& zero, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
+                               const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
     Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
@@ -201,37 +173,37 @@ void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>&
         buttons = 3;
 
     const int SPACING = 10;
-    const int BUTTON_WIDTH = (Width() - (buttons + 1) * SPACING) / buttons;
-    const int BUTTON_HEIGHT = font->PointSize() + 8;
+    const int BUTTON_HEIGHT = font->Height() + 10;
 
-    AttachChild(new TextControl(0, 0, Width(), Height() - BUTTON_HEIGHT - 2 * SPACING, msg, font, m_text_color,
-                                TF_CENTER | TF_VCENTER | TF_WORDBREAK));
+    Layout* layout = new Layout(0, 0, 1, 1, 2, 1, 10);
+    Layout* button_layout = new Layout(0, 0, 1, 1, 1, buttons, 0, 10);
 
-    if (!m_button_0) {
-        m_button_0 = new Button(SPACING + (BUTTON_WIDTH + SPACING) * 0,
-                                Height() - BUTTON_HEIGHT - SPACING,
-                                BUTTON_WIDTH, BUTTON_HEIGHT,
-                                (zero == "" ? (buttons < 3 ? "Ok" : "Yes") : zero),
-                                        font, m_button_color, m_text_color);
-    }
-    if (!m_button_1 && 2 <= buttons) {
-        m_button_1 = new Button(SPACING + (BUTTON_WIDTH + SPACING) * 1,
-                                Height() - BUTTON_HEIGHT - SPACING,
-                                BUTTON_WIDTH, BUTTON_HEIGHT,
-                                (one == "" ? (buttons < 3 ? "Cancel" : "No") : one),
-                                        font, m_button_color, m_text_color);
-    }
-    if (!m_button_2 && 3 <= buttons) {
-        m_button_2 = new Button(SPACING + (BUTTON_WIDTH + SPACING) * 2,
-                                Height() - BUTTON_HEIGHT - SPACING,
-                                BUTTON_WIDTH, BUTTON_HEIGHT,
-                                (two == "" ? "Cancel" : two),
-                                font, m_button_color, m_text_color);
-    }
+    boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
-    AttachChild(m_button_0);
-    AttachChild(m_button_1);
-    AttachChild(m_button_2);
+    TextControl* message_text = style->NewTextControl(0, 0, ClientWidth() - 2 * SPACING, Height(), msg, font, m_text_color,
+                                                      TF_CENTER | TF_VCENTER | TF_WORDBREAK);
+    message_text->SetMinSize(true);
+    layout->Add(message_text, 0, 0);
+    layout->SetRowStretch(0, 1);
+    layout->SetMinimumRowHeight(1, BUTTON_HEIGHT);
+
+    m_button_0 = style->NewButton(0, 0, 1, 1, (zero == "" ? (buttons < 3 ? "Ok" : "Yes") : zero),
+                                  font, m_button_color, m_text_color);
+    button_layout->Add(m_button_0, 0, 0);
+
+    if (2 <= buttons) {
+        m_button_1 = style->NewButton(0, 0, 1, 1, (one == "" ? (buttons < 3 ? "Cancel" : "No") : one),
+                                      font, m_button_color, m_text_color);
+        button_layout->Add(m_button_1, 0, 1);
+    }
+    if (3 <= buttons) {
+        m_button_2 = style->NewButton(0, 0, 1, 1, (two == "" ? "Cancel" : two),
+                                      font, m_button_color, m_text_color);
+        button_layout->Add(m_button_2, 0, 2);
+    }
+    layout->Add(button_layout, 1, 0);
+
+    SetLayout(layout);
 
     ConnectSignals();
 }

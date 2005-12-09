@@ -29,6 +29,7 @@
 #include <GGApp.h>
 #include <GGButton.h>
 #include <GGDrawUtil.h>
+#include <GGStyleFactory.h>
 #include <GGWndEditor.h>
 
 using namespace GG;
@@ -42,11 +43,12 @@ Slider::Slider() :
     m_line_width(5),
     m_tab_width(5),
     m_line_style(RAISED),
-    m_tab_drag_offset(-1)
+    m_tab_drag_offset(-1),
+    m_tab(0)
 {
 }
 
-Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color,
+Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color,
                int tab_width, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_posn(min),
@@ -57,28 +59,17 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     m_tab_width(tab_width),
     m_line_style(style),
     m_tab_drag_offset(-1),
-    m_tab(new Button(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
-                     m_orientation == VERTICAL ? m_tab_width : Height(), "", boost::shared_ptr<Font>(), color))
+    m_tab(GetStyleFactory()->NewButton(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
+                                       m_orientation == VERTICAL ? m_tab_width : Height(), "",
+                                       boost::shared_ptr<Font>(), color))
 {
     SetColor(color);
     SizeMove(UpperLeft(), LowerRight());
 }
 
-Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, LineStyleType style, Clr color,
-               Button* tab, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
-    Control(x, y, w, h, flags),
-    m_posn(min),
-    m_range_min(min),
-    m_range_max(max),
-    m_orientation(orientation),
-    m_line_width(line_width),
-    m_tab_width(m_orientation == VERTICAL ? tab->Width() : tab->Height()),
-    m_line_style(style),
-    m_tab_drag_offset(-1),
-    m_tab(tab)
+Slider::~Slider()
 {
-    SetColor(color);
-    SizeMove(UpperLeft(), LowerRight());
+    delete m_tab;
 }
 
 int Slider::Posn() const
@@ -91,7 +82,7 @@ std::pair<int, int> Slider::SliderRange() const
     return std::pair<int,int>(m_range_min, m_range_max);
 }
 
-Slider::Orientation Slider::GetOrientation() const
+Orientation Slider::GetOrientation() const
 {
     return m_orientation;
 }
@@ -106,7 +97,7 @@ int Slider::LineWidth() const
     return m_line_width;
 }
 
-Slider::LineStyleType Slider::LineStyle() const
+SliderLineStyle Slider::LineStyle() const
 {
     return m_line_style;
 }
@@ -297,7 +288,7 @@ void Slider::SlideTo(int p)
     }
 }
 
-void Slider::SetLineStyle(LineStyleType style)
+void Slider::SetLineStyle(SliderLineStyle style)
 {
     m_line_style = style;
 }
@@ -322,7 +313,7 @@ int Slider::TabDragOffset() const
     return m_tab_drag_offset;
 }
 
-const boost::shared_ptr<Button>& Slider::Tab() const
+Button* Slider::Tab() const
 {
     return m_tab;
 }

@@ -121,7 +121,7 @@ void WndEditor::SetWnd(Wnd* wnd)
 void WndEditor::Label(const std::string& name)
 {
     ListBox::Row* label = new ListBox::Row();
-    label->push_back(ListBox::Row::CreateControl(name, m_label_font, CLR_BLACK));
+    label->push_back(label->CreateControl(name, m_label_font, CLR_BLACK));
     m_list_box->Insert(label);
 }
 

@@ -49,12 +49,7 @@ class Scroll;
     lines within the space taken up by the text.  The latter justifies the entire block of text within the client area
     of the control.  So if you specify TF_LEFT and use \<right> formatting tags on the entire text, the text will appear
     to be right-justified, but you will probably only see the extreme left of the text area without scrolling.  If none
-    of the no-scroll style flags are in use, the scrolls are created and destroyed automatically, as needed.  If
-    non-standard Scrolls are desired, subclasses can create their own Scroll-derived scrolls by overriding NewVScroll()
-    and NewHScroll().  When overriding NewVScroll() and NewHScroll() in subclasses, call RecreateScrolls() at the end of
-    the subclass's constructor, to ensure that the correct type of Scrolls are created; if scrolls are created in the
-    MultiEdit base constructor, the virtual function table may not be complete yet, so GG::Scrolls may be created
-    instead of the types used in the overloaded New*Scroll() functions. */
+    of the no-scroll style flags are in use, the scrolls are created and destroyed automatically, as needed. */
 class GG_API MultiEdit : public Edit
 {
 public:
@@ -131,9 +126,7 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual Scroll* NewVScroll(bool horz_scroll);   ///< creates and returns a new vertical scroll, allowing subclasses to use Scroll-derived scrolls
-    virtual Scroll* NewHScroll(bool vert_scroll);   ///< creates and returns a new horizontal scroll, allowing subclasses to use Scroll-derived scrolls
-    void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.  Subclasses that override NewVScroll or NewHScroll should call this at the end of their ctor.
+    void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
     //@}
 
     static const int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls

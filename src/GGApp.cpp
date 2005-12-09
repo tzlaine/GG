@@ -27,7 +27,9 @@
 #include "GGApp.h"
 
 #include "GGBrowseInfoWnd.h"
+#include "GGControl.h"
 #include "GGPluginInterface.h"
+#include "GGStyleFactory.h"
 #include "GGZList.h"
 
 #include <cassert>
@@ -81,6 +83,7 @@ struct GG::AppImplData
         double_click_wnd(0),
         double_click_start_time(-1),
         double_click_time(-1),
+        style_factory(new StyleFactory()),
         save_wnd_fn(0),
         load_wnd_fn(0)
     {
@@ -139,6 +142,8 @@ struct GG::AppImplData
     int          double_click_button;   // the index of the mouse button used in the last click
     int          double_click_start_time;// the time from which we started measuring double_click_time, in ms
     int          double_click_time;     // time elapsed since last click, in ms
+
+    boost::shared_ptr<StyleFactory> style_factory;
 
     App::SaveWndFn    save_wnd_fn;
     App::LoadWndFn    load_wnd_fn;
@@ -237,6 +242,11 @@ Pt App::MousePosition() const
 Pt App::MouseMovement() const
 {
     return s_impl->mouse_rel;
+}
+
+const boost::shared_ptr<StyleFactory>& App::GetStyleFactory() const
+{
+    return s_impl->style_factory;
 }
 
 App::const_accel_iterator App::accel_begin() const
@@ -450,6 +460,13 @@ boost::shared_ptr<Texture> App::GetTexture(const std::string& name, bool mipmap/
 void App::FreeTexture(const std::string& name)
 {
     GetTextureManager().FreeTexture(name);
+}
+
+void App::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const
+{
+    s_impl->style_factory = factory;
+    if (!s_impl->style_factory)
+        s_impl->style_factory.reset(new StyleFactory());
 }
 
 void App::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)

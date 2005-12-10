@@ -8,6 +8,16 @@ from build_config import *
 def OptionValue(key, env):
     return env.subst('$' + key)
 
+def ParseOptionsCacheFile(filename):
+    f = open(filename, 'r')
+    lines = f.readlines()
+    f.close()
+    retval = {}
+    for i in lines:
+        key_and_value = i.split(" = ")
+        retval[key_and_value[0]] = key_and_value[1]
+    return retval
+
 def GenerateHelpText(options, env):
     import textwrap
     retval = ''
@@ -31,7 +41,7 @@ def GenerateHelpText(options, env):
         'Options:',
         '========',
         '',
-        'Each of the following options should be specified with an equals sign (e.g., foo=bar).  Dashes are not required.  Once an option has been specified, it is saved in options.cache for later use; this means an option only needs to be set once.  To change or remove a single option, edit the file.  To clear all options delete the file.',
+        'Each of the following options should be specified with an equals sign (e.g., foo=bar).  Dashes are not required.  Once an option has been specified, it is saved in options.cache for later use; this means an option only needs to be set once.  To change or remove a single option, edit the file.  To clear all options, delete the file.  Note that only command-line option changes are guaranteed to trigger the configuration step when relevant changes are made; manual changes to the options cache are not.',
         ''
         ]
     for i in lines:

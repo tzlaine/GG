@@ -8,15 +8,19 @@ from build_support import *
 
 env = Environment()
 
-mising_pkg_config = not WhereIs('pkg-config')
+missing_pkg_config = not WhereIs('pkg-config')
 
 ##################################################
 # create options                                 #
 ##################################################
-options = Options('options.cache')
+options_cache_filename = 'options.cache'
+old_options_cache = ParseOptionsCacheFile(options_cache_filename)
+options = Options(options_cache_filename)
 options.Add(BoolOption('debug', 'Generate debug code', 0))
 options.Add(BoolOption('multithreaded', 'Generate multithreaded code', 1))
 options.Add(BoolOption('dynamic', 'Generate a shared (dynamic-link) library', 1))
+if WhereIs('ccache'):
+    options.Add(BoolOption('use_ccache', 'Use ccache to build GG', 0))
 if WhereIs('distcc'):
     options.Add(BoolOption('use_distcc', 'Use distcc to build GG', 0))
 if str(Platform()) == 'posix':
@@ -27,7 +31,7 @@ options.Add('scons_cache_dir', 'Directory to use for SCons object file caching (
 options.Add('incdir', 'Location to install headers', os.path.normpath(os.path.join('$prefix', 'include')))
 options.Add('bindir', 'Location to install executables', os.path.normpath(os.path.join('$prefix', 'bin')))
 options.Add('libdir', 'Location to install libraries', os.path.normpath(os.path.join('$prefix', 'lib')))
-if not mising_pkg_config:
+if not missing_pkg_config:
     options.Add('pkgconfigdir', 'Location to install pkg-config .pc files', '/usr/lib/pkgconfig')
 options.Add(BoolOption('disable_allegro_hack',
                        'Disable the hack for Allegro-linked DevILs (ignored if DevIL is not linked against Allegro)',
@@ -77,16 +81,18 @@ elif ('-h' in command_line_args) or ('--help' in command_line_args):
     preconfigured = True # this is just to ensure config gets skipped when help is requested
 ms_linker = 'msvs' in env['TOOLS'] or 'msvc' in env['TOOLS']
 
-env_cache_keys = ['CCFLAGS',
-                  'CPPDEFINES',
-                  'CPPFLAGS',
-                  'CPPPATH',
-                  'CXXFLAGS',
-                  'LIBPATH',
-                  'LIBS',
-                  'LINKFLAGS',
-                  'need__vsnprintf_c',
-                  'devil_with_allegro']
+env_cache_keys = [
+    'CCFLAGS',
+    'CPPDEFINES',
+    'CPPFLAGS',
+    'CPPPATH',
+    'CXXFLAGS',
+    'LIBPATH',
+    'LIBS',
+    'LINKFLAGS',
+    'need__vsnprintf_c',
+    'devil_with_allegro'
+    ]
 if not force_configure:
     try:
         f = open('config.cache', 'r')
@@ -113,13 +119,72 @@ if env.has_key('use_distcc') and env['use_distcc']:
               'DISTCC_MMAP',
               'DISTCC_SAVE_TEMPS',
               'DISTCC_TCP_CORK',
-              'DISTCC_SSH'
-              ]:
+              'DISTCC_SSH']:
+        if os.environ.has_key(i) and not env.has_key(i):
+            env['ENV'][i] = os.environ[i]
+
+if env.has_key('use_ccache') and env['use_ccache']:
+    env['CC'] = 'ccache %s' % env['CC']
+    env['CXX'] = 'ccache %s' % env['CXX']
+    for i in ['HOME',
+              'CCACHE_DIR',
+              'CCACHE_TEMPDIR',
+              'CCACHE_LOGFILE',
+              'CCACHE_PATH',
+              'CCACHE_CC',
+              'CCACHE_PREFIX',
+              'CCACHE_DISABLE',
+              'CCACHE_READONLY',
+              'CCACHE_CPP2',
+              'CCACHE_NOSTATS',
+              'CCACHE_NLEVELS',
+              'CCACHE_HARDLINK',
+              'CCACHE_RECACHE',
+              'CCACHE_UMASK',
+              'CCACHE_HASHDIR',
+              'CCACHE_UNIFY',
+              'CCACHE_EXTENSION']:
         if os.environ.has_key(i) and not env.has_key(i):
             env['ENV'][i] = os.environ[i]
 
 Help(GenerateHelpText(options, env))
 options.Save('options.cache', env)
+
+# detect changes in the "reconfigurable" options (those that should trigger the configuration step when changed)
+new_options_cache = ParseOptionsCacheFile('options.cache')
+reconfigurable_options = [
+    'disable_allegro_hack',
+    'disable_net',
+    'disable_sdl',
+    'with_boost',
+    'with_boost_include',
+    'with_boost_libdir',
+    'boost_lib_suffix',
+    'boost_signals_namespace',
+    'with_sdl',
+    'with_sdl_include',
+    'with_sdl_libdir',
+    'with_builtin_sdlnet',
+    'with_sdlnet',
+    'with_sdlnet_include',
+    'with_sdlnet_libdir',
+    'with_ft',
+    'with_ft_include',
+    'with_ft_libdir',
+    'with_devil',
+    'with_devil_include',
+    'with_devil_libdir'
+    ]
+if preconfigured:
+    for i in old_options_cache.keys():
+        if i in reconfigurable_options and (not new_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]):
+            preconfigured = False
+            break
+if preconfigured:
+    for i in new_options_cache.keys():
+        if i in reconfigurable_options and (not old_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]):
+            preconfigured = False
+            break
 
 if env['disable_sdl'] and not env['disable_net']:
     print 'Warning: since SDL is disabled, the GiGiNet build is disabled as well.'
@@ -167,8 +232,10 @@ if not env.GetOption('clean'):
                 ('signals', signals_namespace)
                 ])
 
-        boost_libs = [('boost_signals', 'boost::signals::connection', '#include <boost/signals.hpp>'),
-                      ('boost_filesystem', 'boost::filesystem::initial_path', '#include <boost/filesystem/operations.hpp>')]
+        boost_libs = [
+            ('boost_signals', 'boost::signals::connection', '#include <boost/signals.hpp>'),
+            ('boost_filesystem', 'boost::filesystem::initial_path', '#include <boost/filesystem/operations.hpp>')
+            ]
         if not conf.CheckBoost('1.32.0', boost_libs, conf, not ms_linker):
             Exit(1)
 
@@ -321,11 +388,13 @@ int main() {
 ##################################################
 # define targets                                 #
 ##################################################
-env.Append(CPPPATH = ['#/include',
-                      '#/include/net',
-                      '#/include/SDL',
-                      '#/include/dialogs',
-                      '#/libltdl'])
+env.Append(CPPPATH = [
+    '#/include',
+    '#/include/net',
+    '#/include/SDL',
+    '#/include/dialogs',
+    '#/libltdl'
+    ])
 
 if str(Platform()) == 'win32':
     if env['multithreaded']:
@@ -367,7 +436,10 @@ if str(Platform()) == 'win32':
         '_USRDLL',
         '_WINDLL'
         ])
-    env.Append(LINKFLAGS = ['/NODEFAULTLIB:LIBCMT.lib', '/DEBUG'])
+    env.Append(LINKFLAGS = [
+        '/NODEFAULTLIB:LIBCMT.lib',
+        '/DEBUG'
+        ])
     env.Append(LIBS = [
         'kernel32',
         'user32',
@@ -392,7 +464,9 @@ Export('env', 'DirHeaders')
 
 # define libGiGi objects
 if str(Platform()) != 'win32':
-    env['libltdl_defines'] = ['HAVE_CONFIG_H']
+    env['libltdl_defines'] = [
+        'HAVE_CONFIG_H'
+        ]
 else:
     env['libltdl_defines'] = [
         'error_t=int',
@@ -487,7 +561,7 @@ else:
               env.Command(lib_dir + '/' + gigi_libname,
                           lib_dir + '/' + installed_gigi_libname,
                           'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
-if not mising_pkg_config:
+if not missing_pkg_config:
     Alias('install', Install(env['pkgconfigdir'], gigi_pc))
 if not env['disable_sdl']:
     if str(Platform()) == 'win32':
@@ -499,7 +573,7 @@ if not env['disable_sdl']:
                   env.Command(lib_dir + '/' + gigi_sdl_libname,
                               lib_dir + '/' + installed_gigi_sdl_libname,
                               'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
-    if not mising_pkg_config:
+    if not missing_pkg_config:
         Alias('install', Install(env['pkgconfigdir'], gigi_sdl_pc))
 if not env['disable_net']:
     if str(Platform()) == 'win32':
@@ -511,7 +585,7 @@ if not env['disable_net']:
                   env.Command(lib_dir + '/' + gigi_net_libname,
                               lib_dir + '/' + installed_gigi_net_libname,
                               'ln -s ' + lib_dir + '/' + installed_gigi_net_libname + ' ' + lib_dir + '/' + gigi_net_libname))
-    if not mising_pkg_config:
+    if not missing_pkg_config:
         Alias('install', Install(env['pkgconfigdir'], gigi_net_pc))
 
 # uninstall target
@@ -525,19 +599,19 @@ deletions = [
     ]
 if str(Platform()) == 'posix' and env['dynamic']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_libname))))
-if not mising_pkg_config:
+if not missing_pkg_config:
     deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_pc[0])))))
 if not env['disable_sdl']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_sdl[0])))))
     if str(Platform()) == 'posix' and env['dynamic']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
-    if not mising_pkg_config:
+    if not missing_pkg_config:
         deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_sdl_pc[0])))))
 if not env['disable_net']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_net[0])))))
     if str(Platform()) == 'posix' and env['dynamic']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_net_libname))))
-    if not mising_pkg_config:
+    if not missing_pkg_config:
         deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_net_pc[0])))))
 uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)
 Alias('uninstall', uninstall_cmd)

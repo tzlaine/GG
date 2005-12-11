@@ -721,7 +721,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
         m_color_squares_layout->Add(m_new_color_square_text, 0, 0);
         m_color_squares_layout->Add(m_new_color_square, 0, 1);
         m_old_color_square_text = style->NewTextControl(0, 0, 1, 1, m_old_str, font, m_text_color, TF_RIGHT);
-        m_color_squares_layout->Add(m_old_color_square_text, 0, 0);
+        m_color_squares_layout->Add(m_old_color_square_text, 1, 0);
         m_old_color_square = new ColorDisplay(m_original_color);
         m_color_squares_layout->Add(m_old_color_square, 1, 1);
         m_color_squares_layout->SetMinimumColumnWidth(0, 30);
@@ -841,13 +841,13 @@ void ColorDlg::ConnectSignals()
     for (unsigned int i = 0; i < m_color_buttons.size(); ++i) {
         Connect(m_color_buttons[i]->ClickedSignal, ColorButtonClickFunctor(i, this));
     }
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::RedSliderChanged, this);
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::GreenSliderChanged, this);
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::BlueSliderChanged, this);
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::AlphaSliderChanged, this);
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::HueSliderChanged, this);
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::SaturationSliderChanged, this);
-    Connect(m_sliders.back()->SlidSignal, &ColorDlg::ValueSliderChanged, this);
+    Connect(m_sliders[R]->SlidSignal, &ColorDlg::RedSliderChanged, this);
+    Connect(m_sliders[G]->SlidSignal, &ColorDlg::GreenSliderChanged, this);
+    Connect(m_sliders[B]->SlidSignal, &ColorDlg::BlueSliderChanged, this);
+    Connect(m_sliders[A]->SlidSignal, &ColorDlg::AlphaSliderChanged, this);
+    Connect(m_sliders[H]->SlidSignal, &ColorDlg::HueSliderChanged, this);
+    Connect(m_sliders[S]->SlidSignal, &ColorDlg::SaturationSliderChanged, this);
+    Connect(m_sliders[V]->SlidSignal, &ColorDlg::ValueSliderChanged, this);
     Connect(m_ok->ClickedSignal, &ColorDlg::OkClicked, this);
     Connect(m_cancel->ClickedSignal, &ColorDlg::CancelClicked, this);
     Connect(m_hue_saturation_picker->ChangedSignal, &ValuePicker::SetHueSaturation, m_value_picker);

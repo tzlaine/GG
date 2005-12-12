@@ -58,7 +58,7 @@ template <class C, class R, class T1, class T2 GG_SIGNALS_COMMA_IF_NONZERO_ARGS
 boost::signals::connection 
 Connect(boost::signal<R (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), C>& sig, 
         R (T1::* fn) (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), 
-        T2* obj, 
+        T2 obj, 
         boost::signals::connect_position at = boost::signals::at_back)
 {
     return sig.connect(boost::bind(fn, obj GG_SIGNALS_COMMA_IF_NONZERO_ARGS GG_SIGNALS_BIND_ARGS), at);
@@ -73,7 +73,7 @@ template <class C, class R, class T1, class T2 GG_SIGNALS_COMMA_IF_NONZERO_ARGS
 boost::signals::connection 
 Connect(boost::signal<R (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), C>& sig, 
         R (T1::* fn) (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS) const, 
-        T2* obj, 
+        T2 obj, 
         boost::signals::connect_position at = boost::signals::at_back)
 {
     return sig.connect(boost::bind(fn, obj GG_SIGNALS_COMMA_IF_NONZERO_ARGS GG_SIGNALS_BIND_ARGS), at);
@@ -88,7 +88,7 @@ template <class C, class R, class T1, class T2 GG_SIGNALS_COMMA_IF_NONZERO_ARGS
 boost::signals::connection 
 Connect(boost::signal<R (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), C>& sig, 
         R (T1::* fn) (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), 
-        T2* obj, 
+        T2 obj, 
         int grp, 
         boost::signals::connect_position at = boost::signals::at_back)
 {
@@ -104,14 +104,13 @@ template <class C, class R, class T1, class T2 GG_SIGNALS_COMMA_IF_NONZERO_ARGS
 boost::signals::connection 
 Connect(boost::signal<R (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), C>& sig, 
         R (T1::* fn) (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS) const, 
-        T2* obj, 
+        T2 obj, 
         int grp, 
         boost::signals::connect_position at = boost::signals::at_back)
 {
     return sig.connect(grp, boost::bind(fn, obj GG_SIGNALS_COMMA_IF_NONZERO_ARGS GG_SIGNALS_BIND_ARGS), at);
 }
 
-#if 1
 /** connects a signal to another signal of the same signature, establishing signal-forwarding. \a sig1 places \a sig2 in
     its slot group 0. */
 template <class C, class R GG_SIGNALS_COMMA_IF_NONZERO_ARGS
@@ -138,7 +137,6 @@ Connect(boost::signal<R (GG_SIGNALS_SIGNAL_TEMPLATE_ARGS), C>& sig1,
     typedef typename detail::GG_SIGNALS_FORWARDER_NAME<C, R GG_SIGNALS_COMMA_IF_NONZERO_ARGS GG_SIGNALS_SIGNAL_TEMPLATE_ARGS> Forwarder;
     return sig1.connect(grp, Forwarder(sig2), at);
 }
-#endif
 
 } //namespace GG
 

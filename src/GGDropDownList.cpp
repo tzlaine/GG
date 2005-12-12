@@ -270,6 +270,11 @@ void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
     m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
 }
 
+void DropDownList::SetColor(Clr c)
+{
+    m_LB->SetColor(c);
+}
+
 int DropDownList::Insert(Row* row, int at/* = -1*/)
 {
     return m_LB->Insert(row, at);

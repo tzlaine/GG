@@ -140,7 +140,8 @@ private:
     Wnd. */
 struct GG_API AttributeRowBase : ListBox::Row
 {
-    virtual void Update(); ///< refreshes the contents of the row to match the value associated with the row
+    virtual void Refresh(); ///< refreshes the contents of the row to match the value associated with the row every frame
+    virtual void Update();  ///< updates the contents of the row to match the value associated with the row on response to a change in the edited Wnd
     mutable boost::signal<void ()> ChangedSignal; ///< emitted when the row has modified its associated value
 };
 
@@ -256,7 +257,7 @@ template <class T>
 struct ConstAttributeRow : AttributeRowBase
 {
     ConstAttributeRow(const std::string& name, const T& value, const boost::shared_ptr<Font>& font);
-    virtual void Update();
+    virtual void Refresh();
 private:
     const T& m_value;
     TextControl* m_value_text;
@@ -267,7 +268,7 @@ template <>
 struct GG_API ConstAttributeRow<Pt> : AttributeRowBase
 {
     ConstAttributeRow(const std::string& name, const Pt& value, const boost::shared_ptr<Font>& font);
-    virtual void Update();
+    virtual void Refresh();
 private:
     const Pt& m_value;
     TextControl* m_value_text;
@@ -278,7 +279,7 @@ template <>
 struct GG_API ConstAttributeRow<Clr> : AttributeRowBase
 {
     ConstAttributeRow(const std::string& name, const Clr& value, const boost::shared_ptr<Font>& font);
-    virtual void Update();
+    virtual void Refresh();
 private:
     const Clr& m_value;
     TextControl* m_value_text;
@@ -322,14 +323,14 @@ private:
 
 /** the AttributeRowBase subclass used to display some custom text about a Wnd, that does not necessarily correspond to
     a single data member in that Wnd.  CustomTextRow accepts a functor with the signature std::string (const Wnd*);
-    when the row's Update() method is called, the row will set its text to <i>functor</i>(<i>m_wnd</i>).  This allows a
+    when the row's Refresh() method is called, the row will set its text to <i>functor</i>(<i>m_wnd</i>).  This allows a
     Wnd subclass to display arbitrary (uneditable) information about itself, without being restricted to displaying just
     data members. */
 template <class T>
 struct CustomTextRow : AttributeRowBase
 {
     CustomTextRow(const std::string& name, const T& functor, const Wnd*& wnd, const boost::shared_ptr<Font>& font);
-    virtual void Update();
+    virtual void Refresh();
 private:
     T m_functor;
     const Wnd*& m_wnd;
@@ -539,7 +540,7 @@ ConstAttributeRow<T>::ConstAttributeRow(const std::string& name, const T& value,
 }
 
 template <class T>
-void ConstAttributeRow<T>::Update()
+void ConstAttributeRow<T>::Refresh()
 {
     m_value_text->SetText(boost::lexical_cast<std::string>(m_value));
 }
@@ -648,7 +649,7 @@ CustomTextRow<T>::CustomTextRow(const std::string& name, const T& functor, const
 }
 
 template <class T>
-void CustomTextRow<T>::Update()
+void CustomTextRow<T>::Refresh()
 {
     m_display_text->SetText(m_functor(m_wnd));
 }

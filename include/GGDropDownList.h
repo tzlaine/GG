@@ -108,6 +108,8 @@ public:
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
+    virtual void   SetColor(Clr c);
+
     int            Insert(Row* row, int at = -1); ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point.  This Row becomes the property of the DropDownList and should not be deleted or inserted into any other DropDownLists
     Row*           Erase(int idx);                ///< removes and returns the row at index \a idx from the list, or 0 if no such row exists
     void           Clear();                       ///< empties the list

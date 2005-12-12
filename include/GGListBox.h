@@ -238,6 +238,9 @@ public:
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, then resizes the scrollbars as needed
 
+    virtual void   Disable(bool b = true);
+    virtual void   SetColor(Clr c);
+
     int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This Row becomes the property of the ListBox.
     Row*           Erase(int idx);                        ///< removes and returns the row at index \a idx from the ListBox, or 0 if no such row exists
     void           Clear();                               ///< empties the ListBox

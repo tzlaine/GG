@@ -85,6 +85,9 @@ private:
 };
 
 
+struct SetFontAction;
+struct SetTextColorAction;
+
 /** a menu bar control providing "browse" updates to user navigation of the menu.  Whenever a menu item is selected, a
     signal is emitted which includes the ID of the selected item.  It is recommended that the user attach each menu item
     to an appropriate function the will execute the actions associated with the menu item, rather than attaching all the
@@ -169,7 +172,9 @@ protected:
     //@}
 
 private:
-    void AdjustLayout();     ///< determines the rects in m_menu_labels, and puts the menus in multiple rows if they will not fit in one
+    /** determines the rects in m_menu_labels, and puts the menus in multiple rows if they will not fit in one */
+    void AdjustLayout(bool reset = false);
+
     void BrowsedSlot(int n); ///< responds to a browse in a PopupMenu submenu, and passes it along
 
     boost::shared_ptr<Font>   m_font;           ///< the font used to render the text in the control
@@ -182,6 +187,9 @@ private:
     MenuItem                  m_menu_data;      ///< this is not just a single menu item; the next_level element represents the entire menu
     std::vector<TextControl*> m_menu_labels;    ///< the text for each top-level menu item
     int                       m_caret;          ///< the currently indicated top-level menu (open or under the cursor)
+
+    friend struct SetFontAction;
+    friend struct SetTextColorAction;
 
     friend class boost::serialization::access;
     template <class Archive>

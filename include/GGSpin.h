@@ -62,10 +62,46 @@
 
 namespace GG {
 
-// forward declaration of spin_details::mod and spin_details::div
+// forward declaration of helper functions and classes
 namespace spin_details {
     template <class T> T mod(T, T);
     template <class T> T div(T, T);
+
+    template <class T>
+    struct SetValueAction : AttributeChangedAction<T>
+    {
+        SetValueAction(Spin<T>* spin) : m_spin(spin) {}
+        void operator()(const T& value) {m_spin->SetValue(m_spin->Value());}
+    private:
+        Spin<T>* m_spin;
+    };
+
+    template <class T>
+    struct SetMinValueAction : AttributeChangedAction<T>
+    {
+        SetMinValueAction(Spin<T>* spin) : m_spin(spin) {}
+        void operator()(const T& value) {m_spin->SetValue(value);}
+    private:
+        Spin<T>* m_spin;
+    };
+
+    template <class T>
+    struct SetMaxValueAction : AttributeChangedAction<T>
+    {
+        SetMaxValueAction(Spin<T>* spin) : m_spin(spin) {}
+        void operator()(const T& value) {m_spin->SetValue(value);}
+    private:
+        Spin<T>* m_spin;
+    };
+
+    template <class T>
+    struct SetEditableAction : AttributeChangedAction<bool>
+    {
+        SetEditableAction(Spin<T>* spin) : m_spin(spin) {}
+        void operator()(const bool& editable) {m_spin->AllowEdits(editable);}
+    private:
+        Spin<T>* m_spin;
+    };
 }
 
 
@@ -137,6 +173,7 @@ public:
     virtual void SizeMove(const Pt& ul, const Pt& lr);
 
     virtual void Disable(bool b = true);
+    virtual void SetColor(Clr c);
 
     void Incr();  ///< increments the value of the control's text by StepSize(), up to at most MaxValue()
     void Decr();  ///< decrements the value of the control's text by StepSize(), down to at least MinValue()
@@ -151,7 +188,6 @@ public:
     /** turns on or off the mode that allows the user to edit the value in the spinbox directly. */
     void AllowEdits(bool b = true);
 
-    virtual void   SetColor(Clr c);
     void           SetTextColor(Clr c);          ///< sets the text color
     void           SetInteriorColor(Clr c);      ///< sets the interior color of the control
     void           SetHiliteColor(Clr c);        ///< sets the color used to render hiliting around selected text
@@ -224,8 +260,7 @@ Spin<T>::Spin() :
     m_dn_bn(0),
     m_initial_depressed_area(SR_NONE),
     m_depressed_area(SR_NONE)
-{
-}
+{}
 
 template<class T>
 Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
@@ -441,6 +476,14 @@ void Spin<T>::Disable(bool b/* = true*/)
 }
 
 template<class T>
+void Spin<T>::SetColor(Clr c)
+{
+    Control::SetColor(c);
+    m_up_bn->SetColor(c);
+    m_dn_bn->SetColor(c);
+}
+
+template<class T>
 void Spin<T>::Incr()
 {
     SetValue(m_value + m_step_size);
@@ -480,37 +523,35 @@ template<class T>
 void Spin<T>::SetStepSize(T step)
 {
     m_step_size = step;
+    SetValue(m_value);
 }
 
 template<class T>
 void Spin<T>::SetMinValue(T value)
 {
     m_min_value = value;
+    if (m_value < m_min_value)
+        SetValue(m_min_value);
 }
 
 template<class T>
-void Spin<T>::SetMaxValue(T value)    
+void Spin<T>::SetMaxValue(T value)
 {
     m_max_value = value;
+    if (m_max_value < m_value)
+        SetValue(m_max_value);
 }
 
 template<class T>
 void Spin<T>::AllowEdits(bool b/* = true*/)
 {
-    DetachChildren();
-    m_edit_connection.disconnect();
     if (m_editable = b) {
         AttachChild(m_edit);
         m_edit_connection = Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
+    } else {
+        DetachChild(m_edit);
+        m_edit_connection.disconnect();
     }
-}
-
-template<class T>
-void Spin<T>::SetColor(Clr c)
-{
-    Control::SetColor(c);
-    m_up_bn->SetColor(c);
-    m_dn_bn->SetColor(c);
 }
 
 template<class T>
@@ -549,11 +590,15 @@ void Spin<T>::DefineAttributes(WndEditor* editor)
         editor->Label("Spin<double>");
     else
         editor->Label("Spin<T>");
-    editor->Attribute("Value", m_value);
-    editor->Attribute("Step Size", m_step_size);
-    editor->Attribute("Min Value", m_min_value);
-    editor->Attribute("Max Value", m_max_value);
-    editor->Attribute("Editable", m_editable);
+    boost::shared_ptr<spin_details::SetValueAction<T> > set_value_action(new spin_details::SetValueAction<T>(this));
+    editor->Attribute<T>("Value", m_value, set_value_action);
+    editor->Attribute<T>("Step Size", m_step_size, set_value_action);
+    boost::shared_ptr<spin_details::SetMinValueAction<T> > set_min_value_action(new spin_details::SetMinValueAction<T>(this));
+    editor->Attribute<T>("Min Value", m_min_value, set_min_value_action);
+    boost::shared_ptr<spin_details::SetMaxValueAction<T> > set_max_value_action(new spin_details::SetMaxValueAction<T>(this));
+    editor->Attribute<T>("Max Value", m_max_value, set_max_value_action);
+    boost::shared_ptr<spin_details::SetEditableAction<T> > set_editable_action(new spin_details::SetEditableAction<T>(this));
+    editor->Attribute<bool>("Editable", m_editable, set_editable_action);
 }
 
 template<class T>

@@ -95,7 +95,7 @@ public:
         default-constructed T if one cannot be deduced from the control's text. */
     template <class T> void operator>>(T& t) const;
 
-    /** sets the value of \a t to the interpreted value of the control's text.
+    /** returns the value of the control's text, interpreted as an object of type T.
         If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
         then GetValue() will do so.  Because lexical_cast attempts to convert the entire contents of the string to a 
         single value, a TextControl containing the string "4.15 3.8" will throw, even though there is a perfectly 
@@ -103,7 +103,7 @@ public:
         boost::bad_lexical_cast when it cannot perform a requested cast. This is handy for validating data in a dialog box;
         Otherwise, using operator>>(), you may get the default value, even though the text in the control may not be the 
         default value at all, but garbage. */
-    template <class T> void GetValue(T& t) const;
+    template <class T> T GetValue() const;
 
     operator const std::string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
 
@@ -199,9 +199,9 @@ void GG::TextControl::operator>>(T& t) const
 }
 
 template <class T>
-void GG::TextControl::GetValue(T& t) const
+T GG::TextControl::GetValue() const
 {
-    t = boost::lexical_cast<T, std::string>(Control::m_text);
+    return boost::lexical_cast<T, std::string>(Control::m_text);
 }
 
 template <class T>

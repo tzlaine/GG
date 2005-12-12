@@ -149,7 +149,7 @@ public:
         BrowseInfoWnd. */
     struct GG_API BrowseInfoMode
     {
-        int                              time; ///< the time the cursor must linger over the Wnd before this mode becomes active
+        int                              time; ///< the time the cursor must linger over the Wnd before this mode becomes active, in ms
         boost::shared_ptr<BrowseInfoWnd> wnd;  ///< the BrowseInfoWnd used to display the browse info for this mode
         std::string                      text; ///< the text to display in the BrowseInfoWnd shown for this mode
         template <class Archive>
@@ -406,7 +406,7 @@ public:
         It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
     virtual int    Run();
 
-    /** sets the time cutoff (in milliseconds) for a browse info mode.  If \a mode is not less than the current nubmer
+    /** sets the time cutoff (in milliseconds) for a browse info mode.  If \a mode is not less than the current number
         of modes, extra modes will be created as needed.  The extra nodes will be set to the value of the last time at
         the time the method is called, or \a time if there were initially no modes. */
     void SetBrowseModeTime(int time, int mode = 0);

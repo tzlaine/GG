@@ -43,6 +43,14 @@ namespace {
         else
             return original_string[lines[line].char_data.back().original_char_index] == '\n';
     }
+
+    struct SetStyleAction : AttributeChangedAction<Uint32>
+    {
+        SetStyleAction(MultiEdit* multi_edit) : m_multi_edit(multi_edit) {}
+        void operator()(const Uint32& style) {m_multi_edit->SetText(m_multi_edit->WindowText());}
+    private:
+        MultiEdit* m_multi_edit;
+    };
 }
 
 ////////////////////////////////////////////////
@@ -58,8 +66,7 @@ MultiEdit::MultiEdit() :
     m_max_lines_history(0),
     m_vscroll(0),
     m_hscroll(0)
-{
-}
+{}
 
 MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
               Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
@@ -499,6 +506,13 @@ void MultiEdit::SetText(const std::string& str)
     EditedSignal(str);
 }
 
+void MultiEdit::SetStyle(Uint32 style)
+{
+    m_style = style;
+    ValidateStyle();
+    SetText(WindowText());
+}
+
 void MultiEdit::SetMaxLinesOfHistory(int max)
 {
     m_max_lines_history = max;
@@ -511,8 +525,9 @@ void MultiEdit::DefineAttributes(WndEditor* editor)
         return;
     Edit::DefineAttributes(editor);
     editor->Label("MultiEdit");
-    editor->BeginFlags(m_style);
-    editor->FlagGroup("V. Alignment", TF_VCENTER, TF_BOTTOM);
+    boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
+    editor->BeginFlags(m_style, set_style_action);
+    editor->FlagGroup("V. Alignment", TF_TOP, TF_BOTTOM);
     editor->FlagGroup("H. Alignment", TF_CENTER, TF_RIGHT);
     editor->Flag("Word-break", TF_WORDBREAK);
     editor->Flag("Line-wrap", TF_LINEWRAP);
@@ -793,10 +808,6 @@ void MultiEdit::AdjustView()
             // try to move the caret by five characters
             int five_char_distance = StringIndexOf(m_cursor_end.first, first_visible_char) -
                 StringIndexOf(m_cursor_end.first, (5 < first_visible_char) ? first_visible_char - 5 : 0);
-#if 0
-            int five_char_distance = GetLineData()[m_cursor_end.first].char_data[first_visible_char].extent - 
-                GetLineData()[m_cursor_end.first].char_data[(5 < first_visible_char) ? first_visible_char - 5 : 0].extent;
-#endif
             m_hscroll->ScrollTo(m_first_col_shown - five_char_distance);
         } else { // if the caret is more than five characters before m_first_char_shown, just move straight to that spot
             m_hscroll->ScrollTo(horz_min + m_first_col_shown + client_char_posn);
@@ -807,10 +818,6 @@ void MultiEdit::AdjustView()
             int last_char_of_line = static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size()) - 1;
             int five_char_distance = StringIndexOf(m_cursor_end.first, (last_visible_char + 5 < last_char_of_line) ? last_visible_char + 5 : last_char_of_line) -
                 StringIndexOf(m_cursor_end.first, last_visible_char);
-#if 0
-            int five_char_distance = GetLineData()[m_cursor_end.first].char_data[(last_visible_char + 5 < last_char_of_line ? last_visible_char + 5 : last_char_of_line)].extent - 
-                GetLineData()[m_cursor_end.first].char_data[last_visible_char].extent;
-#endif
             m_hscroll->ScrollTo(m_first_col_shown + five_char_distance);
         } else { // if the caret is more than five characters before m_first_char_shown, just move straight to that spot
             m_hscroll->ScrollTo(std::min(horz_min + m_first_col_shown + client_char_posn, horz_max));
@@ -828,10 +835,12 @@ void MultiEdit::AdjustScrolls()
     contents_sz.y = GetLineData().size() * GetFont()->Lineskip();
     int excess_width = contents_sz.x - cl_sz.x;
 
-    need_vert = (!(m_style & NO_VSCROLL) && (contents_sz.y > cl_sz.y ||
-                 (contents_sz.y > cl_sz.y - SCROLL_WIDTH && contents_sz.x > cl_sz.x - SCROLL_WIDTH)));
-    need_horz = (!(m_style & NO_HSCROLL) && (contents_sz.x > cl_sz.x ||
-                 (contents_sz.x > cl_sz.x - SCROLL_WIDTH && contents_sz.y > cl_sz.y - SCROLL_WIDTH)));
+    need_vert =
+        (!(m_style & NO_VSCROLL) && (contents_sz.y > cl_sz.y ||
+                                     (contents_sz.y > cl_sz.y - SCROLL_WIDTH && contents_sz.x > cl_sz.x - SCROLL_WIDTH)));
+    need_horz =
+        (!(m_style & NO_HSCROLL) && (contents_sz.x > cl_sz.x ||
+                                     (contents_sz.x > cl_sz.x - SCROLL_WIDTH && contents_sz.y > cl_sz.y - SCROLL_WIDTH)));
 
     Pt orig_cl_sz = ClientSize();
 

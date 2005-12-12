@@ -108,10 +108,9 @@ const boost::shared_ptr<Font>& WndEditor::GetFont() const
 void WndEditor::Render ()
 {
     for (int i = 0; i < m_list_box->NumRows(); ++i) {
-        AttributeRowBase* row = 
-            dynamic_cast<AttributeRowBase*>(&m_list_box->GetRow(i));
-        if (row)
-            row->Update();
+        if (AttributeRowBase* row = 
+            dynamic_cast<AttributeRowBase*>(&m_list_box->GetRow(i)))
+            row->Refresh();
     }
 }
 
@@ -162,15 +161,22 @@ void WndEditor::Init()
 
 void WndEditor::AttributeChangedSlot()
 {
+    for (int i = 0; i < m_list_box->NumRows(); ++i) {
+        if (AttributeRowBase* row = 
+            dynamic_cast<AttributeRowBase*>(&m_list_box->GetRow(i)))
+            row->Update();
+    }
     WndChangedSignal(m_wnd);
 }
 
 ////////////////////////////////////////////////
 // GG::AttributeRowBase
 ////////////////////////////////////////////////
+void AttributeRowBase::Refresh()
+{}
+
 void AttributeRowBase::Update()
-{
-}
+{}
 
 ////////////////////////////////////////////////
 // GG::AttributeRow<Pt>
@@ -352,7 +358,7 @@ ConstAttributeRow<Pt>::ConstAttributeRow(const std::string& name, const Pt& valu
     push_back(m_value_text);
 }
 
-void ConstAttributeRow<Pt>::Update()
+void ConstAttributeRow<Pt>::Refresh()
 {
     std::stringstream value_stream;
     value_stream << "(" << m_value.x << ", " << m_value.y << ")";
@@ -373,7 +379,7 @@ ConstAttributeRow<Clr>::ConstAttributeRow(const std::string& name, const Clr& va
     push_back(m_value_text);
 }
 
-void ConstAttributeRow<Clr>::Update()
+void ConstAttributeRow<Clr>::Refresh()
 {
     std::stringstream value_stream;
     value_stream << "(" << m_value.r << ", " << m_value.g << ", " << m_value.b << ", " << m_value.a << ")";

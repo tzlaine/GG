@@ -74,7 +74,7 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
     m_initial_depressed_area(SBR_NONE),
     m_depressed_area(SBR_NONE)
 {
-    SetColor(color);
+    Control::SetColor(color);
     boost::shared_ptr<Font> null_font;
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     if (m_orientation == VERTICAL) {
@@ -264,6 +264,14 @@ void Scroll::Disable(bool b/* = true*/)
     m_decr->Disable(b);
 }
 
+void Scroll::SetColor(Clr c)
+{
+    Control::SetColor(c);
+    m_tab->SetColor(c);
+    m_incr->SetColor(c);
+    m_decr->SetColor(c);
+}
+
 void Scroll::SetInteriorColor(Clr c)
 {
     m_int_color = c;
@@ -389,7 +397,6 @@ void Scroll::DefineAttributes(WndEditor* editor)
     Control::DefineAttributes(editor);
     editor->Label("Scroll");
     editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Position", m_posn);
     editor->Attribute("Range Min", m_range_min);
     editor->Attribute("Range Max", m_range_max);
     editor->Attribute("Line Size", m_line_sz);

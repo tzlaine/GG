@@ -30,20 +30,28 @@
 
 using namespace GG;
 
+namespace {
+    struct SetColorAction : AttributeChangedAction<Clr>
+    {
+        SetColorAction(Control* control) : m_control(control) {}
+        virtual void operator()(const Clr& value) {m_control->SetColor(value);}
+    private:
+        Control* m_control;
+    };
+}
+
 ////////////////////////////////////////////////
 // GG::Control
 ////////////////////////////////////////////////
 Control::Control() :
     Wnd (),
     m_disabled(false)
-{
-}
+{}
 
 Control::Control(int x, int y, int w, int h, Uint32 flags/* = CLICKABLE*/) :
     Wnd(x, y, w, h, flags),
     m_disabled(false)
-{
-}
+{}
 
 Clr Control::Color() const
 {
@@ -88,6 +96,7 @@ void Control::DefineAttributes(WndEditor* editor)
         return;
     Wnd::DefineAttributes(editor);
     editor->Label("Control");
-    editor->Attribute("Color", m_color);
+    boost::shared_ptr<SetColorAction> action(new SetColorAction(this));
+    editor->Attribute<Clr>("Color", m_color, action);
     editor->Attribute("Disabled", m_disabled);
 }

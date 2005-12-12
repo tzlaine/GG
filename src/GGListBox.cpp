@@ -59,6 +59,22 @@ namespace {
         const int  sort_col;
         const bool return_less;
     };
+
+    struct SetStyleAction : AttributeChangedAction<Uint32>
+    {
+        SetStyleAction(ListBox* list_box) : m_list_box(list_box) {}
+        void operator()(const Uint32& style) {m_list_box->SetStyle(style);}
+    private:
+        ListBox* m_list_box;
+    };
+
+    struct SetSortColAction : AttributeChangedAction<int>
+    {
+        SetSortColAction(ListBox* list_box) : m_list_box(list_box) {}
+        void operator()(const int& sort_col) {m_list_box->SetSortCol(sort_col);}
+    private:
+        ListBox* m_list_box;
+    };
 }
 
 ////////////////////////////////////////////////
@@ -306,7 +322,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     m_clip_cells(false),
     m_sort_col(0)
 {
-    SetColor(color);
+    Control::SetColor(color);
     ValidateStyle();
     SetText("ListBox");
     EnableChildClipping();
@@ -683,6 +699,24 @@ void ListBox::SizeMove(const Pt& ul, const Pt& lr)
     AdjustScrolls(true);
 }
 
+void ListBox::Disable(bool b/* = true*/)
+{
+    Control::Disable(b);
+    if (m_vscroll)
+        m_vscroll->Disable(b);
+    if (m_hscroll)
+        m_hscroll->Disable(b);
+}
+
+void ListBox::SetColor(Clr c)
+{
+    Control::SetColor(c);
+    if (m_vscroll)
+        m_vscroll->SetColor(c);
+    if (m_hscroll)
+        m_hscroll->SetColor(c);
+}
+
 int ListBox::Insert(Row* row, int at/*= -1*/)
 {
     return Insert(row, at, false);
@@ -810,8 +844,7 @@ void ListBox::SetStyle(Uint32 s)
         if (!(s & LB_NOSORT))
             std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_col, !(s & LB_SORTDESCENDING)));
     } else { // if we're changing the sorting order of a sorted list, reverse the contents
-        if (((m_style & LB_SORTDESCENDING) && !(s & LB_SORTDESCENDING)) ||
-                (!(m_style & LB_SORTDESCENDING) && (s & LB_SORTDESCENDING)))
+        if (static_cast<bool>(m_style & LB_SORTDESCENDING) != static_cast<bool>(s & LB_SORTDESCENDING))
             std::reverse(m_rows.begin(), m_rows.end());
     }
     m_style = s;
@@ -926,7 +959,8 @@ void ListBox::DefineAttributes(WndEditor* editor)
     editor->Attribute("Cell Margin", m_cell_margin);
     editor->Attribute("Interior Color", m_int_color);
     editor->Attribute("Highlighting Color", m_hilite_color);
-    editor->BeginFlags(m_style);
+    boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
+    editor->BeginFlags(m_style, set_style_action);
     editor->FlagGroup("V. Alignment", LB_VCENTER, LB_BOTTOM);
     editor->FlagGroup("H. Alignment", LB_CENTER, LB_RIGHT);
     editor->Flag("Do not Sort", LB_NOSORT);
@@ -940,8 +974,10 @@ void ListBox::DefineAttributes(WndEditor* editor)
     // TODO: handle setting header row
     editor->Attribute("Keep Column Widths", m_keep_col_widths);
     editor->Attribute("Clip Cells", m_clip_cells);
-    editor->Attribute("Sort Column", m_sort_col,
-                      0, static_cast<int>(m_col_widths.size()));
+    boost::shared_ptr<SetSortColAction> set_sort_col_action(new SetSortColAction(this));
+    editor->Attribute<int>("Sort Column", m_sort_col,
+                           0, static_cast<int>(m_col_widths.size()),
+                           set_sort_col_action);
     // TODO: handle specifying allowed drop types
 }
 

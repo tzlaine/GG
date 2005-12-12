@@ -91,6 +91,8 @@ public:
     virtual void   SelectAll();
     virtual void   SetText(const std::string& str);
 
+    void           SetStyle(Uint32 style); ///< sets the style flags for this MultiEdit to \a style
+
     /** sets the maximum number of rows of text that the control will keep */
     void           SetMaxLinesOfHistory(int max);
 

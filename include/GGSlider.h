@@ -84,7 +84,9 @@ public:
     virtual void   Keypress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< sizes the control, then resizes the tab as needed
+
     virtual void   Disable(bool b = true);
+    virtual void   SetColor(Clr c);
 
     void           SizeSlider(int min, int max); ///< sets the logical range of the control; \a min must not equal \a max
     void           SetMax(int max);              ///< sets the maximum value of the control

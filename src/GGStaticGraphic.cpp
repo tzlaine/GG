@@ -31,6 +31,16 @@
 
 using namespace GG;
 
+namespace {
+    struct SetStyleAction : AttributeChangedAction<Uint32>
+    {
+        SetStyleAction(StaticGraphic* static_graphic) : m_static_graphic(static_graphic) {}
+        void operator()(const Uint32& style) {m_static_graphic->SetStyle(style);}
+    private:
+        StaticGraphic* m_static_graphic;
+    };
+}
+
 ////////////////////////////////////////////////
 // GG::StaticGraphic
 ////////////////////////////////////////////////
@@ -129,7 +139,8 @@ void StaticGraphic::DefineAttributes(WndEditor* editor)
     Control::DefineAttributes(editor);
     editor->Label("StaticGraphic");
     // TODO: handle setting image
-    editor->BeginFlags(m_style);
+    boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
+    editor->BeginFlags(m_style, set_style_action);
     editor->FlagGroup("V. Alignment", GR_VCENTER, GR_BOTTOM);
     editor->FlagGroup("H. Alignment", GR_CENTER, GR_RIGHT);
     editor->Flag("Fit Graphic to Size", GR_FITGRAPHIC);

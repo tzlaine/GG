@@ -37,6 +37,8 @@
 
 namespace GG {
 
+struct SetMarginAction;
+
 /** an invisible Wnd subclass whose only purpose is to arrange its child Wnds.  A Layout consists of a grid of cells.  A
     cell may have at most one Wnd covering it, but need not contain a Wnd at all.  A Wnd may cover any rectangular
     region of cells, though they will commonly only cover one.  The cells are arranged into rows and columns.  Most
@@ -223,6 +225,7 @@ private:
     bool                            m_ignore_parent_resize;
 
     friend class Wnd;
+    friend struct SetMarginAction;
 
     friend class boost::serialization::access;
     template <class Archive>

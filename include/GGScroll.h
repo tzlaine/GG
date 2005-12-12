@@ -101,7 +101,9 @@ public:
     virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
+
     virtual void   Disable(bool b = true);
+    virtual void   SetColor(Clr c);
 
     void           SetInteriorColor(Clr c); ///< sets the color painted into the client area of the control
     void           SizeScroll(int min, int max, int line, int page); ///< sets the logical ranges of the control, and the logical increment values

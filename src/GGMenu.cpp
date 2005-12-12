@@ -39,6 +39,23 @@ namespace {
     const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in pixels
 }
 
+struct GG::SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
+{
+    SetFontAction(MenuBar* menu_bar) : m_menu_bar(menu_bar) {}
+    void operator()(const boost::shared_ptr<Font>&) {m_menu_bar->AdjustLayout(true);}
+private:
+    MenuBar* m_menu_bar;
+};
+
+struct GG::SetTextColorAction : AttributeChangedAction<Clr>
+{
+    SetTextColorAction(MenuBar* menu_bar) : m_menu_bar(menu_bar) {}
+    void operator()(const Clr&) {m_menu_bar->AdjustLayout(true);}
+private:
+    MenuBar* m_menu_bar;
+};
+
+
 ////////////////////////////////////////////////
 // GG::MenuItem
 ////////////////////////////////////////////////
@@ -47,8 +64,7 @@ MenuItem::MenuItem() :
     item_ID(0), 
     disabled(false), 
     checked(false)
-{
-}
+{}
 
 MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check) : 
     SelectedSignal(new SelectedSignalType()),
@@ -56,8 +72,7 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check) :
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{
-}
+{}
 
 MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const MenuItem::SelectedSlotType& slot) : 
     SelectedSignal(new SelectedSignalType()),
@@ -70,8 +85,7 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, con
 }
 
 MenuItem::~MenuItem()
-{
-}
+{}
 
 
 ////////////////////////////////////////////////
@@ -80,8 +94,7 @@ MenuItem::~MenuItem()
 MenuBar::MenuBar() :
     Control(),
     m_caret(-1)
-{
-}
+{}
 
 MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color/* = CLR_WHITE*/,
                  Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
@@ -298,10 +311,12 @@ void MenuBar::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("MenuBar");
-    editor->Attribute("Font", m_font);
+    boost::shared_ptr<SetFontAction> set_font_action(new SetFontAction(this));
+    editor->Attribute<boost::shared_ptr<Font> >("Font", m_font, set_font_action);
     editor->Attribute("Border Color", m_border_color);
     editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Text Color", m_text_color);
+    boost::shared_ptr<SetTextColorAction> set_text_color_action(new SetTextColorAction(this));
+    editor->Attribute<Clr>("Text Color", m_text_color, set_text_color_action);
     editor->Attribute("Highlighting Color", m_hilite_color);
     editor->Attribute("Selected Text Color", m_sel_text_color);
     // TODO: handle assigning menu items
@@ -322,8 +337,13 @@ int MenuBar::Caret() const
     return m_caret;
 }
 
-void MenuBar::AdjustLayout()
+void MenuBar::AdjustLayout(bool reset/* = false*/)
 {
+    if (reset) {
+        DeleteChildren();
+        m_menu_labels.clear();
+    }
+
     // create any needed labels
     for (unsigned int i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
         m_menu_labels.push_back(GetStyleFactory()->NewTextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));

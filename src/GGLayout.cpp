@@ -31,6 +31,8 @@
 #include <cassert>
 #include <cmath>
 
+using namespace GG;
+
 namespace {
     int MinDueToMargin(int cell_margin, int num_rows_or_columns, int row_or_column)
     {
@@ -40,7 +42,13 @@ namespace {
     }
 }
 
-using namespace GG;
+struct GG::SetMarginAction : AttributeChangedAction<int>
+{
+    SetMarginAction(Layout* layout) : m_layout(layout) {}
+    void operator()(const int& sort_col) {m_layout->RedoLayout();}
+private:
+    Layout* m_layout;
+};
 
 // RowColParams
 Layout::RowColParams::RowColParams() :
@@ -490,8 +498,9 @@ void Layout::DefineAttributes(WndEditor* editor)
         return;
     Wnd::DefineAttributes(editor);
     editor->Label("Layout");
-    editor->Attribute("Border Margin", m_border_margin);
-    editor->Attribute("Cell Margin", m_cell_margin);
+    boost::shared_ptr<SetMarginAction> set_margin_action(new SetMarginAction(this));
+    editor->Attribute<int>("Border Margin", m_border_margin, set_margin_action);
+    editor->Attribute<int>("Cell Margin", m_cell_margin, set_margin_action);
     // TODO: handle setting the number of rows and columns
 }
 

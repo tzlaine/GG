@@ -45,8 +45,7 @@ Slider::Slider() :
     m_line_style(RAISED),
     m_tab_drag_offset(-1),
     m_tab(0)
-{
-}
+{}
 
 Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color,
                int tab_width, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
@@ -63,7 +62,7 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
                                        m_orientation == VERTICAL ? m_tab_width : Height(), "",
                                        boost::shared_ptr<Font>(), color))
 {
-    SetColor(color);
+    Control::SetColor(color);
     SizeMove(UpperLeft(), LowerRight());
 }
 
@@ -249,6 +248,12 @@ void Slider::Disable(bool b/* = true*/)
     m_tab->Disable(b);
 }
 
+void Slider::SetColor(Clr c)
+{
+    Control::SetColor(c);
+    m_tab->SetColor(c);
+}
+
 void Slider::SizeSlider(int min, int max)
 {
     assert(m_range_min != m_range_max);
@@ -299,7 +304,6 @@ void Slider::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("Slider");
-    editor->Attribute("Position", m_posn);
     editor->Attribute("Range Min", m_range_min);
     editor->Attribute("Range Max", m_range_max);
     editor->Attribute("Line Width", m_line_width);

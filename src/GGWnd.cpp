@@ -149,9 +149,9 @@ namespace {
         const bool& m_done;
     };
 
-    struct WindowTextAttributeAction : AttributeChangedAction<std::string>
+    struct SetWindowTextAction : AttributeChangedAction<std::string>
     {
-        WindowTextAttributeAction(Wnd* wnd) : m_wnd(wnd) {}
+        SetWindowTextAction(Wnd* wnd) : m_wnd(wnd) {}
         virtual void operator()(const std::string& value)
         {
             if (TextControl* text_control = dynamic_cast<TextControl*>(m_wnd))
@@ -1029,7 +1029,7 @@ void Wnd::DefineAttributes(WndEditor* editor)
     if (!editor)
         return;
     editor->Label("Wnd");
-    boost::shared_ptr<WindowTextAttributeAction> action(new WindowTextAttributeAction(this));
+    boost::shared_ptr<SetWindowTextAction> action(new SetWindowTextAction(this));
     editor->Attribute<std::string>("Window Text", m_text, action);
     editor->ConstAttribute("Upper Left", m_upperleft);
     editor->ConstAttribute("Lower Right", m_lowerright);
@@ -1038,6 +1038,7 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Attribute("Min Size", m_min_size);
     editor->Attribute("Max Size", m_max_size);
     editor->Attribute("Clip Children", m_clip_children);
+    editor->Attribute("Drag Drop Type", m_drag_drop_data_type);
     editor->BeginFlags(m_flags);
     editor->Flag("Clickable", CLICKABLE);
     editor->Flag("Dragable", DRAGABLE);
@@ -1046,6 +1047,8 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Flag("Ontop", ONTOP);
     editor->Flag("Modal", MODAL);
     editor->EndFlags();
+    // TODO: handle creating/removing layouts
+    // TODO: handle creation and modification of browse info modes
 }
 
 int Wnd::DefaultBrowseTime()

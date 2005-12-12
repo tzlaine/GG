@@ -34,6 +34,7 @@
 
 #include "GGApp.h"
 #include "GGButton.h"
+#include "GGColorDlg.h"
 #include "GGDropDownList.h"
 #include "GGEdit.h"
 
@@ -48,6 +49,18 @@ namespace detail {
     GG_API extern const int ATTRIBUTE_ROW_CONTROL_WIDTH;
 }
 
+struct AttributeRowBase;
+
+/** This is the base class for functors that respond to a change in a Wnd attribute edited by a WndEditor.  This is
+    needed when a change in a value within a Wnd must be accompanied by some action that is taken in response to that
+    change. */
+template <class T>
+struct AttributeChangedAction
+{
+    virtual ~AttributeChangedAction() {}
+    virtual void operator()(const T& value) {}
+};
+
 /** Allows Wnds to be edited texually in a GUI, primarily for use in GG Sketch.  WndEditor takes an assigned Wnd and
     queries it for controls that can be used to edit it.  Each Wnd to be edited calls methods in the WndEditor that
     create the appropriate controls, and provides references to its internal members that may be altered by the controls
@@ -58,6 +71,9 @@ public:
     /** basic ctor.  Note that WndEditor has an integral width. */
     WndEditor(int h, const boost::shared_ptr<Font>& font);
 
+    /** Returns the font used by this WndEditor to create its attribute rows. */
+    const boost::shared_ptr<Font>& GetFont() const;
+
     virtual void Render ();
 
     /** sets the edited window to \a wnd, and updates the contents of WndEditor's controls to contain the controls that
@@ -67,26 +83,32 @@ public:
     /** creates a row containing just the text \a name. */
     void Label(const std::string& name);
 
+    /** adds \a row and attaches to its ChangedSignal */
+    void Attribute(AttributeRowBase* row);
+
     /** creates a row containing an edit box controlling the value of \a value. */
     template <class T>
-    void Attribute(const std::string& name, T& value);
-
-    /** creates a row containing the uneditable string representation of \a value. */
-    template <class T>
-    void ConstAttribute(const std::string& name, T& value);
-
-    /** creates a row that displays the uneditable result of calling \a functor on the edited Wnd. */
-    template <class T>
-    void CustomDisplay(const std::string& name, const T& functor);
+    void Attribute(const std::string& name, T& value,
+                   boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action = boost::shared_ptr<AttributeChangedAction<T> >());
 
     /** creates a row containing an edit box controlling the value of \a value.  The legal values for \a value are
         restricted to the range [\a min, \a max].*/
     template <class T>
-    void Attribute(const std::string& name, T& value, const T& min, const T& max);
+    void Attribute(const std::string& name, T& value, const T& min, const T& max,
+                   boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action = boost::shared_ptr<AttributeChangedAction<T> >());
+
+    /** creates a row containing the uneditable string representation of \a value. */
+    template <class T>
+    void ConstAttribute(const std::string& name, const T& value);
+
+    /** creates a row that displays the uneditable result of calling \a functor on the edited Wnd. */
+    template <class T>
+    void CustomText(const std::string& name, const T& functor);
 
     /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
         FlagGroup() calls will set values in \a flags. */
-    void BeginFlags(Uint32& flags);
+    void BeginFlags(Uint32& flags,
+                    boost::shared_ptr<AttributeChangedAction<Uint32> > attribute_changed_action = boost::shared_ptr<AttributeChangedAction<Uint32> >());
 
     /** creates a row representing a single bit flag in the currently-set flags variable. */
     template <class T>
@@ -111,6 +133,7 @@ private:
     boost::shared_ptr<Font> m_font;
     boost::shared_ptr<Font> m_label_font;
     Uint32* m_current_flags;
+    boost::shared_ptr<AttributeChangedAction<Uint32> > m_current_flags_changed_actions;
 };
 
 /** the base class for the hierarchy of rows of controls used by WndEditor to accept user modifications of its edited
@@ -126,10 +149,13 @@ template <class T>
 struct AttributeRow : AttributeRowBase
 {
     AttributeRow(const std::string& name, T& value, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const T&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void TextChanged(const std::string& value_text);
     T& m_value;
     Edit* m_edit;
+    boost::signals::connection m_edit_connection;
 };
 
 /** the specialization of AttributeRow<T> for Pt. */
@@ -137,10 +163,14 @@ template <>
 struct GG_API AttributeRow<Pt> : AttributeRowBase
 {
     AttributeRow(const std::string& name, Pt& value, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const Pt&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     Pt& m_value;
     Edit* m_x_edit;
     Edit* m_y_edit;
+    boost::signals::connection m_x_connection;
+    boost::signals::connection m_y_connection;
 };
 
 /** the specialization of AttributeRow<T> for Clr. */
@@ -148,12 +178,13 @@ template <>
 struct GG_API AttributeRow<Clr> : AttributeRowBase
 {
     AttributeRow(const std::string& name, Clr& value, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const Clr&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
+    void ColorButtonClicked();
     Clr& m_value;
-    Edit* m_red_edit;
-    Edit* m_green_edit;
-    Edit* m_blue_edit;
-    Edit* m_alpha_edit;
+    ColorDlg::ColorButton* m_color_button;
+    boost::shared_ptr<Font> m_font;
 };
 
 /** the specialization of AttributeRow<T> for bool. */
@@ -161,10 +192,13 @@ template <>
 struct GG_API AttributeRow<bool> : AttributeRowBase
 {
     AttributeRow(const std::string& name, bool& value, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const bool&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void SelectionChanged(int selection);
     bool& m_value;
-    DropDownList* m_bool_drop_list;
+    RadioButtonGroup* m_radio_button_group;
+    boost::signals::connection m_button_group_connection;
 };
 
 /** the specialization of AttributeRow<T> for Font shared pointers. */
@@ -172,12 +206,16 @@ template <>
 struct GG_API AttributeRow<boost::shared_ptr<Font> > : AttributeRowBase
 {
     AttributeRow(const std::string& name, boost::shared_ptr<Font>& value, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const boost::shared_ptr<Font>&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void FilenameChanged(const std::string& filename_text);
     void PointsChanged(const std::string& points_text);
     boost::shared_ptr<Font>& m_value;
     Edit* m_filename_edit;
     Edit* m_points_edit;
+    boost::signals::connection m_filename_connection;
+    boost::signals::connection m_points_connection;
 };
 
 /** a AttributeRowBase subclass that is restricted to a certain range of values.  Note that all this type of row should
@@ -187,12 +225,15 @@ template <class T, bool is_enum = boost::is_enum<T>::value>
 struct RangedAttributeRow : AttributeRowBase
 {
     RangedAttributeRow(const std::string& name, T& value, const T& min, const T& max, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const T&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void TextChanged(const std::string& value_text);
     T& m_value;
     T m_min;
     T m_max;
     Edit* m_edit;
+    boost::signals::connection m_edit_connection;
 };
 
 /** the specialization of RangedAttributeRow<T, bool> for enum types. */
@@ -200,11 +241,14 @@ template <class T>
 struct RangedAttributeRow<T, true> : AttributeRowBase
 {
     RangedAttributeRow(const std::string& name, T& value, const T& min, const T& max, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const T&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void SelectionChanged(int selection);
     T& m_value;
     T m_min;
     DropDownList* m_enum_drop_list;
+    boost::signals::connection m_drop_list_connection;
 };
 
 /** an uneditable attribute row. */
@@ -247,11 +291,14 @@ struct FlagAttributeRow : AttributeRowBase
     /** basic ctor.  \a flags should be the variable that holds all the flag values, and \a value should be the flag
         represented by this row. */
     FlagAttributeRow(const std::string& name, Uint32& flags, const T& value, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const Uint32&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void CheckChanged(bool checked);
     Uint32& m_flags;
     T m_value;
     StateButton* m_check_box;
+    boost::signals::connection m_check_box_connection;
 };
 
 /** the AttributeRowBase subclass used to represent a group of mutually-exclusive flag attributes, one of which must be
@@ -262,23 +309,26 @@ struct FlagGroupAttributeRow : AttributeRowBase
     /** basic ctor.  \a flags should be the variable that holds all the flag values, and \a min and \a max should define
         the range of flags represented by this row. */
     FlagGroupAttributeRow(const std::string& name, Uint32& flags, const T& value, const T& min, const T& max, const boost::shared_ptr<Font>& font);
+    virtual void Update();
+    mutable boost::signal<void (const Uint32&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void SelectionChanged(int selection);
     Uint32& m_flags;
     T m_value;
     std::vector<T> m_group_values;
     DropDownList* m_flag_drop_list;
+    boost::signals::connection m_drop_list_connection;
 };
 
 /** the AttributeRowBase subclass used to display some custom text about a Wnd, that does not necessarily correspond to
-    a single data member in that Wnd.  CustomDisplayRow accepts a functor with the signature std::string (const Wnd*);
+    a single data member in that Wnd.  CustomTextRow accepts a functor with the signature std::string (const Wnd*);
     when the row's Update() method is called, the row will set its text to <i>functor</i>(<i>m_wnd</i>).  This allows a
     Wnd subclass to display arbitrary (uneditable) information about itself, without being restricted to displaying just
     data members. */
 template <class T>
-struct CustomDisplayRow : AttributeRowBase
+struct CustomTextRow : AttributeRowBase
 {
-    CustomDisplayRow(const std::string& name, const T& functor, const Wnd*& wnd, const boost::shared_ptr<Font>& font);
+    CustomTextRow(const std::string& name, const T& functor, const Wnd*& wnd, const boost::shared_ptr<Font>& font);
     virtual void Update();
 private:
     T m_functor;
@@ -289,33 +339,39 @@ private:
 
 // template implementations
 template <class T>
-void WndEditor::Attribute(const std::string& name, T& value)
+void WndEditor::Attribute(const std::string& name, T& value,
+                          boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action/* = boost::shared_ptr<AttributeChangedAction<T> >()*/)
 {
-    AttributeRowBase* attribute = new AttributeRow<T>(name, value, m_font);
+    AttributeRow<T>* attribute = new AttributeRow<T>(name, value, m_font);
     m_list_box->Insert(attribute);
+    if (attribute_changed_action)
+        Connect(attribute->ValueChangedSignal, &AttributeChangedAction<T>::operator(), attribute_changed_action);
     Connect(attribute->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
 template <class T>
-void WndEditor::ConstAttribute(const std::string& name, T& value)
+void WndEditor::Attribute(const std::string& name, T& value, const T& min, const T& max,
+                          boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action/* = boost::shared_ptr<AttributeChangedAction<T> >()*/)
 {
-    AttributeRowBase* attribute = new ConstAttributeRow<T>(name, value, m_font);
+    RangedAttributeRow<T>* attribute = new RangedAttributeRow<T>(name, value, min, max, m_font);
+    m_list_box->Insert(attribute);
+    if (attribute_changed_action)
+        Connect(attribute->ValueChangedSignal, &AttributeChangedAction<T>::operator(), attribute_changed_action);
+    Connect(attribute->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
+}
+
+template <class T>
+void WndEditor::ConstAttribute(const std::string& name, const T& value)
+{
+    ConstAttributeRow<T>* attribute = new ConstAttributeRow<T>(name, value, m_font);
     m_list_box->Insert(attribute);
 }
 
 template <class T>
-void WndEditor::CustomDisplay(const std::string& name, const T& functor)
+void WndEditor::CustomText(const std::string& name, const T& functor)
 {
-    AttributeRowBase* display_row = new CustomDisplayRow<T>(name, functor, const_cast<const GG::Wnd*&>(m_wnd), m_font);
+    CustomTextRow<T>* display_row = new CustomTextRow<T>(name, functor, const_cast<const GG::Wnd*&>(m_wnd), m_font);
     m_list_box->Insert(display_row);
-}
-
-template <class T>
-void WndEditor::Attribute(const std::string& name, T& value, const T& min, const T& max)
-{
-    AttributeRowBase* attribute = new RangedAttributeRow<T>(name, value, min, max, m_font);
-    m_list_box->Insert(attribute);
-    Connect(attribute->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
 template <class T>
@@ -325,8 +381,10 @@ void WndEditor::Flag(const std::string& name, T flag)
         throw std::runtime_error("WndEditor::Flag() : Attempted to create a flag outside of a BeginFlags()/EndFlags() "
                                  "block.");
     }
-    AttributeRowBase* flag_attribute = new FlagAttributeRow<T>(name, *m_current_flags, flag, m_font);
+    FlagAttributeRow<T>* flag_attribute = new FlagAttributeRow<T>(name, *m_current_flags, flag, m_font);
     m_list_box->Insert(flag_attribute);
+    if (m_current_flags_changed_actions)
+        Connect(flag_attribute->ValueChangedSignal, &AttributeChangedAction<Uint32>::operator(), m_current_flags_changed_actions);
     Connect(flag_attribute->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
@@ -345,8 +403,10 @@ void WndEditor::FlagGroup(const std::string& name, T min_flag, T max_flag)
         throw std::runtime_error("WndEditor::FlagGroup() : Attempted to initialize a flag group from a set of flags "
                                  "that contains no flags in the group.");
     }
-    AttributeRowBase* flag_group = new FlagGroupAttributeRow<T>(name, *m_current_flags, value, min_flag, max_flag, m_font);
+    FlagGroupAttributeRow<T>* flag_group = new FlagGroupAttributeRow<T>(name, *m_current_flags, value, min_flag, max_flag, m_font);
     m_list_box->Insert(flag_group);
+    if (m_current_flags_changed_actions)
+        Connect(flag_group->ValueChangedSignal, &AttributeChangedAction<Uint32>::operator(), m_current_flags_changed_actions);
     Connect(flag_group->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
@@ -357,10 +417,11 @@ AttributeRow<T>::AttributeRow(const std::string& name, T& value, const boost::sh
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     m_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT));
+    m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_edit->Height()));
+    Resize(m_edit->Size());
     push_back(m_edit);
     *m_edit << value;
-    Connect(m_edit->FocusUpdateSignal, &AttributeRow::TextChanged, this);
+    m_edit_connection = Connect(m_edit->FocusUpdateSignal, &AttributeRow::TextChanged, this);
 }
 
 template <class T>
@@ -370,10 +431,19 @@ void AttributeRow<T>::TextChanged(const std::string& value_text)
         T value = boost::lexical_cast<T>(value_text);
         m_value = value;
         m_edit->SetTextColor(CLR_BLACK);
+        ValueChangedSignal(m_value);
         ChangedSignal();
     } catch (const boost::bad_lexical_cast& e) {
         m_edit->SetTextColor(CLR_RED);
     }
+}
+
+template <class T>
+void AttributeRow<T>::Update()
+{
+    m_edit_connection.block();
+    *m_edit << m_value;
+    m_edit_connection.unblock();
 }
 
 template <class T, bool is_enum>
@@ -385,10 +455,11 @@ RangedAttributeRow<T, is_enum>::RangedAttributeRow(const std::string& name, T& v
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     m_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT));
+    m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_edit->Height()));
+    Resize(m_edit->Size());
     push_back(m_edit);
     *m_edit << value;
-    Connect(m_edit->FocusUpdateSignal, &RangedAttributeRow::TextChanged, this);
+    m_edit_connection = Connect(m_edit->FocusUpdateSignal, &RangedAttributeRow::TextChanged, this);
 }
 
 template <class T, bool is_enum>
@@ -400,10 +471,19 @@ void RangedAttributeRow<T, is_enum>::TextChanged(const std::string& value_text)
             throw boost::bad_lexical_cast();
         m_value = value;
         m_edit->SetTextColor(CLR_BLACK);
+        ValueChangedSignal(m_value);
         ChangedSignal();
     } catch (const boost::bad_lexical_cast& e) {
         m_edit->SetTextColor(CLR_RED);
     }
+}
+
+template <class T, bool is_enum>
+void RangedAttributeRow<T, is_enum>::Update()
+{
+    m_edit_connection.block();
+    *m_edit << m_value;
+    m_edit_connection.unblock();
 }
 
 template <class T>
@@ -429,14 +509,23 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
     }
     push_back(m_enum_drop_list);
     m_enum_drop_list->Select(m_value - m_min);
-    Connect(m_enum_drop_list->SelChangedSignal, &RangedAttributeRow::SelectionChanged, this);
+    m_drop_list_connection = Connect(m_enum_drop_list->SelChangedSignal, &RangedAttributeRow::SelectionChanged, this);
 }
 
 template <class T>
 void RangedAttributeRow<T, true>::SelectionChanged(int selection)
 {
     m_value = T(m_min + selection);
+    ValueChangedSignal(m_value);
     ChangedSignal();
+}
+
+template <class T>
+void RangedAttributeRow<T, true>::Update()
+{
+    m_drop_list_connection.block();
+    m_enum_drop_list->Select(m_value - m_min);
+    m_drop_list_connection.unblock();
 }
 
 template <class T>
@@ -445,7 +534,7 @@ ConstAttributeRow<T>::ConstAttributeRow(const std::string& name, const T& value,
     m_value_text(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_value_text = new TextControl(0, 0, boost::lexical_cast<std::string>(m_value), font, CLR_BLACK);
+    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, boost::lexical_cast<std::string>(m_value), font, CLR_BLACK, TF_LEFT);
     push_back(m_value_text);
 }
 
@@ -466,7 +555,7 @@ FlagAttributeRow<T>::FlagAttributeRow(const std::string& name, Uint32& flags, co
     m_check_box = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font_to_use, GG::TF_LEFT, GG::CLR_GRAY);
     m_check_box->SetCheck(m_flags & m_value);
     push_back(m_check_box);
-    Connect(m_check_box->CheckedSignal, &FlagAttributeRow::CheckChanged, this);
+    m_check_box_connection = Connect(m_check_box->CheckedSignal, &FlagAttributeRow::CheckChanged, this);
 }
 
 template <class T>
@@ -476,7 +565,16 @@ void FlagAttributeRow<T>::CheckChanged(bool checked)
         m_flags |= m_value;
     else
         m_flags &= ~m_value;
+    ValueChangedSignal(m_flags);
     ChangedSignal();
+}
+
+template <class T>
+void FlagAttributeRow<T>::Update()
+{
+    m_check_box_connection.block();
+    m_check_box->SetCheck(m_flags & m_value);
+    m_check_box_connection.unblock();
 }
 
 template <class T>
@@ -490,7 +588,8 @@ FlagGroupAttributeRow<T>::FlagGroupAttributeRow(const std::string& name, Uint32&
     for (T i = min; i <= max; i = T(i * 2)) {
         m_group_values.push_back(T(i));
     }
-    m_flag_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY);
+    m_flag_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, font->Height() + 8, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY);
+    Resize(m_flag_drop_list->Size());
     m_flag_drop_list->SetInteriorColor(CLR_WHITE);
     m_flag_drop_list->SetStyle(LB_NOSORT);
     for (unsigned int i = 0; i < m_group_values.size(); ++i) {
@@ -499,18 +598,18 @@ FlagGroupAttributeRow<T>::FlagGroupAttributeRow(const std::string& name, Uint32&
         m_flag_drop_list->Insert(row);
     }
     push_back(m_flag_drop_list);
-    unsigned int initial_index = 0;
-    for (; initial_index < m_group_values.size(); ++initial_index) {
-        if (m_group_values[initial_index] == value)
+    unsigned int index = 0;
+    for (; index < m_group_values.size(); ++index) {
+        if (m_group_values[index] == value)
             break;
     }
-    if (initial_index == m_group_values.size()) {
+    if (index == m_group_values.size()) {
         throw std::runtime_error("FlagGroupAttributeRow::FlagGroupAttributeRow() : Attempted to initialize a "
                                  "flag group's drop-down list with a value that is not a power-of-two in the "
                                  "range (min, max).");
     }
-    m_flag_drop_list->Select(initial_index);
-    Connect(m_flag_drop_list->SelChangedSignal, &FlagGroupAttributeRow::SelectionChanged, this);
+    m_flag_drop_list->Select(index);
+    m_drop_list_connection = Connect(m_flag_drop_list->SelChangedSignal, &FlagGroupAttributeRow::SelectionChanged, this);
 }
 
 template <class T>
@@ -519,22 +618,37 @@ void FlagGroupAttributeRow<T>::SelectionChanged(int selection)
     m_flags &= ~m_value;
     m_value = m_group_values[selection];
     m_flags |= m_value;
+    ValueChangedSignal(m_flags);
     ChangedSignal();
 }
 
 template <class T>
-CustomDisplayRow<T>::CustomDisplayRow(const std::string& name, const T& functor, const Wnd*& wnd, const boost::shared_ptr<Font>& font) :
+void FlagGroupAttributeRow<T>::Update()
+{
+    m_drop_list_connection.block();
+    unsigned int index = 0;
+    for (; index < m_group_values.size(); ++index) {
+        if (m_group_values[index] == m_value)
+            break;
+    }
+    m_flag_drop_list->Select(index);
+    m_drop_list_connection.unblock();
+}
+
+template <class T>
+CustomTextRow<T>::CustomTextRow(const std::string& name, const T& functor, const Wnd*& wnd, const boost::shared_ptr<Font>& font) :
     m_functor(functor),
     m_wnd(wnd),
     m_display_text(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_display_text = new TextControl(0, 0, m_functor(m_wnd), font, CLR_BLACK);
+    m_display_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, m_functor(m_wnd), font, CLR_BLACK, TF_LEFT);
+    Resize(m_display_text->Size());
     push_back(m_display_text);
 }
 
 template <class T>
-void CustomDisplayRow<T>::Update()
+void CustomTextRow<T>::Update()
 {
     m_display_text->SetText(m_functor(m_wnd));
 }

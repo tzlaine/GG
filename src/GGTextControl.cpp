@@ -32,6 +32,40 @@
 
 using namespace GG;
 
+namespace {
+    struct SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
+    {
+        SetFontAction(TextControl* text_control) : m_text_control(text_control) {}
+        void operator()(const boost::shared_ptr<Font>&) {m_text_control->SetText(m_text_control->WindowText());}
+    private:
+        TextControl* m_text_control;
+    };
+
+    struct SetFormatAction : AttributeChangedAction<Uint32>
+    {
+        SetFormatAction(TextControl* text_control) : m_text_control(text_control) {}
+        void operator()(const Uint32& format) {m_text_control->SetTextFormat(format);}
+    private:
+        TextControl* m_text_control;
+    };
+
+    struct FitToTextAction : AttributeChangedAction<bool>
+    {
+        FitToTextAction(TextControl* text_control) : m_text_control(text_control) {}
+        void operator()(const bool&) {m_text_control->SetText(m_text_control->WindowText());}
+    private:
+        TextControl* m_text_control;
+    };
+
+    struct SetMinSizeAction : AttributeChangedAction<bool>
+    {
+        SetMinSizeAction(TextControl* text_control) : m_text_control(text_control) {}
+        void operator()(const bool& set_min_size) {m_text_control->SetMinSize(set_min_size);}
+    private:
+        TextControl* m_text_control;
+    };
+}
+
 ////////////////////////////////////////////////
 // GG::TextControl
 ////////////////////////////////////////////////
@@ -230,7 +264,10 @@ void TextControl::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("TextControl");
-    editor->BeginFlags(m_format);
+    boost::shared_ptr<SetFontAction> set_font_action(new SetFontAction(this));
+    editor->Attribute<boost::shared_ptr<Font> >("Font", m_font, set_font_action);
+    boost::shared_ptr<SetFormatAction> set_format_action(new SetFormatAction(this));
+    editor->BeginFlags(m_format, set_format_action);
     editor->FlagGroup("V. Alignment", TF_VCENTER, TF_BOTTOM);
     editor->FlagGroup("H. Alignment", TF_CENTER, TF_RIGHT);
     editor->Flag("Word-break", TF_WORDBREAK);
@@ -238,8 +275,13 @@ void TextControl::DefineAttributes(WndEditor* editor)
     editor->Flag("Ignore Tags", TF_IGNORETAGS);
     editor->EndFlags();
     editor->Attribute("Text Color", m_text_color);
-    editor->Attribute("Font", m_font);
-    editor->Attribute("Fit Size to Text", m_fit_to_text);
+    editor->Attribute("Clip Text", m_clip_text);
+    boost::shared_ptr<FitToTextAction> fit_to_text_action(new FitToTextAction(this));
+    editor->Attribute<bool>("Fit Size to Text", m_fit_to_text, fit_to_text_action);
+    boost::shared_ptr<SetMinSizeAction> min_size_action(new SetMinSizeAction(this));
+    editor->Attribute<bool>("Set Min Size", m_set_min_size, min_size_action);
+    editor->ConstAttribute("Text Upper Left", m_text_ul);
+    editor->ConstAttribute("Text Lower Right", m_text_lr);
 }
 
 const std::vector<Font::LineData>& TextControl::GetLineData() const

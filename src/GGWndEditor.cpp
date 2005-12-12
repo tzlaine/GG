@@ -100,6 +100,11 @@ WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
     Init();
 }
 
+const boost::shared_ptr<Font>& WndEditor::GetFont() const
+{
+    return m_font;
+}
+
 void WndEditor::Render ()
 {
     for (int i = 0; i < m_list_box->NumRows(); ++i) {
@@ -125,15 +130,24 @@ void WndEditor::Label(const std::string& name)
     m_list_box->Insert(label);
 }
 
-void WndEditor::BeginFlags(Uint32& flags)
+void WndEditor::Attribute(AttributeRowBase* row)
+{
+    m_list_box->Insert(row);
+    Connect(row->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
+}
+
+void WndEditor::BeginFlags(Uint32& flags,
+                           boost::shared_ptr<AttributeChangedAction<Uint32> > attribute_changed_action/* = boost::shared_ptr<AttributeChangedAction<Uint32> >()*/)
 {
     m_current_flags = &flags;
+    m_current_flags_changed_actions = attribute_changed_action;
     assert(m_current_flags);
 }
 
 void WndEditor::EndFlags()
 {
     m_current_flags = 0;
+    m_current_flags_changed_actions.reset();
 }
 
 void WndEditor::Init()
@@ -170,13 +184,25 @@ AttributeRow<Pt>::AttributeRow(const std::string& name, Pt& value, const boost::
     MultiControlWrapper* edits = new MultiControlWrapper();
     m_x_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     m_y_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    edits->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_x_edit->Height()));
     *m_x_edit << m_value.x;
     *m_y_edit << m_value.y;
     edits->Add(m_x_edit);
     edits->Add(m_y_edit);
-    Connect(m_x_edit->FocusUpdateSignal, WrappedEditChangedFunctor<int>(m_value.x, m_x_edit, ChangedSignal));
-    Connect(m_y_edit->FocusUpdateSignal, WrappedEditChangedFunctor<int>(m_value.y, m_y_edit, ChangedSignal));
+    Resize(edits->Size());
+    m_x_connection = Connect(m_x_edit->FocusUpdateSignal, WrappedEditChangedFunctor<int>(m_value.x, m_x_edit, ChangedSignal));
+    m_y_connection = Connect(m_y_edit->FocusUpdateSignal, WrappedEditChangedFunctor<int>(m_value.y, m_y_edit, ChangedSignal));
     push_back(edits);
+}
+
+void AttributeRow<Pt>::Update()
+{
+    m_x_connection.block();
+    m_y_connection.block();
+    *m_x_edit << m_value.x;
+    *m_y_edit << m_value.y;
+    m_x_connection.unblock();
+    m_y_connection.unblock();
 }
 
 ////////////////////////////////////////////////
@@ -184,30 +210,34 @@ AttributeRow<Pt>::AttributeRow(const std::string& name, Pt& value, const boost::
 ////////////////////////////////////////////////
 AttributeRow<Clr>::AttributeRow(const std::string& name, Clr& value, const boost::shared_ptr<Font>& font) :
     m_value(value),
-    m_red_edit(0),
-    m_green_edit(0),
-    m_blue_edit(0),
-    m_alpha_edit(0)
+    m_color_button(0),
+    m_font(font)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    MultiControlWrapper* edits = new MultiControlWrapper();
-    m_red_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_green_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_blue_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_alpha_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    *m_red_edit << static_cast<int>(m_value.r);
-    *m_green_edit << static_cast<int>(m_value.g);
-    *m_blue_edit << static_cast<int>(m_value.b);
-    *m_alpha_edit << static_cast<int>(m_value.a);
-    edits->Add(m_red_edit);
-    edits->Add(m_green_edit);
-    edits->Add(m_blue_edit);
-    edits->Add(m_alpha_edit);
-    Connect(m_red_edit->FocusUpdateSignal, WrappedEditChangedFunctor<Uint8>(m_value.r, m_red_edit, ChangedSignal));
-    Connect(m_green_edit->FocusUpdateSignal, WrappedEditChangedFunctor<Uint8>(m_value.g, m_green_edit, ChangedSignal));
-    Connect(m_blue_edit->FocusUpdateSignal, WrappedEditChangedFunctor<Uint8>(m_value.b, m_blue_edit, ChangedSignal));
-    Connect(m_alpha_edit->FocusUpdateSignal, WrappedEditChangedFunctor<Uint8>(m_value.a, m_alpha_edit, ChangedSignal));
-    push_back(edits);
+    m_color_button = new ColorDlg::ColorButton(CLR_GRAY);
+    m_color_button->SetRepresentedColor(m_value);
+    m_color_button->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, 22));
+    Connect(m_color_button->ClickedSignal, &AttributeRow::ColorButtonClicked, this);
+    push_back(m_color_button);
+}
+
+void AttributeRow<Clr>::ColorButtonClicked()
+{
+    ColorDlg dlg(0, 0, m_value, m_font, CLR_GRAY, CLR_GRAY);
+    dlg.MoveTo(Pt((App::GetApp()->AppWidth() - dlg.Width()) / 2,
+                  (App::GetApp()->AppHeight() - dlg.Height()) / 2));
+    dlg.Run();
+    if (dlg.ColorWasSelected()) {
+        m_color_button->SetRepresentedColor(dlg.Result());
+        m_value = dlg.Result();
+        ValueChangedSignal(m_value);
+        ChangedSignal();
+    }
+}
+
+void AttributeRow<Clr>::Update()
+{
+    m_color_button->SetRepresentedColor(m_value);
 }
 
 ////////////////////////////////////////////////
@@ -215,27 +245,33 @@ AttributeRow<Clr>::AttributeRow(const std::string& name, Clr& value, const boost
 ////////////////////////////////////////////////
 AttributeRow<bool>::AttributeRow(const std::string& name, bool& value, const boost::shared_ptr<Font>& font) :
     m_value(value),
-    m_bool_drop_list(0)
+    m_radio_button_group(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_bool_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * 2 + 4, CLR_GRAY);
-    m_bool_drop_list->SetInteriorColor(CLR_WHITE);
-    m_bool_drop_list->SetStyle(LB_NOSORT);
-    Row* row = new ListBox::Row();
-    row->push_back(CreateControl("True", font, CLR_BLACK));
-    m_bool_drop_list->Insert(row);
-    row = new ListBox::Row();
-    row->push_back(CreateControl("False", font, CLR_BLACK));
-    m_bool_drop_list->Insert(row);
-    push_back(m_bool_drop_list);
-    m_bool_drop_list->Select(!m_value);
-    Connect(m_bool_drop_list->SelChangedSignal, &AttributeRow::SelectionChanged, this);
+    m_radio_button_group = new RadioButtonGroup(0, 0);
+    StateButton* button1 = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH / 2, detail::ATTRIBUTE_ROW_HEIGHT,
+                                           "True", font, TF_LEFT, CLR_GRAY);
+    StateButton* button2 = new StateButton(button1->LowerRight().x, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH / 2, detail::ATTRIBUTE_ROW_HEIGHT,
+                                           "False", font, TF_LEFT, CLR_GRAY);
+    m_radio_button_group->AddButton(button1);
+    m_radio_button_group->AddButton(button2);
+    (value ? button1 : button2)->SetCheck(true);
+    m_button_group_connection = Connect(m_radio_button_group->ButtonChangedSignal, &AttributeRow::SelectionChanged, this);
+    push_back(m_radio_button_group);
 }
 
 void AttributeRow<bool>::SelectionChanged(int selection)
 {
     m_value = !selection;
+    ValueChangedSignal(m_value);
     ChangedSignal();
+}
+
+void AttributeRow<bool>::Update()
+{
+    m_button_group_connection.block();
+    m_radio_button_group->SetCheck(!m_value);
+    m_button_group_connection.unblock();
 }
 
 ////////////////////////////////////////////////
@@ -250,12 +286,14 @@ AttributeRow<boost::shared_ptr<Font> >::AttributeRow(const std::string& name, bo
     MultiControlWrapper* edits = new MultiControlWrapper();
     m_filename_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     m_points_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    edits->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_filename_edit->Height()));
     *m_filename_edit << m_value->FontName();
     *m_points_edit << m_value->PointSize();
     edits->Add(m_filename_edit);
     edits->Add(m_points_edit);
-    Connect(m_filename_edit->FocusUpdateSignal, &AttributeRow::FilenameChanged, this);
-    Connect(m_points_edit->FocusUpdateSignal, &AttributeRow::PointsChanged, this);
+    Resize(edits->Size());
+    m_filename_connection = Connect(m_filename_edit->FocusUpdateSignal, &AttributeRow::FilenameChanged, this);
+    m_points_connection = Connect(m_points_edit->FocusUpdateSignal, &AttributeRow::PointsChanged, this);
     push_back(edits);
 }
 
@@ -265,6 +303,7 @@ void AttributeRow<boost::shared_ptr<Font> >::FilenameChanged(const std::string& 
         boost::shared_ptr<Font> font = App::GetApp()->GetFont(filename_text, m_value->PointSize());
         m_value = font;
         m_filename_edit->SetTextColor(CLR_BLACK);
+        ValueChangedSignal(m_value);
         ChangedSignal();
     } catch (const Font::Exception& e) {
         m_filename_edit->SetTextColor(CLR_RED);
@@ -275,17 +314,28 @@ void AttributeRow<boost::shared_ptr<Font> >::PointsChanged(const std::string& po
 {
     try {
         int points = boost::lexical_cast<int>(points_text);
-        if (points < 4 || 150 < points)
+        if (points < 4 || 200 < points)
             throw boost::bad_lexical_cast();
         boost::shared_ptr<Font> font = App::GetApp()->GetFont(m_value->FontName(), points);
         m_value = font;
         m_points_edit->SetTextColor(CLR_BLACK);
+        ValueChangedSignal(m_value);
         ChangedSignal();
     } catch (const boost::bad_lexical_cast& e) {
         m_points_edit->SetTextColor(CLR_RED);
     } catch (const Font::Exception& e) {
         m_points_edit->SetTextColor(CLR_RED);
     }
+}
+
+void AttributeRow<boost::shared_ptr<Font> >::Update()
+{
+    m_filename_connection.block();
+    m_points_connection.block();
+    *m_filename_edit << m_value->FontName();
+    *m_points_edit << m_value->PointSize();
+    m_filename_connection.unblock();
+    m_points_connection.unblock();
 }
 
 ////////////////////////////////////////////////
@@ -298,7 +348,7 @@ ConstAttributeRow<Pt>::ConstAttributeRow(const std::string& name, const Pt& valu
     push_back(CreateControl(name, font, CLR_BLACK));
     std::stringstream value_stream;
     value_stream << "(" << m_value.x << ", " << m_value.y << ")";
-    m_value_text = new TextControl(0, 0, value_stream.str(), font, CLR_BLACK);
+    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, TF_LEFT);
     push_back(m_value_text);
 }
 
@@ -319,7 +369,7 @@ ConstAttributeRow<Clr>::ConstAttributeRow(const std::string& name, const Clr& va
     push_back(CreateControl(name, font, CLR_BLACK));
     std::stringstream value_stream;
     value_stream << "(" << m_value.r << ", " << m_value.g << ", " << m_value.b << ", " << m_value.a << ")";
-    m_value_text = new TextControl(0, 0, value_stream.str(), font, CLR_BLACK);
+    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, TF_LEFT);
     push_back(m_value_text);
 }
 

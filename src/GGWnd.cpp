@@ -148,6 +148,18 @@ namespace {
     private:
         const bool& m_done;
     };
+
+    struct WindowTextAttributeAction : AttributeChangedAction<std::string>
+    {
+        WindowTextAttributeAction(Wnd* wnd) : m_wnd(wnd) {}
+        virtual void operator()(const std::string& value)
+        {
+            if (TextControl* text_control = dynamic_cast<TextControl*>(m_wnd))
+                text_control->SetText(value);
+        }
+    private:
+        Wnd* m_wnd;
+    };
 }
 
 ///////////////////////////////////////
@@ -1017,11 +1029,12 @@ void Wnd::DefineAttributes(WndEditor* editor)
     if (!editor)
         return;
     editor->Label("Wnd");
-    editor->Attribute("Window Text", m_text);
+    boost::shared_ptr<WindowTextAttributeAction> action(new WindowTextAttributeAction(this));
+    editor->Attribute<std::string>("Window Text", m_text, action);
     editor->ConstAttribute("Upper Left", m_upperleft);
     editor->ConstAttribute("Lower Right", m_lowerright);
-    editor->CustomDisplay("Size", WndSizeFunctor());
-    editor->CustomDisplay("Client Size", WndClientSizeFunctor());
+    editor->CustomText("Size", WndSizeFunctor());
+    editor->CustomText("Client Size", WndClientSizeFunctor());
     editor->Attribute("Min Size", m_min_size);
     editor->Attribute("Max Size", m_max_size);
     editor->Attribute("Clip Children", m_clip_children);

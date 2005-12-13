@@ -579,9 +579,11 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                         if (parent)
                             parent->StartingChildDragDrop(s_impl->drag_wnds[0], offset);
                     } else {
+                        Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
                         Pt move = pos + s_impl->wnd_drag_offset - s_impl->drag_wnds[0]->UpperLeft();
                         s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, move, key_mods));
-                        s_impl->curr_drag_wnd_dragged = true;
+                        if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
+                            s_impl->curr_drag_wnd_dragged = true;
                     }
                 }
             } else if (s_impl->drag_wnds[0]->Resizable()) { // send appropriate resize message to window
@@ -634,9 +636,11 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     break;
                 }
             } else if (s_impl->drag_wnds[0]->DragKeeper()) {
+                Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
                 Pt move = pos + s_impl->wnd_drag_offset - s_impl->drag_wnds[0]->UpperLeft();
                 s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, move, key_mods));
-                s_impl->curr_drag_wnd_dragged = true;
+                if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
+                    s_impl->curr_drag_wnd_dragged = true;
             }
         } else if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor) { // if !s_impl->drag_wnds[0] and we're moving over the same (valid) object we were during the last iteration
             s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseHere, pos, 0));

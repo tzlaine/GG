@@ -37,14 +37,13 @@
 #include "GGTexture.h"
 #endif
 
-#ifndef __FREETYPE_H__
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#endif
-
 #include <set>
 
 #include <boost/serialization/access.hpp>
+
+typedef unsigned long FT_ULong;
+struct FT_FaceRec_;
+typedef struct FT_FaceRec_*  FT_Face;
 
 namespace GG {
 

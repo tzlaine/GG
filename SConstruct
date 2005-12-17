@@ -223,7 +223,7 @@ if not env.GetOption('clean'):
         elif str(Platform()) == 'win32':
             print 'Configuring for WIN32 system...'
         else:
-            print 'Configuring unknown system (assuming the system is POSIX-like...'
+            print 'Configuring unknown system (assuming the system is POSIX-like) ...'
 
         if OptionValue('boost_signals_namespace', env):
             signals_namespace = OptionValue('boost_signals_namespace', env)

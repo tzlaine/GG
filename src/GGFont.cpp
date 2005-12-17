@@ -30,6 +30,9 @@
 #include <GGBase.h>
 #include <GGDrawUtil.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include <boost/spirit.hpp>
 
 #include <cmath>

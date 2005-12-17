@@ -748,7 +748,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     // being dragged in a registered drag
                     if (click_wnd) {
                         Wnd* parent = click_wnd->Parent();
-                        if (s_impl->curr_wnd_under_cursor->AcceptDrop(click_wnd, pos) && parent)
+                        if (click_wnd->DragDropDataType() != "" && s_impl->curr_wnd_under_cursor->AcceptDrop(click_wnd, pos) && parent)
                             parent->ChildDraggedAway(click_wnd, s_impl->curr_wnd_under_cursor);
                         s_impl->drag_drop_wnds.erase(click_wnd);
                     }

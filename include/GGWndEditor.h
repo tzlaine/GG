@@ -74,11 +74,14 @@ public:
     /** Returns the font used by this WndEditor to create its attribute rows. */
     const boost::shared_ptr<Font>& GetFont() const;
 
+    /** Returns the Wnd currently being edited. */
+    const Wnd* GetWnd() const;
+
     virtual void Render ();
 
     /** sets the edited window to \a wnd, and updates the contents of WndEditor's controls to contain the controls that
         edit the new Wnd. */
-    void SetWnd(Wnd* wnd);
+    void SetWnd(Wnd* wnd, const std::string& name = "");
 
     /** creates a row containing just the text \a name. */
     void Label(const std::string& name);
@@ -122,11 +125,13 @@ public:
     /** marks the end of a section of flag and flag-group rows. */
     void EndFlags();
 
+    mutable boost::signal<void (Wnd*, const std::string&)> WndNameChangedSignal; ///< emitted when the edited window's name has been changed
     mutable boost::signal<void (Wnd*)> WndChangedSignal; ///< emitted when the edited window has been changed
 
 private:
     void Init();
     void AttributeChangedSlot();
+    void NameChangedSlot(const std::string& name);
 
     Wnd* m_wnd;
     ListBox* m_list_box;

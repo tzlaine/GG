@@ -105,6 +105,11 @@ const boost::shared_ptr<Font>& WndEditor::GetFont() const
     return m_font;
 }
 
+const Wnd* WndEditor::GetWnd() const
+{
+    return m_wnd;
+}
+
 void WndEditor::Render ()
 {
     for (int i = 0; i < m_list_box->NumRows(); ++i) {
@@ -114,10 +119,21 @@ void WndEditor::Render ()
     }
 }
 
-void WndEditor::SetWnd(Wnd* wnd)
+void WndEditor::SetWnd(Wnd* wnd, const std::string& name/* = ""*/)
 {
     m_wnd = wnd;
     m_list_box->Clear();
+    if (name != "") {
+        ListBox::Row* row = new ListBox::Row();
+        row->push_back("Name", m_font, CLR_BLACK);
+        Edit* edit = new Edit(0, 0, 1, "", m_font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+        edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, edit->Height()));
+        row->Resize(edit->Size());
+        row->push_back(edit);
+        edit->SetText(name);
+        Connect(edit->FocusUpdateSignal, &WndEditor::NameChangedSlot, this);
+        m_list_box->Insert(row);
+    }
     if (wnd)
         wnd->DefineAttributes(this);
 }
@@ -167,6 +183,11 @@ void WndEditor::AttributeChangedSlot()
             row->Update();
     }
     WndChangedSignal(m_wnd);
+}
+
+void WndEditor::NameChangedSlot(const std::string& name)
+{
+    WndNameChangedSignal(m_wnd, name);
 }
 
 ////////////////////////////////////////////////

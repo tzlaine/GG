@@ -588,49 +588,47 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 }
             } else if (s_impl->drag_wnds[0]->Resizable()) { // send appropriate resize message to window
                 Pt offset_pos = pos + s_impl->wnd_resize_offset;
+                if (Wnd* parent = s_impl->drag_wnds[0]->Parent())
+                    offset_pos -= parent->ClientUpperLeft();
                 switch (s_impl->wnd_region)
                 {
                 case WR_TOPLEFT:
-                    s_impl->drag_wnds[0]->SizeMove(offset_pos, s_impl->drag_wnds[0]->LowerRight());
+                    s_impl->drag_wnds[0]->SizeMove(offset_pos, s_impl->drag_wnds[0]->RelativeLowerRight());
                     break;
                 case WR_TOP:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
+                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->RelativeUpperLeft().x,
                                                       offset_pos.y),
-                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
-                                                      s_impl->drag_wnds[0]->LowerRight().y));
+                                                   s_impl->drag_wnds[0]->RelativeLowerRight());
                     break;
                 case WR_TOPRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
+                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->RelativeUpperLeft().x,
                                                       offset_pos.y),
                                                    Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->LowerRight().y));
+                                                      s_impl->drag_wnds[0]->RelativeLowerRight().y));
                     break;
                 case WR_MIDLEFT:
                     s_impl->drag_wnds[0]->SizeMove(Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->UpperLeft().y),
-                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
-                                                      s_impl->drag_wnds[0]->LowerRight().y));
+                                                      s_impl->drag_wnds[0]->RelativeUpperLeft().y),
+                                                   s_impl->drag_wnds[0]->RelativeLowerRight());
                     break;
                 case WR_MIDRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
-                                                      s_impl->drag_wnds[0]->UpperLeft().y),
+                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->RelativeUpperLeft(),
                                                    Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->LowerRight().y));
+                                                      s_impl->drag_wnds[0]->RelativeLowerRight().y));
                     break;
                 case WR_BOTTOMLEFT:
                     s_impl->drag_wnds[0]->SizeMove(Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->UpperLeft().y),
-                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
+                                                      s_impl->drag_wnds[0]->RelativeUpperLeft().y),
+                                                   Pt(s_impl->drag_wnds[0]->RelativeLowerRight().x,
                                                       offset_pos.y));
                     break;
                 case WR_BOTTOM:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->UpperLeft().x,
-                                                      s_impl->drag_wnds[0]->UpperLeft().y),
-                                                   Pt(s_impl->drag_wnds[0]->LowerRight().x,
+                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->RelativeUpperLeft(),
+                                                   Pt(s_impl->drag_wnds[0]->RelativeLowerRight().x,
                                                       offset_pos.y));
                     break;
                 case WR_BOTTOMRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->UpperLeft(), offset_pos);
+                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->RelativeUpperLeft(), offset_pos);
                     break;
                 default:
                     break;

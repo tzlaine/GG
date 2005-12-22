@@ -65,6 +65,7 @@ struct GG::AppImplData
         focus_wnd(0),
         mouse_pos(0,0),
         mouse_rel(0,0),
+        key_mods(0),
         mouse_repeat_delay(0),
         mouse_repeat_interval(0),
         double_click_interval(500),
@@ -99,8 +100,9 @@ struct GG::AppImplData
                  modal_wnds;            // modal GUI windows, and the window with focus for that modality (only the one in back is active, simulating a stack but allowing traversal of the list)
 
     bool         button_state[3];       // the up/down states of the three buttons on the mouse are kept here
-    Pt           mouse_pos;             // absolute position of mouse based on last MOUSEMOVE event
-    Pt           mouse_rel;             // relative position of mouse based on last MOUSEMOVE event
+    Pt           mouse_pos;             // absolute position of mouse, based on last MOUSEMOVE event
+    Pt           mouse_rel;             // relative position of mouse, based on last MOUSEMOVE event
+    Uint32       key_mods;              // currently-depressed modifier keys, based on last KEYPRESS event
 
     int          mouse_repeat_delay;    // see note above App class definition
     int          mouse_repeat_interval;
@@ -242,6 +244,11 @@ Pt App::MousePosition() const
 Pt App::MouseMovement() const
 {
     return s_impl->mouse_rel;
+}
+
+Uint32 App::KeyMods() const
+{
+    return s_impl->key_mods;
 }
 
 const boost::shared_ptr<StyleFactory>& App::GetStyleFactory() const
@@ -523,6 +530,8 @@ void App::RenderWindow(Wnd* wnd)
 
 void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
+    s_impl->key_mods = key_mods;
+
     int curr_ticks = Ticks();
 
     // track double-click time and time-out any pending double-click that has outlived its interval

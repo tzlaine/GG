@@ -162,8 +162,9 @@ public:
     int            MinDragTime() const;          ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag
     int            MinDragDistance() const;      ///< returns the minimum distance an item must be dragged before it is a valid drag
     bool           MouseButtonDown(int bn) const;///< returns the up/down states of the mouse buttons
-    Pt             MousePosition() const;        ///< returns the absolute position of mouse based on last mouse motion event
-    Pt             MouseMovement() const;        ///< returns the relative position of mouse based on last mouse motion event
+    Pt             MousePosition() const;        ///< returns the absolute position of mouse, based on the last mouse motion event
+    Pt             MouseMovement() const;        ///< returns the relative position of mouse, based on the last mouse motion event
+    Uint32         KeyMods() const;              ///< returns the bitwise or'd set of modifier keys that are currently depressed, based on the last event
 
     const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the app-wide currently-installed style factory
 

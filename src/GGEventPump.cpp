@@ -65,17 +65,17 @@ void EventPumpBase::LoopBody(App* app, EventPumpState& state, bool do_non_render
             } else if (state.mouse_drag_repeat_start_time == app->MouseRepeatDelay()) { // if we're counting repeat intervals
                 if (state.time - state.last_mouse_drag_repeat_time > app->MouseRepeatInterval()) {
                     state.last_mouse_drag_repeat_time = state.time;
-                    app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
+                    app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, app->KeyMods(), app->MousePosition(), Pt());
                 }
             } else if (state.time - state.mouse_drag_repeat_start_time > app->MouseRepeatDelay()) { // if we're done waiting for the initial delay period
                 state.mouse_drag_repeat_start_time = app->MouseRepeatDelay(); // set this as equal so we know later that we've passed the delay interval
                 state.last_mouse_drag_repeat_time = state.time;
-                app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
+                app->HandleGGEvent(App::MOUSEMOVE, GGK_UNKNOWN, app->KeyMods(), app->MousePosition(), Pt());
             }
         } else {
             // otherwise, send an idle message immediately, so that the app has timely updates for triggering browse
             // info windows, etc., and reset the mouse drag repeat start time to zero
-            app->HandleGGEvent(App::IDLE, GGK_UNKNOWN, 0, app->MousePosition(), Pt());
+            app->HandleGGEvent(App::IDLE, GGK_UNKNOWN, app->KeyMods(), app->MousePosition(), Pt());
             state.mouse_drag_repeat_start_time = 0;
         }
 

@@ -68,12 +68,13 @@ Layout::WndPosition::WndPosition() :
     alignment(0)
 {}
 
-Layout::WndPosition::WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_size_) :
+Layout::WndPosition::WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_ul_, const Pt& original_size_) :
     first_row(first_row_),
     first_column(first_column_),
     last_row(last_row_),
     last_column(last_column_),
     alignment(alignment_),
+    original_ul(original_ul_),
     original_size(original_size_)
 {}
 
@@ -84,8 +85,7 @@ Layout::Layout() :
     m_cell_margin(0),
     m_ignore_child_resize(false),
     m_ignore_parent_resize(false)
-{
-}
+{}
 
 Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
     Wnd(x, y, w, h, 0),
@@ -410,7 +410,7 @@ void Layout::Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uin
             m_cells[i][j] = w;
         }
     }
-    m_wnd_positions[w] = WndPosition(row, column, last_row, last_column, alignment, w->Size());
+    m_wnd_positions[w] = WndPosition(row, column, last_row, last_column, alignment, w->RelativeUpperLeft(), w->Size());
     AttachChild(w);
     RedoLayout();
 }
@@ -571,6 +571,6 @@ void Layout::DetachAndResetChildren()
     std::map<Wnd*, WndPosition> wnd_positions = m_wnd_positions;
     DetachChildren();
     for (std::map<Wnd*, WndPosition>::iterator it = wnd_positions.begin(); it != wnd_positions.end(); ++it) {
-        it->first->Resize(it->second.original_size);
+        it->first->SizeMove(it->second.original_ul, it->second.original_ul + it->second.original_size);
     }
 }

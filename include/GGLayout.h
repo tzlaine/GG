@@ -192,13 +192,14 @@ private:
     struct WndPosition
     {
         WndPosition();
-        WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_size_);
+        WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_ul_, const Pt& original_size_);
 
         int    first_row;
         int    first_column;
         int    last_row;
         int    last_column;
         Uint32 alignment;
+        Pt     original_ul;
         Pt     original_size;
 
     private:
@@ -253,6 +254,7 @@ void GG::Layout::WndPosition::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(last_row)
         & BOOST_SERIALIZATION_NVP(last_column)
         & BOOST_SERIALIZATION_NVP(alignment)
+        & BOOST_SERIALIZATION_NVP(original_ul)
         & BOOST_SERIALIZATION_NVP(original_size);
 }
 

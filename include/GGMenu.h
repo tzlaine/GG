@@ -49,27 +49,39 @@ class TextControl;
 struct GG_API MenuItem
 {
     /** \name Signal Types */ //@{
-    typedef boost::signal<void (int)> SelectedSignalType; ///< invokes the appropriate functor to handle the menu selection, and passes the ID assigned to the item
+    typedef boost::signal<void (int)> SelectedIDSignalType; ///< invokes the appropriate functor to handle the menu selection, and passes the ID assigned to the item
+    typedef boost::signal<void ()>    SelectedSignalType;   ///< invokes the appropriate functor to handle the menu selection
     //@}
 
     /** \name Slot Types */ //@{
-    typedef SelectedSignalType::slot_type  SelectedSlotType; ///< type of functor(s) invoked on a SelectedSignalType
+    typedef SelectedIDSignalType::slot_type SelectedIDSlotType; ///< type of functor(s) invoked on a SelectedSignalType
+    typedef SelectedSignalType::slot_type   SelectedSlotType;   ///< type of functor(s) invoked on a SelectedSignalType
     //@}
 
     /** \name Structors */ //@{
     MenuItem(); ///< default ctor
     MenuItem(const std::string& str, int id, bool disable, bool check); ///< ctor
-    MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedSlotType& slot); ///< ctor that allows direct attachment of this item's signal to a "slot" function or functor
+
+    /** ctor that allows direct attachment of this item's signal to a "slot" function or functor */
+    MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedIDSlotType& slot);
+
+    /** ctor that allows direct attachment of this item's signal to a "slot" function or functor */
+    MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedSlotType& slot);
 
     /** ctor that allows direct attachment of this item's signal to a "slot" member function of a specific object */
-    template <class T>
-    MenuItem(const std::string& str, int id, bool disable, bool check, void (T::* slot)(int), T* obj);
+    template <class T1, class T2>
+    MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(int), T2* obj);
+
+    /** ctor that allows direct attachment of this item's signal to a "slot" member function of a specific object */
+    template <class T1, class T2>
+    MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(), T2* obj);
 
     virtual ~MenuItem(); ///< virtual dtor
     //@}
 
     /** \name Accessors */ //@{
-    mutable boost::shared_ptr<SelectedSignalType> SelectedSignal; ///< the selected signal object for this MenuItem
+    mutable boost::shared_ptr<SelectedIDSignalType> SelectedIDSignal; ///< the selected signal object for this MenuItem that conveys the selected menu item ID
+    mutable boost::shared_ptr<SelectedSignalType>   SelectedSignal;   ///< the selected signal object for this MenuItem
     //@}
 
     std::string           label;      ///< text shown for this menu item
@@ -287,15 +299,28 @@ private:
 } // namespace GG
 
 // template implemetations
-template <class T>
-GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, void (T::* slot)(int), T* obj) :
+template <class T1, class T2>
+GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(int), T2* obj) :
+    SelectedIDSignal(new SelectedIDSignalType()),
     SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
     disabled(disable), 
     checked(check)
 {
-    SelectedSignal->connect(boost::bind(slot, obj, _1));
+    SelectedIDSignal->connect(boost::bind(slot, obj, _1));
+}
+
+template <class T1, class T2>
+GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(), T2* obj) :
+    SelectedIDSignal(new SelectedIDSignalType()),
+    SelectedSignal(new SelectedSignalType()),
+    label(str), 
+    item_ID(id), 
+    disabled(disable), 
+    checked(check)
+{
+    SelectedSignal->connect(boost::bind(slot, obj));
 }
 
 template <class Archive>

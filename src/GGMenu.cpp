@@ -60,6 +60,7 @@ private:
 // GG::MenuItem
 ////////////////////////////////////////////////
 MenuItem::MenuItem() : 
+    SelectedIDSignal(new SelectedIDSignalType()),
     SelectedSignal(new SelectedSignalType()),
     item_ID(0), 
     disabled(false), 
@@ -67,6 +68,7 @@ MenuItem::MenuItem() :
 {}
 
 MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check) : 
+    SelectedIDSignal(new SelectedIDSignalType()),
     SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
@@ -74,7 +76,19 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check) :
     checked(check)
 {}
 
-MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const MenuItem::SelectedSlotType& slot) : 
+MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedIDSlotType& slot) : 
+    SelectedIDSignal(new SelectedIDSignalType()),
+    SelectedSignal(new SelectedSignalType()),
+    label(str), 
+    item_ID(id), 
+    disabled(disable), 
+    checked(check)
+{
+    SelectedIDSignal->connect(slot);
+}
+
+MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedSlotType& slot) : 
+    SelectedIDSignal(new SelectedIDSignalType()),
     SelectedSignal(new SelectedSignalType()),
     label(str), 
     item_ID(id), 
@@ -216,7 +230,8 @@ void MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
                 // we launch a PopupMenu whenever a menu item is selected, then use the ID returned from it to find the
                 // menu item that was chosen; we then emit a signal from that item
                 if (m_menu_data.next_level[i].next_level.empty()) {
-                    (*m_menu_data.next_level[i].SelectedSignal)(m_menu_data.next_level[i].item_ID);
+                    (*m_menu_data.next_level[i].SelectedIDSignal)(m_menu_data.next_level[i].item_ID);
+                    (*m_menu_data.next_level[i].SelectedSignal)();
                 } else {
                     MenuItem popup_data;
                     PopupMenu menu(m_menu_labels[i]->UpperLeft().x, m_menu_labels[i]->LowerRight().y, m_font, m_menu_data.next_level[i], m_text_color, m_border_color, m_int_color);
@@ -629,8 +644,10 @@ void PopupMenu::MouseHere(const Pt& pt, Uint32 keys)
 int PopupMenu::Run()
 {
     int retval = Wnd::Run();
-    if (m_item_selected)
-        (*m_item_selected->SelectedSignal)(m_item_selected->item_ID);
+    if (m_item_selected) {
+        (*m_item_selected->SelectedIDSignal)(m_item_selected->item_ID);
+        (*m_item_selected->SelectedSignal)();
+    }
     return retval;
 }
 

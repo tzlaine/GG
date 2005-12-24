@@ -9,13 +9,16 @@ def OptionValue(key, env):
     return env.subst('$' + key)
 
 def ParseOptionsCacheFile(filename):
-    f = open(filename, 'r')
-    lines = f.readlines()
-    f.close()
     retval = {}
-    for i in lines:
-        key_and_value = i.split(" = ")
-        retval[key_and_value[0]] = key_and_value[1]
+    try:
+        f = open(filename, 'r')
+        lines = f.readlines()
+        f.close()
+        for i in lines:
+            key_and_value = i.split(" = ")
+            retval[key_and_value[0]] = key_and_value[1]
+    except IOError:
+        pass
     return retval
 
 def GenerateHelpText(options, env):
@@ -206,14 +209,14 @@ def FindRegexMatchesInHeader(regex, filename, env = None):
                 f = open(os.path.normpath(os.path.join(i, filename)), 'r')
                 break
             except Exception:
-                None
+                pass
     if not f:
         for i in ['.', '/usr/include', '/usr/local/include']:
             try:
                 f = open(os.path.normpath(os.path.join(i, filename)), 'r')
                 break
             except Exception:
-                None
+                pass
     if f:
         return regex.findall(f.read())
     else:

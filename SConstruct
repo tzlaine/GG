@@ -104,7 +104,7 @@ if not force_configure:
         if ('-h' not in command_line_args) and ('--help' not in command_line_args):
             print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
     except Exception:
-        None
+        pass
 
 options.Update(env)
 

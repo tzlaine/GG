@@ -99,6 +99,12 @@ public:
     double ColumnStretch(int column) const;          ///< returns the stretch factor for column \a column.  Note that \a column is not range-checked.
     int    MinimumRowHeight(int row) const;          ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
     int    MinimumColumnWidth(int column) const;     ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
+    std::vector<std::vector<const Wnd*> >
+           Cells() const;                            ///< returns a matrix of the Wnds that can be found in each cell
+    std::vector<std::vector<Rect> >
+           CellRects() const;                        ///< returns a matrix of rectangles int screen space that cover the cells in which child Wnds are placed
+    std::vector<std::vector<Rect> >
+           RelativeCellRects() const;                ///< returns a matrix of rectangles in layout client space that cover the cells in which child Wnds are placed
     //@}
    
     /** \name Mutators */ //@{
@@ -109,14 +115,17 @@ public:
     /** inserts \a w into the layout in the indicated cell, expanding the layout grid as necessary.  Note that \a row
         and \a column must not be negative, though this is not checked. \throw GG::Layout::AttemptedOverwrite Throws if
         there is already a Wnd in the given cell. */
-    void Add(Wnd *w, int row, int column, Uint32 alignment = 0);
+    void Add(Wnd* wnd, int row, int column, Uint32 alignment = 0);
 
     /** inserts \a w into the layout, covering the indicated cell(s), expanding the layout grid as necessary.  The
         num_rows and num_columns indicate how many rows and columns \a w covers, respectively.  So Add(foo, 1, 2, 2, 3)
         covers cells (1, 2) through (2, 4), inclusive.  Note that \a row, and \a column must be nonnegative and \a
         num_rows and \a num_columns must be positive, though this is not checked. \throw GG::Layout::AttemptedOverwrite
         Throws if there is already a Wnd in one of the given cells. */
-    void Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
+    void Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
+
+    /** removes and returns \a w from the layout, recalculating the layout as needed */
+    void Remove(Wnd* wnd);
 
     /** resizes the layout to be \a rows by \a columns.  If the layout shrinks, any contained windows are deleted.  Each
         of \a rows and \a columns must be greater than 0, though this is not checked. */

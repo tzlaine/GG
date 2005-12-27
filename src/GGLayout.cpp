@@ -149,6 +149,62 @@ int Layout::MinimumColumnWidth(int column) const
     return m_column_params[column].min;
 }
 
+std::vector<std::vector<const Wnd*> > Layout::Cells() const
+{
+    std::vector<std::vector<const Wnd*> > retval(m_cells.size());
+    for (unsigned int i = 0; i < m_cells.size(); ++i) {
+	retval[i].resize(m_cells[i].size());
+	for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
+	    retval[i][j] = m_cells[i][j];
+	}
+    }    
+    return retval;
+}
+
+std::vector<std::vector<Rect> > Layout::CellRects() const
+{
+    std::vector<std::vector<Rect> > retval = RelativeCellRects();
+    for (unsigned int i = 0; i < retval.size(); ++i) {
+	for (unsigned int j = 0; j < retval[i].size(); ++j) {
+	    retval[i][j] += ClientUpperLeft();
+	}
+    }
+    return retval;
+}
+
+std::vector<std::vector<Rect> > Layout::RelativeCellRects() const
+{
+    std::vector<std::vector<Rect> > retval(m_cells.size());
+    for (unsigned int i = 0; i < m_cells.size(); ++i) {
+	retval[i].resize(m_cells[i].size());
+	for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
+	    Pt ul(m_row_params[i].current_origin,
+		  m_column_params[j].current_origin);
+	    Pt lr = ul + Pt(m_row_params[i].current_width,
+			    m_column_params[j].current_width);
+	    Rect rect(ul, lr);
+	    if (!j)
+		rect.ul.x += m_border_margin;
+	    else
+		rect.ul.x += m_cell_margin / 2;
+	    if (j == m_cells[i].size() - 1)
+		rect.lr.x -= m_border_margin;
+	    else
+		rect.lr.x -= m_cell_margin - m_cell_margin / 2;
+	    if (!i)
+		rect.ul.y += m_border_margin;
+	    else
+		rect.ul.y += m_cell_margin / 2;
+	    if (i == m_cells.size() - 1)
+		rect.lr.y -= m_border_margin;
+	    else
+		rect.lr.y -= m_cell_margin - m_cell_margin / 2;
+	    retval[i][j] = rect;
+	}
+    }
+    return retval;
+}
+
 void Layout::SizeMove(const Pt& ul, const Pt& lr)
 {
     if (m_ignore_parent_resize)
@@ -386,12 +442,12 @@ void Layout::Keypress(Key key, Uint32 key_mods)
         Parent()->Keypress(key, key_mods);
 }
 
-void Layout::Add(Wnd *w, int row, int column, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd *wnd, int row, int column, Uint32 alignment/* = 0*/)
 {
-    Add(w, row, column, 1, 1, alignment);
+    Add(wnd, row, column, 1, 1, alignment);
 }
 
-void Layout::Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd *wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment/* = 0*/)
 {
     int last_row = row + num_rows;
     int last_column = column + num_columns;
@@ -407,12 +463,28 @@ void Layout::Add(Wnd *w, int row, int column, int num_rows, int num_columns, Uin
         for (int j = column; j < last_column; ++j) {
             if (m_cells[i][j])
                 throw AttemptedOverwrite("Layout::Add() : Attempted to add a Wnd to a layout cell that is already occupied");
-            m_cells[i][j] = w;
+            m_cells[i][j] = wnd;
         }
     }
-    m_wnd_positions[w] = WndPosition(row, column, last_row, last_column, alignment, w->RelativeUpperLeft(), w->Size());
-    AttachChild(w);
+    m_wnd_positions[wnd] = WndPosition(row, column, last_row, last_column, alignment, wnd->RelativeUpperLeft(), wnd->Size());
+    AttachChild(wnd);
     RedoLayout();
+}
+
+void Layout::Remove(Wnd* wnd)
+{
+    std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
+    if (it != m_wnd_positions.end()) {
+	DetachChild(wnd);
+	const WndPosition& wnd_position = it->second;
+	for (int i = wnd_position.first_row; i < wnd_position.last_row; ++i) {
+	    for (int j = wnd_position.first_column; j < wnd_position.last_column; ++j) {
+		m_cells[i][j] = 0;
+	    }
+	}
+	m_wnd_positions.erase(wnd);
+	RedoLayout();
+    }
 }
 
 void Layout::ResizeLayout(int rows, int columns)

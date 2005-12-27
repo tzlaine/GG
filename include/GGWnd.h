@@ -327,9 +327,13 @@ public:
         windows. */
     void           SetLayout(Layout* layout);
 
-    /** removes the window's layout, handing ownership of all children back to the window, with the sizes they had
-        before the layout resized them.  If no layout exists for the window, no action is taken. */
+    /** removes the window's layout, handing ownership of all children back to the window, with the sizes and positions
+	they had before the layout resized them.  If no layout exists for the window, no action is taken. */
     void           RemoveLayout();
+
+    /** removes the window's layout, including all attached children, and returns it.  If no layout exists for the
+	window, no action is taken. */
+    Layout*        DetachLayout();
 
     /** sets the margin that should exist between the outer edges of the windows in the layout and the edge of the
         client area.  If no layout exists for the window, this has no effect. */

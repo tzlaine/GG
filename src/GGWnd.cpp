@@ -692,8 +692,10 @@ void Wnd::DetachChild(Wnd* wnd)
         if (it != m_children.end()) {
             m_children.erase(it);
             wnd->m_parent = 0;
-            if (dynamic_cast<Layout*>(this))
+            if (Layout* this_as_layout = dynamic_cast<Layout*>(this)) {
+		this_as_layout->Remove(wnd);
                 wnd->m_containing_layout = 0;
+	    }
         }
     }
 }
@@ -924,6 +926,14 @@ void Wnd::RemoveLayout()
         DeleteChild(m_layout);
         m_layout = 0;
     }
+}
+
+Layout* Wnd::DetachLayout()
+{
+    Layout* retval = m_layout;
+    DetachChild(m_layout);
+    m_layout = 0;
+    return retval;
 }
 
 void Wnd::SetLayoutBorderMargin(int margin)

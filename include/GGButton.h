@@ -242,6 +242,10 @@ public:
     /** returns the index of the currently checked button, or -1 if none are checked */
     int              CheckedButton() const;
 
+    /** returns true iff this button group will render an outline of itself; this is sometimes useful for debugging
+	purposes */
+    bool             RenderOutline() const;
+
     mutable ButtonChangedSignalType ButtonChangedSignal; ///< the button changed signal object for this RadioButtonGroup
     //@}
 
@@ -259,6 +263,10 @@ public:
     /** adds a button to the group. \note There is no way to remove buttons; RadioButtonGroup is meant to be a 
         simple grouping control. */
     void AddButton(StateButton* bn);
+
+    /** set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
+	purposes */
+    void RenderOutline(bool render_outline);
     //@}
 
 protected:
@@ -289,6 +297,8 @@ private:
     std::vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be disconnected when programmatically unclicking the buttons
 
     int  m_checked_button; ///< the index of the currently-checked button; -1 if none is clicked
+
+    bool m_render_outline;
 
     friend class ButtonClickedFunctor;
 
@@ -326,8 +336,9 @@ template <class Archive>
 void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_buttons)
         & BOOST_SERIALIZATION_NVP(m_checked_button)
-        & BOOST_SERIALIZATION_NVP(m_buttons);
+	& BOOST_SERIALIZATION_NVP(m_render_outline);
 
     if (Archive::is_loading::value)
         ConnectSignals();

@@ -105,10 +105,19 @@ public:
            CellRects() const;                        ///< returns a matrix of rectangles int screen space that cover the cells in which child Wnds are placed
     std::vector<std::vector<Rect> >
            RelativeCellRects() const;                ///< returns a matrix of rectangles in layout client space that cover the cells in which child Wnds are placed
+
+    /** returns true iff this layout will render an outline of itself; this is sometimes useful for debugging
+	purposes */
+    bool   RenderOutline() const;
+
+    /** returns the outline color used to render this layout (this is only used if RenderOutline() returns true).  This is
+	sometimes useful for debugging purposes. */
+    Clr    OutlineColor() const;
     //@}
    
     /** \name Mutators */ //@{
     virtual void SizeMove(const Pt& ul, const Pt& lr);
+    virtual void Render();
     virtual void MouseWheel(const Pt& pt, int move, Uint32 keys);
     virtual void Keypress(Key key, Uint32 key_mods);
 
@@ -155,6 +164,14 @@ public:
 
     /** sets the minimum width of column \a column to \a width.  Note that \a column is not range-checked. */
     void SetMinimumColumnWidth(int column, int width);
+
+    /** set this to true if this layout should render an outline of itself; this is sometimes useful for debugging
+	purposes */
+    void RenderOutline(bool render_outline);
+
+    /** sets the outline color used to render this layout (this is only used if RenderOutline() returns true).  This is
+	sometimes useful for debugging purposes. */
+    void SetOutlineColor(Clr color);
 
     virtual void DefineAttributes(WndEditor* editor);
     //@}
@@ -233,6 +250,8 @@ private:
     std::map<Wnd*, WndPosition>     m_wnd_positions;
     bool                            m_ignore_child_resize;
     bool                            m_ignore_parent_resize;
+    bool                            m_render_outline;
+    Clr                             m_outline_color;
 
     friend class Wnd;
     friend struct SetMarginAction;
@@ -277,7 +296,9 @@ void GG::Layout::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_row_params)
         & BOOST_SERIALIZATION_NVP(m_column_params)
         & BOOST_SERIALIZATION_NVP(m_wnd_positions)
-        & BOOST_SERIALIZATION_NVP(m_ignore_child_resize);
+        & BOOST_SERIALIZATION_NVP(m_ignore_child_resize)
+        & BOOST_SERIALIZATION_NVP(m_render_outline)
+	& BOOST_SERIALIZATION_NVP(m_outline_color);
 }
 
 #endif // _GGLayout_h_

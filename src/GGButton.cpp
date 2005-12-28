@@ -40,8 +40,7 @@ using namespace GG;
 Button::Button() :
     TextControl(),
     m_state(BN_UNPRESSED)
-{
-}
+{}
 
 Button::Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
                Clr text_color/* = CLR_BLACK*/, Uint32 flags/* = CLICKABLE*/) :
@@ -229,8 +228,7 @@ StateButton::StateButton() :
     TextControl(),
     m_checked(false),
     m_style(SBSTYLE_3D_XBOX)
-{
-}
+{}
 
 StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                          Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
@@ -438,8 +436,7 @@ Pt StateButton::TextUpperLeft() const
 RadioButtonGroup::ButtonClickedFunctor::ButtonClickedFunctor(RadioButtonGroup* grp, int idx) :
     m_grp(grp),
     m_idx(idx)
-{
-}
+{}
 
 void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
 {
@@ -449,14 +446,18 @@ void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
 // RadioButtonGroup
 RadioButtonGroup::RadioButtonGroup() :
     Control(),
-    m_checked_button(-1)
+    m_checked_button(-1),
+    m_render_outline(false)
 {
+    SetColor(CLR_YELLOW);
 }
 
 RadioButtonGroup::RadioButtonGroup(int x, int y) :
     Control(x, y, 10, 10),
-    m_checked_button(-1)
+    m_checked_button(-1),
+    m_render_outline(false)
 {
+    SetColor(CLR_YELLOW);
 }
 
 int RadioButtonGroup::NumButtons() const
@@ -469,8 +470,19 @@ int RadioButtonGroup::CheckedButton() const
     return m_checked_button;
 }
 
+bool RadioButtonGroup::RenderOutline() const
+{
+    return m_render_outline;
+}
+
 void RadioButtonGroup::Render()
-{}
+{
+    if (m_render_outline) {
+	Pt ul = UpperLeft(), lr = LowerRight();
+	Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
+	FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, color_to_use, 1);
+    }
+}
 
 void RadioButtonGroup::SetCheck(int idx)
 {
@@ -501,6 +513,11 @@ void RadioButtonGroup::AddButton(StateButton* bn)
     if (bn->LowerRight() >= Size()) // stretch group to encompass all its children
         Resize(bn->LowerRight());
     AttachChild(bn);
+}
+
+void RadioButtonGroup::RenderOutline(bool render_outline)
+{
+    m_render_outline = render_outline;
 }
 
 const std::vector<StateButton*>& RadioButtonGroup::Buttons() const

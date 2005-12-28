@@ -26,6 +26,7 @@
 
 #include "GGLayout.h"
 
+#include <GGDrawUtil.h>
 #include <GGWndEditor.h>
 
 #include <cassert>
@@ -84,7 +85,9 @@ Layout::Layout() :
     m_border_margin(0),
     m_cell_margin(0),
     m_ignore_child_resize(false),
-    m_ignore_parent_resize(false)
+    m_ignore_parent_resize(false),
+    m_render_outline(false),
+    m_outline_color(CLR_MAGENTA)
 {}
 
 Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
@@ -95,7 +98,9 @@ Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_mar
     m_row_params(rows),
     m_column_params(columns),
     m_ignore_child_resize(false),
-    m_ignore_parent_resize(false)
+    m_ignore_parent_resize(false),
+    m_render_outline(false),
+    m_outline_color(CLR_MAGENTA)
 {
     if (m_border_margin < 0)
         throw InvalidMargin("Layout::Layout() : m_border_margin may not be less than 0");
@@ -178,10 +183,10 @@ std::vector<std::vector<Rect> > Layout::RelativeCellRects() const
     for (unsigned int i = 0; i < m_cells.size(); ++i) {
 	retval[i].resize(m_cells[i].size());
 	for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
-	    Pt ul(m_row_params[i].current_origin,
-		  m_column_params[j].current_origin);
-	    Pt lr = ul + Pt(m_row_params[i].current_width,
-			    m_column_params[j].current_width);
+	    Pt ul(m_column_params[j].current_origin,
+		  m_row_params[i].current_origin);
+	    Pt lr = ul + Pt(m_column_params[j].current_width,
+			    m_row_params[i].current_width);
 	    Rect rect(ul, lr);
 	    if (!j)
 		rect.ul.x += m_border_margin;
@@ -203,6 +208,16 @@ std::vector<std::vector<Rect> > Layout::RelativeCellRects() const
 	}
     }
     return retval;
+}
+
+bool Layout::RenderOutline() const
+{
+    return m_render_outline;
+}
+
+Clr Layout::OutlineColor() const
+{
+    return m_outline_color;
 }
 
 void Layout::SizeMove(const Pt& ul, const Pt& lr)
@@ -430,6 +445,21 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
         ContainingLayout()->ChildSizeOrMinSizeOrMaxSizeChanged();
 }
 
+void Layout::Render()
+{
+    if (m_render_outline) {
+	Pt ul = UpperLeft(), lr = LowerRight();
+	FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, m_outline_color, 1);
+	std::vector<std::vector<Rect> > rects = CellRects();
+	for (unsigned int i = 0; i < rects.size(); ++i) {
+	    for (unsigned int j = 0; j < rects[i].size(); ++j) {
+		FlatRectangle(rects[i][j].ul.x, rects[i][j].ul.y, rects[i][j].lr.x, rects[i][j].lr.y,
+			      CLR_ZERO, m_outline_color, 1);
+	    }
+	}
+    }
+}
+
 void Layout::MouseWheel(const Pt& pt, int move, Uint32 keys)
 {
     if (Parent())
@@ -442,12 +472,12 @@ void Layout::Keypress(Key key, Uint32 key_mods)
         Parent()->Keypress(key, key_mods);
 }
 
-void Layout::Add(Wnd *wnd, int row, int column, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd* wnd, int row, int column, Uint32 alignment/* = 0*/)
 {
     Add(wnd, row, column, 1, 1, alignment);
 }
 
-void Layout::Add(Wnd *wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment/* = 0*/)
 {
     int last_row = row + num_rows;
     int last_column = column + num_columns;
@@ -562,6 +592,16 @@ void Layout::SetMinimumColumnWidth(int column, int width)
     assert(static_cast<unsigned int>(column) < m_column_params.size());
     m_column_params[column].min = width;
     RedoLayout();
+}
+
+void Layout::RenderOutline(bool render_outline)
+{
+    m_render_outline = render_outline;
+}
+
+void Layout::SetOutlineColor(Clr color)
+{
+    m_outline_color = color;
 }
 
 void Layout::DefineAttributes(WndEditor* editor)

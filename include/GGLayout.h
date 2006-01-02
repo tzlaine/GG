@@ -133,8 +133,12 @@ public:
         Throws if there is already a Wnd in one of the given cells. */
     void Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
 
-    /** removes and returns \a w from the layout, recalculating the layout as needed */
+    /** removes \a w from the layout, recalculating the layout as needed */
     void Remove(Wnd* wnd);
+
+    /** resets children to their original sizes and detaches them, so that a removed Layout can leave the Wnds it lays
+        out in their original configuration when it is no longer useful. */
+    void DetachAndResetChildren();
 
     /** resizes the layout to be \a rows by \a columns.  If the layout shrinks, any contained windows are deleted.  Each
         of \a rows and \a columns must be greater than 0, though this is not checked. */
@@ -240,7 +244,6 @@ private:
     void   ValidateAlignment(Uint32& alignment);
     void   RedoLayout();
     void   ChildSizeOrMinSizeOrMaxSizeChanged();
-    void   DetachAndResetChildren(); // resets children to their original sizes and detaches them, so that a removed Layout can leave the Wnds it lays out in their original configuration when it is removed from a Wnd it is laying out
 
     std::vector<std::vector<Wnd*> > m_cells;
     int                             m_border_margin;

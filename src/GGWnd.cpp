@@ -693,9 +693,9 @@ void Wnd::DetachChild(Wnd* wnd)
             m_children.erase(it);
             wnd->m_parent = 0;
             if (Layout* this_as_layout = dynamic_cast<Layout*>(this)) {
-		this_as_layout->Remove(wnd);
+                this_as_layout->Remove(wnd);
                 wnd->m_containing_layout = 0;
-	    }
+            }
         }
     }
 }
@@ -726,17 +726,21 @@ void Wnd::DeleteChildren()
 
 void Wnd::InstallEventFilter(Wnd* wnd)
 {
-    RemoveEventFilter(wnd);
-    m_filters.push_back(wnd);
-    wnd->m_filtering.insert(this);
+    if (wnd) {
+        RemoveEventFilter(wnd);
+        m_filters.push_back(wnd);
+        wnd->m_filtering.insert(this);
+    }
 }
 
 void Wnd::RemoveEventFilter(Wnd* wnd)
 {
-    std::vector<Wnd*>::iterator it = std::find(m_filters.begin(), m_filters.end(), wnd);
-    if (it != m_filters.end())
-        m_filters.erase(it);
-    wnd->m_filtering.erase(this);
+    if (wnd) {
+        std::vector<Wnd*>::iterator it = std::find(m_filters.begin(), m_filters.end(), wnd);
+        if (it != m_filters.end())
+            m_filters.erase(it);
+        wnd->m_filtering.erase(this);
+    }
 }
 
 void Wnd::HorizontalLayout()

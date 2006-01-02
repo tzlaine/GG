@@ -158,10 +158,10 @@ std::vector<std::vector<const Wnd*> > Layout::Cells() const
 {
     std::vector<std::vector<const Wnd*> > retval(m_cells.size());
     for (unsigned int i = 0; i < m_cells.size(); ++i) {
-	retval[i].resize(m_cells[i].size());
-	for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
-	    retval[i][j] = m_cells[i][j];
-	}
+        retval[i].resize(m_cells[i].size());
+        for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
+            retval[i][j] = m_cells[i][j];
+        }
     }    
     return retval;
 }
@@ -170,9 +170,9 @@ std::vector<std::vector<Rect> > Layout::CellRects() const
 {
     std::vector<std::vector<Rect> > retval = RelativeCellRects();
     for (unsigned int i = 0; i < retval.size(); ++i) {
-	for (unsigned int j = 0; j < retval[i].size(); ++j) {
-	    retval[i][j] += ClientUpperLeft();
-	}
+        for (unsigned int j = 0; j < retval[i].size(); ++j) {
+            retval[i][j] += ClientUpperLeft();
+        }
     }
     return retval;
 }
@@ -181,31 +181,31 @@ std::vector<std::vector<Rect> > Layout::RelativeCellRects() const
 {
     std::vector<std::vector<Rect> > retval(m_cells.size());
     for (unsigned int i = 0; i < m_cells.size(); ++i) {
-	retval[i].resize(m_cells[i].size());
-	for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
-	    Pt ul(m_column_params[j].current_origin,
-		  m_row_params[i].current_origin);
-	    Pt lr = ul + Pt(m_column_params[j].current_width,
-			    m_row_params[i].current_width);
-	    Rect rect(ul, lr);
-	    if (!j)
-		rect.ul.x += m_border_margin;
-	    else
-		rect.ul.x += m_cell_margin / 2;
-	    if (j == m_cells[i].size() - 1)
-		rect.lr.x -= m_border_margin;
-	    else
-		rect.lr.x -= m_cell_margin - m_cell_margin / 2;
-	    if (!i)
-		rect.ul.y += m_border_margin;
-	    else
-		rect.ul.y += m_cell_margin / 2;
-	    if (i == m_cells.size() - 1)
-		rect.lr.y -= m_border_margin;
-	    else
-		rect.lr.y -= m_cell_margin - m_cell_margin / 2;
-	    retval[i][j] = rect;
-	}
+        retval[i].resize(m_cells[i].size());
+        for (unsigned int j = 0; j < m_cells[i].size(); ++j) {
+            Pt ul(m_column_params[j].current_origin,
+                  m_row_params[i].current_origin);
+            Pt lr = ul + Pt(m_column_params[j].current_width,
+                            m_row_params[i].current_width);
+            Rect rect(ul, lr);
+            if (!j)
+                rect.ul.x += m_border_margin;
+            else
+                rect.ul.x += m_cell_margin / 2;
+            if (j == m_cells[i].size() - 1)
+                rect.lr.x -= m_border_margin;
+            else
+                rect.lr.x -= m_cell_margin - m_cell_margin / 2;
+            if (!i)
+                rect.ul.y += m_border_margin;
+            else
+                rect.ul.y += m_cell_margin / 2;
+            if (i == m_cells.size() - 1)
+                rect.lr.y -= m_border_margin;
+            else
+                rect.lr.y -= m_cell_margin - m_cell_margin / 2;
+            retval[i][j] = rect;
+        }
     }
     return retval;
 }
@@ -448,15 +448,15 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
 void Layout::Render()
 {
     if (m_render_outline) {
-	Pt ul = UpperLeft(), lr = LowerRight();
-	FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, m_outline_color, 1);
-	std::vector<std::vector<Rect> > rects = CellRects();
-	for (unsigned int i = 0; i < rects.size(); ++i) {
-	    for (unsigned int j = 0; j < rects[i].size(); ++j) {
-		FlatRectangle(rects[i][j].ul.x, rects[i][j].ul.y, rects[i][j].lr.x, rects[i][j].lr.y,
-			      CLR_ZERO, m_outline_color, 1);
-	    }
-	}
+        Pt ul = UpperLeft(), lr = LowerRight();
+        FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, m_outline_color, 1);
+        std::vector<std::vector<Rect> > rects = CellRects();
+        for (unsigned int i = 0; i < rects.size(); ++i) {
+            for (unsigned int j = 0; j < rects[i].size(); ++j) {
+                FlatRectangle(rects[i][j].ul.x, rects[i][j].ul.y, rects[i][j].lr.x, rects[i][j].lr.y,
+                              CLR_ZERO, m_outline_color, 1);
+            }
+        }
     }
 }
 
@@ -505,16 +505,26 @@ void Layout::Remove(Wnd* wnd)
 {
     std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
     if (it != m_wnd_positions.end()) {
-	DetachChild(wnd);
-	const WndPosition& wnd_position = it->second;
-	for (int i = wnd_position.first_row; i < wnd_position.last_row; ++i) {
-	    for (int j = wnd_position.first_column; j < wnd_position.last_column; ++j) {
-		m_cells[i][j] = 0;
-	    }
-	}
-	m_wnd_positions.erase(wnd);
-	RedoLayout();
+        DetachChild(wnd);
+        const WndPosition& wnd_position = it->second;
+        for (int i = wnd_position.first_row; i < wnd_position.last_row; ++i) {
+            for (int j = wnd_position.first_column; j < wnd_position.last_column; ++j) {
+                m_cells[i][j] = 0;
+            }
+        }
+        m_wnd_positions.erase(wnd);
+        RedoLayout();
     }
+}
+
+void Layout::DetachAndResetChildren()
+{
+    std::map<Wnd*, WndPosition> wnd_positions = m_wnd_positions;
+    DetachChildren();
+    for (std::map<Wnd*, WndPosition>::iterator it = wnd_positions.begin(); it != wnd_positions.end(); ++it) {
+        it->first->SizeMove(it->second.original_ul, it->second.original_ul + it->second.original_size);
+    }
+    m_wnd_positions.clear();
 }
 
 void Layout::ResizeLayout(int rows, int columns)
@@ -676,13 +686,4 @@ void Layout::ChildSizeOrMinSizeOrMaxSizeChanged()
 {
     if (!m_ignore_child_resize)
         RedoLayout();
-}
-
-void Layout::DetachAndResetChildren()
-{
-    std::map<Wnd*, WndPosition> wnd_positions = m_wnd_positions;
-    DetachChildren();
-    for (std::map<Wnd*, WndPosition>::iterator it = wnd_positions.begin(); it != wnd_positions.end(); ++it) {
-        it->first->SizeMove(it->second.original_ul, it->second.original_ul + it->second.original_size);
-    }
 }

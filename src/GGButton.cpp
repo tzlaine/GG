@@ -478,9 +478,9 @@ bool RadioButtonGroup::RenderOutline() const
 void RadioButtonGroup::Render()
 {
     if (m_render_outline) {
-	Pt ul = UpperLeft(), lr = LowerRight();
-	Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-	FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, color_to_use, 1);
+        Pt ul = UpperLeft(), lr = LowerRight();
+        Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
+        FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, color_to_use, 1);
     }
 }
 

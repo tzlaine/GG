@@ -1345,10 +1345,14 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
     if (!m_rows.empty())
         total_y_extent = m_rows.back()->LowerRight().y - m_rows.front()->UpperLeft().y;
 
-    bool vertical_needed = (total_y_extent > cl_sz.y ||
-                            (total_y_extent > cl_sz.y - SCROLL_WIDTH && total_x_extent > cl_sz.x - SCROLL_WIDTH));
-    bool horizontal_needed = (total_x_extent > cl_sz.x ||
-                              (total_x_extent > cl_sz.x - SCROLL_WIDTH && total_y_extent > cl_sz.y - SCROLL_WIDTH));
+    bool vertical_needed =
+        m_rows.size() && (total_y_extent > cl_sz.y ||
+                          (total_y_extent > cl_sz.y - SCROLL_WIDTH &&
+                           total_x_extent > cl_sz.x - SCROLL_WIDTH));
+    bool horizontal_needed =
+        m_rows.size() && (total_x_extent > cl_sz.x ||
+                          (total_x_extent > cl_sz.x - SCROLL_WIDTH &&
+                           total_y_extent > cl_sz.y - SCROLL_WIDTH));
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
@@ -1511,6 +1515,8 @@ void ListBox::NormalizeRow(Row* row)
 
 int ListBox::FirstRowShownWhenBottomIs(int bottom_row, int client_height)
 {
+    if (bottom_row < 0)
+        return 0;
     int available_space = client_height - m_rows[bottom_row]->Height();
     int i = bottom_row;
     while (0 < i && m_rows[i - 1]->Height() <= available_space) {
@@ -1521,6 +1527,8 @@ int ListBox::FirstRowShownWhenBottomIs(int bottom_row, int client_height)
 
 int ListBox::FirstColShownWhenRightIs(int right_col, int client_width)
 {
+    if (right_col < 0)
+        return 0;
     int available_space = client_width - m_col_widths[right_col];
     int i = right_col;
     while (0 < i && m_col_widths[i - 1] <= available_space) {

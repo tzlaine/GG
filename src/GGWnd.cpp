@@ -1061,7 +1061,6 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Flag("Ontop", ONTOP);
     editor->Flag("Modal", MODAL);
     editor->EndFlags();
-    // TODO: handle creating/removing layouts
     // TODO: handle creation and modification of browse info modes
 }
 

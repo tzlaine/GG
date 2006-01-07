@@ -228,21 +228,15 @@ void ControlsTestGGApp::Initialize()
 
     GG::MenuItem menu_contents;
     GG::MenuItem file_menu("File", 0, false, false);
-    file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, BrowseFilesFunctor()));
+    file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, GG::MenuItem::SelectedSlotType(BrowseFilesFunctor())));
     menu_contents.next_level.push_back(file_menu);
     GG::MenuBar* menu_bar =
         new GG::MenuBar(0, 0, AppWidth(), font, menu_contents, GG::CLR_WHITE);
     layout->Add(menu_bar, 0, 0, 1, 2, GG::ALIGN_TOP);
 
-    GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10);
-    GG::StateButton* state_button8 =
-        new GG::StateButton(0,   0, 100, 25, "Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
-    GG::StateButton* state_button9 =
-        new GG::StateButton(100, 0, 100, 25, "Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
-    radio_button_group->AddButton(state_button8);
-    radio_button_group->AddButton(state_button9);
+    GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10, 200, 25, GG::HORIZONTAL);
+    radio_button_group->AddButton("Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
+    radio_button_group->AddButton("Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
     layout->Add(radio_button_group, 1, 0);
 
     GG::TextControl* plan_text_control =

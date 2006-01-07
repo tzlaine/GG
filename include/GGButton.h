@@ -172,6 +172,7 @@ public:
     /** \name Mutators */ //@{
     virtual void     Render();
     virtual void     LClick(const Pt& pt, Uint32 keys);
+    virtual void     SizeMove(const Pt& ul, const Pt& lr);
 
     void             Reset();                 ///< unchecks button
     void             SetCheck(bool b = true); ///< (un)checks button
@@ -197,6 +198,10 @@ protected:
     Pt  TextUpperLeft() const;    ///< returns the upper-left of the text part of the control
     //@}
 
+    /** \name Mutators */ //@{
+    void RepositionButton();      ///< places the button at the appropriate position based on the style flags, without resizing it
+    //@}
+
 private:
     bool              m_checked;     ///< true when this button in a checked, active state
     Clr               m_int_color;   ///< color inside border
@@ -212,14 +217,14 @@ private:
 };
 
 
-/** This is a class that encapsulates multiple GG::StateButtons into a single radio-button control.  The location of the
-    radio button group should be set to the desired location of the upper-left corner of the entire group.  The group
-    starts out having 1x1 dimensions; as each button is added, the lower-right corner of the group moves to encompass
-    it.  The upper-left corner will not move.  RadioButtonGroup emits a signal whenever its currently-checked button
-    changes.  The signal indicates which button has been pressed, by passing the index of the button; the
-    currently-checked button index is -1 when no button is checked.  Any StateButton-derived controls can be used in a
-    RadioButtonGroup.  However, if you want to automatically serialize a RadioButtonGroup that has custom buttons, you
-    must register the new types.  See the boost serialization documentation for details.*/
+/** This is a class that encapsulates multiple GG::StateButtons into a single radio-button control.  RadioButtonGroup
+    emits a signal whenever its currently-checked button changes.  The signal indicates which button has been pressed,
+    by passing the index of the button; the currently-checked button index is -1 when no button is checked.  Any
+    StateButton-derived controls can be used in a RadioButtonGroup.  However, if you want to automatically serialize a
+    RadioButtonGroup that has custom buttons, you must register the new types.  See the boost serialization
+    documentation for details.  \note There is no way to remove buttons; RadioButtonGroup is meant to be a simple
+    grouping control.  \warning Though it is possible to remove buttons by explicitly calling DetachChild(), this will
+    leave the RadioButtonGroup with a dangling pointer to the detached button. */
 class GG_API RadioButtonGroup : public Control
 {
 public:
@@ -232,10 +237,13 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    RadioButtonGroup(int x, int y); ///< ctor
+    RadioButtonGroup(int x, int y, int w, int h, Orientation orientation); ///< ctor
     //@}
 
     /** \name Accessors */ //@{
+    /** returns the orientation of the buttons in the group */
+    Orientation      GetOrientation() const;
+
     /** returns the number of buttons in this control */
     int              NumButtons() const;
 
@@ -252,6 +260,9 @@ public:
     /** \name Mutators */ //@{
     virtual void Render();
 
+    /** sets the orientation of the buttons in the group */
+    void SetOrientation(Orientation orientation);
+
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
         currently-checked button index is set to -1. */
     void SetCheck(int idx);
@@ -264,9 +275,16 @@ public:
         simple grouping control. */
     void AddButton(StateButton* bn);
 
+    /** creates a StateButton from the given parameters and adds it to the group. */
+    void AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+                   Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
+                   StateButtonStyle style = SBSTYLE_3D_RADIO);
+
     /** set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
 	purposes */
     void RenderOutline(bool render_outline);
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -293,6 +311,7 @@ private:
     void ConnectSignals();
     void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active
 
+    Orientation                             m_orientation;
     std::vector<StateButton*>               m_buttons;     ///< the state buttons in the group
     std::vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be disconnected when programmatically unclicking the buttons
 
@@ -336,9 +355,10 @@ template <class Archive>
 void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_orientation)
         & BOOST_SERIALIZATION_NVP(m_buttons)
         & BOOST_SERIALIZATION_NVP(m_checked_button)
-	& BOOST_SERIALIZATION_NVP(m_render_outline);
+        & BOOST_SERIALIZATION_NVP(m_render_outline);
 
     if (Archive::is_loading::value)
         ConnectSignals();

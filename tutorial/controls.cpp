@@ -43,8 +43,6 @@ struct BrowseFilesFunctor
                              GG::CLR_GRAY, GG::CLR_GRAY);
         file_dlg.Run();
     }
-    void operator()(int)
-    {operator()();}
 };
 
 // This is a full-fledged class that has one of its member functions invoked when the radio buttons are clicked.
@@ -229,7 +227,7 @@ void ControlsTestGGApp::Initialize()
     GG::MenuItem file_menu("File", 0, false, false);
     // Notice that the menu item can be directly attached to a slot right in its ctor.  In this case, the slot is a
     // functor.
-    file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, BrowseFilesFunctor()));
+    file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, GG::MenuItem::SelectedSlotType(BrowseFilesFunctor())));
     menu_contents.next_level.push_back(file_menu);
     GG::MenuBar* menu_bar =
         new GG::MenuBar(0, 0, AppWidth(), font, menu_contents, GG::CLR_WHITE);
@@ -238,17 +236,9 @@ void ControlsTestGGApp::Initialize()
     // Here we create a RadioButtonGroup, then create two StateButtons and add them to the group.  The only signal that
     // needs to be handled to respond to changes to the StateButtons is the group's ButtonChangedSignal; the group
     // handles the click signals of its member radio buttons.
-    GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10);
-    // Note that even though the overall app has a layout, the positions of the buttons within the RadioButtonGroup must
-    // be hand-coded.
-    GG::StateButton* state_button8 =
-        new GG::StateButton(0,   0, 100, 25, "Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
-    GG::StateButton* state_button9 =
-        new GG::StateButton(100, 0, 100, 25, "Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE,
-                            GG::CLR_ZERO, GG::SBSTYLE_3D_RADIO);
-    radio_button_group->AddButton(state_button8);
-    radio_button_group->AddButton(state_button9);
+    GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10, 200, 25, GG::HORIZONTAL);
+    radio_button_group->AddButton("Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
+    radio_button_group->AddButton("Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
     layout->Add(radio_button_group, 1, 0);
 
     // A text control to display the result of clicking the radio buttons above.

@@ -275,14 +275,10 @@ AttributeRow<bool>::AttributeRow(const std::string& name, bool& value, const boo
     m_radio_button_group(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_radio_button_group = new RadioButtonGroup(0, 0);
-    StateButton* button1 = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH / 2, detail::ATTRIBUTE_ROW_HEIGHT,
-                                           "True", font, TF_LEFT, CLR_GRAY);
-    StateButton* button2 = new StateButton(button1->LowerRight().x, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH / 2, detail::ATTRIBUTE_ROW_HEIGHT,
-                                           "False", font, TF_LEFT, CLR_GRAY);
-    m_radio_button_group->AddButton(button1);
-    m_radio_button_group->AddButton(button2);
-    (value ? button1 : button2)->SetCheck(true);
+    m_radio_button_group = new RadioButtonGroup(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, HORIZONTAL);
+    m_radio_button_group->AddButton("True", font, TF_LEFT, CLR_GRAY);
+    m_radio_button_group->AddButton("False", font, TF_LEFT, CLR_GRAY);
+    m_radio_button_group->SetCheck(!value);
     m_button_group_connection = Connect(m_radio_button_group->ButtonChangedSignal, &AttributeRow::SelectionChanged, this);
     push_back(m_radio_button_group);
 }

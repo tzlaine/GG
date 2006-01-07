@@ -505,7 +505,6 @@ void Layout::Remove(Wnd* wnd)
 {
     std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
     if (it != m_wnd_positions.end()) {
-        DetachChild(wnd);
         const WndPosition& wnd_position = it->second;
         for (int i = wnd_position.first_row; i < wnd_position.last_row; ++i) {
             for (int j = wnd_position.first_column; j < wnd_position.last_column; ++j) {
@@ -514,6 +513,7 @@ void Layout::Remove(Wnd* wnd)
         }
         m_wnd_positions.erase(wnd);
         RedoLayout();
+        DetachChild(wnd);
     }
 }
 

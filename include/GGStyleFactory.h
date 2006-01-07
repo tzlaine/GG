@@ -84,7 +84,7 @@ public:
                                               StateButtonStyle style = SBSTYLE_3D_XBOX, Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG RadioButtonGroup. */
-    virtual RadioButtonGroup*  NewRadioButtonGroup(int x, int y) const;
+    virtual RadioButtonGroup*  NewRadioButtonGroup(int x, int y, int w, int h, Orientation orientation) const;
 
     /** Returns a new GG DropDownList. */
     virtual DropDownList*      NewDropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color,

@@ -28,11 +28,39 @@
 
 #include <GGApp.h>
 #include <GGDrawUtil.h>
+#include <GGLayout.h>
+#include <GGStyleFactory.h>
 #include <GGWndEditor.h>
 
 #include <boost/lexical_cast.hpp>
 
 using namespace GG;
+
+namespace {
+    struct SetOrientationAction : AttributeChangedAction<Orientation>
+    {
+        SetOrientationAction(RadioButtonGroup* radio_button_group) : m_radio_button_group(radio_button_group) {}
+        void operator()(const Orientation& orientation)
+        {
+            Orientation o = orientation;
+            m_radio_button_group->SetOrientation(o == VERTICAL ? HORIZONTAL : VERTICAL);
+            m_radio_button_group->SetOrientation(o);
+        }
+        RadioButtonGroup* const m_radio_button_group;
+    };
+
+    struct SetCheckedButtonAction : AttributeChangedAction<int>
+    {
+        SetCheckedButtonAction(RadioButtonGroup* radio_button_group) : m_radio_button_group(radio_button_group) {}
+        void operator()(const int& button)
+        {
+            int b = button;
+            m_radio_button_group->SetCheck(-1);
+            m_radio_button_group->SetCheck(b);
+        }
+        RadioButtonGroup* const m_radio_button_group;
+    };
+}
 
 ////////////////////////////////////////////////
 // GG::Button
@@ -318,6 +346,12 @@ void StateButton::LClick(const Pt& pt, Uint32 keys)
         SetCheck(!m_checked);
 }
 
+void StateButton::SizeMove(const Pt& ul, const Pt& lr)
+{
+    RepositionButton();
+    TextControl::SizeMove(ul, lr);
+}
+
 void StateButton::Reset()
 {
     SetCheck(false);
@@ -328,54 +362,68 @@ void StateButton::SetCheck(bool b/* = true*/)
     CheckedSignal(m_checked = b);
 }
 
-void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
+void StateButton::RepositionButton()
 {
     int w = Width();
     int h = Height();
+    const int BN_W = m_button_lr.x - m_button_ul.x;
+    const int BN_H = m_button_lr.y - m_button_ul.y;
+    int bn_x = m_button_ul.x;
+    int bn_y = m_button_ul.y;
+    Uint32 format = TextFormat();
+    const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
+    if (format & TF_VCENTER)       // center button vertically
+        bn_y = static_cast<int>((h - BN_H) / 2.0 + 0.5);
+    if (format & TF_TOP) {         // put button at top, text just below
+        bn_y = 0;
+        m_text_ul.y = BN_H;
+    }
+    if (format & TF_BOTTOM) {      // put button at bottom, text just above
+        bn_y = (h - BN_H);
+        m_text_ul.y = static_cast<int>(h - (BN_H * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
+    }
+
+    if (format & TF_CENTER) {      // center button horizontally
+        if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
+            format |= TF_LEFT;     // so go to the default (TF_CENTER|TF_LEFT)
+            format &= ~TF_CENTER;
+        } else {
+            bn_x = static_cast<int>((w - bn_x) / 2.0 - BN_W / 2.0 + 0.5);
+        }
+    }
+    if (format & TF_LEFT) {        // put button at left, text just to the right
+        bn_x = 0;
+        if (format & TF_VCENTER)
+            m_text_ul.x = static_cast<int>(BN_W * (1 + SPACING) + 0.5);
+    }
+    if (format & TF_RIGHT) {       // put button at right, text just to the left
+        bn_x = (w - BN_W);
+        if (format & TF_VCENTER)
+            m_text_ul.x = static_cast<int>(-BN_W * (1 + SPACING) + 0.5);
+    }
+    SetTextFormat(format);
+    m_button_ul = Pt(bn_x, bn_y);
+    m_button_lr = m_button_ul + Pt(BN_W, BN_H);
+}
+
+void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
+{
     int bn_x = ul.x;
     int bn_y = ul.y;
     int bn_w = lr.x - ul.x;
     int bn_h = lr.y - ul.y;
 
-    if (bn_w <= 0 || bn_h <= 0)            // if one of these is invalid
+    if (bn_w <= 0 || bn_h <= 0)               // if one of these is invalid,
         bn_w = bn_h = GetFont()->PointSize(); // set button width and height to text height
 
-    double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
     if (bn_x == -1 || bn_y == -1) {
-        Uint32 format = TextFormat();
-        if (format & TF_VCENTER)       // center button vertically
-            bn_y = static_cast<int>((h - bn_h) / 2.0 + 0.5);
-        if (format & TF_TOP) {         // put button at top, text just below
-            bn_y = 0;
-            m_text_ul.y = bn_h;
-        }
-        if (format & TF_BOTTOM) {      // put button at bottom, text just above
-            bn_y = (h - bn_h);
-            m_text_ul.y = static_cast<int>(h - (bn_h * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
-        }
-
-        if (format & TF_CENTER) {      // center button horizontally
-            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                format |= TF_LEFT;      // so go to the default (TF_CENTER|TF_LEFT)
-                format &= ~TF_CENTER;
-            } else {
-                bn_x = static_cast<int>((w - bn_x) / 2.0 - bn_w / 2.0 + 0.5);
-            }
-        }
-        if (format & TF_LEFT) {        // put button at left, text just to the right
-            bn_x = 0;
-            if (format & TF_VCENTER)
-                m_text_ul.x = static_cast<int>(bn_w * (1 + SPACING) + 0.5);
-        }
-        if (format & TF_RIGHT) {       // put button at right, text just to the left
-            bn_x = (w - bn_w);
-            if (format & TF_VCENTER)
-                m_text_ul.x = static_cast<int>(-bn_w * (1 + SPACING) + 0.5);
-        }
-        SetTextFormat(format);
+        m_button_ul = Pt(0, 0);
+        m_button_lr = Pt(bn_w, bn_h);
+        RepositionButton();
+    } else {
+        m_button_ul = Pt(bn_x, bn_y);
+        m_button_lr = m_button_ul + Pt(bn_w, bn_h);
     }
-    m_button_ul = Pt(bn_x, bn_y);
-    m_button_lr = m_button_ul + Pt(bn_w, bn_h);
 }
 
 void StateButton::SetDefaultButtonPosition()
@@ -452,12 +500,18 @@ RadioButtonGroup::RadioButtonGroup() :
     SetColor(CLR_YELLOW);
 }
 
-RadioButtonGroup::RadioButtonGroup(int x, int y) :
-    Control(x, y, 10, 10),
+RadioButtonGroup::RadioButtonGroup(int x, int y, int w, int h, Orientation orientation) :
+    Control(x, y, w, h),
+    m_orientation(orientation),
     m_checked_button(-1),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
+}
+
+Orientation RadioButtonGroup::GetOrientation() const
+{
+    return m_orientation;
 }
 
 int RadioButtonGroup::NumButtons() const
@@ -481,6 +535,21 @@ void RadioButtonGroup::Render()
         Pt ul = UpperLeft(), lr = LowerRight();
         Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
         FlatRectangle(ul.x, ul.y, lr.x, lr.y, CLR_ZERO, color_to_use, 1);
+    }
+}
+
+void RadioButtonGroup::SetOrientation(Orientation orientation)
+{
+    if (orientation != m_orientation) {
+        m_orientation = orientation;
+        if (GetLayout()) {
+            RemoveLayout();
+            Layout* layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
+            for (unsigned int i = 0; i < m_buttons.size(); ++i) {
+                layout->Add(m_buttons[i], m_orientation == VERTICAL ? i : 0, m_orientation == VERTICAL ? 0 : i);
+            }
+            SetLayout(layout);
+        }
     }
 }
 
@@ -510,14 +579,38 @@ void RadioButtonGroup::AddButton(StateButton* bn)
 {
     m_buttons.push_back(bn);
     m_connections.push_back(Connect(m_buttons.back()->CheckedSignal, ButtonClickedFunctor(this, m_buttons.size() - 1)));
-    if (bn->LowerRight() >= Size()) // stretch group to encompass all its children
-        Resize(bn->LowerRight());
-    AttachChild(bn);
+    if (Layout* layout = GetLayout()) {
+        layout->Add(bn, m_orientation == VERTICAL ? m_buttons.size() - 1 : 0, m_orientation == VERTICAL ? 0 : m_buttons.size() - 1);
+    } else {
+        layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
+        layout->Add(bn, 0, 0);
+        SetLayout(layout);
+    }
+}
+
+void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+                                 Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
+                                 StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
+{
+    boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
+    AddButton(style_factory->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style));
 }
 
 void RadioButtonGroup::RenderOutline(bool render_outline)
 {
     m_render_outline = render_outline;
+}
+
+void RadioButtonGroup::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    Control::DefineAttributes(editor);
+    editor->Label("RadioButtonGroup");
+    boost::shared_ptr<SetOrientationAction> set_orientation_action(new SetOrientationAction(this));
+    editor->Attribute<Orientation>("Orientation", m_orientation, VERTICAL, HORIZONTAL, set_orientation_action);
+    boost::shared_ptr<SetCheckedButtonAction> set_checked_button_action(new SetCheckedButtonAction(this));
+    editor->Attribute<int>("Checked Button", m_checked_button, set_checked_button_action);
 }
 
 const std::vector<StateButton*>& RadioButtonGroup::Buttons() const

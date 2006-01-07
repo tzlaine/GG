@@ -64,9 +64,9 @@ StateButton* StyleFactory::NewStateButton(int x, int y, int w, int h, const std:
     return new StateButton(x, y, w, h, str, font, text_fmt, color, text_color, interior, style, flags);
 }
 
-RadioButtonGroup* StyleFactory::NewRadioButtonGroup(int x, int y) const
+RadioButtonGroup* StyleFactory::NewRadioButtonGroup(int x, int y, int w, int h, Orientation orientation) const
 {
-    return new RadioButtonGroup(x, y);
+    return new RadioButtonGroup(x, y, w, h, orientation);
 }
 
 DropDownList* StyleFactory::NewDropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color,

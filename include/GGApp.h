@@ -307,7 +307,7 @@ void App::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive
     Wnd* wnd_as_base = wnd;
     LoadWnd(wnd_as_base, name, ar);
     wnd = dynamic_cast<T*>(wnd_as_base);
-    assert(wnd);
+    assert(wnd || !wnd_as_base);
 }
 
 } // namespace GG

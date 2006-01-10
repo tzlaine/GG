@@ -444,6 +444,11 @@ bool Wnd::InClient(const Pt& pt) const
     return pt >= ClientUpperLeft() && pt < ClientLowerRight();
 }
 
+const std::list<Wnd*>& Wnd::Children() const
+{
+    return m_children;
+}
+
 Wnd* Wnd::Parent() const
 {
     return m_parent;
@@ -1082,11 +1087,6 @@ const boost::shared_ptr<BrowseInfoWnd>& Wnd::DefaultBrowseInfoWnd()
 void Wnd::SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd)
 {
     s_default_browse_info_wnd = browse_info_wnd;
-}
-
-const std::list<Wnd*>& Wnd::Children() const
-{
-    return m_children;
 }
 
 bool Wnd::EventFilter(Wnd* w, const Event& event)

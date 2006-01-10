@@ -61,9 +61,7 @@ if platform_str == 'win32':
                'C:/freetype-2.1.7/objs',
                'C:/zlib/lib',
                'C:/SDL-1.2.7/lib',
-               gg_dir + 'msvc/GG/GiGi/Release',
-               gg_dir + 'msvc/GG/GiGiNet/Release',
-               gg_dir + 'msvc/GG/GiGiSDL/Release']
+               gg_dir]
     ccflags = '/D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "BOOST_SIGNALS_STATIC_LINK" /D "_MBCS" /FD /EHsc /MD /GS /Zc:forScope /GR /W3 /nologo /c /Wp64 /Zi /wd4099 /wd4251 /wd4800 /wd4267 /wd4275 /wd4244 /wd4101 /wd4258'
     env = Environment(CCFLAGS = '',
                       CPPPATH = cpppath,

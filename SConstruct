@@ -426,7 +426,7 @@ if str(Platform()) == 'win32':
         ]
     env.Append(CCFLAGS = flags)
     env.Append(CPPDEFINES = [
-        '_DEBUG',
+        (env['debug'] and '_DEBUG' or 'NDEBUG'),
         'WIN32',
         '_WINDOWS'
         ])
@@ -437,7 +437,7 @@ if str(Platform()) == 'win32':
         '_WINDLL'
         ])
     env.Append(LINKFLAGS = [
-        '/NODEFAULTLIB:LIBCMT.lib',
+        '/NODEFAULTLIB:LIBCMT',
         '/DEBUG'
         ])
     env.Append(LIBS = [

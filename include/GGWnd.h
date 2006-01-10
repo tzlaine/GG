@@ -226,6 +226,8 @@ public:
     /** returns true if screen-coordinate point \a pt falls within the window's client area */
     virtual bool   InClient(const Pt& pt) const;
 
+    const std::list<Wnd*>&
+                   Children() const;                    ///< returns child list; the list is const, but the children may be manipulated
     Wnd*           Parent() const;                      ///< returns the window's parent (may be null)
     Wnd*           RootParent() const;                  ///< returns the earliest ancestor window (may be null)
 
@@ -529,10 +531,6 @@ protected:
 
     /** ctor that allows a size and position to be specified, as well as creation flags */
     Wnd(int x, int y, int w, int h, Uint32 flags = CLICKABLE | DRAGABLE);
-    //@}
-
-    /** \name Accessors */ //@{
-    const std::list<Wnd*>& Children() const; ///< returns child list; the list is const, but the children may be manipulated
     //@}
 
     /** \name Mutators */ //@{

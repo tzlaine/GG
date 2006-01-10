@@ -203,7 +203,7 @@ protected:
     //@}
 
 private:
-    struct RowColParams
+    struct GG_API RowColParams
     {
         RowColParams();
 
@@ -219,7 +219,7 @@ private:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    struct WndPosition
+    struct GG_API WndPosition
     {
         WndPosition();
         WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_ul_, const Pt& original_size_);

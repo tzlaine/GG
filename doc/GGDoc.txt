@@ -85,14 +85,14 @@
     For those of you who use the Microsoft compiler, SCons will also work from the command line.  You need to install
     SCons and Python, and make sure that python is in your path.  There is also a standalone version of SCons available
     somewhere on the SCons site.  Then you just open up a command prompt window, cd to the root of the GG directory
-    tree, and type scons.  I have only been able to get GG to compile on MSVC++ 7.1, the version that comes with .NET
-    2003.
+    tree, and type scons.  I have only been able to get the current version of GG to compile on MSVC++ 8.0, the version
+    that comes with .NET 2005.
     <p>There is experimental support for generated MSVC project files.  To enable this, you can uncomment the large
-    block of commented-out lines at the end of SConstruct (all the ones starting with "##").  After this, assuming you
-    are using a recent-enough version of SCons, scons --help should give you all the instructions you need ot generate
-    MSVC project files.  Note that you can get precompiled MSVC 7.1-compatible DLLs for many of the required libraries.
-    DevIL's 1.6.5 pre-compiled library can be substituted for the latest one, if there is no pre-compiled version
-    available.
+    block of commented-out lines at the end of SConstruct and near the top of build_support.py (all the lines starting
+    with "##").  After this, assuming you are using a recent-enough version of SCons, scons --help should give you all
+    the instructions you need ot generate MSVC project files.  Note that you can get precompiled MSVC-compatible DLLs
+    for many of the required libraries.  DevIL's 1.6.5 pre-compiled library can be substituted for the latest one, if
+    there is no pre-compiled version available.
     <p>In order to build the boost libraries, do the following, with the boost zipfile unzipped into your root
     directory:
     - Unzip the boost zipfile into your root directory.

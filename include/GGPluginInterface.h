@@ -155,11 +155,11 @@ private:
 
     static bool s_lt_dl_initialized;
 
-    friend PluginManager& GetPluginManager();
+    friend GG_API PluginManager& GetPluginManager();
 };
 
 /** Returns the singleton PluginManager instance. */
-PluginManager& GetPluginManager();
+GG_API PluginManager& GetPluginManager();
 
 // template implementations
 template <class T>

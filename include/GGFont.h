@@ -97,7 +97,7 @@ class GG_API Font
 {
 public:
     /** Used to encapsulate a token-like piece of text to be rendered using GG::Font. */
-    struct TextElement
+    struct GG_API TextElement
     {
         /** The types of token-like entities that can be represented by a TextElement. */
         enum TextElementType {
@@ -130,7 +130,7 @@ public:
     };
 
     /** The type of TextElement that represents a text formatting tag. */
-    struct FormattingTag : TextElement
+    struct GG_API FormattingTag : TextElement
     {
         FormattingTag(bool close); ///< Ctor.  \a close indicates that the tag is a close-tag (e.g. "</rgba>").
 
@@ -157,7 +157,7 @@ public:
 
         /** Contains the extent in pixels, the index into the original string, and the text formatting tags that should
             be applied before rendering of a visible character. */
-        struct CharData
+        struct GG_API CharData
         {
             CharData(); ///< Defauilt ctor.
             CharData(int extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_); ///< Ctor.

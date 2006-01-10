@@ -626,7 +626,7 @@ const std::vector<boost::signals::connection>& RadioButtonGroup::Connections() c
 void RadioButtonGroup::ConnectSignals()
 {
     for (unsigned int i = 0; i < m_buttons.size(); ++i)
-        m_connections.push_back(Connect(m_buttons[i]->CheckedSignal, ButtonClickedFunctor(this, m_buttons.size() - 1)));
+        m_connections.push_back(Connect(m_buttons[i]->CheckedSignal, ButtonClickedFunctor(this, i)));
     SetCheck(m_checked_button);
 }
 
@@ -636,15 +636,15 @@ void RadioButtonGroup::HandleRadioClick(bool checked, int index)
     if (checked) {
         for (unsigned int i = 0; i < m_connections.size(); ++i) {
             if (m_buttons[i]->Checked() != (static_cast<int>(i) == index)) {
-                m_connections[i].disconnect();
+                m_connections[i].block();
                 m_buttons[i]->SetCheck(static_cast<int>(i) == index);
-                m_connections[i] = m_buttons[i]->CheckedSignal.connect(ButtonClickedFunctor(this, i), boost::signals::at_front);
+                m_connections[i].unblock();
             }
         }
         ButtonChangedSignal(m_checked_button);
     } else {
-        m_connections[index].disconnect();
+        m_connections[index].block();
         m_buttons[index]->SetCheck(true);
-        m_connections[index] = m_buttons[index]->CheckedSignal.connect(ButtonClickedFunctor(this, index), boost::signals::at_front);
+        m_connections[index].unblock();
     }
 }

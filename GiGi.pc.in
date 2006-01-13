@@ -7,4 +7,4 @@ Name: GiGi
 Description: An OpenGL GUI library.
 Version: ${version}
 Libs: -lIL -lILU -lILUT -L${libdir} -lGiGi %(gigi_libs)s
-Cflags: -I${includedir} -I${includedir}/dialogs
+Cflags: %(boost_include)s -I${includedir} -I${includedir}/dialogs

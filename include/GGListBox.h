@@ -334,7 +334,7 @@ protected:
     virtual bool    EventFilter(Wnd* w, const Event& event);
 
     int             Insert(Row* row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
-    ListBox::Row*   Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a dupliate removal (such as for drag-drops within a single ListBox) if indicated
+    Row*            Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a dupliate removal (such as for drag-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
     //@}

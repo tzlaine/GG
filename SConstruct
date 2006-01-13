@@ -562,7 +562,7 @@ else:
                           lib_dir + '/' + installed_gigi_libname,
                           'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
 if not missing_pkg_config:
-    Alias('install', Install(env['pkgconfigdir'], gigi_pc))
+    Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_pc))
 if not env['disable_sdl']:
     if str(Platform()) == 'win32':
         Alias('install', Install(lib_dir, lib_gigi_sdl))
@@ -574,7 +574,7 @@ if not env['disable_sdl']:
                               lib_dir + '/' + installed_gigi_sdl_libname,
                               'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
     if not missing_pkg_config:
-        Alias('install', Install(env['pkgconfigdir'], gigi_sdl_pc))
+        Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_sdl_pc))
 if not env['disable_net']:
     if str(Platform()) == 'win32':
         Alias('install', Install(lib_dir, lib_gigi_net))
@@ -586,7 +586,7 @@ if not env['disable_net']:
                               lib_dir + '/' + installed_gigi_net_libname,
                               'ln -s ' + lib_dir + '/' + installed_gigi_net_libname + ' ' + lib_dir + '/' + gigi_net_libname))
     if not missing_pkg_config:
-        Alias('install', Install(env['pkgconfigdir'], gigi_net_pc))
+        Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_net_pc))
 
 # uninstall target
 # This is a dirty hack, used here because I don't know how else to do this.  Basically, I've created a Command that
@@ -600,19 +600,19 @@ deletions = [
 if str(Platform()) == 'posix' and env['dynamic']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_libname))))
 if not missing_pkg_config:
-    deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_pc[0])))))
+    deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_pc[0])))))
 if not env['disable_sdl']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_sdl[0])))))
     if str(Platform()) == 'posix' and env['dynamic']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
     if not missing_pkg_config:
-        deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_sdl_pc[0])))))
+        deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_sdl_pc[0])))))
 if not env['disable_net']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_net[0])))))
     if str(Platform()) == 'posix' and env['dynamic']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_net_libname))))
     if not missing_pkg_config:
-        deletions.append(Delete(os.path.normpath(os.path.join(env['pkgconfigdir'], str(gigi_net_pc[0])))))
+        deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_net_pc[0])))))
 uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)
 Alias('uninstall', uninstall_cmd)
 

@@ -444,6 +444,10 @@ else:
 
 Export('env')
 
+# copy ltdl.h and config.h into the header tree before compiling
+Execute(Copy(os.path.normpath('GG/ltdl.h'), os.path.normpath('libltdl/ltdl.h')))
+Execute(Copy(os.path.normpath('GG/config.h'), os.path.normpath('libltdl/config.h')))
+
 # define libGiGi objects
 if str(Platform()) != 'win32':
     env['libltdl_defines'] = [
@@ -535,8 +539,6 @@ for root, dirs, files in os.walk('GG'):
     for f in files:
         Alias('install', Install(os.path.normpath(os.path.join(env.subst(env['incdir']), root)),
                                  os.path.normpath(os.path.join(root, f))))
-Alias('install', Install(header_dir, os.path.normpath('libltdl/ltdl.h')))
-Alias('install', Install(header_dir, os.path.normpath('libltdl/config.h')))
 
 if str(Platform()) == 'win32':
     Alias('install', Install(lib_dir, lib_gigi))

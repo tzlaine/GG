@@ -40,7 +40,7 @@
 #endif
 
 #ifndef LTDL_H
-#include <ltdl.h>
+#include <GG/ltdl.h>
 #endif
 
 #include <string>

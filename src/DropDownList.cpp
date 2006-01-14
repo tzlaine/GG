@@ -24,13 +24,13 @@
 
 /* $Header$ */
 
-#include "GGDropDownList.h"
+#include <GG/DropDownList.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGScroll.h>
-#include <GGStyleFactory.h>
-#include <GGWndEditor.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/Scroll.h>
+#include <GG/StyleFactory.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 
@@ -41,7 +41,7 @@ namespace {
     {
     public:
         ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-            Wnd(0, 0, App::GetApp()->AppWidth(), App::GetApp()->AppHeight(), CLICKABLE | MODAL),
+            Wnd(0, 0, GUI::GetGUI()->AppWidth(), GUI::GetGUI()->AppHeight(), CLICKABLE | MODAL),
             m_drop_wnd(drop_wnd),
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
@@ -207,7 +207,7 @@ void DropDownList::Render()
         if (!visible)
             current_item->Show();
         BeginClipping();
-        App::GetApp()->RenderWindow(current_item);
+        GUI::GetGUI()->RenderWindow(current_item);
         EndClipping();
         current_item->OffsetMove(-offset);
         if (!visible)

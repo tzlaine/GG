@@ -25,16 +25,16 @@
 
 /* $Header$ */
 
-/** \file GGFont.h
+/** \file Font.h
     Contains the Font class, a class that encapsulates the rendering of a single FreeType-compatible fonts in 
     italics, with underlining, left-, right-, or center- justified, etc., and the FontManager class which provides 
     application-wide management of Font objects. */
 
-#ifndef _GGFont_h_
-#define _GGFont_h_
+#ifndef _GG_Font_h_
+#define _GG_Font_h_
 
-#ifndef _GGTexture_h_
-#include "GGTexture.h"
+#ifndef _GG_Texture_h_
+#include <GG/Texture.h>
 #endif
 
 #include <set>
@@ -431,4 +431,4 @@ void GG::Font::serialize(Archive& ar, const unsigned int version)
     }
 }
 
-#endif // _GGFont_h_
+#endif // _GG_Font_h_

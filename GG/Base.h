@@ -25,11 +25,11 @@
 
 /* $Header$ */
 
-/** \file GGBase.h
+/** \file Base.h
     Contains enums, utility classes, and free functions used throughout GG. */
 
-#ifndef _GGBase_h_
-#define _GGBase_h_
+#ifndef _GG_Base_h_
+#define _GG_Base_h_
 
 typedef unsigned char Uint8;    ///< unsigned char from SDL.h; provided here in case GG is not being driven by SDL
 typedef signed char Sint8;      ///< signed char from SDL.h; provided here in case GG is not being driven by SDL
@@ -66,24 +66,24 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #endif
 
 // other project headers
-#ifndef _XMLDoc_h_
-#include "XMLDoc.h"
+#ifndef _GG_XMLDoc_h_
+#include <GG/XMLDoc.h>
 #endif
 
-#ifndef _XMLObjectFactory_h_
-#include "XMLObjectFactory.h"
+#ifndef _GG_XMLObjectFactory_h_
+#include <GG/XMLObjectFactory.h>
 #endif
 
-#ifndef _GGSignalsAndSlots_h_
-#include "GGSignalsAndSlots.h"
+#ifndef _GG_SignalsAndSlots_h_
+#include <GG/SignalsAndSlots.h>
 #endif
 
-#ifndef _GGPtRect_h_
-#include "GGPtRect.h"
+#ifndef _GG_PtRect_h_
+#include <GG/PtRect.h>
 #endif
 
-#ifndef _GGClr_h_
-#include "GGClr.h"
+#ifndef _GG_Clr_h_
+#include <GG/Clr.h>
 #endif
 
 /** \namespace GG
@@ -952,5 +952,5 @@ GG_ENUM_STREAM_OUT(Mod)
 
 } // namespace GG
 
-#endif // _GGBase_h_
+#endif // _GG_Base_h_
 

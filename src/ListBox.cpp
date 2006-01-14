@@ -24,16 +24,16 @@
 
 /* $Header$ */
 
-#include "GGListBox.h"
+#include <GG/ListBox.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGLayout.h>
-#include <GGScroll.h>
-#include <GGStaticGraphic.h>
-#include <GGStyleFactory.h>
-#include <GGTextControl.h>
-#include <GGWndEditor.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/Layout.h>
+#include <GG/Scroll.h>
+#include <GG/StaticGraphic.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
+#include <GG/WndEditor.h>
 
 #include <cmath>
 #include <numeric>
@@ -173,7 +173,7 @@ void ListBox::Row::push_back(const std::string& str, const boost::shared_ptr<Fon
 
 void ListBox::Row::push_back(const std::string& str, const std::string& font_filename, int pts, Clr color/* = CLR_BLACK*/)
 {
-    push_back(CreateControl(str, App::GetApp()->GetFont(font_filename, pts), color));
+    push_back(CreateControl(str, GUI::GetGUI()->GetFont(font_filename, pts), color));
 }
 
 void ListBox::Row::push_back(const SubTexture& st)
@@ -489,7 +489,7 @@ void ListBox::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
     for (std::set<int>::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
         Wnd* row_wnd = static_cast<Wnd*>(m_rows[*it]);
         if (row_wnd != wnd) {
-            App::GetApp()->RegisterDragDropWnd(row_wnd, Pt(offset.x, vertical_offset), this);
+            GUI::GetGUI()->RegisterDragDropWnd(row_wnd, Pt(offset.x, vertical_offset), this);
             vertical_offset -= row_wnd->Height();
         } else {
             vertical_offset -= wnd->Height();
@@ -565,7 +565,7 @@ void ListBox::Render()
 
     // draw caret
     if (m_caret >= m_first_row_shown && m_caret <= last_visible_row &&
-        MatchesOrContains(this, App::GetApp()->FocusWnd())) {
+        MatchesOrContains(this, GUI::GetGUI()->FocusWnd())) {
         Pt row_ul = m_rows[m_caret]->UpperLeft();
         Pt row_lr = m_rows[m_caret]->LowerRight();
         FlatRectangle(row_ul.x, row_ul.y, row_lr.x, row_lr.y, CLR_ZERO, CLR_SHADOW, 2);
@@ -577,13 +577,13 @@ void ListBox::Render()
     if (!m_header_row->empty()) {
         Rect header_area(Pt(ul.x + BORDER_THICK, m_header_row->UpperLeft().y), Pt(lr.x - BORDER_THICK, m_header_row->LowerRight().y));
         BeginScissorClipping(header_area.ul, header_area.lr);
-        App::GetApp()->RenderWindow(m_header_row);
+        GUI::GetGUI()->RenderWindow(m_header_row);
         EndScissorClipping();
     }
     if (m_vscroll)
-        App::GetApp()->RenderWindow(m_vscroll);
+        GUI::GetGUI()->RenderWindow(m_vscroll);
     if (m_hscroll)
-        App::GetApp()->RenderWindow(m_hscroll);
+        GUI::GetGUI()->RenderWindow(m_hscroll);
 
     // ensure that data in occluded cells is not rendered
     for (int i = 0; i < NumRows(); ++i) {
@@ -1138,7 +1138,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
         }
 
         case Event::GainingFocus: {
-            App::GetApp()->SetFocusWnd(this);
+            GUI::GetGUI()->SetFocusWnd(this);
             break;
         }
 

@@ -24,11 +24,10 @@
 
 /* $Header$ */
 
-#include "GGTextControl.h"
+#include <GG/TextControl.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGWndEditor.h>
+#include <GG/DrawUtil.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 

@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGZList.h
-    Contains the ZList class, which maintains the Z-/depth-position of Wnds for App. */
+/** \file ZList.h
+    Contains the ZList class, which maintains the Z-/depth-position of Wnds for GUI. */
 
-#ifndef _GGZList_h_
-#define _GGZList_h_
+#ifndef _GG_ZList_h_
+#define _GG_ZList_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
 #include <list>
@@ -75,4 +75,4 @@ private:
 
 } // namespace GG
 
-#endif // _GGZList_h_
+#endif // _GG_ZList_h_

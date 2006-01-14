@@ -2,23 +2,23 @@
 
 #include "saveload.h"
 
-#include "GGButton.h"
-#include "GGDropDownList.h"
-#include "GGDynamicGraphic.h"
-#include "GGEdit.h"
-#include "GGListBox.h"
-#include "GGLayout.h"
-#include "GGMenu.h"
-#include "GGMultiEdit.h"
-#include "GGScroll.h"
-#include "GGSlider.h"
-#include "GGSpin.h"
-#include "GGStaticGraphic.h"
-#include "GGTextControl.h"
-#include "GGFileDlg.h"
-#include "GGColorDlg.h"
-#include "GGThreeButtonDlg.h"
-#include "SDLGGApp.h"
+#include <GG/Button.h>
+#include <GG/DropDownList.h>
+#include <GG/DynamicGraphic.h>
+#include <GG/Edit.h>
+#include <GG/ListBox.h>
+#include <GG/Layout.h>
+#include <GG/Menu.h>
+#include <GG/MultiEdit.h>
+#include <GG/Scroll.h>
+#include <GG/Slider.h>
+#include <GG/Spin.h>
+#include <GG/StaticGraphic.h>
+#include <GG/TextControl.h>
+#include <GG/dialogs/FileDlg.h>
+#include <GG/dialogs/ColorDlg.h>
+#include <GG/dialogs/ThreeButtonDlg.h>
+#include <GG/SDL/SDLGUI.h>
 
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
@@ -36,24 +36,24 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Ignore all code until the end of ControlsTestGGApp::Initialize(); the
+// Ignore all code until the end of ControlsTestApp::Initialize(); the
 // enclosed code is straight from Tutorial 2.
 ////////////////////////////////////////////////////////////////////////////////
 void QuitButtonClicked()
 {
-    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::App::GetApp()->GetFont("Vera.ttf", 12),
+    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("Vera.ttf", 12),
                                 GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
     quit_dlg.Run();
 
     if (quit_dlg.Result() == 0)
-        GG::App::GetApp()->Exit(0);
+        GG::GUI::GetGUI()->Exit(0);
 }
 
 struct BrowseFilesFunctor
 {
     void operator()()
     {
-        GG::FileDlg file_dlg("", "", false, false, GG::App::GetApp()->GetFont("Vera.ttf", 12),
+        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12),
                              GG::CLR_GRAY, GG::CLR_GRAY);
         file_dlg.Run();
     }
@@ -87,14 +87,14 @@ CustomTextRow::CustomTextRow() :
 CustomTextRow::CustomTextRow(const std::string& text) :
     Row()
 {
-    push_back(GG::ListBox::Row::CreateControl(text, GG::App::GetApp()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
+    push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
 }
 
 
-class ControlsTestGGApp : public SDLGGApp
+class ControlsTestApp : public SDLGUI
 {
 public:
-    ControlsTestGGApp();
+    ControlsTestApp();
 
     virtual void Enter2DMode();
     virtual void Exit2DMode();
@@ -108,14 +108,14 @@ private:
     virtual void FinalCleanup();
 };
 
-ControlsTestGGApp::ControlsTestGGApp() : 
-    SDLGGApp(1024, 768, false, "Control-Test GG App")
+ControlsTestApp::ControlsTestApp() : 
+    SDLGUI(1024, 768, false, "Control-Test GG App")
 {
     SetSaveWndFunction(&::SaveWnd);
     SetLoadWndFunction(&::LoadWnd);
 }
 
-void ControlsTestGGApp::Enter2DMode()
+void ControlsTestApp::Enter2DMode()
 {
     glPushAttrib(GL_ENABLE_BIT | GL_PIXEL_MODE_BIT | GL_TEXTURE_BIT);
     glDisable(GL_DEPTH_TEST);
@@ -139,7 +139,7 @@ void ControlsTestGGApp::Enter2DMode()
     glLoadIdentity();
 }
 
-void ControlsTestGGApp::Exit2DMode()
+void ControlsTestApp::Exit2DMode()
 {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
@@ -150,7 +150,7 @@ void ControlsTestGGApp::Exit2DMode()
     glPopAttrib();
 }
 
-void ControlsTestGGApp::Render()
+void ControlsTestApp::Render()
 {
     const double RPM = 4;
     const double DEGREES_PER_MS = 360.0 * RPM / 60000.0;
@@ -197,10 +197,10 @@ void ControlsTestGGApp::Render()
 
     glEnd();
 
-    GG::App::Render();
+    GG::GUI::Render();
 }
 
-void ControlsTestGGApp::GLInit()
+void ControlsTestApp::GLInit()
 {
     double ratio = AppWidth() / (float)(AppHeight());
 
@@ -218,7 +218,7 @@ void ControlsTestGGApp::GLInit()
     glMatrixMode(GL_MODELVIEW);
 }
 
-void ControlsTestGGApp::Initialize()
+void ControlsTestApp::Initialize()
 {
     SDL_WM_SetCaption("Control-Test GG App", "Control-Test GG App");
 
@@ -398,14 +398,14 @@ void ControlsTestGGApp::Initialize()
     Register(layout);
 }
 
-void ControlsTestGGApp::FinalCleanup()
+void ControlsTestApp::FinalCleanup()
 {
 }
 
 extern "C"
 int main(int argc, char* argv[])
 {
-    ControlsTestGGApp app;
+    ControlsTestApp app;
 
     try {
         app();

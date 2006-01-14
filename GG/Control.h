@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGControl.h
+/** \file Control.h
     Contains the Control class, the base class for all GG controls. */
 
-#ifndef _GGControl_h_
-#define _GGControl_h_
+#ifndef _GG_Control_h_
+#define _GG_Control_h_
 
-#ifndef _GGWnd_h_
-#include "GGWnd.h"
+#ifndef _GG_Wnd_h_
+#include <GG/Wnd.h>
 #endif
 
 #include <boost/serialization/is_abstract.hpp>
@@ -92,4 +92,4 @@ void GG::Control::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_disabled);
 }
 
-#endif // _GGControl_h_
+#endif // _GG_Control_h_

@@ -27,14 +27,14 @@
 
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 
-/** \file GGDynamicGraphic.h
+/** \file DynamicGraphic.h
     Contains the DynamicGraphic class, a control that allows display of a slideshow or animated sequence of images. */
 
-#ifndef _GGDynamicGraphic_h_
-#define _GGDynamicGraphic_h_
+#ifndef _GG_DynamicGraphic_h_
+#define _GG_DynamicGraphic_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
 namespace GG {
@@ -268,4 +268,4 @@ void GG::DynamicGraphic::serialize(Archive& ar, const unsigned int version)
         ValidateStyle();
 }
 
-#endif // _GGDynamicGraphic_h_
+#endif // _GG_DynamicGraphic_h_

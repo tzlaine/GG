@@ -25,18 +25,18 @@
 
 /* $Header$ */
 
-/** \file GGFileDlg.h
+/** \file FileDlg.h
     Contains the standard GG file dialog. */
 
-#ifndef _GGFileDlg_h_
-#define _GGFileDlg_h_
+#ifndef _GG_FileDlg_h_
+#define _GG_FileDlg_h_
 
-#ifndef _GGWnd_h_
-#include "../GGWnd.h"
+#ifndef _GG_Wnd_h_
+#include <GG/Wnd.h>
 #endif
 
-#ifndef _GGListBox_h_
-#include "../GGListBox.h"
+#ifndef _GG_ListBox_h_
+#include <GG/ListBox.h>
 #endif
 
 #include <boost/filesystem/path.hpp>
@@ -235,4 +235,4 @@ void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
         ConnectSignals();
 }
 
-#endif // _GGFileDlg_h_
+#endif // _GG_FileDlg_h_

@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGLayout.h
+/** \file Layout.h
     Contains the Layout class, which is used to size and align GG windows. */
 
-#ifndef _GGLayout_h_
-#define _GGLayout_h_
+#ifndef _GG_Layout_h_
+#define _GG_Layout_h_
 
-#ifndef _GGWnd_h_
-#include "GGWnd.h"
+#ifndef _GG_Wnd_h_
+#include <GG/Wnd.h>
 #endif
 
 namespace GG {
@@ -304,4 +304,4 @@ void GG::Layout::serialize(Archive& ar, const unsigned int version)
 	& BOOST_SERIALIZATION_NVP(m_outline_color);
 }
 
-#endif // _GGLayout_h_
+#endif // _GG_Layout_h_

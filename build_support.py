@@ -362,23 +362,3 @@ def CheckConfigSuccess(context, complete):
     context.Message('Configuration successful... ')
     context.Result(complete and 'yes' or 'no')
     return complete
-
-def TraverseHeaderTree(dir, header_root, headers, current_path, op, nodes):
-    if headers[0]:
-        current_path.append(headers[0])
-    sub_path = ""
-    for i in current_path:
-        sub_path = os.path.normpath(os.path.join(sub_path, i))
-    for i in range(1, len(headers)):
-        if type(headers[i]) == types.ListType:
-            TraverseHeaderTree(dir, header_root, headers[i], current_path, op, nodes)
-        else:
-            nodes.append(op(os.path.normpath(os.path.join(dir, sub_path)),
-                            os.path.normpath(os.path.join(header_root, sub_path, headers[i]))))
-    if headers[0]:
-        current_path.pop()
-
-def InstallHeaderTree(dir, header_root, headers, current_path, op):
-    install_nodes = []
-    TraverseHeaderTree(dir, header_root, headers, current_path, op, install_nodes)
-    return install_nodes

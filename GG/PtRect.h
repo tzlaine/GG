@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGPtRect.h
+/** \file PtRect.h
     Contains the utility classes Pt and Rect. */
 
-#ifndef _GGPtRect_h_
-#define _GGPtRect_h_
+#ifndef _GG_PtRect_h_
+#define _GG_PtRect_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
 #include <boost/serialization/access.hpp>
@@ -147,5 +147,5 @@ void GG::Rect::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(lr);
 }
 
-#endif // _GGPtRect_h_
+#endif // _GG_PtRect_h_
 

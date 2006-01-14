@@ -24,10 +24,10 @@
 
 /* $Header$ */
 
-#include "GGStaticGraphic.h"
+#include <GG/StaticGraphic.h>
 
-#include <GGDrawUtil.h>
-#include <GGWndEditor.h>
+#include <GG/DrawUtil.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 

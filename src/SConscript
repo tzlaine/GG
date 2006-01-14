@@ -1,38 +1,36 @@
 # -*- Python -*-
 
-Import('env', 'DirHeaders')
+Import('env')
 
 sources = [
-    'GGApp.cpp',
-    'GGBrowseInfoWnd.cpp',
-    'GGButton.cpp',
-    'GGClr.cpp',
-    'GGControl.cpp',
-    'GGDrawUtil.cpp',
-    'GGDropDownList.cpp',
-    'GGDynamicGraphic.cpp',
-    'GGEdit.cpp',
-    'GGEventPump.cpp',
-    'GGFont.cpp',
-    'GGLayout.cpp',
-    'GGListBox.cpp',
-    'GGMenu.cpp',
-    'GGMultiEdit.cpp',
-    'GGPluginInterface.cpp',
-    'GGPtRect.cpp',
-    'GGScroll.cpp',
-    'GGSlider.cpp',
-    'GGStaticGraphic.cpp',
-    'GGStyleFactory.cpp',
-    'GGTextControl.cpp',
-    'GGTexture.cpp',
-    'GGWnd.cpp',
-    'GGWndEditor.cpp',
-    'GGZList.cpp',
+    'BrowseInfoWnd.cpp',
+    'Button.cpp',
+    'Clr.cpp',
+    'Control.cpp',
+    'DrawUtil.cpp',
+    'DropDownList.cpp',
+    'DynamicGraphic.cpp',
+    'Edit.cpp',
+    'EventPump.cpp',
+    'Font.cpp',
+    'GUI.cpp',
+    'Layout.cpp',
+    'ListBox.cpp',
+    'Menu.cpp',
+    'MultiEdit.cpp',
+    'PluginInterface.cpp',
+    'PtRect.cpp',
+    'Scroll.cpp',
+    'Slider.cpp',
+    'StaticGraphic.cpp',
+    'StyleFactory.cpp',
+    'TextControl.cpp',
+    'Texture.cpp',
+    'Wnd.cpp',
+    'WndEditor.cpp',
+    'ZList.cpp',
     'XMLDoc.cpp'
     ]
-
-headers = [None] + DirHeaders('../include')
 
 if env['need__vsnprintf_c']:
     sources.append('_vsnprintf.c')
@@ -42,9 +40,8 @@ if env['dynamic']:
 else:
     objects = env.Object(sources)
 
-result_objects, result_sources, result_headers = SConscript('dialogs/SConscript', exports = ['env'])
+result_objects, result_sources = SConscript('dialogs/SConscript', exports = ['env'])
 objects += result_objects
 sources += result_sources
-headers.append(result_headers)
 
-Return('objects', 'sources', 'headers')
+Return('objects', 'sources')

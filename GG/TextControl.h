@@ -25,18 +25,18 @@
 
 /* $Header$ */
 
-/** \file GGTextControl.h
+/** \file TextControl.h
     Contains the TextControl class, a control which represents a certain text string in a certain font, justification, etc. */
 
-#ifndef _GGTextControl_h_
-#define _GGTextControl_h_
+#ifndef _GG_TextControl_h_
+#define _GG_TextControl_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
-#ifndef _GGFont_h_
-#include "GGFont.h"
+#ifndef _GG_Font_h_
+#include <GG/Font.h>
 #endif
 
 namespace GG {
@@ -48,7 +48,7 @@ namespace GG {
     read from a Text object as if it were an input or output stream, thanks to boost::lexical_cast.  Note that the Text
     stream operators only read the first instance of the specified type from m_text, and overwrite the entire m_text
     string when writing to it; both operators may throw.  This is a text control based on pre-rendered font glyphs.  The
-    text is rendered character by character from a prerendered font. The font used is gotten from the application's font
+    text is rendered character by character from a prerendered font. The font used is gotten from the GUI's font
     manager.  Since a shared_ptr to the font is kept, the font is guaranteed to live at least as long as the TextControl
     object that refers to it.  This also means that if the font is explicitly released from the font manager but is
     still held by at least one TextControl object, it will not be destroyed, due to the shared_ptr.  Note that if "" is
@@ -230,4 +230,4 @@ void GG::TextControl::serialize(Archive& ar, const unsigned int version)
     }
 }
 
-#endif // _GGTextControl_h_
+#endif // _GG_TextControl_h_

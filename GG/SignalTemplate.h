@@ -26,7 +26,7 @@
 /* $Header$ */
 
 /* Note that this file intentionally has no include guards.  This is because it is intended to be included multiple
-   times, as in GGSignalsAndSlots.h. */
+   times, as in SignalsAndSlots.h. */
 
 #if GG_SIGNALS_NUM_ARGS == 0
 #define GG_SIGNALS_COMMA_IF_NONZERO_ARGS

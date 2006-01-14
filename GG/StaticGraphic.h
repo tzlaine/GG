@@ -25,18 +25,18 @@
 
 /* $Header$ */
 
-/** \file GGStaticGraphic.h
+/** \file StaticGraphic.h
     Contains the StaticGraphic class, a fixed image control. */
 
-#ifndef _GGStaticGraphic_h_
-#define _GGStaticGraphic_h_
+#ifndef _GG_StaticGraphic_h_
+#define _GG_StaticGraphic_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
-#ifndef _GGTexture_h_
-#include "GGTexture.h"
+#ifndef _GG_Texture_h_
+#include <GG/Texture.h>
 #endif
 
 namespace GG {
@@ -100,4 +100,4 @@ void GG::StaticGraphic::serialize(Archive& ar, const unsigned int version)
         ValidateStyle();
 }
 
-#endif // _GGStaticGraphic_h_
+#endif // _GG_StaticGraphic_h_

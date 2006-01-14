@@ -25,11 +25,11 @@
    
 /* $Header$ */
 
-/** \file GGException.h
+/** \file Exception.h
     Contains the GG::Exception base class and macros that ease declaring subclasses. */
 
-#ifndef _GGException_h_
-#define _GGException_h_
+#ifndef _GG_Exception_h_
+#define _GG_Exception_h_
 
 #include <stdexcept>
 #include <string>
@@ -90,4 +90,4 @@ private:
 
 } // namespace GG
 
-#endif // _GGEnum_h_
+#endif // _GG_Enum_h_

@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGMultiEdit.h
+/** \file MultiEdit.h
     Contains the MultiEdit class, a multi-line text box control. */
 
-#ifndef _GGMultiEdit_h_
-#define _GGMultiEdit_h_
+#ifndef _GG_MultiEdit_h_
+#define _GG_MultiEdit_h_
 
-#ifndef _GGEdit_h_
-#include "GGEdit.h"
+#ifndef _GG_Edit_h_
+#include <GG/Edit.h>
 #endif
 
 namespace GG {
@@ -197,4 +197,4 @@ void GG::MultiEdit::serialize(Archive& ar, const unsigned int version)
         ValidateStyle();
 }
 
-#endif // _GGMultiEdit_h_
+#endif // _GG_MultiEdit_h_

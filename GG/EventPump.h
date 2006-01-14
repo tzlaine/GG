@@ -25,15 +25,15 @@
    
 /* $Header$ */
 
-/** \file GGEventPump.h
+/** \file EventPump.h
     Contains the EventPump class and its helper classes.  An EventPump encapsulates the behavior of a GG processing loop, 
-    such as the one associated with the singleton App object, or one associated with a modal Wnd. */
+    such as the one associated with the singleton GUI object, or one associated with a modal Wnd. */
 
-#ifndef _GGEventPump_h_
-#define _GGEventPump_h_
+#ifndef _GG_EventPump_h_
+#define _GG_EventPump_h_
 
-#ifndef _GGApp_h_
-#include "GGApp.h"
+#ifndef _GG_GUI_h_
+#include <GG/GUI.h>
 #endif
 
 namespace GG {
@@ -58,7 +58,7 @@ struct GG_API EventPumpState
     int old_mouse_repeat_interval;
 };
 
-/** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::App
+/** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::GUI
     functionality; users who wish to define a new type of event pump should do so by inheriting from EventPump instead
     of this class. */
 class GG_API EventPumpBase
@@ -71,7 +71,7 @@ protected:
         and then turn back on FPS limits, mouse drag repeat, etc. if they don't want them to take place in their custom 
         event pump.  Also, this provides a convenient way to turn rendering off completely in a custom event pump, if 
         that is desired. */
-    void LoopBody(App* app, EventPumpState& state, bool do_non_rendering, bool do_rendering);
+    void LoopBody(GUI* gui, EventPumpState& state, bool do_non_rendering, bool do_rendering);
 
     /** returns the EventPumpState object shared by all event pump types. */
     static EventPumpState& State();
@@ -79,21 +79,21 @@ protected:
 
 /** encapsulates the GG event-pumping mechanism.  Events from the application framework (i.e. SDL, DirectInput, etc.) 
     are received by an EventPump, and appropriate action is taken.  The default action is to call
-    App::HandleSystemEvents(), but any action can be taken in a EventPump-derived type that overrides operator()().  For
+    GUI::HandleSystemEvents(), but any action can be taken in a EventPump-derived type that overrides operator()().  For
     example, it might be useful to override operator()() with a function that gives all GG-relevant events to a GG
-    event-hendler, and gives all other events to a system-specific handler, if your App-derived class does not already
+    event-hendler, and gives all other events to a system-specific handler, if your GUI-derived class does not already
     do so.  \note Modal Wnds use EventPumps to implement their modality.  This means that you must write your
-    App-derived class's HandleSystemEvents() in such a way that it can handle modal Wnd events to your satisfaction,
+    GUI-derived class's HandleSystemEvents() in such a way that it can handle modal Wnd events to your satisfaction,
     since the type of EventPump that modal Wnds use is fixed. */
 class GG_API EventPump : public GG::EventPumpBase
 {
 public:
     virtual ~EventPump() {} ///< virtual dtor
 
-    /** cycles through event-handling and rendering, calling App::HandleSystemEvents() and then EventPumpBase::LoopBody(). */
+    /** cycles through event-handling and rendering, calling GUI::HandleSystemEvents() and then EventPumpBase::LoopBody(). */
     virtual void operator()();
 };
 
 } // namespace GG
 
-#endif // _GGEventPump_h_
+#endif // _GG_EventPump_h_

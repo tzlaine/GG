@@ -25,14 +25,16 @@
 
 /* $Header$ */
 
-/** \file GGBrowseInfoWnd.h
+/** \file BrowseInfoWnd.h
     Contains the BrowseInfoWnd class, and its subclass TextBoxBrowseInfoWnd.  These classes display info on another
     window. */
 
-#ifndef _GGBrowseInfoWnd_h_
-#define _GGBrowseInfoWnd_h_
+#ifndef _GG_BrowseInfoWnd_h_
+#define _GG_BrowseInfoWnd_h_
 
-#include <GGWnd.h>
+#ifndef _GG_Wnd_h_
+#include <GG/Wnd.h>
+#endif
 
 #include <boost/serialization/is_abstract.hpp>
 
@@ -152,4 +154,4 @@ void GG::TextBoxBrowseInfoWnd::serialize(Archive& ar, const unsigned int version
         & BOOST_SERIALIZATION_NVP(m_text_control);
 }
 
-#endif // _GGBrowseInfoWnd_h_
+#endif // _GG_BrowseInfoWnd_h_

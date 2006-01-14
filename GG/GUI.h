@@ -25,18 +25,18 @@
    
 /* $Header$ */
 
-/** \file GGApp.h
-    Contains App class, which encapsulates the state and behavior of the entire GG GUI. */
+/** \file GUI.h
+    Contains GUI class, which encapsulates the state and behavior of the entire GG GUI. */
 
-#ifndef _GGApp_h_ 
-#define _GGApp_h_
+#ifndef _GG_GUI_h_ 
+#define _GG_GUI_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
-#ifndef _GGFont_h_
-#include "GGFont.h"
+#ifndef _GG_Font_h_
+#include <GG/Font.h>
 #endif
 
 namespace boost { namespace archive {
@@ -51,11 +51,11 @@ class EventPumpBase;
 class PluginInterface;
 class StyleFactory;
 class Texture;
-struct AppImplData;
+struct GUIImplData;
 
-/** An abstract base for an application framework class to drive the GG GUI.  
+/** An abstract base for an GUI framework class to drive the GG GUI.  
     This class has all the essential services that GG requires: 
-    - application initialization and emergency exit
+    - GUI initialization and emergency exit
     - GG event handling
     - rendering of GUI windows
     - entry into and cleanup after a "2D" mode, in case the app also uses non-orthographic 3D projections
@@ -67,11 +67,11 @@ struct AppImplData;
     - access to the dimensions of the application window or screen
     - mouse state information
     - keyboard accelerators
-    - application-wide management of fonts and textures
+    - management of fonts and textures
     <p>
     The user is required to provide several functions.  The most vital functions the user is required to provide are:
     Enter2DMode(), Exit2DMode(), DeltaT(), PollAndRender() [virtual private], and Run() [virtual private].  Without
-    these App is pretty useless.  In addition, HandleEvent() must be driven from PollAndRender().  The code driving
+    these GUI is pretty useless.  In addition, HandleEvent() must be driven from PollAndRender().  The code driving
     HandleEvent() must interact with the hardware and operating system, and supply the appropriate EventType's, key
     presses, and mouse position info to HandleEvent().  It is the author's recommendation that the user use SDL to do
     this.  See http://www.libsdl.org for more info.
@@ -79,7 +79,7 @@ struct AppImplData;
     Keyboard accelerators may be defined, as mentioned above.  Each defined accelerator has its own signal which is
     emitted each time the accelerator is detected.  Client code should listen to the appropriate signal to act on an
     accelerator invocation.  Each slot that is signalled with a keyboard accelerator should return true if it processed
-    the accelerator, or false otherwise.  This lets App know whether or not it should create a keystroke event and
+    the accelerator, or false otherwise.  This lets GUI know whether or not it should create a keystroke event and
     process it normally, sending it to the Wnd that currently has focus.  Note that since signals can be connected to
     multiple slots, if even one slot returns true, no kestroke event is created.  It is perfectly legal to return false
     even if an accelerator is processed, as long as you also then want the focus Wnd to receive a keystroke event.
@@ -90,7 +90,7 @@ struct AppImplData;
     - Have slots that process these accelerators return false, or
     - Do not connect anything to such an accelerator, in which case it will return false.
     <p>
-    An app-wide StyleFactory can be set; this controls the actual types of controls and dialogs that are created when a
+    A GUI-wide StyleFactory can be set; this controls the actual types of controls and dialogs that are created when a
     control or dialog creates one (e.g. when FileDlg encounters an error and creates a ThreeButtonDlg).  This is
     overridden by any StyleFactory that may be installed in an individual Wnd.
     <p>
@@ -100,7 +100,7 @@ struct AppImplData;
     still, there will probably be no events sent to the scrollbar control after the first button-down event.  When
     enabled, mouse drag repeat sends messages to the scrollbar when there otherwise would be none.
 */
-class GG_API App
+class GG_API GUI
 {
 private:
     struct OrCombiner 
@@ -122,7 +122,7 @@ public:
 
     /// these are the only events absolutely necessary for GG to function properly
     enum EventType {
-        IDLE,        ///< nothing has changed since the last message, but the App might want to update some things anyway
+        IDLE,        ///< nothing has changed since the last message, but the GUI might want to update some things anyway
         KEYPRESS,    ///< a down key press or key repeat, with or without modifiers like Alt, Ctrl, Meta, etc.
         LPRESS,      ///< a left mouse button press
         MPRESS,      ///< a middle mouse button press
@@ -140,7 +140,7 @@ public:
     typedef void (*LoadWndFn)(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
 
     /** \name Structors */ //@{
-    virtual ~App(); ///< virtual dtor
+    virtual ~GUI(); ///< virtual dtor
     //@}
 
     /** \name Accessors */ //@{
@@ -151,7 +151,7 @@ public:
     int            DeltaT() const;               ///< returns ms since last frame was rendered
     virtual int    Ticks() const = 0;            ///< returns ms since the app started running
     bool           FPSEnabled() const;           ///< returns true iff FPS calulations are turned on
-    double         FPS() const;                  ///< returns the frames per second at which the application is rendering
+    double         FPS() const;                  ///< returns the frames per second at which the GUI is rendering
     std::string    FPSString() const;            ///< returns a string of the form "[m_FPS] frames per second"
     double         MaxFPS() const;               ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
     virtual int    AppWidth() const = 0;         ///< returns the width of the application window/screen
@@ -166,7 +166,7 @@ public:
     Pt             MouseMovement() const;        ///< returns the relative position of mouse, based on the last mouse motion event
     Uint32         KeyMods() const;              ///< returns the bitwise or'd set of modifier keys that are currently depressed, based on the last event
 
-    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the app-wide currently-installed style factory
+    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed default style factory
 
     const_accel_iterator accel_begin() const;    ///< returns an iterator to the first defined keyboard accelerator
     const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
@@ -177,18 +177,18 @@ public:
 
     /** \name Mutators */ //@{
     void           operator()();                 ///< external interface to Run()
-    virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetApp()
+    virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetGUI()
     
     /** handles all waiting system events (from SDL, DirectInput, etc.).  This function should set last_mouse_event_time to the current 
         time (using Ticks()) if mouse events are processed.  This function should only be called from custom EventPump event handlers. */
     virtual void   HandleSystemEvents(int& last_mouse_event_time) = 0;
 
     void           SetFocusWnd(Wnd* wnd);        ///< sets the input focus window to \a wnd
-    virtual void   Wait(int ms);                 ///< suspends the app thread for \a ms milliseconds.  Singlethreaded App subclasses may do nothing here, or may pause for \a ms milliseconds; the default implementation does nothing.
+    virtual void   Wait(int ms);                 ///< suspends the GUI thread for \a ms milliseconds.  Singlethreaded GUI subclasses may do nothing here, or may pause for \a ms milliseconds; the default implementation does nothing.
     void           Register(Wnd* wnd);           ///< adds \a wnd into the z-list.  Registering a null pointer or registering the same window multiple times is a no-op.
     void           RegisterModal(Wnd* wnd);      ///< adds \a wnd onto the modal windows "stack"
     void           Remove(Wnd* wnd);             ///< removes \a wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.
-    void           WndDying(Wnd* wnd);           ///< removes \a wnd from all App state variables, so that none of them point to a deleted object
+    void           WndDying(Wnd* wnd);           ///< removes \a wnd from all GUI state variables, so that none of them point to a deleted object
     void           MoveUp(Wnd* wnd);             ///< moves \a wnd to the top of the z-list
     void           MoveDown(Wnd* wnd);           ///< moves \a wnd to the bottom of the z-list
 
@@ -224,15 +224,15 @@ public:
     boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
 
-    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const; ///< sets the app-wide currently-installed style factory
+    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const; ///< sets the currently-installed default style factory
 
-    /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw GG::App::BadFunctionPointer Throws
-        GG::App::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using
+    /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw GG::GUI::BadFunctionPointer Throws
+        GG::GUI::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using
         SetSaveWndFunction(). */
     void SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
 
-    /** loads \a wnd, with the xml tag \a name, from the archive \a ar.  \throw GG::App::BadFunctionPointer Throws
-        GG::App::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using
+    /** loads \a wnd, with the xml tag \a name, from the archive \a ar.  \throw GG::GUI::BadFunctionPointer Throws
+        GG::GUI::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using
         SetLoadWndFunction(). */
     void LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
 
@@ -248,20 +248,20 @@ public:
     void SetSaveLoadFunctions(const PluginInterface& interface);
     //@}
 
-    static App*  GetApp();                ///< allows any GG code access to app framework by calling App::GetApp()
+    static GUI*  GetGUI();                ///< allows any GG code access to GUI framework by calling GUI::GetGUI()
     static void  RenderWindow(Wnd* wnd);  ///< renders a window (if it is visible) and all its visible descendents recursively
 
     /** \name Exceptions */ //@{
-    /** The base class for App exceptions. */
+    /** The base class for GUI exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
     /** Thrown when an attempt is made to invoke either of the save- or load-window functions before they have been set. */
-    GG_CONCRETE_EXCEPTION(BadFunctionPointer, GG::App, Exception);
+    GG_CONCRETE_EXCEPTION(BadFunctionPointer, GG::GUI, Exception);
     //@}
 
 protected:
     /** \name Structors */ //@{
-    App(const std::string& app_name); ///< protected ctor, called by derived classes
+    GUI(const std::string& app_name); ///< protected ctor, called by derived classes
     //@}
 
     /** \name Mutators */ //@{
@@ -277,13 +277,13 @@ protected:
     //@}
 
 private:
-    virtual void   Run() = 0;                    // initializes app state, then executes main event handler/render loop (PollAndRender())
+    virtual void   Run() = 0;                    // initializes GUI state, then executes main event handler/render loop (PollAndRender())
     Wnd*           ModalWindow() const;          // returns the currently modal window, if any
 
-    static App*                           s_app;
-    static boost::shared_ptr<AppImplData> s_impl;
+    static GUI*                           s_gui;
+    static boost::shared_ptr<GUIImplData> s_impl;
 
-    friend class EventPumpBase; ///< allows EventPumpBase types to drive App
+    friend class EventPumpBase; ///< allows EventPumpBase types to drive GUI
 };
 
 
@@ -293,7 +293,7 @@ GG_API bool MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd);
 
 // template implementations
 template<class InIt> 
-bool App::OrCombiner::operator()(InIt first, InIt last) const
+bool GUI::OrCombiner::operator()(InIt first, InIt last) const
 {
     bool retval = false;
     while (first != last)
@@ -302,7 +302,7 @@ bool App::OrCombiner::operator()(InIt first, InIt last) const
 }
 
 template <class T>
-void App::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+void GUI::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
 {
     Wnd* wnd_as_base = wnd;
     LoadWnd(wnd_as_base, name, ar);
@@ -312,4 +312,4 @@ void App::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive
 
 } // namespace GG
 
-#endif // _GGApp_h_
+#endif // _GG_GUI_h_

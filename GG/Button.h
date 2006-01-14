@@ -25,15 +25,15 @@
 
 /* $Header$ */
 
-/** \file GGButton.h
+/** \file Button.h
     Contains the Button push-button control class; the StateButton control class, which represents check boxes and radio 
     buttons; and the RadioButtonGroup control class, which allows multiple radio buttons to be combined into a single control. */
 
-#ifndef _GGButton_h_
-#define _GGButton_h_
+#ifndef _GG_Button_h_
+#define _GG_Button_h_
 
-#ifndef _GGTextControl_h_
-#include "GGTextControl.h"
+#ifndef _GG_TextControl_h_
+#include <GG/TextControl.h>
 #endif
 
 namespace GG {
@@ -364,5 +364,5 @@ void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
         ConnectSignals();
 }
 
-#endif // _GGButton_h_
+#endif // _GG_Button_h_
 

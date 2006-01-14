@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGWnd.h
+/** \file ColorDlg.h
     Contains the Wnd class, upon which all GG GUI elements are based. */
 
-#ifndef _GGColorDlg_h_
-#define _GGColorDlg_h_
+#ifndef _GG_ColorDlg_h_
+#define _GG_ColorDlg_h_
 
-#ifndef _GGButton_h_
-#include "GGButton.h"
+#ifndef _GG_Button_h_
+#include <GG/Button.h>
 #endif
 
 namespace GG {
@@ -442,4 +442,4 @@ void GG::ColorDlg::serialize(Archive& ar, const unsigned int version)
         ConnectSignals();
 }
 
-#endif // _GGColorDlg_h_
+#endif // _GG_ColorDlg_h_

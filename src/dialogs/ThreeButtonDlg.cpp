@@ -24,14 +24,14 @@
 
 /* $Header$ */
 
-#include "GGThreeButtonDlg.h"
+#include <GG/dialogs/ThreeButtonDlg.h>
 
-#include "../GGApp.h"
-#include "../GGButton.h"
-#include "../GGDrawUtil.h"
-#include "../GGLayout.h"
-#include "../GGStyleFactory.h"
-#include "../GGTextControl.h"
+#include <GG/GUI.h>
+#include <GG/Button.h>
+#include <GG/DrawUtil.h>
+#include <GG/Layout.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
 using namespace GG;
 
@@ -68,7 +68,7 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& ms
 ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
-    Wnd((App::GetApp()->AppWidth() - w) / 2, (App::GetApp()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
+    Wnd((GUI::GetGUI()->AppWidth() - w) / 2, (GUI::GetGUI()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
     m_text_color(text_color),

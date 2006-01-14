@@ -24,7 +24,7 @@
 
 /* $Header$ */
 
-#include "GGClr.h"
+#include <GG/Clr.h>
 
 using namespace GG;
 

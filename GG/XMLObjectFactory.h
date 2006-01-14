@@ -29,8 +29,8 @@
     Contains the XMLObjectFactory class template, which allows the user to register object-creation functions and then 
     automatically create objects from XML encodings. */
 
-#ifndef _XMLObjectFactory_h_
-#define _XMLObjectFactory_h_
+#ifndef _GG_XMLObjectFactory_h_
+#define _GG_XMLObjectFactory_h_
 
 #include <map>
 #include <string>
@@ -112,5 +112,5 @@ void XMLObjectFactory<T>::RemoveGenerator(const std::string& name)
 
 } // namespace GG
 
-#endif // _XMLObjectFactory_h_
+#endif // _GG_XMLObjectFactory_h_
 

@@ -24,13 +24,13 @@
 
 /* $Header$ */
 
-#include "GGApp.h"
+#include <GG/GUI.h>
 
-#include "GGBrowseInfoWnd.h"
-#include "GGControl.h"
-#include "GGPluginInterface.h"
-#include "GGStyleFactory.h"
-#include "GGZList.h"
+#include <GG/BrowseInfoWnd.h>
+#include <GG/Control.h>
+#include <GG/PluginInterface.h>
+#include <GG/StyleFactory.h>
+#include <GG/ZList.h>
 
 #include <cassert>
 #include <fstream>
@@ -59,9 +59,9 @@ namespace {
 }
 
 // implementation data types
-struct GG::AppImplData
+struct GG::GUIImplData
 {
-    AppImplData() :
+    GUIImplData() :
         focus_wnd(0),
         mouse_pos(0,0),
         mouse_rel(0,0),
@@ -104,7 +104,7 @@ struct GG::AppImplData
     Pt           mouse_rel;             // relative position of mouse, based on last MOUSEMOVE event
     Uint32       key_mods;              // currently-depressed modifier keys, based on last KEYPRESS event
 
-    int          mouse_repeat_delay;    // see note above App class definition
+    int          mouse_repeat_delay;    // see note above GUI class definition
     int          mouse_repeat_interval;
     int          double_click_interval; // the maximum interval allowed between clicks that is still considered a double-click, in ms
     int          min_drag_time;         // the minimum amount of time that a drag must be in progress before it is considered a drag, in ms
@@ -132,7 +132,7 @@ struct GG::AppImplData
     std::set<std::pair<Key, Uint32> >
                  accelerators;          // the keyboard accelerators
 
-    std::map<std::pair<Key, Uint32>, boost::shared_ptr<App::AcceleratorSignalType> >
+    std::map<std::pair<Key, Uint32>, boost::shared_ptr<GUI::AcceleratorSignalType> >
                  accelerator_sigs;      // the signals emitted by the keyboard accelerators
 
     int          delta_t;               // the number of ms since the last frame
@@ -147,128 +147,128 @@ struct GG::AppImplData
 
     boost::shared_ptr<StyleFactory> style_factory;
 
-    App::SaveWndFn    save_wnd_fn;
-    App::LoadWndFn    load_wnd_fn;
+    GUI::SaveWndFn    save_wnd_fn;
+    GUI::LoadWndFn    load_wnd_fn;
 };
 
 // static member(s)
-App*                           App::s_app = 0;
-boost::shared_ptr<AppImplData> App::s_impl;
+GUI*                           GUI::s_gui = 0;
+boost::shared_ptr<GUIImplData> GUI::s_impl;
 
 // member functions
-App::App(const std::string& app_name)
+GUI::GUI(const std::string& app_name)
 {
-    assert(!s_app);
-    s_app = this;
+    assert(!s_gui);
+    s_gui = this;
     assert(!s_impl);
-    s_impl.reset(new AppImplData());
+    s_impl.reset(new GUIImplData());
     s_impl->app_name = app_name;
 }
 
-App::~App()
+GUI::~GUI()
 {
 }
 
-Wnd* App::FocusWnd() const
+Wnd* GUI::FocusWnd() const
 {
     return s_impl->modal_wnds.empty() ? s_impl->focus_wnd : s_impl->modal_wnds.back().second;
 }
 
-Wnd* App::GetWindowUnder(const Pt& pt) const
+Wnd* GUI::GetWindowUnder(const Pt& pt) const
 {
     return s_impl->zlist.Pick(pt, ModalWindow());
 }
 
-int App::DeltaT() const
+int GUI::DeltaT() const
 {
     return s_impl->delta_t;
 }
 
-bool App::FPSEnabled() const
+bool GUI::FPSEnabled() const
 {
     return s_impl->calc_FPS;
 }
 
-double App::FPS() const
+double GUI::FPS() const
 {
     return s_impl->FPS;
 }
 
-std::string App::FPSString() const
+std::string GUI::FPSString() const
 {
     char buf[128];
     sprintf(buf, "%.2f frames per second", s_impl->FPS);
     return std::string(buf);
 }
 
-double App::MaxFPS() const
+double GUI::MaxFPS() const
 {
     return s_impl->max_FPS;
 }
 
-int App::MouseRepeatDelay() const
+int GUI::MouseRepeatDelay() const
 {
     return s_impl->mouse_repeat_delay;
 }
 
-int App::MouseRepeatInterval() const
+int GUI::MouseRepeatInterval() const
 {
     return s_impl->mouse_repeat_interval;
 }
 
-int App::DoubleClickInterval() const
+int GUI::DoubleClickInterval() const
 {
     return s_impl->double_click_interval;
 }
 
-int App::MinDragTime() const
+int GUI::MinDragTime() const
 {
     return s_impl->min_drag_time;
 }
 
-int App::MinDragDistance() const
+int GUI::MinDragDistance() const
 {
     return s_impl->min_drag_distance;
 }
 
-bool App::MouseButtonDown(int bn) const
+bool GUI::MouseButtonDown(int bn) const
 {
     return (bn >= 0 && bn <= 2) ? s_impl->button_state[bn] : false;
 }
 
-Pt App::MousePosition() const
+Pt GUI::MousePosition() const
 {
     return s_impl->mouse_pos;
 }
 
-Pt App::MouseMovement() const
+Pt GUI::MouseMovement() const
 {
     return s_impl->mouse_rel;
 }
 
-Uint32 App::KeyMods() const
+Uint32 GUI::KeyMods() const
 {
     return s_impl->key_mods;
 }
 
-const boost::shared_ptr<StyleFactory>& App::GetStyleFactory() const
+const boost::shared_ptr<StyleFactory>& GUI::GetStyleFactory() const
 {
     return s_impl->style_factory;
 }
 
-App::const_accel_iterator App::accel_begin() const
+GUI::const_accel_iterator GUI::accel_begin() const
 {
-    const AppImplData* impl = s_impl.get();
+    const GUIImplData* impl = s_impl.get();
     return impl->accelerators.begin();
 }
 
-App::const_accel_iterator App::accel_end() const
+GUI::const_accel_iterator GUI::accel_end() const
 {
-    const AppImplData* impl = s_impl.get();
+    const GUIImplData* impl = s_impl.get();
     return impl->accelerators.end();
 }
 
-App::AcceleratorSignalType& App::AcceleratorSignal(Key key, Uint32 key_mods) const
+GUI::AcceleratorSignalType& GUI::AcceleratorSignal(Key key, Uint32 key_mods) const
 {
     boost::shared_ptr<AcceleratorSignalType>& sig_ptr = s_impl->accelerator_sigs[std::make_pair(key, key_mods)];
     if (!sig_ptr)
@@ -276,12 +276,12 @@ App::AcceleratorSignalType& App::AcceleratorSignal(Key key, Uint32 key_mods) con
     return *sig_ptr;
 }
 
-void App::operator()()
+void GUI::operator()()
 {
     Run();
 }
 
-void App::SetFocusWnd(Wnd* wnd)
+void GUI::SetFocusWnd(Wnd* wnd)
 {
     // inform old focus wnd that it is losing focus
     if (FocusWnd())
@@ -294,16 +294,16 @@ void App::SetFocusWnd(Wnd* wnd)
         FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::GainingFocus));
 }
 
-void App::Wait(int ms)
+void GUI::Wait(int ms)
 {
 }
 
-void App::Register(Wnd* wnd)
+void GUI::Register(Wnd* wnd)
 {
     if (wnd) s_impl->zlist.Add(wnd);
 }
 
-void App::RegisterModal(Wnd* wnd)
+void GUI::RegisterModal(Wnd* wnd)
 {
     if (wnd && wnd->Modal()) {
         s_impl->modal_wnds.push_back(std::make_pair(wnd, wnd));
@@ -311,7 +311,7 @@ void App::RegisterModal(Wnd* wnd)
     }
 }
 
-void App::Remove(Wnd* wnd)
+void GUI::Remove(Wnd* wnd)
 {
     if (wnd) {
         if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back().first == wnd) // if it's the current modal window, remove it from the modal list
@@ -321,7 +321,7 @@ void App::Remove(Wnd* wnd)
     }
 }
 
-void App::WndDying(Wnd* wnd)
+void GUI::WndDying(Wnd* wnd)
 {
     if (wnd) {
         Remove(wnd);
@@ -362,46 +362,46 @@ void App::WndDying(Wnd* wnd)
     }
 }
 
-void App::EnableFPS(bool b/* = true*/)
+void GUI::EnableFPS(bool b/* = true*/)
 {
     s_impl->calc_FPS = b;
     if (!b) 
         s_impl->FPS = -1.0f;
 }
 
-void App::SetMaxFPS(double max)
+void GUI::SetMaxFPS(double max)
 {
     if (max && max < 0.1)
         max = 0.1;
     s_impl->max_FPS = max;
 }
 
-void App::MoveUp(Wnd* wnd)
+void GUI::MoveUp(Wnd* wnd)
 {
     if (wnd) s_impl->zlist.MoveUp(wnd);
 }
 
-void App::MoveDown(Wnd* wnd)
+void GUI::MoveDown(Wnd* wnd)
 {
     if (wnd) s_impl->zlist.MoveDown(wnd);
 }
 
-void App::RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd)
+void GUI::RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd)
 {
     if (!s_impl->drag_drop_wnds.empty() && originating_wnd != s_impl->drag_drop_originating_wnd) {
-        throw std::runtime_error("App::RegisterDragDropWnd() : Attempted to register a drag drop item dragged from "
+        throw std::runtime_error("GUI::RegisterDragDropWnd() : Attempted to register a drag drop item dragged from "
                                  "one window, when another window already has items being dragged from it.");
     }
     s_impl->drag_drop_wnds[wnd] = offset;
     s_impl->drag_drop_originating_wnd = originating_wnd;
 }
 
-void App::CancelDragDrop()
+void GUI::CancelDragDrop()
 {
     s_impl->drag_drop_wnds.clear();
 }
 
-void App::EnableMouseDragRepeat(int delay, int interval)
+void GUI::EnableMouseDragRepeat(int delay, int interval)
 {
     if (!delay) { // setting delay = 0 completely disables mouse drag repeat
         s_impl->mouse_repeat_delay = 0;
@@ -412,106 +412,106 @@ void App::EnableMouseDragRepeat(int delay, int interval)
     }
 }
 
-void App::SetDoubleClickInterval(int interval)
+void GUI::SetDoubleClickInterval(int interval)
 {
     s_impl->double_click_interval = interval;
 }
 
-void App::SetMinDragTime(int time)
+void GUI::SetMinDragTime(int time)
 {
     s_impl->min_drag_time = time;
 }
 
-void App::SetMinDragDistance(int distance)
+void GUI::SetMinDragDistance(int distance)
 {
     s_impl->min_drag_distance = distance;
 }
 
-void App::SetAccelerator(Key key, Uint32 key_mods)
+void GUI::SetAccelerator(Key key, Uint32 key_mods)
 {
     key_mods = MassagedAccelKeyMods(key_mods);
     s_impl->accelerators.insert(std::make_pair(key, key_mods));
 }
 
-void App::RemoveAccelerator(Key key, Uint32 key_mods)
+void GUI::RemoveAccelerator(Key key, Uint32 key_mods)
 {
     key_mods = MassagedAccelKeyMods(key_mods);
     s_impl->accelerators.erase(std::make_pair(key, key_mods));
 }
 
-boost::shared_ptr<Font> App::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
 {
     return GetFontManager().GetFont(font_filename, pts, range);
 }
 
-void App::FreeFont(const std::string& font_filename, int pts)
+void GUI::FreeFont(const std::string& font_filename, int pts)
 {
     GetFontManager().FreeFont(font_filename, pts);
 }
 
-boost::shared_ptr<Texture> App::StoreTexture(Texture* texture, const std::string& texture_name)
+boost::shared_ptr<Texture> GUI::StoreTexture(Texture* texture, const std::string& texture_name)
 {
     return GetTextureManager().StoreTexture(texture, texture_name);
 }
 
-boost::shared_ptr<Texture> App::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
+boost::shared_ptr<Texture> GUI::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
 {
     return GetTextureManager().StoreTexture(texture, texture_name);
 }
 
-boost::shared_ptr<Texture> App::GetTexture(const std::string& name, bool mipmap/* = false*/)
+boost::shared_ptr<Texture> GUI::GetTexture(const std::string& name, bool mipmap/* = false*/)
 {
     return GetTextureManager().GetTexture(name, mipmap);
 }
 
-void App::FreeTexture(const std::string& name)
+void GUI::FreeTexture(const std::string& name)
 {
     GetTextureManager().FreeTexture(name);
 }
 
-void App::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const
+void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const
 {
     s_impl->style_factory = factory;
     if (!s_impl->style_factory)
         s_impl->style_factory.reset(new StyleFactory());
 }
 
-void App::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
+void GUI::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
 {
     if (!s_impl->save_wnd_fn)
-        throw BadFunctionPointer("App::SaveWnd() : Attempted call on null function pointer.");
+        throw BadFunctionPointer("GUI::SaveWnd() : Attempted call on null function pointer.");
     s_impl->save_wnd_fn(wnd, name, ar);
 }
 
-void App::LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+void GUI::LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
 {
     if (!s_impl->load_wnd_fn)
-        throw BadFunctionPointer("App::LoadWnd() : Attempted call on null function pointer.");
+        throw BadFunctionPointer("GUI::LoadWnd() : Attempted call on null function pointer.");
     s_impl->load_wnd_fn(wnd, name, ar);
 }
 
-void App::SetSaveWndFunction(SaveWndFn fn)
+void GUI::SetSaveWndFunction(SaveWndFn fn)
 {
     s_impl->save_wnd_fn = fn;
 }
 
-void App::SetLoadWndFunction(LoadWndFn fn)
+void GUI::SetLoadWndFunction(LoadWndFn fn)
 {
     s_impl->load_wnd_fn = fn;
 }
 
-void App::SetSaveLoadFunctions(const PluginInterface& interface)
+void GUI::SetSaveLoadFunctions(const PluginInterface& interface)
 {
     s_impl->save_wnd_fn = interface.SaveWnd;
     s_impl->load_wnd_fn = interface.LoadWnd;
 }
 
-App* App::GetApp()
+GUI* GUI::GetGUI()
 {
-    return s_app;
+    return s_gui;
 }
 
-void App::RenderWindow(Wnd* wnd)
+void GUI::RenderWindow(Wnd* wnd)
 {
     if (wnd) {
         if (wnd->Visible())
@@ -528,7 +528,7 @@ void App::RenderWindow(Wnd* wnd)
     }
 }
 
-void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
+void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
     s_impl->key_mods = key_mods;
 
@@ -825,7 +825,7 @@ void App::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     }
 }
 
-void App::ProcessBrowseInfo()
+void GUI::ProcessBrowseInfo()
 {
     if (s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
         const std::vector<Wnd::BrowseInfoMode>& browse_modes = s_impl->curr_wnd_under_cursor->BrowseModes();
@@ -841,7 +841,7 @@ void App::ProcessBrowseInfo()
     }
 }
 
-void App::Render()
+void GUI::Render()
 {
     Enter2DMode();
     // render normal windows back-to-front
@@ -876,7 +876,7 @@ void App::Render()
     Exit2DMode();
 }
 
-Wnd* App::ModalWindow() const
+Wnd* GUI::ModalWindow() const
 {
     Wnd* retval = 0;
     if (!s_impl->modal_wnds.empty())
@@ -884,12 +884,12 @@ Wnd* App::ModalWindow() const
     return retval;
 }
 
-void App::SetFPS(double FPS)
+void GUI::SetFPS(double FPS)
 {
     s_impl->FPS = FPS;
 }
 
-void App::SetDeltaT(int delta_t)
+void GUI::SetDeltaT(int delta_t)
 {
     s_impl->delta_t = delta_t;
 }

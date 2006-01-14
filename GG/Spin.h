@@ -29,31 +29,31 @@
     Contains the Spin class template, which provides a spin-box control that allows the user to select a value from a 
     range an arbitrary type (int, double, an enum, etc.). */
 
-#ifndef _GGSpin_h_
-#define _GGSpin_h_
+#ifndef _GG_Spin_h_
+#define _GG_Spin_h_
 
-#ifndef _GGApp_h_
-#include <GGApp.h>
+#ifndef _GG_GUI_h_
+#include <GG/GUI.h>
 #endif
 
-#ifndef _GGButton_h_
-#include <GGButton.h>
+#ifndef _GG_Button_h_
+#include <GG/Button.h>
 #endif
 
-#ifndef _GGDrawUtil_h_
-#include <GGDrawUtil.h>
+#ifndef _GG_DrawUtil_h_
+#include <GG/DrawUtil.h>
 #endif
 
-#ifndef _GGEdit_h_
-#include <GGEdit.h>
+#ifndef _GG_Edit_h_
+#include <GG/Edit.h>
 #endif
 
-#ifndef _GGStyleFactory_h_
-#include <GGStyleFactory.h>
+#ifndef _GG_StyleFactory_h_
+#include <GG/StyleFactory.h>
 #endif
 
-#ifndef _GGWndEditor_h_
-#include <GGWndEditor.h>
+#ifndef _GG_WndEditor_h_
+#include <GG/WndEditor.h>
 #endif
 
 #include <cmath>
@@ -650,7 +650,7 @@ void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_colo
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     Control::SetColor(color);
     m_edit = style->NewEdit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
-    boost::shared_ptr<Font> small_font = App::GetApp()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
+    boost::shared_ptr<Font> small_font = GUI::GetGUI()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
     m_up_bn = style->NewButton(0, 0, 1, 1, "+", small_font, color);
     m_dn_bn = style->NewButton(0, 0, 1, 1, "-", small_font, color);
     if (m_editable)
@@ -718,5 +718,5 @@ namespace spin_details {
 
 } // namespace GG
 
-#endif // _GGSpin_h_
+#endif // _GG_Spin_h_
 

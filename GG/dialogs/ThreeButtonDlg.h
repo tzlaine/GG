@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGThreeButtonDlg.h
+/** \file ThreeButtonDlg.h
     Contains the standard modal user-input/-notification dialog. */
 
-#ifndef _GGThreeButtonDlg_h_
-#define _GGThreeButtonDlg_h_
+#ifndef _GG_ThreeButtonDlg_h_
+#define _GG_ThreeButtonDlg_h_
 
-#ifndef _GGWnd_h_
-#include "../GGWnd.h"
+#ifndef _GG_Wnd_h_
+#include <GG/Wnd.h>
 #endif
 
 namespace GG {
@@ -133,4 +133,4 @@ void GG::ThreeButtonDlg::serialize(Archive& ar, const unsigned int version)
         ConnectSignals();
 }
 
-#endif // _GGThreeButtonDlg_h_
+#endif // _GG_ThreeButtonDlg_h_

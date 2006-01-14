@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGStyleFactory.h
+/** \file StyleFactory.h
     Contains the StyleFactory class, which creates new controls for internal use by dialogs and other controls. */
 
-#ifndef _GGStyleFactory_h_
-#define _GGStyleFactory_h_
+#ifndef _GG_StyleFactory_h_
+#define _GG_StyleFactory_h_
 
-#ifndef _GGBase_h_
-#include  <GGBase.h>
+#ifndef _GG_Base_h_
+#include  <GG/Base.h>
 #endif
 
 namespace GG {
@@ -185,4 +185,4 @@ public:
 
 } // namespace GG
 
-#endif // _GGStyleFactory_h_
+#endif // _GG_StyleFactory_h_

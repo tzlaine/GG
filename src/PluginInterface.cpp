@@ -24,16 +24,16 @@
 
 /* $Header$ */
 
-#include "GGPluginInterface.h"
+#include <GG/PluginInterface.h>
 
-#include <GGDropDownList.h>
-#include <GGDynamicGraphic.h>
-#include <GGEdit.h>
-#include <GGListBox.h>
-#include <GGMenu.h>
-#include <GGMultiEdit.h>
-#include <GGStaticGraphic.h>
-#include <GGTextControl.h>
+#include <GG/DropDownList.h>
+#include <GG/DynamicGraphic.h>
+#include <GG/Edit.h>
+#include <GG/ListBox.h>
+#include <GG/Menu.h>
+#include <GG/MultiEdit.h>
+#include <GG/StaticGraphic.h>
+#include <GG/TextControl.h>
 
 #include <iostream>
 

@@ -24,11 +24,11 @@
 
 /* $Header$ */
 
-#include "GGFont.h"
+#include <GG/Font.h>
 
-#include <GGApp.h>
-#include <GGBase.h>
-#include <GGDrawUtil.h>
+#include <GG/GUI.h>
+#include <GG/Base.h>
+#include <GG/DrawUtil.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

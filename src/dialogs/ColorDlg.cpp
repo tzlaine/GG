@@ -24,14 +24,14 @@
 
 /* $Header$ */
 
-#include "GGColorDlg.h"
+#include <GG/dialogs/ColorDlg.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGFont.h>
-#include <GGLayout.h>
-#include <GGSlider.h>
-#include <GGStyleFactory.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/Font.h>
+#include <GG/Layout.h>
+#include <GG/Slider.h>
+#include <GG/StyleFactory.h>
 
 using namespace GG;
 

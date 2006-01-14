@@ -57,9 +57,8 @@
 =============================================================================*/
 
 
-#include "XMLDoc.h"
-
-#include <XMLValidators.h>
+#include <GG/XMLDoc.h>
+#include <GG/XMLValidators.h>
 
 #include <boost/spirit.hpp>
 

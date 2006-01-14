@@ -34,7 +34,7 @@
 #define GG_SIGNALS_SIGNAL_ARGS a1
 #define GG_SIGNALS_BIND_ARGS _1
 
-#include "GGSignalTemplate.h"
+#include "SignalTemplate.h"
 
 #undef GG_SIGNALS_NUM_ARGS
 #undef GG_SIGNALS_SIGNAL_TEMPLATE_PARMS

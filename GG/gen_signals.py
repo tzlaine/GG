@@ -9,7 +9,7 @@ if not 1 < len(sys.argv) or int(sys.argv[1]) < 0:
 arity_to_generate = int(sys.argv[1])
 
 for i in range(arity_to_generate + 1):
-    filename = 'GGSignal' + str(i) + '.h'
+    filename = 'Signal' + str(i) + '.h'
     f = open(filename, 'w')
     f.write("""// -*- C++ -*-
 /* GG is a GUI for SDL and OpenGL.
@@ -61,7 +61,7 @@ for i in range(arity_to_generate + 1):
     f.write('#define GG_SIGNALS_SIGNAL_ARGS' + sig_args + '\n')
     f.write('#define GG_SIGNALS_BIND_ARGS' + bind_args + '\n')
     f.write('\n')
-    f.write('#include "GGSignalTemplate.h"' + '\n')
+    f.write('#include "SignalTemplate.h"' + '\n')
     f.write('\n')
     f.write('#undef GG_SIGNALS_NUM_ARGS' + '\n')
     f.write('#undef GG_SIGNALS_SIGNAL_TEMPLATE_PARMS' + '\n')

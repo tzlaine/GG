@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGScroll.h
+/** \file Scroll.h
     Contains the Scroll scrollbar control class. */
 
-#ifndef _GGScroll_h_
-#define _GGScroll_h_
+#ifndef _GG_Scroll_h_
+#define _GG_Scroll_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
 namespace GG {
@@ -194,4 +194,4 @@ void GG::Scroll::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_depressed_area);
 }
 
-#endif // _GGScroll_h_
+#endif // _GG_Scroll_h_

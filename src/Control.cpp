@@ -24,9 +24,9 @@
 
 /* $Header$ */
 
-#include "GGControl.h"
+#include <GG/Control.h>
 
-#include <GGWndEditor.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 

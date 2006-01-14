@@ -24,13 +24,12 @@
 
 /* $Header$ */
 
-#include "GGButton.h"
+#include <GG/Button.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGLayout.h>
-#include <GGStyleFactory.h>
-#include <GGWndEditor.h>
+#include <GG/DrawUtil.h>
+#include <GG/Layout.h>
+#include <GG/StyleFactory.h>
+#include <GG/WndEditor.h>
 
 #include <boost/lexical_cast.hpp>
 

@@ -30,8 +30,8 @@
     XML descriptions.  Contents of this faile are deprecated and it will be removed upon the next major release.
 */
 
-#ifndef _XMLDoc_h_
-#define _XMLDoc_h_
+#ifndef _GG_XMLDoc_h_
+#define _GG_XMLDoc_h_
 
 #ifdef _MSC_VER
 # ifdef GIGI_EXPORTS
@@ -43,12 +43,12 @@
 # define GG_API
 #endif
 
-#ifndef _GGEnum_h_
-#include "GGEnum.h"
+#ifndef _GG_Enum_h_
+#include <GG/Enum.h>
 #endif
 
-#ifndef _GGException_h_
-#include "GGException.h"
+#ifndef _GG_Exception_h_
+#include <GG/Exception.h>
 #endif
 
 #include <boost/lexical_cast.hpp>
@@ -478,5 +478,5 @@ std::multimap<T1, T2> MultimapFromString(const std::string& str)
 
 } // namespace GG
 
-#endif // _XMLDoc_h_
+#endif // _GG_XMLDoc_h_
 

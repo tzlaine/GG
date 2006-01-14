@@ -24,14 +24,14 @@
 
 /* $Header$ */
 
-#include "GGWnd.h"
+#include <GG/Wnd.h>
 
-#include <GGApp.h>
-#include <GGBrowseInfoWnd.h>
-#include <GGDrawUtil.h>
-#include <GGEventPump.h>
-#include <GGLayout.h>
-#include <GGWndEditor.h>
+#include <GG/GUI.h>
+#include <GG/BrowseInfoWnd.h>
+#include <GG/DrawUtil.h>
+#include <GG/EventPump.h>
+#include <GG/Layout.h>
+#include <GG/WndEditor.h>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -138,11 +138,11 @@ namespace {
         ModalEventPump(const bool& done) : m_done(done) {}
         virtual void operator()()
             {
-                App* app = App::GetApp();
+                GUI* gui = GUI::GetGUI();
                 EventPumpState& state = State();
                 while (!m_done) {
-                    app->HandleSystemEvents(state.last_mouse_event_time);
-                    LoopBody(app, state, true, true);
+                    gui->HandleSystemEvents(state.last_mouse_event_time);
+                    LoopBody(gui, state, true, true);
                 }
             }
     private:
@@ -288,7 +288,7 @@ Wnd::~Wnd()
     if (Wnd* parent = Parent())
         parent->DetachChild(this);
 
-    App::GetApp()->WndDying(this);
+    GUI::GetGUI()->WndDying(this);
 
     DeleteChildren();
 }
@@ -485,7 +485,7 @@ const std::string& Wnd::BrowseInfoText(int mode) const
 
 const boost::shared_ptr<StyleFactory>& Wnd::GetStyleFactory() const
 {
-    return m_style_factory ? m_style_factory : App::GetApp()->GetStyleFactory();
+    return m_style_factory ? m_style_factory : GUI::GetGUI()->GetStyleFactory();
 }
 
 WndRegion Wnd::WindowRegion(const Pt& pt) const
@@ -662,7 +662,7 @@ void Wnd::AttachChild(Wnd* wnd)
         // remove from previous parent, if any
         if (wnd->Parent())
             wnd->Parent()->DetachChild(wnd);
-        App::GetApp()->Remove(wnd);
+        GUI::GetGUI()->Remove(wnd);
         m_children.push_back(wnd);
         wnd->m_parent = this;
         if (Layout* this_as_layout = dynamic_cast<Layout*>(this))
@@ -993,12 +993,12 @@ int Wnd::Run()
 {
     int retval = 0;
     if (m_flags & MODAL) {
-        App* app = App::GetApp();
-        app->RegisterModal(this);
+        GUI* gui = GUI::GetGUI();
+        gui->RegisterModal(this);
         ModalInit();
         ModalEventPump pump(m_done);
         pump();
-        app->Remove(this);
+        gui->Remove(this);
         retval = 1;
     }
     return retval;

@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGListBox.h
+/** \file ListBox.h
     Contains the ListBox class, a control that contains rows of other controls, commonly TextControls. */
 
-#ifndef _GGListBox_h_
-#define _GGListBox_h_
+#ifndef _GG_ListBox_h_
+#define _GG_ListBox_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
 #include <set>
@@ -440,4 +440,4 @@ void GG::ListBox::serialize(Archive& ar, const unsigned int version)
     }
 }
 
-#endif // _GGListBox_h_
+#endif // _GG_ListBox_h_

@@ -24,8 +24,8 @@
 
 /* $Header$ */
 
-#include "GGZList.h"
-#include "GGWnd.h"
+#include <GG/ZList.h>
+#include <GG/Wnd.h>
 
 using namespace GG;
 

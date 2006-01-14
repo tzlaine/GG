@@ -1,6 +1,6 @@
-#include "GGWndEditor.h"
+#include <GG/WndEditor.h>
 
-#include "GGLayout.h"
+#include <GG/Layout.h>
 
 using namespace GG;
 
@@ -94,7 +94,7 @@ WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
     m_wnd(0),
     m_list_box(new ListBox(0, 0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
     m_font(font),
-    m_label_font(App::GetApp()->GetFont(font->FontName(), font->PointSize() + 4)),
+    m_label_font(GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 4)),
     m_current_flags(0)
 {
     Init();
@@ -258,8 +258,8 @@ AttributeRow<Clr>::AttributeRow(const std::string& name, Clr& value, const boost
 void AttributeRow<Clr>::ColorButtonClicked()
 {
     ColorDlg dlg(0, 0, m_value, m_font, CLR_GRAY, CLR_GRAY);
-    dlg.MoveTo(Pt((App::GetApp()->AppWidth() - dlg.Width()) / 2,
-                  (App::GetApp()->AppHeight() - dlg.Height()) / 2));
+    dlg.MoveTo(Pt((GUI::GetGUI()->AppWidth() - dlg.Width()) / 2,
+                  (GUI::GetGUI()->AppHeight() - dlg.Height()) / 2));
     dlg.Run();
     if (dlg.ColorWasSelected()) {
         m_color_button->SetRepresentedColor(dlg.Result());
@@ -330,7 +330,7 @@ AttributeRow<boost::shared_ptr<Font> >::AttributeRow(const std::string& name, bo
 void AttributeRow<boost::shared_ptr<Font> >::FilenameChanged(const std::string& filename_text)
 {
     try {
-        boost::shared_ptr<Font> font = App::GetApp()->GetFont(filename_text, m_value->PointSize());
+        boost::shared_ptr<Font> font = GUI::GetGUI()->GetFont(filename_text, m_value->PointSize());
         m_value = font;
         m_filename_edit->SetTextColor(CLR_BLACK);
         ValueChangedSignal(m_value);
@@ -346,7 +346,7 @@ void AttributeRow<boost::shared_ptr<Font> >::PointsChanged(const std::string& po
         int points = boost::lexical_cast<int>(points_text);
         if (points < 4 || 200 < points)
             throw boost::bad_lexical_cast();
-        boost::shared_ptr<Font> font = App::GetApp()->GetFont(m_value->FontName(), points);
+        boost::shared_ptr<Font> font = GUI::GetGUI()->GetFont(m_value->FontName(), points);
         m_value = font;
         m_points_edit->SetTextColor(CLR_BLACK);
         ValueChangedSignal(m_value);

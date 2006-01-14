@@ -24,45 +24,45 @@
 
 /* $Header$ */
 
-#include "SDL/SDLGGApp.h"
-#include "GGEventPump.h"
+#include <GG/SDL/SDLGUI.h>
+#include <GG/EventPump.h>
 
 #include <iostream>
 
 // member functions
-SDLGGApp::SDLGGApp(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
-    App(app_name),
+SDLGUI::SDLGUI(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
+    GUI(app_name),
     m_app_width(w),
     m_app_height(h)
 {
 }
 
-SDLGGApp::~SDLGGApp()
+SDLGUI::~SDLGUI()
 {
     SDLQuit();
 }
 
-int SDLGGApp::AppWidth() const
+int SDLGUI::AppWidth() const
 {
     return m_app_width;
 }
 
-int SDLGGApp::AppHeight() const
+int SDLGUI::AppHeight() const
 {
     return m_app_height;
 }
 
-int SDLGGApp::Ticks() const
+int SDLGUI::Ticks() const
 {
     return SDL_GetTicks();
 }
 
-void SDLGGApp::operator()()
+void SDLGUI::operator()()
 {
-    App::operator()();
+    GUI::operator()();
 }
 
-void SDLGGApp::Exit(int code)
+void SDLGUI::Exit(int code)
 {
     if (code)
         std::cerr << "Initiating Exit (code " << code << " - error termination)";
@@ -70,17 +70,17 @@ void SDLGGApp::Exit(int code)
     exit(code);
 }
 
-void SDLGGApp::Wait(int ms)
+void SDLGUI::Wait(int ms)
 {
     SDL_Delay(ms);
 }
 
-SDLGGApp* SDLGGApp::GetApp()
+SDLGUI* SDLGUI::GetGUI()
 {
-    return dynamic_cast<SDLGGApp*>(App::GetApp());
+    return dynamic_cast<SDLGUI*>(GUI::GetGUI());
 }
 
-GG::Key SDLGGApp::GGKeyFromSDLKey(const SDL_keysym& key)
+GG::Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
 {
     GG::Key retval = GG::Key(key.sym);
     bool shift = key.mod & KMOD_SHIFT;
@@ -122,7 +122,7 @@ GG::Key SDLGGApp::GGKeyFromSDLKey(const SDL_keysym& key)
     return retval;
 }
 
-void SDLGGApp::SDLInit()
+void SDLGUI::SDLInit()
 {
     const SDL_VideoInfo* vid_info = 0;
 
@@ -170,7 +170,7 @@ void SDLGGApp::SDLInit()
     GLInit();
 }
 
-void SDLGGApp::GLInit()
+void SDLGUI::GLInit()
 {
     double ratio = m_app_width / (float)(m_app_height);
 
@@ -187,7 +187,7 @@ void SDLGGApp::GLInit()
     gluPerspective(50.0, ratio, 1.0, 10.0);
 }
 
-void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
+void SDLGUI::HandleSystemEvents(int& last_mouse_event_time)
 {
     // handle events
     SDL_Event event;
@@ -251,7 +251,7 @@ void SDLGGApp::HandleSystemEvents(int& last_mouse_event_time)
     }
 }
 
-void SDLGGApp::HandleNonGGEvent(const SDL_Event& event)
+void SDLGUI::HandleNonGGEvent(const SDL_Event& event)
 {
     switch (event.type) {
     case SDL_QUIT:
@@ -260,21 +260,21 @@ void SDLGGApp::HandleNonGGEvent(const SDL_Event& event)
     }
 }
 
-void SDLGGApp::RenderBegin()
+void SDLGUI::RenderBegin()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void SDLGGApp::RenderEnd()
+void SDLGUI::RenderEnd()
 {
     SDL_GL_SwapBuffers();
 }
 
-void SDLGGApp::FinalCleanup()
+void SDLGUI::FinalCleanup()
 {
 }
 
-void SDLGGApp::SDLQuit()
+void SDLGUI::SDLQuit()
 {
     FinalCleanup();
 #if defined(GG_USE_NET) && GG_USE_NET
@@ -285,7 +285,7 @@ void SDLGGApp::SDLQuit()
     SDL_Quit();
 }
 
-void SDLGGApp::Run()
+void SDLGUI::Run()
 {
     try {
         SDLInit();
@@ -293,13 +293,13 @@ void SDLGGApp::Run()
         GG::EventPump pump;
         pump();
     } catch (const std::invalid_argument& e) {
-        std::cerr << "std::invalid_argument exception caught in App::Run(): " << e.what();
+        std::cerr << "std::invalid_argument exception caught in GUI::Run(): " << e.what();
         Exit(1);
     } catch (const std::runtime_error& e) {
-        std::cerr << "std::runtime_error exception caught in App::Run(): " << e.what();
+        std::cerr << "std::runtime_error exception caught in GUI::Run(): " << e.what();
         Exit(1);
     } catch (const GG::ExceptionBase& e) {
-        std::cerr << "GG exception (subclass " << e.type() << ") caught in App::Run(): " << e.what();
+        std::cerr << "GG exception (subclass " << e.type() << ") caught in GUI::Run(): " << e.what();
         Exit(1);
     }
 }

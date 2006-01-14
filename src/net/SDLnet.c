@@ -26,8 +26,8 @@
 
 #include "SDL_byteorder.h"
 
-#include "SDLnetsys.h"
-#include "SDL_net.h"
+#include <GG/net/SDLnetsys.h>
+#include <GG/net/SDL_net.h>
 
 
 /* Since the UNIX/Win32/BeOS code is so different from MacOS,

@@ -30,13 +30,13 @@
 #include <math.h>
 
 #include "SDL.h"
-#include "SDL_net.h"
 #include "SDL_thread.h"
+#include <GG/net/SDL_net.h>
 
-#include "net2.h"
-#include "fastevents.h"
-#include "queue.h"
-#include "trace.h"
+#include <GG/net/net2.h>
+#include <GG/net/fastevents.h>
+#include <GG/net/queue.h>
+#include <GG/net/trace.h>
 
 //----------------------------------------
 //

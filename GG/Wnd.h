@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGWnd.h
+/** \file Wnd.h
     Contains the Wnd class, upon which all GG GUI elements are based. */
 
-#ifndef _GGWnd_h_
-#define _GGWnd_h_
+#ifndef _GG_Wnd_h_
+#define _GG_Wnd_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
 #include <list>
@@ -80,7 +80,7 @@ class WndEditor;
     OnTop() window in the z-order.  On-topness is useful for modeless dialog boxes, among other things.
     <br>Modal() windows are available (by setting the MODAL window creation flag), and are also always-on-top, but are
     handled differently and do not have ONTOP specified in their creation flags.  Modal windows are executed by calling
-    Run(), which registers them as modal windows and starts the local execution of the application's event pump.
+    Run(), which registers them as modal windows and starts the local execution of the GUI's event pump.
     Execution of the code that calls Run() is effectively halted until Run() returns.  Derived classes that wish to use
     modal execution should set m_done = true to escape from the modal execution loop.  EventPump has more information
     about processing during modal dialog execution.
@@ -88,7 +88,7 @@ class WndEditor;
     <p>Signal Considerations
     <br>Wnd inherits from boost::signals::trackable.  This means that any slots contained in a Wnd object or Wnd-derived
     object will automatically be disconnected from any connected signals when the Wnd is destroyed.  Every Wnd responds
-    to input as driven by the singleton App object.
+    to input as driven by the singleton GUI object.
 
     <p>Event Filters
     <br>Every Wnd can also have its incoming Events filtered by an arbitrary number of other Wnds.
@@ -134,9 +134,9 @@ class WndEditor;
 
     <p>Style Factory
     <br>A StyleFactory is responsible for creating controls and dialogs that other Wnds may need (e.g. when Slider needs
-    to create a Button for its sliding tab).  There is an app-wide StyleFactory available, but for complete
+    to create a Button for its sliding tab).  There is an GUI-wide StyleFactory available, but for complete
     customization, each Wnd may have one installed as well.  The GetStyleFactory() method returns the one installed in
-    the Wnd, if one exists, or the app-wide one otherwise.
+    the Wnd, if one exists, or the GUI-wide one otherwise.
 
     <p>Note that while a Wnd can contain arbitrary Wnd-derived children, in order for such children to be automatically
     serialized, any user-defined Wnd subclasses must be registered.  See the boost serialization documentation for
@@ -244,7 +244,7 @@ public:
         std::out_of_range if \a mode is not a valid browse mode. */
     const std::string& BrowseInfoText(int mode) const;
 
-    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory if none exists, or the app-wide one otherwise
+    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory if none exists, or the GUI-wide one otherwise
 
     virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
     //@}
@@ -463,7 +463,7 @@ public:
     //@}
 
 protected:
-    /** encapsulates a Wnd event that is passed from the singleton App to a Wnd.  The various types of Events correspond
+    /** encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.  The various types of Events correspond
         to the various message member functions of Wnd, some of which have different parameterizations.  Rather than
         have a less-efficient but more-easily-extensible hierarchy of Event types, a single Event type exists that has
         all possible parameters to a Wnd message function call.  Therefore, not all of Event's accessors will return
@@ -582,7 +582,7 @@ private:
     static boost::shared_ptr<BrowseInfoWnd>
                       s_default_browse_info_wnd;
 
-    friend class App;   ///< App needs access to \a m_zorder, m_children, etc.
+    friend class GUI;   ///< GUI needs access to \a m_zorder, m_children, etc.
     friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
 
     friend class boost::serialization::access;
@@ -628,4 +628,4 @@ void GG::Wnd::serialize(Archive& ar, const unsigned int version)
         ValidateFlags();
 }
 
-#endif // _GGWnd_h_
+#endif // _GG_Wnd_h_

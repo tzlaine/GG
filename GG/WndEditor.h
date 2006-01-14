@@ -25,18 +25,32 @@
 
 /* $Header$ */
 
-/** \file GGWndEditor.h
-    Contains the GGWndEditor class, a window that contains controls that can alter the properties of a Wnd
+/** \file WndEditor.h
+    Contains the WndEditor class, a window that contains controls that can alter the properties of a Wnd
     interactively. */
 
-#ifndef _GGWndEditor_h_
-#define _GGWndEditor_h_
+#ifndef _GG_WndEditor_h_
+#define _GG_WndEditor_h_
 
-#include "GGApp.h"
-#include "GGButton.h"
-#include "GGColorDlg.h"
-#include "GGDropDownList.h"
-#include "GGEdit.h"
+#ifndef _GG_Button_h_
+#include <GG/Button.h>
+#endif
+
+#ifndef _GG_ColorDlg_h_
+#include <GG/dialogs/ColorDlg.h>
+#endif
+
+#ifndef _GG_DropDownList_h_
+#include <GG/DropDownList.h>
+#endif
+
+#ifndef _GG_Edit_h_
+#include <GG/Edit.h>
+#endif
+
+#ifndef _GG_GUI_h_
+#include <GG/GUI.h>
+#endif
 
 #include <boost/type_traits.hpp>
 
@@ -585,7 +599,7 @@ FlagAttributeRow<T>::FlagAttributeRow(const std::string& name, Uint32& flags, co
     m_value(value),
     m_check_box(0)
 {
-    boost::shared_ptr<Font> font_to_use = App::GetApp()->GetFont(font->FontName(), font->PointSize() + 2);
+    boost::shared_ptr<Font> font_to_use = GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 2);
     push_back(CreateControl(name, font, CLR_BLACK));
     m_check_box = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font_to_use, GG::TF_LEFT, GG::CLR_GRAY);
     m_check_box->SetCheck(m_flags & m_value);
@@ -690,4 +704,4 @@ void CustomTextRow<T>::Refresh()
 
 } // namespace GG
 
-#endif // _GGWndEditor_h_
+#endif // _GG_WndEditor_h_

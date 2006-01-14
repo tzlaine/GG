@@ -25,18 +25,18 @@
 
 /* $Header$ */
 
-/** \file GGPluginInterface.h
+/** \file PluginInterface.h
     Contains the PluginInterface class, an interface to custom-control plugins that allow runtime control selection. */
 
-#ifndef _GGPluginInterface_h_
-#define _GGPluginInterface_h_
+#ifndef _GG_PluginInterface_h_
+#define _GG_PluginInterface_h_
 
-#ifndef _GGApp_h_
-#include  <GGApp.h>
+#ifndef _GG_GUI_h_
+#include  <GG/GUI.h>
 #endif
 
-#ifndef _GGBase_h_
-#include  <GGBase.h>
+#ifndef _GG_Base_h_
+#include  <GG/Base.h>
 #endif
 
 #ifndef LTDL_H
@@ -78,8 +78,8 @@ public:
     typedef int                             (*DefaultFontSizeFn)();
     typedef boost::shared_ptr<StyleFactory> (*GetStyleFactoryFn)();
 
-    typedef App::SaveWndFn                  SaveWndFn;
-    typedef App::LoadWndFn                  LoadWndFn;
+    typedef GUI::SaveWndFn                  SaveWndFn;
+    typedef GUI::LoadWndFn                  LoadWndFn;
 
     /** \name Structors */ //@{
     PluginInterface(); ///< default ctor.
@@ -173,4 +173,4 @@ void PluginInterface::LoadWndT(T*& wnd, const std::string& name, boost::archive:
 
 } // namespace GG
 
-#endif // _GGPluginInterface_h_
+#endif // _GG_PluginInterface_h_

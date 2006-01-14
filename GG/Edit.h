@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGEdit.h
+/** \file Edit.h
     Contains the Edit class, a single-line editable text-box control. */
 
-#ifndef _GGEdit_h_
-#define _GGEdit_h_
+#ifndef _GG_Edit_h_
+#define _GG_Edit_h_
 
-#ifndef _GGTextControl_h_
-#include "GGTextControl.h"
+#ifndef _GG_TextControl_h_
+#include <GG/TextControl.h>
 #endif
 
 namespace GG {
@@ -158,4 +158,4 @@ void GG::Edit::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_sel_text_color);
 }
 
-#endif // _GGEdit_h_
+#endif // _GG_Edit_h_

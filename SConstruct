@@ -47,10 +47,6 @@ options.Add('boost_signals_namespace',
 options.Add('with_sdl', 'Root directory of SDL installation')
 options.Add('with_sdl_include', 'Specify exact include dir for SDL headers')
 options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library')
-options.Add(BoolOption('with_builtin_sdlnet', 'Use built-in version of SDL_net', 1))
-options.Add('with_sdlnet', 'Root directory of SDL_net installation (ignored if $with_builtin_sdlnet is true)')
-options.Add('with_sdlnet_include', 'Specify exact include dir for SDL_net headers (ignored if $with_builtin_sdlnet is true)')
-options.Add('with_sdlnet_libdir', 'Specify exact library dir for SDL_net library (ignored if $with_builtin_sdlnet is true)')
 options.Add('with_ft', 'Root directory of FreeType2 installation')
 options.Add('with_ft_include', 'Specify exact include dir for FreeType2 headers')
 options.Add('with_ft_libdir', 'Specify exact library dir for FreeType2 library')
@@ -164,10 +160,6 @@ reconfigurable_options = [
     'with_sdl',
     'with_sdl_include',
     'with_sdl_libdir',
-    'with_builtin_sdlnet',
-    'with_sdlnet',
-    'with_sdlnet_include',
-    'with_sdlnet_libdir',
     'with_ft',
     'with_ft_include',
     'with_ft_libdir',
@@ -267,13 +259,6 @@ if not env.GetOption('clean'):
             if not conf.CheckSDL(options, conf, sdl_config, not ms_linker):
                 Exit(1)
 
-        # SDL_net (optional)
-        if not env['disable_net'] and not env['with_builtin_sdlnet']:
-            AppendPackagePaths('sdlnet', env)
-            if not conf.CheckCHeader('SDL/SDL_net.h') and not conf.CheckCHeader('SDL_net.h') or \
-                   not conf.CheckLib('SDL_net', 'SDLNet_Init'):
-                Exit(1)
-
         # pkg-config
         pkg_config = conf.CheckPkgConfig('0.15.0')
 
@@ -356,20 +341,20 @@ int main() {
                 print 'Check libltdl/config.log to see what went wrong.'
                 Exit(1)
 
-        # create include/GGConfig.h
+        # create GG/Config.h
         gg_config_h_values = {
             'gg_use_net' : not env['disable_net'] and 1 or 0,
             'gg_devil_with_allegro' : env['devil_with_allegro'] and '#define GG_DEVIL_WITH_ALLEGRO 1' or '/* #undef GG_DEVIL_WITH_ALLEGRO */',
             'gg_no_allegro_hack' : env['disable_allegro_hack'] and '#define GG_NO_ALLEGRO_HACK 1' or '/* #undef GG_NO_ALLEGRO_HACK */'
             }
-        sys.stdout.write('Creating include/GGConfig.h from include/GGConfig.h.in... ')
+        sys.stdout.write('Creating GG/Config.h from GG/Config.h.in... ')
         try:
-            in_f = open(os.path.normpath('include/GGConfig.h.in'), 'r')
-            out_f = open(os.path.normpath('include/GGConfig.h'), 'w')
+            in_f = open(os.path.normpath('GG/Config.h.in'), 'r')
+            out_f = open(os.path.normpath('GG/Config.h'), 'w')
             out_f.write(in_f.read() % gg_config_h_values)
         except Exception:
             print 'failed'
-            print 'Unable to create include/GGConfig.h from include/GGConfig.h.in'
+            print 'Unable to create GG/Config.h from GG/Config.h.in'
             Exit(1)
         print 'ok'
 
@@ -389,10 +374,7 @@ int main() {
 # define targets                                 #
 ##################################################
 env.Append(CPPPATH = [
-    '#/include',
-    '#/include/net',
-    '#/include/SDL',
-    '#/include/dialogs',
+    '#',
     '#/libltdl'
     ])
 
@@ -460,7 +442,7 @@ else:
     else:
         env.Append(CCFLAGS = ['-Wall', '-O2'])
 
-Export('env', 'DirHeaders')
+Export('env')
 
 # define libGiGi objects
 if str(Platform()) != 'win32':
@@ -486,9 +468,8 @@ else:
         ]
 if env.has_key('CPPDEFINES'):
     env['libltdl_defines'] += env['CPPDEFINES']
-gigi_objects, gigi_sources, gigi_headers = SConscript(os.path.normpath('src/SConscript'))
-install_headers = gigi_headers
-result_objects, result_sources, result_headers = SConscript(os.path.normpath('libltdl/SConscript'))
+gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'))
+result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript'))
 gigi_objects += result_objects
 gigi_sources += result_sources
 
@@ -499,16 +480,14 @@ if not env['disable_sdl']:
         sdl_env.Append(LIBS = ['SDL', 'GiGi'])
         if not env['disable_net']:
             sdl_env.Append(LIBS = ['GiGiNet'])
-    gigi_sdl_objects, gigi_sdl_sources, gigi_sdl_headers = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
-    install_headers.append(gigi_sdl_headers)
+    gigi_sdl_objects, gigi_sdl_sources = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
 
 # define libGiGiNet objects
 if not env['disable_net']:
     net_env = env.Copy()
     if str(Platform()) == 'win32':
         net_env.Append(LIBS = ['SDL', 'wsock32'])
-    gigi_net_objects, gigi_net_sources, gigi_net_headers = SConscript(os.path.normpath('src/net/SConscript'), exports = 'net_env')
-    install_headers.append(gigi_net_headers)
+    gigi_net_objects, gigi_net_sources = SConscript(os.path.normpath('src/net/SConscript'), exports = 'net_env')
 
 if env['dynamic']:
     lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
@@ -548,7 +527,14 @@ if str(Platform()) == 'posix' and env['dynamic']:
     installed_gigi_sdl_libname += gigi_version_suffix
     installed_gigi_net_libname += gigi_version_suffix
 
-Alias('install', InstallHeaderTree(header_dir, 'include', install_headers, [], Install))
+for root, dirs, files in os.walk('GG'):
+    if 'CVS' in dirs:
+        dirs.remove('CVS')
+    if '.svn' in dirs:
+        dirs.remove('.svn')
+    for f in files:
+        Alias('install', Install(os.path.normpath(os.path.join(env.subst(env['incdir']), root)),
+                                 os.path.normpath(os.path.join(root, f))))
 Alias('install', Install(header_dir, os.path.normpath('libltdl/ltdl.h')))
 Alias('install', Install(header_dir, os.path.normpath('libltdl/config.h')))
 

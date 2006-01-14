@@ -24,13 +24,12 @@
 
 /* $Header$ */
 
-#include "GGSlider.h"
+#include <GG/Slider.h>
 
-#include <GGApp.h>
-#include <GGButton.h>
-#include <GGDrawUtil.h>
-#include <GGStyleFactory.h>
-#include <GGWndEditor.h>
+#include <GG/Button.h>
+#include <GG/DrawUtil.h>
+#include <GG/StyleFactory.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 

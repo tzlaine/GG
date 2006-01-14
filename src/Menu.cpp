@@ -24,13 +24,13 @@
 
 /* $Header$ */
 
-#include "GGMenu.h"
+#include <GG/Menu.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGStyleFactory.h>
-#include <GGTextControl.h>
-#include <GGWndEditor.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 
@@ -416,7 +416,7 @@ const int HORIZONTAL_MARGIN = 3; // distance to leave between edge of PopupMenu 
 
 PopupMenu::PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = CLR_WHITE*/,
                      Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
-    Wnd(0, 0, App::GetApp()->AppWidth() - 1, App::GetApp()->AppHeight() - 1, CLICKABLE | MODAL),
+    Wnd(0, 0, GUI::GetGUI()->AppWidth() - 1, GUI::GetGUI()->AppHeight() - 1, CLICKABLE | MODAL),
     m_font(font),
     m_border_color(color),
     m_int_color(interior),
@@ -507,13 +507,13 @@ void PopupMenu::Render()
             Rect r(ul.x + next_menu_x_offset, ul.y + next_menu_y_offset,
                    ul.x + next_menu_x_offset + menu_sz.x, ul.y + next_menu_y_offset + menu_sz.y);
 
-            if (r.lr.x > App::GetApp()->AppWidth()) {
-                int offset = r.lr.x - App::GetApp()->AppWidth();
+            if (r.lr.x > GUI::GetGUI()->AppWidth()) {
+                int offset = r.lr.x - GUI::GetGUI()->AppWidth();
                 r.ul.x -= offset;
                 r.lr.x -= offset;
             }
-            if (r.lr.y > App::GetApp()->AppHeight()) {
-                int offset = r.lr.y - App::GetApp()->AppHeight();
+            if (r.lr.y > GUI::GetGUI()->AppHeight()) {
+                int offset = r.lr.y - GUI::GetGUI()->AppHeight();
                 r.ul.y -= offset;
                 r.lr.y -= offset;
             }

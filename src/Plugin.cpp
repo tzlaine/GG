@@ -28,20 +28,20 @@
     This is a sample plugin implementation.  It can only create and serialize the default types of GG controls.  Extend
     it to create a plugin suitable for a user-defned GG control a hierarchy. */
 
-#include <GGButton.h>
-#include <GGDropDownList.h>
-#include <GGDynamicGraphic.h>
-#include <GGEdit.h>
-#include <GGLayout.h>
-#include <GGListBox.h>
-#include <GGMenu.h>
-#include <GGMultiEdit.h>
-#include <GGScroll.h>
-#include <GGSlider.h>
-#include <GGSpin.h>
-#include <GGStaticGraphic.h>
-#include <GGStyleFactory.h>
-#include <GGTextControl.h>
+#include <GG/Button.h>
+#include <GG/DropDownList.h>
+#include <GG/DynamicGraphic.h>
+#include <GG/Edit.h>
+#include <GG/Layout.h>
+#include <GG/ListBox.h>
+#include <GG/Menu.h>
+#include <GG/MultiEdit.h>
+#include <GG/Scroll.h>
+#include <GG/Slider.h>
+#include <GG/Spin.h>
+#include <GG/StaticGraphic.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
 // TODO : add include files for custom Wnd subclasses to be included in your plugin
 

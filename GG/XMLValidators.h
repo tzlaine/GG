@@ -28,15 +28,15 @@
 /** \file XMLValidators.h
     Contains validator classes used to validate the XML encodings of GG elements. */
 
-#ifndef _XMLValidators_h_
-#define _XMLValidators_h_
+#ifndef _GG_XMLValidators_h_
+#define _GG_XMLValidators_h_
 
-#ifndef _GGBase_h_
-#include <GGBase.h>
+#ifndef _GG_GGBase_h_
+#include <GG/Base.h>
 #endif
 
-#ifndef _XMLDoc_h_
-#include <XMLDoc.h>
+#ifndef _GG_XMLDoc_h_
+#include <GG/XMLDoc.h>
 #endif
 
 #include <boost/lexical_cast.hpp>
@@ -309,4 +309,4 @@ struct MapListValidator : public ValidatorBase
 
 } // namespace GG
 
-#endif // _XMLValidators_h_
+#endif // _GG_XMLValidators_h_

@@ -30,9 +30,9 @@
 #include "SDL.h"
 #include "SDL_thread.h"
 
-#include "fastevents.h"
-#include "queue.h"
-#include "trace.h"
+#include <GG/net/fastevents.h>
+#include <GG/net/queue.h>
+#include <GG/net/trace.h>
 
 static int PollMaskedEvent(SDL_Event *event, Uint32 mask)
 {

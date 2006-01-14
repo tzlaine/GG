@@ -24,10 +24,10 @@
 
 /* $Header$ */
 
-#include "GGLayout.h"
+#include <GG/Layout.h>
 
-#include <GGDrawUtil.h>
-#include <GGWndEditor.h>
+#include <GG/DrawUtil.h>
+#include <GG/WndEditor.h>
 
 #include <cassert>
 #include <cmath>

@@ -6,14 +6,11 @@ platform_str = "%s" % Platform()
 # posix
 if platform_str == 'posix':
     print 'Posix platform detected ...'
-    gg_dir = '/usr/local/include/GG/'
+    gg_dir = '/usr/local/include'
     cpppath = ['/usr/local/include/boost-1_33_1',
                '/usr/include/SDL',
                '/usr/include/freetype2',
-               gg_dir,
-               gg_dir + 'dialogs',
-               gg_dir + 'net',
-               gg_dir + 'SDL']
+               gg_dir]
     libs = ['GiGiSDL',
             'GiGi',
             'GiGiNet',
@@ -36,10 +33,7 @@ if platform_str == 'win32':
                'C:/log4cpp-0.3.4b/include',
                'C:/freetype-2.1.7/include',
                'C:/zlib/include',
-               gg_dir + 'include',
-               gg_dir + 'include/dialogs',
-               gg_dir + 'include/net',
-               gg_dir + 'include/SDL']
+               gg_dir]
     libs = ['GiGiNet',
             'GiGiSDL',
             'GiGi',

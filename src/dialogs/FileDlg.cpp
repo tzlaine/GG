@@ -24,17 +24,17 @@
 
 /* $Header$ */
 
-#include "GGFileDlg.h"
+#include <GG/dialogs/FileDlg.h>
 
-#include "../GGApp.h"
-#include "../GGButton.h"
-#include "../GGEdit.h"
-#include "../GGDropDownList.h"
-#include "../GGDrawUtil.h"
-#include "../GGStyleFactory.h"
-#include "../GGTextControl.h"
+#include <GG/GUI.h>
+#include <GG/Button.h>
+#include <GG/Edit.h>
+#include <GG/DropDownList.h>
+#include <GG/DrawUtil.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
-#include "GGThreeButtonDlg.h"
+#include <GG/dialogs/ThreeButtonDlg.h>
 
 // HACK! MSVC #defines int64_t to be __int64, which breaks the code in boost's cstdint.hpp
 #ifdef int64_t
@@ -142,7 +142,7 @@ FileDlg::FileDlg() :
 
 FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi,
                  const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/) : 
-    Wnd((App::GetApp()->AppWidth() - WIDTH) / 2, (App::GetApp()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
+    Wnd((GUI::GetGUI()->AppWidth() - WIDTH) / 2, (GUI::GetGUI()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
     m_text_color(text_color),

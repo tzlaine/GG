@@ -24,9 +24,9 @@
 
 /* $Header$ */
 
-#include "GGDrawUtil.h"
+#include <GG/DrawUtil.h>
 
-#include "GGApp.h"
+#include <GG/GUI.h>
 
 #include <valarray>
 
@@ -581,7 +581,7 @@ namespace GG {
             x2 = std::max(r.Left(), std::min(x2, r.Right()));
             y2 = std::max(r.Top(), std::min(y2, r.Bottom()));
         }
-        glScissor(x1, App::GetApp()->AppHeight() - y2, x2 - x1, y2 - y1);
+        glScissor(x1, GUI::GetGUI()->AppHeight() - y2, x2 - x1, y2 - y1);
         g_scissor_clipping_rects.push_back(Rect(x1, y1, x2, y2));
     }
 
@@ -593,7 +593,7 @@ namespace GG {
             glPopAttrib();
         } else {
             const Rect& r = g_scissor_clipping_rects.back();
-            glScissor(r.Left(), App::GetApp()->AppHeight() - r.Bottom(), r.Width(), r.Height());
+            glScissor(r.Left(), GUI::GetGUI()->AppHeight() - r.Bottom(), r.Width(), r.Height());
         }
     }
 

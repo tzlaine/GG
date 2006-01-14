@@ -24,14 +24,14 @@
 
 /* $Header$ */
 
-#include "GGBrowseInfoWnd.h"
+#include <GG/BrowseInfoWnd.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGFont.h>
-#include <GGLayout.h>
-#include <GGStyleFactory.h>
-#include <GGTextControl.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/Font.h>
+#include <GG/Layout.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
 using namespace GG;
 

@@ -1,18 +1,18 @@
-#include "SDLGGApp.h"
-#include "GGThreeButtonDlg.h"
-#include "GGFileDlg.h"
+#include <GG/SDL/SDLGUI.h>
+#include <GG/dialogs/ThreeButtonDlg.h>
+#include <GG/dialogs/FileDlg.h>
 
 #include <iostream>
 
 // Tutorial 1: Minimal
 // This contains the minimal interesting GG application.  It contains 3D as well as GUI elements in the same scene, and
-// demonstrates how to use the default SDL input driver, SDLGGApp.
+// demonstrates how to use the default SDL input driver, SDLGUI.
 
 
-// This is the minimal interface (or nearly so) to SDLGGApp required to produce a functional GG-over-SDL application.
-// Note that GG does not require SDL, and even when using SDL, it does not require you to use SDLGGApp.  However, using
-// SDLGGApp as an application framework makes using GG extremely easy, as you can see.
-class MinimalGGApp : public SDLGGApp
+// This is the minimal interface (or nearly so) to SDLGUI required to produce a functional GG-over-SDL application.
+// Note that GG does not require SDL, and even when using SDL, it does not require you to use SDLGUI.  However, using
+// SDLGUI as an application framework makes using GG extremely easy, as you can see.
+class MinimalGGApp : public SDLGUI
 {
 public:
     MinimalGGApp();
@@ -29,11 +29,11 @@ private:
     virtual void FinalCleanup();
 };
 
-// The constructor must call SDLGGApp with the desired application width and height, a flag indicating whether FPS
-// statistics should be generated, amd the application's name.  Note that SDLGGApps run in windowed mode by default, and
+// The constructor must call SDLGUI with the desired application width and height, a flag indicating whether FPS
+// statistics should be generated, amd the application's name.  Note that SDLGUIs run in windowed mode by default, and
 // note that the application name does not appear in the title bar, but must be set separately.
 MinimalGGApp::MinimalGGApp() : 
-    SDLGGApp(1024, 768, false, "Minimal GG App")
+    SDLGUI(1024, 768, false, "Minimal GG App")
 {
 }
 
@@ -75,7 +75,7 @@ void MinimalGGApp::Enter2DMode()
 // At the end of a single iteration of the GG rendering cycle, GG attempts to return GL state to what it was before the
 // call to Enter2DMode() at the beginning of the iteration.  That is accomplished by calling Exit2DMode().  Note that
 // Enter- and Exit2DMode() depend entirely on the details of your application; there is no default implementation for
-// either of these methods in SDLGGApp.
+// either of these methods in SDLGUI.
 void MinimalGGApp::Exit2DMode()
 {
     glMatrixMode(GL_MODELVIEW);
@@ -87,9 +87,9 @@ void MinimalGGApp::Exit2DMode()
     glPopAttrib();
 }
 
-// This gets called once per frame, and should call GG::App::Render() at its end.  Before this call to
-// GG::App::Render(), all "3D" (non-GG, non-orthographic) rendering should be done.  If you don't plan on doing anything
-// but using GG's windows and controls, you won't need to override this method at all.  Note that GG::App::Render()
+// This gets called once per frame, and should call GG::GUI::Render() at its end.  Before this call to
+// GG::GUI::Render(), all "3D" (non-GG, non-orthographic) rendering should be done.  If you don't plan on doing anything
+// but using GG's windows and controls, you won't need to override this method at all.  Note that GG::GUI::Render()
 // calls Enter2DMode() at tis beginning and Exit2DMode() at its end.
 void MinimalGGApp::Render()
 {
@@ -140,7 +140,7 @@ void MinimalGGApp::Render()
 
     glEnd();
 
-    GG::App::Render();
+    GG::GUI::Render();
 }
 
 // This is where you put any OpenGL initialization code you need to execute at the start of the application.  This
@@ -185,7 +185,7 @@ void MinimalGGApp::Initialize()
     quit_dlg->Run();
 
     // Now that we're back from the modal dialog, we can exit normally, since that's what closing the dialog indicates.
-    // Exit() calls all the cleanup methods for GG::SDLGGApp.
+    // Exit() calls all the cleanup methods for GG::SDLGUI.
     Exit(0);
 }
 

@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGDrawUtil.h
+/** \file DrawUtil.h
     Contains numerous 2D rendering convenience functions, for rendering rectangles, circles, etc. */
 
-#ifndef _GGDrawUtil_h_
-#define _GGDrawUtil_h_
+#ifndef _GG_DrawUtil_h_
+#define _GG_DrawUtil_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
 namespace GG {
@@ -116,4 +116,4 @@ namespace GG {
 
 }
 
-#endif // _GGDrawUtil_h_
+#endif // _GG_DrawUtil_h_

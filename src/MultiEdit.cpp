@@ -24,13 +24,12 @@
 
 /* $Header$ */
 
-#include "GGMultiEdit.h"
+#include <GG/MultiEdit.h>
  
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGScroll.h>
-#include <GGStyleFactory.h>
-#include <GGWndEditor.h>
+#include <GG/DrawUtil.h>
+#include <GG/Scroll.h>
+#include <GG/StyleFactory.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 

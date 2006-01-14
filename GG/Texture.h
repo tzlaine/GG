@@ -25,15 +25,15 @@
 
 /* $Header$ */
 
-/** \file GGTexture.h
+/** \file Texture.h
     Contains the Texture class, which encapsulates an OpenGL texture object; the SubTexture class, which represents a portion 
-    of an OpenGL texture object; and the TextureManager class, which provides application-wide management of Texture objects. */
+    of an OpenGL texture object; and the TextureManager class, which provides GUI-wide management of Texture objects. */
 
-#ifndef _GGTexture_h_
-#define _GGTexture_h_
+#ifndef _GG_Texture_h_
+#define _GG_Texture_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
 #include <boost/serialization/access.hpp>
@@ -333,4 +333,4 @@ void GG::SubTexture::serialize(Archive& ar, const unsigned int version)
         m_texture = boost::const_pointer_cast<const Texture>(non_const_texture);
 }
 
-#endif // _GGTexture_h_
+#endif // _GG_Texture_h_

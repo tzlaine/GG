@@ -25,15 +25,15 @@
 
 /* $Header$ */
 
-/** \file GGSlider.h
+/** \file Slider.h
     Contains the Slider class, which provides a slider control that allows the user to select a value from a range 
     if integers. */
 
-#ifndef _GGSlider_h_
-#define _GGSlider_h_
+#ifndef _GG_Slider_h_
+#define _GG_Slider_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
 namespace GG {
@@ -150,4 +150,4 @@ void GG::Slider::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_tab);
 }
 
-#endif // _GGSlider_h_
+#endif // _GG_Slider_h_

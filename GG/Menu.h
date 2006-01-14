@@ -25,15 +25,15 @@
 
 /* $Header$ */
 
-/** \file GGMenu.h
+/** \file Menu.h
     Contains the MenuItem class, which represents menu data; the MenuBar control class; and the PopupMenu class, which is 
     used to provide immediate context menus. */
 
-#ifndef _GGMenu_h_
-#define _GGMenu_h_
+#ifndef _GG_Menu_h_
+#define _GG_Menu_h_
 
-#ifndef _GGControl_h_
-#include "GGControl.h"
+#ifndef _GG_Control_h_
+#include <GG/Control.h>
 #endif
 
 namespace GG {
@@ -348,4 +348,4 @@ void GG::MenuBar::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_caret);
 }
 
-#endif // _GGMenu_h_
+#endif // _GG_Menu_h_

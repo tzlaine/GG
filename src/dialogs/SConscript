@@ -1,18 +1,16 @@
 # -*- Python -*-
 
-Import('env', 'DirHeaders')
+Import('env')
 
 sources = [
-    'GGColorDlg.cpp',
-    'GGFileDlg.cpp',
-    'GGThreeButtonDlg.cpp'
+    'ColorDlg.cpp',
+    'FileDlg.cpp',
+    'ThreeButtonDlg.cpp'
     ]
-
-headers = ['dialogs'] + DirHeaders('../../include/dialogs')
 
 if env['dynamic']:
     objects = env.SharedObject(sources)
 else:
     objects = env.Object(sources)
 
-Return('objects', 'sources', 'headers')
+Return('objects', 'sources')

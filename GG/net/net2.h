@@ -30,7 +30,7 @@
     Part of the SDL_Net2/Fastevents libs. */
 
 #include "SDL.h"
-#include "SDL_net.h"
+#include <GG/net/SDL_net.h>
 
 #ifdef __cplusplus
 extern "C" {

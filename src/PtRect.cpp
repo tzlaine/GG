@@ -24,7 +24,7 @@
 
 /* $Header$ */
 
-#include "GGPtRect.h"
+#include <GG/PtRect.h>
 
 #include <iostream>
 

@@ -24,24 +24,24 @@
 
 /* $Header$ */
 
-#include "GGStyleFactory.h"
+#include <GG/StyleFactory.h>
 
-#include "GGButton.h"
-#include "GGDropDownList.h"
-#include "GGDynamicGraphic.h"
-#include "GGEdit.h"
-#include "GGListBox.h"
-#include "GGMenu.h"
-#include "GGMultiEdit.h"
-#include "GGScroll.h"
-#include "GGSlider.h"
-#include "GGSpin.h"
-#include "GGStaticGraphic.h"
-#include "GGTextControl.h"
+#include <GG/Button.h>
+#include <GG/DropDownList.h>
+#include <GG/DynamicGraphic.h>
+#include <GG/Edit.h>
+#include <GG/ListBox.h>
+#include <GG/Menu.h>
+#include <GG/MultiEdit.h>
+#include <GG/Scroll.h>
+#include <GG/Slider.h>
+#include <GG/Spin.h>
+#include <GG/StaticGraphic.h>
+#include <GG/TextControl.h>
 
-#include "GGColorDlg.h"
-#include "GGFileDlg.h"
-#include "GGThreeButtonDlg.h"
+#include <GG/dialogs/ColorDlg.h>
+#include <GG/dialogs/FileDlg.h>
+#include <GG/dialogs/ThreeButtonDlg.h>
 
 using namespace GG;
 

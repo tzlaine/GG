@@ -26,12 +26,12 @@
 
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 
-#include "GGDynamicGraphic.h"
+#include <GG/DynamicGraphic.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGTexture.h>
-#include <GGWndEditor.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/Texture.h>
+#include <GG/WndEditor.h>
 
 #include <cmath>
 
@@ -157,12 +157,12 @@ void DynamicGraphic::Render()
         int final_frame_idx =   (0.0 <= m_FPS ? m_last_frame_idx : m_first_frame_idx);
         if (m_playing) {
             if (m_first_frame_time == -1) {
-                m_last_frame_time = m_first_frame_time = App::GetApp()->Ticks();
+                m_last_frame_time = m_first_frame_time = GUI::GetGUI()->Ticks();
                 if (0.0 != m_FPS) // needed if a start index was set
                     m_first_frame_time = static_cast<int>(m_first_frame_time - 1000.0 / m_FPS * m_curr_frame);
             } else {
                 int old_frame = m_curr_frame;
-                int curr_time = App::GetApp()->Ticks();
+                int curr_time = GUI::GetGUI()->Ticks();
                 SetFrameIndex(initial_frame_idx + static_cast<int>((curr_time - m_first_frame_time) / 1000.0 * m_FPS) % (m_last_frame_idx - m_first_frame_idx + 1));
 
                 // determine whether the final frame was passed

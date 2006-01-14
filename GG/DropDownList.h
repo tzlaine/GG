@@ -25,15 +25,15 @@
 
 /* $Header$ */
 
-/** \file GGDropDownList.h
+/** \file DropDownList.h
     Contains the DropDownList class, a control that displays a current selection, and allows the user to select one 
     of several options from a list that drops down when the control is clicked. */
 
-#ifndef _GGDropDownList_h_
-#define _GGDropDownList_h_
+#ifndef _GG_DropDownList_h_
+#define _GG_DropDownList_h_
 
-#ifndef _GGListBox_h_
-#include "GGListBox.h"
+#ifndef _GG_ListBox_h_
+#include <GG/ListBox.h>
 #endif
 
 namespace GG {
@@ -170,4 +170,4 @@ void GG::DropDownList::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_LB);
 }
 
-#endif // _GGDropDownList_h_
+#endif // _GG_DropDownList_h_

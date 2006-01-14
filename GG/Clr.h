@@ -25,14 +25,14 @@
 
 /* $Header$ */
 
-/** \file GGClr.h
+/** \file Clr.h
     Contains the utility class Clr, which represents colors in GG. */
 
-#ifndef _GGClr_h_
-#define _GGClr_h_
+#ifndef _GG_Clr_h_
+#define _GG_Clr_h_
 
-#ifndef _GGBase_h_
-#include "GGBase.h"
+#ifndef _GG_Base_h_
+#include <GG/Base.h>
 #endif
 
 #include <boost/serialization/access.hpp>
@@ -98,5 +98,5 @@ void GG::Clr::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(a);
 }
 
-#endif // _GGClr_h_
+#endif // _GG_Clr_h_
 

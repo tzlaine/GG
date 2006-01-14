@@ -2,7 +2,7 @@
 #ifndef SERIALIZATION_H
 #define SERIALIZATION_H
 
-#include "GGListBox.h"
+#include <GG/ListBox.h>
 
 // Tutorial 3: Serialization
 // This file is part of the third tutorial.  The other two files are serialization.cpp, saveload.h, and saveload.cpp.

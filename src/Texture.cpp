@@ -24,9 +24,9 @@
 
 /* $Header$ */
 
-#include "GGTexture.h"
+#include <GG/Texture.h>
 
-#include <GGApp.h>
+#include <GG/GUI.h>
 
 #include <IL/il.h>
 
@@ -43,9 +43,7 @@
    * Allegro programs to crash! Therefore, if GG_NO_ALLEGRO_HACK is
    defined, the developer has to use Allegro's END_OF_MAIN macro. */
 
-#ifndef _GGConfig_h_
-# include "GGConfig.h"
-#endif
+#include <GG/Config.h>
 
 #ifdef GG_DEVIL_WITH_ALLEGRO
 # include <allegro.h>
@@ -187,7 +185,7 @@ void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coord
             tex_coords = m_tex_coords;
 
         if (enter_2d_mode)
-            App::GetApp()->Enter2DMode(); // enter 2D mode, if needed
+            GUI::GetGUI()->Enter2DMode(); // enter 2D mode, if needed
 
         glBindTexture(GL_TEXTURE_2D, m_opengl_id);
 
@@ -215,7 +213,7 @@ void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coord
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
 
         if (enter_2d_mode)
-            App::GetApp()->Exit2DMode(); // exit 2D mode, if needed
+            GUI::GetGUI()->Exit2DMode(); // exit 2D mode, if needed
     }
 }
 

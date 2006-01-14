@@ -24,11 +24,11 @@
 
 /* $Header$ */
 
-#include "GGEdit.h"
+#include <GG/Edit.h>
 
-#include <GGApp.h>
-#include <GGDrawUtil.h>
-#include <GGWndEditor.h>
+#include <GG/GUI.h>
+#include <GG/DrawUtil.h>
+#include <GG/WndEditor.h>
 
 using namespace GG;
 
@@ -133,7 +133,7 @@ void Edit::Render()
     } else { // no selected text
         glColor4ubv(text_color_to_use.v);
         GetFont()->RenderText(client_ul.x, text_y_pos, WindowText().substr(m_first_char_shown, last_visible_char - m_first_char_shown));
-        if (App::GetApp()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
+        if (GUI::GetGUI()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
             int caret_x = ScreenPosOfChar(m_cursor_pos.second);
             glDisable(GL_TEXTURE_2D);
             glBegin(GL_LINES);

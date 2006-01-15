@@ -28,8 +28,7 @@ sources = [
     'Texture.cpp',
     'Wnd.cpp',
     'WndEditor.cpp',
-    'ZList.cpp',
-    'XMLDoc.cpp'
+    'ZList.cpp'
     ]
 
 if env['need__vsnprintf_c']:

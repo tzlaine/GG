@@ -65,13 +65,9 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #include <boost/signal.hpp>
 #endif
 
-// other project headers
-#ifndef _GG_XMLDoc_h_
-#include <GG/XMLDoc.h>
-#endif
-
-#ifndef _GG_XMLObjectFactory_h_
-#include <GG/XMLObjectFactory.h>
+// other headers
+#ifndef _GG_Enum_h_
+#include <GG/Enum.h>
 #endif
 
 #ifndef _GG_SignalsAndSlots_h_

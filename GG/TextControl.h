@@ -39,6 +39,8 @@
 #include <GG/Font.h>
 #endif
 
+#include <boost/lexical_cast.hpp>
+
 namespace GG {
 
 /** The name says it all.  All TextControl objects know how to center, left- or right-justify, etc. themselves within

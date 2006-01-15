@@ -24,7 +24,7 @@
     GG has the following features and services:
     - Communication of UI controls via signals and slots
     - Support for 2D-, 3D-, and mixed-mode rendering
-    - Application-wide managment of textures and fonts
+    - Managment of textures and fonts
     - XML serialization of UI elements
     - Optional network support; SDL_net and Fastevents make it possible to receive network packets as SDL messages
 
@@ -114,15 +114,15 @@
 
 /** \page architecture Architecture
     \section arch_rendering Rendering Overview
-    GG uses OpenGL to render its graphics; it is assumed that the entire application is being redrawn multiple times each second.  
+    GG uses OpenGL to render its graphics; it is assumed that the entire GUI is being redrawn multiple times each second.  
     Each GG UI element is draw using calls to OpenGL.  Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D 
     mode graphic, or even a 3D mode rendering; the complexity of the graphics used to represent the UI elements is only limited
     by the target rendering hardware and the user's skill.
     \section arch_UI_overview UI Overview
     \subsection arch_input_events Input Events
     GG is organized as a layer on top of an existing user input framework.  GG has no way of determining that a mouse click, mouse move, 
-    or any other user input event, has taken place.  To use GG, one must subclass off of the abstract class GG::App, and define several 
-    of GG::App's pure virtual functions.  These functions poll the underlying operating system or input framework (by default the SDL),
+    or any other user input event, has taken place.  To use GG, one must subclass off of the abstract class GG::GUI, and define several 
+    of GG::GUI's pure virtual functions.  These functions poll the underlying operating system or input framework (by default the SDL),
     and generate GG input messages from them.  Such messages are mouse moves and clicks, key presses and releases, joystick movement, 
     etc. GG maintains internal state as to what part of the GUI is being dragged, clicked, etc.
     \subsection arch_UI_overview_example Example:
@@ -138,17 +138,17 @@
     GG UI elements are connected using signals and slots, using the boost.signals library implementation.  This allows arbitrary 
     connections between one control and another, and between a control and other code; there is no hierarchy of passed messages 
     as there is in some other GUIs, and there are no unsafe callbacks used.  Refer to the \ref sigs_n_slots documentation for details.
-    \subsection arch_app_services GG::App Services
-    The singleton GG::App object is globally available through a static member function, GG::App::GetApp().  This allows all code
-    in the application to rely on GG::App for certain essential services.  GUI-specific services include registering windows into
+    \subsection arch_gui_services GG::GUI Services
+    The singleton GG::GUI object is globally available through a static member function, GG::GUI::GetGUI().  This allows all code
+    in the application to rely on GG::GUI for certain essential services.  GUI-specific services include registering windows into
     the GUI, registering windows as always-on-top or modal windows, moving windows up or down in the z-order layers of the GUI,
-    removing windows from the GUI, getting mouse state (position and button depression), setting mouse delay repeat (see GG::App 
+    removing windows from the GUI, getting mouse state (position and button depression), setting mouse delay repeat (see GG::GUI 
     for a description of this), entering and exiting from an orthographic projection (2D) rendering mode, and creating polymorphic
-    GUI elements from XML-formatted text.  Most of these services must be provided by the user when subclassing from GG::App; 
-    if SDLGGApp is used, these services are already implemented.
+    GUI elements from XML-formatted text.  Most of these services must be provided by the user when subclassing from GG::GUI; 
+    if SDLGUI is used, these services are already implemented.
     <p>
-    GG::App does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
-    GG::App provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the app is rendering, 
+    GG::GUI does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
+    GG::GUI provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the GUI is rendering, 
     and how long it has been since the last frame was rendered.  There is also a font manager, an application-wide font "pool",
     from which the user can request fonts.  The font pool loads and stores the fonts as needed by the application, and multiple 
     requests for the same font at the same size will result in the creation of only one rendered font object.  A texture manager
@@ -229,8 +229,7 @@
     One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
     capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
     elements for network transmission and receipt.  To satisfy all these requirements, GG uses the boost.serialization 
-    library to serialize Wnd-derived objects.  There was a previous home-grown version of XML serialization that is now
-    deprecated (the GG::XML* classes).
+    library to serialize Wnd-derived objects.
     \section serialization_approach Details
     GG does not contain any actual code that will serialize a Wnd.  Instead, each Wnd subclass contains a serialize() template
     method which may be invoked by user code to perform serialization.  The user must then create a boost serialization
@@ -243,7 +242,7 @@
     archive, all its signals must be reconnected to their slots (and any signals connected to it should be reconnected
     as well).  Many of the built-in GG controls must reconnect signals when loaded; such classes have a private
     ConnectSignals() method that is called at load time.  See RadioButtonGroup::serialize() in GGButton.h for an
-    example.  Another caveat: Font and Texture objects that were part of the App's FontManager and TextureManager when
+    example.  Another caveat: Font and Texture objects that were part of the GUI's FontManager and TextureManager when
     saved will not be added back to these two structures when they are loaded.
 */
 

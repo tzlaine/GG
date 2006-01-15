@@ -7,4 +7,3 @@ Description: An SDL-based networking library for use by libGiGi.
 Requires: GiGi = ${version}
 Version: ${version}
 Libs: %(gigi_net_libs)s -lGiGiNet
-Cflags: -I${includedir}/net

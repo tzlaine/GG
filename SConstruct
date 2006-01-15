@@ -532,11 +532,11 @@ if str(Platform()) == 'posix' and env['dynamic']:
     installed_gigi_net_libname += gigi_version_suffix
 
 for root, dirs, files in os.walk('GG'):
-    if 'CVS' in dirs:
-        dirs.remove('CVS')
     if '.svn' in dirs:
         dirs.remove('.svn')
-    for f in files:
+    if 'CVS' in dirs:
+        dirs.remove('CVS')
+    for f in [f for f in files if f.find('.scons') != 0]:
         Alias('install', Install(os.path.normpath(os.path.join(env.subst(env['incdir']), root)),
                                  os.path.normpath(os.path.join(root, f))))
 

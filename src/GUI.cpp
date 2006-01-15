@@ -513,9 +513,8 @@ GUI* GUI::GetGUI()
 
 void GUI::RenderWindow(Wnd* wnd)
 {
-    if (wnd) {
-        if (wnd->Visible())
-            wnd->Render();
+    if (wnd && wnd->Visible()) {
+        wnd->Render();
         bool clip = wnd->ClipChildren();
         if (clip)
             wnd->BeginClipping();

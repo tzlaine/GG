@@ -157,6 +157,7 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
     m_invalid_filename_str("\"%1%\"\nis an invalid file name."),
     m_filename_is_a_directory_str("\"%1%\"\nis a directory."),
     m_file_does_not_exist_str("File \"%1%\"\ndoes not exist."),
+    m_device_is_not_ready_str("Device is not ready."),
     m_three_button_dlg_ok_str("Ok"),
     m_three_button_dlg_cancel_str("Cancel"),
     m_curr_dir_text(0),
@@ -319,6 +320,11 @@ void FileDlg::SetFilenameIsADirectoryString(const std::string& str)
 void FileDlg::SetFileDoesNotExistString(const std::string& str)
 {
     m_file_does_not_exist_str = str;
+}
+
+void FileDlg::SetDeviceIsNotReadyString(const std::string& str)
+{
+    m_device_is_not_ready_str = str;
 }
 
 void FileDlg::SetThreeButtonDlgOKString(const std::string& str)

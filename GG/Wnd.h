@@ -35,6 +35,10 @@
 #include <GG/Base.h>
 #endif
 
+#ifndef _GG_Exception_h_
+#include <GG/Exception.h>
+#endif
+
 #include <list>
 #include <set>
 

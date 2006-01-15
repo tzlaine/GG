@@ -33,6 +33,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <boost/lexical_cast.hpp>
 #include <boost/spirit.hpp>
 
 #include <cmath>

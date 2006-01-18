@@ -137,7 +137,7 @@ void Button::LButtonUp(const Pt& pt, Uint32 keys)
 void Button::LClick(const Pt& pt, Uint32 keys)
 {
     if (!Disabled()) {
-        m_state = BN_UNPRESSED;
+        m_state = BN_ROLLOVER;
         ClickedSignal();
     }
 }

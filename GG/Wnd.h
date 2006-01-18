@@ -235,8 +235,8 @@ public:
     Wnd*           Parent() const;                      ///< returns the window's parent (may be null)
     Wnd*           RootParent() const;                  ///< returns the earliest ancestor window (may be null)
 
-    const Layout*  GetLayout() const;                   ///< returns the layout for the window, if any
-    const Layout*  ContainingLayout() const;            ///< returns the layout containing the window, if any
+    Layout*        GetLayout() const;                   ///< returns the layout for the window, if any
+    Layout*        ContainingLayout() const;            ///< returns the layout containing the window, if any
 
     /** returns the browse modes for the Wnd, including time cutoffs (in milliseconds), the BrowseInfoWnds to be
         displayed for each browse info mode, and the text (if any) to be displayed in each mode.  As the time that the
@@ -541,9 +541,6 @@ protected:
     /** handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this
         filter processed the message. */
     virtual bool EventFilter(Wnd* w, const Event& event);
-
-    Layout*      GetLayout();        ///< returns the layout for the window, if any
-    Layout*      ContainingLayout(); ///< returns the layout containing the window, if any
     //@}
 
     std::string  m_text;            ///< text associated with the window, such as a window title or button label, etc.

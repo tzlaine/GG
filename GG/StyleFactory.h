@@ -61,8 +61,12 @@ class Wnd;
 
 /** Creates new dialogs and Controls.  This class can be used to create a look for the entire GUI by providing
     user-defined subclasses of the standard Controls.  A Control or dialog can then use the StyleFactory to create the
-    dialogs/controls it needs (e.g. Scroll can use NewButton() to create its tab and/or resize buttons).  This reduces
-    the amount of subclassing that is required to produce a set of custom GG classes. */
+    dialogs/controls it needs (e.g. a vertical Scroll uses NewVScrollTabButton() to create its tab).  This reduces the
+    amount of subclass code that is required to produce a set of custom GG classes.  Note that the subcontrol factory
+    methods below may be the same as or different from their generic counterparts, allowing greater flexibility in which
+    controls are created in different contexts.  For example, NewButton() may create a generic, basic GG Button, but
+    NewHSliderTabButton() may produce a specialized button that looks better on horizontal sliders.  By default, all
+    subcontrol methods invoke the more generic control method for the type of control they each return. */
 class GG_API StyleFactory
 {
 public:
@@ -87,7 +91,7 @@ public:
     virtual RadioButtonGroup*  NewRadioButtonGroup(int x, int y, int w, int h, Orientation orientation) const;
 
     /** Returns a new GG DropDownList. */
-    virtual DropDownList*      NewDropDownList(int x, int y, int w, int row_ht, int drop_ht, Clr color,
+    virtual DropDownList*      NewDropDownList(int x, int y, int w, int h, int drop_ht, Clr color,
                                                Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG DynamicGraphic. */
@@ -146,6 +150,83 @@ public:
     /** Returns a new GG TextControl whose size is exactly that required to hold its text. */
     virtual TextControl*       NewTextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font,
                                               Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0) const;
+    //@}
+
+    /** \name Subcontrols */ //@{
+    /** Returns a new ListBox, to be used in a DropDownList. */
+    virtual ListBox*           NewDropDownListListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO,
+                                                      Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+
+    /** Returns a new vertical Scroll, to be used in a ListBox. */
+    virtual Scroll*            NewListBoxVScroll(int x, int y, int w, int h, Clr color, Clr interior,
+                                                 Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new horizontal Scroll, to be used in a ListBox. */
+    virtual Scroll*            NewListBoxHScroll(int x, int y, int w, int h, Clr color, Clr interior,
+                                                 Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new vertical Scroll, to be used in a MultiEdit. */
+    virtual Scroll*            NewMultiEditVScroll(int x, int y, int w, int h, Clr color, Clr interior,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new horizontal Scroll, to be used in a MultiEdit. */
+    virtual Scroll*            NewMultiEditHScroll(int x, int y, int w, int h, Clr color, Clr interior,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new up (decrease) Button, to be used in a vertical Scroll. */
+    virtual Button*            NewScrollUpButton(int x, int y, int w, int h, const std::string& str,
+                                                 const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                 Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new down (increase) Button, to be used in a vertical Scroll. */
+    virtual Button*            NewScrollDownButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new tab Button, to be used in a vertical Scroll. */
+    virtual Button*            NewVScrollTabButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new left (decrease) Button, to be used in a horizontal Scroll. */
+    virtual Button*            NewScrollLeftButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new right (increase) Button, to be used in a horizontal Scroll. */
+    virtual Button*            NewScrollRightButton(int x, int y, int w, int h, const std::string& str,
+                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                    Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new tab Button, to be used in a horizontal Scroll. */
+    virtual Button*            NewHScrollTabButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new tab Button, to be used in a vertical Slider. */
+    virtual Button*            NewVSliderTabButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new tab Button, to be used in a horizontal Slider. */
+    virtual Button*            NewHSliderTabButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new increase Button, to be used in a Spin. */
+    virtual Button*            NewSpinIncrButton(int x, int y, int w, int h, const std::string& str,
+                                                 const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                 Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new decrease Button, to be used in a Spin. */
+    virtual Button*            NewSpinDecrButton(int x, int y, int w, int h, const std::string& str,
+                                                 const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                 Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new Edit, to be used in an editable Spin. */
+    virtual Edit*              NewSpinEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
+                                           Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
+                                           Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
     //@}
 
     /** \name Dialogs */ //@{

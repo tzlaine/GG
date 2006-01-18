@@ -868,7 +868,7 @@ void MultiEdit::AdjustScrolls()
             m_vscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0)));
         }
     } else if (!m_vscroll && need_vert) { // if scroll doesn't exist but is needed
-        m_vscroll = style->NewScroll(cl_sz.x + GAP - SCROLL_WIDTH, -GAP, SCROLL_WIDTH, cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0), VERTICAL, m_color, CLR_SHADOW);
+        m_vscroll = style->NewMultiEditVScroll(cl_sz.x + GAP - SCROLL_WIDTH, -GAP, SCROLL_WIDTH, cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0), m_color, CLR_SHADOW);
         m_vscroll->SizeScroll(vscroll_min, vscroll_max, cl_sz.y / 8, cl_sz.y - (need_horz ? SCROLL_WIDTH : 0));
         AttachChild(m_vscroll);
         Connect(m_vscroll->ScrolledSignal, &MultiEdit::VScrolled, this);
@@ -885,7 +885,7 @@ void MultiEdit::AdjustScrolls()
             m_hscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH));
         }
     } else if (!m_hscroll && need_horz) { // if scroll doesn't exist but is needed
-        m_hscroll = style->NewScroll(-GAP, cl_sz.y + GAP - SCROLL_WIDTH, cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), SCROLL_WIDTH, HORIZONTAL, m_color, CLR_SHADOW);
+        m_hscroll = style->NewMultiEditHScroll(-GAP, cl_sz.y + GAP - SCROLL_WIDTH, cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), SCROLL_WIDTH, m_color, CLR_SHADOW);
         m_hscroll->SizeScroll(hscroll_min, hscroll_max, cl_sz.x / 8, cl_sz.x - (need_vert ? SCROLL_WIDTH : 0));
         AttachChild(m_hscroll);
         Connect(m_hscroll->ScrolledSignal, &MultiEdit::HScrolled, this);

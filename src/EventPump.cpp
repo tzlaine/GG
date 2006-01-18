@@ -57,7 +57,7 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
 
         state.time = gui->Ticks();
 
-        // if drag repeat is enabled, the left mouse button is depressed (a drag is ocurring), and the last event
+        // if drag repeat is enabled, the left mouse button is depressed (a drag is occurring), and the last event
         // processed wasn't too recent
         if (gui->MouseRepeatDelay() && gui->MouseButtonDown(0) && state.time - state.last_mouse_event_time > state.old_mouse_repeat_interval) {
             if (!state.mouse_drag_repeat_start_time) { // if we're just starting the drag, mark the time we started

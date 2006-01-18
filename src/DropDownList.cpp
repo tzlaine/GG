@@ -96,7 +96,7 @@ DropDownList::DropDownList() :
 DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_current_item_idx(-1),
-    m_LB(GetStyleFactory()->NewListBox(x, y, w, drop_ht, color, color, flags))
+    m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))
 {
     SetStyle(LB_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.

@@ -1370,7 +1370,7 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
             MoveChildUp(m_vscroll);
         }
     } else if (!m_vscroll && vertical_needed) { // if scroll doesn't exist but is needed
-        m_vscroll = style->NewScroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0), VERTICAL, m_color, CLR_SHADOW);
+        m_vscroll = style->NewListBoxVScroll(cl_sz.x - SCROLL_WIDTH, 0, SCROLL_WIDTH, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0), m_color, CLR_SHADOW);
         total_y_extent += VerticalScrollPadding(cl_sz.y);
         m_vscroll->SizeScroll(0, total_y_extent - 1, cl_sz.y / 8, cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
         AttachChild(m_vscroll);
@@ -1391,7 +1391,7 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
             MoveChildUp(m_hscroll);
         }
     } else if (!m_hscroll && horizontal_needed) { // if scroll doesn't exist but is needed
-        m_hscroll = style->NewScroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), SCROLL_WIDTH, HORIZONTAL, m_color, CLR_SHADOW);
+        m_hscroll = style->NewListBoxHScroll(0, cl_sz.y - SCROLL_WIDTH, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), SCROLL_WIDTH, m_color, CLR_SHADOW);
         total_x_extent += HorizontalScrollPadding(cl_sz.x);
         m_hscroll->SizeScroll(0, total_x_extent - 1, cl_sz.x / 8, cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
         AttachChild(m_hscroll);

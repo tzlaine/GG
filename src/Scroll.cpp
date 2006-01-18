@@ -77,13 +77,13 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
     boost::shared_ptr<Font> null_font;
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     if (m_orientation == VERTICAL) {
-        m_decr = style->NewButton(0,     0, w, w,          "", null_font, color);
-        m_incr = style->NewButton(0, h - w, w, w,          "", null_font, color);
-        m_tab  = style->NewButton(0,     w, w, TabWidth(), "", null_font, color);
+        m_decr = style->NewScrollUpButton(   0,     0, w, w,          "", null_font, color);
+        m_incr = style->NewScrollDownButton( 0, h - w, w, w,          "", null_font, color);
+        m_tab  = style->NewVScrollTabButton( 0,     w, w, TabWidth(), "", null_font, color);
     } else {
-        m_decr = style->NewButton(0,     0, h,          h, "", null_font, color);
-        m_incr = style->NewButton(w - h, 0, h,          h, "", null_font, color);
-        m_tab  = style->NewButton(h,     0, TabWidth(), h, "", null_font, color);
+        m_decr = style->NewScrollLeftButton( 0,     0, h,          h, "", null_font, color);
+        m_incr = style->NewScrollRightButton(w - h, 0, h,          h, "", null_font, color);
+        m_tab  = style->NewHScrollTabButton( h,     0, TabWidth(), h, "", null_font, color);
     }
 }
 
@@ -94,7 +94,7 @@ std::pair<int, int> Scroll::PosnRange() const
 
 std::pair<int, int> Scroll::ScrollRange() const
 {
-    return std::pair<int,int>(m_range_min, m_range_max);
+    return std::pair<int, int>(m_range_min, m_range_max);
 }
 
 int Scroll::LineSize() const

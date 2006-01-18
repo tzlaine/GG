@@ -463,12 +463,12 @@ Wnd* Wnd::RootParent() const
     return retval;
 }
 
-const Layout* Wnd::GetLayout() const
+Layout* Wnd::GetLayout() const
 {
     return m_layout;
 }
 
-const Layout* Wnd::ContainingLayout() const
+Layout* Wnd::ContainingLayout() const
 {
     return m_containing_layout;
 }
@@ -1092,16 +1092,6 @@ void Wnd::SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse
 bool Wnd::EventFilter(Wnd* w, const Event& event)
 {
     return false;
-}
-
-Layout* Wnd::GetLayout()
-{
-    return m_layout;
-}
-
-Layout* Wnd::ContainingLayout()
-{
-    return m_containing_layout;
 }
 
 void Wnd::ValidateFlags()

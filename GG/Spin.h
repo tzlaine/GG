@@ -95,22 +95,15 @@ namespace spin_details {
     };
 
     template <class T>
-    struct SetEditableAction : AttributeChangedAction<bool>
+    struct SetButtonWidthAction : AttributeChangedAction<int>
     {
-        SetEditableAction(Spin<T>* spin) : m_spin(spin) {}
-        void operator()(const bool& editable) {m_spin->AllowEdits(editable);}
+        SetButtonWidthAction(Spin<T>* spin) : m_spin(spin) {}
+        void operator()(const int& width) {m_spin->SetButtonWidth(width);}
     private:
         Spin<T>* m_spin;
     };
 }
 
-
-/** the regions of the a SpinBox that a click may fall within; used to catch clicks on the contained Buttons */
-enum SpinRegion {
-    SR_NONE,
-    SR_UP_BN,
-    SR_DN_BN
-};
 
 /** a spin box control.  This control class is templated so that arbitrary data types can be used with Spin.  All the
     built-in numeric types are supported by the code here.  If you want to use some other type, such as an enum type,
@@ -150,7 +143,9 @@ public:
     T     StepSize() const;           ///< returns the step size of the control
     T     MinValue() const;           ///< returns the minimum value of the control
     T     MaxValue() const;           ///< returns the maximum value of the control
-    bool  EditsAllowed() const;       ///< returns true if the spinbox can have its value typed in directly
+    bool  Editable() const;           ///< returns true if the spinbox can have its value typed in directly
+
+    int   ButtonWidth() const;        ///< returns the width used for the up and down buttons
 
     Clr   TextColor() const;          ///< returns the text color
     Clr   InteriorColor() const;      ///< returns the the interior color of the control
@@ -162,12 +157,6 @@ public:
 
     /** \name Mutators */ //@{
     virtual void Render();
-    virtual void LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual void LButtonUp(const Pt& pt, Uint32 keys);
-    virtual void LClick(const Pt& pt, Uint32 keys);
-    virtual void MouseHere(const Pt& pt, Uint32 keys);
-    virtual void MouseLeave(const Pt& pt, Uint32 keys);
     virtual void Keypress(Key key, Uint32 key_mods);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
@@ -181,19 +170,21 @@ public:
     /** sets the value of the control's text to \a value, locked to the range [MinValue(), MaxValue()]*/
     void SetValue(T value);
 
-    void           SetStepSize(T step);   ///< sets the step size of the control to \a step
-    void           SetMinValue(T value);  ///< sets the minimum value of the control to \a value
-    void           SetMaxValue(T value);  ///< sets the maximum value of the control to \a value
+    void SetStepSize(T step);   ///< sets the step size of the control to \a step
+    void SetMinValue(T value);  ///< sets the minimum value of the control to \a value
+    void SetMaxValue(T value);  ///< sets the maximum value of the control to \a value
 
     /** turns on or off the mode that allows the user to edit the value in the spinbox directly. */
     void AllowEdits(bool b = true);
 
-    void           SetTextColor(Clr c);          ///< sets the text color
-    void           SetInteriorColor(Clr c);      ///< sets the interior color of the control
-    void           SetHiliteColor(Clr c);        ///< sets the color used to render hiliting around selected text
-    void           SetSelectedTextColor(Clr c);  ///< sets the color used to render selected text   
+    void SetButtonWidth(int width);    ///< sets the width used for the up and down buttons
 
-    virtual void   DefineAttributes(WndEditor* editor);
+    void SetTextColor(Clr c);          ///< sets the text color
+    void SetInteriorColor(Clr c);      ///< sets the interior color of the control
+    void SetHiliteColor(Clr c);        ///< sets the color used to render hiliting around selected text
+    void SetSelectedTextColor(Clr c);  ///< sets the color used to render selected text   
+
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -208,15 +199,11 @@ protected:
     /** \name Accessors */ //@{
     Button*     UpButton() const;   ///< returns a pointer to the Button control used as this control's up button
     Button*     DownButton() const; ///< returns a pointer to the Button control used as this control's down button
-
-    SpinRegion  InitialDepressedRegion() const;  ///< returns the part of the control originally under cursor in LButtonDown msg
-    SpinRegion  DepressedRegion() const;         ///< returns the part of the control currently being "depressed" by held-down mouse button
-
-    boost::signals::connection EditConnection() const; ///< returns the connection to the internal edit control's FocusUpdateSignal
+    Edit*       GetEdit() const;    ///< returns a pointer to the Edit control used to render this control's text and accept keyboard input
     //@}
 
     /** \name Mutators */ //@{
-    Edit* GetEdit();  ///< returns a pointer to the Edit control used to render this control's text and accept keyboard input
+    virtual bool EventFilter(Wnd* w, const Event& event);
     //@}
 
 private:
@@ -232,13 +219,10 @@ private:
     bool       m_editable;
 
     Edit*      m_edit;
-    Button*    m_up_bn;
-    Button*    m_dn_bn;
+    Button*    m_up_button;
+    Button*    m_down_button;
 
-    SpinRegion m_initial_depressed_area;  ///< the part of the control originally under cursor in LButtonDown msg
-    SpinRegion m_depressed_area;          ///< the part of the control currently being "depressed" by held-down mouse button
-
-    boost::signals::connection m_edit_connection;
+    int        m_button_width;
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -256,10 +240,9 @@ Spin<T>::Spin() :
     m_max_value(),
     m_editable(false),
     m_edit(0),
-    m_up_bn(0),
-    m_dn_bn(0),
-    m_initial_depressed_area(SR_NONE),
-    m_depressed_area(SR_NONE)
+    m_up_button(0),
+    m_down_button(0),
+    m_button_width(15)
 {}
 
 template<class T>
@@ -272,10 +255,9 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_max_value(max),
     m_editable(edits),
     m_edit(0),
-    m_up_bn(0),
-    m_dn_bn(0),
-    m_initial_depressed_area(SR_NONE),
-    m_depressed_area(SR_NONE)
+    m_up_button(0),
+    m_down_button(0),
+    m_button_width(15)
 {
     Init(font, color, text_color, interior, flags);
 }
@@ -283,10 +265,6 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
 template<class T>
 Spin<T>::~Spin()
 {
-    DetachChildren();
-    delete m_edit;
-    delete m_up_bn;
-    delete m_dn_bn;
 }
 
 template<class T>
@@ -314,9 +292,15 @@ T Spin<T>::MaxValue() const
 }
 
 template<class T>
-bool Spin<T>::EditsAllowed() const 
+bool Spin<T>::Editable() const 
 {
     return m_editable;
+}
+
+template<class T>
+int Spin<T>::ButtonWidth() const
+{
+    return m_button_width;
 }
 
 template<class T>
@@ -350,79 +334,6 @@ void Spin<T>::Render()
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
     Pt ul = UpperLeft(), lr = LowerRight();
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
-    if (!m_editable) {
-        m_edit->OffsetMove(UpperLeft());
-        m_edit->Render();
-        m_edit->OffsetMove(-UpperLeft());
-    }
-    m_up_bn->OffsetMove(UpperLeft());
-    m_dn_bn->OffsetMove(UpperLeft());
-    m_up_bn->Render();
-    m_dn_bn->Render();
-    m_up_bn->OffsetMove(-UpperLeft());
-    m_dn_bn->OffsetMove(-UpperLeft());
-}
-
-template<class T>
-void Spin<T>::LButtonDown(const Pt& pt, Uint32 keys)
-{
-    if (!Disabled()) {
-        Pt ul = UpperLeft();
-        if (m_up_bn->InWindow(pt - ul)) {
-            m_initial_depressed_area = SR_UP_BN;
-            m_depressed_area = SR_UP_BN;
-            m_up_bn->SetState(Button::BN_PRESSED);
-            Incr();
-        } else if (m_dn_bn->InWindow(pt - ul)) {
-            m_initial_depressed_area = SR_DN_BN;
-            m_depressed_area = SR_DN_BN;
-            m_dn_bn->SetState(Button::BN_PRESSED);
-            Decr();
-        } else {
-            m_initial_depressed_area = SR_NONE;
-            m_depressed_area = SR_NONE;
-        }
-    }
-}
-
-template<class T>
-void Spin<T>::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
-{
-    if (!Disabled()) {
-        Pt ul = UpperLeft();
-        if (m_up_bn->InWindow(pt - ul)) {
-            Incr();
-        } else if (m_dn_bn->InWindow(pt - ul)) {
-            Decr();
-        }
-    }
-}
-
-template<class T>
-void Spin<T>::LButtonUp(const Pt& pt, Uint32 keys)
-{
-    m_up_bn->SetState(Button::BN_UNPRESSED);
-    m_dn_bn->SetState(Button::BN_UNPRESSED);
-    m_initial_depressed_area = SR_NONE;
-    m_depressed_area = SR_NONE;
-}
-
-template<class T>
-void Spin<T>::LClick(const Pt& pt, Uint32 keys)
-{
-    LButtonUp(pt, keys);
-}
-
-template<class T>
-void Spin<T>::MouseHere(const Pt& pt, Uint32 keys)
-{
-    LButtonUp(pt, keys);
-}
-
-template<class T>
-void Spin<T>::MouseLeave(const Pt& pt, Uint32 keys)
-{
-    m_depressed_area = SR_NONE;
 }
 
 template<class T>
@@ -456,14 +367,13 @@ template<class T>
 void Spin<T>::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
-    const int BN_X_POS = Width() - (Height() - 2 * BORDER_THICK) - BORDER_THICK;
-    const int BN_WIDTH = Height() - 2 * BORDER_THICK;
-    const int BNS_HEIGHT = BN_WIDTH; // height of BOTH buttons
-    m_edit->SizeMove(Pt(0, 0), Pt(Width() - Height(), Height()));
-    m_up_bn->SizeMove(Pt(BN_X_POS, BORDER_THICK),
-                      Pt(BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT / 2));
-    m_dn_bn->SizeMove(Pt(BN_X_POS, BORDER_THICK + BNS_HEIGHT / 2),
-                      Pt(BN_X_POS + BN_WIDTH, BORDER_THICK + BNS_HEIGHT));
+    const int BUTTON_X_POS = Width() - m_button_width - BORDER_THICK;
+    const int BUTTONS_HEIGHT = Height() - 2 * BORDER_THICK; // height of *both* buttons
+    m_edit->SizeMove(Pt(0, 0), Pt(Width() - m_button_width, Height()));
+    m_up_button->SizeMove(Pt(BUTTON_X_POS, BORDER_THICK),
+                          Pt(BUTTON_X_POS + m_button_width, BORDER_THICK + BUTTONS_HEIGHT / 2));
+    m_down_button->SizeMove(Pt(BUTTON_X_POS, BORDER_THICK + BUTTONS_HEIGHT / 2),
+                            Pt(BUTTON_X_POS + m_button_width, BORDER_THICK + BUTTONS_HEIGHT));
 }
 
 template<class T>
@@ -471,16 +381,16 @@ void Spin<T>::Disable(bool b/* = true*/)
 {
     Control::Disable(b);
     m_edit->Disable(b);
-    m_up_bn->Disable(b);
-    m_dn_bn->Disable(b);
+    m_up_button->Disable(b);
+    m_down_button->Disable(b);
 }
 
 template<class T>
 void Spin<T>::SetColor(Clr c)
 {
     Control::SetColor(c);
-    m_up_bn->SetColor(c);
-    m_dn_bn->SetColor(c);
+    m_up_button->SetColor(c);
+    m_down_button->SetColor(c);
 }
 
 template<class T>
@@ -543,21 +453,20 @@ void Spin<T>::SetMaxValue(T value)
 }
 
 template<class T>
-void Spin<T>::AllowEdits(bool b/* = true*/)
-{
-    if (m_editable = b) {
-        AttachChild(m_edit);
-        m_edit_connection = Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
-    } else {
-        DetachChild(m_edit);
-        m_edit_connection.disconnect();
-    }
-}
-
-template<class T>
 void Spin<T>::SetTextColor(Clr c)
 {
     m_edit->SetTextColor(c);
+}
+
+template<class T>
+void Spin<T>::SetButtonWidth(int width)
+{
+    if (1 <= width) {
+        if (Width() - 2 * BORDER_THICK - 1 < width)
+            width = Width() - 2 * BORDER_THICK - 1;
+        m_button_width = width;
+        SizeMove(RelativeUpperLeft(), RelativeLowerRight());
+    }
 }
 
 template<class T>
@@ -597,51 +506,55 @@ void Spin<T>::DefineAttributes(WndEditor* editor)
     editor->Attribute<T>("Min Value", m_min_value, set_min_value_action);
     boost::shared_ptr<spin_details::SetMaxValueAction<T> > set_max_value_action(new spin_details::SetMaxValueAction<T>(this));
     editor->Attribute<T>("Max Value", m_max_value, set_max_value_action);
-    boost::shared_ptr<spin_details::SetEditableAction<T> > set_editable_action(new spin_details::SetEditableAction<T>(this));
-    editor->Attribute<bool>("Editable", m_editable, set_editable_action);
+    editor->Attribute("Editable", m_editable);
+    boost::shared_ptr<spin_details::SetButtonWidthAction<T> > set_button_width_action(new spin_details::SetButtonWidthAction<T>(this));
+    editor->Attribute<int>("Button Width", m_button_width, set_button_width_action);
 }
 
 template<class T>
 Button* Spin<T>::UpButton() const
 {
-    return m_up_bn;
+    return m_up_button;
 }
 
 template<class T>
 Button* Spin<T>::DownButton() const
 {
-    return m_dn_bn;
+    return m_down_button;
 }
 
 template<class T>
-SpinRegion Spin<T>::InitialDepressedRegion() const
-{
-    return m_initial_depressed_area;
-}
-
-template<class T>
-SpinRegion Spin<T>::DepressedRegion() const
-{
-    return m_depressed_area;
-}
-
-template<class T>
-boost::signals::connection Spin<T>::EditConnection() const
-{
-    return m_edit_connection;
-}
-
-template<class T>
-Edit* Spin<T>::GetEdit()
+Edit* Spin<T>::GetEdit() const
 {
     return m_edit;
 }
 
 template<class T>
+bool Spin<T>::EventFilter(Wnd* w, const Event& event)
+{
+    if (w == m_edit) {
+        if (!m_editable && event.Type() == Event::GainingFocus) {
+            GUI::GetGUI()->SetFocusWnd(this);
+            return true;
+        } else {
+            return !m_editable;
+        }
+    }
+    if (event.Type() == Event::LDrag) {
+        if (w == m_up_button)
+            Incr();
+        else if (w == m_down_button)
+            Decr();
+    }
+    return false;
+}
+
+template<class T>
 void Spin<T>::ConnectSignals()
 {
-    if (m_editable)
-        m_edit_connection = Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
+    Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
+    Connect(m_up_button->ClickedSignal, &Spin::Incr, this);
+    Connect(m_down_button->ClickedSignal, &Spin::Decr, this);
 }
 
 template<class T>
@@ -649,12 +562,16 @@ void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_colo
 {
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     Control::SetColor(color);
-    m_edit = style->NewEdit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
+    m_edit = style->NewSpinEdit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
     boost::shared_ptr<Font> small_font = GUI::GetGUI()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
-    m_up_bn = style->NewButton(0, 0, 1, 1, "+", small_font, color);
-    m_dn_bn = style->NewButton(0, 0, 1, 1, "-", small_font, color);
-    if (m_editable)
-        AttachChild(m_edit);
+    m_up_button = style->NewSpinIncrButton(0, 0, 1, 1, "+", small_font, color);
+    m_down_button = style->NewSpinDecrButton(0, 0, 1, 1, "-", small_font, color);
+    m_edit->InstallEventFilter(this);
+    m_up_button->InstallEventFilter(this);
+    m_down_button->InstallEventFilter(this);
+    AttachChild(m_edit);
+    AttachChild(m_up_button);
+    AttachChild(m_down_button);
     ConnectSignals();
     SizeMove(UpperLeft(), LowerRight());
 }
@@ -683,8 +600,8 @@ void Spin<T>::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_max_value)
         & BOOST_SERIALIZATION_NVP(m_editable)
         & BOOST_SERIALIZATION_NVP(m_edit)
-        & BOOST_SERIALIZATION_NVP(m_up_bn)
-        & BOOST_SERIALIZATION_NVP(m_dn_bn);
+        & BOOST_SERIALIZATION_NVP(m_up_button)
+        & BOOST_SERIALIZATION_NVP(m_down_button);
 
     if (Archive::is_loading::value)
         ConnectSignals();

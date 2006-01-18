@@ -57,9 +57,9 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     m_tab_width(tab_width),
     m_line_style(style),
     m_tab_drag_offset(-1),
-    m_tab(GetStyleFactory()->NewButton(0, 0, m_orientation == VERTICAL ? Width() : m_tab_width,
-                                       m_orientation == VERTICAL ? m_tab_width : Height(), "",
-                                       boost::shared_ptr<Font>(), color))
+    m_tab(m_orientation == VERTICAL ?
+          GetStyleFactory()->NewVSliderTabButton(0, 0, Width(), m_tab_width, "", boost::shared_ptr<Font>(), color) :
+          GetStyleFactory()->NewHSliderTabButton(0, 0, m_tab_width, Height(), "", boost::shared_ptr<Font>(), color))
 {
     Control::SetColor(color);
     SizeMove(UpperLeft(), LowerRight());

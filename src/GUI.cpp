@@ -119,9 +119,9 @@ struct GG::GUIImplData
     int          prev_wnd_under_cursor_time; // the time at which prev_wnd_under_cursor was initially set to its current value
     Wnd*         curr_wnd_under_cursor; // GUI window currently under the input cursor; may be 0
     Wnd*         drag_wnds[3];          // GUI window currently being clicked or dragged by each mouse button
-    Pt           wnd_drag_offset;       // offset from the cursor of either the upper-left corner of the GUI window currently being dragged
+    Pt           prev_wnd_drag_position;// the screen coordinates of the cursor when the last *Drag message was generated
     bool         curr_drag_wnd_dragged; // true iff the currently-pressed window (drag_wnd[N]) has actually been dragged some distance (in which case releasing the mouse button is not a click)
-    Pt           wnd_resize_offset;     // offset from the cursor of either the upper-left or lowe-right corner of the GUI window currently being resized
+    Pt           wnd_resize_offset;     // offset from the cursor of either the upper-left or lower-right corner of the GUI window currently being resized
     WndRegion    wnd_region;            // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
 
     boost::shared_ptr<BrowseInfoWnd>
@@ -603,8 +603,9 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                             parent->StartingChildDragDrop(s_impl->drag_wnds[0], offset);
                     } else {
                         Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
-                        Pt move = pos + s_impl->wnd_drag_offset - s_impl->drag_wnds[0]->UpperLeft();
+                        Pt move = pos - s_impl->prev_wnd_drag_position;
                         s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, move, key_mods));
+                        s_impl->prev_wnd_drag_position = pos;
                         if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
                             s_impl->curr_drag_wnd_dragged = true;
                     }
@@ -658,8 +659,9 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 }
             } else if (s_impl->drag_wnds[0]->DragKeeper()) {
                 Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
-                Pt move = pos + s_impl->wnd_drag_offset - s_impl->drag_wnds[0]->UpperLeft();
+                Pt move = pos - s_impl->prev_wnd_drag_position;
                 s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, move, key_mods));
+                s_impl->prev_wnd_drag_position = pos;
                 if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
                     s_impl->curr_drag_wnd_dragged = true;
             }
@@ -682,13 +684,12 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case MPRESS:
     case RPRESS: {
         s_impl->last_button_down_repeat_time = 0;
+        s_impl->prev_wnd_drag_position = pos;
         s_impl->prev_button_press_time = 0;
         s_impl->browse_info_wnd.reset();
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         s_impl->prev_button_press_time = curr_ticks;
         s_impl->prev_button_press_pos = pos;
-        if (s_impl->curr_wnd_under_cursor)
-            s_impl->wnd_drag_offset = s_impl->curr_wnd_under_cursor->UpperLeft() - pos;
         switch (event) {
         case LPRESS: {
             s_impl->button_state[0] = true;
@@ -729,6 +730,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case MRELEASE:
     case RRELEASE: {
         s_impl->last_button_down_repeat_time = 0;
+        s_impl->prev_wnd_drag_position = Pt();
         s_impl->browse_info_wnd.reset();
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         switch (event) {

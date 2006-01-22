@@ -58,7 +58,7 @@ struct SetMarginAction;
     <p>Layouts are best used to arrange the children of another window, such as arranging the controls of a dialog box.
     When used this way, the Layout becomes the sole child of its parent, and contains the parent's children as its own.
     This scheme allows Layouts to be easily nested, since all Layouts are Wnd-derived.  Like a Control, a Layout will
-    forward all MouseWheel() and Keypress() calls to its parent.  Clicks fall through as well, since Layouts are not
+    forward all MouseWheel() and KeyPress() calls to its parent.  Clicks fall through as well, since Layouts are not
     constructed with the Wnd::CLICKABLE flag.
 
     <p>There are two attributes that affect the spacing of all the layout's child windows: border margin and cell
@@ -119,7 +119,8 @@ public:
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
     virtual void MouseWheel(const Pt& pt, int move, Uint32 keys);
-    virtual void Keypress(Key key, Uint32 key_mods);
+    virtual void KeyPress(Key key, Uint32 key_mods);
+    virtual void KeyRelease(Key key, Uint32 key_mods);
 
     /** inserts \a w into the layout in the indicated cell, expanding the layout grid as necessary.  Note that \a row
         and \a column must not be negative, though this is not checked. \throw GG::Layout::AttemptedOverwrite Throws if

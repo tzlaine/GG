@@ -116,16 +116,19 @@ void Button::Render()
 
 void Button::LButtonDown(const Pt& pt, Uint32 keys)
 {
-    if (!Disabled())
+    if (!Disabled()) {
+        ButtonState prev_state = m_state;
         m_state = BN_PRESSED;
+        if (prev_state == BN_PRESSED && RepeatButtonDown())
+            ClickedSignal();
+    }
 }
 
 void Button::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
 {
     if (!Disabled())
         m_state = BN_PRESSED;
-    if (Dragable())
-        OffsetMove(move);
+    Wnd::LDrag(pt, move, keys);
 }
 
 void Button::LButtonUp(const Pt& pt, Uint32 keys)

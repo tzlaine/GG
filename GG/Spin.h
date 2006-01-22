@@ -157,7 +157,7 @@ public:
 
     /** \name Mutators */ //@{
     virtual void Render();
-    virtual void Keypress(Key key, Uint32 key_mods);
+    virtual void KeyPress(Key key, Uint32 key_mods);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
 
@@ -337,7 +337,7 @@ void Spin<T>::Render()
 }
 
 template<class T>
-void Spin<T>::Keypress(Key key, Uint32 key_mods)
+void Spin<T>::KeyPress(Key key, Uint32 key_mods)
 {
     switch (key) {
     case GGK_HOME:
@@ -539,12 +539,6 @@ bool Spin<T>::EventFilter(Wnd* w, const Event& event)
         } else {
             return !m_editable;
         }
-    }
-    if (event.Type() == Event::LDrag) {
-        if (w == m_up_button)
-            Incr();
-        else if (w == m_down_button)
-            Decr();
     }
     return false;
 }

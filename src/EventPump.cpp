@@ -33,51 +33,17 @@ EventPumpState::EventPumpState() :
     last_frame_time(0),
     most_recent_time(0),
     time(0),
-    frames(0),
-    last_mouse_event_time(0),
-    mouse_drag_repeat_start_time(0),
-    last_mouse_drag_repeat_time(0),
-    mouse_repeat_delay(0),
-    mouse_repeat_interval(0),
-    old_mouse_repeat_delay(0),
-    old_mouse_repeat_interval(0)
+    frames(0)
 {}
 
 
 void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_rendering, bool do_rendering)
 {
     if (do_non_rendering) {
-        // handle mouse drag repeats; if there's a change in the values, zero everything out and start the counting over
-        if (state.old_mouse_repeat_delay != gui->MouseRepeatDelay() || state.old_mouse_repeat_interval != gui->MouseRepeatInterval()) {
-            state.old_mouse_repeat_delay = gui->MouseRepeatDelay();
-            state.old_mouse_repeat_interval = gui->MouseRepeatInterval();
-            state.mouse_drag_repeat_start_time = 0;
-            state.last_mouse_drag_repeat_time = 0;
-        }
-
         state.time = gui->Ticks();
 
-        // if drag repeat is enabled, the left mouse button is depressed (a drag is occurring), and the last event
-        // processed wasn't too recent
-        if (gui->MouseRepeatDelay() && gui->MouseButtonDown(0) && state.time - state.last_mouse_event_time > state.old_mouse_repeat_interval) {
-            if (!state.mouse_drag_repeat_start_time) { // if we're just starting the drag, mark the time we started
-                state.mouse_drag_repeat_start_time = state.time;
-            } else if (state.mouse_drag_repeat_start_time == gui->MouseRepeatDelay()) { // if we're counting repeat intervals
-                if (state.time - state.last_mouse_drag_repeat_time > gui->MouseRepeatInterval()) {
-                    state.last_mouse_drag_repeat_time = state.time;
-                    gui->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, gui->KeyMods(), gui->MousePosition(), Pt());
-                }
-            } else if (state.time - state.mouse_drag_repeat_start_time > gui->MouseRepeatDelay()) { // if we're done waiting for the initial delay period
-                state.mouse_drag_repeat_start_time = gui->MouseRepeatDelay(); // set this as equal so we know later that we've passed the delay interval
-                state.last_mouse_drag_repeat_time = state.time;
-                gui->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, gui->KeyMods(), gui->MousePosition(), Pt());
-            }
-        } else {
-            // otherwise, send an idle message immediately, so that the gui has timely updates for triggering browse
-            // info windows, etc., and reset the mouse drag repeat start time to zero
-            gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, gui->KeyMods(), gui->MousePosition(), Pt());
-            state.mouse_drag_repeat_start_time = 0;
-        }
+        // send an idle message, so that the gui has timely updates for triggering browse info windows, etc.
+        gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, gui->KeyMods(), gui->MousePosition(), Pt());
 
         // govern FPS speed if needed
         if (double max_FPS = gui->MaxFPS()) {
@@ -121,7 +87,7 @@ void EventPump::operator()()
     GUI* gui = GUI::GetGUI();
     EventPumpState& state = State();
     while (1) {
-        gui->HandleSystemEvents(state.last_mouse_event_time);
+        gui->HandleSystemEvents();
         LoopBody(gui, state, true, true);
     }
 }

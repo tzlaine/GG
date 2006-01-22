@@ -186,7 +186,7 @@ void Slider::MouseHere(const Pt& pt, Uint32 keys)
     m_tab_drag_offset = -1;
 }
 
-void Slider::Keypress(Key key, Uint32 key_mods)
+void Slider::KeyPress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
         switch (key) {
@@ -221,13 +221,11 @@ void Slider::Keypress(Key key, Uint32 key_mods)
             SlideTo(m_posn - 1);
             break;
         default:
-            if (Parent())
-                Parent()->Keypress(key, key_mods);
+            Control::KeyPress(key, key_mods);
             break;
         }
     } else {
-        if (Parent())
-            Parent()->Keypress(key, key_mods);
+        Control::KeyPress(key, key_mods);
     }
 }
 

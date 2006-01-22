@@ -74,10 +74,16 @@ void Control::MouseWheel(const Pt& pt, int move, Uint32 keys)
         Parent()->MouseWheel(pt, move, keys);
 }
 
-void Control::Keypress(Key key, Uint32 key_mods)
+void Control::KeyPress(Key key, Uint32 key_mods)
 {
     if (Parent())
-        Parent()->Keypress(key, key_mods);
+        Parent()->KeyPress(key, key_mods);
+}
+
+void Control::KeyRelease(Key key, Uint32 key_mods)
+{
+    if (Parent())
+        Parent()->KeyRelease(key, key_mods);
 }
 
 void Control::SetColor(Clr c)

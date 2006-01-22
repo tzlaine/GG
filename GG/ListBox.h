@@ -233,7 +233,7 @@ public:
     virtual bool   AcceptDrop(Wnd* wnd, const Pt& pt);
     virtual void   ChildDraggedAway(Wnd* child, const Wnd* destination);
     virtual void   Render();
-    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   KeyPress(Key key, Uint32 key_mods);
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, then resizes the scrollbars as needed

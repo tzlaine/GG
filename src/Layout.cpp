@@ -466,10 +466,16 @@ void Layout::MouseWheel(const Pt& pt, int move, Uint32 keys)
         Parent()->MouseWheel(pt, move, keys);
 }
 
-void Layout::Keypress(Key key, Uint32 key_mods)
+void Layout::KeyPress(Key key, Uint32 key_mods)
 {
     if (Parent())
-        Parent()->Keypress(key, key_mods);
+        Parent()->KeyPress(key, key_mods);
+}
+
+void Layout::KeyRelease(Key key, Uint32 key_mods)
+{
+    if (Parent())
+        Parent()->KeyRelease(key, key_mods);
 }
 
 void Layout::Add(Wnd* wnd, int row, int column, Uint32 alignment/* = 0*/)

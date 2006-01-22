@@ -109,7 +109,7 @@ private:
     virtual void   GLInit();         ///< allows user to specify OpenGL initialization code; called at the end of SDLInit()
     virtual void   Initialize() = 0; ///< provides one-time gui initialization
 
-    virtual void   HandleSystemEvents(int& last_mouse_event_time);
+    virtual void   HandleSystemEvents();
     virtual void   HandleNonGGEvent(const SDL_Event& event); ///< event handler for all SDL events that are not GG-related
 
     virtual void   RenderBegin();

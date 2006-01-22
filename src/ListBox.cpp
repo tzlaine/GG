@@ -594,7 +594,7 @@ void ListBox::Render()
     }
 }
 
-void ListBox::Keypress(Key key, Uint32 key_mods)
+void ListBox::KeyPress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
         switch (key) {
@@ -673,15 +673,13 @@ void ListBox::Keypress(Key key, Uint32 key_mods)
 
         // any other key gets passed along to the parent
         default:
-            if (Parent())
-                Parent()->Keypress(key, key_mods);
+            Control::KeyPress(key, key_mods);
         }
 
         if (key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT)
             BringCaretIntoView();
     } else {
-        if (Parent())
-            Parent()->Keypress(key, key_mods);
+        Control::KeyPress(key, key_mods);
    }
 }
 
@@ -1118,6 +1116,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
+        case Event::MouseEnter:
         case Event::MouseHere: {
             if (m_style & LB_BROWSEUPDATES) {
                 int sel_row = RowUnderPt(pt);
@@ -1141,6 +1140,11 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             GUI::GetGUI()->SetFocusWnd(this);
             break;
         }
+
+        case Event::MouseWheel:
+        case Event::KeyPress:
+        case Event::KeyRelease:
+            return false;
 
         default:
             break;

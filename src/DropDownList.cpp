@@ -229,7 +229,7 @@ void DropDownList::LClick(const Pt& pt, Uint32 keys)
     }
 }
 
-void DropDownList::Keypress(Key key, Uint32 key_mods)
+void DropDownList::KeyPress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
         switch (key) {
@@ -257,24 +257,18 @@ void DropDownList::Keypress(Key key, Uint32 key_mods)
             if (m_LB->NumRows())
                 Select(m_LB->NumRows() - 1);
             break;
-        default: // any other key gets passed along to the parent
-            if (Parent())
-                Parent()->Keypress(key, key_mods);
+        default:
+            Control::KeyPress(key, key_mods);
         }
     } else {
-        if (Parent())
-            Parent()->Keypress(key, key_mods);
+        Control::KeyPress(key, key_mods);
     }
 }
 
 void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
 {
     // adjust size to keep correct height based on row height, etc.
-#if 0
-    Wnd::SizeMove(ul, Pt(lr.x, ul.y + Height()));
-#else
     Wnd::SizeMove(ul, lr);
-#endif
     m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
 }
 

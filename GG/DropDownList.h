@@ -105,7 +105,7 @@ public:
     /** \name Mutators */ //@{
     virtual void   Render();
     virtual void   LClick(const Pt& pt, Uint32 keys);
-    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   KeyPress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 

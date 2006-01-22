@@ -121,7 +121,7 @@ public:
 
     /** Returns a new GG Scroll. */
     virtual Scroll*            NewScroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
-                                         Uint32 flags = CLICKABLE) const;
+                                         Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new GG Slider. */
     virtual Slider*            NewSlider(int x, int y, int w, int h, int min, int max, Orientation orientation,
@@ -159,29 +159,29 @@ public:
 
     /** Returns a new vertical Scroll, to be used in a ListBox. */
     virtual Scroll*            NewListBoxVScroll(int x, int y, int w, int h, Clr color, Clr interior,
-                                                 Uint32 flags = CLICKABLE) const;
+                                                 Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new horizontal Scroll, to be used in a ListBox. */
     virtual Scroll*            NewListBoxHScroll(int x, int y, int w, int h, Clr color, Clr interior,
-                                                 Uint32 flags = CLICKABLE) const;
+                                                 Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new vertical Scroll, to be used in a MultiEdit. */
     virtual Scroll*            NewMultiEditVScroll(int x, int y, int w, int h, Clr color, Clr interior,
-                                                   Uint32 flags = CLICKABLE) const;
+                                                   Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new horizontal Scroll, to be used in a MultiEdit. */
     virtual Scroll*            NewMultiEditHScroll(int x, int y, int w, int h, Clr color, Clr interior,
-                                                   Uint32 flags = CLICKABLE) const;
+                                                   Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new up (decrease) Button, to be used in a vertical Scroll. */
     virtual Button*            NewScrollUpButton(int x, int y, int w, int h, const std::string& str,
                                                  const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                 Uint32 flags = CLICKABLE) const;
+                                                 Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new down (increase) Button, to be used in a vertical Scroll. */
     virtual Button*            NewScrollDownButton(int x, int y, int w, int h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Uint32 flags = CLICKABLE) const;
+                                                   Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new tab Button, to be used in a vertical Scroll. */
     virtual Button*            NewVScrollTabButton(int x, int y, int w, int h, const std::string& str,
@@ -191,12 +191,12 @@ public:
     /** Returns a new left (decrease) Button, to be used in a horizontal Scroll. */
     virtual Button*            NewScrollLeftButton(int x, int y, int w, int h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Uint32 flags = CLICKABLE) const;
+                                                   Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new right (increase) Button, to be used in a horizontal Scroll. */
     virtual Button*            NewScrollRightButton(int x, int y, int w, int h, const std::string& str,
                                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                    Uint32 flags = CLICKABLE) const;
+                                                    Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new tab Button, to be used in a horizontal Scroll. */
     virtual Button*            NewHScrollTabButton(int x, int y, int w, int h, const std::string& str,
@@ -216,12 +216,12 @@ public:
     /** Returns a new increase Button, to be used in a Spin. */
     virtual Button*            NewSpinIncrButton(int x, int y, int w, int h, const std::string& str,
                                                  const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                 Uint32 flags = CLICKABLE) const;
+                                                 Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new decrease Button, to be used in a Spin. */
     virtual Button*            NewSpinDecrButton(int x, int y, int w, int h, const std::string& str,
                                                  const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                 Uint32 flags = CLICKABLE) const;
+                                                 Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new Edit, to be used in an editable Spin. */
     virtual Edit*              NewSpinEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,

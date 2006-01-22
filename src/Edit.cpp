@@ -168,7 +168,7 @@ void Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     }
 }
 
-void Edit::Keypress(Key key, Uint32 key_mods)
+void Edit::KeyPress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
         bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
@@ -237,8 +237,7 @@ void Edit::Keypress(Key key, Uint32 key_mods)
         case GGK_RETURN:
         case GGK_KP_ENTER:
             FocusUpdateSignal(WindowText());
-            if (Parent())
-                Parent()->Keypress(key, key_mods);
+            TextControl::KeyPress(key, key_mods);
             m_recently_edited = false;
             break;
         default:
@@ -252,15 +251,15 @@ void Edit::Keypress(Key key, Uint32 key_mods)
                 emit_signal = true;                             // notify parent that text has changed
                 if (LastVisibleChar() <= m_cursor_pos.first)    // when we over-run our writing space with typing, scroll the window
                     AdjustView();
-            } else if (Parent()) {
-                Parent()->Keypress(key, key_mods);
+            } else {
+                TextControl::KeyPress(key, key_mods);
             }
             break;
         }
         if (emit_signal)
             EditedSignal(WindowText());
-    } else if (Parent()) {
-        Parent()->Keypress(key, key_mods);
+    } else {
+        TextControl::KeyPress(key, key_mods);
     }
 }
 

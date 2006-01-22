@@ -165,7 +165,7 @@ void SDLGUI::SDLInit()
 #endif // GG_USE_NET
 
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-    EnableMouseDragRepeat(SDL_DEFAULT_REPEAT_DELAY / 2, SDL_DEFAULT_REPEAT_INTERVAL / 2);
+    EnableMouseButtonDownRepeat(SDL_DEFAULT_REPEAT_DELAY / 2, SDL_DEFAULT_REPEAT_INTERVAL / 2);
 
     GLInit();
 }
@@ -187,7 +187,7 @@ void SDLGUI::GLInit()
     gluPerspective(50.0, ratio, 1.0, 10.0);
 }
 
-void SDLGUI::HandleSystemEvents(int& last_mouse_event_time)
+void SDLGUI::HandleSystemEvents()
 {
     // handle events
     SDL_Event event;
@@ -195,10 +195,7 @@ void SDLGUI::HandleSystemEvents(int& last_mouse_event_time)
     while (0 < FE_PollEvent(&event)) {
 #else
     while (0 < SDL_PollEvent(&event)) {
-#endif // GG_USE_NET
-        if (event.type  == SDL_MOUSEBUTTONDOWN || event.type  == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEMOTION)
-            last_mouse_event_time = Ticks();
-
+#endif
         bool send_to_gg = false;
         EventType gg_event = MOUSEMOVE;
         GG::Key key = GG::GGK_UNKNOWN;
@@ -213,10 +210,11 @@ void SDLGUI::HandleSystemEvents(int& last_mouse_event_time)
 
         switch (event.type) {
         case SDL_KEYDOWN:
+        case SDL_KEYUP:
             key = GGKeyFromSDLKey(event.key.keysym);
             if (key < GG::GGK_NUMLOCK)
                 send_to_gg = true;
-            gg_event = KEYPRESS;
+            gg_event = (event.type == SDL_KEYDOWN) ? KEYPRESS : KEYRELEASE;
             break;
         case SDL_MOUSEMOTION:
             send_to_gg = true;

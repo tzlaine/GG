@@ -49,13 +49,6 @@ struct GG_API EventPumpState
     int most_recent_time;
     int time;
     int frames;
-    int last_mouse_event_time;
-    int mouse_drag_repeat_start_time;
-    int last_mouse_drag_repeat_time;
-    int mouse_repeat_delay;
-    int mouse_repeat_interval;
-    int old_mouse_repeat_delay;
-    int old_mouse_repeat_interval;
 };
 
 /** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::GUI
@@ -64,13 +57,12 @@ struct GG_API EventPumpState
 class GG_API EventPumpBase
 {
 protected:
-    /** executes everything but the system event handling portion of the event handling and rendering cycle. 
-        If \a do_non_rendering is true, all the non-rendering code in LoopBody() will be executed; if \a do_rendering 
-        is true, all rendering code in LoopBody() will be executed as well.  Set one or both of these to false to 
-        remove them from the execution of LoopBody().  This is provided mainly so users don't have to manually turn off 
-        and then turn back on FPS limits, mouse drag repeat, etc. if they don't want them to take place in their custom 
-        event pump.  Also, this provides a convenient way to turn rendering off completely in a custom event pump, if 
-        that is desired. */
+    /** executes everything but the system event handling portion of the event handling and rendering cycle. If \a
+        do_non_rendering is true, all the non-rendering code in LoopBody() will be executed; if \a do_rendering is true,
+        all rendering code in LoopBody() will be executed as well.  Set one or both of these to false to remove them
+        from the execution of LoopBody().  This is provided mainly so users don't have to manually turn off and then
+        turn back on FPS limits, etc., if they don't want them to take place in their custom event pump.  Also, this
+        provides a convenient way to turn rendering off completely in a custom event pump, if that is desired. */
     void LoopBody(GUI* gui, EventPumpState& state, bool do_non_rendering, bool do_rendering);
 
     /** returns the EventPumpState object shared by all event pump types. */

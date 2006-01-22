@@ -81,7 +81,7 @@ public:
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
     virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
-    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   KeyPress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< sizes the control, then resizes the tab as needed
 

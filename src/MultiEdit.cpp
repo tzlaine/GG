@@ -220,7 +220,7 @@ void MultiEdit::MouseWheel(const Pt& pt, int move, Uint32 keys)
     }
 }
 
-void MultiEdit::Keypress(Key key, Uint32 key_mods)
+void MultiEdit::KeyPress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
         if (!(m_style & READ_ONLY)) {
@@ -404,8 +404,8 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
                     }
                     m_cursor_end = m_cursor_begin;
                     emit_signal = true;
-                } else if (Parent()) {
-                    Parent()->Keypress(key, key_mods);
+                } else {
+                    Edit::KeyPress(key, key_mods);
                 }
                 break;
             }
@@ -415,8 +415,7 @@ void MultiEdit::Keypress(Key key, Uint32 key_mods)
                 EditedSignal(WindowText());
         }
     } else {
-        if (Parent())
-            Parent()->Keypress(key, key_mods);
+        Edit::KeyPress(key, key_mods);
     }
 }
 

@@ -55,9 +55,6 @@ public:
     /// the clickable regions of a Scroll
     enum ScrollRegion {
         SBR_NONE,
-        SBR_TAB,
-        SBR_LINE_DN,
-        SBR_LINE_UP,
         SBR_PAGE_DN,
         SBR_PAGE_UP
     };
@@ -75,7 +72,7 @@ public:
     /** \name Structors */ //@{
     /** ctor. */
     Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
-           Uint32 flags = CLICKABLE);
+           Uint32 flags = CLICKABLE | REPEAT_BUTTON_DOWN);
     //@}
 
     /** \name Accessors */ //@{
@@ -94,11 +91,9 @@ public:
     /** \name Mutators */ //@{
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
     virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
 
@@ -136,23 +131,26 @@ protected:
     Button*       DecrButton() const;    ///< returns the decrease button (line up/line left)
     //@}
 
-private:
-    void                      UpdatePosn();        ///< adjusts m_posn due to a tab-drag
-    void                      MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
+    /** \name Mutators */ //@{
+    virtual bool  EventFilter(Wnd* w, const Event& event);
+    //@}
 
-    Clr                       m_int_color;   ///< color inside border of slide area
-    const Orientation         m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)
-    int                       m_posn;        ///< current position of tab in logical coords (will be in [m_range_min, m_range_max - m_page_sz])
-    int                       m_range_min;   ///< lowest value in range of scrollbar
-    int                       m_range_max;   ///< highest value "
-    int                       m_line_sz;     ///< logical units traversed in a line movement (such as a click on either end button)
-    int                       m_page_sz;     ///< logical units traversed for a page movement (such as a click in non-tab middle area, or PgUp/PgDn)
-    Button*                   m_tab;         ///< the button representing the tab
-    Button*                   m_incr;        ///< the increase button (line down/line right)
-    Button*                   m_decr;        ///< the decrease button (line up/line left)
-    int                       m_tab_drag_offset;         ///< the offset on the tab as it is dragged (like drag_offset in ProcessInput function)
-    ScrollRegion              m_initial_depressed_area;  ///< the part of the scrollbar originally under cursor in LButtonDown msg
-    ScrollRegion              m_depressed_area;          ///< the part of the scrollbar currently being "depressed" by held-down mouse button
+private:
+    void              UpdatePosn();        ///< adjusts m_posn due to a tab-drag
+    void              MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
+
+    Clr               m_int_color;   ///< color inside border of slide area
+    const Orientation m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)
+    int               m_posn;        ///< current position of tab in logical coords (will be in [m_range_min, m_range_max - m_page_sz])
+    int               m_range_min;   ///< lowest value in range of scrollbar
+    int               m_range_max;   ///< highest value "
+    int               m_line_sz;     ///< logical units traversed in a line movement (such as a click on either end button)
+    int               m_page_sz;     ///< logical units traversed for a page movement (such as a click in non-tab middle area, or PgUp/PgDn)
+    Button*           m_tab;         ///< the button representing the tab
+    Button*           m_incr;        ///< the increase button (line down/line right)
+    Button*           m_decr;        ///< the decrease button (line up/line left)
+    ScrollRegion      m_initial_depressed_region; ///< the part of the scrollbar originally under cursor in LButtonDown msg
+    ScrollRegion      m_depressed_region;         ///< the part of the scrollbar currently being "depressed" by held-down mouse button
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -162,9 +160,6 @@ private:
 // define EnumMap and stream operators for Scroll::ScrollRegion
 GG_ENUM_MAP_BEGIN(Scroll::ScrollRegion)
     GG_ENUM_MAP_INSERT(Scroll::SBR_NONE)
-    GG_ENUM_MAP_INSERT(Scroll::SBR_TAB)
-    GG_ENUM_MAP_INSERT(Scroll::SBR_LINE_DN)
-    GG_ENUM_MAP_INSERT(Scroll::SBR_LINE_UP)
     GG_ENUM_MAP_INSERT(Scroll::SBR_PAGE_DN)
     GG_ENUM_MAP_INSERT(Scroll::SBR_PAGE_UP)
 GG_ENUM_MAP_END
@@ -188,10 +183,7 @@ void GG::Scroll::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_page_sz)
         & BOOST_SERIALIZATION_NVP(m_tab)
         & BOOST_SERIALIZATION_NVP(m_incr)
-        & BOOST_SERIALIZATION_NVP(m_decr)
-        & BOOST_SERIALIZATION_NVP(m_tab_drag_offset)
-        & BOOST_SERIALIZATION_NVP(m_initial_depressed_area)
-        & BOOST_SERIALIZATION_NVP(m_depressed_area);
+        & BOOST_SERIALIZATION_NVP(m_decr);
 }
 
 #endif // _GG_Scroll_h_

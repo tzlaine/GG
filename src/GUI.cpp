@@ -66,8 +66,9 @@ struct GG::GUIImplData
         mouse_pos(0,0),
         mouse_rel(0,0),
         key_mods(0),
-        mouse_repeat_delay(0),
-        mouse_repeat_interval(0),
+        button_down_repeat_delay(250),
+        button_down_repeat_interval(66),
+        last_button_down_repeat_time(0),
         double_click_interval(500),
         min_drag_time(250),
         min_drag_distance(5),
@@ -104,8 +105,10 @@ struct GG::GUIImplData
     Pt           mouse_rel;             // relative position of mouse, based on last MOUSEMOVE event
     Uint32       key_mods;              // currently-depressed modifier keys, based on last KEYPRESS event
 
-    int          mouse_repeat_delay;    // see note above GUI class definition
-    int          mouse_repeat_interval;
+    int          button_down_repeat_delay;     // see note above GUI class definition
+    int          button_down_repeat_interval;
+    int          last_button_down_repeat_time; // last time of a simulated button-down message
+
     int          double_click_interval; // the maximum interval allowed between clicks that is still considered a double-click, in ms
     int          min_drag_time;         // the minimum amount of time that a drag must be in progress before it is considered a drag, in ms
     int          min_drag_distance;     // the minimum distance that a drag must cover before it is considered a drag
@@ -206,14 +209,14 @@ double GUI::MaxFPS() const
     return s_impl->max_FPS;
 }
 
-int GUI::MouseRepeatDelay() const
+int GUI::ButtonDownRepeatDelay() const
 {
-    return s_impl->mouse_repeat_delay;
+    return s_impl->button_down_repeat_delay;
 }
 
-int GUI::MouseRepeatInterval() const
+int GUI::ButtonDownRepeatInterval() const
 {
-    return s_impl->mouse_repeat_interval;
+    return s_impl->button_down_repeat_interval;
 }
 
 int GUI::DoubleClickInterval() const
@@ -401,14 +404,14 @@ void GUI::CancelDragDrop()
     s_impl->drag_drop_wnds.clear();
 }
 
-void GUI::EnableMouseDragRepeat(int delay, int interval)
+void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
 {
     if (!delay) { // setting delay = 0 completely disables mouse drag repeat
-        s_impl->mouse_repeat_delay = 0;
-        s_impl->mouse_repeat_interval = 0;
+        s_impl->button_down_repeat_delay = 0;
+        s_impl->button_down_repeat_interval = 0;
     } else {
-        s_impl->mouse_repeat_delay = delay;
-        s_impl->mouse_repeat_interval = interval;
+        s_impl->button_down_repeat_delay = delay;
+        s_impl->button_down_repeat_interval = interval;
     }
 }
 
@@ -544,33 +547,45 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     }
 
     switch (event) {
-    case IDLE:{
-        if (s_impl->curr_wnd_under_cursor)
-            ProcessBrowseInfo();
-        break;}
-    case KEYPRESS:{
+    case IDLE: {
+        if (s_impl->curr_wnd_under_cursor) {
+            if (s_impl->button_down_repeat_delay && s_impl->curr_wnd_under_cursor->RepeatButtonDown() &&
+                s_impl->drag_wnds[0] == s_impl->curr_wnd_under_cursor) { // convert to a button-down message
+                // ensure that the timing requirements are met
+                if (curr_ticks - s_impl->prev_button_press_time > s_impl->button_down_repeat_delay) {
+                    if (!s_impl->last_button_down_repeat_time ||
+                        curr_ticks - s_impl->last_button_down_repeat_time > s_impl->button_down_repeat_interval) {
+                        s_impl->last_button_down_repeat_time = curr_ticks;
+                        s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::LButtonDown, pos, key_mods));
+                    }
+                }
+            } else {
+                ProcessBrowseInfo();
+            }
+        }
+        break; }
+    case KEYPRESS: {
         s_impl->browse_info_wnd.reset();
         s_impl->browse_info_mode = -1;
         bool processed = false;
-        // only process accelerators when there are no modal windows active; otherwise, accelerators would be an end-run around modality
+        // only process accelerators when there are no modal windows active; otherwise, accelerators would be an end-run
+        // around modality
         if (s_impl->modal_wnds.empty()) {
-            // the focus_wnd may care about the state of the numlock and capslock, or which side of the keyboard's 
-            // CTRL, SHIFT, etc. was pressed, but the accelerators don't
+            // the focus_wnd may care about the state of the numlock and capslock, or which side of the keyboard's CTRL,
+            // SHIFT, etc. was pressed, but the accelerators don't
             Uint32 massaged_mods = MassagedAccelKeyMods(key_mods);
             if (s_impl->accelerators.find(std::make_pair(key, massaged_mods)) != s_impl->accelerators.end())
                 processed = AcceleratorSignal(key, massaged_mods)();
         }
         if (!processed && FocusWnd())
-            FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::Keypress, key, key_mods));
-        break;}
-    case MOUSEMOVE:{
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos); // get window under mouse position
+            FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::KeyPress, key, key_mods));
+        break; }
+    case MOUSEMOVE: {
+        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
 
-        // record these
-        s_impl->mouse_pos = pos; // mouse position
-        s_impl->mouse_rel = rel; // mouse movement
+        s_impl->mouse_pos = pos; // record mouse position
+        s_impl->mouse_rel = rel; // record mouse movement
 
-        // then act on mouse motion
         if (s_impl->drag_wnds[0]) { // only respond to left mouse button drags
             if (s_impl->wnd_region == WR_MIDDLE || s_impl->wnd_region == WR_NONE) { // send drag message to window or initiate drag-drop
                 Pt diff = s_impl->prev_button_press_pos - pos;
@@ -662,11 +677,12 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             s_impl->prev_wnd_under_cursor_time = curr_ticks;
         }
         s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
-        break;}
+        break; }
     case LPRESS:
     case MPRESS:
-    case RPRESS:{
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
+    case RPRESS: {
+        s_impl->last_button_down_repeat_time = 0;
+        s_impl->prev_button_press_time = 0;
         s_impl->browse_info_wnd.reset();
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         s_impl->prev_button_press_time = curr_ticks;
@@ -674,7 +690,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         if (s_impl->curr_wnd_under_cursor)
             s_impl->wnd_drag_offset = s_impl->curr_wnd_under_cursor->UpperLeft() - pos;
         switch (event) {
-        case LPRESS:{
+        case LPRESS: {
             s_impl->button_state[0] = true;
             s_impl->drag_wnds[0] = s_impl->curr_wnd_under_cursor; // track this window as the one being dragged by the left mouse button
             // if this window is not a disabled Control window, it becomes the focus window
@@ -695,27 +711,28 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 MoveUp(drag_wnds_root_parent ? drag_wnds_root_parent : s_impl->drag_wnds[0]); // move root window up to top of z-order
                 s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LButtonDown, pos, key_mods));
             }
-            break;}
-        case MPRESS:{
+            break; }
+        case MPRESS: {
             s_impl->button_state[1] = true;
-            break;}
-        case RPRESS:{
+            break; }
+        case RPRESS: {
             s_impl->button_state[2] = true;
             s_impl->drag_wnds[2] = s_impl->curr_wnd_under_cursor;  // track this window as the one being dragged by the right mouse button
             if (s_impl->drag_wnds[2])
                 s_impl->drag_wnds[2]->HandleEvent(Wnd::Event(Wnd::Event::RButtonDown, pos, key_mods));
-            break;}
+            break; }
         default: break;
         }
         s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
-        break;}
+        break; }
     case LRELEASE:
     case MRELEASE:
-    case RRELEASE:{
+    case RRELEASE: {
+        s_impl->last_button_down_repeat_time = 0;
         s_impl->browse_info_wnd.reset();
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         switch (event) {
-        case LRELEASE:{
+        case LRELEASE: {
             Wnd* click_wnd = s_impl->drag_wnds[0];
             s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), s_impl->curr_drag_wnd_dragged ? click_wnd : 0);
             s_impl->button_state[0] = false;
@@ -767,15 +784,15 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 }
             }
             s_impl->drag_drop_wnds.clear();
-            break;}
-        case MRELEASE:{
+            break; }
+        case MRELEASE: {
             Wnd* click_wnd = s_impl->drag_wnds[1];
             s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), s_impl->curr_drag_wnd_dragged ? click_wnd : 0);
             s_impl->button_state[1] = false;
             s_impl->double_click_wnd = 0;
             s_impl->double_click_time = -1;
-            break;}
-        case RRELEASE:{
+            break; }
+        case RRELEASE: {
             Wnd* click_wnd = s_impl->drag_wnds[2];
             s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), s_impl->curr_drag_wnd_dragged ? click_wnd : 0);
             s_impl->button_state[2] = false;
@@ -803,22 +820,22 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 s_impl->double_click_wnd = 0;
                 s_impl->double_click_time = -1;
             }
-            break;}
+            break; }
         default:
             break;
         }
         s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
         s_impl->curr_drag_wnd_dragged = false;
-        break;}
-    case MOUSEWHEEL:{
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);  // update window under mouse position
+        break; }
+    case MOUSEWHEEL: {
+        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
         s_impl->browse_info_wnd.reset();
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
         if (s_impl->curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2]))
             s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseWheel, pos, rel.y, key_mods));
         s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
-        break;}
+        break; }
     default:
         break;
     }
@@ -826,7 +843,9 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
 
 void GUI::ProcessBrowseInfo()
 {
-    if (s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
+    assert(s_impl->curr_wnd_under_cursor);
+    if (!s_impl->button_state[0] && !s_impl->button_state[1] && !s_impl->button_state[2] &&
+        s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
         const std::vector<Wnd::BrowseInfoMode>& browse_modes = s_impl->curr_wnd_under_cursor->BrowseModes();
         int delta_t = Ticks() - s_impl->prev_wnd_under_cursor_time;
         for (unsigned int i = 0; i < browse_modes.size(); ++i) {

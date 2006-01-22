@@ -166,6 +166,10 @@ public:
 
     /** \name Accessors */ //@{
     bool           Clickable() const;    ///< does a click over this window pass through?
+
+    /** should holding a mouse button down over this Wnd generate multiple *ButtonDown messages? */
+    bool           RepeatButtonDown() const;
+
     bool           Dragable() const;     ///< does a click here become a drag? 
 
     /** when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway? */
@@ -353,11 +357,12 @@ public:
     virtual void   Render(); ///< draws this Wnd
 
     /** respond to left button down msg.  A window receives this whenever any input device button changes from up to
-        down while over the window. */
+        down while over the window.  \note If this Wnd was created with the REPEAT_BUTTON_DOWN flag, this method may be
+        called multiple times during a single button press-release cycle.  \see GG::GUI */
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
 
     /** respond to drag msg (even if this Wnd is not dragable).  Drag messages are only sent to the window over which
-        the button was dressed at the beginning of the drag. A window receives this whenever any input device button is
+        the button was pressed at the beginning of the drag. A window receives this whenever any input device button is
         down and the mouse is moving while over the window.  If a window has the DRAG_KEEPER flag set, the window will
         also receive drag messages when the mouse is being dragged outside the window's area. */
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
@@ -394,8 +399,9 @@ public:
 
     virtual void   MouseEnter(const Pt& pt, Uint32 keys);  ///< respond to cursor entering window's coords
 
-    /** respond to cursor moving about in window's coords.  A MouseHere() message will not be generated the first time
-        the cursor enters the window's area.  In that case, a MouseEnter() message is generated. */
+    /** respond to cursor moving about within the Wnd, or to cursor lingering within the Wnd for a long period of time.
+        A MouseHere() message will not be generated the first time the cursor enters the window's area.  In that case, a
+        MouseEnter() message is generated. */
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
 
     virtual void   MouseLeave(const Pt& pt, Uint32 keys);  ///< respond to cursor leaving window's coords
@@ -403,10 +409,17 @@ public:
     /** respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down) */
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
 
-    /** respond to keystrokes (focus window only).  A window may receive Keypress() messages passed up to it from its
-        children.  For instance, many Control-derived classes pass Keypress() messages to their Parent() windows by
+    /** respond to down-keystrokes (focus window only).  A window may receive KeyPress() messages passed up to it from
+        its children.  For instance, Control-derived classes pass KeyPress() messages to their Parent() windows by
+        default.  \note Though mouse clicks consist of a press and a release, all Control classes by default respond
+        immediately to KeyPress(), not KeyRelease(); in fact, by default no Wnd class does anything at all on a
+        KeyRelease event. */
+    virtual void   KeyPress(Key key, Uint32 key_mods);
+
+    /** respond to up-keystrokes (focus window only).  A window may receive KeyRelease() messages passed up to it from
+        its children.  For instance, Control-derived classes pass KeyRelease() messages to their Parent() windows by
         default. */
-    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   KeyRelease(Key key, Uint32 key_mods);
 
     virtual void   GainingFocus();                         ///< respond to this window gaining the input focus
     virtual void   LosingFocus();                          ///< respond to this window losing the input focus
@@ -490,7 +503,8 @@ protected:
             MouseHere,
             MouseLeave,
             MouseWheel,
-            Keypress,
+            KeyPress,
+            KeyRelease,
             GainingFocus,
             LosingFocus
         };
@@ -508,7 +522,7 @@ protected:
         Event(EventType type, const Pt& pt, int move, Uint32 keys);
 
         /** constructs an Event that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg
-            Keypress(). */
+            KeyPress(). */
         Event(EventType type, Key key, Uint32 key_mods);
 
         /** constructs an Event that is used to invoke a function taking no parameters, eg GainingFocus(). */
@@ -516,7 +530,7 @@ protected:
 
         EventType  Type() const;       ///< returns the type of the Event
         const Pt&  Point() const;      ///< returns the point at which the event took place, if any
-        Key        KeyPress() const;   ///< returns the keypress represented by the Event, if any
+        Key        GetKey() const;     ///< returns the key pressed or released in the Event, if any
         Uint32     KeyMods() const;    ///< returns the modifiers to the Event's keypress, if any
         const Pt&  DragMove() const;   ///< returns the amount of drag movement represented by the Event, if any
         int        WheelMove() const;  ///< returns the ammount of mouse wheel movement represented by the Event, if any
@@ -524,7 +538,7 @@ protected:
     private:
         EventType  m_type;
         Pt         m_point;
-        Key        m_keypress;
+        Key        m_key;
         Uint32     m_key_mods;
         Pt         m_drag_move;
         int        m_wheel_move;

@@ -56,7 +56,8 @@ public:
     virtual bool   AcceptDrop(Wnd* wnd, const Pt& pt);
     virtual void   Render() = 0;
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
-    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   KeyPress(Key key, Uint32 key_mods);
+    virtual void   KeyRelease(Key key, Uint32 key_mods);
 
     virtual void   SetColor(Clr c);        ///< sets the color of the control
     virtual void   Disable(bool b = true); ///< disables/enables the control; disabled controls appear greyed

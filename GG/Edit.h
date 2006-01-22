@@ -84,7 +84,7 @@ public:
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual void   Keypress(Key key, Uint32 key_mods);
+    virtual void   KeyPress(Key key, Uint32 key_mods);
     virtual void   GainingFocus();
     virtual void   LosingFocus();
 

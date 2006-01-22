@@ -141,7 +141,7 @@ namespace {
                 GUI* gui = GUI::GetGUI();
                 EventPumpState& state = State();
                 while (!m_done) {
-                    gui->HandleSystemEvents(state.last_mouse_event_time);
+                    gui->HandleSystemEvents();
                     LoopBody(gui, state, true, true);
                 }
             }
@@ -190,7 +190,7 @@ Wnd::Event::Event(EventType type, const Pt& pt, int move, Uint32 keys) :
 
 Wnd::Event::Event(EventType type, Key key, Uint32 key_mods) :
     m_type(type),
-    m_keypress(key),
+    m_key(key),
     m_key_mods(key_mods),
     m_wheel_move(0)
 {}
@@ -211,9 +211,9 @@ const Pt& Wnd::Event::Point() const
     return m_point;
 }
 
-Key Wnd::Event::KeyPress() const
+Key Wnd::Event::GetKey() const
 {
-    return m_keypress;
+    return m_key;
 }
 
 Uint32 Wnd::Event::KeyMods() const
@@ -296,6 +296,11 @@ Wnd::~Wnd()
 bool Wnd::Clickable() const
 {
     return m_flags & CLICKABLE;
+}
+
+bool Wnd::RepeatButtonDown() const
+{
+    return m_flags & REPEAT_BUTTON_DOWN;
 }
 
 bool Wnd::Dragable() const
@@ -983,7 +988,9 @@ void Wnd::MouseLeave(const Pt& pt, Uint32 keys) {}
 
 void Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {}
 
-void Wnd::Keypress(Key key, Uint32 key_mods) {}
+void Wnd::KeyPress(Key key, Uint32 key_mods) {}
+
+void Wnd::KeyRelease(Key key, Uint32 key_mods) {}
 
 void Wnd::GainingFocus() {}
 
@@ -1144,8 +1151,11 @@ void Wnd::HandleEvent(const Event& event)
     case Event::MouseWheel:
         MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());
         break;
-    case Event::Keypress:
-        Keypress(event.KeyPress(), event.KeyMods());
+    case Event::KeyPress:
+        KeyPress(event.GetKey(), event.KeyMods());
+        break;
+    case Event::KeyRelease:
+        KeyRelease(event.GetKey(), event.KeyMods());
         break;
     case Event::GainingFocus:
         GainingFocus();

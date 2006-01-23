@@ -110,16 +110,17 @@ class WndEditor;
 
     <p>Layouts
     <br>Layouts arrange children in the client area of a window, and can be assigned to a window in 4 ways.
-    HorizontalLayout(), VerticalLayout(), and GridLayout() all arrange the window's children automatically, and take
-    ownership of them as their own children, becoming the window's only child.  Any existing layout is removed first.
-    SetLayout() allows you to attach a pre-configured Layout object directly, without automatically arranging the
-    window's children.  Because SetLayout() does no auto-arrangement, it does not know how to place any children the
-    window may have at the time it is called; for this reason, it not only removes any previous layout, but deletes all
-    current children as well.  Therefore, SetLayout() should usually only be called before any children are attached to
-    a window; all children should be attached directly to the layout.
-    <br>When a window has an attached layout and is resized, it resizes its layout automatically.  Further, if a window
-    is part of a layout, it notifies its containing layout whenever it is moved, resized, or has its MinSize() changed.
-    This ensures that layouts are always current.
+    HorizontalLayout(), VerticalLayout(), and GridLayout() all arrange the window's client-area children automatically,
+    and take ownership of them as their own children, becoming the window's only client-area child.  Any existing layout
+    is removed first.  SetLayout() allows you to attach a pre-configured Layout object directly, without automatically
+    arranging the window's client-area children.  Because SetLayout() does no auto-arrangement, it does not know how to
+    place any client-area children the window may have at the time it is called; for this reason, it not only removes
+    any previous layout, but deletes all current client-area children as well.  Therefore, SetLayout() should usually
+    only be called before any client-area children are attached to a window; all client-area children should be attached
+    directly to the layout.  <br>When a window has an attached layout and is resized, it resizes its layout
+    automatically.  Further, if a window is part of a layout, it notifies its containing layout whenever it is moved,
+    resized, or has its MinSize() changed.  This ensures that layouts are always current.  Note the use of the phrase
+    "client-area children".  This refers to children entirely within the client area of the window.
 
     <p>Browse Info
     <br>Browse info is a non-interactive informational window that pops up after the user keeps the mouse over the Wnd
@@ -321,28 +322,28 @@ public:
     void           InstallEventFilter(Wnd* wnd);        ///< adds \a wnd to the front of the event filtering chain
     void           RemoveEventFilter(Wnd* wnd);         ///< removes \a wnd from the filter chain
 
-    /** places the window's children in a horizontal layout, handing ownership of the window's children over to the
-        layout.  Removes any current layout which may exist. */
+    /** places the window's client-area children in a horizontal layout, handing ownership of the window's client-area
+        children over to the layout.  Removes any current layout which may exist. */
     void           HorizontalLayout();
 
-    /** places the window's children in a vertical layout, handing ownership of the window's children over to the
-        layout.  Removes any current layout which may exist. */
+    /** places the window's client-area children in a vertical layout, handing ownership of the window's client-area
+        children over to the layout.  Removes any current layout which may exist. */
     void           VerticalLayout();
 
-    /** places the window's children in a grid layout, handing ownership of the window's children over to the layout.
-        Removes any current layout which may exist. */
+    /** places the window's client-area children in a grid layout, handing ownership of the window's client-area
+        children over to the layout.  Removes any current layout which may exist. */
     void           GridLayout();
 
-    /** sets \a layout as the layout for the window.  Removes any current layout which may exist, and deletes all child
-        windows. */
+    /** sets \a layout as the layout for the window.  Removes any current layout which may exist, and deletes all
+        client-area child windows. */
     void           SetLayout(Layout* layout);
 
-    /** removes the window's layout, handing ownership of all children back to the window, with the sizes and positions
-	they had before the layout resized them.  If no layout exists for the window, no action is taken. */
+    /** removes the window's layout, handing ownership of all its children back to the window, with the sizes and
+        positions they had before the layout resized them.  If no layout exists for the window, no action is taken. */
     void           RemoveLayout();
 
     /** removes the window's layout, including all attached children, and returns it.  If no layout exists for the
-	window, no action is taken. */
+        window, no action is taken. */
     Layout*        DetachLayout();
 
     /** sets the margin that should exist between the outer edges of the windows in the layout and the edge of the

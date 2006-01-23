@@ -758,7 +758,11 @@ void Wnd::HorizontalLayout()
     RemoveLayout();
 
     std::multiset<Wnd*, WndHorizontalLess> wnds;
+    Pt client_sz = ClientSize();
     for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+        Pt wnd_ul = (*it)->RelativeUpperLeft(), wnd_lr = (*it)->RelativeLowerRight();
+        if (wnd_ul.x < 0 || wnd_ul.y < 0 || client_sz.x < wnd_lr.x || client_sz.y < wnd_lr.y)
+            continue;
         wnds.insert(*it);
     }
 
@@ -778,7 +782,11 @@ void Wnd::VerticalLayout()
     RemoveLayout();
 
     std::multiset<Wnd*, WndVerticalLess> wnds;
+    Pt client_sz = ClientSize();
     for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+        Pt wnd_ul = (*it)->RelativeUpperLeft(), wnd_lr = (*it)->RelativeLowerRight();
+        if (wnd_ul.x < 0 || wnd_ul.y < 0 || client_sz.x < wnd_lr.x || client_sz.y < wnd_lr.y)
+            continue;
         wnds.insert(*it);
     }
 
@@ -805,20 +813,18 @@ void Wnd::GridLayout()
     // validate existing children and place them in a grid with one cell per pixel
     for (std::list<Wnd*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
         Wnd* wnd = *it;
-        Pt wnd_ul = wnd->UpperLeft(), wnd_lr = wnd->LowerRight();
-        if (wnd_ul < cl_ul || cl_lr < wnd_lr)
-            throw BadLayout("Wnd::GridLayout() : A child window lies at least partially outside the client area");
+        Pt wnd_ul = wnd->RelativeUpperLeft(), wnd_lr = wnd->RelativeLowerRight();
+        if (wnd_ul.x < 0 || wnd_ul.y < 0 || client_sz.x < wnd_lr.x || client_sz.y < wnd_lr.y)
+            continue;
 
         std::list<Wnd*>::const_iterator it2 = it;
         ++it2;
         for (; it2 != m_children.end(); ++it2) {
-            Rect other_wnd_rect((*it2)->UpperLeft(), (*it2)->LowerRight());
+            Rect other_wnd_rect((*it2)->RelativeUpperLeft(), (*it2)->RelativeLowerRight());
             if (other_wnd_rect.Contains(wnd_ul) || other_wnd_rect.Contains(wnd_lr - Pt(1, 1)))
                 throw BadLayout("Wnd::GridLayout() : Two or more child windows overlap");
         }
 
-        wnd_ul = ScreenToClient(wnd_ul);
-        wnd_lr = ScreenToClient(wnd_lr);
         grid_layout.insert(GridLayoutWnd(wnd, wnd_ul, wnd_lr));
     }
 
@@ -923,7 +929,16 @@ void Wnd::SetLayout(Layout* layout)
     if (layout == m_layout && layout == m_containing_layout)
         throw BadLayout("Wnd::SetLayout() : Attempted to set a Wnd's layout to be its current layout or the layout that contains the Wnd");
     RemoveLayout();
-    DeleteChildren();
+    std::list<Wnd*> children = m_children;
+    DetachChildren();
+    Pt client_sz = ClientSize();
+    for (std::list<Wnd*>::const_iterator it = children.begin(); it != children.end(); ++it) {
+        Pt wnd_ul = (*it)->RelativeUpperLeft(), wnd_lr = (*it)->RelativeLowerRight();
+        if (wnd_ul.x < 0 || wnd_ul.y < 0 || client_sz.x < wnd_lr.x || client_sz.y < wnd_lr.y)
+            AttachChild(*it);
+        else
+            delete *it;
+    }
     AttachChild(layout);
     m_layout = layout;
     m_layout->SizeMove(Pt(0, 0), Pt(ClientWidth(), ClientHeight()));

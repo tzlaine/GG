@@ -472,6 +472,9 @@ const std::set<std::string>& ListBox::AllowedDropTypes() const
 
 void ListBox::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
 {
+    if (m_selections.empty())
+        return;
+
     int vertical_offset = offset.y;
     int wnd_idx = -1;
     for (unsigned int i = 0; i < m_rows.size(); ++i) {

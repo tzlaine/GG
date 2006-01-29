@@ -500,35 +500,41 @@ void ListBox::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
     }
 }
 
-bool ListBox::AcceptDrop(Wnd* wnd, const Pt& pt)
+void ListBox::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
 {
-    if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
-        m_allowed_drop_types.find(wnd->DragDropDataType()) != m_allowed_drop_types.end()) {
-        if (Row* row = dynamic_cast<Row*>(wnd)) {
-            int insertion_row = RowUnderPt(pt);
-            try {
-                Insert(row, insertion_row, true);
-                return true;
-            } catch (const DontAcceptDrop&) {}
+    for (std::list<Wnd*>::iterator it = wnds.begin(); it != wnds.end(); ) {
+        std::list<Wnd*>::iterator tmp_it = it++;
+        Wnd* wnd = *tmp_it;
+        if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
+            m_allowed_drop_types.find(wnd->DragDropDataType()) != m_allowed_drop_types.end()) {
+            if (Row* row = dynamic_cast<Row*>(wnd)) {
+                int insertion_row = RowUnderPt(pt);
+                try {
+                    Insert(row, insertion_row, true);
+                } catch (const DontAcceptDrop&) {
+                    wnds.erase(it);
+                }
+            }
         }
     }
-    return false;
 }
 
-void ListBox::ChildDraggedAway(Wnd* child, const Wnd* destination)
+void ListBox::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
 {
-    Row* row = dynamic_cast<Row*>(child);
-    assert(row);
-    int idx = -1;
-    for (unsigned int i = 0; i < m_rows.size(); ++i) {
-        if (m_rows[i] == row) {
-            idx = i;
-            break;
+    for (std::list<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
+        Row* row = dynamic_cast<Row*>(*it);
+        assert(row);
+        int idx = -1;
+        for (unsigned int i = 0; i < m_rows.size(); ++i) {
+            if (m_rows[i] == row) {
+                idx = i;
+                break;
+            }
         }
+        assert(0 <= idx && idx < static_cast<int>(m_rows.size()));
+        if (!MatchesOrContains(this, destination))
+            Erase(idx);
     }
-    assert(0 <= idx && idx < static_cast<int>(m_rows.size()));
-    if (!MatchesOrContains(this, destination))
-        Erase(idx);
 }
 
 void ListBox::Render()

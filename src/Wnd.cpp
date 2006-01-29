@@ -528,14 +528,16 @@ void Wnd::SetDragDropDataType(const std::string& data_type)
 void Wnd::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
 {}
 
-bool Wnd::AcceptDrop(Wnd* wnd, const Pt& pt)
+void Wnd::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
 {
-    return false;
+    wnds.clear();
 }
 
-void Wnd::ChildDraggedAway(Wnd* child, const Wnd* destination)
+void Wnd::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
 {
-    DetachChild(child);
+    for (std::list<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
+        DetachChild(*it);
+    }
 }
 
 void Wnd::SetText(const std::string& str)

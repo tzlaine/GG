@@ -769,19 +769,23 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 if (click_wnd)
                     click_wnd->HandleEvent(Wnd::Event(Wnd::Event::LButtonUp, pos, key_mods));
                 if (s_impl->curr_wnd_under_cursor) {
-                    // this is a normal (unregistered) drag that results in a drag-drop, or possibly one of several Wnds
-                    // being dragged in a registered drag
-                    if (click_wnd) {
-                        Wnd* parent = click_wnd->Parent();
-                        if (click_wnd->DragDropDataType() != "" && s_impl->curr_wnd_under_cursor->AcceptDrop(click_wnd, pos) && parent)
-                            parent->ChildDraggedAway(click_wnd, s_impl->curr_wnd_under_cursor);
-                        s_impl->drag_drop_wnds.erase(click_wnd);
-                    }
-                    // process registered drag-drop Wnds
-                    for (std::map<Wnd*, Pt>::iterator it = s_impl->drag_drop_wnds.begin();
-                         it != s_impl->drag_drop_wnds.end(); ++it) {
-                        if (s_impl->curr_wnd_under_cursor->AcceptDrop(it->first, pos) && s_impl->drag_drop_originating_wnd)
-                            s_impl->drag_drop_originating_wnd->ChildDraggedAway(it->first, s_impl->curr_wnd_under_cursor);
+                    std::list<Wnd*> drag_wnds;
+                    if (s_impl->drag_drop_wnds.empty()) {
+                        if (click_wnd && click_wnd->DragDropDataType() != "") {
+                            drag_wnds.push_back(click_wnd);
+                            s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
+                            if (Wnd* parent = click_wnd->Parent())
+                                parent->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
+                        }
+                    } else {
+                        for (std::map<Wnd*, Pt>::iterator it = s_impl->drag_drop_wnds.begin();
+                             it != s_impl->drag_drop_wnds.end();
+                             ++it) {
+                            drag_wnds.push_back(it->first);
+                        }
+                        s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
+                        if (s_impl->drag_drop_originating_wnd)
+                            s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
                     }
                 }
             }

@@ -63,9 +63,10 @@ bool Control::Disabled() const
     return m_disabled;
 }
 
-bool Control::AcceptDrop(Wnd* wnd, const Pt& pt)
+void Control::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
 {
-    return Parent() ? Parent()->AcceptDrop(wnd, pt) : false;
+    if (Parent())
+        Parent()->AcceptDrops(wnds, pt);
 }
 
 void Control::MouseWheel(const Pt& pt, int move, Uint32 keys)

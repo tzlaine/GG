@@ -261,20 +261,19 @@ public:
     /** \name Mutators */ //@{
     /** sets the string key that defines the type of data that this Wnd represents when used as a drag-drop Wnd.
         This should be set to the empty string when this Wnd cannot be used as a drag-drop Wnd. */
-    void SetDragDropDataType(const std::string& data_type);
+    void           SetDragDropDataType(const std::string& data_type);
 
     /** indicates to the Wnd that a child widget \a w is being drag-dropped, which gives it the opportunity to add other
         associated drag-drop Wnds.  \a offset indicates the position of the mouse realtive to \a wnd's UpperLeft(). */
-    virtual void StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
+    virtual void   StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
 
-    /** handles a drop of a drag-drop wnd into this Wnd; returns true iff the drag was accepted.  This function will
-        will return false if any DontAcceptDropException occurs within it or any function called by it, and will stop
-        the propogation of the exception. */
-    virtual bool AcceptDrop(Wnd* wnd, const Pt& pt);
+    /** handles a drop of one or more drag-drop wnds into this Wnd; the accepted wnds remain in the list \a wnds; the
+        rejected ones do not. */
+    virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
 
-    /** handles the removal of a child window that has been dropped onto another window which has accepted it as a drop.
-        The accepting window retains ownership, so this function must not delete the child. */
-    virtual void ChildDraggedAway(Wnd* child, const Wnd* destination);
+    /** handles the removal of one or more child windows that have been dropped onto another window which has accepted
+        them as drops.  The accepting window retains ownership, so this function must not delete the children. */
+    virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
 
     virtual void   SetText(const std::string& str);     ///< set window text
 

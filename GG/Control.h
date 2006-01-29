@@ -53,7 +53,7 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool   AcceptDrop(Wnd* wnd, const Pt& pt);
+    virtual void AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
     virtual void   Render() = 0;
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
     virtual void   KeyPress(Key key, Uint32 key_mods);

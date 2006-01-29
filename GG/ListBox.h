@@ -65,7 +65,8 @@ class SubTexture;
     cancelled, even though by the time a client responds to the DroppedSignal, the dropped row is already in place in
     the ListBox.  The exception to this is that the dropped row may be altered with a call to NormalizeRow() before the
     drop can be reversed; this means that drag-drops between ListBoxes with different numbers of columns, or different
-    column widths or alignments should be avoided.
+    column widths or alignments should be avoided, or caught and handled.  Note that a DroppedSignal is emitted for each
+    row dropped into the ListBox, so individual rows may be accepted or rejected from a single multi-row drop.
     <br>Also note that while a ListBox can contain arbitrary Control-derived controls, in order for such controls to be
     automatically serialized, any user-defined Control subclasses must be registerd.  See the boost serialization
     documentation for details. */
@@ -230,8 +231,8 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   StartingChildDragDrop(const Wnd* wnd, const GG::Pt& offset);
-    virtual bool   AcceptDrop(Wnd* wnd, const Pt& pt);
-    virtual void   ChildDraggedAway(Wnd* child, const Wnd* destination);
+    virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
+    virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
     virtual void   Render();
     virtual void   KeyPress(Key key, Uint32 key_mods);
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);

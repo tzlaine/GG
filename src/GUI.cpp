@@ -356,12 +356,14 @@ void GUI::WndDying(Wnd* wnd)
             s_impl->drag_wnds[2] = 0;
             s_impl->wnd_region = WR_NONE;
         }
+        if (MatchesOrContains(wnd, s_impl->drag_drop_originating_wnd))
+            s_impl->drag_drop_originating_wnd = 0;
+        s_impl->drag_drop_wnds.erase(wnd);
         if (MatchesOrContains(wnd, s_impl->double_click_wnd)) {
             s_impl->double_click_wnd = 0;
             s_impl->double_click_start_time = -1;
             s_impl->double_click_time = -1;
         }
-        s_impl->drag_drop_wnds.erase(wnd);
     }
 }
 
@@ -773,9 +775,10 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     if (s_impl->drag_drop_wnds.empty()) {
                         if (click_wnd && click_wnd->DragDropDataType() != "") {
                             drag_wnds.push_back(click_wnd);
+                            s_impl->drag_drop_originating_wnd = click_wnd->Parent();
                             s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
-                            if (Wnd* parent = click_wnd->Parent())
-                                parent->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
+                            if (s_impl->drag_drop_originating_wnd)
+                                s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
                         }
                     } else {
                         for (std::map<Wnd*, Pt>::iterator it = s_impl->drag_drop_wnds.begin();
@@ -789,6 +792,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     }
                 }
             }
+            s_impl->drag_drop_originating_wnd = 0;
             s_impl->drag_drop_wnds.clear();
             break; }
         case MRELEASE: {

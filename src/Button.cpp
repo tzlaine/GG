@@ -36,18 +36,6 @@
 using namespace GG;
 
 namespace {
-    struct SetOrientationAction : AttributeChangedAction<Orientation>
-    {
-        SetOrientationAction(RadioButtonGroup* radio_button_group) : m_radio_button_group(radio_button_group) {}
-        void operator()(const Orientation& orientation)
-        {
-            Orientation o = orientation;
-            m_radio_button_group->SetOrientation(o == VERTICAL ? HORIZONTAL : VERTICAL);
-            m_radio_button_group->SetOrientation(o);
-        }
-        RadioButtonGroup* const m_radio_button_group;
-    };
-
     struct SetCheckedButtonAction : AttributeChangedAction<int>
     {
         SetCheckedButtonAction(RadioButtonGroup* radio_button_group) : m_radio_button_group(radio_button_group) {}
@@ -496,6 +484,7 @@ void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
 // RadioButtonGroup
 RadioButtonGroup::RadioButtonGroup() :
     Control(),
+    m_orientation(VERTICAL),
     m_checked_button(-1),
     m_render_outline(false)
 {
@@ -540,21 +529,6 @@ void RadioButtonGroup::Render()
     }
 }
 
-void RadioButtonGroup::SetOrientation(Orientation orientation)
-{
-    if (orientation != m_orientation) {
-        m_orientation = orientation;
-        if (GetLayout()) {
-            RemoveLayout();
-            Layout* layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
-            for (unsigned int i = 0; i < m_buttons.size(); ++i) {
-                layout->Add(m_buttons[i], m_orientation == VERTICAL ? i : 0, m_orientation == VERTICAL ? 0 : i);
-            }
-            SetLayout(layout);
-        }
-    }
-}
-
 void RadioButtonGroup::SetCheck(int idx)
 {
     if (idx == m_checked_button)
@@ -581,13 +555,24 @@ void RadioButtonGroup::AddButton(StateButton* bn)
 {
     m_buttons.push_back(bn);
     m_connections.push_back(Connect(m_buttons.back()->CheckedSignal, ButtonClickedFunctor(this, m_buttons.size() - 1)));
-    if (Layout* layout = GetLayout()) {
-        layout->Add(bn, m_orientation == VERTICAL ? m_buttons.size() - 1 : 0, m_orientation == VERTICAL ? 0 : m_buttons.size() - 1);
+    Pt bn_sz = bn->Size();
+    Layout* layout = GetLayout();
+    if (layout) {
+        layout->Add(0, m_orientation == VERTICAL ? layout->Rows() : 0, m_orientation == VERTICAL ? 0 : layout->Columns());
+        if (m_orientation == VERTICAL)
+            layout->SetRowStretch(layout->Rows() - 1, 1.0);
+        else
+            layout->SetColumnStretch(layout->Columns() - 1, 1.0);
+        layout->Add(bn, m_orientation == VERTICAL ? layout->Rows() : 0, m_orientation == VERTICAL ? 0 : layout->Columns());
     } else {
         layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
         layout->Add(bn, 0, 0);
         SetLayout(layout);
     }
+    if (m_orientation == VERTICAL)
+        layout->SetMinimumRowHeight(layout->Rows() - 1, bn_sz.y);
+    else
+        layout->SetMinimumColumnWidth(layout->Columns() - 1, bn_sz.x);
 }
 
 void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
@@ -609,8 +594,6 @@ void RadioButtonGroup::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("RadioButtonGroup");
-    boost::shared_ptr<SetOrientationAction> set_orientation_action(new SetOrientationAction(this));
-    editor->Attribute<Orientation>("Orientation", m_orientation, VERTICAL, HORIZONTAL, set_orientation_action);
     boost::shared_ptr<SetCheckedButtonAction> set_checked_button_action(new SetCheckedButtonAction(this));
     editor->Attribute<int>("Checked Button", m_checked_button, set_checked_button_action);
 }

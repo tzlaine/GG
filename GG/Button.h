@@ -260,9 +260,6 @@ public:
     /** \name Mutators */ //@{
     virtual void Render();
 
-    /** sets the orientation of the buttons in the group */
-    void SetOrientation(Orientation orientation);
-
     /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
         currently-checked button index is set to -1. */
     void SetCheck(int idx);
@@ -311,7 +308,7 @@ private:
     void ConnectSignals();
     void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active
 
-    Orientation                             m_orientation;
+    const Orientation                       m_orientation;
     std::vector<StateButton*>               m_buttons;     ///< the state buttons in the group
     std::vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be disconnected when programmatically unclicking the buttons
 
@@ -355,7 +352,7 @@ template <class Archive>
 void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_orientation)
+        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation))
         & BOOST_SERIALIZATION_NVP(m_buttons)
         & BOOST_SERIALIZATION_NVP(m_checked_button)
         & BOOST_SERIALIZATION_NVP(m_render_outline);

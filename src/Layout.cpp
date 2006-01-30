@@ -502,8 +502,10 @@ void Layout::Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, U
             m_cells[i][j] = wnd;
         }
     }
-    m_wnd_positions[wnd] = WndPosition(row, column, last_row, last_column, alignment, wnd->RelativeUpperLeft(), wnd->Size());
-    AttachChild(wnd);
+    if (wnd) {
+        m_wnd_positions[wnd] = WndPosition(row, column, last_row, last_column, alignment, wnd->RelativeUpperLeft(), wnd->Size());
+        AttachChild(wnd);
+    }
     RedoLayout();
 }
 

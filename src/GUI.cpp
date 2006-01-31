@@ -855,7 +855,7 @@ void GUI::ProcessBrowseInfo()
 {
     assert(s_impl->curr_wnd_under_cursor);
     if (!s_impl->button_state[0] && !s_impl->button_state[1] && !s_impl->button_state[2] &&
-        s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first) {
+        (s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first)) {
         const std::vector<Wnd::BrowseInfoMode>& browse_modes = s_impl->curr_wnd_under_cursor->BrowseModes();
         int delta_t = Ticks() - s_impl->prev_wnd_under_cursor_time;
         for (unsigned int i = 0; i < browse_modes.size(); ++i) {

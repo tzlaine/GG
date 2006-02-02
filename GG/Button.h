@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file Button.h
     Contains the Button push-button control class; the StateButton control class, which represents check boxes and radio 

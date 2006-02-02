@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file FileDlg.h
     Contains the standard GG file dialog. */

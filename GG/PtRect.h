@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file PtRect.h
     Contains the utility classes Pt and Rect. */

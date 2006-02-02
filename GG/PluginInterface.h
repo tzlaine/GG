@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file PluginInterface.h
     Contains the PluginInterface class, an interface to custom-control plugins that allow runtime control selection. */

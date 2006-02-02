@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Header$ */
+/* $Id$ */
 
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 

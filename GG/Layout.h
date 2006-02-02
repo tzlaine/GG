@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file Layout.h
     Contains the Layout class, which is used to size and align GG windows. */

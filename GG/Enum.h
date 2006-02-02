@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Header$ */
+/* $Id$ */
 
 /** \file Enum.h
     Contains the utility classes and macros that allow for easy conversion to and from an enum 

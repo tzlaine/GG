@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file StyleFactory.h
     Contains the StyleFactory class, which creates new controls for internal use by dialogs and other controls. */

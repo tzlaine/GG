@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file ListBox.h
     Contains the ListBox class, a control that contains rows of other controls, commonly TextControls. */

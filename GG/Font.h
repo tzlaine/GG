@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file Font.h
     Contains the Font class, a class that encapsulates the rendering of a single FreeType-compatible fonts in 

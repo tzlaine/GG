@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file TextControl.h
     Contains the TextControl class, a control which represents a certain text string in a certain font, justification, etc. */

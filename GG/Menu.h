@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file Menu.h
     Contains the MenuItem class, which represents menu data; the MenuBar control class; and the PopupMenu class, which is 

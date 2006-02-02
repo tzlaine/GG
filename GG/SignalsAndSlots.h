@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 #ifndef _GG_SignalsAndSlots_h_
 #define _GG_SignalsAndSlots_h_

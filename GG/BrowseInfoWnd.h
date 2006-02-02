@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file BrowseInfoWnd.h
     Contains the BrowseInfoWnd class, and its subclass TextBoxBrowseInfoWnd.  These classes display info on another

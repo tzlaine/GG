@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file ThreeButtonDlg.h
     Contains the standard modal user-input/-notification dialog. */

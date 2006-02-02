@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file DropDownList.h
     Contains the DropDownList class, a control that displays a current selection, and allows the user to select one 

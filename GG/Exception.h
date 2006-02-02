@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Header$ */
+/* $Id$ */
 
 /** \file Exception.h
     Contains the GG::Exception base class and macros that ease declaring subclasses. */

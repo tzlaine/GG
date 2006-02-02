@@ -22,7 +22,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 #include <GG/GUI.h>
 

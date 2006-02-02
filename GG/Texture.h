@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file Texture.h
     Contains the Texture class, which encapsulates an OpenGL texture object; the SubTexture class, which represents a portion 

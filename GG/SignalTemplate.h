@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /* Note that this file intentionally has no include guards.  This is because it is intended to be included multiple
    times, as in SignalsAndSlots.h. */

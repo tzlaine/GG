@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file ZList.h
     Contains the ZList class, which maintains the Z-/depth-position of Wnds for GUI. */

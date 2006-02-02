@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file DrawUtil.h
     Contains numerous 2D rendering convenience functions, for rendering rectangles, circles, etc. */

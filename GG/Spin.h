@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file GGSpin.h
     Contains the Spin class template, which provides a spin-box control that allows the user to select a value from a 

@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Header$ */
+/* $Id$ */
 
 /** \file SDLGUI.h
     Contains SDLGUI, the input driver for using SDL with GG. */

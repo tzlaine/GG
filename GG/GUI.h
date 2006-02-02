@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Header$ */
+/* $Id$ */
 
 /** \file GUI.h
     Contains GUI class, which encapsulates the state and behavior of the entire GG GUI. */

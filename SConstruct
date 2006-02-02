@@ -367,6 +367,11 @@ int main() {
         for i in env_cache_keys:
             cache_dict[i] = env.has_key(i) and env.Dictionary(i) or []
         p.dump(cache_dict)
+
+        # copy ltdl.h and config.h into the header tree before compiling
+        Execute(Copy(os.path.normpath('GG/ltdl.h'), os.path.normpath('libltdl/ltdl.h')))
+        Execute(Copy(os.path.normpath('GG/ltdl_config.h'), os.path.normpath('libltdl/config.h')))
+
         if 'configure' in command_line_args:
             Exit(0)
 
@@ -464,10 +469,6 @@ if str(Platform()) == 'win32':
 #define LTDL_SHLIB_EXT ".dll"
 """)
     f.close()
-
-# copy ltdl.h and config.h into the header tree before compiling
-Execute(Copy(os.path.normpath('GG/ltdl.h'), os.path.normpath('libltdl/ltdl.h')))
-Execute(Copy(os.path.normpath('GG/ltdl_config.h'), os.path.normpath('libltdl/config.h')))
 
 # define libGiGi objects
 env['libltdl_defines'] = [

@@ -160,7 +160,7 @@ HueSaturationPicker::HueSaturationPicker() :
 {}
 
 HueSaturationPicker::HueSaturationPicker(int x, int y, int w, int h) :
-    Control(x, y, w, h, CLICKABLE | DRAG_KEEPER),
+    Control(x, y, w, h, CLICKABLE),
     m_hue(0.0),
     m_saturation(0.0)
 {
@@ -254,7 +254,7 @@ ValuePicker::ValuePicker() :
 {}
 
 ValuePicker::ValuePicker(int x, int y, int w, int h, Clr arrow_color) :
-    Control(x, y, w, h, CLICKABLE | DRAG_KEEPER),
+    Control(x, y, w, h, CLICKABLE),
     m_hue(0.0),
     m_saturation(0.0),
     m_value(0.0),

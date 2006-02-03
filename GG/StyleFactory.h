@@ -102,11 +102,11 @@ public:
     /** Returns a new GG Edit. */
     virtual Edit*              NewEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
                                        Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                       Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                       Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG ListBox. */
     virtual ListBox*           NewListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO,
-                                          Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                          Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG MenuBar. */
     virtual MenuBar*           NewMenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font,
@@ -117,7 +117,7 @@ public:
     virtual MultiEdit*         NewMultiEdit(int x, int y, int w, int h, const std::string& str,
                                             const boost::shared_ptr<Font>& font, Clr color, Uint32 style = TF_LINEWRAP,
                                             Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                            Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                            Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG Scroll. */
     virtual Scroll*            NewScroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
@@ -131,12 +131,12 @@ public:
     /** Returns a new GG Spin<int>. */
     virtual Spin<int>*         NewIntSpin(int x, int y, int w, int value, int step, int min, int max, bool edits,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                          Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                          Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG Spin<int>. */
     virtual Spin<double>*      NewDoubleSpin(int x, int y, int w, double value, double step, double min, double max, bool edits,
                                              const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                             Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                             Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE) const;
 
     /** Returns a new GG StaticGraphic. */
     virtual StaticGraphic*     NewStaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture,
@@ -155,7 +155,7 @@ public:
     /** \name Subcontrols */ //@{
     /** Returns a new ListBox, to be used in a DropDownList. */
     virtual ListBox*           NewDropDownListListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO,
-                                                      Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                                      Uint32 flags = CLICKABLE) const;
 
     /** Returns a new vertical Scroll, to be used in a ListBox. */
     virtual Scroll*            NewListBoxVScroll(int x, int y, int w, int h, Clr color, Clr interior,
@@ -226,7 +226,7 @@ public:
     /** Returns a new Edit, to be used in an editable Spin. */
     virtual Edit*              NewSpinEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
                                            Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                           Uint32 flags = CLICKABLE | DRAG_KEEPER) const;
+                                           Uint32 flags = CLICKABLE) const;
     //@}
 
     /** \name Dialogs */ //@{

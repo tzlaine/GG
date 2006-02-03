@@ -308,11 +308,6 @@ bool Wnd::Dragable() const
     return m_flags & DRAGABLE;
 }
 
-bool Wnd::DragKeeper() const
-{
-    return m_flags & DRAG_KEEPER;
-}
-
 bool Wnd::Resizable() const
 {
     return m_flags & RESIZABLE;
@@ -1085,7 +1080,6 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->BeginFlags(m_flags);
     editor->Flag("Clickable", CLICKABLE);
     editor->Flag("Dragable", DRAGABLE);
-    editor->Flag("Drag Keeper", DRAG_KEEPER);
     editor->Flag("Resizable", RESIZABLE);
     editor->Flag("Ontop", ONTOP);
     editor->Flag("Modal", MODAL);

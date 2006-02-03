@@ -84,13 +84,13 @@ DynamicGraphic* StyleFactory::NewDynamicGraphic(int x, int y, int w, int h, bool
 
 Edit* StyleFactory::NewEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
                             Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
-                            Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                            Uint32 flags/* = CLICKABLE*/) const
 {
     return new Edit(x, y, w, str, font, color, text_color, interior, flags);
 }
 
 ListBox* StyleFactory::NewListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
-                                  Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                                  Uint32 flags/* = CLICKABLE*/) const
 {
     return new ListBox(x, y, w, h, color, interior, flags);
 }
@@ -103,7 +103,7 @@ MenuBar* StyleFactory::NewMenuBar(int x, int y, int w, const boost::shared_ptr<F
 
 MultiEdit* StyleFactory::NewMultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font,
                                       Clr color, Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/,
-                                      Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                                      Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE*/) const
 {
     return new MultiEdit(x, y, w, h, str, font, color, style, text_color, interior, flags);
 }
@@ -123,14 +123,14 @@ Slider* StyleFactory::NewSlider(int x, int y, int w, int h, int min, int max, Or
 
 Spin<int>* StyleFactory::NewIntSpin(int x, int y, int w, int value, int step, int min, int max, bool edits,
                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
-                                    Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                                    Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE*/) const
 {
     return new Spin<int>(x, y, w, value, step, min, max, edits, font, color, text_color, interior, flags);
 }
 
 Spin<double>* StyleFactory::NewDoubleSpin(int x, int y, int w, double value, double step, double min, double max, bool edits,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
-                                          Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                                          Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE*/) const
 {
     return new Spin<double>(x, y, w, value, step, min, max, edits, font, color, text_color, interior, flags);
 }
@@ -155,7 +155,7 @@ TextControl* StyleFactory::NewTextControl(int x, int y, const std::string& str, 
 }
 
 ListBox* StyleFactory::NewDropDownListListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
-                                              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                                              Uint32 flags/* = CLICKABLE*/) const
 {
     return NewListBox(x, y, w, h, color, interior, flags);
 }
@@ -256,7 +256,7 @@ Button* StyleFactory::NewSpinDecrButton(int x, int y, int w, int h, const std::s
 
 Edit* StyleFactory::NewSpinEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
-                                Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) const
+                                Uint32 flags/* = CLICKABLE*/) const
 {
     return NewEdit(x, y, w, str, font, color, text_color, interior, flags);
 }

@@ -73,8 +73,6 @@ class WndEditor;
     provide such control.
 
     <p>Effects of Window-Creation Flags
-    <br>DragKeeper() windows are those that maintain cursor drags, even when they leave the bounds of the window, and
-    even though such windows are not themselves draggable.  This is useful for such controls as Edit and Scroll.
     <br>Resizable() windows are able to be stretched by the user, by dragging the areas of the window outside the client
     area.  So the RESIZABLE flag will have no effect on a window that does not have non-default ClientUpperLeft() and/or
     ClientLowerRight().  The WindowRegion() method can also be overidden in derived classes, and can return regions that
@@ -172,10 +170,6 @@ public:
     bool           RepeatButtonDown() const;
 
     bool           Dragable() const;     ///< does a click here become a drag? 
-
-    /** when a drag is started on this obj, and it's non-dragable, does it need to receive all drag messages anyway? */
-    bool           DragKeeper() const;
-
     bool           Resizable() const;    ///< can this window be resized using the mouse?
     bool           OnTop() const;        ///< is this an on-top window?
     bool           Modal() const;        ///< is this a modal window?
@@ -363,8 +357,8 @@ public:
 
     /** respond to drag msg (even if this Wnd is not dragable).  Drag messages are only sent to the window over which
         the button was pressed at the beginning of the drag. A window receives this whenever any input device button is
-        down and the mouse is moving while over the window.  If a window has the DRAG_KEEPER flag set, the window will
-        also receive drag messages when the mouse is being dragged outside the window's area. */
+        down and the cursor is moving while over the window.  The window will also receive drag messages when the mouse
+        is being dragged outside the window's area. */
     virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
 
     /** respond to release of left mouse button outside window, if it was originally depressed over window.  A window

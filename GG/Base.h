@@ -94,15 +94,14 @@ enum WndFlag {
     REPEAT_BUTTON_DOWN = 1 << 1,
 
     DRAGABLE =           1 << 2,  ///< this window can be dragged around independently
-    DRAG_KEEPER =        1 << 3,  ///< this window receives drag messages, even if it is not dragable
-    RESIZABLE =          1 << 4,  ///< this window can be resized by the user, with the mouse
+    RESIZABLE =          1 << 3,  ///< this window can be resized by the user, with the mouse
 
     /** this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows */
-    ONTOP =              1 << 5,
+    ONTOP =              1 << 4,
 
     /** this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above
         "on-top" windows, and should not be flagged as ONTOP. */
-    MODAL =              1 << 6
+    MODAL =              1 << 5
 };
 
 /** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/
@@ -573,7 +572,6 @@ GG_ENUM_STREAM_OUT(ListBoxStyle)
 GG_ENUM_MAP_BEGIN(WndFlag)
     GG_ENUM_MAP_INSERT(CLICKABLE)
     GG_ENUM_MAP_INSERT(DRAGABLE)
-    GG_ENUM_MAP_INSERT(DRAG_KEEPER)
     GG_ENUM_MAP_INSERT(RESIZABLE)
     GG_ENUM_MAP_INSERT(ONTOP)
     GG_ENUM_MAP_INSERT(MODAL)

@@ -69,7 +69,7 @@ MultiEdit::MultiEdit() :
 
 MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
               Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
-              Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) : 
+              Uint32 flags/* = CLICKABLE*/) : 
     Edit(x, y, w, str, font, color, text_color, interior, flags),
     m_style(style),
     m_cursor_begin(0, 0),

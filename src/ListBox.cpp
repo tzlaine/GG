@@ -301,7 +301,7 @@ ListBox::ListBox() :
 {}
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
-                 Uint32 flags/* = CLICKABLE | DRAG_KEEPER*/) :
+                 Uint32 flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_vscroll(0),
     m_hscroll(0),

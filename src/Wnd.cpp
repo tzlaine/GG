@@ -169,6 +169,7 @@ namespace {
 Wnd::Event::Event(EventType type, const Pt& pt, Uint32 keys) :
     m_type(type),
     m_point(pt),
+    m_key(GGK_UNKNOWN),
     m_key_mods(keys),
     m_wheel_move(0)
 {}
@@ -176,6 +177,7 @@ Wnd::Event::Event(EventType type, const Pt& pt, Uint32 keys) :
 Wnd::Event::Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys) :
     m_type(type),
     m_point(pt),
+    m_key(GGK_UNKNOWN),
     m_key_mods(keys),
     m_drag_move(move),
     m_wheel_move(0)
@@ -184,8 +186,18 @@ Wnd::Event::Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys) :
 Wnd::Event::Event(EventType type, const Pt& pt, int move, Uint32 keys) :
     m_type(type),
     m_point(pt),
+    m_key(GGK_UNKNOWN),
     m_key_mods(keys),
     m_wheel_move(move)
+{}
+
+Wnd::Event::Event(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) :
+    m_type(type),
+    m_point(pt),
+    m_key(GGK_UNKNOWN),
+    m_key_mods(keys),
+    m_wheel_move(0),
+    m_drag_drop_wnds(drag_drop_wnds)
 {}
 
 Wnd::Event::Event(EventType type, Key key, Uint32 key_mods) :
@@ -197,6 +209,7 @@ Wnd::Event::Event(EventType type, Key key, Uint32 key_mods) :
 
 Wnd::Event::Event(EventType type) :
     m_type(type),
+    m_key(GGK_UNKNOWN),
     m_key_mods(0), 
     m_wheel_move(0)
 {}
@@ -230,6 +243,12 @@ int Wnd::Event::WheelMove() const
 {
     return m_wheel_move;
 }
+
+const std::map<Wnd*, Pt>& Wnd::Event::DragDropWnds() const
+{
+    return m_drag_drop_wnds;
+}
+
 
 // Wnd
 // static(s)
@@ -1000,6 +1019,12 @@ void Wnd::MouseLeave(const Pt& pt, Uint32 keys) {}
 
 void Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {}
 
+void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
+
+void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
+
+void Wnd::DragDropLeave(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
+
 void Wnd::KeyPress(Key key, Uint32 key_mods) {}
 
 void Wnd::KeyRelease(Key key, Uint32 key_mods) {}
@@ -1158,6 +1183,15 @@ void Wnd::HandleEvent(const Event& event)
         break;
     case Event::MouseLeave:
         MouseLeave(event.Point(), event.KeyMods());
+        break;
+    case Event::DragDropEnter:
+        DragDropEnter(event.Point(), event.DragDropWnds(), event.KeyMods());
+        break;
+    case Event::DragDropHere:
+        DragDropHere(event.Point(), event.DragDropWnds(), event.KeyMods());
+        break;
+    case Event::DragDropLeave:
+        DragDropLeave(event.Point(), event.DragDropWnds(), event.KeyMods());
         break;
     case Event::MouseWheel:
         MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());

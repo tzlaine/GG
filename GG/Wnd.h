@@ -403,6 +403,20 @@ public:
     /** respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down) */
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
 
+    /** respond to the cursor entering the Wnd's coords while dragging drag-drop Wnds.  The Pts in \a drag_drop_wnds are
+        the Wnds' offsets from \a pt. */
+    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+
+    /** respond to cursor moving about within the Wnd, or to cursor lingering within the Wnd for a long period of time,
+        while dragging drag-drop Wnds.  A DragDropHere() message will not be generated the first time the cursor enters
+        the window's area.  In that case, a DragDropEnter() message is generated The Pts in \a drag_drop_wnds are the
+        Wnds' offsets from \a pt.. */
+    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+
+    /** respond to cursor leaving window's coords while dragging drag-drop Wnds.  The Pts in \a drag_drop_wnds are the
+        Wnds' offsets from \a pt. */
+    virtual void   DragDropLeave(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+
     /** respond to down-keystrokes (focus window only).  A window may receive KeyPress() messages passed up to it from
         its children.  For instance, Control-derived classes pass KeyPress() messages to their Parent() windows by
         default.  \note Though mouse clicks consist of a press and a release, all Control classes by default respond
@@ -497,6 +511,9 @@ protected:
             MouseHere,
             MouseLeave,
             MouseWheel,
+            DragDropEnter,
+            DragDropHere,
+            DragDropLeave,
             KeyPress,
             KeyRelease,
             GainingFocus,
@@ -515,6 +532,10 @@ protected:
             keys), eg MouseWheel(). */
         Event(EventType type, const Pt& pt, int move, Uint32 keys);
 
+        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const std::map<Wnd*,
+            Pt>& drag_drop_wnds, Uint32 keys), eg DragDropEnter(). */
+        Event(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+
         /** constructs an Event that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg
             KeyPress(). */
         Event(EventType type, Key key, Uint32 key_mods);
@@ -522,20 +543,22 @@ protected:
         /** constructs an Event that is used to invoke a function taking no parameters, eg GainingFocus(). */
         Event(EventType type);
 
-        EventType  Type() const;       ///< returns the type of the Event
-        const Pt&  Point() const;      ///< returns the point at which the event took place, if any
-        Key        GetKey() const;     ///< returns the key pressed or released in the Event, if any
-        Uint32     KeyMods() const;    ///< returns the modifiers to the Event's keypress, if any
-        const Pt&  DragMove() const;   ///< returns the amount of drag movement represented by the Event, if any
-        int        WheelMove() const;  ///< returns the ammount of mouse wheel movement represented by the Event, if any
+        EventType                 Type() const;         ///< returns the type of the Event
+        const Pt&                 Point() const;        ///< returns the point at which the event took place, if any
+        Key                       GetKey() const;       ///< returns the key pressed or released in the Event, if any
+        Uint32                    KeyMods() const;      ///< returns the modifiers to the Event's keypress, if any
+        const Pt&                 DragMove() const;     ///< returns the amount of drag movement represented by the Event, if any
+        int                       WheelMove() const;    ///< returns the ammount of mouse wheel movement represented by the Event, if any
+        const std::map<Wnd*, Pt>& DragDropWnds() const; ///< returns the drag-drop wnds represented by the Event, if any
 
     private:
-        EventType  m_type;
-        Pt         m_point;
-        Key        m_key;
-        Uint32     m_key_mods;
-        Pt         m_drag_move;
-        int        m_wheel_move;
+        EventType          m_type;
+        Pt                 m_point;
+        Key                m_key;
+        Uint32             m_key_mods;
+        Pt                 m_drag_move;
+        int                m_wheel_move;
+        std::map<Wnd*, Pt> m_drag_drop_wnds;
     };
 
     /** \name Structors */ //@{

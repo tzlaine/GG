@@ -572,6 +572,8 @@ protected:
     /** handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this
         filter processed the message. */
     virtual bool EventFilter(Wnd* w, const Event& event);
+
+    void HandleEvent(const Event& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
     //@}
 
     std::string  m_text;            ///< text associated with the window, such as a window title or button label, etc.
@@ -579,7 +581,6 @@ protected:
 
 private:
     void ValidateFlags();                 ///< sanity-checks the window creation flags
-    void HandleEvent(const Event& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
 
     Wnd*              m_parent;        ///< ptr to this window's parent; may be 0
     std::list<Wnd*>   m_children;      ///< list of ptrs to child windows kept in order of decreasing area

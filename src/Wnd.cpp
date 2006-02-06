@@ -1137,12 +1137,6 @@ bool Wnd::EventFilter(Wnd* w, const Event& event)
     return false;
 }
 
-void Wnd::ValidateFlags()
-{
-    if ((m_flags & MODAL) && (m_flags & ONTOP))
-        m_flags &= ~ONTOP;
-}
-
 void Wnd::HandleEvent(const Event& event)
 {
     for (int i = static_cast<int>(m_filters.size()) - 1; i >= 0; --i) {
@@ -1211,4 +1205,10 @@ void Wnd::HandleEvent(const Event& event)
     default:
         break;
     }
+}
+
+void Wnd::ValidateFlags()
+{
+    if ((m_flags & MODAL) && (m_flags & ONTOP))
+        m_flags &= ~ONTOP;
 }

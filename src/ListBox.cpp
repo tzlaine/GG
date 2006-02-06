@@ -1125,8 +1125,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::MouseEnter:
-        case Event::MouseHere: {
+        case Event::MouseEnter: {
             if (m_style & LB_BROWSEUPDATES) {
                 int sel_row = RowUnderPt(pt);
                 if (sel_row >= static_cast<int>(m_rows.size()))
@@ -1136,6 +1135,9 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             }
             break;
         }
+
+        case Event::MouseHere:
+            return true;
 
         case Event::MouseLeave: {
             if (m_style & LB_BROWSEUPDATES) {
@@ -1151,6 +1153,14 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
         }
 
         case Event::MouseWheel:
+            return false;
+
+        case Event::DragDropEnter:
+        case Event::DragDropHere:
+        case Event::DragDropLeave:
+            HandleEvent(event);
+            break;
+
         case Event::KeyPress:
         case Event::KeyRelease:
             return false;
@@ -1159,7 +1169,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
     }
-    return false;
+    return true;
 }
 
 int ListBox::Insert(Row* row, int at, bool dropped)

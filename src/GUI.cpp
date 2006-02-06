@@ -533,7 +533,6 @@ void GUI::RenderWindow(Wnd* wnd)
     }
 }
 
-#include <iostream> // TODO: remove
 void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
     s_impl->key_mods = key_mods;
@@ -552,7 +551,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
 
     switch (event) {
     case IDLE: {
-        if (s_impl->curr_wnd_under_cursor) {
+        if ((s_impl->curr_wnd_under_cursor = GetWindowUnder(pos))) {
             if (s_impl->button_down_repeat_delay && s_impl->curr_wnd_under_cursor->RepeatButtonDown() &&
                 s_impl->drag_wnds[0] == s_impl->curr_wnd_under_cursor) { // convert to a button-down message
                 // ensure that the timing requirements are met
@@ -698,6 +697,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case LPRESS:
     case MPRESS:
     case RPRESS: {
+        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
         s_impl->last_button_down_repeat_time = 0;
         s_impl->prev_wnd_drag_position = pos;
         s_impl->wnd_drag_offset = Pt();
@@ -747,6 +747,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case LRELEASE:
     case MRELEASE:
     case RRELEASE: {
+        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
         s_impl->last_button_down_repeat_time = 0;
         s_impl->prev_wnd_drag_position = Pt();
         s_impl->browse_info_wnd.reset();

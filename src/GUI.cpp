@@ -793,6 +793,9 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                         if (click_wnd && click_wnd->DragDropDataType() != "") {
                             drag_wnds.push_back(click_wnd);
                             s_impl->drag_drop_originating_wnd = click_wnd->Parent();
+                            std::map<Wnd*, Pt> drag_drop_wnds;
+                            drag_drop_wnds[click_wnd] = s_impl->wnd_drag_offset;
+                            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pos, drag_drop_wnds, key_mods));
                             s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
                             if (s_impl->drag_drop_originating_wnd)
                                 s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
@@ -803,6 +806,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                              ++it) {
                             drag_wnds.push_back(it->first);
                         }
+                        s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pos, s_impl->drag_drop_wnds, key_mods));
                         s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
                         if (s_impl->drag_drop_originating_wnd)
                             s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);

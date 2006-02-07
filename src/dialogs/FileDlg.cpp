@@ -463,7 +463,7 @@ void FileDlg::OkClicked()
                 dlg->Run();
                 return;
             }
-            fs::path p = s_working_dir / save_file;
+            fs::path p = s_working_dir / fs::path(save_file, fs::native);
             m_result.insert(p.native_directory_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
@@ -489,7 +489,7 @@ void FileDlg::OkClicked()
                     results_valid = false;
                     break;
                 }
-                fs::path p = s_working_dir / *it;
+                fs::path p = s_working_dir / fs::path(*it, fs::native);
                 if (fs::exists(p)) {
                     if (fs::is_directory(p)) {
                         std::string msg_str = boost::str(boost::format(m_filename_is_a_directory_str) % (*it));
@@ -729,7 +729,7 @@ void FileDlg::OpenDirectory()
             }
         } else {
             if (!m_in_win32_drive_selection) {
-                SetWorkingDirectory(s_working_dir / directory);
+                SetWorkingDirectory(s_working_dir / fs::path(directory, fs::native));
             } else {
                 m_in_win32_drive_selection = false;
                 try {

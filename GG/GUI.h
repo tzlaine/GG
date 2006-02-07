@@ -282,6 +282,9 @@ private:
     virtual void   Run() = 0;                    // initializes GUI state, then executes main event handler/render loop (PollAndRender())
     Wnd*           ModalWindow() const;          // returns the currently modal window, if any
 
+    // returns the window under \a pt, sending MouseLeave or DragDropLeave messages as appropriate
+    Wnd*           CheckedGetWindowUnder(const Pt& pt, Uint32 key_mods);
+
     static GUI*                           s_gui;
     static boost::shared_ptr<GUIImplData> s_impl;
 

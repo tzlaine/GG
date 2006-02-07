@@ -76,8 +76,10 @@ struct GG::GUIImplData
         prev_wnd_under_cursor(0),
         prev_wnd_under_cursor_time(-1),
         curr_wnd_under_cursor(0),
+        drag_wnds(),
         curr_drag_wnd_dragged(false),
         wnd_region(WR_NONE),
+        drag_drop_originating_wnd(0),
         delta_t(0),
         FPS(-1.0),
         calc_FPS(false),
@@ -551,7 +553,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
 
     switch (event) {
     case IDLE: {
-        if ((s_impl->curr_wnd_under_cursor = GetWindowUnder(pos))) {
+        if ((s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods))) {
             if (s_impl->button_down_repeat_delay && s_impl->curr_wnd_under_cursor->RepeatButtonDown() &&
                 s_impl->drag_wnds[0] == s_impl->curr_wnd_under_cursor) { // convert to a button-down message
                 // ensure that the timing requirements are met
@@ -584,7 +586,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
             FocusWnd()->HandleEvent(Wnd::Event(Wnd::Event::KeyPress, key, key_mods));
         break; }
     case MOUSEMOVE: {
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
+        s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods);
 
         s_impl->mouse_pos = pos; // record mouse position
         s_impl->mouse_rel = rel; // record mouse movement
@@ -614,22 +616,15 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     }
                 }
                 // notify wnd under cursor of presence of drag-drop wnd(s)
-                if (s_impl->curr_drag_wnd_dragged ||
-                    s_impl->drag_drop_wnds.find(s_impl->drag_wnds[0]) != s_impl->drag_drop_wnds.end()) {
-                    bool normal_drag = s_impl->curr_drag_wnd_dragged;
-                    s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), normal_drag ? s_impl->drag_wnds[0] : 0);
+                if (s_impl->curr_drag_wnd_dragged && !s_impl->drag_wnds[0]->DragDropDataType().empty() ||
+                    !s_impl->drag_drop_wnds.empty()) {
+                    bool unregistered_drag = s_impl->curr_drag_wnd_dragged;
+                    s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), unregistered_drag ? s_impl->drag_wnds[0] : 0);
                     std::map<Wnd*, Pt> drag_drop_wnds;
-                    if (normal_drag)
-                        drag_drop_wnds[s_impl->drag_wnds[0]] = s_impl->wnd_drag_offset;
-                    std::map<Wnd*, Pt>& drag_drop_wnds_to_use = normal_drag ? drag_drop_wnds : s_impl->drag_drop_wnds;
-                    if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor) {
+                    drag_drop_wnds[s_impl->drag_wnds[0]] = s_impl->wnd_drag_offset;
+                    std::map<Wnd*, Pt>& drag_drop_wnds_to_use = unregistered_drag ? drag_drop_wnds : s_impl->drag_drop_wnds;
+                    if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor)
                         s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropHere, pos, drag_drop_wnds_to_use, key_mods));
-                    } else {
-                        if (s_impl->prev_wnd_under_cursor)
-                            s_impl->prev_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pos, drag_drop_wnds_to_use, key_mods));
-                        if (s_impl->curr_wnd_under_cursor)
-                            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropEnter, pos, drag_drop_wnds_to_use, key_mods));
-                    }
                 }
             } else if (s_impl->drag_wnds[0]->Resizable()) { // send appropriate resize message to window
                 Pt offset_pos = pos + s_impl->wnd_resize_offset;
@@ -680,13 +675,8 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                 }
             }
         } else if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor) { // if !s_impl->drag_wnds[0] and we're moving over the same (valid) object we were during the last iteration
-            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseHere, pos, 0));
+            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseHere, pos, key_mods));
             ProcessBrowseInfo();
-        } else { // if !s_impl->drag_wnds[0] and s_impl->prev_wnd_under_cursor != s_impl->curr_wnd_under_cursor, we're just moving around
-            if (s_impl->prev_wnd_under_cursor)
-                s_impl->prev_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseLeave, pos, 0));
-            if (s_impl->curr_wnd_under_cursor)
-                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseEnter, pos, 0));
         }
         if (s_impl->prev_wnd_under_cursor != s_impl->curr_wnd_under_cursor) {
             s_impl->browse_info_wnd.reset();
@@ -697,7 +687,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case LPRESS:
     case MPRESS:
     case RPRESS: {
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
+        s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods);
         s_impl->last_button_down_repeat_time = 0;
         s_impl->prev_wnd_drag_position = pos;
         s_impl->wnd_drag_offset = Pt();
@@ -747,7 +737,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case LRELEASE:
     case MRELEASE:
     case RRELEASE: {
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
+        s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods);
         s_impl->last_button_down_repeat_time = 0;
         s_impl->prev_wnd_drag_position = Pt();
         s_impl->browse_info_wnd.reset();
@@ -859,7 +849,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         s_impl->curr_drag_wnd_dragged = false;
         break; }
     case MOUSEWHEEL: {
-        s_impl->curr_wnd_under_cursor = GetWindowUnder(pos);
+        s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods);
         s_impl->browse_info_wnd.reset();
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
@@ -931,6 +921,35 @@ Wnd* GUI::ModalWindow() const
     if (!s_impl->modal_wnds.empty())
         retval = s_impl->modal_wnds.back().first;
     return retval;
+}
+
+Wnd* GUI::CheckedGetWindowUnder(const Pt& pt, Uint32 key_mods)
+{
+    Wnd* w = GetWindowUnder(pt);
+    bool unregistered_drag_drop =
+        s_impl->curr_drag_wnd_dragged && !s_impl->drag_wnds[0]->DragDropDataType().empty();
+    bool registered_drag_drop = !s_impl->drag_drop_wnds.empty();
+    std::map<Wnd*, Pt> drag_drop_wnds;
+    drag_drop_wnds[s_impl->drag_wnds[0]] = s_impl->wnd_drag_offset;
+    if (w != s_impl->curr_wnd_under_cursor) {
+        if (s_impl->curr_wnd_under_cursor) {
+            if (unregistered_drag_drop)
+                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pt, drag_drop_wnds, key_mods));
+            else if (registered_drag_drop)
+                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pt, s_impl->drag_drop_wnds, key_mods));
+            else
+                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseLeave, pt, key_mods));
+        }
+        if (w) {
+            if (unregistered_drag_drop)
+                w->HandleEvent(Wnd::Event(Wnd::Event::DragDropEnter, pt, drag_drop_wnds, key_mods));
+            else if (registered_drag_drop)
+                w->HandleEvent(Wnd::Event(Wnd::Event::DragDropEnter, pt, s_impl->drag_drop_wnds, key_mods));
+            else
+                w->HandleEvent(Wnd::Event(Wnd::Event::MouseEnter, pt, key_mods));
+        }
+    }
+    return w;
 }
 
 void GUI::SetFPS(double FPS)

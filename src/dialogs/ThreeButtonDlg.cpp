@@ -108,7 +108,7 @@ void ThreeButtonDlg::Render()
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
 }
 
-void ThreeButtonDlg::Keypress(Key key, Uint32 key_mods)
+void ThreeButtonDlg::KeyPress(Key key, Uint32 key_mods)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER && m_default != -1) {
         if (m_default == 0)

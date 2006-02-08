@@ -677,7 +677,7 @@ void ColorDlg::Render()
     }
 }
 
-void ColorDlg::Keypress(Key key, Uint32 key_mods)
+void ColorDlg::KeyPress(Key key, Uint32 key_mods)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER)
         OkClicked();

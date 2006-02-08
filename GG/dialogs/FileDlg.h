@@ -91,7 +91,7 @@ public:
 
     /** \name Mutators */ //@{
     virtual void Render();
-    virtual void Keypress(Key key, Uint32 key_mods);
+    virtual void KeyPress(Key key, Uint32 key_mods);
 
     /** sets the allowed file types.  Each pair in the \a types parameter contains a description of the file type in its
         .first member, and wildcarded file types in its .second member.  For example, an entry might be ("Text Files

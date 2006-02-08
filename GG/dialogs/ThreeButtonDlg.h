@@ -74,7 +74,7 @@ public:
 
     /** \name Mutators */ //@{
     virtual void Render();
-    virtual void Keypress(Key key, Uint32 key_mods);
+    virtual void KeyPress(Key key, Uint32 key_mods);
 
     void SetButtonColor(Clr color);  ///< sets the color used to render the dialog's buttons
     void SetDefaultButton(int i);    ///< sets the number of the button that will be chosen by default if the user hits enter (-1 to disable)

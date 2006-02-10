@@ -372,6 +372,8 @@ bool Scroll::EventFilter(Wnd* w, const Event& event)
     if (w == m_tab) {
         switch (event.Type()) {
         case Event::LDrag: {
+            if (Disabled())
+                break;
             Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
             if (m_orientation == VERTICAL) {
                 new_ul.x = m_tab->RelativeUpperLeft().x;

@@ -59,7 +59,6 @@ public:
 
     /** \name Structors */ //@{
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
-    ~Slider();
     //@}
 
     /** \name Accessors */ //@{
@@ -76,11 +75,6 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
-    virtual void   LClick(const Pt& pt, Uint32 keys);
-    virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   KeyPress(Key key, Uint32 key_mods);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< sizes the control, then resizes the tab as needed
@@ -105,9 +99,11 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    int TabDragOffset() const; ///< returns the offset from the cursor to the left edge of the tab; -1 when the tab is not being dragged
-
     Button* Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
+    //@}
+
+    /** \name Mutators */ //@{
+    virtual bool  EventFilter(Wnd* w, const Event& event);
     //@}
 
 private:

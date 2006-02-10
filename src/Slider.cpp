@@ -62,12 +62,9 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
           GetStyleFactory()->NewHSliderTabButton(0, 0, m_tab_width, Height(), "", boost::shared_ptr<Font>(), color))
 {
     Control::SetColor(color);
+    AttachChild(m_tab);
+    m_tab->InstallEventFilter(this);
     SizeMove(UpperLeft(), LowerRight());
-}
-
-Slider::~Slider()
-{
-    delete m_tab;
 }
 
 int Slider::Posn() const
@@ -128,62 +125,41 @@ void Slider::Render()
         BeveledRectangle(x_start, y_start, x_end, y_end, color_to_use, color_to_use, false, m_line_width / 2);
         break;
     }
-    m_tab->OffsetMove(UpperLeft());
-    m_tab->Render();
-    m_tab->OffsetMove(-UpperLeft());
 }
 
-void Slider::LButtonDown(const Pt& pt, Uint32 keys)
+bool Slider::EventFilter(Wnd* w, const Event& event)
 {
-    if (!Disabled()) {
-        Pt ul = UpperLeft();
-        m_tab_drag_offset = -1;   // until we know the tab is being dragged, clear the offset
-        if (m_tab->InWindow(pt - ul))
-            m_tab_drag_offset = m_orientation == VERTICAL ? m_tab->ScreenToWindow(pt - ul).y : m_tab->ScreenToWindow(pt - ul).x;
-    }
-}
-
-void Slider::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
-{
-    if (!Disabled() && m_tab_drag_offset != -1) // if tab is being dragged
-    {
-        int click_pos;
-        int slide_width;   // "width" in these is not necessarily in the x direction, it means more like "extent" in horiz or vert direction
-        int tab_width;
-        if (m_orientation == VERTICAL) {
-            click_pos = ScreenToWindow(pt).y;
-            slide_width = Size().y;
-            tab_width = m_tab->Size().y;
-        } else {
-            click_pos = ScreenToWindow(pt).x;
-            slide_width = Size().x;
-            tab_width = m_tab->Size().x;
+    if (w == m_tab) {
+        switch (event.Type()) {
+        case Event::LDrag: {
+            if (Disabled())
+                break;
+            Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
+            if (m_orientation == VERTICAL) {
+                new_ul.x = m_tab->RelativeUpperLeft().x;
+                new_ul.y = std::max(0,
+                                    std::min(new_ul.y, ClientHeight() - m_tab->Height()));
+            } else {
+                new_ul.x = std::max(0,
+                                    std::min(new_ul.x, ClientWidth() - m_tab->Width()));
+                new_ul.y = m_tab->RelativeUpperLeft().y;
+            }
+            m_tab->MoveTo(new_ul);
+            UpdatePosn();
+            break; }
+        case Event::MouseEnter:
+        case Event::MouseHere:
+        case Event::MouseLeave:
+        case Event::MouseWheel:
+        case Event::KeyPress:
+        case Event::KeyRelease:
+            return false;
+        default:
+            break;
         }
-        if (click_pos - m_tab_drag_offset < 0)
-            m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, 0)) : m_tab->MoveTo(Pt(0, 0));
-        else if (click_pos - m_tab_drag_offset + tab_width > slide_width)
-            m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, slide_width - tab_width)) : m_tab->MoveTo(Pt(slide_width - tab_width, 0));
-        else
-            m_orientation == VERTICAL ? m_tab->MoveTo(Pt(0, click_pos - m_tab_drag_offset)) : m_tab->MoveTo(Pt(click_pos - m_tab_drag_offset, 0));
-        UpdatePosn();
+        return true;
     }
-}
-
-void Slider::LButtonUp(const Pt& pt, Uint32 keys)
-{
-    if (!Disabled() && m_tab_drag_offset != -1)
-        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
-    m_tab_drag_offset = -1;
-}
-
-void Slider::LClick(const Pt& pt, Uint32 keys)
-{
-    LButtonUp(pt, keys);
-}
-
-void Slider::MouseHere(const Pt& pt, Uint32 keys)
-{
-    m_tab_drag_offset = -1;
+    return false;
 }
 
 void Slider::KeyPress(Key key, Uint32 key_mods)
@@ -309,11 +285,6 @@ void Slider::DefineAttributes(WndEditor* editor)
                       FLAT, GROOVED);
 }
 
-int Slider::TabDragOffset() const
-{
-    return m_tab_drag_offset;
-}
-
 Button* Slider::Tab() const
 {
     return m_tab;
@@ -321,20 +292,24 @@ Button* Slider::Tab() const
 
 void Slider::MoveTabToPosn()
 {
-    double fractional_distance = static_cast<double>(std::abs(m_posn - m_range_min)) / (std::abs(m_range_max - m_range_min));
-    int line_length = (m_orientation == VERTICAL ? Height() : Width()) - m_tab_width;
+    assert(m_range_min <= m_posn && m_posn <= m_range_max ||
+           m_range_max <= m_posn && m_posn <= m_range_min);
+    double fractional_distance = static_cast<double>(m_posn - m_range_min) / (m_range_max - m_range_min);
+    int tab_width = m_orientation == VERTICAL ? m_tab->Height() : m_tab->Width();
+    int line_length = (m_orientation == VERTICAL ? Height() : Width()) - tab_width;
     int pixel_distance = static_cast<int>(line_length * fractional_distance);
     if (m_orientation == VERTICAL)
-        m_tab->MoveTo(Pt(m_tab->UpperLeft().x, Height() - m_tab_width - pixel_distance));
+        m_tab->MoveTo(Pt(m_tab->RelativeUpperLeft().x, Height() - tab_width - pixel_distance));
     else
-        m_tab->MoveTo(Pt(pixel_distance, m_tab->UpperLeft().y));
+        m_tab->MoveTo(Pt(pixel_distance, m_tab->RelativeUpperLeft().y));
 }
 
 void Slider::UpdatePosn()
 {
     int old_posn = m_posn;
-    int line_length = (m_orientation == VERTICAL ? Height() : Width()) - m_tab_width;
-    int tab_posn = (m_orientation == VERTICAL ? Height() - m_tab->LowerRight().y : m_tab->UpperLeft().x);
+    int tab_width = m_orientation == VERTICAL ? m_tab->Height() : m_tab->Width();
+    int line_length = (m_orientation == VERTICAL ? Height() : Width()) - tab_width;
+    int tab_posn = (m_orientation == VERTICAL ? Height() - m_tab->RelativeLowerRight().y : m_tab->RelativeUpperLeft().x);
     double fractional_distance = static_cast<double>(tab_posn) / line_length;
     m_posn = static_cast<int>((m_range_max - m_range_min) * fractional_distance) + m_range_min;
     if (m_posn != old_posn)

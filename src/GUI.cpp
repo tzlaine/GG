@@ -610,7 +610,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                         Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
                         Pt move = pos - s_impl->prev_wnd_drag_position;
                         s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, move, key_mods));
-                        s_impl->prev_wnd_drag_position = pos;
+                        s_impl->prev_wnd_drag_position += s_impl->drag_wnds[0]->UpperLeft() - start_pos;
                         if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
                             s_impl->curr_drag_wnd_dragged = true;
                     }

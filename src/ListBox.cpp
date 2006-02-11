@@ -695,10 +695,14 @@ void ListBox::KeyPress(Key key, Uint32 key_mods)
 void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
 {
     if (m_vscroll) {
-        for (int i = 0; i < move; ++i)
-            m_vscroll->ScrollLineDecr();
-        for (int i = 0; i < -move; ++i)
-            m_vscroll->ScrollLineIncr();
+        for (int i = 0; i < move; ++i) {
+            if (0 < m_first_row_shown)
+                m_vscroll->ScrollTo(m_vscroll->PosnRange().first - m_rows[m_first_row_shown - 1]->Height());
+        }
+        for (int i = 0; i < -move; ++i) {
+            if (m_first_row_shown < m_rows.size() - 1)
+                m_vscroll->ScrollTo(m_vscroll->PosnRange().first + m_rows[m_first_row_shown]->Height());
+        }
     }
 }
 

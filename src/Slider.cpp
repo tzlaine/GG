@@ -132,32 +132,25 @@ bool Slider::EventFilter(Wnd* w, const Event& event)
     if (w == m_tab) {
         switch (event.Type()) {
         case Event::LDrag: {
-            if (Disabled())
-                break;
-            Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
-            if (m_orientation == VERTICAL) {
-                new_ul.x = m_tab->RelativeUpperLeft().x;
-                new_ul.y = std::max(0,
-                                    std::min(new_ul.y, ClientHeight() - m_tab->Height()));
-            } else {
-                new_ul.x = std::max(0,
-                                    std::min(new_ul.x, ClientWidth() - m_tab->Width()));
-                new_ul.y = m_tab->RelativeUpperLeft().y;
+            if (!Disabled()) {
+                Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
+                if (m_orientation == VERTICAL) {
+                    new_ul.x = m_tab->RelativeUpperLeft().x;
+                    new_ul.y = std::max(0,
+                                        std::min(new_ul.y, ClientHeight() - m_tab->Height()));
+                } else {
+                    new_ul.x = std::max(0,
+                                        std::min(new_ul.x, ClientWidth() - m_tab->Width()));
+                    new_ul.y = m_tab->RelativeUpperLeft().y;
+                }
+                m_tab->MoveTo(new_ul);
+                UpdatePosn();
             }
-            m_tab->MoveTo(new_ul);
-            UpdatePosn();
-            break; }
-        case Event::MouseEnter:
-        case Event::MouseHere:
-        case Event::MouseLeave:
-        case Event::MouseWheel:
-        case Event::KeyPress:
-        case Event::KeyRelease:
-            return false;
+            return true;
+        }
         default:
             break;
         }
-        return true;
     }
     return false;
 }

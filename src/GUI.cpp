@@ -121,7 +121,7 @@ struct GG::GUIImplData
     int          prev_wnd_under_cursor_time; // the time at which prev_wnd_under_cursor was initially set to its current value
     Wnd*         curr_wnd_under_cursor; // GUI window currently under the input cursor; may be 0
     Wnd*         drag_wnds[3];          // GUI window currently being clicked or dragged by each mouse button
-    Pt           prev_wnd_drag_position;// the screen coordinates of the cursor when the last *Drag message was generated
+    Pt           prev_wnd_drag_position;// the upper-left corner of the dragged window when the last *Drag message was generated
     Pt           wnd_drag_offset;       // the offset from the upper left corner of the dragged window to the cursor for the current drag
     bool         curr_drag_wnd_dragged; // true iff the currently-pressed window (drag_wnd[N]) has actually been dragged some distance (in which case releasing the mouse button is not a click)
     Pt           wnd_resize_offset;     // offset from the cursor of either the upper-left or lower-right corner of the GUI window currently being resized
@@ -608,9 +608,9 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                             parent->StartingChildDragDrop(s_impl->drag_wnds[0], offset);
                     } else {
                         Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
-                        Pt move = pos - s_impl->prev_wnd_drag_position;
+                        Pt move = (pos - s_impl->wnd_drag_offset) - s_impl->prev_wnd_drag_position;
                         s_impl->drag_wnds[0]->HandleEvent(Wnd::Event(Wnd::Event::LDrag, pos, move, key_mods));
-                        s_impl->prev_wnd_drag_position += s_impl->drag_wnds[0]->UpperLeft() - start_pos;
+                        s_impl->prev_wnd_drag_position = s_impl->drag_wnds[0]->UpperLeft();
                         if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
                             s_impl->curr_drag_wnd_dragged = true;
                     }
@@ -689,7 +689,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case RPRESS: {
         s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods);
         s_impl->last_button_down_repeat_time = 0;
-        s_impl->prev_wnd_drag_position = pos;
+        s_impl->prev_wnd_drag_position = Pt();
         s_impl->wnd_drag_offset = Pt();
         s_impl->prev_button_press_time = 0;
         s_impl->browse_info_wnd.reset();
@@ -700,8 +700,10 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         case LPRESS: {
             s_impl->button_state[0] = true;
             s_impl->drag_wnds[0] = s_impl->curr_wnd_under_cursor; // track this window as the one being dragged by the left mouse button
-            if (s_impl->curr_wnd_under_cursor)
-                s_impl->wnd_drag_offset = pos - s_impl->drag_wnds[0]->UpperLeft();
+            if (s_impl->curr_wnd_under_cursor) {
+                s_impl->prev_wnd_drag_position = s_impl->drag_wnds[0]->UpperLeft();
+                s_impl->wnd_drag_offset = pos - s_impl->prev_wnd_drag_position;
+            }
             // if this window is not a disabled Control window, it becomes the focus window
             Control* control = 0;
             if (s_impl->drag_wnds[0] && (!(control = dynamic_cast<Control*>(s_impl->drag_wnds[0])) || !control->Disabled()))

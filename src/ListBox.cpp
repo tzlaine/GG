@@ -700,7 +700,7 @@ void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
                 m_vscroll->ScrollTo(m_vscroll->PosnRange().first - m_rows[m_first_row_shown - 1]->Height());
         }
         for (int i = 0; i < -move; ++i) {
-            if (m_first_row_shown < m_rows.size() - 1)
+            if (m_first_row_shown < static_cast<int>(m_rows.size() - 1))
                 m_vscroll->ScrollTo(m_vscroll->PosnRange().first + m_rows[m_first_row_shown]->Height());
         }
     }

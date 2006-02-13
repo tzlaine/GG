@@ -148,6 +148,12 @@ bool Slider::EventFilter(Wnd* w, const Event& event)
             }
             return true;
         }
+        case Event::LButtonUp:
+        case Event::LClick: {
+            if (!Disabled())
+                SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
+            break;
+        }
         default:
             break;
         }

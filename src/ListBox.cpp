@@ -577,6 +577,7 @@ void ListBox::Render()
         MatchesOrContains(this, GUI::GetGUI()->FocusWnd())) {
         Pt row_ul = m_rows[m_caret]->UpperLeft();
         Pt row_lr = m_rows[m_caret]->LowerRight();
+        row_lr.x = ClientLowerRight().x;
         FlatRectangle(row_ul.x, row_ul.y, row_lr.x, row_lr.y, CLR_ZERO, CLR_SHADOW, 2);
     }
 

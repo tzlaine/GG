@@ -258,7 +258,7 @@ void MenuBar::MouseHere(const Pt& pt, Uint32 keys)
     }
 }
 
-void MenuBar::MouseLeave(const Pt& pt, Uint32 keys)
+void MenuBar::MouseLeave()
 {
     m_caret = -1;
 }

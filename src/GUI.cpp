@@ -78,6 +78,7 @@ struct GG::GUIImplData
         curr_wnd_under_cursor(0),
         drag_wnds(),
         curr_drag_wnd_dragged(false),
+        curr_drag_drop_here_wnd(0),
         wnd_region(WR_NONE),
         drag_drop_originating_wnd(0),
         delta_t(0),
@@ -124,6 +125,7 @@ struct GG::GUIImplData
     Pt           prev_wnd_drag_position;// the upper-left corner of the dragged window when the last *Drag message was generated
     Pt           wnd_drag_offset;       // the offset from the upper left corner of the dragged window to the cursor for the current drag
     bool         curr_drag_wnd_dragged; // true iff the currently-pressed window (drag_wnd[N]) has actually been dragged some distance (in which case releasing the mouse button is not a click)
+    Wnd*         curr_drag_drop_here_wnd;// the Wnd that most recently received a DragDropEnter or DragDropHere message (0 if DragDropLeave was sent as well, or if none)
     Pt           wnd_resize_offset;     // offset from the cursor of either the upper-left or lower-right corner of the GUI window currently being resized
     WndRegion    wnd_region;            // window region currently being dragged or clicked; for non-frame windows, this will always be WR_NONE
 
@@ -359,6 +361,8 @@ void GUI::WndDying(Wnd* wnd)
             s_impl->drag_wnds[2] = 0;
             s_impl->wnd_region = WR_NONE;
         }
+        if (MatchesOrContains(wnd, s_impl->curr_drag_drop_here_wnd))
+            s_impl->curr_drag_drop_here_wnd = 0;
         if (MatchesOrContains(wnd, s_impl->drag_drop_originating_wnd))
             s_impl->drag_drop_originating_wnd = 0;
         s_impl->drag_drop_wnds.erase(wnd);
@@ -623,8 +627,15 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                     std::map<Wnd*, Pt> drag_drop_wnds;
                     drag_drop_wnds[s_impl->drag_wnds[0]] = s_impl->wnd_drag_offset;
                     std::map<Wnd*, Pt>& drag_drop_wnds_to_use = unregistered_drag ? drag_drop_wnds : s_impl->drag_drop_wnds;
-                    if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor)
-                        s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropHere, pos, drag_drop_wnds_to_use, key_mods));
+                    if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor) {
+                        if (s_impl->curr_drag_drop_here_wnd) {
+                            assert(s_impl->curr_wnd_under_cursor == s_impl->curr_drag_drop_here_wnd);
+                            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropHere, pos, drag_drop_wnds_to_use, key_mods));
+                        } else {
+                            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropEnter, pos, drag_drop_wnds_to_use, key_mods));
+                            s_impl->curr_drag_drop_here_wnd = s_impl->curr_wnd_under_cursor;
+                        }
+                    }
                 }
             } else if (s_impl->drag_wnds[0]->Resizable()) { // send appropriate resize message to window
                 Pt offset_pos = pos + s_impl->wnd_resize_offset;
@@ -787,7 +798,8 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                             s_impl->drag_drop_originating_wnd = click_wnd->Parent();
                             std::map<Wnd*, Pt> drag_drop_wnds;
                             drag_drop_wnds[click_wnd] = s_impl->wnd_drag_offset;
-                            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pos, drag_drop_wnds, key_mods));
+                            s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave));
+                            s_impl->curr_drag_drop_here_wnd = 0;
                             s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
                             if (s_impl->drag_drop_originating_wnd)
                                 s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
@@ -798,7 +810,8 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
                              ++it) {
                             drag_wnds.push_back(it->first);
                         }
-                        s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pos, s_impl->drag_drop_wnds, key_mods));
+                        s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave));
+                        s_impl->curr_drag_drop_here_wnd = 0;
                         s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
                         if (s_impl->drag_drop_originating_wnd)
                             s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
@@ -933,22 +946,32 @@ Wnd* GUI::CheckedGetWindowUnder(const Pt& pt, Uint32 key_mods)
     bool registered_drag_drop = !s_impl->drag_drop_wnds.empty();
     std::map<Wnd*, Pt> drag_drop_wnds;
     drag_drop_wnds[s_impl->drag_wnds[0]] = s_impl->wnd_drag_offset;
+    if (s_impl->curr_drag_drop_here_wnd && !unregistered_drag_drop && !registered_drag_drop) {
+        s_impl->curr_drag_drop_here_wnd->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave));
+        s_impl->curr_drag_drop_here_wnd = 0;
+    }
     if (w != s_impl->curr_wnd_under_cursor) {
         if (s_impl->curr_wnd_under_cursor) {
-            if (unregistered_drag_drop)
-                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pt, drag_drop_wnds, key_mods));
-            else if (registered_drag_drop)
-                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave, pt, s_impl->drag_drop_wnds, key_mods));
-            else
-                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseLeave, pt, key_mods));
+            if (unregistered_drag_drop) {
+                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave));
+                s_impl->curr_drag_drop_here_wnd = 0;
+            } else if (registered_drag_drop) {
+                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::DragDropLeave));
+                s_impl->curr_drag_drop_here_wnd = 0;
+            } else {
+                s_impl->curr_wnd_under_cursor->HandleEvent(Wnd::Event(Wnd::Event::MouseLeave));
+            }
         }
         if (w) {
-            if (unregistered_drag_drop)
+            if (unregistered_drag_drop) {
                 w->HandleEvent(Wnd::Event(Wnd::Event::DragDropEnter, pt, drag_drop_wnds, key_mods));
-            else if (registered_drag_drop)
+                s_impl->curr_drag_drop_here_wnd = w;
+            } else if (registered_drag_drop) {
                 w->HandleEvent(Wnd::Event(Wnd::Event::DragDropEnter, pt, s_impl->drag_drop_wnds, key_mods));
-            else
+                s_impl->curr_drag_drop_here_wnd = w;
+            } else {
                 w->HandleEvent(Wnd::Event(Wnd::Event::MouseEnter, pt, key_mods));
+            }
         }
     }
     return w;

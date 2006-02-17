@@ -1015,7 +1015,7 @@ void Wnd::MouseEnter(const Pt& pt, Uint32 keys) {}
 
 void Wnd::MouseHere(const Pt& pt, Uint32 keys) {}
 
-void Wnd::MouseLeave(const Pt& pt, Uint32 keys) {}
+void Wnd::MouseLeave() {}
 
 void Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {}
 
@@ -1023,7 +1023,7 @@ void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, 
 
 void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
 
-void Wnd::DragDropLeave(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
+void Wnd::DragDropLeave() {}
 
 void Wnd::KeyPress(Key key, Uint32 key_mods) {}
 
@@ -1176,7 +1176,7 @@ void Wnd::HandleEvent(const Event& event)
         MouseHere(event.Point(), event.KeyMods());
         break;
     case Event::MouseLeave:
-        MouseLeave(event.Point(), event.KeyMods());
+        MouseLeave();
         break;
     case Event::DragDropEnter:
         DragDropEnter(event.Point(), event.DragDropWnds(), event.KeyMods());
@@ -1185,7 +1185,7 @@ void Wnd::HandleEvent(const Event& event)
         DragDropHere(event.Point(), event.DragDropWnds(), event.KeyMods());
         break;
     case Event::DragDropLeave:
-        DragDropLeave(event.Point(), event.DragDropWnds(), event.KeyMods());
+        DragDropLeave();
         break;
     case Event::MouseWheel:
         MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());

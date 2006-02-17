@@ -398,7 +398,7 @@ public:
         MouseEnter() message is generated. */
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
 
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys);  ///< respond to cursor leaving window's coords
+    virtual void   MouseLeave();  ///< respond to cursor leaving window's coords
 
     /** respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down) */
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
@@ -413,9 +413,8 @@ public:
         Wnds' offsets from \a pt.. */
     virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
 
-    /** respond to cursor leaving window's coords while dragging drag-drop Wnds.  The Pts in \a drag_drop_wnds are the
-        Wnds' offsets from \a pt. */
-    virtual void   DragDropLeave(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+    /** respond to cursor leaving window's coords while dragging drag-drop Wnds. */
+    virtual void   DragDropLeave();
 
     /** respond to down-keystrokes (focus window only).  A window may receive KeyPress() messages passed up to it from
         its children.  For instance, Control-derived classes pass KeyPress() messages to their Parent() windows by

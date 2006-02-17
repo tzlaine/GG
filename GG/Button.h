@@ -83,7 +83,7 @@ public:
     virtual void   LButtonUp(const Pt& pt, Uint32 keys);
     virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys);
+    virtual void   MouseLeave();
 
     virtual void   SetColor(Clr c); ///< sets the control's color; does not affect the text color
 

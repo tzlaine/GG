@@ -151,7 +151,7 @@ public:
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Uint32 keys);
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
-    virtual void   MouseLeave(const Pt& pt, Uint32 keys);
+    virtual void   MouseLeave();
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
 

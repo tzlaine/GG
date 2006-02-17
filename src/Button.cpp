@@ -139,7 +139,7 @@ void Button::MouseHere(const Pt& pt, Uint32 keys)
         m_state = BN_ROLLOVER;
 }
 
-void Button::MouseLeave(const Pt& pt, Uint32 keys)
+void Button::MouseLeave()
 {
     if (!Disabled())
         m_state = BN_UNPRESSED;

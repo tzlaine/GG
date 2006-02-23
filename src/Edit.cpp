@@ -173,7 +173,7 @@ void Edit::KeyPress(Key key, Uint32 key_mods)
     if (!Disabled()) {
         bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
         bool emit_signal = false;
-    
+
         switch (key) {
         case GGK_HOME:
             m_first_char_shown = 0;
@@ -200,7 +200,8 @@ void Edit::KeyPress(Key key, Uint32 key_mods)
                 m_cursor_pos.second = m_cursor_pos.first = std::max(m_cursor_pos.first, m_cursor_pos.second);
             } else if (m_cursor_pos.second < Length()) {
                 int extent = GetLineData()[0].char_data[m_cursor_pos.second].extent;
-                while (extent == GetLineData()[0].char_data[++m_cursor_pos.second].extent) ;
+                while (m_cursor_pos.second < Length() && extent == GetLineData()[0].char_data[m_cursor_pos.second].extent)
+                    ++m_cursor_pos.second;
                 if (!shift_down)
                     m_cursor_pos.first = m_cursor_pos.second;
             }
@@ -432,7 +433,8 @@ void Edit::AdjustView()
         if (last_idx_to_use == Length() - 1) // if the caret is at the very end of the string, add the length of some spaces
             pixels_to_move += (m_cursor_pos.second + 5 - Length() - 1) * GetFont()->SpaceWidth();
         int move_to = m_first_char_shown;
-        while (char_data[move_to].extent - first_char_offset < pixels_to_move)
+        while (move_to < static_cast<int>(char_data.size()) &&
+               char_data[move_to].extent - first_char_offset < pixels_to_move)
             ++move_to;
         m_first_char_shown = move_to;
     }

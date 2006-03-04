@@ -319,13 +319,10 @@ void Edit::SetText(const std::string& str)
     TextControl::SetText(str);
     m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
 
-    if (str.empty())
-        m_first_char_shown = 0;
-
     // make sure the change in text did not make the cursor or view position invalid
-    if (GetLineData().empty() || static_cast<int>(GetLineData()[0].char_data.size()) < m_cursor_pos.first) {
+    if (str.empty() || GetLineData().empty() || static_cast<int>(GetLineData()[0].char_data.size()) < m_cursor_pos.first) {
+        m_first_char_shown = 0;
         m_cursor_pos = std::make_pair(0, 0);
-        AdjustView();
     }
 
     m_recently_edited = true;

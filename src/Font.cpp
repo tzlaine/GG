@@ -795,10 +795,10 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
 
     // Get the scalable font metrics for this font
     scale = face->size->metrics.y_scale;
-    m_ascent  = static_cast<int>(std::ceil(FT_MulFix(face->bbox.yMax, scale) / 64.0)); // convert from fixed-point 26.6 format
-    m_descent = static_cast<int>(std::floor(FT_MulFix(face->bbox.yMin, scale) / 64.0));
+    m_ascent  = static_cast<int>(face->size->metrics.ascender / 64.0); // convert from fixed-point 26.6 format
+    m_descent  = static_cast<int>(face->size->metrics.descender / 64.0); // convert from fixed-point 26.6 format
     m_height  = m_ascent - m_descent + 1;
-    m_lineskip = static_cast<int>(std::ceil(FT_MulFix(face->height, scale) / 64.0));
+    m_lineskip = static_cast<int>(face->size->metrics.height / 64.0);
     // underline info
     m_underline_offset = std::floor(FT_MulFix(face->underline_position, scale) / 64.0);
     m_underline_height = std::ceil(FT_MulFix(face->underline_thickness, scale) / 64.0);

@@ -28,6 +28,7 @@
 
 #include <GG/BrowseInfoWnd.h>
 #include <GG/Control.h>
+#include <GG/EventPump.h>
 #include <GG/PluginInterface.h>
 #include <GG/StyleFactory.h>
 #include <GG/ZList.h>
@@ -396,6 +397,11 @@ void GUI::MoveUp(Wnd* wnd)
 void GUI::MoveDown(Wnd* wnd)
 {
     if (wnd) s_impl->zlist.MoveDown(wnd);
+}
+
+boost::shared_ptr<ModalEventPump> GUI::CreateModalEventPump(bool& done)
+{
+    return boost::shared_ptr<ModalEventPump>(new ModalEventPump(done));
 }
 
 void GUI::RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd)

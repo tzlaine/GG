@@ -91,3 +91,18 @@ void EventPump::operator()()
         LoopBody(gui, state, true, true);
     }
 }
+
+
+ModalEventPump::ModalEventPump(const bool& done) :
+    m_done(done)
+{}
+
+void ModalEventPump::operator()()
+{
+    GUI* gui = GUI::GetGUI();
+    EventPumpState& state = State();
+    while (!m_done) {
+        gui->HandleSystemEvents();
+        LoopBody(gui, state, true, true);
+    }
+}

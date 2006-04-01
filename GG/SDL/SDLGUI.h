@@ -103,7 +103,9 @@ public:
     static SDLGUI* GetGUI();                             ///< allows any code to access the gui framework by calling SDLGUI::GetGUI()
     static GG::Key GGKeyFromSDLKey(const SDL_keysym& key); ///< gives the GGKey equivalent of key
 
-private:
+protected:
+    void SetAppSize(const GG::Pt& size);
+
     // these are called at the beginning of the gui's execution
     virtual void   SDLInit();        ///< initializes SDL, FE, and SDL OpenGL functionality
     virtual void   GLInit();         ///< allows user to specify OpenGL initialization code; called at the end of SDLInit()
@@ -121,6 +123,7 @@ private:
 
     virtual void   Run();
 
+private:
     int            m_app_width;      ///< application width and height (defaults to 1024 x 768)
     int            m_app_height;
 };

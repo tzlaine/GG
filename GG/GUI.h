@@ -48,6 +48,7 @@ namespace GG {
 
 class Wnd;
 class EventPumpBase;
+class ModalEventPump;
 class PluginInterface;
 class StyleFactory;
 class Texture;
@@ -194,6 +195,9 @@ public:
     void           MoveUp(Wnd* wnd);             ///< moves \a wnd to the top of the z-list
     void           MoveDown(Wnd* wnd);           ///< moves \a wnd to the bottom of the z-list
 
+    virtual boost::shared_ptr<ModalEventPump>
+                   CreateModalEventPump(bool& done); ///< creates a new ModalEventPump that will terminate when \a done is set to true
+
     /** adds \a wnd to the set of current drag-and-drop Wnds, to be rendered \a offset pixels from the cursor
         position. \a originating_wnd indicates the original owner of \a wnd before the drag-drop.  \throw
         std::runtime_error May throw std::runtime_error if there are already other Wnds registered that belong to a
@@ -278,9 +282,10 @@ protected:
     void SetDeltaT(int delta_t);           ///< sets the time between the most recent frame and the one before it, in ms
     //@}
 
-private:
     virtual void   Run() = 0;                    // initializes GUI state, then executes main event handler/render loop (PollAndRender())
-    Wnd*           ModalWindow() const;          // returns the currently modal window, if any
+
+private:
+    Wnd*           ModalWindow() const;          // returns the current modal window, if any
 
     // returns the window under \a pt, sending Mouse{Enter|Leave} or DragDrop{Enter|Leave} as appropriate
     Wnd*           CheckedGetWindowUnder(const Pt& pt, Uint32 key_mods);

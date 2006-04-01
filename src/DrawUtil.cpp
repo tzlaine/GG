@@ -75,7 +75,7 @@ namespace { // file-scope constants and functions
             glDrawArrays(GL_QUADS, 0, 4);
         }
 
-        glEnableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_VERTEX_ARRAY);
         glEnable(GL_TEXTURE_2D);
     }
 

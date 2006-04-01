@@ -131,24 +131,6 @@ namespace {
         }
     };
 
-    // an EventPump that terminates when its m_done reference member is true
-    class ModalEventPump : public EventPump
-    {
-    public:
-        ModalEventPump(const bool& done) : m_done(done) {}
-        virtual void operator()()
-            {
-                GUI* gui = GUI::GetGUI();
-                EventPumpState& state = State();
-                while (!m_done) {
-                    gui->HandleSystemEvents();
-                    LoopBody(gui, state, true, true);
-                }
-            }
-    private:
-        const bool& m_done;
-    };
-
     struct SetWindowTextAction : AttributeChangedAction<std::string>
     {
         SetWindowTextAction(Wnd* wnd) : m_wnd(wnd) {}
@@ -1040,8 +1022,8 @@ int Wnd::Run()
         GUI* gui = GUI::GetGUI();
         gui->RegisterModal(this);
         ModalInit();
-        ModalEventPump pump(m_done);
-        pump();
+        boost::shared_ptr<ModalEventPump> pump = gui->CreateModalEventPump(m_done);
+        (*pump)();
         gui->Remove(this);
         retval = 1;
     }

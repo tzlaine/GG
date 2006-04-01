@@ -74,16 +74,25 @@ protected:
     GUI::HandleSystemEvents(), but any action can be taken in a EventPump-derived type that overrides operator()().  For
     example, it might be useful to override operator()() with a function that gives all GG-relevant events to a GG
     event-hendler, and gives all other events to a system-specific handler, if your GUI-derived class does not already
-    do so.  \note Modal Wnds use EventPumps to implement their modality.  This means that you must write your
-    GUI-derived class's HandleSystemEvents() in such a way that it can handle modal Wnd events to your satisfaction,
-    since the type of EventPump that modal Wnds use is fixed. */
-class GG_API EventPump : public GG::EventPumpBase
+    do so. */
+class GG_API EventPump : public EventPumpBase
 {
 public:
     virtual ~EventPump() {} ///< virtual dtor
 
     /** cycles through event-handling and rendering, calling GUI::HandleSystemEvents() and then EventPumpBase::LoopBody(). */
     virtual void operator()();
+};
+
+/** an EventPump that terminates when its m_done reference member is true.  \note Modal Wnds use EventPumps to implement
+    their modality. */
+class GG_API ModalEventPump : public EventPump
+{
+public:
+    ModalEventPump(const bool& done);
+    virtual void operator()();
+protected:
+    const bool& m_done;
 };
 
 } // namespace GG

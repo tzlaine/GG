@@ -122,6 +122,12 @@ GG::Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
     return retval;
 }
 
+void SDLGUI::SetAppSize(const GG::Pt& size)
+{
+    m_app_width = size.x;
+    m_app_height = size.y;
+}
+
 void SDLGUI::SDLInit()
 {
     const SDL_VideoInfo* vid_info = 0;

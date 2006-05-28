@@ -74,7 +74,7 @@ private:
     class GG_API name : public ExceptionBase                            \
     {                                                                   \
     public:                                                             \
-        name () throw() : ExceptionBase() {}							\
+        name () throw() : ExceptionBase() {}                            \
         name (const std::string& msg) throw() : ExceptionBase(msg) {}   \
         virtual const char* type() const throw()                        \
             {return "GG::" # name ;}                                    \

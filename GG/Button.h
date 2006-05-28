@@ -251,7 +251,7 @@ public:
     int              CheckedButton() const;
 
     /** returns true iff this button group will render an outline of itself; this is sometimes useful for debugging
-	purposes */
+        purposes */
     bool             RenderOutline() const;
 
     mutable ButtonChangedSignalType ButtonChangedSignal; ///< the button changed signal object for this RadioButtonGroup
@@ -278,7 +278,7 @@ public:
                    StateButtonStyle style = SBSTYLE_3D_RADIO);
 
     /** set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
-	purposes */
+        purposes */
     void RenderOutline(bool render_outline);
 
     virtual void DefineAttributes(WndEditor* editor);

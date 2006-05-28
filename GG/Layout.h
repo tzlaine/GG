@@ -107,11 +107,11 @@ public:
            RelativeCellRects() const;                ///< returns a matrix of rectangles in layout client space that cover the cells in which child Wnds are placed
 
     /** returns true iff this layout will render an outline of itself; this is sometimes useful for debugging
-	purposes */
+        purposes */
     bool   RenderOutline() const;
 
     /** returns the outline color used to render this layout (this is only used if RenderOutline() returns true).  This is
-	sometimes useful for debugging purposes. */
+        sometimes useful for debugging purposes. */
     Clr    OutlineColor() const;
     //@}
    
@@ -171,11 +171,11 @@ public:
     void SetMinimumColumnWidth(int column, int width);
 
     /** set this to true if this layout should render an outline of itself; this is sometimes useful for debugging
-	purposes */
+        purposes */
     void RenderOutline(bool render_outline);
 
     /** sets the outline color used to render this layout (this is only used if RenderOutline() returns true).  This is
-	sometimes useful for debugging purposes. */
+        sometimes useful for debugging purposes. */
     void SetOutlineColor(Clr color);
 
     virtual void DefineAttributes(WndEditor* editor);
@@ -302,7 +302,7 @@ void GG::Layout::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_wnd_positions)
         & BOOST_SERIALIZATION_NVP(m_ignore_child_resize)
         & BOOST_SERIALIZATION_NVP(m_render_outline)
-	& BOOST_SERIALIZATION_NVP(m_outline_color);
+        & BOOST_SERIALIZATION_NVP(m_outline_color);
 }
 
 #endif // _GG_Layout_h_

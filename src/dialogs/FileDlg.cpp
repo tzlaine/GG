@@ -690,8 +690,8 @@ void FileDlg::UpdateDirectoryText()
     std::string str = s_working_dir.native_directory_string();
     const int H_SPACING = 10;
     while (m_font->TextExtent(str).x > Width() - 2 * H_SPACING) {
-        unsigned int slash_idx = str.find('/', 1);
-        unsigned int backslash_idx = str.find('\\', 1);
+        std::string::size_type slash_idx = str.find('/', 1);
+        std::string::size_type backslash_idx = str.find('\\', 1);
         if (slash_idx != std::string::npos) {
             slash_idx = str.find_first_not_of('/', slash_idx);
             str = "..." + str.substr(slash_idx);

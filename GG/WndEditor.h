@@ -548,7 +548,7 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
     for (T i = min; i <= max; i = T(i + 1)) {
         Row* row = new ListBox::Row();
         std::string enum_label = boost::lexical_cast<std::string>(i);
-        unsigned int pos = enum_label.find_last_of(':');
+        std::string::size_type pos = enum_label.find_last_of(':');
         if (pos != std::string::npos) {
             ++pos;
             enum_label = enum_label.substr(pos);

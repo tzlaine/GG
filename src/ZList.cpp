@@ -46,12 +46,14 @@ Wnd* ZList::Pick(const Pt& pt, Wnd* modal, Wnd* ignore/* = 0*/) const
 {
     Wnd* retval = 0;
     if (modal) { // if a modal window is active, only look there
-        retval = modal->InWindow(pt) ? PickWithinWindow(pt, modal, ignore) : 0;
+        // NOTE: We have to check Visible() separately, because in the rendering code a invisble parent's children are
+        // never rendered.
+        retval = modal->Visible() && modal->InWindow(pt) ? PickWithinWindow(pt, modal, ignore) : 0;
     } else { // otherwise, look in the z-list
         const_iterator end_it = end();
         for (const_iterator it = begin(); it != end_it; ++it) {
             Wnd* temp = 0;
-            if ((*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it, ignore))) {
+            if ((*it)->Visible() && (*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it, ignore))) {
                 retval = temp;
                 break;
             }

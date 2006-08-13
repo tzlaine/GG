@@ -471,21 +471,43 @@ Pt StateButton::TextUpperLeft() const
 // GG::RadioButtonGroup
 ////////////////////////////////////////////////
 // ButtonClickedFunctor
-RadioButtonGroup::ButtonClickedFunctor::ButtonClickedFunctor(RadioButtonGroup* grp, int idx) :
-    m_grp(grp),
-    m_idx(idx)
+RadioButtonGroup::ButtonClickedFunctor::ButtonClickedFunctor(RadioButtonGroup* group, StateButton* button, int index) :
+    m_group(group),
+    m_button(button),
+    m_index(index),
+    m_ignore_clicks(false)
 {}
 
 void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
 {
-    m_grp->HandleRadioClick(checked, m_idx);
+    if (!m_ignore_clicks) {
+        if (checked) {
+            m_group->HandleRadioClick(m_index, false);
+        } else {
+            m_ignore_clicks = true;
+            m_button->SetCheck(true);
+            m_ignore_clicks = false;
+        }
+    }
 }
 
+// ButtonSlot
+RadioButtonGroup::ButtonSlot::ButtonSlot() :
+    button(0)
+{}
+
+RadioButtonGroup::ButtonSlot::ButtonSlot(StateButton* button_) :
+    button(button_)
+{}
+
 // RadioButtonGroup
+// static(s)
+const int RadioButtonGroup::NO_BUTTON = -1;
+
 RadioButtonGroup::RadioButtonGroup() :
     Control(),
     m_orientation(VERTICAL),
-    m_checked_button(-1),
+    m_checked_button(NO_BUTTON),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
@@ -494,7 +516,7 @@ RadioButtonGroup::RadioButtonGroup() :
 RadioButtonGroup::RadioButtonGroup(int x, int y, int w, int h, Orientation orientation) :
     Control(x, y, w, h),
     m_orientation(orientation),
-    m_checked_button(-1),
+    m_checked_button(NO_BUTTON),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
@@ -507,7 +529,7 @@ Orientation RadioButtonGroup::GetOrientation() const
 
 int RadioButtonGroup::NumButtons() const
 {
-    return m_buttons.size();
+    return m_button_slots.size();
 }
 
 int RadioButtonGroup::CheckedButton() const
@@ -529,50 +551,28 @@ void RadioButtonGroup::Render()
     }
 }
 
-void RadioButtonGroup::SetCheck(int idx)
+void RadioButtonGroup::SetCheck(int index)
 {
-    if (idx == m_checked_button)
+    if (index == m_checked_button)
         return;
-
-    if (idx < 0 || idx >= static_cast<int>(m_buttons.size()))
-        idx = -1;
-    // for buttons that are already checked, pass false to simulate the unchecking of a button for HandleRadioClick;
-    // this prevents sending duplicate signals when a button is already checked
-    HandleRadioClick(((idx != -1 && m_buttons[idx]->Checked()) ? false : true), idx);
+    if (index < 0 || index >= static_cast<int>(m_button_slots.size()))
+        index = NO_BUTTON;
+    HandleRadioClick(index, true);
 }
 
-void RadioButtonGroup::DisableButton(int idx, bool b/* = true*/)
+void RadioButtonGroup::DisableButton(int index, bool b/* = true*/)
 {
-    if (0 <= idx && idx < static_cast<int>(m_buttons.size())) {
-        bool was_disabled = m_buttons[idx]->Disabled();
-        m_buttons[idx]->Disable(b);
-        if (b && !was_disabled && idx == m_checked_button)
-            SetCheck(-1);
+    if (0 <= index && index < static_cast<int>(m_button_slots.size())) {
+        bool was_disabled = m_button_slots[index].button->Disabled();
+        m_button_slots[index].button->Disable(b);
+        if (b && !was_disabled && index == m_checked_button)
+            SetCheck(NO_BUTTON);
     }
 }
 
 void RadioButtonGroup::AddButton(StateButton* bn)
 {
-    m_buttons.push_back(bn);
-    m_connections.push_back(Connect(m_buttons.back()->CheckedSignal, ButtonClickedFunctor(this, m_buttons.size() - 1)));
-    Pt bn_sz = bn->Size();
-    Layout* layout = GetLayout();
-    if (layout) {
-        layout->Add(0, m_orientation == VERTICAL ? layout->Rows() : 0, m_orientation == VERTICAL ? 0 : layout->Columns());
-        if (m_orientation == VERTICAL)
-            layout->SetRowStretch(layout->Rows() - 1, 1.0);
-        else
-            layout->SetColumnStretch(layout->Columns() - 1, 1.0);
-        layout->Add(bn, m_orientation == VERTICAL ? layout->Rows() : 0, m_orientation == VERTICAL ? 0 : layout->Columns());
-    } else {
-        layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
-        layout->Add(bn, 0, 0);
-        SetLayout(layout);
-    }
-    if (m_orientation == VERTICAL)
-        layout->SetMinimumRowHeight(layout->Rows() - 1, bn_sz.y);
-    else
-        layout->SetMinimumColumnWidth(layout->Columns() - 1, bn_sz.x);
+    InsertButton(m_button_slots.size(), bn);
 }
 
 void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
@@ -581,6 +581,102 @@ void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_pt
 {
     boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
     AddButton(style_factory->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style));
+}
+
+void RadioButtonGroup::InsertButton(int index, StateButton* bn)
+{
+    assert(0 <= index && index <= static_cast<int>(m_button_slots.size()));
+    Pt bn_sz = bn->Size();
+    Layout* layout = GetLayout();
+    if (!layout) {
+        layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
+        layout->RenderOutline(true); // TODO: remove
+        SetLayout(layout);
+    }
+    if (m_button_slots.empty()) {
+        layout->Add(bn, 0, 0);
+    } else {
+        if (m_orientation == VERTICAL) {
+            layout->ResizeLayout(layout->Rows() + 2, 1);
+            layout->SetRowStretch(layout->Rows() - 2, 1.0);
+        } else {
+            layout->ResizeLayout(1, layout->Columns() + 2);
+            layout->SetColumnStretch(layout->Columns() - 2, 1.0);
+        }
+        for (int i = m_button_slots.size() - 1; index <= i; --i) {
+            layout->Remove(m_button_slots[i].button);
+            layout->Add(m_button_slots[i].button, m_orientation == VERTICAL ? i * 2 + 2 : 0, m_orientation == VERTICAL ? 0 : i * 2 + 2);
+            if (m_orientation == VERTICAL)
+                layout->SetMinimumRowHeight(i * 2 + 2, layout->MinimumRowHeight(i * 2));
+            else
+                layout->SetMinimumColumnWidth(i * 2 + 2, layout->MinimumColumnWidth(i * 2));
+        }
+        layout->Add(bn, m_orientation == VERTICAL ? index * 2 : 0, m_orientation == VERTICAL ? 0 : index * 2);
+    }
+    if (m_orientation == VERTICAL)
+        layout->SetMinimumRowHeight(index * 2, bn_sz.y);
+    else
+        layout->SetMinimumColumnWidth(index * 2, bn_sz.x);
+    m_button_slots.insert(m_button_slots.begin() + index, ButtonSlot(bn));
+
+    int old_checked_button = m_checked_button;
+    if (index <= m_checked_button)
+        ++m_checked_button;
+    Reconnect();
+    if (m_checked_button != old_checked_button)
+        ButtonChangedSignal(m_checked_button);
+}
+
+void RadioButtonGroup::InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+                                    Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
+                                    StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
+{
+    assert(0 <= index && index <= static_cast<int>(m_button_slots.size()));
+    boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
+    InsertButton(index, style_factory->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style));
+}
+
+void RadioButtonGroup::RemoveButton(StateButton* button)
+{
+    int index = -1;
+    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+        if (m_button_slots[i].button == button) {
+            index = i;
+            break;
+        }
+    }
+    assert(0 <= index && index < static_cast<int>(m_button_slots.size()));
+
+    Layout* layout = GetLayout();
+    layout->Remove(m_button_slots[index].button);
+    for (unsigned int i = index + 1; i < m_button_slots.size(); ++i) {
+        layout->Remove(m_button_slots[i].button);
+        if (m_orientation == VERTICAL) {
+            layout->Add(m_button_slots[i].button, i * 2 - 2, 0);
+            layout->SetMinimumRowHeight(i * 2 - 2, layout->MinimumRowHeight(i * 2));
+        } else {
+            layout->Add(m_button_slots[i].button, 0, i * 2 - 2);
+            layout->SetMinimumColumnWidth(i * 2 - 2, layout->MinimumColumnWidth(i * 2));
+        }
+    }
+    m_button_slots.erase(m_button_slots.begin() + index);
+    if (m_button_slots.empty()) {
+        layout->ResizeLayout(1, 1);
+    } else {
+        if (m_orientation == VERTICAL)
+            layout->ResizeLayout(layout->Rows() - 2, 1);
+        else
+            layout->ResizeLayout(1, layout->Columns() - 2);
+    }
+
+    int old_checked_button = m_checked_button;
+    if (index == m_checked_button)
+        m_checked_button = NO_BUTTON;
+    else if (m_checked_button != NO_BUTTON && m_checked_button < index)
+        --m_checked_button;
+    Reconnect();
+    if (m_checked_button != old_checked_button)
+        ButtonChangedSignal(m_checked_button);
 }
 
 void RadioButtonGroup::RenderOutline(bool render_outline)
@@ -598,38 +694,40 @@ void RadioButtonGroup::DefineAttributes(WndEditor* editor)
     editor->Attribute<int>("Checked Button", m_checked_button, set_checked_button_action);
 }
 
-const std::vector<StateButton*>& RadioButtonGroup::Buttons() const
+const std::vector<RadioButtonGroup::ButtonSlot>& RadioButtonGroup::ButtonSlots() const
 {
-    return m_buttons;
-}
-
-const std::vector<boost::signals::connection>& RadioButtonGroup::Connections() const
-{
-    return m_connections;
+    return m_button_slots;
 }
 
 void RadioButtonGroup::ConnectSignals()
 {
-    for (unsigned int i = 0; i < m_buttons.size(); ++i)
-        m_connections.push_back(Connect(m_buttons[i]->CheckedSignal, ButtonClickedFunctor(this, i)));
+    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+        m_button_slots[i].connection = Connect(m_button_slots[i].button->CheckedSignal, ButtonClickedFunctor(this, m_button_slots[i].button, i));
+    }
     SetCheck(m_checked_button);
 }
 
-void RadioButtonGroup::HandleRadioClick(bool checked, int index)
+void RadioButtonGroup::HandleRadioClick(int index, bool set_check)
 {
-    m_checked_button = index;
-    if (checked) {
-        for (unsigned int i = 0; i < m_connections.size(); ++i) {
-            if (m_buttons[i]->Checked() != (static_cast<int>(i) == index)) {
-                m_connections[i].block();
-                m_buttons[i]->SetCheck(static_cast<int>(i) == index);
-                m_connections[i].unblock();
-            }
-        }
-        ButtonChangedSignal(m_checked_button);
-    } else {
-        m_connections[index].block();
-        m_buttons[index]->SetCheck(true);
-        m_connections[index].unblock();
+    assert(m_checked_button == NO_BUTTON ||
+           (0 <= m_checked_button && m_checked_button < static_cast<int>(m_button_slots.size())));
+    if (m_checked_button != NO_BUTTON) {
+        m_button_slots[m_checked_button].connection.block();
+        m_button_slots[m_checked_button].button->SetCheck(false);
+        m_button_slots[m_checked_button].connection.unblock();
     }
+    if (set_check && index != NO_BUTTON) {
+        m_button_slots[index].connection.block();
+        m_button_slots[index].button->SetCheck(true);
+        m_button_slots[index].connection.unblock();
+    }
+    ButtonChangedSignal(m_checked_button = index);
+}
+
+void RadioButtonGroup::Reconnect()
+{
+    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+        m_button_slots[i].connection.disconnect();
+    }
+    ConnectSignals();
 }

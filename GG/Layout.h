@@ -102,7 +102,7 @@ public:
     std::vector<std::vector<const Wnd*> >
            Cells() const;                            ///< returns a matrix of the Wnds that can be found in each cell
     std::vector<std::vector<Rect> >
-           CellRects() const;                        ///< returns a matrix of rectangles int screen space that cover the cells in which child Wnds are placed
+           CellRects() const;                        ///< returns a matrix of rectangles in screen space that cover the cells in which child Wnds are placed
     std::vector<std::vector<Rect> >
            RelativeCellRects() const;                ///< returns a matrix of rectangles in layout client space that cover the cells in which child Wnds are placed
 
@@ -134,7 +134,8 @@ public:
         Throws if there is already a Wnd in one of the given cells. */
     void Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
 
-    /** removes \a w from the layout, recalculating the layout as needed */
+    /** removes \a w from the layout, recalculating the layout as needed.  Note that this causes the layout to
+        relinquish responsibility for \a wnd's memory management. */
     void Remove(Wnd* wnd);
 
     /** resets children to their original sizes and detaches them, so that a removed Layout can leave the Wnds it lays
@@ -210,9 +211,9 @@ private:
 
         double stretch;
         int    min;
-        int    effective_min;   ///< current effective minimum width of this row or column, based on min, layout margins, and layout cell contents
+        int    effective_min;   ///< current effective minimum size of this row or column, based on min, layout margins, and layout cell contents
         int    current_origin;  ///< current position of top or left side
-        int    current_width;   ///< current extent in downward or right direction
+        int    current_width;   ///< current extent in downward or rightward direction
 
     private:
         friend class boost::serialization::access;

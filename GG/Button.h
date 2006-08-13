@@ -47,17 +47,17 @@ class GG_API Button : public TextControl
 public:
     /// the states of being for a GG::Button
     enum ButtonState {
-        BN_PRESSED,    ///< the button is being pressed by the user, and the cursor is over the button
-        BN_UNPRESSED,  ///< the button is unpressed
-        BN_ROLLOVER    ///< the button has the cursor over it, but is unpressed
+        BN_PRESSED,    ///< The button is being pressed by the user, and the cursor is over the button
+        BN_UNPRESSED,  ///< The button is unpressed
+        BN_ROLLOVER    ///< The button has the cursor over it, but is unpressed
     };
 
     /** \name Signal Types */ //@{
-    typedef boost::signal<void ()> ClickedSignalType; ///< emitted when the button is clicked by the user
+    typedef boost::signal<void ()> ClickedSignalType; ///< Emitted when the button is clicked by the user
     //@}
 
     /** \name Slot Types */ //@{
-    typedef ClickedSignalType::slot_type ClickedSlotType; ///< type of functor(s) invoked on a ClickedSignalType
+    typedef ClickedSignalType::slot_type ClickedSlotType; ///< Type of functor(s) invoked on a ClickedSignalType
     //@}
 
     /** \name Structors */ //@{
@@ -66,14 +66,14 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    /** returns button state \see ButtonState */
+    /** Returns button state \see ButtonState */
     ButtonState       State() const;
 
-    const SubTexture& UnpressedGraphic() const; ///< returns the SubTexture to be used as the image of the button when unpressed
-    const SubTexture& PressedGraphic() const;   ///< returns the SubTexture to be used as the image of the button when pressed
-    const SubTexture& RolloverGraphic() const;  ///< returns the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
+    const SubTexture& UnpressedGraphic() const; ///< Returns the SubTexture to be used as the image of the button when unpressed
+    const SubTexture& PressedGraphic() const;   ///< Returns the SubTexture to be used as the image of the button when pressed
+    const SubTexture& RolloverGraphic() const;  ///< Returns the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
 
-    mutable ClickedSignalType ClickedSignal; ///< the clicked signal object for this Button
+    mutable ClickedSignalType ClickedSignal; ///< The clicked signal object for this Button
     //@}
 
     /** \name Mutators */ //@{
@@ -85,14 +85,14 @@ public:
     virtual void   MouseHere(const Pt& pt, Uint32 keys);
     virtual void   MouseLeave();
 
-    virtual void   SetColor(Clr c); ///< sets the control's color; does not affect the text color
+    virtual void   SetColor(Clr c); ///< Sets the control's color; does not affect the text color
 
-    /** sets button state programmatically \see ButtonState */
+    /** Sets button state programmatically \see ButtonState */
     void           SetState(ButtonState state);
 
-    void           SetUnpressedGraphic(const SubTexture& st); ///< sets the SubTexture to be used as the image of the button when unpressed
-    void           SetPressedGraphic(const SubTexture& st);   ///< sets the SubTexture to be used as the image of the button when pressed
-    void           SetRolloverGraphic(const SubTexture& st);  ///< sets the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
+    void           SetUnpressedGraphic(const SubTexture& st); ///< Sets the SubTexture to be used as the image of the button when unpressed
+    void           SetPressedGraphic(const SubTexture& st);   ///< Sets the SubTexture to be used as the image of the button when pressed
+    void           SetRolloverGraphic(const SubTexture& st);  ///< Sets the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
@@ -103,19 +103,19 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual void   RenderUnpressed();   ///< draws the button unpressed.  If an unpressed graphic has been supplied, it is used.
-    virtual void   RenderPressed();     ///< draws the button pressed.  If an pressed graphic has been supplied, it is used.
-    virtual void   RenderRollover();    ///< draws the button rolled-over.  If an rollover graphic has been supplied, it is used.
+    virtual void   RenderUnpressed();   ///< Draws the button unpressed.  If an unpressed graphic has been supplied, it is used.
+    virtual void   RenderPressed();     ///< Draws the button pressed.  If an pressed graphic has been supplied, it is used.
+    virtual void   RenderRollover();    ///< Draws the button rolled-over.  If an rollover graphic has been supplied, it is used.
     //@}
 
 private:
-    void           RenderDefault();     ///< this just draws the default unadorned square-and-rectangle button
+    void           RenderDefault();     ///< This just draws the default unadorned square-and-rectangle button
 
-    ButtonState    m_state;               ///< button is always in exactly one of the ButtonState states above
+    ButtonState    m_state;             ///< Button is always in exactly one of the ButtonState states above
 
-    SubTexture     m_unpressed_graphic; ///< graphic used to display button when it's unpressed
-    SubTexture     m_pressed_graphic;   ///< graphic used to display button when it's depressed
-    SubTexture     m_rollover_graphic;  ///< graphic used to display button when it's under the mouse and not pressed
+    SubTexture     m_unpressed_graphic; ///< Graphic used to display button when it's unpressed
+    SubTexture     m_pressed_graphic;   ///< Graphic used to display button when it's depressed
+    SubTexture     m_rollover_graphic;  ///< Graphic used to display button when it's under the mouse and not pressed
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -146,27 +146,27 @@ class GG_API StateButton : public TextControl
 {
 public:
     /** \name Signal Types */ //@{
-    typedef boost::signal<void (bool)> CheckedSignalType; ///< emitted when the StateButton is checked or unchecked; the checked/unchecked status is indicated by the bool parameter
+    typedef boost::signal<void (bool)> CheckedSignalType; ///< Emitted when the StateButton is checked or unchecked; the checked/unchecked status is indicated by the bool parameter
     //@}
 
     /** \name Slot Types */ //@{
-    typedef CheckedSignalType::slot_type CheckedSlotType; ///< type of functor(s) invoked on a CheckedSignalType
+    typedef CheckedSignalType::slot_type CheckedSlotType; ///< Type of functor(s) invoked on a CheckedSignalType
     //@}
 
     /** \name Structors */ //@{
     StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
-                Uint32 flags = CLICKABLE); ///< ctor
+                Uint32 flags = CLICKABLE); ///< Ctor
     //@}
 
     /** \name Accessors */ //@{
-    bool             Checked() const;       ///< returns true if button is checked
-    Clr              InteriorColor() const; ///< returns the interior color of the box, circle, or other enclosing shape
+    bool             Checked() const;       ///< Returns true if button is checked
+    Clr              InteriorColor() const; ///< Returns the interior color of the box, circle, or other enclosing shape
 
-    /** returns the visual style of the button \see StateButtonStyle */
+    /** Returns the visual style of the button \see StateButtonStyle */
     StateButtonStyle Style() const;
 
-    mutable CheckedSignalType CheckedSignal; ///< the checked signal object for this StaticButton
+    mutable CheckedSignalType CheckedSignal; ///< The checked signal object for this StaticButton
     //@}
 
     /** \name Mutators */ //@{
@@ -174,14 +174,14 @@ public:
     virtual void     LClick(const Pt& pt, Uint32 keys);
     virtual void     SizeMove(const Pt& ul, const Pt& lr);
 
-    void             Reset();                 ///< unchecks button
-    void             SetCheck(bool b = true); ///< (un)checks button
+    void             Reset();                 ///< Unchecks button
+    void             SetCheck(bool b = true); ///< (Un)checks button
     void             SetButtonPosition(const Pt& ul, const Pt& lr); ///< places the button within the control
-    void             SetDefaultButtonPosition(); ///< places the button to its default positionwithin the control
-    virtual void     SetColor(Clr c);         ///< sets the color of the button; does not affect text color
-    void             SetInteriorColor(Clr c); ///< sets the interior color of the box, circle, or other enclosing shape
+    void             SetDefaultButtonPosition(); ///< Places the button to its default positionwithin the control
+    virtual void     SetColor(Clr c);         ///< Sets the color of the button; does not affect text color
+    void             SetInteriorColor(Clr c); ///< Sets the interior color of the box, circle, or other enclosing shape
 
-    /** sets the visual style of the button \see StateButtonStyle */
+    /** Sets the visual style of the button \see StateButtonStyle */
     void             SetStyle(StateButtonStyle bs);
 
     virtual void     DefineAttributes(WndEditor* editor);
@@ -193,13 +193,13 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    Pt  ButtonUpperLeft() const;  ///< returns the upper-left of the button part of the control
-    Pt  ButtonLowerRight() const; ///< returns the lower-right of the button part of the control
-    Pt  TextUpperLeft() const;    ///< returns the upper-left of the text part of the control
+    Pt  ButtonUpperLeft() const;  ///< Returns the upper-left of the button part of the control
+    Pt  ButtonLowerRight() const; ///< Returns the lower-right of the button part of the control
+    Pt  TextUpperLeft() const;    ///< Returns the upper-left of the text part of the control
     //@}
 
     /** \name Mutators */ //@{
-    void RepositionButton();      ///< places the button at the appropriate position based on the style flags, without resizing it
+    void RepositionButton();      ///< Places the button at the appropriate position based on the style flags, without resizing it
     //@}
 
 private:
@@ -219,17 +219,15 @@ private:
 
 /** This is a class that encapsulates multiple GG::StateButtons into a single radio-button control.  RadioButtonGroup
     emits a signal whenever its currently-checked button changes.  The signal indicates which button has been pressed,
-    by passing the index of the button; the currently-checked button index is -1 when no button is checked.  Any
+    by passing the index of the button; the currently-checked button index is NO_BUTTON when no button is checked.  Any
     StateButton-derived controls can be used in a RadioButtonGroup.  However, if you want to automatically serialize a
     RadioButtonGroup that has custom buttons, you must register the new types.  See the boost serialization
-    documentation for details.  \note There is no way to remove buttons; RadioButtonGroup is meant to be a simple
-    grouping control.  \warning Though it is possible to remove buttons by explicitly calling DetachChild(), this will
-    leave the RadioButtonGroup with a dangling pointer to the detached button. */
+    documentation for details. */
 class GG_API RadioButtonGroup : public Control
 {
 public:
     /** \name Signal Types */ //@{
-    typedef boost::signal<void (int)> ButtonChangedSignalType; ///< emitted when the currently-selected button has changed; the new selected button's index in the group is provided (this may be -1 if no button is currently selected)
+    typedef boost::signal<void (int)> ButtonChangedSignalType; ///< emitted when the currently-selected button has changed; the new selected button's index in the group is provided (this may be NO_BUTTON if no button is currently selected)
     //@}
 
     /** \name Slot Types */ //@{
@@ -241,80 +239,108 @@ public:
     //@}
 
     /** \name Accessors */ //@{
-    /** returns the orientation of the buttons in the group */
+    /** Returns the orientation of the buttons in the group */
     Orientation      GetOrientation() const;
 
-    /** returns the number of buttons in this control */
+    /** Returns the number of buttons in this control */
     int              NumButtons() const;
 
-    /** returns the index of the currently checked button, or -1 if none are checked */
+    /** Returns the index of the currently checked button, or NO_BUTTON if none are checked */
     int              CheckedButton() const;
 
-    /** returns true iff this button group will render an outline of itself; this is sometimes useful for debugging
+    /** Returns true iff this button group will render an outline of itself; this is sometimes useful for debugging
         purposes */
     bool             RenderOutline() const;
 
-    mutable ButtonChangedSignalType ButtonChangedSignal; ///< the button changed signal object for this RadioButtonGroup
+    mutable ButtonChangedSignalType ButtonChangedSignal; ///< The button changed signal object for this RadioButtonGroup
     //@}
 
     /** \name Mutators */ //@{
     virtual void Render();
 
-    /** checks the idx-th button, and unchecks all others.  If there is no idx-th button, they are all unchecked, and the 
-        currently-checked button index is set to -1. */
-    void SetCheck(int idx);
+    /** Checks the index-th button, and unchecks all others.  If there is no index-th button, they are all unchecked,
+        and the currently-checked button index is set to NO_BUTTON. */
+    void SetCheck(int index);
 
-    /** disables (with b == true) or enables (with b == false) the idx-th button, if it exists.  If the button exists,
-        is being disabled, and is the one currently checked, the currently-checked button index is set to -1. */
-    void DisableButton(int idx, bool b = true); 
+    /** Disables (with b == true) or enables (with b == false) the index-th button, if it exists.  If the button exists,
+        is being disabled, and is the one currently checked, the currently-checked button index is set to NO_BUTTON. */
+    void DisableButton(int index, bool b = true); 
 
-    /** adds a button to the group. \note There is no way to remove buttons; RadioButtonGroup is meant to be a 
-        simple grouping control. */
+    /** Adds a button to the end of the group. */
     void AddButton(StateButton* bn);
 
-    /** creates a StateButton from the given parameters and adds it to the group. */
+    /** creates a StateButton from the given parameters and adds it to the end of the group. */
     void AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
                    Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                    StateButtonStyle style = SBSTYLE_3D_RADIO);
 
-    /** set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
+    /** Adds a button to the group at position \a index.  \a index must be in the range [0, NumButtons()]. */
+    void InsertButton(int index, StateButton* bn);
+
+    /** Creates a StateButton from the given parameters and adds it to the group at position \a index.  \a index must be
+        in the range [0, NumButtons()]. */
+    void InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+                      Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
+                      StateButtonStyle style = SBSTYLE_3D_RADIO);
+
+    /** Removes \a button from the group.  If \a button is at index i, and is the currently-checked button, the
+        currently-checked button index is set to NO_BUTTON.  If the currently-checked button is after i, the
+        currently-checked button index will be decremented.  In either case, a ButtonChangedSignal will be emitted.
+        Note that this causes the layout to relinquish responsibility for \a wnd's memory management. */
+    void RemoveButton(StateButton* button);
+
+    /** Set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
         purposes */
     void RenderOutline(bool render_outline);
 
     virtual void DefineAttributes(WndEditor* editor);
+
+    /** The invalid button position index that there is no currently-checked button. */
+    static const int NO_BUTTON;
     //@}
 
 protected:
+    /** Encapsulates all data pertaining ot a single button in a RadioButtonGroup. */
+    struct GG_API ButtonSlot
+    {
+        ButtonSlot();
+        ButtonSlot(StateButton* button_);
+        StateButton*               button;
+        boost::signals::connection connection;
+
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
+    };
+
     /** \name Structors */ //@{
     RadioButtonGroup(); ///< default ctor
     //@}
 
     /** \name Accessors */ //@{
-    const std::vector<StateButton*>&               Buttons() const;     ///< returns the state buttons in the group
-    const std::vector<boost::signals::connection>& Connections() const; ///< returns the connections to the state buttons
+    const std::vector<ButtonSlot>& ButtonSlots() const; ///< returns the state buttons in the group
     //@}
 
 private:
     class ButtonClickedFunctor // for catching button-click signals from the contained buttons
     {
     public:
-        ButtonClickedFunctor(RadioButtonGroup* grp, int idx);
+        ButtonClickedFunctor(RadioButtonGroup* group, StateButton* button, int index);
         void operator()(bool checked);
     private:
-        RadioButtonGroup* m_grp;
-        int m_idx;
+        RadioButtonGroup* m_group;
+        StateButton*      m_button;
+        int               m_index;
+        bool              m_ignore_clicks;
     };
 
     void ConnectSignals();
-    void HandleRadioClick(bool checked, int index);   ///< if a state button is clicked, this function ensures it and only it is active
+    void HandleRadioClick(int index, bool set_check);
+    void Reconnect();
 
-    const Orientation                       m_orientation;
-    std::vector<StateButton*>               m_buttons;     ///< the state buttons in the group
-    std::vector<boost::signals::connection> m_connections; ///< the connections to the state buttons; these must be disconnected when programmatically unclicking the buttons
-
-    int  m_checked_button; ///< the index of the currently-checked button; -1 if none is clicked
-
-    bool m_render_outline;
+    const Orientation       m_orientation;
+    std::vector<ButtonSlot> m_button_slots;
+    int                     m_checked_button; ///< the index of the currently-checked button; NO_BUTTON if none is clicked
+    bool                    m_render_outline;
 
     friend class ButtonClickedFunctor;
 
@@ -324,6 +350,8 @@ private:
 };
 
 } // namespace GG
+
+BOOST_CLASS_VERSION(GG::RadioButtonGroup, 1)
 
 // template implementations
 template <class Archive>
@@ -349,12 +377,37 @@ void GG::StateButton::serialize(Archive& ar, const unsigned int version)
 }
 
 template <class Archive>
+void GG::RadioButtonGroup::ButtonSlot::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(button);
+}
+
+template <class Archive>
 void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation))
-        & BOOST_SERIALIZATION_NVP(m_buttons)
-        & BOOST_SERIALIZATION_NVP(m_checked_button)
+        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation));
+
+    if (version == 0) {
+        std::vector<StateButton*> m_buttons;
+        if (Archive::is_saving::value) {
+            m_buttons.resize(m_button_slots.size());
+            for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+                m_buttons[i] = m_button_slots[i].button;
+            }
+        }
+        ar  & BOOST_SERIALIZATION_NVP(m_buttons);
+        if (Archive::is_loading::value) {
+            m_button_slots.resize(m_buttons.size());
+            for (unsigned int i = 0; i < m_buttons.size(); ++i) {
+                m_button_slots[i].button = m_buttons[i];
+            }
+        }
+    } else {
+        ar  & BOOST_SERIALIZATION_NVP(m_button_slots);
+    }
+
+    ar  & BOOST_SERIALIZATION_NVP(m_checked_button)
         & BOOST_SERIALIZATION_NVP(m_render_outline);
 
     if (Archive::is_loading::value)
@@ -362,4 +415,3 @@ void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
 }
 
 #endif // _GG_Button_h_
-

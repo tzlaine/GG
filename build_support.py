@@ -322,7 +322,7 @@ def CheckSDL(context, options, conf, sdl_config, check_lib):
         link_test_app = """
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
-int main()
+int main(int argc, char **argv)
 {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);

@@ -23,10 +23,10 @@ if WhereIs('ccache'):
     options.Add(BoolOption('use_ccache', 'Use ccache to build GG', 0))
 if WhereIs('distcc'):
     options.Add(BoolOption('use_distcc', 'Use distcc to build GG', 0))
-if str(Platform()) == 'posix':
-    options.Add('prefix', 'Location to install GG', '/usr/local')
-else:
+if str(Platform()) == 'win32':
     options.Add('prefix', 'Location to install GG', 'C:\\')
+else:
+    options.Add('prefix', 'Location to install GG', '/usr/local')
 options.Add('scons_cache_dir', 'Directory to use for SCons object file caching (specifying any directory will enable caching)')
 options.Add('incdir', 'Location to install headers', os.path.normpath(os.path.join('$prefix', 'include')))
 options.Add('bindir', 'Location to install executables', os.path.normpath(os.path.join('$prefix', 'bin')))
@@ -235,8 +235,8 @@ if not env.GetOption('clean'):
         if str(Platform()) == 'posix':
             if env['multithreaded']:
                 if conf.CheckCHeader('pthread.h') and conf.CheckLib('pthread', 'pthread_create', autoadd = 0):
-                    env.Append(CCFLAGS = ' -pthread')
-                    env.Append(LINKFLAGS = ' -pthread')
+                    env.Append(CCFLAGS = ['-pthread'])
+                    env.Append(LINKFLAGS = ['-pthread'])
                 else:
                     Exit(1)
 
@@ -306,7 +306,7 @@ if not env.GetOption('clean'):
         stdout.write('Checking for DevIL OpenGL support... ')
         devil_gl_check_app = """
 #include <IL/ilut.h>
-#if !ILUT_USE_OPENGL
+#ifndef ILUT_USE_OPENGL
 #error "DevIL not built with OpenGL support"
 #endif
 int main() {
@@ -320,7 +320,7 @@ int main() {
         stdout.write('Checking for DevIL Allegro support... ')
         devil_gl_check_app = """
 #include <IL/ilut.h>
-#if !ILUT_USE_ALLEGRO
+#ifndef ILUT_USE_ALLEGRO
 #error "DevIL not built with Allegro support"
 #endif
 int main() {

@@ -138,12 +138,12 @@ int Texture::BytesPP() const
     return m_bytes_pp;
 }
 
-int Texture::Width() const
+GLint Texture::Width() const
 {
     return m_width;
 }
 
-int Texture::Height() const
+GLint Texture::Height() const
 {
     return m_height;
 }
@@ -163,12 +163,12 @@ const GLfloat* Texture::DefaultTexCoords() const
     return m_tex_coords;
 }
 
-int Texture::DefaultWidth() const
+GLint Texture::DefaultWidth() const
 {
     return m_default_width;
 }
 
-int Texture::DefaultHeight() const
+GLint Texture::DefaultHeight() const
 {
     return m_default_height;
 }
@@ -512,12 +512,12 @@ const GLfloat* SubTexture::TexCoords() const
     return m_tex_coords;
 }
 
-int SubTexture::Width() const
+GLint SubTexture::Width() const
 {
     return m_width;
 }
 
-int SubTexture::Height() const
+GLint SubTexture::Height() const
 {
     return m_height;
 }

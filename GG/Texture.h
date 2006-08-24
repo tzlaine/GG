@@ -73,13 +73,13 @@ public:
     GLenum           MinFilter() const;        ///< returns minimization filter modes associated with this opengl texture
     GLenum           MagFilter() const;        ///< returns maximization filter modes associated with this opengl texture
     int              BytesPP() const;          ///< returns the image's color depth in bytes
-    int              Width() const;            ///< returns width of entire texture
-    int              Height() const;           ///< returns height of entire texture
+    GLint            Width() const;            ///< returns width of entire texture
+    GLint            Height() const;           ///< returns height of entire texture
     bool             MipMapped() const;        ///< returns true if the texture has mipmaps
     GLuint           OpenGLId() const;         ///< GLuint "name" of the opengl texture object associated with this object
     const GLfloat*   DefaultTexCoords() const; ///< texture coordinates to use by default when blitting this texture
-    int              DefaultWidth() const;     ///< returns width in pixels, based on initial image (0 if texture was not loaded)
-    int              DefaultHeight() const;    ///< returns height in pixels, based on initial image (0 if texture was not loaded)
+    GLint            DefaultWidth() const;     ///< returns width in pixels, based on initial image (0 if texture was not loaded)
+    GLint            DefaultHeight() const;    ///< returns height in pixels, based on initial image (0 if texture was not loaded)
 
     /** blit any portion of texture to any place on screen, scaling as necessary*/
     void OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords = 0, bool enter_2d_mode = true) const;
@@ -147,8 +147,8 @@ private:
     std::string m_filename;   ///< filename from which this Texture was constructed ("" if not loaded from a file)
 
     int         m_bytes_pp;
-    int         m_width;
-    int         m_height;
+    GLint       m_width;
+    GLint       m_height;
 
     GLenum      m_wrap_s, m_wrap_t;
     GLenum      m_min_filter, m_mag_filter;
@@ -159,8 +159,8 @@ private:
 
     /// each of these is used for a non-power-of-two-sized graphic loaded into a power-of-two-sized texture
     GLfloat     m_tex_coords[4];  ///< the texture coords used to blit from this texture by default (reflecting original image width and height)
-    int         m_default_width;  ///< the original width and height of this texture to be used in blitting 
-    int         m_default_height;
+    GLint       m_default_width;  ///< the original width and height of this texture to be used in blitting 
+    GLint       m_default_height;
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -187,8 +187,8 @@ public:
     /** \name Accessors */ //@{
     bool             Empty() const;     ///< returns true if this object has no associated GG::Texture
     const GLfloat*   TexCoords() const; ///< texture coordinates to use when blitting this sub-texture
-    int              Width() const;     ///< width of sub-texture in pixels
-    int              Height() const;    ///< height of sub-texture in pixels
+    GLint            Width() const;     ///< width of sub-texture in pixels
+    GLint            Height() const;    ///< height of sub-texture in pixels
     const Texture*   GetTexture()const; ///< returns the texture the SubTexture is a part of
 
     /** blit sub-texture to any place on screen, scaling as necessary \see GG::Texture::OrthoBlit*/
@@ -217,8 +217,8 @@ public:
 
 private:
     boost::shared_ptr<const Texture> m_texture;        ///< shared_ptr to texture object with entire image
-    int                              m_width;
-    int                              m_height;
+    GLint                            m_width;
+    GLint                            m_height;
     GLfloat                          m_tex_coords[4];  ///< position of element within containing texture 
 
     friend class boost::serialization::access;

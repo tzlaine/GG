@@ -75,8 +75,7 @@ TextControl::TextControl() :
     m_set_min_size(false),
     m_fit_to_text(false),
     m_dirty_load(false)
-{
-}
+{}
 
 TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                          Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
@@ -106,6 +105,13 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
 {
     ValidateFormat();
     SetText(str);
+}
+
+Pt TextControl::MinUsableSize() const
+{
+    return m_font ?
+        m_font->TextExtent(WindowText(), m_format, ClientSize().x) :
+        Pt();
 }
 
 Uint32 TextControl::TextFormat() const

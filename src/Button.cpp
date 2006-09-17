@@ -260,6 +260,13 @@ StateButton::StateButton(int x, int y, int w, int h, const std::string& str, con
     SetDefaultButtonPosition();
 }
 
+Pt StateButton::MinUsableSize() const
+{
+    Pt text_lr = m_text_ul + TextControl::MinUsableSize();
+    return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, m_text_ul.x),
+              std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, m_text_ul.y));
+}
+
 bool StateButton::Checked() const
 {
     return m_checked;
@@ -322,6 +329,12 @@ void StateButton::Render()
                       Disabled() ? DisabledColor(m_color) : m_color,
                       Disabled() ? DisabledColor(m_color) : Color(),
                       !m_checked, bevel);
+        break;
+    case SBSTYLE_3D_TAB:
+        break;
+    case SBSTYLE_3D_UP_ANGLED_TAB:
+        break;
+    case SBSTYLE_3D_DOWN_ANGLED_TAB:
         break;
     }
 
@@ -522,6 +535,22 @@ RadioButtonGroup::RadioButtonGroup(int x, int y, int w, int h, Orientation orien
     SetColor(CLR_YELLOW);
 }
 
+Pt RadioButtonGroup::MinUsableSize() const
+{
+    Pt retval;
+    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+        Pt min_usable_size = m_button_slots[i].button->MinUsableSize();
+        if (m_orientation == VERTICAL) {
+            retval.x = std::max(retval.x, min_usable_size.x);
+            retval.y += min_usable_size.y;
+        } else {
+            retval.x += min_usable_size.x;
+            retval.y = std::max(retval.y, min_usable_size.y);
+        }
+    }
+    return retval;
+}
+
 Orientation RadioButtonGroup::GetOrientation() const
 {
     return m_orientation;
@@ -540,6 +569,12 @@ int RadioButtonGroup::CheckedButton() const
 bool RadioButtonGroup::RenderOutline() const
 {
     return m_render_outline;
+}
+
+void RadioButtonGroup::RaiseCheckedButton()
+{
+    if (m_checked_button != NO_BUTTON)
+        MoveChildUp(m_button_slots[m_checked_button].button);
 }
 
 void RadioButtonGroup::Render()
@@ -579,8 +614,7 @@ void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_pt
                                  Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                  StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
 {
-    boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
-    AddButton(style_factory->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style));
+    InsertButton(m_button_slots.size(), text, font, text_fmt, color, text_color, interior, style);
 }
 
 void RadioButtonGroup::InsertButton(int index, StateButton* bn)
@@ -590,7 +624,6 @@ void RadioButtonGroup::InsertButton(int index, StateButton* bn)
     Layout* layout = GetLayout();
     if (!layout) {
         layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
-        layout->RenderOutline(true); // TODO: remove
         SetLayout(layout);
     }
     if (m_button_slots.empty()) {
@@ -632,8 +665,9 @@ void RadioButtonGroup::InsertButton(int index, const std::string& text, const bo
                                     StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
 {
     assert(0 <= index && index <= static_cast<int>(m_button_slots.size()));
-    boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
-    InsertButton(index, style_factory->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style));
+    StateButton* button = GetStyleFactory()->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style);
+    button->Resize(button->MinUsableSize());
+    InsertButton(index, button);
 }
 
 void RadioButtonGroup::RemoveButton(StateButton* button)

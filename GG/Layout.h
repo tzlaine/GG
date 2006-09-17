@@ -90,6 +90,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt MinUsableSize() const;
+
     int    Rows() const;                             ///< returns the number of rows in the layout
     int    Columns() const;                          ///< returns the number of columns in the layout
     Uint32 ChildAlignment(Wnd* wnd) const;           ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
@@ -253,6 +255,7 @@ private:
     std::vector<RowColParams>       m_row_params;
     std::vector<RowColParams>       m_column_params;
     std::map<Wnd*, WndPosition>     m_wnd_positions;
+    Pt                              m_min_usable_size;
     bool                            m_ignore_child_resize;
     bool                            m_ignore_parent_resize;
     bool                            m_render_outline;
@@ -267,6 +270,8 @@ private:
 };
 
 } // namespace GG
+
+BOOST_CLASS_VERSION(GG::Layout, 1)
 
 // template implementations
 template <class Archive>
@@ -304,6 +309,9 @@ void GG::Layout::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_ignore_child_resize)
         & BOOST_SERIALIZATION_NVP(m_render_outline)
         & BOOST_SERIALIZATION_NVP(m_outline_color);
+
+    if (1 <= version)
+        ar & BOOST_SERIALIZATION_NVP(m_min_usable_size);
 }
 
 #endif // _GG_Layout_h_

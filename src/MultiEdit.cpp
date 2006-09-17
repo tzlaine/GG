@@ -57,6 +57,7 @@ namespace {
 ////////////////////////////////////////////////
 // static(s)
 const int MultiEdit::SCROLL_WIDTH = 14;
+const int MultiEdit::BORDER_THICK = 2;
 
 MultiEdit::MultiEdit() :
     Edit(),
@@ -91,6 +92,12 @@ MultiEdit::~MultiEdit()
     delete m_hscroll;
 }
 
+Pt MultiEdit::MinUsableSize() const
+{
+    return Pt(4 * SCROLL_WIDTH + 2 * BORDER_THICK,
+              4 * SCROLL_WIDTH + 2 * BORDER_THICK);
+}
+
 Pt MultiEdit::ClientLowerRight() const
 {
     return Edit::ClientLowerRight() - Pt(RightMargin(), BottomMargin());
@@ -115,7 +122,7 @@ void MultiEdit::Render()
     Pt cl_ul = ClientUpperLeft();
     Pt cl_lr = ClientLowerRight();
 
-    BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, 2);
+    BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
 
     // clip text to client area
     BeginScissorClipping(cl_ul.x - 1, cl_ul.y, cl_lr.x, cl_lr.y);

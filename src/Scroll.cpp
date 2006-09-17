@@ -90,6 +90,24 @@ Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, C
     m_tab->InstallEventFilter(this);
 }
 
+Pt Scroll::MinUsableSize() const
+{
+    Pt retval;
+    const int MIN_DRAGABLE_SIZE = 2;
+    if (m_orientation == VERTICAL) {
+        retval.x = MIN_DRAGABLE_SIZE;
+        int decr_y = m_decr->MinUsableSize().y;
+        int incr_y = m_incr->MinUsableSize().y;
+        retval.y = decr_y + incr_y + 3 * std::min(decr_y, incr_y);
+    } else {
+        int decr_x = m_decr->MinUsableSize().x;
+        int incr_x = m_incr->MinUsableSize().x;
+        retval.x = decr_x + incr_x + 3 * std::min(decr_x, incr_x);
+        retval.y = MIN_DRAGABLE_SIZE;
+    }
+    return retval;
+}
+
 std::pair<int, int> Scroll::PosnRange() const
 {
     return std::pair<int, int>(m_posn, m_posn + m_page_sz);

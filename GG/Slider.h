@@ -62,6 +62,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt           MinUsableSize() const;
+
     int                  Posn() const;           ///< returns the current tab position
     std::pair<int, int>  SliderRange() const;    ///< returns the defined possible range of control
     Orientation          GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)

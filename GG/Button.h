@@ -160,6 +160,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt       MinUsableSize() const;
+
     bool             Checked() const;       ///< Returns true if button is checked
     Clr              InteriorColor() const; ///< Returns the interior color of the box, circle, or other enclosing shape
 
@@ -239,6 +241,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt       MinUsableSize() const;
+
     /** Returns the orientation of the buttons in the group */
     Orientation      GetOrientation() const;
 
@@ -292,6 +296,10 @@ public:
     /** Set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
         purposes */
     void RenderOutline(bool render_outline);
+
+    /** Raises the currently-selected button to the top of the child z-order.  If there is no currently-selected button,
+        no action is taken. */
+    void RaiseCheckedButton();
 
     virtual void DefineAttributes(WndEditor* editor);
 

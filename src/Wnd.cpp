@@ -400,6 +400,11 @@ Pt Wnd::MaxSize() const
     return m_max_size;
 }
 
+Pt Wnd::MinUsableSize() const
+{
+    return Size();
+}
+
 Pt Wnd::ClientUpperLeft() const
 {
     return UpperLeft();

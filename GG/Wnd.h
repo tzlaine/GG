@@ -206,6 +206,12 @@ public:
     Pt             MinSize() const;      ///< returns the minimum allowable size of window
     Pt             MaxSize() const;      ///< returns the maximum allowable size of window
 
+    /** returns the size of the minimum bounding box that can enclose the Wnd and still show all of its elements, plus
+        enough room for interaction with those elements (if applicable).  For example, a TextControl's MinUsableSize()
+        is just the area of its text, and a Scroll's RenderableMinSize() is the combined sizes of its up-button,
+        down-button, and tab (plus a bit of room in which to drag the tab). */
+    virtual Pt     MinUsableSize() const;
+
     /** returns upper-left corner of window's client area in screen coordinates (or of the entire area, if no client
         area is specified).  Virtual because different windows have different shapes (and so ways of calculating client
         area) */
@@ -213,7 +219,7 @@ public:
 
     /** returns (one pixel past) lower-right corner of window's client area in screen coordinates (or of the entire
         area, if no client area is specified).  Virtual because different windows have different shapes (and so ways of
-        calculating client area)*/
+        calculating client area) */
     virtual Pt     ClientLowerRight() const;
 
     /** returns the size of the client area \see Size() */

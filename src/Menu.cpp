@@ -143,6 +143,17 @@ MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const
     AdjustLayout();
 }
 
+Pt MenuBar::MinUsableSize() const
+{
+    Pt retval;
+    for (unsigned int i = 0; i < m_menu_labels.size(); ++i) {
+        Pt min_size = m_menu_labels[i]->MinUsableSize();
+        retval.y = std::max(retval.y, min_size.y);
+        retval.x += min_size.x;
+    }
+    return retval;
+}
+
 const MenuItem& MenuBar::AllMenus() const
 {
     return m_menu_data;

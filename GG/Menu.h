@@ -129,6 +129,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt        MinUsableSize() const;
+
     const MenuItem&   AllMenus() const;                           ///< returns a const reference to the MenuItem that contains all the menus and their contents
     bool              ContainsMenu(const std::string& str) const; ///< returns true if there is a top-level menu in the MenuBar whose label is \a str
     int               NumMenus() const;                           ///< returns the number of top-level menus in the MenuBar

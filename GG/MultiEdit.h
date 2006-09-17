@@ -72,6 +72,7 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt MinUsableSize() const;
     virtual Pt ClientLowerRight() const;
 
     /** returns the maximum number of lines of text that the control keeps. This number includes the lines that are 
@@ -128,10 +129,11 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
+    void            RecreateScrolls();      ///< recreates the vertical and horizontal scrolls as needed.
     //@}
 
     static const int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls
+    static const int BORDER_THICK;          ///< the thickness with which to render the border of the control
 
 private:
     void    Init();

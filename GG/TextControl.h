@@ -72,6 +72,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual Pt     MinUsableSize() const;
+
     /** returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.) */
     Uint32         TextFormat() const;
 

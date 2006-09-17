@@ -67,6 +67,13 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     SizeMove(UpperLeft(), LowerRight());
 }
 
+Pt Slider::MinUsableSize() const
+{
+    Pt tab_min = m_tab->MinUsableSize();
+    return Pt(m_orientation == VERTICAL ? tab_min.x : 3 * tab_min.x,
+              m_orientation == VERTICAL ? 3 * tab_min.y : tab_min.y);
+}
+
 int Slider::Posn() const
 {
     return m_posn;

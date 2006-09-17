@@ -335,6 +335,12 @@ ListBox::~ListBox()
     delete m_header_row;
 }
 
+Pt ListBox::MinUsableSize() const
+{
+    return Pt(5 * SCROLL_WIDTH + 2 * BORDER_THICK,
+              5 * SCROLL_WIDTH + 2 * BORDER_THICK);
+}
+
 Pt ListBox::ClientUpperLeft() const
 {
     return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK + (m_header_row->empty() ? 0 : m_header_row->Height()));

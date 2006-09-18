@@ -252,6 +252,11 @@ public:
     /** Returns the index of the currently checked button, or NO_BUTTON if none are checked */
     int              CheckedButton() const;
 
+    /** Returns true iff the buttons in the group are to be expanded to fill the group's available space.  If false,
+        this indicates that the buttons are to be spaced out evenly, and that they should all be their
+        MinUsableSize()s. */
+    bool             ExpandButtons() const;
+
     /** Returns true iff this button group will render an outline of itself; this is sometimes useful for debugging
         purposes */
     bool             RenderOutline() const;
@@ -292,6 +297,10 @@ public:
         currently-checked button index will be decremented.  In either case, a ButtonChangedSignal will be emitted.
         Note that this causes the layout to relinquish responsibility for \a wnd's memory management. */
     void RemoveButton(StateButton* button);
+
+    /** Set this to true if the buttons in the group are to be expanded to fill the group's available space.  If set to
+        false, the buttons are to be spaced out evenly, and they will all be their MinUsableSize()s. */
+    void ExpandButtons(bool expand);
 
     /** Set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
         purposes */
@@ -348,6 +357,7 @@ private:
     const Orientation       m_orientation;
     std::vector<ButtonSlot> m_button_slots;
     int                     m_checked_button; ///< the index of the currently-checked button; NO_BUTTON if none is clicked
+    bool                    m_expand_buttons;
     bool                    m_render_outline;
 
     friend class ButtonClickedFunctor;
@@ -412,7 +422,8 @@ void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
             }
         }
     } else {
-        ar  & BOOST_SERIALIZATION_NVP(m_button_slots);
+        ar  & BOOST_SERIALIZATION_NVP(m_button_slots)
+            & BOOST_SERIALIZATION_NVP(m_expand_buttons);
     }
 
     ar  & BOOST_SERIALIZATION_NVP(m_checked_button)

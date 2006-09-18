@@ -44,13 +44,14 @@ namespace { // file-scope constants and functions
     /// this doesn't serve as a cache, but does allow us to prevent numerous constructions and destructions of Clr valarrays.
     std::map<int, std::valarray<Clr> > color_arrays;
 
-    void Rectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr border_color2, int bevel_thick)
+    void Rectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color1, Clr border_color2, int bevel_thick,
+                   bool bevel_left, bool bevel_top, bool bevel_right, bool bevel_bottom)
     {
         glDisable(GL_TEXTURE_2D);
         glEnableClientState(GL_VERTEX_ARRAY);
 
-        int inner_x1 = x1 + bevel_thick, inner_y1 = y1 + bevel_thick,
-            inner_x2 = x2 - bevel_thick, inner_y2 = y2 - bevel_thick;
+        int inner_x1 = x1 + (bevel_left ? bevel_thick : 0), inner_y1 = y1 + (bevel_top ? bevel_thick : 0),
+            inner_x2 = x2 - (bevel_right ? bevel_thick : 0), inner_y2 = y2 - (bevel_bottom ? bevel_thick : 0);
 
         int vertices[] = {inner_x2, inner_y1, x2, y1, inner_x1, inner_y1, x1, y1, inner_x1, inner_y2, x1, y2,
                           inner_x2, inner_y2, x2, y2, inner_x2, inner_y1, x2, y1};
@@ -599,12 +600,13 @@ namespace GG {
 
     void FlatRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, int border_thick/* = 2*/)
     {
-        Rectangle(x1, y1, x2, y2, color, border_color, border_color, border_thick);
+        Rectangle(x1, y1, x2, y2, color, border_color, border_color, border_thick, true, true, true, true);
     }
 
-    void BeveledRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, bool up, int bevel_thick/* = 2*/)
+    void BeveledRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, bool up, int bevel_thick/* = 2*/,
+                          bool bevel_left/* = true*/, bool bevel_top/* = true*/, bool bevel_right/* = true*/, bool bevel_bottom/* = true*/)
     {
-        Rectangle(x1, y1, x2, y2, color, (up ? LightColor(border_color) : DarkColor(border_color)), (up ? DarkColor(border_color) : LightColor(border_color)), bevel_thick);
+        Rectangle(x1, y1, x2, y2, color, (up ? LightColor(border_color) : DarkColor(border_color)), (up ? DarkColor(border_color) : LightColor(border_color)), bevel_thick, bevel_left, bevel_top, bevel_right, bevel_bottom);
     }
 
     void FlatRoundedRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, int corner_radius/* = 5*/, int border_thick/* = 2*/)

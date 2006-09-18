@@ -171,14 +171,13 @@ enum GraphicStyle {
 
 /** The built-in visual styles of state buttons. */
 enum StateButtonStyle {
-    SBSTYLE_3D_XBOX,            ///< draws a down-beveled box with a 3D x-mark inside
-    SBSTYLE_3D_CHECKBOX,        ///< draws a down-beveled box with a 3D check-mark inside
-    SBSTYLE_3D_RADIO,           ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
-    SBSTYLE_3D_BUTTON,          ///< draws a button that toggles bewtween popped up and pushed down
-    SBSTYLE_3D_ROUND_BUTTON,    ///< draws a down-beveled circle with an up-beveled circle inside
-    SBSTYLE_3D_TAB,             ///< draws an up-beveled rectagular tab that only changes color when pressed
-    SBSTYLE_3D_UP_ANGLED_TAB,   ///< draws an up-beveled trapezoidal tab (wider at the bottom) that only changes color when pressed
-    SBSTYLE_3D_DOWN_ANGLED_TAB  ///< draws an up-beveled trapezoidal tab (wider at the top) that only changes color when pressed
+    SBSTYLE_3D_XBOX,             ///< draws a down-beveled box with a 3D x-mark inside
+    SBSTYLE_3D_CHECKBOX,         ///< draws a down-beveled box with a 3D check-mark inside
+    SBSTYLE_3D_RADIO,            ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
+    SBSTYLE_3D_BUTTON,           ///< draws a button that toggles bewtween popped up and pushed down
+    SBSTYLE_3D_ROUND_BUTTON,     ///< draws a down-beveled circle with an up-beveled circle inside
+    SBSTYLE_3D_TOP_ATTACHED_TAB, ///< draws an up-beveled rectagular tab that is brighter and larger when pressed; it's bottom is unbeveled
+    SBSTYLE_3D_TOP_DETACHED_TAB  ///< draws an up-beveled rectagular tab that is brighter and larger when pressed; it's bottom is beveled
 };
 
 /** The rendering styles of the line the tab slides over in a Slider. */

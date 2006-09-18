@@ -287,8 +287,12 @@ void StateButton::Render()
     const Uint8 bevel = 2;
 
     // draw button
-    Pt bn_ul = ClientUpperLeft() + m_button_ul;
-    Pt bn_lr = ClientUpperLeft() + m_button_lr;
+    Pt cl_ul = ClientUpperLeft();
+    Pt cl_lr = ClientLowerRight();
+    Pt bn_ul = cl_ul + m_button_ul;
+    Pt bn_lr = cl_ul + m_button_lr;
+
+    Pt additional_text_offset;
 
     switch (m_style) {
     case SBSTYLE_3D_XBOX:
@@ -330,17 +334,36 @@ void StateButton::Render()
                       Disabled() ? DisabledColor(m_color) : Color(),
                       !m_checked, bevel);
         break;
-    case SBSTYLE_3D_TAB:
-        break;
-    case SBSTYLE_3D_UP_ANGLED_TAB:
-        break;
-    case SBSTYLE_3D_DOWN_ANGLED_TAB:
+    case SBSTYLE_3D_TOP_ATTACHED_TAB: {
+        Clr color_to_use = m_checked ? m_color : DarkColor(m_color);
+        color_to_use = Disabled() ? DisabledColor(color_to_use) : color_to_use;
+        if (!m_checked) {
+            cl_ul.y += bevel;
+            additional_text_offset.y = bevel / 2;
+        }
+        BeveledRectangle(cl_ul.x, cl_ul.y, cl_lr.x, cl_lr.y,
+                         color_to_use, color_to_use,
+                         true, bevel,
+                         true, true, true, false);
         break;
     }
+    case SBSTYLE_3D_TOP_DETACHED_TAB: {
+        Clr color_to_use = m_checked ? m_color : DarkColor(m_color);
+        color_to_use = Disabled() ? DisabledColor(color_to_use) : color_to_use;
+        if (!m_checked) {
+            cl_ul.y += bevel;
+            additional_text_offset.y = bevel / 2;
+        }
+        BeveledRectangle(cl_ul.x, cl_ul.y, cl_lr.x, cl_lr.y,
+                         color_to_use, color_to_use,
+                         true, bevel);
+        break;
+    }
+    }
 
-    OffsetMove(m_text_ul);
+    OffsetMove(m_text_ul + additional_text_offset);
     TextControl::Render();
-    OffsetMove(-m_text_ul);
+    OffsetMove(-(m_text_ul + additional_text_offset));
 }
 
 void StateButton::LClick(const Pt& pt, Uint32 keys)
@@ -367,46 +390,53 @@ void StateButton::SetCheck(bool b/* = true*/)
 
 void StateButton::RepositionButton()
 {
-    int w = Width();
-    int h = Height();
-    const int BN_W = m_button_lr.x - m_button_ul.x;
-    const int BN_H = m_button_lr.y - m_button_ul.y;
-    int bn_x = m_button_ul.x;
-    int bn_y = m_button_ul.y;
-    Uint32 format = TextFormat();
-    const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
-    if (format & TF_VCENTER)       // center button vertically
-        bn_y = static_cast<int>((h - BN_H) / 2.0 + 0.5);
-    if (format & TF_TOP) {         // put button at top, text just below
-        bn_y = 0;
-        m_text_ul.y = BN_H;
-    }
-    if (format & TF_BOTTOM) {      // put button at bottom, text just above
-        bn_y = (h - BN_H);
-        m_text_ul.y = static_cast<int>(h - (BN_H * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
-    }
-
-    if (format & TF_CENTER) {      // center button horizontally
-        if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
-            format |= TF_LEFT;     // so go to the default (TF_CENTER|TF_LEFT)
-            format &= ~TF_CENTER;
-        } else {
-            bn_x = static_cast<int>((w - bn_x) / 2.0 - BN_W / 2.0 + 0.5);
+    if (m_style == SBSTYLE_3D_TOP_ATTACHED_TAB ||
+        m_style == SBSTYLE_3D_TOP_DETACHED_TAB) {
+        m_button_ul = Pt();
+        m_button_lr = Pt();
+        m_text_ul = Pt();
+    } else {
+        int w = Width();
+        int h = Height();
+        const int BN_W = m_button_lr.x - m_button_ul.x;
+        const int BN_H = m_button_lr.y - m_button_ul.y;
+        int bn_x = m_button_ul.x;
+        int bn_y = m_button_ul.y;
+        Uint32 format = TextFormat();
+        const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
+        if (format & TF_VCENTER)       // center button vertically
+            bn_y = static_cast<int>((h - BN_H) / 2.0 + 0.5);
+        if (format & TF_TOP) {         // put button at top, text just below
+            bn_y = 0;
+            m_text_ul.y = BN_H;
         }
+        if (format & TF_BOTTOM) {      // put button at bottom, text just above
+            bn_y = (h - BN_H);
+            m_text_ul.y = static_cast<int>(h - (BN_H * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
+        }
+
+        if (format & TF_CENTER) {      // center button horizontally
+            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
+                format |= TF_LEFT;     // so go to the default (TF_CENTER|TF_LEFT)
+                format &= ~TF_CENTER;
+            } else {
+                bn_x = static_cast<int>((w - bn_x) / 2.0 - BN_W / 2.0 + 0.5);
+            }
+        }
+        if (format & TF_LEFT) {        // put button at left, text just to the right
+            bn_x = 0;
+            if (format & TF_VCENTER)
+                m_text_ul.x = static_cast<int>(BN_W * (1 + SPACING) + 0.5);
+        }
+        if (format & TF_RIGHT) {       // put button at right, text just to the left
+            bn_x = (w - BN_W);
+            if (format & TF_VCENTER)
+                m_text_ul.x = static_cast<int>(-BN_W * (1 + SPACING) + 0.5);
+        }
+        SetTextFormat(format);
+        m_button_ul = Pt(bn_x, bn_y);
+        m_button_lr = m_button_ul + Pt(BN_W, BN_H);
     }
-    if (format & TF_LEFT) {        // put button at left, text just to the right
-        bn_x = 0;
-        if (format & TF_VCENTER)
-            m_text_ul.x = static_cast<int>(BN_W * (1 + SPACING) + 0.5);
-    }
-    if (format & TF_RIGHT) {       // put button at right, text just to the left
-        bn_x = (w - BN_W);
-        if (format & TF_VCENTER)
-            m_text_ul.x = static_cast<int>(-BN_W * (1 + SPACING) + 0.5);
-    }
-    SetTextFormat(format);
-    m_button_ul = Pt(bn_x, bn_y);
-    m_button_lr = m_button_ul + Pt(BN_W, BN_H);
 }
 
 void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
@@ -521,6 +551,7 @@ RadioButtonGroup::RadioButtonGroup() :
     Control(),
     m_orientation(VERTICAL),
     m_checked_button(NO_BUTTON),
+    m_expand_buttons(false),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
@@ -530,6 +561,7 @@ RadioButtonGroup::RadioButtonGroup(int x, int y, int w, int h, Orientation orien
     Control(x, y, w, h),
     m_orientation(orientation),
     m_checked_button(NO_BUTTON),
+    m_expand_buttons(false),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
@@ -564,6 +596,11 @@ int RadioButtonGroup::NumButtons() const
 int RadioButtonGroup::CheckedButton() const
 {
     return m_checked_button;
+}
+
+bool RadioButtonGroup::ExpandButtons() const
+{
+    return m_expand_buttons;
 }
 
 bool RadioButtonGroup::RenderOutline() const
@@ -626,30 +663,39 @@ void RadioButtonGroup::InsertButton(int index, StateButton* bn)
         layout = new Layout(0, 0, ClientWidth(), ClientHeight(), 1, 1);
         SetLayout(layout);
     }
+    const int CELLS_PER_BUTTON = m_expand_buttons ? 1 : 2;
     if (m_button_slots.empty()) {
         layout->Add(bn, 0, 0);
+        if (m_expand_buttons) {
+            if (m_orientation == VERTICAL)
+                layout->SetRowStretch(0, 1.0);
+            else
+                layout->SetColumnStretch(0, 1.0);
+        }
     } else {
         if (m_orientation == VERTICAL) {
-            layout->ResizeLayout(layout->Rows() + 2, 1);
-            layout->SetRowStretch(layout->Rows() - 2, 1.0);
+            layout->ResizeLayout(layout->Rows() + CELLS_PER_BUTTON, 1);
+            layout->SetRowStretch(layout->Rows() - CELLS_PER_BUTTON, 1.0);
         } else {
-            layout->ResizeLayout(1, layout->Columns() + 2);
-            layout->SetColumnStretch(layout->Columns() - 2, 1.0);
+            layout->ResizeLayout(1, layout->Columns() + CELLS_PER_BUTTON);
+            layout->SetColumnStretch(layout->Columns() - CELLS_PER_BUTTON, 1.0);
         }
         for (int i = m_button_slots.size() - 1; index <= i; --i) {
             layout->Remove(m_button_slots[i].button);
-            layout->Add(m_button_slots[i].button, m_orientation == VERTICAL ? i * 2 + 2 : 0, m_orientation == VERTICAL ? 0 : i * 2 + 2);
+            layout->Add(m_button_slots[i].button,
+                        m_orientation == VERTICAL ? i * CELLS_PER_BUTTON + CELLS_PER_BUTTON : 0,
+                        m_orientation == VERTICAL ? 0 : i * CELLS_PER_BUTTON + CELLS_PER_BUTTON);
             if (m_orientation == VERTICAL)
-                layout->SetMinimumRowHeight(i * 2 + 2, layout->MinimumRowHeight(i * 2));
+                layout->SetMinimumRowHeight(i * CELLS_PER_BUTTON + CELLS_PER_BUTTON, layout->MinimumRowHeight(i * CELLS_PER_BUTTON));
             else
-                layout->SetMinimumColumnWidth(i * 2 + 2, layout->MinimumColumnWidth(i * 2));
+                layout->SetMinimumColumnWidth(i * CELLS_PER_BUTTON + CELLS_PER_BUTTON, layout->MinimumColumnWidth(i * CELLS_PER_BUTTON));
         }
-        layout->Add(bn, m_orientation == VERTICAL ? index * 2 : 0, m_orientation == VERTICAL ? 0 : index * 2);
+        layout->Add(bn, m_orientation == VERTICAL ? index * CELLS_PER_BUTTON : 0, m_orientation == VERTICAL ? 0 : index * CELLS_PER_BUTTON);
     }
     if (m_orientation == VERTICAL)
-        layout->SetMinimumRowHeight(index * 2, bn_sz.y);
+        layout->SetMinimumRowHeight(index * CELLS_PER_BUTTON, bn_sz.y);
     else
-        layout->SetMinimumColumnWidth(index * 2, bn_sz.x);
+        layout->SetMinimumColumnWidth(index * CELLS_PER_BUTTON, bn_sz.x);
     m_button_slots.insert(m_button_slots.begin() + index, ButtonSlot(bn));
 
     int old_checked_button = m_checked_button;
@@ -681,26 +727,28 @@ void RadioButtonGroup::RemoveButton(StateButton* button)
     }
     assert(0 <= index && index < static_cast<int>(m_button_slots.size()));
 
+    const int CELLS_PER_BUTTON = m_expand_buttons ? 1 : 2;
     Layout* layout = GetLayout();
     layout->Remove(m_button_slots[index].button);
     for (unsigned int i = index + 1; i < m_button_slots.size(); ++i) {
         layout->Remove(m_button_slots[i].button);
         if (m_orientation == VERTICAL) {
-            layout->Add(m_button_slots[i].button, i * 2 - 2, 0);
-            layout->SetMinimumRowHeight(i * 2 - 2, layout->MinimumRowHeight(i * 2));
+            layout->Add(m_button_slots[i].button, i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, 0);
+            layout->SetMinimumRowHeight(i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, layout->MinimumRowHeight(i * CELLS_PER_BUTTON));
         } else {
-            layout->Add(m_button_slots[i].button, 0, i * 2 - 2);
-            layout->SetMinimumColumnWidth(i * 2 - 2, layout->MinimumColumnWidth(i * 2));
+            layout->Add(m_button_slots[i].button, 0, i * CELLS_PER_BUTTON - CELLS_PER_BUTTON);
+            layout->SetMinimumColumnWidth(i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, layout->MinimumColumnWidth(i * CELLS_PER_BUTTON));
         }
     }
+    m_button_slots[index].connection.disconnect();
     m_button_slots.erase(m_button_slots.begin() + index);
     if (m_button_slots.empty()) {
         layout->ResizeLayout(1, 1);
     } else {
         if (m_orientation == VERTICAL)
-            layout->ResizeLayout(layout->Rows() - 2, 1);
+            layout->ResizeLayout(layout->Rows() - CELLS_PER_BUTTON, 1);
         else
-            layout->ResizeLayout(1, layout->Columns() - 2);
+            layout->ResizeLayout(1, layout->Columns() - CELLS_PER_BUTTON);
     }
 
     int old_checked_button = m_checked_button;
@@ -711,6 +759,24 @@ void RadioButtonGroup::RemoveButton(StateButton* button)
     Reconnect();
     if (m_checked_button != old_checked_button)
         ButtonChangedSignal(m_checked_button);
+}
+
+void RadioButtonGroup::ExpandButtons(bool expand)
+{
+    if (expand != m_expand_buttons) {
+        int old_checked_button = m_checked_button;
+        std::vector<StateButton*> buttons(m_button_slots.size());
+        while (!m_button_slots.empty()) {
+            StateButton* button = m_button_slots.back().button;
+            buttons[m_button_slots.size() - 1] = button;
+            RemoveButton(button);
+        }
+        m_expand_buttons = expand;
+        for (unsigned int i = 0; i < buttons.size(); ++i) {
+            AddButton(buttons[i]);
+        }
+        SetCheck(old_checked_button);
+    }
 }
 
 void RadioButtonGroup::RenderOutline(bool render_outline)

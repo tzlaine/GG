@@ -79,7 +79,8 @@ namespace GG {
         thickness.  If \a up is true, the beveled edges are lighter on the top and left, darker on the bottom and right,
         effecting a raised appearance.  If \a up is false, the opposite happens, and the rectangle looks depressed.
         This is true of all the Beveled*() functions.*/
-    GG_API void BeveledRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, bool up, int bevel_thick = 2);
+    GG_API void BeveledRectangle(int x1, int y1, int x2, int y2, Clr color, Clr border_color, bool up, int bevel_thick = 2,
+                                 bool bevel_left = true, bool bevel_top = true, bool bevel_right = true, bool bevel_bottom = true);
 
     /** Draws a checkmark used to draw state buttons. */
     GG_API void FlatCheck(int x1, int y1, int x2, int y2, Clr color);

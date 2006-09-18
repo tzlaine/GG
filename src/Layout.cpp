@@ -559,9 +559,12 @@ void Layout::Remove(Wnd* wnd)
                 m_cells[i][j] = 0;
             }
         }
+        Pt original_ul = it->second.original_ul;
+        Pt original_size = it->second.original_size;
         m_wnd_positions.erase(wnd);
         RedoLayout();
         DetachChild(wnd);
+        wnd->SizeMove(original_ul, original_ul + original_size);
     }
 }
 

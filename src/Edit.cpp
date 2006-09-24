@@ -33,8 +33,8 @@
 using namespace GG;
 
 namespace {
-    int HeightFromFont(const boost::shared_ptr<Font>& font)
-    {  return font->Height() + 2; }
+    int HeightFromFont(const boost::shared_ptr<Font>& font, int pixel_margin)
+    {  return font->Height() + 2 * pixel_margin; }
 }
 
 ////////////////////////////////////////////////
@@ -51,7 +51,7 @@ Edit::Edit() :
 
 Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, HeightFromFont(font) * PIXEL_MARGIN, str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
+    TextControl(x, y, w, HeightFromFont(font, PIXEL_MARGIN), str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),
     m_int_color(interior),
@@ -65,7 +65,7 @@ Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<
 Pt Edit::MinUsableSize() const
 {
     return Pt(4 * PIXEL_MARGIN,
-              HeightFromFont(GetFont()) * PIXEL_MARGIN);
+              HeightFromFont(GetFont(), PIXEL_MARGIN));
 }
 
 Pt Edit::ClientUpperLeft() const

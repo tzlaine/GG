@@ -552,6 +552,7 @@ RadioButtonGroup::RadioButtonGroup() :
     m_orientation(VERTICAL),
     m_checked_button(NO_BUTTON),
     m_expand_buttons(false),
+    m_expand_buttons_proportionally(false),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
@@ -562,6 +563,7 @@ RadioButtonGroup::RadioButtonGroup(int x, int y, int w, int h, Orientation orien
     m_orientation(orientation),
     m_checked_button(NO_BUTTON),
     m_expand_buttons(false),
+    m_expand_buttons_proportionally(false),
     m_render_outline(false)
 {
     SetColor(CLR_YELLOW);
@@ -601,6 +603,11 @@ int RadioButtonGroup::CheckedButton() const
 bool RadioButtonGroup::ExpandButtons() const
 {
     return m_expand_buttons;
+}
+
+bool RadioButtonGroup::ExpandButtonsProportionally() const
+{
+    return m_expand_buttons_proportionally;
 }
 
 bool RadioButtonGroup::RenderOutline() const
@@ -664,21 +671,21 @@ void RadioButtonGroup::InsertButton(int index, StateButton* bn)
         SetLayout(layout);
     }
     const int CELLS_PER_BUTTON = m_expand_buttons ? 1 : 2;
+    const int X_STRETCH = (m_expand_buttons && m_expand_buttons_proportionally) ? bn_sz.x : 1;
+    const int Y_STRETCH = (m_expand_buttons && m_expand_buttons_proportionally) ? bn_sz.y : 1;
     if (m_button_slots.empty()) {
         layout->Add(bn, 0, 0);
-        if (m_expand_buttons) {
-            if (m_orientation == VERTICAL)
-                layout->SetRowStretch(0, 1.0);
-            else
-                layout->SetColumnStretch(0, 1.0);
-        }
+        if (m_orientation == VERTICAL)
+            layout->SetRowStretch(0, Y_STRETCH);
+        else
+            layout->SetColumnStretch(0, X_STRETCH);
     } else {
         if (m_orientation == VERTICAL) {
             layout->ResizeLayout(layout->Rows() + CELLS_PER_BUTTON, 1);
-            layout->SetRowStretch(layout->Rows() - CELLS_PER_BUTTON, 1.0);
+            layout->SetRowStretch(layout->Rows() - CELLS_PER_BUTTON, Y_STRETCH);
         } else {
             layout->ResizeLayout(1, layout->Columns() + CELLS_PER_BUTTON);
-            layout->SetColumnStretch(layout->Columns() - CELLS_PER_BUTTON, 1.0);
+            layout->SetColumnStretch(layout->Columns() - CELLS_PER_BUTTON, X_STRETCH);
         }
         for (int i = m_button_slots.size() - 1; index <= i; --i) {
             layout->Remove(m_button_slots[i].button);
@@ -734,9 +741,11 @@ void RadioButtonGroup::RemoveButton(StateButton* button)
         layout->Remove(m_button_slots[i].button);
         if (m_orientation == VERTICAL) {
             layout->Add(m_button_slots[i].button, i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, 0);
+            layout->SetRowStretch(i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, layout->RowStretch(i * CELLS_PER_BUTTON));
             layout->SetMinimumRowHeight(i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, layout->MinimumRowHeight(i * CELLS_PER_BUTTON));
         } else {
             layout->Add(m_button_slots[i].button, 0, i * CELLS_PER_BUTTON - CELLS_PER_BUTTON);
+            layout->SetColumnStretch(i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, layout->ColumnStretch(i * CELLS_PER_BUTTON));
             layout->SetMinimumColumnWidth(i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, layout->MinimumColumnWidth(i * CELLS_PER_BUTTON));
         }
     }
@@ -772,6 +781,24 @@ void RadioButtonGroup::ExpandButtons(bool expand)
             RemoveButton(button);
         }
         m_expand_buttons = expand;
+        for (unsigned int i = 0; i < buttons.size(); ++i) {
+            AddButton(buttons[i]);
+        }
+        SetCheck(old_checked_button);
+    }
+}
+
+void RadioButtonGroup::ExpandButtonsProportionally(bool proportional)
+{
+    if (proportional != m_expand_buttons_proportionally) {
+        int old_checked_button = m_checked_button;
+        std::vector<StateButton*> buttons(m_button_slots.size());
+        while (!m_button_slots.empty()) {
+            StateButton* button = m_button_slots.back().button;
+            buttons[m_button_slots.size() - 1] = button;
+            RemoveButton(button);
+        }
+        m_expand_buttons_proportionally = proportional;
         for (unsigned int i = 0; i < buttons.size(); ++i) {
             AddButton(buttons[i]);
         }

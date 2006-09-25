@@ -52,24 +52,15 @@ namespace boost { namespace archive {
 
 namespace GG {
 
-class DropDownList;
-class DynamicGraphic;
-class Edit;
-class ListBox;
-class MenuBar;
-class MultiEdit;
-class StaticGraphic;
-class TextControl;
-
 /** the interface to custom-control plugins.  This class is used to access derived GG controls and dialogs that are
     unknown until runtime, but are available for dynamic loading in shared libraries/DLLs.  The interface basically
     allows you to create custom controls and dialogs (anything a StyleFactory can produce) from a dynamic-link library,
     which in turn allows you to change the styles of the controls in an application without recompiling, or even
     relinking.  While the interface is in an unloaded state, the functions in the interface are all null, and calling
     any of them will crash your app.  Once a plugin has been loaded, all the functions in the interface should be valid
-    (if the plugin author did everything correctly).  The plugin interface also provides Save- and LoadWnd() methods to
-    serialize all types in the GG::Wnd hierarchy.  Note that this means all types, not just the ones added by the
-    plugin; if Wnd is not serializable, none of its descendents are either. */
+    (if the plugin author did everything correctly).  The plugin interface also provides SaveWnd() and LoadWnd() methods
+    to serialize all types in the GG::Wnd hierarchy.  Note that includes all the original GG types, not just the ones
+    added by the plugin; if Wnd is not serializable, none of its descendents are either. */
 class GG_API PluginInterface
 {
 public:

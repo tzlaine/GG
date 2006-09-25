@@ -210,6 +210,13 @@ enum ListBoxStyle {
     LB_BROWSEUPDATES =   1 << 19,       ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
 };   
 
+/** The styles of display for a TabBar. */
+enum TabBarStyle {
+    TAB_BAR_ATTACHED, ///< The currently active tab should appear to be connected to the area below the bar.
+    TAB_BAR_DETACHED  ///< The currently active tab should appear to be unconnected to the area below the bar.
+};
+
+
 /** Adpated from SDLKey enum in SDL_keysym.h of the SDL library; enumeration of valid key mods (possibly |'d together). */
 enum Mod {
     GGKMOD_NONE       = 0x0000,
@@ -650,6 +657,15 @@ GG_ENUM_MAP_END
 
 GG_ENUM_STREAM_IN(StateButtonStyle)
 GG_ENUM_STREAM_OUT(StateButtonStyle)
+
+// define EnumMap and stream operators for TabBarStyle
+GG_ENUM_MAP_BEGIN(TabBarStyle)
+    GG_ENUM_MAP_INSERT(TAB_BAR_ATTACHED)
+    GG_ENUM_MAP_INSERT(TAB_BAR_DETACHED)
+GG_ENUM_MAP_END
+
+GG_ENUM_STREAM_IN(TabBarStyle)
+GG_ENUM_STREAM_OUT(TabBarStyle)
 
 // define EnumMap and stream operators for Mod
 GG_ENUM_MAP_BEGIN(Key)

@@ -54,6 +54,7 @@ template <class T>
 class Spin;
 class StateButton;
 class StaticGraphic;
+class TabBar;
 class TextControl;
 class Texture;
 class ThreeButtonDlg;
@@ -142,6 +143,11 @@ public:
     virtual StaticGraphic*     NewStaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture,
                                                 Uint32 style = 0, Uint32 flags = 0) const;
 
+    /** Returns a new GG TabBar. */
+    virtual TabBar*            NewTabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color,
+                                         Clr text_color = CLR_BLACK, TabBarStyle style = TAB_BAR_ATTACHED,
+                                         Uint32 flags = CLICKABLE) const;
+
     /** Returns a new GG TextControl. */
     virtual TextControl*       NewTextControl(int x, int y, int w, int h, const std::string& str,
                                               const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK,
@@ -227,6 +233,22 @@ public:
     virtual Edit*              NewSpinEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
                                            Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                                            Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new StateButton, to be used in a TabBar. */
+    virtual StateButton*       NewTabBarTab(int x, int y, int w, int h, const std::string& str,
+                                            const boost::shared_ptr<Font>& font, Uint32 text_fmt, Clr color,
+                                            Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
+                                            StateButtonStyle style = SBSTYLE_3D_TOP_ATTACHED_TAB, Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new left Button, to be used in a TabBar. */
+    virtual Button*            NewTabBarLeftButton(int x, int y, int w, int h, const std::string& str,
+                                                   const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                   Uint32 flags = CLICKABLE) const;
+
+    /** Returns a new left Button, to be used in a TabBar. */
+    virtual Button*            NewTabBarRightButton(int x, int y, int w, int h, const std::string& str,
+                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+                                                    Uint32 flags = CLICKABLE) const;
     //@}
 
     /** \name Dialogs */ //@{

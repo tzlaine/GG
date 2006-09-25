@@ -37,6 +37,7 @@
 #include <GG/Slider.h>
 #include <GG/Spin.h>
 #include <GG/StaticGraphic.h>
+#include <GG/TabWnd.h>
 #include <GG/TextControl.h>
 
 #include <GG/dialogs/ColorDlg.h>
@@ -154,6 +155,12 @@ TextControl* StyleFactory::NewTextControl(int x, int y, const std::string& str, 
     return new TextControl(x, y, str, font, color, text_fmt, flags);
 }
 
+TabBar* StyleFactory::NewTabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
+                                TabBarStyle style/* = TAB_BAR_ATTACHED*/, Uint32 flags/* = CLICKABLE*/) const
+{
+    return new TabBar(x, y, w, font, color, text_color, style, flags);
+}
+
 ListBox* StyleFactory::NewDropDownListListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
                                               Uint32 flags/* = CLICKABLE*/) const
 {
@@ -259,6 +266,30 @@ Edit* StyleFactory::NewSpinEdit(int x, int y, int w, const std::string& str, con
                                 Uint32 flags/* = CLICKABLE*/) const
 {
     return NewEdit(x, y, w, str, font, color, text_color, interior, flags);
+}
+
+StateButton* StyleFactory::NewTabBarTab(int x, int y, int w, int h, const std::string& str,
+                                        const boost::shared_ptr<Font>& font, Uint32 text_fmt, Clr color,
+                                        Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
+                                        StateButtonStyle style/* = SBSTYLE_3D_TOP_ATTACHED_TAB*/, Uint32 flags/* = CLICKABLE*/) const
+{
+    StateButton* retval = NewStateButton(x, y, w, h, str, font, text_fmt, color, text_color, interior, style, flags);
+    retval->Resize(retval->MinUsableSize() + Pt(12, 0));
+    return retval;
+}
+
+Button* StyleFactory::NewTabBarLeftButton(int x, int y, int w, int h, const std::string& str,
+                                          const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
+                                          Uint32 flags/* = CLICKABLE*/) const
+{
+    return NewButton(x, y, w, h, str, font, color, text_color, flags);
+}
+
+Button* StyleFactory::NewTabBarRightButton(int x, int y, int w, int h, const std::string& str,
+                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
+                                           Uint32 flags /*= CLICKABLE*/) const
+{
+    return NewButton(x, y, w, h, str, font, color, text_color, flags);
 }
 
 ColorDlg* StyleFactory::NewColorDlg(int x, int y, const boost::shared_ptr<Font>& font,

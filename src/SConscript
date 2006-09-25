@@ -24,6 +24,7 @@ sources = [
     'Slider.cpp',
     'StaticGraphic.cpp',
     'StyleFactory.cpp',
+    'TabWnd.cpp',
     'TextControl.cpp',
     'Texture.cpp',
     'Wnd.cpp',

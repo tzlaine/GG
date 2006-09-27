@@ -763,7 +763,7 @@ void RadioButtonGroup::RemoveButton(StateButton* button)
     int old_checked_button = m_checked_button;
     if (index == m_checked_button)
         m_checked_button = NO_BUTTON;
-    else if (m_checked_button != NO_BUTTON && m_checked_button < index)
+    else if (index <= m_checked_button)
         --m_checked_button;
     Reconnect();
     if (m_checked_button != old_checked_button)

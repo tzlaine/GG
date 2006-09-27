@@ -292,6 +292,13 @@ Button* StyleFactory::NewTabBarRightButton(int x, int y, int w, int h, const std
     return NewButton(x, y, w, h, str, font, color, text_color, flags);
 }
 
+TabWnd* StyleFactory::NewTabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color,
+                                Clr text_color/* = CLR_BLACK*/, TabBarStyle style/* = TAB_BAR_ATTACHED*/,
+                                Uint32 flags/* = CLICKABLE | DRAGABLE*/) const
+{
+    return new TabWnd(x, y, w, h, font, color, text_color, style, flags);
+}
+
 ColorDlg* StyleFactory::NewColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
                                     Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) const
 {

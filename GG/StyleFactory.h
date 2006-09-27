@@ -55,6 +55,7 @@ class Spin;
 class StateButton;
 class StaticGraphic;
 class TabBar;
+class TabWnd;
 class TextControl;
 class Texture;
 class ThreeButtonDlg;
@@ -249,6 +250,13 @@ public:
     virtual Button*            NewTabBarRightButton(int x, int y, int w, int h, const std::string& str,
                                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
                                                     Uint32 flags = CLICKABLE) const;
+    //@}
+
+    /** \name Wnds */ //@{
+    /** Returns a new GG TabWnd. */
+    virtual TabWnd*            NewTabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color,
+                                         Clr text_color = CLR_BLACK, TabBarStyle style = TAB_BAR_ATTACHED,
+                                         Uint32 flags = CLICKABLE | DRAGABLE) const;
     //@}
 
     /** \name Dialogs */ //@{

@@ -40,15 +40,23 @@ namespace GG {
 
 class TabBar;
 
-#if 0
 class GG_API TabWnd : public Wnd
 {
 public:
+    /** \name Signal Types */ //@{
+    /** Emitted when the currently-selected Wnd has changed; the new selected Wnd's index in the group is provided (this
+        may be NO_WND if no Wnd is currently selected). */
+    typedef boost::signal<void (int)> WndChangedSignalType;
+    //@}
+
+    /** \name Slot Types */ //@{
+    typedef WndChangedSignalType::slot_type WndChangedSlotType; ///< Type of functor(s) invoked on a WndChangedSignalType.
+    //@}
+
     /** \name Structors */ //@{
     /** Basic ctor. */
-    TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
-           Clr color, Clr text_color/* = CLR_BLACK*/, Uint32 flags = CLICKABLE | DRAGABLE);
-
+    TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+           TabBarStyle style = TAB_BAR_ATTACHED, Uint32 flags = CLICKABLE | DRAGABLE);
     ~TabWnd();
     //@}
 
@@ -59,11 +67,18 @@ public:
     //@}
 
     /** \name Mutators */ //@{
+    virtual void Render();
+
     void AddWnd(Wnd* wnd, const std::string& name);
     void InsertWnd(int index, Wnd* wnd, const std::string& name);
-    void RemoveWnd(int index);
+    Wnd* RemoveWnd(const std::string& name);
     void SetCurrentWnd(int index);
     //@}
+
+    mutable WndChangedSignalType WndChangedSignal; ///< The Wnd change signal object for this Button
+
+    /** The invalid Wnd position index that there is no currently-selected Wnd. */
+    static const int NO_WND;
 
 protected:
     /** \name Structors */ //@{
@@ -71,22 +86,21 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    const TabBar*            TabBar() const;
-    const std::vector<Wnd*>& Wnds() const;
+    const TabBar*                                     GetTabBar() const;
+    const std::vector<std::pair<Wnd*, std::string> >& Wnds() const;
     //@}
 
 private:
     void TabChanged(int tab_index);
 
-    TabBar*           m_tab_bar;
-    std::vector<Wnd*> m_wnds;
-    int               m_current_index;
+    TabBar*                                    m_tab_bar;
+    std::vector<std::pair<Wnd*, std::string> > m_wnds;
+    Wnd*                                       m_current_wnd;
 
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
-#endif
 
 
 class GG_API TabBar : public Control
@@ -170,6 +184,32 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
+} // namespace GG
+
+// template implementations
+template <class Archive>
+void GG::TabWnd::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_tab_bar)
+        & BOOST_SERIALIZATION_NVP(m_wnds)
+        & BOOST_SERIALIZATION_NVP(m_current_wnd);
+}
+
+template <class Archive>
+void GG::TabBar::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_tabs)
+        & BOOST_SERIALIZATION_NVP(m_tab_buttons)
+        & BOOST_SERIALIZATION_NVP(m_font)
+        & BOOST_SERIALIZATION_NVP(m_left_button)
+        & BOOST_SERIALIZATION_NVP(m_right_button)
+        & BOOST_SERIALIZATION_NVP(m_left_right_button_layout)
+        & BOOST_SERIALIZATION_NVP(m_text_fmt)
+        & BOOST_SERIALIZATION_NVP(m_text_color)
+        & BOOST_SERIALIZATION_NVP(m_style)
+        & BOOST_SERIALIZATION_NVP(m_first_tab_shown);
 }
 
 #endif

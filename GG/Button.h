@@ -310,7 +310,7 @@ public:
     /** Set this to true if the buttons in the group are to be expanded in proportion to their initial sizes.  If set to
         false, this indicates that the buttons are to be expanded evenly.  Note that this has no effect if
         ExpandButtons() is false. */
-    void             ExpandButtonsProportionally(bool proportional);
+    void ExpandButtonsProportionally(bool proportional);
 
     /** Set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
         purposes */

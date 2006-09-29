@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/PluginInterface.h>
 
 #include <GG/DropDownList.h>

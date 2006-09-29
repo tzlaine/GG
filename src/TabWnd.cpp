@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id: Edit.cpp 528 2006-03-04 02:56:33Z tzlaine $ */
-
 #include <GG/TabWnd.h>
 
 #ifndef _GG_DrawUtil_h_

@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-/* $Id$ */
-
 #include <string.h>
 
 #include "SDL_byteorder.h"

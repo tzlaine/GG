@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Scroll.h
     Contains the Scroll scrollbar control class. */
 

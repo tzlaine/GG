@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Id$ */
-
 /** \file Enum.h
     Contains the utility classes and macros that allow for easy conversion to and from an enum 
     value and its textual representation. */

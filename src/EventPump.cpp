@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/EventPump.h>
 
 using namespace GG;

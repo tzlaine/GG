@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Clr.h
     Contains the utility class Clr, which represents colors in GG. */
 

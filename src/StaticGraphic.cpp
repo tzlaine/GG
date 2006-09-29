@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/StaticGraphic.h>
 
 #include <GG/DrawUtil.h>

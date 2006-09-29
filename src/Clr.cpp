@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/Clr.h>
 
 using namespace GG;

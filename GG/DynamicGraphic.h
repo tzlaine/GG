@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Id$ */
-
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 
 /** \file DynamicGraphic.h

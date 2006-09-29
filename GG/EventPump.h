@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Id$ */
-
 /** \file EventPump.h
     Contains the EventPump class and its helper classes.  An EventPump encapsulates the behavior of a GG processing loop, 
     such as the one associated with the singleton GUI object, or one associated with a modal Wnd. */

@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Font.h
     Contains the Font class, a class that encapsulates the rendering of a single FreeType-compatible fonts in 
     italics, with underlining, left-, right-, or center- justified, etc., and the FontManager class which provides 

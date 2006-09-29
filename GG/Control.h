@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Control.h
     Contains the Control class, the base class for all GG controls. */
 

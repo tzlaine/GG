@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/SDL/SDLGUI.h>
 #include <GG/EventPump.h>
 

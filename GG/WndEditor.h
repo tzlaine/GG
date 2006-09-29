@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file WndEditor.h
     Contains the WndEditor class, a window that contains controls that can alter the properties of a Wnd
     interactively. */

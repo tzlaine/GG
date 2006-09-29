@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-/* $Id$ */
-
 #include <GG/net/SDLnetsys.h>
 #include <GG/net/SDL_net.h>
 #ifdef MACOS_OPENTRANSPORT

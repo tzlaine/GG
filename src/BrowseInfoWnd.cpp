@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/BrowseInfoWnd.h>
 
 #include <GG/GUI.h>

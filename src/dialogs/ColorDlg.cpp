@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 #include <GG/dialogs/ColorDlg.h>
 
 #include <GG/GUI.h>

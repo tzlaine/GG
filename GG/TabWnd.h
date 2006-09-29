@@ -23,10 +23,8 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
-/* $Id: Enum.h 503 2006-02-02 04:14:12Z tzlaine $ */
-
-/** \file TabSet.h
-    Contains the TabSet class, which encapsulates a set of tabbed windows. */
+/** \file TabWnd.h
+    Contains the TabWnd class, which encapsulates a set of tabbed windows. */
 
 #ifndef _GG_TabWnd_h_
 #define _GG_TabWnd_h_

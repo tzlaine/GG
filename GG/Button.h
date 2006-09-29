@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Button.h
     Contains the Button push-button control class; the StateButton control class, which represents check boxes and radio 
     buttons; and the RadioButtonGroup control class, which allows multiple radio buttons to be combined into a single control. */

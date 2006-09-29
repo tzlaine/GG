@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file StaticGraphic.h
     Contains the StaticGraphic class, a fixed image control. */
 

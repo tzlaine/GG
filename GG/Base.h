@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Base.h
     Contains enums, utility classes, and free functions used throughout GG. */
 

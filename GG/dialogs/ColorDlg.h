@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file ColorDlg.h
     Contains the Wnd class, upon which all GG GUI elements are based. */
 

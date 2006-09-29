@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-/* $Id$ */
-
 /** \file SDL_net.h
     Part of the SDL_Net2/Fastevents libs. */
 

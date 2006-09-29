@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file MultiEdit.h
     Contains the MultiEdit class, a multi-line text box control. */
 

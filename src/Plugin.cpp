@@ -22,8 +22,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file GGPlugin.cpp
     This is a sample plugin implementation.  It can only create and serialize the default types of GG controls.  Extend
     it to create a plugin suitable for a user-defned GG control a hierarchy. */

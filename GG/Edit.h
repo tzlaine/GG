@@ -23,8 +23,6 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-/* $Id$ */
-
 /** \file Edit.h
     Contains the Edit class, a single-line editable text-box control. */
 

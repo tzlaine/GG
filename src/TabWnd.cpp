@@ -245,7 +245,10 @@ void TabBar::InsertTab(int index, const std::string& name)
     if (Width() < m_tabs->Width()) {
         m_left_right_button_layout->Show();
         m_left_button->Disable(m_first_tab_shown == 0);
-        m_right_button->Disable(m_first_tab_shown == static_cast<int>(m_tab_buttons.size()) - 1);
+        int right_side = m_left_right_button_layout->Visible() ?
+            m_left_button->UpperLeft().x :
+            LowerRight().x;
+        m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
     }
     if (m_tabs->CheckedButton() == RadioButtonGroup::NO_BUTTON)
         m_tabs->SetCheck(0);
@@ -307,7 +310,10 @@ void TabBar::RightClicked()
     assert(m_first_tab_shown < static_cast<int>(m_tab_buttons.size()) - 1);
     m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown + 1]->UpperLeft().x, 0));
     ++m_first_tab_shown;
-    m_right_button->Disable(m_first_tab_shown == static_cast<int>(m_tab_buttons.size()) - 1);
+    int right_side = m_left_right_button_layout->Visible() ?
+        m_left_button->UpperLeft().x :
+        LowerRight().x;
+    m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
     m_left_button->Disable(false);
 }
 
@@ -316,16 +322,16 @@ void TabBar::BringTabIntoView(int index)
     while (m_tab_buttons[index]->UpperLeft().x < UpperLeft().x) {
         LeftClicked();
     }
+    int right_side = m_left_right_button_layout->Visible() ?
+        m_left_button->UpperLeft().x :
+        LowerRight().x;
     if (m_tab_buttons[index]->Width() < Width()) {
-        int right_side = m_left_right_button_layout->Visible() ?
-            m_left_button->UpperLeft().x :
-            LowerRight().x;
         while (right_side < m_tab_buttons[index]->LowerRight().x && index != m_first_tab_shown) {
             RightClicked();
         }
     } else {
         m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[index]->UpperLeft().x, 0));
-        m_right_button->Disable(m_first_tab_shown == static_cast<int>(m_tab_buttons.size()) - 1);
+        m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
         m_left_button->Disable(false);
     }
 }

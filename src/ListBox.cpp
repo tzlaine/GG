@@ -157,7 +157,7 @@ void ListBox::Row::push_back(Control* c)
 {
     m_cells.push_back(c);
     m_col_widths.push_back(5);
-    m_col_alignments.resize(ALIGN_CENTER);
+    m_col_alignments.push_back(ALIGN_CENTER);
     if (1 < m_cells.size()) {
         m_col_widths.back() = m_col_widths[m_cells.size() - 1];
     }

@@ -27,6 +27,7 @@
 #include <GG/BrowseInfoWnd.h>
 #include <GG/Control.h>
 #include <GG/EventPump.h>
+#include <GG/Layout.h>
 #include <GG/PluginInterface.h>
 #include <GG/StyleFactory.h>
 #include <GG/ZList.h>
@@ -79,6 +80,7 @@ struct GG::GUIImplData
         curr_drag_wnd_dragged(false),
         curr_drag_drop_here_wnd(0),
         wnd_region(WR_NONE),
+        browse_target(0),
         drag_drop_originating_wnd(0),
         delta_t(0),
         FPS(-1.0),
@@ -131,6 +133,7 @@ struct GG::GUIImplData
     boost::shared_ptr<BrowseInfoWnd>
                  browse_info_wnd;       // the current browse info window, if any
     int          browse_info_mode;      // the current browse info mode (only valid if browse_info_wnd is non-null)
+    Wnd*         browse_target;         // the current browse info target
 
     Wnd*         drag_drop_originating_wnd; // the window that originally owned the Wnds in drag_drop_wnds
     std::map<Wnd*, Pt>
@@ -580,6 +583,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case KEYPRESS: {
         s_impl->browse_info_wnd.reset();
         s_impl->browse_info_mode = -1;
+        s_impl->browse_target = 0;
         bool processed = false;
         // only process accelerators when there are no modal windows active; otherwise, accelerators would be an end-run
         // around modality
@@ -695,6 +699,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         }
         if (s_impl->prev_wnd_under_cursor != s_impl->curr_wnd_under_cursor) {
             s_impl->browse_info_wnd.reset();
+            s_impl->browse_target = 0;
             s_impl->prev_wnd_under_cursor_time = curr_ticks;
         }
         s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
@@ -708,6 +713,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         s_impl->wnd_drag_offset = Pt();
         s_impl->prev_button_press_time = 0;
         s_impl->browse_info_wnd.reset();
+        s_impl->browse_target = 0;
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         s_impl->prev_button_press_time = curr_ticks;
         s_impl->prev_button_press_pos = pos;
@@ -758,6 +764,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         s_impl->last_button_down_repeat_time = 0;
         s_impl->prev_wnd_drag_position = Pt();
         s_impl->browse_info_wnd.reset();
+        s_impl->browse_target = 0;
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         switch (event) {
         case LRELEASE: {
@@ -870,6 +877,7 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
     case MOUSEWHEEL: {
         s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, key_mods);
         s_impl->browse_info_wnd.reset();
+        s_impl->browse_target = 0;
         s_impl->prev_wnd_under_cursor_time = curr_ticks;
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
         if (s_impl->curr_wnd_under_cursor && rel.y && !(s_impl->button_state[0] || s_impl->button_state[1] || s_impl->button_state[2]))
@@ -886,15 +894,9 @@ void GUI::ProcessBrowseInfo()
     assert(s_impl->curr_wnd_under_cursor);
     if (!s_impl->button_state[0] && !s_impl->button_state[1] && !s_impl->button_state[2] &&
         (s_impl->modal_wnds.empty() || s_impl->curr_wnd_under_cursor->RootParent() == s_impl->modal_wnds.back().first)) {
-        const std::vector<Wnd::BrowseInfoMode>& browse_modes = s_impl->curr_wnd_under_cursor->BrowseModes();
-        int delta_t = Ticks() - s_impl->prev_wnd_under_cursor_time;
-        for (unsigned int i = 0; i < browse_modes.size(); ++i) {
-            if (browse_modes[i].time < delta_t && s_impl->browse_info_wnd != browse_modes[i].wnd) {
-                s_impl->browse_info_wnd = browse_modes[i].wnd;
-                s_impl->browse_info_mode = i;
-                s_impl->browse_info_wnd->MoveTo(s_impl->mouse_pos);
-                break;
-            }
+        Wnd* wnd = s_impl->curr_wnd_under_cursor;
+        while (!ProcessBrowseInfoImpl(wnd) && wnd->Parent() && (dynamic_cast<Control*>(wnd) || dynamic_cast<Layout*>(wnd))) {
+            wnd = wnd->Parent();
         }
     }
 }
@@ -915,9 +917,11 @@ void GUI::Render()
         if (!s_impl->curr_wnd_under_cursor) {
             s_impl->browse_info_wnd.reset();
             s_impl->browse_info_mode = -1;
+            s_impl->browse_target = 0;
             s_impl->prev_wnd_under_cursor_time = Ticks();
         } else {
-            s_impl->browse_info_wnd->Update(s_impl->browse_info_mode, s_impl->curr_wnd_under_cursor);
+            assert(s_impl->browse_target);
+            s_impl->browse_info_wnd->Update(s_impl->browse_info_mode, s_impl->browse_target);
             RenderWindow(s_impl->browse_info_wnd.get());
         }
     }
@@ -932,6 +936,29 @@ void GUI::Render()
         }
     }
     Exit2DMode();
+}
+
+bool GUI::ProcessBrowseInfoImpl(Wnd* wnd)
+{
+    bool retval = true;
+    const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
+    int delta_t = Ticks() - s_impl->prev_wnd_under_cursor_time;
+    for (int i = static_cast<int>(browse_modes.size()) - 1; 0 <= i; --i) {
+        if (browse_modes[i].time < delta_t) {
+            if (browse_modes[i].wnd && browse_modes[i].wnd->WndHasBrowseInfo(wnd, i)) {
+                if (s_impl->browse_target != wnd || s_impl->browse_info_wnd != browse_modes[i].wnd || s_impl->browse_info_mode != i) {
+                    s_impl->browse_target = wnd;
+                    s_impl->browse_info_wnd = browse_modes[i].wnd;
+                    s_impl->browse_info_mode = i;
+                    s_impl->browse_info_wnd->MoveTo(s_impl->mouse_pos);
+                }
+            } else {
+                retval = false;
+            }
+            break;
+        }
+    }
+    return retval;
 }
 
 Wnd* GUI::ModalWindow() const

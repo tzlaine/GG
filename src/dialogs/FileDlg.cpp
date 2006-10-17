@@ -127,6 +127,7 @@ fs::path FileDlg::s_working_dir = fs::initial_path();
 
 FileDlg::FileDlg() :
     Wnd(),
+    m_select_directories(false),
     m_in_win32_drive_selection(false),
     m_curr_dir_text(0),
     m_files_list(0),
@@ -146,6 +147,7 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
     m_text_color(text_color),
     m_font(font),
     m_save(save),
+    m_select_directories(false),
     m_in_win32_drive_selection(false),
     m_save_str("Save"),
     m_open_str("Open"),
@@ -174,6 +176,11 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
 std::set<std::string> FileDlg::Result() const
 {
     return m_result;
+}
+
+bool FileDlg::SelectDirectories() const
+{
+    return m_select_directories;
 }
 
 const std::string& FileDlg::FilesString() const
@@ -249,9 +256,19 @@ void FileDlg::Render()
 void FileDlg::KeyPress(Key key, Uint32 key_mods)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER)
-        OkClicked();
+        OkHandler(false);
     else if (key == GGK_ESCAPE)
         CancelClicked();
+}
+
+void FileDlg::SelectDirectories(bool directories)
+{
+    if (!m_save) {
+        bool refresh_list = directories != m_select_directories;
+        m_select_directories = directories;
+        if (refresh_list)
+            UpdateList();
+    }
 }
 
 void FileDlg::SetFileFilters(const std::vector<std::pair<std::string, std::string> >& filters)
@@ -437,6 +454,11 @@ void FileDlg::ConnectSignals()
 
 void FileDlg::OkClicked()
 {
+    OkHandler(false);
+}
+
+void FileDlg::OkHandler(bool double_click)
+{
     bool results_valid = false;
 
     // parse contents of edit control to determine file names
@@ -462,7 +484,7 @@ void FileDlg::OkClicked()
                 return;
             }
             fs::path p = s_working_dir / fs::path(save_file, fs::native);
-            m_result.insert(p.native_directory_string());
+            m_result.insert(fs::is_directory(p) ? p.native_directory_string() : p.native_file_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
                 std::string msg_str = boost::str(boost::format(m_overwrite_prompt_str) % save_file);
@@ -474,7 +496,7 @@ void FileDlg::OkClicked()
             }
         }
     } else { // file open case
-        if (files.empty()) {
+        if (files.empty() || (m_select_directories && double_click)) {
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
             for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it) {
@@ -489,7 +511,8 @@ void FileDlg::OkClicked()
                 }
                 fs::path p = s_working_dir / fs::path(*it, fs::native);
                 if (fs::exists(p)) {
-                    if (fs::is_directory(p)) {
+                    bool p_is_directory = fs::is_directory(p);
+                    if (!m_select_directories && p_is_directory) {
                         std::string msg_str = boost::str(boost::format(m_filename_is_a_directory_str) % (*it));
                         boost::shared_ptr<ThreeButtonDlg> dlg(
                             style->NewThreeButtonDlg(300, 125, msg_str, m_font, m_color, m_border_color, m_color,
@@ -498,7 +521,7 @@ void FileDlg::OkClicked()
                         results_valid = false;
                         break;
                     }
-                    m_result.insert(p.native_directory_string());
+                    m_result.insert(p_is_directory ? p.native_directory_string() : p.native_file_string());
                     results_valid = true; // indicate validity only if at least one good file was found
                 } else {
                     std::string msg_str = boost::str(boost::format(m_file_does_not_exist_str) % (*it));
@@ -533,6 +556,11 @@ void FileDlg::FileSetChanged(const std::set<int>& files)
                 all_files += " ";
             all_files += filename;
         } else {
+            if (m_select_directories) {
+                if (!all_files.empty())
+                    all_files += " ";
+                all_files += filename.substr(1, filename.size() - 2);
+            }
             dir_selected = true;
         }
     }
@@ -548,7 +576,7 @@ void FileDlg::FileDoubleClicked(int n, ListBox::Row* row)
     std::string filename = (*row)[0]->WindowText();
     m_files_list->DeselectAll();
     m_files_list->SelectRow(n);
-    OkClicked();
+    OkHandler(true);
 }
 
 void FileDlg::FilesEditChanged(const std::string& str)
@@ -648,24 +676,26 @@ void FileDlg::UpdateList()
                     throw;
             }
         }
-        for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
-            try {
-                if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
-                    bool meets_filters = file_filters.empty();
-                    for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
-                        if (parse(it->leaf().c_str(), file_filters[i]).full)
-                            meets_filters = true;
+        if (!m_select_directories) {
+            for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
+                try {
+                    if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
+                        bool meets_filters = file_filters.empty();
+                        for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
+                            if (parse(it->leaf().c_str(), file_filters[i]).full)
+                                meets_filters = true;
+                        }
+                        if (meets_filters) {
+                            ListBox::Row* row = new ListBox::Row();
+                            row->push_back(it->leaf(), m_font, m_text_color);
+                            m_files_list->Insert(row);
+                        }
                     }
-                    if (meets_filters) {
-                        ListBox::Row* row = new ListBox::Row();
-                        row->push_back(it->leaf(), m_font, m_text_color);
-                        m_files_list->Insert(row);
-                    }
+                } catch (const fs::filesystem_error& e) {
+                    // ignore files for which permission is denied, and rethrow other exceptions
+                    if (e.error() != fs::security_error)
+                        throw;
                 }
-            } catch (const fs::filesystem_error& e) {
-                // ignore files for which permission is denied, and rethrow other exceptions
-                if (e.error() != fs::security_error)
-                    throw;
             }
         }
     } else {

@@ -74,6 +74,13 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>&
     SetLayoutBorderMargin(text_margin);
 }
 
+bool TextBoxBrowseInfoWnd::WndHasBrowseInfo(const Wnd* wnd, int mode) const
+{
+    const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
+    assert(0 <= mode && mode <= static_cast<int>(browse_modes.size()));
+    return !wnd->BrowseInfoText(mode).empty();
+}
+
 bool TextBoxBrowseInfoWnd::TextFromTarget() const
 {
     return m_text_from_target;

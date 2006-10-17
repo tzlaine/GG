@@ -48,12 +48,19 @@ class TextControl;
 class GG_API BrowseInfoWnd : public Wnd
 {
 public:
+    /** \name Accessors */ //@{
+    /** Returns true iff \a wnd's browse mode \a mode contains browse info that is usable by this BrowseInfoWnd.  This
+        method is used by GUI to determine whether a Wnd w has suitable browse info available; if not, w's ancestors may
+        instead be asked for browse info recursively. */
+    virtual bool WndHasBrowseInfo(const Wnd* wnd, int mode) const = 0;
+    //@}
+
     /** \name Mutators */ //@{
     virtual void Render() = 0;
 
     /** collects data from \a target that is needed by Render().  Note that the one datum that is always available for
         any Wnd is the text to display for \a mode, accessible through Wnd::BrowseInfoText() (though this may be the
-        empty string).  Other data that is provided by a Wnd subclass can be recovered by casting \a target to its
+        empty string).  Other data that are provided by a Wnd subclass can be recovered by casting \a target to its
         actual subclass type. */
     virtual void Update(int mode, const Wnd* target);
     //@}
@@ -85,6 +92,8 @@ public:
     //@}
 
     /** \name Accessors */ //@{
+    virtual bool                   WndHasBrowseInfo(const Wnd* wnd, int mode) const;
+
     bool                           TextFromTarget() const; ///< returns true iff the text to display will be read from the target wnd
     const std::string&             Text () const;          ///< returns the text currently set for display
     const boost::shared_ptr<Font>& GetFont() const;        ///< returns the Font used to display text

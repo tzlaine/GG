@@ -104,10 +104,11 @@ protected:
 
     /** \name Mutators */ //@{
     virtual bool  EventFilter(Wnd* w, const Event& event);
+
+    void MoveTabToPosn(); ///< moves the tab to the current logical position
     //@}
 
 private:
-    void  MoveTabToPosn();
     void  UpdatePosn();
 
     int                       m_posn;

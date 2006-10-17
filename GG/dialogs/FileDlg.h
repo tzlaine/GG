@@ -71,6 +71,9 @@ public:
     /** \name Accessors */ //@{
     std::set<std::string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
 
+    /** Returns true iff this FileDlg will select directories instead of files. */
+    bool SelectDirectories() const;
+
     const std::string& FilesString() const;                ///< returns the text label next to the files edit box to \a str Default: "File(s):"
     const std::string& FileTypesString() const;            ///< returns the text label next to the file types dropdown list to \a str Default: "Type(s):"
     const std::string& SaveString() const;                 ///< returns the text of the ok button in its "save" state to \a str Default: "Save"
@@ -90,6 +93,10 @@ public:
     /** \name Mutators */ //@{
     virtual void Render();
     virtual void KeyPress(Key key, Uint32 key_mods);
+
+    /** Set this to true if this FileDlg should select directories instead of files.  Note that this will only have an
+        effect in file-open mode. */
+    void SelectDirectories(bool directories);
 
     /** sets the allowed file types.  Each pair in the \a types parameter contains a description of the file type in its
         .first member, and wildcarded file types in its .second member.  For example, an entry might be ("Text Files
@@ -142,6 +149,7 @@ private:
     void Init(const std::string& directory);
     void ConnectSignals();
     void OkClicked();
+    void OkHandler(bool double_click);
     void CancelClicked();
     void FileSetChanged(const std::set<int>& files);
     void FileDoubleClicked(int n, ListBox::Row* row);
@@ -164,6 +172,7 @@ private:
                      m_file_filters;
     std::set<std::string>
                      m_result;
+    bool             m_select_directories;
     bool             m_in_win32_drive_selection;
 
     std::string      m_save_str;
@@ -197,6 +206,8 @@ private:
 
 } // namespace GG
 
+BOOST_CLASS_VERSION(GG::FileDlg, 1)
+
 // template implementations
 template <class Archive>
 void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
@@ -228,6 +239,9 @@ void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_cancel_button)
         & BOOST_SERIALIZATION_NVP(m_files_label)
         & BOOST_SERIALIZATION_NVP(m_file_types_label);
+
+    if (1 <= version)
+        ar & BOOST_SERIALIZATION_NVP(m_select_directories);
 
     if (Archive::is_loading::value)
         ConnectSignals();

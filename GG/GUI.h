@@ -280,10 +280,11 @@ protected:
     void SetDeltaT(int delta_t);           ///< sets the time between the most recent frame and the one before it, in ms
     //@}
 
-    virtual void   Run() = 0;                    // initializes GUI state, then executes main event handler/render loop (PollAndRender())
+    virtual void   Run() = 0;              ///< initializes GUI state, then executes main event handler/render loop (PollAndRender())
 
 private:
-    Wnd*           ModalWindow() const;          // returns the current modal window, if any
+    bool           ProcessBrowseInfoImpl(Wnd* wnd);
+    Wnd*           ModalWindow() const;    // returns the current modal window, if any
 
     // returns the window under \a pt, sending Mouse{Enter|Leave} or DragDrop{Enter|Leave} as appropriate
     Wnd*           CheckedGetWindowUnder(const Pt& pt, Uint32 key_mods);

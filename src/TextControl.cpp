@@ -331,12 +331,8 @@ void TextControl::ValidateFormat()
 
 void TextControl::AdjustMinimumSize()
 {
-    if (m_set_min_size) {
-        Pt new_min = TextLowerRight() - TextUpperLeft();
-        Pt curent_min = MinSize();
-        SetMinSize(Pt(std::max(new_min.x, curent_min.x),
-                      std::max(new_min.y, curent_min.y)));
-    }
+    if (m_set_min_size)
+        SetMinSize(m_text_lr - m_text_ul);
 }
 
 void TextControl::RecomputeTextBounds()

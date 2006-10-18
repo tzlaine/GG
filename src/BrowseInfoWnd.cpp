@@ -134,6 +134,7 @@ void TextBoxBrowseInfoWnd::SetText(const std::string& str)
         Hide();
     else
         Show();
+    SetMinSize(Pt(1, 1));
     Resize(Pt(1, 1));
 }
 
@@ -145,10 +146,8 @@ void TextBoxBrowseInfoWnd::Render()
 
 void TextBoxBrowseInfoWnd::Update(int mode, const Wnd* target)
 {
-    if (m_text_from_target) {
-        std::string text = target->BrowseInfoText(mode);
-        SetText(text);
-    }
+    if (m_text_from_target)
+        SetText(target->BrowseInfoText(mode));
 }
 
 void TextBoxBrowseInfoWnd::SetTextFromTarget(bool b)

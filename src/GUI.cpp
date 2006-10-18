@@ -950,7 +950,7 @@ bool GUI::ProcessBrowseInfoImpl(Wnd* wnd)
                     s_impl->browse_target = wnd;
                     s_impl->browse_info_wnd = browse_modes[i].wnd;
                     s_impl->browse_info_mode = i;
-                    s_impl->browse_info_wnd->MoveTo(s_impl->mouse_pos);
+                    s_impl->browse_info_wnd->SetCursorPosition(s_impl->mouse_pos);
                 }
             } else {
                 retval = false;

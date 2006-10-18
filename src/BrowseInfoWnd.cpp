@@ -45,6 +45,25 @@ BrowseInfoWnd::BrowseInfoWnd(int x, int y, int w, int h) :
 {}
 
 void BrowseInfoWnd::Update(int mode, const Wnd* target)
+{
+    UpdateImpl(mode, target);
+    MoveTo(m_cursor_pos - Pt(Width() / 2, Height()));
+    Pt ul = UpperLeft(), lr = LowerRight();
+    if (GUI::GetGUI()->AppWidth() <= lr.x)
+        ul.x += (lr.x - GUI::GetGUI()->AppWidth());
+    else if (ul.x < 0)
+        ul.x = 0;
+    if (GUI::GetGUI()->AppHeight() <= lr.y)
+        ul.y += (lr.y - GUI::GetGUI()->AppHeight());
+    else if (ul.y < 0)
+        ul.y = 0;
+    MoveTo(ul);
+}
+
+void BrowseInfoWnd::SetCursorPosition(const Pt& cursor_pos)
+{ m_cursor_pos = cursor_pos; }
+
+void BrowseInfoWnd::UpdateImpl(int mode, const Wnd* target)
 {}
 
 
@@ -55,20 +74,21 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd() :
     BrowseInfoWnd(),
     m_text_from_target(true),
     m_border_width(1),
+    m_preferred_width(1),
     m_text_control(0)
 {}
 
 TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
                                            Uint32 text_fmt/* = TF_LEFT | TF_WORDBREAK*/, int border_width/* = 2*/, int text_margin/* = 4*/) :
-    BrowseInfoWnd(0, 0, w, 1),
+    BrowseInfoWnd(0, 0, w, 100),
     m_text_from_target(true),
     m_font(font),
     m_color(color),
     m_border_color(border_color),
     m_border_width(border_width),
+    m_preferred_width(w),
     m_text_control(GetStyleFactory()->NewTextControl(0, 0, w, 1, "", m_font, text_color, text_fmt))
 {
-    m_text_control->SetMinSize(true);
     AttachChild(m_text_control);
     GridLayout();
     SetLayoutBorderMargin(text_margin);
@@ -129,25 +149,20 @@ int TextBoxBrowseInfoWnd::TextMargin() const
 void TextBoxBrowseInfoWnd::SetText(const std::string& str)
 {
     m_text = str;
+    Resize(Pt(m_preferred_width, 1));
     m_text_control->SetText(str);
     if (str.empty())
         Hide();
     else
         Show();
-    SetMinSize(Pt(1, 1));
     Resize(Pt(1, 1));
+    Resize(Pt(std::min(m_preferred_width, GetLayout()->MinUsableSize().x), GetLayout()->MinUsableSize().y));
 }
 
 void TextBoxBrowseInfoWnd::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_color, m_border_color, m_border_width);
-}
-
-void TextBoxBrowseInfoWnd::Update(int mode, const Wnd* target)
-{
-    if (m_text_from_target)
-        SetText(target->BrowseInfoText(mode));
 }
 
 void TextBoxBrowseInfoWnd::SetTextFromTarget(bool b)
@@ -188,4 +203,10 @@ void TextBoxBrowseInfoWnd::SetBorderWidth(int border_width)
 void TextBoxBrowseInfoWnd::SetTextMargin(int text_margin)
 {
     SetLayoutBorderMargin(text_margin);
+}
+
+void TextBoxBrowseInfoWnd::UpdateImpl(int mode, const Wnd* target)
+{
+    if (m_text_from_target)
+        SetText(target->BrowseInfoText(mode));
 }

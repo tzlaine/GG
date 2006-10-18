@@ -58,11 +58,14 @@ public:
     /** \name Mutators */ //@{
     virtual void Render() = 0;
 
-    /** collects data from \a target that is needed by Render().  Note that the one datum that is always available for
+    /** Collects data from \a target that is needed by Render().  Note that the one datum that is always available for
         any Wnd is the text to display for \a mode, accessible through Wnd::BrowseInfoText() (though this may be the
         empty string).  Other data that are provided by a Wnd subclass can be recovered by casting \a target to its
         actual subclass type. */
-    virtual void Update(int mode, const Wnd* target);
+    void Update(int mode, const Wnd* target);
+
+    /** Sets the current cursor position to the one given. */
+    void SetCursorPosition(const Pt& cursor_pos);
     //@}
 
 protected:
@@ -72,6 +75,10 @@ protected:
     //@}
 
 private:
+    Pt m_cursor_pos;
+
+    virtual void UpdateImpl(int mode, const Wnd* target);
+
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
@@ -108,7 +115,6 @@ public:
     /** \name Mutators */ //@{
     void         SetText (const std::string& str);
     virtual void Render();
-    virtual void Update(int mode, const Wnd* target);
 
     void SetTextFromTarget(bool b);                    ///< sets the text display mode to static (\a b == true) or dynamic (read from the target Wnd, \a b == false)
     void SetFont(const boost::shared_ptr<Font>& font); ///< sets the Font used to display text
@@ -126,11 +132,14 @@ protected:
     //@}
 
 private:
+    virtual void UpdateImpl(int mode, const Wnd* target);
+
     bool                    m_text_from_target;
     boost::shared_ptr<Font> m_font;
     Clr                     m_color;
     Clr                     m_border_color;
     int                     m_border_width;
+    int                     m_preferred_width;
     TextControl*            m_text_control;
 
     friend class boost::serialization::access;
@@ -141,12 +150,16 @@ private:
 } // namespace GG
 
 BOOST_IS_ABSTRACT(GG::BrowseInfoWnd);
+BOOST_CLASS_VERSION(GG::BrowseInfoWnd, 1);
+BOOST_CLASS_VERSION(GG::TextBoxBrowseInfoWnd, 1);
 
 // template implementations
 template <class Archive>
 void GG::BrowseInfoWnd::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd);
+    if (1 <= version)
+        ar & BOOST_SERIALIZATION_NVP(m_cursor_pos);
 }
 
 template <class Archive>
@@ -159,6 +172,8 @@ void GG::TextBoxBrowseInfoWnd::serialize(Archive& ar, const unsigned int version
         & BOOST_SERIALIZATION_NVP(m_border_color)
         & BOOST_SERIALIZATION_NVP(m_border_width)
         & BOOST_SERIALIZATION_NVP(m_text_control);
+    if (1 <= version)
+        ar & BOOST_SERIALIZATION_NVP(m_preferred_width);
 }
 
 #endif // _GG_BrowseInfoWnd_h_

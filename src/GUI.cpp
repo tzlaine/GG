@@ -32,6 +32,8 @@
 #include <GG/StyleFactory.h>
 #include <GG/ZList.h>
 
+#include <boost/format.hpp>
+
 #include <cassert>
 #include <fstream>
 #include <list>
@@ -206,9 +208,7 @@ double GUI::FPS() const
 
 std::string GUI::FPSString() const
 {
-    char buf[128];
-    sprintf(buf, "%.2f frames per second", s_impl->FPS);
-    return std::string(buf);
+    return boost::io::str(boost::format("%.2f frames per second") % s_impl->FPS);
 }
 
 double GUI::MaxFPS() const

@@ -430,8 +430,7 @@ void MultiEdit::SizeMove(const Pt& ul, const Pt& lr)
     if (m_style & INTEGRAL_HEIGHT)
         lower_right.y -= ((lr.y - ul.y) - (2 * PIXEL_MARGIN)) % GetFont()->Lineskip();
     Edit::SizeMove(ul, lower_right);
-    AdjustScrolls();
-    AdjustView();
+    SetText(WindowText());
 }
 
 void MultiEdit::SelectAll()

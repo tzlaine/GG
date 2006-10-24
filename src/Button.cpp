@@ -673,10 +673,12 @@ void RadioButtonGroup::InsertButton(int index, StateButton* bn)
     const int Y_STRETCH = (m_expand_buttons && m_expand_buttons_proportionally) ? bn_sz.y : 1;
     if (m_button_slots.empty()) {
         layout->Add(bn, 0, 0);
-        if (m_orientation == VERTICAL)
-            layout->SetRowStretch(0, Y_STRETCH);
-        else
-            layout->SetColumnStretch(0, X_STRETCH);
+        if (m_expand_buttons) {
+            if (m_orientation == VERTICAL)
+                layout->SetRowStretch(0, Y_STRETCH);
+            else
+                layout->SetColumnStretch(0, X_STRETCH);
+        }
     } else {
         if (m_orientation == VERTICAL) {
             layout->ResizeLayout(layout->Rows() + CELLS_PER_BUTTON, 1);

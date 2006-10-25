@@ -516,7 +516,7 @@ void ListBox::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
                 try {
                     Insert(row, insertion_row, true);
                 } catch (const DontAcceptDrop&) {
-                    wnds.erase(it);
+                    wnds.erase(tmp_it);
                 }
             }
         }

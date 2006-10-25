@@ -940,6 +940,7 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
 
     // record the width of the space character
     std::map<FT_ULong, Glyph>::const_iterator glyph_it = m_glyphs.find(CharToFT_ULong(' '));
+    assert(glyph_it != m_glyphs.end());
     m_space_width = glyph_it->second.advance;
 }
 

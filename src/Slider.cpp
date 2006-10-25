@@ -36,6 +36,7 @@ Slider::Slider() :
     m_posn(0),
     m_range_min(0),
     m_range_max(99),
+    m_page_sz(-1),
     m_orientation(VERTICAL),
     m_line_width(5),
     m_tab_width(5),
@@ -50,6 +51,7 @@ Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orienta
     m_posn(min),
     m_range_min(min),
     m_range_max(max),
+    m_page_sz(-1),
     m_orientation(orientation),
     m_line_width(line_width),
     m_tab_width(tab_width),
@@ -79,7 +81,12 @@ int Slider::Posn() const
 
 std::pair<int, int> Slider::SliderRange() const
 {
-    return std::pair<int,int>(m_range_min, m_range_max);
+    return std::pair<int, int>(m_range_min, m_range_max);
+}
+
+int Slider::PageSize() const
+{
+    return 0 <= m_page_sz ? m_page_sz : (m_range_max - m_range_min) / 10;
 }
 
 Orientation Slider::GetOrientation() const
@@ -141,11 +148,9 @@ bool Slider::EventFilter(Wnd* w, const Event& event)
                 Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
                 if (m_orientation == VERTICAL) {
                     new_ul.x = m_tab->RelativeUpperLeft().x;
-                    new_ul.y = std::max(0,
-                                        std::min(new_ul.y, ClientHeight() - m_tab->Height()));
+                    new_ul.y = std::max(0, std::min(new_ul.y, ClientHeight() - m_tab->Height()));
                 } else {
-                    new_ul.x = std::max(0,
-                                        std::min(new_ul.x, ClientWidth() - m_tab->Width()));
+                    new_ul.x = std::max(0, std::min(new_ul.x, ClientWidth() - m_tab->Width()));
                     new_ul.y = m_tab->RelativeUpperLeft().y;
                 }
                 m_tab->MoveTo(new_ul);
@@ -166,6 +171,11 @@ bool Slider::EventFilter(Wnd* w, const Event& event)
     return false;
 }
 
+void Slider::LClick(const Pt& pt, Uint32 keys)
+{
+    SlideTo(m_posn + (m_posn < PtToPosn(pt) ? PageSize() : -PageSize()));
+}
+
 void Slider::KeyPress(Key key, Uint32 key_mods)
 {
     if (!Disabled()) {
@@ -178,19 +188,19 @@ void Slider::KeyPress(Key key, Uint32 key_mods)
             break;
         case GGK_UP:
             if (m_orientation != HORIZONTAL)
-                SlideTo(m_posn + ((m_range_max - m_range_min) > 0 ? 1 : -1));
+                SlideTo(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1));
             break;
         case GGK_RIGHT:
             if (m_orientation != VERTICAL)
-                SlideTo(m_posn + ((m_range_max - m_range_min) > 0 ? 1 : -1));
+                SlideTo(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1));
             break;
         case GGK_DOWN:
             if (m_orientation != HORIZONTAL)
-                SlideTo(m_posn - ((m_range_max - m_range_min) > 0 ? 1 : -1));
+                SlideTo(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1));
             break;
         case GGK_LEFT:
             if (m_orientation != VERTICAL)
-                SlideTo(m_posn - ((m_range_max - m_range_min) > 0 ? 1 : -1));
+                SlideTo(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1));
             break;
         case GGK_PLUS:
         case GGK_KP_PLUS:
@@ -257,9 +267,9 @@ void Slider::SetMin(int min)
 void Slider::SlideTo(int p)
 {
     int old_posn = m_posn;
-    if ((m_range_max - m_range_min) > 0 ? p < m_range_min : p > m_range_min)
+    if (0 < (m_range_max - m_range_min) ? p < m_range_min : p > m_range_min)
         m_posn = m_range_min;
-    else if ((m_range_max - m_range_min) > 0 ? m_range_max < p : m_range_max > p)
+    else if (0 < (m_range_max - m_range_min) ? m_range_max < p : m_range_max > p)
         m_posn = m_range_max;
     else
         m_posn = p;
@@ -268,6 +278,11 @@ void Slider::SlideTo(int p)
         SlidSignal(m_posn, m_range_min, m_range_max);
         SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
     }
+}
+
+void Slider::SetPageSize(int size)
+{
+    m_page_sz = size;
 }
 
 void Slider::SetLineStyle(SliderLineStyle style)
@@ -294,6 +309,25 @@ Button* Slider::Tab() const
     return m_tab;
 }
 
+int Slider::PtToPosn(const Pt& pt) const
+{
+    Pt ul = UpperLeft(), lr = LowerRight();
+    int line_min = 0;
+    int line_max = 0;
+    int pixel_nearest_to_pt_on_line = 0;
+    if (m_orientation == VERTICAL) {
+        line_min = m_tab->Height() / 2;
+        line_max = Height() - (m_tab->Height() - m_tab->Height() / 2);
+        pixel_nearest_to_pt_on_line = std::max(line_min, std::min(pt.y - lr.y, line_max));
+    } else {
+        line_min = m_tab->Width() / 2;
+        line_max = Width() - (m_tab->Width() - m_tab->Width() / 2);
+        pixel_nearest_to_pt_on_line = std::max(line_min, std::min(pt.x - ul.x, line_max));
+    }
+    double fractional_distance = static_cast<double>(pixel_nearest_to_pt_on_line) / (line_max - line_min);
+    return m_range_min + static_cast<int>((m_range_max - m_range_min) * fractional_distance);
+}
+
 void Slider::MoveTabToPosn()
 {
     assert(m_range_min <= m_posn && m_posn <= m_range_max ||
@@ -311,11 +345,10 @@ void Slider::MoveTabToPosn()
 void Slider::UpdatePosn()
 {
     int old_posn = m_posn;
-    int tab_width = m_orientation == VERTICAL ? m_tab->Height() : m_tab->Width();
-    int line_length = (m_orientation == VERTICAL ? Height() : Width()) - tab_width;
+    int line_length = m_orientation == VERTICAL ? Height() - m_tab->Height() : Width() - m_tab->Width();
     int tab_posn = (m_orientation == VERTICAL ? Height() - m_tab->RelativeLowerRight().y : m_tab->RelativeUpperLeft().x);
     double fractional_distance = static_cast<double>(tab_posn) / line_length;
-    m_posn = static_cast<int>((m_range_max - m_range_min) * fractional_distance) + m_range_min;
+    m_posn = m_range_min + static_cast<int>((m_range_max - m_range_min) * fractional_distance);
     if (m_posn != old_posn)
         SlidSignal(m_posn, m_range_min, m_range_max);
 }

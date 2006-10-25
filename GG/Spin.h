@@ -158,6 +158,7 @@ public:
     /** \name Mutators */ //@{
     virtual void Render();
     virtual void KeyPress(Key key, Uint32 key_mods);
+    virtual void MouseWheel(const Pt& pt, int move, Uint32 keys);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
 
@@ -369,6 +370,17 @@ void Spin<T>::KeyPress(Key key, Uint32 key_mods)
         break;
     default:
         break;
+    }
+}
+
+template<class T>
+void Spin<T>::MouseWheel(const Pt& pt, int move, Uint32 keys)
+{
+    for (int i = 0; i < move; ++i) {
+        Incr();
+    }
+    for (int i = 0; i < -move; ++i) {
+        Decr();
     }
 }
 

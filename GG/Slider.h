@@ -64,6 +64,11 @@ public:
 
     int                  Posn() const;           ///< returns the current tab position
     std::pair<int, int>  SliderRange() const;    ///< returns the defined possible range of control
+
+    /** returns the current page size, or the amount that the slider increments/decrements when a click occurs off of
+        the tab.  If not set, this defaults to 10% of the slider's range. */
+    int                  PageSize() const;
+
     Orientation          GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
     int                  TabWidth() const;       ///< returns the width of the slider's tab, in pixels
     int                  LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
@@ -75,18 +80,21 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
+    virtual void   LClick(const Pt& pt, Uint32 keys);
     virtual void   KeyPress(Key key, Uint32 key_mods);
-
-    virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< sizes the control, then resizes the tab as needed
-
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
     virtual void   Disable(bool b = true);
     virtual void   SetColor(Clr c);
 
     void           SizeSlider(int min, int max); ///< sets the logical range of the control; \a min must not equal \a max
     void           SetMax(int max);              ///< sets the maximum value of the control
     void           SetMin(int min);              ///< sets the minimum value of the control
+    void           SlideTo(int p);               ///< slides the control to a certain spot
 
-    void           SlideTo(int p); ///< slides the control to a certain spot
+    /** sets the size of a "page", or the amount that the slider increments/decrements when a click occurs off of the
+        tab.  If not set, this defaults to 10% of the slider's range.  To disable clicks off the tab, set the page size
+        to 0. */
+    void           SetPageSize(int size);
 
     void           SetLineStyle(SliderLineStyle style); ///< returns the style of line used to render the control
 
@@ -99,28 +107,27 @@ protected:
     //@}
 
     /** \name Accessors */ //@{
-    Button* Tab() const; ///< returns a pointer to the Button used as this control's sliding tab
+    Button* Tab() const;                  ///< returns a pointer to the Button used as this control's sliding tab
+    int     PtToPosn(const Pt& pt) const; ///< maps an arbitrary screen point to its nearest logical slider position
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool  EventFilter(Wnd* w, const Event& event);
+    virtual bool EventFilter(Wnd* w, const Event& event);
 
     void MoveTabToPosn(); ///< moves the tab to the current logical position
     //@}
 
 private:
-    void  UpdatePosn();
+    void UpdatePosn();
 
     int                       m_posn;
     int                       m_range_min;
     int                       m_range_max;
-
+    int                       m_page_sz;
     Orientation               m_orientation;
-
     int                       m_line_width;
     int                       m_tab_width;
     SliderLineStyle           m_line_style;
-
     int                       m_tab_drag_offset;
     Button*                   m_tab;
 
@@ -130,6 +137,8 @@ private:
 };
 
 } // namespace GG
+
+BOOST_CLASS_VERSION(GG::Slider, 1)
 
 // template implementations
 template <class Archive>
@@ -145,6 +154,9 @@ void GG::Slider::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_line_style)
         & BOOST_SERIALIZATION_NVP(m_tab_drag_offset)
         & BOOST_SERIALIZATION_NVP(m_tab);
+
+    if (1 <= version)
+        ar & m_page_sz;
 }
 
 #endif // _GG_Slider_h_

@@ -105,7 +105,7 @@ public:
     void           SetMax(int max);         ///< sets the maximum value of the scroll
     void           SetMin(int min);         ///< sets the minimum value of the scroll
     void           SetLineSize(int line);   ///< sets the size of a line in the scroll. This is the number of logical units the tab moves when either of the up or down buttons is pressed.
-    void           SetPageSize(int page);   ///< sets the maximum value of the scroll. This is the number of logical units the tab moves when either of the page-up or page-down areas is clicked.
+    void           SetPageSize(int page);   ///< sets the size of a line page in the scroll. This is the number of logical units the tab moves when either of the page-up or page-down areas is clicked.
 
     void           ScrollTo(int p);  ///< scrolls the control to a certain spot
     void           ScrollLineIncr(); ///< scrolls the control down (or right) by a line

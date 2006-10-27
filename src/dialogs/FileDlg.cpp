@@ -484,7 +484,7 @@ void FileDlg::OkHandler(bool double_click)
                 return;
             }
             fs::path p = s_working_dir / fs::path(save_file, fs::native);
-            m_result.insert(fs::is_directory(p) ? p.native_directory_string() : p.native_file_string());
+            m_result.insert(m_select_directories ? p.native_directory_string() : p.native_file_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
                 std::string msg_str = boost::str(boost::format(m_overwrite_prompt_str) % save_file);

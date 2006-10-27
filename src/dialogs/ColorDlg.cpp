@@ -197,7 +197,7 @@ void HueSaturationPicker::Render()
     glPopMatrix();
     Pt color_position(static_cast<int>(ul.x + size.x * m_hue),
                       static_cast<int>(ul.y + size.y * (1.0 - m_saturation)));
-    glColor4ubv(CLR_SHADOW.v);
+    glColor(CLR_SHADOW);
     glBegin(GL_LINES);
     glVertex2i(color_position.x, ul.y);
     glVertex2i(color_position.x, lr.y);
@@ -265,20 +265,20 @@ void ValuePicker::Render()
     int h = Height();
     glDisable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
-    glColor4ubv(Convert(HSVClr(m_hue, m_saturation, 1.0)).v);
+    glColor(Convert(HSVClr(m_hue, m_saturation, 1.0)));
     glVertex2i(eff_lr.x, eff_ul.y);
     glVertex2i(eff_ul.x, eff_ul.y);
-    glColor4ubv(Convert(HSVClr(m_hue, m_saturation, 0.0)).v);
+    glColor(Convert(HSVClr(m_hue, m_saturation, 0.0)));
     glVertex2i(eff_ul.x, eff_lr.y);
     glVertex2i(eff_lr.x, eff_lr.y);
     glEnd();
     int color_position = static_cast<int>(eff_ul.y + h * (1.0 - m_value));
-    glColor4ubv(CLR_SHADOW.v);
+    glColor(CLR_SHADOW);
     glBegin(GL_LINES);
     glVertex2i(eff_ul.x, color_position);
     glVertex2i(eff_lr.x, color_position);
     glEnd();
-    glColor4ubv(m_arrow_color.v);
+    glColor(m_arrow_color);
     glBegin(GL_TRIANGLES);
     glVertex2i(eff_lr.x + 4, color_position - 3);
     glVertex2i(eff_lr.x + 1, color_position);
@@ -396,7 +396,7 @@ void ColorDlg::ColorDisplay::Render()
             int x0 = x - SQUARE_SIZE;
             if (x0 < ul.x)
                 x0 = ul.x;
-            glColor4ubv(((i + j) % 2) ? CLR_WHITE.v : CLR_BLACK.v);
+            glColor(((i + j) % 2) ? CLR_WHITE : CLR_BLACK);
             glVertex2i(x, y0);
             glVertex2i(x0, y0);
             glVertex2i(x0, y);
@@ -407,11 +407,11 @@ void ColorDlg::ColorDisplay::Render()
     Clr full_alpha_color = Color();
     full_alpha_color.a = 255;
     glBegin(GL_TRIANGLES);
-    glColor4ubv(full_alpha_color.v);
+    glColor(full_alpha_color);
     glVertex2i(lr.x, ul.y);
     glVertex2i(ul.x, ul.y);
     glVertex2i(ul.x, lr.y);
-    glColor4ubv(Color().v);
+    glColor(Color());
     glVertex2i(ul.x, lr.y);
     glVertex2i(lr.x, lr.y);
     glVertex2i(lr.x, ul.y);

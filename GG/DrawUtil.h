@@ -35,6 +35,9 @@
 
 namespace GG {
 
+    /** Calls the appropriate version of glColor*() with \a clr.*/
+    GG_API void glColor(Clr clr);
+
     /** Returns the lightened version of color clr.  LightColor leaves the alpha channel unchanged, and multiplies the
         other channels by a some factor.  (The factor is defined within LightColor().)*/
     GG_API Clr LightColor(Clr clr);

@@ -553,7 +553,7 @@ void PopupMenu::Render()
                 Clr clr = (m_caret[i] == static_cast<int>(j)) ?
                           (menu.next_level[j].disabled ? DisabledColor(m_sel_text_color) : m_sel_text_color) :
                                   (menu.next_level[j].disabled ? DisabledColor(m_text_color) : m_text_color);
-                glColor3ubv(clr.v);
+                glColor3ub(clr.r, clr.g, clr.b);
                 m_font->RenderText(line_rect.ul.x, line_rect.ul.y, line_rect.lr.x, line_rect.lr.y, menu.next_level[j].label, fmt);
                 if (menu.next_level[j].checked) {
                     FlatCheck(line_rect.lr.x - CHECK_WIDTH - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN,

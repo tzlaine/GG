@@ -180,7 +180,7 @@ void DynamicGraphic::Render()
 
         // render current frame
         Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-        glColor4ubv(color_to_use.v);
+        glColor(color_to_use);
 
         int cols = m_textures[m_curr_texture].texture->DefaultWidth() / (m_frame_width + m_margin);
         int x = (m_curr_subtexture % cols) * (m_frame_width + m_margin) + m_margin;

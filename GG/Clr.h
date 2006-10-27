@@ -44,24 +44,15 @@ namespace GG {
 struct GG_API Clr
 {
     /** \name Structors */ //@{
-    Clr();                                                    ///< default ctor
-    Clr(Uint32 clr);                                          ///< ctor that constructs a Clr from a 32-bit value packed with the 4 color channels
-    explicit Clr(int _r, int _g, int _b, int _a);             ///< ctor that constructs a Clr from four Uint8s that represent the color channels
-    explicit Clr(double _r, double _g, double _b, double _a); ///< ctor that constructs a Clr from four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
-    Clr(Uint8 arr[]);                                         ///< ctor that constructs a Clr from an array of at least four Uint8s that represent the color channels
-    Clr(double arr[]);                                        ///< ctor that constructs a Clr from an array of at least four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
+    Clr();                                           ///< default ctor
+    Clr(int _r, int _g, int _b, int _a);             ///< ctor that constructs a Clr from four Uint8s that represent the color channels
+    Clr(double _r, double _g, double _b, double _a); ///< ctor that constructs a Clr from four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
     //@}
 
-    union {
-        Uint32 i;     ///< represents Clr as a packed RGBA color
-        Uint8  v[4];  ///< represents Clr as a vector of RGBA components
-        struct {
-            Uint8 r;   ///< the red channel
-            Uint8 g;   ///< the green channel
-            Uint8 b;   ///< the blue channel
-            Uint8 a;   ///< the alpha channel
-        };
-    };
+    Uint8 r;   ///< the red channel
+    Uint8 g;   ///< the green channel
+    Uint8 b;   ///< the blue channel
+    Uint8 a;   ///< the alpha channel
 
 private:
     friend class boost::serialization::access;
@@ -70,6 +61,7 @@ private:
 };
 
 GG_API bool operator==(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are identical
+GG_API bool operator!=(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are different
 
 // some useful color constants
 extern GG_API const Clr CLR_ZERO;

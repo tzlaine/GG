@@ -132,14 +132,14 @@ void Edit::Render()
 
         // draw text
         int text_x_pos = ul.x + PIXEL_MARGIN;
-        glColor4ubv(text_color_to_use.v);
+        glColor(text_color_to_use);
         text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(idx0, idx1 - idx0));
-        glColor4ubv(sel_text_color_to_use.v);
+        glColor(sel_text_color_to_use);
         text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(idx1, idx2 - idx1));
-        glColor4ubv(text_color_to_use.v);
+        glColor(text_color_to_use);
         text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(idx2, idx3 - idx2));
     } else { // no selected text
-        glColor4ubv(text_color_to_use.v);
+        glColor(text_color_to_use);
         GetFont()->RenderText(client_ul.x, text_y_pos, WindowText().substr(m_first_char_shown, last_visible_char - m_first_char_shown));
         if (GUI::GetGUI()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
             int caret_x = ScreenPosOfChar(m_cursor_pos.second);

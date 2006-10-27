@@ -72,7 +72,7 @@ Uint32 StaticGraphic::Style() const
 void StaticGraphic::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-    glColor4ubv(color_to_use.v);
+    glColor(color_to_use);
 
     Pt ul = UpperLeft(), lr = LowerRight();
     Pt window_sz(lr - ul);

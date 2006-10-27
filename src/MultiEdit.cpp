@@ -153,7 +153,7 @@ void MultiEdit::Render()
                 int idx2 = high_cursor_pos.first == row ? std::min(high_cursor_pos.second, idx3) : idx3;
 
                 // draw text
-                glColor4ubv(text_color_to_use.v);
+                glColor(text_color_to_use);
                 Pt text_lr((idx0 != idx1 ? initial_text_x_pos + lines[row].char_data[idx1 - 1].extent : text_pos.x), text_pos.y + GetFont()->Height());
                 GetFont()->RenderText(text_pos, text_lr, WindowText(), text_format, lines, state, row, idx0, row + 1, idx1);
                 text_pos.x = text_lr.x;
@@ -162,16 +162,16 @@ void MultiEdit::Render()
                 text_lr.x = idx1 != idx2 ? initial_text_x_pos + lines[row].char_data[idx2 - 1].extent : text_lr.x;
                 FlatRectangle(text_pos.x, text_pos.y, text_lr.x, text_pos.y + GetFont()->Lineskip(), hilite_color_to_use, CLR_ZERO, 0);
                 // draw hilited text
-                glColor4ubv(sel_text_color_to_use.v);
+                glColor(sel_text_color_to_use);
                 GetFont()->RenderText(text_pos, text_lr, WindowText(), text_format, lines, state, row, idx1, row + 1, idx2);
                 text_pos.x = text_lr.x;
 
-                glColor4ubv(text_color_to_use.v);
+                glColor(text_color_to_use);
                 text_lr.x = idx2 != idx3 ? initial_text_x_pos + lines[row].char_data[idx3 - 1].extent : text_lr.x;
                 GetFont()->RenderText(text_pos, text_lr, WindowText(), text_format, lines, state, row, idx2, row + 1, idx3);
             } else { // just draw normal text on this line
                 Pt lr = text_pos + Pt(lines[row].char_data.back().extent, GetFont()->Height());
-                glColor4ubv(text_color_to_use.v);
+                glColor(text_color_to_use);
                 GetFont()->RenderText(text_pos, text_pos + Pt(lines[row].char_data.back().extent, GetFont()->Height()), WindowText(), text_format, lines, state, row, 0, row + 1, lines[row].char_data.size());
             }
         }

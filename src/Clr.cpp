@@ -42,14 +42,11 @@ extern const Clr GG::CLR_MAGENTA(255, 0, 255, 255);
 // GG::Clr
 ////////////////////////////////////////////////
 Clr::Clr() :
-    i(0)
-{
-}
-
-Clr::Clr(Uint32 clr) :
-    i(clr)
-{
-}
+    r(0),
+    g(0),
+    b(0),
+    a(0)
+{}
 
 Clr::Clr(int _r, int _g, int _b, int _a)
 {
@@ -67,26 +64,11 @@ Clr::Clr(double _r, double _g, double _b, double _a)
     a = Uint8(_a * 255);
 }
 
-Clr::Clr(Uint8 arr[])
-{
-    r = arr[0];
-    g = arr[1];
-    b = arr[2];
-    a = arr[3];
-}
-
-Clr::Clr(double arr[])
-{
-    r = Uint8(arr[0] * 255);
-    g = Uint8(arr[1] * 255);
-    b = Uint8(arr[2] * 255);
-    a = Uint8(arr[3] * 255);
-}
-
 ////////////////////////////////////////////////
 // free function(s)
 ////////////////////////////////////////////////
 bool GG::operator==(const Clr& rhs, const Clr& lhs) 
-{
-    return rhs.i == lhs.i;
-}
+{ return rhs.r == lhs.r && rhs.g == lhs.g && rhs.b == lhs.b && rhs.a == lhs.a; }
+
+bool GG::operator!=(const Clr& rhs, const Clr& lhs) 
+{ return !(rhs == lhs); }

@@ -179,7 +179,7 @@ void Button::DefineAttributes(WndEditor* editor)
 void Button::RenderPressed()
 {
     if (!m_pressed_graphic.Empty()) {
-        glColor4ubv(Disabled() ? DisabledColor(m_color).v : m_color.v);
+        glColor(Disabled() ? DisabledColor(m_color) : m_color);
         m_pressed_graphic.OrthoBlit(UpperLeft(), LowerRight(), false);
     } else {
         RenderDefault();
@@ -192,7 +192,7 @@ void Button::RenderPressed()
 void Button::RenderUnpressed()
 {
     if (!m_unpressed_graphic.Empty()) {
-        glColor4ubv(Disabled() ? DisabledColor(m_color).v : m_color.v);
+        glColor(Disabled() ? DisabledColor(m_color) : m_color);
         m_unpressed_graphic.OrthoBlit(UpperLeft(), LowerRight(), false);
     } else {
         RenderDefault();
@@ -211,7 +211,7 @@ void Button::RenderUnpressed()
 void Button::RenderRollover()
 {
     if (!m_rollover_graphic.Empty()) {
-        glColor4ubv(Disabled() ? DisabledColor(m_color).v : m_color.v);
+        glColor(Disabled() ? DisabledColor(m_color) : m_color);
         m_rollover_graphic.OrthoBlit(UpperLeft(), LowerRight(), false);
     } else {
         RenderDefault();

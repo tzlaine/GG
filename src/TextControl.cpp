@@ -162,7 +162,7 @@ void TextControl::Render()
     if (m_dirty_load)
         SetText(WindowText());
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
-    glColor4ubv(clr_to_use.v);
+    glColor(clr_to_use);
     if (m_font) {
         if (m_clip_text)
             BeginClipping();

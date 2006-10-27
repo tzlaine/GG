@@ -55,22 +55,22 @@ namespace { // file-scope constants and functions
                           inner_x2, inner_y2, x2, y2, inner_x2, inner_y1, x2, y1};
 
         // draw beveled edges
-        if (bevel_thick && (border_color1.i != CLR_ZERO.i || border_color2.i != CLR_ZERO.i)) {
+        if (bevel_thick && (border_color1 != CLR_ZERO || border_color2 != CLR_ZERO)) {
             glVertexPointer(2, GL_INT, 0, vertices);
-            glColor4ubv(border_color1.v);
-            if (border_color1.i == border_color2.i) {
+            glColor(border_color1);
+            if (border_color1 == border_color2) {
                 glDrawArrays(GL_QUAD_STRIP, 0, 10);
             } else {
                 glDrawArrays(GL_QUAD_STRIP, 0, 6);
-                glColor4ubv(border_color2.v);
+                glColor(border_color2);
                 glDrawArrays(GL_QUAD_STRIP, 4, 6);
             }
         }
 
         // draw interior of rectangle
-        if (color.i != CLR_ZERO.i) {
+        if (color != CLR_ZERO) {
             glVertexPointer(2, GL_INT, 2 * 2 * sizeof(GL_INT), vertices);
-            glColor4ubv(color.v);
+            glColor(color);
             glDrawArrays(GL_QUADS, 0, 4);
         }
 
@@ -92,7 +92,7 @@ namespace { // file-scope constants and functions
         glTranslated(x1 + wd / 2.0f, y1 + ht / 2.0 * sf, 0.0); // move origin to the center of the rectangle
         glScaled(wd / 2.0 * sf, ht / 2.0 * sf, 1.0);          // map the range [-1,1] to the rectangle in both directions
 
-        glColor4ubv(color3.v);
+        glColor(color3);
         glBegin(GL_TRIANGLES);
         glVertex2dv(verts[1]);
         glVertex2dv(verts[4]);
@@ -105,7 +105,7 @@ namespace { // file-scope constants and functions
         glVertex2dv(verts[7]);
         glEnd();
 
-        glColor4ubv(color2.v);
+        glColor(color2);
         glBegin(GL_QUADS);
         glVertex2dv(verts[2]);
         glVertex2dv(verts[4]);
@@ -117,7 +117,7 @@ namespace { // file-scope constants and functions
         glVertex2dv(verts[6]);
         glEnd();
 
-        glColor4ubv(color1.v);
+        glColor(color1);
         glBegin(GL_TRIANGLES);
         glVertex2dv(verts[8]);
         glVertex2dv(verts[7]);
@@ -149,7 +149,7 @@ namespace { // file-scope constants and functions
         glTranslatef(x1 + wd / 2.0f, y1 + ht / 2.0f, 0.0f);   // move origin to the center of the rectangle
         glScalef(wd / 2.0f * sf, ht / 2.0f * sf, 1.0f);       // map the range [-1,1] to the rectangle in both directions
 
-        glColor4ubv(color1.v);
+        glColor(color1);
         glBegin(GL_TRIANGLES);
         glVertex2dv(verts[12]);
         glVertex2dv(verts[13]);
@@ -166,7 +166,7 @@ namespace { // file-scope constants and functions
         glVertex2dv(verts[10]);
         glEnd();
 
-        glColor4ubv(color2.v);
+        glColor(color2);
         glBegin(GL_TRIANGLES);
         glVertex2dv(verts[0]);
         glVertex2dv(verts[1]);
@@ -183,7 +183,7 @@ namespace { // file-scope constants and functions
         glVertex2dv(verts[16]);
         glEnd();
 
-        glColor4ubv(color3.v);
+        glColor(color3);
         glBegin(GL_TRIANGLES);
         glVertex2dv(verts[4]);
         glVertex2dv(verts[5]);
@@ -242,7 +242,7 @@ namespace { // file-scope constants and functions
                 unit_vertices[j*2] = cos(-theta);
                 unit_vertices[j*2+1] = sin(-theta);
             }
-            colors.resize(SLICES + 1, 0u); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
+            colors.resize(SLICES + 1, Clr()); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
         }
         int first_slice_idx = int(theta1 / HORZ_THETA + 1);
         int last_slice_idx = int(theta2 / HORZ_THETA - 1);
@@ -254,14 +254,14 @@ namespace { // file-scope constants and functions
             colors[j] = Clr(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
                             Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
                             Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-                            Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor)).i;
+                            Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         }
 
         glPushMatrix();
         glTranslatef(x1 + wd / 2.0f, y1 + ht / 2.0f, 0.0f);   // move origin to the center of the rectangle
         glScalef(wd / 2.0f, ht / 2.0f, 1.0f);                 // map the range [-1,1] to the rectangle in both (x- and y-) directions
 
-        glColor4ubv(color1.v);
+        glColor(color1);
         glBegin(GL_TRIANGLE_FAN);
         glVertex2f(0, 0);
         // point on circle at angle theta1
@@ -276,7 +276,7 @@ namespace { // file-scope constants and functions
         // angles in between theta1 and theta2, if any
         for (int i = first_slice_idx; i <= last_slice_idx; ++i) {
             int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
-            glColor4ubv(colors[i].v);
+            glColor(colors[i]);
             glVertex2f(unit_vertices[X], unit_vertices[Y]);
         }
         // theta2
@@ -321,7 +321,7 @@ namespace { // file-scope constants and functions
                 unit_vertices[j*2] = cos(-theta);
                 unit_vertices[j*2+1] = sin(-theta);
             }
-            colors.resize(SLICES + 1, 0u); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
+            colors.resize(SLICES + 1, Clr()); // create but don't initialize (this is essentially just scratch space, since the colors are different call-to-call)
         }
         int first_slice_idx = int(theta1 / HORZ_THETA + 1);
         int last_slice_idx = int(theta2 / HORZ_THETA - 1);
@@ -333,7 +333,7 @@ namespace { // file-scope constants and functions
             colors[j] = Clr(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
                             Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
                             Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-                            Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor)).i;
+                            Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         }
 
         glPushMatrix();
@@ -341,7 +341,7 @@ namespace { // file-scope constants and functions
         glScalef(wd / 2.0f, ht / 2.0f, 1.0f);                 // map the range [-1,1] to the rectangle in both (x- and y-) directions
 
         double inner_radius = (std::min(wd, ht) - 2.0 * bevel_thick) / std::min(wd, ht);
-        glColor4ubv(color.v);
+        glColor(color);
         glBegin(GL_TRIANGLE_FAN);
         glVertex2f(0, 0);
         // point on circle at angle theta1
@@ -367,7 +367,7 @@ namespace { // file-scope constants and functions
         // angles in between theta1 and theta2, if any
         for (int i = first_slice_idx; i <= last_slice_idx; ++i) {
             int X = (i > SLICES ? (i - SLICES) : i) * 2, Y = X + 1;
-            glColor4ubv(colors[i].v);
+            glColor(colors[i]);
             glVertex2f(unit_vertices[X], unit_vertices[Y]);
             glVertex2f(unit_vertices[X] * inner_radius, unit_vertices[Y] * inner_radius);
         }
@@ -437,7 +437,7 @@ namespace { // file-scope constants and functions
         glEnd();
 
         // middle
-        glColor4ubv(color.v);
+        glColor(color);
         glBegin(GL_QUADS);
         glVertex2i(x2 - corner_radius, y1 + thick);
         glVertex2i(x1 + corner_radius, y1 + thick);
@@ -474,20 +474,20 @@ namespace { // file-scope constants and functions
                          Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
                          Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glBegin(GL_QUADS);
-        glColor4ubv(scaled_color.v);
+        glColor(scaled_color);
         glVertex2i(x2 - corner_radius, y1);
         glVertex2i(x1 + corner_radius, y1);
-        glColor4ubv(color1.v);
+        glColor(color1);
         glVertex2i(x1 + corner_radius, y1 + corner_radius);
         glVertex2i(x2 - corner_radius, y1 + corner_radius);
         glEnd();
 
         // left (uses color scale factor (SQRT2OVER2 * (1 + 0) + 1) / 2, which equals that of top
         glBegin(GL_QUADS);
-        glColor4ubv(scaled_color.v);
+        glColor(scaled_color);
         glVertex2i(x1, y1 + corner_radius);
         glVertex2i(x1, y2 - corner_radius);
-        glColor4ubv(color1.v);
+        glColor(color1);
         glVertex2i(x1 + corner_radius, y2 - corner_radius);
         glVertex2i(x1 + corner_radius, y1 + corner_radius);
         glEnd();
@@ -499,27 +499,27 @@ namespace { // file-scope constants and functions
                            Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
                            Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glBegin(GL_QUADS);
-        glColor4ubv(color1.v);
+        glColor(color1);
         glVertex2i(x2 - corner_radius, y1 + corner_radius);
         glVertex2i(x2 - corner_radius, y2 - corner_radius);
-        glColor4ubv(scaled_color.v);
+        glColor(scaled_color);
         glVertex2i(x2, y2 - corner_radius);
         glVertex2i(x2, y1 + corner_radius);
         glEnd();
 
         // bottom (uses color scale factor (SQRT2OVER2 * (0 + -1) + 1) / 2, which equals that of left
         glBegin(GL_QUADS);
-        glColor4ubv(color1.v);
+        glColor(color1);
         glVertex2i(x2 - corner_radius, y2 - corner_radius);
         glVertex2i(x1 + corner_radius, y2 - corner_radius);
-        glColor4ubv(scaled_color.v);
+        glColor(scaled_color);
         glVertex2i(x1 + corner_radius, y2);
         glVertex2i(x2 - corner_radius, y2);
         glEnd();
 
         // middle
         glBegin(GL_QUADS);
-        glColor4ubv(color1.v);
+        glColor(color1);
         glVertex2i(x2 - corner_radius, y1 + corner_radius);
         glVertex2i(x1 + corner_radius, y1 + corner_radius);
         glVertex2i(x1 + corner_radius, y2 - corner_radius);
@@ -531,6 +531,9 @@ namespace { // file-scope constants and functions
 
 
 namespace GG {
+
+    void glColor(Clr clr)
+    { glColor4ub(clr.r, clr.g, clr.b, clr.a); }
 
     Clr LightColor(Clr clr)
     {

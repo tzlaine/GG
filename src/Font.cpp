@@ -469,7 +469,7 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, U
     glGetDoublev(GL_CURRENT_COLOR, orig_color);
     
     if (render_state.color_set)
-        glColor4ubv(render_state.curr_color.v);
+        glColor(render_state.curr_color);
 
     int y_origin = y1; // default value for TF_TOP
     if (format & TF_BOTTOM)
@@ -1035,7 +1035,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                         color[2] = temp_color[2];
                         color[3] = temp_color[3];
                         glColor4ubv(color);
-                        render_state.curr_color = Clr(color);
+                        render_state.curr_color = Clr(color[0], color[1], color[2], color[3]);
                         render_state.color_set = true;
                     } else {
                         well_formed_tag = false;
@@ -1050,7 +1050,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                         if (0.0 <= color[0] && color[0] <= 1.0 && 0.0 <= color[1] && color[1] <= 1.0 &&
                             0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0) {
                             glColor4dv(color);
-                            render_state.curr_color = Clr(color);
+                            render_state.curr_color = Clr(color[0], color[1], color[2], color[3]);
                             render_state.color_set = true;
                         } else {
                             well_formed_tag = false;

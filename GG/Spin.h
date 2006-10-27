@@ -54,6 +54,10 @@
 #include <GG/WndEditor.h>
 #endif
 
+#ifndef _GG_WndEvent_h_
+#include <GG/WndEvent.h>
+#endif
+
 #include <cmath>
 #include <limits>
 
@@ -204,7 +208,7 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool EventFilter(Wnd* w, const Event& event);
+    virtual bool EventFilter(Wnd* w, const WndEvent& event);
     //@}
 
 private:
@@ -551,10 +555,10 @@ Edit* Spin<T>::GetEdit() const
 }
 
 template<class T>
-bool Spin<T>::EventFilter(Wnd* w, const Event& event)
+bool Spin<T>::EventFilter(Wnd* w, const WndEvent& event)
 {
     if (w == m_edit) {
-        if (!m_editable && event.Type() == Event::GainingFocus) {
+        if (!m_editable && event.Type() == WndEvent::GainingFocus) {
             GUI::GetGUI()->SetFocusWnd(this);
             return true;
         } else {

@@ -24,17 +24,10 @@
 
 #include <GG/TabWnd.h>
 
-#ifndef _GG_DrawUtil_h_
 #include <GG/DrawUtil.h>
-#endif
-
-#ifndef _GG_Layout_h_
 #include <GG/Layout.h>
-#endif
-
-#ifndef _GG_StyleFactory_h_
 #include <GG/StyleFactory.h>
-#endif
+#include <GG/WndEvent.h>
 
 
 using namespace GG;
@@ -334,10 +327,10 @@ void TabBar::BringTabIntoView(int index)
     }
 }
 
-bool TabBar::EventFilter(Wnd* w, const Event& event)
+bool TabBar::EventFilter(Wnd* w, const WndEvent& event)
 {
-    if (event.Type() == Event::LButtonDown ||
-        event.Type() == Event::RButtonDown)
+    if (event.Type() == WndEvent::LButtonDown ||
+        event.Type() == WndEvent::RButtonDown)
         MoveChildUp(m_left_right_button_layout);
     return false;
 }

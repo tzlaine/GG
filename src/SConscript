@@ -27,8 +27,10 @@ sources = [
     'TabWnd.cpp',
     'TextControl.cpp',
     'Texture.cpp',
+    'Timer.cpp',
     'Wnd.cpp',
     'WndEditor.cpp',
+    'WndEvent.cpp',
     'ZList.cpp'
     ]
 

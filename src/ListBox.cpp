@@ -31,6 +31,7 @@
 #include <GG/StaticGraphic.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
+#include <GG/WndEvent.h>
 #include <GG/WndEditor.h>
 
 #include <cmath>
@@ -295,8 +296,18 @@ ListBox::ListBox() :
     m_header_row(0),
     m_keep_col_widths(false),
     m_clip_cells(false),
-    m_sort_col(0)
-{}
+    m_sort_col(0),
+    m_auto_scroll_during_drag_drops(true),
+    m_auto_scroll_margin(8),
+    m_auto_scrolling_up(false),
+    m_auto_scrolling_down(false),
+    m_auto_scrolling_left(false),
+    m_auto_scrolling_right(false),
+    m_auto_scroll_timer(250)
+{
+    m_auto_scroll_timer.Stop();
+    m_auto_scroll_timer.Connect(this);
+}
 
 ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
                  Uint32 flags/* = CLICKABLE*/) :
@@ -320,12 +331,21 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     m_header_row(new Row()),
     m_keep_col_widths(false),
     m_clip_cells(false),
-    m_sort_col(0)
+    m_sort_col(0),
+    m_auto_scroll_during_drag_drops(true),
+    m_auto_scroll_margin(8),
+    m_auto_scrolling_up(false),
+    m_auto_scrolling_down(false),
+    m_auto_scrolling_left(false),
+    m_auto_scrolling_right(false),
+    m_auto_scroll_timer(250)
 {
     Control::SetColor(color);
     ValidateStyle();
     SetText("ListBox");
     EnableChildClipping();
+    m_auto_scroll_timer.Stop();
+    m_auto_scroll_timer.Connect(this);
 }
 
 ListBox::~ListBox()
@@ -472,6 +492,21 @@ Alignment ListBox::RowAlignment(int n) const
 const std::set<std::string>& ListBox::AllowedDropTypes() const
 {
     return m_allowed_drop_types;
+}
+
+bool ListBox::AutoScrollDuringDragDrops() const
+{
+    return m_auto_scroll_during_drag_drops;
+}
+
+int ListBox::AutoScrollMargin() const
+{
+    return m_auto_scroll_margin;
+}
+
+int ListBox::AutoScrollInterval() const
+{
+    return m_auto_scroll_timer.Interval();
 }
 
 void ListBox::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
@@ -707,6 +742,73 @@ void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
         for (int i = 0; i < -move; ++i) {
             if (m_first_row_shown < static_cast<int>(m_rows.size() - 1))
                 m_vscroll->ScrollTo(m_vscroll->PosnRange().first + m_rows[m_first_row_shown]->Height());
+        }
+    }
+}
+
+void ListBox::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys)
+{
+    ResetAutoScrollVars();
+    DragDropHere(pt, drag_drop_wnds, keys);
+}
+
+void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys)
+{
+    if (!m_rows.empty() && m_auto_scroll_during_drag_drops && InClient(pt)) {
+        const Pt MARGIN_OFFSET(m_auto_scroll_margin, m_auto_scroll_margin);
+        Rect client_no_scroll_hole(ClientUpperLeft() + MARGIN_OFFSET, ClientLowerRight() - MARGIN_OFFSET);
+        m_auto_scrolling_up = pt.y < client_no_scroll_hole.ul.y;
+        m_auto_scrolling_down = client_no_scroll_hole.lr.y < pt.y;
+        m_auto_scrolling_left = pt.x < client_no_scroll_hole.ul.x;
+        m_auto_scrolling_right = client_no_scroll_hole.lr.x < pt.x;
+        if (m_auto_scrolling_up || m_auto_scrolling_down || m_auto_scrolling_left || m_auto_scrolling_right) {
+            bool acceptible_drop = false;
+            for (std::map<Wnd*, GG::Pt>::const_iterator it = drag_drop_wnds.begin(); it != drag_drop_wnds.end(); ++it) {
+                if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
+                    m_allowed_drop_types.find(it->first->DragDropDataType()) != m_allowed_drop_types.end()) {
+                    acceptible_drop = true;
+                    break;
+                }
+            }
+            if (acceptible_drop) {
+                if (!m_auto_scroll_timer.Running()) {
+                    m_auto_scroll_timer.Reset(GUI::GetGUI()->Ticks());
+                    m_auto_scroll_timer.Start();
+                }
+            } else {
+                DragDropLeave();
+            }
+        }
+    }
+}
+
+void ListBox::DragDropLeave()
+{
+    ResetAutoScrollVars();
+}
+
+void ListBox::TimerFiring(int ticks, Timer* timer)
+{
+    if (timer == &m_auto_scroll_timer && !m_rows.empty()) {
+        if (m_vscroll) {
+            if (m_auto_scrolling_up && 0 < m_first_row_shown)
+                m_vscroll->ScrollTo(m_vscroll->PosnRange().first - m_rows[m_first_row_shown - 1]->Height());
+            if (m_auto_scrolling_down) {
+                int last_visible_row = LastVisibleRow();
+                if (last_visible_row < static_cast<int>(m_rows.size() - 1) ||
+                    ClientLowerRight().y < m_rows[last_visible_row]->LowerRight().y)
+                    m_vscroll->ScrollTo(m_vscroll->PosnRange().first + m_rows[m_first_row_shown]->Height());
+            }
+        }
+        if (m_hscroll) {
+            if (m_auto_scrolling_left && 0 < m_first_col_shown)
+                m_hscroll->ScrollTo(m_hscroll->PosnRange().first - m_col_widths[m_first_col_shown - 1]);
+            if (m_auto_scrolling_right) {
+                int last_visible_col = LastVisibleCol();
+                if (last_visible_col < static_cast<int>(m_col_widths.size() - 1) ||
+                    ClientLowerRight().x < m_rows.front()->LowerRight().x)
+                    m_hscroll->ScrollTo(m_hscroll->PosnRange().first + m_col_widths[m_first_col_shown]);
+            }
         }
     }
 }
@@ -967,6 +1069,21 @@ void ListBox::DisallowDropType(const std::string& str)
     m_allowed_drop_types.erase(str);
 }
 
+void ListBox::AutoScrollDuringDragDrops(bool auto_scroll)
+{
+    m_auto_scroll_during_drag_drops = auto_scroll;
+}
+
+void ListBox::SetAutoScrollMargin(int margin)
+{
+    m_auto_scroll_margin = margin;
+}
+
+void ListBox::SetAutoScrollInterval(int interval)
+{
+    m_auto_scroll_timer.SetInterval(interval);
+}
+
 void ListBox::DefineAttributes(WndEditor* editor)
 {
     if (!editor)
@@ -1040,6 +1157,26 @@ int ListBox::RClickRow() const
     return m_rclick_row;
 }
 
+bool ListBox::AutoScrollingUp() const
+{
+    return m_auto_scrolling_up;
+}
+
+bool ListBox::AutoScrollingDown() const
+{
+    return m_auto_scrolling_down;
+}
+
+bool ListBox::AutoScrollingLeft() const
+{
+    return m_auto_scrolling_left;
+}
+
+bool ListBox::AutoScrollingRight() const
+{
+    return m_auto_scrolling_right;
+}
+
 int ListBox::VerticalScrollPadding(int client_height_without_horizontal_scroll)
 {
     int first_row_shown_when_caret_at_bottom =
@@ -1062,7 +1199,7 @@ int ListBox::HorizontalScrollPadding(int client_width_without_vertical_scroll)
     return client_width_without_vertical_scroll - width_of_cols_visible_at_right;
 }
 
-bool ListBox::EventFilter(Wnd* w, const Event& event)
+bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
 {
     assert(dynamic_cast<Row*>(w));
 
@@ -1071,7 +1208,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
         Uint32 keys = event.KeyMods();
 
         switch (event.Type()) {
-        case Event::LButtonDown: {
+        case WndEvent::LButtonDown: {
             m_old_sel_row = RowUnderPt(pt);
             if (m_old_sel_row >= static_cast<int>(m_rows.size()) || !InClient(pt)) {
                 m_old_sel_row = -1;
@@ -1083,12 +1220,12 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::LButtonUp: {
+        case WndEvent::LButtonUp: {
             m_old_sel_row = -1;
             break;
         }
 
-        case Event::LClick: {
+        case WndEvent::LClick: {
             if (m_old_sel_row >= 0 && InClient(pt)) {
                 int sel_row = RowUnderPt(pt);
                 if (sel_row == m_old_sel_row) {
@@ -1103,7 +1240,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::LDoubleClick: {
+        case WndEvent::LDoubleClick: {
             int row = RowUnderPt(pt);
             if (row >= 0 && row == m_lclick_row && InClient(pt)) {
                 DoubleClickedSignal(row, m_rows[row]);
@@ -1114,7 +1251,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::RButtonDown: {
+        case WndEvent::RButtonDown: {
             int row = RowUnderPt(pt);
             if (row < static_cast<int>(m_rows.size()) && InClient(pt)) {
                 m_old_rdown_row = row;
@@ -1124,7 +1261,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::RClick: {
+        case WndEvent::RClick: {
             int row = RowUnderPt(pt);
             if (row >= 0 && row == m_old_rdown_row && InClient(pt)) {
                 m_rclick_row = row;
@@ -1134,7 +1271,7 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::MouseEnter: {
+        case WndEvent::MouseEnter: {
             if (m_style & LB_BROWSEUPDATES) {
                 int sel_row = RowUnderPt(pt);
                 if (sel_row >= static_cast<int>(m_rows.size()))
@@ -1145,10 +1282,10 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::MouseHere:
-            return true;
+        case WndEvent::MouseHere:
+            break;
 
-        case Event::MouseLeave: {
+        case WndEvent::MouseLeave: {
             if (m_style & LB_BROWSEUPDATES) {
                 if (m_last_row_browsed != -1)
                     BrowsedSignal(m_last_row_browsed = -1);
@@ -1156,22 +1293,23 @@ bool ListBox::EventFilter(Wnd* w, const Event& event)
             break;
         }
 
-        case Event::GainingFocus: {
+        case WndEvent::GainingFocus: {
             GUI::GetGUI()->SetFocusWnd(this);
             break;
         }
 
-        case Event::MouseWheel:
+        case WndEvent::MouseWheel:
             return false;
 
-        case Event::DragDropEnter:
-        case Event::DragDropHere:
-        case Event::DragDropLeave:
+        case WndEvent::DragDropEnter:
+        case WndEvent::DragDropHere:
+        case WndEvent::DragDropLeave:
             HandleEvent(event);
             break;
 
-        case Event::KeyPress:
-        case Event::KeyRelease:
+        case WndEvent::KeyPress:
+        case WndEvent::KeyRelease:
+        case WndEvent::TimerFiring:
             return false;
 
         default:
@@ -1330,6 +1468,15 @@ void ListBox::RecreateScrolls()
     delete m_hscroll;
     m_vscroll = m_hscroll = 0;
     AdjustScrolls(false);
+}
+
+void ListBox::ResetAutoScrollVars()
+{
+    m_auto_scrolling_up = false;
+    m_auto_scrolling_down = false;
+    m_auto_scrolling_left = false;
+    m_auto_scrolling_right = false;
+    m_auto_scroll_timer.Stop();
 }
 
 void ListBox::ConnectSignals()

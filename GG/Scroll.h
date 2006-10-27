@@ -132,7 +132,7 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool  EventFilter(Wnd* w, const Event& event);
+    virtual bool  EventFilter(Wnd* w, const WndEvent& event);
     //@}
 
 private:

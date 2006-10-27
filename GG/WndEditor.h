@@ -52,7 +52,6 @@
 
 #include <boost/type_traits.hpp>
 
-#include <iostream>
 
 namespace GG {
 

@@ -30,6 +30,7 @@
 #include <GG/EventPump.h>
 #include <GG/Layout.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -145,92 +146,6 @@ namespace {
 ///////////////////////////////////////
 // class GG::Wnd
 ///////////////////////////////////////
-// Wnd::Event
-Wnd::Event::Event(EventType type, const Pt& pt, Uint32 keys) :
-    m_type(type),
-    m_point(pt),
-    m_key(GGK_UNKNOWN),
-    m_key_mods(keys),
-    m_wheel_move(0)
-{}
-
-Wnd::Event::Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys) :
-    m_type(type),
-    m_point(pt),
-    m_key(GGK_UNKNOWN),
-    m_key_mods(keys),
-    m_drag_move(move),
-    m_wheel_move(0)
-{}
-
-Wnd::Event::Event(EventType type, const Pt& pt, int move, Uint32 keys) :
-    m_type(type),
-    m_point(pt),
-    m_key(GGK_UNKNOWN),
-    m_key_mods(keys),
-    m_wheel_move(move)
-{}
-
-Wnd::Event::Event(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) :
-    m_type(type),
-    m_point(pt),
-    m_key(GGK_UNKNOWN),
-    m_key_mods(keys),
-    m_wheel_move(0),
-    m_drag_drop_wnds(drag_drop_wnds)
-{}
-
-Wnd::Event::Event(EventType type, Key key, Uint32 key_mods) :
-    m_type(type),
-    m_key(key),
-    m_key_mods(key_mods),
-    m_wheel_move(0)
-{}
-
-Wnd::Event::Event(EventType type) :
-    m_type(type),
-    m_key(GGK_UNKNOWN),
-    m_key_mods(0), 
-    m_wheel_move(0)
-{}
-
-Wnd::Event::EventType Wnd::Event::Type() const
-{
-    return m_type;
-}
-
-const Pt& Wnd::Event::Point() const
-{
-    return m_point;
-}
-
-Key Wnd::Event::GetKey() const
-{
-    return m_key;
-}
-
-Uint32 Wnd::Event::KeyMods() const
-{
-    return m_key_mods;
-}
-
-const Pt& Wnd::Event::DragMove() const
-{
-    return m_drag_move;
-}
-
-int Wnd::Event::WheelMove() const
-{
-    return m_wheel_move;
-}
-
-const std::map<Wnd*, Pt>& Wnd::Event::DragDropWnds() const
-{
-    return m_drag_drop_wnds;
-}
-
-
-// Wnd
 // static(s)
 int Wnd::s_default_browse_time = 1500;
 boost::shared_ptr<BrowseInfoWnd> Wnd::s_default_browse_info_wnd;
@@ -1018,6 +933,8 @@ void Wnd::GainingFocus() {}
 
 void Wnd::LosingFocus() {}
 
+void Wnd::TimerFiring(int ticks, Timer* timer) {}
+
 int Wnd::Run()
 {
     int retval = 0;
@@ -1117,12 +1034,12 @@ void Wnd::SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse
     s_default_browse_info_wnd = browse_info_wnd;
 }
 
-bool Wnd::EventFilter(Wnd* w, const Event& event)
+bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
 {
     return false;
 }
 
-void Wnd::HandleEvent(const Event& event)
+void Wnd::HandleEvent(const WndEvent& event)
 {
     for (int i = static_cast<int>(m_filters.size()) - 1; i >= 0; --i) {
         if (m_filters[i]->EventFilter(this, event))
@@ -1130,62 +1047,65 @@ void Wnd::HandleEvent(const Event& event)
     }
 
     switch (event.Type()) {
-    case Event::LButtonDown:
+    case WndEvent::LButtonDown:
         LButtonDown(event.Point(), event.KeyMods());
         break;
-    case Event::LDrag:
+    case WndEvent::LDrag:
         LDrag(event.Point(), event.DragMove(), event.KeyMods());
         break;
-    case Event::LButtonUp:
+    case WndEvent::LButtonUp:
         LButtonUp(event.Point(), event.KeyMods());
         break;
-    case Event::LClick:
+    case WndEvent::LClick:
         LClick(event.Point(), event.KeyMods());
         break;
-    case Event::LDoubleClick:
+    case WndEvent::LDoubleClick:
         LDoubleClick(event.Point(), event.KeyMods());
         break;
-    case Event::RButtonDown:
+    case WndEvent::RButtonDown:
         RButtonDown(event.Point(), event.KeyMods());
         break;
-    case Event::RClick:
+    case WndEvent::RClick:
         RClick(event.Point(), event.KeyMods());
         break;
-    case Event::RDoubleClick:
+    case WndEvent::RDoubleClick:
         RDoubleClick(event.Point(), event.KeyMods());
         break;
-    case Event::MouseEnter:
+    case WndEvent::MouseEnter:
         MouseEnter(event.Point(), event.KeyMods());
         break;
-    case Event::MouseHere:
+    case WndEvent::MouseHere:
         MouseHere(event.Point(), event.KeyMods());
         break;
-    case Event::MouseLeave:
+    case WndEvent::MouseLeave:
         MouseLeave();
         break;
-    case Event::DragDropEnter:
+    case WndEvent::DragDropEnter:
         DragDropEnter(event.Point(), event.DragDropWnds(), event.KeyMods());
         break;
-    case Event::DragDropHere:
+    case WndEvent::DragDropHere:
         DragDropHere(event.Point(), event.DragDropWnds(), event.KeyMods());
         break;
-    case Event::DragDropLeave:
+    case WndEvent::DragDropLeave:
         DragDropLeave();
         break;
-    case Event::MouseWheel:
+    case WndEvent::MouseWheel:
         MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());
         break;
-    case Event::KeyPress:
+    case WndEvent::KeyPress:
         KeyPress(event.GetKey(), event.KeyMods());
         break;
-    case Event::KeyRelease:
+    case WndEvent::KeyRelease:
         KeyRelease(event.GetKey(), event.KeyMods());
         break;
-    case Event::GainingFocus:
+    case WndEvent::GainingFocus:
         GainingFocus();
         break;
-    case Event::LosingFocus:
+    case WndEvent::LosingFocus:
         LosingFocus();
+        break;
+    case WndEvent::TimerFiring:
+        TimerFiring(event.Ticks(), event.GetTimer());
         break;
     default:
         break;

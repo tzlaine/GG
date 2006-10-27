@@ -33,6 +33,10 @@
 #include <GG/Control.h>
 #endif
 
+#ifndef _GG_Timer_h_
+#include <GG/Timer.h>
+#endif
+
 #include <set>
 
 namespace GG {
@@ -40,6 +44,7 @@ namespace GG {
 class Font;
 class Scroll;
 class SubTexture;
+class WndEvent;
 
 /** a flexible control that can contain rows and columns of other controls, even other ListBoxes.  A ListBox consists of
     rows of controls, usually text or graphics.  Each row represents one item; rows can be added or removed, but not
@@ -217,6 +222,17 @@ public:
         this set contains "", all drop types are allowed. */
     const std::set<std::string>& AllowedDropTypes() const;
 
+    /** whether the list should autoscroll when the user is attempting to drop an item into a location that is not
+        currently visible. */
+    bool            AutoScrollDuringDragDrops() const;
+
+    /** the thickness of the area around the border of the client area that will provoke an auto-scroll, if
+        AutoScrollDuringDragDrops() returns true. */
+    int             AutoScrollMargin() const;
+
+    /** the number of milliseconds that elapse between row/column scrolls when auto-scrolling. */
+    int             AutoScrollInterval() const;
+
     mutable ClearedSignalType       ClearedSignal;       ///< the cleared signal object for this ListBox
     mutable SelChangedSignalType    SelChangedSignal;    ///< the selection change signal object for this ListBox
     mutable InsertedSignalType      InsertedSignal;      ///< the inserted signal object for this ListBox
@@ -235,6 +251,10 @@ public:
     virtual void   Render();
     virtual void   KeyPress(Key key, Uint32 key_mods);
     virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
+    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+    virtual void   DragDropLeave();
+    virtual void   TimerFiring(int ticks, Timer* timer);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, then resizes the scrollbars as needed
 
@@ -260,8 +280,8 @@ public:
     /** sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle */
     void           SetStyle(Uint32 s);
 
-    void           SetColHeaders(Row* r);                   ///< sets the row used as headings for the columns; this Row becomes property of the ListBox.
-    void           RemoveColHeaders();                      ///< removes any columns headings set
+    void           SetColHeaders(Row* r);                 ///< sets the row used as headings for the columns; this Row becomes property of the ListBox.
+    void           RemoveColHeaders();                    ///< removes any columns headings set
 
     void           SetNumCols(int n);                     ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);                     ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
@@ -284,6 +304,17 @@ public:
         is still an allowed drop type, drops of type \a str will still be allowed, even after disallowed with a call to
         this function. */
     void           DisallowDropType(const std::string& str);
+
+    /** set this to determine whether the list should autoscroll when the user is attempting to drop an item into a
+        location that is not currently visible. */
+    void           AutoScrollDuringDragDrops(bool auto_scroll);
+
+    /** sets the thickness of the area around the border of the client area that will provoke an auto-scroll, if
+        AutoScrollDuringDragDrops() returns true. */
+    void           SetAutoScrollMargin(int margin);
+
+    /** sets the number of milliseconds that elapse between row/column scrolls when auto-scrolling. */
+    void           SetAutoScrollInterval(int interval);
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
@@ -317,6 +348,11 @@ protected:
     int             LClickRow() const;   ///< returns the last row that was left-clicked
     int             RClickRow() const;   ///< returns the last row that was right-clicked
 
+    bool            AutoScrollingUp() const;    ///< returns true iff the list is being autoscrolled up due to drag-drop
+    bool            AutoScrollingDown() const;  ///< returns true iff the list is being autoscrolled down due to drag-drop
+    bool            AutoScrollingLeft() const;  ///< returns true iff the list is being autoscrolled left due to drag-drop
+    bool            AutoScrollingRight() const; ///< returns true iff the list is being autoscrolled right due to drag-drop
+
     /** Returns the amount of vertical padding it is necessary to add to the combined height of all rows to make the
         vertical scroll the proper length to fully show the last row.  This is calculated by first determining the first
         row when the last row is visible, then determining how much left over space would result if only the range
@@ -331,12 +367,14 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool    EventFilter(Wnd* w, const Event& event);
+    virtual bool    EventFilter(Wnd* w, const WndEvent& event);
 
     int             Insert(Row* row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
     Row*            Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a dupliate removal (such as for drag-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
+
+    void            ResetAutoScrollVars();          ///< resets all variables related to auto-scroll to their initial values
     //@}
 
 private:
@@ -383,6 +421,14 @@ private:
     std::set<std::string>
                     m_allowed_drop_types;///< the line item types allowed for use in this listbox
 
+    bool            m_auto_scroll_during_drag_drops;
+    int             m_auto_scroll_margin;
+    bool            m_auto_scrolling_up;
+    bool            m_auto_scrolling_down;
+    bool            m_auto_scrolling_left;
+    bool            m_auto_scrolling_right;
+    Timer           m_auto_scroll_timer;
+
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
 
     friend class boost::serialization::access;
@@ -391,6 +437,8 @@ private:
 };
 
 } // namespace GG
+
+BOOST_CLASS_VERSION(GG::ListBox, 1)
 
 // template implementations
 template <class Archive>
@@ -433,6 +481,16 @@ void GG::ListBox::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_clip_cells)
         & BOOST_SERIALIZATION_NVP(m_sort_col)
         & BOOST_SERIALIZATION_NVP(m_allowed_drop_types);
+
+    if (1 <= version) {
+        ar  & BOOST_SERIALIZATION_NVP(m_auto_scroll_during_drag_drops)
+            & BOOST_SERIALIZATION_NVP(m_auto_scroll_margin)
+            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_up)
+            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_down)
+            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_left)
+            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_right)
+            & BOOST_SERIALIZATION_NVP(m_auto_scroll_timer);
+    }
 
     if (Archive::is_loading::value) {
         ValidateStyle();

@@ -50,6 +50,7 @@ class ModalEventPump;
 class PluginInterface;
 class StyleFactory;
 class Texture;
+class Timer;
 struct GUIImplData;
 
 /** An abstract base for an GUI framework class to drive the GG GUI.  
@@ -201,8 +202,11 @@ public:
         std::runtime_error May throw std::runtime_error if there are already other Wnds registered that belong to a
         window other than \a originating_wnd. */
     void           RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd);
-
     void           CancelDragDrop();             ///< clears the set of current drag-and-drop Wnds
+
+    void           RegisterTimer(Timer& timer);  ///< adds \a timer to the list of active timers
+    void           RemoveTimer(Timer& timer);    ///< removes \a timer from the list of active timers
+
     virtual void   Enter2DMode() = 0;            ///< saves any current GL state, sets up GG-friendly 2D drawing mode.  GG expects an orthographic projection, with the origin in the upper left corner, and with one unit of GL space equal to one pixel on the screen.
     virtual void   Exit2DMode() = 0;             ///< restores GL to its condition prior to Enter2DMode() call
     void           EnableFPS(bool b = true);     ///< turns FPS calulations on or off

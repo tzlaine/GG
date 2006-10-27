@@ -37,6 +37,7 @@
 namespace GG {
 
 class Button;
+class WndEvent;
 
 /** a slider control.  This control allows the user to drag a tab to a desired setting; it is somewhat like a Scroll.
     Sliders can be either vertical or horizontal, but cannot switch between the two.  Unlike vertical Scrolls, whose
@@ -112,7 +113,7 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    virtual bool EventFilter(Wnd* w, const Event& event);
+    virtual bool EventFilter(Wnd* w, const WndEvent& event);
 
     void MoveTabToPosn(); ///< moves the tab to the current logical position
     //@}

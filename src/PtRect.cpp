@@ -24,7 +24,6 @@
 
 #include <GG/PtRect.h>
 
-#include <iostream>
 
 using namespace GG;
 

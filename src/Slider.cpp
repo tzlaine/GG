@@ -28,6 +28,8 @@
 #include <GG/DrawUtil.h>
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -139,11 +141,11 @@ void Slider::Render()
     }
 }
 
-bool Slider::EventFilter(Wnd* w, const Event& event)
+bool Slider::EventFilter(Wnd* w, const WndEvent& event)
 {
     if (w == m_tab) {
         switch (event.Type()) {
-        case Event::LDrag: {
+        case WndEvent::LDrag: {
             if (!Disabled()) {
                 Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
                 if (m_orientation == VERTICAL) {
@@ -158,8 +160,8 @@ bool Slider::EventFilter(Wnd* w, const Event& event)
             }
             return true;
         }
-        case Event::LButtonUp:
-        case Event::LClick: {
+        case WndEvent::LButtonUp:
+        case WndEvent::LClick: {
             if (!Disabled())
                 SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
             break;

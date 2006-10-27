@@ -47,7 +47,9 @@ namespace GG {
 class BrowseInfoWnd;
 class Layout;
 class StyleFactory;
+class Timer;
 class WndEditor;
+class WndEvent;
 
 /** This is the basic GG window class.
 
@@ -91,18 +93,18 @@ class WndEditor;
     to input as driven by the singleton GUI object.
 
     <p>Event Filters
-    <br>Every Wnd can also have its incoming Events filtered by an arbitrary number of other Wnds.
-    Each such Wnds in a Wnd's "filter chain" gets an opportunity, one at a time, to process an incoming Event, or pass
-    it on to the next filter in the chain.  If all EventFilter() calls in the chain return false, the filtered Wnd then
-    gets the chance to process the Event as normal.  Filter Wnds are traversed in reverse order that they are installed,
-    and no filter Wnd can be in a filter chain more than once.  Installing the same filter Wnd more than once removes
-    the Wnd from the filter chain and re-adds it to the beginning of the chain.  Note that the default implementation of
+    <br>Every Wnd can also have its incoming WndEvents filtered by an arbitrary number of other Wnds.  Each such Wnds in
+    a Wnd's "filter chain" gets an opportunity, one at a time, to process an incoming WndEvent, or pass it on to the
+    next filter in the chain.  If all EventFilter() calls in the chain return false, the filtered Wnd then gets the
+    chance to process the WndEvent as normal.  Filter Wnds are traversed in reverse order that they are installed, and
+    no filter Wnd can be in a filter chain more than once.  Installing the same filter Wnd more than once removes the
+    Wnd from the filter chain and re-adds it to the beginning of the chain.  Note that the default implementation of
     EventFilter() is to return false and do nothing else, so installing a Wnd-derived type with no overridden
     EventFilter() in a filter Wnd will have no effect.  Also note that just as it is legal for keyboard accelerator
     slots to do nontrivial work and still return false (causing a keystroke event to be generated), EventFilter() may
     return false even when it does nontrivial work, and the next filter in the chain will also get a chance to process
-    the Event.  It is even possible to have an arbitrary number of filters that all do processing on an Event, and
-    finally let the filtered Wnd do its normal Event processing.
+    the WndEvent.  It is even possible to have an arbitrary number of filters that all do processing on an WndEvent, and
+    finally let the filtered Wnd do its normal WndEvent processing.
 
     <p>Layouts
     <br>Layouts arrange children in the client area of a window, and can be assigned to a window in 4 ways.
@@ -435,6 +437,8 @@ public:
     virtual void   GainingFocus();                         ///< respond to this window gaining the input focus
     virtual void   LosingFocus();                          ///< respond to this window losing the input focus
 
+    virtual void   TimerFiring(int ticks, Timer* timer);   ///< respond to Timer \a timer firing at time \a ticks
+
 
     /** this executes a modal window and gives it its modality.  For non-modal windows, this function is a no-op.
         It returns 0 if the window is non-modal, or non-zero after successful modal execution.*/
@@ -491,79 +495,6 @@ public:
     //@}
 
 protected:
-    /** encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.  The various types of Events correspond
-        to the various message member functions of Wnd, some of which have different parameterizations.  Rather than
-        have a less-efficient but more-easily-extensible hierarchy of Event types, a single Event type exists that has
-        all possible parameters to a Wnd message function call.  Therefore, not all of Event's accessors will return
-        sensical results, depending on the EventType of the Event.  Note that Wnd events may be filtered before they
-        actually reach the target Wnd \see Wnd */
-    class GG_API Event
-    {
-    public:
-        /** the types of Wnd events.  Each of these corresponds to a Wnd member function of the same name. */
-        enum EventType {
-            LButtonDown,
-            LDrag,
-            LButtonUp,
-            LClick,
-            LDoubleClick,
-            RButtonDown,
-            RClick,
-            RDoubleClick,
-            MouseEnter,
-            MouseHere,
-            MouseLeave,
-            MouseWheel,
-            DragDropEnter,
-            DragDropHere,
-            DragDropLeave,
-            KeyPress,
-            KeyRelease,
-            GainingFocus,
-            LosingFocus
-        };
-
-        /** constructs an Event that is used to invoke a function taking parameters (const GG::Pt& pt, Uint32 keys), eg
-            LButtonDown(). */
-        Event(EventType type, const Pt& pt, Uint32 keys);
-
-        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const Pt& move,
-            Uint32 keys), eg LDrag(). */
-        Event(EventType type, const Pt& pt, const Pt& move, Uint32 keys);
-
-        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, int move, Uint32
-            keys), eg MouseWheel(). */
-        Event(EventType type, const Pt& pt, int move, Uint32 keys);
-
-        /** constructs an Event that is used to invoke a function taking parameters (const Pt& pt, const std::map<Wnd*,
-            Pt>& drag_drop_wnds, Uint32 keys), eg DragDropEnter(). */
-        Event(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
-
-        /** constructs an Event that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg
-            KeyPress(). */
-        Event(EventType type, Key key, Uint32 key_mods);
-
-        /** constructs an Event that is used to invoke a function taking no parameters, eg GainingFocus(). */
-        Event(EventType type);
-
-        EventType                 Type() const;         ///< returns the type of the Event
-        const Pt&                 Point() const;        ///< returns the point at which the event took place, if any
-        Key                       GetKey() const;       ///< returns the key pressed or released in the Event, if any
-        Uint32                    KeyMods() const;      ///< returns the modifiers to the Event's keypress, if any
-        const Pt&                 DragMove() const;     ///< returns the amount of drag movement represented by the Event, if any
-        int                       WheelMove() const;    ///< returns the ammount of mouse wheel movement represented by the Event, if any
-        const std::map<Wnd*, Pt>& DragDropWnds() const; ///< returns the drag-drop wnds represented by the Event, if any
-
-    private:
-        EventType          m_type;
-        Pt                 m_point;
-        Key                m_key;
-        Uint32             m_key_mods;
-        Pt                 m_drag_move;
-        int                m_wheel_move;
-        std::map<Wnd*, Pt> m_drag_drop_wnds;
-    };
-
     /** \name Structors */ //@{
     Wnd(); ///< default ctor
 
@@ -572,18 +503,18 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    /** handles an Event destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this
+    /** handles an WndEvent destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this
         filter processed the message. */
-    virtual bool EventFilter(Wnd* w, const Event& event);
+    virtual bool EventFilter(Wnd* w, const WndEvent& event);
 
-    void HandleEvent(const Event& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
+    void HandleEvent(const WndEvent& event); ///< handles all messages, and calls appropriate function (LButtonDown(), LDrag(), etc.)
     //@}
 
-    std::string  m_text;            ///< text associated with the window, such as a window title or button label, etc.
-    bool         m_done;            ///< derived modal Wnd's set this to true to stop modal loop
+    std::string  m_text;               ///< text associated with the window, such as a window title or button label, etc.
+    bool         m_done;               ///< derived modal Wnd's set this to true to stop modal loop
 
 private:
-    void ValidateFlags();                 ///< sanity-checks the window creation flags
+    void ValidateFlags();              ///< sanity-checks the window creation flags
 
     Wnd*              m_parent;        ///< ptr to this window's parent; may be 0
     std::list<Wnd*>   m_children;      ///< list of ptrs to child windows kept in order of decreasing area
@@ -619,6 +550,7 @@ private:
                       s_default_browse_info_wnd;
 
     friend class GUI;   ///< GUI needs access to \a m_zorder, m_children, etc.
+    friend class Timer; ///< Timer needs to be able to call HandleEvent
     friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
 
     friend class boost::serialization::access;

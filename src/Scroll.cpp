@@ -28,6 +28,8 @@
 #include <GG/DrawUtil.h>
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -383,11 +385,11 @@ Button* Scroll::DecrButton() const
     return m_decr;
 }
 
-bool Scroll::EventFilter(Wnd* w, const Event& event)
+bool Scroll::EventFilter(Wnd* w, const WndEvent& event)
 {
     if (w == m_tab) {
         switch (event.Type()) {
-        case Event::LDrag: {
+        case WndEvent::LDrag: {
             if (!Disabled()) {
                 Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
                 if (m_orientation == VERTICAL) {

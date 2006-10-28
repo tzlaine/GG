@@ -927,7 +927,7 @@ void GUI::Render()
         Timer* timer = *it;
         if (timer->ShouldFire(ticks)) {
             const std::set<Wnd*>& wnds = timer->Wnds();
-            for (std::set<Wnd*>::iterator wnd_it = wnds.begin(); wnd_it != wnds.end(); ++wnd_it) {
+            for (std::set<Wnd*>::const_iterator wnd_it = wnds.begin(); wnd_it != wnds.end(); ++wnd_it) {
                 (*wnd_it)->HandleEvent(WndEvent(WndEvent::TimerFiring, ticks, timer));
             }
         }

@@ -662,6 +662,10 @@ void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_pt
 void RadioButtonGroup::InsertButton(int index, StateButton* bn)
 {
     assert(0 <= index && index <= static_cast<int>(m_button_slots.size()));
+    if (!m_expand_buttons) {
+        Pt min_usable_size = bn->MinUsableSize();
+        bn->Resize(Pt(std::max(bn->Width(), min_usable_size.x), std::max(bn->Height(), min_usable_size.y)));
+    }
     Pt bn_sz = bn->Size();
     Layout* layout = GetLayout();
     if (!layout) {

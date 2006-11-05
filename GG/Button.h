@@ -302,7 +302,7 @@ public:
     void RemoveButton(StateButton* button);
 
     /** Set this to true if the buttons in the group are to be expanded to fill the group's available space.  If set to
-        false, the buttons are to be spaced out evenly, and they will all be their MinUsableSize()s. */
+        false, the buttons are to be spaced out evenly, and they will all be at least their MinUsableSize()s. */
     void ExpandButtons(bool expand);
 
     /** Set this to true if the buttons in the group are to be expanded in proportion to their initial sizes.  If set to

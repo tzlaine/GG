@@ -59,7 +59,7 @@ class GG_API FileDlg : public Wnd
 public:
     /** \name Structors */ //@{
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, if
-        desired (such as when "Save As" is called in an app, and there is a current filename).  If \a directory is
+        desired (such as when "Save As..." is selected in an app, and there is a current filename).  If \a directory is
         specified, it is taken as-is if it is absolute, or relative to boost::filesystem::initial_path() if it is
         relative.  If \a directory is "", the initial directory is WorkingDirectory().  \a save indicates whether this
         is a save or load dialog; \a multi indicates whether multiple file selections are allowed.  \throw
@@ -73,6 +73,12 @@ public:
 
     /** Returns true iff this FileDlg will select directories instead of files. */
     bool SelectDirectories() const;
+
+    /** Returns true iff this FileDlg will append the missing extension to a file when in save mode.  Note that action
+        is only taken if there is a single file filter containing exactly one wildcard in its first position (i.e. it is
+        of the form "*foo").  If precondition is satisfied, any filename the user selects that does not end in "foo"
+        will have "foo" appended to it. */
+    bool AppendMissingSaveExtension() const;
 
     const std::string& FilesString() const;                ///< returns the text label next to the files edit box to \a str Default: "File(s):"
     const std::string& FileTypesString() const;            ///< returns the text label next to the file types dropdown list to \a str Default: "Type(s):"
@@ -97,6 +103,12 @@ public:
     /** Set this to true if this FileDlg should select directories instead of files.  Note that this will only have an
         effect in file-open mode. */
     void SelectDirectories(bool directories);
+
+    /** Set this to true if this FileDlg should append the missing extension to a file when in save mode.  Note that
+        action is only taken if there is a single file filter containing exactly one wildcard in its first position
+        (i.e. it is of the form "*foo").  If precondition is satisfied, any filename the user selects that does not end
+        in "foo" will have "foo" appended to it. */
+    void AppendMissingSaveExtension(bool append);
 
     /** sets the allowed file types.  Each pair in the \a types parameter contains a description of the file type in its
         .first member, and wildcarded file types in its .second member.  For example, an entry might be ("Text Files
@@ -173,6 +185,7 @@ private:
     std::set<std::string>
                      m_result;
     bool             m_select_directories;
+    bool             m_append_missing_save_extension;
     bool             m_in_win32_drive_selection;
 
     std::string      m_save_str;
@@ -240,8 +253,10 @@ void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_files_label)
         & BOOST_SERIALIZATION_NVP(m_file_types_label);
 
-    if (1 <= version)
-        ar & BOOST_SERIALIZATION_NVP(m_select_directories);
+    if (1 <= version) {
+        ar  & BOOST_SERIALIZATION_NVP(m_select_directories)
+            & BOOST_SERIALIZATION_NVP(m_append_missing_save_extension);
+    }
 
     if (Archive::is_loading::value)
         ConnectSignals();

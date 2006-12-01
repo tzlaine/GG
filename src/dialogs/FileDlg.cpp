@@ -128,6 +128,7 @@ fs::path FileDlg::s_working_dir = fs::initial_path();
 FileDlg::FileDlg() :
     Wnd(),
     m_select_directories(false),
+    m_append_missing_save_extension(false),
     m_in_win32_drive_selection(false),
     m_curr_dir_text(0),
     m_files_list(0),
@@ -148,6 +149,7 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
     m_font(font),
     m_save(save),
     m_select_directories(false),
+    m_append_missing_save_extension(false),
     m_in_win32_drive_selection(false),
     m_save_str("Save"),
     m_open_str("Open"),
@@ -181,6 +183,11 @@ std::set<std::string> FileDlg::Result() const
 bool FileDlg::SelectDirectories() const
 {
     return m_select_directories;
+}
+
+bool FileDlg::AppendMissingSaveExtension() const
+{
+    return m_append_missing_save_extension;
 }
 
 const std::string& FileDlg::FilesString() const
@@ -269,6 +276,11 @@ void FileDlg::SelectDirectories(bool directories)
         if (refresh_list)
             UpdateList();
     }
+}
+
+void FileDlg::AppendMissingSaveExtension(bool append)
+{
+    m_append_missing_save_extension = append;
 }
 
 void FileDlg::SetFileFilters(const std::vector<std::pair<std::string, std::string> >& filters)
@@ -476,6 +488,12 @@ void FileDlg::OkHandler(bool double_click)
         } else if (files.size() == 1) {
             results_valid = true;
             std::string save_file = *files.begin();
+            if (m_append_missing_save_extension &&
+                m_file_filters.size() == 1 &&
+                std::count(m_file_filters[0].second.begin(), m_file_filters[0].second.end(), '*') == 1 &&
+                m_file_filters[0].second[0] == '*') {
+                save_file += m_file_filters[0].second.substr(1);
+            }
             if (!fs::path::default_name_check()(save_file)) {
                 boost::shared_ptr<ThreeButtonDlg> dlg(
                     style->NewThreeButtonDlg(150, 75, m_malformed_filename_str, m_font, m_color, m_border_color, m_color,

@@ -39,6 +39,7 @@
 #undef int64_t
 #endif
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -491,7 +492,8 @@ void FileDlg::OkHandler(bool double_click)
             if (m_append_missing_save_extension &&
                 m_file_filters.size() == 1 &&
                 std::count(m_file_filters[0].second.begin(), m_file_filters[0].second.end(), '*') == 1 &&
-                m_file_filters[0].second[0] == '*') {
+                m_file_filters[0].second[0] == '*' &&
+                !boost::algorithm::ends_with(save_file, m_file_filters[0].second.substr(1))) {
                 save_file += m_file_filters[0].second.substr(1);
             }
             if (!fs::path::default_name_check()(save_file)) {

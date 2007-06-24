@@ -157,7 +157,7 @@ void GG::Slider::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_tab);
 
     if (1 <= version)
-        ar & m_page_sz;
+        ar & BOOST_SERIALIZATION_NVP(m_page_sz);
 }
 
 #endif // _GG_Slider_h_

@@ -27,8 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SDL.h"
-#include "SDL_thread.h"
+#include "SDL/SDL.h"
+#include "SDL/SDL_thread.h"
 
 #include <GG/net/fastevents.h>
 #include <GG/net/queue.h>

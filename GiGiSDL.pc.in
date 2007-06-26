@@ -7,4 +7,4 @@ Description: An SDL-based input driver and application framework for use with li
 Requires: GiGi = ${version}, GiGiNet = ${version}
 Version: ${version}
 Libs: -lGiGiSDL %(gigi_sdl_libs)s
-Cflags: %(sdl_include)s
+Cflags: 

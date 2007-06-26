@@ -29,8 +29,8 @@
 #include <signal.h>
 #include <math.h>
 
-#include "SDL.h"
-#include "SDL_thread.h"
+#include "SDL/SDL.h"
+#include "SDL/SDL_thread.h"
 #include <GG/net/SDL_net.h>
 
 #include <GG/net/net2.h>

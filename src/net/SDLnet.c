@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include "SDL_byteorder.h"
+#include "SDL/SDL_byteorder.h"
 
 #include <GG/net/SDLnetsys.h>
 #include <GG/net/SDL_net.h>

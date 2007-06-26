@@ -113,8 +113,7 @@ def CreateGiGiSDLPCFile(target, source, env):
         'prefix' : env['prefix'],
         'incdir' : env.subst(env['incdir']),
         'version' : gigi_version,
-        'gigi_sdl_libs' : '',
-        'sdl_include' : ''
+        'gigi_sdl_libs' : ''
     }
     for flag in env['LINKFLAGS']:
         if flag not in pc_file_link_flags_used:
@@ -128,9 +127,6 @@ def CreateGiGiSDLPCFile(target, source, env):
         if lib.find('net') == -1 and lib not in pc_file_libs_used:
             pc_file_libs_used.append(lib)
             values['gigi_sdl_libs'] += ' -l' + (lib[0] != '$' and lib or env.subst(lib))
-    for path in env['CPPPATH']:
-        if path.find('SDL') != -1 and path[0] != '#':
-            values['sdl_include'] += ' -I' + (path[0] != '$' and path or env.subst(path))
     for tgt, src in zip(target, source):
         pc = open(str(tgt), 'w')
         pc_in = open(str(src), 'r')
@@ -175,9 +171,9 @@ def AppendPackagePaths(package, env):
     if not lib and root:
         lib = os.path.normpath(os.path.join(root, 'lib'))
     if inc:
-        env.Append(CPPPATH = [inc])
+        env.Append(CPPPATH = [os.path.abspath(inc)])
     if lib:
-        env.Append(LIBPATH = [lib])
+        env.Append(LIBPATH = [os.path.abspath(lib)])
 
 def CheckPkgConfig(context, version):
     context.Message('Checking for pkg-config... ')
@@ -313,7 +309,7 @@ def CheckSDL(context, options, conf, sdl_config, check_lib):
             context.Result(False)
             return False
     version_regex = re.compile(r'SDL_MAJOR_VERSION\s*(\d+).*SDL_MINOR_VERSION\s*(\d+).*SDL_PATCHLEVEL\s*(\d+)', re.DOTALL)
-    if not conf.CheckVersionHeader('SDL', 'SDL_version.h', version_regex, sdl_version, True):
+    if not conf.CheckVersionHeader('SDL', 'SDL/SDL_version.h', version_regex, sdl_version, True):
         context.Message('SDL configuration... ')
         context.Result(False)
         return False

@@ -29,7 +29,7 @@
 /** \file fastevents.h
     Part of the SDL_Net2/Fastevents libs. */
 
-#include "SDL.h"
+#include "SDL/SDL.h"
 
 #ifdef __cplusplus
 extern "C" {

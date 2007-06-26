@@ -26,9 +26,9 @@
 #ifndef _SDLnet_h
 #define _SDLnet_h
 
-#include "SDL.h"
-#include "SDL_endian.h"
-#include "begin_code.h"
+#include "SDL/SDL.h"
+#include "SDL/SDL_endian.h"
+#include "SDL/begin_code.h"
 
 
 
@@ -416,6 +416,6 @@ do					\
 #ifdef __cplusplus
 };
 #endif
-#include "close_code.h"
+#include "SDL/close_code.h"
 
 #endif /* _SDLnet_h */

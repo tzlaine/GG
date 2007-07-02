@@ -109,7 +109,11 @@ protected:
     int     BottomMargin() const;           ///< returns the width of the scrollbar at the bottom of the control (0 if none)
     std::pair<int, int>
             CharAt(const Pt& pt) const;     ///< returns row and character index of \a pt, or (0, 0) if \a pt falls outside the text.  \a pt is in client-space coordinates
-    int     StringIndexOf(int row, int char_idx) const; ///< returns index into WindowText() of position \a char_idx in row \a row.  Not range-checked.
+
+    /** returns index into WindowText() of position \a char_idx in row \a row, using \a line_data instead of the current
+        line data, if it is supplied.  Not range-checked. */
+    int     StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+
     int     RowStartX(int row) const;       ///< returns the the x-coordinate of the beginning of row \a row, in cleint-space coordinates.  Not range-checked.
     int     CharXOffset(int row, int idx) const; ///< returns the distance in pixels from the start of row \a row to the character at index idx.  Not range-checked.
     int     RowAt(int y) const;             ///< returns the line that falls under y coordinate \a y.  \a y must be in client-space coordinates.

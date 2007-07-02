@@ -59,6 +59,9 @@ const int MultiEdit::BORDER_THICK = 2;
 
 MultiEdit::MultiEdit() :
     Edit(),
+    m_style(0),
+    m_cursor_begin(0, 0),
+    m_cursor_end(0, 0),
     m_first_col_shown(0),
     m_first_row_shown(0),
     m_max_lines_history(0),
@@ -455,30 +458,30 @@ void MultiEdit::SetText(const std::string& str)
             int last_line = m_max_lines_history - 1;
             int cursor_begin_idx = -1; // used to correct the cursor range when lines get chopped
             int cursor_end_idx = -1;
-            int first_line_char_idx = StringIndexOf(first_line, 0);
-            int last_line_char_idx = StringIndexOf(last_line, 0);
             if (m_style & TERMINAL_STYLE) {
-                first_line = (lines.size() - 1) - (m_max_lines_history - 1);
+                first_line = lines.size() - m_max_lines_history;
                 last_line = lines.size() - 1;
-                first_line_char_idx = StringIndexOf(first_line, 0);
-                last_line_char_idx = StringIndexOf(last_line, 0);
-                // chopping these lines off the front will invalidate the cursor range unless we do this
-                cursor_begin_idx = StringIndexOf(m_cursor_begin.first, m_cursor_begin.second) - first_line_char_idx;
-                cursor_end_idx = StringIndexOf(m_cursor_end.first, m_cursor_end.second) - first_line_char_idx;
             }
-            TextControl::SetText(str.substr(first_line_char_idx, last_line_char_idx - first_line_char_idx));
+            int first_line_first_char_idx = StringIndexOf(first_line, 0, &lines);
+            int last_line_last_char_idx = last_line < static_cast<int>(lines.size() - 1) ? StringIndexOf(last_line + 1, 0, &lines) : str.size();
+            if (m_style & TERMINAL_STYLE) {
+                // chopping these lines off the front will invalidate the cursor range unless we do this
+                cursor_begin_idx = std::max(0, StringIndexOf(m_cursor_begin.first, m_cursor_begin.second, &lines) - first_line_first_char_idx);
+                cursor_end_idx = std::max(0, StringIndexOf(m_cursor_end.first, m_cursor_end.second, &lines) - first_line_first_char_idx);
+            }
+            TextControl::SetText(str.substr(first_line_first_char_idx, last_line_last_char_idx - first_line_first_char_idx));
             if (cursor_begin_idx != -1 && cursor_end_idx != -1) {
                 bool found_cursor_begin = false;
                 bool found_cursor_end = false;
                 for (unsigned int i = 0; i < GetLineData().size(); ++i) {
                     if (!found_cursor_begin && cursor_begin_idx <= GetLineData()[i].char_data.back().original_char_index) {
                         m_cursor_begin.first = i;
-                        m_cursor_begin.second = cursor_begin_idx - GetLineData()[i].char_data.front().original_char_index;
+                        m_cursor_begin.second = cursor_begin_idx - StringIndexOf(i, 0);
                         found_cursor_begin = true;
                     }
                     if (!found_cursor_end && cursor_end_idx <= GetLineData()[i].char_data.back().original_char_index) {
                         m_cursor_end.first = i;
-                        m_cursor_end.second = cursor_end_idx - GetLineData()[i].char_data.front().original_char_index;
+                        m_cursor_end.second = cursor_end_idx - StringIndexOf(i, 0);
                         found_cursor_end = true;
                     }
                 }
@@ -566,10 +569,10 @@ std::pair<int, int> MultiEdit::CharAt(const Pt& pt) const
     return retval;
 }
 
-int MultiEdit::StringIndexOf(int row, int char_idx) const
+int MultiEdit::StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data) const
 {
     int retval;
-    const std::vector<Font::LineData>& lines = GetLineData();
+    const std::vector<Font::LineData>& lines = line_data ? *line_data : GetLineData();
     if (lines[row].Empty()) {
         if (!row)
             return 0;

@@ -41,8 +41,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/exception.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/cerrno.hpp>
 #include <boost/format.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/dynamic.hpp>
@@ -114,7 +113,10 @@ namespace {
         return root_name.size() == 2 && std::isalpha(root_name[0]) && root_name[1] == ':';
     }
 
-    const bool WIN32_PATHS = WindowsRoot(boost::filesystem::initial_path().root_name());
+    bool Win32Paths()
+    {
+        return WindowsRoot(boost::filesystem::initial_path().root_name());
+    }
 
     const int H_SPACING = 10;
     const int V_SPACING = 10;
@@ -123,7 +125,7 @@ namespace {
 namespace fs = boost::filesystem;
 
 // static member definition(s)
-fs::path FileDlg::s_working_dir = fs::initial_path();
+fs::path FileDlg::s_working_dir = fs::current_path();
 
 
 FileDlg::FileDlg() :
@@ -380,7 +382,7 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
-    fs::path filename_path = fs::complete(fs::path(filename, fs::native));
+    fs::path filename_path = fs::complete(fs::path(filename));
     m_files_edit = style->NewEdit(0, 0, 1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
     m_filter_list = style->NewDropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
@@ -443,7 +445,7 @@ void FileDlg::Init(const std::string& directory)
     AttachChild(m_file_types_label);
 
     if (directory != "") {
-        fs::path dir_path = fs::complete(fs::path(directory, fs::native));
+        fs::path dir_path = fs::complete(fs::path(directory));
         if (!fs::exists(dir_path))
             throw BadInitialDirectory("FileDlg::Init() : Initial directory \"" + dir_path.native_directory_string() + "\" does not exist.");
         SetWorkingDirectory(dir_path);
@@ -496,14 +498,14 @@ void FileDlg::OkHandler(bool double_click)
                 !boost::algorithm::ends_with(save_file, m_file_filters[0].second.substr(1))) {
                 save_file += m_file_filters[0].second.substr(1);
             }
-            if (!fs::path::default_name_check()(save_file)) {
+            if (!fs::native(save_file)) {
                 boost::shared_ptr<ThreeButtonDlg> dlg(
                     style->NewThreeButtonDlg(150, 75, m_malformed_filename_str, m_font, m_color, m_border_color, m_color,
                                              m_text_color, 1, m_three_button_dlg_ok_str));
                 dlg->Run();
                 return;
             }
-            fs::path p = s_working_dir / fs::path(save_file, fs::native);
+            fs::path p = s_working_dir / fs::path(save_file);
             m_result.insert(m_select_directories ? p.native_directory_string() : p.native_file_string());
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
@@ -520,7 +522,7 @@ void FileDlg::OkHandler(bool double_click)
             OpenDirectory();
         } else { // ensure the file(s) are valid before returning them
             for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it) {
-                if (!fs::path::default_name_check()(*it)) {
+                if (!fs::native(*it)) {
                     std::string msg_str = boost::str(boost::format(m_invalid_filename_str) % (*it));
                     boost::shared_ptr<ThreeButtonDlg> dlg(
                         style->NewThreeButtonDlg(300, 125, msg_str, m_font, m_color, m_border_color, m_color,
@@ -529,7 +531,7 @@ void FileDlg::OkHandler(bool double_click)
                     results_valid = false;
                     break;
                 }
-                fs::path p = s_working_dir / fs::path(*it, fs::native);
+                fs::path p = s_working_dir / fs::path(*it);
                 if (fs::exists(p)) {
                     bool p_is_directory = fs::is_directory(p);
                     if (!m_select_directories && p_is_directory) {
@@ -678,7 +680,7 @@ void FileDlg::UpdateList()
     if (!m_in_win32_drive_selection) {
         if ((s_working_dir.string() != s_working_dir.root_path().string() &&
              s_working_dir.branch_path().string() != "") ||
-            WIN32_PATHS) {
+            Win32Paths()) {
             ListBox::Row* row = new ListBox::Row();
             row->push_back("[..]", m_font, m_text_color);
             m_files_list->Insert(row);
@@ -692,7 +694,7 @@ void FileDlg::UpdateList()
                 }
             } catch (const fs::filesystem_error& e) {
                 // ignore files for which permission is denied, and rethrow other exceptions
-                if (e.error() != fs::security_error)
+                if (e.system_error() != EACCES)
                     throw;
             }
         }
@@ -713,7 +715,7 @@ void FileDlg::UpdateList()
                     }
                 } catch (const fs::filesystem_error& e) {
                     // ignore files for which permission is denied, and rethrow other exceptions
-                    if (e.error() != fs::security_error)
+                    if (e.system_error() != EACCES)
                         throw;
                 }
             }
@@ -721,7 +723,7 @@ void FileDlg::UpdateList()
     } else {
         for (char c = 'C'; c <= 'Z'; ++c) {
             try {
-                fs::path path(c + std::string(":"), fs::native);
+                fs::path path(c + std::string(":"));
                 if (fs::exists(path)) {
                     ListBox::Row* row = new ListBox::Row();
                     row->push_back("[" + path.root_name() + "]", m_font, m_text_color);
@@ -777,13 +779,13 @@ void FileDlg::OpenDirectory()
             }
         } else {
             if (!m_in_win32_drive_selection) {
-                SetWorkingDirectory(s_working_dir / fs::path(directory, fs::native));
+                SetWorkingDirectory(s_working_dir / fs::path(directory));
             } else {
                 m_in_win32_drive_selection = false;
                 try {
-                    SetWorkingDirectory(fs::path(directory + "\\", fs::native));
+                    SetWorkingDirectory(fs::path(directory + "\\"));
                 } catch (const fs::filesystem_error& e) {
-                    if (e.error() == fs::io_error) {
+                    if (e.system_error() == EIO) {
                         m_in_win32_drive_selection = true;
                         m_files_edit->Clear();
                         m_curr_dir_text->SetText("");

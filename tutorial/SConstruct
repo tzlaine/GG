@@ -7,16 +7,16 @@ platform_str = "%s" % Platform()
 if platform_str == 'posix':
     print 'Posix platform detected ...'
     gg_dir = '/usr/local/include'
-    cpppath = ['/usr/local/include/boost-1_33_1',
+    cpppath = ['/usr/local/include/boost-1_34',
                '/usr/include/SDL',
                '/usr/include/freetype2',
                gg_dir]
     libs = ['GiGiSDL',
             'GiGi',
             'GiGiNet',
-            'boost_signals-gcc-mt-d-1_33_1',
-            'boost_filesystem-gcc-mt-d-1_33_1',
-            'boost_serialization-gcc-mt-d-1_33_1']
+            'boost_signals-gcc41-mt-d-1_34',
+            'boost_filesystem-gcc41-mt-d-1_34',
+            'boost_serialization-gcc41-mt-d-1_34']
     ccflags = '-DHAVE_CONFIG_H -D_REENTRANT -Wall -g'
     env = Environment(CCFLAGS = '',
                       CPPPATH = cpppath,
@@ -28,7 +28,7 @@ if platform_str == 'posix':
 if platform_str == 'win32':
     print 'Win32 platform detected ...'
     gg_dir = '../'
-    cpppath = ['C:/Boost/include/boost-1_33_1',
+    cpppath = ['C:/Boost/include/boost-1_34',
                'C:/SDL-1.2.7/include',
                'C:/log4cpp-0.3.4b/include',
                'C:/freetype-2.1.7/include',

@@ -182,8 +182,7 @@ GUI::GUI(const std::string& app_name)
 }
 
 GUI::~GUI()
-{
-}
+{ Wnd::s_default_browse_info_wnd.reset(); }
 
 Wnd* GUI::FocusWnd() const
 {

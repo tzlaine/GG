@@ -36,7 +36,6 @@ if not missing_pkg_config:
 options.Add(BoolOption('disable_allegro_hack',
                        'Disable the hack for Allegro-linked DevILs (ignored if DevIL is not linked against Allegro)',
                        0))
-options.Add(BoolOption('disable_net', 'Disables GG networking support (the GiGiNet library)', 0))
 options.Add(BoolOption('disable_sdl', 'Disables GG SDL support (the GiGiSDL library)', 0))
 options.Add('with_boost', 'Root directory of boost installation')
 options.Add('with_boost_include', 'Specify exact include dir for boost headers')
@@ -150,7 +149,6 @@ options.Save('options.cache', env)
 new_options_cache = ParseOptionsCacheFile('options.cache')
 reconfigurable_options = [
     'disable_allegro_hack',
-    'disable_net',
     'disable_sdl',
     'with_boost',
     'with_boost_include',
@@ -178,13 +176,7 @@ if preconfigured:
             preconfigured = False
             break
 
-if env['disable_sdl'] and not env['disable_net']:
-    print 'Warning: since SDL is disabled, the GiGiNet build is disabled as well.'
-    env['disable_net'] = 1
 if not env['multithreaded']:
-    if not env['disable_net']:
-        print 'Warning: since multithreaded code is disabled, the GiGiNet build is disabled as well.'
-        env['disable_net'] = 1
     if not env['disable_sdl']:
         print 'Warning: since multithreaded code is disabled, the GiGiSDL build is disabled as well.'
         env['disable_sdl'] = 1
@@ -343,7 +335,6 @@ int main() {
 
         # create GG/Config.h
         gg_config_h_values = {
-            'gg_use_net' : not env['disable_net'] and 1 or 0,
             'gg_devil_with_allegro' : env['devil_with_allegro'] and '#define GG_DEVIL_WITH_ALLEGRO 1' or '/* #undef GG_DEVIL_WITH_ALLEGRO */',
             'gg_no_allegro_hack' : env['disable_allegro_hack'] and '#define GG_NO_ALLEGRO_HACK 1' or '/* #undef GG_NO_ALLEGRO_HACK */'
             }
@@ -486,39 +477,23 @@ if not env['disable_sdl']:
     sdl_env = env.Copy()
     if str(Platform()) == 'win32':
         sdl_env.Append(LIBS = ['SDL', 'GiGi'])
-        if not env['disable_net']:
-            sdl_env.Append(LIBS = ['GiGiNet'])
     gigi_sdl_objects, gigi_sdl_sources = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
-
-# define libGiGiNet objects
-if not env['disable_net']:
-    net_env = env.Copy()
-    if str(Platform()) == 'win32':
-        net_env.Append(LIBS = ['SDL', 'wsock32'])
-    gigi_net_objects, gigi_net_sources = SConscript(os.path.normpath('src/net/SConscript'), exports = 'net_env')
 
 if env['dynamic']:
     lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
     if not env['disable_sdl']:
         lib_gigi_sdl = sdl_env.SharedLibrary('GiGiSDL', gigi_sdl_objects)
-    if not env['disable_net']:
-        lib_gigi_net = net_env.SharedLibrary('GiGiNet', gigi_net_objects)
 else:
     lib_gigi = env.StaticLibrary('GiGi', gigi_objects)
     if not env['disable_sdl']:
         lib_gigi_sdl = sdl_env.StaticLibrary('GiGiSDL', gigi_sdl_objects)
-    if not env['disable_net']:
-        lib_gigi_net = net_env.StaticLibrary('GiGiNet', gigi_net_objects)
 
-Depends(lib_gigi_sdl, lib_gigi_net)
 Depends(lib_gigi_sdl, lib_gigi)
 
 if not missing_pkg_config and str(Platform()) != 'win32':
     gigi_pc = env.Command('GiGi.pc', 'GiGi.pc.in', CreateGiGiPCFile)
     if not env['disable_sdl']:
         gigi_sdl_pc = env.Command('GiGiSDL.pc', 'GiGiSDL.pc.in', CreateGiGiSDLPCFile)
-        if not env['disable_net']:
-            gigi_net_pc = env.Command('GiGiNet.pc', 'GiGiNet.pc.in', CreateGiGiNetPCFile)
 
 header_dir = os.path.normpath(os.path.join(env.subst(env['incdir']), 'GG'))
 lib_dir = os.path.normpath(env.subst(env['libdir']))
@@ -526,15 +501,12 @@ lib_dir = os.path.normpath(env.subst(env['libdir']))
 # install target
 gigi_libname = str(lib_gigi[0])
 gigi_sdl_libname = str(lib_gigi_sdl[0])
-gigi_net_libname = str(lib_gigi_net[0])
 installed_gigi_libname = gigi_libname
 installed_gigi_sdl_libname = gigi_sdl_libname
-installed_gigi_net_libname = gigi_net_libname
 if str(Platform()) == 'posix' and env['dynamic']:
     gigi_version_suffix = '.' + gigi_version
     installed_gigi_libname += gigi_version_suffix
     installed_gigi_sdl_libname += gigi_version_suffix
-    installed_gigi_net_libname += gigi_version_suffix
 
 for root, dirs, files in os.walk('GG'):
     if '.svn' in dirs:
@@ -568,18 +540,6 @@ if not env['disable_sdl']:
                               'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
     if not missing_pkg_config and str(Platform()) != 'win32':
         Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_sdl_pc))
-if not env['disable_net']:
-    if str(Platform()) == 'win32':
-        Alias('install', Install(lib_dir, lib_gigi_net))
-    else:
-        Alias('install', InstallAs(lib_dir + '/' + installed_gigi_net_libname, lib_gigi_net))
-        if env['dynamic']:
-            Alias('install',
-                  env.Command(lib_dir + '/' + gigi_net_libname,
-                              lib_dir + '/' + installed_gigi_net_libname,
-                              'ln -s ' + lib_dir + '/' + installed_gigi_net_libname + ' ' + lib_dir + '/' + gigi_net_libname))
-    if not missing_pkg_config and str(Platform()) != 'win32':
-        Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_net_pc))
 
 # uninstall target
 # This is a dirty hack, used here because I don't know how else to do this.  Basically, I've created a Command that
@@ -600,12 +560,6 @@ if not env['disable_sdl']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
     if not missing_pkg_config and str(Platform()) != 'win32':
         deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_sdl_pc[0])))))
-if not env['disable_net']:
-    deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_net[0])))))
-    if str(Platform()) == 'posix' and env['dynamic']:
-        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_net_libname))))
-    if not missing_pkg_config and str(Platform()) != 'win32':
-        deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_net_pc[0])))))
 uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)
 Alias('uninstall', uninstall_cmd)
 
@@ -647,24 +601,12 @@ Alias('uninstall', uninstall_cmd)
 ##                                       buildtarget = lib_gigi,
 ##                                       variant = variant_name)
 ##        Alias('msvc_project', gigi_sdl_project)
-##    if not env['disable_net']:
-##        gigi_net_project = MSVSProject(target = 'msvc/GiGiNet' + env['MSVSPROJECTSUFFIX'],
-##                                       srcs = gigi_sources,
-##                                       incs = '',
-##                                       localincs = '',
-##                                       resources = '',
-##                                       misc = '',
-##                                       buildtarget = lib_gigi,
-##                                       variant = variant_name)
-##        Alias('msvc_project', gigi_net_project)
 
 # default targets
 if env['disable_sdl']:
     Default(lib_gigi)
-elif env['disable_net']:
-    Default(lib_gigi, lib_gigi_sdl)
 else:
-    Default(lib_gigi, lib_gigi_sdl, lib_gigi_net)
+    Default(lib_gigi, lib_gigi_sdl)
 
 if OptionValue('scons_cache_dir', env):
     CacheDir(OptionValue('scons_cache_dir', env))

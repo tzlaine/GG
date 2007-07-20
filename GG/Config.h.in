@@ -26,10 +26,6 @@
 #ifndef _GGConfig_h_
 #define _GGConfig_h_
 
-#ifndef GG_USE_NET
-#define GG_USE_NET %(gg_use_net)d
-#endif
-
 /* Define if DevIL was compiled with allegro */
 %(gg_devil_with_allegro)s
 

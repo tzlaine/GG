@@ -29,29 +29,13 @@
 #ifndef _GG_SDLGUI_h_
 #define _GG_SDLGUI_h_
 
-#ifndef _GG_Config_h_
-# include <GG/Config.h>
-#endif
-
-#if defined(GG_USE_NET) && GG_USE_NET
-# ifndef _FASTEVENTS_H_
-#  include <GG/net/fastevents.h>
-# endif
-# ifndef _NET2_H_
-#  include <GG/net/net2.h>
-# endif
-#endif
-
-#ifndef _GG_GUI_h_
+#include <GG/Config.h>
 #include <GG/GUI.h>
-#endif
 
-#ifndef _SDL_H
-#include <SDL.h>
-#endif
+#include <SDL/SDL.h>
 
 /** This is an abstract singleton class that represents the GUI framework of an SDL OpenGL 
-    application. By default, it includes Bob Pendleton's fastevents/net2 library.
+    application.
     <p>
     Usage:<br>
     Any application including an object of this class should declare that object as a local variable in main(). 
@@ -71,10 +55,10 @@
     <p>
     SDLGUI takes a two-tiered approach to event handling.  The event pump calls HandlSystemEvents(), which
     polls for SDL events and handles them by first determining whether the event is GG-related, or some other
-    non-GG event, such as SDL_QUIT, a net2 network event, etc.  GG events and non-GG events are passed to 
-    HandleGGEvent() and HandleNonGGEvent(), respectively.  For most uses, there should be no need to override 
-    the behavior of HandleSDLEvents().  However, the HandleNonGGEvent() default implementation only responds to 
-    SDL_QUIT events, and so should be overridden in most cases. */
+    non-GG event, such as SDL_QUIT, etc.  GG events and non-GG events are passed to HandleGGEvent() and
+    HandleNonGGEvent(), respectively.  For most uses, there should be no need to override the behavior of
+    HandleSDLEvents().  However, the HandleNonGGEvent() default implementation only responds to SDL_QUIT
+    events, and so should be overridden in most cases. */
 class GG_API SDLGUI : public GG::GUI
 {
 public:

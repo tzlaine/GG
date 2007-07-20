@@ -8,12 +8,10 @@ if platform_str == 'posix':
     print 'Posix platform detected ...'
     gg_dir = '/usr/local/include'
     cpppath = ['/usr/local/include/boost-1_34',
-               '/usr/include/SDL',
                '/usr/include/freetype2',
                gg_dir]
     libs = ['GiGiSDL',
             'GiGi',
-            'GiGiNet',
             'boost_signals-gcc41-mt-d-1_34',
             'boost_filesystem-gcc41-mt-d-1_34',
             'boost_serialization-gcc41-mt-d-1_34']
@@ -34,8 +32,7 @@ if platform_str == 'win32':
                'C:/freetype-2.1.7/include',
                'C:/zlib/include',
                gg_dir]
-    libs = ['GiGiNet',
-            'GiGiSDL',
+    libs = ['GiGiSDL',
             'GiGi',
             'opengl32',
             'glu32',

@@ -25,8 +25,7 @@
     - Communication of UI controls via signals and slots
     - Support for 2D-, 3D-, and mixed-mode rendering
     - Managment of textures and fonts
-    - XML serialization of UI elements
-    - Optional network support; SDL_net and Fastevents make it possible to receive network packets as SDL messages
+    - Serialization of UI elements
 
     \section nonfeatures Non-Features
     - GG is not fully threadsafe, due to its use of signals and slots
@@ -45,10 +44,6 @@
     Optional libraries:
     - SDL 1.2.7 - http://www.libsdl.org
 
-    Also optional, but distributed with GG:
-    - SDL_net 1.2.7 - http://www.libsdl.org/projects/SDL_net
-    - fastevents & SDL_net2 - http://gameprogrammer.com/game.html
-   
     GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
     documentation will appear in the GG/doc/html directory.
     <br>

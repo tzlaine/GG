@@ -167,22 +167,6 @@ void OgreSDLGUI::GLInit()
 
 void OgreSDLGUI::Initialize()
 {
-#if defined(GG_USE_NET) && GG_USE_NET
-    if (SDLNet_Init() < 0) {
-        std::cerr << "SDL Net initialization failed: " << SDLNet_GetError();
-        Exit(1);
-    }
-
-    if (FE_Init() < 0) {
-        std::cerr << "FastEvents initialization failed: " << FE_GetError();
-        Exit(1);
-    }
-
-    if (NET2_Init() < 0) {
-        std::cerr << "SDL Net2 initialization failed: " << NET2_GetError();
-        Exit(1);
-    }
-#endif // GG_USE_NET
 }
 
 void OgreSDLGUI::HandleNonGGEvent(const SDL_Event& event)
@@ -199,11 +183,6 @@ void OgreSDLGUI::FinalCleanup()
 
 void OgreSDLGUI::SDLQuit()
 {
-#if defined(GG_USE_NET) && GG_USE_NET
-    NET2_Quit();
-    FE_Quit();
-    SDLNet_Quit();
-#endif // GG_USE_NET
 }
 
 void OgreSDLGUI::Run()

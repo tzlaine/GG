@@ -29,7 +29,7 @@ def GenerateHelpText(options, env):
         'Targets:',
         '========',
         '',
-        'The default target builds GiGi, GiGiSDL, and GiGiNet based on the options you specify.  Not that some options force GiGiSDL and/or GiGiNet not to be built.',
+        'The default target builds GiGi and GiGiSDL based on the options you specify.  Not that some options force GiGiSDL not to be built.',
         '',
         'install',
         'Installs the default targets in the installation directory, building it first if needed.',
@@ -119,41 +119,6 @@ def CreateGiGiSDLPCFile(target, source, env):
         if flag not in pc_file_link_flags_used:
             pc_file_link_flags_used.append(flag)
             values['gigi_sdl_libs'] += ' ' + (flag[0] != '$' and flag or env.subst(flag))
-    for path in env['LIBPATH']:
-        if path.find('net') == -1 and path not in pc_file_lib_paths_used:
-            pc_file_lib_paths_used.append(path)
-            values['gigi_sdl_libs'] += ' -L' + (path[0] != '$' and path or env.subst(path))
-    for lib in env['LIBS']:
-        if lib.find('net') == -1 and lib not in pc_file_libs_used:
-            pc_file_libs_used.append(lib)
-            values['gigi_sdl_libs'] += ' -l' + (lib[0] != '$' and lib or env.subst(lib))
-    for tgt, src in zip(target, source):
-        pc = open(str(tgt), 'w')
-        pc_in = open(str(src), 'r')
-        pc.write(pc_in.read() % values)
-        pc.close()
-        pc_in.close()
-    return None
-
-def CreateGiGiNetPCFile(target, source, env):
-    values = {
-        'prefix' : env['prefix'],
-        'incdir' : env.subst(env['incdir']),
-        'version' : gigi_version,
-        'gigi_net_libs' : ''
-    }
-    for flag in env['LINKFLAGS']:
-        if flag not in pc_file_link_flags_used:
-            pc_file_link_flags_used.append(flag)
-            values['gigi_net_libs'] += ' ' + (flag[0] != '$' and flag or env.subst(flag))
-    for path in env['LIBPATH']:
-        if path not in pc_file_lib_paths_used:
-            pc_file_lib_paths_used.append(path)
-            values['gigi_net_libs'] += ' -L' + (path[0] != '$' and path or env.subst(path))
-    for lib in env['LIBS']:
-        if lib not in pc_file_libs_used:
-            pc_file_libs_used.append(lib)
-            values['gigi_net_libs'] += ' -l' + (lib[0] != '$' and lib or env.subst(lib))
     for tgt, src in zip(target, source):
         pc = open(str(tgt), 'w')
         pc_in = open(str(src), 'r')

@@ -135,18 +135,6 @@ void SDLGUI::SDLInit()
         Exit(1);
     }
 
-#if defined(GG_USE_NET) && GG_USE_NET
-    if (SDLNet_Init() < 0) {
-        std::cerr << "SDL Net initialization failed: " << SDLNet_GetError();
-        Exit(1);
-    }
-
-    if (FE_Init() < 0) {
-        std::cerr << "FastEvents initialization failed: " << FE_GetError();
-        Exit(1);
-    }
-#endif // GG_USE_NET
-
     vid_info = SDL_GetVideoInfo();
 
     if (!vid_info) {
@@ -160,13 +148,6 @@ void SDLGUI::SDLInit()
         std::cerr << "Video mode set failed: " << SDL_GetError();
         Exit(1);
     }
-
-#if defined(GG_USE_NET) && GG_USE_NET
-    if (NET2_Init() < 0) {
-        std::cerr << "SDL Net2 initialization failed: " << NET2_GetError();
-        Exit(1);
-    }
-#endif // GG_USE_NET
 
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
     EnableMouseButtonDownRepeat(SDL_DEFAULT_REPEAT_DELAY / 2, SDL_DEFAULT_REPEAT_INTERVAL / 2);
@@ -195,11 +176,7 @@ void SDLGUI::HandleSystemEvents()
 {
     // handle events
     SDL_Event event;
-#if defined(GG_USE_NET) && GG_USE_NET
-    while (0 < FE_PollEvent(&event)) {
-#else
     while (0 < SDL_PollEvent(&event)) {
-#endif
         bool send_to_gg = false;
         EventType gg_event = MOUSEMOVE;
         GG::Key key = GG::GGK_UNKNOWN;
@@ -274,11 +251,6 @@ void SDLGUI::FinalCleanup()
 void SDLGUI::SDLQuit()
 {
     FinalCleanup();
-#if defined(GG_USE_NET) && GG_USE_NET
-    NET2_Quit();
-    FE_Quit();
-    SDLNet_Quit();
-#endif // GG_USE_NET
     SDL_Quit();
 }
 

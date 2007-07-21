@@ -541,11 +541,6 @@ if not env['disable_sdl']:
     if not missing_pkg_config and str(Platform()) != 'win32':
         Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_sdl_pc))
 
-# uninstall target
-# This is a dirty hack, used here because I don't know how else to do this.  Basically, I've created a Command that
-# deletes the uninstallable files.  To keep it dependent on its target and source arguments, I made it depend on
-# SConstruct for its source, since it is guaranteed to exist, and a target with a filename which is pretty well
-# guaranteed not to exist, and which is in fact never created.
 deletions = [
     Delete(header_dir),
     Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi[0]))))
@@ -560,8 +555,9 @@ if not env['disable_sdl']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
     if not missing_pkg_config and str(Platform()) != 'win32':
         deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_sdl_pc[0])))))
-uninstall_cmd = env.Command('.unlikely_filename934765437', 'SConstruct', deletions)
-Alias('uninstall', uninstall_cmd)
+uninstall = env.Command('uninstall', '', deletions)
+env.AlwaysBuild(uninstall)
+env.Precious(uninstall)
 
 # MSVC project target
 ##if str(Platform()) == 'win32':

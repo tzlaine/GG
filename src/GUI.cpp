@@ -41,6 +41,11 @@
 #include <list>
 
 
+#define INSTRUMENT_GET_WINDOW_UNDER 0
+#if INSTRUMENT_GET_WINDOW_UNDER
+#include <iostream>
+#endif
+
 using namespace GG;
 
 namespace {
@@ -191,6 +196,10 @@ Wnd* GUI::FocusWnd() const
 
 Wnd* GUI::GetWindowUnder(const Pt& pt) const
 {
+#if INSTRUMENT_GET_WINDOW_UNDER
+    if (Wnd* w = s_impl->zlist.Pick(pt, ModalWindow()))
+        std::cerr << "GUI::GetWindowUnder() : " << w->WindowText() << " @ " << w << std::endl;
+#endif
     return s_impl->zlist.Pick(pt, ModalWindow());
 }
 

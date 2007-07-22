@@ -30,9 +30,8 @@
 #ifndef _GG_DropDownList_h_
 #define _GG_DropDownList_h_
 
-#ifndef _GG_ListBox_h_
 #include <GG/ListBox.h>
-#endif
+
 
 namespace GG {
 

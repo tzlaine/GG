@@ -26,13 +26,8 @@
 #ifndef _GG_SignalsAndSlots_h_
 #define _GG_SignalsAndSlots_h_
 
-#ifndef BOOST_BIND_HPP_INCLUDED
 #include <boost/bind.hpp>
-#endif
-
-#ifndef BOOST_PREPROCESSOR_CAT_HPP
 #include <boost/preprocessor/cat.hpp>
-#endif
 
 #include <GG/Signal0.h>
 #include <GG/Signal1.h>

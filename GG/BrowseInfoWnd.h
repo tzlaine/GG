@@ -30,11 +30,11 @@
 #ifndef _GG_BrowseInfoWnd_h_
 #define _GG_BrowseInfoWnd_h_
 
-#ifndef _GG_Wnd_h_
 #include <GG/Wnd.h>
-#endif
 
 #include <boost/serialization/is_abstract.hpp>
+#include <boost/serialization/version.hpp>
+
 
 namespace GG {
 

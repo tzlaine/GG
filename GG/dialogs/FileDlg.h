@@ -29,15 +29,10 @@
 #ifndef _GG_FileDlg_h_
 #define _GG_FileDlg_h_
 
-#ifndef _GG_Wnd_h_
-#include <GG/Wnd.h>
-#endif
-
-#ifndef _GG_ListBox_h_
 #include <GG/ListBox.h>
-#endif
 
 #include <boost/filesystem/path.hpp>
+
 
 namespace GG {
 

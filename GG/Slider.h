@@ -30,9 +30,10 @@
 #ifndef _GG_Slider_h_
 #define _GG_Slider_h_
 
-#ifndef _GG_Control_h_
 #include <GG/Control.h>
-#endif
+
+#include <boost/serialization/version.hpp>
+
 
 namespace GG {
 

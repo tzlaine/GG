@@ -55,30 +55,14 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 #include <GL/glu.h>
 
 // include useful boost headers
-#ifndef BOOST_SERIALIZATION_SHARED_PTR_HPP
-#include <boost/serialization/shared_ptr.hpp>
-#endif
-
-#ifndef BOOST_SIGNAL_HPP
 #include <boost/signal.hpp>
-#endif
 
 // other headers
-#ifndef _GG_Enum_h_
 #include <GG/Enum.h>
-#endif
-
-#ifndef _GG_SignalsAndSlots_h_
 #include <GG/SignalsAndSlots.h>
-#endif
-
-#ifndef _GG_PtRect_h_
 #include <GG/PtRect.h>
-#endif
-
-#ifndef _GG_Clr_h_
 #include <GG/Clr.h>
-#endif
+
 
 /** \namespace GG
     The namespace that encloses all GG classes, functions, typedefs, enums, etc. */

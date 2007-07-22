@@ -29,11 +29,11 @@
 #ifndef _GG_Clr_h_
 #define _GG_Clr_h_
 
-#ifndef _GG_Base_h_
 #include <GG/Base.h>
-#endif
 
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
+
 
 namespace GG {
 

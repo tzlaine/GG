@@ -33,6 +33,7 @@
 #include <map>
 #include <string>
 
+
 namespace GG {
 
 /** A base type for all templated EnumMap types. */

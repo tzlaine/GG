@@ -29,15 +29,11 @@
 #ifndef _GG_TextControl_h_
 #define _GG_TextControl_h_
 
-#ifndef _GG_Control_h_
 #include <GG/Control.h>
-#endif
-
-#ifndef _GG_Font_h_
 #include <GG/Font.h>
-#endif
 
 #include <boost/lexical_cast.hpp>
+
 
 namespace GG {
 

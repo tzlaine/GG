@@ -29,9 +29,8 @@
 #ifndef _GG_ThreeButtonDlg_h_
 #define _GG_ThreeButtonDlg_h_
 
-#ifndef _GG_Wnd_h_
 #include <GG/Wnd.h>
-#endif
+
 
 namespace GG {
 

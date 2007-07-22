@@ -30,33 +30,13 @@
 #ifndef _GG_Spin_h_
 #define _GG_Spin_h_
 
-#ifndef _GG_GUI_h_
-#include <GG/GUI.h>
-#endif
-
-#ifndef _GG_Button_h_
 #include <GG/Button.h>
-#endif
-
-#ifndef _GG_DrawUtil_h_
 #include <GG/DrawUtil.h>
-#endif
-
-#ifndef _GG_Edit_h_
 #include <GG/Edit.h>
-#endif
-
-#ifndef _GG_StyleFactory_h_
+#include <GG/GUI.h>
 #include <GG/StyleFactory.h>
-#endif
-
-#ifndef _GG_WndEditor_h_
 #include <GG/WndEditor.h>
-#endif
-
-#ifndef _GG_WndEvent_h_
 #include <GG/WndEvent.h>
-#endif
 
 #include <cmath>
 #include <limits>

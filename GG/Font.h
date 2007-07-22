@@ -31,13 +31,12 @@
 #ifndef _GG_Font_h_
 #define _GG_Font_h_
 
-#ifndef _GG_Texture_h_
 #include <GG/Texture.h>
-#endif
 
 #include <set>
 
 #include <boost/serialization/access.hpp>
+
 
 typedef unsigned long FT_ULong;
 struct FT_FaceRec_;

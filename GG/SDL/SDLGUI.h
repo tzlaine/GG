@@ -34,6 +34,7 @@
 
 #include <SDL/SDL.h>
 
+
 /** This is an abstract singleton class that represents the GUI framework of an SDL OpenGL 
     application.
     <p>

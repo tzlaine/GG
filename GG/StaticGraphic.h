@@ -29,13 +29,9 @@
 #ifndef _GG_StaticGraphic_h_
 #define _GG_StaticGraphic_h_
 
-#ifndef _GG_Control_h_
 #include <GG/Control.h>
-#endif
-
-#ifndef _GG_Texture_h_
 #include <GG/Texture.h>
-#endif
+
 
 namespace GG {
 

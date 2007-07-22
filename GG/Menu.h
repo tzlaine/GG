@@ -30,9 +30,8 @@
 #ifndef _GG_Menu_h_
 #define _GG_Menu_h_
 
-#ifndef _GG_Control_h_
 #include <GG/Control.h>
-#endif
+
 
 namespace GG {
 

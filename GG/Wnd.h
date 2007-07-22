@@ -29,18 +29,15 @@
 #ifndef _GG_Wnd_h_
 #define _GG_Wnd_h_
 
-#ifndef _GG_Base_h_
 #include <GG/Base.h>
-#endif
-
-#ifndef _GG_Exception_h_
 #include <GG/Exception.h>
-#endif
 
 #include <list>
 #include <set>
 
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
+
 
 namespace GG {
 

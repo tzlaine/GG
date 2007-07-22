@@ -29,13 +29,13 @@
 #ifndef _GG_PtRect_h_
 #define _GG_PtRect_h_
 
-#ifndef _GG_Base_h_
 #include <GG/Base.h>
-#endif
 
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
 
 #include <iosfwd>
+
 
 namespace GG {
 

@@ -30,16 +30,12 @@
 #ifndef _GG_Texture_h_
 #define _GG_Texture_h_
 
-#ifndef _GG_Base_h_
 #include <GG/Base.h>
-#endif
-
-#ifndef _GG_Exception_h_
 #include <GG/Exception.h>
-#endif
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/binary_object.hpp>
+
 
 namespace GG {
 

@@ -30,9 +30,10 @@
 #ifndef _GG_Button_h_
 #define _GG_Button_h_
 
-#ifndef _GG_TextControl_h_
 #include <GG/TextControl.h>
-#endif
+
+#include <boost/serialization/version.hpp>
+
 
 namespace GG {
 

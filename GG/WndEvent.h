@@ -29,9 +29,7 @@
 #ifndef _GG_WndEvent_h_
 #define _GG_WndEvent_h_
 
-#ifndef _GG_Base_h_
 #include <GG/Base.h>
-#endif
 
 #include <map>
 

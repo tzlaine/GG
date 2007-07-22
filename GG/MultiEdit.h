@@ -29,9 +29,8 @@
 #ifndef _GG_MultiEdit_h_
 #define _GG_MultiEdit_h_
 
-#ifndef _GG_Edit_h_
 #include <GG/Edit.h>
-#endif
+
 
 namespace GG {
 

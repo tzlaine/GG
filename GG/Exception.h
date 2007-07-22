@@ -48,6 +48,7 @@
 #include <stdexcept>
 #include <string>
 
+
 namespace GG {
 
 /** This is the base class for all GG exceptions.  It is based on the std::exception class.  As required by its

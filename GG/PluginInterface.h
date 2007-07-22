@@ -29,19 +29,11 @@
 #ifndef _GG_PluginInterface_h_
 #define _GG_PluginInterface_h_
 
-#ifndef _GG_GUI_h_
-#include  <GG/GUI.h>
-#endif
-
-#ifndef _GG_Base_h_
-#include  <GG/Base.h>
-#endif
-
-#ifndef LTDL_H
+#include <GG/GUI.h>
 #include <GG/ltdl.h>
-#endif
 
 #include <string>
+
 
 namespace boost { namespace archive {
     class xml_oarchive;

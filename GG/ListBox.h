@@ -29,15 +29,13 @@
 #ifndef _GG_ListBox_h_
 #define _GG_ListBox_h_
 
-#ifndef _GG_Control_h_
 #include <GG/Control.h>
-#endif
-
-#ifndef _GG_Timer_h_
 #include <GG/Timer.h>
-#endif
 
 #include <set>
+
+#include <boost/serialization/version.hpp>
+
 
 namespace GG {
 

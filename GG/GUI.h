@@ -29,13 +29,9 @@
 #ifndef _GG_GUI_h_ 
 #define _GG_GUI_h_
 
-#ifndef _GG_Base_h_
 #include <GG/Base.h>
-#endif
-
-#ifndef _GG_Font_h_
 #include <GG/Font.h>
-#endif
+
 
 namespace boost { namespace archive {
     class xml_oarchive;

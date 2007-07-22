@@ -29,9 +29,8 @@
 #ifndef _GG_ColorDlg_h_
 #define _GG_ColorDlg_h_
 
-#ifndef _GG_Button_h_
 #include <GG/Button.h>
-#endif
+
 
 namespace GG {
 

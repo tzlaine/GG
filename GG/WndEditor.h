@@ -30,25 +30,11 @@
 #ifndef _GG_WndEditor_h_
 #define _GG_WndEditor_h_
 
-#ifndef _GG_Button_h_
-#include <GG/Button.h>
-#endif
-
-#ifndef _GG_ColorDlg_h_
-#include <GG/dialogs/ColorDlg.h>
-#endif
-
-#ifndef _GG_DropDownList_h_
 #include <GG/DropDownList.h>
-#endif
-
-#ifndef _GG_Edit_h_
 #include <GG/Edit.h>
-#endif
-
-#ifndef _GG_GUI_h_
 #include <GG/GUI.h>
-#endif
+#include <GG/ListBox.h>
+#include <GG/dialogs/ColorDlg.h>
 
 #include <boost/type_traits.hpp>
 

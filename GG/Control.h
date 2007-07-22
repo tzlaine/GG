@@ -29,11 +29,10 @@
 #ifndef _GG_Control_h_
 #define _GG_Control_h_
 
-#ifndef _GG_Wnd_h_
 #include <GG/Wnd.h>
-#endif
 
 #include <boost/serialization/is_abstract.hpp>
+
 
 namespace GG {
 

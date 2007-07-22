@@ -30,9 +30,8 @@
 #ifndef _GG_EventPump_h_
 #define _GG_EventPump_h_
 
-#ifndef _GG_GUI_h_
 #include <GG/GUI.h>
-#endif
+
 
 namespace GG {
 

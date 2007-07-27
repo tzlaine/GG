@@ -433,7 +433,7 @@ enum Key {
     GGK_KP7          = 263,
     GGK_KP8          = 264,
     GGK_KP9          = 265,
-    GGK_KP_PERIOD      = 266,
+    GGK_KP_PERIOD    = 266,
     GGK_KP_DIVIDE    = 267,
     GGK_KP_MULTIPLY  = 268,
     GGK_KP_MINUS     = 269,

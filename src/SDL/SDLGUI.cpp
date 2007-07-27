@@ -87,8 +87,8 @@ GG::Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
     // this code works because both SDLKey and GG::Key map (at least
     // partially) to the printable ASCII characters
     if (shift || caps_lock) {
-        if (shift != caps_lock && (retval >= 'a' && retval <= 'z')) {
-            retval = GG::Key(toupper(retval));
+        if (shift != caps_lock && ('a' <= retval && retval <= 'z')) {
+            retval = GG::Key(std::toupper(retval));
         } else if (shift) { // the caps lock key should not affect these
             // this assumes a US keyboard layout
             switch (retval) {

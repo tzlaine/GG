@@ -26,9 +26,6 @@
 #ifndef _GG_OgreGUI_h_ 
 #define _GG_OgreGUI_h_
 
-#include <OIS/OISKeyboard.h>
-#include <OIS/OISMouse.h>
-
 #include <OgreRenderTargetListener.h>
 #include <OgreTimer.h>
 #include <OgreWindowEventUtilities.h>
@@ -37,16 +34,13 @@
 
 
 namespace Ogre { class RenderWindow; }
-namespace OIS { class InputManager; }
 
 namespace GG {
 
 class OgreGUI :
     public GUI,
     public Ogre::RenderTargetListener,
-    public Ogre::WindowEventListener,
-    public OIS::MouseListener,
-    public OIS::KeyListener
+    public Ogre::WindowEventListener
 {
 public:
     OgreGUI(Ogre::RenderWindow* window);
@@ -59,37 +53,29 @@ public:
     virtual int  AppHeight() const;
 
     virtual void Exit(int code);
-    virtual void HandleSystemEvents();
 
-    virtual void Enter2DMode();
-    virtual void Exit2DMode();
+    boost::signal<void ()> HandleSystemEventsSignal;
+    boost::signal<void (int, int)> WindowResizedSignal;
+    boost::signal<void ()> WindowClosedSignal;
+
+    /** allows any code to access the gui framework by calling OgreGUI::GetGUI() */
+    static OgreGUI* GetGUI();
 
 protected:
     virtual void RenderBegin();
     virtual void RenderEnd();
     virtual void Run();
+    virtual void HandleSystemEvents();
+    virtual void Enter2DMode();
+    virtual void Exit2DMode();
 
 private:
-    struct CleanQuit {};
-
     virtual void postRenderTargetUpdate(const Ogre::RenderTargetEvent& event);
     virtual void windowResized(Ogre::RenderWindow* window);
     virtual void windowClosed(Ogre::RenderWindow* window);
 
-    virtual bool mouseMoved(const OIS::MouseEvent &event);
-    virtual bool mousePressed(const OIS::MouseEvent &event, OIS::MouseButtonID id);
-    virtual bool mouseReleased(const OIS::MouseEvent &event, OIS::MouseButtonID id);
-
-    virtual bool keyPressed(const OIS::KeyEvent& event);
-    virtual bool keyReleased(const OIS::KeyEvent& event);
-
-    void CleanupInputManager();
-
     Ogre::RenderWindow* m_window;
     mutable Ogre::Timer m_timer;
-	OIS::InputManager*  m_input_manager;
-	OIS::Mouse*         m_mouse;
-	OIS::Keyboard*      m_keyboard;
 };
 
 } // namespace GG

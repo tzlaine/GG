@@ -218,7 +218,8 @@ if not env.GetOption('clean'):
 
         boost_libs = [
             ('boost_signals', 'boost/signals.hpp', 'boost::signals::connection();'),
-            ('boost_filesystem', 'boost/filesystem/operations.hpp', 'boost::filesystem::initial_path();')
+            ('boost_filesystem', 'boost/filesystem/operations.hpp', 'boost::filesystem::initial_path();'),
+            ('boost_thread', 'boost/thread/thread.hpp', 'boost::thread::yield();')
             ]
         if not conf.CheckBoost(boost_version_string, boost_libs, conf, not ms_linker):
             Exit(1)

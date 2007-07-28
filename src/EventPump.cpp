@@ -34,7 +34,7 @@ EventPumpState::EventPumpState() :
     frames(0)
 {}
 
-
+#include <iostream>
 void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_rendering, bool do_rendering)
 {
     if (do_non_rendering) {
@@ -45,6 +45,7 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
 
         // govern FPS speed if needed
         if (double max_FPS = gui->MaxFPS()) {
+            std::cout << "max_FPS=" << max_FPS << std::endl;
             double min_ms_per_frame = 1000.0 * 1.0 / max_FPS;
             double ms_to_wait = min_ms_per_frame - (state.time - state.last_frame_time);
             if (0.0 < ms_to_wait)

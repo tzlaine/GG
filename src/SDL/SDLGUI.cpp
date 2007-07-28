@@ -25,6 +25,7 @@
 #include <GG/SDL/SDLGUI.h>
 #include <GG/EventPump.h>
 
+#include <cctype>
 #include <iostream>
 
 // member functions
@@ -66,11 +67,6 @@ void SDLGUI::Exit(int code)
         std::cerr << "Initiating Exit (code " << code << " - error termination)";
     SDLQuit();
     exit(code);
-}
-
-void SDLGUI::Wait(int ms)
-{
-    SDL_Delay(ms);
 }
 
 SDLGUI* SDLGUI::GetGUI()

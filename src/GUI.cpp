@@ -35,6 +35,7 @@
 #include <GG/ZList.h>
 
 #include <boost/format.hpp>
+#include <boost/thread.hpp>
 
 #include <cassert>
 #include <fstream>
@@ -318,6 +319,15 @@ void GUI::SetFocusWnd(Wnd* wnd)
 
 void GUI::Wait(int ms)
 {
+    boost::xtime t;
+    boost::xtime_get(&t, boost::TIME_UTC);
+    int ns_sum = t.nsec + ms * 1000000;
+    const int NANOSECONDS_PER_SECOND = 1000000000;
+    int delta_secs = ns_sum / NANOSECONDS_PER_SECOND;
+    int nanosecs = ns_sum % NANOSECONDS_PER_SECOND;
+    t.sec += delta_secs;
+    t.nsec = nanosecs;
+    boost::thread::sleep(t);
 }
 
 void GUI::Register(Wnd* wnd)

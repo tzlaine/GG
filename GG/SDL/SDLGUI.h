@@ -77,7 +77,6 @@ public:
     /** \name Mutators */ //@{
     void           operator()();      ///< external interface to Run()
     virtual void   Exit(int code);
-    virtual void   Wait(int ms);      ///< suspends the gui thread for \a ms milliseconds
 
     virtual void   Enter2DMode() = 0;
     virtual void   Exit2DMode() = 0;

@@ -182,7 +182,7 @@ public:
     virtual void   HandleSystemEvents() = 0;
 
     void           SetFocusWnd(Wnd* wnd);        ///< sets the input focus window to \a wnd
-    virtual void   Wait(int ms);                 ///< suspends the GUI thread for \a ms milliseconds.  Singlethreaded GUI subclasses may do nothing here, or may pause for \a ms milliseconds; the default implementation does nothing.
+    virtual void   Wait(int ms);                 ///< suspends the GUI thread for \a ms milliseconds.  Singlethreaded GUI subclasses may do nothing here, or may pause for \a ms milliseconds.
     void           Register(Wnd* wnd);           ///< adds \a wnd into the z-list.  Registering a null pointer or registering the same window multiple times is a no-op.
     void           RegisterModal(Wnd* wnd);      ///< adds \a wnd onto the modal windows "stack"
     void           Remove(Wnd* wnd);             ///< removes \a wnd from the z-list.  Removing a null pointer or removing the same window multiple times is a no-op.

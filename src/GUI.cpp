@@ -304,284 +304,6 @@ void GUI::operator()()
     Run();
 }
 
-void GUI::SetFocusWnd(Wnd* wnd)
-{
-    // inform old focus wnd that it is losing focus
-    if (FocusWnd())
-        FocusWnd()->HandleEvent(WndEvent(WndEvent::LosingFocus));
-
-    (s_impl->modal_wnds.empty() ? s_impl->focus_wnd : s_impl->modal_wnds.back().second) = wnd;
-
-    // inform new focus wnd that it is gaining focus
-    if (FocusWnd())
-        FocusWnd()->HandleEvent(WndEvent(WndEvent::GainingFocus));
-}
-
-void GUI::Wait(int ms)
-{
-    boost::xtime t;
-    boost::xtime_get(&t, boost::TIME_UTC);
-    int ns_sum = t.nsec + ms * 1000000;
-    const int NANOSECONDS_PER_SECOND = 1000000000;
-    int delta_secs = ns_sum / NANOSECONDS_PER_SECOND;
-    int nanosecs = ns_sum % NANOSECONDS_PER_SECOND;
-    t.sec += delta_secs;
-    t.nsec = nanosecs;
-    boost::thread::sleep(t);
-}
-
-void GUI::Register(Wnd* wnd)
-{
-    if (wnd) s_impl->zlist.Add(wnd);
-}
-
-void GUI::RegisterModal(Wnd* wnd)
-{
-    if (wnd && wnd->Modal()) {
-        s_impl->modal_wnds.push_back(std::make_pair(wnd, wnd));
-        wnd->HandleEvent(WndEvent(WndEvent::GainingFocus));
-    }
-}
-
-void GUI::Remove(Wnd* wnd)
-{
-    if (wnd) {
-        if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back().first == wnd) // if it's the current modal window, remove it from the modal list
-            s_impl->modal_wnds.pop_back();
-        else // if it's not a modal window, remove it from the z-order
-            s_impl->zlist.Remove(wnd);
-    }
-}
-
-void GUI::WndDying(Wnd* wnd)
-{
-    if (wnd) {
-        Remove(wnd);
-        if (MatchesOrContains(wnd, s_impl->focus_wnd))
-            s_impl->focus_wnd = 0;
-        for (std::list<std::pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
-            if (MatchesOrContains(wnd, it->second)) {
-                if (MatchesOrContains(wnd, it->first)) {
-                    it->second = 0;
-                } else { // if the modal window for the removed window's focus level is available, revert focus to the modal window
-                    if ((it->second = it->first))
-                        it->first->HandleEvent(WndEvent(WndEvent::GainingFocus));
-                }
-            }
-        }
-        if (MatchesOrContains(wnd, s_impl->prev_wnd_under_cursor))
-            s_impl->prev_wnd_under_cursor = 0;
-        if (MatchesOrContains(wnd, s_impl->curr_wnd_under_cursor))
-            s_impl->curr_wnd_under_cursor = 0;
-        if (MatchesOrContains(wnd, s_impl->drag_wnds[0])) {
-            s_impl->drag_wnds[0] = 0;
-            s_impl->wnd_region = WR_NONE;
-        }
-        if (MatchesOrContains(wnd, s_impl->drag_wnds[1])) {
-            s_impl->drag_wnds[1] = 0;
-            s_impl->wnd_region = WR_NONE;
-        }
-        if (MatchesOrContains(wnd, s_impl->drag_wnds[2])) {
-            s_impl->drag_wnds[2] = 0;
-            s_impl->wnd_region = WR_NONE;
-        }
-        if (MatchesOrContains(wnd, s_impl->curr_drag_drop_here_wnd))
-            s_impl->curr_drag_drop_here_wnd = 0;
-        if (MatchesOrContains(wnd, s_impl->drag_drop_originating_wnd))
-            s_impl->drag_drop_originating_wnd = 0;
-        s_impl->drag_drop_wnds.erase(wnd);
-        if (MatchesOrContains(wnd, s_impl->double_click_wnd)) {
-            s_impl->double_click_wnd = 0;
-            s_impl->double_click_start_time = -1;
-            s_impl->double_click_time = -1;
-        }
-        for (std::set<Timer*>::iterator it = s_impl->timers.begin(); it != s_impl->timers.end(); ++it) {
-            (*it)->Disconnect(wnd);
-        }
-    }
-}
-
-void GUI::EnableFPS(bool b/* = true*/)
-{
-    s_impl->calc_FPS = b;
-    if (!b) 
-        s_impl->FPS = -1.0f;
-}
-
-void GUI::SetMaxFPS(double max)
-{
-    if (max && max < 0.1)
-        max = 0.1;
-    s_impl->max_FPS = max;
-}
-
-void GUI::MoveUp(Wnd* wnd)
-{
-    if (wnd) s_impl->zlist.MoveUp(wnd);
-}
-
-void GUI::MoveDown(Wnd* wnd)
-{
-    if (wnd) s_impl->zlist.MoveDown(wnd);
-}
-
-boost::shared_ptr<ModalEventPump> GUI::CreateModalEventPump(bool& done)
-{
-    return boost::shared_ptr<ModalEventPump>(new ModalEventPump(done));
-}
-
-void GUI::RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd)
-{
-    assert(wnd);
-    if (!s_impl->drag_drop_wnds.empty() && originating_wnd != s_impl->drag_drop_originating_wnd) {
-        throw std::runtime_error("GUI::RegisterDragDropWnd() : Attempted to register a drag drop item dragged from "
-                                 "one window, when another window already has items being dragged from it.");
-    }
-    s_impl->drag_drop_wnds[wnd] = offset;
-    s_impl->drag_drop_originating_wnd = originating_wnd;
-}
-
-void GUI::CancelDragDrop()
-{
-    s_impl->drag_drop_wnds.clear();
-}
-
-void GUI::RegisterTimer(Timer& timer)
-{
-    s_impl->timers.insert(&timer);
-}
-
-void GUI::RemoveTimer(Timer& timer)
-{
-    s_impl->timers.erase(&timer);
-}
-
-void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
-{
-    if (!delay) { // setting delay = 0 completely disables mouse drag repeat
-        s_impl->button_down_repeat_delay = 0;
-        s_impl->button_down_repeat_interval = 0;
-    } else {
-        s_impl->button_down_repeat_delay = delay;
-        s_impl->button_down_repeat_interval = interval;
-    }
-}
-
-void GUI::SetDoubleClickInterval(int interval)
-{
-    s_impl->double_click_interval = interval;
-}
-
-void GUI::SetMinDragTime(int time)
-{
-    s_impl->min_drag_time = time;
-}
-
-void GUI::SetMinDragDistance(int distance)
-{
-    s_impl->min_drag_distance = distance;
-}
-
-void GUI::SetAccelerator(Key key, Uint32 key_mods)
-{
-    key_mods = MassagedAccelKeyMods(key_mods);
-    s_impl->accelerators.insert(std::make_pair(key, key_mods));
-}
-
-void GUI::RemoveAccelerator(Key key, Uint32 key_mods)
-{
-    key_mods = MassagedAccelKeyMods(key_mods);
-    s_impl->accelerators.erase(std::make_pair(key, key_mods));
-}
-
-boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
-{
-    return GetFontManager().GetFont(font_filename, pts, range);
-}
-
-void GUI::FreeFont(const std::string& font_filename, int pts)
-{
-    GetFontManager().FreeFont(font_filename, pts);
-}
-
-boost::shared_ptr<Texture> GUI::StoreTexture(Texture* texture, const std::string& texture_name)
-{
-    return GetTextureManager().StoreTexture(texture, texture_name);
-}
-
-boost::shared_ptr<Texture> GUI::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
-{
-    return GetTextureManager().StoreTexture(texture, texture_name);
-}
-
-boost::shared_ptr<Texture> GUI::GetTexture(const std::string& name, bool mipmap/* = false*/)
-{
-    return GetTextureManager().GetTexture(name, mipmap);
-}
-
-void GUI::FreeTexture(const std::string& name)
-{
-    GetTextureManager().FreeTexture(name);
-}
-
-void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const
-{
-    s_impl->style_factory = factory;
-    if (!s_impl->style_factory)
-        s_impl->style_factory.reset(new StyleFactory());
-}
-
-void GUI::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
-{
-    if (!s_impl->save_wnd_fn)
-        throw BadFunctionPointer("GUI::SaveWnd() : Attempted call on null function pointer.");
-    s_impl->save_wnd_fn(wnd, name, ar);
-}
-
-void GUI::LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
-{
-    if (!s_impl->load_wnd_fn)
-        throw BadFunctionPointer("GUI::LoadWnd() : Attempted call on null function pointer.");
-    s_impl->load_wnd_fn(wnd, name, ar);
-}
-
-void GUI::SetSaveWndFunction(SaveWndFn fn)
-{
-    s_impl->save_wnd_fn = fn;
-}
-
-void GUI::SetLoadWndFunction(LoadWndFn fn)
-{
-    s_impl->load_wnd_fn = fn;
-}
-
-void GUI::SetSaveLoadFunctions(const PluginInterface& interface)
-{
-    s_impl->save_wnd_fn = interface.SaveWnd;
-    s_impl->load_wnd_fn = interface.LoadWnd;
-}
-
-GUI* GUI::GetGUI()
-{
-    return s_gui;
-}
-
-void GUI::RenderWindow(Wnd* wnd)
-{
-    if (wnd && wnd->Visible()) {
-        wnd->Render();
-        bool clip = wnd->ClipChildren();
-        if (clip)
-            wnd->BeginClipping();
-        for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
-            if ((*it)->Visible())
-                RenderWindow(*it);
-        }
-        if (clip)
-            wnd->EndClipping();
-    }
-}
-
 void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel)
 {
     s_impl->key_mods = key_mods;
@@ -922,6 +644,284 @@ void GUI::HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos
         break; }
     default:
         break;
+    }
+}
+
+void GUI::SetFocusWnd(Wnd* wnd)
+{
+    // inform old focus wnd that it is losing focus
+    if (FocusWnd())
+        FocusWnd()->HandleEvent(WndEvent(WndEvent::LosingFocus));
+
+    (s_impl->modal_wnds.empty() ? s_impl->focus_wnd : s_impl->modal_wnds.back().second) = wnd;
+
+    // inform new focus wnd that it is gaining focus
+    if (FocusWnd())
+        FocusWnd()->HandleEvent(WndEvent(WndEvent::GainingFocus));
+}
+
+void GUI::Wait(int ms)
+{
+    boost::xtime t;
+    boost::xtime_get(&t, boost::TIME_UTC);
+    int ns_sum = t.nsec + ms * 1000000;
+    const int NANOSECONDS_PER_SECOND = 1000000000;
+    int delta_secs = ns_sum / NANOSECONDS_PER_SECOND;
+    int nanosecs = ns_sum % NANOSECONDS_PER_SECOND;
+    t.sec += delta_secs;
+    t.nsec = nanosecs;
+    boost::thread::sleep(t);
+}
+
+void GUI::Register(Wnd* wnd)
+{
+    if (wnd) s_impl->zlist.Add(wnd);
+}
+
+void GUI::RegisterModal(Wnd* wnd)
+{
+    if (wnd && wnd->Modal()) {
+        s_impl->modal_wnds.push_back(std::make_pair(wnd, wnd));
+        wnd->HandleEvent(WndEvent(WndEvent::GainingFocus));
+    }
+}
+
+void GUI::Remove(Wnd* wnd)
+{
+    if (wnd) {
+        if (!s_impl->modal_wnds.empty() && s_impl->modal_wnds.back().first == wnd) // if it's the current modal window, remove it from the modal list
+            s_impl->modal_wnds.pop_back();
+        else // if it's not a modal window, remove it from the z-order
+            s_impl->zlist.Remove(wnd);
+    }
+}
+
+void GUI::WndDying(Wnd* wnd)
+{
+    if (wnd) {
+        Remove(wnd);
+        if (MatchesOrContains(wnd, s_impl->focus_wnd))
+            s_impl->focus_wnd = 0;
+        for (std::list<std::pair<Wnd*, Wnd*> >::iterator it = s_impl->modal_wnds.begin(); it != s_impl->modal_wnds.end(); ++it) {
+            if (MatchesOrContains(wnd, it->second)) {
+                if (MatchesOrContains(wnd, it->first)) {
+                    it->second = 0;
+                } else { // if the modal window for the removed window's focus level is available, revert focus to the modal window
+                    if ((it->second = it->first))
+                        it->first->HandleEvent(WndEvent(WndEvent::GainingFocus));
+                }
+            }
+        }
+        if (MatchesOrContains(wnd, s_impl->prev_wnd_under_cursor))
+            s_impl->prev_wnd_under_cursor = 0;
+        if (MatchesOrContains(wnd, s_impl->curr_wnd_under_cursor))
+            s_impl->curr_wnd_under_cursor = 0;
+        if (MatchesOrContains(wnd, s_impl->drag_wnds[0])) {
+            s_impl->drag_wnds[0] = 0;
+            s_impl->wnd_region = WR_NONE;
+        }
+        if (MatchesOrContains(wnd, s_impl->drag_wnds[1])) {
+            s_impl->drag_wnds[1] = 0;
+            s_impl->wnd_region = WR_NONE;
+        }
+        if (MatchesOrContains(wnd, s_impl->drag_wnds[2])) {
+            s_impl->drag_wnds[2] = 0;
+            s_impl->wnd_region = WR_NONE;
+        }
+        if (MatchesOrContains(wnd, s_impl->curr_drag_drop_here_wnd))
+            s_impl->curr_drag_drop_here_wnd = 0;
+        if (MatchesOrContains(wnd, s_impl->drag_drop_originating_wnd))
+            s_impl->drag_drop_originating_wnd = 0;
+        s_impl->drag_drop_wnds.erase(wnd);
+        if (MatchesOrContains(wnd, s_impl->double_click_wnd)) {
+            s_impl->double_click_wnd = 0;
+            s_impl->double_click_start_time = -1;
+            s_impl->double_click_time = -1;
+        }
+        for (std::set<Timer*>::iterator it = s_impl->timers.begin(); it != s_impl->timers.end(); ++it) {
+            (*it)->Disconnect(wnd);
+        }
+    }
+}
+
+void GUI::EnableFPS(bool b/* = true*/)
+{
+    s_impl->calc_FPS = b;
+    if (!b) 
+        s_impl->FPS = -1.0f;
+}
+
+void GUI::SetMaxFPS(double max)
+{
+    if (max && max < 0.1)
+        max = 0.1;
+    s_impl->max_FPS = max;
+}
+
+void GUI::MoveUp(Wnd* wnd)
+{
+    if (wnd) s_impl->zlist.MoveUp(wnd);
+}
+
+void GUI::MoveDown(Wnd* wnd)
+{
+    if (wnd) s_impl->zlist.MoveDown(wnd);
+}
+
+boost::shared_ptr<ModalEventPump> GUI::CreateModalEventPump(bool& done)
+{
+    return boost::shared_ptr<ModalEventPump>(new ModalEventPump(done));
+}
+
+void GUI::RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd)
+{
+    assert(wnd);
+    if (!s_impl->drag_drop_wnds.empty() && originating_wnd != s_impl->drag_drop_originating_wnd) {
+        throw std::runtime_error("GUI::RegisterDragDropWnd() : Attempted to register a drag drop item dragged from "
+                                 "one window, when another window already has items being dragged from it.");
+    }
+    s_impl->drag_drop_wnds[wnd] = offset;
+    s_impl->drag_drop_originating_wnd = originating_wnd;
+}
+
+void GUI::CancelDragDrop()
+{
+    s_impl->drag_drop_wnds.clear();
+}
+
+void GUI::RegisterTimer(Timer& timer)
+{
+    s_impl->timers.insert(&timer);
+}
+
+void GUI::RemoveTimer(Timer& timer)
+{
+    s_impl->timers.erase(&timer);
+}
+
+void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
+{
+    if (!delay) { // setting delay = 0 completely disables mouse drag repeat
+        s_impl->button_down_repeat_delay = 0;
+        s_impl->button_down_repeat_interval = 0;
+    } else {
+        s_impl->button_down_repeat_delay = delay;
+        s_impl->button_down_repeat_interval = interval;
+    }
+}
+
+void GUI::SetDoubleClickInterval(int interval)
+{
+    s_impl->double_click_interval = interval;
+}
+
+void GUI::SetMinDragTime(int time)
+{
+    s_impl->min_drag_time = time;
+}
+
+void GUI::SetMinDragDistance(int distance)
+{
+    s_impl->min_drag_distance = distance;
+}
+
+void GUI::SetAccelerator(Key key, Uint32 key_mods)
+{
+    key_mods = MassagedAccelKeyMods(key_mods);
+    s_impl->accelerators.insert(std::make_pair(key, key_mods));
+}
+
+void GUI::RemoveAccelerator(Key key, Uint32 key_mods)
+{
+    key_mods = MassagedAccelKeyMods(key_mods);
+    s_impl->accelerators.erase(std::make_pair(key, key_mods));
+}
+
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
+{
+    return GetFontManager().GetFont(font_filename, pts, range);
+}
+
+void GUI::FreeFont(const std::string& font_filename, int pts)
+{
+    GetFontManager().FreeFont(font_filename, pts);
+}
+
+boost::shared_ptr<Texture> GUI::StoreTexture(Texture* texture, const std::string& texture_name)
+{
+    return GetTextureManager().StoreTexture(texture, texture_name);
+}
+
+boost::shared_ptr<Texture> GUI::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
+{
+    return GetTextureManager().StoreTexture(texture, texture_name);
+}
+
+boost::shared_ptr<Texture> GUI::GetTexture(const std::string& name, bool mipmap/* = false*/)
+{
+    return GetTextureManager().GetTexture(name, mipmap);
+}
+
+void GUI::FreeTexture(const std::string& name)
+{
+    GetTextureManager().FreeTexture(name);
+}
+
+void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const
+{
+    s_impl->style_factory = factory;
+    if (!s_impl->style_factory)
+        s_impl->style_factory.reset(new StyleFactory());
+}
+
+void GUI::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
+{
+    if (!s_impl->save_wnd_fn)
+        throw BadFunctionPointer("GUI::SaveWnd() : Attempted call on null function pointer.");
+    s_impl->save_wnd_fn(wnd, name, ar);
+}
+
+void GUI::LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
+{
+    if (!s_impl->load_wnd_fn)
+        throw BadFunctionPointer("GUI::LoadWnd() : Attempted call on null function pointer.");
+    s_impl->load_wnd_fn(wnd, name, ar);
+}
+
+void GUI::SetSaveWndFunction(SaveWndFn fn)
+{
+    s_impl->save_wnd_fn = fn;
+}
+
+void GUI::SetLoadWndFunction(LoadWndFn fn)
+{
+    s_impl->load_wnd_fn = fn;
+}
+
+void GUI::SetSaveLoadFunctions(const PluginInterface& interface)
+{
+    s_impl->save_wnd_fn = interface.SaveWnd;
+    s_impl->load_wnd_fn = interface.LoadWnd;
+}
+
+GUI* GUI::GetGUI()
+{
+    return s_gui;
+}
+
+void GUI::RenderWindow(Wnd* wnd)
+{
+    if (wnd && wnd->Visible()) {
+        wnd->Render();
+        bool clip = wnd->ClipChildren();
+        if (clip)
+            wnd->BeginClipping();
+        for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
+            if ((*it)->Visible())
+                RenderWindow(*it);
+        }
+        if (clip)
+            wnd->EndClipping();
     }
 }
 

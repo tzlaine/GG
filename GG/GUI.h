@@ -176,10 +176,11 @@ public:
     /** \name Mutators */ //@{
     void           operator()();                 ///< external interface to Run()
     virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetGUI()
-    
+
     /** handles all waiting system events (from SDL, DirectInput, etc.).  This function should only be called from
         custom EventPump event handlers. */
     virtual void   HandleSystemEvents() = 0;
+    void           HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
 
     void           SetFocusWnd(Wnd* wnd);        ///< sets the input focus window to \a wnd
     virtual void   Wait(int ms);                 ///< suspends the GUI thread for \a ms milliseconds.  Singlethreaded GUI subclasses may do nothing here, or may pause for \a ms milliseconds.
@@ -269,7 +270,6 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    void           HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
     void           ProcessBrowseInfo();    ///< determines the current browse info mode, if any
     virtual void   RenderBegin() = 0;      ///< clears the backbuffer, etc.
     virtual void   Render();               ///< renders the windows in the z-list

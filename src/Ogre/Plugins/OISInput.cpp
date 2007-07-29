@@ -24,9 +24,7 @@
    
 #include "OISInput.h"
 
-#define protected public
 #include "OgreGUI.h"
-#undef protected
 
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
@@ -42,7 +40,7 @@
 using namespace GG;
 
 namespace {
-    OISInput* gOISInputPlugin;
+    OISInput* gOISInputPlugin = 0;
 
     const Ogre::String PLUGIN_NAME = "OIS Input Plugin";
 
@@ -280,8 +278,21 @@ void OISInput::initialise()
     OIS::ParamList param_list;
     std::size_t window_handle = 0;
     window->getCustomAttribute("WINDOW", &window_handle);
-    param_list.insert(std::make_pair(std::string("WINDOW"),
-                                     boost::lexical_cast<std::string>(window_handle)));
+    typedef OIS::ParamList::value_type ParamType;
+    param_list.insert(
+        ParamType("WINDOW",
+                  boost::lexical_cast<std::string>(window_handle)));
+#if defined OIS_WIN32_PLATFORM
+    //param_list.insert(ParamType("w32_mouse", "DISCL_FOREGROUND"));
+    param_list.insert(ParamType("w32_mouse", "DISCL_NONEXCLUSIVE"));
+    //param_list.insert(ParamType("w32_keyboard", "DISCL_FOREGROUND"));
+    param_list.insert(ParamType("w32_keyboard", "DISCL_NONEXCLUSIVE"));
+#elif defined OIS_LINUX_PLATFORM
+    param_list.insert(ParamType("x11_mouse_grab", "false"));
+    param_list.insert(ParamType("x11_mouse_hide", "false"));
+    param_list.insert(ParamType("x11_keyboard_grab", "false"));
+    param_list.insert(ParamType("XAutoRepeatOn", "true"));
+#endif
     m_input_manager = OIS::InputManager::createInputSystem(param_list);
     m_keyboard = boost::polymorphic_downcast<OIS::Keyboard*>(
         m_input_manager->createInputObject(OIS::OISKeyboard, true));
@@ -326,9 +337,11 @@ void OISInput::HandleWindowClose()
 bool OISInput::mouseMoved(const OIS::MouseEvent &event)
 {
     Pt mouse_pos(event.state.X.abs, event.state.Y.abs);
-    Pt mouse_rel(event.state.X.rel, event.state.Y.rel);
     assert(OgreGUI::GetGUI());
-    OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, mouse_rel);
+    if (event.state.Z.rel)
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, Pt(0, 0 < event.state.Z.rel ? 1 : -1));
+    else
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, Pt(event.state.X.rel, event.state.Y.rel));
     return true;
 }
 

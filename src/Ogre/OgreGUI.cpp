@@ -70,6 +70,7 @@ OgreGUI::OgreGUI(Ogre::RenderWindow* window) :
 {
     m_window->addListener(this);
     Ogre::WindowEventUtilities::addWindowEventListener(m_window, this);
+    EnableMouseButtonDownRepeat(250, 15);
 }
 
 OgreGUI::~OgreGUI()

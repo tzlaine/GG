@@ -152,7 +152,7 @@ void WndEditor::Attribute(AttributeRowBase* row)
 }
 
 void WndEditor::BeginFlags(Uint32& flags,
-                           boost::shared_ptr<AttributeChangedAction<Uint32> > attribute_changed_action)
+                           const boost::shared_ptr<AttributeChangedAction<Uint32> >& attribute_changed_action)
 {
     m_current_flags = &flags;
     m_current_flags_changed_actions = attribute_changed_action;

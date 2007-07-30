@@ -89,7 +89,7 @@ public:
     /** creates a row containing an edit box controlling the value of \a value. */
     template <class T>
     void Attribute(const std::string& name, T& value,
-                   boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action);
+                   const boost::shared_ptr<AttributeChangedAction<T> >& attribute_changed_action);
 
     /** creates a row containing an edit box controlling the value of \a value. */
     template <class T>
@@ -99,7 +99,7 @@ public:
         restricted to the range [\a min, \a max].*/
     template <class T>
     void Attribute(const std::string& name, T& value, const T& min, const T& max,
-                   boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action);
+                   const boost::shared_ptr<AttributeChangedAction<T> >& attribute_changed_action);
 
     /** creates a row containing an edit box controlling the value of \a value.  The legal values for \a value are
         restricted to the range [\a min, \a max].*/
@@ -117,7 +117,7 @@ public:
     /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
         FlagGroup() calls will set values in \a flags. */
     void BeginFlags(Uint32& flags,
-                    boost::shared_ptr<AttributeChangedAction<Uint32> > attribute_changed_action);
+                    const boost::shared_ptr<AttributeChangedAction<Uint32> >& attribute_changed_action);
 
     /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
         FlagGroup() calls will set values in \a flags. */
@@ -356,7 +356,7 @@ private:
 // template implementations
 template <class T>
 void WndEditor::Attribute(const std::string& name, T& value,
-                          boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action)
+                          const boost::shared_ptr<AttributeChangedAction<T> >& attribute_changed_action)
 {
     AttributeRow<T>* attribute = new AttributeRow<T>(name, value, m_font);
     m_list_box->Insert(attribute);
@@ -375,7 +375,7 @@ void WndEditor::Attribute(const std::string& name, T& value)
 
 template <class T>
 void WndEditor::Attribute(const std::string& name, T& value, const T& min, const T& max,
-                          boost::shared_ptr<AttributeChangedAction<T> > attribute_changed_action)
+                          const boost::shared_ptr<AttributeChangedAction<T> >& attribute_changed_action)
 {
     RangedAttributeRow<T>* attribute = new RangedAttributeRow<T>(name, value, min, max, m_font);
     m_list_box->Insert(attribute);

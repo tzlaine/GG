@@ -852,7 +852,7 @@ boost::shared_ptr<Texture> GUI::StoreTexture(Texture* texture, const std::string
     return GetTextureManager().StoreTexture(texture, texture_name);
 }
 
-boost::shared_ptr<Texture> GUI::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
+boost::shared_ptr<Texture> GUI::StoreTexture(const boost::shared_ptr<Texture>& texture, const std::string& texture_name)
 {
     return GetTextureManager().StoreTexture(texture, texture_name);
 }

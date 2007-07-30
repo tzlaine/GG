@@ -26,7 +26,7 @@
 /** \file GUI.h
     Contains GUI class, which encapsulates the state and behavior of the entire GG GUI. */
 
-#ifndef _GG_GUI_h_ 
+#ifndef _GG_GUI_h_
 #define _GG_GUI_h_
 
 #include <GG/Base.h>
@@ -225,7 +225,7 @@ public:
     /** adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that. */
     boost::shared_ptr<Texture> StoreTexture(Texture* texture, const std::string& texture_name);
 
-    boost::shared_ptr<Texture> StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name); ///< adds an already-constructed texture to the managed pool
+    boost::shared_ptr<Texture> StoreTexture(const boost::shared_ptr<Texture> &texture, const std::string& texture_name); ///< adds an already-constructed texture to the managed pool
     boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
 

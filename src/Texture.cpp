@@ -561,7 +561,7 @@ boost::shared_ptr<Texture> TextureManager::StoreTexture(Texture* texture, const 
     return StoreTexture(temp, texture_name);
 }
 
-boost::shared_ptr<Texture> TextureManager::StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name)
+boost::shared_ptr<Texture> TextureManager::StoreTexture(const boost::shared_ptr<Texture>& texture, const std::string& texture_name)
 {
     return (m_textures[texture_name] = texture);
 }

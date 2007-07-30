@@ -234,7 +234,7 @@ public:
 
     /** stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> 
         delete \a texture; \a texture becomes the property of the manager, which will eventually delete it. */
-    boost::shared_ptr<Texture> StoreTexture(boost::shared_ptr<Texture> texture, const std::string& texture_name);
+    boost::shared_ptr<Texture> StoreTexture(const boost::shared_ptr<Texture>& texture, const std::string& texture_name);
 
     /** returns a shared_ptr to the texture created from image file \a name; mipmapped textures are generated if \a mimap is true.  If the
         texture is not present in the manager's pool, it will be loaded from disk. */

@@ -15,6 +15,9 @@
 #include <GG/dialogs/ThreeButtonDlg.h>
 #include <GG/SDL/SDLGUI.h>
 
+#include <iostream>
+
+
 // Tutorial 2: Controls
 // Below you'll find the basic framework from Tutorial 1, plus one of every kind of GG Control.  Note that these
 // controls are pretty ugly, especially the ones with the circles I drew myself in 2 minutes.  Yech.

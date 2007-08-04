@@ -27,13 +27,17 @@
 #define _GG_OgreGUI_h_
 
 #include <OgreRenderTargetListener.h>
+#include <OgreSharedPtr.h>
 #include <OgreTimer.h>
 #include <OgreWindowEventUtilities.h>
 
 #include <GG/GUI.h>
 
 
-namespace Ogre { class RenderWindow; }
+namespace Ogre {
+    class RenderWindow;
+    class DataStream;
+}
 
 namespace GG {
 
@@ -43,7 +47,7 @@ class OgreGUI :
     public Ogre::WindowEventListener
 {
 public:
-    OgreGUI(Ogre::RenderWindow* window);
+    OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename = "");
     ~OgreGUI();
 
     virtual boost::shared_ptr<ModalEventPump> CreateModalEventPump(bool& done);
@@ -51,6 +55,8 @@ public:
     virtual int  Ticks() const;
     virtual int  AppWidth() const;
     virtual int  AppHeight() const;
+
+    const Ogre::SharedPtr<Ogre::DataStream>& ConfigFileStream() const;
 
     virtual void Exit(int code);
 
@@ -74,8 +80,9 @@ private:
     virtual void windowResized(Ogre::RenderWindow* window);
     virtual void windowClosed(Ogre::RenderWindow* window);
 
-    Ogre::RenderWindow* m_window;
-    mutable Ogre::Timer m_timer;
+    Ogre::RenderWindow*               m_window;
+    mutable Ogre::Timer               m_timer;
+    Ogre::SharedPtr<Ogre::DataStream> m_config_file_data;
 };
 
 } // namespace GG

@@ -26,6 +26,8 @@
 
 #include "OgreGUI.h"
 
+#include <OgreConfigFile.h>
+#include <OgreLogManager.h>
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
 
@@ -282,17 +284,21 @@ void OISInput::initialise()
     param_list.insert(
         ParamType("WINDOW",
                   boost::lexical_cast<std::string>(window_handle)));
-#if defined OIS_WIN32_PLATFORM
-    //param_list.insert(ParamType("w32_mouse", "DISCL_FOREGROUND"));
-    param_list.insert(ParamType("w32_mouse", "DISCL_NONEXCLUSIVE"));
-    //param_list.insert(ParamType("w32_keyboard", "DISCL_FOREGROUND"));
-    param_list.insert(ParamType("w32_keyboard", "DISCL_NONEXCLUSIVE"));
-#elif defined OIS_LINUX_PLATFORM
-    param_list.insert(ParamType("x11_mouse_grab", "false"));
-    param_list.insert(ParamType("x11_mouse_hide", "false"));
-    param_list.insert(ParamType("x11_keyboard_grab", "false"));
-    param_list.insert(ParamType("XAutoRepeatOn", "true"));
-#endif
+
+    OgreGUI* gui = OgreGUI::GetGUI();
+    assert(gui);
+    const Ogre::SharedPtr<Ogre::DataStream>& config_file_stream = gui->ConfigFileStream();
+    if (!config_file_stream.isNull()) {
+        Ogre::ConfigFile config_file;
+        config_file.load(config_file_stream);
+        for (Ogre::ConfigFile::SettingsIterator it = config_file.getSettingsIterator();
+             it.hasMoreElements();
+             it.getNext()) {
+            param_list.insert(ParamType(it.peekNextKey(), it.peekNextValue()));
+            Ogre::LogManager::getSingleton().logMessage("OISPlugin using config setting " + it.peekNextKey() + "=" + it.peekNextValue());
+        }
+    }
+
     m_input_manager = OIS::InputManager::createInputSystem(param_list);
     m_keyboard = boost::polymorphic_downcast<OIS::Keyboard*>(
         m_input_manager->createInputObject(OIS::OISKeyboard, true));

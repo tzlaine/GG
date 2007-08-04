@@ -26,6 +26,7 @@
 
 #include <GG/EventPump.h>
 
+#include <OgreDataStream.h>
 #include <OgreRenderSystem.h>
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
@@ -63,14 +64,21 @@ namespace {
     };
 }
 
-OgreGUI::OgreGUI(Ogre::RenderWindow* window) :
+OgreGUI::OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename/* = ""*/) :
     GUI(""),
     m_window(window),
-    m_timer()
+    m_timer(),
+    m_config_file_data()
 {
     m_window->addListener(this);
     Ogre::WindowEventUtilities::addWindowEventListener(m_window, this);
     EnableMouseButtonDownRepeat(250, 15);
+
+    std::ifstream ifs(config_filename.c_str());
+    if (ifs) {
+        Ogre::FileStreamDataStream file_stream(&ifs, false);
+        m_config_file_data.bind(new Ogre::MemoryDataStream(file_stream));
+    }
 }
 
 OgreGUI::~OgreGUI()
@@ -90,6 +98,9 @@ int OgreGUI::AppWidth() const
 
 int OgreGUI::AppHeight() const
 { return m_window->getHeight(); }
+
+const Ogre::SharedPtr<Ogre::DataStream>& OgreGUI::ConfigFileStream() const
+{ return m_config_file_data; }
 
 void OgreGUI::Exit(int code)
 {
@@ -133,10 +144,6 @@ void OgreGUI::Enter2DMode()
 
     Ogre::RenderSystem* render_system = Ogre::Root::getSingleton().getRenderSystem();
 
-    // TODO: These calls are designed to set up OpenGL in a GG-friendly state.  This code works for Ogre 1.2-RC1 on
-    // Linux, but not Windows.  It has not been tried with other versions of Ogre.  Therefore, users may need to set up
-    // the state themselves, perhaps through direct OpenGL calls, with state pushed/popped to preserve it.
-
     // set-up matrices
     render_system->_setWorldMatrix(Matrix4::IDENTITY);
     render_system->_setViewMatrix(Matrix4::IDENTITY);
@@ -179,7 +186,7 @@ void OgreGUI::Enter2DMode()
     render_system->_setAlphaRejectSettings(CMPF_ALWAYS_PASS, 0);
     render_system->_setTextureBlendMode(0, colour_blend_mode);
     render_system->_setTextureBlendMode(0, alpha_blend_mode);
-    render_system->_disableTextureUnitsFrom(1);
+    render_system->_disableTextureUnitsFrom(0);
 
     // enable alpha blending
     render_system->_setSceneBlending(SBF_SOURCE_ALPHA, SBF_ONE_MINUS_SOURCE_ALPHA);

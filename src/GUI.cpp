@@ -26,6 +26,7 @@
 
 #include <GG/BrowseInfoWnd.h>
 #include <GG/Control.h>
+#include <GG/Cursor.h>
 #include <GG/EventPump.h>
 #include <GG/Layout.h>
 #include <GG/PluginInterface.h>
@@ -73,8 +74,8 @@ struct GG::GUIImplData
 {
     GUIImplData() :
         focus_wnd(0),
-        mouse_pos(0,0),
-        mouse_rel(0,0),
+        mouse_pos(-1000, -1000),
+        mouse_rel(0, 0),
         key_mods(0),
         button_down_repeat_delay(250),
         button_down_repeat_interval(66),
@@ -100,6 +101,8 @@ struct GG::GUIImplData
         double_click_start_time(-1),
         double_click_time(-1),
         style_factory(new StyleFactory()),
+        render_cursor(false),
+        cursor(),
         save_wnd_fn(0),
         load_wnd_fn(0)
     {
@@ -166,6 +169,8 @@ struct GG::GUIImplData
     int          double_click_time;     // time elapsed since last click, in ms
 
     boost::shared_ptr<StyleFactory> style_factory;
+    bool                            render_cursor;
+    boost::shared_ptr<Cursor>       cursor;
 
     std::set<Timer*>  timers;
 
@@ -277,6 +282,16 @@ Uint32 GUI::KeyMods() const
 const boost::shared_ptr<StyleFactory>& GUI::GetStyleFactory() const
 {
     return s_impl->style_factory;
+}
+
+bool GUI::RenderCursor() const
+{
+    return s_impl->render_cursor;
+}
+
+const boost::shared_ptr<Cursor>& GUI::GetCursor() const
+{
+    return s_impl->cursor;
 }
 
 GUI::const_accel_iterator GUI::accel_begin() const
@@ -867,11 +882,21 @@ void GUI::FreeTexture(const std::string& name)
     GetTextureManager().FreeTexture(name);
 }
 
-void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const
+void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
 {
     s_impl->style_factory = factory;
     if (!s_impl->style_factory)
         s_impl->style_factory.reset(new StyleFactory());
+}
+
+void GUI::RenderCursor(bool render)
+{
+    s_impl->render_cursor = render;
+}
+
+void GUI::SetCursor(const boost::shared_ptr<Cursor>& cursor)
+{
+    s_impl->cursor = cursor;
 }
 
 void GUI::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
@@ -986,6 +1011,8 @@ void GUI::Render()
         if (!old_visible)
             it->first->Hide();
     }
+    if (s_impl->render_cursor && s_impl->cursor)
+        s_impl->cursor->Render(s_impl->mouse_pos);
     Exit2DMode();
 }
 

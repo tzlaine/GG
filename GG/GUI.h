@@ -40,6 +40,7 @@ namespace boost { namespace archive {
 
 namespace GG {
 
+class Cursor;
 class Wnd;
 class EventPumpBase;
 class ModalEventPump;
@@ -164,7 +165,10 @@ public:
     Pt             MouseMovement() const;        ///< returns the relative position of mouse, based on the last mouse motion event
     Uint32         KeyMods() const;              ///< returns the bitwise or'd set of modifier keys that are currently depressed, based on the last event
 
-    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed default style factory
+    const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory
+
+    bool                                   RenderCursor() const; ///< returns true iff the GUI is responsible for rendering the cursor
+    const boost::shared_ptr<Cursor>&       GetCursor() const; ///< returns the currently-installed cursor
 
     const_accel_iterator accel_begin() const;    ///< returns an iterator to the first defined keyboard accelerator
     const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
@@ -229,7 +233,10 @@ public:
     boost::shared_ptr<Texture> GetTexture(const std::string& name, bool mipmap = false); ///< loads the requested texture from file \a name; mipmap textures are generated if \a mipmap is true
     void                       FreeTexture(const std::string& name); ///< removes the desired texture from the managed pool; since shared_ptr's are used, the texture may be deleted much later
 
-    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory) const; ///< sets the currently-installed default style factory
+    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory); ///< sets the currently-installed style factory
+
+    void RenderCursor(bool render); ///< set this to true iff the GUI should render the cursor
+    void SetCursor(const boost::shared_ptr<Cursor>& cursor); ///< sets the currently-installed cursor
 
     /** saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw GG::GUI::BadFunctionPointer Throws
         GG::GUI::BadFunctionPointer if no Wnd-serializing function has ben defined by the user using

@@ -7,6 +7,7 @@ sources = [
     'Button.cpp',
     'Clr.cpp',
     'Control.cpp',
+    'Cursor.cpp',
     'DrawUtil.cpp',
     'DropDownList.cpp',
     'DynamicGraphic.cpp',

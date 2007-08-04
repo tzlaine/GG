@@ -53,6 +53,7 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 // include OpenGL headers
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GG/glext.h>
 
 // include useful boost headers
 #include <boost/signal.hpp>

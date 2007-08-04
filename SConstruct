@@ -61,7 +61,6 @@ options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library')
 # This is supposed to be detected during configuration, but sometimes isn't, and is harmless, so we're including it all
 # the time now on POSIX systems.
 env['need__vsnprintf_c'] = str(Platform()) == 'posix'
-env['devil_with_allegro'] = False
 
 
 # fill Environment using saved and command-line provided options, save options for next time, and fill environment
@@ -85,8 +84,7 @@ env_cache_keys = [
     'LIBPATH',
     'LIBS',
     'LINKFLAGS',
-    'need__vsnprintf_c',
-    'devil_with_allegro'
+    'need__vsnprintf_c'
     ]
 if not force_configure:
     try:
@@ -280,75 +278,23 @@ if not env.GetOption('clean'):
         if not conf.CheckVersionHeader('DevIL', 'IL/il.h', version_regex, devil_version, True, 'Checking DevIL version >= %s... ' % devil_version_string):
             Exit(1)
         if not conf.CheckCHeader('IL/il.h') or \
-               not conf.CheckCHeader('IL/ilu.h') or \
-               not conf.CheckCHeader('IL/ilut.h'):
-            print "Note: since SDL support is disabled, the SDL headers are not be in the compiler's search path during tests.  If DevIL was built with SDL support, this may cause the seach for ilut.h to fail."
+               not conf.CheckCHeader('IL/ilu.h'):
             Exit(1)
         if str(Platform()) != 'win32' and (not conf.CheckLib('IL', 'ilInit') or \
-                                           not conf.CheckLib('ILU', 'iluInit') or \
-                                           not conf.CheckLib('ILUT', 'ilutInit')):
+                                           not conf.CheckLib('ILU', 'iluInit')):
             print 'Trying IL again with local _vnsprintf.c...'
             if conf.CheckLib('IL', 'ilInit', header = '#include "../src/_vsnprintf.c"') and \
-                   conf.CheckLib('ILU', 'iluInit', header = '#include "../src/_vsnprintf.c"') and \
-                   conf.CheckLib('ILUT', 'ilutInit', header = '#include "../src/_vsnprintf.c"'):
+                   conf.CheckLib('ILU', 'iluInit', header = '#include "../src/_vsnprintf.c"'):
                 env['need__vsnprintf_c'] = True
                 print 'DevIL is broken.  It depends on a function _vnsprintf that does not exist on your system.  GG will provide a vnsprintf wrapper called _vnsprintf.'
             else:
                 Exit(1)
-        from sys import stdout
-        stdout.write('Checking for DevIL OpenGL support... ')
-        devil_gl_check_app = """
-#include <IL/ilut.h>
-#ifndef ILUT_USE_OPENGL
-#error "DevIL not built with OpenGL support"
-#endif
-int main() {
-    return 0;
-}
-"""
-        if not conf.TryCompile(devil_gl_check_app, '.c'):
-            print 'no'
-        else:
-            print 'yes'
-        stdout.write('Checking for DevIL Allegro support... ')
-        devil_gl_check_app = """
-#include <IL/ilut.h>
-#ifndef ILUT_USE_ALLEGRO
-#error "DevIL not built with Allegro support"
-#endif
-int main() {
-    return 0;
-}
-"""
-        devil_with_allegro = conf.TryCompile(devil_gl_check_app, '.c');
-        print devil_with_allegro and 'yes' or "no (That's good!)"
-        if devil_with_allegro:
-            if env['disable_allegro_hack']:
-                print """Your DevIL-library is linked with Allegro, and this requires placing an "END_OF_MAIN"-macro after the program's main routine. You have chosen to omit the hack that would eliminate this requirement! This means that _every_ program that uses this library has to #include <allegro.h> and place END_OF_MAIN() after the main function."""
-            else:
-                print """Your DevIL-library is linked with Allegro, and this would require placing an "END_OF_MAIN"-macro after the program's main routine. GG contains a hack to remove this requirement, but it's a dirty hack and might not work. Note that your Allegro programs will crash if you use GiGi and forget the "END_OF_MAIN"-macro! If you want to be able to use GiGi in Allegro-programs, run configure with the '--disable-allegro-hack' option."""
 
         # ltdl
         if str(Platform()) != 'win32':
             if not conf.CheckLibLTDL():
                 print 'Check libltdl/config.log to see what went wrong.'
                 Exit(1)
-
-        # create GG/Config.h
-        gg_config_h_values = {
-            'gg_devil_with_allegro' : env['devil_with_allegro'] and '#define GG_DEVIL_WITH_ALLEGRO 1' or '/* #undef GG_DEVIL_WITH_ALLEGRO */',
-            'gg_no_allegro_hack' : env['disable_allegro_hack'] and '#define GG_NO_ALLEGRO_HACK 1' or '/* #undef GG_NO_ALLEGRO_HACK */'
-            }
-        sys.stdout.write('Creating GG/Config.h from GG/Config.h.in... ')
-        try:
-            in_f = open(os.path.normpath('GG/Config.h.in'), 'r')
-            out_f = open(os.path.normpath('GG/Config.h'), 'w')
-            out_f.write(in_f.read() % gg_config_h_values)
-        except Exception:
-            print 'failed'
-            print 'Unable to create GG/Config.h from GG/Config.h.in'
-            Exit(1)
-        print 'ok'
 
         # finish config and save results for later
         conf.CheckConfigSuccess(True)

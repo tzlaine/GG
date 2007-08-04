@@ -6,5 +6,5 @@ version=%(version)s
 Name: GiGi
 Description: An OpenGL GUI library.
 Version: ${version}
-Libs: -lIL -lILU -lILUT -L${libdir} -lGiGi %(gigi_libs)s
+Libs: -lIL -lILU -L${libdir} -lGiGi %(gigi_libs)s
 Cflags: %(boost_include)s -I${includedir}

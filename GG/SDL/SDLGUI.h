@@ -29,7 +29,6 @@
 #ifndef _GG_SDLGUI_h_
 #define _GG_SDLGUI_h_
 
-#include <GG/Config.h>
 #include <GG/GUI.h>
 
 #include <SDL/SDL.h>

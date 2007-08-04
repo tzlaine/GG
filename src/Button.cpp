@@ -180,7 +180,7 @@ void Button::RenderPressed()
 {
     if (!m_pressed_graphic.Empty()) {
         glColor(Disabled() ? DisabledColor(m_color) : m_color);
-        m_pressed_graphic.OrthoBlit(UpperLeft(), LowerRight(), false);
+        m_pressed_graphic.OrthoBlit(UpperLeft(), LowerRight());
     } else {
         RenderDefault();
     }
@@ -193,7 +193,7 @@ void Button::RenderUnpressed()
 {
     if (!m_unpressed_graphic.Empty()) {
         glColor(Disabled() ? DisabledColor(m_color) : m_color);
-        m_unpressed_graphic.OrthoBlit(UpperLeft(), LowerRight(), false);
+        m_unpressed_graphic.OrthoBlit(UpperLeft(), LowerRight());
     } else {
         RenderDefault();
     }
@@ -212,7 +212,7 @@ void Button::RenderRollover()
 {
     if (!m_rollover_graphic.Empty()) {
         glColor(Disabled() ? DisabledColor(m_color) : m_color);
-        m_rollover_graphic.OrthoBlit(UpperLeft(), LowerRight(), false);
+        m_rollover_graphic.OrthoBlit(UpperLeft(), LowerRight());
     } else {
         RenderDefault();
     }

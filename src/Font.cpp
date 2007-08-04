@@ -929,7 +929,7 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
     // create opengl texture from buffer(s) and release buffer(s)
     for (unsigned int i = 0; i < buffer_vec.size(); ++i) {
         boost::shared_ptr<Texture> temp_texture(new Texture);
-        temp_texture->Init(0, 0, buffer_sizes[i].x, buffer_sizes[i].y, BUF_WIDTH, (unsigned char*)(buffer_vec[i]), 2);
+        temp_texture->Init(0, 0, buffer_sizes[i].x, buffer_sizes[i].y, BUF_WIDTH, (unsigned char*)(buffer_vec[i]), GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 2);
         m_textures.push_back(temp_texture);
         delete [] buffer_vec[i];
     }
@@ -988,7 +988,7 @@ int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState*
         glVertex2d(x + glyph.left_bearing - m_italics_offset + glyph.sub_texture.Width(), y + glyph.sub_texture.Height());
         glEnd();
     } else {
-        glyph.sub_texture.OrthoBlit(x + glyph.left_bearing, y, false);
+        glyph.sub_texture.OrthoBlit(Pt(x + glyph.left_bearing, y));
     }
     if (render_state && render_state->draw_underline) {
         double x1 = x;

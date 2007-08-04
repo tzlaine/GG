@@ -234,7 +234,7 @@ void DynamicGraphic::Render()
         pt1.y += shift;
         pt2.y += shift;
 
-        st.OrthoBlit(pt1, pt2, false);
+        st.OrthoBlit(pt1, pt2);
 
         if (send_end_frame_signal)
             EndFrameSignal(final_frame_idx);

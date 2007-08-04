@@ -27,40 +27,17 @@
 #include <GG/GUI.h>
 
 #include <IL/il.h>
+#include <IL/ilu.h>
 
 #include <iostream>
-
-/* some versions of libDevIL are linked with Allegro, which requires
-   _mangled_main_address to be defined. Futhermore, ilut.h includes
-   allegro.h as extern "C", which is wrong, because allegro defines
-   some C++-classes if it detects a C++ compiler. So, we need to
-   include allegro before including ilut!
- 
-   If GG_NO_ALLEGRO_HACK is not defined, we include a
-   _mangled_main_address variable with a dummy value; this would cause
-   * Allegro programs to crash! Therefore, if GG_NO_ALLEGRO_HACK is
-   defined, the developer has to use Allegro's END_OF_MAIN macro. */
-
-#include <GG/Config.h>
-
-#ifdef GG_DEVIL_WITH_ALLEGRO
-# include <allegro.h>
-# ifndef GG_NO_ALLEGRO_HACK
-   /* This "hexspeak" address should stand out in an debugger,
-      reminding the developer what went wrong */
-   void * _mangled_main_address = (void*) 0xdeadbabe;
-# endif
-#endif
-
-#include <IL/ilut.h>
-
 #include <iomanip>
 
-#define VERBOSE_DEVIL_ERROR_REPORTING 0
 
 using namespace GG;
 
 namespace {
+    const bool VERBOSE_DEVIL_ERROR_REPORTING = true;
+
     int PowerOfTwo(int input)
     {
         int value = 1;
@@ -73,11 +50,33 @@ namespace {
     {
         ILuint error;
         while ((error = ilGetError()) != IL_NO_ERROR) {
-#if VERBOSE_DEVIL_ERROR_REPORTING
-            std::cerr << "IL call \"" << function_call << "\" failed with IL error \"" << iluErrorString(error)
-                      << "\" (code " << error << ")\n";
-#endif
+            if (VERBOSE_DEVIL_ERROR_REPORTING) {
+                std::cerr << "IL call \"" << function_call << "\" failed with IL error \"" << iluErrorString(error)
+                          << "\" (code " << error << ")\n";
+            }
         }
+    }
+
+    std::string ILenumToString(ILenum il_enum)
+    {
+#define ENUM_CASE(x) if (il_enum == x) return #x
+        ENUM_CASE(IL_COLOR_INDEX);
+        ENUM_CASE(IL_RGB);
+        ENUM_CASE(IL_RGBA);
+        ENUM_CASE(IL_BGR);
+        ENUM_CASE(IL_BGRA);
+        ENUM_CASE(IL_LUMINANCE);
+        ENUM_CASE(IL_LUMINANCE_ALPHA);
+        ENUM_CASE(IL_BYTE);
+        ENUM_CASE(IL_UNSIGNED_BYTE);
+        ENUM_CASE(IL_SHORT);
+        ENUM_CASE(IL_UNSIGNED_SHORT);
+        ENUM_CASE(IL_INT);
+        ENUM_CASE(IL_UNSIGNED_INT);
+        ENUM_CASE(IL_FLOAT);
+        ENUM_CASE(IL_DOUBLE);
+#undef ENUM_CASE
+        return "UNKNOWN";
     }
 }
 
@@ -90,10 +89,12 @@ Texture::Texture() :
     m_height(0),
     m_wrap_s(GL_REPEAT),
     m_wrap_t(GL_REPEAT),
-    m_min_filter(GL_NEAREST_MIPMAP_LINEAR),
+    m_min_filter(GL_LINEAR_MIPMAP_LINEAR),
     m_mag_filter(GL_LINEAR),
     m_mipmaps(false),
     m_opengl_id(0),
+    m_format(GL_INVALID_ENUM),
+    m_type(GL_INVALID_ENUM),
     m_tex_coords(),
     m_default_width(0),
     m_default_height(0)
@@ -171,66 +172,45 @@ GLint Texture::DefaultHeight() const
     return m_default_height;
 }
 
-void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/* = 0*/, bool enter_2d_mode/* = true*/) const
-{
-    OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, tex_coords, enter_2d_mode);
-}
-
-void Texture::OrthoBlit(int x1, int y1, int x2, int y2, const GLfloat* tex_coords/* = 0*/, bool enter_2d_mode/* = true*/) const
+void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/* = 0*/) const
 {
     if (m_opengl_id) {
         if (!tex_coords) // use default texture coords when not given any others
             tex_coords = m_tex_coords;
 
-        if (enter_2d_mode)
-            GUI::GetGUI()->Enter2DMode(); // enter 2D mode, if needed
-
         glBindTexture(GL_TEXTURE_2D, m_opengl_id);
 
         // HACK! This code ensures that unscaled textures are reproduced exactly, even
         // though they theoretically should be even when using non-GL_NEAREST* scaling.
-        bool render_scaled = (x2 - x1) != m_default_width || (y2 - y1) != m_default_height;
-        bool need_min_filter_change = !render_scaled && m_min_filter != (m_mipmaps ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+        bool render_scaled = (pt2.x - pt1.x) != m_default_width || (pt2.y - pt1.y) != m_default_height;
+        bool need_min_filter_change = !render_scaled && m_min_filter != GL_NEAREST;
         bool need_mag_filter_change = !render_scaled && m_mag_filter != GL_NEAREST;
         if (need_min_filter_change)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_mipmaps ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         if (need_mag_filter_change)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         // render texture
         glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(tex_coords[0], tex_coords[1]); glVertex2i(x1, y1);
-        glTexCoord2f(tex_coords[2], tex_coords[1]); glVertex2i(x2, y1);
-        glTexCoord2f(tex_coords[0], tex_coords[3]); glVertex2i(x1, y2);
-        glTexCoord2f(tex_coords[2], tex_coords[3]); glVertex2i(x2, y2);
+        glTexCoord2f(tex_coords[0], tex_coords[1]); glVertex2i(pt1.x, pt1.y);
+        glTexCoord2f(tex_coords[2], tex_coords[1]); glVertex2i(pt2.x, pt1.y);
+        glTexCoord2f(tex_coords[0], tex_coords[3]); glVertex2i(pt1.x, pt2.y);
+        glTexCoord2f(tex_coords[2], tex_coords[3]); glVertex2i(pt2.x, pt2.y);
         glEnd();
 
         if (need_min_filter_change)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
         if (need_mag_filter_change)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
-
-        if (enter_2d_mode)
-            GUI::GetGUI()->Exit2DMode(); // exit 2D mode, if needed
     }
 }
 
-void Texture::OrthoBlit(const Pt& pt, bool enter_2d_mode/* = true*/) const
+void Texture::OrthoBlit(const Pt& pt) const
 {
-    OrthoBlit(pt.x, pt.y, enter_2d_mode);
-}
-
-void Texture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
-{
-    OrthoBlit(x, y, x + m_default_width, y + m_default_height, m_tex_coords, enter_2d_mode);
+    OrthoBlit(pt, pt + Pt(m_default_width, m_default_height), m_tex_coords);
 }
 
 void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
-{
-    Load(filename.c_str(), mipmap);
-}
-
-void Texture::Load(const char* filename, bool mipmap/* = false*/)
 {
     if (m_opengl_id)
         Clear();
@@ -242,45 +222,38 @@ void Texture::Load(const char* filename, bool mipmap/* = false*/)
     CheckILErrors("ilGenImages(1, &id)");
     ilBindImage(id);
     CheckILErrors("ilBindImage(id)");
-    ilLoadImage(const_cast<char*>(filename));
-    CheckILErrors("ilLoadImage(const_cast<char*>(filename))");
+    ilLoadImage(const_cast<char*>(filename.c_str()));
+    CheckILErrors("ilLoadImage(const_cast<char*>(filename.c_str()))");
     if ((error = ilGetError()) != IL_NO_ERROR)
-        throw BadFile((std::string("Could not load temporary DevIL image from file \'") + filename) + "\'");
-   
-    if (mipmap) {
-        m_opengl_id = ilutGLBindMipmaps();
-        CheckILErrors("ilutGLBindMipmaps()");
-    } else {
-        m_opengl_id = ilutGLBindTexImage();
-        CheckILErrors("ilutGLBindTexImage()");
-    }
-    if (!m_opengl_id || (error = ilGetError()) != IL_NO_ERROR)
-        throw BadFile((std::string("Could not create OpenGL texture object from file \'") + filename) + "\'");
+        throw BadFile("Could not load temporary DevIL image from file \'" + filename + "\'");
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
-
-    // be sure to record these
     m_filename = filename;
-    m_mipmaps = mipmap;
-    m_bytes_pp = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
-    CheckILErrors("ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL)");
     m_default_width = ilGetInteger(IL_IMAGE_WIDTH);
     CheckILErrors("ilGetInteger(IL_IMAGE_WIDTH)");
     m_default_height = ilGetInteger(IL_IMAGE_HEIGHT);
     CheckILErrors("ilGetInteger(IL_IMAGE_HEIGHT)");
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
-    m_tex_coords[2] = m_default_width / double(m_width);
-    m_tex_coords[3] = m_default_height / double(m_height);
-    
+    m_bytes_pp = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+    CheckILErrors("ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL)");
+    m_format = ilGetInteger(IL_IMAGE_FORMAT);
+    CheckILErrors("ilGetInteger(IL_IMAGE_FORMAT)");
+    if (m_format == IL_COLOR_INDEX) {
+        m_format = IL_RGBA;
+        m_type = IL_UNSIGNED_BYTE;
+        ilConvertImage(m_format, m_type);
+        CheckILErrors("ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE)");
+    } else {
+        m_type = ilGetInteger(IL_IMAGE_TYPE);
+        CheckILErrors("ilGetInteger(IL_IMAGE_TYPE)");
+    }
+    ILubyte* image_data = ilGetData();
+    CheckILErrors("ilGetData()");
+    Init(m_default_width, m_default_height, image_data, m_format, m_type, m_bytes_pp, mipmap);
+
     ilDeleteImages(1, &id);
     CheckILErrors("ilDeleteImages(1, &id)");
 }
 
-void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, int channels, bool mipmap/* = false*/)
+void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
     glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
@@ -291,7 +264,7 @@ void Texture::Init(int x, int y, int width, int height, int image_width, const u
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     try {
-        InitFromRawData(width, height, image, channels, mipmap);
+        InitFromRawData(width, height, image, format, type, bytes_per_pixel, mipmap);
     } catch (...) {
         glPopClientAttrib();
         throw;
@@ -300,7 +273,7 @@ void Texture::Init(int x, int y, int width, int height, int image_width, const u
     glPopClientAttrib();
 }
 
-void Texture::Init(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap/* = false*/)
+void Texture::Init(int width, int height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
     glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
@@ -311,7 +284,7 @@ void Texture::Init(int width, int height, const unsigned char* image, Uint32 cha
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     try {
-        InitFromRawData(width, height, image, channels, mipmap);
+        InitFromRawData(width, height, image, format, type, bytes_per_pixel, mipmap);
     } catch (...) {
         glPopClientAttrib();
         throw;
@@ -357,68 +330,69 @@ void Texture::Clear()
     m_min_filter = m_mag_filter = GL_NEAREST;
 
     m_mipmaps = false;
-
     m_opengl_id = 0;
 
     m_tex_coords[0] = m_tex_coords[1] = 0.0f;   // min x, y
     m_tex_coords[2] = m_tex_coords[3] = 1.0f;   // max x, y
 }
 
-void Texture::InitFromRawData(int width, int height, const unsigned char* image, Uint32 channels, bool mipmap)
+void Texture::InitFromRawData(int width, int height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap)
 {
+    if (!image)
+        return;
+
     if (m_opengl_id)
         Clear();
 
-    if (image) {
-        GLenum mode = 0;
-        switch (channels) {
-        case 1:   mode = GL_LUMINANCE;       break;
-        case 2:   mode = GL_LUMINANCE_ALPHA; break;
-        case 3:   mode = GL_RGB;             break;
-        case 4:   mode = GL_RGBA;            break;
-        default: throw InvalidColorChannels("Attempted to initialize a GG::Texture with an invalid number of color channels");
-        }
+    int GL_texture_width = PowerOfTwo(width);
+    int GL_texture_height = PowerOfTwo(height);
 
-        int GL_texture_width = PowerOfTwo(width);
-        int GL_texture_height = PowerOfTwo(height);
-        if (width != GL_texture_width || height != GL_texture_height)
-            throw BadSize("Attempted to create a texture whose sides are not powers of two");
+    glGenTextures(1, &m_opengl_id);
+    glBindTexture(GL_TEXTURE_2D, m_opengl_id);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
 
-        glGenTextures(1, &m_opengl_id);
-        glBindTexture(GL_TEXTURE_2D, m_opengl_id);                     // set this texture as the current opengl texture
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);   // set some relevant opengl texture parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_min_filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_mag_filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
-
-        if (mipmap) { // creating mipmapped texture
-            // check to see if this texture can be created with available resources
-            gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, channels, GL_texture_width, GL_texture_height, mode, GL_UNSIGNED_BYTE, image);
-            GLint format;
-            glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
-            if (format) // if yes, build it
-                gluBuild2DMipmaps(GL_TEXTURE_2D, channels, GL_texture_width, GL_texture_height, mode, GL_UNSIGNED_BYTE, image);
-            else // if no, throw
-                throw InsufficientResources("Insufficient resources to create requested mipmapped OpenGL texture");
-        } else { // creating non-mipmapped texture
-            glTexImage2D(GL_PROXY_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
-            GLint format;
-            glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
-            if (format)
-                glTexImage2D(GL_TEXTURE_2D, 0, channels, GL_texture_width, GL_texture_height, 0, mode, GL_UNSIGNED_BYTE, image);
-            else
-                throw InsufficientResources("Insufficient resources to create requested OpenGL texture");
-        }
-
-        // be sure to record these
-        m_mipmaps = mipmap;
-        m_bytes_pp = channels;
-        m_default_width = width;
-        m_default_height = height;
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
+    glTexImage2D(GL_PROXY_TEXTURE_2D, 0, format, GL_texture_width, GL_texture_height, 0, format, type, image);
+    GLint checked_format;
+    glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &checked_format);
+    if (!checked_format)
+        throw InsufficientResources("Insufficient resources to create requested OpenGL texture");
+    bool image_is_power_of_two = width == GL_texture_width && height == GL_texture_height;
+    if (image_is_power_of_two) {
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, image);
+    } else {
+        std::vector<unsigned char> zero_data(bytes_per_pixel * GL_texture_width * GL_texture_height);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, GL_texture_width, GL_texture_height, 0, format, type, &zero_data[0]);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, image);
     }
+
+    if (mipmap) {
+        std::auto_ptr<unsigned char> image_copy;
+        if (!image_is_power_of_two)
+            image_copy.reset(GetRawBytes());
+        unsigned char* image_to_use = image_copy.get() ? image_copy.get() : const_cast<unsigned char*>(image);
+        gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, format, GL_texture_width, GL_texture_height, format, type, image_to_use);
+        GLint checked_format;
+        glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &checked_format);
+        if (!checked_format)
+            throw InsufficientResources("Insufficient resources to create requested mipmapped OpenGL texture");
+        gluBuild2DMipmaps(GL_TEXTURE_2D, format, GL_texture_width, GL_texture_height, format, type, image_to_use);
+    } else {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    }
+
+    m_mipmaps = mipmap;
+    m_default_width = width;
+    m_default_height = height;
+    m_bytes_pp = bytes_per_pixel;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
+    m_tex_coords[2] = m_default_width / double(m_width);
+    m_tex_coords[3] = m_default_height / double(m_height);
 }
 
 unsigned char* Texture::GetRawBytes()
@@ -436,20 +410,11 @@ unsigned char* Texture::GetRawBytes()
         // get pixel data
         typedef unsigned char uchar;
         retval = new uchar[m_width * m_height * m_bytes_pp];
-        GLenum mode = 0;
-        switch (m_bytes_pp) {
-        case 1:   mode = GL_LUMINANCE;       break;
-        case 2:   mode = GL_LUMINANCE_ALPHA; break;
-        case 3:   mode = GL_RGB;             break;
-        case 4:   mode = GL_RGBA;            break;
-        default: throw InvalidColorChannels("Attempted to encode a GG::Texture with an invalid number of bytes per pixel");
-        }
-        glGetTexImage(GL_TEXTURE_2D, 0, mode, GL_UNSIGNED_BYTE, retval);
+        glGetTexImage(GL_TEXTURE_2D, 0, m_format, m_type, retval);
         glPopClientAttrib();
     }
     return retval;
 }
-
 
 
 ///////////////////////////////////////
@@ -471,10 +436,10 @@ SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, 
     if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");
 
-    m_tex_coords[0] = static_cast<double>(x1) / texture->DefaultWidth();
-    m_tex_coords[1] = static_cast<double>(y1) / texture->DefaultHeight();
-    m_tex_coords[2] = static_cast<double>(x2) / texture->DefaultWidth();
-    m_tex_coords[3] = static_cast<double>(y2) / texture->DefaultHeight();
+    m_tex_coords[0] = static_cast<double>(x1) / texture->Width();
+    m_tex_coords[1] = static_cast<double>(y1) / texture->Height();
+    m_tex_coords[2] = static_cast<double>(x2) / texture->Width();
+    m_tex_coords[3] = static_cast<double>(y2) / texture->Height();
 }
 
 SubTexture::~SubTexture()
@@ -520,29 +485,19 @@ GLint SubTexture::Height() const
     return m_height;
 }
 
-const Texture* SubTexture::GetTexture()const
+const Texture* SubTexture::GetTexture() const
 {
     return m_texture.get();
 }
 
-void SubTexture::OrthoBlit(const Pt& pt1, const Pt& pt2, bool enter_2d_mode/* = true*/) const
+void SubTexture::OrthoBlit(const Pt& pt1, const Pt& pt2) const
 {
-    OrthoBlit(pt1.x, pt1.y, pt2.x, pt2.y, enter_2d_mode);
+    if (m_texture) m_texture->OrthoBlit(pt1, pt2, m_tex_coords);
 }
 
-void SubTexture::OrthoBlit(int x1, int y1, int x2, int y2, bool enter_2d_mode/* = true*/) const
+void SubTexture::OrthoBlit(const Pt& pt) const
 {
-    if (m_texture) m_texture->OrthoBlit(x1, y1, x2, y2, m_tex_coords, enter_2d_mode);
-}
-
-void SubTexture::OrthoBlit(const Pt& pt, bool enter_2d_mode/* = true*/) const
-{
-    OrthoBlit(pt.x, pt.y, enter_2d_mode);
-}
-
-void SubTexture::OrthoBlit(int x, int y, bool enter_2d_mode/* = true*/) const
-{
-    if (m_texture) m_texture->OrthoBlit(x, y, x + m_width, y + m_height, m_tex_coords, enter_2d_mode);
+    if (m_texture) m_texture->OrthoBlit(pt, pt + Pt(m_width, m_height), m_tex_coords);
 }
 
 
@@ -592,23 +547,11 @@ void TextureManager::InitDevIL()
         CheckILErrors("ilInit()");
         iluInit();
         CheckILErrors("iluInit()");
-        ilutInit();
-        CheckILErrors("ilutInit()");
-        ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
-        CheckILErrors("ilOriginFunc()");
-        ilutRenderer(ILUT_OPENGL);
-        CheckILErrors("ilutRenderer()");
-        GLint max_size;
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
-        ilutSetInteger(ILUT_MAXTEX_WIDTH, max_size);
-        CheckILErrors("ilutSetInteger(ILUT_MAXTEX_WIDTH, max_size)");
-        ilutSetInteger(ILUT_MAXTEX_HEIGHT, max_size);
-        CheckILErrors("ilutSetInteger(ILUT_MAXTEX_HEIGHT, max_size)");
         s_il_initialized = true;
     }
 }
 
-boost::shared_ptr<Texture> TextureManager::LoadTexture(const std::string& filename, bool mipmap)
+boost::shared_ptr<Texture> TextureManager::LoadTexture(const std::string& filename, bool mipmap/* = false*/)
 {
     boost::shared_ptr<Texture> temp(new Texture());
     temp->Load(filename, mipmap);

@@ -121,7 +121,7 @@ void StaticGraphic::Render()
     pt1.y += shift;
     pt2.y += shift;
 
-    m_graphic.OrthoBlit(pt1, pt2, false);
+    m_graphic.OrthoBlit(pt1, pt2);
 }
 
 void StaticGraphic::SetStyle(Uint32 style)

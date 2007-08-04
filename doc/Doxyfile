@@ -473,7 +473,6 @@ RECURSIVE              = YES
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
 EXCLUDE                = ../config.h \
-                         ../include/GGConfig.h \
                          ../tutorial \
                          ../libltdl
 

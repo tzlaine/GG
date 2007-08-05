@@ -51,23 +51,23 @@ class WndEvent;
 GG_FLAG_TYPE(WndFlag);
 
 /** Clicks hit this window, rather than passing through it. */
-extern WndFlag CLICKABLE;
+extern GG_API WndFlag CLICKABLE;
 
 /** When a mouse button is held down over this window, it expects to receive multiple *ButtonDown messages. */
-extern WndFlag REPEAT_BUTTON_DOWN;
+extern GG_API WndFlag REPEAT_BUTTON_DOWN;
 
 /** This window can be dragged around independently. */
-extern WndFlag DRAGABLE;
+extern GG_API WndFlag DRAGABLE;
 
 /** This window can be resized by the user, with the mouse. */
-extern WndFlag RESIZABLE;
+extern GG_API WndFlag RESIZABLE;
 
 /** This windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows. */
-extern WndFlag ONTOP;
+extern GG_API WndFlag ONTOP;
 
 /** This window is modal; while it is active, no other windows are interactive.  Modal windows are considered above
     "on-top" windows, and should not be flagged as OnTop. */
-extern WndFlag MODAL;
+extern GG_API WndFlag MODAL;
 
 
 /** This is the basic GG window class.

@@ -13,6 +13,7 @@ sources = [
     'DynamicGraphic.cpp',
     'Edit.cpp',
     'EventPump.cpp',
+    'Flags.cpp',
     'Font.cpp',
     'GUI.cpp',
     'Layout.cpp',

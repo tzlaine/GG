@@ -108,9 +108,11 @@ struct is_flag_type : boost::mpl::false_ {};
     a subclass of Wnd may want to add a MINIMIZABLE flag.  Doing so is as simple as declaring it and registering it with
     \verbatim FlagSpec<WndFlag>::instance.insert(MINIMIZABLE, "MINIMIZABLE")\endverbatim.  If user-defined subclasses
     and their associated user-defined flags are loaded in a runtime-loaded library, users should take care to erase them
-    from the FlagSpec when the library is unloaded. */
+    from the FlagSpec when the library is unloaded.  \note All user-instantiated FlagSpecs must provide their own
+    implementations of the instance() static function (all the GG-provided FlagSpec instantiations provide such
+    implementations already. */
 template <class FlagType>
-class FlagSpec
+class GG_API FlagSpec
 {
 public:
     // If you have received an error message directing you to the line below, it means you probably have tried to use
@@ -134,11 +136,7 @@ public:
     //@}
 
     /** Returns the singelton instance of this class. */
-    static FlagSpec& instance()
-        {
-            static FlagSpec retval;
-            return retval;
-        }
+    static FlagSpec& instance();
 
     /** \name Accessors */ //@{
     /** Returns true iff FlagSpec contains \a flag. */
@@ -237,8 +235,8 @@ public:
     /** The base class for Flags exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
-    /** Thrown when an unknown flag is used to construct a FlagSpec. */
-    GG_CONCRETE_EXCEPTION(UnknownFlag, GG::FlagSpec, Exception);
+    /** Thrown when an unknown flag is used to construct a Flags. */
+    GG_CONCRETE_EXCEPTION(UnknownFlag, GG::Flags, Exception);
     //@}
 
     /** \name Structors */ //@{
@@ -250,7 +248,7 @@ public:
         m_flags(flag.m_value)
         {
             if (!FlagSpec<FlagType>::instance().contains(flag))
-                throw std::invalid_argument("Flags::Flags() : Invalid flag");
+                throw UnknownFlag("Invalid flag with value " + boost::lexical_cast<std::string>(flag.m_value));
         }
     //@}
 

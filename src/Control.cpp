@@ -46,7 +46,7 @@ Control::Control() :
     m_disabled(false)
 {}
 
-Control::Control(int x, int y, int w, int h, Uint32 flags/* = CLICKABLE*/) :
+Control::Control(int x, int y, int w, int h, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Wnd(x, y, w, h, flags),
     m_disabled(false)
 {}

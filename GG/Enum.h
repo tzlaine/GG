@@ -65,65 +65,64 @@ template <class E> EnumMap<E> GetEnumMap()
 
 /** Declares the beginning of a template specialization of EnumMap, for enumerated type \a name.
     Text-to-enum conversion is one of those places that calls for macro magic.  To use these for 
-    e.g. "enum Foo {FOO, BAR};", call: 
+    e.g. "enum Foo {FOO, BAR};", write: 
     \verbatim 
     GG_ENUM_MAP_BEGIN( Foo ) 
         GG_ENUM_MAP_INSERT( FOO )
         GG_ENUM_MAP_INSERT( BAR )
         ...
     GG_ENUM_MAP_END \endverbatim */
-#define GG_ENUM_MAP_BEGIN( name )                                               \
-template <> struct EnumMap< name > : EnumMapBase                                \
-{                                                                               \
-    typedef name EnumType;                                                      \
-    typedef std::map<EnumType, std::string> MapType;                            \
-    EnumMap ()                                                                  \
+#define GG_ENUM_MAP_BEGIN( name )                                       \
+template <> struct EnumMap< name > : EnumMapBase                        \
+{                                                                       \
+    typedef name EnumType;                                              \
+    typedef std::map<EnumType, std::string> MapType;                    \
+    EnumMap ()                                                          \
     {
 
 /** Adds a single value from an enumerated type, and its corresponding string representation, to an EnumMap. */
 #define GG_ENUM_MAP_INSERT( value ) m_map[ value ] = #value ;
 
 /** Declares the end of a template specialization of EnumMap, for enumerated type \a name. */
-#define GG_ENUM_MAP_END                                                         \
-    }                                                                           \
-    virtual const std::string& FromEnum(int i) const                            \
-    {                                                                           \
-        static const std::string error_str;                                     \
-        std::map<EnumType, std::string>::const_iterator it =                    \
-            m_map.find(EnumType(i));                                            \
-        return it == m_map.end() ? error_str : it->second;                      \
-    }                                                                           \
-    int FromString (const std::string &str) const                               \
-    {                                                                           \
-        for (MapType::const_iterator it = m_map.begin();                        \
-             it != m_map.end();                                                 \
-             ++it) {                                                            \
-            if (it->second == str) {                                            \
-                return it->first;                                               \
-            }                                                                   \
-        }                                                                       \
-        return BAD_VALUE;                                                       \
-    }                                                                           \
-    MapType m_map;                                                              \
+#define GG_ENUM_MAP_END                                                 \
+    }                                                                   \
+    virtual const std::string& FromEnum(int i) const                    \
+    {                                                                   \
+        static const std::string ERROR_STR;                             \
+        std::map<EnumType, std::string>::const_iterator it =            \
+            m_map.find(EnumType(i));                                    \
+        return it == m_map.end() ? ERROR_STR : it->second;              \
+    }                                                                   \
+    int FromString (const std::string &str) const                       \
+    {                                                                   \
+        for (MapType::const_iterator it = m_map.begin();                \
+             it != m_map.end();                                         \
+             ++it) {                                                    \
+            if (it->second == str)                                      \
+                return it->first;                                       \
+        }                                                               \
+        return BAD_VALUE;                                               \
+    }                                                                   \
+    MapType m_map;                                                      \
 };
 
 /** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
-#define GG_ENUM_STREAM_IN( name )                                               \
-inline std::istream& operator>>(std::istream& is, name& v)                      \
-{                                                                               \
-    std::string str;                                                            \
-    is >> str;                                                                  \
-    v = name (GG::GetEnumMap< name >().FromString(str));                        \
-    return is;                                                                  \
-}
+#define GG_ENUM_STREAM_IN( name )                                       \
+    inline std::istream& operator>>(std::istream& is, name& v)          \
+    {                                                                   \
+        std::string str;                                                \
+        is >> str;                                                      \
+        v = name (GG::GetEnumMap< name >().FromString(str));            \
+        return is;                                                      \
+    }
 
 /** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
-#define GG_ENUM_STREAM_OUT( name )                                              \
-inline std::ostream& operator<<(std::ostream& os, name v)                       \
-{                                                                               \
-    os << GG::GetEnumMap< name >().FromEnum(v);                                 \
-    return os;                                                                  \
-}
+#define GG_ENUM_STREAM_OUT( name )                                      \
+    inline std::ostream& operator<<(std::ostream& os, name v)           \
+    {                                                                   \
+        os << GG::GetEnumMap< name >().FromEnum(v);                     \
+        return os;                                                      \
+    }
 
 } // namespace GG
 

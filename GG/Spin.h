@@ -115,7 +115,7 @@ public:
     /** \name Structors */ //@{
     /** ctor that does not required height. Height is determined from the font and point size used.*/
     Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE);
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
 
     ~Spin(); // dtor
     //@}
@@ -193,7 +193,7 @@ protected:
 
 private:
     void ConnectSignals();
-    void Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags);
+    void Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Flags<WndFlag> flags);
     void ValueUpdated(const std::string& val_text);
 
     T          m_value;
@@ -232,7 +232,7 @@ Spin<T>::Spin() :
 
 template<class T>
 Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE*/) : 
+              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) : 
     Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
     m_value(value),
     m_step_size(step),
@@ -557,7 +557,7 @@ void Spin<T>::ConnectSignals()
 }
 
 template<class T>
-void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Uint32 flags)
+void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Flags<WndFlag> flags)
 {
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     Control::SetColor(color);

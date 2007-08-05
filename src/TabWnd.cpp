@@ -56,7 +56,7 @@ TabWnd::~TabWnd()
 }
 
 TabWnd::TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
-               TabBarStyle style/* = TAB_BAR_ATTACHED*/, Uint32 flags/* = CLICKABLE | DRAGABLE*/) :
+               TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
     Wnd(x, y, w, h, flags),
     m_tab_bar(GetStyleFactory()->NewTabBar(0, 0, w, font, color, text_color, style, CLICKABLE)),
     m_current_wnd(0)
@@ -152,7 +152,7 @@ TabBar::TabBar() :
 {}
 
 TabBar::TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
-               TabBarStyle style/* = TAB_BAR_ATTACHED*/, Uint32 flags/* = CLICKABLE*/) :
+               TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, TabHeightFromFont(font), flags),
     m_tabs(0),
     m_font(font),

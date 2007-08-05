@@ -173,7 +173,7 @@ public:
 
     /** \name Structors */ //@{
     /** basic ctor */
-    ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE);
+    ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
 
     virtual ~ListBox(); ///< virtual dtor
     //@}

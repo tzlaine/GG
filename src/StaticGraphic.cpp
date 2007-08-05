@@ -49,7 +49,7 @@ StaticGraphic::StaticGraphic() :
 }
 
 StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style/* = 0*/,
-                             Uint32 flags/* = 0*/) :
+                             Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
 {
@@ -57,7 +57,7 @@ StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr
 }
 
 StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style/* = 0*/,
-                             Uint32 flags/* = 0*/) :
+                             Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
 {

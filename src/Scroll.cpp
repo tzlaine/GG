@@ -55,7 +55,7 @@ Scroll::Scroll() :
     m_depressed_region(SBR_NONE)
 {}
 
-Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Uint32 flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) :
+Scroll::Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior, Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) :
     Control(x, y, w, h, flags),
     m_int_color(interior),
     m_orientation(orientation),

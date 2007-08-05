@@ -64,7 +64,7 @@ public:
     /** \name Structors */ //@{
     MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
               Uint32 style = TF_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
-              Uint32 flags = CLICKABLE); ///< ctor
+              Flags<WndFlag> flags = CLICKABLE); ///< ctor
     virtual ~MultiEdit(); ///< dtor
     //@}
 

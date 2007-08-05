@@ -144,6 +144,32 @@ namespace {
 }
 
 ///////////////////////////////////////
+// WndFlags
+///////////////////////////////////////
+WndFlag GG::CLICKABLE(1 << 0);
+WndFlag GG::REPEAT_BUTTON_DOWN(1 << 1);
+WndFlag GG::DRAGABLE(1 << 2);
+WndFlag GG::RESIZABLE(1 << 3);
+WndFlag GG::ONTOP(1 << 4);
+WndFlag GG::MODAL(1 << 5);
+
+namespace {
+    bool RegisterWndFlags()
+    {
+        FlagSpec<WndFlag>& spec = FlagSpec<WndFlag>::instance();
+        spec.insert(CLICKABLE, "CLICKABLE", true);
+        spec.insert(REPEAT_BUTTON_DOWN, "REPEAT_BUTTON_DOWN", true);
+        spec.insert(DRAGABLE, "DRAGABLE", true);
+        spec.insert(RESIZABLE, "RESIZABLE", true);
+        spec.insert(ONTOP, "ONTOP", true);
+        spec.insert(MODAL, "MODAL", true);
+        return true;
+    }
+    bool dummy = RegisterWndFlags();
+}
+
+
+///////////////////////////////////////
 // class GG::Wnd
 ///////////////////////////////////////
 // static(s)
@@ -159,14 +185,14 @@ Wnd::Wnd() :
     m_max_size(1 << 30, 1 << 30),
     m_layout(0),
     m_containing_layout(0),
-    m_flags(0)
+    m_flags()
 {
     m_browse_modes.resize(1);
     m_browse_modes[0].time = s_default_browse_time;
     m_browse_modes[0].wnd = s_default_browse_info_wnd;
 }
 
-Wnd::Wnd(int x, int y, int w, int h, Uint32 flags) :
+Wnd::Wnd(int x, int y, int w, int h, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
     m_done(false),
     m_parent(0),
     m_zorder(0),
@@ -1004,6 +1030,7 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Attribute("Max Size", m_max_size);
     editor->Attribute("Clip Children", m_clip_children);
     editor->Attribute("Drag Drop Type", m_drag_drop_data_type);
+#if 0 // TODO: one day, in the distant future, when a decent editor exists for GG, fix this code.
     editor->BeginFlags(m_flags);
     editor->Flag("Clickable", CLICKABLE);
     editor->Flag("Dragable", DRAGABLE);
@@ -1011,6 +1038,7 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Flag("Ontop", ONTOP);
     editor->Flag("Modal", MODAL);
     editor->EndFlags();
+#endif
     // TODO: handle creation and modification of browse info modes
 }
 

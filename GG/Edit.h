@@ -60,7 +60,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Uint32 flags = CLICKABLE); ///< ctor that does not required height. Height is determined from the font and point size used.
+    Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE); ///< ctor that does not required height. Height is determined from the font and point size used.
     //@}
 
     /** \name Accessors */ //@{

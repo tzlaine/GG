@@ -63,7 +63,7 @@ public:
 
     /** \name Structors */ //@{
     /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null. */
-    DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Uint32 flags = CLICKABLE);
+    DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags = CLICKABLE);
 
     ~DropDownList(); ///< dtor
     //@}

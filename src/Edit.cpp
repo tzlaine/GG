@@ -48,7 +48,7 @@ Edit::Edit() :
 {}
 
 Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
-           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Uint32 flags/* = CLICKABLE*/) :
+           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
     TextControl(x, y, w, HeightFromFont(font, PIXEL_MARGIN), str, font, text_color, TF_LEFT | TF_IGNORETAGS, flags),
     m_cursor_pos(0, 0),
     m_first_char_shown(0),

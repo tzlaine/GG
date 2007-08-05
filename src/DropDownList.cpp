@@ -91,7 +91,7 @@ DropDownList::DropDownList() :
     m_LB(0)
 {}
 
-DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Uint32 flags/* = CLICKABLE*/) :
+DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_current_item_idx(-1),
     m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))

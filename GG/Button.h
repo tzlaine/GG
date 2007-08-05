@@ -61,7 +61,7 @@ public:
 
     /** \name Structors */ //@{
     Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
-           Clr text_color = CLR_BLACK, Uint32 flags = CLICKABLE); ///< ctor
+           Clr text_color = CLR_BLACK, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
     /** \name Accessors */ //@{
@@ -155,7 +155,7 @@ public:
     /** \name Structors */ //@{
     StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
-                Uint32 flags = CLICKABLE); ///< Ctor
+                Flags<WndFlag> flags = CLICKABLE); ///< Ctor
     //@}
 
     /** \name Accessors */ //@{

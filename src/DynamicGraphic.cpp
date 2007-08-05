@@ -60,7 +60,7 @@ DynamicGraphic::DynamicGraphic() :
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, 
                                const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style/* = 0*/, int frames/* = -1*/, 
-                               Uint32 flags/* = 0*/) :
+                               Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
     m_frame_width(frame_width),

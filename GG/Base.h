@@ -69,24 +69,6 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
     The namespace that encloses all GG classes, functions, typedefs, enums, etc. */
 namespace GG {
 
-/** Wnd creation flags */
-enum WndFlag {
-    CLICKABLE =          1 << 0,  ///< clicks hit this window, rather than passing through it
-
-    /** when a mouse button is held down over this window, it expects to receive multiple *ButtonDown messages */
-    REPEAT_BUTTON_DOWN = 1 << 1,
-
-    DRAGABLE =           1 << 2,  ///< this window can be dragged around independently
-    RESIZABLE =          1 << 3,  ///< this window can be resized by the user, with the mouse
-
-    /** this windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows */
-    ONTOP =              1 << 4,
-
-    /** this window is modal; while it is active, no other windows are interactive.  Modal windows are considered above
-        "on-top" windows, and should not be flagged as ONTOP. */
-    MODAL =              1 << 5
-};
-
 /** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/
 enum WndRegion {
     WR_NONE = -1, 
@@ -559,18 +541,6 @@ GG_ENUM_MAP_END
 
 GG_ENUM_STREAM_IN(ListBoxStyle)
 GG_ENUM_STREAM_OUT(ListBoxStyle)
-
-// define EnumMap and stream operators for Wnd::WndFlag
-GG_ENUM_MAP_BEGIN(WndFlag)
-    GG_ENUM_MAP_INSERT(CLICKABLE)
-    GG_ENUM_MAP_INSERT(DRAGABLE)
-    GG_ENUM_MAP_INSERT(RESIZABLE)
-    GG_ENUM_MAP_INSERT(ONTOP)
-    GG_ENUM_MAP_INSERT(MODAL)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(WndFlag)
-GG_ENUM_STREAM_OUT(WndFlag)
 
 // define EnumMap and stream operators for Alignment
 GG_ENUM_MAP_BEGIN(Alignment)

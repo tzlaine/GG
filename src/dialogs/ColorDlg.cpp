@@ -375,7 +375,7 @@ ColorDlg::ColorDisplay::ColorDisplay() :
 {}
 
 ColorDlg::ColorDisplay::ColorDisplay(Clr color) :
-    Control(0, 0, 1, 1, 0)
+    Control(0, 0, 1, 1, Flags<WndFlag>())
 {
     SetColor(color);
 }

@@ -89,7 +89,7 @@ Layout::Layout() :
 {}
 
 Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_margin/* = 0*/, int cell_margin/* = -1*/) :
-    Wnd(x, y, w, h, 0),
+    Wnd(x, y, w, h, Flags<WndFlag>()),
     m_cells(rows, std::vector<Wnd*>(columns)),
     m_border_margin(border_margin),
     m_cell_margin(cell_margin < 0 ? border_margin : cell_margin),

@@ -76,7 +76,7 @@ TextControl::TextControl() :
 {}
 
 TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
-                         Uint32 text_fmt/* = 0*/, Uint32 flags/* = 0*/) :
+                         Uint32 text_fmt/* = 0*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
     Control(x, y, w, h, flags),
     m_format(text_fmt),
     m_text_color(color),
@@ -91,7 +91,7 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
 }
 
 TextControl::TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
-                         Uint32 flags/* = 0*/) :
+                         Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
     Control(x, y, 0, 0, flags),
     m_format(text_fmt),
     m_text_color(color),

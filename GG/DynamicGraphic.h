@@ -78,7 +78,7 @@ public:
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
         Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor allows
         specification of a frame size different from the size of the DynamicGraphic's size. */
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Uint32 flags = 0);
+    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ //@{

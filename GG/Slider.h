@@ -58,7 +58,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Uint32 flags = CLICKABLE); ///< ctor
+    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
     /** \name Accessors */ //@{

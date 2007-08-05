@@ -45,8 +45,8 @@ public:
     /** creates a StaticGraphic from a pre-existing Texture.
         \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
         a SubTexture. */
-    StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing Texture.
-    StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style = 0, Uint32 flags = 0); ///< creates a StaticGraphic from a pre-existing SubTexture.
+    StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing Texture.
+    StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style = 0, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing SubTexture.
     //@}
 
     /** \name Accessors */ //@{

@@ -48,7 +48,7 @@ Slider::Slider() :
 {}
 
 Slider::Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color,
-               int tab_width, int line_width/* = 5*/, Uint32 flags/* = CLICKABLE*/) :
+               int tab_width, int line_width/* = 5*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_posn(min),
     m_range_min(min),

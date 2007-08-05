@@ -57,12 +57,12 @@ public:
     using Wnd::SetMinSize;
 
     /** \name Structors */ //@{
-    TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0); ///< ctor taking a font directly
+    TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Uint32 flags = 0);
+    TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ //@{

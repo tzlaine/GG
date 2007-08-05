@@ -31,12 +31,10 @@
 
 #include <GG/Base.h>
 #include <GG/Exception.h>
+#include <GG/Flags.h>
 
 #include <list>
 #include <set>
-
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/nvp.hpp>
 
 
 namespace GG {
@@ -47,6 +45,30 @@ class StyleFactory;
 class Timer;
 class WndEditor;
 class WndEvent;
+
+
+/** Wnd creation flags type. */
+GG_FLAG_TYPE(WndFlag);
+
+/** Clicks hit this window, rather than passing through it. */
+extern WndFlag CLICKABLE;
+
+/** When a mouse button is held down over this window, it expects to receive multiple *ButtonDown messages. */
+extern WndFlag REPEAT_BUTTON_DOWN;
+
+/** This window can be dragged around independently. */
+extern WndFlag DRAGABLE;
+
+/** This window can be resized by the user, with the mouse. */
+extern WndFlag RESIZABLE;
+
+/** This windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows. */
+extern WndFlag ONTOP;
+
+/** This window is modal; while it is active, no other windows are interactive.  Modal windows are considered above
+    "on-top" windows, and should not be flagged as OnTop. */
+extern WndFlag MODAL;
+
 
 /** This is the basic GG window class.
 
@@ -496,7 +518,7 @@ protected:
     Wnd(); ///< default ctor
 
     /** ctor that allows a size and position to be specified, as well as creation flags */
-    Wnd(int x, int y, int w, int h, Uint32 flags = CLICKABLE | DRAGABLE);
+    Wnd(int x, int y, int w, int h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
     //@}
 
     /** \name Mutators */ //@{
@@ -536,8 +558,8 @@ private:
     boost::shared_ptr<StyleFactory>
                       m_style_factory;     ///< the style factory to use when creating dialogs or child controls
 
-    /** flags supplied at window creation for clickability, dragability, drag-keeping, and resizability */
-    Uint32            m_flags;
+    /** flags supplied at window creation for clickability, dragability, resizability, etc. */
+    Flags<WndFlag>    m_flags;
 
     /** the default time to set for the first (and only) value in m_browse_mode_times during Wnd contruction */
     static int        s_default_browse_time;

@@ -29,6 +29,7 @@
 #ifndef _GG_Flags_h_
 #define _GG_Flags_h_
 
+#include <boost/lexical_cast.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
@@ -60,13 +61,15 @@ template <class T>
 struct is_flag_type : boost::mpl::false_ {};
 
 
-/** Defines a new type \a name that is usable as a bit-flag type that can be used by Flags and FlagSpec.  The
-    resulting code defines a specialization for is_flag_type, the flag class itself, and streaming operators for the
-    flag type. */
+/** Defines a new type \a name that is usable as a bit-flag type that can be used by Flags and FlagSpec.  The resulting
+    code defines a specialization for is_flag_type, the flag class itself, streaming operators for the flag type, and
+    the forward declaration of FlagSpec::instance() for the flag type.  The user must define FlagSpec::instance(). */
 #define GG_FLAG_TYPE(name)                                              \
     class name;                                                         \
+                                                                        \
     template <>                                                         \
     struct is_flag_type<name> : boost::mpl::true_ {};                   \
+                                                                        \
     class name                                                          \
     {                                                                   \
     public:                                                             \
@@ -87,17 +90,32 @@ struct is_flag_type : boost::mpl::false_ {};
         Uint32 m_value;                                                 \
         friend class Flags<name>;                                       \
     };                                                                  \
+                                                                        \
+    template <>                                                         \
+    FlagSpec<name>& FlagSpec<name>::instance();                         \
+                                                                        \
     inline std::ostream& operator<<(std::ostream& os, name n)           \
     {                                                                   \
         os << FlagSpec<name>::instance().ToString(n);                   \
         return os;                                                      \
     }                                                                   \
+                                                                        \
     inline std::istream& operator>>(std::istream& is, name& n)          \
     {                                                                   \
         std::string str;                                                \
         is >> str;                                                      \
         n = FlagSpec<name>::instance().FromString(str);                 \
         return is;                                                      \
+    }
+
+
+/** Defines the implementation of FlagSpec::instance() for the flag type \a name. */
+#define GG_FLAGSPEC_IMPL(name)                          \
+    template <>                                         \
+    FlagSpec<name>& FlagSpec<name>::instance()          \
+    {                                                   \
+        static FlagSpec retval;                         \
+        return retval;                                  \
     }
 
 

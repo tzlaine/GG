@@ -27,9 +27,4 @@
 
 using namespace GG;
 
-template <>
-FlagSpec<WndFlag>& FlagSpec<WndFlag>::instance()
-{
-    static FlagSpec retval;
-    return retval;
-}
+GG_FLAGSPEC_IMPL(WndFlag);

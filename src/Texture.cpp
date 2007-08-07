@@ -124,7 +124,7 @@ GLenum Texture::WrapT() const
 
 GLenum Texture::MinFilter() const
 {
-return m_min_filter;
+    return m_min_filter;
 }
 
 GLenum Texture::MagFilter() const
@@ -327,10 +327,13 @@ void Texture::Clear()
     m_default_height = m_height = 0;
 
     m_wrap_s = m_wrap_t = GL_REPEAT;
-    m_min_filter = m_mag_filter = GL_NEAREST;
+    m_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+    m_mag_filter = GL_LINEAR;
 
     m_mipmaps = false;
     m_opengl_id = 0;
+    m_format = GL_INVALID_ENUM;
+    m_type = GL_INVALID_ENUM;
 
     m_tex_coords[0] = m_tex_coords[1] = 0.0f;   // min x, y
     m_tex_coords[2] = m_tex_coords[3] = 1.0f;   // max x, y

@@ -124,11 +124,11 @@ struct is_flag_type : boost::mpl::false_ {};
     FlagSpec is designed to be extensible.  That is, it is understood that the flags used by GG may be insufficient for
     all subclasses that users may write, and FlagSpec allows authors of GG-derived classes to add flags.  For instance,
     a subclass of Wnd may want to add a MINIMIZABLE flag.  Doing so is as simple as declaring it and registering it with
-    \verbatim FlagSpec<WndFlag>::instance.insert(MINIMIZABLE, "MINIMIZABLE")\endverbatim.  If user-defined subclasses
+    \verbatim FlagSpec<WndFlag>::instance.insert(MINIMIZABLE, "MINIMIZABLE") \endverbatim.  If user-defined subclasses
     and their associated user-defined flags are loaded in a runtime-loaded library, users should take care to erase them
     from the FlagSpec when the library is unloaded.  \note All user-instantiated FlagSpecs must provide their own
     implementations of the instance() static function (all the GG-provided FlagSpec instantiations provide such
-    implementations already. */
+    implementations already). */
 template <class FlagType>
 class GG_API FlagSpec
 {
@@ -241,6 +241,8 @@ class Flags;
 template <class FlagType>
 std::ostream& operator<<(std::ostream& os, Flags<FlagType> flags);
 
+/** A set of flags of the same type.  Individual flags and sets of flags can be passed as parameters and/or be stored as
+    member variables in Flags objects. */
 template <class FlagType>
 class Flags
 {

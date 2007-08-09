@@ -52,9 +52,9 @@ public:
     /** \name Mutators */ //@{
     virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
     virtual void   Render() = 0;
-    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
-    virtual void   KeyPress(Key key, Uint32 key_mods);
-    virtual void   KeyRelease(Key key, Uint32 key_mods);
+    virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void   KeyRelease(Key key, Flags<ModKey> mod_keys);
 
     virtual void   SetColor(Clr c);        ///< sets the color of the control
     virtual void   Disable(bool b = true); ///< disables/enables the control; disabled controls appear greyed

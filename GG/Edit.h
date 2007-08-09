@@ -80,9 +80,9 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual void   KeyPress(Key key, Uint32 key_mods);
+    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
     virtual void   GainingFocus();
     virtual void   LosingFocus();
 

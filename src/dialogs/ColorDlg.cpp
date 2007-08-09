@@ -30,6 +30,8 @@
 #include <GG/Layout.h>
 #include <GG/Slider.h>
 #include <GG/StyleFactory.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -207,12 +209,12 @@ void HueSaturationPicker::Render()
     glEnable(GL_TEXTURE_2D);
 }
 
-void HueSaturationPicker::LButtonDown(const Pt& pt, Uint32 keys)
+void HueSaturationPicker::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     SetHueSaturationFromPt(pt);
 }
 
-void HueSaturationPicker::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void HueSaturationPicker::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     SetHueSaturationFromPt(pt);
 }
@@ -287,12 +289,12 @@ void ValuePicker::Render()
     glEnable(GL_TEXTURE_2D);
 }
 
-void ValuePicker::LButtonDown(const Pt& pt, Uint32 keys)
+void ValuePicker::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     SetValueFromPt(pt);
 }
 
-void ValuePicker::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void ValuePicker::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     SetValueFromPt(pt);
 }
@@ -675,7 +677,7 @@ void ColorDlg::Render()
     }
 }
 
-void ColorDlg::KeyPress(Key key, Uint32 key_mods)
+void ColorDlg::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER)
         OkClicked();

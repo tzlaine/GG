@@ -25,6 +25,8 @@
 #include <GG/Control.h>
 
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -67,22 +69,22 @@ void Control::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
         Parent()->AcceptDrops(wnds, pt);
 }
 
-void Control::MouseWheel(const Pt& pt, int move, Uint32 keys)
+void Control::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->MouseWheel(pt, move, keys);
+        Parent()->MouseWheel(pt, move, mod_keys);
 }
 
-void Control::KeyPress(Key key, Uint32 key_mods)
+void Control::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->KeyPress(key, key_mods);
+        Parent()->KeyPress(key, mod_keys);
 }
 
-void Control::KeyRelease(Key key, Uint32 key_mods)
+void Control::KeyRelease(Key key, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->KeyRelease(key, key_mods);
+        Parent()->KeyRelease(key, mod_keys);
 }
 
 void Control::SetColor(Clr c)

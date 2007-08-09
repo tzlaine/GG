@@ -119,9 +119,9 @@ public:
     /** \name Mutators */ //@{
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
-    virtual void MouseWheel(const Pt& pt, int move, Uint32 keys);
-    virtual void KeyPress(Key key, Uint32 key_mods);
-    virtual void KeyRelease(Key key, Uint32 key_mods);
+    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void KeyRelease(Key key, Flags<ModKey> mod_keys);
 
     /** inserts \a w into the layout in the indicated cell, expanding the layout grid as necessary.  Note that \a row
         and \a column must not be negative, though this is not checked. \throw GG::Layout::AttemptedOverwrite Throws if

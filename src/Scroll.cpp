@@ -145,7 +145,7 @@ void Scroll::Render()
     FlatRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, CLR_ZERO, 0);
 }
 
-void Scroll::LButtonDown(const Pt& pt, Uint32 keys)
+void Scroll::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         // when a button is pressed, record the region of the control the cursor is over
@@ -168,7 +168,7 @@ void Scroll::LButtonDown(const Pt& pt, Uint32 keys)
     }
 }
 
-void Scroll::LButtonUp(const Pt& pt, Uint32 keys)
+void Scroll::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         m_decr->SetState(Button::BN_UNPRESSED);
@@ -178,14 +178,14 @@ void Scroll::LButtonUp(const Pt& pt, Uint32 keys)
     }
 }
 
-void Scroll::LClick(const Pt& pt, Uint32 keys)
+void Scroll::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    LButtonUp(pt, keys);
+    LButtonUp(pt, mod_keys);
 }
 
-void Scroll::MouseHere(const Pt& pt, Uint32 keys)
+void Scroll::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    LButtonUp(pt, keys);
+    LButtonUp(pt, mod_keys);
 }
 
 void Scroll::SizeMove(const Pt& ul, const Pt& lr)

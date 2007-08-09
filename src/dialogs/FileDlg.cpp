@@ -31,6 +31,7 @@
 #include <GG/DrawUtil.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
+#include <GG/WndEvent.h>
 
 #include <GG/dialogs/ThreeButtonDlg.h>
 
@@ -45,6 +46,7 @@
 #include <boost/format.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/dynamic.hpp>
+
 
 using namespace GG;
 
@@ -263,7 +265,7 @@ void FileDlg::Render()
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
 }
 
-void FileDlg::KeyPress(Key key, Uint32 key_mods)
+void FileDlg::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (key == GGK_RETURN || key == GGK_KP_ENTER)
         OkHandler(false);

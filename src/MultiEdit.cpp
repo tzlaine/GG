@@ -28,6 +28,8 @@
 #include <GG/Scroll.h>
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -193,7 +195,7 @@ void MultiEdit::Render()
     EndScissorClipping();
 }
 
-void MultiEdit::LButtonDown(const Pt& pt, Uint32 keys)
+void MultiEdit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     // when a button press occurs, record the character position under the cursor, and remove any previous selection range
     if (!Disabled() && !(m_style & READ_ONLY)) {
@@ -205,7 +207,7 @@ void MultiEdit::LButtonDown(const Pt& pt, Uint32 keys)
     }
 }
 
-void MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void MultiEdit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (!Disabled() && !(m_style & READ_ONLY)) {
         // when a drag occurs, move m_cursor_end to where the mouse is, which selects a range of characters
@@ -218,7 +220,7 @@ void MultiEdit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     }
 }
 
-void MultiEdit::MouseWheel(const Pt& pt, int move, Uint32 keys)
+void MultiEdit::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     if (!Disabled() && m_vscroll) {
         for (int i = 0; i < move; ++i)
@@ -228,11 +230,11 @@ void MultiEdit::MouseWheel(const Pt& pt, int move, Uint32 keys)
     }
 }
 
-void MultiEdit::KeyPress(Key key, Uint32 key_mods)
+void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         if (!(m_style & READ_ONLY)) {
-            bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
+            bool shift_down = mod_keys & (MOD_KEY_LSHIFT | MOD_KEY_RSHIFT);
             bool emit_signal = false;
             switch (key) {
             case GGK_RETURN:
@@ -392,8 +394,8 @@ void MultiEdit::KeyPress(Key key, Uint32 key_mods)
 
             default: {
                 // only process it if it's a printable character, and no significant modifiers are in use
-                KeypadKeyToPrintable(key, key_mods);
-                if (key < GGK_DELETE && isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
+                KeypadKeyToPrintable(key, mod_keys);
+                if (key < GGK_DELETE && isprint(key) && !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
                     if (MultiSelected())
                         ClearSelected();
                     // insert the character to the right of the caret
@@ -413,7 +415,7 @@ void MultiEdit::KeyPress(Key key, Uint32 key_mods)
                     m_cursor_end = m_cursor_begin;
                     emit_signal = true;
                 } else {
-                    Edit::KeyPress(key, key_mods);
+                    Edit::KeyPress(key, mod_keys);
                 }
                 break;
             }
@@ -423,7 +425,7 @@ void MultiEdit::KeyPress(Key key, Uint32 key_mods)
                 EditedSignal(WindowText());
         }
     } else {
-        Edit::KeyPress(key, key_mods);
+        Edit::KeyPress(key, mod_keys);
     }
 }
 

@@ -29,6 +29,8 @@
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -228,7 +230,7 @@ void MenuBar::Render()
     }
 }
 
-void MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
+void MenuBar::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         for (int i = 0; i < static_cast<int>(m_menu_labels.size()); ++i) {
@@ -254,7 +256,7 @@ void MenuBar::LButtonDown(const Pt& pt, Uint32 keys)
     }
 }
 
-void MenuBar::MouseHere(const Pt& pt, Uint32 keys)
+void MenuBar::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         m_caret = -1;
@@ -574,7 +576,7 @@ void PopupMenu::Render()
     }
 }
 
-void PopupMenu::LButtonUp(const Pt& pt, Uint32 keys)
+void PopupMenu::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (m_caret[0] != -1) {
         MenuItem* menu_ptr = &m_menu_data;
@@ -588,12 +590,12 @@ void PopupMenu::LButtonUp(const Pt& pt, Uint32 keys)
     m_done = true;
 }
 
-void PopupMenu::LClick(const Pt& pt, Uint32 keys)
+void PopupMenu::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    LButtonUp(pt, keys);
+    LButtonUp(pt, mod_keys);
 }
 
-void PopupMenu::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     bool cursor_is_in_menu = false;
     for (int i = static_cast<int>(m_open_levels.size()) - 1; i >= 0; --i) {
@@ -635,19 +637,19 @@ void PopupMenu::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     BrowsedSignal(update_ID);
 }
 
-void PopupMenu::RButtonUp(const Pt& pt, Uint32 keys)
+void PopupMenu::RButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    LButtonUp(pt, keys);
+    LButtonUp(pt, mod_keys);
 }
 
-void PopupMenu::RClick(const Pt& pt, Uint32 keys)
+void PopupMenu::RClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    LButtonUp(pt, keys);
+    LButtonUp(pt, mod_keys);
 }
 
-void PopupMenu::MouseHere(const Pt& pt, Uint32 keys)
+void PopupMenu::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    LDrag(pt, Pt(), keys);
+    LDrag(pt, Pt(), mod_keys);
 }
 
 int PopupMenu::Run()

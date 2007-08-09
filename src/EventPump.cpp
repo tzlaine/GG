@@ -24,6 +24,9 @@
 
 #include <GG/EventPump.h>
 
+#include <GG/WndEvent.h>
+
+
 using namespace GG;
 
 EventPumpState::EventPumpState() :
@@ -41,7 +44,7 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
         state.time = gui->Ticks();
 
         // send an idle message, so that the gui has timely updates for triggering browse info windows, etc.
-        gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, gui->KeyMods(), gui->MousePosition(), Pt());
+        gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, gui->ModKeys(), gui->MousePosition(), Pt());
 
         // govern FPS speed if needed
         if (double max_FPS = gui->MaxFPS()) {

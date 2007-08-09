@@ -146,12 +146,14 @@ namespace {
 ///////////////////////////////////////
 // WndFlags
 ///////////////////////////////////////
-WndFlag GG::CLICKABLE(1 << 0);
-WndFlag GG::REPEAT_BUTTON_DOWN(1 << 1);
-WndFlag GG::DRAGABLE(1 << 2);
-WndFlag GG::RESIZABLE(1 << 3);
-WndFlag GG::ONTOP(1 << 4);
-WndFlag GG::MODAL(1 << 5);
+WndFlag GG::CLICKABLE          (1 << 0);
+WndFlag GG::REPEAT_BUTTON_DOWN (1 << 1);
+WndFlag GG::DRAGABLE           (1 << 2);
+WndFlag GG::RESIZABLE          (1 << 3);
+WndFlag GG::ONTOP              (1 << 4);
+WndFlag GG::MODAL              (1 << 5);
+
+GG_FLAGSPEC_IMPL(WndFlag);
 
 namespace {
     bool RegisterWndFlags()
@@ -921,39 +923,39 @@ void Wnd::SetLayoutCellMargin(int margin)
 
 void Wnd::Render() {}
 
-void Wnd::LButtonDown(const Pt& pt, Uint32 keys) {}
+void Wnd::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
 
-void Wnd::LDrag(const Pt& pt, const Pt& move, Uint32 keys) {if (Dragable()) OffsetMove(move);}
+void Wnd::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {if (Dragable()) OffsetMove(move);}
 
-void Wnd::LButtonUp(const Pt& pt, Uint32 keys) {}
+void Wnd::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
 
-void Wnd::LClick(const Pt& pt, Uint32 keys) {}
+void Wnd::LClick(const Pt& pt, Flags<ModKey> mod_keys) {}
 
-void Wnd::LDoubleClick(const Pt& pt, Uint32 keys) {LClick(pt, keys);}
+void Wnd::LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {LClick(pt, mod_keys);}
 
-void Wnd::RButtonDown(const Pt& pt, Uint32 keys) {}
+void Wnd::RButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
 
-void Wnd::RClick(const Pt& pt, Uint32 keys) {}
+void Wnd::RClick(const Pt& pt, Flags<ModKey> mod_keys) {}
 
-void Wnd::RDoubleClick(const Pt& pt, Uint32 keys) {RClick(pt, keys);}
+void Wnd::RDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {RClick(pt, mod_keys);}
 
-void Wnd::MouseEnter(const Pt& pt, Uint32 keys) {}
+void Wnd::MouseEnter(const Pt& pt, Flags<ModKey> mod_keys) {}
 
-void Wnd::MouseHere(const Pt& pt, Uint32 keys) {}
+void Wnd::MouseHere(const Pt& pt, Flags<ModKey> mod_keys) {}
 
 void Wnd::MouseLeave() {}
 
-void Wnd::MouseWheel(const Pt& pt, int move, Uint32 keys) {}
+void Wnd::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys) {}
 
-void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
+void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys) {}
 
-void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys) {}
+void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys) {}
 
 void Wnd::DragDropLeave() {}
 
-void Wnd::KeyPress(Key key, Uint32 key_mods) {}
+void Wnd::KeyPress(Key key, Flags<ModKey> mod_keys) {}
 
-void Wnd::KeyRelease(Key key, Uint32 key_mods) {}
+void Wnd::KeyRelease(Key key, Flags<ModKey> mod_keys) {}
 
 void Wnd::GainingFocus() {}
 
@@ -1076,55 +1078,55 @@ void Wnd::HandleEvent(const WndEvent& event)
 
     switch (event.Type()) {
     case WndEvent::LButtonDown:
-        LButtonDown(event.Point(), event.KeyMods());
+        LButtonDown(event.Point(), event.ModKeys());
         break;
     case WndEvent::LDrag:
-        LDrag(event.Point(), event.DragMove(), event.KeyMods());
+        LDrag(event.Point(), event.DragMove(), event.ModKeys());
         break;
     case WndEvent::LButtonUp:
-        LButtonUp(event.Point(), event.KeyMods());
+        LButtonUp(event.Point(), event.ModKeys());
         break;
     case WndEvent::LClick:
-        LClick(event.Point(), event.KeyMods());
+        LClick(event.Point(), event.ModKeys());
         break;
     case WndEvent::LDoubleClick:
-        LDoubleClick(event.Point(), event.KeyMods());
+        LDoubleClick(event.Point(), event.ModKeys());
         break;
     case WndEvent::RButtonDown:
-        RButtonDown(event.Point(), event.KeyMods());
+        RButtonDown(event.Point(), event.ModKeys());
         break;
     case WndEvent::RClick:
-        RClick(event.Point(), event.KeyMods());
+        RClick(event.Point(), event.ModKeys());
         break;
     case WndEvent::RDoubleClick:
-        RDoubleClick(event.Point(), event.KeyMods());
+        RDoubleClick(event.Point(), event.ModKeys());
         break;
     case WndEvent::MouseEnter:
-        MouseEnter(event.Point(), event.KeyMods());
+        MouseEnter(event.Point(), event.ModKeys());
         break;
     case WndEvent::MouseHere:
-        MouseHere(event.Point(), event.KeyMods());
+        MouseHere(event.Point(), event.ModKeys());
         break;
     case WndEvent::MouseLeave:
         MouseLeave();
         break;
     case WndEvent::DragDropEnter:
-        DragDropEnter(event.Point(), event.DragDropWnds(), event.KeyMods());
+        DragDropEnter(event.Point(), event.DragDropWnds(), event.ModKeys());
         break;
     case WndEvent::DragDropHere:
-        DragDropHere(event.Point(), event.DragDropWnds(), event.KeyMods());
+        DragDropHere(event.Point(), event.DragDropWnds(), event.ModKeys());
         break;
     case WndEvent::DragDropLeave:
         DragDropLeave();
         break;
     case WndEvent::MouseWheel:
-        MouseWheel(event.Point(), event.WheelMove(), event.KeyMods());
+        MouseWheel(event.Point(), event.WheelMove(), event.ModKeys());
         break;
     case WndEvent::KeyPress:
-        KeyPress(event.GetKey(), event.KeyMods());
+        KeyPress(event.GetKey(), event.ModKeys());
         break;
     case WndEvent::KeyRelease:
-        KeyRelease(event.GetKey(), event.KeyMods());
+        KeyRelease(event.GetKey(), event.ModKeys());
         break;
     case WndEvent::GainingFocus:
         GainingFocus();

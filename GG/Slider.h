@@ -82,8 +82,8 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
-    virtual void   LClick(const Pt& pt, Uint32 keys);
-    virtual void   KeyPress(Key key, Uint32 key_mods);
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
     virtual void   Disable(bool b = true);
     virtual void   SetColor(Clr c);

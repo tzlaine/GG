@@ -30,6 +30,8 @@
 #define _GG_WndEvent_h_
 
 #include <GG/Base.h>
+#include <GG/Exception.h>
+#include <GG/Flags.h>
 
 #include <map>
 
@@ -38,6 +40,25 @@ namespace GG {
 
 class Timer;
 class Wnd;
+
+// Adpated from SDLKey enum in SDL_keysym.h of the SDL library.
+GG_FLAG_TYPE(ModKey);
+extern GG_API ModKey MOD_KEY_NONE;         ///< No modifier key.
+extern GG_API ModKey MOD_KEY_LSHIFT;       ///< The left Shift key.
+extern GG_API ModKey MOD_KEY_RSHIFT;       ///< The right Shift key.
+extern GG_API ModKey MOD_KEY_LCTRL;        ///< The left Control key.
+extern GG_API ModKey MOD_KEY_RCTRL;        ///< The right Control key.
+extern GG_API ModKey MOD_KEY_LALT;         ///< The left Alt key.
+extern GG_API ModKey MOD_KEY_RALT;         ///< The right Alt key.
+extern GG_API ModKey MOD_KEY_LMETA;        ///< The left Meta key.
+extern GG_API ModKey MOD_KEY_RMETA;        ///< The right Meta key.
+extern GG_API ModKey MOD_KEY_NUM;          ///< The Num Lock key.
+extern GG_API ModKey MOD_KEY_CAPS;         ///< The Caps Lock key.
+extern GG_API ModKey MOD_KEY_MODE;         ///< The Mode key.
+extern GG_API Flags<ModKey> MOD_KEY_CTRL;  ///< Either Control key.
+extern GG_API Flags<ModKey> MOD_KEY_SHIFT; ///< Either Shift key.
+extern GG_API Flags<ModKey> MOD_KEY_ALT;   ///< Either Alt key.
+extern GG_API Flags<ModKey> MOD_KEY_META;  ///< Either Meta key.
 
 /** encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.  The various types of WndEvents correspond
     to the various message member functions of Wnd, some of which have different parameterizations.  Rather than have a
@@ -72,25 +93,25 @@ public:
         TimerFiring
     };
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const GG::Pt& pt, Uint32 keys), eg
+    /** constructs an WndEvent that is used to invoke a function taking parameters (const GG::Pt& pt, Flags<ModKey> mod_keys), eg
         LButtonDown(). */
-    WndEvent(EventType type, const Pt& pt, Uint32 keys);
+    WndEvent(EventType type, const Pt& pt, Flags<ModKey> mod_keys);
 
     /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, const Pt& move, Uint32
-        key_mods), eg LDrag(). */
-    WndEvent(EventType type, const Pt& pt, const Pt& move, Uint32 key_mods);
+        mod_keys), eg LDrag(). */
+    WndEvent(EventType type, const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
     /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, int move, Uint32
-        key_mods), eg MouseWheel(). */
-    WndEvent(EventType type, const Pt& pt, int move, Uint32 key_mods);
+        mod_keys), eg MouseWheel(). */
+    WndEvent(EventType type, const Pt& pt, int move, Flags<ModKey> mod_keys);
 
     /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, const std::map<Wnd*,
-        Pt>& drag_drop_wnds, Uint32 key_mods), eg DragDropEnter(). */
-    WndEvent(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 key_mods);
+        Pt>& drag_drop_wnds, Flags<ModKey> mod_keys), eg DragDropEnter(). */
+    WndEvent(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (Key key, Uint32 key_mods), eg
+    /** constructs an WndEvent that is used to invoke a function taking parameters (Key key, Flags<ModKey> mod_keys), eg
         KeyPress(). */
-    WndEvent(EventType type, Key key, Uint32 key_mods);
+    WndEvent(EventType type, Key key, Flags<ModKey> mod_keys);
 
     /** constructs an WndEvent that is used to invoke a function taking parameters (int, Timer*), eg TimerFiring(). */
     WndEvent(EventType type, int ticks, Timer* timer);
@@ -101,7 +122,7 @@ public:
     EventType                 Type() const;         ///< returns the type of the WndEvent
     const Pt&                 Point() const;        ///< returns the point at which the event took place, if any
     Key                       GetKey() const;       ///< returns the key pressed or released in the WndEvent, if any
-    Uint32                    KeyMods() const;      ///< returns the modifiers to the WndEvent's keypress, if any
+    Flags<ModKey>             ModKeys() const;      ///< returns the modifiers to the WndEvent's keypress, if any
     const Pt&                 DragMove() const;     ///< returns the amount of drag movement represented by the WndEvent, if any
     int                       WheelMove() const;    ///< returns the ammount of mouse wheel movement represented by the WndEvent, if any
     const std::map<Wnd*, Pt>& DragDropWnds() const; ///< returns the drag-drop wnds represented by the WndEvent, if any
@@ -112,7 +133,7 @@ private:
     EventType          m_type;
     Pt                 m_point;
     Key                m_key;
-    Uint32             m_key_mods;
+    Flags<ModKey>      m_mod_keys;
     Pt                 m_drag_move;
     int                m_wheel_move;
     std::map<Wnd*, Pt> m_drag_drop_wnds;

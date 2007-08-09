@@ -643,14 +643,14 @@ void ListBox::Render()
     }
 }
 
-void ListBox::KeyPress(Key key, Uint32 key_mods)
+void ListBox::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         switch (key) {
         case GGK_SPACE: // space bar (selects item under caret like a mouse click)
             if (m_caret != -1) {
                 m_old_sel_row_selected = m_selections.find(m_caret) != m_selections.end();
-                ClickAtRow(m_caret, key_mods);
+                ClickAtRow(m_caret, mod_keys);
             }
             break;
         case GGK_DELETE: // delete key
@@ -722,17 +722,17 @@ void ListBox::KeyPress(Key key, Uint32 key_mods)
 
         // any other key gets passed along to the parent
         default:
-            Control::KeyPress(key, key_mods);
+            Control::KeyPress(key, mod_keys);
         }
 
         if (key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT)
             BringCaretIntoView();
     } else {
-        Control::KeyPress(key, key_mods);
+        Control::KeyPress(key, mod_keys);
    }
 }
 
-void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
+void ListBox::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     if (m_vscroll) {
         for (int i = 0; i < move; ++i) {
@@ -746,13 +746,13 @@ void ListBox::MouseWheel(const Pt& pt, int move, Uint32 keys)
     }
 }
 
-void ListBox::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys)
+void ListBox::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
 {
     ResetAutoScrollVars();
-    DragDropHere(pt, drag_drop_wnds, keys);
+    DragDropHere(pt, drag_drop_wnds, mod_keys);
 }
 
-void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys)
+void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
 {
     if (!m_rows.empty() && m_auto_scroll_during_drag_drops && InClient(pt)) {
         const Pt MARGIN_OFFSET(m_auto_scroll_margin, m_auto_scroll_margin);
@@ -1205,7 +1205,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
 
     if (!Disabled()) {
         Pt pt = event.Point();
-        Uint32 keys = event.KeyMods();
+        Flags<ModKey> mod_keys = event.ModKeys();
 
         switch (event.Type()) {
         case WndEvent::LButtonDown: {
@@ -1215,7 +1215,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
             } else {
                 m_old_sel_row_selected = m_selections.find(m_old_sel_row) != m_selections.end();
                 if (!(m_style & LB_NOSEL) && !m_old_sel_row_selected)
-                    ClickAtRow(m_old_sel_row, keys);
+                    ClickAtRow(m_old_sel_row, mod_keys);
             }
             break;
         }
@@ -1230,7 +1230,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
                 int sel_row = RowUnderPt(pt);
                 if (sel_row == m_old_sel_row) {
                     if (!(m_style & LB_NOSEL))
-                        ClickAtRow(sel_row, keys);
+                        ClickAtRow(sel_row, mod_keys);
                     else
                         m_caret = sel_row;
                     m_lclick_row = sel_row;
@@ -1246,7 +1246,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
                 DoubleClickedSignal(row, m_rows[row]);
                 m_old_sel_row = -1;
             } else {
-                LClick(pt, keys);
+                LClick(pt, mod_keys);
             }
             break;
         }
@@ -1622,7 +1622,7 @@ void ListBox::HScrolled(int tab_low, int tab_high, int low, int high)
     m_header_row->MoveTo(Pt(position, m_header_row->RelativeUpperLeft().y));
 }
 
-void ListBox::ClickAtRow(int row, Uint32 keys)
+void ListBox::ClickAtRow(int row, Flags<ModKey> mod_keys)
 {
     std::set<int> previous_selections = m_selections;
     if (m_style & LB_SINGLESEL) { // no special keys are being used; just clear all previous selections, select this row, set the caret here
@@ -1630,8 +1630,8 @@ void ListBox::ClickAtRow(int row, Uint32 keys)
         m_selections.insert(row);
         m_caret = row;
     } else {
-        if (keys & GGKMOD_CTRL) { // control key depressed
-            if (keys & GGKMOD_SHIFT && m_caret != -1) { // both shift and control keys depressed
+        if (mod_keys & MOD_KEY_CTRL) { // control key depressed
+            if (mod_keys & MOD_KEY_SHIFT && m_caret != -1) { // both shift and control keys depressed
                 int low  = m_caret < row ? m_caret : row;
                 int high = m_caret < row ? row : m_caret;
                 bool erase = m_selections.find(m_caret) == m_selections.end();
@@ -1648,7 +1648,7 @@ void ListBox::ClickAtRow(int row, Uint32 keys)
                     m_selections.insert(row);
                 m_caret = row;
             }
-        } else if (keys & GGKMOD_SHIFT) { // shift key depressed
+        } else if (mod_keys & MOD_KEY_SHIFT) { // shift key depressed
             bool erase = m_selections.find(m_caret) == m_selections.end();
             if (!(m_style & LB_QUICKSEL))
                 m_selections.clear();

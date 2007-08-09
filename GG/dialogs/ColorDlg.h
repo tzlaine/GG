@@ -71,8 +71,8 @@ public:
 
     /** \name Mutators */ //@{
     virtual void Render();
-    virtual void LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
     void SetHueSaturation(double hue, double saturation); ///< sets the current hue and saturation.  Note that this does not cause a signal to be emitted.
     //@}
@@ -117,8 +117,8 @@ public:
 
     /** \name Mutators */ //@{
     virtual void Render();
-    virtual void LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
     /** sets the current hue and saturation.  These are only used to render the control, and do not otherwise influence
         its operation. */
@@ -262,7 +262,7 @@ public:
     void SetCancelString(const std::string& str);     ///< sets the text to use to label the cancel button to \a str Default: "Cancel"
 
     virtual void Render();
-    virtual void KeyPress(Key key, Uint32 key_mods);
+    virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
     //@}
 
 protected:

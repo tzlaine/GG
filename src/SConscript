@@ -3,6 +3,7 @@
 Import('env')
 
 sources = [
+    'Base.cpp',
     'BrowseInfoWnd.cpp',
     'Button.cpp',
     'Clr.cpp',
@@ -13,7 +14,6 @@ sources = [
     'DynamicGraphic.cpp',
     'Edit.cpp',
     'EventPump.cpp',
-    'Flags.cpp',
     'Font.cpp',
     'GUI.cpp',
     'Layout.cpp',

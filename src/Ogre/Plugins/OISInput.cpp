@@ -46,19 +46,19 @@ namespace {
 
     const Ogre::String PLUGIN_NAME = "OIS Input Plugin";
 
-    Uint32 GetKeyMods(OIS::Keyboard* keyboard)
+    Uint32 GetModKeys(OIS::Keyboard* keyboard)
     {
         Uint32 retval = 0;
-        if (keyboard->isKeyDown(OIS::KC_LSHIFT))   retval |= GGKMOD_LSHIFT;
-        if (keyboard->isKeyDown(OIS::KC_RSHIFT))   retval |= GGKMOD_RSHIFT;
-        if (keyboard->isKeyDown(OIS::KC_LCONTROL)) retval |= GGKMOD_LCTRL;
-        if (keyboard->isKeyDown(OIS::KC_RCONTROL)) retval |= GGKMOD_RCTRL;
-        if (keyboard->isKeyDown(OIS::KC_LMENU))    retval |= GGKMOD_LALT;
-        if (keyboard->isKeyDown(OIS::KC_RMENU))    retval |= GGKMOD_RALT;
-        if (keyboard->isKeyDown(OIS::KC_LWIN))     retval |= GGKMOD_LMETA;
-        if (keyboard->isKeyDown(OIS::KC_RWIN))     retval |= GGKMOD_RMETA;
-        if (keyboard->isKeyDown(OIS::KC_NUMLOCK))  retval |= GGKMOD_NUM;
-        if (keyboard->isKeyDown(OIS::KC_CAPITAL))  retval |= GGKMOD_CAPS;
+        if (keyboard->isKeyDown(OIS::KC_LSHIFT))   retval |= MOD_KEY_LSHIFT;
+        if (keyboard->isKeyDown(OIS::KC_RSHIFT))   retval |= MOD_KEY_RSHIFT;
+        if (keyboard->isKeyDown(OIS::KC_LCONTROL)) retval |= MOD_KEY_LCTRL;
+        if (keyboard->isKeyDown(OIS::KC_RCONTROL)) retval |= MOD_KEY_RCTRL;
+        if (keyboard->isKeyDown(OIS::KC_LMENU))    retval |= MOD_KEY_LALT;
+        if (keyboard->isKeyDown(OIS::KC_RMENU))    retval |= MOD_KEY_RALT;
+        if (keyboard->isKeyDown(OIS::KC_LWIN))     retval |= MOD_KEY_LMETA;
+        if (keyboard->isKeyDown(OIS::KC_RWIN))     retval |= MOD_KEY_RMETA;
+        if (keyboard->isKeyDown(OIS::KC_NUMLOCK))  retval |= MOD_KEY_NUM;
+        if (keyboard->isKeyDown(OIS::KC_CAPITAL))  retval |= MOD_KEY_CAPS;
         return retval;
     }
 
@@ -217,8 +217,8 @@ namespace {
 
         // this code works because GG::Key maps (at least partially) to the
         // printable ASCII characters
-        bool shift = mods & GGKMOD_SHIFT;
-        bool caps_lock = mods & GGKMOD_CAPS;
+        bool shift = mods & MOD_KEY_SHIFT;
+        bool caps_lock = mods & MOD_KEY_CAPS;
         if (shift || caps_lock) {
             if (shift != caps_lock && ('a' <= retval && retval <= 'z')) {
                 retval = Key(std::toupper(retval));
@@ -345,9 +345,9 @@ bool OISInput::mouseMoved(const OIS::MouseEvent &event)
     Pt mouse_pos(event.state.X.abs, event.state.Y.abs);
     assert(OgreGUI::GetGUI());
     if (event.state.Z.rel)
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, Pt(0, 0 < event.state.Z.rel ? 1 : -1));
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt(0, 0 < event.state.Z.rel ? 1 : -1));
     else
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, Pt(event.state.X.rel, event.state.Y.rel));
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt(event.state.X.rel, event.state.Y.rel));
     return true;
 }
 
@@ -363,7 +363,7 @@ bool OISInput::mousePressed(const OIS::MouseEvent &event, OIS::MouseButtonID id)
     }
     assert(OgreGUI::GetGUI());
     if (gg_event != GUI::IDLE)
-        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, Pt());
+        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt());
     return true;
 }
 
@@ -379,13 +379,13 @@ bool OISInput::mouseReleased(const OIS::MouseEvent &event, OIS::MouseButtonID id
     }
     assert(OgreGUI::GetGUI());
     if (gg_event != GUI::IDLE)
-        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, GetKeyMods(m_keyboard), mouse_pos, Pt());
+        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt());
     return true;
 }
 
 bool OISInput::keyPressed(const OIS::KeyEvent& event)
 {
-    Uint32 mods = GetKeyMods(m_keyboard);
+    Uint32 mods = GetModKeys(m_keyboard);
     Key key = GGKeyFromOISKey(event, mods, m_keyboard->getTextTranslation());
     assert(OgreGUI::GetGUI());
     if (key != GGK_UNKNOWN)
@@ -395,7 +395,7 @@ bool OISInput::keyPressed(const OIS::KeyEvent& event)
 
 bool OISInput::keyReleased(const OIS::KeyEvent& event)
 {
-    Uint32 mods = GetKeyMods(m_keyboard);
+    Uint32 mods = GetModKeys(m_keyboard);
     Key key = GGKeyFromOISKey(event, mods, m_keyboard->getTextTranslation());
     assert(OgreGUI::GetGUI());
     if (key != GGK_UNKNOWN)

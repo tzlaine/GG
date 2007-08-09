@@ -24,9 +24,31 @@
 
 #include <GG/SDL/SDLGUI.h>
 #include <GG/EventPump.h>
+#include <GG/WndEvent.h>
 
 #include <cctype>
 #include <iostream>
+
+
+namespace {
+    GG::Flags<GG::ModKey> GetSDLModKeys()
+    {
+        GG::Flags<GG::ModKey> retval;
+        Uint32 sdl_keys = SDL_GetModState();
+        if (sdl_keys & KMOD_LSHIFT) retval |= GG::MOD_KEY_LSHIFT;
+        if (sdl_keys & KMOD_RSHIFT) retval |= GG::MOD_KEY_RSHIFT;
+        if (sdl_keys & KMOD_LCTRL)  retval |= GG::MOD_KEY_LCTRL;
+        if (sdl_keys & KMOD_RCTRL)  retval |= GG::MOD_KEY_RCTRL;
+        if (sdl_keys & KMOD_LALT)   retval |= GG::MOD_KEY_LALT;
+        if (sdl_keys & KMOD_RALT)   retval |= GG::MOD_KEY_RALT;
+        if (sdl_keys & KMOD_LMETA)  retval |= GG::MOD_KEY_LMETA;
+        if (sdl_keys & KMOD_RMETA)  retval |= GG::MOD_KEY_RMETA;
+        if (sdl_keys & KMOD_NUM)    retval |= GG::MOD_KEY_NUM;
+        if (sdl_keys & KMOD_CAPS)   retval |= GG::MOD_KEY_CAPS;
+        if (sdl_keys & KMOD_MODE)   retval |= GG::MOD_KEY_MODE;
+        return retval;
+    }
+}
 
 // member functions
 SDLGUI::SDLGUI(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, const std::string& app_name/* = "GG"*/) :
@@ -176,7 +198,7 @@ void SDLGUI::HandleSystemEvents()
         bool send_to_gg = false;
         EventType gg_event = MOUSEMOVE;
         GG::Key key = GG::GGK_UNKNOWN;
-        Uint32 key_mods = SDL_GetModState();
+        GG::Flags<GG::ModKey> mod_keys = GetSDLModKeys();
         GG::Pt mouse_pos(event.motion.x, event.motion.y);
         GG::Pt mouse_rel(event.motion.xrel, event.motion.yrel);
 
@@ -201,7 +223,7 @@ void SDLGUI::HandleSystemEvents()
                 case SDL_BUTTON_WHEELUP:   gg_event = MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
                 case SDL_BUTTON_WHEELDOWN: gg_event = MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
             }
-            key_mods = SDL_GetModState();
+            mod_keys = GetSDLModKeys();
             break;
         case SDL_MOUSEBUTTONUP:
             send_to_gg = true;
@@ -210,12 +232,12 @@ void SDLGUI::HandleSystemEvents()
                 case SDL_BUTTON_MIDDLE: gg_event = MRELEASE; break;
                 case SDL_BUTTON_RIGHT:  gg_event = RRELEASE; break;
             }
-            key_mods = SDL_GetModState();
+            mod_keys = GetSDLModKeys();
             break;
         }
 
         if (send_to_gg)
-            HandleGGEvent(gg_event, key, key_mods, mouse_pos, mouse_rel);
+            HandleGGEvent(gg_event, key, mod_keys, mouse_pos, mouse_rel);
         else
             HandleNonGGEvent(event);
     }

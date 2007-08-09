@@ -173,12 +173,12 @@ bool Slider::EventFilter(Wnd* w, const WndEvent& event)
     return false;
 }
 
-void Slider::LClick(const Pt& pt, Uint32 keys)
+void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
     SlideTo(m_posn + (m_posn < PtToPosn(pt) ? PageSize() : -PageSize()));
 }
 
-void Slider::KeyPress(Key key, Uint32 key_mods)
+void Slider::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         switch (key) {
@@ -213,11 +213,11 @@ void Slider::KeyPress(Key key, Uint32 key_mods)
             SlideTo(m_posn - 1);
             break;
         default:
-            Control::KeyPress(key, key_mods);
+            Control::KeyPress(key, mod_keys);
             break;
         }
     } else {
-        Control::KeyPress(key, key_mods);
+        Control::KeyPress(key, mod_keys);
     }
 }
 

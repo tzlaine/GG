@@ -29,6 +29,8 @@
 #include <GG/Scroll.h>
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -60,7 +62,7 @@ namespace {
         }
 
     protected:
-        virtual void LClick(const Pt& pt, Uint32 keys) {m_done = true;}
+        virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys) {m_done = true;}
 
     private:
         void LBSelChangedSlot(const std::set<int>& rows)
@@ -213,7 +215,7 @@ void DropDownList::Render()
     }
 }
 
-void DropDownList::LClick(const Pt& pt, Uint32 keys)
+void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         ModalListPicker picker(this, m_LB);
@@ -227,7 +229,7 @@ void DropDownList::LClick(const Pt& pt, Uint32 keys)
     }
 }
 
-void DropDownList::KeyPress(Key key, Uint32 key_mods)
+void DropDownList::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         switch (key) {
@@ -256,10 +258,10 @@ void DropDownList::KeyPress(Key key, Uint32 key_mods)
                 Select(m_LB->NumRows() - 1);
             break;
         default:
-            Control::KeyPress(key, key_mods);
+            Control::KeyPress(key, mod_keys);
         }
     } else {
-        Control::KeyPress(key, key_mods);
+        Control::KeyPress(key, mod_keys);
     }
 }
 

@@ -378,65 +378,65 @@ public:
     /** respond to left button down msg.  A window receives this whenever any input device button changes from up to
         down while over the window.  \note If this Wnd was created with the REPEAT_BUTTON_DOWN flag, this method may be
         called multiple times during a single button press-release cycle.  \see GG::GUI */
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
 
     /** respond to drag msg (even if this Wnd is not dragable).  Drag messages are only sent to the window over which
         the button was pressed at the beginning of the drag. A window receives this whenever any input device button is
         down and the cursor is moving while over the window.  The window will also receive drag messages when the mouse
         is being dragged outside the window's area. */
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
     /** respond to release of left mouse button outside window, if it was originally depressed over window.  A window
         will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not
         currently over the window when this happens. */
-    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
+    virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
 
     /** respond to release of left mouse button over window, if it was also originally depressed over window.  A window
         will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well. */
-    virtual void   LClick(const Pt& pt, Uint32 keys);
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
 
     /** respond to second left click in window within the time limit.  A window will receive an LButtonUp() message
         instead of an LButtonDown() or LClick() message if the left input device button is pressed over a window that
         was l-clicked within a double-click time interval.  Note that this means a double click is always preceded by a
         click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in
         during the interval. */
-    virtual void   LDoubleClick(const Pt& pt, Uint32 keys);
+    virtual void   LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys);
 
     /** respond to right button down msg. \see LButtonDown() */
-    virtual void   RButtonDown(const Pt& pt, Uint32 keys);
+    virtual void   RButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
 
     /** respond to release of right mouse button over window, if it was also originally depressed over window. \see
         LButtonUp() */
-    virtual void   RClick(const Pt& pt, Uint32 keys);
+    virtual void   RClick(const Pt& pt, Flags<ModKey> mod_keys);
 
     /** respond to second right click in window within the time limit.  A window will receive an RButtonUp() message
         instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that
         was r-clicked within a double-click time interval Note that this means a double click is always preceded by a
         click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in
         during the interval. */
-    virtual void   RDoubleClick(const Pt& pt, Uint32 keys);
+    virtual void   RDoubleClick(const Pt& pt, Flags<ModKey> mod_keys);
 
-    virtual void   MouseEnter(const Pt& pt, Uint32 keys);  ///< respond to cursor entering window's coords
+    virtual void   MouseEnter(const Pt& pt, Flags<ModKey> mod_keys);  ///< respond to cursor entering window's coords
 
     /** respond to cursor moving about within the Wnd, or to cursor lingering within the Wnd for a long period of time.
         A MouseHere() message will not be generated the first time the cursor enters the window's area.  In that case, a
         MouseEnter() message is generated. */
-    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
 
     virtual void   MouseLeave();  ///< respond to cursor leaving window's coords
 
     /** respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down) */
-    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
+    virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
 
     /** respond to the cursor entering the Wnd's coords while dragging drag-drop Wnds.  The Pts in \a drag_drop_wnds are
         the Wnds' offsets from \a pt. */
-    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
 
     /** respond to cursor moving about within the Wnd, or to cursor lingering within the Wnd for a long period of time,
         while dragging drag-drop Wnds.  A DragDropHere() message will not be generated the first time the cursor enters
         the window's area.  In that case, a DragDropEnter() message is generated The Pts in \a drag_drop_wnds are the
         Wnds' offsets from \a pt.. */
-    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
 
     /** respond to cursor leaving window's coords while dragging drag-drop Wnds. */
     virtual void   DragDropLeave();
@@ -446,12 +446,12 @@ public:
         default.  \note Though mouse clicks consist of a press and a release, all Control classes by default respond
         immediately to KeyPress(), not KeyRelease(); in fact, by default no Wnd class does anything at all on a
         KeyRelease event. */
-    virtual void   KeyPress(Key key, Uint32 key_mods);
+    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
 
     /** respond to up-keystrokes (focus window only).  A window may receive KeyRelease() messages passed up to it from
         its children.  For instance, Control-derived classes pass KeyRelease() messages to their Parent() windows by
         default. */
-    virtual void   KeyRelease(Key key, Uint32 key_mods);
+    virtual void   KeyRelease(Key key, Flags<ModKey> mod_keys);
 
     virtual void   GainingFocus();                         ///< respond to this window gaining the input focus
     virtual void   LosingFocus();                          ///< respond to this window losing the input focus

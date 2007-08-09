@@ -89,10 +89,10 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
-    virtual void   LClick(const Pt& pt, Uint32 keys);
-    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
 

@@ -29,8 +29,8 @@
 #ifndef _GG_GUI_h_
 #define _GG_GUI_h_
 
-#include <GG/Base.h>
 #include <GG/Font.h>
+#include <GG/WndEvent.h>
 
 
 namespace boost { namespace archive {
@@ -133,7 +133,7 @@ public:
         MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
     };
 
-    typedef std::set<std::pair<Key, Uint32> >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
+    typedef std::set<std::pair<Key, Flags<ModKey> > >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
 
     typedef void (*SaveWndFn)(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
     typedef void (*LoadWndFn)(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
@@ -163,7 +163,7 @@ public:
     bool           MouseButtonDown(int bn) const;///< returns the up/down states of the mouse buttons
     Pt             MousePosition() const;        ///< returns the absolute position of mouse, based on the last mouse motion event
     Pt             MouseMovement() const;        ///< returns the relative position of mouse, based on the last mouse motion event
-    Uint32         KeyMods() const;              ///< returns the bitwise or'd set of modifier keys that are currently depressed, based on the last event
+    Flags<ModKey>  ModKeys() const;              ///< returns the set of modifier keys that are currently depressed, based on the last event
 
     const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory
 
@@ -174,7 +174,7 @@ public:
     const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
 
     /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
-    AcceleratorSignalType& AcceleratorSignal(Key key, Uint32 key_mods) const;
+    AcceleratorSignalType& AcceleratorSignal(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE) const;
     //@}
 
     /** \name Mutators */ //@{
@@ -184,7 +184,7 @@ public:
     /** handles all waiting system events (from SDL, DirectInput, etc.).  This function should only be called from
         custom EventPump event handlers. */
     virtual void   HandleSystemEvents() = 0;
-    void           HandleGGEvent(EventType event, Key key, Uint32 key_mods, const Pt& pos, const Pt& rel); ///< event handler for GG events
+    void           HandleGGEvent(EventType event, Key key, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel); ///< event handler for GG events
 
     void           SetFocusWnd(Wnd* wnd);        ///< sets the input focus window to \a wnd
     virtual void   Wait(int ms);                 ///< suspends the GUI thread for \a ms milliseconds.  Singlethreaded GUI subclasses may do nothing here, or may pause for \a ms milliseconds.
@@ -218,10 +218,10 @@ public:
     void           SetMinDragDistance(int distance); ///< sets the minimum distance an item must be dragged before it is a valid drag
 
     /** establishes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
-    void           SetAccelerator(Key key, Uint32 key_mods);
+    void           SetAccelerator(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE);
 
     /** removes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
-    void           RemoveAccelerator(Key key, Uint32 key_mods);
+    void           RemoveAccelerator(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE);
 
     boost::shared_ptr<Font>    GetFont(const std::string& font_filename, int pts, Uint32 range = Font::ALL_CHARS); ///< returns a shared_ptr to the desired font
     void                       FreeFont(const std::string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
@@ -294,7 +294,7 @@ private:
     Wnd*           ModalWindow() const;    // returns the current modal window, if any
 
     // returns the window under \a pt, sending Mouse{Enter|Leave} or DragDrop{Enter|Leave} as appropriate
-    Wnd*           CheckedGetWindowUnder(const Pt& pt, Uint32 key_mods);
+    Wnd*           CheckedGetWindowUnder(const Pt& pt, Flags<ModKey> mod_keys);
 
     static GUI*                           s_gui;
     static boost::shared_ptr<GUIImplData> s_impl;

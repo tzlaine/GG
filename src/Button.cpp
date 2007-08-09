@@ -28,8 +28,10 @@
 #include <GG/Layout.h>
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
 
 #include <boost/lexical_cast.hpp>
+
 
 using namespace GG;
 
@@ -100,7 +102,7 @@ void Button::Render()
     }
 }
 
-void Button::LButtonDown(const Pt& pt, Uint32 keys)
+void Button::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         ButtonState prev_state = m_state;
@@ -110,20 +112,20 @@ void Button::LButtonDown(const Pt& pt, Uint32 keys)
     }
 }
 
-void Button::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void Button::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (!Disabled())
         m_state = BN_PRESSED;
-    Wnd::LDrag(pt, move, keys);
+    Wnd::LDrag(pt, move, mod_keys);
 }
 
-void Button::LButtonUp(const Pt& pt, Uint32 keys)
+void Button::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled())
         m_state = BN_UNPRESSED;
 }
 
-void Button::LClick(const Pt& pt, Uint32 keys)
+void Button::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         m_state = BN_ROLLOVER;
@@ -131,7 +133,7 @@ void Button::LClick(const Pt& pt, Uint32 keys)
     }
 }
 
-void Button::MouseHere(const Pt& pt, Uint32 keys)
+void Button::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled())
         m_state = BN_ROLLOVER;
@@ -364,7 +366,7 @@ void StateButton::Render()
     OffsetMove(-(m_text_ul + additional_text_offset));
 }
 
-void StateButton::LClick(const Pt& pt, Uint32 keys)
+void StateButton::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled())
         SetCheck(!m_checked);

@@ -148,8 +148,8 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Uint32 keys);
-    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   MouseLeave();
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
@@ -251,12 +251,12 @@ public:
 
     /** \name Mutators */ //@{
     virtual void   Render();
-    virtual void   LButtonUp(const Pt& pt, Uint32 keys);
-    virtual void   LClick(const Pt& pt, Uint32 keys);
-    virtual void   LDrag(const Pt& pt, const Pt& move, Uint32 keys);
-    virtual void   RButtonUp(const Pt& pt, Uint32 keys);
-    virtual void   RClick(const Pt& pt, Uint32 keys);
-    virtual void   MouseHere(const Pt& pt, Uint32 keys);
+    virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+    virtual void   RButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   RClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
 
     virtual int    Run();
 

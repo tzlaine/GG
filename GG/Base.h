@@ -60,14 +60,18 @@ typedef signed int Sint32;      ///< signed int from SDL.h; provided here in cas
 
 // other headers
 #include <GG/Enum.h>
-#include <GG/SignalsAndSlots.h>
-#include <GG/PtRect.h>
 #include <GG/Clr.h>
+#include <GG/PtRect.h>
+#include <GG/SignalsAndSlots.h>
 
 
 /** \namespace GG
     The namespace that encloses all GG classes, functions, typedefs, enums, etc. */
 namespace GG {
+
+template <class FlagType>
+class Flags;
+class ModKey;
 
 /** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/
 enum WndRegion {
@@ -182,28 +186,7 @@ enum TabBarStyle {
 };
 
 
-/** Adpated from SDLKey enum in SDL_keysym.h of the SDL library; enumeration of valid key mods (possibly |'d together). */
-enum Mod {
-    GGKMOD_NONE       = 0x0000,
-    GGKMOD_LSHIFT     = 0x0001,
-    GGKMOD_RSHIFT     = 0x0002,
-    GGKMOD_LCTRL      = 0x0040,
-    GGKMOD_RCTRL      = 0x0080,
-    GGKMOD_LALT       = 0x0100,
-    GGKMOD_RALT       = 0x0200,
-    GGKMOD_LMETA      = 0x0400,
-    GGKMOD_RMETA      = 0x0800,
-    GGKMOD_NUM        = 0x1000,
-    GGKMOD_CAPS       = 0x2000,
-    GGKMOD_MODE       = 0x4000,
-    GGKMOD_RESERVED   = 0x8000,
-    GGKMOD_CTRL       = (GGKMOD_LCTRL | GGKMOD_RCTRL),    ///< either control key
-    GGKMOD_SHIFT      = (GGKMOD_LSHIFT | GGKMOD_RSHIFT),  ///< either shift key
-    GGKMOD_ALT        = (GGKMOD_LALT | GGKMOD_RALT),      ///< either alt key
-    GGKMOD_META       = (GGKMOD_LMETA | GGKMOD_RMETA)     ///< either meta key
-};
-
-/** adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added*/
+/** adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added */
 enum Key {
     // The keyboard symbols have been cleverly chosen to map to ASCII
     GGK_UNKNOWN      = 0,
@@ -487,24 +470,7 @@ enum Key {
 /** Translates a printable key combination from a keypad press to the equivalent main-keyboard press.  \a key is \a only
     modified if it is a keypad value, and numlock is taken into account.  For instance, with numlock on, a GGK_KP7
     (which is equal to a nonprintable char value) becomes a GGK_7 (which equals '7', and is printable). */
-inline void KeypadKeyToPrintable(Key& key, Uint32 key_mods)
-{
-    if (GGK_KP0 <= key && key <= GGK_KP9 && (key_mods & GGKMOD_NUM)) {
-        key = Key(GGK_0 + (key - GGK_KP0));
-    } else {
-        switch (key) {
-        case GGK_KP_PERIOD:
-            if (key_mods & GGKMOD_NUM) key = GGK_PERIOD;
-            break;
-        case GGK_KP_DIVIDE:   key = GGK_SLASH;    break;
-        case GGK_KP_MULTIPLY: key = GGK_ASTERISK; break;
-        case GGK_KP_MINUS:    key = GGK_MINUS;    break;
-        case GGK_KP_PLUS:     key = GGK_PLUS;     break;
-        case GGK_KP_EQUALS:   key = GGK_EQUALS;   break;
-        default: break;
-        }
-    }
-}
+void KeypadKeyToPrintable(Key& key, Flags<ModKey> mod_keys);
 
 
 ////////////////////////////////////////
@@ -895,31 +861,6 @@ GG_ENUM_MAP_END
 
 GG_ENUM_STREAM_IN(Key)
 GG_ENUM_STREAM_OUT(Key)
-
-
-// define EnumMap and stream operators for Mod
-GG_ENUM_MAP_BEGIN(Mod)
-    GG_ENUM_MAP_INSERT(GGKMOD_NONE)
-    GG_ENUM_MAP_INSERT(GGKMOD_LSHIFT)
-    GG_ENUM_MAP_INSERT(GGKMOD_RSHIFT)
-    GG_ENUM_MAP_INSERT(GGKMOD_LCTRL)
-    GG_ENUM_MAP_INSERT(GGKMOD_RCTRL)
-    GG_ENUM_MAP_INSERT(GGKMOD_LALT)
-    GG_ENUM_MAP_INSERT(GGKMOD_RALT)
-    GG_ENUM_MAP_INSERT(GGKMOD_LMETA)
-    GG_ENUM_MAP_INSERT(GGKMOD_RMETA)
-    GG_ENUM_MAP_INSERT(GGKMOD_NUM)
-    GG_ENUM_MAP_INSERT(GGKMOD_CAPS)
-    GG_ENUM_MAP_INSERT(GGKMOD_MODE)
-    GG_ENUM_MAP_INSERT(GGKMOD_RESERVED)
-    GG_ENUM_MAP_INSERT(GGKMOD_CTRL)
-    GG_ENUM_MAP_INSERT(GGKMOD_SHIFT)
-    GG_ENUM_MAP_INSERT(GGKMOD_ALT)
-    GG_ENUM_MAP_INSERT(GGKMOD_META)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(Mod)
-GG_ENUM_STREAM_OUT(Mod)
 
 } // namespace GG
 

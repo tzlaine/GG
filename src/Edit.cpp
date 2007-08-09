@@ -27,6 +27,8 @@
 #include <GG/GUI.h>
 #include <GG/DrawUtil.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
+
 
 using namespace GG;
 
@@ -155,7 +157,7 @@ void Edit::Render()
     EndScissorClipping();
 }
 
-void Edit::LButtonDown(const Pt& pt, Uint32 keys)
+void Edit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         // when a button press occurs, record the character position under the cursor, and remove any previous selection range
@@ -165,7 +167,7 @@ void Edit::LButtonDown(const Pt& pt, Uint32 keys)
     }
 }
 
-void Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
+void Edit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         // when a drag occurs, move m_cursor_pos.second to where the mouse is, which selects a range of characters
@@ -176,10 +178,10 @@ void Edit::LDrag(const Pt& pt, const Pt& move, Uint32 keys)
     }
 }
 
-void Edit::KeyPress(Key key, Uint32 key_mods)
+void Edit::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        bool shift_down = key_mods & (GGKMOD_LSHIFT | GGKMOD_RSHIFT);
+        bool shift_down = mod_keys & (MOD_KEY_LSHIFT | MOD_KEY_RSHIFT);
         bool emit_signal = false;
 
         switch (key) {
@@ -246,13 +248,13 @@ void Edit::KeyPress(Key key, Uint32 key_mods)
         case GGK_RETURN:
         case GGK_KP_ENTER:
             FocusUpdateSignal(WindowText());
-            TextControl::KeyPress(key, key_mods);
+            TextControl::KeyPress(key, mod_keys);
             m_recently_edited = false;
             break;
         default:
             // only process it if it's a printable character, and no significant modifiers are in use
-            KeypadKeyToPrintable(key, key_mods);
-            if (key < GGK_DELETE && isprint(key) && !(key_mods & (GGKMOD_CTRL | GGKMOD_ALT | GGKMOD_META | GGKMOD_MODE))) {
+            KeypadKeyToPrintable(key, mod_keys);
+            if (key < GGK_DELETE && isprint(key) && !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
                 if (MultiSelected())
                     ClearSelected();
                 Insert(m_cursor_pos.first, key);                // insert character after caret
@@ -261,14 +263,14 @@ void Edit::KeyPress(Key key, Uint32 key_mods)
                 if (LastVisibleChar() <= m_cursor_pos.first)    // when we over-run our writing space with typing, scroll the window
                     AdjustView();
             } else {
-                TextControl::KeyPress(key, key_mods);
+                TextControl::KeyPress(key, mod_keys);
             }
             break;
         }
         if (emit_signal)
             EditedSignal(WindowText());
     } else {
-        TextControl::KeyPress(key, key_mods);
+        TextControl::KeyPress(key, mod_keys);
     }
 }
 

@@ -26,9 +26,11 @@
 
 #include <GG/DrawUtil.h>
 #include <GG/WndEditor.h>
+#include <GG/WndEvent.h>
 
 #include <cassert>
 #include <cmath>
+
 
 using namespace GG;
 
@@ -501,22 +503,22 @@ void Layout::Render()
     }
 }
 
-void Layout::MouseWheel(const Pt& pt, int move, Uint32 keys)
+void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->MouseWheel(pt, move, keys);
+        Parent()->MouseWheel(pt, move, mod_keys);
 }
 
-void Layout::KeyPress(Key key, Uint32 key_mods)
+void Layout::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->KeyPress(key, key_mods);
+        Parent()->KeyPress(key, mod_keys);
 }
 
-void Layout::KeyRelease(Key key, Uint32 key_mods)
+void Layout::KeyRelease(Key key, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->KeyRelease(key, key_mods);
+        Parent()->KeyRelease(key, mod_keys);
 }
 
 void Layout::Add(Wnd* wnd, int row, int column, Uint32 alignment/* = 0*/)

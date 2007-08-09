@@ -247,10 +247,10 @@ public:
     virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
     virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
     virtual void   Render();
-    virtual void   KeyPress(Key key, Uint32 key_mods);
-    virtual void   MouseWheel(const Pt& pt, int move, Uint32 keys);
-    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
-    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Uint32 keys);
+    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
+    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
     virtual void   DragDropLeave();
     virtual void   TimerFiring(int ticks, Timer* timer);
 
@@ -381,7 +381,7 @@ private:
     void            AdjustScrolls(bool adjust_for_resize); ///< creates, destroys, or resizes scrolls to reflect size of data in listbox
     void            VScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the vertical scroll bar are caught here
     void            HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
-    void            ClickAtRow(int row, Uint32 keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys
+    void            ClickAtRow(int row, Flags<ModKey> mod_keys); ///< handles to a mouse-click or spacebar-click on \a row, modified by \a keys
     void            NormalizeRow(Row* row); ///< adjusts a Row so that it has the same number of cells as other rows, and that each cell has the correct width and alignment
     int             FirstRowShownWhenBottomIs(int bottom_row, int client_height); ///< Returns the index of the first row shown when the last row shown is \a bottom_row
     int             FirstColShownWhenRightIs(int right_col, int client_width); ///< Returns the index of the first column shown when the last column shown is \a right_col

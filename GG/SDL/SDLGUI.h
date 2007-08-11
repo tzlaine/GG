@@ -34,6 +34,16 @@
 #include <SDL/SDL.h>
 
 
+#ifdef _MSC_VER
+# ifdef GIGI_SDL_EXPORTS
+#  define GG_SDL_API __declspec(dllexport)
+# else
+#  define GG_SDL_API __declspec(dllimport)
+# endif
+#else
+# define GG_SDL_API
+#endif
+
 /** This is an abstract singleton class that represents the GUI framework of an SDL OpenGL 
     application.
     <p>
@@ -59,7 +69,7 @@
     HandleNonGGEvent(), respectively.  For most uses, there should be no need to override the behavior of
     HandleSDLEvents().  However, the HandleNonGGEvent() default implementation only responds to SDL_QUIT
     events, and so should be overridden in most cases. */
-class GG_API SDLGUI : public GG::GUI
+class GG_SDL_API SDLGUI : public GG::GUI
 {
 public:
     /** \name Structors */ //@{

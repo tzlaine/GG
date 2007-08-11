@@ -1,6 +1,6 @@
 # -*- Python -*-
 
-Import('env')
+Import('gigi_env')
 
 sources = [
     'ColorDlg.cpp',
@@ -8,9 +8,9 @@ sources = [
     'ThreeButtonDlg.cpp'
     ]
 
-if env['dynamic']:
-    objects = env.SharedObject(sources)
+if gigi_env['dynamic']:
+    objects = gigi_env.SharedObject(sources)
 else:
-    objects = env.Object(sources)
+    objects = gigi_env.Object(sources)
 
 Return('objects', 'sources')

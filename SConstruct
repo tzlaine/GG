@@ -378,7 +378,6 @@ if str(Platform()) == 'win32':
         ])
     if env['dynamic']:
         env.Append(CPPDEFINES = [
-        'GIGI_EXPORTS',
         '_USRDLL',
         '_WINDLL'
         ])
@@ -414,8 +413,9 @@ env['libltdl_defines'] = [
     ]
 if env.has_key('CPPDEFINES'):
     env['libltdl_defines'] += env['CPPDEFINES']
-gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'))
-result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript'))
+gigi_env = env.Copy()
+gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'), exports = 'gigi_env')
+result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript'), exports = 'gigi_env')
 gigi_objects += result_objects
 gigi_sources += result_sources
 

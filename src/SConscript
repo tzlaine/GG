@@ -1,6 +1,6 @@
 # -*- Python -*-
 
-Import('env')
+Import('gigi_env')
 
 sources = [
     'AlignmentFlags.cpp',
@@ -37,15 +37,16 @@ sources = [
     'ZList.cpp'
     ]
 
-if env['need__vsnprintf_c']:
+if gigi_env['need__vsnprintf_c']:
     sources.append('_vsnprintf.c')
 
-if env['dynamic']:
-    objects = env.SharedObject(sources)
+if gigi_env['dynamic']:
+    gigi_env.AppendUnique(CPPDEFINES = ['GIGI_EXPORTS'])
+    objects = gigi_env.SharedObject(sources)
 else:
-    objects = env.Object(sources)
+    objects = gigi_env.Object(sources)
 
-result_objects, result_sources = SConscript('dialogs/SConscript', exports = ['env'])
+result_objects, result_sources = SConscript('dialogs/SConscript', exports = ['gigi_env'])
 objects += result_objects
 sources += result_sources
 

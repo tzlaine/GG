@@ -26,17 +26,17 @@
 
 using namespace GG;
 
-extern const Clr GG::CLR_ZERO(0, 0, 0, 0);
-extern const Clr GG::CLR_BLACK(0, 0, 0, 255);
-extern const Clr GG::CLR_WHITE(255, 255, 255, 255);
-extern const Clr GG::CLR_GRAY(127, 127, 127, 255);
-extern const Clr GG::CLR_SHADOW(127, 127, 127, 127);
-extern const Clr GG::CLR_RED(255, 0, 0, 255);
-extern const Clr GG::CLR_GREEN(0, 255, 0, 255);
-extern const Clr GG::CLR_BLUE(0, 0, 255, 255);
-extern const Clr GG::CLR_CYAN(0, 255, 255, 255);
-extern const Clr GG::CLR_YELLOW(255, 255, 0, 255);
-extern const Clr GG::CLR_MAGENTA(255, 0, 255, 255);
+const Clr GG::CLR_ZERO(0, 0, 0, 0);
+const Clr GG::CLR_BLACK(0, 0, 0, 255);
+const Clr GG::CLR_WHITE(255, 255, 255, 255);
+const Clr GG::CLR_GRAY(127, 127, 127, 255);
+const Clr GG::CLR_SHADOW(127, 127, 127, 127);
+const Clr GG::CLR_RED(255, 0, 0, 255);
+const Clr GG::CLR_GREEN(0, 255, 0, 255);
+const Clr GG::CLR_BLUE(0, 0, 255, 255);
+const Clr GG::CLR_CYAN(0, 255, 255, 255);
+const Clr GG::CLR_YELLOW(255, 255, 0, 255);
+const Clr GG::CLR_MAGENTA(255, 0, 255, 255);
 
 ////////////////////////////////////////////////
 // GG::Clr

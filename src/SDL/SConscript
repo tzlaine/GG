@@ -7,6 +7,7 @@ sources = [
     ]
 
 if sdl_env['dynamic']:
+    sdl_env.AppendUnique(CPPDEFINES = ['GIGI_SDL_EXPORTS'])
     objects = sdl_env.SharedObject(sources)
 else:
     objects = sdl_env.Object(sources)

@@ -284,7 +284,7 @@ StateButtonStyle StateButton::Style() const
 
 void StateButton::Render()
 {
-    const Uint8 bevel = 2;
+    const int BEVEL = 2;
 
     // draw button
     Pt cl_ul = ClientUpperLeft();
@@ -299,51 +299,51 @@ void StateButton::Render()
         BeveledRectangle(bn_ul.x, bn_ul.y, bn_lr.x, bn_lr.y,
                          Disabled() ? DisabledColor(m_int_color) : m_int_color,
                          Disabled() ? DisabledColor(m_color) : m_color,
-                         false, bevel);
+                         false, BEVEL);
         if (m_checked)
-            BeveledX(bn_ul.x + 2 * bevel, bn_ul.y + 2 * bevel, bn_lr.x - 2 * bevel, bn_lr.y - 2 * bevel,
+            BeveledX(bn_ul.x + 2 * BEVEL, bn_ul.y + 2 * BEVEL, bn_lr.x - 2 * BEVEL, bn_lr.y - 2 * BEVEL,
                      m_disabled ? DisabledColor(m_color) : m_color);
         break;
     case SBSTYLE_3D_CHECKBOX:
         BeveledRectangle(bn_ul.x, bn_ul.y, bn_lr.x, bn_lr.y,
                          Disabled() ? DisabledColor(m_int_color) : m_int_color,
                          Disabled() ? DisabledColor(m_color) : m_color,
-                         false, bevel);
+                         false, BEVEL);
         if (m_checked)
-            BeveledCheck(bn_ul.x + 2 * bevel, bn_ul.y + 2 * bevel, bn_lr.x - 2 * bevel, bn_lr.y - 2 * bevel,
+            BeveledCheck(bn_ul.x + 2 * BEVEL, bn_ul.y + 2 * BEVEL, bn_lr.x - 2 * BEVEL, bn_lr.y - 2 * BEVEL,
                          Disabled() ? DisabledColor(m_color) : m_color);
         break;
     case SBSTYLE_3D_RADIO:
         BeveledCircle(bn_ul.x, bn_ul.y, bn_lr.x, bn_lr.y,
                       Disabled() ? DisabledColor(m_int_color) : m_int_color,
                       Disabled() ? DisabledColor(m_color) : m_color,
-                      false, bevel);
+                      false, BEVEL);
         if (m_checked)
-            Bubble(bn_ul.x + 2 * bevel, bn_ul.y + 2 * bevel, bn_lr.x - 2 * bevel, bn_lr.y - 2 * bevel,
+            Bubble(bn_ul.x + 2 * BEVEL, bn_ul.y + 2 * BEVEL, bn_lr.x - 2 * BEVEL, bn_lr.y - 2 * BEVEL,
                    Disabled() ? DisabledColor(m_color) : m_color);
         break;
     case SBSTYLE_3D_BUTTON:
         BeveledRectangle(bn_ul.x, bn_ul.y, bn_lr.x, bn_lr.y,
                          Disabled() ? DisabledColor(m_color) : m_color,
                          Disabled() ? DisabledColor(m_color) : m_color,
-                         !m_checked, bevel);
+                         !m_checked, BEVEL);
         break;
     case SBSTYLE_3D_ROUND_BUTTON:
         BeveledCircle(bn_ul.x, bn_ul.y, bn_lr.x, bn_lr.y,
                       Disabled() ? DisabledColor(m_color) : m_color,
                       Disabled() ? DisabledColor(m_color) : Color(),
-                      !m_checked, bevel);
+                      !m_checked, BEVEL);
         break;
     case SBSTYLE_3D_TOP_ATTACHED_TAB: {
         Clr color_to_use = m_checked ? m_color : DarkColor(m_color);
         color_to_use = Disabled() ? DisabledColor(color_to_use) : color_to_use;
         if (!m_checked) {
-            cl_ul.y += bevel;
-            additional_text_offset.y = bevel / 2;
+            cl_ul.y += BEVEL;
+            additional_text_offset.y = BEVEL / 2;
         }
         BeveledRectangle(cl_ul.x, cl_ul.y, cl_lr.x, cl_lr.y,
                          color_to_use, color_to_use,
-                         true, bevel,
+                         true, BEVEL,
                          true, true, true, false);
         break;
     }
@@ -351,12 +351,12 @@ void StateButton::Render()
         Clr color_to_use = m_checked ? m_color : DarkColor(m_color);
         color_to_use = Disabled() ? DisabledColor(color_to_use) : color_to_use;
         if (!m_checked) {
-            cl_ul.y += bevel;
-            additional_text_offset.y = bevel / 2;
+            cl_ul.y += BEVEL;
+            additional_text_offset.y = BEVEL / 2;
         }
         BeveledRectangle(cl_ul.x, cl_ul.y, cl_lr.x, cl_lr.y,
                          color_to_use, color_to_use,
-                         true, bevel);
+                         true, BEVEL);
         break;
     }
     }

@@ -29,13 +29,6 @@
 #ifndef _GG_Base_h_
 #define _GG_Base_h_
 
-typedef unsigned char Uint8;    ///< unsigned char from SDL.h; provided here in case GG is not being driven by SDL
-typedef signed char Sint8;      ///< signed char from SDL.h; provided here in case GG is not being driven by SDL
-typedef unsigned short Uint16;  ///< unsigned short from SDL.h; provided here in case GG is not being driven by SDL
-typedef signed short Sint16;    ///< signed short from SDL.h; provided here in case GG is not being driven by SDL
-typedef unsigned int Uint32;    ///< unsigned int from SDL.h; provided here in case GG is not being driven by SDL
-typedef signed int Sint32;      ///< signed int from SDL.h; provided here in case GG is not being driven by SDL
-
 #ifdef _MSC_VER
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>

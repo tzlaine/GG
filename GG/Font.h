@@ -223,7 +223,7 @@ public:
     /** \name Structors */ //@{
     /** ctor. \throw Font::Exception Throws a subclass of Exception if one of the conditions specified for the
         subclasses is met. */
-    Font(const std::string& font_filename, int pts, Uint32 range = ALL_DEFINED_RANGES);
+    Font(const std::string& font_filename, int pts, unsigned int range = ALL_DEFINED_RANGES);
     virtual ~Font(); ///< virtual dtor
     //@}
 
@@ -302,7 +302,7 @@ private:
     };
     struct HandleTagFunctor;
 
-    void              Init(const std::string& font_filename, int pts, Uint32 range);
+    void              Init(const std::string& font_filename, int pts, unsigned int range);
     bool              GenerateGlyph(FT_Face font, FT_ULong ch);
     inline int        RenderGlyph(int x, int y, const Glyph& glyph, const RenderState* render_state) const;
     void              HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const;
@@ -371,7 +371,7 @@ private:
 
 public:
     /** \name Mutators */ //@{
-    boost::shared_ptr<Font> GetFont(const std::string& font_filename, int pts, Uint32 range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the requested font.  May load font if unavailable at time of request.
+    boost::shared_ptr<Font> GetFont(const std::string& font_filename, int pts, unsigned int range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the requested font.  May load font if unavailable at time of request.
     void                    FreeFont(const std::string& font_filename, int pts); ///< removes the indicated font from the font manager.  Due to shared_ptr semantics, the font may not be deleted until much later.
     //@}
 

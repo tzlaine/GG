@@ -48,25 +48,25 @@ Clr::Clr() :
     a(0)
 {}
 
-Clr::Clr(int _r, int _g, int _b, int _a)
-{
-    r = std::min(_r, 255);
-    g = std::min(_g, 255);
-    b = std::min(_b, 255);
-    a = std::min(_a, 255);
-}
+Clr::Clr(GLubyte r_, GLubyte g_, GLubyte b_, GLubyte a_) :
+    r(r_),
+    g(g_),
+    b(b_),
+    a(a_)
+{}
 
-Clr::Clr(double _r, double _g, double _b, double _a)
-{
-    r = Uint8(_r * 255);
-    g = Uint8(_g * 255);
-    b = Uint8(_b * 255);
-    a = Uint8(_a * 255);
-}
 
 ////////////////////////////////////////////////
 // free function(s)
 ////////////////////////////////////////////////
+Clr GG::FloatClr(float r, float g, float b, float a)
+{
+    return Clr(static_cast<GLubyte>(r * 255),
+               static_cast<GLubyte>(g * 255),
+               static_cast<GLubyte>(b * 255),
+               static_cast<GLubyte>(a * 255));
+}
+
 bool GG::operator==(const Clr& rhs, const Clr& lhs) 
 { return rhs.r == lhs.r && rhs.g == lhs.g && rhs.b == lhs.b && rhs.a == lhs.a; }
 

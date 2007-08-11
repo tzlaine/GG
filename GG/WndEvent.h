@@ -97,11 +97,11 @@ public:
         LButtonDown(). */
     WndEvent(EventType type, const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, const Pt& move, Uint32
+    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, const Pt& move,  Flags<ModKey>
         mod_keys), eg LDrag(). */
     WndEvent(EventType type, const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, int move, Uint32
+    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, int move,  Flags<ModKey>
         mod_keys), eg MouseWheel(). */
     WndEvent(EventType type, const Pt& pt, int move, Flags<ModKey> mod_keys);
 

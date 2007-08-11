@@ -34,9 +34,9 @@ namespace {
     };
 
     template <>
-    struct WrappedEditChangedFunctor<Uint8>
+    struct WrappedEditChangedFunctor<unsigned char>
     {
-        WrappedEditChangedFunctor(Uint8& value, Edit* edit, boost::signal<void ()>& signal) :
+        WrappedEditChangedFunctor(unsigned char& value, Edit* edit, boost::signal<void ()>& signal) :
             m_value(value),
             m_edit(edit),
             m_signal(signal)
@@ -55,7 +55,7 @@ namespace {
             }
         }
     private:
-        Uint8& m_value;
+        unsigned char& m_value;
         Edit* m_edit;
         boost::signal<void ()>& m_signal;
     };

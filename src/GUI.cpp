@@ -851,7 +851,7 @@ void GUI::RemoveAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
     s_impl->accelerators.erase(std::make_pair(key, mod_keys));
 }
 
-boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts, Uint32 range/* = Font::ALL_CHARS*/)
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts, unsigned int range/* = Font::ALL_CHARS*/)
 {
     return GetFontManager().GetFont(font_filename, pts, range);
 }

@@ -42,7 +42,7 @@
 namespace GG {
 
 namespace detail {
-    inline int OneBits(Uint32 num)
+    inline int OneBits(unsigned int num)
     {
         int retval = 0;
         const int NUM_BITS = sizeof(num) * 8;
@@ -74,7 +74,7 @@ struct is_flag_type : boost::mpl::false_ {};
     {                                                                   \
     public:                                                             \
         name() : m_value(0) {}                                          \
-        explicit name(Uint32 value) :                                   \
+        explicit name(unsigned int value) :                             \
             m_value(value)                                              \
             {                                                           \
                 if (1 < detail::OneBits(value))                         \
@@ -88,7 +88,7 @@ struct is_flag_type : boost::mpl::false_ {};
         bool operator<(name rhs) const                                  \
             { return m_value < rhs.m_value; }                           \
     private:                                                            \
-        Uint32 m_value;                                                 \
+        unsigned int m_value;                                           \
         friend class Flags<name>;                                       \
                                                                         \
         friend class boost::serialization::access;                      \
@@ -313,7 +313,7 @@ public:
     //@}
 
 private:
-    Uint32 m_flags;
+    unsigned int m_flags;
 
     friend std::ostream& operator<<<>(std::ostream& os, Flags<FlagType> flags);
 
@@ -326,7 +326,7 @@ private:
 template <class FlagType>
 std::ostream& operator<<(std::ostream& os, Flags<FlagType> flags)
 {
-    Uint32 flags_data = flags.m_flags;
+    unsigned int flags_data = flags.m_flags;
     bool flag_printed = false;
     for (unsigned int i = 0; i < sizeof(flags_data) * 8; ++i) {
         if (flags_data & 1) {

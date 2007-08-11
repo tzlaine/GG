@@ -251,10 +251,10 @@ namespace { // file-scope constants and functions
         for (int j = first_slice_idx; j <= last_slice_idx; ++j) { // calculate the color value for each needed point
             int X = (j > SLICES ? (j - SLICES) : j) * 2, Y = X + 1;
             double color_scale_factor = (SQRT2OVER2 * (unit_vertices[X] + unit_vertices[Y]) + 1) / 2; // this is essentially the dot product of (x,y) with (sqrt2over2,sqrt2over2), the direction of the light source, scaled to the range [0,1]
-            colors[j] = Clr(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-                            Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-                            Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-                            Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+            colors[j] = Clr(GLubyte(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
+                            GLubyte(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                            GLubyte(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                            GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         }
 
         glPushMatrix();
@@ -268,10 +268,10 @@ namespace { // file-scope constants and functions
         double x = cos(-theta1),
             y = sin(-theta1);
         double color_scale_factor = (SQRT2OVER2 * (x + y) + 1) / 2;
-        glColor4ub(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-                   Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-                   Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-                   Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+        glColor4ub(GLubyte(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
+                   GLubyte(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                   GLubyte(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                   GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glVertex2f(x, y);
         // angles in between theta1 and theta2, if any
         for (int i = first_slice_idx; i <= last_slice_idx; ++i) {
@@ -283,10 +283,10 @@ namespace { // file-scope constants and functions
         x = cos(-theta2);
         y = sin(-theta2);
         color_scale_factor = (SQRT2OVER2 * (x + y) + 1) / 2;
-        glColor4ub(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-                   Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-                   Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-                   Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+        glColor4ub(GLubyte(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
+                   GLubyte(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                   GLubyte(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                   GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glVertex2f(x, y);
         glEnd();
         glPopMatrix();
@@ -330,10 +330,10 @@ namespace { // file-scope constants and functions
         for (int j = first_slice_idx; j <= last_slice_idx; ++j) { // calculate the color value for each needed point
             int X = (j > SLICES ? (j - SLICES) : j) * 2, Y = X + 1;
             double color_scale_factor = (SQRT2OVER2 * (unit_vertices[X] + unit_vertices[Y]) + 1) / 2; // this is essentially the dot product of (x,y) with (sqrt2over2,sqrt2over2), the direction of the light source, scaled to the range [0,1]
-            colors[j] = Clr(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-                            Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-                            Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-                            Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+            colors[j] = Clr(GLubyte(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
+                            GLubyte(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+                            GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+                            GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         }
 
         glPushMatrix();
@@ -358,10 +358,10 @@ namespace { // file-scope constants and functions
         glBegin(GL_QUAD_STRIP);
         // point on circle at angle theta1
         double color_scale_factor = (SQRT2OVER2 * (theta1_x + theta1_y) + 1) / 2;
-        glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-                   Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-                   Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-                   Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+        glColor4ub(GLubyte(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
+                   GLubyte(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+                   GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+                   GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         glVertex2f(theta1_x, theta1_y);
         glVertex2f(theta1_x * inner_radius, theta1_y * inner_radius);
         // angles in between theta1 and theta2, if any
@@ -373,10 +373,10 @@ namespace { // file-scope constants and functions
         }
         // theta2
         color_scale_factor = (SQRT2OVER2 * (theta2_x + theta2_y) + 1) / 2;
-        glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-                   Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-                   Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-                   Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+        glColor4ub(GLubyte(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
+                   GLubyte(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+                   GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+                   GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         glVertex2f(theta2_x, theta2_y);
         glVertex2f(theta2_x * inner_radius, theta2_y * inner_radius);
         glEnd();
@@ -396,10 +396,10 @@ namespace { // file-scope constants and functions
 
         // top
         double color_scale_factor = (SQRT2OVER2 * (0 + 1) + 1) / 2;
-        glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-                   Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-                   Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-                   Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+        glColor4ub(GLubyte(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
+                   GLubyte(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+                   GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+                   GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         glBegin(GL_QUADS);
         glVertex2i(x2 - corner_radius, y1);
         glVertex2i(x1 + corner_radius, y1);
@@ -417,10 +417,10 @@ namespace { // file-scope constants and functions
 
         // right
         color_scale_factor = (SQRT2OVER2 * (-1 + 0) + 1) / 2;
-        glColor4ub(Uint8(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
-                   Uint8(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
-                   Uint8(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
-                   Uint8(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
+        glColor4ub(GLubyte(border_color2.r * (1 - color_scale_factor) + border_color1.r * color_scale_factor),
+                   GLubyte(border_color2.g * (1 - color_scale_factor) + border_color1.g * color_scale_factor),
+                   GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
+                   GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         glBegin(GL_QUADS);
         glVertex2i(x2, y1 + corner_radius);
         glVertex2i(x2 - thick, y1 + corner_radius);
@@ -469,10 +469,10 @@ namespace { // file-scope constants and functions
 
         // top
         double color_scale_factor = (SQRT2OVER2 * (0 + 1) + 1) / 2;
-        Clr scaled_color(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-                         Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-                         Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-                         Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+        Clr scaled_color(GLubyte(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
+                         GLubyte(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                         GLubyte(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                         GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glBegin(GL_QUADS);
         glColor(scaled_color);
         glVertex2i(x2 - corner_radius, y1);
@@ -494,10 +494,10 @@ namespace { // file-scope constants and functions
 
         // right
         color_scale_factor = (SQRT2OVER2 * (-1 + 0) + 1) / 2;
-        scaled_color = Clr(Uint8(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
-                           Uint8(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
-                           Uint8(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
-                           Uint8(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
+        scaled_color = Clr(GLubyte(color3.r * (1 - color_scale_factor) + color2.r * color_scale_factor),
+                           GLubyte(color3.g * (1 - color_scale_factor) + color2.g * color_scale_factor),
+                           GLubyte(color3.b * (1 - color_scale_factor) + color2.b * color_scale_factor),
+                           GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glBegin(GL_QUADS);
         glColor(color1);
         glVertex2i(x2 - corner_radius, y1 + corner_radius);

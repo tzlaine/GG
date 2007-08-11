@@ -381,7 +381,7 @@ Font::Font() :
 {
 }
 
-Font::Font(const std::string& font_filename, int pts, Uint32 range/* = ALL_DEFINED_RANGES*/) :
+Font::Font(const std::string& font_filename, int pts, unsigned int range/* = ALL_DEFINED_RANGES*/) :
     m_font_filename(font_filename),
     m_pt_sz(pts),
     m_glyph_range(range),
@@ -810,7 +810,7 @@ void Font::ClearKnownTags()
     s_known_tags = s_action_tags;
 }
 
-void Font::Init(const std::string& font_filename, int pts, Uint32 range)
+void Font::Init(const std::string& font_filename, int pts, unsigned int range)
 {
     if (s_action_tags.empty()) // if this is the first Font to get initialized, it needs to initialize some static members
         ClearKnownTags();
@@ -890,10 +890,11 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
     const int BUF_SZ = BUF_WIDTH * BUF_HEIGHT;
 
     // declare std::vector of image buffers into which we will copy glyph images and create first buffer
-    std::vector<Uint16*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
+    std::vector<unsigned short*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
     std::vector<Pt> buffer_sizes;
     std::map<FT_ULong, TempGlyphData> temp_glyph_data;
-    Uint16* temp_buf = new Uint16[BUF_SZ]; // 16 bpp: we are creating a luminance + alpha image
+    typedef unsigned short ushort;
+    unsigned short* temp_buf = new ushort[BUF_SZ]; // 16 bpp: we are creating a luminance + alpha image
     for (int i = 0; i < BUF_SZ; ++i)
         temp_buf[i] = 0;
     buffer_vec.push_back(temp_buf);
@@ -923,7 +924,8 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
                         if (pow_of_2_x < buffer_sizes.back().x)
                             buffer_sizes.back().x = pow_of_2_x;
                         x = y = 0;
-                        temp_buf = new Uint16[BUF_SZ];
+                        typedef unsigned short ushort;
+                        temp_buf = new ushort[BUF_SZ];
                         for (int i = 0; i < BUF_SZ; ++i)
                             temp_buf[i] = 0;
                         buffer_vec.push_back(temp_buf);
@@ -931,14 +933,14 @@ void Font::Init(const std::string& font_filename, int pts, Uint32 range)
                     }
                 }
 
-                Uint8*  src_start = glyph_bitmap.buffer;
-                Uint16* dst_start = buffer_vec.back() + y * BUF_WIDTH + x;
+                unsigned char*  src_start = glyph_bitmap.buffer;
+                unsigned short* dst_start = buffer_vec.back() + y * BUF_WIDTH + x;
 
                 int y_offset = m_height - 1 + m_descent - face->glyph->bitmap_top + FT_MAGIC_NUMBER;
 
                 for (int row = 0; row < glyph_bitmap.rows; ++row) {
-                    Uint8*  src = src_start + row * glyph_bitmap.pitch;
-                    Uint16* dst = dst_start + (row + y_offset) * BUF_WIDTH;
+                    unsigned char*  src = src_start + row * glyph_bitmap.pitch;
+                    unsigned short* dst = dst_start + (row + y_offset) * BUF_WIDTH;
                     for (int col = 0; col < glyph_bitmap.width; ++col) {
 #ifdef __BIG_ENDIAN__
                         *dst++ = *src++ | (255 << 8); // big-endian uses different byte ordering
@@ -1065,7 +1067,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
             if (4 <= tag->params.size()) {
                 try {
                     int temp_color[4];
-                    Uint8 color[4];
+                    GLubyte color[4];
                     temp_color[0] = lexical_cast<int>(tag->params[0]);
                     temp_color[1] = lexical_cast<int>(tag->params[1]);
                     temp_color[2] = lexical_cast<int>(tag->params[2]);
@@ -1092,7 +1094,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                         if (0.0 <= color[0] && color[0] <= 1.0 && 0.0 <= color[1] && color[1] <= 1.0 &&
                             0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0) {
                             glColor4dv(color);
-                            render_state.curr_color = Clr(color[0], color[1], color[2], color[3]);
+                            render_state.curr_color = FloatClr(color[0], color[1], color[2], color[3]);
                             render_state.color_set = true;
                         } else {
                             well_formed_tag = false;
@@ -1130,7 +1132,7 @@ bool FontManager::FontKey::operator<(const FontKey& rhs) const
 FontManager::FontManager()
 {}
 
-boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, int pts, Uint32 range/* = GGFont::ALL_DEFINED_RANGES*/)
+boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, int pts, unsigned int range/* = Font::ALL_DEFINED_RANGES*/)
 {
     static const boost::shared_ptr<Font> EMPTY_FONT(new Font("", 0));
     FontKey key(font_filename, pts);

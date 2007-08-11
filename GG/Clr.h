@@ -44,21 +44,22 @@ namespace GG {
 struct GG_API Clr
 {
     /** \name Structors */ //@{
-    Clr();                                           ///< default ctor
-    Clr(int _r, int _g, int _b, int _a);             ///< ctor that constructs a Clr from four Uint8s that represent the color channels
-    Clr(double _r, double _g, double _b, double _a); ///< ctor that constructs a Clr from four doubles that represent the color channels (each must be >= 0.0 and <= 1.0)
+    Clr();                                                       ///< default ctor
+    Clr(GLubyte r_, GLubyte g_, GLubyte b_, GLubyte a_);         ///< ctor that constructs a Clr from four ints that represent the color channels
     //@}
 
-    Uint8 r;   ///< the red channel
-    Uint8 g;   ///< the green channel
-    Uint8 b;   ///< the blue channel
-    Uint8 a;   ///< the alpha channel
+    GLubyte r;   ///< the red channel
+    GLubyte g;   ///< the green channel
+    GLubyte b;   ///< the blue channel
+    GLubyte a;   ///< the alpha channel
 
 private:
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
+
+GG_API Clr FloatClr(float r_, float g_, float b_, float a_); ///< named ctor that constructs a Clr from four floats that represent the color channels (each must be >= 0.0 and <= 1.0)
 
 GG_API bool operator==(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are identical
 GG_API bool operator!=(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are different

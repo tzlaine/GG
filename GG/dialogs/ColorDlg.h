@@ -42,11 +42,11 @@ class Slider;
 struct GG_API HSVClr
 {
     HSVClr(); ///< default ctor
-    HSVClr(double h_, double s_, double v_, Uint8 a_ = 255); ///< ctor
-    double h;   ///< hue
-    double s;   ///< saturation
-    double v;   ///< value
-    Uint8  a;   ///< alpha
+    HSVClr(double h_, double s_, double v_, GLubyte a_ = 255); ///< ctor
+    double  h;   ///< hue
+    double  s;   ///< saturation
+    double  v;   ///< value
+    GLubyte a;   ///< alpha
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);

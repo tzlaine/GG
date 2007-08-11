@@ -85,9 +85,9 @@ namespace {
         retval.a = hsv_color.a;
 
         if (hsv_color.s < EPSILON) {
-            retval.r = static_cast<Uint8>(hsv_color.v * 255);
-            retval.g = static_cast<Uint8>(hsv_color.v * 255);
-            retval.b = static_cast<Uint8>(hsv_color.v * 255);
+            retval.r = static_cast<GLubyte>(hsv_color.v * 255);
+            retval.g = static_cast<GLubyte>(hsv_color.v * 255);
+            retval.b = static_cast<GLubyte>(hsv_color.v * 255);
         } else {
             double tmph = hsv_color.h * 6.0;
             int tmpi = static_cast<int>(tmph);
@@ -96,34 +96,34 @@ namespace {
             double tmp3 = hsv_color.v * (1 - hsv_color.s * (1 - (tmph - tmpi)));
             switch (tmpi) {
             case 0:
-                retval.r = static_cast<Uint8>(hsv_color.v * 255);
-                retval.g = static_cast<Uint8>(tmp3 * 255);
-                retval.b = static_cast<Uint8>(tmp1 * 255);
+                retval.r = static_cast<GLubyte>(hsv_color.v * 255);
+                retval.g = static_cast<GLubyte>(tmp3 * 255);
+                retval.b = static_cast<GLubyte>(tmp1 * 255);
                 break;
             case 1:
-                retval.r = static_cast<Uint8>(tmp2 * 255);
-                retval.g = static_cast<Uint8>(hsv_color.v * 255);
-                retval.b = static_cast<Uint8>(tmp1 * 255);
+                retval.r = static_cast<GLubyte>(tmp2 * 255);
+                retval.g = static_cast<GLubyte>(hsv_color.v * 255);
+                retval.b = static_cast<GLubyte>(tmp1 * 255);
                 break;
             case 2:
-                retval.r = static_cast<Uint8>(tmp1 * 255);
-                retval.g = static_cast<Uint8>(hsv_color.v * 255);
-                retval.b = static_cast<Uint8>(tmp3 * 255);
+                retval.r = static_cast<GLubyte>(tmp1 * 255);
+                retval.g = static_cast<GLubyte>(hsv_color.v * 255);
+                retval.b = static_cast<GLubyte>(tmp3 * 255);
                 break;
             case 3:
-                retval.r = static_cast<Uint8>(tmp1 * 255);
-                retval.g = static_cast<Uint8>(tmp2 * 255);
-                retval.b = static_cast<Uint8>(hsv_color.v * 255);
+                retval.r = static_cast<GLubyte>(tmp1 * 255);
+                retval.g = static_cast<GLubyte>(tmp2 * 255);
+                retval.b = static_cast<GLubyte>(hsv_color.v * 255);
                 break;
             case 4:
-                retval.r = static_cast<Uint8>(tmp3 * 255);
-                retval.g = static_cast<Uint8>(tmp1 * 255);
-                retval.b = static_cast<Uint8>(hsv_color.v * 255);
+                retval.r = static_cast<GLubyte>(tmp3 * 255);
+                retval.g = static_cast<GLubyte>(tmp1 * 255);
+                retval.b = static_cast<GLubyte>(hsv_color.v * 255);
                 break;
             default:
-                retval.r = static_cast<Uint8>(hsv_color.v * 255);
-                retval.g = static_cast<Uint8>(tmp1 * 255);
-                retval.b = static_cast<Uint8>(tmp2 * 255);
+                retval.r = static_cast<GLubyte>(hsv_color.v * 255);
+                retval.g = static_cast<GLubyte>(tmp1 * 255);
+                retval.b = static_cast<GLubyte>(tmp2 * 255);
                 break;
             }
         }
@@ -143,7 +143,7 @@ HSVClr::HSVClr() :
     a(0)
 {}
 
-HSVClr::HSVClr(double h_, double s_, double v_, Uint8 a_/* = 255*/) :
+HSVClr::HSVClr(double h_, double s_, double v_, GLubyte a_/* = 255*/) :
     h(h_),
     s(s_),
     v(v_),

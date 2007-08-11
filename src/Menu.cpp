@@ -510,7 +510,7 @@ void PopupMenu::Render()
                     needs_indicator = true;
             }
             std::vector<Font::LineData> lines;
-            Uint32 fmt = TF_LEFT | TF_TOP;
+            Flags<TextFormat> fmt = FORMAT_LEFT | FORMAT_TOP;
             Pt menu_sz = m_font->DetermineLines(str, fmt, 0, lines); // get dimensions of text in menu
             menu_sz.x += 2 * HORIZONTAL_MARGIN;
             if (needs_indicator)

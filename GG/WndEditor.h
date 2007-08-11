@@ -65,6 +65,14 @@ struct AttributeChangedAction
 class GG_API WndEditor : public Wnd
 {
 public:
+    /** Contains a Flags object and the AttributeChangedAction associated with it. */
+    template <class FlagType>
+    struct FlagsAndAction
+    {
+        Flags<FlagType>* m_flags;
+        boost::shared_ptr<AttributeChangedAction<Flags<FlagType> > > m_action;
+    };
+
     /** basic ctor.  Note that WndEditor has an integral width. */
     WndEditor(int h, const boost::shared_ptr<Font>& font);
 
@@ -116,21 +124,23 @@ public:
 
     /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
         FlagGroup() calls will set values in \a flags. */
-    void BeginFlags(Uint32& flags,
-                    const boost::shared_ptr<AttributeChangedAction<Uint32> >& attribute_changed_action);
+    template <class FlagType>
+    void BeginFlags(Flags<FlagType>& flags,
+                    const boost::shared_ptr<AttributeChangedAction<Flags<FlagType> > >& attribute_changed_action);
 
     /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
         FlagGroup() calls will set values in \a flags. */
-    void BeginFlags(Uint32& flags);
+    template <class FlagType>
+    void BeginFlags(Flags<FlagType>& flags);
 
     /** creates a row representing a single bit flag in the currently-set flags variable. */
-    template <class T>
-    void Flag(const std::string& name, T flag);
+    template <class FlagType>
+    void Flag(const std::string& name, FlagType flag);
 
     /** creates a row representing a group of bit flags in the currently-set flags variable.  Exactly one of the given
         flags will be enabled at one time. */
-    template <class T>
-    void FlagGroup(const std::string& name, T min_flag, T max_flag);
+    template <class FlagType>
+    void FlagGroup(const std::string& name, const std::vector<FlagType>& group_values);
 
     /** marks the end of a section of flag and flag-group rows. */
     void EndFlags();
@@ -147,8 +157,7 @@ private:
     ListBox* m_list_box;
     boost::shared_ptr<Font> m_font;
     boost::shared_ptr<Font> m_label_font;
-    Uint32* m_current_flags;
-    boost::shared_ptr<AttributeChangedAction<Uint32> > m_current_flags_changed_actions;
+    boost::any m_current_flags_and_action;
 };
 
 /** the base class for the hierarchy of rows of controls used by WndEditor to accept user modifications of its edited
@@ -301,37 +310,37 @@ private:
 };
 
 /** the subclass of AttributeRowBase used to represent a single flag attribute. */
-template <class T>
+template <class FlagType>
 struct FlagAttributeRow : AttributeRowBase
 {
     /** basic ctor.  \a flags should be the variable that holds all the flag values, and \a value should be the flag
         represented by this row. */
-    FlagAttributeRow(const std::string& name, Uint32& flags, const T& value, const boost::shared_ptr<Font>& font);
+    FlagAttributeRow(const std::string& name, Flags<FlagType>& flags, FlagType value, const boost::shared_ptr<Font>& font);
     virtual void Update();
-    mutable boost::signal<void (const Uint32&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
+    mutable boost::signal<void (const Flags<FlagType>&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void CheckChanged(bool checked);
-    Uint32& m_flags;
-    T m_value;
+    Flags<FlagType>& m_flags;
+    FlagType m_value;
     StateButton* m_check_box;
     boost::signals::connection m_check_box_connection;
 };
 
 /** the AttributeRowBase subclass used to represent a group of mutually-exclusive flag attributes, one of which must be
     set to true at all times. */
-template <class T>
+template <class FlagType>
 struct FlagGroupAttributeRow : AttributeRowBase
 {
     /** basic ctor.  \a flags should be the variable that holds all the flag values, and \a min and \a max should define
         the range of flags represented by this row. */
-    FlagGroupAttributeRow(const std::string& name, Uint32& flags, const T& value, const T& min, const T& max, const boost::shared_ptr<Font>& font);
+    FlagGroupAttributeRow(const std::string& name, Flags<FlagType>& flags, FlagType value, const std::vector<FlagType>& group_values, const boost::shared_ptr<Font>& font);
     virtual void Update();
-    mutable boost::signal<void (const Uint32&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
+    mutable boost::signal<void (const Flags<FlagType>&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
     void SelectionChanged(int selection);
-    Uint32& m_flags;
-    T m_value;
-    std::vector<T> m_group_values;
+    Flags<FlagType>& m_flags;
+    FlagType m_value;
+    std::vector<FlagType> m_group_values;
     DropDownList* m_flag_drop_list;
     boost::signals::connection m_drop_list_connection;
 };
@@ -402,43 +411,81 @@ void WndEditor::ConstAttribute(const std::string& name, const T& value)
 template <class T>
 void WndEditor::CustomText(const std::string& name, const T& functor)
 {
-    CustomTextRow<T>* display_row = new CustomTextRow<T>(name, functor, const_cast<const GG::Wnd*&>(m_wnd), m_font);
+    CustomTextRow<T>* display_row = new CustomTextRow<T>(name, functor, const_cast<const Wnd*&>(m_wnd), m_font);
     m_list_box->Insert(display_row);
 }
 
-template <class T>
-void WndEditor::Flag(const std::string& name, T flag)
+template <class FlagType>
+void WndEditor::BeginFlags(Flags<FlagType>& flags,
+                           const boost::shared_ptr<AttributeChangedAction<Flags<FlagType> > >& attribute_changed_action)
 {
-    if (!m_current_flags) {
+    FlagsAndAction<FlagType> flags_and_action;
+    flags_and_action.m_flags = &flags;
+    flags_and_action.m_action = attribute_changed_action;
+    m_current_flags_and_action = flags_and_action;
+}
+
+
+template <class FlagType>
+void WndEditor::BeginFlags(Flags<FlagType>& flags)
+{
+    FlagsAndAction<FlagType> flags_and_action;
+    flags_and_action.m_flags = &flags;
+    m_current_flags_and_action = flags_and_action;
+}
+
+template <class FlagType>
+void WndEditor::Flag(const std::string& name, FlagType flag)
+{
+    if (m_current_flags_and_action.empty()) {
         throw std::runtime_error("WndEditor::Flag() : Attempted to create a flag outside of a BeginFlags()/EndFlags() "
                                  "block.");
     }
-    FlagAttributeRow<T>* flag_attribute = new FlagAttributeRow<T>(name, *m_current_flags, flag, m_font);
+    FlagsAndAction<FlagType> flags_and_action;
+    try {
+        flags_and_action = boost::any_cast<FlagsAndAction<FlagType> >(m_current_flags_and_action);
+    } catch (const boost::bad_any_cast&) {
+        throw std::runtime_error("WndEditor::Flag() : Attempted to initialize a flag group from a set of flags "
+                                 "of a type that does not match the most recent call to BeginFlags().");
+    }
+    FlagAttributeRow<FlagType>* flag_attribute = new FlagAttributeRow<FlagType>(name, *flags_and_action.m_flags, flag, m_font);
     m_list_box->Insert(flag_attribute);
-    if (m_current_flags_changed_actions)
-        Connect(flag_attribute->ValueChangedSignal, &AttributeChangedAction<Uint32>::operator(), m_current_flags_changed_actions);
+    if (flags_and_action.m_action)
+        Connect(flag_attribute->ValueChangedSignal, &AttributeChangedAction<Flags<FlagType> >::operator(), flags_and_action.m_action);
     Connect(flag_attribute->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
-template <class T>
-void WndEditor::FlagGroup(const std::string& name, T min_flag, T max_flag)
+template <class FlagType>
+void WndEditor::FlagGroup(const std::string& name, const std::vector<FlagType>& group_values)
 {
-    if (!m_current_flags) {
+    if (m_current_flags_and_action.empty()) {
         throw std::runtime_error("WndEditor::FlagGroup() : Attempted to create a flag group outside of a BeginFlags()/"
                                  "EndFlags() block.");
     }
-    T value = min_flag;
-    while (value <= max_flag && !(*m_current_flags & value)) {
-        value = T(value * 2);
-    }
-    if (max_flag < value) {
+    FlagsAndAction<FlagType> flags_and_action;
+    try {
+        flags_and_action = boost::any_cast<FlagsAndAction<FlagType> >(m_current_flags_and_action);
+    } catch (const boost::bad_any_cast&) {
         throw std::runtime_error("WndEditor::FlagGroup() : Attempted to initialize a flag group from a set of flags "
-                                 "that contains no flags in the group.");
+                                 "of a type that does not match the type of the flags given to the most recent call "
+                                 "to BeginFlags().");
     }
-    FlagGroupAttributeRow<T>* flag_group = new FlagGroupAttributeRow<T>(name, *m_current_flags, value, min_flag, max_flag, m_font);
+    if (group_values.empty()) {
+        throw std::runtime_error("WndEditor::FlagGroup() : Attempted to initialize a flag group from a n empty set of flags.");
+    }
+    bool value_found = false;
+    FlagType value;
+    for (unsigned int i = 0; i < group_values.size(); ++i) {
+        if (*flags_and_action.m_flags & group_values[i]) {
+            value = group_values[i];
+            value_found = true;
+            break;
+        }
+    }
+    FlagGroupAttributeRow<FlagType>* flag_group = new FlagGroupAttributeRow<FlagType>(name, *flags_and_action.m_flags, value, group_values, m_font);
     m_list_box->Insert(flag_group);
-    if (m_current_flags_changed_actions)
-        Connect(flag_group->ValueChangedSignal, &AttributeChangedAction<Uint32>::operator(), m_current_flags_changed_actions);
+    if (flags_and_action.m_action)
+        Connect(flag_group->ValueChangedSignal, &AttributeChangedAction<Flags<FlagType> >::operator(), flags_and_action.m_action);
     Connect(flag_group->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
@@ -527,7 +574,7 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
     push_back(CreateControl(name, font, CLR_BLACK));
     m_enum_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * (max - min + 1) + 4, CLR_GRAY);
     m_enum_drop_list->SetInteriorColor(CLR_WHITE);
-    m_enum_drop_list->SetStyle(LB_NOSORT);
+    m_enum_drop_list->SetStyle(LIST_NOSORT);
     for (T i = min; i <= max; i = T(i + 1)) {
         Row* row = new ListBox::Row();
         std::string enum_label = boost::lexical_cast<std::string>(i);
@@ -566,7 +613,7 @@ ConstAttributeRow<T>::ConstAttributeRow(const std::string& name, const T& value,
     m_value_text(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, boost::lexical_cast<std::string>(m_value), font, CLR_BLACK, TF_LEFT);
+    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, boost::lexical_cast<std::string>(m_value), font, CLR_BLACK, FORMAT_LEFT);
     push_back(m_value_text);
 }
 
@@ -576,22 +623,22 @@ void ConstAttributeRow<T>::Refresh()
     m_value_text->SetText(boost::lexical_cast<std::string>(m_value));
 }
 
-template <class T>
-FlagAttributeRow<T>::FlagAttributeRow(const std::string& name, Uint32& flags, const T& value, const boost::shared_ptr<Font>& font) :
+template <class FlagType>
+FlagAttributeRow<FlagType>::FlagAttributeRow(const std::string& name, Flags<FlagType>& flags, FlagType value, const boost::shared_ptr<Font>& font) :
     m_flags(flags),
     m_value(value),
     m_check_box(0)
 {
     boost::shared_ptr<Font> font_to_use = GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 2);
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_check_box = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font_to_use, GG::TF_LEFT, GG::CLR_GRAY);
+    m_check_box = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font_to_use, FORMAT_LEFT, CLR_GRAY);
     m_check_box->SetCheck(m_flags & m_value);
     push_back(m_check_box);
     m_check_box_connection = Connect(m_check_box->CheckedSignal, &FlagAttributeRow::CheckChanged, this);
 }
 
-template <class T>
-void FlagAttributeRow<T>::CheckChanged(bool checked)
+template <class FlagType>
+void FlagAttributeRow<FlagType>::CheckChanged(bool checked)
 {
     if (checked)
         m_flags |= m_value;
@@ -601,29 +648,26 @@ void FlagAttributeRow<T>::CheckChanged(bool checked)
     ChangedSignal();
 }
 
-template <class T>
-void FlagAttributeRow<T>::Update()
+template <class FlagType>
+void FlagAttributeRow<FlagType>::Update()
 {
     m_check_box_connection.block();
     m_check_box->SetCheck(m_flags & m_value);
     m_check_box_connection.unblock();
 }
 
-template <class T>
-FlagGroupAttributeRow<T>::FlagGroupAttributeRow(const std::string& name, Uint32& flags, const T& value, const T& min, const T& max, const boost::shared_ptr<Font>& font) :
+template <class FlagType>
+FlagGroupAttributeRow<FlagType>::FlagGroupAttributeRow(const std::string& name, Flags<FlagType>& flags, FlagType value, const std::vector<FlagType>& group_values, const boost::shared_ptr<Font>& font) :
     m_flags(flags),
     m_value(value),
-    m_group_values(),
+    m_group_values(group_values),
     m_flag_drop_list(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    for (T i = min; i <= max; i = T(i * 2)) {
-        m_group_values.push_back(T(i));
-    }
     m_flag_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, font->Height() + 8, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY);
     Resize(m_flag_drop_list->Size());
     m_flag_drop_list->SetInteriorColor(CLR_WHITE);
-    m_flag_drop_list->SetStyle(LB_NOSORT);
+    m_flag_drop_list->SetStyle(LIST_NOSORT);
     for (unsigned int i = 0; i < m_group_values.size(); ++i) {
         Row* row = new ListBox::Row();
         row->push_back(CreateControl(boost::lexical_cast<std::string>(m_group_values[i]), font, CLR_BLACK));
@@ -637,15 +681,14 @@ FlagGroupAttributeRow<T>::FlagGroupAttributeRow(const std::string& name, Uint32&
     }
     if (index == m_group_values.size()) {
         throw std::runtime_error("FlagGroupAttributeRow::FlagGroupAttributeRow() : Attempted to initialize a "
-                                 "flag group's drop-down list with a value that is not a power-of-two in the "
-                                 "range (min, max).");
+                                 "flag group's drop-down list with a value that is not in the given set of group values.");
     }
     m_flag_drop_list->Select(index);
     m_drop_list_connection = Connect(m_flag_drop_list->SelChangedSignal, &FlagGroupAttributeRow::SelectionChanged, this);
 }
 
-template <class T>
-void FlagGroupAttributeRow<T>::SelectionChanged(int selection)
+template <class FlagType>
+void FlagGroupAttributeRow<FlagType>::SelectionChanged(int selection)
 {
     m_flags &= ~m_value;
     m_value = m_group_values[selection];
@@ -654,8 +697,8 @@ void FlagGroupAttributeRow<T>::SelectionChanged(int selection)
     ChangedSignal();
 }
 
-template <class T>
-void FlagGroupAttributeRow<T>::Update()
+template <class FlagType>
+void FlagGroupAttributeRow<FlagType>::Update()
 {
     m_drop_list_connection.block();
     unsigned int index = 0;
@@ -674,7 +717,7 @@ CustomTextRow<T>::CustomTextRow(const std::string& name, const T& functor, const
     m_display_text(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_display_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, m_functor(m_wnd), font, CLR_BLACK, TF_LEFT);
+    m_display_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, m_functor(m_wnd), font, CLR_BLACK, FORMAT_LEFT);
     Resize(m_display_text->Size());
     push_back(m_display_text);
 }

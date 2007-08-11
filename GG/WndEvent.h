@@ -43,22 +43,22 @@ class Wnd;
 
 // Adpated from SDLKey enum in SDL_keysym.h of the SDL library.
 GG_FLAG_TYPE(ModKey);
-extern GG_API ModKey MOD_KEY_NONE;         ///< No modifier key.
-extern GG_API ModKey MOD_KEY_LSHIFT;       ///< The left Shift key.
-extern GG_API ModKey MOD_KEY_RSHIFT;       ///< The right Shift key.
-extern GG_API ModKey MOD_KEY_LCTRL;        ///< The left Control key.
-extern GG_API ModKey MOD_KEY_RCTRL;        ///< The right Control key.
-extern GG_API ModKey MOD_KEY_LALT;         ///< The left Alt key.
-extern GG_API ModKey MOD_KEY_RALT;         ///< The right Alt key.
-extern GG_API ModKey MOD_KEY_LMETA;        ///< The left Meta key.
-extern GG_API ModKey MOD_KEY_RMETA;        ///< The right Meta key.
-extern GG_API ModKey MOD_KEY_NUM;          ///< The Num Lock key.
-extern GG_API ModKey MOD_KEY_CAPS;         ///< The Caps Lock key.
-extern GG_API ModKey MOD_KEY_MODE;         ///< The Mode key.
-extern GG_API Flags<ModKey> MOD_KEY_CTRL;  ///< Either Control key.
-extern GG_API Flags<ModKey> MOD_KEY_SHIFT; ///< Either Shift key.
-extern GG_API Flags<ModKey> MOD_KEY_ALT;   ///< Either Alt key.
-extern GG_API Flags<ModKey> MOD_KEY_META;  ///< Either Meta key.
+extern GG_API const ModKey MOD_KEY_NONE;         ///< No modifier key.
+extern GG_API const ModKey MOD_KEY_LSHIFT;       ///< The left Shift key.
+extern GG_API const ModKey MOD_KEY_RSHIFT;       ///< The right Shift key.
+extern GG_API const ModKey MOD_KEY_LCTRL;        ///< The left Control key.
+extern GG_API const ModKey MOD_KEY_RCTRL;        ///< The right Control key.
+extern GG_API const ModKey MOD_KEY_LALT;         ///< The left Alt key.
+extern GG_API const ModKey MOD_KEY_RALT;         ///< The right Alt key.
+extern GG_API const ModKey MOD_KEY_LMETA;        ///< The left Meta key.
+extern GG_API const ModKey MOD_KEY_RMETA;        ///< The right Meta key.
+extern GG_API const ModKey MOD_KEY_NUM;          ///< The Num Lock key.
+extern GG_API const ModKey MOD_KEY_CAPS;         ///< The Caps Lock key.
+extern GG_API const ModKey MOD_KEY_MODE;         ///< The Mode key.
+extern GG_API const Flags<ModKey> MOD_KEY_CTRL;  ///< Either Control key.
+extern GG_API const Flags<ModKey> MOD_KEY_SHIFT; ///< Either Shift key.
+extern GG_API const Flags<ModKey> MOD_KEY_ALT;   ///< Either Alt key.
+extern GG_API const Flags<ModKey> MOD_KEY_META;  ///< Either Meta key.
 
 /** encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.  The various types of WndEvents correspond
     to the various message member functions of Wnd, some of which have different parameterizations.  Rather than have a

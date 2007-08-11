@@ -66,10 +66,10 @@ Layout::WndPosition::WndPosition() :
     first_column(0),
     last_row(0),
     last_column(0),
-    alignment(0)
+    alignment(ALIGN_NONE)
 {}
 
-Layout::WndPosition::WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_ul_, const Pt& original_size_) :
+Layout::WndPosition::WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Flags<Alignment> alignment_, const Pt& original_ul_, const Pt& original_size_) :
     first_row(first_row_),
     first_column(first_column_),
     last_row(last_row_),
@@ -121,7 +121,7 @@ int Layout::Columns() const
     return m_cells.empty() ? 0 : m_cells[0].size();
 }
 
-Uint32 Layout::ChildAlignment(Wnd* wnd) const
+Flags<Alignment> Layout::ChildAlignment(Wnd* wnd) const
 {
     std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
     if (it == m_wnd_positions.end())
@@ -521,12 +521,12 @@ void Layout::KeyRelease(Key key, Flags<ModKey> mod_keys)
         Parent()->KeyRelease(key, mod_keys);
 }
 
-void Layout::Add(Wnd* wnd, int row, int column, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd* wnd, int row, int column, Flags<Alignment> alignment/* = ALIGN_NONE*/)
 {
     Add(wnd, row, column, 1, 1, alignment);
 }
 
-void Layout::Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment/* = 0*/)
+void Layout::Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Flags<Alignment> alignment/* = ALIGN_NONE*/)
 {
     int last_row = row + num_rows;
     int last_column = column + num_columns;
@@ -608,7 +608,7 @@ void Layout::ResizeLayout(int rows, int columns)
     RedoLayout();
 }
 
-void Layout::SetChildAlignment(Wnd* wnd, Uint32 alignment)
+void Layout::SetChildAlignment(Wnd* wnd, Flags<Alignment> alignment)
 {
     std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.find(wnd);
     if (it != m_wnd_positions.end()) {
@@ -707,7 +707,7 @@ int Layout::TotalMinHeight() const
     return retval;
 }
 
-void Layout::ValidateAlignment(Uint32& alignment)
+void Layout::ValidateAlignment(Flags<Alignment>& alignment)
 {
     int dup_ct = 0;   // duplication count
     if (alignment & ALIGN_LEFT) ++dup_ct;

@@ -27,28 +27,67 @@
 #include <GG/DrawUtil.h>
 #include <GG/WndEditor.h>
 
+#include <boost/assign/list_of.hpp>
+
+
 using namespace GG;
 
 namespace {
-    struct SetStyleAction : AttributeChangedAction<Uint32>
+    struct SetStyleAction : AttributeChangedAction<Flags<GraphicStyle> >
     {
         SetStyleAction(StaticGraphic* static_graphic) : m_static_graphic(static_graphic) {}
-        void operator()(const Uint32& style) {m_static_graphic->SetStyle(style);}
+        void operator()(const Flags<GraphicStyle>& style) {m_static_graphic->SetStyle(style);}
     private:
         StaticGraphic* m_static_graphic;
     };
 }
+
+///////////////////////////////////////
+// GraphicStyle
+///////////////////////////////////////
+const GraphicStyle GG::GRAPHIC_NONE          (0);
+const GraphicStyle GG::GRAPHIC_VCENTER       (1 << 0);
+const GraphicStyle GG::GRAPHIC_TOP           (1 << 1);
+const GraphicStyle GG::GRAPHIC_BOTTOM        (1 << 2);
+const GraphicStyle GG::GRAPHIC_CENTER        (1 << 3);
+const GraphicStyle GG::GRAPHIC_LEFT          (1 << 4);
+const GraphicStyle GG::GRAPHIC_RIGHT         (1 << 5);
+const GraphicStyle GG::GRAPHIC_FITGRAPHIC    (1 << 6);
+const GraphicStyle GG::GRAPHIC_SHRINKFIT     (1 << 7);
+const GraphicStyle GG::GRAPHIC_PROPSCALE     (1 << 8);
+
+GG_FLAGSPEC_IMPL(GraphicStyle);
+
+namespace {
+    bool RegisterGraphicStyles()
+    {
+        FlagSpec<GraphicStyle>& spec = FlagSpec<GraphicStyle>::instance();
+        spec.insert(GRAPHIC_NONE, "GRAPHIC_NONE", true);
+        spec.insert(GRAPHIC_VCENTER, "GRAPHIC_VCENTER", true);
+        spec.insert(GRAPHIC_TOP, "GRAPHIC_TOP", true);
+        spec.insert(GRAPHIC_BOTTOM, "GRAPHIC_BOTTOM", true);
+        spec.insert(GRAPHIC_CENTER, "GRAPHIC_CENTER", true);
+        spec.insert(GRAPHIC_LEFT, "GRAPHIC_LEFT", true);
+        spec.insert(GRAPHIC_RIGHT, "GRAPHIC_RIGHT", true);
+        spec.insert(GRAPHIC_FITGRAPHIC, "GRAPHIC_FITGRAPHIC", true);
+        spec.insert(GRAPHIC_SHRINKFIT, "GRAPHIC_SHRINKFIT", true);
+        spec.insert(GRAPHIC_PROPSCALE, "GRAPHIC_PROPSCALE", true);
+        return true;
+    }
+    bool dummy = RegisterGraphicStyles();
+}
+
 
 ////////////////////////////////////////////////
 // GG::StaticGraphic
 ////////////////////////////////////////////////
 StaticGraphic::StaticGraphic() :
     Control(),
-    m_style(0)
+    m_style(GRAPHIC_NONE)
 {
 }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style/* = 0*/,
+StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
                              Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
@@ -56,7 +95,7 @@ StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr
     Init(SubTexture(texture, 0, 0, texture->DefaultWidth(), texture->DefaultHeight()));
 }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style/* = 0*/,
+StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
                              Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
@@ -64,7 +103,7 @@ StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subte
     Init(subtexture);
 }
 
-Uint32 StaticGraphic::Style() const
+Flags<GraphicStyle> StaticGraphic::Style() const
 {
     return m_style;
 }
@@ -78,8 +117,8 @@ void StaticGraphic::Render()
     Pt window_sz(lr - ul);
     Pt graphic_sz(m_graphic.Width(), m_graphic.Height());
     Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
-    if (m_style & GR_FITGRAPHIC) {
-        if (m_style & GR_PROPSCALE) {
+    if (m_style & GRAPHIC_FITGRAPHIC) {
+        if (m_style & GRAPHIC_PROPSCALE) {
             double scale_x = window_sz.x / double(graphic_sz.x),
                              scale_y = window_sz.y / double(graphic_sz.y);
             double scale = (scale_x < scale_y) ? scale_x : scale_y;
@@ -88,8 +127,8 @@ void StaticGraphic::Render()
         } else {
             pt2 = window_sz;
         }
-    } else if (m_style & GR_SHRINKFIT) {
-        if (m_style & GR_PROPSCALE) {
+    } else if (m_style & GRAPHIC_SHRINKFIT) {
+        if (m_style & GRAPHIC_PROPSCALE) {
             double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
                              scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
             double scale = (scale_x < scale_y) ? scale_x : scale_y;
@@ -101,21 +140,21 @@ void StaticGraphic::Render()
     }
 
     int shift = 0;
-    if (m_style & GR_LEFT) {
+    if (m_style & GRAPHIC_LEFT) {
         shift = ul.x;
-    } else if (m_style & GR_CENTER) {
+    } else if (m_style & GRAPHIC_CENTER) {
         shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
-    } else { // m_style & GR_RIGHT
+    } else { // m_style & GRAPHIC_RIGHT
         shift = lr.x - (pt2.x - pt1.x);
     }
     pt1.x += shift;
     pt2.x += shift;
 
-    if (m_style & GR_TOP) {
+    if (m_style & GRAPHIC_TOP) {
         shift = ul.y;
-    } else if (m_style & GR_VCENTER) {
+    } else if (m_style & GRAPHIC_VCENTER) {
         shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
-    } else { // m_style & GR_BOTTOM
+    } else { // m_style & GRAPHIC_BOTTOM
         shift = lr.y - (pt2.y - pt1.y);
     }
     pt1.y += shift;
@@ -124,7 +163,7 @@ void StaticGraphic::Render()
     m_graphic.OrthoBlit(pt1, pt2);
 }
 
-void StaticGraphic::SetStyle(Uint32 style)
+void StaticGraphic::SetStyle(Flags<GraphicStyle> style)
 {
     m_style = style;
     ValidateStyle();
@@ -138,12 +177,14 @@ void StaticGraphic::DefineAttributes(WndEditor* editor)
     editor->Label("StaticGraphic");
     // TODO: handle setting image
     boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
-    editor->BeginFlags(m_style, set_style_action);
-    editor->FlagGroup("V. Alignment", GR_VCENTER, GR_BOTTOM);
-    editor->FlagGroup("H. Alignment", GR_CENTER, GR_RIGHT);
-    editor->Flag("Fit Graphic to Size", GR_FITGRAPHIC);
-    editor->Flag("Shrink-to-Fit", GR_SHRINKFIT);
-    editor->Flag("Proportional Scaling", GR_PROPSCALE);
+    editor->BeginFlags<GraphicStyle>(m_style, set_style_action);
+    typedef std::vector<GraphicStyle> FlagVec;
+    using boost::assign::list_of;
+    editor->FlagGroup("V. Alignment", FlagVec() = list_of(GRAPHIC_TOP)(GRAPHIC_VCENTER)(GRAPHIC_BOTTOM));
+    editor->FlagGroup("H. Alignment", FlagVec() = list_of(GRAPHIC_LEFT)(GRAPHIC_CENTER)(GRAPHIC_RIGHT));
+    editor->Flag("Fit Graphic to Size", GRAPHIC_FITGRAPHIC);
+    editor->Flag("Shrink-to-Fit", GRAPHIC_SHRINKFIT);
+    editor->Flag("Proportional Scaling", GRAPHIC_PROPSCALE);
     editor->EndFlags();
 }
 
@@ -157,26 +198,26 @@ void StaticGraphic::Init(const SubTexture& subtexture)
 void StaticGraphic::ValidateStyle()
 {
     int dup_ct = 0;   // duplication count
-    if (m_style & GR_LEFT) ++dup_ct;
-    if (m_style & GR_RIGHT) ++dup_ct;
-    if (m_style & GR_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GR_CENTER by default
-        m_style &= ~(GR_RIGHT | GR_LEFT);
-        m_style |= GR_CENTER;
+    if (m_style & GRAPHIC_LEFT) ++dup_ct;
+    if (m_style & GRAPHIC_RIGHT) ++dup_ct;
+    if (m_style & GRAPHIC_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GRAPHIC_CENTER by default
+        m_style &= ~(GRAPHIC_RIGHT | GRAPHIC_LEFT);
+        m_style |= GRAPHIC_CENTER;
     }
     dup_ct = 0;
-    if (m_style & GR_TOP) ++dup_ct;
-    if (m_style & GR_BOTTOM) ++dup_ct;
-    if (m_style & GR_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GR_VCENTER by default
-        m_style &= ~(GR_TOP | GR_BOTTOM);
-        m_style |= GR_VCENTER;
+    if (m_style & GRAPHIC_TOP) ++dup_ct;
+    if (m_style & GRAPHIC_BOTTOM) ++dup_ct;
+    if (m_style & GRAPHIC_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GRAPHIC_VCENTER by default
+        m_style &= ~(GRAPHIC_TOP | GRAPHIC_BOTTOM);
+        m_style |= GRAPHIC_VCENTER;
     }
     dup_ct = 0;
-    if (m_style & GR_FITGRAPHIC) ++dup_ct;
-    if (m_style & GR_SHRINKFIT) ++dup_ct;
-    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use GR_SHRINKFIT by default
-        m_style &= ~GR_FITGRAPHIC;
-        m_style |= GR_SHRINKFIT;
+    if (m_style & GRAPHIC_FITGRAPHIC) ++dup_ct;
+    if (m_style & GRAPHIC_SHRINKFIT) ++dup_ct;
+    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use GRAPHIC_SHRINKFIT by default
+        m_style &= ~GRAPHIC_FITGRAPHIC;
+        m_style |= GRAPHIC_SHRINKFIT;
     }
 }

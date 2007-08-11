@@ -3,6 +3,7 @@
 Import('env')
 
 sources = [
+    'AlignmentFlags.cpp',
     'Base.cpp',
     'BrowseInfoWnd.cpp',
     'Button.cpp',

@@ -31,6 +31,7 @@
 #ifndef _GG_Font_h_
 #define _GG_Font_h_
 
+#include <GG/AlignmentFlags.h>
 #include <GG/Texture.h>
 
 #include <set>
@@ -46,6 +47,20 @@ namespace GG {
 
 /** returns a string of the form "<rgba r g b a>" from a Clr object with color channels r, b, g, a.*/
 GG_API std::string RgbaTag(const Clr& c);
+
+/** Text formatting flags. */
+GG_FLAG_TYPE(TextFormat);
+extern GG_API const TextFormat FORMAT_NONE;        ///< Default format selected.
+extern GG_API const TextFormat FORMAT_VCENTER;     ///< Centers text vertically.
+extern GG_API const TextFormat FORMAT_TOP;         ///< Top-justifies text.
+extern GG_API const TextFormat FORMAT_BOTTOM;      ///< Justifies the text to the bottom of the rectangle.
+extern GG_API const TextFormat FORMAT_CENTER;      ///< Centers text horizontally in the rectangle.
+extern GG_API const TextFormat FORMAT_LEFT;        ///< Aligns text to the left. 
+extern GG_API const TextFormat FORMAT_RIGHT;       ///< Aligns text to the right. 
+extern GG_API const TextFormat FORMAT_WORDBREAK;   ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
+extern GG_API const TextFormat FORMAT_LINEWRAP;    ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
+extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
+
 
 /** This class creates one or more 16-bpp OpenGL textures that contain rendered text from a requested font file at the 
     requested point size, including only the requested ranges of characters.  
@@ -87,7 +102,7 @@ GG_API std::string RgbaTag(const Clr& c);
     the Font code, it is possible to let Font know about other tags, in order for Font to render them invisible as it does 
     with the tags listed above.  See the static methods RegisterKnownTag(), RemoveKnownTag(), and ClearKnownTags() for details.
     It is not possible to remove the built-in tags using these methods.  If you wish not to use tags at all, call DetermineLines()
-    and RenderText() with the parameter format containing TF_IGNORETAGS, or include a \<pre\> tag at the beginning of the text
+    and RenderText() with the parameter format containing FORMAT_IGNORETAGS, or include a \<pre\> tag at the beginning of the text
     to be rendered.
    */
 class GG_API Font
@@ -174,7 +189,7 @@ public:
         bool        Empty() const; ///< returns true iff char_data has size 0
 
         std::vector<CharData> char_data;
-        Uint32                justification; ///< TF_LEFT, TF_CENTER, or TF_RIGHT; derived from text format flags and/or formatting tags in the text
+        Alignment             justification; ///< FORMAT_LEFT, FORMAT_CENTER, or FORMAT_RIGHT; derived from text format flags and/or formatting tags in the text
 
     private:
         friend class boost::serialization::access;
@@ -228,12 +243,12 @@ public:
     int               RenderGlyph(int x, int y, char c) const; ///< renders glyph for \a c and returns advance of glyph rendered
     int               RenderText(const Pt& pt, const std::string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
     int               RenderText(int x, int y, const std::string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
-    void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Uint32& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
-    void              RenderText(int x1, int y1, int x2, int y2, const std::string& text, Uint32& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
-    void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Uint32& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
-    void              RenderText(int x1, int y1, int x2, int y2, const std::string& text, Uint32& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
-    Pt                DetermineLines(const std::string& text, Uint32& format, int box_width, std::vector<LineData>& lines) const; ///< returns the maximum dimensions of the string in x and y
-    Pt                TextExtent(const std::string& text, Uint32 format = TF_NONE, int box_width = 0) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
+    void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
+    void              RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
+    void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
+    void              RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
+    Pt                DetermineLines(const std::string& text, Flags<TextFormat>& format, int box_width, std::vector<LineData>& lines) const; ///< returns the maximum dimensions of the string in x and y
+    Pt                TextExtent(const std::string& text, Flags<TextFormat> format = FORMAT_NONE, int box_width = 0) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
     //@}
 
     static void       RegisterKnownTag(const std::string& tag);   ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.

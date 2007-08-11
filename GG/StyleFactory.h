@@ -29,8 +29,9 @@
 #ifndef _GG_StyleFactory_h_
 #define _GG_StyleFactory_h_
 
-#include  <GG/Base.h>
-#include  <GG/Wnd.h>
+#include  <GG/Font.h>
+#include  <GG/MultiEdit.h>
+#include  <GG/StaticGraphic.h>
 
 
 namespace GG {
@@ -39,25 +40,20 @@ class Button;
 class ColorDlg;
 class DropDownList;
 class DynamicGraphic;
-class Edit;
 class FileDlg;
-class Font;
 class ListBox;
 class MenuBar;
-class MultiEdit;
 class RadioButtonGroup;
 class Scroll;
 class Slider;
 template <class T>
 class Spin;
 class StateButton;
-class StaticGraphic;
 class TabBar;
 class TabWnd;
 class TextControl;
 class Texture;
 class ThreeButtonDlg;
-class Wnd;
 
 /** Creates new dialogs and Controls.  This class can be used to create a look for the entire GUI by providing
     user-defined subclasses of the standard Controls.  A Control or dialog can then use the StyleFactory to create the
@@ -83,7 +79,7 @@ public:
 
     /** Returns a new GG StateButton. */
     virtual StateButton*       NewStateButton(int x, int y, int w, int h, const std::string& str,
-                                              const boost::shared_ptr<Font>& font, Uint32 text_fmt, Clr color,
+                                              const boost::shared_ptr<Font>& font, Flags<TextFormat> format, Clr color,
                                               Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                                               StateButtonStyle style = SBSTYLE_3D_XBOX, Flags<WndFlag> flags = CLICKABLE) const;
 
@@ -97,7 +93,7 @@ public:
     /** Returns a new GG DynamicGraphic. */
     virtual DynamicGraphic*    NewDynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height,
                                                  int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
-                                                 Uint32 style = 0, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>()) const;
+                                                 Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>()) const;
 
     /** Returns a new GG Edit. */
     virtual Edit*              NewEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
@@ -115,7 +111,7 @@ public:
 
     /** Returns a new GG MultiEdit. */
     virtual MultiEdit*         NewMultiEdit(int x, int y, int w, int h, const std::string& str,
-                                            const boost::shared_ptr<Font>& font, Clr color, Uint32 style = TF_LINEWRAP,
+                                            const boost::shared_ptr<Font>& font, Clr color, Flags<MultiEditStyle> style = MULTI_LINEWRAP,
                                             Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                                             Flags<WndFlag> flags = CLICKABLE) const;
 
@@ -140,7 +136,7 @@ public:
 
     /** Returns a new GG StaticGraphic. */
     virtual StaticGraphic*     NewStaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture,
-                                                Uint32 style = 0, Flags<WndFlag> flags = Flags<WndFlag>()) const;
+                                                Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()) const;
 
     /** Returns a new GG TabBar. */
     virtual TabBar*            NewTabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color,
@@ -150,11 +146,11 @@ public:
     /** Returns a new GG TextControl. */
     virtual TextControl*       NewTextControl(int x, int y, int w, int h, const std::string& str,
                                               const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK,
-                                              Uint32 text_fmt = 0, Flags<WndFlag> flags = Flags<WndFlag>()) const;
+                                              Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()) const;
 
     /** Returns a new GG TextControl whose size is exactly that required to hold its text. */
     virtual TextControl*       NewTextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font,
-                                              Clr color = CLR_BLACK, Uint32 text_fmt = 0,
+                                              Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE,
                                               Flags<WndFlag> flags = Flags<WndFlag>()) const;
     //@}
 
@@ -236,7 +232,7 @@ public:
 
     /** Returns a new StateButton, to be used in a TabBar. */
     virtual StateButton*       NewTabBarTab(int x, int y, int w, int h, const std::string& str,
-                                            const boost::shared_ptr<Font>& font, Uint32 text_fmt, Clr color,
+                                            const boost::shared_ptr<Font>& font, Flags<TextFormat> format, Clr color,
                                             Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                                             StateButtonStyle style = SBSTYLE_3D_TOP_ATTACHED_TAB, Flags<WndFlag> flags = CLICKABLE) const;
 

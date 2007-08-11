@@ -388,7 +388,7 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
     m_files_edit = style->NewEdit(0, 0, 1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
     m_filter_list = style->NewDropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
-    m_filter_list->SetStyle(LB_NOSORT);
+    m_filter_list->SetStyle(LIST_NOSORT);
 
     m_files_edit->Resize(Pt(100, m_font->Height() + 2 * 5));
     m_files_edit->MoveTo(Pt(0, 0));
@@ -398,8 +398,8 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
     const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
 
     m_curr_dir_text = style->NewTextControl(H_SPACING, V_SPACING / 2, "", m_font, m_text_color);
-    m_files_label = style->NewTextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, m_text_color, TF_RIGHT | TF_VCENTER);
-    m_file_types_label = style->NewTextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, m_text_color, TF_RIGHT | TF_VCENTER);
+    m_files_label = style->NewTextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, m_text_color, FORMAT_RIGHT | FORMAT_VCENTER);
+    m_file_types_label = style->NewTextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, m_text_color, FORMAT_RIGHT | FORMAT_VCENTER);
 
     m_ok_button = style->NewButton(0, 0, 1, 1, m_save ? m_save_str : m_open_str, m_font, m_color, m_text_color);
     m_cancel_button = style->NewButton(0, 0, 1, 1, m_cancel_str, m_font, m_color, m_text_color);
@@ -411,7 +411,7 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
 
     // finally, we can create the listbox with the files in it, sized to fill the available space
     m_files_list = style->NewListBox(0, 0, 1, 1, m_border_color);
-    m_files_list->SetStyle(LB_NOSORT | (multi ? 0 : LB_SINGLESEL));
+    m_files_list->SetStyle(LIST_NOSORT | (multi ? LIST_NONE : LIST_SINGLESEL));
 
     PlaceLabelsAndEdits(BUTTON_WIDTH, BUTTON_HEIGHT);
 }

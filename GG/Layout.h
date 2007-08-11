@@ -29,6 +29,7 @@
 #ifndef _GG_Layout_h_
 #define _GG_Layout_h_
 
+#include <GG/AlignmentFlags.h>
 #include <GG/Wnd.h>
 
 #include <boost/serialization/version.hpp>
@@ -93,7 +94,8 @@ public:
 
     int    Rows() const;                             ///< returns the number of rows in the layout
     int    Columns() const;                          ///< returns the number of columns in the layout
-    Uint32 ChildAlignment(Wnd* wnd) const;           ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
+    Flags<Alignment>
+           ChildAlignment(Wnd* wnd) const;           ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
     int    BorderMargin() const;                     ///< returns the number of pixels that the layout will leave between its edges and the windows it contains
     int    CellMargin() const;                       ///< returns the number of pixels the layout leaves between the edges of windows in adjacent cells
     double RowStretch(int row) const;                ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.
@@ -126,14 +128,14 @@ public:
     /** inserts \a w into the layout in the indicated cell, expanding the layout grid as necessary.  Note that \a row
         and \a column must not be negative, though this is not checked. \throw GG::Layout::AttemptedOverwrite Throws if
         there is already a Wnd in the given cell. */
-    void Add(Wnd* wnd, int row, int column, Uint32 alignment = 0);
+    void Add(Wnd* wnd, int row, int column, Flags<Alignment> alignment = ALIGN_NONE);
 
     /** inserts \a w into the layout, covering the indicated cell(s), expanding the layout grid as necessary.  The
         num_rows and num_columns indicate how many rows and columns \a w covers, respectively.  So Add(foo, 1, 2, 2, 3)
         covers cells (1, 2) through (2, 4), inclusive.  Note that \a row, and \a column must be nonnegative and \a
         num_rows and \a num_columns must be positive, though this is not checked. \throw GG::Layout::AttemptedOverwrite
         Throws if there is already a Wnd in one of the given cells. */
-    void Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Uint32 alignment = 0);
+    void Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Flags<Alignment> alignment = ALIGN_NONE);
 
     /** removes \a w from the layout, recalculating the layout as needed.  Note that this causes the layout to
         relinquish responsibility for \a wnd's memory management. */
@@ -148,7 +150,7 @@ public:
     void ResizeLayout(int rows, int columns);
 
     /** sets the aligment of child \a wnd to \a alignment.  If no such child exists, no action is taken. */
-    void SetChildAlignment(Wnd* wnd, Uint32 alignment);
+    void SetChildAlignment(Wnd* wnd, Flags<Alignment> alignment);
 
     /** sets the number of pixels that the layout will leave between its edges and the windows it contains */
     void SetBorderMargin(int margin);
@@ -225,15 +227,15 @@ private:
     struct GG_API WndPosition
     {
         WndPosition();
-        WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Uint32 alignment_, const Pt& original_ul_, const Pt& original_size_);
+        WndPosition(int first_row_, int first_column_, int last_row_, int last_column_, Flags<Alignment> alignment_, const Pt& original_ul_, const Pt& original_size_);
 
-        int    first_row;
-        int    first_column;
-        int    last_row;
-        int    last_column;
-        Uint32 alignment;
-        Pt     original_ul;
-        Pt     original_size;
+        int              first_row;
+        int              first_column;
+        int              last_row;
+        int              last_column;
+        Flags<Alignment> alignment;
+        Pt               original_ul;
+        Pt               original_size;
 
     private:
         friend class boost::serialization::access;
@@ -244,7 +246,7 @@ private:
     double TotalStretch(const std::vector<RowColParams>& params_vec) const;
     int    TotalMinWidth() const;
     int    TotalMinHeight() const;
-    void   ValidateAlignment(Uint32& alignment);
+    void   ValidateAlignment(Flags<Alignment>& alignment);
     void   RedoLayout();
     void   ChildSizeOrMinSizeOrMaxSizeChanged();
 

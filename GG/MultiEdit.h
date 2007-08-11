@@ -36,34 +36,43 @@ namespace GG {
 
 class Scroll;
 
+/** The styles of display and interaction for a MultiEdit. */
+GG_FLAG_TYPE(MultiEditStyle);
+extern GG_API const MultiEditStyle MULTI_NONE;             ///< Default style selected.
+extern GG_API const MultiEditStyle MULTI_WORDBREAK;        ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
+extern GG_API const MultiEditStyle MULTI_LINEWRAP;         ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
+extern GG_API const MultiEditStyle MULTI_VCENTER;          ///< Verrtically centers text. 
+extern GG_API const MultiEditStyle MULTI_TOP;              ///< Aligns text to the top. 
+extern GG_API const MultiEditStyle MULTI_BOTTOM;           ///< Aligns text to the bottom. 
+extern GG_API const MultiEditStyle MULTI_CENTER;           ///< Centers text. 
+extern GG_API const MultiEditStyle MULTI_LEFT;             ///< Aligns text to the left. 
+extern GG_API const MultiEditStyle MULTI_RIGHT;            ///< Aligns text to the right. 
+extern GG_API const MultiEditStyle MULTI_READ_ONLY;        ///< The control is not user-interactive, only used to display text.  Text can still be programmatically altered and selected.
+extern GG_API const MultiEditStyle MULTI_TERMINAL_STYLE;   ///< The text in the control is displayed so that the bottom is visible, instead of the top.
+extern GG_API const MultiEditStyle MULTI_INTEGRAL_HEIGHT;  ///< The height of the control will always be a multiple of the height of one row (fractions rounded down).
+extern GG_API const MultiEditStyle MULTI_NO_VSCROLL;       ///< Vertical scrolling is not available, and there is no vertical scroll bar.
+extern GG_API const MultiEditStyle MULTI_NO_HSCROLL;       ///< Horizontal scrolling is not available, and there is no horizontal scroll bar.
+extern GG_API const Flags<MultiEditStyle> MULTI_NO_SCROLL; ///< Scrolls are not used for this control.
+
+
 /** This is a multi-line text input and display control.  MultiEdit is designed to be used as a basic text-input control
     for text longer than one line, or to display large amounts of formatted or unformatted text.  MultiEdit supports
-    text formatting tags.  See GG::Font for details.  Several style flags are available.  If the TERMINAL_STYLE flag is
-    in use, rows that exceed the history limit will be removed from the beginning of the text; otherwise, they are
-    removed from the end.  If either TF_LINEWRAP of TF_WORDBREAK are in use, NO_HSCROLL must be in use as well.
-    TF_VCENTER is not an allowed style; if it is specified, TF_TOP will be used in its place.  The justification
-    introduced by text formatting tags is very different from that introduced by the TF_* styles.  The former justifies
-    lines within the space taken up by the text.  The latter justifies the entire block of text within the client area
-    of the control.  So if you specify TF_LEFT and use \<right> formatting tags on the entire text, the text will appear
-    to be right-justified, but you will probably only see the extreme left of the text area without scrolling.  If none
-    of the no-scroll style flags are in use, the scrolls are created and destroyed automatically, as needed. */
+    text formatting tags.  See GG::Font for details.  Several style flags are available.  If the MULTI_TERMINAL_STYLE
+    flag is in use, rows that exceed the history limit will be removed from the beginning of the text; otherwise, they
+    are removed from the end.  If either MULTI_LINEWRAP of MULTI_WORDBREAK are in use, MULTI_NO_HSCROLL must be in use
+    as well.  MULTI_VCENTER is not an allowed style; if it is specified, MULTI_TOP will be used in its place.  The
+    justification introduced by text formatting tags is very different from that introduced by the TF_* styles.  The
+    former justifies lines within the space taken up by the text.  The latter justifies the entire block of text within
+    the client area of the control.  So if you specify MULTI_LEFT and use \<right> formatting tags on the entire text,
+    the text will appear to be right-justified, but you will probably only see the extreme left of the text area without
+    scrolling.  If none of the no-scroll style flags are in use, the scrolls are created and destroyed automatically, as
+    needed. */
 class GG_API MultiEdit : public Edit
 {
 public:
-    /** the styles of display and interaction for a MultiEdit.  The TF_WORDBREAK, TF_LINEWRAP, TF_LEFT, TF_CENTER, and 
-        TF_RIGHT GG::TextFormat flags also apply.*/
-    enum Styles {
-        READ_ONLY =       1 << 10, ///< the control is not user-interactive, only used to display text.  Text can still be programmatically altered and selected.
-        TERMINAL_STYLE =  1 << 11, ///< the text in the control is displayed so that the bottom is visible, instead of the top
-        INTEGRAL_HEIGHT = 1 << 12, ///< the height of the control will always be a multiple of the height of one row (fractions rounded down)
-        NO_VSCROLL =      1 << 13, ///< vertical scrolling is not available, and there is no vertical scroll bar
-        NO_HSCROLL =      1 << 14, ///< horizontal scrolling is not available, and there is no horizontal scroll bar
-        NO_SCROLL = NO_VSCROLL | NO_HSCROLL ///< scrolls are not used for this control
-    };
-
     /** \name Structors */ //@{
     MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
-              Uint32 style = TF_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
+              Flags<MultiEditStyle> style = MULTI_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
               Flags<WndFlag> flags = CLICKABLE); ///< ctor
     virtual ~MultiEdit(); ///< dtor
     //@}
@@ -71,6 +80,8 @@ public:
     /** \name Accessors */ //@{
     virtual Pt MinUsableSize() const;
     virtual Pt ClientLowerRight() const;
+
+    Flags<MultiEditStyle> Style() const; ///< returns the style flags for this MultiEdit to \a style
 
     /** returns the maximum number of lines of text that the control keeps. This number includes the lines that are 
         visible in the control.  A value <= 0 indicates that there is no limit.*/
@@ -89,7 +100,7 @@ public:
     virtual void   SelectAll();
     virtual void   SetText(const std::string& str);
 
-    void           SetStyle(Uint32 style); ///< sets the style flags for this MultiEdit to \a style
+    void           SetStyle(Flags<MultiEditStyle> style); ///< sets the style flags for this MultiEdit to \a style
 
     /** sets the maximum number of rows of text that the control will keep */
     void           SetMaxLinesOfHistory(int max);
@@ -145,11 +156,11 @@ private:
     void    VScrolled(int upper, int lower, int range_upper, int range_lower);
     void    HScrolled(int upper, int lower, int range_upper, int range_lower);
 
-    Uint32  m_style;
+    Flags<MultiEditStyle> m_style;
 
-    std::pair<int, int> m_cursor_begin; ///< the row and character index of the first character in the hilited selection
-    std::pair<int, int> m_cursor_end;   ///< the row and character index + 1 of the last character in the hilited selection
-                                        // if m_cursor_begin == m_cursor_end, the caret is draw at m_cursor_end
+    std::pair<int, int>  m_cursor_begin; ///< the row and character index of the first character in the hilited selection
+    std::pair<int, int>  m_cursor_end;   ///< the row and character index + 1 of the last character in the hilited selection
+                                         // if m_cursor_begin == m_cursor_end, the caret is draw at m_cursor_end
 
     Pt          m_contents_sz;          ///< the size of the entire text block in the control (not just the visible part)
 
@@ -165,19 +176,6 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
 };
-
-// define EnumMap and stream operators for MultiEdit::Style
-GG_ENUM_MAP_BEGIN(MultiEdit::Styles)
-    GG_ENUM_MAP_INSERT(MultiEdit::READ_ONLY)
-    GG_ENUM_MAP_INSERT(MultiEdit::TERMINAL_STYLE)
-    GG_ENUM_MAP_INSERT(MultiEdit::INTEGRAL_HEIGHT)
-    GG_ENUM_MAP_INSERT(MultiEdit::NO_VSCROLL)
-    GG_ENUM_MAP_INSERT(MultiEdit::NO_HSCROLL)
-    GG_ENUM_MAP_INSERT(MultiEdit::NO_SCROLL)
-GG_ENUM_MAP_END
-
-GG_ENUM_STREAM_IN(MultiEdit::Styles)
-GG_ENUM_STREAM_OUT(MultiEdit::Styles)
 
 } // namespace GG
 

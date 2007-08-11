@@ -149,7 +149,7 @@ namespace {
         std::vector<boost::shared_ptr<Font::TextElement> >& elements;
     };
 
-    void SetJustification(bool& last_line_of_curr_just, Font::LineData& line_data, Uint32 orig_just, Uint32 prev_just)
+    void SetJustification(bool& last_line_of_curr_just, Font::LineData& line_data, Alignment orig_just, Alignment prev_just)
     {
         if (last_line_of_curr_just) {
             line_data.justification = orig_just;
@@ -175,6 +175,42 @@ std::string GG::RgbaTag(const Clr& c)
     stream << "<rgba " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << " " << 
         static_cast<int>(c.b) << " " << static_cast<int>(c.a) << ">";
     return stream.str();
+}
+
+
+///////////////////////////////////////
+// TextFormat
+///////////////////////////////////////
+const TextFormat GG::FORMAT_NONE         (0);
+const TextFormat GG::FORMAT_VCENTER      (1 << 0);
+const TextFormat GG::FORMAT_TOP          (1 << 1);
+const TextFormat GG::FORMAT_BOTTOM       (1 << 2);
+const TextFormat GG::FORMAT_CENTER       (1 << 3);
+const TextFormat GG::FORMAT_LEFT         (1 << 4);
+const TextFormat GG::FORMAT_RIGHT        (1 << 5);
+const TextFormat GG::FORMAT_WORDBREAK    (1 << 6);
+const TextFormat GG::FORMAT_LINEWRAP     (1 << 7);
+const TextFormat GG::FORMAT_IGNORETAGS   (1 << 8);
+
+GG_FLAGSPEC_IMPL(TextFormat);
+
+namespace {
+    bool RegisterTextFormats()
+    {
+        FlagSpec<TextFormat>& spec = FlagSpec<TextFormat>::instance();
+        spec.insert(FORMAT_NONE, "FORMAT_NONE", true);
+        spec.insert(FORMAT_VCENTER, "FORMAT_VCENTER", true);
+        spec.insert(FORMAT_TOP, "FORMAT_TOP", true);
+        spec.insert(FORMAT_BOTTOM, "FORMAT_BOTTOM", true);
+        spec.insert(FORMAT_CENTER, "FORMAT_CENTER", true);
+        spec.insert(FORMAT_LEFT, "FORMAT_LEFT", true);
+        spec.insert(FORMAT_RIGHT, "FORMAT_RIGHT", true);
+        spec.insert(FORMAT_WORDBREAK, "FORMAT_WORDBREAK", true);
+        spec.insert(FORMAT_LINEWRAP, "FORMAT_LINEWRAP", true);
+        spec.insert(FORMAT_IGNORETAGS, "FORMAT_IGNORETAGS", true);
+        return true;
+    }
+    bool dummy = RegisterTextFormats();
 }
 
 
@@ -243,7 +279,7 @@ int Font::FormattingTag::OriginalStringChars() const
 // class GG::Font::LineData
 ///////////////////////////////////////
 Font::LineData::LineData() :
-    justification(TF_CENTER)
+    justification(ALIGN_CENTER)
 {
 }
 
@@ -433,13 +469,13 @@ int Font::RenderText(int x, int y, const std::string& text) const
     return x - orig_x;
 }
 
-void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Uint32& format, const std::vector<LineData>* line_data/* = 0*/,
+void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data/* = 0*/,
                       RenderState* render_state/* = 0*/) const
 {
     RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state);
 }
 
-void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Uint32& format, const std::vector<LineData>* line_data/* = 0*/,
+void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data/* = 0*/,
                       RenderState* render_state/* = 0*/) const
 {
     RenderState state;
@@ -456,13 +492,13 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, U
     RenderText(x1, y1, x2, y2, text, format, *line_data, *render_state, 0, 0, line_data->size(), line_data->back().char_data.size());
 }
 
-void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Uint32& format, const std::vector<LineData>& line_data, RenderState& render_state,
+void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state,
                       int begin_line, int begin_char, int end_line, int end_char) const
 {
     RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state, begin_line, begin_char, end_line, end_char);
 }
 
-void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Uint32& format, const std::vector<LineData>& line_data, RenderState& render_state,
+void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state,
                       int begin_line, int begin_char, int end_line, int end_char) const
 {
     double orig_color[4];
@@ -471,18 +507,18 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, U
     if (render_state.color_set)
         glColor(render_state.curr_color);
 
-    int y_origin = y1; // default value for TF_TOP
-    if (format & TF_BOTTOM)
+    int y_origin = y1; // default value for FORMAT_TOP
+    if (format & FORMAT_BOTTOM)
         y_origin = y2 - ((end_line - begin_line - 1) * m_lineskip + m_height);
-    else if (format & TF_VCENTER)
+    else if (format & FORMAT_VCENTER)
         y_origin = y1 + static_cast<int>(((y2 - y1) - ((end_line - begin_line - 1) * m_lineskip + m_height)) / 2.0);
 
     for (int i = begin_line; i < end_line; ++i) {
         const LineData& line = line_data[i];
-        int x_origin = x1; // default value for TF_LEFT
-        if (line.justification == TF_RIGHT)
+        int x_origin = x1; // default value for FORMAT_LEFT
+        if (line.justification == ALIGN_RIGHT)
             x_origin = x2 - line.Width();
-        else if (line.justification == TF_CENTER)
+        else if (line.justification == ALIGN_CENTER)
             x_origin = x1 + static_cast<int>(((x2 - x1) - line.Width()) / 2.0);
         int y = y_origin + (i - begin_line) * m_lineskip;
         int x = x_origin;
@@ -505,29 +541,29 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, U
     glColor4dv(orig_color);
 }
 
-Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, std::vector<LineData>& line_data) const
+Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int box_width, std::vector<LineData>& line_data) const
 {
     Pt retval;
 
     // correct any disagreements in the format flags
     int dup_ct = 0;   // duplication count
-    if (format & TF_LEFT) ++dup_ct;
-    if (format & TF_RIGHT) ++dup_ct;
-    if (format & TF_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use TF_LEFT by default
-        format &= ~(TF_RIGHT | TF_CENTER);
-        format |= TF_LEFT;
+    if (format & FORMAT_LEFT) ++dup_ct;
+    if (format & FORMAT_RIGHT) ++dup_ct;
+    if (format & FORMAT_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_LEFT by default
+        format &= ~(FORMAT_RIGHT | FORMAT_CENTER);
+        format |= FORMAT_LEFT;
     }
     dup_ct = 0;
-    if (format & TF_TOP) ++dup_ct;
-    if (format & TF_BOTTOM) ++dup_ct;
-    if (format & TF_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use TF_TOP by default
-        format &= ~(TF_BOTTOM | TF_VCENTER);
-        format |= TF_TOP;
+    if (format & FORMAT_TOP) ++dup_ct;
+    if (format & FORMAT_BOTTOM) ++dup_ct;
+    if (format & FORMAT_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_TOP by default
+        format &= ~(FORMAT_BOTTOM | FORMAT_VCENTER);
+        format |= FORMAT_TOP;
     }
-    if ((format & TF_WORDBREAK) && (format & TF_LINEWRAP))   // only one of these can be picked; TF_WORDBREAK overrides TF_LINEWRAP
-        format &= ~TF_LINEWRAP;
+    if ((format & FORMAT_WORDBREAK) && (format & FORMAT_LINEWRAP))   // only one of these can be picked; FORMAT_WORDBREAK overrides FORMAT_LINEWRAP
+        format &= ~FORMAT_LINEWRAP;
 
 #if DEBUG_DETERMINELINES
     std::cout << "Font::DetermineLines(text=\"" << text << "\" format=" << format << " box_width=" << box_width << ")" << std::endl;
@@ -540,7 +576,7 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
     rule<> close_tag_p = str_p("</") >> +(anychar_p - '>') >> '>';
     rule<> open_tag_p = ch_p('<') >> +(anychar_p - '>') >> '>';
     rule<> text_p = +(anychar_p - (close_tag_p | open_tag_p | space_p));
-    if (format & TF_IGNORETAGS) {
+    if (format & FORMAT_IGNORETAGS) {
         text_p = +(anychar_p - space_p);
         rule<> lines_parser = *(text_p[HandleTextFunctor(text_elements)] |
                                 ws_p[HandleWhitespaceFunctor(text_elements)]);
@@ -597,8 +633,14 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
     if (!tab_width)
         tab_width = 8; // default tab width
     int tab_pixel_width = tab_width * m_space_width; // get the length of a tab stop
-    bool expand_tabs = format & TF_LEFT; // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
-    Uint32 orig_just = format & (TF_LEFT | TF_CENTER | TF_RIGHT); // original justification as comes from the format
+    bool expand_tabs = format & FORMAT_LEFT; // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
+    Alignment orig_just = ALIGN_NONE;
+    if (format & FORMAT_LEFT)
+        orig_just = ALIGN_LEFT;
+    if (format & FORMAT_CENTER)
+        orig_just = ALIGN_CENTER;
+    if (format & FORMAT_RIGHT)
+        orig_just = ALIGN_RIGHT;
     bool last_line_of_curr_just = false; // is this the last line of the current justification? (for instance when a </right> tag is encountered)
 
     line_data.clear();
@@ -625,7 +667,7 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
                         advance_position = x;
                     }
                     int advance = advance_position - x;
-                    if ((format & TF_LINEWRAP) && box_width < advance_position) { // if we're using linewrap and this space won't fit on this line,
+                    if ((format & FORMAT_LINEWRAP) && box_width < advance_position) { // if we're using linewrap and this space won't fit on this line,
                         if (!x && box_width < advance) {
                             // if the space is larger than the line and alone on the line, let the space overrun this
                             // line and then start a new one
@@ -647,7 +689,7 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
                 }
             }
         } else if (elem->Type() == TextElement::TEXT) {
-            if (format & TF_WORDBREAK) {
+            if (format & FORMAT_WORDBREAK) {
                 if (box_width < x + elem->Width() && x) { // if the text "word" overruns this line, and isn't alone on this line, move it down to the next line
                     line_data.push_back(LineData());
                     x = 0;
@@ -660,7 +702,7 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
                 }
             } else {
                 for (unsigned int j = 0; j < elem->text.size(); ++j) {
-                    if ((format & TF_LINEWRAP) && box_width < x + elem->widths[j] && x) { // if the char overruns this line, and isn't alone on this line, move it down to the next line
+                    if ((format & FORMAT_LINEWRAP) && box_width < x + elem->widths[j] && x) { // if the char overruns this line, and isn't alone on this line, move it down to the next line
                         line_data.push_back(LineData());
                         x = elem->widths[j];
                         line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + j, pending_formatting_tags));
@@ -675,18 +717,18 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
             }
         } else if (elem->Type() == TextElement::OPEN_TAG) {
             if (elem->text == "left")
-                line_data.back().justification = TF_LEFT;
+                line_data.back().justification = ALIGN_LEFT;
             else if (elem->text == "center")
-                line_data.back().justification = TF_CENTER;
+                line_data.back().justification = ALIGN_CENTER;
             else if (elem->text == "right")
-                line_data.back().justification = TF_RIGHT;
+                line_data.back().justification = ALIGN_RIGHT;
             else if (elem->text != "pre")
                 pending_formatting_tags.push_back(elem);
             last_line_of_curr_just = false;
         } else if (elem->Type() == TextElement::CLOSE_TAG) {
-            if ((elem->text == "left" && line_data.back().justification == TF_LEFT) ||
-                (elem->text == "center" && line_data.back().justification == TF_CENTER) ||
-                (elem->text == "right" && line_data.back().justification == TF_RIGHT))
+            if ((elem->text == "left" && line_data.back().justification == ALIGN_LEFT) ||
+                (elem->text == "center" && line_data.back().justification == ALIGN_CENTER) ||
+                (elem->text == "right" && line_data.back().justification == ALIGN_RIGHT))
                 last_line_of_curr_just = true;
             else if (elem->text != "pre")
                 pending_formatting_tags.push_back(elem);
@@ -738,7 +780,7 @@ Pt Font::DetermineLines(const std::string& text, Uint32& format, int box_width, 
     return retval;
 }
 
-Pt Font::TextExtent(const std::string& text, Uint32 format/* = TF_NONE*/, int box_width/* = 0*/) const
+Pt Font::TextExtent(const std::string& text, Flags<TextFormat> format/* = FORMAT_NONE*/, int box_width/* = 0*/) const
 {
     std::vector<LineData> lines;
     return DetermineLines(text, format, box_width ? box_width : 1 << 15, lines);

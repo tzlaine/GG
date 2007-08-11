@@ -79,7 +79,7 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd() :
 {}
 
 TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
-                                           Uint32 text_fmt/* = TF_LEFT | TF_WORDBREAK*/, int border_width/* = 2*/, int text_margin/* = 4*/) :
+                                           Flags<TextFormat> format/* = FORMAT_LEFT | FORMAT_WORDBREAK*/, int border_width/* = 2*/, int text_margin/* = 4*/) :
     BrowseInfoWnd(0, 0, w, 100),
     m_text_from_target(true),
     m_font(font),
@@ -87,7 +87,7 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>&
     m_border_color(border_color),
     m_border_width(border_width),
     m_preferred_width(w),
-    m_text_control(GetStyleFactory()->NewTextControl(0, 0, w, 1, "", m_font, text_color, text_fmt))
+    m_text_control(GetStyleFactory()->NewTextControl(0, 0, w, 1, "", m_font, text_color, format))
 {
     AttachChild(m_text_control);
     GridLayout();
@@ -126,9 +126,9 @@ Clr TextBoxBrowseInfoWnd::TextColor() const
     return m_text_control->TextColor();
 }
 
-Uint32 TextBoxBrowseInfoWnd::TextFormat() const
+Flags<TextFormat> TextBoxBrowseInfoWnd::GetTextFormat() const
 {
-    return m_text_control->TextFormat();
+    return m_text_control->GetTextFormat();
 }
 
 Clr TextBoxBrowseInfoWnd::BorderColor() const
@@ -190,7 +190,7 @@ void TextBoxBrowseInfoWnd::SetTextColor(Clr text_color)
     m_text_control->SetTextColor(text_color);
 }
 
-void TextBoxBrowseInfoWnd::SetTextFormat(Uint32 format)
+void TextBoxBrowseInfoWnd::SetTextFormat(Flags<TextFormat> format)
 {
     m_text_control->SetTextFormat(format);
 }

@@ -27,6 +27,9 @@
 #include <GG/DrawUtil.h>
 #include <GG/WndEditor.h>
 
+#include <boost/assign/list_of.hpp>
+
+
 using namespace GG;
 
 namespace {
@@ -38,10 +41,10 @@ namespace {
         TextControl* m_text_control;
     };
 
-    struct SetFormatAction : AttributeChangedAction<Uint32>
+    struct SetFormatAction : AttributeChangedAction<Flags<TextFormat> >
     {
         SetFormatAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const Uint32& format) {m_text_control->SetTextFormat(format);}
+        void operator()(const Flags<TextFormat>& format) {m_text_control->SetTextFormat(format);}
     private:
         TextControl* m_text_control;
     };
@@ -68,7 +71,7 @@ namespace {
 ////////////////////////////////////////////////
 TextControl::TextControl() :
     Control(),
-    m_format(0),
+    m_format(FORMAT_NONE),
     m_clip_text(false),
     m_set_min_size(false),
     m_fit_to_text(false),
@@ -76,9 +79,9 @@ TextControl::TextControl() :
 {}
 
 TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
-                         Uint32 text_fmt/* = 0*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
+                         Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
     Control(x, y, w, h, flags),
-    m_format(text_fmt),
+    m_format(format),
     m_text_color(color),
     m_clip_text(false),
     m_set_min_size(false),
@@ -90,10 +93,10 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     SetText(str);
 }
 
-TextControl::TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/,
-                         Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
+TextControl::TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
+                         Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
     Control(x, y, 0, 0, flags),
-    m_format(text_fmt),
+    m_format(format),
     m_text_color(color),
     m_clip_text(false),
     m_set_min_size(false),
@@ -112,7 +115,7 @@ Pt TextControl::MinUsableSize() const
         Pt();
 }
 
-Uint32 TextControl::TextFormat() const
+Flags<TextFormat> TextControl::GetTextFormat() const
 {
     return m_format;
 }
@@ -200,7 +203,7 @@ void TextControl::SizeMove(const Pt& ul, const Pt& lr)
     RecomputeTextBounds();
 }
 
-void TextControl::SetTextFormat(Uint32 format)
+void TextControl::SetTextFormat(Flags<TextFormat> format)
 {
     m_format = format;
     ValidateFormat();
@@ -270,12 +273,14 @@ void TextControl::DefineAttributes(WndEditor* editor)
     boost::shared_ptr<SetFontAction> set_font_action(new SetFontAction(this));
     editor->Attribute<boost::shared_ptr<Font> >("Font", m_font, set_font_action);
     boost::shared_ptr<SetFormatAction> set_format_action(new SetFormatAction(this));
-    editor->BeginFlags(m_format, set_format_action);
-    editor->FlagGroup("V. Alignment", TF_VCENTER, TF_BOTTOM);
-    editor->FlagGroup("H. Alignment", TF_CENTER, TF_RIGHT);
-    editor->Flag("Word-break", TF_WORDBREAK);
-    editor->Flag("Line-wrap", TF_LINEWRAP);
-    editor->Flag("Ignore Tags", TF_IGNORETAGS);
+    editor->BeginFlags<TextFormat>(m_format, set_format_action);
+    typedef std::vector<TextFormat> FlagVec;
+    using boost::assign::list_of;
+    editor->FlagGroup("V. Alignment", FlagVec() = list_of(FORMAT_TOP)(FORMAT_VCENTER)(FORMAT_BOTTOM));
+    editor->FlagGroup("H. Alignment", FlagVec() = list_of(FORMAT_LEFT)(FORMAT_CENTER)(FORMAT_RIGHT));
+    editor->Flag("Word-break", FORMAT_WORDBREAK);
+    editor->Flag("Line-wrap", FORMAT_LINEWRAP);
+    editor->Flag("Ignore Tags", FORMAT_IGNORETAGS);
     editor->EndFlags();
     editor->Attribute("Text Color", m_text_color);
     editor->Attribute("Clip Text", m_clip_text);
@@ -310,23 +315,23 @@ bool TextControl::DirtyLoad() const
 void TextControl::ValidateFormat()
 {
     int dup_ct = 0;   // duplication count
-    if (m_format & TF_LEFT) ++dup_ct;
-    if (m_format & TF_RIGHT) ++dup_ct;
-    if (m_format & TF_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use TF_CENTER by default
-        m_format &= ~(TF_RIGHT | TF_LEFT);
-        m_format |= TF_CENTER;
+    if (m_format & FORMAT_LEFT) ++dup_ct;
+    if (m_format & FORMAT_RIGHT) ++dup_ct;
+    if (m_format & FORMAT_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_CENTER by default
+        m_format &= ~(FORMAT_RIGHT | FORMAT_LEFT);
+        m_format |= FORMAT_CENTER;
     }
     dup_ct = 0;
-    if (m_format & TF_TOP) ++dup_ct;
-    if (m_format & TF_BOTTOM) ++dup_ct;
-    if (m_format & TF_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use TF_VCENTER by default
-        m_format &= ~(TF_TOP | TF_BOTTOM);
-        m_format |= TF_VCENTER;
+    if (m_format & FORMAT_TOP) ++dup_ct;
+    if (m_format & FORMAT_BOTTOM) ++dup_ct;
+    if (m_format & FORMAT_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_VCENTER by default
+        m_format &= ~(FORMAT_TOP | FORMAT_BOTTOM);
+        m_format |= FORMAT_VCENTER;
     }
-    if ((m_format & TF_WORDBREAK) && (m_format & TF_LINEWRAP))   // only one of these can be picked; TF_WORDBREAK overrides TF_LINEWRAP
-        m_format &= ~TF_LINEWRAP;
+    if ((m_format & FORMAT_WORDBREAK) && (m_format & FORMAT_LINEWRAP))   // only one of these can be picked; FORMAT_WORDBREAK overrides FORMAT_LINEWRAP
+        m_format &= ~FORMAT_LINEWRAP;
 }
 
 void TextControl::AdjustMinimumSize()
@@ -338,15 +343,15 @@ void TextControl::AdjustMinimumSize()
 void TextControl::RecomputeTextBounds()
 {
     Pt text_sz = TextLowerRight() - TextUpperLeft();
-    m_text_ul.y = 0; // default value for TF_TOP
-    if (m_format & TF_BOTTOM)
+    m_text_ul.y = 0; // default value for FORMAT_TOP
+    if (m_format & FORMAT_BOTTOM)
         m_text_ul.y = Size().y - text_sz.y;
-    else if (m_format & TF_VCENTER)
+    else if (m_format & FORMAT_VCENTER)
         m_text_ul.y = static_cast<int>((Size().y - text_sz.y) / 2.0);
-    m_text_ul.x = 0; // default for TF_LEFT
-    if (m_format & TF_RIGHT)
+    m_text_ul.x = 0; // default for FORMAT_LEFT
+    if (m_format & FORMAT_RIGHT)
         m_text_ul.x = Size().x - text_sz.x;
-    else if (m_format & TF_CENTER)
+    else if (m_format & FORMAT_CENTER)
         m_text_ul.x = static_cast<int>((Size().x - text_sz.x) / 2.0);
     m_text_lr = m_text_ul + text_sz;
 }

@@ -29,6 +29,7 @@
 #ifndef _GG_ListBox_h_
 #define _GG_ListBox_h_
 
+#include <GG/AlignmentFlags.h>
 #include <GG/Control.h>
 #include <GG/Timer.h>
 
@@ -43,6 +44,24 @@ class Font;
 class Scroll;
 class SubTexture;
 class WndEvent;
+
+/** Styles for ListBox controls. */
+GG_FLAG_TYPE(ListBoxStyle);
+extern GG_API const ListBoxStyle LIST_NONE;           ///< Default style selected.
+extern GG_API const ListBoxStyle LIST_VCENTER;        ///< Cells are aligned with the top of the list box control.
+extern GG_API const ListBoxStyle LIST_TOP;            ///< Cells are aligned with the top of the list box control. This is the default.
+extern GG_API const ListBoxStyle LIST_BOTTOM;         ///< Cells are aligned with the bottom of the list box control.
+extern GG_API const ListBoxStyle LIST_CENTER;         ///< Cells are center-aligned.
+extern GG_API const ListBoxStyle LIST_LEFT;           ///< Cells are left-aligned. This is the default.
+extern GG_API const ListBoxStyle LIST_RIGHT;          ///< Cells are right-aligned.
+extern GG_API const ListBoxStyle LIST_NOSORT;         ///< List items are not sorted. Items are sorted by default.  When used with drag-and-drop, this style allows arbitrary rearrangement of list elements by dragging.
+extern GG_API const ListBoxStyle LIST_SORTDESCENDING; ///< Items are sorted based on item text in ascending order. Ascending order is the default.
+extern GG_API const ListBoxStyle LIST_NOSEL;          ///< No selection, dragging, or dropping allowed.  This makes the list box effectively read-only.
+extern GG_API const ListBoxStyle LIST_SINGLESEL;      ///< Only one item at a time can be selected. By default, multiple items may be selected.
+extern GG_API const ListBoxStyle LIST_QUICKSEL;       ///< Each click toggles an item without affecting any others; ignored when used with LIST_SINGLESEL.
+extern GG_API const ListBoxStyle LIST_USERDELETE;     ///< Allows user to remove selected items by pressing the delete key.
+extern GG_API const ListBoxStyle LIST_BROWSEUPDATES;  ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
+
 
 /** a flexible control that can contain rows and columns of other controls, even other ListBoxes.  A ListBox consists of
     rows of controls, usually text or graphics.  Each row represents one item; rows can be added or removed, but not
@@ -61,7 +80,7 @@ class WndEvent;
     and Insert(Row*, int).
     <br>Note that drag-and-drop support is a key part of ListBox's functionality.  As such, special effort has been made
     to make its use as natural and flexible as possible.  This includes allowing arbitrary reordering of ListBox rows
-    when the LB_NOSORT is in effect, and includes the use of the DontAcceptDrop exception.  The DontAcceptDrop exception
+    when the LIST_NOSORT is in effect, and includes the use of the DontAcceptDrop exception.  The DontAcceptDrop exception
     can be thrown by any client of the ListBox in response to its DroppedSignal.  Such a throw will cause the drop to be
     cancelled, even though by the time a client responds to the DroppedSignal, the dropped row is already in place in
     the ListBox.  The exception to this is that the dropped row may be altered with a call to NormalizeRow() before the
@@ -193,7 +212,7 @@ public:
     Clr             HiliteColor() const;    ///< returns the color behind selected line items
 
     /** returns the style flags of the listbox \see GG::ListBoxStyle */
-    Uint32          Style() const;
+    Flags<ListBoxStyle> Style() const;
 
     const Row&      ColHeaders() const;     ///< returns the row containing the headings for the columns, if any.  If undefined, the returned heading Row will have size() 0.
     int             FirstRowShown() const;  ///< returns the index of the first row visible in the listbox
@@ -276,7 +295,7 @@ public:
     void           SetHiliteColor(Clr c);                 ///< sets the color behind selected line items
 
     /** sets the style flags for the ListBox to \a s. \see GG::ListBoxStyle */
-    void           SetStyle(Uint32 s);
+    void           SetStyle(Flags<ListBoxStyle> s);
 
     void           SetColHeaders(Row* r);                 ///< sets the row used as headings for the columns; this Row becomes property of the ListBox.
     void           RemoveColHeaders();                    ///< removes any columns headings set
@@ -400,7 +419,7 @@ private:
 
     std::vector<Row*> m_rows;           ///< line item data
 
-    int             m_first_row_shown;  ///< index of row at top of visible area (always 0 for LB_NOSCROLL)
+    int             m_first_row_shown;  ///< index of row at top of visible area (always 0 for LIST_NOSCROLL)
     int             m_first_col_shown;  ///< like above, but index of column at left
     std::vector<int>
                     m_col_widths;       ///< the width of each of the columns goes here
@@ -410,7 +429,8 @@ private:
 
     Clr             m_int_color;        ///< color painted into the client area of the control
     Clr             m_hilite_color;     ///< color behind selected line items
-    Uint32          m_style;            ///< composed of ListBoxStyles enums (see GUIBase.h)
+    Flags<ListBoxStyle>
+                    m_style;            ///< composed of ListBoxStyles enums (see GUIBase.h)
 
     Row*            m_header_row;       ///< row of header text/graphics
     bool            m_keep_col_widths;  ///< should we keep the column widths, once set?

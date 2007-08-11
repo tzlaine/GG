@@ -59,7 +59,7 @@ Button::Button() :
 
 Button::Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
                Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font, text_color, TF_NONE, flags),
+    TextControl(x, y, w, h, str, font, text_color, FORMAT_NONE, flags),
     m_state(BN_UNPRESSED)
 {
     m_color = color;
@@ -248,10 +248,10 @@ StateButton::StateButton() :
     m_style(SBSTYLE_3D_XBOX)
 {}
 
-StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
+StateButton::StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
                          Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          Flags<WndFlag> flags/* = CLICKABLE*/) :
-    TextControl(x, y, w, h, str, font, text_color, text_fmt, flags),
+    TextControl(x, y, w, h, str, font, text_color, format, flags),
     m_checked(false),
     m_int_color(interior),
     m_style(style)
@@ -402,35 +402,35 @@ void StateButton::RepositionButton()
         const int BN_H = m_button_lr.y - m_button_ul.y;
         int bn_x = m_button_ul.x;
         int bn_y = m_button_ul.y;
-        Uint32 format = TextFormat();
+        Flags<TextFormat> format = GetTextFormat();
         const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
-        if (format & TF_VCENTER)       // center button vertically
+        if (format & FORMAT_VCENTER)       // center button vertically
             bn_y = static_cast<int>((h - BN_H) / 2.0 + 0.5);
-        if (format & TF_TOP) {         // put button at top, text just below
+        if (format & FORMAT_TOP) {         // put button at top, text just below
             bn_y = 0;
             m_text_ul.y = BN_H;
         }
-        if (format & TF_BOTTOM) {      // put button at bottom, text just above
+        if (format & FORMAT_BOTTOM) {      // put button at bottom, text just above
             bn_y = (h - BN_H);
             m_text_ul.y = static_cast<int>(h - (BN_H * (1 + SPACING)) - ((GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5);
         }
 
-        if (format & TF_CENTER) {      // center button horizontally
-            if (format & TF_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                format |= TF_LEFT;     // so go to the default (TF_CENTER|TF_LEFT)
-                format &= ~TF_CENTER;
+        if (format & FORMAT_CENTER) {      // center button horizontally
+            if (format & FORMAT_VCENTER) { // if both the button and the text are to be centered, bad things happen
+                format |= FORMAT_LEFT;     // so go to the default (FORMAT_CENTER|FORMAT_LEFT)
+                format &= ~FORMAT_CENTER;
             } else {
                 bn_x = static_cast<int>((w - bn_x) / 2.0 - BN_W / 2.0 + 0.5);
             }
         }
-        if (format & TF_LEFT) {        // put button at left, text just to the right
+        if (format & FORMAT_LEFT) {        // put button at left, text just to the right
             bn_x = 0;
-            if (format & TF_VCENTER)
+            if (format & FORMAT_VCENTER)
                 m_text_ul.x = static_cast<int>(BN_W * (1 + SPACING) + 0.5);
         }
-        if (format & TF_RIGHT) {       // put button at right, text just to the left
+        if (format & FORMAT_RIGHT) {       // put button at right, text just to the left
             bn_x = (w - BN_W);
-            if (format & TF_VCENTER)
+            if (format & FORMAT_VCENTER)
                 m_text_ul.x = static_cast<int>(-BN_W * (1 + SPACING) + 0.5);
         }
         SetTextFormat(format);
@@ -654,11 +654,11 @@ void RadioButtonGroup::AddButton(StateButton* bn)
     InsertButton(m_button_slots.size(), bn);
 }
 
-void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+void RadioButtonGroup::AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
                                  Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                  StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
 {
-    InsertButton(m_button_slots.size(), text, font, text_fmt, color, text_color, interior, style);
+    InsertButton(m_button_slots.size(), text, font, format, color, text_color, interior, style);
 }
 
 void RadioButtonGroup::InsertButton(int index, StateButton* bn)
@@ -719,12 +719,12 @@ void RadioButtonGroup::InsertButton(int index, StateButton* bn)
         ButtonChangedSignal(m_checked_button);
 }
 
-void RadioButtonGroup::InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+void RadioButtonGroup::InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
                                     Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                     StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
 {
     assert(0 <= index && index <= static_cast<int>(m_button_slots.size()));
-    StateButton* button = GetStyleFactory()->NewStateButton(0, 0, 1, 1, text, font, text_fmt, color, text_color, interior, style);
+    StateButton* button = GetStyleFactory()->NewStateButton(0, 0, 1, 1, text, font, format, color, text_color, interior, style);
     button->Resize(button->MinUsableSize());
     InsertButton(index, button);
 }

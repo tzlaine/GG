@@ -240,8 +240,8 @@ void ControlsTestApp::Initialize()
     // needs to be handled to respond to changes to the StateButtons is the group's ButtonChangedSignal; the group
     // handles the click signals of its member radio buttons.
     GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10, 200, 25, GG::HORIZONTAL);
-    radio_button_group->AddButton("Plan 8", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
-    radio_button_group->AddButton("Plan 9", font, GG::TF_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
+    radio_button_group->AddButton("Plan 8", font, GG::FORMAT_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
+    radio_button_group->AddButton("Plan 9", font, GG::FORMAT_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
     layout->Add(radio_button_group, 1, 0);
 
     // A text control to display the result of clicking the radio buttons above.
@@ -255,7 +255,7 @@ void ControlsTestApp::Initialize()
         new GG::DropDownList(0, 0, 150, 25, 150, GG::CLR_GRAY);
     drop_down_list->SetInteriorColor(GG::CLR_GRAY);
     // Here we add the rows we want to appear in the DropDownList one at a time.
-    drop_down_list->SetStyle(GG::LB_NOSORT);
+    drop_down_list->SetStyle(GG::LIST_NOSORT);
     row = new GG::ListBox::Row();
     row->push_back(row->CreateControl("I always", font, GG::CLR_WHITE));
     drop_down_list->Insert(row);
@@ -303,7 +303,7 @@ void ControlsTestApp::Initialize()
 
     // A multi-line edit control.
     GG::MultiEdit* multi_edit =
-        new GG::MultiEdit(0, 0, 300, 200, "Edit me\ntoo.", font, GG::CLR_GRAY, GG::TF_LINEWRAP, GG::CLR_WHITE, GG::CLR_SHADOW);
+        new GG::MultiEdit(0, 0, 300, 200, "Edit me\ntoo.", font, GG::CLR_GRAY, GG::MULTI_LINEWRAP, GG::CLR_WHITE, GG::CLR_SHADOW);
     layout->Add(multi_edit, 3, 1);
 
     // A numerical value slider control.

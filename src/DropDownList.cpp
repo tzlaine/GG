@@ -98,7 +98,7 @@ DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, F
     m_current_item_idx(-1),
     m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))
 {
-    SetStyle(LB_SINGLESEL);
+    SetStyle(LIST_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
     Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + h + 2 * m_LB->CellMargin() + 2 * BORDER_THICK));
     m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
@@ -144,7 +144,7 @@ int DropDownList::DropHeight() const
     return m_LB->Height();
 }
 
-Uint32 DropDownList::Style() const
+Flags<ListBoxStyle> DropDownList::Style() const
 {
     return m_LB->Style();
 }
@@ -328,10 +328,10 @@ void DropDownList::SetDropHeight(int h)
     m_LB->Resize(Pt(Width(), h));
 }
 
-void DropDownList::SetStyle(Uint32 s)
+void DropDownList::SetStyle(Flags<ListBoxStyle> s)
 {
-    s &= ~(LB_NOSEL | LB_QUICKSEL | LB_USERDELETE | LB_BROWSEUPDATES);
-    s |= LB_SINGLESEL;
+    s &= ~(LIST_NOSEL | LIST_QUICKSEL | LIST_USERDELETE | LIST_BROWSEUPDATES);
+    s |= LIST_SINGLESEL;
     m_LB->SetStyle(s);
     m_current_item_idx = -1;
 }

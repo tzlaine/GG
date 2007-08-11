@@ -57,31 +57,31 @@ public:
     using Wnd::SetMinSize;
 
     /** \name Structors */ //@{
-    TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
+    TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Uint32 text_fmt = 0, Flags<WndFlag> flags = Flags<WndFlag>());
+    TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ //@{
-    virtual Pt     MinUsableSize() const;
+    virtual Pt        MinUsableSize() const;
 
     /** returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.) */
-    Uint32         TextFormat() const;
+    Flags<TextFormat> GetTextFormat() const;
 
     /** returns the text color (this may differ from the Control::Color() in some subclasses) */
-    Clr            TextColor() const;
+    Clr               TextColor() const;
 
     /** returns true iff the text control clips its text to its client area; by default this is not done */
-    bool           ClipText() const;
+    bool              ClipText() const;
 
     /** returns true iff the text control sets its MinSize() when the bounds of its text change because of a call to
         SetText() or SetTextFormat(); by default this is not done.  The minimum size of the control in each dimension
         will be the larger of the text size and the current MinSize(), if any has been set.  Note that this operates
         independently of fit-to-text behavior, which sets the window size, not its minimum size. */
-    bool           SetMinSize() const;
+    bool              SetMinSize() const;
 
     /** sets the value of \a t to the interpreted value of the control's text.
         If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
@@ -126,7 +126,7 @@ public:
     virtual void   SetText(const std::string& str);
     virtual void   SetText(const char* str);
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
-    void           SetTextFormat(Uint32 format); ///< sets the text format; ensures that the flags are sane
+    void           SetTextFormat(Flags<TextFormat> format); ///< sets the text format; ensures that the flags are sane
     void           SetTextColor(Clr color);      ///< sets the text color
     virtual void   SetColor(Clr c);              ///< just like Control::SetColor(), except that this one also adjusts the text color
     void           ClipText(bool b);             ///< enables/disables text clipping to the client area
@@ -165,7 +165,7 @@ private:
     void AdjustMinimumSize();
     void RecomputeTextBounds(); ///< recalculates m_text_ul and m_text_lr
 
-    Uint32                      m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
+    Flags<TextFormat>           m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
     Clr                         m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
     bool                        m_clip_text;
     bool                        m_set_min_size;

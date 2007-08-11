@@ -34,6 +34,8 @@
 #include <GG/WndEvent.h>
 #include <GG/WndEditor.h>
 
+#include <boost/assign/list_of.hpp>
+
 #include <cmath>
 #include <numeric>
 
@@ -59,10 +61,10 @@ namespace {
         const bool return_less;
     };
 
-    struct SetStyleAction : AttributeChangedAction<Uint32>
+    struct SetStyleAction : AttributeChangedAction<Flags<ListBoxStyle> >
     {
         SetStyleAction(ListBox* list_box) : m_list_box(list_box) {}
-        void operator()(const Uint32& style) {m_list_box->SetStyle(style);}
+        void operator()(const Flags<ListBoxStyle>& style) {m_list_box->SetStyle(style);}
     private:
         ListBox* m_list_box;
     };
@@ -75,6 +77,50 @@ namespace {
         ListBox* m_list_box;
     };
 }
+
+///////////////////////////////////////
+// ListBoxStyle
+///////////////////////////////////////
+const ListBoxStyle GG::LIST_NONE            (0);
+const ListBoxStyle GG::LIST_VCENTER         (1 << 0);
+const ListBoxStyle GG::LIST_TOP             (1 << 1);
+const ListBoxStyle GG::LIST_BOTTOM          (1 << 2);
+const ListBoxStyle GG::LIST_CENTER          (1 << 3);
+const ListBoxStyle GG::LIST_LEFT            (1 << 4);
+const ListBoxStyle GG::LIST_RIGHT           (1 << 5);
+const ListBoxStyle GG::LIST_NOSORT          (1 << 6);
+const ListBoxStyle GG::LIST_SORTDESCENDING  (1 << 7);
+const ListBoxStyle GG::LIST_NOSEL           (1 << 8);
+const ListBoxStyle GG::LIST_SINGLESEL       (1 << 9);
+const ListBoxStyle GG::LIST_QUICKSEL        (1 << 10);
+const ListBoxStyle GG::LIST_USERDELETE      (1 << 11);
+const ListBoxStyle GG::LIST_BROWSEUPDATES   (1 << 12);
+
+GG_FLAGSPEC_IMPL(ListBoxStyle);
+
+namespace {
+    bool RegisterListBoxStyles()
+    {
+        FlagSpec<ListBoxStyle>& spec = FlagSpec<ListBoxStyle>::instance();
+        spec.insert(LIST_NONE, "LIST_NONE", true);
+        spec.insert(LIST_VCENTER, "LIST_VCENTER", true);
+        spec.insert(LIST_TOP, "LIST_TOP", true);
+        spec.insert(LIST_BOTTOM, "LIST_BOTTOM", true);
+        spec.insert(LIST_CENTER, "LIST_CENTER", true);
+        spec.insert(LIST_LEFT, "LIST_LEFT", true);
+        spec.insert(LIST_RIGHT, "LIST_RIGHT", true);
+        spec.insert(LIST_NOSORT, "LIST_NOSORT", true);
+        spec.insert(LIST_SORTDESCENDING, "LIST_SORTDESCENDING", true);
+        spec.insert(LIST_NOSEL, "LIST_NOSEL", true);
+        spec.insert(LIST_SINGLESEL, "LIST_SINGLESEL", true);
+        spec.insert(LIST_QUICKSEL, "LIST_QUICKSEL", true);
+        spec.insert(LIST_USERDELETE, "LIST_USERDELETE", true);
+        spec.insert(LIST_BROWSEUPDATES, "LIST_BROWSEUPDATES", true);
+        return true;
+    }
+    bool dummy = RegisterListBoxStyles();
+}
+
 
 ////////////////////////////////////////////////
 // GG::ListBox::Row
@@ -148,7 +194,7 @@ Control* ListBox::Row::CreateControl(const std::string& str, const boost::shared
 
 Control* ListBox::Row::CreateControl(const SubTexture& st) const
 {
-    return new StaticGraphic(0, 0, st.Width(), st.Height(), st, GR_SHRINKFIT);
+    return new StaticGraphic(0, 0, st.Width(), st.Height(), st, GRAPHIC_SHRINKFIT);
 }
 
 void ListBox::Row::Render()
@@ -292,7 +338,7 @@ ListBox::ListBox() :
     m_first_row_shown(0),
     m_first_col_shown(0),
     m_cell_margin(2),
-    m_style(0),
+    m_style(LIST_NONE),
     m_header_row(0),
     m_keep_col_widths(false),
     m_clip_cells(false),
@@ -327,7 +373,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     m_cell_margin(2),
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
-    m_style(0),
+    m_style(LIST_NONE),
     m_header_row(new Row()),
     m_keep_col_widths(false),
     m_clip_cells(false),
@@ -404,7 +450,7 @@ Clr ListBox::HiliteColor() const
     return m_hilite_color;
 }
 
-Uint32 ListBox::Style() const
+Flags<ListBoxStyle> ListBox::Style() const
 {
     return m_style;
 }
@@ -654,9 +700,9 @@ void ListBox::KeyPress(Key key, Flags<ModKey> mod_keys)
             }
             break;
         case GGK_DELETE: // delete key
-            if (m_style & LB_USERDELETE) {
+            if (m_style & LIST_USERDELETE) {
                 std::set<int>::reverse_iterator r_it;
-                if (m_style & LB_NOSEL) {
+                if (m_style & LIST_NOSEL) {
                     if (m_caret != -1) {
                         Row* row = Erase(m_caret);
                         delete row;
@@ -873,9 +919,9 @@ void ListBox::Clear()
 
 void ListBox::SelectRow(int n)
 {
-    if (!(m_style & LB_NOSEL) && n >= 0 && n < static_cast<int>(m_rows.size()) && m_selections.find(n) == m_selections.end()) {
+    if (!(m_style & LIST_NOSEL) && n >= 0 && n < static_cast<int>(m_rows.size()) && m_selections.find(n) == m_selections.end()) {
         bool emit_signal = m_selections.find(n) == m_selections.end();
-        if (m_style & LB_SINGLESEL)
+        if (m_style & LIST_SINGLESEL)
             m_selections.clear();
         m_selections.insert(n);
         if (emit_signal)
@@ -957,14 +1003,14 @@ void ListBox::SetHiliteColor(Clr c)
     m_hilite_color = c;
 }
 
-void ListBox::SetStyle(Uint32 s)
+void ListBox::SetStyle(Flags<ListBoxStyle> s)
 {
     // if we're going from an unsorted style to a sorted one, do the sorting now
-    if (m_style & LB_NOSORT) {
-        if (!(s & LB_NOSORT))
-            std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_col, !(s & LB_SORTDESCENDING)));
+    if (m_style & LIST_NOSORT) {
+        if (!(s & LIST_NOSORT))
+            std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_col, !(s & LIST_SORTDESCENDING)));
     } else { // if we're changing the sorting order of a sorted list, reverse the contents
-        if (static_cast<bool>(m_style & LB_SORTDESCENDING) != static_cast<bool>(s & LB_SORTDESCENDING))
+        if (static_cast<bool>(m_style & LIST_SORTDESCENDING) != static_cast<bool>(s & LIST_SORTDESCENDING))
             std::reverse(m_rows.begin(), m_rows.end());
     }
     m_style = s;
@@ -983,7 +1029,14 @@ void ListBox::SetColHeaders(Row* r)
             m_col_widths.resize(m_header_row->size(), (ClientSize().x - SCROLL_WIDTH) / m_header_row->size());
             // put the remainder in the last column, so the total width == ClientSize().x - SCROLL_WIDTH
             m_col_widths.back() += (ClientSize().x - SCROLL_WIDTH) % m_header_row->size();
-            m_col_alignments.resize(m_header_row->size(), Alignment(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+            Alignment alignment = ALIGN_NONE;
+            if (m_style & LIST_LEFT)
+                alignment = ALIGN_LEFT;
+            if (m_style & LIST_CENTER)
+                alignment = ALIGN_CENTER;
+            if (m_style & LIST_RIGHT)
+                alignment = ALIGN_RIGHT;
+            m_col_alignments.resize(m_header_row->size(), alignment);
         }
         NormalizeRow(m_header_row);
         m_header_row->MoveTo(Pt(0, -m_header_row->Height()));
@@ -1009,7 +1062,14 @@ void ListBox::SetNumCols(int n)
         } else {
             m_col_widths.resize(n, ClientSize().x / n);
             m_col_widths.back() += ClientSize().x % n;
-            m_col_alignments.resize(n, Alignment(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+            Alignment alignment = ALIGN_NONE;
+            if (m_style & LIST_LEFT)
+                alignment = ALIGN_LEFT;
+            if (m_style & LIST_CENTER)
+                alignment = ALIGN_CENTER;
+            if (m_style & LIST_RIGHT)
+                alignment = ALIGN_RIGHT;
+            m_col_alignments.resize(n, alignment);
         }
         if (m_sort_col <= n)
             m_sort_col = 0;
@@ -1022,8 +1082,8 @@ void ListBox::SetNumCols(int n)
 
 void ListBox::SetSortCol(int n)
 {
-    if (m_sort_col != n && !(m_style & LB_NOSORT))
-        std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(n, !(m_style & LB_SORTDESCENDING)));
+    if (m_sort_col != n && !(m_style & LIST_NOSORT))
+        std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(n, !(m_style & LIST_SORTDESCENDING)));
     m_sort_col = n;
 }
 
@@ -1095,16 +1155,18 @@ void ListBox::DefineAttributes(WndEditor* editor)
     editor->Attribute("Interior Color", m_int_color);
     editor->Attribute("Highlighting Color", m_hilite_color);
     boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
-    editor->BeginFlags(m_style, set_style_action);
-    editor->FlagGroup("V. Alignment", LB_VCENTER, LB_BOTTOM);
-    editor->FlagGroup("H. Alignment", LB_CENTER, LB_RIGHT);
-    editor->Flag("Do not Sort", LB_NOSORT);
-    editor->Flag("Sort Descending", LB_SORTDESCENDING);
-    editor->Flag("No Selections", LB_NOSEL);
-    editor->Flag("Single-Selection", LB_SINGLESEL);
-    editor->Flag("Quick-Selection", LB_QUICKSEL);
-    editor->Flag("User Deletions", LB_USERDELETE);
-    editor->Flag("Browse Updates", LB_BROWSEUPDATES);
+    editor->BeginFlags<ListBoxStyle>(m_style, set_style_action);
+    typedef std::vector<ListBoxStyle> FlagVec;
+    using boost::assign::list_of;
+    editor->FlagGroup("V. Alignment", FlagVec() = list_of(LIST_TOP)(LIST_VCENTER)(LIST_BOTTOM));
+    editor->FlagGroup("H. Alignment", FlagVec() = list_of(LIST_LEFT)(LIST_CENTER)(LIST_RIGHT));
+    editor->Flag("Do not Sort", LIST_NOSORT);
+    editor->Flag("Sort Descending", LIST_SORTDESCENDING);
+    editor->Flag("No Selections", LIST_NOSEL);
+    editor->Flag("Single-Selection", LIST_SINGLESEL);
+    editor->Flag("Quick-Selection", LIST_QUICKSEL);
+    editor->Flag("User Deletions", LIST_USERDELETE);
+    editor->Flag("Browse Updates", LIST_BROWSEUPDATES);
     editor->EndFlags();
     // TODO: handle setting header row
     editor->Attribute("Keep Column Widths", m_keep_col_widths);
@@ -1214,7 +1276,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
                 m_old_sel_row = -1;
             } else {
                 m_old_sel_row_selected = m_selections.find(m_old_sel_row) != m_selections.end();
-                if (!(m_style & LB_NOSEL) && !m_old_sel_row_selected)
+                if (!(m_style & LIST_NOSEL) && !m_old_sel_row_selected)
                     ClickAtRow(m_old_sel_row, mod_keys);
             }
             break;
@@ -1229,7 +1291,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
             if (m_old_sel_row >= 0 && InClient(pt)) {
                 int sel_row = RowUnderPt(pt);
                 if (sel_row == m_old_sel_row) {
-                    if (!(m_style & LB_NOSEL))
+                    if (!(m_style & LIST_NOSEL))
                         ClickAtRow(sel_row, mod_keys);
                     else
                         m_caret = sel_row;
@@ -1272,7 +1334,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
         }
 
         case WndEvent::MouseEnter: {
-            if (m_style & LB_BROWSEUPDATES) {
+            if (m_style & LIST_BROWSEUPDATES) {
                 int sel_row = RowUnderPt(pt);
                 if (sel_row >= static_cast<int>(m_rows.size()))
                     sel_row = -1;
@@ -1286,7 +1348,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
             break;
 
         case WndEvent::MouseLeave: {
-            if (m_style & LB_BROWSEUPDATES) {
+            if (m_style & LIST_BROWSEUPDATES) {
                 if (m_last_row_browsed != -1)
                     BrowsedSignal(m_last_row_browsed = -1);
             }
@@ -1339,7 +1401,14 @@ int ListBox::Insert(Row* row, int at, bool dropped)
         m_col_widths.resize(row->size(), (ClientSize().x - SCROLL_WIDTH) / row->size());
         // put the remainder in the last column, so the total width == ClientSize().x - SCROLL_WIDTH
         m_col_widths.back() += (ClientSize().x - SCROLL_WIDTH) % row->size();
-        m_col_alignments.resize(row->size(), Alignment(m_style & (LB_LEFT | LB_CENTER | LB_RIGHT)));
+        Alignment alignment = ALIGN_NONE;
+        if (m_style & LIST_LEFT)
+            alignment = ALIGN_LEFT;
+        if (m_style & LIST_CENTER)
+            alignment = ALIGN_CENTER;
+        if (m_style & LIST_RIGHT)
+            alignment = ALIGN_RIGHT;
+        m_col_alignments.resize(row->size(), alignment);
         if (!m_header_row->empty())
             NormalizeRow(m_header_row);
     }
@@ -1352,7 +1421,7 @@ int ListBox::Insert(Row* row, int at, bool dropped)
         retval = 0;
         m_rows.push_back(row);
     } else {
-        if (m_style & LB_NOSORT) {
+        if (m_style & LIST_NOSORT) {
             if (at < 0 || at > static_cast<int>(m_rows.size())) // if at is out of bounds, insert item at the end
                 at = m_rows.size();
             retval = at;
@@ -1360,7 +1429,7 @@ int ListBox::Insert(Row* row, int at, bool dropped)
             const std::string& row_str = (*row)[m_sort_col]->WindowText();
             retval = 0;
             while ((retval < static_cast<int>(m_rows.size())) &&
-                   ((m_style & LB_SORTDESCENDING) ? (row_str <= (*m_rows[retval])[m_sort_col]->WindowText()) :
+                   ((m_style & LIST_SORTDESCENDING) ? (row_str <= (*m_rows[retval])[m_sort_col]->WindowText()) :
                     (row_str >= (*m_rows[retval])[m_sort_col]->WindowText())))
                 ++retval;
         }
@@ -1490,27 +1559,27 @@ void ListBox::ConnectSignals()
 void ListBox::ValidateStyle()
 {
     int dup_ct = 0;   // duplication count
-    if (m_style & LB_LEFT) ++dup_ct;
-    if (m_style & LB_RIGHT) ++dup_ct;
-    if (m_style & LB_CENTER) ++dup_ct;
-    if (dup_ct != 1) {  // exactly one must be picked; when none or multiples are picked, use LB_LEFT by default
-        m_style &= ~(LB_RIGHT | LB_CENTER);
-        m_style |= LB_LEFT;
+    if (m_style & LIST_LEFT) ++dup_ct;
+    if (m_style & LIST_RIGHT) ++dup_ct;
+    if (m_style & LIST_CENTER) ++dup_ct;
+    if (dup_ct != 1) {  // exactly one must be picked; when none or multiples are picked, use LIST_LEFT by default
+        m_style &= ~(LIST_RIGHT | LIST_CENTER);
+        m_style |= LIST_LEFT;
     }
     dup_ct = 0;
-    if (m_style & LB_TOP) ++dup_ct;
-    if (m_style & LB_BOTTOM) ++dup_ct;
-    if (m_style & LB_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {  // exactly one must be picked; when none or multiples are picked, use LB_VCENTER by default
-        m_style &= ~(LB_TOP | LB_BOTTOM);
-        m_style |= LB_VCENTER;
+    if (m_style & LIST_TOP) ++dup_ct;
+    if (m_style & LIST_BOTTOM) ++dup_ct;
+    if (m_style & LIST_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {  // exactly one must be picked; when none or multiples are picked, use LIST_VCENTER by default
+        m_style &= ~(LIST_TOP | LIST_BOTTOM);
+        m_style |= LIST_VCENTER;
     }
     dup_ct = 0;
-    if (m_style & LB_NOSEL) ++dup_ct;
-    if (m_style & LB_SINGLESEL) ++dup_ct;
-    if (m_style & LB_QUICKSEL) ++dup_ct;
+    if (m_style & LIST_NOSEL) ++dup_ct;
+    if (m_style & LIST_SINGLESEL) ++dup_ct;
+    if (m_style & LIST_QUICKSEL) ++dup_ct;
     if (dup_ct > 1)  // at most one of these may be picked; when multiples are picked, disable all of them
-        m_style &= ~(LB_NOSEL | LB_SINGLESEL | LB_QUICKSEL);
+        m_style &= ~(LIST_NOSEL | LIST_SINGLESEL | LIST_QUICKSEL);
 }
 
 void ListBox::AdjustScrolls(bool adjust_for_resize)
@@ -1625,7 +1694,7 @@ void ListBox::HScrolled(int tab_low, int tab_high, int low, int high)
 void ListBox::ClickAtRow(int row, Flags<ModKey> mod_keys)
 {
     std::set<int> previous_selections = m_selections;
-    if (m_style & LB_SINGLESEL) { // no special keys are being used; just clear all previous selections, select this row, set the caret here
+    if (m_style & LIST_SINGLESEL) { // no special keys are being used; just clear all previous selections, select this row, set the caret here
         m_selections.clear();
         m_selections.insert(row);
         m_caret = row;
@@ -1650,7 +1719,7 @@ void ListBox::ClickAtRow(int row, Flags<ModKey> mod_keys)
             }
         } else if (mod_keys & MOD_KEY_SHIFT) { // shift key depressed
             bool erase = m_selections.find(m_caret) == m_selections.end();
-            if (!(m_style & LB_QUICKSEL))
+            if (!(m_style & LIST_QUICKSEL))
                 m_selections.clear();
             if (m_caret == -1) { // no previous caret exists; select this row, mark it as the caret
                 m_selections.insert(row);
@@ -1665,8 +1734,8 @@ void ListBox::ClickAtRow(int row, Flags<ModKey> mod_keys)
                         m_selections.insert(i);
                 }
             }
-        } else { // unless LB_QUICKSEL is used, this is treated just like LB_SINGLESEL above
-            if (m_style & LB_QUICKSEL) {
+        } else { // unless LIST_QUICKSEL is used, this is treated just like LIST_SINGLESEL above
+            if (m_style & LIST_QUICKSEL) {
                 if (m_old_sel_row_selected)
                     m_selections.erase(row);
                 else

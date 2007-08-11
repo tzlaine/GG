@@ -73,6 +73,7 @@ struct is_flag_type : boost::mpl::false_ {};
     class name                                                          \
     {                                                                   \
     public:                                                             \
+        name() : m_value(0) {}                                          \
         explicit name(Uint32 value) :                                   \
             m_value(value)                                              \
             {                                                           \
@@ -89,6 +90,11 @@ struct is_flag_type : boost::mpl::false_ {};
     private:                                                            \
         Uint32 m_value;                                                 \
         friend class Flags<name>;                                       \
+                                                                        \
+        friend class boost::serialization::access;                      \
+        template <class Archive>                                        \
+        void serialize(Archive& ar, const unsigned int version)         \
+            { ar & BOOST_SERIALIZATION_NVP(m_value); }                  \
     };                                                                  \
                                                                         \
     template <>                                                         \
@@ -445,6 +451,6 @@ operator~(FlagType flag)
 template <class FlagType>
 template <class Archive>
 void GG::Flags<FlagType>::serialize(Archive& ar, const unsigned int version)
-{ ar  & BOOST_SERIALIZATION_NVP(m_flags); }
+{ ar & BOOST_SERIALIZATION_NVP(m_flags); }
 
 #endif // _GG_Flags_h_

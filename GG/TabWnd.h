@@ -171,7 +171,7 @@ private:
     Button*                   m_left_button;
     Button*                   m_right_button;
     Layout*                   m_left_right_button_layout;
-    Uint32                    m_text_fmt;
+    Flags<TextFormat>         m_format;
     Clr                       m_text_color;
     TabBarStyle               m_style;
     int                       m_first_tab_shown;
@@ -203,7 +203,7 @@ void GG::TabBar::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_left_button)
         & BOOST_SERIALIZATION_NVP(m_right_button)
         & BOOST_SERIALIZATION_NVP(m_left_right_button_layout)
-        & BOOST_SERIALIZATION_NVP(m_text_fmt)
+        & BOOST_SERIALIZATION_NVP(m_format)
         & BOOST_SERIALIZATION_NVP(m_text_color)
         & BOOST_SERIALIZATION_NVP(m_style)
         & BOOST_SERIALIZATION_NVP(m_first_tab_shown);

@@ -95,7 +95,7 @@ WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
     m_list_box(new ListBox(0, 0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
     m_font(font),
     m_label_font(GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 4)),
-    m_current_flags(0)
+    m_current_flags_and_action()
 {
     Init();
 }
@@ -151,30 +151,12 @@ void WndEditor::Attribute(AttributeRowBase* row)
     Connect(row->ChangedSignal, &WndEditor::AttributeChangedSlot, this);
 }
 
-void WndEditor::BeginFlags(Uint32& flags,
-                           const boost::shared_ptr<AttributeChangedAction<Uint32> >& attribute_changed_action)
-{
-    m_current_flags = &flags;
-    m_current_flags_changed_actions = attribute_changed_action;
-    assert(m_current_flags);
-}
-
-
-void WndEditor::BeginFlags(Uint32& flags)
-{
-    m_current_flags = &flags;
-    assert(m_current_flags);
-}
-
 void WndEditor::EndFlags()
-{
-    m_current_flags = 0;
-    m_current_flags_changed_actions.reset();
-}
+{ m_current_flags_and_action = boost::any(); }
 
 void WndEditor::Init()
 {
-    m_list_box->SetStyle(LB_NOSORT | LB_NOSEL);
+    m_list_box->SetStyle(LIST_NOSORT | LIST_NOSEL);
     m_list_box->SetNumCols(2);
     m_list_box->SetColWidth(0, WND_EDITOR_TEXT_WIDTH - 2);
     m_list_box->SetColWidth(1, WND_EDITOR_WIDTH - WND_EDITOR_TEXT_WIDTH - 14 - 2);
@@ -283,8 +265,8 @@ AttributeRow<bool>::AttributeRow(const std::string& name, bool& value, const boo
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     m_radio_button_group = new RadioButtonGroup(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, HORIZONTAL);
-    m_radio_button_group->AddButton("True", font, TF_LEFT, CLR_GRAY);
-    m_radio_button_group->AddButton("False", font, TF_LEFT, CLR_GRAY);
+    m_radio_button_group->AddButton("True", font, FORMAT_LEFT, CLR_GRAY);
+    m_radio_button_group->AddButton("False", font, FORMAT_LEFT, CLR_GRAY);
     m_radio_button_group->SetCheck(!value);
     m_button_group_connection = Connect(m_radio_button_group->ButtonChangedSignal, &AttributeRow::SelectionChanged, this);
     push_back(m_radio_button_group);
@@ -378,7 +360,7 @@ ConstAttributeRow<Pt>::ConstAttributeRow(const std::string& name, const Pt& valu
     push_back(CreateControl(name, font, CLR_BLACK));
     std::stringstream value_stream;
     value_stream << "(" << m_value.x << ", " << m_value.y << ")";
-    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, TF_LEFT);
+    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, FORMAT_LEFT);
     push_back(m_value_text);
 }
 
@@ -399,7 +381,7 @@ ConstAttributeRow<Clr>::ConstAttributeRow(const std::string& name, const Clr& va
     push_back(CreateControl(name, font, CLR_BLACK));
     std::stringstream value_stream;
     value_stream << "(" << m_value.r << ", " << m_value.g << ", " << m_value.b << ", " << m_value.a << ")";
-    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, TF_LEFT);
+    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, FORMAT_LEFT);
     push_back(m_value_text);
 }
 

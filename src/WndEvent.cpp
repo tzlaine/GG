@@ -30,18 +30,18 @@ using namespace GG;
 ///////////////////////////////////////
 // ModKeys
 ///////////////////////////////////////
-ModKey GG::MOD_KEY_NONE         (0x0000);
-ModKey GG::MOD_KEY_LSHIFT       (0x0001);
-ModKey GG::MOD_KEY_RSHIFT       (0x0002);
-ModKey GG::MOD_KEY_LCTRL        (0x0040);
-ModKey GG::MOD_KEY_RCTRL        (0x0080);
-ModKey GG::MOD_KEY_LALT         (0x0100);
-ModKey GG::MOD_KEY_RALT         (0x0200);
-ModKey GG::MOD_KEY_LMETA        (0x0400);
-ModKey GG::MOD_KEY_RMETA        (0x0800);
-ModKey GG::MOD_KEY_NUM          (0x1000);
-ModKey GG::MOD_KEY_CAPS         (0x2000);
-ModKey GG::MOD_KEY_MODE         (0x4000);
+const ModKey GG::MOD_KEY_NONE         (0x0000);
+const ModKey GG::MOD_KEY_LSHIFT       (0x0001);
+const ModKey GG::MOD_KEY_RSHIFT       (0x0002);
+const ModKey GG::MOD_KEY_LCTRL        (0x0040);
+const ModKey GG::MOD_KEY_RCTRL        (0x0080);
+const ModKey GG::MOD_KEY_LALT         (0x0100);
+const ModKey GG::MOD_KEY_RALT         (0x0200);
+const ModKey GG::MOD_KEY_LMETA        (0x0400);
+const ModKey GG::MOD_KEY_RMETA        (0x0800);
+const ModKey GG::MOD_KEY_NUM          (0x1000);
+const ModKey GG::MOD_KEY_CAPS         (0x2000);
+const ModKey GG::MOD_KEY_MODE         (0x4000);
 
 namespace {
     bool RegisterModKeys()
@@ -64,10 +64,10 @@ namespace {
     bool dummy = RegisterModKeys();
 }
 
-Flags<ModKey> GG::MOD_KEY_CTRL  ((MOD_KEY_LCTRL | MOD_KEY_RCTRL));
-Flags<ModKey> GG::MOD_KEY_SHIFT ((MOD_KEY_LSHIFT | MOD_KEY_RSHIFT));
-Flags<ModKey> GG::MOD_KEY_ALT   ((MOD_KEY_LALT | MOD_KEY_RALT));
-Flags<ModKey> GG::MOD_KEY_META  ((MOD_KEY_LMETA | MOD_KEY_RMETA));
+const Flags<ModKey> GG::MOD_KEY_CTRL  ((MOD_KEY_LCTRL | MOD_KEY_RCTRL));
+const Flags<ModKey> GG::MOD_KEY_SHIFT ((MOD_KEY_LSHIFT | MOD_KEY_RSHIFT));
+const Flags<ModKey> GG::MOD_KEY_ALT   ((MOD_KEY_LALT | MOD_KEY_RALT));
+const Flags<ModKey> GG::MOD_KEY_META  ((MOD_KEY_LMETA | MOD_KEY_RMETA));
 
 GG_FLAGSPEC_IMPL(ModKey);
 

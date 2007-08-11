@@ -35,6 +35,20 @@
 
 namespace GG {
 
+/** Styles for StaticGraphic controls. */
+GG_FLAG_TYPE(GraphicStyle);
+extern GG_API const GraphicStyle GRAPHIC_NONE;        ///< Default style selected.
+extern GG_API const GraphicStyle GRAPHIC_VCENTER;     ///< Centers graphic vertically.
+extern GG_API const GraphicStyle GRAPHIC_TOP;         ///< Top-justifies graphic.
+extern GG_API const GraphicStyle GRAPHIC_BOTTOM;      ///< Justifies the graphic to the bottom of the rectangle.
+extern GG_API const GraphicStyle GRAPHIC_CENTER;      ///< Centers graphic horizontally in the rectangle.
+extern GG_API const GraphicStyle GRAPHIC_LEFT;        ///< Aligns graphic to the left.
+extern GG_API const GraphicStyle GRAPHIC_RIGHT;       ///< Aligns graphic to the right.
+extern GG_API const GraphicStyle GRAPHIC_FITGRAPHIC;  ///< Scales graphic to fit within the StaticGraphic's window dimensions.
+extern GG_API const GraphicStyle GRAPHIC_SHRINKFIT;   ///< Like GRAPHIC_FITGRAPHIC, but this one only scales the image if it otherwise would not fit in the window.
+extern GG_API const GraphicStyle GRAPHIC_PROPSCALE;   ///< If GRAPHIC_FITGRAPHIC or GRAPHIC_SHRINKFIT is used, this ensures scaling is done proportionally.
+
+
 /** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a
     StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the
     StaticGraphic's window area. \see StaticGraphicStyle*/
@@ -45,20 +59,20 @@ public:
     /** creates a StaticGraphic from a pre-existing Texture.
         \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
         a SubTexture. */
-    StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Uint32 style = 0, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing Texture.
-    StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Uint32 style = 0, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing SubTexture.
+    StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing Texture.
+    StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing SubTexture.
     //@}
 
     /** \name Accessors */ //@{
     /** returns the style of the StaticGraphic \see StaticGraphicStyle */
-    Uint32   Style() const;
+    Flags<GraphicStyle> Style() const;
     //@}
 
     /** \name Mutators */ //@{
     virtual void Render();
 
     /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
-    void  SetStyle(Uint32 style);
+    void SetStyle(Flags<GraphicStyle> style);
 
     virtual void DefineAttributes(WndEditor* editor);
     //@}
@@ -72,8 +86,8 @@ private:
     void     Init(const SubTexture& subtexture); ///< initializes a StaticGraphic from a SubTexture
     void     ValidateStyle();   ///< ensures that the style flags are consistent
 
-    SubTexture  m_graphic;
-    Uint32      m_style;        ///< position of texture wrt the window area
+    SubTexture          m_graphic;
+    Flags<GraphicStyle> m_style;        ///< position of texture wrt the window area
 
     friend class boost::serialization::access;
     template <class Archive>

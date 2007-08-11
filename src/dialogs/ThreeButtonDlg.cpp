@@ -181,7 +181,7 @@ void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>&
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
     TextControl* message_text = style->NewTextControl(0, 0, ClientWidth() - 2 * SPACING, Height(), msg, font, m_text_color,
-                                                      TF_CENTER | TF_VCENTER | TF_WORDBREAK);
+                                                      FORMAT_CENTER | FORMAT_VCENTER | FORMAT_WORDBREAK);
     message_text->SetMinSize(true);
     layout->Add(message_text, 0, 0);
     layout->SetRowStretch(0, 1);

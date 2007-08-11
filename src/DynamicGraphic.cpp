@@ -31,7 +31,10 @@
 #include <GG/Texture.h>
 #include <GG/WndEditor.h>
 
+#include <boost/assign/list_of.hpp>
+
 #include <cmath>
+
 
 using namespace GG;
 
@@ -54,13 +57,13 @@ DynamicGraphic::DynamicGraphic() :
     m_first_frame_time(-1),
     m_last_frame_time(-1),
     m_first_frame_idx(0),
-    m_style(0)
+    m_style(GRAPHIC_NONE)
 {
 }
 
 DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, 
-                               const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style/* = 0*/, int frames/* = -1*/, 
-                               Flags<WndFlag> flags/* = 0*/) :
+                               const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, int frames/* = -1*/, 
+                               Flags<WndFlag> flags/* = Flags<WndFlags>()*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
     m_frame_width(frame_width),
@@ -138,7 +141,7 @@ int DynamicGraphic::FrameHeight() const
     return m_frame_height;
 }
 
-Uint32 DynamicGraphic::Style() const
+Flags<GraphicStyle> DynamicGraphic::Style() const
 {
     return m_style;
 }
@@ -191,8 +194,8 @@ void DynamicGraphic::Render()
         Pt window_sz(lr - ul);
         Pt graphic_sz(m_frame_width, m_frame_height);
         Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
-        if (m_style & GR_FITGRAPHIC) {
-            if (m_style & GR_PROPSCALE) {
+        if (m_style & GRAPHIC_FITGRAPHIC) {
+            if (m_style & GRAPHIC_PROPSCALE) {
                 double scale_x = window_sz.x / double(graphic_sz.x),
                     scale_y = window_sz.y / double(graphic_sz.y);
                 double scale = (scale_x < scale_y) ? scale_x : scale_y;
@@ -201,8 +204,8 @@ void DynamicGraphic::Render()
             } else {
                 pt2 = window_sz;
             }
-        } else if (m_style & GR_SHRINKFIT) {
-            if (m_style & GR_PROPSCALE) {
+        } else if (m_style & GRAPHIC_SHRINKFIT) {
+            if (m_style & GRAPHIC_PROPSCALE) {
                 double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
                     scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
                 double scale = (scale_x < scale_y) ? scale_x : scale_y;
@@ -214,21 +217,21 @@ void DynamicGraphic::Render()
         }
 
         int shift = 0;
-        if (m_style & GR_LEFT) {
+        if (m_style & GRAPHIC_LEFT) {
             shift = ul.x;
-        } else if (m_style & GR_CENTER) {
+        } else if (m_style & GRAPHIC_CENTER) {
             shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
-        } else { // m_style & GR_RIGHT
+        } else { // m_style & GRAPHIC_RIGHT
             shift = lr.x - (pt2.x - pt1.x);
         }
         pt1.x += shift;
         pt2.x += shift;
 
-        if (m_style & GR_TOP) {
+        if (m_style & GRAPHIC_TOP) {
             shift = ul.y;
-        } else if (m_style & GR_VCENTER) {
+        } else if (m_style & GRAPHIC_VCENTER) {
             shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
-        } else { // m_style & GR_BOTTOM
+        } else { // m_style & GRAPHIC_BOTTOM
             shift = lr.y - (pt2.y - pt1.y);
         }
         pt1.y += shift;
@@ -428,7 +431,7 @@ void DynamicGraphic::SetEndFrame(int idx)
         SetFrameIndex(m_last_frame_idx);
 }
 
-void DynamicGraphic::SetStyle(Uint32 style)
+void DynamicGraphic::SetStyle(Flags<GraphicStyle> style)
 {
     m_style = style;
     ValidateStyle();
@@ -448,11 +451,13 @@ void DynamicGraphic::DefineAttributes(WndEditor* editor)
     editor->Attribute("Playing", m_playing);
     editor->Attribute("Looping", m_looping);
     editor->BeginFlags(m_style);
-    editor->FlagGroup("V. Alignment", GR_VCENTER, GR_BOTTOM);
-    editor->FlagGroup("H. Alignment", GR_CENTER, GR_RIGHT);
-    editor->Flag("Fit Graphic to Size", GR_FITGRAPHIC);
-    editor->Flag("Shrink-to-Fit", GR_SHRINKFIT);
-    editor->Flag("Proportional Scaling", GR_PROPSCALE);
+    typedef std::vector<GraphicStyle> FlagVec;
+    using boost::assign::list_of;
+    editor->FlagGroup("V. Alignment", FlagVec() = list_of(GRAPHIC_TOP)(GRAPHIC_VCENTER)(GRAPHIC_BOTTOM));
+    editor->FlagGroup("H. Alignment", FlagVec() = list_of(GRAPHIC_LEFT)(GRAPHIC_CENTER)(GRAPHIC_RIGHT));
+    editor->Flag("Fit Graphic to Size", GRAPHIC_FITGRAPHIC);
+    editor->Flag("Shrink-to-Fit", GRAPHIC_SHRINKFIT);
+    editor->Flag("Proportional Scaling", GRAPHIC_PROPSCALE);
     editor->EndFlags();
 }
 
@@ -491,26 +496,26 @@ int DynamicGraphic::LastFrameTime() const
 void DynamicGraphic::ValidateStyle()
 {
     int dup_ct = 0;   // duplication count
-    if (m_style & GR_LEFT) ++dup_ct;
-    if (m_style & GR_RIGHT) ++dup_ct;
-    if (m_style & GR_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GR_CENTER by default
-        m_style &= ~(GR_RIGHT | GR_LEFT);
-        m_style |= GR_CENTER;
+    if (m_style & GRAPHIC_LEFT) ++dup_ct;
+    if (m_style & GRAPHIC_RIGHT) ++dup_ct;
+    if (m_style & GRAPHIC_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GRAPHIC_CENTER by default
+        m_style &= ~(GRAPHIC_RIGHT | GRAPHIC_LEFT);
+        m_style |= GRAPHIC_CENTER;
     }
     dup_ct = 0;
-    if (m_style & GR_TOP) ++dup_ct;
-    if (m_style & GR_BOTTOM) ++dup_ct;
-    if (m_style & GR_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GR_VCENTER by default
-        m_style &= ~(GR_TOP | GR_BOTTOM);
-        m_style |= GR_VCENTER;
+    if (m_style & GRAPHIC_TOP) ++dup_ct;
+    if (m_style & GRAPHIC_BOTTOM) ++dup_ct;
+    if (m_style & GRAPHIC_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use GRAPHIC_VCENTER by default
+        m_style &= ~(GRAPHIC_TOP | GRAPHIC_BOTTOM);
+        m_style |= GRAPHIC_VCENTER;
     }
     dup_ct = 0;
-    if (m_style & GR_FITGRAPHIC) ++dup_ct;
-    if (m_style & GR_SHRINKFIT) ++dup_ct;
-    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use GR_SHRINKFIT by default
-        m_style &= ~GR_FITGRAPHIC;
-        m_style |= GR_SHRINKFIT;
+    if (m_style & GRAPHIC_FITGRAPHIC) ++dup_ct;
+    if (m_style & GRAPHIC_SHRINKFIT) ++dup_ct;
+    if (dup_ct > 1) {   // mo more than one may be picked; when both are picked, use GRAPHIC_SHRINKFIT by default
+        m_style &= ~GRAPHIC_FITGRAPHIC;
+        m_style |= GRAPHIC_SHRINKFIT;
     }
 }

@@ -57,10 +57,10 @@ Button* StyleFactory::NewButton(int x, int y, int w, int h, const std::string& s
 }
 
 StateButton* StyleFactory::NewStateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font,
-                                          Uint32 text_fmt, Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
+                                          Flags<TextFormat> format, Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                           StateButtonStyle style/* = SBSTYLE_3D_XBOX*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
 {
-    return new StateButton(x, y, w, h, str, font, text_fmt, color, text_color, interior, style, flags);
+    return new StateButton(x, y, w, h, str, font, format, color, text_color, interior, style, flags);
 }
 
 RadioButtonGroup* StyleFactory::NewRadioButtonGroup(int x, int y, int w, int h, Orientation orientation) const
@@ -76,7 +76,7 @@ DropDownList* StyleFactory::NewDropDownList(int x, int y, int w, int h, int drop
 
 DynamicGraphic* StyleFactory::NewDynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height,
                                                 int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
-                                                Uint32 style/* = 0*/, int frames/* = -1*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+                                                Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, int frames/* = -1*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 {
     return new DynamicGraphic(x, y, w, h, loop, frame_width, frame_height, margin, textures, style, frames, flags);
 }
@@ -101,7 +101,7 @@ MenuBar* StyleFactory::NewMenuBar(int x, int y, int w, const boost::shared_ptr<F
 }
 
 MultiEdit* StyleFactory::NewMultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font,
-                                      Clr color, Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/,
+                                      Clr color, Flags<MultiEditStyle> style/* = MULTI_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/,
                                       Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
 {
     return new MultiEdit(x, y, w, h, str, font, color, style, text_color, interior, flags);
@@ -135,22 +135,22 @@ Spin<double>* StyleFactory::NewDoubleSpin(int x, int y, int w, double value, dou
 }
 
 StaticGraphic* StyleFactory::NewStaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture,
-                                              Uint32 style/* = 0*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+                                              Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 {
     return new StaticGraphic(x, y, w, h, texture, style, flags);
 }
 
 TextControl* StyleFactory::NewTextControl(int x, int y, int w, int h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
-                                          Uint32 text_fmt/* = 0*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+                                          Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 {
-    return new TextControl(x, y, w, h, str, font, color, text_fmt, flags);
+    return new TextControl(x, y, w, h, str, font, color, format, flags);
 }
 
 TextControl* StyleFactory::NewTextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font,
-                                          Clr color/* = CLR_BLACK*/, Uint32 text_fmt/* = 0*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+                                          Clr color/* = CLR_BLACK*/, Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 {
-    return new TextControl(x, y, str, font, color, text_fmt, flags);
+    return new TextControl(x, y, str, font, color, format, flags);
 }
 
 TabBar* StyleFactory::NewTabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
@@ -267,11 +267,11 @@ Edit* StyleFactory::NewSpinEdit(int x, int y, int w, const std::string& str, con
 }
 
 StateButton* StyleFactory::NewTabBarTab(int x, int y, int w, int h, const std::string& str,
-                                        const boost::shared_ptr<Font>& font, Uint32 text_fmt, Clr color,
+                                        const boost::shared_ptr<Font>& font, Flags<TextFormat> format, Clr color,
                                         Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                         StateButtonStyle style/* = SBSTYLE_3D_TOP_ATTACHED_TAB*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
 {
-    StateButton* retval = NewStateButton(x, y, w, h, str, font, text_fmt, color, text_color, interior, style, flags);
+    StateButton* retval = NewStateButton(x, y, w, h, str, font, format, color, text_color, interior, style, flags);
     retval->Resize(retval->MinUsableSize() + Pt(12, 0));
     return retval;
 }

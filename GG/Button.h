@@ -139,8 +139,8 @@ GG_ENUM_STREAM_OUT(Button::ButtonState)
     centered, and the button will appear above or below the text.  Whenever there is not room to place the button and
     the text in the proper orientation because the entire control's size is too small, the button and text are
     positioned in their default spots (button on left, text on right, centered vertically).  If no text format flags are
-    provided, the default text orientation is TF_VCENTER | TF_LEFT.  Note that the bn_x and bn_y paramters are taken to
-    be relative to the control's x and y position.*/
+    provided, the default text orientation is FORMAT_VCENTER | FORMAT_LEFT.  Note that the bn_x and bn_y paramters are
+    taken to be relative to the control's x and y position.*/
 class GG_API StateButton : public TextControl
 {
 public:
@@ -153,7 +153,7 @@ public:
     //@}
 
     /** \name Structors */ //@{
-    StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Uint32 text_fmt, 
+    StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 Flags<WndFlag> flags = CLICKABLE); ///< Ctor
     //@}
@@ -283,7 +283,7 @@ public:
     void AddButton(StateButton* bn);
 
     /** creates a StateButton from the given parameters and adds it to the end of the group. */
-    void AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+    void AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
                    Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                    StateButtonStyle style = SBSTYLE_3D_RADIO);
 
@@ -292,7 +292,7 @@ public:
 
     /** Creates a StateButton from the given parameters and adds it to the group at position \a index.  \a index must be
         in the range [0, NumButtons()]. */
-    void InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Uint32 text_fmt,
+    void InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
                       Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                       StateButtonStyle style = SBSTYLE_3D_RADIO);
 

@@ -146,12 +146,12 @@ namespace {
 ///////////////////////////////////////
 // WndFlags
 ///////////////////////////////////////
-WndFlag GG::CLICKABLE          (1 << 0);
-WndFlag GG::REPEAT_BUTTON_DOWN (1 << 1);
-WndFlag GG::DRAGABLE           (1 << 2);
-WndFlag GG::RESIZABLE          (1 << 3);
-WndFlag GG::ONTOP              (1 << 4);
-WndFlag GG::MODAL              (1 << 5);
+const WndFlag GG::CLICKABLE          (1 << 0);
+const WndFlag GG::REPEAT_BUTTON_DOWN (1 << 1);
+const WndFlag GG::DRAGABLE           (1 << 2);
+const WndFlag GG::RESIZABLE          (1 << 3);
+const WndFlag GG::ONTOP              (1 << 4);
+const WndFlag GG::MODAL              (1 << 5);
 
 GG_FLAGSPEC_IMPL(WndFlag);
 
@@ -1032,7 +1032,6 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Attribute("Max Size", m_max_size);
     editor->Attribute("Clip Children", m_clip_children);
     editor->Attribute("Drag Drop Type", m_drag_drop_data_type);
-#if 0 // TODO: one day, in the distant future, when a decent editor exists for GG, fix this code.
     editor->BeginFlags(m_flags);
     editor->Flag("Clickable", CLICKABLE);
     editor->Flag("Dragable", DRAGABLE);
@@ -1040,7 +1039,6 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Flag("Ontop", ONTOP);
     editor->Flag("Modal", MODAL);
     editor->EndFlags();
-#endif
     // TODO: handle creation and modification of browse info modes
 }
 

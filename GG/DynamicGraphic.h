@@ -32,6 +32,7 @@
 #define _GG_DynamicGraphic_h_
 
 #include <GG/Control.h>
+#include <GG/StaticGraphic.h>
 
 
 namespace GG {
@@ -78,7 +79,7 @@ public:
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
         Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor allows
         specification of a frame size different from the size of the DynamicGraphic's size. */
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Uint32 style = 0, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>());
+    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ //@{
@@ -100,7 +101,7 @@ public:
     int     FrameHeight() const; ///< returns the original height of the control (and the height of the frame images)
 
     /** returns the style of the DynamicGraphic \see StaticGraphicStyle */
-    Uint32  Style() const;
+    Flags<GraphicStyle>  Style() const;
 
     mutable StoppedSignalType  StoppedSignal;  ///< the stopped signal object for this DynamicGraphic
     mutable EndFrameSignalType EndFrameSignal; ///< the end-frame signal object for this DynamicGraphic
@@ -155,7 +156,7 @@ public:
     void  SetEndFrame(int idx);
 
     /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
-    void  SetStyle(Uint32 style);
+    void  SetStyle(Flags<GraphicStyle> style);
 
     virtual void DefineAttributes(WndEditor* editor);
     //@}
@@ -216,7 +217,8 @@ private:
     int         m_first_frame_idx;   ///< the index of the first frame shown during playback, usually 0
     int         m_last_frame_idx;    ///< the index of the last frame shown during playback. usually m_frames - 1
 
-    Uint32      m_style;             ///< position of texture wrt the window area
+    Flags<GraphicStyle>
+                m_style;             ///< position of texture wrt the window area
 
     friend class boost::serialization::access;
     template <class Archive>

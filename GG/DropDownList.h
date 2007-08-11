@@ -80,7 +80,7 @@ public:
     int            DropHeight() const; ///< returns the height of the drop-down list
 
     /** returns the style flags of the list \see GG::ListBoxStyle */
-    Uint32         Style() const;
+    Flags<ListBoxStyle> Style() const;
 
     int            NumRows() const;          ///< returns the total number of items in the list
     int            NumCols() const;          ///< returns the total number of columns in each list item
@@ -90,8 +90,8 @@ public:
     int            SortCol() const;
 
     int            ColWidth(int n) const;     ///< returns the width of column \a n in pixels; not range-checked
-    Alignment      ColAlignment(int n) const; ///< returns the alignment of column \a n; must be LB_LEFT, LB_CENTER, or LB_RIGHT; not range-checked
-    Alignment      RowAlignment(int n) const; ///< returns the alignment of row \a n; must be LB_TOP, LB_VCENTER, or LB_BOTTOM; not range-checked
+    Alignment      ColAlignment(int n) const; ///< returns the alignment of column \a n; must be LIST_LEFT, LIST_CENTER, or LIST_RIGHT; not range-checked
+    Alignment      RowAlignment(int n) const; ///< returns the alignment of row \a n; must be LIST_TOP, LIST_VCENTER, or LIST_BOTTOM; not range-checked
 
     virtual Pt     ClientUpperLeft() const;
     virtual Pt     ClientLowerRight() const;
@@ -119,7 +119,7 @@ public:
     void           SetDropHeight(int h);          ///< sets the height of the drop-down list
 
     /** sets the style flags for the list to \a s (invalidates currently selected item). \see GG::ListBoxStyle */
-    void           SetStyle(Uint32 s);
+    void           SetStyle(Flags<ListBoxStyle> s);
 
     void           SetNumCols(int n);         ///< sets the number of columns in each list item to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);         ///< sets the index of the column used to sort rows when sorting is enabled (invalidates currently selected item); not range-checked

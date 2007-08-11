@@ -23,12 +23,14 @@
    whatwasthataddress@hotmail.com */
 
 #include <GG/MultiEdit.h>
- 
+
 #include <GG/DrawUtil.h>
 #include <GG/Scroll.h>
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
+
+#include <boost/assign/list_of.hpp>
 
 
 using namespace GG;
@@ -43,14 +45,60 @@ namespace {
             return original_string[lines[line].char_data.back().original_char_index] == '\n';
     }
 
-    struct SetStyleAction : AttributeChangedAction<Uint32>
+    struct SetStyleAction : AttributeChangedAction<Flags<MultiEditStyle> >
     {
         SetStyleAction(MultiEdit* multi_edit) : m_multi_edit(multi_edit) {}
-        void operator()(const Uint32& style) {m_multi_edit->SetText(m_multi_edit->WindowText());}
+        void operator()(const Flags<MultiEditStyle>& style) {m_multi_edit->SetText(m_multi_edit->WindowText());}
     private:
         MultiEdit* m_multi_edit;
     };
 }
+
+///////////////////////////////////////
+// MultiEditStyle
+///////////////////////////////////////
+const MultiEditStyle GG::MULTI_NONE             (0);
+const MultiEditStyle GG::MULTI_WORDBREAK        (1 << 0);
+const MultiEditStyle GG::MULTI_LINEWRAP         (1 << 1);
+const MultiEditStyle GG::MULTI_VCENTER          (1 << 2);
+const MultiEditStyle GG::MULTI_TOP              (1 << 3);
+const MultiEditStyle GG::MULTI_BOTTOM           (1 << 4);
+const MultiEditStyle GG::MULTI_CENTER           (1 << 5);
+const MultiEditStyle GG::MULTI_LEFT             (1 << 6);
+const MultiEditStyle GG::MULTI_RIGHT            (1 << 7);
+const MultiEditStyle GG::MULTI_READ_ONLY        (1 << 8);
+const MultiEditStyle GG::MULTI_TERMINAL_STYLE   (1 << 9);
+const MultiEditStyle GG::MULTI_INTEGRAL_HEIGHT  (1 << 10);
+const MultiEditStyle GG::MULTI_NO_VSCROLL       (1 << 11);
+const MultiEditStyle GG::MULTI_NO_HSCROLL       (1 << 12);
+
+GG_FLAGSPEC_IMPL(MultiEditStyle);
+
+namespace {
+    bool RegisterMultiEditStyles()
+    {
+        FlagSpec<MultiEditStyle>& spec = FlagSpec<MultiEditStyle>::instance();
+        spec.insert(MULTI_NONE, "MULTI_NONE", true);
+        spec.insert(MULTI_WORDBREAK, "MULTI_WORDBREAK", true);
+        spec.insert(MULTI_LINEWRAP, "MULTI_LINEWRAP", true);
+        spec.insert(MULTI_VCENTER, "MULTI_VCENTER", true);
+        spec.insert(MULTI_TOP, "MULTI_TOP", true);
+        spec.insert(MULTI_BOTTOM, "MULTI_BOTTOM", true);
+        spec.insert(MULTI_CENTER, "MULTI_CENTER", true);
+        spec.insert(MULTI_LEFT, "MULTI_LEFT", true);
+        spec.insert(MULTI_RIGHT, "MULTI_RIGHT", true);
+        spec.insert(MULTI_READ_ONLY, "MULTI_READ_ONLY", true);
+        spec.insert(MULTI_TERMINAL_STYLE, "MULTI_TERMINAL_STYLE", true);
+        spec.insert(MULTI_INTEGRAL_HEIGHT, "MULTI_INTEGRAL_HEIGHT", true);
+        spec.insert(MULTI_NO_VSCROLL, "MULTI_NO_VSCROLL", true);
+        spec.insert(MULTI_NO_HSCROLL, "MULTI_NO_HSCROLL", true);
+        return true;
+    }
+    bool dummy = RegisterMultiEditStyles();
+}
+
+const Flags<MultiEditStyle> GG::MULTI_NO_SCROLL (MULTI_NO_VSCROLL | MULTI_NO_HSCROLL);
+
 
 ////////////////////////////////////////////////
 // GG::MultiEdit
@@ -61,7 +109,7 @@ const int MultiEdit::BORDER_THICK = 2;
 
 MultiEdit::MultiEdit() :
     Edit(),
-    m_style(0),
+    m_style(MULTI_NONE),
     m_cursor_begin(0, 0),
     m_cursor_end(0, 0),
     m_first_col_shown(0),
@@ -72,8 +120,8 @@ MultiEdit::MultiEdit() :
 {}
 
 MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
-              Uint32 style/* = TF_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
-              Flags<WndFlag> flags/* = CLICKABLE*/) : 
+                     Flags<MultiEditStyle> style/* = MULTI_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, 
+                     Flags<WndFlag> flags/* = CLICKABLE*/) : 
     Edit(x, y, w, str, font, color, text_color, interior, flags),
     m_style(style),
     m_cursor_begin(0, 0),
@@ -86,7 +134,8 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const b
 {
     SetColor(color);
     Resize(Pt(w, h));
-    Init();
+    SetStyle(m_style);
+    SizeMove(UpperLeft(), LowerRight()); // do this to set up the scrolls, and in case MULTI_INTEGRAL_HEIGHT is in effect
 }
 
 MultiEdit::~MultiEdit()
@@ -104,6 +153,11 @@ Pt MultiEdit::MinUsableSize() const
 Pt MultiEdit::ClientLowerRight() const
 {
     return Edit::ClientLowerRight() - Pt(RightMargin(), BottomMargin());
+}
+
+Flags<MultiEditStyle> MultiEdit::Style() const
+{
+    return m_style;
 }
 
 int MultiEdit::MaxLinesOfHistory() const
@@ -133,10 +187,10 @@ void MultiEdit::Render()
     Font::RenderState state;
     int first_visible_row = FirstVisibleRow();
     int last_visible_row = LastVisibleRow();
-    Uint32 text_format = TextFormat() & ~(TF_TOP | TF_BOTTOM) | TF_VCENTER;
+    Flags<TextFormat> text_format = TextFormat() & ~(FORMAT_TOP | FORMAT_BOTTOM) | FORMAT_VCENTER;
     const std::vector<Font::LineData>& lines = GetLineData();
     for (int row = first_visible_row; row <= last_visible_row && row < static_cast<int>(lines.size()); ++row) {
-        int row_y_pos = ((m_style & TF_TOP) || m_contents_sz.y - ClientSize().y < 0) ? 
+        int row_y_pos = ((m_style & MULTI_TOP) || m_contents_sz.y - ClientSize().y < 0) ? 
             cl_ul.y + row * GetFont()->Lineskip() - m_first_row_shown : 
             cl_lr.y - (static_cast<int>(lines.size()) - row) * GetFont()->Lineskip() - m_first_row_shown + 
             (m_vscroll && m_hscroll ? BottomMargin() : 0);
@@ -180,8 +234,8 @@ void MultiEdit::Render()
                 GetFont()->RenderText(text_pos, text_pos + Pt(lines[row].char_data.back().extent, GetFont()->Height()), WindowText(), text_format, lines, state, row, 0, row + 1, lines[row].char_data.size());
             }
         }
-        // if there's no selected text, but this row contains the caret (and READ_ONLY is not in effect)
-        if (!MultiSelected() && m_cursor_begin.first == row && !(m_style & READ_ONLY)) {
+        // if there's no selected text, but this row contains the caret (and MULTI_READ_ONLY is not in effect)
+        if (!MultiSelected() && m_cursor_begin.first == row && !(m_style & MULTI_READ_ONLY)) {
             int caret_x = CharXOffset(m_cursor_begin.first, m_cursor_begin.second) + initial_text_x_pos;
             glDisable(GL_TEXTURE_2D);
             glBegin(GL_LINES);
@@ -198,7 +252,7 @@ void MultiEdit::Render()
 void MultiEdit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     // when a button press occurs, record the character position under the cursor, and remove any previous selection range
-    if (!Disabled() && !(m_style & READ_ONLY)) {
+    if (!Disabled() && !(m_style & MULTI_READ_ONLY)) {
         m_cursor_end = CharAt(ScreenToClient(pt));
         if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, WindowText()))
             --m_cursor_end.second;
@@ -209,7 +263,7 @@ void MultiEdit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 
 void MultiEdit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
-    if (!Disabled() && !(m_style & READ_ONLY)) {
+    if (!Disabled() && !(m_style & MULTI_READ_ONLY)) {
         // when a drag occurs, move m_cursor_end to where the mouse is, which selects a range of characters
         Pt click_pos = ScreenToClient(pt); // coord of click within text space
         m_cursor_end = CharAt(click_pos);
@@ -233,7 +287,7 @@ void MultiEdit::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        if (!(m_style & READ_ONLY)) {
+        if (!(m_style & MULTI_READ_ONLY)) {
             bool shift_down = mod_keys & (MOD_KEY_LSHIFT | MOD_KEY_RSHIFT);
             bool emit_signal = false;
             switch (key) {
@@ -432,7 +486,7 @@ void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
 void MultiEdit::SizeMove(const Pt& ul, const Pt& lr)
 {
     Pt lower_right = lr;
-    if (m_style & INTEGRAL_HEIGHT)
+    if (m_style & MULTI_INTEGRAL_HEIGHT)
         lower_right.y -= ((lr.y - ul.y) - (2 * PIXEL_MARGIN)) % GetFont()->Lineskip();
     Edit::SizeMove(ul, lower_right);
     SetText(WindowText());
@@ -446,12 +500,12 @@ void MultiEdit::SelectAll()
 
 void MultiEdit::SetText(const std::string& str)
 {
-     bool scroll_to_end = (m_style & TERMINAL_STYLE) &&
+     bool scroll_to_end = (m_style & MULTI_TERMINAL_STYLE) &&
           (!m_vscroll || m_vscroll->ScrollRange().second - m_vscroll->PosnRange().second <= 1);
 
     // trim the rows, if required by m_max_lines_history
     Pt cl_sz = ClientSize();
-    Uint32 format = TextFormat();
+    Flags<TextFormat> format = GetTextFormat();
     if (0 < m_max_lines_history) {
         std::vector<Font::LineData> lines;
         GetFont()->DetermineLines(str, format, cl_sz.x, lines);
@@ -460,13 +514,13 @@ void MultiEdit::SetText(const std::string& str)
             int last_line = m_max_lines_history - 1;
             int cursor_begin_idx = -1; // used to correct the cursor range when lines get chopped
             int cursor_end_idx = -1;
-            if (m_style & TERMINAL_STYLE) {
+            if (m_style & MULTI_TERMINAL_STYLE) {
                 first_line = lines.size() - m_max_lines_history;
                 last_line = lines.size() - 1;
             }
             int first_line_first_char_idx = StringIndexOf(first_line, 0, &lines);
             int last_line_last_char_idx = last_line < static_cast<int>(lines.size() - 1) ? StringIndexOf(last_line + 1, 0, &lines) : str.size();
-            if (m_style & TERMINAL_STYLE) {
+            if (m_style & MULTI_TERMINAL_STYLE) {
                 // chopping these lines off the front will invalidate the cursor range unless we do this
                 cursor_begin_idx = std::max(0, StringIndexOf(m_cursor_begin.first, m_cursor_begin.second, &lines) - first_line_first_char_idx);
                 cursor_end_idx = std::max(0, StringIndexOf(m_cursor_end.first, m_cursor_end.second, &lines) - first_line_first_char_idx);
@@ -504,7 +558,7 @@ void MultiEdit::SetText(const std::string& str)
     }
     m_cursor_begin = m_cursor_end; // eliminate any hiliting
 
-    m_contents_sz = GetFont()->TextExtent(WindowText(), format, (format & (TF_WORDBREAK | TF_LINEWRAP)) ? cl_sz.x : 0);
+    m_contents_sz = GetFont()->TextExtent(WindowText(), format, (format & (FORMAT_WORDBREAK | FORMAT_LINEWRAP)) ? cl_sz.x : 0);
 
     AdjustScrolls();
     AdjustView();
@@ -513,10 +567,28 @@ void MultiEdit::SetText(const std::string& str)
     EditedSignal(str);
 }
 
-void MultiEdit::SetStyle(Uint32 style)
+void MultiEdit::SetStyle(Flags<MultiEditStyle> style)
 {
     m_style = style;
     ValidateStyle();
+    Flags<TextFormat> format;
+    if (m_style & MULTI_WORDBREAK)
+        format |= FORMAT_WORDBREAK;
+    if (m_style & MULTI_LINEWRAP)
+        format |= FORMAT_LINEWRAP;
+    if (m_style & MULTI_VCENTER)
+        format |= FORMAT_VCENTER;
+    if (m_style & MULTI_TOP)
+        format |= FORMAT_TOP;
+    if (m_style & MULTI_BOTTOM)
+        format |= FORMAT_BOTTOM;
+    if (m_style & MULTI_CENTER)
+        format |= FORMAT_CENTER;
+    if (m_style & MULTI_LEFT)
+        format |= FORMAT_LEFT;
+    if (m_style & MULTI_RIGHT)
+        format |= FORMAT_RIGHT;
+    SetTextFormat(format);
     SetText(WindowText());
 }
 
@@ -533,17 +605,18 @@ void MultiEdit::DefineAttributes(WndEditor* editor)
     Edit::DefineAttributes(editor);
     editor->Label("MultiEdit");
     boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
-    editor->BeginFlags(m_style, set_style_action);
-    editor->FlagGroup("V. Alignment", TF_TOP, TF_BOTTOM);
-    editor->FlagGroup("H. Alignment", TF_CENTER, TF_RIGHT);
-    editor->Flag("Word-break", TF_WORDBREAK);
-    editor->Flag("Line-wrap", TF_LINEWRAP);
-    editor->Flag("Ignore Tags", TF_IGNORETAGS);
-    editor->Flag("Read Only", READ_ONLY);
-    editor->Flag("Terminal Style", TERMINAL_STYLE);
-    editor->Flag("Integral Height", INTEGRAL_HEIGHT);
-    editor->Flag("No V. Scrolling", NO_VSCROLL);
-    editor->Flag("No H. Scrolling", NO_HSCROLL);
+    editor->BeginFlags<MultiEditStyle>(m_style, set_style_action);
+    typedef std::vector<MultiEditStyle> FlagVec;
+    using boost::assign::list_of;
+    editor->FlagGroup("V. Alignment", FlagVec() = list_of(MULTI_TOP)(MULTI_VCENTER)(MULTI_BOTTOM));
+    editor->FlagGroup("H. Alignment", FlagVec() = list_of(MULTI_LEFT)(MULTI_CENTER)(MULTI_RIGHT));
+    editor->Flag("Word-break", MULTI_WORDBREAK);
+    editor->Flag("Line-wrap", MULTI_LINEWRAP);
+    editor->Flag("Read Only", MULTI_READ_ONLY);
+    editor->Flag("Terminal Style", MULTI_TERMINAL_STYLE);
+    editor->Flag("Integral Height", MULTI_INTEGRAL_HEIGHT);
+    editor->Flag("No V. Scrolling", MULTI_NO_VSCROLL);
+    editor->Flag("No H. Scrolling", MULTI_NO_HSCROLL);
     editor->EndFlags();
     editor->Attribute("Lines of History", m_max_lines_history);
 }
@@ -599,18 +672,18 @@ int MultiEdit::RowStartX(int row) const
 
     Pt cl_sz = ClientSize();
     int excess_width = m_contents_sz.x - cl_sz.x;
-    if (m_style & TF_RIGHT)
+    if (m_style & MULTI_RIGHT)
         retval -= excess_width;
-    else if (m_style & TF_CENTER)
+    else if (m_style & MULTI_CENTER)
         retval -= excess_width / 2;
 
     if (!GetLineData()[row].Empty()) {
         int line_width = GetLineData()[row].char_data.back().extent;
-        if (GetLineData()[row].justification == TF_LEFT) {
+        if (GetLineData()[row].justification == ALIGN_LEFT) {
             retval += (m_vscroll && m_hscroll ? RightMargin() : 0);
-        } else if (GetLineData()[row].justification == TF_RIGHT) {
+        } else if (GetLineData()[row].justification == ALIGN_RIGHT) {
             retval += m_contents_sz.x - line_width + (m_vscroll && m_hscroll ? RightMargin() : 0);
-        } else if (GetLineData()[row].justification == TF_CENTER) {
+        } else if (GetLineData()[row].justification == ALIGN_CENTER) {
             retval += (m_contents_sz.x - line_width + (m_vscroll && m_hscroll ? RightMargin() : 0)) / 2;
         }
     }
@@ -626,11 +699,11 @@ int MultiEdit::CharXOffset(int row, int idx) const
 int MultiEdit::RowAt(int y) const
 {
     int retval = 0;
-    Uint32 format = TextFormat();
+    Flags<TextFormat> format = GetTextFormat();
     y += m_first_row_shown;
-    if ((format & TF_TOP) || m_contents_sz.y - ClientSize().y < 0) {
+    if ((format & FORMAT_TOP) || m_contents_sz.y - ClientSize().y < 0) {
         retval = y / GetFont()->Lineskip();
-    } else { // TF_BOTTOM
+    } else { // FORMAT_BOTTOM
         retval = (static_cast<int>(GetLineData().size()) - 1) - 
             (ClientSize().y + (m_vscroll && m_hscroll ? BottomMargin() : 0) - y - 1) / GetFont()->Lineskip();
     }
@@ -720,35 +793,27 @@ void MultiEdit::RecreateScrolls()
     AdjustScrolls();
 }
 
-void MultiEdit::Init()
-{
-    ValidateStyle();
-    SetTextFormat(m_style);
-    SetText(WindowText());
-    SizeMove(UpperLeft(), LowerRight()); // do this to set up the scrolls, and in case INTEGRAL_HEIGHT is in effect
-}
-
 void MultiEdit::ValidateStyle()
 {
-    if (m_style & TERMINAL_STYLE) {
-        m_style &= ~(TF_TOP | TF_VCENTER);
-        m_style |= TF_BOTTOM;
+    if (m_style & MULTI_TERMINAL_STYLE) {
+        m_style &= ~(MULTI_TOP | MULTI_VCENTER);
+        m_style |= MULTI_BOTTOM;
     } else {
-        m_style &= ~(TF_VCENTER | TF_BOTTOM);
-        m_style |= TF_TOP;
+        m_style &= ~(MULTI_VCENTER | MULTI_BOTTOM);
+        m_style |= MULTI_TOP;
     }
 
     int dup_ct = 0;   // duplication count
-    if (m_style & TF_LEFT) ++dup_ct;
-    if (m_style & TF_RIGHT) ++dup_ct;
-    if (m_style & TF_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use TF_LEFT by default
-        m_style &= ~(TF_RIGHT | TF_LEFT);
-        m_style |= TF_LEFT;
+    if (m_style & MULTI_LEFT) ++dup_ct;
+    if (m_style & MULTI_RIGHT) ++dup_ct;
+    if (m_style & MULTI_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use MULTI_LEFT by default
+        m_style &= ~(MULTI_RIGHT | MULTI_LEFT);
+        m_style |= MULTI_LEFT;
     }
 
-    if (m_style & (TF_LINEWRAP | TF_WORDBREAK)) {
-        m_style |= NO_HSCROLL;
+    if (m_style & (MULTI_LINEWRAP | MULTI_WORDBREAK)) {
+        m_style |= MULTI_NO_HSCROLL;
     }
 }
 
@@ -763,22 +828,22 @@ void MultiEdit::ClearSelected()
 void MultiEdit::AdjustView()
 {
     Pt cl_sz = ClientSize();
-    Uint32 format = TextFormat();
+    Flags<TextFormat> format = GetTextFormat();
     int excess_width = m_contents_sz.x - cl_sz.x;
     int excess_height = m_contents_sz.y - cl_sz.y;
-    int horz_min = 0;            // these are default values for TF_LEFT and TF_TOP
+    int horz_min = 0;            // these are default values for MULTI_LEFT and MULTI_TOP
     int horz_max = excess_width;
     int vert_min = 0;
     int vert_max = excess_height;
     
-    if (format & TF_RIGHT) {
+    if (format & FORMAT_RIGHT) {
         horz_min = -excess_width;
         horz_max = horz_min + m_contents_sz.x;
-    } else if (format & TF_CENTER) {
+    } else if (format & FORMAT_CENTER) {
         horz_min = -excess_width / 2;
         horz_max = horz_min + m_contents_sz.x;
     }
-    if ((format & TF_BOTTOM) && 0 <= excess_height) {
+    if ((format & FORMAT_BOTTOM) && 0 <= excess_height) {
         vert_min = -excess_height;
         vert_max = vert_min + m_contents_sz.y;
     }
@@ -838,16 +903,16 @@ void MultiEdit::AdjustScrolls()
 
     // this client area calculation disregards the thickness of scrolls
     Pt cl_sz = Edit::ClientLowerRight() - Edit::ClientUpperLeft();
-    Pt contents_sz = GetFont()->TextExtent(WindowText(), TextFormat(), (TextFormat() & (TF_WORDBREAK | TF_LINEWRAP)) ? cl_sz.x : 0);
+    Pt contents_sz = GetFont()->TextExtent(WindowText(), GetTextFormat(), (GetTextFormat() & (FORMAT_WORDBREAK | FORMAT_LINEWRAP)) ? cl_sz.x : 0);
     contents_sz.y = GetLineData().size() * GetFont()->Lineskip();
     int excess_width = contents_sz.x - cl_sz.x;
 
     need_vert =
-        (!(m_style & NO_VSCROLL) && (contents_sz.y > cl_sz.y ||
-                                     (contents_sz.y > cl_sz.y - SCROLL_WIDTH && contents_sz.x > cl_sz.x - SCROLL_WIDTH)));
+        (!(m_style & MULTI_NO_VSCROLL) && (contents_sz.y > cl_sz.y ||
+                                           (contents_sz.y > cl_sz.y - SCROLL_WIDTH && contents_sz.x > cl_sz.x - SCROLL_WIDTH)));
     need_horz =
-        (!(m_style & NO_HSCROLL) && (contents_sz.x > cl_sz.x ||
-                                     (contents_sz.x > cl_sz.x - SCROLL_WIDTH && contents_sz.y > cl_sz.y - SCROLL_WIDTH)));
+        (!(m_style & MULTI_NO_HSCROLL) && (contents_sz.x > cl_sz.x ||
+                                           (contents_sz.x > cl_sz.x - SCROLL_WIDTH && contents_sz.y > cl_sz.y - SCROLL_WIDTH)));
 
     Pt orig_cl_sz = ClientSize();
 
@@ -855,11 +920,11 @@ void MultiEdit::AdjustScrolls()
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
-    int vscroll_min = (m_style & TERMINAL_STYLE) ? (cl_sz.y - contents_sz.y) : 0;
-    int hscroll_min = 0; // default values for TF_LEFT
-    if (m_style & TF_RIGHT) {
+    int vscroll_min = (m_style & MULTI_TERMINAL_STYLE) ? (cl_sz.y - contents_sz.y) : 0;
+    int hscroll_min = 0; // default values for MULTI_LEFT
+    if (m_style & MULTI_RIGHT) {
         hscroll_min = -excess_width;
-    } else if (m_style & TF_CENTER) {
+    } else if (m_style & MULTI_CENTER) {
         hscroll_min = -excess_width / 2;
     }
     int vscroll_max = vscroll_min + contents_sz.y - 1;
@@ -903,7 +968,7 @@ void MultiEdit::AdjustScrolls()
     // and there is some kind of wrapping going on, we need to re-SetText()
     Pt new_cl_sz = ClientSize();
     if (orig_cl_sz != new_cl_sz && (new_cl_sz.x != contents_sz.x || new_cl_sz.y != contents_sz.y) && 
-        (m_style & (TF_WORDBREAK | TF_LINEWRAP))) {
+        (m_style & (MULTI_WORDBREAK | MULTI_LINEWRAP))) {
         SetText(WindowText());
     }
 }

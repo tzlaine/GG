@@ -34,6 +34,16 @@
 #include <GG/GUI.h>
 
 
+#ifdef _MSC_VER
+# ifdef GIGI_OGRE_EXPORTS
+#  define GG_OGRE_API __declspec(dllexport)
+# else
+#  define GG_OGRE_API __declspec(dllimport)
+# endif
+#else
+# define GG_OGRE_API
+#endif
+
 namespace Ogre {
     class RenderWindow;
     class DataStream;
@@ -41,7 +51,7 @@ namespace Ogre {
 
 namespace GG {
 
-class OgreGUI :
+class GG_OGRE_API OgreGUI :
     public GUI,
     public Ogre::RenderTargetListener,
     public Ogre::WindowEventListener

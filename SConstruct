@@ -33,9 +33,6 @@ options.Add('bindir', 'Location to install executables', os.path.normpath(os.pat
 options.Add('libdir', 'Location to install libraries', os.path.normpath(os.path.join('$prefix', 'lib')))
 if not missing_pkg_config:
     options.Add('pkgconfigdir', 'Location to install pkg-config .pc files', '/usr/lib/pkgconfig')
-options.Add(BoolOption('disable_allegro_hack',
-                       'Disable the hack for Allegro-linked DevILs (ignored if DevIL is not linked against Allegro)',
-                       0))
 options.Add(BoolOption('build_sdl_driver', 'Builds GG SDL support (the GiGiSDL library)', 1))
 options.Add('with_boost', 'Root directory of boost installation')
 options.Add('with_boost_include', 'Specify exact include dir for boost headers')
@@ -43,9 +40,9 @@ options.Add('with_boost_libdir', 'Specify exact library dir for boost library')
 options.Add('boost_lib_suffix', 'Specify the suffix placed on user-compiled Boost libraries (e.g. "-vc71-mt-gd-1_31")')
 options.Add('boost_signals_namespace',
             'Specify alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost)')
-options.Add('with_sdl', 'Root directory of SDL installation')
-options.Add('with_sdl_include', 'Specify exact include dir for SDL headers')
-options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library')
+options.Add('with_sdl', 'Root directory of SDL installation (only required when build_sdl_driver=1)')
+options.Add('with_sdl_include', 'Specify exact include dir for SDL headers (only required when build_sdl_driver=1)')
+options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library (only required when build_sdl_driver=1)')
 options.Add('with_ft', 'Root directory of FreeType2 installation')
 options.Add('with_ft_include', 'Specify exact include dir for FreeType2 headers')
 options.Add('with_ft_libdir', 'Specify exact library dir for FreeType2 library')

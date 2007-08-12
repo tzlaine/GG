@@ -403,22 +403,21 @@ if not env.GetOption('clean'):
         Execute(Copy(os.path.normpath('GG/ltdl_config.h'), os.path.normpath('libltdl/config.h')))
 
     # SDL
-    if not sdl_preconfigured:
-        if env['build_sdl_driver']:
-            print 'Configuring GiGiSDL driver...'
-            sdl_env = env.Copy()
-            sdl_conf = sdl_env.Configure(custom_tests = custom_tests_dict)
-            sdl_config_script = WhereIs('sdl-config')
-            if not sdl_conf.CheckSDL(options, sdl_conf, sdl_config_script, not ms_linker):
-                Exit(1)
-            sdl_conf.CheckConfigSuccess(True)
-            sdl_conf.Finish();
-            f = open('sdl_config.cache', 'w')
-            p = pickle.Pickler(f)
-            cache_dict = {}
-            for i in env_cache_keys:
-                cache_dict[i] = sdl_env.has_key(i) and sdl_env.Dictionary(i) or []
-            p.dump(cache_dict)
+    if not sdl_preconfigured and env['build_sdl_driver']:
+        print 'Configuring GiGiSDL driver...'
+        sdl_env = env.Copy()
+        sdl_conf = sdl_env.Configure(custom_tests = custom_tests_dict)
+        sdl_config_script = WhereIs('sdl-config')
+        if not sdl_conf.CheckSDL(options, sdl_conf, sdl_config_script, not ms_linker):
+            Exit(1)
+        sdl_conf.CheckConfigSuccess(True)
+        sdl_conf.Finish();
+        f = open('sdl_config.cache', 'w')
+        p = pickle.Pickler(f)
+        cache_dict = {}
+        for i in env_cache_keys:
+            cache_dict[i] = sdl_env.has_key(i) and sdl_env.Dictionary(i) or []
+        p.dump(cache_dict)
 
     if 'configure' in command_line_args:
         Exit(0)

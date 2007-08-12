@@ -239,6 +239,7 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     if (m_format == IL_COLOR_INDEX) {
         m_format = IL_RGBA;
         m_type = IL_UNSIGNED_BYTE;
+        m_bytes_pp = 4;
         ilConvertImage(m_format, m_type);
         CheckILErrors("ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE)");
     } else {
@@ -372,6 +373,15 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, image);
     }
 
+    m_mipmaps = mipmap;
+    m_default_width = width;
+    m_default_height = height;
+    m_bytes_pp = bytes_per_pixel;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
+    m_tex_coords[2] = m_default_width / double(m_width);
+    m_tex_coords[3] = m_default_height / double(m_height);
+
     if (mipmap) {
         std::auto_ptr<unsigned char> image_copy;
         if (!image_is_power_of_two)
@@ -387,35 +397,24 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
     }
-
-    m_mipmaps = mipmap;
-    m_default_width = width;
-    m_default_height = height;
-    m_bytes_pp = bytes_per_pixel;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
-    m_tex_coords[2] = m_default_width / double(m_width);
-    m_tex_coords[3] = m_default_height / double(m_height);
 }
 
 unsigned char* Texture::GetRawBytes()
 {
     unsigned char* retval = 0;
-    if (m_filename == "" && m_opengl_id) {
-        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-        glPixelStorei(GL_PACK_SWAP_BYTES, false);
-        glPixelStorei(GL_PACK_LSB_FIRST, false);
-        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-        glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-        glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+    glPixelStorei(GL_PACK_SWAP_BYTES, false);
+    glPixelStorei(GL_PACK_LSB_FIRST, false);
+    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-        // get pixel data
-        typedef unsigned char uchar;
-        retval = new uchar[m_width * m_height * m_bytes_pp];
-        glGetTexImage(GL_TEXTURE_2D, 0, m_format, m_type, retval);
-        glPopClientAttrib();
-    }
+    // get pixel data
+    typedef unsigned char uchar;
+    retval = new uchar[m_width * m_height * m_bytes_pp];
+    glGetTexImage(GL_TEXTURE_2D, 0, m_format, m_type, retval);
+    glPopClientAttrib();
     return retval;
 }
 

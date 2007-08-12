@@ -263,7 +263,8 @@ void GG::Texture::serialize(Archive& ar, const unsigned int version)
     unsigned char* raw_data_bytes = 0;
     std::size_t raw_data_size = 0;
     if (Archive::is_saving::value) {
-        raw_data_bytes = GetRawBytes();
+        if (m_filename == "" && m_opengl_id)
+            raw_data_bytes = GetRawBytes();
         if (raw_data_bytes)
             raw_data_size = static_cast<std::size_t>(m_width * m_height * m_bytes_pp);
     }

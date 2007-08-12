@@ -36,7 +36,7 @@ if not missing_pkg_config:
 options.Add(BoolOption('disable_allegro_hack',
                        'Disable the hack for Allegro-linked DevILs (ignored if DevIL is not linked against Allegro)',
                        0))
-options.Add(BoolOption('disable_sdl', 'Disables GG SDL support (the GiGiSDL library)', 0))
+options.Add(BoolOption('build_sdl_driver', 'Builds GG SDL support (the GiGiSDL library)', 1))
 options.Add('with_boost', 'Root directory of boost installation')
 options.Add('with_boost_include', 'Specify exact include dir for boost headers')
 options.Add('with_boost_libdir', 'Specify exact library dir for boost library')
@@ -58,6 +58,7 @@ options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library')
 # build vars                                     #
 ##################################################
 # important vars that need to be set for later use when generating and building certain targets
+
 # This is supposed to be detected during configuration, but sometimes isn't, and is harmless, so we're including it all
 # the time now on POSIX systems.
 env['need__vsnprintf_c'] = str(Platform()) == 'posix'
@@ -66,13 +67,16 @@ env['need__vsnprintf_c'] = str(Platform()) == 'posix'
 # fill Environment using saved and command-line provided options, save options for next time, and fill environment
 # with save configuration values.
 import sys
-preconfigured = False
+gigi_preconfigured = False
+sdl_preconfigured = False
 force_configure = False
 command_line_args = sys.argv[1:]
 if 'configure' in command_line_args:
     force_configure = True
 elif ('-h' in command_line_args) or ('--help' in command_line_args):
-    preconfigured = True # this is just to ensure config gets skipped when help is requested
+    # ensure configuration gets skipped when help is requested
+    gigi_preconfigured = True
+    sdl_preconfigured = True
 ms_linker = 'msvs' in env['TOOLS'] or 'msvc' in env['TOOLS']
 
 env_cache_keys = [
@@ -84,18 +88,17 @@ env_cache_keys = [
     'LIBPATH',
     'LIBS',
     'LINKFLAGS',
-    'need__vsnprintf_c'
+    'need__vsnprintf_c',
+    'libltdl_defines'
     ]
 if not force_configure:
     try:
-        f = open('config.cache', 'r')
+        f = open('gigi_config.cache', 'r')
         up = pickle.Unpickler(f)
         pickled_values = up.load()
         for key, value in pickled_values.items():
             env[key] = value
-        preconfigured = True
-        if ('-h' not in command_line_args) and ('--help' not in command_line_args):
-            print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
+        gigi_preconfigured = True
     except Exception:
         pass
 
@@ -143,62 +146,62 @@ if env.has_key('use_ccache') and env['use_ccache']:
 Help(GenerateHelpText(options, env))
 options.Save('options.cache', env)
 
-# detect changes in the "reconfigurable" options (those that should trigger the configuration step when changed)
 new_options_cache = ParseOptionsCacheFile('options.cache')
-reconfigurable_options = [
-    'disable_allegro_hack',
-    'disable_sdl',
-    'with_boost',
-    'with_boost_include',
-    'with_boost_libdir',
-    'boost_lib_suffix',
-    'boost_signals_namespace',
-    'with_sdl',
-    'with_sdl_include',
-    'with_sdl_libdir',
-    'with_ft',
-    'with_ft_include',
-    'with_ft_libdir',
-    'with_devil',
-    'with_devil_include',
-    'with_devil_libdir'
-    ]
-if preconfigured:
+if gigi_preconfigured and sdl_preconfigured:
     for i in old_options_cache.keys():
-        if i in reconfigurable_options and (not new_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]):
-            preconfigured = False
+        if not new_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:
+            gigi_preconfigured = False
+            sdl_preconfigured = False
             break
-if preconfigured:
+if gigi_preconfigured and sdl_preconfigured:
     for i in new_options_cache.keys():
-        if i in reconfigurable_options and (not old_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]):
-            preconfigured = False
+        if not old_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:
+            gigi_preconfigured = False
+            sdl_preconfigured = False
             break
 
+if not force_configure and env['build_sdl_driver']:
+    sdl_env = env.Copy()
+    try:
+        f = open('sdl_config.cache', 'r')
+        up = pickle.Unpickler(f)
+        pickled_values = up.load()
+        for key, value in pickled_values.items():
+            sdl_env[key] = value
+        sdl_preconfigured = True
+    except Exception:
+        pass
+
 if not env['multithreaded']:
-    if not env['disable_sdl']:
+    if env['build_sdl_driver']:
         print 'Warning: since multithreaded code is disabled, the GiGiSDL build is disabled as well.'
-        env['disable_sdl'] = 1
+        env['build_sdl_driver'] = 0
 if str(Platform()) == 'win32':
     if not env['multithreaded']:
         if env['dynamic']:
-            print 'Warning: since the Win32 platform does not support multithreaded DLLs, multithreaded static libraries will be produced instead.'
+            print 'Warning: since the Win32 platform does not support singlethreaded DLLs, singlethreaded static libraries will be produced instead.'
             env['dynamic'] = 0
+
+
+if gigi_preconfigured and sdl_preconfigured and ('-h' not in command_line_args) and ('--help' not in command_line_args):
+    print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
 
 
 ##################################################
 # check configuration                            #
 ##################################################
 if not env.GetOption('clean'):
-    if not preconfigured:
-        conf = env.Configure(custom_tests = {'CheckVersionHeader' : CheckVersionHeader,
-                                             'CheckPkgConfig' : CheckPkgConfig,
-                                             'CheckPkg' : CheckPkg,
-                                             'CheckBoost' : CheckBoost,
-                                             'CheckBoostLib' : CheckBoostLib,
-                                             'CheckSDL' : CheckSDL,
-                                             'CheckLibLTDL' : CheckLibLTDL,
-                                             'CheckConfigSuccess' : CheckConfigSuccess})
+    custom_tests_dict = {'CheckVersionHeader' : CheckVersionHeader,
+                         'CheckPkgConfig' : CheckPkgConfig,
+                         'CheckPkg' : CheckPkg,
+                         'CheckBoost' : CheckBoost,
+                         'CheckBoostLib' : CheckBoostLib,
+                         'CheckSDL' : CheckSDL,
+                         'CheckLibLTDL' : CheckLibLTDL,
+                         'CheckConfigSuccess' : CheckConfigSuccess}
 
+    if not gigi_preconfigured:
+        conf = env.Configure(custom_tests = custom_tests_dict)
         
         if str(Platform()) == 'posix':
             print 'Configuring for POSIX system...'
@@ -242,12 +245,6 @@ if not env.GetOption('clean'):
                    not conf.CheckCHeader('GL/glu.h') or \
                    not conf.CheckLib('GL', 'glBegin') or \
                    not conf.CheckLib('GLU', 'gluLookAt'):
-                Exit(1)
-
-        # SDL
-        sdl_config = WhereIs('sdl-config')
-        if not env['disable_sdl']:
-            if not conf.CheckSDL(options, conf, sdl_config, not ms_linker):
                 Exit(1)
 
         # pkg-config
@@ -296,17 +293,91 @@ if not env.GetOption('clean'):
                 print 'Check libltdl/config.log to see what went wrong.'
                 Exit(1)
 
+        # define platform-specific flags
+        env.Append(CPPPATH = [
+            '#',
+            '#/libltdl'
+            ])
+
+        if str(Platform()) == 'win32':
+            if env['multithreaded']:
+                if env['dynamic']:
+                    if env['debug']:
+                        code_generation_flag = '/MDd'
+                    else:
+                        code_generation_flag = '/MD'
+                else:
+                    if env['debug']:
+                        code_generation_flag = '/MTd'
+                    else:
+                        code_generation_flag = '/MT'
+            else:
+                if env['debug']:
+                    code_generation_flag = '/MLd'
+                else:
+                    code_generation_flag = '/ML'
+            flags = [
+                code_generation_flag,
+                '/EHsc',
+                '/W3',
+                '/Zc:forScope',
+                '/GR',
+                '/Gd',
+                '/Zi',
+                '/wd4099', '/wd4251', '/wd4800', '/wd4267', '/wd4275', '/wd4244', '/wd4101', '/wd4258', '/wd4351', '/wd4996'
+                ]
+            env.Append(CCFLAGS = flags)
+            env.Append(CPPDEFINES = [
+                (env['debug'] and '_DEBUG' or 'NDEBUG'),
+                'WIN32',
+                '_WINDOWS'
+                ])
+            if env['dynamic']:
+                env.Append(CPPDEFINES = [
+                '_USRDLL',
+                '_WINDLL'
+                ])
+            env.Append(LINKFLAGS = [
+                '/NODEFAULTLIB:LIBCMT',
+                '/DEBUG'
+                ])
+            env.Append(LIBS = [
+                'kernel32',
+                'user32',
+                'gdi32',
+                'winspool',
+                'comdlg32',
+                'advapi32',
+                'shell32',
+                'ole32',
+                'oleaut32',
+                'uuid',
+                'odbc32',
+                'odbccp32',
+                ])
+        else:
+            if env['debug']:
+                env.Append(CCFLAGS = ['-Wall', '-g', '-O0'])
+            else:
+                env.Append(CCFLAGS = ['-Wall', '-O2'])
+
+        env['libltdl_defines'] = [
+            'HAVE_CONFIG_H'
+            ]
+        if env.has_key('CPPDEFINES'):
+            env['libltdl_defines'] += env['CPPDEFINES']
+
         # finish config and save results for later
         conf.CheckConfigSuccess(True)
         conf.Finish();
-        f = open('config.cache', 'w')
+        f = open('gigi_config.cache', 'w')
         p = pickle.Pickler(f)
         cache_dict = {}
         for i in env_cache_keys:
             cache_dict[i] = env.has_key(i) and env.Dictionary(i) or []
         p.dump(cache_dict)
 
-	# for win32, create libltdl/config.h
+        # for win32, create libltdl/config.h
         if str(Platform()) == 'win32':
             f = open(os.path.normpath('libltdl/config.h'), 'w')
             f.write("""/* WARNING: Generated by GG's SConstruct file.  All local changes will be lost! */
@@ -331,116 +402,66 @@ if not env.GetOption('clean'):
         Execute(Copy(os.path.normpath('GG/ltdl.h'), os.path.normpath('libltdl/ltdl.h')))
         Execute(Copy(os.path.normpath('GG/ltdl_config.h'), os.path.normpath('libltdl/config.h')))
 
-        if 'configure' in command_line_args:
-            Exit(0)
+    # SDL
+    if not sdl_preconfigured:
+        if env['build_sdl_driver']:
+            print 'Configuring GiGiSDL driver...'
+            sdl_env = env.Copy()
+            sdl_conf = sdl_env.Configure(custom_tests = custom_tests_dict)
+            sdl_config_script = WhereIs('sdl-config')
+            if not sdl_conf.CheckSDL(options, sdl_conf, sdl_config_script, not ms_linker):
+                Exit(1)
+            sdl_conf.CheckConfigSuccess(True)
+            sdl_conf.Finish();
+            f = open('sdl_config.cache', 'w')
+            p = pickle.Pickler(f)
+            cache_dict = {}
+            for i in env_cache_keys:
+                cache_dict[i] = sdl_env.has_key(i) and sdl_env.Dictionary(i) or []
+            p.dump(cache_dict)
+
+    if 'configure' in command_line_args:
+        Exit(0)
 
 ##################################################
 # define targets                                 #
 ##################################################
-env.Append(CPPPATH = [
-    '#',
-    '#/libltdl'
-    ])
-
-if str(Platform()) == 'win32':
-    if env['multithreaded']:
-        if env['dynamic']:
-            if env['debug']:
-                code_generation_flag = '/MDd'
-            else:
-                code_generation_flag = '/MD'
-        else:
-            if env['debug']:
-                code_generation_flag = '/MTd'
-            else:
-                code_generation_flag = '/MT'
-    else:
-        if env['debug']:
-            code_generation_flag = '/MLd'
-        else:
-            code_generation_flag = '/ML'
-    flags = [
-        #env['debug'] and '/Od' or '/Ox',
-        code_generation_flag,
-        '/EHsc',
-        '/W3',
-        '/Zc:forScope',
-        '/GR',
-        '/Gd',
-        '/Zi',
-        '/wd4099', '/wd4251', '/wd4800', '/wd4267', '/wd4275', '/wd4244', '/wd4101', '/wd4258', '/wd4351', '/wd4996'
-        ]
-    env.Append(CCFLAGS = flags)
-    env.Append(CPPDEFINES = [
-        (env['debug'] and '_DEBUG' or 'NDEBUG'),
-        'WIN32',
-        '_WINDOWS'
-        ])
-    if env['dynamic']:
-        env.Append(CPPDEFINES = [
-        '_USRDLL',
-        '_WINDLL'
-        ])
-    env.Append(LINKFLAGS = [
-        '/NODEFAULTLIB:LIBCMT',
-        '/DEBUG'
-        ])
-    env.Append(LIBS = [
-        'kernel32',
-        'user32',
-        'gdi32',
-        'winspool',
-        'comdlg32',
-        'advapi32',
-        'shell32',
-        'ole32',
-        'oleaut32',
-        'uuid',
-        'odbc32',
-        'odbccp32',
-        ])
-else:
-    if env['debug']:
-        env.Append(CCFLAGS = ['-Wall', '-g', '-O0'])
-    else:
-        env.Append(CCFLAGS = ['-Wall', '-O2'])
-
 Export('env')
 
 # define libGiGi objects
-env['libltdl_defines'] = [
-    'HAVE_CONFIG_H'
-    ]
-if env.has_key('CPPDEFINES'):
-    env['libltdl_defines'] += env['CPPDEFINES']
 gigi_env = env.Copy()
+if str(Platform()) == 'win32' and gigi_env['dynamic']:
+    gigi_env.AppendUnique(CPPDEFINES = ['GIGI_EXPORTS'])
 gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'), exports = 'gigi_env')
 result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript'), exports = 'gigi_env')
 gigi_objects += result_objects
 gigi_sources += result_sources
 
 # define libGiGiSDL objects
-if not env['disable_sdl']:
-    sdl_env = env.Copy()
+if env['build_sdl_driver']:
     if str(Platform()) == 'win32':
         sdl_env.Append(LIBS = ['SDL', 'GiGi'])
+        if sdl_env['dynamic']:
+            sdl_env.AppendUnique(CPPDEFINES = ['GIGI_SDL_EXPORTS'])
     gigi_sdl_objects, gigi_sdl_sources = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
 
 if env['dynamic']:
     lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
-    if not env['disable_sdl']:
+    if env['build_sdl_driver']:
         lib_gigi_sdl = sdl_env.SharedLibrary('GiGiSDL', gigi_sdl_objects)
 else:
     lib_gigi = env.StaticLibrary('GiGi', gigi_objects)
-    if not env['disable_sdl']:
+    if env['build_sdl_driver']:
         lib_gigi_sdl = sdl_env.StaticLibrary('GiGiSDL', gigi_sdl_objects)
 
 Depends(lib_gigi_sdl, lib_gigi)
 
 if not missing_pkg_config and str(Platform()) != 'win32':
     gigi_pc = env.Command('GiGi.pc', 'GiGi.pc.in', CreateGiGiPCFile)
-    if not env['disable_sdl']:
-        gigi_sdl_pc = env.Command('GiGiSDL.pc', 'GiGiSDL.pc.in', CreateGiGiSDLPCFile)
+    env.Depends(gigi_pc, 'options.cache')
+    if env['build_sdl_driver']:
+        gigi_sdl_pc = sdl_env.Command('GiGiSDL.pc', 'GiGiSDL.pc.in', CreateGiGiSDLPCFile)
+        sdl_env.Depends(gigi_sdl_pc, 'options.cache')
 
 header_dir = os.path.normpath(os.path.join(env.subst(env['incdir']), 'GG'))
 lib_dir = os.path.normpath(env.subst(env['libdir']))
@@ -475,7 +496,7 @@ else:
                           'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
 if not missing_pkg_config and str(Platform()) != 'win32':
     Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_pc))
-if not env['disable_sdl']:
+if env['build_sdl_driver']:
     if str(Platform()) == 'win32':
         Alias('install', Install(lib_dir, lib_gigi_sdl))
     else:
@@ -496,7 +517,7 @@ if str(Platform()) == 'posix' and env['dynamic']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_libname))))
 if not missing_pkg_config and str(Platform()) != 'win32':
     deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_pc[0])))))
-if not env['disable_sdl']:
+if env['build_sdl_driver']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_sdl[0])))))
     if str(Platform()) == 'posix' and env['dynamic']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
@@ -506,47 +527,8 @@ uninstall = env.Command('uninstall', '', deletions)
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
 
-# MSVC project target
-##if str(Platform()) == 'win32':
-##    variant_name = ''
-##    if env['multithreaded']:
-##        if env['dynamic']:
-##            if env['debug']:
-##                variant_name = 'Multi-threaded Debug DLL'
-##            else:
-##                variant_name = 'Multi-threaded Release DLL'
-##        else:
-##            if env['debug']:
-##                variant_name = 'Multi-threaded Debug'
-##            else:
-##                variant_name = 'Multi-threaded Release'
-##    else:
-##        if env['debug']:
-##            variant_name = 'Single-threaded Debug'
-##        else:
-##            variant_name = 'Single-threaded Release'
-##    gigi_project = MSVSProject(target = 'msvc/GiGi' + env['MSVSPROJECTSUFFIX'],
-##                               srcs = gigi_sources,
-##                               incs = '',
-##                               localincs = '',
-##                               resources = '',
-##                               misc = '',
-##                               buildtarget = lib_gigi,
-##                               variant = variant_name)
-##    Alias('msvc_project', gigi_project)
-##    if not env['disable_sdl']:
-##        gigi_sdl_project = MSVSProject(target = 'msvc/GiGiSDL' + env['MSVSPROJECTSUFFIX'],
-##                                       srcs = gigi_sources,
-##                                       incs = '',
-##                                       localincs = '',
-##                                       resources = '',
-##                                       misc = '',
-##                                       buildtarget = lib_gigi,
-##                                       variant = variant_name)
-##        Alias('msvc_project', gigi_sdl_project)
-
 # default targets
-if env['disable_sdl']:
+if not env['build_sdl_driver']:
     Default(lib_gigi)
 else:
     Default(lib_gigi, lib_gigi_sdl)

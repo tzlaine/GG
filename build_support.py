@@ -89,7 +89,7 @@ def CreateGiGiPCFile(target, source, env):
         pc_file_link_flags_used.append(flag)
         values['gigi_libs'] += ' ' + (flag[0] != '$' and flag or env.subst(flag))
     for path in env['LIBPATH']:
-        if path.find('SDL') == -1:
+        if path.find('SDL') == -1: # if it's not SDL-specific, include it
             pc_file_lib_paths_used.append(path)
             values['gigi_libs'] += ' -L' + (path[0] != '$' and path or env.subst(path))
     for path in env['CPPPATH']:

@@ -41,7 +41,6 @@ if gigi_env['need__vsnprintf_c']:
     sources.append('_vsnprintf.c')
 
 if gigi_env['dynamic']:
-    gigi_env.AppendUnique(CPPDEFINES = ['GIGI_EXPORTS'])
     objects = gigi_env.SharedObject(sources)
 else:
     objects = gigi_env.Object(sources)

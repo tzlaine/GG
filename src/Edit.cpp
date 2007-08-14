@@ -160,6 +160,7 @@ void Edit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
         RecordLastButtonDownTime();
         int click_xpos = ScreenToWindow(pt).x - PIXEL_MARGIN; // x coord of click within text space
         int idx = CharIndexOf(click_xpos);
+        m_cursor_pos.first = m_cursor_pos.second = idx;
         if (InDoubleButtonDownMode()) {
             std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
             std::set<std::pair<int, int> >::const_iterator it =
@@ -168,9 +169,6 @@ void Edit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
                 m_cursor_pos = *it;
             m_in_double_click_mode = true;
             m_double_click_cursor_pos = m_cursor_pos;
-        } else {
-            // when a button single-press occurs, record the character position under the cursor, and remove any previous selection range
-            m_cursor_pos.first = m_cursor_pos.second = idx;
         }
     }
 }

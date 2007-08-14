@@ -82,6 +82,7 @@ public:
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
     virtual void   GainingFocus();
     virtual void   LosingFocus();
@@ -118,24 +119,36 @@ protected:
     int                     FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
     int                     ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
     int                     LastVisibleChar() const;        ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
+    int                     LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
+    bool                    InDoubleButtonDownMode() const; ///< returns true iff the button is still down after being pressed twice within GUI::DoubleClickInterval() ticks
+    std::pair<int, int>     DoubleButtonDownCursorPos() const; ///< returns the cursor position at the time of the most recent double-button-down
+    //@}
+
+    /** \name Mutators */ //@{
+    void                    RecordLastButtonDownTime();     ///< sets the value of LastButtonDownTime() to GUI::Ticks(), representing the time of the last left button press
+    void                    ClearDoubleButtonDownMode();    ///< sets the value of InDoubleButtonDownMode() to false
     //@}
 
     static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame
 
 private:
-    void     ClearSelected();       ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
-    void     AdjustView();          ///< makes sure the caret ends up in view after an arbitrary move
+    void         ClearSelected();       ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
+    void         AdjustView();          ///< makes sure the caret ends up in view after an arbitrary move
 
     /** if .first == .second, the caret is drawn before character at m_cursor_pos.first; otherwise, the range is
         selected (when range is selected, caret is considered at .second) */
     std::pair<int, int> m_cursor_pos;
 
-    int         m_first_char_shown; ///< index into the string of the first character on the left end of the control's viewable area
-    Clr         m_int_color;        ///< color of background inside text box
-    Clr         m_hilite_color;     ///< color behind selected range
-    Clr         m_sel_text_color;   ///< color of selected text
+    int                 m_first_char_shown; ///< index into the string of the first character on the left end of the control's viewable area
+    Clr                 m_int_color;        ///< color of background inside text box
+    Clr                 m_hilite_color;     ///< color behind selected range
+    Clr                 m_sel_text_color;   ///< color of selected text
 
-    bool        m_recently_edited;  ///< the contents when the focus was last gained
+    bool                m_recently_edited;  ///< the contents when the focus was last gained
+
+    int                 m_last_button_down_time;
+    bool                m_in_double_click_mode;
+    std::pair<int, int> m_double_click_cursor_pos;
 
     friend class boost::serialization::access;
     template <class Archive>

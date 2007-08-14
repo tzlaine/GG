@@ -33,6 +33,14 @@
 using namespace GG;
 
 namespace {
+    struct InRange
+    {
+        InRange(int value) : m_value(value) {}
+        bool operator()(const std::pair<int, int>& p) const
+            { return p.first < m_value && m_value < p.second; }
+        const int m_value;
+    };
+
     int HeightFromFont(const boost::shared_ptr<Font>& font, int pixel_margin)
     {  return font->Height() + 2 * pixel_margin; }
 }
@@ -46,7 +54,9 @@ const int Edit::PIXEL_MARGIN = 5;
 Edit::Edit() :
     TextControl(),
     m_first_char_shown(0),
-    m_recently_edited(false)
+    m_recently_edited(false),
+    m_last_button_down_time(0),
+    m_in_double_click_mode(false)
 {}
 
 Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
@@ -57,46 +67,33 @@ Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<
     m_int_color(interior),
     m_hilite_color(CLR_SHADOW),
     m_sel_text_color(CLR_WHITE),
-    m_recently_edited(false)
+    m_recently_edited(false),
+    m_last_button_down_time(0),
+    m_in_double_click_mode(false)
 {
     SetColor(color);
 }
 
 Pt Edit::MinUsableSize() const
-{
-    return Pt(4 * PIXEL_MARGIN,
-              HeightFromFont(GetFont(), PIXEL_MARGIN));
-}
+{ return Pt(4 * PIXEL_MARGIN, HeightFromFont(GetFont(), PIXEL_MARGIN)); }
 
 Pt Edit::ClientUpperLeft() const
-{
-    return UpperLeft() + Pt(PIXEL_MARGIN, PIXEL_MARGIN);
-}
+{ return UpperLeft() + Pt(PIXEL_MARGIN, PIXEL_MARGIN); }
 
 Pt Edit::ClientLowerRight() const
-{
-    return LowerRight() - Pt(PIXEL_MARGIN, PIXEL_MARGIN);
-}
+{ return LowerRight() - Pt(PIXEL_MARGIN, PIXEL_MARGIN); }
 
 const std::pair<int, int>& Edit::CursorPosn() const
-{
-    return m_cursor_pos;
-}
+{ return m_cursor_pos; }
 
 Clr Edit::InteriorColor() const
-{
-    return m_int_color;
-}
+{ return m_int_color; }
 
 Clr Edit::HiliteColor() const
-{
-    return m_hilite_color;
-}
+{ return m_hilite_color; }
 
 Clr Edit::SelectedTextColor() const
-{
-    return m_sel_text_color;
-}
+{ return m_sel_text_color; }
 
 void Edit::Render()
 {
@@ -160,23 +157,66 @@ void Edit::Render()
 void Edit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        // when a button press occurs, record the character position under the cursor, and remove any previous selection range
+        RecordLastButtonDownTime();
         int click_xpos = ScreenToWindow(pt).x - PIXEL_MARGIN; // x coord of click within text space
         int idx = CharIndexOf(click_xpos);
-        m_cursor_pos.first = m_cursor_pos.second = idx;
+        if (InDoubleButtonDownMode()) {
+            std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
+            std::set<std::pair<int, int> >::const_iterator it =
+                std::find_if(words.begin(), words.end(), InRange(idx));
+            if (it != words.end())
+                m_cursor_pos = *it;
+            m_in_double_click_mode = true;
+            m_double_click_cursor_pos = m_cursor_pos;
+        } else {
+            // when a button single-press occurs, record the character position under the cursor, and remove any previous selection range
+            m_cursor_pos.first = m_cursor_pos.second = idx;
+        }
     }
 }
 
 void Edit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        // when a drag occurs, move m_cursor_pos.second to where the mouse is, which selects a range of characters
         int xpos = ScreenToWindow(pt).x - PIXEL_MARGIN; // x coord for mouse position within text space
-        m_cursor_pos.second = CharIndexOf(xpos);
-        if (xpos < 0 || Size().x - 2 * PIXEL_MARGIN < xpos) // if we're dragging past the currently visible text
-            AdjustView();
+        int idx = CharIndexOf(xpos);
+        if (m_in_double_click_mode) {
+            std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
+            std::set<std::pair<int, int> >::const_iterator it =
+                std::find_if(words.begin(), words.end(), InRange(idx));
+            std::pair<int, int> ordered(
+                std::min(m_double_click_cursor_pos.first, m_double_click_cursor_pos.second),
+                std::max(m_double_click_cursor_pos.first, m_double_click_cursor_pos.second));
+            if (it == words.end()) {
+                if (idx < ordered.first) {
+                    m_cursor_pos.second = idx;
+                    m_cursor_pos.first = ordered.second;
+                } else if (ordered.second < idx) {
+                    m_cursor_pos.second = idx;
+                    m_cursor_pos.first = ordered.first;
+                } else {
+                    m_cursor_pos = ordered;
+                }
+            } else {
+                if (it->first <= ordered.first) {
+                    m_cursor_pos.second = it->first;
+                    m_cursor_pos.first = ordered.second;
+                } else {
+                    m_cursor_pos.second = it->second;
+                    m_cursor_pos.first = ordered.first;
+                }
+            }
+        } else {
+            // when a single-click drag occurs, move m_cursor_pos.second to where the mouse is, which selects a range of characters
+            m_cursor_pos.second = idx;
+            if (xpos < 0 || Size().x - 2 * PIXEL_MARGIN < xpos) // if we're dragging past the currently visible text
+                AdjustView();
+        }
     }
 }
+
+void Edit::LClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ ClearDoubleButtonDownMode(); }
 
 void Edit::KeyPress(Key key, Flags<ModKey> mod_keys)
 {
@@ -275,9 +315,7 @@ void Edit::KeyPress(Key key, Flags<ModKey> mod_keys)
 }
 
 void Edit::GainingFocus()
-{
-    m_recently_edited = false;
-}
+{ m_recently_edited = false; }
 
 void Edit::LosingFocus()
 {
@@ -286,24 +324,16 @@ void Edit::LosingFocus()
 }
 
 void Edit::SetColor(Clr c)
-{
-    Control::SetColor(c);
-}
+{ Control::SetColor(c); }
 
 void Edit::SetInteriorColor(Clr c)
-{
-    m_int_color = c;
-}
+{ m_int_color = c; }
 
 void Edit::SetHiliteColor(Clr c)
-{
-    m_hilite_color = c;
-}
+{ m_hilite_color = c; }
 
 void Edit::SetSelectedTextColor(Clr c)
-{
-    m_sel_text_color = c;
-}
+{ m_sel_text_color = c; }
 
 void Edit::SelectAll()
 {
@@ -352,19 +382,13 @@ void Edit::DefineAttributes(WndEditor* editor)
 }
 
 bool Edit::MultiSelected() const
-{
-    return m_cursor_pos.first != m_cursor_pos.second;
-}
+{ return m_cursor_pos.first != m_cursor_pos.second; }
 
 int Edit::FirstCharShown() const
-{
-    return m_first_char_shown;
-}
+{ return m_first_char_shown; }
 
 bool Edit::RecentlyEdited() const
-{
-    return m_recently_edited;
-}
+{ return m_recently_edited; }
 
 int Edit::CharIndexOf(int x) const
 {
@@ -384,9 +408,7 @@ int Edit::CharIndexOf(int x) const
 }
 
 int Edit::FirstCharOffset() const
-{
-    return (m_first_char_shown ? GetLineData()[0].char_data[m_first_char_shown - 1].extent : 0);
-}
+{ return (m_first_char_shown ? GetLineData()[0].char_data[m_first_char_shown - 1].extent : 0); }
 
 int Edit::ScreenPosOfChar(int idx) const
 {
@@ -404,6 +426,26 @@ int Edit::LastVisibleChar() const
     }
     return retval;
 }
+
+int Edit::LastButtonDownTime() const
+{ return m_last_button_down_time; }
+
+bool Edit::InDoubleButtonDownMode() const
+{ return m_in_double_click_mode; }
+
+std::pair<int, int> Edit::DoubleButtonDownCursorPos() const
+{ return m_double_click_cursor_pos; }
+
+void Edit::RecordLastButtonDownTime()
+{
+    int ticks = GUI::GetGUI()->Ticks();
+    if (ticks - m_last_button_down_time <= GUI::GetGUI()->DoubleClickInterval())
+        m_in_double_click_mode = true;
+    m_last_button_down_time = ticks;
+}
+
+void Edit::ClearDoubleButtonDownMode()
+{ m_in_double_click_mode = false; }
 
 void Edit::ClearSelected()
 {

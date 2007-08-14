@@ -36,6 +36,7 @@
 
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
+#include <boost/xpressive/xpressive.hpp>
 
 #include <cassert>
 #include <fstream>
@@ -50,6 +51,9 @@
 using namespace GG;
 
 namespace {
+    const boost::xpressive::sregex WORD_REGEX =
+        +boost::xpressive::set[boost::xpressive::_w | '-'];
+
     /* returns the storage value of mod_keys that should be used with keyboard accelerators the accelerators don't care
        which side of the keyboard you use for CTRL, SHIFT, etc., and whether or not the numlock or capslock are
        engaged.*/
@@ -276,6 +280,21 @@ Pt GUI::MouseMovement() const
 Flags<ModKey> GUI::ModKeys() const
 {
     return s_impl->mod_keys;
+}
+
+std::set<std::pair<int, int> > GUI::FindWords(const std::string& str) const
+{
+    std::set<std::pair<int, int> > retval;
+    using namespace boost::xpressive;
+    sregex_iterator it(str.begin(), str.end(), WORD_REGEX);
+    sregex_iterator end_it;
+    for ( ; it != end_it; ++it) {
+        std::pair<int, int> indices;
+        indices.first = it->position();
+        indices.second = indices.first + it->length();
+        retval.insert(indices);
+    }
+    return retval;
 }
 
 const boost::shared_ptr<StyleFactory>& GUI::GetStyleFactory() const

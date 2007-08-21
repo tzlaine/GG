@@ -629,9 +629,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
 #endif
 
     RenderState render_state;
-    int tab_width = (format >> 16) & 0xFF; // width of tabs is embedded in bits 16-23
-    if (!tab_width)
-        tab_width = 8; // default tab width
+    int tab_width = 8; // default tab width
     int tab_pixel_width = tab_width * m_space_width; // get the length of a tab stop
     bool expand_tabs = format & FORMAT_LEFT; // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
     Alignment orig_just = ALIGN_NONE;

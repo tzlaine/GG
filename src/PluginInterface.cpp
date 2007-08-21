@@ -81,9 +81,9 @@ PluginInterface::~PluginInterface()
     }
 }
 
-PluginInterface::operator bool() const
+PluginInterface::operator int ConvertibleToBoolDummy::* () const
 {
-    return m_handle;
+    return m_handle ? &ConvertibleToBoolDummy::_ : 0;
 }
 
 bool PluginInterface::Load(const std::string& lib_name)

@@ -53,6 +53,9 @@ namespace GG {
     added by the plugin; if Wnd is not serializable, none of its descendents are either. */
 class GG_API PluginInterface
 {
+private:
+    struct ConvertibleToBoolDummy {int _;};
+
 public:
     typedef const char*                     (*PluginNameFn)();
     typedef const char*                     (*DefaultFontNameFn)();
@@ -76,7 +79,7 @@ public:
     /** returns true iff this PluginInterface has a loaded plugin.  This is a conversion operator, allowing you to test the validity of 
         the interface, as you would a pointer (e.g. if (my_interface) my_interface.PluginName();).  \warning If this method returns false, 
         the functions in the interface are invalid. */
-    operator bool() const;
+    operator int ConvertibleToBoolDummy::* () const;
     //@}
 
     /** \name Mutators */ //@{

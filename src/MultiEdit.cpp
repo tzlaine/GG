@@ -253,10 +253,14 @@ void MultiEdit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     // when a button press occurs, record the character position under the cursor, and remove any previous selection range
     if (!Disabled() && !(m_style & MULTI_READ_ONLY)) {
-        m_cursor_end = CharAt(ScreenToClient(pt));
-        if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, WindowText()))
-            --m_cursor_end.second;
-        m_cursor_begin = m_cursor_end;
+        std::pair<int, int> click_pos = CharAt(ScreenToClient(pt));
+        m_cursor_begin = m_cursor_end = click_pos;
+        std::pair<int, int> word_indices =
+            GetDoubleButtonDownWordIndices(StringIndexOf(click_pos.first, click_pos.second));
+        if (word_indices.first != word_indices.second) {
+            m_cursor_begin = CharAt(word_indices.first);
+            m_cursor_end = CharAt(word_indices.second);
+        }
         AdjustView();
     }
 }
@@ -265,8 +269,35 @@ void MultiEdit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (!Disabled() && !(m_style & MULTI_READ_ONLY)) {
         // when a drag occurs, move m_cursor_end to where the mouse is, which selects a range of characters
-        Pt click_pos = ScreenToClient(pt); // coord of click within text space
+        Pt click_pos = ScreenToClient(pt);
         m_cursor_end = CharAt(click_pos);
+        if (InDoubleButtonDownMode()) {
+            std::pair<int, int> initial_indices = DoubleButtonDownCursorPos();
+            int idx = StringIndexOf(m_cursor_end.first, m_cursor_end.second);
+            std::pair<int, int> word_indices = GetDoubleButtonDownDragWordIndices(idx);
+            std::pair<int, int> final_indices;
+            if (word_indices.first == word_indices.second) {
+                if (idx < initial_indices.first) {
+                    final_indices.second = idx;
+                    final_indices.first = initial_indices.second;
+                } else if (initial_indices.second < idx) {
+                    final_indices.second = idx;
+                    final_indices.first = initial_indices.first;
+                } else {
+                    final_indices = initial_indices;
+                }
+            } else {
+                if (word_indices.first <= initial_indices.first) {
+                    final_indices.second = word_indices.first;
+                    final_indices.first = initial_indices.second;
+                } else {
+                    final_indices.second = word_indices.second;
+                    final_indices.first = initial_indices.first;
+                }
+            }
+            m_cursor_begin = CharAt(final_indices.first);
+            m_cursor_end = CharAt(final_indices.second);
+        }
         // if we're dragging past the currently visible text, adjust the view so more text can be selected
         if (click_pos.x < 0 || click_pos.x > ClientSize().x || 
             click_pos.y < 0 || click_pos.y > ClientSize().y) 
@@ -641,6 +672,34 @@ std::pair<int, int> MultiEdit::CharAt(const Pt& pt) const
     std::pair<int, int> retval;
     retval.first = std::max(0, std::min(RowAt(pt.y), static_cast<int>(GetLineData().size() - 1)));
     retval.second = std::max(0, std::min(CharAt(retval.first, pt.x), static_cast<int>(GetLineData()[retval.first].char_data.size())));
+    return retval;
+}
+
+std::pair<int, int> MultiEdit::CharAt(int string_idx) const
+{
+    std::pair<int, int> retval;
+    if (string_idx <= static_cast<int>(WindowText().size()))
+    {
+        const std::vector<Font::LineData>& lines = GetLineData();
+        bool found_it = false;
+        int prev_original_char_index = -1;
+        for (unsigned int i = 0; i < lines.size() && !found_it; ++i) {
+            for (unsigned int j = 0; j < lines[i].char_data.size(); ++j) {
+                int current_idx = lines[i].char_data[j].original_char_index;
+                if (prev_original_char_index < string_idx && string_idx <= current_idx) {
+                    retval.first = i;
+                    retval.second = j;
+                    found_it = true;
+                    break;
+                }
+                prev_original_char_index = current_idx;
+            }
+        }
+        if (!found_it) {
+            retval.first = lines.size() - 1;
+            retval.second = lines.back().char_data.size();
+        }
+    }
     return retval;
 }
 

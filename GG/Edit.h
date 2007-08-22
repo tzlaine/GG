@@ -125,8 +125,19 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    void                    RecordLastButtonDownTime();     ///< sets the value of LastButtonDownTime() to GUI::Ticks(), representing the time of the last left button press
-    void                    ClearDoubleButtonDownMode();    ///< sets the value of InDoubleButtonDownMode() to false
+    /** Does a bit more than its name suggests.  Records the current time, and if it's within GUI::DoubleClickInterval()
+        of the last button down time, returns the indices into WindowText() that delimit the word around index \a
+        char_index.  If not within the time limit, or if no such word exists, the returned range will be empty (its
+        .first and .second members will be equal).  This function should be called in LButtonDown() overrides. */
+    std::pair<int, int>     GetDoubleButtonDownWordIndices(int char_index);
+
+    /** Returns the indices into WindowText() that delimit the word around index \a char_index.  If no such word exists,
+        the returned range will be empty (its .first and .second members will be equal).  This function should be called
+        in LDrag() overrides, when InDoubleButtonDownMode() is true. */
+    std::pair<int, int>     GetDoubleButtonDownDragWordIndices(int char_index);
+
+    /** Sets the value of InDoubleButtonDownMode() to false.  This should be called in LClick() overrides. */
+    void                    ClearDoubleButtonDownMode();
     //@}
 
     static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame

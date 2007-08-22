@@ -119,6 +119,8 @@ protected:
     int     BottomMargin() const;           ///< returns the width of the scrollbar at the bottom of the control (0 if none)
     std::pair<int, int>
             CharAt(const Pt& pt) const;     ///< returns row and character index of \a pt, or (0, 0) if \a pt falls outside the text.  \a pt is in client-space coordinates
+    std::pair<int, int>
+            CharAt(int string_idx) const;   ///< returns row and character index of char at string index, or (0, 0) if \a string_idx falls outside the text, or if \a string_idx refers to a non-visible character
 
     /** returns index into WindowText() of position \a char_idx in row \a row, using \a line_data instead of the current
         line data, if it is supplied.  Not range-checked. */

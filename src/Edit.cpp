@@ -157,19 +157,12 @@ void Edit::Render()
 void Edit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        RecordLastButtonDownTime();
         int click_xpos = ScreenToWindow(pt).x - PIXEL_MARGIN; // x coord of click within text space
         int idx = CharIndexOf(click_xpos);
         m_cursor_pos.first = m_cursor_pos.second = idx;
-        if (InDoubleButtonDownMode()) {
-            std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
-            std::set<std::pair<int, int> >::const_iterator it =
-                std::find_if(words.begin(), words.end(), InRange(idx));
-            if (it != words.end())
-                m_cursor_pos = *it;
-            m_in_double_click_mode = true;
-            m_double_click_cursor_pos = m_cursor_pos;
-        }
+        std::pair<int, int> word_indices = GetDoubleButtonDownWordIndices(idx);
+        if (word_indices.first != word_indices.second)
+            m_cursor_pos = word_indices;
     }
 }
 
@@ -179,29 +172,24 @@ void Edit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
         int xpos = ScreenToWindow(pt).x - PIXEL_MARGIN; // x coord for mouse position within text space
         int idx = CharIndexOf(xpos);
         if (m_in_double_click_mode) {
-            std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
-            std::set<std::pair<int, int> >::const_iterator it =
-                std::find_if(words.begin(), words.end(), InRange(idx));
-            std::pair<int, int> ordered(
-                std::min(m_double_click_cursor_pos.first, m_double_click_cursor_pos.second),
-                std::max(m_double_click_cursor_pos.first, m_double_click_cursor_pos.second));
-            if (it == words.end()) {
-                if (idx < ordered.first) {
+            std::pair<int, int> word_indices = GetDoubleButtonDownDragWordIndices(idx);
+            if (word_indices.first == word_indices.second) {
+                if (idx < m_double_click_cursor_pos.first) {
                     m_cursor_pos.second = idx;
-                    m_cursor_pos.first = ordered.second;
-                } else if (ordered.second < idx) {
+                    m_cursor_pos.first = m_double_click_cursor_pos.second;
+                } else if (m_double_click_cursor_pos.second < idx) {
                     m_cursor_pos.second = idx;
-                    m_cursor_pos.first = ordered.first;
+                    m_cursor_pos.first = m_double_click_cursor_pos.first;
                 } else {
-                    m_cursor_pos = ordered;
+                    m_cursor_pos = m_double_click_cursor_pos;
                 }
             } else {
-                if (it->first <= ordered.first) {
-                    m_cursor_pos.second = it->first;
-                    m_cursor_pos.first = ordered.second;
+                if (word_indices.first <= m_double_click_cursor_pos.first) {
+                    m_cursor_pos.second = word_indices.first;
+                    m_cursor_pos.first = m_double_click_cursor_pos.second;
                 } else {
-                    m_cursor_pos.second = it->second;
-                    m_cursor_pos.first = ordered.first;
+                    m_cursor_pos.second = word_indices.second;
+                    m_cursor_pos.first = m_double_click_cursor_pos.first;
                 }
             }
         } else {
@@ -434,12 +422,32 @@ bool Edit::InDoubleButtonDownMode() const
 std::pair<int, int> Edit::DoubleButtonDownCursorPos() const
 { return m_double_click_cursor_pos; }
 
-void Edit::RecordLastButtonDownTime()
+std::pair<int, int> Edit::GetDoubleButtonDownWordIndices(int char_index)
 {
     int ticks = GUI::GetGUI()->Ticks();
     if (ticks - m_last_button_down_time <= GUI::GetGUI()->DoubleClickInterval())
         m_in_double_click_mode = true;
     m_last_button_down_time = ticks;
+    m_double_click_cursor_pos = std::pair<int, int>();
+    if (m_in_double_click_mode) {
+        std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
+        std::set<std::pair<int, int> >::const_iterator it =
+            std::find_if(words.begin(), words.end(), InRange(char_index));
+        if (it != words.end())
+            m_double_click_cursor_pos = *it;
+    }
+    return m_double_click_cursor_pos;
+}
+
+std::pair<int, int> Edit::GetDoubleButtonDownDragWordIndices(int char_index)
+{
+    std::pair<int, int> retval;
+    std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
+    std::set<std::pair<int, int> >::const_iterator it =
+        std::find_if(words.begin(), words.end(), InRange(char_index));
+    if (it != words.end())
+        retval = *it;
+    return retval;
 }
 
 void Edit::ClearDoubleButtonDownMode()

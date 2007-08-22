@@ -81,7 +81,7 @@ PluginInterface::~PluginInterface()
     }
 }
 
-PluginInterface::operator int ConvertibleToBoolDummy::* () const
+PluginInterface::operator int PluginInterface::ConvertibleToBoolDummy::* () const
 {
     return m_handle ? &ConvertibleToBoolDummy::_ : 0;
 }

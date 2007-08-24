@@ -50,11 +50,11 @@ void BrowseInfoWnd::Update(int mode, const Wnd* target)
     MoveTo(m_cursor_pos - Pt(Width() / 2, Height()));
     Pt ul = UpperLeft(), lr = LowerRight();
     if (GUI::GetGUI()->AppWidth() <= lr.x)
-        ul.x += (lr.x - GUI::GetGUI()->AppWidth());
+        ul.x += GUI::GetGUI()->AppWidth() - lr.x;
     else if (ul.x < 0)
         ul.x = 0;
     if (GUI::GetGUI()->AppHeight() <= lr.y)
-        ul.y += (lr.y - GUI::GetGUI()->AppHeight());
+        ul.y += GUI::GetGUI()->AppHeight() - lr.y;
     else if (ul.y < 0)
         ul.y = 0;
     MoveTo(ul);

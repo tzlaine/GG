@@ -670,7 +670,7 @@ if env['build_ogre_driver']:
         Alias('install', Install(env.subst(env['pkgconfigdir']), env.File('GiGiOgre.pc')))
 if env['build_ogre_ois_plugin']:
     for key, value in lib_gigi_ogre_plugins.items():
-        Alias('install', InstallAs(lib_dir + '/' + key + env['SHLIBSUFFIX'], value))
+        Alias('install', Install(lib_dir, value))
 
 deletions = [
     Delete(header_dir),
@@ -694,7 +694,7 @@ if env['build_ogre_driver']:
         deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), 'GiGiOgre.pc'))))
 if env['build_ogre_driver']:
     for key, value in lib_gigi_ogre_plugins.items():
-        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, key + env['SHLIBSUFFIX']))))
+        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(value)))))
 uninstall = env.Command('uninstall', '', deletions)
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)

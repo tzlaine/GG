@@ -26,8 +26,6 @@
 
 #include <OgreRoot.h>
 
-#include "OgreGUI.h"
-
 
 using namespace GG;
 

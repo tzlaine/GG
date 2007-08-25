@@ -24,8 +24,6 @@
    
 #include "OISInput.h"
 
-#include "OgreGUI.h"
-
 #include <OgreConfigFile.h>
 #include <OgreLogManager.h>
 #include <OgreRenderWindow.h>

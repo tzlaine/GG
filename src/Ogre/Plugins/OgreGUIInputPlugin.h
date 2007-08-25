@@ -26,6 +26,8 @@
 #ifndef _GG_OgreGUIInputPlugin_h_ 
 #define _GG_OgreGUIInputPlugin_h_
 
+#include <GG/Ogre/OgreGUI.h>
+
 #include <OgrePlugin.h>
 
 #include <boost/signals.hpp>
@@ -35,7 +37,7 @@ namespace Ogre { class RenderWindow; }
 
 namespace GG {
 
-class OgreGUIInputPlugin :
+class GG_OGRE_API OgreGUIInputPlugin :
     public Ogre::Plugin
 {
 public:

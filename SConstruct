@@ -60,10 +60,10 @@ options.Add(BoolOption('build_ogre_driver', 'Builds GG Ogre support (the GiGiOgr
 options.Add('with_ogre', 'Root directory of Ogre installation (only required when build_ogre_driver=1)')
 options.Add('with_ogre_include', 'Specify exact include dir for Ogre headers (only required when build_ogre_driver=1)')
 options.Add('with_ogre_libdir', 'Specify exact library dir for Ogre library (only required when build_ogre_driver=1)')
-options.Add(BoolOption('build_ogre_driver_ois_plugin', 'Builds OIS input plugin for the GiGiOgre library', 1))
-options.Add('with_ois', 'Root directory of OIS installation (only required when build_ogre_driver_ois_plugin=1)')
-options.Add('with_ois_include', 'Specify exact include dir for OIS headers (only required when build_ogre_driver_ois_plugin=1)')
-options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only required when build_ogre_driver_ois_plugin=1)')
+options.Add(BoolOption('build_ogre_ois_plugin', 'Builds OIS input plugin for the GiGiOgre library', 1))
+options.Add('with_ois', 'Root directory of OIS installation (only required when build_ogre_ois_plugin=1)')
+options.Add('with_ois_include', 'Specify exact include dir for OIS headers (only required when build_ogre_ois_plugin=1)')
+options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only required when build_ogre_ois_plugin=1)')
 
 
 
@@ -106,7 +106,8 @@ env_cache_keys = [
     'need__vsnprintf_c',
     'libltdl_defines',
     'build_sdl_driver',
-    'build_ogre_driver'
+    'build_ogre_driver',
+    'build_ogre_ois_plugin'
     ]
 if not force_configure:
     try:
@@ -206,6 +207,9 @@ if not force_configure and env['build_ogre_driver']:
         if not ogre_env['build_ogre_driver']:
             print 'Warning: You have requested to build Ogre support, but Ogre was not found, and so has been disabled.  To fix this, run scons configure.'
             env['build_ogre_driver'] = False
+        if env['build_ogre_ois_plugin'] and not ogre_env['build_ogre_ois_plugin']:
+            print 'Warning: You have requested to build the Ogre OIS plugin, but OIS was not found, and so has been disabled.  To fix this, run scons configure.'
+            env['build_ogre_ois_plugin'] = False
     except Exception:
         pass
 
@@ -465,26 +469,49 @@ if not env.GetOption('clean'):
         print 'Configuring GiGiOgre driver...'
         ogre_env = env.Copy()
         ogre_conf = ogre_env.Configure(custom_tests = custom_tests_dict)
+        pkg_config = ogre_conf.CheckPkgConfig('0.15.0')
         AppendPackagePaths('ogre', ogre_env)
         found_it_with_pkg_config = False
         if pkg_config:
             if ogre_conf.CheckPkg('OGRE', ogre_version):
                 ogre_env.ParseConfig('pkg-config --cflags --libs OGRE')
                 found_it_with_pkg_config = True
-        config_failed = False
+        ogre_config_failed = False
         if not found_it_with_pkg_config:
             version_regex = re.compile(r'OGRE_VERSION_MAJOR\s*(\d+).*OGRE_VERSION_MINOR\s*(\d+).*OGRE_VERSION_PATCH\s*(\d+)', re.DOTALL)
             if not ogre_conf.CheckVersionHeader('Ogre', 'OgrePrerequisites.h', version_regex, ogre_version, True):
-                config_failed = True
-        if not config_failed and not ogre_conf.CheckCXXHeader('Ogre.h'):
-            config_failed = True
-        if not config_failed:
+                ogre_config_failed = True
+        if not ogre_config_failed and not ogre_conf.CheckCXXHeader('Ogre.h'):
+            ogre_config_failed = True
+        if not ogre_config_failed:
             if str(Platform()) != 'win32':
                 if not ogre_conf.CheckLib('OgreMain', 'Ogre::Root', '#include <Ogre.h>', 'C++'):
-                    config_failed = True
+                    ogre_config_failed = True
             else:
                 ogre_env.Append(LIBS = ['OgreMain'])
-        if config_failed:
+
+        # OIS Plugin
+        if not ogre_config_failed and env['build_ogre_ois_plugin']:
+            print "Configuring GiGiOgre's OIS plugin..."
+            ois_config_failed = False
+            AppendPackagePaths('ois', ogre_env)
+            found_it_with_pkg_config = False
+            if pkg_config:
+                if ogre_conf.CheckPkg('OIS', ois_version):
+                    ogre_env.ParseConfig('pkg-config --cflags --libs OIS')
+                    found_it_with_pkg_config = True
+            if not found_it_with_pkg_config:
+                version_regex = re.compile(r'OIS_VERSION_MAJOR\s*(\d+).*OIS_VERSION_MINOR\s*(\d+).*OIS_VERSION_PATCH\s*(\d+)', re.DOTALL)
+                if not ogre_conf.CheckVersionHeader('OIS', 'OISPrereqs.h', version_regex, ois_version, True):
+                    ois_config_failed = True
+            if not ois_config_failed and not ogre_conf.CheckCXXHeader('OIS.h'):
+                ois_config_failed = True
+            if ois_config_failed:
+                print "Warning: OIS not configured.  The GiGiOgre library's OIS plugin will not be built!"
+                env['build_ogre_ois_plugin'] = False
+                ogre_env['build_ogre_ois_plugin'] = False
+
+        if ogre_config_failed:
             print 'Warning: Ogre not configured.  The GiGiOgre library will not be built!'
             env['build_ogre_driver'] = False
             ogre_env['build_ogre_driver'] = False
@@ -528,11 +555,10 @@ if env['build_sdl_driver']:
             sdl_env.AppendUnique(CPPDEFINES = ['GIGI_SDL_EXPORTS'])
     gigi_sdl_objects, gigi_sdl_sources = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
 
-    if env['build_sdl_driver']:
-        if env['dynamic']:
-            lib_gigi_sdl = sdl_env.SharedLibrary('GiGiSDL', gigi_sdl_objects)
-        else:
-            lib_gigi_sdl = sdl_env.StaticLibrary('GiGiSDL', gigi_sdl_objects)
+    if env['dynamic']:
+        lib_gigi_sdl = sdl_env.SharedLibrary('GiGiSDL', gigi_sdl_objects)
+    else:
+        lib_gigi_sdl = sdl_env.StaticLibrary('GiGiSDL', gigi_sdl_objects)
 
     Depends(lib_gigi_sdl, lib_gigi)
 
@@ -544,13 +570,28 @@ if env['build_ogre_driver']:
             ogre_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_EXPORTS'])
     gigi_ogre_objects, gigi_ogre_sources = SConscript(os.path.normpath('src/Ogre/SConscript'), exports = 'ogre_env')
 
-    if env['build_ogre_driver']:
-        if env['dynamic']:
-            lib_gigi_ogre = ogre_env.SharedLibrary('GiGiOgre', gigi_ogre_objects)
-        else:
-            lib_gigi_ogre = ogre_env.StaticLibrary('GiGiOgre', gigi_ogre_objects)
+    if env['dynamic']:
+        lib_gigi_ogre = ogre_env.SharedLibrary('GiGiOgre', gigi_ogre_objects)
+    else:
+        lib_gigi_ogre = ogre_env.StaticLibrary('GiGiOgre', gigi_ogre_objects)
 
     Depends(lib_gigi_ogre, lib_gigi)
+
+# define libGiGiOgre Plugin objects
+if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
+    if str(Platform()) == 'win32':
+        ogre_env.Append(LIBS = ['GiGiOgre'])
+        if ogre_env['dynamic']:
+            ogre_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_EXPORTS'])
+    gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_env')
+
+    lib_gigi_ogre_plugins = {}
+    for key, value in gigi_ogre_plugin_objects.items():
+        if env['dynamic']:
+            lib_gigi_ogre_plugins[key] = ogre_env.SharedLibrary(key, value)
+        else:
+            lib_gigi_ogre_plugins[key] = ogre_env.StaticLibrary(key, value)
+        Depends(lib_gigi_ogre_plugins[key], lib_gigi_ogre)
 
 # Generate pkg-config .pc files
 if not missing_pkg_config and str(Platform()) != 'win32':
@@ -627,6 +668,9 @@ if env['build_ogre_driver']:
                               'ln -s ' + lib_dir + '/' + installed_gigi_ogre_libname + ' ' + lib_dir + '/' + gigi_ogre_libname))
     if not missing_pkg_config and str(Platform()) != 'win32':
         Alias('install', Install(env.subst(env['pkgconfigdir']), env.File('GiGiOgre.pc')))
+if env['build_ogre_ois_plugin']:
+    for key, value in lib_gigi_ogre_plugins.items():
+        Alias('install', InstallAs(lib_dir + '/' + key + env['SHLIBSUFFIX'], value))
 
 deletions = [
     Delete(header_dir),
@@ -648,6 +692,9 @@ if env['build_ogre_driver']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_ogre_libname))))
     if not missing_pkg_config and str(Platform()) != 'win32':
         deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), 'GiGiOgre.pc'))))
+if env['build_ogre_driver']:
+    for key, value in lib_gigi_ogre_plugins.items():
+        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, key + env['SHLIBSUFFIX']))))
 uninstall = env.Command('uninstall', '', deletions)
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
@@ -658,6 +705,9 @@ if env['build_sdl_driver']:
     default_targets += lib_gigi_sdl
 if env['build_ogre_driver']:
     default_targets += lib_gigi_ogre
+if env['build_ogre_ois_plugin']:
+    for key, value in lib_gigi_ogre_plugins.items():
+        default_targets += value
 Default(default_targets)
 
 if OptionValue('scons_cache_dir', env):

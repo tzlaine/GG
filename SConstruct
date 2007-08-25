@@ -579,18 +579,20 @@ if env['build_ogre_driver']:
 
 # define libGiGiOgre Plugin objects
 if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
+    ogre_plugin_env = ogre_env.Copy()
     if str(Platform()) == 'win32':
-        ogre_env.Append(LIBS = ['GiGiOgre'])
-        if ogre_env['dynamic']:
-            ogre_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_EXPORTS'])
-    gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_env')
+        ogre_plugin_env.Append(LIBS = ['GiGiOgre', 'OIS'])
+        if ogre_plugin_env['dynamic']:
+            ogre_plugin_env['CPPDEFINES'].remove('GIGI_OGRE_EXPORTS')
+            ogre_plugin_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_PLUGIN_EXPORTS'])
+    gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_plugin_env')
 
     lib_gigi_ogre_plugins = {}
     for key, value in gigi_ogre_plugin_objects.items():
         if env['dynamic']:
-            lib_gigi_ogre_plugins[key] = ogre_env.SharedLibrary(key, value)
+            lib_gigi_ogre_plugins[key] = ogre_plugin_env.SharedLibrary(key, value)
         else:
-            lib_gigi_ogre_plugins[key] = ogre_env.StaticLibrary(key, value)
+            lib_gigi_ogre_plugins[key] = ogre_plugin_env.StaticLibrary(key, value)
         Depends(lib_gigi_ogre_plugins[key], lib_gigi_ogre)
 
 # Generate pkg-config .pc files

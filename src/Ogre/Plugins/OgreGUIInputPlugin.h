@@ -26,18 +26,26 @@
 #ifndef _GG_OgreGUIInputPlugin_h_ 
 #define _GG_OgreGUIInputPlugin_h_
 
-#include <GG/Ogre/OgreGUI.h>
-
 #include <OgrePlugin.h>
 
 #include <boost/signals.hpp>
 
 
+#ifdef _MSC_VER
+# ifdef GIGI_OGRE_PLUGIN_EXPORTS
+#  define GG_OGRE_PLUGIN_API __declspec(dllexport)
+# else
+#  define GG_OGRE_PLUGIN_API __declspec(dllimport)
+# endif
+#else
+# define GG_OGRE_PLUGIN_API
+#endif
+
 namespace Ogre { class RenderWindow; }
 
 namespace GG {
 
-class GG_OGRE_API OgreGUIInputPlugin :
+class GG_OGRE_PLUGIN_API OgreGUIInputPlugin :
     public Ogre::Plugin
 {
 public:

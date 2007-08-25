@@ -33,7 +33,7 @@
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #include <GL/gl.h>
-#include "glext.h"
+#include <GG/glext.h>
 #else
 #include <GL/glx.h>
 #endif

@@ -24,6 +24,8 @@
    
 #include "OISInput.h"
 
+#include <GG/Ogre/OgreGUI.h>
+
 #include <OgreConfigFile.h>
 #include <OgreLogManager.h>
 #include <OgreRenderWindow.h>
@@ -411,13 +413,13 @@ void OISInput::CleanupInputManager()
     }
 }
 
-extern "C" void GG_API dllStartPlugin(void)
+extern "C" void GG_OGRE_PLUGIN_API dllStartPlugin(void)
 {
     gOISInputPlugin = new OISInput();
     Ogre::Root::getSingleton().installPlugin(gOISInputPlugin);
 }
 
-extern "C" void GG_API dllStopPlugin(void)
+extern "C" void GG_OGRE_PLUGIN_API dllStopPlugin(void)
 {
 	Ogre::Root::getSingleton().uninstallPlugin(gOISInputPlugin);
     delete gOISInputPlugin;

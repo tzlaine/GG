@@ -24,6 +24,8 @@
    
 #include "OgreGUIInputPlugin.h"
 
+#include <GG/Ogre/OgreGUI.h>
+
 #include <OgreRoot.h>
 
 

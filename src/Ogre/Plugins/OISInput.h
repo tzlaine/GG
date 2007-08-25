@@ -31,7 +31,7 @@
 
 namespace OIS { class InputManager; }
 
-class GG_OGRE_API OISInput :
+class GG_OGRE_PLUGIN_API OISInput :
     public GG::OgreGUIInputPlugin,
     public OIS::MouseListener,
     public OIS::KeyListener

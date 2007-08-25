@@ -6,5 +6,5 @@ Name: GiGiSDL
 Description: An SDL-based input driver and application framework for use with libGiGi.
 Requires: GiGi = ${version}
 Version: ${version}
-Libs: -lGiGiSDL %(gigi_sdl_libs)s
+Libs: -lGiGiSDL %(driver_libs)s
 Cflags: 

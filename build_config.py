@@ -11,6 +11,8 @@ devil_version = ''.join(devil_version_string.split('.'))
 
 sdl_version = '1.2.7'
 
+ogre_version = '1.4.3'
+
 boost_version_string = '1.34'
 def BoostStringToNumber(version_string):
     pieces = version_string.split('.')

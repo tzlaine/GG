@@ -1,0 +1,14 @@
+# -*- Python -*-
+
+Import('ogre_env')
+
+sources = [
+    'OgreGUI.cpp'
+    ]
+
+if ogre_env['dynamic']:
+    objects = ogre_env.SharedObject(sources)
+else:
+    objects = ogre_env.Object(sources)
+
+Return('objects', 'sources')

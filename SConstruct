@@ -33,22 +33,38 @@ options.Add('bindir', 'Location to install executables', os.path.normpath(os.pat
 options.Add('libdir', 'Location to install libraries', os.path.normpath(os.path.join('$prefix', 'lib')))
 if not missing_pkg_config:
     options.Add('pkgconfigdir', 'Location to install pkg-config .pc files', '/usr/lib/pkgconfig')
-options.Add(BoolOption('build_sdl_driver', 'Builds GG SDL support (the GiGiSDL library)', 1))
 options.Add('with_boost', 'Root directory of boost installation')
 options.Add('with_boost_include', 'Specify exact include dir for boost headers')
 options.Add('with_boost_libdir', 'Specify exact library dir for boost library')
 options.Add('boost_lib_suffix', 'Specify the suffix placed on user-compiled Boost libraries (e.g. "-vc71-mt-gd-1_31")')
 options.Add('boost_signals_namespace',
             'Specify alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost)')
-options.Add('with_sdl', 'Root directory of SDL installation (only required when build_sdl_driver=1)')
-options.Add('with_sdl_include', 'Specify exact include dir for SDL headers (only required when build_sdl_driver=1)')
-options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library (only required when build_sdl_driver=1)')
 options.Add('with_ft', 'Root directory of FreeType2 installation')
 options.Add('with_ft_include', 'Specify exact include dir for FreeType2 headers')
 options.Add('with_ft_libdir', 'Specify exact library dir for FreeType2 library')
 options.Add('with_devil', 'Root directory of DevIL installation')
 options.Add('with_devil_include', 'Specify exact include dir for DevIL headers')
 options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library')
+
+##################################################
+# Drivers                                        #
+##################################################
+# SDL
+options.Add(BoolOption('build_sdl_driver', 'Builds GG SDL support (the GiGiSDL library)', 1))
+options.Add('with_sdl', 'Root directory of SDL installation (only required when build_sdl_driver=1)')
+options.Add('with_sdl_include', 'Specify exact include dir for SDL headers (only required when build_sdl_driver=1)')
+options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library (only required when build_sdl_driver=1)')
+
+# Ogre
+options.Add(BoolOption('build_ogre_driver', 'Builds GG Ogre support (the GiGiOgre library)', 1))
+options.Add('with_ogre', 'Root directory of Ogre installation (only required when build_ogre_driver=1)')
+options.Add('with_ogre_include', 'Specify exact include dir for Ogre headers (only required when build_ogre_driver=1)')
+options.Add('with_ogre_libdir', 'Specify exact library dir for Ogre library (only required when build_ogre_driver=1)')
+options.Add(BoolOption('build_ogre_driver_ois_plugin', 'Builds OIS input plugin for the GiGiOgre library', 1))
+options.Add('with_ois', 'Root directory of OIS installation (only required when build_ogre_driver_ois_plugin=1)')
+options.Add('with_ois_include', 'Specify exact include dir for OIS headers (only required when build_ogre_driver_ois_plugin=1)')
+options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only required when build_ogre_driver_ois_plugin=1)')
+
 
 
 ##################################################
@@ -66,6 +82,7 @@ env['need__vsnprintf_c'] = str(Platform()) == 'posix'
 import sys
 gigi_preconfigured = False
 sdl_preconfigured = False
+ogre_preconfigured = False
 force_configure = False
 command_line_args = sys.argv[1:]
 if 'configure' in command_line_args:
@@ -74,6 +91,7 @@ elif ('-h' in command_line_args) or ('--help' in command_line_args):
     # ensure configuration gets skipped when help is requested
     gigi_preconfigured = True
     sdl_preconfigured = True
+    ogre_preconfigured = True
 ms_linker = 'msvs' in env['TOOLS'] or 'msvc' in env['TOOLS']
 
 env_cache_keys = [
@@ -86,7 +104,9 @@ env_cache_keys = [
     'LIBS',
     'LINKFLAGS',
     'need__vsnprintf_c',
-    'libltdl_defines'
+    'libltdl_defines',
+    'build_sdl_driver',
+    'build_ogre_driver'
     ]
 if not force_configure:
     try:
@@ -144,17 +164,19 @@ Help(GenerateHelpText(options, env))
 options.Save('options.cache', env)
 
 new_options_cache = ParseOptionsCacheFile('options.cache')
-if gigi_preconfigured and sdl_preconfigured:
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured:
     for i in old_options_cache.keys():
         if not new_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:
             gigi_preconfigured = False
             sdl_preconfigured = False
+            ogre_preconfigured = False
             break
-if gigi_preconfigured and sdl_preconfigured:
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured:
     for i in new_options_cache.keys():
         if not old_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:
             gigi_preconfigured = False
             sdl_preconfigured = False
+            ogre_preconfigured = False
             break
 
 if not force_configure and env['build_sdl_driver']:
@@ -166,6 +188,24 @@ if not force_configure and env['build_sdl_driver']:
         for key, value in pickled_values.items():
             sdl_env[key] = value
         sdl_preconfigured = True
+        if not sdl_env['sdl_driver']:
+            print 'Warning: You have requested to build SDL support, but SDL was not found, and so has been disabled.  To fix this, run scons configure.'
+            env['build_sdl_driver'] = False
+    except Exception:
+        pass
+
+if not force_configure and env['build_ogre_driver']:
+    ogre_env = env.Copy()
+    try:
+        f = open('ogre_config.cache', 'r')
+        up = pickle.Unpickler(f)
+        pickled_values = up.load()
+        for key, value in pickled_values.items():
+            ogre_env[key] = value
+        ogre_preconfigured = True
+        if not ogre_env['build_ogre_driver']:
+            print 'Warning: You have requested to build Ogre support, but Ogre was not found, and so has been disabled.  To fix this, run scons configure.'
+            env['build_ogre_driver'] = False
     except Exception:
         pass
 
@@ -180,7 +220,7 @@ if str(Platform()) == 'win32':
             env['dynamic'] = 0
 
 
-if gigi_preconfigured and sdl_preconfigured and ('-h' not in command_line_args) and ('--help' not in command_line_args):
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ('-h' not in command_line_args) and ('--help' not in command_line_args):
     print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
 
 
@@ -188,6 +228,9 @@ if gigi_preconfigured and sdl_preconfigured and ('-h' not in command_line_args) 
 # check configuration                            #
 ##################################################
 if not env.GetOption('clean'):
+    if os.environ.has_key('PKG_CONFIG_PATH'):
+        env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
+
     custom_tests_dict = {'CheckVersionHeader' : CheckVersionHeader,
                          'CheckPkgConfig' : CheckPkgConfig,
                          'CheckPkg' : CheckPkg,
@@ -200,6 +243,8 @@ if not env.GetOption('clean'):
     if not gigi_preconfigured:
         conf = env.Configure(custom_tests = custom_tests_dict)
         
+        pkg_config = conf.CheckPkgConfig('0.15.0')
+
         if str(Platform()) == 'posix':
             print 'Configuring for POSIX system...'
         elif str(Platform()) == 'win32':
@@ -243,9 +288,6 @@ if not env.GetOption('clean'):
                    not conf.CheckLib('GL', 'glBegin') or \
                    not conf.CheckLib('GLU', 'gluLookAt'):
                 Exit(1)
-
-        # pkg-config
-        pkg_config = conf.CheckPkgConfig('0.15.0')
 
         # FreeType2
         AppendPackagePaths('ft', env)
@@ -406,14 +448,53 @@ if not env.GetOption('clean'):
         sdl_conf = sdl_env.Configure(custom_tests = custom_tests_dict)
         sdl_config_script = WhereIs('sdl-config')
         if not sdl_conf.CheckSDL(options, sdl_conf, sdl_config_script, not ms_linker):
-            Exit(1)
-        sdl_conf.CheckConfigSuccess(True)
+            print 'Warning: SDL not configured.  The GiGiSDL library will not be built!'
+            env['build_sdl_driver'] = False
+            sdl_env['build_sdl_driver'] = False
+        sdl_conf.CheckConfigSuccess(sdl_env['build_sdl_driver'])
         sdl_conf.Finish();
         f = open('sdl_config.cache', 'w')
         p = pickle.Pickler(f)
         cache_dict = {}
         for i in env_cache_keys:
             cache_dict[i] = sdl_env.has_key(i) and sdl_env.Dictionary(i) or []
+        p.dump(cache_dict)
+
+    # Ogre
+    if not ogre_preconfigured and env['build_ogre_driver']:
+        print 'Configuring GiGiOgre driver...'
+        ogre_env = env.Copy()
+        ogre_conf = ogre_env.Configure(custom_tests = custom_tests_dict)
+        AppendPackagePaths('ogre', ogre_env)
+        found_it_with_pkg_config = False
+        if pkg_config:
+            if ogre_conf.CheckPkg('OGRE', ogre_version):
+                ogre_env.ParseConfig('pkg-config --cflags --libs OGRE')
+                found_it_with_pkg_config = True
+        config_failed = False
+        if not found_it_with_pkg_config:
+            version_regex = re.compile(r'OGRE_VERSION_MAJOR\s*(\d+).*OGRE_VERSION_MINOR\s*(\d+).*OGRE_VERSION_PATCH\s*(\d+)', re.DOTALL)
+            if not ogre_conf.CheckVersionHeader('Ogre', 'OgrePrerequisites.h', version_regex, ogre_version, True):
+                config_failed = True
+        if not config_failed and not ogre_conf.CheckCXXHeader('Ogre.h'):
+            config_failed = True
+        if not config_failed:
+            if str(Platform()) != 'win32':
+                if not ogre_conf.CheckLib('OgreMain', 'Ogre::Root', '#include <Ogre.h>', 'C++'):
+                    config_failed = True
+            else:
+                ogre_env.Append(LIBS = ['OgreMain'])
+        if config_failed:
+            print 'Warning: Ogre not configured.  The GiGiOgre library will not be built!'
+            env['build_ogre_driver'] = False
+            ogre_env['build_ogre_driver'] = False
+        ogre_conf.CheckConfigSuccess(ogre_env['build_ogre_driver'])
+        ogre_conf.Finish();
+        f = open('ogre_config.cache', 'w')
+        p = pickle.Pickler(f)
+        cache_dict = {}
+        for i in env_cache_keys:
+            cache_dict[i] = ogre_env.has_key(i) and ogre_env.Dictionary(i) or []
         p.dump(cache_dict)
 
     if 'configure' in command_line_args:
@@ -433,6 +514,12 @@ result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript
 gigi_objects += result_objects
 gigi_sources += result_sources
 
+if env['dynamic']:
+    lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
+else:
+    lib_gigi = env.StaticLibrary('GiGi', gigi_objects)
+
+
 # define libGiGiSDL objects
 if env['build_sdl_driver']:
     if str(Platform()) == 'win32':
@@ -441,36 +528,60 @@ if env['build_sdl_driver']:
             sdl_env.AppendUnique(CPPDEFINES = ['GIGI_SDL_EXPORTS'])
     gigi_sdl_objects, gigi_sdl_sources = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
 
-if env['dynamic']:
-    lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
     if env['build_sdl_driver']:
-        lib_gigi_sdl = sdl_env.SharedLibrary('GiGiSDL', gigi_sdl_objects)
-else:
-    lib_gigi = env.StaticLibrary('GiGi', gigi_objects)
-    if env['build_sdl_driver']:
-        lib_gigi_sdl = sdl_env.StaticLibrary('GiGiSDL', gigi_sdl_objects)
+        if env['dynamic']:
+            lib_gigi_sdl = sdl_env.SharedLibrary('GiGiSDL', gigi_sdl_objects)
+        else:
+            lib_gigi_sdl = sdl_env.StaticLibrary('GiGiSDL', gigi_sdl_objects)
 
-Depends(lib_gigi_sdl, lib_gigi)
+    Depends(lib_gigi_sdl, lib_gigi)
 
+# define libGiGiOgre objects
+if env['build_ogre_driver']:
+    if str(Platform()) == 'win32':
+        ogre_env.Append(LIBS = ['GiGi'])
+        if ogre_env['dynamic']:
+            ogre_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_EXPORTS'])
+    gigi_ogre_objects, gigi_ogre_sources = SConscript(os.path.normpath('src/Ogre/SConscript'), exports = 'ogre_env')
+
+    if env['build_ogre_driver']:
+        if env['dynamic']:
+            lib_gigi_ogre = ogre_env.SharedLibrary('GiGiOgre', gigi_ogre_objects)
+        else:
+            lib_gigi_ogre = ogre_env.StaticLibrary('GiGiOgre', gigi_ogre_objects)
+
+    Depends(lib_gigi_ogre, lib_gigi)
+
+# Generate pkg-config .pc files
 if not missing_pkg_config and str(Platform()) != 'win32':
-    gigi_pc = env.Command('GiGi.pc', 'GiGi.pc.in', CreateGiGiPCFile)
-    env.Depends(gigi_pc, 'options.cache')
+    CreateGiGiPCFile(['GiGi.pc'], ['GiGi.pc.in'], env)
     if env['build_sdl_driver']:
-        gigi_sdl_pc = sdl_env.Command('GiGiSDL.pc', 'GiGiSDL.pc.in', CreateGiGiSDLPCFile)
-        sdl_env.Depends(gigi_sdl_pc, 'options.cache')
+        CreateGiGiDriverPCFile(['GiGiSDL.pc'], ['GiGiSDL.pc.in'], sdl_env)
+    if env['build_ogre_driver']:
+        CreateGiGiDriverPCFile(['GiGiOgre.pc'], ['GiGiOgre.pc.in'], ogre_env)
 
 header_dir = os.path.normpath(os.path.join(env.subst(env['incdir']), 'GG'))
 lib_dir = os.path.normpath(env.subst(env['libdir']))
 
 # install target
 gigi_libname = str(lib_gigi[0])
-gigi_sdl_libname = str(lib_gigi_sdl[0])
 installed_gigi_libname = gigi_libname
-installed_gigi_sdl_libname = gigi_sdl_libname
+
+if env['build_sdl_driver']:
+    gigi_sdl_libname = str(lib_gigi_sdl[0])
+    installed_gigi_sdl_libname = gigi_sdl_libname
+
+if env['build_ogre_driver']:
+    gigi_ogre_libname = str(lib_gigi_ogre[0])
+    installed_gigi_ogre_libname = gigi_ogre_libname
+
 if str(Platform()) == 'posix' and env['dynamic']:
     gigi_version_suffix = '.' + gigi_version
     installed_gigi_libname += gigi_version_suffix
-    installed_gigi_sdl_libname += gigi_version_suffix
+    if env['build_sdl_driver']:
+        installed_gigi_sdl_libname += gigi_version_suffix
+    if env['build_ogre_driver']:
+        installed_gigi_ogre_libname += gigi_version_suffix
 
 for root, dirs, files in os.walk('GG'):
     if '.svn' in dirs:
@@ -491,7 +602,7 @@ else:
                           lib_dir + '/' + installed_gigi_libname,
                           'ln -s ' + lib_dir + '/' + installed_gigi_libname + ' ' + lib_dir + '/' + gigi_libname))
 if not missing_pkg_config and str(Platform()) != 'win32':
-    Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_pc))
+    Alias('install', Install(env.subst(env['pkgconfigdir']), env.File('GiGi.pc')))
 if env['build_sdl_driver']:
     if str(Platform()) == 'win32':
         Alias('install', Install(lib_dir, lib_gigi_sdl))
@@ -503,7 +614,19 @@ if env['build_sdl_driver']:
                               lib_dir + '/' + installed_gigi_sdl_libname,
                               'ln -s ' + lib_dir + '/' + installed_gigi_sdl_libname + ' ' + lib_dir + '/' + gigi_sdl_libname))
     if not missing_pkg_config and str(Platform()) != 'win32':
-        Alias('install', Install(env.subst(env['pkgconfigdir']), gigi_sdl_pc))
+        Alias('install', Install(env.subst(env['pkgconfigdir']), env.File('GiGiSDL.pc')))
+if env['build_ogre_driver']:
+    if str(Platform()) == 'win32':
+        Alias('install', Install(lib_dir, lib_gigi_ogre))
+    else:
+        Alias('install', InstallAs(lib_dir + '/' + installed_gigi_ogre_libname, lib_gigi_ogre))
+        if env['dynamic']:
+            Alias('install',
+                  env.Command(lib_dir + '/' + gigi_ogre_libname,
+                              lib_dir + '/' + installed_gigi_ogre_libname,
+                              'ln -s ' + lib_dir + '/' + installed_gigi_ogre_libname + ' ' + lib_dir + '/' + gigi_ogre_libname))
+    if not missing_pkg_config and str(Platform()) != 'win32':
+        Alias('install', Install(env.subst(env['pkgconfigdir']), env.File('GiGiOgre.pc')))
 
 deletions = [
     Delete(header_dir),
@@ -512,23 +635,30 @@ deletions = [
 if str(Platform()) == 'posix' and env['dynamic']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_libname))))
 if not missing_pkg_config and str(Platform()) != 'win32':
-    deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_pc[0])))))
+    deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), 'GiGi.pc'))))
 if env['build_sdl_driver']:
     deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_sdl[0])))))
     if str(Platform()) == 'posix' and env['dynamic']:
         deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_sdl_libname))))
     if not missing_pkg_config and str(Platform()) != 'win32':
-        deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), str(gigi_sdl_pc[0])))))
+        deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), 'GiGiSDL.pc'))))
+if env['build_ogre_driver']:
+    deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, str(lib_gigi_ogre[0])))))
+    if str(Platform()) == 'posix' and env['dynamic']:
+        deletions.append(Delete(os.path.normpath(os.path.join(lib_dir, installed_gigi_ogre_libname))))
+    if not missing_pkg_config and str(Platform()) != 'win32':
+        deletions.append(Delete(os.path.normpath(os.path.join(env.subst(env['pkgconfigdir']), 'GiGiOgre.pc'))))
 uninstall = env.Command('uninstall', '', deletions)
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
 
 # default targets
-if not env['build_sdl_driver']:
-    Default(lib_gigi)
-else:
-    Default(lib_gigi, lib_gigi_sdl)
+default_targets = [lib_gigi]
+if env['build_sdl_driver']:
+    default_targets += lib_gigi_sdl
+if env['build_ogre_driver']:
+    default_targets += lib_gigi_ogre
+Default(default_targets)
 
 if OptionValue('scons_cache_dir', env):
     CacheDir(OptionValue('scons_cache_dir', env))
-

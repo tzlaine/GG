@@ -22,7 +22,7 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
 
-#include "OgreGUI.h"
+#include <GG/Ogre/OgreGUI.h>
 
 #include <GG/EventPump.h>
 

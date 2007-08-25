@@ -37,9 +37,6 @@ def GenerateHelpText(options, env):
         'uninstall',
         'Removes the files installed by the "install" targtet from the installation directory.',
         '',
-##        'msvc_project',
-##        'Creates MSVC project files that can be used to build GiGi.  The project files will only be built with the code generation specified in the options (i.e. Multi-threaded Debug DLL and Multi-threaded DLL will not both be generated).',
-##        '',
         '',
         'Options:',
         '========',
@@ -97,7 +94,7 @@ def CreateGiGiPCFile(target, source, env):
             pc_file_paths_used.append(path)
             values['boost_include'] += ' -I' + (path[0] != '$' and path or env.subst(path))
     for lib in env['LIBS']:
-        if lib.find('IL') == -1 and lib.find('SDL') == -1 and lib not in pc_file_libs_used:
+        if lib.find('IL') == -1 and lib not in pc_file_libs_used:
             pc_file_libs_used.append(lib)
             values['gigi_libs'] += ' -l' + (lib[0] != '$' and lib or env.subst(lib))
     for tgt, src in zip(target, source):
@@ -108,17 +105,21 @@ def CreateGiGiPCFile(target, source, env):
         pc_in.close()
     return None
 
-def CreateGiGiSDLPCFile(target, source, env):
+def CreateGiGiDriverPCFile(target, source, env):
     values = {
         'prefix' : env['prefix'],
         'incdir' : env.subst(env['incdir']),
         'version' : gigi_version,
-        'gigi_sdl_libs' : ''
+        'driver_libs' : ''
     }
     for flag in env['LINKFLAGS']:
         if flag not in pc_file_link_flags_used:
             pc_file_link_flags_used.append(flag)
-            values['gigi_sdl_libs'] += ' ' + (flag[0] != '$' and flag or env.subst(flag))
+            values['driver_libs'] += ' ' + (flag[0] != '$' and flag or env.subst(flag))
+    for lib in env['LIBS']:
+        if lib.find('IL') == -1 and lib not in pc_file_libs_used:
+            pc_file_libs_used.append(lib)
+            values['driver_libs'] += ' -l' + (lib[0] != '$' and lib or env.subst(lib))
     for tgt, src in zip(target, source):
         pc = open(str(tgt), 'w')
         pc_in = open(str(src), 'r')

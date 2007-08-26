@@ -139,6 +139,7 @@ void OgreGUI::HandleSystemEvents()
 void OgreGUI::Enter2DMode()
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
 	using namespace Ogre;
 
@@ -201,10 +202,22 @@ void OgreGUI::Enter2DMode()
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
         glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
     }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
+    glDisableClientState(GL_INDEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_FOG_COORDINATE_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_EDGE_FLAG_ARRAY);
 }
 
 void OgreGUI::Exit2DMode()
-{ glPopAttrib(); }
+{
+    glPopClientAttrib();
+    glPopAttrib();
+}
 
 void OgreGUI::postRenderTargetUpdate(const Ogre::RenderTargetEvent& event)
 { Render(); }

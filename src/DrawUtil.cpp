@@ -46,7 +46,6 @@ namespace { // file-scope constants and functions
                    bool bevel_left, bool bevel_top, bool bevel_right, bool bevel_bottom)
     {
         glDisable(GL_TEXTURE_2D);
-        glEnableClientState(GL_VERTEX_ARRAY);
 
         int inner_x1 = x1 + (bevel_left ? bevel_thick : 0), inner_y1 = y1 + (bevel_top ? bevel_thick : 0),
             inner_x2 = x2 - (bevel_right ? bevel_thick : 0), inner_y2 = y2 - (bevel_bottom ? bevel_thick : 0);
@@ -56,14 +55,25 @@ namespace { // file-scope constants and functions
 
         // draw beveled edges
         if (bevel_thick && (border_color1 != CLR_ZERO || border_color2 != CLR_ZERO)) {
-            glVertexPointer(2, GL_INT, 0, vertices);
             glColor(border_color1);
             if (border_color1 == border_color2) {
-                glDrawArrays(GL_QUAD_STRIP, 0, 10);
+                glBegin(GL_QUAD_STRIP);
+                for (int i = 0; i < 10; ++i) {
+                    glVertex2i(vertices[i * 2 + 0], vertices[i * 2 + 1]);
+                }
+                glEnd();
             } else {
-                glDrawArrays(GL_QUAD_STRIP, 0, 6);
+                glBegin(GL_QUAD_STRIP);
+                for (int i = 0; i < 6; ++i) {
+                    glVertex2i(vertices[i * 2 + 0], vertices[i * 2 + 1]);
+                }
+                glEnd();
                 glColor(border_color2);
-                glDrawArrays(GL_QUAD_STRIP, 4, 6);
+                glBegin(GL_QUAD_STRIP);
+                for (int i = 4; i < 6; ++i) {
+                    glVertex2i(vertices[i * 2 + 0], vertices[i * 2 + 1]);
+                }
+                glEnd();
             }
         }
 
@@ -71,10 +81,14 @@ namespace { // file-scope constants and functions
         if (color != CLR_ZERO) {
             glVertexPointer(2, GL_INT, 2 * 2 * sizeof(GL_INT), vertices);
             glColor(color);
-            glDrawArrays(GL_QUADS, 0, 4);
+            glBegin(GL_QUADS);
+            glVertex2i(inner_x2, inner_y1);
+            glVertex2i(inner_x1, inner_y1);
+            glVertex2i(inner_x1, inner_y2);
+            glVertex2i(inner_x2, inner_y2);
+            glEnd();
         }
 
-        glDisableClientState(GL_VERTEX_ARRAY);
         glEnable(GL_TEXTURE_2D);
     }
 

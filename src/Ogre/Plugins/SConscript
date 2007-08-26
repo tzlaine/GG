@@ -1,9 +1,6 @@
 # -*- Python -*-
 
-Import('ogre_plugin_env')
-
-def PluginName(name):
-    return 'GiGiOgrePlugin_' + name
+Import('ogre_plugin_envs')
 
 common_sources = [
     'OgreGUIInputPlugin.cpp'
@@ -13,17 +10,15 @@ sources = {}
 objects = {}
 
 
-# OIS plugin
-if ogre_plugin_env['build_ogre_ois_plugin']:
-    OIS_plugin_name = PluginName('OIS')
-    ois_souces = [
-        'OISInput.cpp'
+for key, value in ogre_plugin_envs.items():
+    plugin_souces = [
+        key + 'Input.cpp'
         ]
-    sources[OIS_plugin_name] = common_sources + ois_souces
-    if ogre_plugin_env['dynamic']:
-        objects[OIS_plugin_name] = ogre_plugin_env.SharedObject(sources[OIS_plugin_name])
+    sources[key] = common_sources + plugin_souces
+    if value['dynamic']:
+        objects[key] = value.SharedObject(sources[key])
     else:
-        objects[OIS_plugin_name] = ogre_plugin_env.Object(sources[OIS_plugin_name])
+        objects[key] = value.Object(sources[key])
 
 
 Return('objects', 'sources')

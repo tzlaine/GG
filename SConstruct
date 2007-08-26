@@ -83,6 +83,7 @@ import sys
 gigi_preconfigured = False
 sdl_preconfigured = False
 ogre_preconfigured = False
+ogre_ois_preconfigured = False
 force_configure = False
 command_line_args = sys.argv[1:]
 if 'configure' in command_line_args:
@@ -92,6 +93,7 @@ elif ('-h' in command_line_args) or ('--help' in command_line_args):
     gigi_preconfigured = True
     sdl_preconfigured = True
     ogre_preconfigured = True
+    ogre_ois_preconfigured = True
 ms_linker = 'msvs' in env['TOOLS'] or 'msvc' in env['TOOLS']
 
 env_cache_keys = [
@@ -165,19 +167,21 @@ Help(GenerateHelpText(options, env))
 options.Save('options.cache', env)
 
 new_options_cache = ParseOptionsCacheFile('options.cache')
-if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured:
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_preconfigured:
     for i in old_options_cache.keys():
         if not new_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:
             gigi_preconfigured = False
             sdl_preconfigured = False
             ogre_preconfigured = False
+            ogre_ois_preconfigured = False
             break
-if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured:
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_preconfigured:
     for i in new_options_cache.keys():
         if not old_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:
             gigi_preconfigured = False
             sdl_preconfigured = False
             ogre_preconfigured = False
+            ogre_ois_preconfigured = False
             break
 
 if not force_configure and env['build_sdl_driver']:
@@ -207,9 +211,22 @@ if not force_configure and env['build_ogre_driver']:
         if not ogre_env['build_ogre_driver']:
             print 'Warning: You have requested to build Ogre support, but Ogre was not found, and so has been disabled.  To fix this, run scons configure.'
             env['build_ogre_driver'] = False
-        if env['build_ogre_ois_plugin'] and not ogre_env['build_ogre_ois_plugin']:
+    except Exception:
+        pass
+
+if not force_configure and env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
+    ogre_ois_env = ogre_env.Copy()
+    try:
+        f = open('ogre_ois_config.cache', 'r')
+        up = pickle.Unpickler(f)
+        pickled_values = up.load()
+        for key, value in pickled_values.items():
+            ogre_ois_env[key] = value
+        ogre_ois_preconfigured = True
+        if not ogre_ois_env['build_ogre_ois_plugin']:
             print 'Warning: You have requested to build the Ogre OIS plugin, but OIS was not found, and so has been disabled.  To fix this, run scons configure.'
             env['build_ogre_ois_plugin'] = False
+            ogre_env['build_ogre_ois_plugin'] = False
     except Exception:
         pass
 
@@ -224,7 +241,8 @@ if str(Platform()) == 'win32':
             env['dynamic'] = 0
 
 
-if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ('-h' not in command_line_args) and ('--help' not in command_line_args):
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_preconfigured and \
+       ('-h' not in command_line_args) and ('--help' not in command_line_args):
     print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
 
 
@@ -490,27 +508,6 @@ if not env.GetOption('clean'):
             else:
                 ogre_env.Append(LIBS = ['OgreMain'])
 
-        # OIS Plugin
-        if not ogre_config_failed and env['build_ogre_ois_plugin']:
-            print "Configuring GiGiOgre's OIS plugin..."
-            ois_config_failed = False
-            AppendPackagePaths('ois', ogre_env)
-            found_it_with_pkg_config = False
-            if pkg_config:
-                if ogre_conf.CheckPkg('OIS', ois_version):
-                    ogre_env.ParseConfig('pkg-config --cflags --libs OIS')
-                    found_it_with_pkg_config = True
-            if not found_it_with_pkg_config:
-                version_regex = re.compile(r'OIS_VERSION_MAJOR\s*(\d+).*OIS_VERSION_MINOR\s*(\d+).*OIS_VERSION_PATCH\s*(\d+)', re.DOTALL)
-                if not ogre_conf.CheckVersionHeader('OIS', 'OISPrereqs.h', version_regex, ois_version, True):
-                    ois_config_failed = True
-            if not ois_config_failed and not ogre_conf.CheckCXXHeader('OIS.h'):
-                ois_config_failed = True
-            if ois_config_failed:
-                print "Warning: OIS not configured.  The GiGiOgre library's OIS plugin will not be built!"
-                env['build_ogre_ois_plugin'] = False
-                ogre_env['build_ogre_ois_plugin'] = False
-
         if ogre_config_failed:
             print 'Warning: Ogre not configured.  The GiGiOgre library will not be built!'
             env['build_ogre_driver'] = False
@@ -522,6 +519,39 @@ if not env.GetOption('clean'):
         cache_dict = {}
         for i in env_cache_keys:
             cache_dict[i] = ogre_env.has_key(i) and ogre_env.Dictionary(i) or []
+        p.dump(cache_dict)
+
+    # Ogre OIS Plugin
+    if not ogre_ois_preconfigured and env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
+        print "Configuring GiGiOgre's OIS plugin..."
+        ogre_ois_env = ogre_env.Copy()
+        ogre_ois_conf = ogre_ois_env.Configure(custom_tests = custom_tests_dict)
+        pkg_config = ogre_ois_conf.CheckPkgConfig('0.15.0')
+        ois_config_failed = False
+        AppendPackagePaths('ois', ogre_ois_env)
+        found_it_with_pkg_config = False
+        if pkg_config:
+            if ogre_ois_conf.CheckPkg('OIS', ois_version):
+                ogre_ois_env.ParseConfig('pkg-config --cflags --libs OIS')
+                found_it_with_pkg_config = True
+        if not found_it_with_pkg_config:
+            version_regex = re.compile(r'OIS_VERSION_MAJOR\s*(\d+).*OIS_VERSION_MINOR\s*(\d+).*OIS_VERSION_PATCH\s*(\d+)', re.DOTALL)
+            if not ogre_ois_conf.CheckVersionHeader('OIS', 'OISPrereqs.h', version_regex, ois_version, True):
+                ois_config_failed = True
+        if not ois_config_failed and not ogre_ois_conf.CheckCXXHeader('OIS.h'):
+            ois_config_failed = True
+        if ois_config_failed:
+            print "Warning: OIS not configured.  The GiGiOgre library's OIS plugin will not be built!"
+            env['build_ogre_ois_plugin'] = False
+            ogre_env['build_ogre_ois_plugin'] = False
+            ogre_ois_env['build_ogre_ois_plugin'] = False
+        ogre_ois_conf.CheckConfigSuccess(not ois_config_failed)
+        ogre_ois_conf.Finish();
+        f = open('ogre_ois_config.cache', 'w')
+        p = pickle.Pickler(f)
+        cache_dict = {}
+        for i in env_cache_keys:
+            cache_dict[i] = ogre_ois_env.has_key(i) and ogre_ois_env.Dictionary(i) or []
         p.dump(cache_dict)
 
     if 'configure' in command_line_args:
@@ -578,21 +608,24 @@ if env['build_ogre_driver']:
     Depends(lib_gigi_ogre, lib_gigi)
 
 # define libGiGiOgre Plugin objects
-if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
-    ogre_plugin_env = ogre_env.Copy()
-    if str(Platform()) == 'win32':
-        ogre_plugin_env.Append(LIBS = ['GiGiOgre', 'OIS'])
-        if ogre_plugin_env['dynamic']:
-            ogre_plugin_env['CPPDEFINES'].remove('GIGI_OGRE_EXPORTS')
-            ogre_plugin_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_PLUGIN_EXPORTS'])
-    gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_plugin_env')
+if env['build_ogre_driver']:
+    ogre_plugin_envs = {}
+    if env['build_ogre_ois_plugin']:
+        ogre_plugin_envs['OIS'] = ogre_ois_env
+    for key, value in ogre_plugin_envs.items():
+        if str(Platform()) == 'win32':
+            value.Append(LIBS = ['GiGiOgre'])
+            if value['dynamic']:
+                value['CPPDEFINES'].remove('GIGI_OGRE_EXPORTS')
+                value.AppendUnique(CPPDEFINES = ['GIGI_OGRE_PLUGIN_EXPORTS'])
+    gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_plugin_envs')
 
     lib_gigi_ogre_plugins = {}
     for key, value in gigi_ogre_plugin_objects.items():
         if env['dynamic']:
-            lib_gigi_ogre_plugins[key] = ogre_plugin_env.SharedLibrary(key, value)
+            lib_gigi_ogre_plugins[key] = ogre_plugin_envs[key].SharedLibrary(OgrePluginName(key), value)
         else:
-            lib_gigi_ogre_plugins[key] = ogre_plugin_env.StaticLibrary(key, value)
+            lib_gigi_ogre_plugins[key] = ogre_plugin_envs[key].StaticLibrary(OgrePluginName(key), value)
         Depends(lib_gigi_ogre_plugins[key], lib_gigi_ogre)
 
 # Generate pkg-config .pc files

@@ -5,6 +5,9 @@ import re
 import types
 from build_config import *
 
+def OgrePluginName(name):
+    return 'GiGiOgrePlugin_' + name
+
 def OptionValue(key, env):
     return env.subst('$' + key)
 

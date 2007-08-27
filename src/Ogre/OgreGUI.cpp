@@ -124,12 +124,9 @@ void OgreGUI::Run()
     active_renderer->_initRenderTargets();
     root.clearEventTimes();
     try {
-        while (1) {
-            Ogre::WindowEventUtilities::messagePump();
-            HandleSystemEvents();
-            if (!root.renderOneFrame())
-                break;
-        }
+        bool done = false;
+        OgreModalEventPump pump(done);
+        pump();
     } catch (const CleanQuit&) {}
 }
 

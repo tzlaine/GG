@@ -614,9 +614,9 @@ if env['build_ogre_driver']:
         ogre_plugin_envs['OIS'] = ogre_ois_env
     for key, value in ogre_plugin_envs.items():
         if str(Platform()) == 'win32':
-            value.Append(LIBS = ['GiGiOgre'])
+            value.Append(LIBS = ['GiGi', 'GiGiOgre', key])
             if value['dynamic']:
-                if values['CPPDEFINES'].has_key('GIGI_OGRE_EXPORTS'):
+                if 'GIGI_OGRE_EXPORTS' in value['CPPDEFINES']:
                     value['CPPDEFINES'].remove('GIGI_OGRE_EXPORTS')
                 value.AppendUnique(CPPDEFINES = ['GIGI_OGRE_PLUGIN_EXPORTS'])
     gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_plugin_envs')

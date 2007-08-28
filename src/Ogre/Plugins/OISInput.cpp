@@ -307,6 +307,10 @@ void OISInput::initialise()
         m_input_manager->createInputObject(OIS::OISMouse, true));
     m_mouse->setEventCallback(this);
 
+    const OIS::MouseState& mouse_state = m_mouse->getMouseState();
+    mouse_state.width = gui->AppWidth();
+    mouse_state.height = gui->AppHeight();
+
     ConnectHandlers();
 }
 

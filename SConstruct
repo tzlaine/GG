@@ -540,6 +540,8 @@ if not env.GetOption('clean'):
                 ois_config_failed = True
         if not ois_config_failed and not ogre_ois_conf.CheckCXXHeader('OIS.h'):
             ois_config_failed = True
+        if str(Platform()) == 'win32':
+            ogre_ois_env.AppendUnique(LIBS = 'OIS')
         if ois_config_failed:
             print "Warning: OIS not configured.  The GiGiOgre library's OIS plugin will not be built!"
             env['build_ogre_ois_plugin'] = False
@@ -614,7 +616,7 @@ if env['build_ogre_driver']:
         ogre_plugin_envs['OIS'] = ogre_ois_env
     for key, value in ogre_plugin_envs.items():
         if str(Platform()) == 'win32':
-            value.Append(LIBS = ['GiGi', 'GiGiOgre', key])
+            value.AppendUnique(LIBS = ['GiGi', 'GiGiOgre'])
             if value['dynamic']:
                 if 'GIGI_OGRE_EXPORTS' in value['CPPDEFINES']:
                     value['CPPDEFINES'].remove('GIGI_OGRE_EXPORTS')

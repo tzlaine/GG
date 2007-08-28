@@ -26,7 +26,6 @@
 
 #include <GG/EventPump.h>
 
-#include <OgreDataStream.h>
 #include <OgreRenderSystem.h>
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>

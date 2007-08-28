@@ -26,6 +26,7 @@
 #ifndef _GG_OgreGUI_h_ 
 #define _GG_OgreGUI_h_
 
+#include <OgreDataStream.h>
 #include <OgreRenderTargetListener.h>
 #include <OgreSharedPtr.h>
 #include <OgreTimer.h>
@@ -46,7 +47,6 @@
 
 namespace Ogre {
     class RenderWindow;
-    class DataStream;
 }
 
 namespace GG {

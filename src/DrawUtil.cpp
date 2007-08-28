@@ -70,7 +70,7 @@ namespace { // file-scope constants and functions
                 glEnd();
                 glColor(border_color2);
                 glBegin(GL_QUAD_STRIP);
-                for (int i = 4; i < 6; ++i) {
+                for (int i = 4; i < 10; ++i) {
                     glVertex2i(vertices[i * 2 + 0], vertices[i * 2 + 1]);
                 }
                 glEnd();

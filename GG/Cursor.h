@@ -40,7 +40,7 @@ class Texture;
 
 /** Cursor is the base class for GUI-renderable cursors.  A Cursor can be set in the GUI and will be rendered if GUI's
     RenderCursor() member returns true.  Note that it may be necessary to disable the underlying platform's cursor . */
-class Cursor
+class GG_API Cursor
 {
 public:
     /** \name Structors */ //@{
@@ -62,7 +62,7 @@ private:
 
 /** TextureCursor is a very simple subclass of Cursor.  It renders a texture such that the point within the texture that
     represents the hotspot of the cursor is rendered at the click-point of the cursor. */
-class TextureCursor :
+class GG_API TextureCursor :
     public Cursor
 {
 public:

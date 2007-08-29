@@ -706,7 +706,7 @@ if env['build_ogre_driver']:
                               'ln -s ' + lib_dir + '/' + installed_gigi_ogre_libname + ' ' + lib_dir + '/' + gigi_ogre_libname))
     if not missing_pkg_config and str(Platform()) != 'win32':
         Alias('install', Install(env.subst(env['pkgconfigdir']), env.File('GiGiOgre.pc')))
-if env['build_ogre_ois_plugin']:
+if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
     for key, value in lib_gigi_ogre_plugins.items():
         Alias('install', Install(lib_dir, value))
 
@@ -743,7 +743,7 @@ if env['build_sdl_driver']:
     default_targets += lib_gigi_sdl
 if env['build_ogre_driver']:
     default_targets += lib_gigi_ogre
-if env['build_ogre_ois_plugin']:
+if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
     for key, value in lib_gigi_ogre_plugins.items():
         default_targets += value
 Default(default_targets)

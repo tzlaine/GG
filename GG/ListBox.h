@@ -94,17 +94,24 @@ class GG_API ListBox : public Control
 {
 public:
     /** This is a single item in a listbox.  A Row is primarily a container for Controls.  Each cell in a Row contains
-        pointer to a Control-derived object.  Each such Control can be connected to arbitrary functionality using
-        signals and slots.  During dragging and dropping, the data type associated with a Row (DragDropDataType())
+        pointer to a Control-derived object.  As always, each such Control can be connected to arbitrary functionality
+        using signals and slots.  During dragging and dropping, the data type associated with a Row (DragDropDataType())
         indicates to potential drop targets what type of data the Row represents; the target may accept or decline the
         drop based on the data type.  Rows are stored in ListBoxes by reference, not copy; this means that you can
         subclass from Row to create your own custom Row types.  This is the recommended method for associating a row
-        with the non-GUI object that it represents.  \note The margin, column alignment, and width cell data are
-        included so that each Row has all the necessary information with which to render itself (this is primarily
-        needed to facilitate drag-and-drop); these data are duplicates of the margin, alignment, and column widths data
-        found in the owning ListBox, and may be overwritten by the ListBox at any time. */
+        with the non-GUI object that it represents.  Note that all subclasses of Row must declare a SortKeyType, if it
+        differs from std::string, and must provide a SortKey() method if it should differ from the default SortKey()
+        that Row provides.  Note that SortKey is not virtual; this part of its interface is used for compile-time
+        polymorphism -- whatever sorter is used with a Row subclass must know the most-derived type of the Row subclass.
+        \note The margin, column alignment, and width cell data are included so that each Row has all the necessary
+        information with which to render itself (this is primarily needed to facilitate drag-and-drop); these data are
+        duplicates of the margin, alignment, and column widths data found in the owning ListBox, and may be overwritten
+        by the ListBox at any time. */
     struct GG_API Row : public Control
     {
+        /** the type of key used to sort rows */
+        typedef std::string SortKeyType;
+
         /** \name Structors */ //@{
         Row(); ///< default ctor
         Row(int w, int h, const std::string& drag_drop_data_type, Alignment align = ALIGN_VCENTER, int margin = 2); ///< ctor
@@ -112,20 +119,20 @@ public:
         //@}
 
         /** \name Accessors */ //@{
-        virtual const std::string& SortKey(int column) const;  ///< returns the string by which this row may be sorted
-        size_t                     size() const;               ///< returns the number of Controls in this Row
-        bool                       empty() const;              ///< returns true iff there are 0 Controls in this Row
+        SortKeyType SortKey(int column) const;  ///< returns the string by which this row may be sorted
+        size_t      size() const;               ///< returns the number of Controls in this Row
+        bool        empty() const;              ///< returns true iff there are 0 Controls in this Row
 
-        Control*                   operator[](size_t n) const; ///< returns the Control in the \a nth cell of this Row; not range checked
-        Control*                   at(size_t n) const;         ///< returns the Control in the \a nth cell of this Row \throw std::range_error throws when size() <= \a n
+        Control*    operator[](size_t n) const; ///< returns the Control in the \a nth cell of this Row; not range checked
+        Control*    at(size_t n) const;         ///< returns the Control in the \a nth cell of this Row \throw std::range_error throws when size() <= \a n
 
-        Alignment                  RowAlignment() const;       ///< returns the vertical alignment of this Row
-        Alignment                  ColAlignment(int n) const;  ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
-        int                        ColWidth(int n) const;      ///< returns the width of the \a nth cell of this Row; not range checked
-        int                        Margin() const;             ///< returns the amount of space left between the contents of adjacent cells, in pixels
+        Alignment   RowAlignment() const;       ///< returns the vertical alignment of this Row
+        Alignment   ColAlignment(int n) const;  ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
+        int         ColWidth(int n) const;      ///< returns the width of the \a nth cell of this Row; not range checked
+        int         Margin() const;             ///< returns the amount of space left between the contents of adjacent cells, in pixels
 
-        Control* CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const; ///< creates a "shrink-fit" TextControl from text, font, and color parameters
-        Control* CreateControl(const SubTexture& st) const; ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
+        Control*    CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const; ///< creates a "shrink-fit" TextControl from text, font, and color parameters
+        Control*    CreateControl(const SubTexture& st) const; ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
         //@}
 
         /** \name Mutators */ //@{
@@ -162,20 +169,20 @@ public:
     };
 
     /** \name Signal Types */ //@{
-    typedef boost::signal<void ()>                ClearedSignalType;        ///< emitted when the list box is cleared
+    typedef boost::signal<void ()>             ClearedSignalType;        ///< emitted when the list box is cleared
     typedef boost::signal<void (const std::set<int>&)>
-                                                  SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
+                                               SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
     typedef boost::signal<void (int, ListBox::Row*)>
-                                                  RowSignalType;            ///< the signature of row-change-notification signals
+                                               RowSignalType;            ///< the signature of row-change-notification signals
     typedef boost::signal<void (int, ListBox::Row*, const Pt&)>
-                                                  RowClickSignalType;       ///< the signature of row-click-notification signals
-    typedef RowSignalType                         InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
-    typedef RowSignalType                         DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
-    typedef RowClickSignalType                    LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the index of the row left-clicked and the Row contents left-clicked
-    typedef RowClickSignalType                    RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
-    typedef RowSignalType                         DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
-    typedef RowSignalType                         ErasedSignalType;         ///< emitted when a row in the listbox is erased; provides the index of the deletion point
-    typedef boost::signal<void (int)>             BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row
+                                               RowClickSignalType;       ///< the signature of row-click-notification signals
+    typedef RowSignalType                      InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
+    typedef RowSignalType                      DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
+    typedef RowClickSignalType                 LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the index of the row left-clicked and the Row contents left-clicked
+    typedef RowClickSignalType                 RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
+    typedef RowSignalType                      DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
+    typedef RowSignalType                      ErasedSignalType;         ///< emitted when a row in the listbox is erased; provides the index of the deletion point
+    typedef boost::signal<void (int)>          BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row
     //@}
 
     /** \name Slot Types */ //@{
@@ -300,9 +307,14 @@ public:
     void           SetColHeaders(Row* r);                 ///< sets the row used as headings for the columns; this Row becomes property of the ListBox.
     void           RemoveColHeaders();                    ///< removes any columns headings set
 
+    void           SetColWidth(int n, int w);             ///< sets the width of column \n to \a w; not range-checked
     void           SetNumCols(int n);                     ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(int n);                     ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
-    void           SetColWidth(int n, int w);             ///< sets the width of column \n to \a w; not range-checked
+
+    /** sets the comparison function used to sort a given pair of Rows during row sorting.  Note that \a sort_cmp is
+        assumed to produce an ascending order when used to sort; setting the LIST_SORTDESCENDING style can be used to
+        produce a reverse sort. */
+    void           SetSortCmp(const boost::function<bool (const Row&, const Row&, int)>& sort_cmp);
 
     /** fixes the column widths; by default, an empty ListBox will take on the number of columns of its first added
         row. \note The number of columns and their widths may still be set via SetNumCols() and SetColWidth() after this
@@ -335,6 +347,15 @@ public:
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
+
+    /** sorts two Rows of a ListBox using operator<() on the Row::SortKeyType provided by the rows' SortKey() methods.
+        If you want to use operator<() with a Row subclass DerivedRow that has a custom SortKeyType, use
+        DefaultRowCmp<DerivedRow>. */
+    template <class RowType>
+    struct DefaultRowCmp
+    {
+        bool operator()(const Row& lhs, const Row& rhs, int column);
+    };
 
     static const int BORDER_THICK; ///< the thickness with which to render the border of the control
 
@@ -436,6 +457,8 @@ private:
     bool            m_keep_col_widths;  ///< should we keep the column widths, once set?
     bool            m_clip_cells;       ///< if true, the contents of each cell will be clipped to the visible area of that cell (TODO: currently unused)
     int             m_sort_col;         ///< the index of the column data used to sort the list
+    boost::function<bool (const Row&, const Row&, int)>
+                    m_sort_cmp;         ///< the predicate used to sort the values in the m_sort_col column of two rows
     std::set<std::string>
                     m_allowed_drop_types;///< the line item types allowed for use in this listbox
 
@@ -468,6 +491,12 @@ void GG::ListBox::Row::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_col_alignments)
         & BOOST_SERIALIZATION_NVP(m_col_widths)
         & BOOST_SERIALIZATION_NVP(m_margin);
+}
+
+template <class RowType>
+bool GG::ListBox::DefaultRowCmp<RowType>::operator()(const GG::ListBox::Row& lhs, const GG::ListBox::Row& rhs, int column)
+{
+    return static_cast<const RowType&>(lhs).SortKey(column) < static_cast<const RowType&>(rhs).SortKey(column);
 }
 
 template <class Archive>

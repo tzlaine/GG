@@ -49,16 +49,18 @@ namespace {
     class RowSorter // used to sort rows by a certain column (which may contain some empty cells)
     {
     public:
-        RowSorter(int col, bool less) : sort_col(col), return_less(less) {}
+        RowSorter(const boost::function<bool (const ListBox::Row&, const ListBox::Row&, int)>& cmp, int col, bool invert) : m_cmp(cmp), m_sort_col(col), m_invert(invert) {}
 
-        bool operator()(const ListBox::Row* lr, const ListBox::Row* rr)
-        {
-            return return_less ? lr->SortKey(sort_col) < rr->SortKey(sort_col) : lr->SortKey(sort_col) > rr->SortKey(sort_col);
-        }
+        bool operator()(const ListBox::Row* l, const ListBox::Row* r)
+            {
+                bool retval = m_cmp(*l, *r, m_sort_col);
+                return m_invert ? !retval : retval;
+            }
 
     private:
-        const int  sort_col;
-        const bool return_less;
+        boost::function<bool (const ListBox::Row&, const ListBox::Row&, int)> m_cmp;
+        int m_sort_col;
+        bool m_invert;
     };
 
     struct SetStyleAction : AttributeChangedAction<Flags<ListBoxStyle> >
@@ -142,7 +144,7 @@ ListBox::Row::Row(int w, int h, const std::string& drag_drop_data_type, Alignmen
 ListBox::Row::~Row()
 {}
 
-const std::string& ListBox::Row::SortKey(int column) const
+std::string ListBox::Row::SortKey(int column) const
 {
     return at(column)->WindowText();
 }
@@ -343,6 +345,7 @@ ListBox::ListBox() :
     m_keep_col_widths(false),
     m_clip_cells(false),
     m_sort_col(0),
+    m_sort_cmp(DefaultRowCmp<Row>()),
     m_auto_scroll_during_drag_drops(true),
     m_auto_scroll_margin(8),
     m_auto_scrolling_up(false),
@@ -1008,7 +1011,7 @@ void ListBox::SetStyle(Flags<ListBoxStyle> s)
     // if we're going from an unsorted style to a sorted one, do the sorting now
     if (m_style & LIST_NOSORT) {
         if (!(s & LIST_NOSORT))
-            std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_col, !(s & LIST_SORTDESCENDING)));
+            std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_cmp, m_sort_col, s & LIST_SORTDESCENDING));
     } else { // if we're changing the sorting order of a sorted list, reverse the contents
         if (static_cast<bool>(m_style & LIST_SORTDESCENDING) != static_cast<bool>(s & LIST_SORTDESCENDING))
             std::reverse(m_rows.begin(), m_rows.end());
@@ -1080,13 +1083,6 @@ void ListBox::SetNumCols(int n)
     AdjustScrolls(false);
 }
 
-void ListBox::SetSortCol(int n)
-{
-    if (m_sort_col != n && !(m_style & LIST_NOSORT))
-        std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(n, !(m_style & LIST_SORTDESCENDING)));
-    m_sort_col = n;
-}
-
 void ListBox::SetColWidth(int n, int w)
 {
     m_col_widths[n] = w;
@@ -1094,6 +1090,20 @@ void ListBox::SetColWidth(int n, int w)
         m_rows[i]->SetColWidth(n, w);
     }
     AdjustScrolls(false);
+}
+
+void ListBox::SetSortCol(int n)
+{
+    if (m_sort_col != n && !(m_style & LIST_NOSORT))
+        std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_cmp, n, m_style & LIST_SORTDESCENDING));
+    m_sort_col = n;
+}
+
+void ListBox::SetSortCmp(const boost::function<bool (const Row&, const Row&, int)>& sort_cmp)
+{
+    m_sort_cmp = sort_cmp;
+    std::stable_sort(m_rows.begin(), m_rows.end(),
+                     RowSorter(m_sort_cmp, m_sort_col, m_style & LIST_SORTDESCENDING));
 }
 
 void ListBox::LockColWidths()

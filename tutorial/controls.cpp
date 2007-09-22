@@ -80,6 +80,15 @@ struct CustomTextRow : GG::ListBox::Row
     {
         push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
     }
+
+    template <class T>
+    CustomTextRow(const std::string& text, const T& t) :
+        Row()
+    {
+        std::string t_str = boost::lexical_cast<std::string>(t);
+        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(t_str, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
+    }
 };
 
 
@@ -292,13 +301,14 @@ void ControlsTestApp::Initialize()
     // very powerful.  The most important use is to have each row contain a reference to the object that it represents
     // in the list.
     GG::ListBox* list_box = new GG::ListBox(0, 0, 300, 200, GG::CLR_GRAY);
-    list_box->Insert(new CustomTextRow("Item 1"));
-    list_box->Insert(new CustomTextRow("Item 2"));
-    list_box->Insert(new CustomTextRow("Item 3"));
-    list_box->Insert(new CustomTextRow("Item 4"));
-    list_box->Insert(new CustomTextRow("Item 5"));
-    list_box->Insert(new CustomTextRow("Item 6"));
-    list_box->Insert(new CustomTextRow("Item 7"));
+    list_box->SetColHeaders(new CustomTextRow("Type", "Value"));
+    list_box->Insert(new CustomTextRow("Number", 1));
+    list_box->Insert(new CustomTextRow("Number", 2));
+    list_box->Insert(new CustomTextRow("Number", 3));
+    list_box->Insert(new CustomTextRow("Number", 4));
+    list_box->Insert(new CustomTextRow("Number", 5));
+    list_box->Insert(new CustomTextRow("Number", 6));
+    list_box->Insert(new CustomTextRow("Number", 7));
     layout->Add(list_box, 3, 0);
 
     // A multi-line edit control.

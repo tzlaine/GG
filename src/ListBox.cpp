@@ -78,6 +78,21 @@ namespace {
     private:
         ListBox* m_list_box;
     };
+
+    ListBox::Row* GetPtrAtIndex(int i, const std::vector<ListBox::Row*>& rows)
+    { return i == -1 ? 0 : rows[i]; }
+
+    void IncrementIfGE(int& lhs, int rhs)
+    {
+        if (rhs <= lhs)
+            ++lhs;
+    }
+
+    void DecrementIfGE(int& lhs, int rhs)
+    {
+        if (rhs <= lhs)
+            --lhs;
+    }
 }
 
 ///////////////////////////////////////
@@ -381,6 +396,7 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     m_keep_col_widths(false),
     m_clip_cells(false),
     m_sort_col(0),
+    m_sort_cmp(DefaultRowCmp<Row>()),
     m_auto_scroll_during_drag_drops(true),
     m_auto_scroll_margin(8),
     m_auto_scrolling_up(false),
@@ -901,7 +917,9 @@ void ListBox::Clear()
     bool signal = !m_rows.empty(); // inhibit signal if the list box was already empty
     m_rows.clear();
     m_caret = -1;
+    DetachChild(m_header_row);
     DeleteChildren();
+    AttachChild(m_header_row);
     m_vscroll = 0;
     m_hscroll = 0;
     m_first_row_shown = m_first_col_shown = 0;
@@ -1008,16 +1026,18 @@ void ListBox::SetHiliteColor(Clr c)
 
 void ListBox::SetStyle(Flags<ListBoxStyle> s)
 {
-    // if we're going from an unsorted style to a sorted one, do the sorting now
-    if (m_style & LIST_NOSORT) {
-        if (!(s & LIST_NOSORT))
-            std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_cmp, m_sort_col, s & LIST_SORTDESCENDING));
-    } else { // if we're changing the sorting order of a sorted list, reverse the contents
-        if (static_cast<bool>(m_style & LIST_SORTDESCENDING) != static_cast<bool>(s & LIST_SORTDESCENDING))
-            std::reverse(m_rows.begin(), m_rows.end());
-    }
+    Flags<ListBoxStyle> old_style = m_style;
     m_style = s;
     ValidateStyle();
+
+    // if we're going from an unsorted style to a sorted one, do the sorting now
+    if (old_style & LIST_NOSORT) {
+        if (!(s & LIST_NOSORT))
+            Resort();
+    // if we're changing the sorting order of a sorted list, reverse the contents
+    } else if (static_cast<bool>(old_style & LIST_SORTDESCENDING) != static_cast<bool>(s & LIST_SORTDESCENDING)) {
+        Resort();
+    }
 }
 
 void ListBox::SetColHeaders(Row* r)
@@ -1094,16 +1114,16 @@ void ListBox::SetColWidth(int n, int w)
 
 void ListBox::SetSortCol(int n)
 {
-    if (m_sort_col != n && !(m_style & LIST_NOSORT))
-        std::stable_sort(m_rows.begin(), m_rows.end(), RowSorter(m_sort_cmp, n, m_style & LIST_SORTDESCENDING));
+    bool needs_resort = m_sort_col != n && !(m_style & LIST_NOSORT);
     m_sort_col = n;
+    if (needs_resort)
+        Resort();
 }
 
 void ListBox::SetSortCmp(const boost::function<bool (const Row&, const Row&, int)>& sort_cmp)
 {
     m_sort_cmp = sort_cmp;
-    std::stable_sort(m_rows.begin(), m_rows.end(),
-                     RowSorter(m_sort_cmp, m_sort_col, m_style & LIST_SORTDESCENDING));
+    Resort();
 }
 
 void ListBox::LockColWidths()
@@ -1436,11 +1456,9 @@ int ListBox::Insert(Row* row, int at, bool dropped)
                 at = m_rows.size();
             retval = at;
         } else {
-            const std::string& row_str = (*row)[m_sort_col]->WindowText();
             retval = 0;
-            while ((retval < static_cast<int>(m_rows.size())) &&
-                   ((m_style & LIST_SORTDESCENDING) ? (row_str <= (*m_rows[retval])[m_sort_col]->WindowText()) :
-                    (row_str >= (*m_rows[retval])[m_sort_col]->WindowText())))
+            RowSorter less_than(m_sort_cmp, m_sort_col, m_style & LIST_SORTDESCENDING);
+            while (retval < static_cast<int>(m_rows.size()) && !less_than(row, m_rows[retval]))
                 ++retval;
         }
         std::vector<Row*>::iterator insertion_it = m_rows.begin() + retval;
@@ -1451,10 +1469,14 @@ int ListBox::Insert(Row* row, int at, bool dropped)
     }
     int row_height = row->Height();
 
-    if (retval <= m_caret) // move caret down, if needed
-        ++m_caret;
-    if (retval <= dropped_row_original_index)
-        ++dropped_row_original_index;
+    // adjust any affected integer indices
+    IncrementIfGE(m_caret, retval);
+    IncrementIfGE(dropped_row_original_index, retval);
+    IncrementIfGE(m_old_sel_row, retval);
+    IncrementIfGE(m_old_rdown_row, retval);
+    IncrementIfGE(m_lclick_row, retval);
+    IncrementIfGE(m_rclick_row, retval);
+    IncrementIfGE(m_last_row_browsed, retval);
 
     // "bump" the positions of, and selections on, lower rows down one row
     for (int i = static_cast<int>(m_rows.size() - 1); i > retval; --i) {
@@ -1522,8 +1544,13 @@ ListBox::Row* ListBox::Erase(int idx, bool removing_duplicate)
             }
         }
 
-        if (idx <= m_caret) // move caret up, if needed
-            --m_caret;
+        // adjust any affected integer indices
+        DecrementIfGE(m_caret, idx);
+        DecrementIfGE(m_old_sel_row, idx);
+        DecrementIfGE(m_old_rdown_row, idx);
+        DecrementIfGE(m_lclick_row, idx);
+        DecrementIfGE(m_rclick_row, idx);
+        DecrementIfGE(m_last_row_browsed, idx);
 
         AdjustScrolls(false);
 
@@ -1556,6 +1583,48 @@ void ListBox::ResetAutoScrollVars()
     m_auto_scrolling_left = false;
     m_auto_scrolling_right = false;
     m_auto_scroll_timer.Stop();
+}
+
+void ListBox::Resort()
+{
+    Row* caret = GetPtrAtIndex(m_caret, m_rows);
+    std::set<Row*> selections;
+    for (std::set<int>::const_iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
+        selections.insert(m_rows[*it]);
+    }
+    m_selections.clear();
+    Row* old_sel_row = GetPtrAtIndex(m_old_sel_row, m_rows);
+    Row* old_rdown_row = GetPtrAtIndex(m_old_rdown_row, m_rows);
+    Row* lclick_row = GetPtrAtIndex(m_lclick_row, m_rows);
+    Row* rclick_row = GetPtrAtIndex(m_rclick_row, m_rows);
+    Row* last_row_browsed = GetPtrAtIndex(m_last_row_browsed, m_rows);
+
+    std::stable_sort(m_rows.begin(), m_rows.end(),
+                     RowSorter(m_sort_cmp, m_sort_col, m_style & LIST_SORTDESCENDING));
+
+    int y = 0;
+    for (unsigned int i = 0; i < m_rows.size(); ++i) {
+        Row* row = m_rows[i];
+        if (caret == row)
+            m_caret = i;
+        if (selections.find(row) != selections.end())
+            m_selections.insert(i);
+        if (old_sel_row == row)
+            m_old_sel_row = i;
+        if (old_rdown_row == row)
+            m_old_rdown_row = i;
+        if (lclick_row == row)
+            m_lclick_row = i;
+        if (rclick_row == row)
+            m_rclick_row = i;
+        if (last_row_browsed == row)
+            m_last_row_browsed = i;
+
+        row->MoveTo(Pt(0, y));
+        y += row->Height();
+    }
+
+    m_first_row_shown = 0;
 }
 
 void ListBox::ConnectSignals()

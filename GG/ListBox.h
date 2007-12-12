@@ -370,7 +370,7 @@ public:
     //@}
 
 protected:
-/** \name Structors */ //@{
+    /** \name Structors */ //@{
     ListBox(); ///< default ctor
     //@}
 
@@ -411,8 +411,8 @@ protected:
     Row*            Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a dupliate removal (such as for drag-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
-
     void            ResetAutoScrollVars();          ///< resets all variables related to auto-scroll to their initial values
+    void            Resort();                       ///< performs a full resort of all rows, using the current sort functor.
     //@}
 
 private:

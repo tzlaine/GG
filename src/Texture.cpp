@@ -223,9 +223,15 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     ilBindImage(id);
     CheckILErrors("ilBindImage(id)");
     ilLoadImage(const_cast<char*>(filename.c_str()));
-    if ((error = ilGetError()) != IL_NO_ERROR)
+    if ((error = ilGetError()) != IL_NO_ERROR) {
+        std::string call = "ilLoadImage(\"" + filename + "\")";
+        if (VERBOSE_DEVIL_ERROR_REPORTING) {
+            std::cerr << "IL call \"" << call << "\" failed with IL error \"" << iluErrorString(error)
+                      << "\" (code " << error << ")\n";
+        }
+        CheckILErrors(call);
         throw BadFile("Could not load temporary DevIL image from file \'" + filename + "\'");
-    CheckILErrors("ilLoadImage(const_cast<char*>(filename.c_str()))");
+    }
 
     m_filename = filename;
     m_default_width = ilGetInteger(IL_IMAGE_WIDTH);

@@ -44,8 +44,8 @@ TextureCursor::TextureCursor(const boost::shared_ptr<Texture>& texture,
     m_texture(texture),
     m_hotspot(hotspot)
 {
-    m_hotspot.x = std::max(0, std::min(m_hotspot.x, m_texture->DefaultWidth() - 1));
-    m_hotspot.y = std::max(0, std::min(m_hotspot.y, m_texture->DefaultHeight() - 1));
+    m_hotspot.x = std::max(0, std::min(m_hotspot.x, static_cast<int>(m_texture->DefaultWidth() - 1)));
+    m_hotspot.y = std::max(0, std::min(m_hotspot.y, static_cast<int>(m_texture->DefaultHeight() - 1)));
 }
 
 void TextureCursor::Render(const Pt& pt)

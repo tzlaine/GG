@@ -263,6 +263,13 @@ const std::string& FileDlg::ThreeButtonDlgCancelString() const
 void FileDlg::Render()
 {
     FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
+    try {
+        fs::directory_iterator test(s_working_dir);
+    } catch (const fs::filesystem_error& e) {
+        // This ctor has been found to throw on Win32 when we attempt to iterate over a path into a drive that has just
+        // been disconnected (e.g. a USB thumb drive).  In this case, we will just cancel the dialog.
+        CancelClicked();
+    }
 }
 
 void FileDlg::KeyPress(Key key, Flags<ModKey> mod_keys)
@@ -686,6 +693,14 @@ void FileDlg::UpdateList()
             ListBox::Row* row = new ListBox::Row();
             row->push_back("[..]", m_font, m_text_color);
             m_files_list->Insert(row);
+        }
+        try {
+            fs::directory_iterator test(s_working_dir);
+        } catch (const fs::filesystem_error& e) {
+            // This ctor has been found to throw on Win32 when we attempt to iterate over a path into a drive that has
+            // just been disconnected (e.g. a USB thumb drive).  In this case, we will just cancel the dialog.
+            CancelClicked();
+            return;
         }
         for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
             try {

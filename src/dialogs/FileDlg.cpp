@@ -695,9 +695,6 @@ void FileDlg::UpdateList()
                     m_files_list->Insert(row);
                 }
             } catch (const fs::filesystem_error& e) {
-                // ignore files for which permission is denied, and rethrow other exceptions
-                if (e.system_error() != EACCES)
-                    throw;
             }
         }
         if (!m_select_directories) {
@@ -716,9 +713,6 @@ void FileDlg::UpdateList()
                         }
                     }
                 } catch (const fs::filesystem_error& e) {
-                    // ignore files for which permission is denied, and rethrow other exceptions
-                    if (e.system_error() != EACCES)
-                        throw;
                 }
             }
         }

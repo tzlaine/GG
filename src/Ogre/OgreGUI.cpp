@@ -197,7 +197,18 @@ void OgreGUI::Enter2DMode()
     if (glBindBufferARB) {
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
         glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+        glBindBufferARB(GL_PIXEL_PACK_BUFFER, 0);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER, 0);
     }
+
+    typedef void (*UseProgramARBFn)(GLuint);
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+    UseProgramARBFn glUseProgramARB = (UseProgramARBFn)wglGetProcAddress("glUseProgramARB");
+#else
+    UseProgramARBFn glUseProgramARB = (UseProgramARBFn)glXGetProcAddress((const GLubyte* )"glUseProgramARB");
+#endif
+    if (glUseProgramARB)
+        glUseProgramARB(0);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);

@@ -380,18 +380,18 @@ public:
         called multiple times during a single button press-release cycle.  \see GG::GUI */
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** respond to drag msg (even if this Wnd is not dragable).  Drag messages are only sent to the window over which
-        the button was pressed at the beginning of the drag. A window receives this whenever any input device button is
-        down and the cursor is moving while over the window.  The window will also receive drag messages when the mouse
-        is being dragged outside the window's area. */
+    /** respond to left button drag msg (even if this Wnd is not dragable).  Drag messages are only sent to the window
+        over which the button was pressed at the beginning of the drag. A window receives this whenever any input device
+        button is down and the cursor is moving while over the window.  The window will also receive drag messages when
+        the mouse is being dragged outside the window's area. */
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
-    /** respond to release of left mouse button outside window, if it was originally depressed over window.  A window
+    /** respond to release of left mouse button outside this Wnd, if it was originally depressed over this Wnd.  A Wnd
         will receive an LButtonUp() message whenever a drag that started over its area ends, even if the cursor is not
         currently over the window when this happens. */
     virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** respond to release of left mouse button over window, if it was also originally depressed over window.  A window
+    /** respond to release of left mouse button over this Wnd, if it was also originally depressed over this Wnd.  A Wnd
         will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well. */
     virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
 
@@ -402,18 +402,38 @@ public:
         during the interval. */
     virtual void   LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** respond to right button down msg. \see LButtonDown() */
+    /** respond to middle button down msg.  \see LButtonDown() */
+    virtual void   MButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+
+    /** respond to middle button drag msg (even if this Wnd is not dragable).  \see LDrag() */
+    virtual void   MDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+
+    /** respond to release of middle mouse button outside this Wnd, if it was originally depressed over this Wnd.  \see
+        LButtonUp()  */
+    virtual void   MButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+
+    /** respond to release of middle mouse button over this Wnd, if it was also originally depressed over this Wnd.  \see
+        LClick()  */
+    virtual void   MClick(const Pt& pt, Flags<ModKey> mod_keys);
+
+    /** respond to second middle click in window within the time limit.  \see LDoubleClick() */
+    virtual void   MDoubleClick(const Pt& pt, Flags<ModKey> mod_keys);
+
+    /** respond to right button down msg.  \see LButtonDown() */
     virtual void   RButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** respond to release of right mouse button over window, if it was also originally depressed over window. \see
-        LButtonUp() */
+    /** respond to right button drag msg (even if this Wnd is not dragable).  \see LDrag() */
+    virtual void   RDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+
+    /** respond to release of right mouse button outside this Wnd, if it was originally depressed over this Wnd.  \see
+        LButtonUp()  */
+    virtual void   RButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+
+    /** respond to release of right mouse button over this Wnd, if it was also originally depressed over this Wnd.  \see
+        LClick()  */
     virtual void   RClick(const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** respond to second right click in window within the time limit.  A window will receive an RButtonUp() message
-        instead of an RButtonDown() or RClick() message if the right input device button is pressed over a window that
-        was r-clicked within a double-click time interval Note that this means a double click is always preceded by a
-        click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in
-        during the interval. */
+    /** respond to second right click in window within the time limit.  \see LDoubleClick() */
     virtual void   RDoubleClick(const Pt& pt, Flags<ModKey> mod_keys);
 
     virtual void   MouseEnter(const Pt& pt, Flags<ModKey> mod_keys);  ///< respond to cursor entering window's coords
@@ -569,6 +589,7 @@ private:
                       s_default_browse_info_wnd;
 
     friend class GUI;   ///< GUI needs access to \a m_zorder, m_children, etc.
+    friend class GUIImpl;
     friend class Timer; ///< Timer needs to be able to call HandleEvent
     friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
 

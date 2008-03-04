@@ -933,7 +933,21 @@ void Wnd::LClick(const Pt& pt, Flags<ModKey> mod_keys) {}
 
 void Wnd::LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {LClick(pt, mod_keys);}
 
+void Wnd::MButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {}
+
+void Wnd::MButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MClick(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {MClick(pt, mod_keys);}
+
 void Wnd::RButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::RDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {}
+
+void Wnd::RButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
 
 void Wnd::RClick(const Pt& pt, Flags<ModKey> mod_keys) {}
 
@@ -1090,8 +1104,29 @@ void Wnd::HandleEvent(const WndEvent& event)
     case WndEvent::LDoubleClick:
         LDoubleClick(event.Point(), event.ModKeys());
         break;
+    case WndEvent::MButtonDown:
+        MButtonDown(event.Point(), event.ModKeys());
+        break;
+    case WndEvent::MDrag:
+        MDrag(event.Point(), event.DragMove(), event.ModKeys());
+        break;
+    case WndEvent::MButtonUp:
+        MButtonUp(event.Point(), event.ModKeys());
+        break;
+    case WndEvent::MClick:
+        MClick(event.Point(), event.ModKeys());
+        break;
+    case WndEvent::MDoubleClick:
+        MDoubleClick(event.Point(), event.ModKeys());
+        break;
     case WndEvent::RButtonDown:
         RButtonDown(event.Point(), event.ModKeys());
+        break;
+    case WndEvent::RDrag:
+        RDrag(event.Point(), event.DragMove(), event.ModKeys());
+        break;
+    case WndEvent::RButtonUp:
+        RButtonUp(event.Point(), event.ModKeys());
         break;
     case WndEvent::RClick:
         RClick(event.Point(), event.ModKeys());

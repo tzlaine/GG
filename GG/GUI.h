@@ -48,9 +48,9 @@ class PluginInterface;
 class StyleFactory;
 class Texture;
 class Timer;
-struct GUIImplData;
+struct GUIImpl;
 
-/** An abstract base for an GUI framework class to drive the GG GUI.  
+/** An abstract base for an GUI framework class to drive the GG GUI.
     This class has all the essential services that GG requires: 
     - GUI initialization and emergency exit
     - GG event handling
@@ -301,10 +301,11 @@ private:
     // returns the window under \a pt, sending Mouse{Enter|Leave} or DragDrop{Enter|Leave} as appropriate
     Wnd*           CheckedGetWindowUnder(const Pt& pt, Flags<ModKey> mod_keys);
 
-    static GUI*                           s_gui;
-    static boost::shared_ptr<GUIImplData> s_impl;
+    static GUI*                       s_gui;
+    static boost::shared_ptr<GUIImpl> s_impl;
 
     friend class EventPumpBase; ///< allows EventPumpBase types to drive GUI
+    friend struct GUIImpl;
 };
 
 

@@ -70,12 +70,15 @@ namespace {
             mod_keys |= MOD_KEY_META;
         return mod_keys;
     }
+
+    WndEvent::EventType ButtonEvent(WndEvent::EventType left_type, int mouse_button)
+    { return WndEvent::EventType(left_type + (WndEvent::MButtonDown - WndEvent::LButtonDown) * mouse_button); }
 }
 
 // implementation data types
-struct GG::GUIImplData
+struct GG::GUIImpl
 {
-    GUIImplData() :
+    GUIImpl() :
         focus_wnd(0),
         mouse_pos(-1000, -1000),
         mouse_rel(0, 0),
@@ -112,6 +115,10 @@ struct GG::GUIImplData
         button_state[0] = button_state[1] = button_state[2] = false;
         drag_wnds[0] = drag_wnds[1] = drag_wnds[2] = 0;
     }
+
+    void HandlePress(int mouse_button, const GG::Pt& pos, int curr_ticks);
+    void HandleDrag(int mouse_button, const GG::Pt& pos, int curr_ticks);
+    void HandleRelease(int mouse_button, const GG::Pt& pos, int curr_ticks);
 
     std::string  app_name;              // the user-defined name of the apllication
 
@@ -181,9 +188,231 @@ struct GG::GUIImplData
     GUI::LoadWndFn    load_wnd_fn;
 };
 
+void GUIImpl::HandlePress(int mouse_button, const Pt& pos, int curr_ticks)
+{
+    curr_wnd_under_cursor = GUI::s_gui->CheckedGetWindowUnder(pos, mod_keys);
+    last_button_down_repeat_time = 0;
+    prev_wnd_drag_position = Pt();
+    wnd_drag_offset = Pt();
+    prev_button_press_time = 0;
+    browse_info_wnd.reset();
+    browse_target = 0;
+    prev_wnd_under_cursor_time = curr_ticks;
+    prev_button_press_time = curr_ticks;
+    prev_button_press_pos = pos;
+
+    button_state[mouse_button] = true;
+    drag_wnds[mouse_button] = curr_wnd_under_cursor; // track this window as the one being dragged by this mouse button
+    if (curr_wnd_under_cursor) {
+        prev_wnd_drag_position = drag_wnds[mouse_button]->UpperLeft();
+        wnd_drag_offset = pos - prev_wnd_drag_position;
+    }
+
+    // if this window is not a disabled Control window, it becomes the focus window
+    Control* control = 0;
+    if (drag_wnds[mouse_button] && (!(control = dynamic_cast<Control*>(drag_wnds[mouse_button])) || !control->Disabled()))
+        GUI::s_gui->SetFocusWnd(drag_wnds[mouse_button]);
+
+    if (drag_wnds[mouse_button]) {
+        wnd_region = drag_wnds[mouse_button]->WindowRegion(pos); // and determine whether a resize-region of it is being dragged
+        if (wnd_region % 3 == 0) // left regions
+            wnd_resize_offset.x = drag_wnds[mouse_button]->UpperLeft().x - pos.x;
+        else
+            wnd_resize_offset.x = drag_wnds[mouse_button]->LowerRight().x - pos.x;
+        if (wnd_region < 3) // top regions
+            wnd_resize_offset.y = drag_wnds[mouse_button]->UpperLeft().y - pos.y;
+        else
+            wnd_resize_offset.y = drag_wnds[mouse_button]->LowerRight().y - pos.y;
+        Wnd* drag_wnds_root_parent = drag_wnds[mouse_button]->RootParent();
+        GUI::s_gui->MoveUp(drag_wnds_root_parent ? drag_wnds_root_parent : drag_wnds[mouse_button]);
+        drag_wnds[mouse_button]->HandleEvent(WndEvent(ButtonEvent(WndEvent::LButtonDown, mouse_button), pos, mod_keys));
+    }
+
+    prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
+}
+
+void GUIImpl::HandleDrag(int mouse_button, const Pt& pos, int curr_ticks)
+{
+    if (wnd_region == WR_MIDDLE || wnd_region == WR_NONE) { // send drag message to window or initiate drag-drop
+        Pt diff = prev_button_press_pos - pos;
+        int drag_distance = diff.x * diff.x + diff.y * diff.y;
+        // ensure that the minimum drag requirements are met
+        if (min_drag_time < (curr_ticks - prev_button_press_time) &&
+            (min_drag_distance * min_drag_distance < drag_distance) &&
+            drag_drop_wnds.find(drag_wnds[mouse_button]) == drag_drop_wnds.end()) {
+            if (!drag_wnds[mouse_button]->Dragable() &&
+                drag_wnds[mouse_button]->DragDropDataType() != "") {
+                Wnd* parent = drag_wnds[mouse_button]->Parent();
+                Pt offset = prev_button_press_pos - drag_wnds[mouse_button]->UpperLeft();
+                GUI::s_gui->RegisterDragDropWnd(drag_wnds[mouse_button], offset, parent);
+                if (parent)
+                    parent->StartingChildDragDrop(drag_wnds[mouse_button], offset);
+            } else {
+                Pt start_pos = drag_wnds[mouse_button]->UpperLeft();
+                Pt move = (pos - wnd_drag_offset) - prev_wnd_drag_position;
+                drag_wnds[mouse_button]->HandleEvent(WndEvent(ButtonEvent(WndEvent::LDrag, mouse_button), pos, move, mod_keys));
+                prev_wnd_drag_position = drag_wnds[mouse_button]->UpperLeft();
+                if (start_pos != drag_wnds[mouse_button]->UpperLeft())
+                    curr_drag_wnd_dragged = true;
+            }
+        }
+        // notify wnd under cursor of presence of drag-drop wnd(s)
+        if (curr_drag_wnd_dragged && !drag_wnds[mouse_button]->DragDropDataType().empty() ||
+            !drag_drop_wnds.empty()) {
+            bool unregistered_drag = curr_drag_wnd_dragged;
+            curr_wnd_under_cursor = zlist.Pick(pos, GUI::s_gui->ModalWindow(), unregistered_drag ? drag_wnds[mouse_button] : 0);
+            std::map<Wnd*, Pt> drag_drop_wnds;
+            drag_drop_wnds[drag_wnds[mouse_button]] = wnd_drag_offset;
+            std::map<Wnd*, Pt>& drag_drop_wnds_to_use = unregistered_drag ? drag_drop_wnds : drag_drop_wnds;
+            if (curr_wnd_under_cursor && prev_wnd_under_cursor == curr_wnd_under_cursor) {
+                if (curr_drag_drop_here_wnd) {
+                    assert(curr_wnd_under_cursor == curr_drag_drop_here_wnd);
+                    curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropHere, pos, drag_drop_wnds_to_use, mod_keys));
+                } else {
+                    curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropEnter, pos, drag_drop_wnds_to_use, mod_keys));
+                    curr_drag_drop_here_wnd = curr_wnd_under_cursor;
+                }
+            }
+        }
+    } else if (drag_wnds[mouse_button]->Resizable()) { // send appropriate resize message to window
+        Pt offset_pos = pos + wnd_resize_offset;
+        if (Wnd* parent = drag_wnds[mouse_button]->Parent())
+            offset_pos -= parent->ClientUpperLeft();
+        switch (wnd_region)
+        {
+        case WR_TOPLEFT:
+            drag_wnds[mouse_button]->SizeMove(
+                offset_pos,
+                drag_wnds[mouse_button]->RelativeLowerRight());
+            break;
+        case WR_TOP:
+            drag_wnds[mouse_button]->SizeMove(
+                Pt(drag_wnds[mouse_button]->RelativeUpperLeft().x,
+                   offset_pos.y),
+                drag_wnds[mouse_button]->RelativeLowerRight());
+            break;
+        case WR_TOPRIGHT:
+            drag_wnds[mouse_button]->SizeMove(
+                Pt(drag_wnds[mouse_button]->RelativeUpperLeft().x,
+                   offset_pos.y),
+                Pt(offset_pos.x,
+                   drag_wnds[mouse_button]->RelativeLowerRight().y));
+            break;
+        case WR_MIDLEFT:
+            drag_wnds[mouse_button]->SizeMove(
+                Pt(offset_pos.x,
+                   drag_wnds[mouse_button]->RelativeUpperLeft().y),
+                drag_wnds[mouse_button]->RelativeLowerRight());
+            break;
+        case WR_MIDRIGHT:
+            drag_wnds[mouse_button]->SizeMove(
+                drag_wnds[mouse_button]->RelativeUpperLeft(),
+                Pt(offset_pos.x,
+                   drag_wnds[mouse_button]->RelativeLowerRight().y));
+            break;
+        case WR_BOTTOMLEFT:
+            drag_wnds[mouse_button]->SizeMove(
+                Pt(offset_pos.x,
+                   drag_wnds[mouse_button]->RelativeUpperLeft().y),
+                Pt(drag_wnds[mouse_button]->RelativeLowerRight().x,
+                   offset_pos.y));
+            break;
+        case WR_BOTTOM:
+            drag_wnds[mouse_button]->SizeMove(
+                drag_wnds[mouse_button]->RelativeUpperLeft(),
+                Pt(drag_wnds[mouse_button]->RelativeLowerRight().x,
+                   offset_pos.y));
+            break;
+        case WR_BOTTOMRIGHT:
+            drag_wnds[mouse_button]->SizeMove(
+                drag_wnds[mouse_button]->RelativeUpperLeft(),
+                offset_pos);
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void GUIImpl::HandleRelease(int mouse_button, const GG::Pt& pos, int curr_ticks)
+{
+    curr_wnd_under_cursor = GUI::s_gui->CheckedGetWindowUnder(pos, mod_keys);
+    last_button_down_repeat_time = 0;
+    prev_wnd_drag_position = Pt();
+    browse_info_wnd.reset();
+    browse_target = 0;
+    prev_wnd_under_cursor_time = curr_ticks;
+
+    Wnd* click_wnd = drag_wnds[mouse_button];
+    curr_wnd_under_cursor = zlist.Pick(pos, GUI::s_gui->ModalWindow(), curr_drag_wnd_dragged ? click_wnd : 0);
+    button_state[mouse_button] = false;
+    drag_wnds[mouse_button] = 0; // if the mouse button is released, stop the tracking the drag window
+    wnd_region = WR_NONE;        // and clear this, just in case
+    // if the release is over the Wnd where the button-down event occurred, and that Wnd has not been dragged
+    if (click_wnd && curr_wnd_under_cursor == click_wnd) {
+        // if this is second click over a window that just received an click within
+        // the time limit -- it's a double-click, not a click
+        if (double_click_time > 0 && double_click_wnd == click_wnd &&
+            double_click_button == 0) {
+            double_click_wnd = 0;
+            double_click_start_time = -1;
+            double_click_time = -1;
+            click_wnd->HandleEvent(WndEvent(ButtonEvent(WndEvent::LDoubleClick, mouse_button), pos, mod_keys));
+        } else {
+            if (double_click_time > 0) {
+                double_click_wnd = 0;
+                double_click_start_time = -1;
+                double_click_time = -1;
+            } else {
+                double_click_start_time = curr_ticks;
+                double_click_time = 0;
+                double_click_wnd = click_wnd;
+                double_click_button = 0;
+            }
+            click_wnd->HandleEvent(WndEvent(ButtonEvent(WndEvent::LClick, mouse_button), pos, mod_keys));
+        }
+    } else {
+        double_click_wnd = 0;
+        double_click_time = -1;
+        if (click_wnd)
+            click_wnd->HandleEvent(WndEvent(ButtonEvent(WndEvent::LButtonUp, mouse_button), pos, mod_keys));
+        if (curr_wnd_under_cursor) {
+            std::list<Wnd*> drag_wnds;
+            if (drag_drop_wnds.empty()) {
+                if (click_wnd && click_wnd->DragDropDataType() != "") {
+                    drag_wnds.push_back(click_wnd);
+                    drag_drop_originating_wnd = click_wnd->Parent();
+                    std::map<Wnd*, Pt> drag_drop_wnds;
+                    drag_drop_wnds[click_wnd] = wnd_drag_offset;
+                    curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
+                    curr_drag_drop_here_wnd = 0;
+                    curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
+                    if (drag_drop_originating_wnd)
+                        drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, curr_wnd_under_cursor);
+                }
+            } else {
+                for (std::map<Wnd*, Pt>::iterator it = drag_drop_wnds.begin();
+                     it != drag_drop_wnds.end();
+                     ++it) {
+                    drag_wnds.push_back(it->first);
+                }
+                curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
+                curr_drag_drop_here_wnd = 0;
+                curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
+                if (drag_drop_originating_wnd)
+                    drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, curr_wnd_under_cursor);
+            }
+        }
+    }
+    drag_drop_originating_wnd = 0;
+    drag_drop_wnds.clear();
+    prev_wnd_under_cursor = curr_wnd_under_cursor; // update this for the next time around
+    curr_drag_wnd_dragged = false;
+}
+
 // static member(s)
-GUI*                           GUI::s_gui = 0;
-boost::shared_ptr<GUIImplData> GUI::s_impl;
+GUI*                       GUI::s_gui = 0;
+boost::shared_ptr<GUIImpl> GUI::s_impl;
 
 // member functions
 GUI::GUI(const std::string& app_name)
@@ -191,7 +420,7 @@ GUI::GUI(const std::string& app_name)
     assert(!s_gui);
     s_gui = this;
     assert(!s_impl);
-    s_impl.reset(new GUIImplData());
+    s_impl.reset(new GUIImpl());
     s_impl->app_name = app_name;
 }
 
@@ -314,13 +543,13 @@ const boost::shared_ptr<Cursor>& GUI::GetCursor() const
 
 GUI::const_accel_iterator GUI::accel_begin() const
 {
-    const GUIImplData* impl = s_impl.get();
+    const GUIImpl* impl = s_impl.get();
     return impl->accelerators.begin();
 }
 
 GUI::const_accel_iterator GUI::accel_end() const
 {
-    const GUIImplData* impl = s_impl.get();
+    const GUIImpl* impl = s_impl.get();
     return impl->accelerators.end();
 }
 
@@ -394,96 +623,13 @@ void GUI::HandleGGEvent(EventType event, Key key, Flags<ModKey> mod_keys, const 
         s_impl->mouse_pos = pos; // record mouse position
         s_impl->mouse_rel = rel; // record mouse movement
 
-        if (s_impl->drag_wnds[0]) { // only respond to left mouse button drags
-            if (s_impl->wnd_region == WR_MIDDLE || s_impl->wnd_region == WR_NONE) { // send drag message to window or initiate drag-drop
-                Pt diff = s_impl->prev_button_press_pos - pos;
-                int drag_distance = diff.x * diff.x + diff.y * diff.y;
-                // ensure that the minimum drag requirements are met
-                if (s_impl->min_drag_time < (curr_ticks - s_impl->prev_button_press_time) &&
-                    (s_impl->min_drag_distance * s_impl->min_drag_distance < drag_distance) &&
-                    s_impl->drag_drop_wnds.find(s_impl->drag_wnds[0]) == s_impl->drag_drop_wnds.end()) {
-                    if (!s_impl->drag_wnds[0]->Dragable() &&
-                        s_impl->drag_wnds[0]->DragDropDataType() != "") {
-                        Wnd* parent = s_impl->drag_wnds[0]->Parent();
-                        Pt offset = s_impl->prev_button_press_pos - s_impl->drag_wnds[0]->UpperLeft();
-                        RegisterDragDropWnd(s_impl->drag_wnds[0], offset, parent);
-                        if (parent)
-                            parent->StartingChildDragDrop(s_impl->drag_wnds[0], offset);
-                    } else {
-                        Pt start_pos = s_impl->drag_wnds[0]->UpperLeft();
-                        Pt move = (pos - s_impl->wnd_drag_offset) - s_impl->prev_wnd_drag_position;
-                        s_impl->drag_wnds[0]->HandleEvent(WndEvent(WndEvent::LDrag, pos, move, mod_keys));
-                        s_impl->prev_wnd_drag_position = s_impl->drag_wnds[0]->UpperLeft();
-                        if (start_pos != s_impl->drag_wnds[0]->UpperLeft())
-                            s_impl->curr_drag_wnd_dragged = true;
-                    }
-                }
-                // notify wnd under cursor of presence of drag-drop wnd(s)
-                if (s_impl->curr_drag_wnd_dragged && !s_impl->drag_wnds[0]->DragDropDataType().empty() ||
-                    !s_impl->drag_drop_wnds.empty()) {
-                    bool unregistered_drag = s_impl->curr_drag_wnd_dragged;
-                    s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), unregistered_drag ? s_impl->drag_wnds[0] : 0);
-                    std::map<Wnd*, Pt> drag_drop_wnds;
-                    drag_drop_wnds[s_impl->drag_wnds[0]] = s_impl->wnd_drag_offset;
-                    std::map<Wnd*, Pt>& drag_drop_wnds_to_use = unregistered_drag ? drag_drop_wnds : s_impl->drag_drop_wnds;
-                    if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor) {
-                        if (s_impl->curr_drag_drop_here_wnd) {
-                            assert(s_impl->curr_wnd_under_cursor == s_impl->curr_drag_drop_here_wnd);
-                            s_impl->curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropHere, pos, drag_drop_wnds_to_use, mod_keys));
-                        } else {
-                            s_impl->curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropEnter, pos, drag_drop_wnds_to_use, mod_keys));
-                            s_impl->curr_drag_drop_here_wnd = s_impl->curr_wnd_under_cursor;
-                        }
-                    }
-                }
-            } else if (s_impl->drag_wnds[0]->Resizable()) { // send appropriate resize message to window
-                Pt offset_pos = pos + s_impl->wnd_resize_offset;
-                if (Wnd* parent = s_impl->drag_wnds[0]->Parent())
-                    offset_pos -= parent->ClientUpperLeft();
-                switch (s_impl->wnd_region)
-                {
-                case WR_TOPLEFT:
-                    s_impl->drag_wnds[0]->SizeMove(offset_pos, s_impl->drag_wnds[0]->RelativeLowerRight());
-                    break;
-                case WR_TOP:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->RelativeUpperLeft().x,
-                                                      offset_pos.y),
-                                                   s_impl->drag_wnds[0]->RelativeLowerRight());
-                    break;
-                case WR_TOPRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(s_impl->drag_wnds[0]->RelativeUpperLeft().x,
-                                                      offset_pos.y),
-                                                   Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->RelativeLowerRight().y));
-                    break;
-                case WR_MIDLEFT:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->RelativeUpperLeft().y),
-                                                   s_impl->drag_wnds[0]->RelativeLowerRight());
-                    break;
-                case WR_MIDRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->RelativeUpperLeft(),
-                                                   Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->RelativeLowerRight().y));
-                    break;
-                case WR_BOTTOMLEFT:
-                    s_impl->drag_wnds[0]->SizeMove(Pt(offset_pos.x,
-                                                      s_impl->drag_wnds[0]->RelativeUpperLeft().y),
-                                                   Pt(s_impl->drag_wnds[0]->RelativeLowerRight().x,
-                                                      offset_pos.y));
-                    break;
-                case WR_BOTTOM:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->RelativeUpperLeft(),
-                                                   Pt(s_impl->drag_wnds[0]->RelativeLowerRight().x,
-                                                      offset_pos.y));
-                    break;
-                case WR_BOTTOMRIGHT:
-                    s_impl->drag_wnds[0]->SizeMove(s_impl->drag_wnds[0]->RelativeUpperLeft(), offset_pos);
-                    break;
-                default:
-                    break;
-                }
-            }
+        if (s_impl->drag_wnds[0] || s_impl->drag_wnds[1] || s_impl->drag_wnds[2]) {
+            if (s_impl->drag_wnds[0])
+                s_impl->HandleDrag(0, pos, curr_ticks);
+            if (s_impl->drag_wnds[1])
+                s_impl->HandleDrag(1, pos, curr_ticks);
+            if (s_impl->drag_wnds[2])
+                s_impl->HandleDrag(2, pos, curr_ticks);
         } else if (s_impl->curr_wnd_under_cursor && s_impl->prev_wnd_under_cursor == s_impl->curr_wnd_under_cursor) { // if !s_impl->drag_wnds[0] and we're moving over the same (valid) object we were during the last iteration
             s_impl->curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::MouseHere, pos, mod_keys));
             ProcessBrowseInfo();
@@ -497,174 +643,14 @@ void GUI::HandleGGEvent(EventType event, Key key, Flags<ModKey> mod_keys, const 
         break; }
     case LPRESS:
     case MPRESS:
-    case RPRESS: {
-        s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, mod_keys);
-        s_impl->last_button_down_repeat_time = 0;
-        s_impl->prev_wnd_drag_position = Pt();
-        s_impl->wnd_drag_offset = Pt();
-        s_impl->prev_button_press_time = 0;
-        s_impl->browse_info_wnd.reset();
-        s_impl->browse_target = 0;
-        s_impl->prev_wnd_under_cursor_time = curr_ticks;
-        s_impl->prev_button_press_time = curr_ticks;
-        s_impl->prev_button_press_pos = pos;
-        switch (event) {
-        case LPRESS: {
-            s_impl->button_state[0] = true;
-            s_impl->drag_wnds[0] = s_impl->curr_wnd_under_cursor; // track this window as the one being dragged by the left mouse button
-            if (s_impl->curr_wnd_under_cursor) {
-                s_impl->prev_wnd_drag_position = s_impl->drag_wnds[0]->UpperLeft();
-                s_impl->wnd_drag_offset = pos - s_impl->prev_wnd_drag_position;
-            }
-            // if this window is not a disabled Control window, it becomes the focus window
-            Control* control = 0;
-            if (s_impl->drag_wnds[0] && (!(control = dynamic_cast<Control*>(s_impl->drag_wnds[0])) || !control->Disabled()))
-                SetFocusWnd(s_impl->drag_wnds[0]);
-            if (s_impl->drag_wnds[0]) {
-                s_impl->wnd_region = s_impl->drag_wnds[0]->WindowRegion(pos); // and determine whether a resize-region of it is being dragged
-                if (s_impl->wnd_region % 3 == 0) // left regions
-                    s_impl->wnd_resize_offset.x = s_impl->drag_wnds[0]->UpperLeft().x - pos.x;
-                else
-                    s_impl->wnd_resize_offset.x = s_impl->drag_wnds[0]->LowerRight().x - pos.x;
-                if (s_impl->wnd_region < 3) // top regions
-                    s_impl->wnd_resize_offset.y = s_impl->drag_wnds[0]->UpperLeft().y - pos.y;
-                else
-                    s_impl->wnd_resize_offset.y = s_impl->drag_wnds[0]->LowerRight().y - pos.y;
-                Wnd* drag_wnds_root_parent = s_impl->drag_wnds[0]->RootParent();
-                MoveUp(drag_wnds_root_parent ? drag_wnds_root_parent : s_impl->drag_wnds[0]); // move root window up to top of z-order
-                s_impl->drag_wnds[0]->HandleEvent(WndEvent(WndEvent::LButtonDown, pos, mod_keys));
-            }
-            break; }
-        case MPRESS: {
-            s_impl->button_state[1] = true;
-            break; }
-        case RPRESS: {
-            s_impl->button_state[2] = true;
-            s_impl->drag_wnds[2] = s_impl->curr_wnd_under_cursor;  // track this window as the one being dragged by the right mouse button
-            if (s_impl->drag_wnds[2])
-                s_impl->drag_wnds[2]->HandleEvent(WndEvent(WndEvent::RButtonDown, pos, mod_keys));
-            break; }
-        default: break;
-        }
-        s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
-        break; }
+    case RPRESS:
+        s_impl->HandlePress(event - LPRESS, pos, curr_ticks);
+        break;
     case LRELEASE:
     case MRELEASE:
-    case RRELEASE: {
-        s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, mod_keys);
-        s_impl->last_button_down_repeat_time = 0;
-        s_impl->prev_wnd_drag_position = Pt();
-        s_impl->browse_info_wnd.reset();
-        s_impl->browse_target = 0;
-        s_impl->prev_wnd_under_cursor_time = curr_ticks;
-        switch (event) {
-        case LRELEASE: {
-            Wnd* click_wnd = s_impl->drag_wnds[0];
-            s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), s_impl->curr_drag_wnd_dragged ? click_wnd : 0);
-            s_impl->button_state[0] = false;
-            s_impl->drag_wnds[0] = 0;       // if the mouse button is released, stop the tracking the drag window
-            s_impl->wnd_region = WR_NONE;   // and clear this, just in case
-            // if the release is over the Wnd where the button-down event occurred, and that Wnd has not been dragged
-            if (click_wnd && s_impl->curr_wnd_under_cursor == click_wnd) {
-                // if this is second l-click over a window that just received an l-click within
-                // the time limit -- it's a double-click, not a click
-                if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == click_wnd &&
-                    s_impl->double_click_button == 0) {
-                    s_impl->double_click_wnd = 0;
-                    s_impl->double_click_start_time = -1;
-                    s_impl->double_click_time = -1;
-                    click_wnd->HandleEvent(WndEvent(WndEvent::LDoubleClick, pos, mod_keys));
-                } else {
-                    if (s_impl->double_click_time > 0) {
-                        s_impl->double_click_wnd = 0;
-                        s_impl->double_click_start_time = -1;
-                        s_impl->double_click_time = -1;
-                    } else {
-                        s_impl->double_click_start_time = curr_ticks;
-                        s_impl->double_click_time = 0;
-                        s_impl->double_click_wnd = click_wnd;
-                        s_impl->double_click_button = 0;
-                    }
-                    click_wnd->HandleEvent(WndEvent(WndEvent::LClick, pos, mod_keys));
-                }
-            } else {
-                s_impl->double_click_wnd = 0;
-                s_impl->double_click_time = -1;
-                if (click_wnd)
-                    click_wnd->HandleEvent(WndEvent(WndEvent::LButtonUp, pos, mod_keys));
-                if (s_impl->curr_wnd_under_cursor) {
-                    std::list<Wnd*> drag_wnds;
-                    if (s_impl->drag_drop_wnds.empty()) {
-                        if (click_wnd && click_wnd->DragDropDataType() != "") {
-                            drag_wnds.push_back(click_wnd);
-                            s_impl->drag_drop_originating_wnd = click_wnd->Parent();
-                            std::map<Wnd*, Pt> drag_drop_wnds;
-                            drag_drop_wnds[click_wnd] = s_impl->wnd_drag_offset;
-                            s_impl->curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
-                            s_impl->curr_drag_drop_here_wnd = 0;
-                            s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
-                            if (s_impl->drag_drop_originating_wnd)
-                                s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
-                        }
-                    } else {
-                        for (std::map<Wnd*, Pt>::iterator it = s_impl->drag_drop_wnds.begin();
-                             it != s_impl->drag_drop_wnds.end();
-                             ++it) {
-                            drag_wnds.push_back(it->first);
-                        }
-                        s_impl->curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
-                        s_impl->curr_drag_drop_here_wnd = 0;
-                        s_impl->curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
-                        if (s_impl->drag_drop_originating_wnd)
-                            s_impl->drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, s_impl->curr_wnd_under_cursor);
-                    }
-                }
-            }
-            s_impl->drag_drop_originating_wnd = 0;
-            s_impl->drag_drop_wnds.clear();
-            break; }
-        case MRELEASE: {
-            Wnd* click_wnd = s_impl->drag_wnds[1];
-            s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), s_impl->curr_drag_wnd_dragged ? click_wnd : 0);
-            s_impl->button_state[1] = false;
-            s_impl->double_click_wnd = 0;
-            s_impl->double_click_time = -1;
-            break; }
-        case RRELEASE: {
-            Wnd* click_wnd = s_impl->drag_wnds[2];
-            s_impl->curr_wnd_under_cursor = s_impl->zlist.Pick(pos, ModalWindow(), s_impl->curr_drag_wnd_dragged ? click_wnd : 0);
-            s_impl->button_state[2] = false;
-            s_impl->drag_wnds[2] = 0;
-            if (click_wnd && s_impl->curr_wnd_under_cursor == click_wnd) { // if the release is over the place where the button-down event occurred
-                // if this is second r-click over a window that just received an r-click within
-                // the time limit -- it's a double-click, not a click
-                if (s_impl->double_click_time > 0 && s_impl->double_click_wnd == click_wnd &&
-                    s_impl->double_click_button == 2) {
-                    s_impl->double_click_wnd = 0;
-                    s_impl->double_click_time = -1;
-                    click_wnd->HandleEvent(WndEvent(WndEvent::RDoubleClick, pos, mod_keys));
-                } else {
-                    if (s_impl->double_click_time > 0) {
-                        s_impl->double_click_wnd = 0;
-                        s_impl->double_click_time = -1;
-                    } else {
-                        s_impl->double_click_time = 0;
-                        s_impl->double_click_wnd = click_wnd;
-                        s_impl->double_click_button = 2;
-                    }
-                    click_wnd->HandleEvent(WndEvent(WndEvent::RClick, pos, mod_keys));
-                }
-            } else {
-                s_impl->double_click_wnd = 0;
-                s_impl->double_click_time = -1;
-            }
-            break; }
-        default:
-            break;
-        }
-        s_impl->prev_wnd_under_cursor = s_impl->curr_wnd_under_cursor; // update this for the next time around
-        s_impl->curr_drag_wnd_dragged = false;
-        break; }
+    case RRELEASE:
+        s_impl->HandleRelease(event - LRELEASE, pos, curr_ticks);
+        break;
     case MOUSEWHEEL: {
         s_impl->curr_wnd_under_cursor = CheckedGetWindowUnder(pos, mod_keys);
         s_impl->browse_info_wnd.reset();

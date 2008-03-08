@@ -116,7 +116,8 @@ MultiEdit::MultiEdit() :
     m_first_row_shown(0),
     m_max_lines_history(0),
     m_vscroll(0),
-    m_hscroll(0)
+    m_hscroll(0),
+    m_preserve_text_position_on_next_set_text(false)
 {}
 
 MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
@@ -130,7 +131,8 @@ MultiEdit::MultiEdit(int x, int y, int w, int h, const std::string& str, const b
     m_first_row_shown(0),
     m_max_lines_history(0),
     m_vscroll(0),
-    m_hscroll(0)
+    m_hscroll(0),
+    m_preserve_text_position_on_next_set_text(false)
 {
     SetColor(color);
     Resize(Pt(w, h));
@@ -531,70 +533,76 @@ void MultiEdit::SelectAll()
 
 void MultiEdit::SetText(const std::string& str)
 {
-     bool scroll_to_end = (m_style & MULTI_TERMINAL_STYLE) &&
-          (!m_vscroll || m_vscroll->ScrollRange().second - m_vscroll->PosnRange().second <= 1);
+    if (m_preserve_text_position_on_next_set_text) {
+        TextControl::SetText(str);
+    } else {
+        bool scroll_to_end = (m_style & MULTI_TERMINAL_STYLE) &&
+            (!m_vscroll || m_vscroll->ScrollRange().second - m_vscroll->PosnRange().second <= 1);
 
-    // trim the rows, if required by m_max_lines_history
-    Pt cl_sz = ClientSize();
-    Flags<TextFormat> format = GetTextFormat();
-    if (0 < m_max_lines_history) {
-        std::vector<Font::LineData> lines;
-        GetFont()->DetermineLines(str, format, cl_sz.x, lines);
-        if (m_max_lines_history < static_cast<int>(lines.size())) {
-            int first_line = 0;
-            int last_line = m_max_lines_history - 1;
-            int cursor_begin_idx = -1; // used to correct the cursor range when lines get chopped
-            int cursor_end_idx = -1;
-            if (m_style & MULTI_TERMINAL_STYLE) {
-                first_line = lines.size() - m_max_lines_history;
-                last_line = lines.size() - 1;
-            }
-            int first_line_first_char_idx = StringIndexOf(first_line, 0, &lines);
-            int last_line_last_char_idx = last_line < static_cast<int>(lines.size() - 1) ? StringIndexOf(last_line + 1, 0, &lines) : str.size();
-            if (m_style & MULTI_TERMINAL_STYLE) {
-                // chopping these lines off the front will invalidate the cursor range unless we do this
-                cursor_begin_idx = std::max(0, StringIndexOf(m_cursor_begin.first, m_cursor_begin.second, &lines) - first_line_first_char_idx);
-                cursor_end_idx = std::max(0, StringIndexOf(m_cursor_end.first, m_cursor_end.second, &lines) - first_line_first_char_idx);
-            }
-            TextControl::SetText(str.substr(first_line_first_char_idx, last_line_last_char_idx - first_line_first_char_idx));
-            if (cursor_begin_idx != -1 && cursor_end_idx != -1) {
-                bool found_cursor_begin = false;
-                bool found_cursor_end = false;
-                for (unsigned int i = 0; i < GetLineData().size(); ++i) {
-                    if (!found_cursor_begin && cursor_begin_idx <= GetLineData()[i].char_data.back().original_char_index) {
-                        m_cursor_begin.first = i;
-                        m_cursor_begin.second = cursor_begin_idx - StringIndexOf(i, 0);
-                        found_cursor_begin = true;
-                    }
-                    if (!found_cursor_end && cursor_end_idx <= GetLineData()[i].char_data.back().original_char_index) {
-                        m_cursor_end.first = i;
-                        m_cursor_end.second = cursor_end_idx - StringIndexOf(i, 0);
-                        found_cursor_end = true;
+        // trim the rows, if required by m_max_lines_history
+        Pt cl_sz = ClientSize();
+        Flags<TextFormat> format = GetTextFormat();
+        if (0 < m_max_lines_history) {
+            std::vector<Font::LineData> lines;
+            GetFont()->DetermineLines(str, format, cl_sz.x, lines);
+            if (m_max_lines_history < static_cast<int>(lines.size())) {
+                int first_line = 0;
+                int last_line = m_max_lines_history - 1;
+                int cursor_begin_idx = -1; // used to correct the cursor range when lines get chopped
+                int cursor_end_idx = -1;
+                if (m_style & MULTI_TERMINAL_STYLE) {
+                    first_line = lines.size() - m_max_lines_history;
+                    last_line = lines.size() - 1;
+                }
+                int first_line_first_char_idx = StringIndexOf(first_line, 0, &lines);
+                int last_line_last_char_idx = last_line < static_cast<int>(lines.size() - 1) ? StringIndexOf(last_line + 1, 0, &lines) : str.size();
+                if (m_style & MULTI_TERMINAL_STYLE) {
+                    // chopping these lines off the front will invalidate the cursor range unless we do this
+                    cursor_begin_idx = std::max(0, StringIndexOf(m_cursor_begin.first, m_cursor_begin.second, &lines) - first_line_first_char_idx);
+                    cursor_end_idx = std::max(0, StringIndexOf(m_cursor_end.first, m_cursor_end.second, &lines) - first_line_first_char_idx);
+                }
+                TextControl::SetText(str.substr(first_line_first_char_idx, last_line_last_char_idx - first_line_first_char_idx));
+                if (cursor_begin_idx != -1 && cursor_end_idx != -1) {
+                    bool found_cursor_begin = false;
+                    bool found_cursor_end = false;
+                    for (unsigned int i = 0; i < GetLineData().size(); ++i) {
+                        if (!found_cursor_begin && cursor_begin_idx <= GetLineData()[i].char_data.back().original_char_index) {
+                            m_cursor_begin.first = i;
+                            m_cursor_begin.second = cursor_begin_idx - StringIndexOf(i, 0);
+                            found_cursor_begin = true;
+                        }
+                        if (!found_cursor_end && cursor_end_idx <= GetLineData()[i].char_data.back().original_char_index) {
+                            m_cursor_end.first = i;
+                            m_cursor_end.second = cursor_end_idx - StringIndexOf(i, 0);
+                            found_cursor_end = true;
+                        }
                     }
                 }
+            } else {
+                TextControl::SetText(str);
             }
         } else {
             TextControl::SetText(str);
         }
-    } else {
-        TextControl::SetText(str);
+
+        // make sure the change in text did not make the cursor position invalid
+        if (static_cast<int>(GetLineData().size()) <= m_cursor_end.first) {
+            m_cursor_end.first = static_cast<int>(GetLineData().size()) - 1;
+            m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size());
+        } else if (static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size()) < m_cursor_end.second) {
+            m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size());
+        }
+        m_cursor_begin = m_cursor_end; // eliminate any hiliting
+
+        m_contents_sz = GetFont()->TextExtent(WindowText(), format, (format & (FORMAT_WORDBREAK | FORMAT_LINEWRAP)) ? cl_sz.x : 0);
+
+        AdjustScrolls();
+        AdjustView();
+        if (scroll_to_end && m_vscroll)
+            m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
     }
+    m_preserve_text_position_on_next_set_text = false;
 
-    // make sure the change in text did not make the cursor position invalid
-    if (static_cast<int>(GetLineData().size()) <= m_cursor_end.first) {
-        m_cursor_end.first = static_cast<int>(GetLineData().size()) - 1;
-        m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size());
-    } else if (static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size()) < m_cursor_end.second) {
-        m_cursor_end.second = static_cast<int>(GetLineData()[m_cursor_end.first].char_data.size());
-    }
-    m_cursor_begin = m_cursor_end; // eliminate any hiliting
-
-    m_contents_sz = GetFont()->TextExtent(WindowText(), format, (format & (FORMAT_WORDBREAK | FORMAT_LINEWRAP)) ? cl_sz.x : 0);
-
-    AdjustScrolls();
-    AdjustView();
-    if (scroll_to_end && m_vscroll)
-        m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
     EditedSignal(str);
 }
 
@@ -702,6 +710,9 @@ std::pair<int, int> MultiEdit::CharAt(int string_idx) const
     }
     return retval;
 }
+
+Pt MultiEdit::ScrollPosition() const
+{ return Pt(m_first_col_shown, m_first_row_shown); }
 
 int MultiEdit::StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data) const
 {
@@ -851,6 +862,9 @@ void MultiEdit::RecreateScrolls()
     m_vscroll = m_hscroll = 0;
     AdjustScrolls();
 }
+
+void MultiEdit::PreserveTextPositionOnNextSetText()
+{ m_preserve_text_position_on_next_set_text = true; }
 
 void MultiEdit::ValidateStyle()
 {

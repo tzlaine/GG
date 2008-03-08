@@ -122,6 +122,8 @@ protected:
     std::pair<int, int>
             CharAt(int string_idx) const;   ///< returns row and character index of char at string index, or (0, 0) if \a string_idx falls outside the text, or if \a string_idx refers to a non-visible character
 
+    Pt      ScrollPosition() const;         ///< returns the positions of the scrollbars, in pixels
+
     /** returns index into WindowText() of position \a char_idx in row \a row, using \a line_data instead of the current
         line data, if it is supplied.  Not range-checked. */
     int     StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
@@ -143,7 +145,14 @@ protected:
     //@}
 
     /** \name Mutators */ //@{
-    void            RecreateScrolls();      ///< recreates the vertical and horizontal scrolls as needed.
+    void    RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
+
+    /** ensures that the next call to SetText() preserves the positioning of the text.  This should only be called if it
+        is known that the call to SetText() will not put the text-position in an illegal state.  For instance, if
+        creating a MultiEdit that contains hyperlink text then coloring or underlining a link may require a call to
+        SetText(), but may be guaranteed not to change the text layout.  Without a call to this function, the scroll
+        positions will be reset. */
+    void    PreserveTextPositionOnNextSetText();
     //@}
 
     static const int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls
@@ -173,6 +182,8 @@ private:
 
     Scroll*     m_vscroll;
     Scroll*     m_hscroll;
+
+    bool        m_preserve_text_position_on_next_set_text;
 
     friend class boost::serialization::access;
     template <class Archive>

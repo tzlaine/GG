@@ -197,8 +197,8 @@ void OgreGUI::Enter2DMode()
     if (glBindBufferARB) {
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
         glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-        glBindBufferARB(GL_PIXEL_PACK_BUFFER, 0);
-        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER, 0);
+        glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
     }
 
     typedef void (*UseProgramARBFn)(GLuint);

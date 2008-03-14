@@ -246,7 +246,8 @@ void ListBox::Row::push_back(const SubTexture& st)
 void ListBox::Row::clear()
 {
     m_cells.clear();
-    AdjustLayout();
+    RemoveLayout();
+    DeleteChildren();
 }
 
 void ListBox::Row::resize(size_t n)
@@ -270,6 +271,14 @@ void ListBox::Row::SetCell(int n, Control* c)
     delete m_cells[n];
     m_cells[n] = c;
     AdjustLayout();
+}
+
+Control* ListBox::Row::RemoveCell(int n)
+{
+    Control* retval = m_cells[n];
+    m_cells[n] = 0;
+    AdjustLayout();
+    return retval;
 }
 
 void ListBox::Row::SetRowAlignment(Alignment align)

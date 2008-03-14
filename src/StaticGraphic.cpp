@@ -108,11 +108,8 @@ Flags<GraphicStyle> StaticGraphic::Style() const
     return m_style;
 }
 
-void StaticGraphic::Render()
+Rect StaticGraphic::RenderedArea() const
 {
-    Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-    glColor(color_to_use);
-
     Pt ul = UpperLeft(), lr = LowerRight();
     Pt window_sz(lr - ul);
     Pt graphic_sz(m_graphic.Width(), m_graphic.Height());
@@ -160,7 +157,15 @@ void StaticGraphic::Render()
     pt1.y += shift;
     pt2.y += shift;
 
-    m_graphic.OrthoBlit(pt1, pt2);
+    return Rect(pt1, pt2);
+}
+
+void StaticGraphic::Render()
+{
+    Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
+    glColor(color_to_use);
+    Rect rendered_area = RenderedArea();
+    m_graphic.OrthoBlit(rendered_area.ul, rendered_area.lr);
 }
 
 void StaticGraphic::SetStyle(Flags<GraphicStyle> style)

@@ -395,7 +395,7 @@ public:
         will receive an LButtonUp() message whenever a drag that started over its area ends over its area as well. */
     virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** respond to second left click in window within the time limit.  A window will receive an LButtonUp() message
+    /** respond to second left click in window within the time limit.  A window will receive an LDoubleClick() message
         instead of an LButtonDown() or LClick() message if the left input device button is pressed over a window that
         was l-clicked within a double-click time interval.  Note that this means a double click is always preceded by a
         click.  For a double click to occur, no other window may have received a *Click() or *ButtonDown() message in

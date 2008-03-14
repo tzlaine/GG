@@ -138,20 +138,21 @@ public:
         /** \name Mutators */ //@{
         virtual void Render();
 
-        void push_back(Control* c); ///< adds a given Control to the end of the Row; this Control becomes property of the Row
-        void push_back(const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
-        void push_back(const std::string& str, const std::string& font_filename, int pts, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
-        void push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
-        void clear(); ///< removes all cells in this Row
-        void resize(size_t n); ///< resizes the Row to have \a n cells
+        void        push_back(Control* c); ///< adds a given Control to the end of the Row; this Control becomes property of the Row
+        void        push_back(const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
+        void        push_back(const std::string& str, const std::string& font_filename, int pts, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
+        void        push_back(const SubTexture& st); ///< overload of push_back that creates a StaticGraphic Control and adds it to the Row
+        void        clear(); ///< removes and deletes all cells in this Row
+        void        resize(size_t n); ///< resizes the Row to have \a n cells
 
-        void SetCell(int n, Control* c); ///< sets the Control in the \a nth cell of this Row, deleting any preexisting Control; not range checked
-        void SetRowAlignment(Alignment align); ///< sets the vertical alignment of this Row
-        void SetColAlignment(int n, Alignment align); ///< sets the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
-        void SetColWidth(int n, int width); ///< sets the width of the \a nth cell of this Row; not range checked
-        void SetColAlignments(const std::vector<Alignment>& aligns); ///< sets the horizontal alignment of all the Controls in this Row; not range checked
-        void SetColWidths(const std::vector<int>& widths); ///< sets all the widths of the cells of this Row; not range checked
-        void SetMargin(int margin); ///< sets the amount of space left between the contents of adjacent cells, in pixels
+        void        SetCell(int n, Control* c); ///< sets the Control in the \a nth cell of this Row, deleting any preexisting Control; not range checked
+        Control*    RemoveCell(int n); ///< returns a pointer to the Control in the \a nth cell of this Row, and sets the contents of the cell to 0; not range checked
+        void        SetRowAlignment(Alignment align); ///< sets the vertical alignment of this Row
+        void        SetColAlignment(int n, Alignment align); ///< sets the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
+        void        SetColWidth(int n, int width); ///< sets the width of the \a nth cell of this Row; not range checked
+        void        SetColAlignments(const std::vector<Alignment>& aligns); ///< sets the horizontal alignment of all the Controls in this Row; not range checked
+        void        SetColWidths(const std::vector<int>& widths); ///< sets all the widths of the cells of this Row; not range checked
+        void        SetMargin(int margin); ///< sets the amount of space left between the contents of adjacent cells, in pixels
         //@}
 
     private:

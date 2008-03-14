@@ -66,6 +66,10 @@ public:
     /** \name Accessors */ //@{
     /** returns the style of the StaticGraphic \see StaticGraphicStyle */
     Flags<GraphicStyle> Style() const;
+
+    /** returns the area in which the graphic is actually rendered, in UpperLeft()-relative coordinates.  This may not
+        be the entire area of the StaticGraphic, based on the style being used. */
+    Rect RenderedArea() const;
     //@}
 
     /** \name Mutators */ //@{

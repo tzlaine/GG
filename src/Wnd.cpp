@@ -257,12 +257,12 @@ bool Wnd::Resizable() const
 
 bool Wnd::OnTop() const
 {
-    return m_flags & ONTOP;
+    return !m_parent && m_flags & ONTOP;
 }
 
 bool Wnd::Modal() const
 {
-    return m_flags & MODAL;
+    return !m_parent && m_flags & MODAL;
 }
 
 bool Wnd::ClipChildren() const
@@ -980,7 +980,7 @@ void Wnd::TimerFiring(int ticks, Timer* timer) {}
 int Wnd::Run()
 {
     int retval = 0;
-    if (m_flags & MODAL) {
+    if (!m_parent && m_flags & MODAL) {
         GUI* gui = GUI::GetGUI();
         gui->RegisterModal(this);
         ModalInit();

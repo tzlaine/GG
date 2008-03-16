@@ -62,11 +62,11 @@ extern GG_API const WndFlag DRAGABLE;
 /** This window can be resized by the user, with the mouse. */
 extern GG_API const WndFlag RESIZABLE;
 
-/** This windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows. */
+/** This windows is an "on-top" window, and will always appear above all non-on-top and non-modal windows.  Note that this only applies to top-level (Parent()-less) Wnds. */
 extern GG_API const WndFlag ONTOP;
 
 /** This window is modal; while it is active, no other windows are interactive.  Modal windows are considered above
-    "on-top" windows, and should not be flagged as OnTop. */
+    "on-top" windows, and should not be flagged as OnTop.  Note that this only applies to top-level (Parent()-less) Wnds. */
 extern GG_API const WndFlag MODAL;
 
 
@@ -105,6 +105,7 @@ extern GG_API const WndFlag MODAL;
     Execution of the code that calls Run() is effectively halted until Run() returns.  Derived classes that wish to use
     modal execution should set m_done = true to escape from the modal execution loop.  EventPump has more information
     about processing during modal dialog execution.
+    <br>Note that OnTop() and Modal() flags only apply to top-level (Parent()-less) Wnds.
 
     <p>Signal Considerations
     <br>Wnd inherits from boost::signals::trackable.  This means that any slots contained in a Wnd object or Wnd-derived

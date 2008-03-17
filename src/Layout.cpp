@@ -107,19 +107,13 @@ Layout::Layout(int x, int y, int w, int h, int rows, int columns, int border_mar
 }
 
 Pt Layout::MinUsableSize() const
-{
-    return m_min_usable_size;
-}
+{ return m_min_usable_size; }
 
 int Layout::Rows() const
-{
-    return m_cells.size();
-}
+{ return m_cells.size(); }
 
 int Layout::Columns() const
-{
-    return m_cells.empty() ? 0 : m_cells[0].size();
-}
+{ return m_cells.empty() ? 0 : m_cells[0].size(); }
 
 Flags<Alignment> Layout::ChildAlignment(Wnd* wnd) const
 {
@@ -130,34 +124,22 @@ Flags<Alignment> Layout::ChildAlignment(Wnd* wnd) const
 }
 
 int Layout::BorderMargin() const
-{
-    return m_border_margin;
-}
+{ return m_border_margin; }
 
 int Layout::CellMargin() const
-{
-    return m_cell_margin;
-}
+{ return m_cell_margin; }
 
 double Layout::RowStretch(int row) const
-{
-    return m_row_params[row].stretch;
-}
+{ return m_row_params[row].stretch; }
 
 double Layout::ColumnStretch(int column) const
-{
-    return m_column_params[column].stretch;
-}
+{ return m_column_params[column].stretch; }
 
 int Layout::MinimumRowHeight(int row) const
-{
-    return m_row_params[row].min;
-}
+{ return m_row_params[row].min; }
 
 int Layout::MinimumColumnWidth(int column) const
-{
-    return m_column_params[column].min;
-}
+{ return m_column_params[column].min; }
 
 std::vector<std::vector<const Wnd*> > Layout::Cells() const
 {
@@ -216,13 +198,21 @@ std::vector<std::vector<Rect> > Layout::RelativeCellRects() const
 }
 
 bool Layout::RenderOutline() const
-{
-    return m_render_outline;
-}
+{ return m_render_outline; }
 
 Clr Layout::OutlineColor() const
+{ return m_outline_color; }
+
+void Layout::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
 {
-    return m_outline_color;
+    if (Parent())
+        Parent()->StartingChildDragDrop(wnd, offset);
+}
+
+void Layout::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
+{
+    if (Parent())
+        Parent()->ChildrenDraggedAway(wnds, destination);
 }
 
 void Layout::SizeMove(const Pt& ul, const Pt& lr)
@@ -522,9 +512,7 @@ void Layout::KeyRelease(Key key, Flags<ModKey> mod_keys)
 }
 
 void Layout::Add(Wnd* wnd, int row, int column, Flags<Alignment> alignment/* = ALIGN_NONE*/)
-{
-    Add(wnd, row, column, 1, 1, alignment);
-}
+{ Add(wnd, row, column, 1, 1, alignment); }
 
 void Layout::Add(Wnd* wnd, int row, int column, int num_rows, int num_columns, Flags<Alignment> alignment/* = ALIGN_NONE*/)
 {
@@ -659,14 +647,10 @@ void Layout::SetMinimumColumnWidth(int column, int width)
 }
 
 void Layout::RenderOutline(bool render_outline)
-{
-    m_render_outline = render_outline;
-}
+{ m_render_outline = render_outline; }
 
 void Layout::SetOutlineColor(Clr color)
-{
-    m_outline_color = color;
-}
+{ m_outline_color = color; }
 
 void Layout::DefineAttributes(WndEditor* editor)
 {
@@ -732,9 +716,7 @@ void Layout::ValidateAlignment(Flags<Alignment>& alignment)
 }
 
 void Layout::RedoLayout()
-{
-    Resize(Size());
-}
+{ Resize(Size()); }
 
 void Layout::ChildSizeOrMinSizeOrMaxSizeChanged()
 {

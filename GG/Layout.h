@@ -43,23 +43,23 @@ struct SetMarginAction;
     cell may have at most one Wnd covering it, but need not contain a Wnd at all.  A Wnd may cover any rectangular
     region of cells, though they will commonly only cover one.  The cells are arranged into rows and columns.  Most
     attributes of the layout are set for an entire row or column, but alignment is set for each child in the layout
-    separately.  The row/column attributes are stretch and minimum row width/column height (hereafter refered to as
-    min).  Stretch indicates a propotional factor by which each row/column is stretched when the layout is resized.  For
+    separately.  Rows and columns have two attributes: "stretch", and "min" (minimum row width/minimum column height).
+    Stretch indicates a propotional factor by which each row/column is stretched when the layout is resized.  For
     example, if the sum of the row stretch factors is 5, a row with a stretch of 2 will gain 2/5 of the increased space
     if the layout grows vertically, or lose 2/5 of the decreased space if the layout shrinks vertically.  Note that this
     means that rows with a stretch of 0 will not change size at all.  The exception to this is when all rows have a
     stretch of 0, in which case all the rows grow and shrink evenly.  Obviously, this applies to columns as well.  The
     min sets a lower bound on the height of a row or the width of a column.  By default, no alignment value is set for a
-    child in the layout.  If one is set, the child is not grown and shrunk when the layout is resized, if possible.
-    Aligned children just sit in place in the center or on the side they are aligned to.  If the layout becomes too
+    child in the layout.  If one is set, the child is not grown and shrunk when the layout is resized, if this is
+    possible. Aligned children just sit there in the place they are aligned to.  If the layout becomes too
     small, aligned windows will be shrunk as necessary and if possible.  Note that the MinSize() and MaxSize() of a
     child will affect how much it can be stretched when the layout is resized.
 
     <p>Layouts are best used to arrange the children of another window, such as arranging the controls of a dialog box.
     When used this way, the Layout becomes the sole child of its parent, and contains the parent's children as its own.
     This scheme allows Layouts to be easily nested, since all Layouts are Wnd-derived.  Like a Control, a Layout will
-    forward all MouseWheel() and KeyPress() calls to its parent.  Clicks fall through as well, since Layouts are not
-    constructed with the Wnd::CLICKABLE flag.
+    forward all MouseWheel(), Key*(), and dragged-child notification calls to its parent.  Clicks fall through as well,
+    since Layouts are not constructed with the Wnd::CLICKABLE flag.
 
     <p>There are two attributes that affect the spacing of all the layout's child windows: border margin and cell
     margin.  Border margin is the space left around the entire layout, between the outer edges of the children in the
@@ -119,6 +119,8 @@ public:
     //@}
    
     /** \name Mutators */ //@{
+    virtual void StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
+    virtual void ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);

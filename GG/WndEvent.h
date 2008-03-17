@@ -132,7 +132,7 @@ public:
     Flags<ModKey>             ModKeys() const;      ///< returns the modifiers to the WndEvent's keypress, if any
     const Pt&                 DragMove() const;     ///< returns the amount of drag movement represented by the WndEvent, if any
     int                       WheelMove() const;    ///< returns the ammount of mouse wheel movement represented by the WndEvent, if any
-    const std::map<Wnd*, Pt>& DragDropWnds() const; ///< returns the drag-drop wnds represented by the WndEvent, if any
+    const std::map<Wnd*, Pt>& DragDropWnds() const; ///< returns the drag-and-drop wnds represented by the WndEvent, if any
     int                       Ticks() const;        ///< returns the number of ticks represented by the WndEvent. if any
     Timer*                    GetTimer() const;     ///< returns the Timer represented by the WndEvent. if any
 

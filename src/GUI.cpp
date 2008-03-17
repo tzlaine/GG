@@ -100,6 +100,7 @@ struct GG::GUIImpl
         browse_target(0),
         drag_drop_originating_wnd(0),
         delta_t(0),
+        rendering_drag_drop_wnds(false),
         FPS(-1.0),
         calc_FPS(false),
         max_FPS(0.0),
@@ -169,6 +170,7 @@ struct GG::GUIImpl
                  accelerator_sigs;      // the signals emitted by the keyboard accelerators
 
     int          delta_t;               // the number of ms since the last frame
+    bool         rendering_drag_drop_wnds;
     double       FPS;                   // the most recent calculation of the frames per second rendering speed (-1.0 if calcs are disabled)
     bool         calc_FPS;              // true iff FPS calcs are to be done
     double       max_FPS;               // the maximum allowed frames per second rendering speed
@@ -233,7 +235,7 @@ void GUIImpl::HandlePress(int mouse_button, const Pt& pos, int curr_ticks)
 
 void GUIImpl::HandleDrag(int mouse_button, const Pt& pos, int curr_ticks)
 {
-    if (wnd_region == WR_MIDDLE || wnd_region == WR_NONE) { // send drag message to window or initiate drag-drop
+    if (wnd_region == WR_MIDDLE || wnd_region == WR_NONE) { // send drag message to window or initiate drag-and-drop
         Pt diff = prev_button_press_pos - pos;
         int drag_distance = diff.x * diff.x + diff.y * diff.y;
         // ensure that the minimum drag requirements are met
@@ -256,7 +258,7 @@ void GUIImpl::HandleDrag(int mouse_button, const Pt& pos, int curr_ticks)
                     curr_drag_wnd_dragged = true;
             }
         }
-        // notify wnd under cursor of presence of drag-drop wnd(s)
+        // notify wnd under cursor of presence of drag-and-drop wnd(s)
         if (curr_drag_wnd_dragged && !drag_wnds[mouse_button]->DragDropDataType().empty() ||
             !drag_drop_wnds.empty()) {
             bool unregistered_drag = curr_drag_wnd_dragged;
@@ -382,13 +384,16 @@ void GUIImpl::HandleRelease(int mouse_button, const GG::Pt& pos, int curr_ticks)
                 if (click_wnd && click_wnd->DragDropDataType() != "") {
                     drag_wnds.push_back(click_wnd);
                     drag_drop_originating_wnd = click_wnd->Parent();
-                    std::map<Wnd*, Pt> drag_drop_wnds;
-                    drag_drop_wnds[click_wnd] = wnd_drag_offset;
                     curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
                     curr_drag_drop_here_wnd = 0;
                     curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
-                    if (drag_drop_originating_wnd)
+                    if (drag_drop_originating_wnd) {
+                        std::list<Wnd*> unaccepted_wnds;
+                        if (drag_wnds.empty())
+                            unaccepted_wnds.push_back(click_wnd);
+                        drag_drop_originating_wnd->CancellingChildDragDrop(unaccepted_wnds);
                         drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, curr_wnd_under_cursor);
+                    }
                 }
             } else {
                 for (std::map<Wnd*, Pt>::iterator it = drag_drop_wnds.begin();
@@ -396,11 +401,18 @@ void GUIImpl::HandleRelease(int mouse_button, const GG::Pt& pos, int curr_ticks)
                      ++it) {
                     drag_wnds.push_back(it->first);
                 }
+                std::list<Wnd*> all_wnds = drag_wnds;
                 curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
                 curr_drag_drop_here_wnd = 0;
                 curr_wnd_under_cursor->AcceptDrops(drag_wnds, pos);
-                if (drag_drop_originating_wnd)
+                if (drag_drop_originating_wnd) {
+                    std::list<Wnd*> unaccepted_wnds;
+                    std::set_difference(all_wnds.begin(), all_wnds.end(),
+                                        drag_wnds.begin(), drag_wnds.end(),
+                                        std::back_inserter(unaccepted_wnds));
+                    drag_drop_originating_wnd->CancellingChildDragDrop(unaccepted_wnds);
                     drag_drop_originating_wnd->ChildrenDraggedAway(drag_wnds, curr_wnd_under_cursor);
+                }
             }
         }
     }
@@ -446,6 +458,11 @@ int GUI::DeltaT() const
     return s_impl->delta_t;
 }
 
+bool GUI::RenderingDragDropWnds() const
+{
+    return s_impl->rendering_drag_drop_wnds;
+}
+
 bool GUI::FPSEnabled() const
 {
     return s_impl->calc_FPS;
@@ -489,6 +506,11 @@ int GUI::MinDragTime() const
 int GUI::MinDragDistance() const
 {
     return s_impl->min_drag_distance;
+}
+
+bool GUI::DragDropWnd(const Wnd* wnd) const
+{
+    return s_impl->drag_drop_wnds.find(const_cast<Wnd*>(wnd)) != s_impl->drag_drop_wnds.end();
 }
 
 bool GUI::MouseButtonDown(int bn) const
@@ -1002,7 +1024,8 @@ void GUI::Render()
             RenderWindow(s_impl->browse_info_wnd.get());
         }
     }
-    // render drag-drop windows in arbitrary order (sorted by pointer value)
+    // render drag-and-drop windows in arbitrary order (sorted by pointer value)
+    s_impl->rendering_drag_drop_wnds = true;
     for (std::map<Wnd*, Pt>::const_iterator it = s_impl->drag_drop_wnds.begin(); it != s_impl->drag_drop_wnds.end(); ++it) {
         bool old_visible = it->first->Visible();
         if (!old_visible)
@@ -1015,6 +1038,7 @@ void GUI::Render()
         if (!old_visible)
             it->first->Hide();
     }
+    s_impl->rendering_drag_drop_wnds = false;
     if (s_impl->render_cursor && s_impl->cursor)
         s_impl->cursor->Render(s_impl->mouse_pos);
     Exit2DMode();

@@ -1422,7 +1422,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
 
 int ListBox::Insert(Row* row, int at, bool dropped)
 {
-    // track the originating row if this is an intra-ListBox drag-drop
+    // track the originating row if this is an intra-ListBox drag-and-drop
     int dropped_row_original_index = -1;
     if (dropped) {
         for (unsigned int i = 0; i < m_rows.size(); ++i) {

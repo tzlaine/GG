@@ -198,8 +198,8 @@ public:
     const std::string&
                    WindowText() const;   ///< returns text associated with this window
 
-    /** returns the string key that defines the type of data that this Wnd represents when used as a drag-drop Wnd.
-        Returns the empty string when this Wnd cannot be used as a drag-drop Wnd. */
+    /** returns the string key that defines the type of data that this Wnd represents in drag-and-drop drags.
+        Returns the empty string when this Wnd cannot be used in drag-and-drop. */
     const std::string&
                    DragDropDataType() const;
 
@@ -279,20 +279,32 @@ public:
     //@}
 
     /** \name Mutators */ //@{
-    /** sets the string key that defines the type of data that this Wnd represents when used as a drag-drop Wnd.
-        This should be set to the empty string when this Wnd cannot be used as a drag-drop Wnd. */
+    /** sets the string key that defines the type of data that this Wnd represents in a drag-and-drop drag.
+        This should be set to the empty string when this Wnd cannot be used in drag-and-drop. */
     void           SetDragDropDataType(const std::string& data_type);
 
-    /** indicates to the Wnd that a child widget \a w is being drag-dropped, which gives it the opportunity to add other
-        associated drag-drop Wnds.  \a offset indicates the position of the mouse realtive to \a wnd's UpperLeft(). */
+    /** indicates to the Wnd that a child Wnd \a wnd is being dragged in a drag-and-drop operation, which gives it the
+        opportunity to add other associated drag-and-drop Wnds (see GUI::RegisterDragDropWnd()).  \a offset indicates
+        the position of the mouse relative to \a wnd's UpperLeft(). */
     virtual void   StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
 
-    /** handles a drop of one or more drag-drop wnds into this Wnd; the accepted wnds remain in the list \a wnds; the
-        rejected ones do not. */
+    /** handles a drop of one or more drag-and-drop wnds into this Wnd; the accepted wnds remain in the list \a wnds;
+        the rejected ones do not.  This function must not not alter the order of the elements in \a wnds.  It may only
+        remove elements. */
     virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
 
+    /** handles the cancellation of the dragging of one or more child windows, whose dragging was established by the
+        most recent call to StartingChildDragDrop().  Note that even if an accepting Wnd Accept()s some but not all
+        Wnds, this function will be called on those Wnds not accepted.  Note that CancellingChildDragDrop() and
+        ChildrenDraggedAway() are always called in that order, and are always called at the end of any drag-and-drop
+        sequence performed on a child of this Wnd, whether the drag-and-drop is successful or not. */
+    virtual void   CancellingChildDragDrop(const std::list<Wnd*>& wnds);
+
     /** handles the removal of one or more child windows that have been dropped onto another window which has accepted
-        them as drops.  The accepting window retains ownership, so this function must not delete the children. */
+        them as drops.  The accepting window retains ownership, so this function must not delete the children.  Note
+        that CancellingChildDragDrop() and ChildrenDraggedAway() are always called in that order, and are always called
+        at the end of any drag-and-drop sequence performed on a child of this Wnd, whether the drag-and-drop is
+        successful or not. */
     virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
 
     virtual void   SetText(const std::string& str);     ///< set window text
@@ -374,7 +386,11 @@ public:
     void           SetLayoutCellMargin(int margin);
 
 
-    virtual void   Render(); ///< draws this Wnd
+    /** draws this Wnd.  Note that Wnds being dragged for a drag-and-drop operation are rendered twice -- once in-place
+        as normal, once in the location of the drag operation, attached to the cursor.  Such Wnds may wish to render
+        themselves differently in those two cases.  To determine which render is being performed, they can call
+        GUI::GetGUI()->RenderingDragDropWnds(). */
+    virtual void   Render();
 
     /** respond to left button down msg.  A window receives this whenever any input device button changes from up to
         down while over the window.  \note If this Wnd was created with the REPEAT_BUTTON_DOWN flag, this method may be
@@ -449,17 +465,17 @@ public:
     /** respond to movement of the mouse wheel (move > 0 indicates the wheel is rolled up, < 0 indicates down) */
     virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
 
-    /** respond to the cursor entering the Wnd's coords while dragging drag-drop Wnds.  The Pts in \a drag_drop_wnds are
-        the Wnds' offsets from \a pt. */
+    /** respond to the cursor entering the Wnd's coords while dragging drag-and-drop Wnds.  The Pts in \a drag_drop_wnds
+        are the Wnds' offsets from \a pt. */
     virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
 
     /** respond to cursor moving about within the Wnd, or to cursor lingering within the Wnd for a long period of time,
-        while dragging drag-drop Wnds.  A DragDropHere() message will not be generated the first time the cursor enters
-        the window's area.  In that case, a DragDropEnter() message is generated The Pts in \a drag_drop_wnds are the
-        Wnds' offsets from \a pt.. */
+        while dragging drag-and-drop Wnds.  A DragDropHere() message will not be generated the first time the cursor
+        enters the window's area.  In that case, a DragDropEnter() message is generated The Pts in \a drag_drop_wnds are
+        the Wnds' offsets from \a pt. */
     virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
 
-    /** respond to cursor leaving window's coords while dragging drag-drop Wnds. */
+    /** respond to cursor leaving the Wnd's bounds while dragging drag-and-drop Wnds. */
     virtual void   DragDropLeave();
 
     /** respond to down-keystrokes (focus window only).  A window may receive KeyPress() messages passed up to it from
@@ -560,7 +576,7 @@ private:
     std::list<Wnd*>   m_children;      ///< list of ptrs to child windows kept in order of decreasing area
     int               m_zorder;        ///< where this window is in the z-order (root (non-child) windows only)
     bool              m_visible;       ///< is this window drawn?
-    std::string       m_drag_drop_data_type; ///< the type of drag-drop data this Wnd represents, if any
+    std::string       m_drag_drop_data_type; ///< the type of drag-and-drop data this Wnd represents, if any
     bool              m_clip_children; ///< should the children of this window be clipped?
     Pt                m_upperleft;     ///< upper left point of window
     Pt                m_lowerright;    ///< lower right point of window

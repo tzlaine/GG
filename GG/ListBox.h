@@ -84,7 +84,7 @@ extern GG_API const ListBoxStyle LIST_BROWSEUPDATES;  ///< Causes a signal to be
     can be thrown by any client of the ListBox in response to its DroppedSignal.  Such a throw will cause the drop to be
     cancelled, even though by the time a client responds to the DroppedSignal, the dropped row is already in place in
     the ListBox.  The exception to this is that the dropped row may be altered with a call to NormalizeRow() before the
-    drop can be reversed; this means that drag-drops between ListBoxes with different numbers of columns, or different
+    drop can be reversed; this means that drag-and-drops between ListBoxes with different numbers of columns, or different
     column widths or alignments should be avoided, or caught and handled.  Note that a DroppedSignal is emitted for each
     row dropped into the ListBox, so individual rows may be accepted or rejected from a single multi-row drop.
     <br>Also note that while a ListBox can contain arbitrary Control-derived controls, in order for such controls to be
@@ -387,10 +387,10 @@ protected:
     int             LClickRow() const;   ///< returns the last row that was left-clicked
     int             RClickRow() const;   ///< returns the last row that was right-clicked
 
-    bool            AutoScrollingUp() const;    ///< returns true iff the list is being autoscrolled up due to drag-drop
-    bool            AutoScrollingDown() const;  ///< returns true iff the list is being autoscrolled down due to drag-drop
-    bool            AutoScrollingLeft() const;  ///< returns true iff the list is being autoscrolled left due to drag-drop
-    bool            AutoScrollingRight() const; ///< returns true iff the list is being autoscrolled right due to drag-drop
+    bool            AutoScrollingUp() const;    ///< returns true iff the list is being autoscrolled up due to drag-and-drop
+    bool            AutoScrollingDown() const;  ///< returns true iff the list is being autoscrolled down due to drag-and-drop
+    bool            AutoScrollingLeft() const;  ///< returns true iff the list is being autoscrolled left due to drag-and-drop
+    bool            AutoScrollingRight() const; ///< returns true iff the list is being autoscrolled right due to drag-and-drop
 
     /** Returns the amount of vertical padding it is necessary to add to the combined height of all rows to make the
         vertical scroll the proper length to fully show the last row.  This is calculated by first determining the first
@@ -409,7 +409,7 @@ protected:
     virtual bool    EventFilter(Wnd* w, const WndEvent& event);
 
     int             Insert(Row* row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
-    Row*            Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a dupliate removal (such as for drag-drops within a single ListBox) if indicated
+    Row*            Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a duplicate removal (such as for drag-and-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
     void            ResetAutoScrollVars();          ///< resets all variables related to auto-scroll to their initial values

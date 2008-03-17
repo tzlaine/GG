@@ -144,26 +144,28 @@ public:
 
     /** \name Accessors */ //@{
     const std::string&
-                   AppName() const;              ///< returns the user-defined name of the application
-    Wnd*           FocusWnd() const;             ///< returns the GG::Wnd that currently has the input focus
+                   AppName() const;                    ///< returns the user-defined name of the application
+    Wnd*           FocusWnd() const;                   ///< returns the GG::Wnd that currently has the input focus
     Wnd*           GetWindowUnder(const Pt& pt) const; ///< returns the GG::Wnd under the point pt
-    int            DeltaT() const;               ///< returns ms since last frame was rendered
-    virtual int    Ticks() const = 0;            ///< returns ms since the app started running
-    bool           FPSEnabled() const;           ///< returns true iff FPS calulations are turned on
-    double         FPS() const;                  ///< returns the frames per second at which the GUI is rendering
-    std::string    FPSString() const;            ///< returns a string of the form "[m_FPS] frames per second"
-    double         MaxFPS() const;               ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
-    virtual int    AppWidth() const = 0;         ///< returns the width of the application window/screen
-    virtual int    AppHeight() const = 0;        ///< returns the height of the application window/screen
-    int            ButtonDownRepeatDelay() const;///< returns the \a delay value set by EnableMouseButtonDownRepeat()
-    int            ButtonDownRepeatInterval() const; ///< returns the \a interval value set by EnableMouseButtonDownRepeat()
-    int            DoubleClickInterval() const;  ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms
-    int            MinDragTime() const;          ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag
-    int            MinDragDistance() const;      ///< returns the minimum distance an item must be dragged before it is a valid drag
-    bool           MouseButtonDown(int bn) const;///< returns the up/down states of the mouse buttons
-    Pt             MousePosition() const;        ///< returns the absolute position of mouse, based on the last mouse motion event
-    Pt             MouseMovement() const;        ///< returns the relative position of mouse, based on the last mouse motion event
-    Flags<ModKey>  ModKeys() const;              ///< returns the set of modifier keys that are currently depressed, based on the last event
+    int            DeltaT() const;                     ///< returns ms since last frame was rendered
+    virtual int    Ticks() const = 0;                  ///< returns ms since the app started running
+    bool           RenderingDragDropWnds() const;      ///< returns true iff drag-and-drop Wnds are currently being rendered
+    bool           FPSEnabled() const;                 ///< returns true iff FPS calulations are turned on
+    double         FPS() const;                        ///< returns the frames per second at which the GUI is rendering
+    std::string    FPSString() const;                  ///< returns a string of the form "[m_FPS] frames per second"
+    double         MaxFPS() const;                     ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
+    virtual int    AppWidth() const = 0;               ///< returns the width of the application window/screen
+    virtual int    AppHeight() const = 0;              ///< returns the height of the application window/screen
+    int            ButtonDownRepeatDelay() const;      ///< returns the \a delay value set by EnableMouseButtonDownRepeat()
+    int            ButtonDownRepeatInterval() const;   ///< returns the \a interval value set by EnableMouseButtonDownRepeat()
+    int            DoubleClickInterval() const;        ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms
+    int            MinDragTime() const;                ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag
+    int            MinDragDistance() const;            ///< returns the minimum distance an item must be dragged before it is a valid drag
+    bool           DragDropWnd(const Wnd* wnd) const;  ///< returns true if \a wnd is currently begin dragged as part of a drag-and-drop operation
+    bool           MouseButtonDown(int bn) const;      ///< returns the up/down states of the mouse buttons
+    Pt             MousePosition() const;              ///< returns the absolute position of mouse, based on the last mouse motion event
+    Pt             MouseMovement() const;              ///< returns the relative position of mouse, based on the last mouse motion event
+    Flags<ModKey>  ModKeys() const;                    ///< returns the set of modifier keys that are currently depressed, based on the last event
 
     /** Returns the (begin, end) indices of all the word-tokens in the given string.  This is perhaps an odd place for
         this function to exist, but the notion of what a "word" is is so application-specific that it was placed here so
@@ -204,7 +206,7 @@ public:
                    CreateModalEventPump(bool& done); ///< creates a new ModalEventPump that will terminate when \a done is set to true
 
     /** adds \a wnd to the set of current drag-and-drop Wnds, to be rendered \a offset pixels from the cursor
-        position. \a originating_wnd indicates the original owner of \a wnd before the drag-drop.  \throw
+        position. \a originating_wnd indicates the original owner of \a wnd before the drag-and-drop.  \throw
         std::runtime_error May throw std::runtime_error if there are already other Wnds registered that belong to a
         window other than \a originating_wnd. */
     void           RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd);

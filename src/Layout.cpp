@@ -209,6 +209,12 @@ void Layout::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
         Parent()->StartingChildDragDrop(wnd, offset);
 }
 
+void Layout::CancellingChildDragDrop(const std::list<Wnd*>& wnds)
+{
+    if (Parent())
+        Parent()->CancellingChildDragDrop(wnds);
+}
+
 void Layout::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
 {
     if (Parent())

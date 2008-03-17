@@ -475,6 +475,8 @@ void Wnd::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
     wnds.clear();
 }
 
+void Wnd::CancellingChildDragDrop(const std::list<Wnd*>& wnds) {}
+
 void Wnd::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
 {
     for (std::list<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {

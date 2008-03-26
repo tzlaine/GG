@@ -113,7 +113,7 @@ extern GG_API const WndFlag MODAL;
     to input as driven by the singleton GUI object.
 
     <p>Event Filters
-    <br>Every Wnd can also have its incoming WndEvents filtered by an arbitrary number of other Wnds.  Each such Wnds in
+    <br>Every Wnd can also have its incoming WndEvents filtered by an arbitrary number of other Wnds.  Each such Wnd in
     a Wnd's "filter chain" gets an opportunity, one at a time, to process an incoming WndEvent, or pass it on to the
     next filter in the chain.  If all EventFilter() calls in the chain return false, the filtered Wnd then gets the
     chance to process the WndEvent as normal.  Filter Wnds are traversed in reverse order that they are installed, and
@@ -144,14 +144,14 @@ extern GG_API const WndFlag MODAL;
     <br>Browse info is a non-interactive informational window that pops up after the user keeps the mouse over the Wnd
     for a certain period of time.  This can reproduce "tooltip"-like functionality, but is not limited to displaying
     only text.  An arbitrary BrowseInfoWnd-derived window can be displayed.  There can be multiple browse info modes,
-    numbered 0 through N.  Each mode has a time associated with it, and after the associated time has elapsed, that mode
+    numbered 0 through N - 1.  Each mode has a time associated with it, and after the associated time has elapsed, that mode
     is entered.  This is intended to allow different levels of detail to be shown for different lengths of mouse
     presence.  For instance, hovering over a Wnd for 1 second might produce a box that says "FooWnd", but leaving it
     there a total of 2 seconds might produce a box that says "FooWnd: currently doing nothing".  When the mouse leaves
     the Wnd, a click occurs, etc., the Wnd reverts to browse mode -1, indicating that no browse info should be
     displayed.  By default, every Wnd has a single browse info mode at time DefaultBrowseTime(), using the
     DefaultBrowseInfoWnd(), with no associated text.  Note that DefaultBrowseInfoWnd() returns a null window unless it
-    is set by the user, and as this implies, it is legal to have no BrowseInfoWnd associated with a browse mode, in
+    is set by the user.  As this implies, it is legal to have no BrowseInfoWnd associated with a browse mode, in
     which case nothing is shown.  Also note that it is legal to have no text associated with a browse mode. \see
     BrowseInfoWnd
 

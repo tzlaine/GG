@@ -75,14 +75,21 @@ Pt TabWnd::MinUsableSize() const
     return retval;
 }
 
-int TabWnd::CurrentWnd() const
-{ return m_tab_bar->CurrentTab(); }
+Wnd* TabWnd::CurrentWnd() const
+{ return m_current_wnd; }
+
+int TabWnd::CurrentWndIndex() const
+{ return m_tab_bar->CurrentTabIndex(); }
 
 void TabWnd::Render()
 {}
 
-void TabWnd::AddWnd(Wnd* wnd, const std::string& name)
-{ InsertWnd(m_wnds.size(), wnd, name); }
+int TabWnd::AddWnd(Wnd* wnd, const std::string& name)
+{
+    int retval = m_wnds.size();
+    InsertWnd(m_wnds.size(), wnd, name);
+    return retval;
+}
 
 void TabWnd::InsertWnd(int index, Wnd* wnd, const std::string& name)
 {
@@ -204,7 +211,7 @@ Pt TabBar::MinUsableSize() const
     return Pt(4 * BUTTON_WIDTH, y);
 }
 
-int TabBar::CurrentTab() const
+int TabBar::CurrentTabIndex() const
 { return m_tabs->CheckedButton(); }
 
 void TabBar::SizeMove(const Pt& ul, const Pt& lr)
@@ -217,8 +224,12 @@ void TabBar::SizeMove(const Pt& ul, const Pt& lr)
 void TabBar::Render()
 {}
 
-void TabBar::AddTab(const std::string& name)
-{ InsertTab(m_tab_buttons.size(), name); }
+int TabBar::AddTab(const std::string& name)
+{
+    int retval = m_tab_buttons.size();
+    InsertTab(m_tab_buttons.size(), name);
+    return retval;
+}
 
 void TabBar::InsertTab(int index, const std::string& name)
 {

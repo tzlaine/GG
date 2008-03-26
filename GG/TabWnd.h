@@ -37,6 +37,8 @@ namespace GG {
 class TabBar;
 class WndEvent;
 
+/** Contains several Wnds and a TabBar, and only displays the Wnd currently
+    selected in the TabBar. */
 class GG_API TabWnd : public Wnd
 {
 public:
@@ -60,15 +62,35 @@ public:
     /** \name Accessors */ //@{
     virtual Pt MinUsableSize() const;
 
-    int CurrentWnd() const;
+    /** Returns the Wnd currently visible in the TabWnd, or 0 if there is none. */
+    Wnd* CurrentWnd() const;
+
+    /** Returns the index into the sequence of Wnds in this TabWnd of the Wnd
+        currently shown.  NO_WND is returned if there is no Wnd currently
+        visible. */
+    int  CurrentWndIndex() const;
     //@}
 
     /** \name Mutators */ //@{
     virtual void Render();
 
-    void AddWnd(Wnd* wnd, const std::string& name);
+    /** Adds \a wnd to the sequence of Wnds in this TabWnd, with name \a name.
+        \a name can be used later to remove the Wnd (\a name is not checked for
+        uniqueness).  Returns the index at which \a wnd is placed. */
+    int  AddWnd(Wnd* wnd, const std::string& name);
+
+    /** Adds \a wnd to the sequence of Wnds in this TabWnd, inserting it at the
+        \a index location within the sequence.  \a name can be used later to
+        remove the Wnd (\a name is not checked for uniqueness).  Not range
+        checked. */
     void InsertWnd(int index, Wnd* wnd, const std::string& name);
+
+    /** Removes and returns the first Wnd previously added witht he name \a name
+        from the sequence of Wnds in this TabWnd. */
     Wnd* RemoveWnd(const std::string& name);
+
+    /** Sets the currently visible Wnd in the sequence to the Wnd in the \a
+        index position within the sequence.  Not range checked. */
     void SetCurrentWnd(int index);
     //@}
 
@@ -100,6 +122,9 @@ private:
 };
 
 
+/** Contains a sequence of buttons (hereafter "tabs") that act together in a
+    RadioButtonGroup.  This class is intended to be used to select the current
+    Wnd in a TabWnd. */
 class GG_API TabBar : public Control
 {
 public:
@@ -122,16 +147,32 @@ public:
     /** \name Accessors */ //@{
     virtual Pt MinUsableSize() const;
 
-    int CurrentTab() const;
+    /** Returns the index into the sequence of tabs in this TabBar of the tab
+        currently selected.  NO_TAB is returned if there is no tab currently
+        selected. */
+    int CurrentTabIndex() const;
     //@}
 
     /** \name Mutators */ //@{
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
 
-    void AddTab(const std::string& name);
+    /** Adds a tab called \a name to the sequence of tabs in this TabBar.  \a
+        name can be used later to remove the tab (\a name is not checked for
+        uniqueness).  Returns the index at which the tab is placed. */
+    int  AddTab(const std::string& name);
+
+    /** Adds tab to the sequence of tabs in this TabBar, inserting it at the \a
+        index location within the sequence.  \a name can be used later to remove
+        the tab (\a name is not checked for uniqueness).  Not range checked. */
     void InsertTab(int index, const std::string& name);
+
+    /** Removes the first tab previously added witht he name \a name from the
+        sequence of tab in this TabBar. */
     void RemoveTab(const std::string& name);
+
+    /** Sets the current tab in the sequence to the tab in the \a index position
+        within the sequence.  Not range checked. */
     void SetCurrentTab(int index);
     //@}
 

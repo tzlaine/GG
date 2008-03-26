@@ -41,7 +41,7 @@ GG_FLAG_TYPE(MultiEditStyle);
 extern GG_API const MultiEditStyle MULTI_NONE;             ///< Default style selected.
 extern GG_API const MultiEditStyle MULTI_WORDBREAK;        ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
 extern GG_API const MultiEditStyle MULTI_LINEWRAP;         ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
-extern GG_API const MultiEditStyle MULTI_VCENTER;          ///< Verrtically centers text. 
+extern GG_API const MultiEditStyle MULTI_VCENTER;          ///< Vertically centers text. 
 extern GG_API const MultiEditStyle MULTI_TOP;              ///< Aligns text to the top. 
 extern GG_API const MultiEditStyle MULTI_BOTTOM;           ///< Aligns text to the bottom. 
 extern GG_API const MultiEditStyle MULTI_CENTER;           ///< Centers text. 
@@ -58,7 +58,7 @@ extern GG_API const Flags<MultiEditStyle> MULTI_NO_SCROLL; ///< Scrolls are not 
 /** This is a multi-line text input and display control.  MultiEdit is designed to be used as a basic text-input control
     for text longer than one line, or to display large amounts of formatted or unformatted text.  MultiEdit supports
     text formatting tags.  See GG::Font for details.  Several style flags are available.  If the MULTI_TERMINAL_STYLE
-    flag is in use, rows that exceed the history limit will be removed from the beginning of the text; otherwise, they
+    flag is in use, lines that exceed the history limit will be removed from the beginning of the text; otherwise, they
     are removed from the end.  If either MULTI_LINEWRAP of MULTI_WORDBREAK are in use, MULTI_NO_HSCROLL must be in use
     as well.  MULTI_VCENTER is not an allowed style; if it is specified, MULTI_TOP will be used in its place.  The
     justification introduced by text formatting tags is very different from that introduced by the TF_* styles.  The

@@ -96,7 +96,7 @@ struct CustomTextRow : GG::ListBox::Row
 // Ignore all code until ControlsTestApp::Initialize(); the enclosed code is
 // straight from Tutorial 1.
 ////////////////////////////////////////////////////////////////////////////////
-class ControlsTestApp : public SDLGUI
+class ControlsTestApp : public GG::SDLGUI
 {
 public:
     ControlsTestApp();

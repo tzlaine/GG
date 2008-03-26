@@ -55,7 +55,7 @@ extern GG_API const ListBoxStyle LIST_CENTER;         ///< Cells are center-alig
 extern GG_API const ListBoxStyle LIST_LEFT;           ///< Cells are left-aligned. This is the default.
 extern GG_API const ListBoxStyle LIST_RIGHT;          ///< Cells are right-aligned.
 extern GG_API const ListBoxStyle LIST_NOSORT;         ///< List items are not sorted. Items are sorted by default.  When used with drag-and-drop, this style allows arbitrary rearrangement of list elements by dragging.
-extern GG_API const ListBoxStyle LIST_SORTDESCENDING; ///< Items are sorted based on item text in ascending order. Ascending order is the default.
+extern GG_API const ListBoxStyle LIST_SORTDESCENDING; ///< Items are sorted based on item text in descending order. Ascending order is the default.
 extern GG_API const ListBoxStyle LIST_NOSEL;          ///< No selection, dragging, or dropping allowed.  This makes the list box effectively read-only.
 extern GG_API const ListBoxStyle LIST_SINGLESEL;      ///< Only one item at a time can be selected. By default, multiple items may be selected.
 extern GG_API const ListBoxStyle LIST_QUICKSEL;       ///< Each click toggles an item without affecting any others; ignored when used with LIST_SINGLESEL.
@@ -88,7 +88,7 @@ extern GG_API const ListBoxStyle LIST_BROWSEUPDATES;  ///< Causes a signal to be
     column widths or alignments should be avoided, or caught and handled.  Note that a DroppedSignal is emitted for each
     row dropped into the ListBox, so individual rows may be accepted or rejected from a single multi-row drop.
     <br>Also note that while a ListBox can contain arbitrary Control-derived controls, in order for such controls to be
-    automatically serialized, any user-defined Control subclasses must be registerd.  See the boost serialization
+    automatically serialized, any user-defined Control subclasses must be registered.  See the boost serialization
     documentation for details. */
 class GG_API ListBox : public Control
 {

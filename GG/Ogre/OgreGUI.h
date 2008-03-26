@@ -23,6 +23,9 @@
    Zach Laine
    whatwasthataddress@hotmail.com */
    
+/** \file OgreGUI.h
+    Contains OgreGUI, the input driver for using Ogre with GG. */
+
 #ifndef _GG_OgreGUI_h_ 
 #define _GG_OgreGUI_h_
 
@@ -51,21 +54,65 @@ namespace Ogre {
 
 namespace GG {
 
+/** This is an abstract singleton class that represents the GUI framework of an
+    Ogre OpenGL application.
+    <p>
+    Usage:<br>
+    Any application including an object of this class should declare that object
+    as a local variable in main(). The name of this variable will herein be
+    assumed to be "gui". It should be allocated on the stack; if it is created
+    dynamically, a leak may occur.
+    <p>
+    OgreGUI serves as a driver of the main Ogre event loop, and mediates between
+    the global GL state set by Ogre and the global GL state set by GG.  It also
+    provides important information to the input plugin via its public signals.
+    <p>
+    OgreGUI does not constitute a complete input driver for GG.  This is because
+    Ogre does not provide any direct input support at all (at the time of this
+    writing, Ogre uses an input library called OIS to provide keyboard, mouse,
+    and joystick input).  Following the Ogre convention, OgreGUI relies upon the
+    Ogre plugin system to provide the actual input system used by Ogre and GG.
+    A plugin for OIS is provided in the Ogre/Plugins subtree of the GG sources.
+    <p>
+    Any plugin used with OgreGUI must grab input state (mouse, keyboard, etc.) 
+    in response to the firing of OgreGUI::HandleSystemEventsSignal.  It is
+    notified of changes in the window size via OgreGUI::WindowResizedSignal.
+    OgreGUI::HandleWindowClose indicates that the Ogre::RenderWindow in which
+    OgreGUI is operating has or is about to close, in case the plugin needs to
+    perform cleanup.
+    <p>
+    To use OgreGUI, one must first create "gui", then load the input plugin
+    using Ogre's plugin loading mechanism, then call "gui();".  For example:
+    \verbatim
+    OgreGUI gui(ogre_window, "/path/to/input_plugin.cfg");
+    ogre_root->loadPlugin("/path/to/plugin");
+    gui();
+    \endverbatim
+    */
 class GG_OGRE_API OgreGUI :
     public GUI,
     public Ogre::RenderTargetListener,
     public Ogre::WindowEventListener
 {
 public:
-    OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename = "");
-    ~OgreGUI();
+    /** Basic ctor.  A nonzero \a window is required, and an optional
+        configuration filename, \a config_filename.  If \a config_filename is
+        supplied, it will be available via ConfigFileStream(). */
+    explicit OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename = "");
 
+    /** Dtor. */
+    virtual ~OgreGUI();
+
+    /** Creates a modal event pump suitable for use with Ogre. */
     virtual boost::shared_ptr<ModalEventPump> CreateModalEventPump(bool& done);
 
     virtual int  Ticks() const;
     virtual int  AppWidth() const;
     virtual int  AppHeight() const;
 
+    /** Returns an Ogre::DataStream containing the contents of the \a
+        config_filename ctor parameter.  This will be null if \a
+        config_filename was not supplied to the ctor. */
     const Ogre::SharedPtr<Ogre::DataStream>& ConfigFileStream() const;
 
     virtual void Exit(int code);
@@ -74,7 +121,7 @@ public:
     boost::signal<void (int, int)> WindowResizedSignal;
     boost::signal<void ()> WindowClosedSignal;
 
-    /** allows any code to access the gui framework by calling OgreGUI::GetGUI() */
+    /** Allows any code to access the gui framework by calling GG::OgreGUI::GetGUI(). */
     static OgreGUI* GetGUI();
 
 protected:

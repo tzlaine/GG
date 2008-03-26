@@ -91,7 +91,7 @@ CustomTextRow::CustomTextRow(const std::string& text) :
 }
 
 
-class ControlsTestApp : public SDLGUI
+class ControlsTestApp : public GG::SDLGUI
 {
 public:
     ControlsTestApp();

@@ -30,22 +30,24 @@
 #include <iostream>
 
 
+using namespace GG;
+
 namespace {
-    GG::Flags<GG::ModKey> GetSDLModKeys()
+    Flags<ModKey> GetSDLModKeys()
     {
-        GG::Flags<GG::ModKey> retval;
+        Flags<ModKey> retval;
         Uint32 sdl_keys = SDL_GetModState();
-        if (sdl_keys & KMOD_LSHIFT) retval |= GG::MOD_KEY_LSHIFT;
-        if (sdl_keys & KMOD_RSHIFT) retval |= GG::MOD_KEY_RSHIFT;
-        if (sdl_keys & KMOD_LCTRL)  retval |= GG::MOD_KEY_LCTRL;
-        if (sdl_keys & KMOD_RCTRL)  retval |= GG::MOD_KEY_RCTRL;
-        if (sdl_keys & KMOD_LALT)   retval |= GG::MOD_KEY_LALT;
-        if (sdl_keys & KMOD_RALT)   retval |= GG::MOD_KEY_RALT;
-        if (sdl_keys & KMOD_LMETA)  retval |= GG::MOD_KEY_LMETA;
-        if (sdl_keys & KMOD_RMETA)  retval |= GG::MOD_KEY_RMETA;
-        if (sdl_keys & KMOD_NUM)    retval |= GG::MOD_KEY_NUM;
-        if (sdl_keys & KMOD_CAPS)   retval |= GG::MOD_KEY_CAPS;
-        if (sdl_keys & KMOD_MODE)   retval |= GG::MOD_KEY_MODE;
+        if (sdl_keys & KMOD_LSHIFT) retval |= MOD_KEY_LSHIFT;
+        if (sdl_keys & KMOD_RSHIFT) retval |= MOD_KEY_RSHIFT;
+        if (sdl_keys & KMOD_LCTRL)  retval |= MOD_KEY_LCTRL;
+        if (sdl_keys & KMOD_RCTRL)  retval |= MOD_KEY_RCTRL;
+        if (sdl_keys & KMOD_LALT)   retval |= MOD_KEY_LALT;
+        if (sdl_keys & KMOD_RALT)   retval |= MOD_KEY_RALT;
+        if (sdl_keys & KMOD_LMETA)  retval |= MOD_KEY_LMETA;
+        if (sdl_keys & KMOD_RMETA)  retval |= MOD_KEY_RMETA;
+        if (sdl_keys & KMOD_NUM)    retval |= MOD_KEY_NUM;
+        if (sdl_keys & KMOD_CAPS)   retval |= MOD_KEY_CAPS;
+        if (sdl_keys & KMOD_MODE)   retval |= MOD_KEY_MODE;
         return retval;
     }
 }
@@ -96,41 +98,41 @@ SDLGUI* SDLGUI::GetGUI()
     return dynamic_cast<SDLGUI*>(GUI::GetGUI());
 }
 
-GG::Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
+Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
 {
-    GG::Key retval = GG::Key(key.sym);
+    Key retval = Key(key.sym);
     bool shift = key.mod & KMOD_SHIFT;
     bool caps_lock = key.mod & KMOD_CAPS;
 
-    // this code works because both SDLKey and GG::Key map (at least
+    // this code works because both SDLKey and Key map (at least
     // partially) to the printable ASCII characters
     if (shift || caps_lock) {
         if (shift != caps_lock && ('a' <= retval && retval <= 'z')) {
-            retval = GG::Key(std::toupper(retval));
+            retval = Key(std::toupper(retval));
         } else if (shift) { // the caps lock key should not affect these
             // this assumes a US keyboard layout
             switch (retval) {
-            case '`': retval = GG::Key('~'); break;
-            case '1': retval = GG::Key('!'); break;
-            case '2': retval = GG::Key('@'); break;
-            case '3': retval = GG::Key('#'); break;
-            case '4': retval = GG::Key('$'); break;
-            case '5': retval = GG::Key('%'); break;
-            case '6': retval = GG::Key('^'); break;
-            case '7': retval = GG::Key('&'); break;
-            case '8': retval = GG::Key('*'); break;
-            case '9': retval = GG::Key('('); break;
-            case '0': retval = GG::Key(')'); break;
-            case '-': retval = GG::Key('_'); break;
-            case '=': retval = GG::Key('+'); break;
-            case '[': retval = GG::Key('{'); break;
-            case ']': retval = GG::Key('}'); break;
-            case '\\': retval = GG::Key('|'); break;
-            case ';': retval = GG::Key(':'); break;
-            case '\'': retval = GG::Key('"'); break;
-            case ',': retval = GG::Key('<'); break;
-            case '.': retval = GG::Key('>'); break;
-            case '/': retval = GG::Key('?'); break;
+            case '`': retval = Key('~'); break;
+            case '1': retval = Key('!'); break;
+            case '2': retval = Key('@'); break;
+            case '3': retval = Key('#'); break;
+            case '4': retval = Key('$'); break;
+            case '5': retval = Key('%'); break;
+            case '6': retval = Key('^'); break;
+            case '7': retval = Key('&'); break;
+            case '8': retval = Key('*'); break;
+            case '9': retval = Key('('); break;
+            case '0': retval = Key(')'); break;
+            case '-': retval = Key('_'); break;
+            case '=': retval = Key('+'); break;
+            case '[': retval = Key('{'); break;
+            case ']': retval = Key('}'); break;
+            case '\\': retval = Key('|'); break;
+            case ';': retval = Key(':'); break;
+            case '\'': retval = Key('"'); break;
+            case ',': retval = Key('<'); break;
+            case '.': retval = Key('>'); break;
+            case '/': retval = Key('?'); break;
             default: break;
             }
         }
@@ -138,7 +140,7 @@ GG::Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
     return retval;
 }
 
-void SDLGUI::SetAppSize(const GG::Pt& size)
+void SDLGUI::SetAppSize(const Pt& size)
 {
     m_app_width = size.x;
     m_app_height = size.y;
@@ -197,16 +199,16 @@ void SDLGUI::HandleSystemEvents()
     while (0 < SDL_PollEvent(&event)) {
         bool send_to_gg = false;
         EventType gg_event = MOUSEMOVE;
-        GG::Key key = GG::GGK_UNKNOWN;
-        GG::Flags<GG::ModKey> mod_keys = GetSDLModKeys();
-        GG::Pt mouse_pos(event.motion.x, event.motion.y);
-        GG::Pt mouse_rel(event.motion.xrel, event.motion.yrel);
+        Key key = GGK_UNKNOWN;
+        Flags<ModKey> mod_keys = GetSDLModKeys();
+        Pt mouse_pos(event.motion.x, event.motion.y);
+        Pt mouse_rel(event.motion.xrel, event.motion.yrel);
 
         switch (event.type) {
         case SDL_KEYDOWN:
         case SDL_KEYUP:
             key = GGKeyFromSDLKey(event.key.keysym);
-            if (key < GG::GGK_NUMLOCK)
+            if (key < GGK_NUMLOCK)
                 send_to_gg = true;
             gg_event = (event.type == SDL_KEYDOWN) ? KEYPRESS : KEYRELEASE;
             break;
@@ -220,8 +222,8 @@ void SDLGUI::HandleSystemEvents()
                 case SDL_BUTTON_LEFT:      gg_event = LPRESS; break;
                 case SDL_BUTTON_MIDDLE:    gg_event = MPRESS; break;
                 case SDL_BUTTON_RIGHT:     gg_event = RPRESS; break;
-                case SDL_BUTTON_WHEELUP:   gg_event = MOUSEWHEEL; mouse_rel = GG::Pt(0, 1); break;
-                case SDL_BUTTON_WHEELDOWN: gg_event = MOUSEWHEEL; mouse_rel = GG::Pt(0, -1); break;
+                case SDL_BUTTON_WHEELUP:   gg_event = MOUSEWHEEL; mouse_rel = Pt(0, 1); break;
+                case SDL_BUTTON_WHEELDOWN: gg_event = MOUSEWHEEL; mouse_rel = Pt(0, -1); break;
             }
             mod_keys = GetSDLModKeys();
             break;
@@ -277,7 +279,7 @@ void SDLGUI::Run()
     try {
         SDLInit();
         Initialize();
-        GG::EventPump pump;
+        EventPump pump;
         pump();
     } catch (const std::invalid_argument& e) {
         std::cerr << "std::invalid_argument exception caught in GUI::Run(): " << e.what();
@@ -285,7 +287,7 @@ void SDLGUI::Run()
     } catch (const std::runtime_error& e) {
         std::cerr << "std::runtime_error exception caught in GUI::Run(): " << e.what();
         Exit(1);
-    } catch (const GG::ExceptionBase& e) {
+    } catch (const ExceptionBase& e) {
         std::cerr << "GG exception (subclass " << e.type() << ") caught in GUI::Run(): " << e.what();
         Exit(1);
     }

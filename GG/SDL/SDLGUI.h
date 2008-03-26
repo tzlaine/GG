@@ -44,6 +44,8 @@
 # define GG_SDL_API
 #endif
 
+namespace GG {
+
 /** This is an abstract singleton class that represents the GUI framework of an SDL OpenGL 
     application.
     <p>
@@ -63,7 +65,7 @@
     subclass and call that from within Run() instead of HandleEvent(). Note that though the bulk of the 
     program execution takes place within Run(), Run() itself is also only called once.
     <p>
-    SDLGUI takes a two-tiered approach to event handling.  The event pump calls HandlSystemEvents(), which
+    SDLGUI takes a two-tiered approach to event handling.  The event pump calls HandleSystemEvents(), which
     polls for SDL events and handles them by first determining whether the event is GG-related, or some other
     non-GG event, such as SDL_QUIT, etc.  GG events and non-GG events are passed to HandleGGEvent() and
     HandleNonGGEvent(), respectively.  For most uses, there should be no need to override the behavior of
@@ -73,7 +75,7 @@ class GG_SDL_API SDLGUI : public GG::GUI
 {
 public:
     /** \name Structors */ //@{
-    SDLGUI(int w = 1024, int h = 768, bool calc_FPS = false, const std::string& app_name = "GG"); ///< ctor
+    explicit SDLGUI(int w = 1024, int h = 768, bool calc_FPS = false, const std::string& app_name = "GG"); ///< ctor
     virtual ~SDLGUI();
     //@}
 
@@ -118,6 +120,8 @@ private:
     int            m_app_width;      ///< application width and height (defaults to 1024 x 768)
     int            m_app_height;
 };
+
+} // namespace GG
 
 #endif // _GG_SDLGUI_h_
 

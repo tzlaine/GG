@@ -68,10 +68,10 @@ struct GUIImpl;
     <p>
     The user is required to provide several functions.  The most vital functions the user is required to provide are:
     Enter2DMode(), Exit2DMode(), DeltaT(), PollAndRender() [virtual private], and Run() [virtual private].  Without
-    these GUI is pretty useless.  In addition, HandleEvent() must be driven from PollAndRender().  The code driving
-    HandleEvent() must interact with the hardware and operating system, and supply the appropriate EventType's, key
-    presses, and mouse position info to HandleEvent().  It is the author's recommendation that the user use SDL to do
-    this.  See http://www.libsdl.org for more info.
+    these, GUI is pretty useless.  In addition, HandleEvent() must be driven from PollAndRender().  The code driving
+    HandleEvent() must interact with the hardware and/or operating system, and supply the appropriate EventType's, key
+    presses, and mouse position info to HandleEvent().  It is the author's recommendation that the user use one of the
+    provided SDL abd Ogre drivers to do this.
     <p>
     Keyboard accelerators may be defined, as mentioned above.  Each defined accelerator has its own signal which is
     emitted each time the accelerator is detected.  Client code should listen to the appropriate signal to act on an

@@ -7,9 +7,9 @@
     GG is designed to achieve several goals:
     - Platform-independence: GG should be buildable on any platform that supports OpenGL
     - Driver-independence: GG should be a standalone GUI framework that does not require any particular application framework;
-    though an SDL driver is supplied, GG should be usable with any driver code the user wishes to supply
+    though SDL and Ogre drivers are supplied, GG should be usable with any driver code the user wishes to supply
     - Easy extensibility: new controls and GUI behavior should be easy to incorporate
-    - Complete graphical control for the user/designer: the user should not be limited by the authors' lack of artistic skill!
+    - Complete graphical control for the user/designer: the user should not be limited by the author's lack of artistic skill!
     - Independence of UI elements from the source code: GG UI elements should be configurable as text files, so that UI design 
     and alteration should not require a recompilation
     - Overall time efficiency: an application with a reasonable number of GG UI elements should not slow down significantly 
@@ -41,8 +41,9 @@
     - FreeType 2.1.2 - http://www.freetype.org
     - boost 1.34 - http://www.boost.org
 
-    Optional libraries:
+    Optional libraries for input drivers:
     - SDL 1.2.7 - http://www.libsdl.org
+    - Ogre 1.4.7 - http://ogre3d.org
 
     GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
     documentation will appear in the GG/doc/html directory.
@@ -101,15 +102,15 @@
 
 /** \page architecture Architecture
     \section arch_rendering Rendering Overview
-    GG uses OpenGL to render its graphics; it is assumed that the entire GUI is being redrawn multiple times each second.  
+    GG uses OpenGL to render its graphics.  It is assumed that the entire GUI is being redrawn multiple times each second, as part of a high-framerate application.  
     Each GG UI element is draw using calls to OpenGL.  Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D 
-    mode graphic, or even a 3D mode rendering; the complexity of the graphics used to represent the UI elements is only limited
+    texture or sprite, or even a fully 3D rendering; the complexity of the graphics used to represent the UI elements is only limited
     by the target rendering hardware and the user's skill.
     \section arch_UI_overview UI Overview
     \subsection arch_input_events Input Events
     GG is organized as a layer on top of an existing user input framework.  GG has no way of determining that a mouse click, mouse move, 
     or any other user input event, has taken place.  To use GG, one must subclass off of the abstract class GG::GUI, and define several 
-    of GG::GUI's pure virtual functions.  These functions poll the underlying operating system or input framework (by default the SDL),
+    of GG::GUI's pure virtual functions.  These functions poll the underlying operating system or input framework,
     and generate GG input messages from them.  Such messages are mouse moves and clicks, key presses and releases, joystick movement, 
     etc. GG maintains internal state as to what part of the GUI is being dragged, clicked, etc.
     \subsection arch_UI_overview_example Example:
@@ -122,23 +123,23 @@
     little computation is involved in processing a single user input event.  GG's performance is therefore usually limited only by the
     application-defined processing that is associated with manipulating the controls (e.g., a button click may trigger disk IO).
    \subsection arch_UI_element_conns UI Element Connections
-    GG UI elements are connected using signals and slots, using the boost.signals library implementation.  This allows arbitrary 
-    connections between one control and another, and between a control and other code; there is no hierarchy of passed messages 
-    as there is in some other GUIs, and there are no unsafe callbacks used.  Refer to the \ref sigs_n_slots documentation for details.
+    GG UI elements are connected using signals and slots, using the boost.signals library.  This allows arbitrary 
+    connections between one control and another, and between a control and any other code; there is no hierarchy of passed messages 
+    as there is in some other GUIs, and no type-unsafe callbacks are used.  Refer to the \ref sigs_n_slots documentation for details.
     \subsection arch_gui_services GG::GUI Services
     The singleton GG::GUI object is globally available through a static member function, GG::GUI::GetGUI().  This allows all code
     in the application to rely on GG::GUI for certain essential services.  GUI-specific services include registering windows into
     the GUI, registering windows as always-on-top or modal windows, moving windows up or down in the z-order layers of the GUI,
     removing windows from the GUI, getting mouse state (position and button depression), setting mouse delay repeat (see GG::GUI 
-    for a description of this), entering and exiting from an orthographic projection (2D) rendering mode, and creating polymorphic
-    GUI elements from XML-formatted text.  Most of these services must be provided by the user when subclassing from GG::GUI; 
-    if SDLGUI is used, these services are already implemented.
+    for a description of this), entering and exiting from an orthographic projection (2D) rendering mode, and saving/loading polymorphic
+    GUI elements to/from their serialized form.  Most of these services must be provided by the user when subclassing from GG::GUI; 
+    if either of SDLGUI or OgreGUI is used, these services are already implemented.
     <p>
     GG::GUI does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
     GG::GUI provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the GUI is rendering, 
     and how long it has been since the last frame was rendered.  There is also a font manager, an application-wide font "pool",
     from which the user can request fonts.  The font pool loads and stores the fonts as needed by the application, and multiple 
-    requests for the same font at the same size will result in the creation of only one rendered font object.  A texture manager
+    requests for the same font at the same size will result in the creation of only one font object.  A texture manager
     exists which does a similar job with textures.  If the user wants to programmatically create textures, she can also add them
     to the texture pool, provide a name, and request that texture as many times as needed.  OpenGL texture objects are used as
     the underlying texture rendering method.
@@ -147,9 +148,9 @@
 /** \page sigs_n_slots Signals and Slots
     \section sigs_n_slots_definition Sig-who? Slo-what?
     If you've never been exposed to the signals and slots pattern before, it can be a little confusing.  Simply put, a slot is a
-    function or funtion object that is "listening" for a signal.  A slot "listening" to a certain signal is said to be connected 
-    to that signal.  When a signal is emitted, all slots that are connected to that signal invoke their function(s)/function 
-    object(s).  If a signal is emitted to which no slots are connected, nothing happens.
+    function or function object that is "listening" for a signal.  A slot "listening" to a certain signal is said to be connected 
+    to that signal.  When a signal is emitted, all slots that are connected to that signal are called (since they are all functions/function
+    objects).  If a signal is emitted to which no slots are connected, nothing happens.
     \section sigs_n_slots_motivation Motivation for the Signals and Slots Pattern
     \subsection prob The Problem
     Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to call a
@@ -179,12 +180,12 @@
     possible.  Calling Connect(sig1, sig2) forwards all sig1's signal emissions to sig2.  This is provided as a
     convenience to avoid having to write dummy forwarding functions that do this.
     \subsection sigs_n_slots_emitting Emitting Signals
-    To emit a signal, just call its () operator, like this: sig();
+    To emit a signal from a signal object "sig", just use its function call operator ("operator()"), like this: "sig();"
     \subsection disconnecting Disconnecting Signals and Slots
     If you kept the connection object returned by Connect(), a connection_obj.disconnect() call will disconnect the associated 
-    signal and slot.  Also, consider this: what happens if a non-static member function slot and signal are connected, the 
-    object owning the slot is destructed, and the signal is emitted?  A segfault, unless the object's class inherits from 
-    boost::trackable, which auto-disconnects slots on object destruction.  GG::Wnd is derived from boost::trackable, so all 
+    signal and slot.  Also, consider this: what happens if a signal A is connected to a slot consisting of a member function
+    of object B, B is deleted, and then A() is called?  A segfault, unless the B's class inherits from 
+    boost::trackable, which auto-disconnects slots in its destructor.  GG::Wnd is derived from boost::trackable, so all 
     GG::Wnd-derived classes should handle such situations gracefully.  See the boost tutorial below for details.
     \see http://boost.org/doc/html/signals.html for a tutorial on other aspects of signals and slots; you can create 
     connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
@@ -198,11 +199,16 @@
     what kind of data the Wnd represents.  The string can be a MIME type or any arbitrary string the user likes.  Upon
     the drop, the Wnd receiving the drop has its AcceptDrop() method called, in which it can examine the data type or
     any other relevant aspects of the dropped Wnd and decide whether or not to accept it.  If the receiver accepts, the
-    dropped Wnd is removed from its parent, if it has one.  Note that only Wnds with non-empty-string
-    DragDropDataType()s may be dragged, and that such Wnds may be, but do not need to be, created with the DRAGABLE
-    flag.
+    dropped Wnd is removed from its parent, if it has one.  Note that only Wnds with non-empty DragDropDataType() or
+    Wnds that were created with the DRAGABLE (both not both!) may be drag-and-dropped.  A DRAGABLE Wnd is draggable as long as
+    it is not the child of another Wnd, and as it is dragged, it moves across the screen normally.  A Wnd with a
+    non-empty DragDropDataType() string does not move when drag-and-dropped; instead, it is rendered in its original place,
+    and a copy of it is rendered as if the cursor were dragging it.
     \section drag_n_drop_advanced Advanced Use
-    Sometimes it is desirable to have the drop-receiving Wnd emit a signal to which clients may attach slots.  Further,
+    There is an extensive set of notification functions that may be called during a drag and drop operation.  The drop target
+    and the orginal parent of the dragged Wnd(s), if any, may be notified of various events or queried (e.g. AcceptDrop()).
+    See the Wnd documentation for details.
+    <p>Sometimes it is desirable to have the drop-receiving Wnd emit a signal to which clients may attach slots.  Further,
     it may be desirable to allow the attached client slots to veto the drop.  If this is desired, the recommended means
     of accomplishing this is to follow the pattern of ListBox.  ListBox catches ListBox::DontAcceptDrop exceptions that
     are thrown in slots attached to its DroppedSignal signal.  The signal is emitted after the drop is completed, and if
@@ -229,7 +235,8 @@
     archive, all its signals must be reconnected to their slots (and any signals connected to it should be reconnected
     as well).  Many of the built-in GG controls must reconnect signals when loaded; such classes have a private
     ConnectSignals() method that is called at load time.  See RadioButtonGroup::serialize() in GGButton.h for an
-    example.  Another caveat: Font and Texture objects that were part of the GUI's FontManager and TextureManager when
+    example.
+    <p>Font and Texture objects that were part of the GUI's FontManager and TextureManager when
     saved will not be added back to these two structures when they are loaded.
 */
 
@@ -238,7 +245,7 @@
     The following tutorials are available in the tutorial directory.  You can build them all using SCons.  SCons can be
     found at http://www.scons.org .  An MSVC solution file is also provided.
     \section tut_1 Tutorial 1: Minimal (minimal.cpp)
-    This is the minimal interesting GG application, and uses the default input driver, SDL.
+    This is the minimal interesting GG application, and uses one of the default input drivers, SDL.
     \section tut_2 Tutorial 2: Controls (controls.cpp)
     This builds upon Tutorial 1 by adding one of every type of Control, and connecting some signals and slots.
     \section tut_3 Tutorial 3: Serialization (serialization.cpp)

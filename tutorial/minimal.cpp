@@ -12,7 +12,7 @@
 // This is the minimal interface (or nearly so) to SDLGUI required to produce a functional GG-over-SDL application.
 // Note that GG does not require SDL, and even when using SDL, it does not require you to use SDLGUI.  However, using
 // SDLGUI as an application framework makes using GG extremely easy, as you can see.
-class MinimalGGApp : public SDLGUI
+class MinimalGGApp : public GG::SDLGUI
 {
 public:
     MinimalGGApp();

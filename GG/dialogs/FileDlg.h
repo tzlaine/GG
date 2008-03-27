@@ -52,7 +52,7 @@ class Font;
 class GG_API FileDlg : public Wnd
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, if
         desired (such as when "Save As..." is selected in an app, and there is a current filename).  If \a directory is
         specified, it is taken as-is if it is absolute, or relative to boost::filesystem::initial_path() if it is
@@ -63,7 +63,7 @@ public:
             Clr color, Clr border_color, Clr text_color = CLR_BLACK);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     std::set<std::string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
 
     /** Returns true iff this FileDlg will select directories instead of files. */
@@ -91,7 +91,7 @@ public:
     const std::string& ThreeButtonDlgCancelString() const; ///< returns the text of the 3-button dialog's cancel button to \a str Default: "Cancel"
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
     virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
 
@@ -133,7 +133,7 @@ public:
     /** returns the current directory (the one that will be used by default on the next invocation of FileDlg::Run()) */
     static const boost::filesystem::path& WorkingDirectory();
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for FileDlg exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -144,7 +144,7 @@ public:
 protected:
     enum {WIDTH = 400, HEIGHT = 350}; ///< default width and height values for the dialog, in pixels
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     FileDlg(); ///< default ctor
     //@}
 

@@ -45,17 +45,17 @@ class TextControl;
     Note that the signal is not serialized.  The user must restore it after the MenuItem is reloaded. */
 struct GG_API MenuItem
 {
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int)> SelectedIDSignalType; ///< invokes the appropriate functor to handle the menu selection, and passes the ID assigned to the item
     typedef boost::signal<void ()>    SelectedSignalType;   ///< invokes the appropriate functor to handle the menu selection
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef SelectedIDSignalType::slot_type SelectedIDSlotType; ///< type of functor(s) invoked on a SelectedSignalType
     typedef SelectedSignalType::slot_type   SelectedSlotType;   ///< type of functor(s) invoked on a SelectedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     MenuItem(); ///< default ctor
     MenuItem(const std::string& str, int id, bool disable, bool check); ///< ctor
 
@@ -76,7 +76,7 @@ struct GG_API MenuItem
     virtual ~MenuItem(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     mutable boost::shared_ptr<SelectedIDSignalType> SelectedIDSignal; ///< the selected signal object for this MenuItem that conveys the selected menu item ID
     mutable boost::shared_ptr<SelectedSignalType>   SelectedSignal;   ///< the selected signal object for this MenuItem
     //@}
@@ -111,21 +111,21 @@ struct SetTextColorAction;
 class GG_API MenuBar : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int)> BrowsedSignalType; ///< emits the ID of an item in the menu when the cursor moves over it
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef BrowsedSignalType::slot_type  BrowsedSlotType;   ///< type of functor(s) invoked on a BrowsedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
     MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
     MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing menus with which to populate the MenuBar
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt        MinUsableSize() const;
 
     const MenuItem&   AllMenus() const;                           ///< returns a const reference to the MenuItem that contains all the menus and their contents
@@ -146,7 +146,7 @@ public:
     mutable BrowsedSignalType BrowsedSignal; ///< the browsed signal object for this PopupMenu
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
@@ -172,11 +172,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     MenuBar(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const boost::shared_ptr<Font>&   GetFont() const;    ///< returns the font used to render text in the control
     const std::vector<TextControl*>& MenuLabels() const; ///< returns the text for each top-level menu item
     int                              Caret() const;      ///< returns the current position of the caret
@@ -223,20 +223,20 @@ private:
 class GG_API PopupMenu : public Wnd
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int)> BrowsedSignalType; ///< emits the ID of an item in the menu when the cursor moves over it
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef BrowsedSignalType::slot_type  BrowsedSlotType;   ///< type of functor(s) invoked on a BrowsedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
     PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt  ClientUpperLeft() const;
 
     int         MenuID() const;            ///< returns the integer ID of the menu item selected by the user, or 0 if none was selected
@@ -249,7 +249,7 @@ public:
     mutable BrowsedSignalType BrowsedSignal; ///< the browsed signal object for this PopupMenu
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
@@ -268,7 +268,7 @@ public:
     //@}
 
 protected:
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const boost::shared_ptr<Font>&
                              GetFont() const;      ///< returns the font used to render text in the control
     const MenuItem&          MenuData() const;     ///< returns a const reference to the MenuItem that contains all the menu contents

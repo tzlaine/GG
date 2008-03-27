@@ -43,7 +43,7 @@ namespace GG {
     endian-ness of the machine, 0x00FFFFFF would be transparent white (little-endian) or opaque yellow (big-endian).*/
 struct GG_API Clr
 {
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Clr();                                                       ///< default ctor
     Clr(GLubyte r_, GLubyte g_, GLubyte b_, GLubyte a_);         ///< ctor that constructs a Clr from four ints that represent the color channels
     //@}

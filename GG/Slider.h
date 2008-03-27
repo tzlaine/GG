@@ -47,21 +47,21 @@ class WndEvent;
 class GG_API Slider : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int, int, int)> SlidSignalType;           ///< emitted whenever the slider is moved; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
     typedef boost::signal<void (int, int, int)> SlidAndStoppedSignalType; ///< emitted when the slider's tab is stopped after being dragged, the slider is adjusted using the keyboard, or the slider is moved programmatically; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef SlidSignalType::slot_type SlidSlotType;           ///< type of functor(s) invoked on a SlidSignalType
     typedef SlidSignalType::slot_type SlidAndStoppedSlotType; ///< type of functor(s) invoked on a SlidAndStoppedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt           MinUsableSize() const;
 
     int                  Posn() const;           ///< returns the current tab position
@@ -80,7 +80,7 @@ public:
     mutable SlidAndStoppedSignalType SlidAndStoppedSignal; ///< returns the slid-and-stopped signal object for this Slider
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
@@ -104,16 +104,16 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Slider(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     Button* Tab() const;                  ///< returns a pointer to the Button used as this control's sliding tab
     int     PtToPosn(const Pt& pt) const; ///< maps an arbitrary screen point to its nearest logical slider position
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual bool EventFilter(Wnd* w, const WndEvent& event);
 
     void MoveTabToPosn(); ///< moves the tab to the current logical position

@@ -104,15 +104,15 @@ template <class T>
 class Spin : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef typename boost::signal<void (T)> ValueChangedSignalType;  ///< emitted whenever the value of the Spin has changed
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef typename ValueChangedSignalType::slot_type ValueChangedSlotType;   ///< type of functor(s) invoked on a ValueChangedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor that does not required height. Height is determined from the font and point size used.*/
     Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
@@ -120,7 +120,7 @@ public:
     ~Spin(); // dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
 
     T     Value() const;              ///< returns the current value of the control's text
@@ -139,7 +139,7 @@ public:
     mutable ValueChangedSignalType ValueChangedSignal; ///< the value changed signal object for this DynamicGraphic
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
     virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
@@ -177,17 +177,17 @@ protected:
 
     enum {BORDER_THICK = 2, PIXEL_MARGIN = 5};
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Spin(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     Button*     UpButton() const;   ///< returns a pointer to the Button control used as this control's up button
     Button*     DownButton() const; ///< returns a pointer to the Button control used as this control's down button
     Edit*       GetEdit() const;    ///< returns a pointer to the Edit control used to render this control's text and accept keyboard input
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual bool EventFilter(Wnd* w, const WndEvent& event);
     //@}
 

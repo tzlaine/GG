@@ -32,74 +32,6 @@
     - No sound support is provided
 */
 
-/** \page building Building GG
-    \section building_reqs Requirements
-    GG requires GCC 3.4 or later, or MSVC++ 8.0 SP1 or later.  Note that both are available for free download.
-    <p>
-    GG relies on a few other open-source libraries:
-    - DevIL 1.6.1 - http://openil.sourceforge.net
-    - FreeType 2.1.2 - http://www.freetype.org
-    - boost 1.34 - http://www.boost.org
-
-    Optional libraries for input drivers:
-    - SDL 1.2.7 - http://www.libsdl.org
-    - Ogre 1.4.7 - http://ogre3d.org
-
-    GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
-    documentation will appear in the GG/doc/html directory.
-    <br>
-
-    \section howto_build How To Build GG
-
-    \subsection howto_build_all_platforms All Platforms
-    You will need to have first built the buildable portions of the boost libraries.  See http://boost.org/more/getting_started/index.html for details on building boost.  There are usually pre-built binaries available for download for the latest Microsoft C++ compiler.
-
-    \subsection howto_build_linux Linux
-    To build GG, you will need to have SCons installed.  These libraries and all the boost
-    includes should be available in your path.  You will of course also need to build and make available all of
-    the libraries listed in the requirements above.
-   
-    Once this is done, Linux, Cygwin, and MinGW users can simply type
-    \verbatim
-      scons
-      scons install [as root, if necessary]\endverbatim
-    from within the root of the GG directory tree.  Type
-    \verbatim
-      scons -h\endverbatim
-    to see all the options for the build, including specifying nonstandard locations for libraries required by GG, which may 
-    be especially useful on Cygwin/MinGW systems.
-
-    \subsection howto_build_win32_gcc Windows (GCC)
-
-    GG works quite well with GCC on Windows, under MinGW or Cygwin, using SCons.  See the SCons documentation for how to
-    force SCons to use Cygwin or MinGW on the Windows platform (this will probably only be necessary if you also have
-    the MSVC compiler), then refer to the Linux section above.  Also note that the DLLs for all the required libraries
-    except the boost libraries can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since
-    they're all C code, there will be no ABI compatibility issues.  You must compile the boost libraries yourself, since
-    they are C++ code.
-
-    \subsection howto_build_win32_microsoft Windows (Microsoft C++)
-
-    For those of you who use the Microsoft compiler, SCons will also work from the command line.  You need to install
-    SCons and Python, and make sure that python is in your path.  There is also a standalone version of SCons available
-    somewhere on the SCons site.  Then you just open up a command prompt window, cd to the root of the GG directory
-    tree, and type scons.  I have only been able to get the current version of GG to compile on MSVC++ 8.0 SP1, the version
-    that comes with .NET 2005.
-    <p>There is experimental support for generated MSVC project files.  To enable this, you can uncomment the large
-    block of commented-out lines at the end of SConstruct and near the top of build_support.py (all the lines starting
-    with "##").  After this, assuming you are using a recent-enough version of SCons, scons --help should give you all
-    the instructions you need ot generate MSVC project files.  Note that you can get precompiled MSVC-compatible DLLs
-    for many of the required libraries.  DevIL's 1.6.5 pre-compiled library can be substituted for the latest one, if
-    there is no pre-compiled version available.
-    <p>
-    Finally, note that the solution file is set up to grab all include and library directories rooted at c:\, not just the boost 
-    ones.  If you'd like to keep them somewhere else, you'll need to change the project settings.
-
-    \subsection howto_build_macos Macintosh
-    It would be nice to have access to a Mac OS X and/or Classic Mac box, to be able to ensure that GG even compiles on such a 
-    thing.  Let me know if you have or are interested in testing out a Mac build, or even taking on porting duties.
-*/
-
 /** \page architecture Architecture
     \section arch_rendering Rendering Overview
     GG uses OpenGL to render its graphics.  It is assumed that the entire GUI is being redrawn multiple times each second, as part of a high-framerate application.  
@@ -217,6 +149,74 @@
     further details.
 */
 
+/** \page building Building GG
+    \section building_reqs Requirements
+    GG requires GCC 3.4 or later, or MSVC++ 8.0 SP1 or later.  Note that both are available for free download.
+    <p>
+    GG relies on a few other open-source libraries:
+    - DevIL 1.6.1 - http://openil.sourceforge.net
+    - FreeType 2.1.2 - http://www.freetype.org
+    - boost 1.34 - http://www.boost.org
+
+    Optional libraries for input drivers:
+    - SDL 1.2.7 - http://www.libsdl.org
+    - Ogre 1.4.7 - http://ogre3d.org
+
+    GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
+    documentation will appear in the GG/doc/html directory.
+    <br>
+
+    \section howto_build How To Build GG
+
+    \subsection howto_build_all_platforms All Platforms
+    You will need to have first built the buildable portions of the boost libraries.  See http://boost.org/more/getting_started/index.html for details on building boost.  There are usually pre-built binaries available for download for the latest Microsoft C++ compiler.
+
+    \subsection howto_build_linux Linux
+    To build GG, you will need to have SCons installed.  These libraries and all the boost
+    includes should be available in your path.  You will of course also need to build and make available all of
+    the libraries listed in the requirements above.
+   
+    Once this is done, Linux, Cygwin, and MinGW users can simply type
+    \verbatim
+      scons
+      scons install [as root, if necessary]\endverbatim
+    from within the root of the GG directory tree.  Type
+    \verbatim
+      scons -h\endverbatim
+    to see all the options for the build, including specifying nonstandard locations for libraries required by GG, which may 
+    be especially useful on Cygwin/MinGW systems.
+
+    \subsection howto_build_win32_gcc Windows (GCC)
+
+    GG works quite well with GCC on Windows, under MinGW or Cygwin, using SCons.  See the SCons documentation for how to
+    force SCons to use Cygwin or MinGW on the Windows platform (this will probably only be necessary if you also have
+    the MSVC compiler), then refer to the Linux section above.  Also note that the DLLs for all the required libraries
+    except the boost libraries can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since
+    they're all C code, there will be no ABI compatibility issues.  You must compile the boost libraries yourself, since
+    they are C++ code.
+
+    \subsection howto_build_win32_microsoft Windows (Microsoft C++)
+
+    For those of you who use the Microsoft compiler, SCons will also work from the command line.  You need to install
+    SCons and Python, and make sure that python is in your path.  There is also a standalone version of SCons available
+    somewhere on the SCons site.  Then you just open up a command prompt window, cd to the root of the GG directory
+    tree, and type scons.  I have only been able to get the current version of GG to compile on MSVC++ 8.0 SP1, the version
+    that comes with .NET 2005.
+    <p>There is experimental support for generated MSVC project files.  To enable this, you can uncomment the large
+    block of commented-out lines at the end of SConstruct and near the top of build_support.py (all the lines starting
+    with "##").  After this, assuming you are using a recent-enough version of SCons, scons --help should give you all
+    the instructions you need ot generate MSVC project files.  Note that you can get precompiled MSVC-compatible DLLs
+    for many of the required libraries.  DevIL's 1.6.5 pre-compiled library can be substituted for the latest one, if
+    there is no pre-compiled version available.
+    <p>
+    Finally, note that the solution file is set up to grab all include and library directories rooted at c:\, not just the boost 
+    ones.  If you'd like to keep them somewhere else, you'll need to change the project settings.
+
+    \subsection howto_build_macos Macintosh
+    It would be nice to have access to a Mac OS X and/or Classic Mac box, to be able to ensure that GG even compiles on such a 
+    thing.  Let me know if you have or are interested in testing out a Mac build, or even taking on porting duties.
+*/
+
 /** \page serialization Serialization
     \section serialization_motivation Motivation
     One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
@@ -240,6 +240,139 @@
     saved will not be added back to these two structures when they are loaded.
 */
 
+/** \page brief_tour A Brief Tour
+
+    In a library as diverse in functionality as GG, it can be difficult even
+    to figure out what the library has to offer.  This "tour" is designed to
+    provide a brief overview of the various features of GG not covered
+    elsewhere, and to point users to the more detailed information elsewhere
+    in the documentation.  The topics are covered in no particular order.
+
+    <p>
+
+    First off, it should be noted that there is a lot of general overview-type
+    documentation in the GG::Wnd and GG::GUI detailed documentation.  Many of
+    the things mentioned below are covered there in more detail.
+
+    \section tour_event_filters Event Filters
+
+    Event filtering allows one to use a Wnd to intrusively handle the events
+    sent to another Wnd.  This can be useful, for example, in a control (the
+    parent) that is composed of multiple controls (the children), but which
+    needs to handle certain events uniformly.  Perhaps left-clicks should
+    always bring up a context menu, for instance.  Without event filtering,
+    each child control would have to explicitly forward its left-clicks
+    instead of processing them normally, which would in turn require
+    subclassing.  Event filters remove the need for such subclassing.  \see
+    The GG::Wnd description, GG::Wnd::EventFilter(),
+    GG::Wnd::InstallEventFilter(), and GG::Wnd::RemoveEventFilter().
+
+    \section tour_layouts Layouts
+
+    GG::Layout encapsulates the relative arrangement of child Wnds in the client
+    area of a Wnd, so that positioning such children requires less
+    hand-coding.  \see The GG::Wnd description.
+
+    \section tour_browse_info The Browse-Info System
+
+    Like "tooltips", but more general.  You can have any non-interactive GUI
+    elements you like inside of a GG::BrowseInfoWnd, and the contents of the
+    GG::BrowseInfoWnd can vary, for example to provide increasing amounts of
+    info over time.  \see The GG::Wnd description.
+
+    \section tour_style_factory The Style Factory
+
+    Many of the control classes reuse other controls to do part of their work.
+    For instance, GG::Scroll uses a pair of GG::Button objects for its up and
+    down (or left and right) buttons.  If a user wishes to use a custom
+    subclass of GG::Button throughout an application, how is she to get
+    GG::Scroll to create GG::Button's of the right type?  The answer is that
+    all controls created by GG are requested from a GG::StyleFactory.  \see
+    The GG::Wnd description and the GG::GUI description.
+
+    \section tour_plugins Plugins
+
+    Plugins (dynamically loaded shared libraries/DLLs not linked into the
+    application when it is built) can be created and used with GG.  Plugins
+    provide a GG::StyleFactory, a default font name and size, and functions to
+    serialize and deserialize GG::Wnd's.  \see GG::PluginInterface.
+
+    \section tour_standard_dialogs Standard Dialogs
+
+    Three standard dialogs are provided:
+    - A color selection dialog, GG::ColorDlg;
+    - A file(s)/directory selection dialog, GG::FileDlg; and
+    - A general-purpose message dialog containing at most three buttons, GG::ThreeButtonDlg.
+
+    \section tour_cursor_rendering Cursor Rendering
+
+    GG can optionally render a cursor.  By default, GG assumes that the
+    underlying system is rendering the cursor, and so does not attempt to do
+    so.  \see GG::GUI::RenderCursor(), GG::GUI::GetCursor(),
+    GG::GUI::SetCursor(), and GG::Cursor.
+
+    \section tour_flags Flags
+
+    GG uses format flags, window creation flags, and several other types of
+    bit-flag sets in various places.  These bit-flag sets are not
+    interoperable.  This is designed as a workaround to problems inherent to
+    C++ enums, such as implicit conversion to integral types, which in turn
+    leads to comparability of arbitrary enumeration values from different
+    enumerations.  For instance, it is impossible (due to a compile-time
+    error) to accidentally pass the (nonsensical) flag FORMAT_NONE to the \a
+    flags parameter of GG::Wnd::Wnd().  With built-in C++ enums, this would
+    not be caught by the compiler.  GG provides two classes, GG::Flags and
+    GG::FlagSpec, that allow the user to extend the sets of flags used in GG,
+    if user-created subclasses should require more flags than the ones GG
+    provides.
+
+    \section tour_text_formatting_tags Text Formatting Tags
+
+    Text rendered by GG can make use of text formatting tags, similar to those
+    used in HTML documents (e.g. \<i><i>italicized text here</i>\</i>).  GG defines
+    numerous tags that control text justification, text color, bolding,
+    underlining, italicizing, etc.  Users can also add their own tags.  Though
+    GG does not associate any semantics with user-defined tags, it will treat
+    them as tags, meaning they will be automatically be removed from the text
+    as it appears when rendered.  \see The GG::Font description.
+
+    \section tour_keyboard_accelerators Keyboard Accelerators
+
+    Keyboard accelerators may be established that emit signals on (and
+    possibly filter out) keystrokes.  Accelerators can include a modifier
+    specification, so for instance Ctrl-K, Alt-K, and K may be created as
+    different accelerators.  Each accelerator has an associated signal to
+    which arbitrarily many slots can be connected.  \see The GG::GUI
+    description.
+
+    \section tour_user_input_drivers User Input Drivers
+
+    Two input drivers are currently available for use with GG -- one for
+    <a href="http://libsdl.org">SDL</a> and one for
+    <a href="http://ogre3d.org">Ogre</a>.  Note that Ogre does not have
+    built-in support for user input.  As of this writing, it uses another
+    library called <a href="http://sourceforge.net/projects/wgois">OIS</a>.  
+    An Ogre plugin that provides OIS support is also provided in
+    src/Ogre/Plugins.  \see GG::SDLGUI, GG::OgreGUI, GG::OgreGUIInputPlugin,
+    and OISInput.
+
+    \section tour_timers Timers
+
+    Timers are available, to which slots can be connected.  A timer fires its
+    signal after at least T time has elapsed, where T is a user-provided time
+    interval.  Note the use of "at least".  Timers are only evaluated during
+    GG's normal processing loop, so if the application is cycling slowly (due
+    to heavy processing, etc.), timers can fire arbitrarily less frequently
+    than desired.
+
+    \section tour_event_pumps Event Pumps
+
+    GG abstracts out the inner loop that processes events and renders frames,
+    into a class called GG::EventPump.  Most users will never need to use
+    event pumps, but those users writing a new input driver will.
+
+*/
+
 /** \page tutorials Tutorials
     \section tut_using Using the Tutorials
     The following tutorials are available in the tutorial directory.  You can build them all using SCons.  SCons can be
@@ -259,6 +392,7 @@
     -# \ref sigs_n_slots
     -# \ref drag_n_drop
     -# \ref serialization
+    -# \ref brief_tour
     -# \ref building
     -# \ref tutorials
 */

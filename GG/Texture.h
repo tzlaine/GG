@@ -55,12 +55,12 @@ namespace GG {
 class GG_API Texture
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Texture();          ///< ctor
     virtual ~Texture(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     std::string      Filename() const;         ///< returns the filename from which this texture was loaded ("" if this texture was not loaded from a file)
     GLenum           WrapS() const;            ///< returns S-wrap mode associated with this opengl texture
     GLenum           WrapT() const;            ///< returns T-wrap mode associated with this opengl texture
@@ -82,7 +82,7 @@ public:
     void OrthoBlit(const Pt& pt) const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     // intialization functions
     /** frees any currently-held memory and loads a texture from file \a filename.  \throw GG::Texture::BadFile Throws
         if the texture creation fails. */
@@ -101,7 +101,7 @@ public:
     void Clear();  ///< frees the opengl texture object associated with this object
     //@}
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for Texture exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -149,7 +149,7 @@ private:
 class GG_API SubTexture
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     SubTexture(); ///< default ctor
 
     /** creates a SubTexture from a GG::Texture and coordinates into it.  \throw GG::SubTexture::BadTexture Throws if
@@ -162,7 +162,7 @@ public:
     virtual ~SubTexture(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     bool             Empty() const;     ///< returns true if this object has no associated GG::Texture
     const GLfloat*   TexCoords() const; ///< texture coordinates to use when blitting this sub-texture
     GLint            Width() const;     ///< width of sub-texture in pixels
@@ -176,7 +176,7 @@ public:
     void OrthoBlit(const Pt& pt) const;
     //@}
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for SubTexture exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -205,7 +205,7 @@ private:
 class GG_API TextureManager
 {
 public:
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** stores a pre-existing GG::Texture in the manager's texture pool, and returns a shared_ptr to it. \warning Calling code <b>must not</b> 
         delete \a texture; \a texture becomes the property of the manager, which will eventually delete it. */
     boost::shared_ptr<Texture> StoreTexture(Texture* texture, const std::string& texture_name);

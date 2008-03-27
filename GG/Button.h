@@ -51,20 +51,20 @@ public:
         BN_ROLLOVER    ///< The button has the cursor over it, but is unpressed
     };
 
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void ()> ClickedSignalType; ///< Emitted when the button is clicked by the user
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef ClickedSignalType::slot_type ClickedSlotType; ///< Type of functor(s) invoked on a ClickedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color = CLR_BLACK, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     /** Returns button state \see ButtonState */
     ButtonState       State() const;
 
@@ -75,7 +75,7 @@ public:
     mutable ClickedSignalType ClickedSignal; ///< The clicked signal object for this Button
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
@@ -97,11 +97,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Button(); ///< default ctor
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   RenderUnpressed();   ///< Draws the button unpressed.  If an unpressed graphic has been supplied, it is used.
     virtual void   RenderPressed();     ///< Draws the button pressed.  If an pressed graphic has been supplied, it is used.
     virtual void   RenderRollover();    ///< Draws the button rolled-over.  If an rollover graphic has been supplied, it is used.
@@ -144,21 +144,21 @@ GG_ENUM_STREAM_OUT(Button::ButtonState)
 class GG_API StateButton : public TextControl
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (bool)> CheckedSignalType; ///< Emitted when the StateButton is checked or unchecked; the checked/unchecked status is indicated by the bool parameter
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef CheckedSignalType::slot_type CheckedSlotType; ///< Type of functor(s) invoked on a CheckedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 Flags<WndFlag> flags = CLICKABLE); ///< Ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt       MinUsableSize() const;
 
     bool             Checked() const;       ///< Returns true if button is checked
@@ -170,7 +170,7 @@ public:
     mutable CheckedSignalType CheckedSignal; ///< The checked signal object for this StaticButton
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void     Render();
     virtual void     LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void     SizeMove(const Pt& ul, const Pt& lr);
@@ -189,17 +189,17 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     StateButton(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     Pt  ButtonUpperLeft() const;  ///< Returns the upper-left of the button part of the control
     Pt  ButtonLowerRight() const; ///< Returns the lower-right of the button part of the control
     Pt  TextUpperLeft() const;    ///< Returns the upper-left of the text part of the control
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void RepositionButton();      ///< Places the button at the appropriate position based on the style flags, without resizing it
     //@}
 
@@ -227,19 +227,19 @@ private:
 class GG_API RadioButtonGroup : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int)> ButtonChangedSignalType; ///< emitted when the currently-selected button has changed; the new selected button's index in the group is provided (this may be NO_BUTTON if no button is currently selected)
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef ButtonChangedSignalType::slot_type ButtonChangedSlotType; ///< type of functor(s) invoked on a ButtonChangedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     RadioButtonGroup(int x, int y, int w, int h, Orientation orientation); ///< ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt       MinUsableSize() const;
 
     /** Returns the orientation of the buttons in the group */
@@ -268,7 +268,7 @@ public:
     mutable ButtonChangedSignalType ButtonChangedSignal; ///< The button changed signal object for this RadioButtonGroup
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
 
     /** Checks the index-th button, and unchecks all others.  If there is no index-th button, they are all unchecked,
@@ -338,11 +338,11 @@ protected:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     RadioButtonGroup(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const std::vector<ButtonSlot>& ButtonSlots() const; ///< returns the state buttons in the group
     //@}
 

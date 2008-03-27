@@ -57,7 +57,7 @@ class Texture;
 class GG_API DynamicGraphic : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     /** emitted whenever playback ends because the last frame was reached and Looping() == false; the argument is the
         index of the last frame (may be the first frame, if playing in reverse).  \note Unlike most other signals, this
         one is emitted during the execution of Render(), so keep this in mind when processing this signal.*/
@@ -69,12 +69,12 @@ public:
     typedef boost::signal<void (int)> EndFrameSignalType;
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef StoppedSignalType::slot_type StoppedSlotType;    ///< type of functor(s) invoked on a StoppedSignalType
     typedef EndFrameSignalType::slot_type EndFrameSlotType;  ///< type of functor(s) invoked on a EndFrameSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor taking a vector of GG::Textures and the number of frames in those Textures.  The default \a frames value -1
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
         Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor allows
@@ -82,7 +82,7 @@ public:
     DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     int     Frames() const;      ///< returns the total number of frames in all the Textures that make up the animated sequence
     bool    Playing() const;     ///< returns true if the animation is running
     bool    Looping() const;     ///< returns true if playback is looping instead of stopping when it reaches the end
@@ -107,7 +107,7 @@ public:
     mutable EndFrameSignalType EndFrameSignal; ///< the end-frame signal object for this DynamicGraphic
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
 
     /** adds a set of frames from Texture \a texture to the animation.  If \a frames == -1, the Texture is assumed to
@@ -161,7 +161,7 @@ public:
     virtual void DefineAttributes(WndEditor* editor);
     //@}
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for DynamicGraphic exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -181,11 +181,11 @@ protected:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     DynamicGraphic(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     int FramesInTexture(const Texture* t) const; ///< returns the maximum number of frames that could be stored in \a t given the size of the control and Margin()
 
     const std::vector<FrameSet>& Textures() const;    ///< returns the shared_ptrs to texture objects with all animation frames

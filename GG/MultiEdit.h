@@ -70,14 +70,14 @@ extern GG_API const Flags<MultiEditStyle> MULTI_NO_SCROLL; ///< Scrolls are not 
 class GG_API MultiEdit : public Edit
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     MultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
               Flags<MultiEditStyle> style = MULTI_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
               Flags<WndFlag> flags = CLICKABLE); ///< ctor
     virtual ~MultiEdit(); ///< dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
     virtual Pt ClientLowerRight() const;
 
@@ -88,7 +88,7 @@ public:
     int MaxLinesOfHistory() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
@@ -109,11 +109,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     MultiEdit(); ///< defalt ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual bool MultiSelected() const;     ///< returns true if >= 1 characters are selected
     int     RightMargin() const;            ///< returns the width of the scrollbar on the right side of the control (0 if none)
     int     BottomMargin() const;           ///< returns the width of the scrollbar at the bottom of the control (0 if none)
@@ -144,7 +144,7 @@ protected:
             LowCursorPos() const;           ///< returns the lesser of m_cursor_begin and m_cursor_end
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void    RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
 
     /** ensures that the next call to SetText() preserves the positioning of the text.  This should only be called if it

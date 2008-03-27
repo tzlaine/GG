@@ -117,8 +117,15 @@ public:
 
     virtual void Exit(int code);
 
+    /** Emitted whenever the OgreGUI is ready for human input from the
+        keyboard, mouse, etc. */
     boost::signal<void ()> HandleSystemEventsSignal;
+
+    /** Emitted whenever the OgreGUI's AppWidth() and/or AppHeight() change. */
     boost::signal<void (int, int)> WindowResizedSignal;
+
+    /** Emitted when the Ogre::RenderWindow in which the OgreGUI is operating
+        closes or is about to close. */
     boost::signal<void ()> WindowClosedSignal;
 
     /** Allows any code to access the gui framework by calling GG::OgreGUI::GetGUI(). */

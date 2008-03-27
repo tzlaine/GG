@@ -44,12 +44,12 @@ namespace GG {
 class GG_API Control : public Wnd
 {
 public:
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     Clr            Color() const;    ///< returns the color of the control
     bool           Disabled() const; ///< returns true if the control is disabled, false otherwise
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
     virtual void   Render() = 0;
     virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
@@ -63,7 +63,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Control(); ///< default ctor
     Control(int x, int y, int w, int h, Flags<WndFlag> flags = CLICKABLE); ///< basic ctor
     //@}

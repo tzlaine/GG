@@ -57,19 +57,19 @@ struct GG_API HSVClr
 class GG_API HueSaturationPicker : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (double, double)> ChangedSignalType; ///< emitted whenever the hue or saturation in the picker changes
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef ChangedSignalType::slot_type         ChangedSlotType;   ///< type of functor(s) invoked on a ChangedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     HueSaturationPicker(int x, int y, int w, int h); ///< basic ctor
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
     virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
@@ -77,10 +77,10 @@ public:
     void SetHueSaturation(double hue, double saturation); ///< sets the current hue and saturation.  Note that this does not cause a signal to be emitted.
     //@}
 
-    mutable ChangedSignalType ChangedSignal;
+    mutable ChangedSignalType ChangedSignal; ///< emitted whenever the hue or saturation in the picker changes
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     HueSaturationPicker(); ///< default ctor
     //@}
 
@@ -103,19 +103,19 @@ private:
 class GG_API ValuePicker : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (double)> ChangedSignalType; ///< emitted whenever the hue or saturation in the picker changes
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef ChangedSignalType::slot_type ChangedSlotType;   ///< type of functor(s) invoked on a ChangedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     ValuePicker(int x, int y, int w, int h, Clr arrow_color); ///< basic ctor
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
     virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
@@ -126,10 +126,10 @@ public:
     void SetValue(double value); ///< sets the current value.  Note that this does not cause a signal to be emitted.
     //@}
 
-    mutable ChangedSignalType ChangedSignal;
+    mutable ChangedSignalType ChangedSignal; ///< emitted whenever the hue or saturation in the picker changes
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     ValuePicker(); ///< default ctor
     //@}
 
@@ -159,26 +159,26 @@ public:
     class GG_API ColorButton : public Button
     {
     public:
-        /** \name Structors */ //@{
+        /** \name Structors */ ///@{
         ColorButton(const Clr& color);
         //@}
 
-        /** \name Accessors */ //@{
+        /** \name Accessors */ ///@{
         /** returns the custom color represented by the button */
         Clr RepresentedColor() const;
         //@}
 
-        /** \name Mutators */ //@{
+        /** \name Mutators */ ///@{
         /** sets the custom color represented by the button */
         void SetRepresentedColor(const Clr& color);
         //@}
 
     protected:
-        /** \name Structors */ //@{
+        /** \name Structors */ ///@{
         ColorButton(); ///< default ctor
         //@}
 
-        /** \name Mutators */ //@{
+        /** \name Mutators */ ///@{
         virtual void RenderUnpressed();
         virtual void RenderPressed();
         virtual void RenderRollover();
@@ -198,16 +198,16 @@ public:
     class GG_API ColorDisplay : public Control
     {
     public:
-        /** \name Structors */ //@{
+        /** \name Structors */ ///@{
         ColorDisplay(Clr color); ///< ctor.
         //@}
 
-        /** \name Accessors */ //@{
+        /** \name Accessors */ ///@{
         virtual void Render();
         //@}
 
     protected:
-        /** \name Structors */ //@{
+        /** \name Structors */ ///@{
         ColorDisplay(); ///< default ctor
         //@}
 
@@ -217,7 +217,7 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor */
     ColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
              Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
@@ -227,7 +227,7 @@ public:
              Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     /** returns true iff the user selected a color and then clicked the "Ok" button.  Otherwise, the color returned by
         Result() will be the original color if one was selected, or undefined if one was not. */
     bool ColorWasSelected() const;
@@ -248,7 +248,7 @@ public:
     const std::string& CancelString(const std::string& str) const;     ///< returns the text to use to label the cancel button to \a str Default: "Cancel"
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void SetNewString(const std::string& str);        ///< sets the text to use to label the new color to \a str Default: "New"
     void SetOldString(const std::string& str);        ///< sets the text to use to label the old color to \a str Default: "Old"
     void SetRedString(const std::string& str);        ///< sets the text to use to label the red slider to \a str Default: "R:"
@@ -266,7 +266,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     ColorDlg(); ///< default ctor
     //@}
 

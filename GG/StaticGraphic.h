@@ -55,7 +55,7 @@ extern GG_API const GraphicStyle GRAPHIC_PROPSCALE;   ///< If GRAPHIC_FITGRAPHIC
 class GG_API StaticGraphic : public Control
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** creates a StaticGraphic from a pre-existing Texture.
         \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
         a SubTexture. */
@@ -63,7 +63,7 @@ public:
     StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing SubTexture.
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     /** returns the style of the StaticGraphic \see StaticGraphicStyle */
     Flags<GraphicStyle> Style() const;
 
@@ -72,7 +72,7 @@ public:
     Rect RenderedArea() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
 
     /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
@@ -82,7 +82,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     StaticGraphic(); ///< default ctor
     //@}
 

@@ -102,7 +102,7 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
     the Font code, it is possible to let Font know about other tags, in order for Font to render them invisible as it does 
     with the tags listed above.  See the static methods RegisterKnownTag(), RemoveKnownTag(), and ClearKnownTags() for details.
     It is not possible to remove the built-in tags using these methods.  If you wish not to use tags at all, call DetermineLines()
-    and RenderText() with the parameter format containing FORMAT_IGNORETAGS, or include a \<pre\> tag at the beginning of the text
+    and RenderText() with the format parameter containing FORMAT_IGNORETAGS, or include a \<pre\> tag at the beginning of the text
     to be rendered.
    */
 class GG_API Font
@@ -188,7 +188,7 @@ public:
         int         Width() const; ///< returns the width of the line, in pixels
         bool        Empty() const; ///< returns true iff char_data has size 0
 
-        std::vector<CharData> char_data;
+        std::vector<CharData> char_data;     ///< Data on each individual character.
         Alignment             justification; ///< FORMAT_LEFT, FORMAT_CENTER, or FORMAT_RIGHT; derived from text format flags and/or formatting tags in the text
 
     private:
@@ -220,14 +220,14 @@ public:
         ALL_CHARS =          (1 << 5) - 1 ///< all characters (0x00 - 0xFF)
     };
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor. \throw Font::Exception Throws a subclass of Exception if one of the conditions specified for the
         subclasses is met. */
     Font(const std::string& font_filename, int pts, unsigned int range = ALL_DEFINED_RANGES);
     virtual ~Font(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const std::string&FontName() const;   ///< returns the name of the file from which this font was created
     int               PointSize() const;  ///< returns the point size in which the characters in the font object are rendered
 
@@ -255,7 +255,7 @@ public:
     static void       RemoveKnownTag(const std::string& tag);     ///< removes \a tag from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
     static void       ClearKnownTags();                      ///< removes all tags from the known tag list.  Does not remove the built in tags: \<i>, \<u>, \<rgba r g b a>, and \<pre\>.
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for Font exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -282,7 +282,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Font(); ///< default ctor
     //@}
 
@@ -370,7 +370,7 @@ private:
     };
 
 public:
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     boost::shared_ptr<Font> GetFont(const std::string& font_filename, int pts, unsigned int range = Font::ALL_DEFINED_RANGES); ///< returns a shared_ptr to the requested font.  May load font if unavailable at time of request.
     void                    FreeFont(const std::string& font_filename, int pts); ///< removes the indicated font from the font manager.  Due to shared_ptr semantics, the font may not be deleted until much later.
     //@}

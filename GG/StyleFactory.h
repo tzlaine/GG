@@ -66,12 +66,12 @@ class ThreeButtonDlg;
 class GG_API StyleFactory
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     StyleFactory(); ///< Default ctor.
     virtual ~StyleFactory(); ///< Virtual dtor.
     //@}
 
-    /** \name Controls */ //@{
+    /** \name Controls */ ///@{
     /** Returns a new GG Button. */
     virtual Button*            NewButton(int x, int y, int w, int h, const std::string& str,
                                          const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
@@ -154,7 +154,7 @@ public:
                                               Flags<WndFlag> flags = Flags<WndFlag>()) const;
     //@}
 
-    /** \name Subcontrols */ //@{
+    /** \name Subcontrols */ ///@{
     /** Returns a new ListBox, to be used in a DropDownList. */
     virtual ListBox*           NewDropDownListListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO,
                                                       Flags<WndFlag> flags = CLICKABLE) const;
@@ -247,14 +247,14 @@ public:
                                                     Flags<WndFlag> flags = CLICKABLE) const;
     //@}
 
-    /** \name Wnds */ //@{
+    /** \name Wnds */ ///@{
     /** Returns a new GG TabWnd. */
     virtual TabWnd*            NewTabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color,
                                          Clr text_color = CLR_BLACK, TabBarStyle style = TAB_BAR_ATTACHED,
                                          Flags<WndFlag> flags = CLICKABLE | DRAGABLE) const;
     //@}
 
-    /** \name Dialogs */ //@{
+    /** \name Dialogs */ ///@{
     /** Returns a new GG ColorDlg. */
     virtual ColorDlg*          NewColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
                                            Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK) const;

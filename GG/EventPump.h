@@ -41,11 +41,10 @@ struct GG_API EventPumpState
 {
     EventPumpState(); ///< default ctor.
 
-    int last_FPS_time;
-    int last_frame_time;
-    int most_recent_time;
-    int time;
-    int frames;
+    int last_FPS_time;    ///< The last time an FPS calculation was done.
+    int last_frame_time;  ///< The time of the last frame rendered.
+    int most_recent_time; ///< The time recorded on the previous iteration of the event pump loop.
+    int frames;           ///< The number of frames rendered since \a last_frame_time.
 };
 
 /** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::GUI
@@ -81,14 +80,19 @@ public:
     virtual void operator()();
 };
 
-/** an EventPump that terminates when its m_done reference member is true.  \note Modal Wnds use EventPumps to implement
+/** an EventPump that terminates when the bool reference \a done supplied to
+    the constructor is true.  \note Modal Wnds use EventPumps to implement
     their modality. */
 class GG_API ModalEventPump : public EventPump
 {
 public:
-    ModalEventPump(const bool& done);
+    ModalEventPump(const bool& done); ///< Basic ctor.
     virtual void operator()();
+
 protected:
+    bool Done() const; ///< Returns true iff the constructor parameter \a done is true;
+
+private:
     const bool& m_done;
 };
 

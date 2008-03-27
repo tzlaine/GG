@@ -33,7 +33,6 @@ EventPumpState::EventPumpState() :
     last_FPS_time(0),
     last_frame_time(0),
     most_recent_time(0),
-    time(0),
     frames(0)
 {}
 
@@ -41,7 +40,7 @@ EventPumpState::EventPumpState() :
 void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_rendering, bool do_rendering)
 {
     if (do_non_rendering) {
-        state.time = gui->Ticks();
+        int time = gui->Ticks();
 
         // send an idle message, so that the gui has timely updates for triggering browse info windows, etc.
         gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, gui->ModKeys(), gui->MousePosition(), Pt());
@@ -49,23 +48,23 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
         // govern FPS speed if needed
         if (double max_FPS = gui->MaxFPS()) {
             double min_ms_per_frame = 1000.0 * 1.0 / max_FPS;
-            double ms_to_wait = min_ms_per_frame - (state.time - state.last_frame_time);
+            double ms_to_wait = min_ms_per_frame - (time - state.last_frame_time);
             if (0.0 < ms_to_wait)
                 gui->Wait(static_cast<int>(ms_to_wait));
         }
-        state.last_frame_time = state.time;
+        state.last_frame_time = time;
 
         // track FPS if needed
-        gui->SetDeltaT(state.time - state.most_recent_time);
+        gui->SetDeltaT(time - state.most_recent_time);
         if (gui->FPSEnabled()) {
             ++state.frames;
-            if (1000 < state.time - state.last_FPS_time) { // calculate FPS at most once a second
-                gui->SetFPS(state.frames / ((state.time - state.last_FPS_time) / 1000.0));
-                state.last_FPS_time = state.time;
+            if (1000 < time - state.last_FPS_time) { // calculate FPS at most once a second
+                gui->SetFPS(state.frames / ((time - state.last_FPS_time) / 1000.0));
+                state.last_FPS_time = time;
                 state.frames = 0;
             }
         }
-        state.most_recent_time = state.time;
+        state.most_recent_time = time;
     }
 
     if (do_rendering) {
@@ -102,8 +101,11 @@ void ModalEventPump::operator()()
 {
     GUI* gui = GUI::GetGUI();
     EventPumpState& state = State();
-    while (!m_done) {
+    while (!Done()) {
         gui->HandleSystemEvents();
         LoopBody(gui, state, true, true);
     }
 }
+
+bool ModalEventPump::Done () const
+{ return m_done; }

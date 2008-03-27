@@ -53,22 +53,22 @@ public:
     /** This is a single item in a dropdown list. \see See GG::ListBox for details.*/
     typedef ListBox::Row Row;
 
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int)>   SelChangedSignalType;   ///< emitted when a new item is selected; the int parameter will be -1 when no item is selected
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef SelChangedSignalType::slot_type   SelChangedSlotType;  ///< type of functor(s) invoked on a SelChangedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null. */
     DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags = CLICKABLE);
 
     ~DropDownList(); ///< dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const Row*     CurrentItem() const;      ///< returns a pointer to the currently selected list item (returns 0 if none is selected)
     int            CurrentItemIndex() const; ///< returns the list index of the currently selected list item (returns -1 if none is selected)
 
@@ -99,7 +99,7 @@ public:
     mutable SelChangedSignalType SelChangedSignal; ///< the selection change signal object for this DropDownList
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
@@ -139,11 +139,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     DropDownList(); ///< default ctor
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     ListBox*       LB();                ///< returns the ListBox used to render the selected row and the popup list
     //@}
 

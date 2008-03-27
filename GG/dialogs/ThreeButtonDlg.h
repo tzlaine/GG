@@ -50,7 +50,7 @@ class Font;
 class GG_API ThreeButtonDlg : public Wnd
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** basic ctor*/
     ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font, Clr color, 
                    Clr border_color, Clr button_color, Clr text_color, int buttons, const std::string& zero = "", 
@@ -62,14 +62,14 @@ public:
                    const std::string& one = "", const std::string& two = "");
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     Clr ButtonColor() const;   ///< returns the color of the buttons in the dialog
     int Result() const;        ///< returns 0, 1, or 2, depending on which buttoon was clicked
     int DefaultButton() const; ///< returns the number of the button that will be chosen by default if the user hits enter (-1 if none)
     int EscapeButton() const;  ///< returns the number of the button that will be chosen by default if the user hits ESC (-1 if none)
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
     virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
 
@@ -79,7 +79,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     ThreeButtonDlg(); ///< default ctor
     //@}
 

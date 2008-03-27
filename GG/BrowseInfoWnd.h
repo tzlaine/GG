@@ -49,14 +49,14 @@ class TextControl;
 class GG_API BrowseInfoWnd : public Wnd
 {
 public:
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     /** Returns true iff \a wnd's browse mode \a mode contains browse info that is usable by this BrowseInfoWnd.  This
         method is used by GUI to determine whether a Wnd w has suitable browse info available; if not, w's ancestors may
         instead be asked for browse info recursively. */
     virtual bool WndHasBrowseInfo(const Wnd* wnd, int mode) const = 0;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render() = 0;
 
     /** Collects data from \a target that is needed by Render().  Note that the one datum that is always available for
@@ -70,7 +70,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     BrowseInfoWnd(); ///< default ctor
     BrowseInfoWnd(int x, int y, int w, int h); ///< basic ctor
     //@}
@@ -93,13 +93,13 @@ private:
 class GG_API TextBoxBrowseInfoWnd : public BrowseInfoWnd
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** basic ctor */
     TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
                          Flags<TextFormat> format = FORMAT_LEFT | FORMAT_WORDBREAK, int border_width = 2, int text_margin = 4);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual bool                   WndHasBrowseInfo(const Wnd* wnd, int mode) const;
 
     bool                           TextFromTarget() const; ///< returns true iff the text to display will be read from the target wnd
@@ -113,7 +113,7 @@ public:
     int                            TextMargin() const;     ///< returns the margin to leave between the text and the text box
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void         SetText (const std::string& str);
     virtual void Render();
 
@@ -128,7 +128,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     TextBoxBrowseInfoWnd(); ///< default ctor
     //@}
 

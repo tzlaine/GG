@@ -112,13 +112,13 @@ public:
         /** the type of key used to sort rows */
         typedef std::string SortKeyType;
 
-        /** \name Structors */ //@{
+        /** \name Structors */ ///@{
         Row(); ///< default ctor
         Row(int w, int h, const std::string& drag_drop_data_type, Alignment align = ALIGN_VCENTER, int margin = 2); ///< ctor
         virtual ~Row();
         //@}
 
-        /** \name Accessors */ //@{
+        /** \name Accessors */ ///@{
         SortKeyType SortKey(int column) const;  ///< returns the string by which this row may be sorted
         size_t      size() const;               ///< returns the number of Controls in this Row
         bool        empty() const;              ///< returns true iff there are 0 Controls in this Row
@@ -135,7 +135,7 @@ public:
         Control*    CreateControl(const SubTexture& st) const; ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
         //@}
 
-        /** \name Mutators */ //@{
+        /** \name Mutators */ ///@{
         virtual void Render();
 
         void        push_back(Control* c); ///< adds a given Control to the end of the Row; this Control becomes property of the Row
@@ -169,7 +169,7 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void ()>             ClearedSignalType;        ///< emitted when the list box is cleared
     typedef boost::signal<void (const std::set<int>&)>
                                                SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
@@ -186,7 +186,7 @@ public:
     typedef boost::signal<void (int)>          BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the index of the browsed row
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef ClearedSignalType::slot_type       ClearedSlotType;      ///< type of functor(s) invoked on a ClearedSignalType
     typedef SelChangedSignalType::slot_type    SelChangedSlotType;   ///< type of functor(s) invoked on a SelChangedSignalType
     typedef InsertedSignalType::slot_type      InsertedSlotType;     ///< type of functor(s) invoked on a InsertedSignalType
@@ -198,14 +198,14 @@ public:
     typedef BrowsedSignalType::slot_type       BrowsedSlotType;      ///< type of functor(s) invoked on a BrowsedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** basic ctor */
     ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
 
     virtual ~ListBox(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt      MinUsableSize() const;
     virtual Pt      ClientUpperLeft() const;
     virtual Pt      ClientLowerRight() const;
@@ -269,7 +269,7 @@ public:
     mutable BrowsedSignalType       BrowsedSignal;       ///< the browsed signal object for this ListBox
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   StartingChildDragDrop(const Wnd* wnd, const GG::Pt& offset);
     virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
     virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
@@ -355,12 +355,13 @@ public:
     template <class RowType>
     struct DefaultRowCmp
     {
-        bool operator()(const Row& lhs, const Row& rhs, int column);
+        /** Returns true iff lhs.SortKey( \a column ) < rhs.SortKey( \a column ). */
+        bool operator()(const Row& lhs, const Row& rhs, int column) const;
     };
 
     static const int BORDER_THICK; ///< the thickness with which to render the border of the control
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for ListBox exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -371,11 +372,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     ListBox(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     int             RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar
     int             BottomMargin() const;    ///< space skipped at bottom of client area for horizontal scroll bar
     int             CellMargin() const {return m_cell_margin;} ///< the number of pixels left between the contents of each cell and the cell boundary
@@ -405,7 +406,7 @@ protected:
     int HorizontalScrollPadding(int client_width_without_vertical_scroll);
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual bool    EventFilter(Wnd* w, const WndEvent& event);
 
     int             Insert(Row* row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
@@ -495,7 +496,7 @@ void GG::ListBox::Row::serialize(Archive& ar, const unsigned int version)
 }
 
 template <class RowType>
-bool GG::ListBox::DefaultRowCmp<RowType>::operator()(const GG::ListBox::Row& lhs, const GG::ListBox::Row& rhs, int column)
+bool GG::ListBox::DefaultRowCmp<RowType>::operator()(const GG::ListBox::Row& lhs, const GG::ListBox::Row& rhs, int column) const
 {
     return static_cast<const RowType&>(lhs).SortKey(column) < static_cast<const RowType&>(rhs).SortKey(column);
 }

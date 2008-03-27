@@ -62,15 +62,21 @@ private:
     struct ConvertibleToBoolDummy {int _;};
 
 public:
+    /** The type of function that supplies the name of the plugin. */
     typedef const char*                     (*PluginNameFn)();
+    /** The type of function that supplies the name of the plugin's default font. */
     typedef const char*                     (*DefaultFontNameFn)();
+    /** The type of function that supplies the plugin's default font size. */
     typedef int                             (*DefaultFontSizeFn)();
+    /** The type of function that supplies the plugin's StyleFactory. */
     typedef boost::shared_ptr<StyleFactory> (*GetStyleFactoryFn)();
 
+    /** The type of function used to serialize Wnds. */
     typedef GUI::SaveWndFn                  SaveWndFn;
+    /** The type of function used to deserialize Wnds. */
     typedef GUI::LoadWndFn                  LoadWndFn;
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     PluginInterface(); ///< default ctor.
 
     /** ctor that loads the plugin file \a lib_name.  The base filename should be provided, without the extension (i.e. "foo", 
@@ -80,14 +86,14 @@ public:
     ~PluginInterface(); ///< dtor.
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     /** returns true iff this PluginInterface has a loaded plugin.  This is a conversion operator, allowing you to test the validity of 
         the interface, as you would a pointer (e.g. if (my_interface) my_interface.PluginName();).  \warning If this method returns false, 
         the functions in the interface are invalid. */
     operator int ConvertibleToBoolDummy::* () const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** loads the plugin \a lib_name, unloading the currently-loaded plugin if necessary. */
     bool Load(const std::string& lib_name);
 
@@ -116,7 +122,7 @@ private:
 class GG_API PluginManager
 {
 public:
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** returns a shared_ptr to the plugin interface created from plugin \a name. If the plugin is not present in the
         manager's pool, it will be loaded from disk. */
     boost::shared_ptr<PluginInterface> GetPlugin(const std::string& name);

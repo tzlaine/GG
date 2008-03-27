@@ -74,18 +74,18 @@ namespace GG {
 class GG_SDL_API SDLGUI : public GG::GUI
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     explicit SDLGUI(int w = 1024, int h = 768, bool calc_FPS = false, const std::string& app_name = "GG"); ///< ctor
     virtual ~SDLGUI();
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual int    AppWidth() const;
     virtual int    AppHeight() const;
     virtual int    Ticks() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void           operator()();      ///< external interface to Run()
     virtual void   Exit(int code);
 

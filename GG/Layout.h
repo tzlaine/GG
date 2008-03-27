@@ -84,12 +84,12 @@ struct SetMarginAction;
 class GG_API Layout : public Wnd
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is negative. */
     Layout(int x, int y, int w, int h, int rows, int columns, int border_margin = 0, int cell_margin = -1);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
 
     int    Rows() const;                             ///< returns the number of rows in the layout
@@ -118,7 +118,7 @@ public:
     Clr    OutlineColor() const;
     //@}
    
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
     virtual void CancellingChildDragDrop(const std::list<Wnd*>& wnds);
     virtual void ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
@@ -188,7 +188,7 @@ public:
     virtual void DefineAttributes(WndEditor* editor);
     //@}
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for Layout exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -206,7 +206,7 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Layout(); ///< default ctor
     //@}
 

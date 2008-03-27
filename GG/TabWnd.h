@@ -42,24 +42,24 @@ class WndEvent;
 class GG_API TabWnd : public Wnd
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     /** Emitted when the currently-selected Wnd has changed; the new selected Wnd's index in the group is provided (this
         may be NO_WND if no Wnd is currently selected). */
     typedef boost::signal<void (int)> WndChangedSignalType;
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef WndChangedSignalType::slot_type WndChangedSlotType; ///< Type of functor(s) invoked on a WndChangedSignalType.
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** Basic ctor. */
     TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
            TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
     ~TabWnd();
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
 
     /** Returns the Wnd currently visible in the TabWnd, or 0 if there is none. */
@@ -71,7 +71,7 @@ public:
     int  CurrentWndIndex() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
 
     /** Adds \a wnd to the sequence of Wnds in this TabWnd, with name \a name.
@@ -100,11 +100,11 @@ public:
     static const int NO_WND;
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     TabWnd(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const TabBar*                                     GetTabBar() const;
     const std::vector<std::pair<Wnd*, std::string> >& Wnds() const;
     //@}
@@ -128,23 +128,23 @@ private:
 class GG_API TabBar : public Control
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     /** Emitted when the currently-selected tab has changed; the new selected tab's index in the group is provided (this
         may be NO_TAB if no tab is currently selected). */
     typedef boost::signal<void (int)> TabChangedSignalType;
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef TabChangedSignalType::slot_type TabChangedSlotType; ///< Type of functor(s) invoked on a TabChangedSignalType.
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** Basic ctor. */
     TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
            TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
 
     /** Returns the index into the sequence of tabs in this TabBar of the tab
@@ -153,7 +153,7 @@ public:
     int CurrentTabIndex() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
 
@@ -185,16 +185,16 @@ public:
     static const int BUTTON_WIDTH;
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     TabBar(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const Button* LeftButton() const;
     const Button* RightButton() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual bool EventFilter(Wnd* w, const WndEvent& event);
     //@}
 

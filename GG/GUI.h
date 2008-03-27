@@ -108,13 +108,13 @@ private:
     };
 
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     /** emitted when a keyboard accelerator is invoked. A return value of true indicates that the accelerator was processed 
         by some slot; otherwise, a keystroke event is processed instead. */
     typedef boost::signal<bool (), OrCombiner> AcceleratorSignalType;
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef AcceleratorSignalType::slot_type   AcceleratorSlotType; ///< type of functor(s) invoked on a AcceleratorSignalType
     //@}
 
@@ -135,14 +135,17 @@ public:
 
     typedef std::set<std::pair<Key, Flags<ModKey> > >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
 
+    /** The type of function used to serialize Wnds. */
     typedef void (*SaveWndFn)(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
+
+    /** The type of function used to deserialize Wnds. */
     typedef void (*LoadWndFn)(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     virtual ~GUI(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const std::string&
                    AppName() const;                    ///< returns the user-defined name of the application
     Wnd*           FocusWnd() const;                   ///< returns the GG::Wnd that currently has the input focus
@@ -184,7 +187,7 @@ public:
     AcceleratorSignalType& AcceleratorSignal(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE) const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void           operator()();                 ///< external interface to Run()
     virtual void   Exit(int code) = 0;           ///< does basic clean-up, then calls exit(); callable from anywhere in user code via GetGUI()
 
@@ -270,7 +273,7 @@ public:
     static GUI*  GetGUI();                ///< allows any GG code access to GUI framework by calling GUI::GetGUI()
     static void  RenderWindow(Wnd* wnd);  ///< renders a window (if it is visible) and all its visible descendents recursively
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for GUI exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -279,11 +282,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     GUI(const std::string& app_name); ///< protected ctor, called by derived classes
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void           ProcessBrowseInfo();    ///< determines the current browse info mode, if any
     virtual void   RenderBegin() = 0;      ///< clears the backbuffer, etc.
     virtual void   Render();               ///< renders the windows in the z-list

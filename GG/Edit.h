@@ -49,21 +49,21 @@ namespace GG {
 class GG_API Edit : public TextControl
 {
 public:
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (const std::string&)> EditedSignalType; ///< emitted whenever the contents of the Edit are altered (keypresses, deletes, etc.); provides the new contents of the Edit
     typedef boost::signal<void (const std::string&)> FocusUpdateSignalType; ///< emitted whenever the Edit loses the input focus, and its contents have changed since it gained the focus; provides the new contents of the Edit
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef EditedSignalType::slot_type       EditedSlotType;      ///< type of functor(s) invoked on a EditedSignalType
     typedef FocusUpdateSignalType::slot_type  FocusUpdateSlotType; ///< type of functor(s) invoked on a FocusUpdateSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE); ///< ctor that does not required height. Height is determined from the font and point size used.
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt     MinUsableSize() const;
     virtual Pt     ClientUpperLeft() const;
     virtual Pt     ClientLowerRight() const;
@@ -78,7 +78,7 @@ public:
     mutable FocusUpdateSignalType FocusUpdateSignal;  ///< returns the focus update signal object for this Edit
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
@@ -107,11 +107,11 @@ public:
     //@}
    
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Edit(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual bool            MultiSelected() const;          ///< returns true if >= 1 characters selected
     int                     FirstCharShown() const;         ///< returns the index of the first character visible in the Edit
     bool                    RecentlyEdited() const;         ///< returns true iff the contents have been changed since the last time the focus was gained
@@ -124,7 +124,7 @@ protected:
     std::pair<int, int>     DoubleButtonDownCursorPos() const; ///< returns the cursor position at the time of the most recent double-button-down
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** Does a bit more than its name suggests.  Records the current time, and if it's within GUI::DoubleClickInterval()
         of the last button down time, returns the indices into WindowText() that delimit the word around index \a
         char_index.  If not within the time limit, or if no such word exists, the returned range will be empty (its

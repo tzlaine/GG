@@ -56,7 +56,7 @@ class GG_API TextControl : public Control
 public:
     using Wnd::SetMinSize;
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
 
     /** ctor that does not require window size.
@@ -65,7 +65,7 @@ public:
     TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt        MinUsableSize() const;
 
     /** returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.) */
@@ -117,7 +117,7 @@ public:
     Pt    TextLowerRight() const;
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render();
 
     /** sets the text to \a str; may resize the window.  If the private member m_fit_to_text is true (i.e. if the second 
@@ -149,11 +149,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     TextControl(); ///< default ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     const std::vector<Font::LineData>&  GetLineData() const;
     const boost::shared_ptr<Font>&      GetFont() const;
     bool                                FitToText() const;

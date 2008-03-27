@@ -43,12 +43,12 @@ class Texture;
 class GG_API Cursor
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Cursor();          ///< ctor
     virtual ~Cursor(); ///< virtual dtor
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** Renders the cursor at the specified location.  Subclasses should take care to ensure that the cursor's "hotspot"
         is rendered at \a pt. */
     virtual void Render(const Pt& pt) = 0;
@@ -66,13 +66,13 @@ class GG_API TextureCursor :
     public Cursor
 {
 public:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** Ctor.  \a texture is the texture to render and \a hotspot is the offset within \a texture where the click-point
         is located.  \a hotspot is clamped to \a texture's valid area. */
     TextureCursor(const boost::shared_ptr<Texture>& texture, const Pt& hotspot = Pt());
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void Render(const Pt& pt);
     //@}
 

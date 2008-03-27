@@ -41,16 +41,22 @@ struct EnumMapBase
 {
     enum {BAD_VALUE = -5000000};
 
-    virtual ~EnumMapBase() {}
-    virtual const std::string& FromEnum(int) const = 0;
-    virtual int FromString (const std::string&) const = 0;
+    virtual ~EnumMapBase() {} ///< Virtual dtor.
+
+    /** Returns the string associated with the enumeration value \a i, or the
+        empty string if \a i is unknown. */
+    virtual const std::string& FromEnum(int i) const = 0;
+
+    /** Returns the enumeration value associated with the string \a str, or
+        BAD_VALUE if \a str is unknown. */
+    virtual int FromString (const std::string& str) const = 0;
 };
 
 /** A mapping between the values of an enum and the string representations of the enum's values.  A specialization
     should be declared for each enumerated type for which an EnumMap is desired. */
 template <class E> struct EnumMap : EnumMapBase
 {
-    virtual ~EnumMap() {}
+    virtual ~EnumMap() {} ///< Virtual dtor.
     virtual const std::string& FromEnum(int) const
     { static std::string empty; return empty; }
     virtual int FromString (const std::string&) const {return 0;}

@@ -56,23 +56,23 @@ public:
         SBR_PAGE_UP
     };
 
-    /** \name Signal Types */ //@{
+    /** \name Signal Types */ ///@{
     typedef boost::signal<void (int, int, int, int)> ScrolledSignalType; ///< emitted whenever the scrollbar is moved; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     typedef boost::signal<void (int, int, int, int)> ScrolledAndStoppedSignalType; ///< emitted when the scrollbar's tab is stopped after being dragged, the scrollbar is adjusted using the keyboard, or the scrollbar is moved programmatically; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     //@}
 
-    /** \name Slot Types */ //@{
+    /** \name Slot Types */ ///@{
     typedef ScrolledSignalType::slot_type ScrolledSlotType; ///< type of functor(s) invoked on a ScrolledSignalType
     typedef ScrolledAndStoppedSignalType::slot_type ScrolledAndStoppedSlotType; ///< type of functor(s) invoked on a ScrolledAndStoppedSignalType
     //@}
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     /** ctor. */
     Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
            Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN);
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     virtual Pt           MinUsableSize() const;
 
     std::pair<int, int>  PosnRange() const;         ///< range currently being viewed
@@ -87,7 +87,7 @@ public:
     mutable ScrolledAndStoppedSignalType ScrolledAndStoppedSignal; ///< the scrolled-and-stopped signal object for this Scroll
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual void   Render();
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
@@ -116,11 +116,11 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Scroll(); ///< defalt ctor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     int           TabSpace() const;          ///< returns the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     int           TabWidth() const;          ///< returns the calculated width of the tab, based on PageSize() and the logical size of the control, in pixels
     ScrollRegion  RegionUnder(const Pt& pt); ///< determines whether a pt is in the incr or decr or tab buttons, or in PgUp/PgDn regions in between
@@ -130,7 +130,7 @@ protected:
     Button*       DecrButton() const;    ///< returns the decrease button (line up/line left)
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     virtual bool  EventFilter(Wnd* w, const WndEvent& event);
     //@}
 

@@ -52,7 +52,7 @@ namespace {
                 GUI* gui = GUI::GetGUI();
                 EventPumpState& state = State();
                 Ogre::Root& root = Ogre::Root::getSingleton();
-                while (!m_done) {
+                while (!Done()) {
                     Ogre::WindowEventUtilities::messagePump();
                     LoopBody(gui, state, true, false);
                     gui->HandleSystemEvents();

@@ -179,11 +179,11 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     virtual ~Wnd(); ///< virtual dtor
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     bool           Clickable() const;    ///< does a click over this window pass through?
 
     /** should holding a mouse button down over this Wnd generate multiple *ButtonDown messages? */
@@ -278,7 +278,7 @@ public:
     virtual WndRegion WindowRegion(const Pt& pt) const; ///< also virtual b/c of different window shapes
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** sets the string key that defines the type of data that this Wnd represents in a drag-and-drop drag.
         This should be set to the empty string when this Wnd cannot be used in drag-and-drop. */
     void           SetDragDropDataType(const std::string& data_type);
@@ -541,7 +541,7 @@ public:
     /** sets the single BrowseInfoWnd to place in the browse modes during Wnd construction. */
     static void SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd);
 
-    /** \name Exceptions */ //@{
+    /** \name Exceptions */ ///@{
     /** The base class for Wnd exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
@@ -551,14 +551,14 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Wnd(); ///< default ctor
 
     /** ctor that allows a size and position to be specified, as well as creation flags */
     Wnd(int x, int y, int w, int h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     /** handles an WndEvent destined for Wnd \a w, but which this Wnd is allowed to handle first.  Returns true if this
         filter processed the message. */
     virtual bool EventFilter(Wnd* w, const WndEvent& event);

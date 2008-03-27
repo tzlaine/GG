@@ -42,18 +42,18 @@ namespace GG {
 /** a GG screen coordinate class */
 struct GG_API Pt
 {
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Pt();                       ///< default ctor
     Pt(int x_, int y_);         ///< ctor that creates a Pt ( \a _x , \a y )
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     /** returns true if x < \a rhs.x or returns true if x == \a rhs.x and y <\a rhs.y.  This is useful for sorting Pts 
         in STL containers and algorithms*/
     bool Less(const Pt& rhs) const {return x < rhs.x ? true : (x == rhs.x ? (y < rhs.y ? true : false) : false);}
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void  operator+=(const Pt& rhs)      {x += rhs.x; y += rhs.y;} ///< adds \a rhs to Pt
     void  operator-=(const Pt& rhs)      {x -= rhs.x; y -= rhs.y;} ///< subtracts \a rhs to Pt
     Pt    operator-() const              {return Pt(-x, -y);}      ///< negates Pt
@@ -71,13 +71,13 @@ private:
 /** a GG rectangle class. this is essentially just two points that bound the rectangle*/
 struct GG_API Rect
 {
-    /** \name Structors */ //@{
+    /** \name Structors */ ///@{
     Rect();                                ///< default ctor
     Rect(const Pt& pt1, const Pt& pt2);    ///< ctor that constructs a Rect from two corners; any two opposing corners will do
     Rect(int x1, int y1, int x2, int y2);  ///< ctor taht constructs a Rect from its left, upper, right, and bottom boundaries
     //@}
 
-    /** \name Accessors */ //@{
+    /** \name Accessors */ ///@{
     int   Left() const         {return ul.x;}        ///< returns the left boundary of the Rect
     int   Right() const        {return lr.x;}        ///< returns the right boundary of the Rect
     int   Top() const          {return ul.y;}        ///< returns the top boundary of the Rect
@@ -90,7 +90,7 @@ struct GG_API Rect
     bool  Contains(const Pt& pt) const; ///< returns true iff \a pt falls inside the Rect
     //@}
 
-    /** \name Mutators */ //@{
+    /** \name Mutators */ ///@{
     void operator+=(const Pt& pt)      {ul += pt; lr += pt;} ///< shifts the Rect by adding \a pt to each corner
     void operator-=(const Pt& pt)      {ul -= pt; lr -= pt;} ///< shifts the Rect by subtracting \a pt from each corner
     //@}

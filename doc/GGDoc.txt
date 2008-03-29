@@ -126,27 +126,36 @@
 
 /** \page drag_n_drop Drag and Drop
     \section drag_n_drop_basics Basics
-    GG has drag and drop support that allows you to drag any Wnd and drop it onto any other Wnd.  The results of this
-    drop depend on the two Wnds involved.  Each Wnd has a DragDropDataType() method that returns a string describing
-    what kind of data the Wnd represents.  The string can be a MIME type or any arbitrary string the user likes.  Upon
-    the drop, the Wnd receiving the drop has its AcceptDrop() method called, in which it can examine the data type or
-    any other relevant aspects of the dropped Wnd and decide whether or not to accept it.  If the receiver accepts, the
-    dropped Wnd is removed from its parent, if it has one.  Note that only Wnds with non-empty DragDropDataType() or
-    Wnds that were created with the DRAGABLE (both not both!) may be drag-and-dropped.  A DRAGABLE Wnd is draggable as long as
-    it is not the child of another Wnd, and as it is dragged, it moves across the screen normally.  A Wnd with a
-    non-empty DragDropDataType() string does not move when drag-and-dropped; instead, it is rendered in its original place,
-    and a copy of it is rendered as if the cursor were dragging it.
+
+    GG has drag and drop support that allows you to potentially drag any Wnd and
+    drop it onto any other Wnd.  The results of this drop depend on the two Wnds
+    involved.  Each Wnd has a DragDropDataType() method that returns a string
+    describing what kind of data the Wnd represents.  The string can be a MIME
+    type, or any arbitrary string the user likes.  During the dragging portion
+    of the operation, a Wnd under the cursor has its DropAcceptable() member
+    called, in which it can examine the data type string and other relevant
+    aspects of each dragged Wnd and decide whether or not to accept it.  On the
+    drop, the Wnd under the cursor has its AcceptDrop() method called with those
+    Wnds it has previously deemed accepted in DropAcceptable().  Wnds accepted
+    by the drop target are removed from their original parent, if any, through a
+    call to ChildrenDraggedAway().
+
+    Note that only Wnds with non-empty DragDropDataType() may be dragged and
+    dropped.  Within those Wnds, there are two categories: 1) Wnds with
+    Dragable() true and those without.  A Dragable() Wnd moves across the screen
+    normally when dragged.  A Non-Dragable() Wnd does not move when
+    drag-and-dropped; instead, it is rendered in place, and an additional copy
+    of it is rendered as if the cursor were dragging it.
+
     \section drag_n_drop_advanced Advanced Use
-    There is an extensive set of notification functions that may be called during a drag and drop operation.  The drop target
-    and the orginal parent of the dragged Wnd(s), if any, may be notified of various events or queried (e.g. AcceptDrop()).
-    See the Wnd documentation for details.
-    <p>Sometimes it is desirable to have the drop-receiving Wnd emit a signal to which clients may attach slots.  Further,
-    it may be desirable to allow the attached client slots to veto the drop.  If this is desired, the recommended means
-    of accomplishing this is to follow the pattern of ListBox.  ListBox catches ListBox::DontAcceptDrop exceptions that
-    are thrown in slots attached to its DroppedSignal signal.  The signal is emitted after the drop is completed, and if
-    DontAcceptDrop is caught, the stack is unwound in two steps.  First, the insertion of the dropped item is rolled
-    back, and then the exception is rethrown so that AcceptDrop() can return false.  See the ListBox implementation for
-    further details.
+
+    There is an extensive set of notification functions that may be called
+    during a drag and drop operation.  The drop target and the orginal parent of
+    the dragged Wnd(s), if any, may be notified of various events or queried
+    (e.g. DropsAcceptable()).  Additionally, there are functions in GUI that
+    indicate whether a Wnd is being dragged, whether it is over a valid drop
+    target, etc.  See the Wnd documentation and the GUI documentation for
+    details.
 */
 
 /** \page building Building GG

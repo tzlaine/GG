@@ -45,12 +45,16 @@ class GG_API Control : public Wnd
 {
 public:
     /** \name Accessors */ ///@{
+    virtual void   DropsAcceptable(DropsAcceptableIter first,
+                                   DropsAcceptableIter last,
+                                   const Pt& pt) const;
+
     Clr            Color() const;    ///< returns the color of the control
     bool           Disabled() const; ///< returns true if the control is disabled, false otherwise
     //@}
 
     /** \name Mutators */ ///@{
-    virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
+    virtual void   AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt);
     virtual void   Render() = 0;
     virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
     virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);

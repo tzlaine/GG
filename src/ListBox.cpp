@@ -34,10 +34,12 @@
 #include <GG/WndEvent.h>
 #include <GG/WndEditor.h>
 
+#include <boost/cast.hpp>
 #include <boost/assign/list_of.hpp>
 
 #include <cmath>
 #include <numeric>
+
 
 using namespace GG;
 
@@ -427,6 +429,25 @@ ListBox::~ListBox()
     delete m_header_row;
 }
 
+void ListBox::DropsAcceptable(DropsAcceptableIter first,
+                              DropsAcceptableIter last,
+                              const Pt& pt) const
+{
+    for (std::map<const Wnd*, bool>::iterator it = first; it != last; ++it) {
+        it->second = false;
+        const Row* row = dynamic_cast<const Row*>(it->first);
+        if (row &&
+            (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
+             m_allowed_drop_types.find(row->DragDropDataType()) != m_allowed_drop_types.end())) {
+            int insertion_row = RowUnderPt(pt);
+            try {
+                DropAcceptableSignal(insertion_row, row);
+                it->second = true;
+            } catch (const DontAcceptDrop&) {}
+        }
+    }
+}
+
 Pt ListBox::MinUsableSize() const
 {
     return Pt(5 * SCROLL_WIDTH + 2 * BORDER_THICK,
@@ -613,40 +634,31 @@ void ListBox::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
     }
 }
 
-void ListBox::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
+void ListBox::AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt)
 {
-    for (std::list<Wnd*>::iterator it = wnds.begin(); it != wnds.end(); ) {
-        std::list<Wnd*>::iterator tmp_it = it++;
-        Wnd* wnd = *tmp_it;
-        if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
-            m_allowed_drop_types.find(wnd->DragDropDataType()) != m_allowed_drop_types.end()) {
-            if (Row* row = dynamic_cast<Row*>(wnd)) {
-                int insertion_row = RowUnderPt(pt);
-                try {
-                    Insert(row, insertion_row, true);
-                } catch (const DontAcceptDrop&) {
-                    wnds.erase(tmp_it);
-                }
-            }
-        }
+    for (std::vector<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
+        Row* row = boost::polymorphic_downcast<Row*>(*it);
+        int insertion_row = RowUnderPt(pt);
+        Insert(row, insertion_row, true);
     }
 }
 
-void ListBox::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
+void ListBox::ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination)
 {
-    for (std::list<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
-        Row* row = dynamic_cast<Row*>(*it);
-        assert(row);
-        int idx = -1;
-        for (unsigned int i = 0; i < m_rows.size(); ++i) {
-            if (m_rows[i] == row) {
-                idx = i;
-                break;
+    if (!MatchesOrContains(this, destination)) {
+        for (std::vector<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
+            Row* row = dynamic_cast<Row*>(*it);
+            assert(row);
+            int idx = -1;
+            for (unsigned int i = 0; i < m_rows.size(); ++i) {
+                if (m_rows[i] == row) {
+                    idx = i;
+                    break;
+                }
             }
-        }
-        assert(0 <= idx && idx < static_cast<int>(m_rows.size()));
-        if (!MatchesOrContains(this, destination))
+            assert(0 <= idx && idx < static_cast<int>(m_rows.size()));
             Erase(idx);
+        }
     }
 }
 
@@ -1422,7 +1434,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
 
 int ListBox::Insert(Row* row, int at, bool dropped)
 {
-    // track the originating row if this is an intra-ListBox drag-and-drop
+    // track the originating row in case this is an intra-ListBox drag-and-drop
     int dropped_row_original_index = -1;
     if (dropped) {
         for (unsigned int i = 0; i < m_rows.size(); ++i) {
@@ -1497,34 +1509,15 @@ int ListBox::Insert(Row* row, int at, bool dropped)
     }
 
     Pt original_ul = row->RelativeUpperLeft();
-    Wnd* original_parent = row->Parent();
     AttachChild(row);
     row->MoveTo(insertion_pt);
 
     AdjustScrolls(false);
 
     if (dropped) {
-        // ensure that no one has a problem with this drop in user space (if so, they should throw DontAcceptDrop)
-        try {
-            DroppedSignal(retval, row);
-            if (0 <= dropped_row_original_index && dropped_row_original_index < static_cast<int>(m_rows.size()))
-                Erase(dropped_row_original_index, true);
-        } catch (const DontAcceptDrop&) {
-            // if there is a problem, silently undo the drop
-            if (dropped_row_original_index == -1) {
-                m_suppress_erase_signal = true;
-                Erase(retval);
-                m_suppress_erase_signal = false;
-            } else {
-                Erase(retval, true);
-            }
-            row->MoveTo(original_ul);
-            if (original_parent)
-                original_parent->AttachChild(row);
-            else
-                DetachChild(row);
-            throw; // re-throw so that AcceptDrop() knows to return false
-        }
+        DroppedSignal(retval, row);
+        if (0 <= dropped_row_original_index && dropped_row_original_index < static_cast<int>(m_rows.size()))
+            Erase(dropped_row_original_index, true);
     } else {
         InsertedSignal(retval, row);
     }

@@ -120,8 +120,8 @@ public:
    
     /** \name Mutators */ ///@{
     virtual void StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
-    virtual void CancellingChildDragDrop(const std::list<Wnd*>& wnds);
-    virtual void ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
+    virtual void CancellingChildDragDrop(const std::vector<const Wnd*>& wnds);
+    virtual void ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination);
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);

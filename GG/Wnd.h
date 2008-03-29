@@ -179,6 +179,9 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
+    /** The type of the iterator parameters passed to DropsAcceptable(). */
+    typedef std::map<const Wnd*, bool>::iterator DropsAcceptableIter;
+
     /** \name Structors */ ///@{
     virtual ~Wnd(); ///< virtual dtor
     //@}
@@ -202,6 +205,13 @@ public:
         Returns the empty string when this Wnd cannot be used in drag-and-drop. */
     const std::string&
                    DragDropDataType() const;
+
+    /** Sets the \a second member of each iterator to true or false, indicating
+        whether the Wnd in the \a first member would be accepted if dropped on
+        this Wnd at \a pt. */
+    virtual void   DropsAcceptable(DropsAcceptableIter first,
+                                   DropsAcceptableIter last,
+                                   const Pt& pt) const;
 
     /** returns the upper-left corner of window in \a screen \a coordinates (taking into account parent's screen
         position, if any) */
@@ -288,24 +298,30 @@ public:
         the position of the mouse relative to \a wnd's UpperLeft(). */
     virtual void   StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
 
-    /** handles a drop of one or more drag-and-drop wnds into this Wnd; the accepted wnds remain in the list \a wnds;
-        the rejected ones do not.  This function must not not alter the order of the elements in \a wnds.  It may only
-        remove elements. */
-    virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
+    /** when the user drops Wnds onto this Wnd, DropsAcceptable() is passed the
+        list of dropped Wnds.  The Wnds marked acceptable by DropsAcceptable()
+        are then passed to AcceptDrops(), which handles the receipt of one or
+        more drag-and-drop wnds into this Wnd. */
+    virtual void   AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt);
 
-    /** handles the cancellation of the dragging of one or more child windows, whose dragging was established by the
-        most recent call to StartingChildDragDrop().  Note that even if an accepting Wnd Accept()s some but not all
-        Wnds, this function will be called on those Wnds not accepted.  Note that CancellingChildDragDrop() and
-        ChildrenDraggedAway() are always called in that order, and are always called at the end of any drag-and-drop
-        sequence performed on a child of this Wnd, whether the drag-and-drop is successful or not. */
-    virtual void   CancellingChildDragDrop(const std::list<Wnd*>& wnds);
+    /** handles the cancellation of the dragging of one or more child windows,
+        whose dragging was established by the most recent call to
+        StartingChildDragDrop().  Note that even if an accepting Wnd accepts
+        some but not all Wnds via DropsAcceptable(), this function will be
+        called on those Wnds not accepted.  \note CancellingChildDragDrop() and
+        ChildrenDraggedAway() are always called in that order, and are always
+        called at the end of any drag-and-drop sequence performed on a child of
+        this Wnd, whether the drag-and-drop is successful or not. */
+    virtual void   CancellingChildDragDrop(const std::vector<const Wnd*>& wnds);
 
-    /** handles the removal of one or more child windows that have been dropped onto another window which has accepted
-        them as drops.  The accepting window retains ownership, so this function must not delete the children.  Note
-        that CancellingChildDragDrop() and ChildrenDraggedAway() are always called in that order, and are always called
-        at the end of any drag-and-drop sequence performed on a child of this Wnd, whether the drag-and-drop is
-        successful or not. */
-    virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
+    /** handles the removal of one or more child windows that have been dropped
+        onto another window which has accepted them as drops via
+        DropsAcceptable().  The accepting window retains ownership, so this
+        function must not delete the children.  \note CancellingChildDragDrop()
+        and ChildrenDraggedAway() are always called in that order, and are
+        always called at the end of any drag-and-drop sequence performed on a
+        child of this Wnd, whether the drag-and-drop is successful or not. */
+    virtual void   ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination);
 
     virtual void   SetText(const std::string& str);     ///< set window text
 

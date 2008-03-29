@@ -124,7 +124,6 @@ public:
         ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 
         text occupies. */
     virtual void   SetText(const std::string& str);
-    virtual void   SetText(const char* str);
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
     void           SetTextFormat(Flags<TextFormat> format); ///< sets the text format; ensures that the flags are sane
     void           SetTextColor(Clr color);      ///< sets the text color
@@ -139,7 +138,6 @@ public:
     template <class T> void operator<<(T t);
 
     void  operator+=(const std::string& str); ///< appends \a str to text string by way of SetText()
-    void  operator+=(const char* str);        ///< appends \a str to text string by way of SetText()
     void  operator+=(char ch);                ///< appends \a ch to text string by way of SetText()
     void  Clear();                            ///< sets text string to ""
     void  Insert(int pos, char ch);           ///< allows access to text string much as a std::string

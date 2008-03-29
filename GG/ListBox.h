@@ -81,15 +81,9 @@ extern GG_API const ListBoxStyle LIST_BROWSEUPDATES;  ///< Causes a signal to be
     <br>Note that drag-and-drop support is a key part of ListBox's functionality.  As such, special effort has been made
     to make its use as natural and flexible as possible.  This includes allowing arbitrary reordering of ListBox rows
     when the LIST_NOSORT is in effect, and includes the use of the DontAcceptDrop exception.  The DontAcceptDrop exception
-    can be thrown by any client of the ListBox in response to its DroppedSignal.  Such a throw will cause the drop to be
-    cancelled, even though by the time a client responds to the DroppedSignal, the dropped row is already in place in
-    the ListBox.  The exception to this is that the dropped row may be altered with a call to NormalizeRow() before the
-    drop can be reversed; this means that drag-and-drops between ListBoxes with different numbers of columns, or different
-    column widths or alignments should be avoided, or caught and handled.  Note that a DroppedSignal is emitted for each
-    row dropped into the ListBox, so individual rows may be accepted or rejected from a single multi-row drop.
-    <br>Also note that while a ListBox can contain arbitrary Control-derived controls, in order for such controls to be
-    automatically serialized, any user-defined Control subclasses must be registered.  See the boost serialization
-    documentation for details. */
+    can be thrown by any client of the ListBox in response to its DropAcceptableSignal.  Such a throw will cause the drop to be
+    refused.  Note that a DropAcceptableSignal is emitted for each
+    row dropped into the ListBox, so individual rows may be accepted or rejected from a single multi-row drop. */
 class GG_API ListBox : public Control
 {
 public:
@@ -175,10 +169,13 @@ public:
                                                SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
     typedef boost::signal<void (int, ListBox::Row*)>
                                                RowSignalType;            ///< the signature of row-change-notification signals
+    typedef boost::signal<void (int, const ListBox::Row*)>
+                                               ConstRowSignalType;       ///< the signature of row-change-notification signals
     typedef boost::signal<void (int, ListBox::Row*, const Pt&)>
                                                RowClickSignalType;       ///< the signature of row-click-notification signals
     typedef RowSignalType                      InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the index of the insertion point and the Row inserted
     typedef RowSignalType                      DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
+    typedef ConstRowSignalType                 DropAcceptableSignalType; ///< emitted when a row may be inserted into the list box via drag-and-drop; provides the index of the drop point and the Row dropped
     typedef RowClickSignalType                 LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the index of the row left-clicked and the Row contents left-clicked
     typedef RowClickSignalType                 RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the index of the row right-clicked and the Row contents right-clicked
     typedef RowSignalType                      DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the index of the row double-clicked and the Row contents double-clicked
@@ -194,7 +191,7 @@ public:
     typedef RightClickedSignalType::slot_type  RightClickedSlotType; ///< type of functor(s) invoked on a RightClickedSignalType
     typedef DoubleClickedSignalType::slot_type DoubleClickedSlotType;///< type of functor(s) invoked on a DoubleClickedSignalType
     typedef ErasedSignalType::slot_type        ErasedSlotType;       ///< type of functor(s) invoked on a ErasedSignalType
-    typedef DroppedSignalType::slot_type       DroppedSlotType;      ///< type of functor(s) invoked on a DroppedSignalType
+    typedef DroppedSignalType::slot_type       DroppedSlotType;      ///< type of functor(s) invoked on a DropAcceptableSignalType
     typedef BrowsedSignalType::slot_type       BrowsedSlotType;      ///< type of functor(s) invoked on a BrowsedSignalType
     //@}
 
@@ -206,6 +203,10 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
+    virtual void   DropsAcceptable(DropsAcceptableIter first,
+                                   DropsAcceptableIter last,
+                                   const Pt& pt) const;
+
     virtual Pt      MinUsableSize() const;
     virtual Pt      ClientUpperLeft() const;
     virtual Pt      ClientLowerRight() const;
@@ -258,21 +259,22 @@ public:
     /** the number of milliseconds that elapse between row/column scrolls when auto-scrolling. */
     int             AutoScrollInterval() const;
 
-    mutable ClearedSignalType       ClearedSignal;       ///< the cleared signal object for this ListBox
-    mutable SelChangedSignalType    SelChangedSignal;    ///< the selection change signal object for this ListBox
-    mutable InsertedSignalType      InsertedSignal;      ///< the inserted signal object for this ListBox
-    mutable DroppedSignalType       DroppedSignal;       ///< the dropped signal object for this ListBox
-    mutable LeftClickedSignalType   LeftClickedSignal;   ///< the left click signal object for this ListBox
-    mutable RightClickedSignalType  RightClickedSignal;  ///< the right click signal object for this ListBox
-    mutable DoubleClickedSignalType DoubleClickedSignal; ///< the double click signal object for this ListBox
-    mutable ErasedSignalType        ErasedSignal;        ///< the erased signal object for this ListBox
-    mutable BrowsedSignalType       BrowsedSignal;       ///< the browsed signal object for this ListBox
+    mutable ClearedSignalType        ClearedSignal;        ///< the cleared signal object for this ListBox
+    mutable SelChangedSignalType     SelChangedSignal;     ///< the selection change signal object for this ListBox
+    mutable InsertedSignalType       InsertedSignal;       ///< the inserted signal object for this ListBox
+    mutable DroppedSignalType        DroppedSignal;        ///< the dropped signal object for this ListBox
+    mutable DropAcceptableSignalType DropAcceptableSignal; ///< the drop-acceptability signal object for this ListBox
+    mutable LeftClickedSignalType    LeftClickedSignal;    ///< the left click signal object for this ListBox
+    mutable RightClickedSignalType   RightClickedSignal;   ///< the right click signal object for this ListBox
+    mutable DoubleClickedSignalType  DoubleClickedSignal;  ///< the double click signal object for this ListBox
+    mutable ErasedSignalType         ErasedSignal;         ///< the erased signal object for this ListBox
+    mutable BrowsedSignalType        BrowsedSignal;        ///< the browsed signal object for this ListBox
     //@}
 
     /** \name Mutators */ ///@{
     virtual void   StartingChildDragDrop(const Wnd* wnd, const GG::Pt& offset);
-    virtual void   AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt);
-    virtual void   ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination);
+    virtual void   AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt);
+    virtual void   ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination);
     virtual void   Render();
     virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
     virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
@@ -365,9 +367,8 @@ public:
     /** The base class for ListBox exceptions. */
     GG_ABSTRACT_EXCEPTION(Exception);
 
-    /** Thrown by a ListBox that does not wish to accept a received drop, for whatever reason. This may be throw at any
-        time during the receipt of a drop -- even in client code activated by a DroppedSignal, which is emitted after
-        the drop has been processed and the dropped item inserted. */
+    /** Thrown by a ListBox that does not wish to accept a potential drop, for whatever reason. This may be throw by anyone
+        -- even in client code activated by a DropAcceptableSignal. */
     GG_CONCRETE_EXCEPTION(DontAcceptDrop, GG::ListBox, Exception);
     //@}
 

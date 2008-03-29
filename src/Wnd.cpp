@@ -285,6 +285,15 @@ const std::string& Wnd::DragDropDataType() const
     return m_drag_drop_data_type;
 }
 
+void Wnd::DropsAcceptable(DropsAcceptableIter first,
+                          DropsAcceptableIter last,
+                          const Pt& pt) const
+{
+    for (std::map<const Wnd*, bool>::iterator it = first; it != last; ++it) {
+        it->second = false;
+    }
+}
+
 Pt Wnd::UpperLeft() const
 {
     Pt retval = m_upperleft;
@@ -470,16 +479,14 @@ void Wnd::SetDragDropDataType(const std::string& data_type)
 void Wnd::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
 {}
 
-void Wnd::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
-{
-    wnds.clear();
-}
+void Wnd::AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt)
+{}
 
-void Wnd::CancellingChildDragDrop(const std::list<Wnd*>& wnds) {}
+void Wnd::CancellingChildDragDrop(const std::vector<const Wnd*>& wnds) {}
 
-void Wnd::ChildrenDraggedAway(const std::list<Wnd*>& wnds, const Wnd* destination)
+void Wnd::ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination)
 {
-    for (std::list<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
+    for (std::vector<Wnd*>::const_iterator it = wnds.begin(); it != wnds.end(); ++it) {
         DetachChild(*it);
     }
 }

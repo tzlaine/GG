@@ -193,7 +193,7 @@ if not force_configure and env['build_sdl_driver']:
         for key, value in pickled_values.items():
             sdl_env[key] = value
         sdl_preconfigured = True
-        if not sdl_env['sdl_driver']:
+        if not sdl_env['build_sdl_driver']:
             print 'Warning: You have requested to build SDL support, but SDL was not found, and so has been disabled.  To fix this, run scons configure.'
             env['build_sdl_driver'] = False
     except Exception:
@@ -282,7 +282,7 @@ if not env.GetOption('clean'):
                 ])
 
         boost_libs = [
-            ('boost_signals', 'boost/signals.hpp', 'boost::signals::connection();'),
+            ('boost_signals', 'boost/signals.hpp', 'boost::' + signals_namespace + '::connection();'),
             ('boost_filesystem', 'boost/filesystem/operations.hpp', 'boost::filesystem::initial_path();'),
             ('boost_thread', 'boost/thread/thread.hpp', 'boost::thread::yield();')
             ]

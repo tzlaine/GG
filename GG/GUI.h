@@ -165,6 +165,7 @@ public:
     int            MinDragTime() const;                ///< returns the minimum time (in ms) an item must be dragged before it is a valid drag
     int            MinDragDistance() const;            ///< returns the minimum distance an item must be dragged before it is a valid drag
     bool           DragDropWnd(const Wnd* wnd) const;  ///< returns true if \a wnd is currently begin dragged as part of a drag-and-drop operation
+    bool           AcceptedDragDropWnd(const Wnd* wnd) const; ///< returns true if \a wnd is currently begin dragged as part of a drag-and-drop operation, and it is over a drop target that will accept it
     bool           MouseButtonDown(int bn) const;      ///< returns the up/down states of the mouse buttons
     Pt             MousePosition() const;              ///< returns the absolute position of mouse, based on the last mouse motion event
     Pt             MouseMovement() const;              ///< returns the relative position of mouse, based on the last mouse motion event

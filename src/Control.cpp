@@ -53,6 +53,14 @@ Control::Control(int x, int y, int w, int h, Flags<WndFlag> flags/* = CLICKABLE*
     m_disabled(false)
 {}
 
+void Control::DropsAcceptable(DropsAcceptableIter first,
+                              DropsAcceptableIter last,
+                              const Pt& pt) const
+{
+    if (Parent())
+        Parent()->DropsAcceptable(first, last, pt);
+}
+
 Clr Control::Color() const
 {
     return m_color;
@@ -63,7 +71,7 @@ bool Control::Disabled() const
     return m_disabled;
 }
 
-void Control::AcceptDrops(std::list<Wnd*>& wnds, const Pt& pt)
+void Control::AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt)
 {
     if (Parent())
         Parent()->AcceptDrops(wnds, pt);

@@ -192,11 +192,6 @@ void TextControl::SetText(const std::string& str)
     m_dirty_load = false;
 }
 
-void TextControl::SetText(const char* str)
-{
-    SetText(std::string(str));
-}
-
 void TextControl::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
@@ -233,11 +228,6 @@ void TextControl::SetMinSize(bool b)
 }
 
 void TextControl::operator+=(const std::string& str)
-{
-    SetText(Control::m_text + str);
-}
-
-void TextControl::operator+=(const char* str)
 {
     SetText(Control::m_text + str);
 }

@@ -567,11 +567,38 @@ public:
     //@}
 
 protected:
+    /** The states a Wnd may be in, with respect to drag-and-drop operations.
+        Wnds may wish to consider the current state when rendering to provide
+        visual feedback to the user. */
+    enum DragDropRenderingState {
+        /** No drag-and-drop is taking place at all with this Wnd. */
+        NOT_DRAGGED,
+
+        /** This Wnd is being dragged-and-dropped, but we're currently rendering
+            the unmoving copy.  The dragged copy is rendered at another time. */
+        IN_PLACE_COPY,
+
+        /** This Wnd is being dragged-and-dropped, and it is currently over a
+            drop target that \b will \b not accept it. */
+        DRAGGED_OVER_UNACCEPTING_DROP_TARGET,
+
+        /** This Wnd is being dragged-and-dropped, and it is currently over a
+            drop target that \b will accept it. */
+        DRAGGED_OVER_ACCEPTING_DROP_TARGET
+    };
+
     /** \name Structors */ ///@{
     Wnd(); ///< default ctor
 
     /** ctor that allows a size and position to be specified, as well as creation flags */
     Wnd(int x, int y, int w, int h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
+    //@}
+
+    /** \name Accessors */ ///@{
+    /** Returns the states the Wnd is in, with respect to drag-and-drop
+        operations.  Wnds may wish to consider the current state when rendering
+        to provide visual feedback to the user. */
+    DragDropRenderingState GetDragDropRenderingState() const;
     //@}
 
     /** \name Mutators */ ///@{

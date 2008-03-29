@@ -1085,6 +1085,20 @@ void Wnd::SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse
     s_default_browse_info_wnd = browse_info_wnd;
 }
 
+Wnd::DragDropRenderingState Wnd::GetDragDropRenderingState() const
+{
+    DragDropRenderingState retval = NOT_DRAGGED;
+    if (GUI::GetGUI()->DragDropWnd(this)) {
+        if (!Dragable() && !GUI::GetGUI()->RenderingDragDropWnds())
+             retval = IN_PLACE_COPY;
+        else if (GUI::GetGUI()->AcceptedDragDropWnd(this))
+            retval = DRAGGED_OVER_ACCEPTING_DROP_TARGET;
+        else
+            retval = DRAGGED_OVER_UNACCEPTING_DROP_TARGET;
+    }
+    return retval;
+}
+
 bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
 {
     return false;

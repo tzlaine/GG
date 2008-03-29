@@ -127,35 +127,38 @@
 /** \page drag_n_drop Drag and Drop
     \section drag_n_drop_basics Basics
 
-    GG has drag and drop support that allows you to potentially drag any Wnd and
-    drop it onto any other Wnd.  The results of this drop depend on the two Wnds
-    involved.  Each Wnd has a DragDropDataType() method that returns a string
-    describing what kind of data the Wnd represents.  The string can be a MIME
-    type, or any arbitrary string the user likes.  During the dragging portion
-    of the operation, a Wnd under the cursor has its DropAcceptable() member
-    called, in which it can examine the data type string and other relevant
-    aspects of each dragged Wnd and decide whether or not to accept it.  On the
-    drop, the Wnd under the cursor has its AcceptDrop() method called with those
-    Wnds it has previously deemed accepted in DropAcceptable().  Wnds accepted
-    by the drop target are removed from their original parent, if any, through a
-    call to ChildrenDraggedAway().
+    GG has drag and drop support that allows you to potentially drag any GG::Wnd
+    and drop it onto any other GG::Wnd.  The results of this drop depend on the
+    two GG::Wnd's involved.  Each GG::Wnd has a GG::Wnd::DragDropDataType()
+    method that returns a string describing what kind of data the GG::Wnd
+    represents.  The string can be a MIME type, or any arbitrary string the user
+    likes.  During the dragging portion of the operation, a GG::Wnd under the
+    cursor has its GG::Wnd::DropAcceptable() member called, in which it can
+    examine the data type string and other relevant aspects of each dragged
+    GG::Wnd and decide whether or not to accept it.  On the drop, the GG::Wnd
+    under the cursor has its GG::Wnd::AcceptDrop() method called with those
+    GG::Wnd's it has previously deemed accepted in GG::Wnd::DropAcceptable().
+    GG::Wnd's accepted by the drop target are removed from their original
+    parent, if any, through a call to GG::Wnd::ChildrenDraggedAway().
 
-    Note that only Wnds with non-empty DragDropDataType() may be dragged and
-    dropped.  Within those Wnds, there are two categories: 1) Wnds with
-    Dragable() true and those without.  A Dragable() Wnd moves across the screen
-    normally when dragged.  A Non-Dragable() Wnd does not move when
-    drag-and-dropped; instead, it is rendered in place, and an additional copy
-    of it is rendered as if the cursor were dragging it.
+    Note that only GG::Wnd's with non-empty GG::Wnd::DragDropDataType() may be
+    dragged and dropped.  Within those GG::Wnd's, there are two categories: 1)
+    GG::Wnd's with GG::Wnd::Dragable() true and those without.  A
+    GG::Wnd::Dragable() GG::Wnd moves across the screen normally when dragged.
+    A Non-GG::Wnd::Dragable() GG::Wnd does not move when drag-and-dropped;
+    instead, it is rendered in place, and an additional copy of it is rendered
+    as if the cursor were dragging it.
 
     \section drag_n_drop_advanced Advanced Use
 
     There is an extensive set of notification functions that may be called
     during a drag and drop operation.  The drop target and the orginal parent of
-    the dragged Wnd(s), if any, may be notified of various events or queried
-    (e.g. DropsAcceptable()).  Additionally, there are functions in GUI that
-    indicate whether a Wnd is being dragged, whether it is over a valid drop
-    target, etc.  See the Wnd documentation and the GUI documentation for
-    details.
+    the dragged GG::Wnd(s), if any, may be notified of various events or queried
+    (e.g. GG::Wnd::DropsAcceptable()).  Additionally,
+    GG::Wnd::GetDragDropRenderingState() indicates whether a GG::Wnd is being
+    dragged, whether it is over a valid drop target, etc.  See the GG::Wnd
+    documentation for details.
+
 */
 
 /** \page building Building GG
@@ -231,33 +234,31 @@
     One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
     capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
     elements for network transmission and receipt.  To satisfy all these requirements, GG uses the boost.serialization 
-    library to serialize Wnd-derived objects.
+    library to serialize GG::Wnd-derived objects.
     \section serialization_approach Details
-    GG does not contain any actual code that will serialize a Wnd.  Instead, each Wnd subclass contains a serialize() template
+    GG does not contain any actual code that will serialize a GG::Wnd.  Instead, each GG::Wnd subclass contains a serialize() template
     method which may be invoked by user code to perform serialization.  The user must then create a boost serialization
     archive, and save/load the desired windows to/from the archive.  To be serializable, user-created subclasses need to define
-    a serialize method that first serializes its base class, then serializes any subclass-specific data; see any Wnd subclass
+    a serialize method that first serializes its base class, then serializes any subclass-specific data; see any GG::Wnd subclass
     for example code.  For full details on how the serialization works, see the serialization tutorial and the
     boost.serialization documentation.
     \section caveats Caveats
     Signals are not currently serializable.  This means that when a class is created from an input serialization
     archive, all its signals must be reconnected to their slots (and any signals connected to it should be reconnected
     as well).  Many of the built-in GG controls must reconnect signals when loaded; such classes have a private
-    ConnectSignals() method that is called at load time.  See RadioButtonGroup::serialize() in GGButton.h for an
+    ConnectSignals() method that is called at load time.  See GG::RadioButtonGroup::serialize() in Button.h for an
     example.
-    <p>Font and Texture objects that were part of the GUI's FontManager and TextureManager when
+    <p>GG::Font and GG::Texture objects that were part of the GUI's GG::FontManager and GG::TextureManager when
     saved will not be added back to these two structures when they are loaded.
 */
 
 /** \page brief_tour A Brief Tour
 
-    In a library as diverse in functionality as GG, it can be difficult even
-    to figure out what the library has to offer.  This "tour" is designed to
+    In a library as diverse in functionality as GG, it can be difficult even to
+    figure out what the library has to offer.  This "tour" is designed to
     provide a brief overview of the various features of GG not covered
-    elsewhere, and to point users to the more detailed information elsewhere
-    in the documentation.  The topics are covered in no particular order.
-
-    <p>
+    elsewhere, and to point users to the more detailed information elsewhere in
+    the documentation.  The topics are covered in no particular order.
 
     First off, it should be noted that there is a lot of general overview-type
     documentation in the GG::Wnd and GG::GUI detailed documentation.  Many of
@@ -265,21 +266,21 @@
 
     \section tour_event_filters Event Filters
 
-    Event filtering allows one to use a Wnd to intrusively handle the events
-    sent to another Wnd.  This can be useful, for example, in a control (the
+    Event filtering allows one to use a GG::Wnd to intrusively handle the events
+    sent to another GG::Wnd.  This can be useful, for example, in a control (the
     parent) that is composed of multiple controls (the children), but which
-    needs to handle certain events uniformly.  Perhaps left-clicks should
-    always bring up a context menu, for instance.  Without event filtering,
-    each child control would have to explicitly forward its left-clicks
-    instead of processing them normally, which would in turn require
-    subclassing.  Event filters remove the need for such subclassing.  \see
-    The GG::Wnd description, GG::Wnd::EventFilter(),
-    GG::Wnd::InstallEventFilter(), and GG::Wnd::RemoveEventFilter().
+    needs to handle certain events uniformly.  Perhaps left-clicks should always
+    bring up a context menu, for instance.  Without event filtering, each child
+    control would have to explicitly forward its left-clicks instead of
+    processing them normally, which would in turn require subclassing.  Event
+    filters remove the need for such subclassing.  \see The GG::Wnd description,
+    GG::Wnd::EventFilter(), GG::Wnd::InstallEventFilter(), and
+    GG::Wnd::RemoveEventFilter().
 
     \section tour_layouts Layouts
 
-    GG::Layout encapsulates the relative arrangement of child Wnds in the client
-    area of a Wnd, so that positioning such children requires less
+    GG::Layout encapsulates the relative arrangement of child GG::Wnd's in the
+    client area of a GG::Wnd, so that positioning such children requires less
     hand-coding.  \see The GG::Wnd description.
 
     \section tour_browse_info The Browse-Info System

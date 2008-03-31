@@ -274,6 +274,7 @@ if not env.GetOption('clean'):
         else:
             print 'Configuring unknown system (assuming the system is POSIX-like) ...'
 
+        signals_namespace = 'signals'
         if OptionValue('boost_signals_namespace', env):
             signals_namespace = OptionValue('boost_signals_namespace', env)
             env.Append(CPPDEFINES = [

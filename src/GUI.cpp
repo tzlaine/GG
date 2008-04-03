@@ -1080,7 +1080,7 @@ void GUI::Render()
 
 bool GUI::ProcessBrowseInfoImpl(Wnd* wnd)
 {
-    bool retval = true;
+    bool retval = false;
     const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
     int delta_t = Ticks() - s_impl->m_prev_wnd_under_cursor_time;
     for (int i = static_cast<int>(browse_modes.size()) - 1; 0 <= i; --i) {
@@ -1092,8 +1092,7 @@ bool GUI::ProcessBrowseInfoImpl(Wnd* wnd)
                     s_impl->m_browse_info_mode = i;
                     s_impl->m_browse_info_wnd->SetCursorPosition(s_impl->m_mouse_pos);
                 }
-            } else {
-                retval = false;
+                retval = true;
             }
             break;
         }

@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
    
 /** \file Cursor.h
     Contains Cursor class, which encapsulates the rendering of the input cursor. */

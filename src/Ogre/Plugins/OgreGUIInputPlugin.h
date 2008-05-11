@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
    
 /** \file OgreGUIInputPlugin.h
     Contains OgreGUIInputPlugin, the Ogre::Plugin base class for making plugins

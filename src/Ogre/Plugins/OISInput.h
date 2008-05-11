@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
    
 /** \file OISInput.h
     Contains OISInput, the OgreGUIInputPlugin subclass that provides OgreGUI with OIS input. */

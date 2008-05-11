@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
    
 /** \file TabWnd.h
     Contains the TabWnd class, which encapsulates a set of tabbed windows. */

@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
    
 /** \file OgreGUI.h
     Contains OgreGUI, the input driver for using Ogre with GG. */

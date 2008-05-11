@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
 
 /** \file Flags.h
     Contains Flags and related classes, used to ensure typesafety when using bitflags. */

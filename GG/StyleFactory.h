@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /* GG is a GUI for SDL and OpenGL.
-   Copyright (C) 2003 T. Zachary Laine
+   Copyright (C) 2003-2008 T. Zachary Laine
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
@@ -21,7 +21,7 @@
    contact the author as other terms are available for a fee.
     
    Zach Laine
-   whatwasthataddress@hotmail.com */
+   whatwasthataddress@gmail.com */
 
 /** \file StyleFactory.h
     Contains the StyleFactory class, which creates new controls for internal use by dialogs and other controls. */

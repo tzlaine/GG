@@ -55,7 +55,7 @@ public:
     /** \name Structors */ ///@{
     /** Basic ctor. */
     TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-           TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
+           TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE);
     ~TabWnd();
     //@}
 

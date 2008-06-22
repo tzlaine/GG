@@ -124,7 +124,13 @@ bool DropDownList::Empty() const
     return m_LB->Empty();
 }
 
-const DropDownList::Row& DropDownList::GetItem(int n) const
+DropDownList::const_iterator DropDownList::Begin() const
+{ return m_LB->Begin(); }
+
+DropDownList::const_iterator DropDownList::End() const
+{ return m_LB->End(); }
+
+const DropDownList::Row& DropDownList::GetRow(int n) const
 {
     return m_LB->GetRow(n);
 }
@@ -297,6 +303,12 @@ void DropDownList::Clear()
     m_current_item_idx = -1;
     m_LB->Clear();
 }
+
+DropDownList::iterator DropDownList::Begin()
+{ return m_LB->Begin(); }
+
+DropDownList::iterator DropDownList::End()
+{ return m_LB->End(); }
 
 DropDownList::Row& DropDownList::GetRow(int n)
 {

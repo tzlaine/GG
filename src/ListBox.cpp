@@ -469,6 +469,12 @@ bool ListBox::Empty() const
     return m_rows.empty();
 }
 
+ListBox::const_iterator ListBox::Begin() const
+{ return m_rows.begin(); }
+
+ListBox::const_iterator ListBox::End() const
+{ return m_rows.end(); }
+
 const ListBox::Row& ListBox::GetRow(int n) const
 {
     return *m_rows.at(n);
@@ -928,10 +934,11 @@ int ListBox::Insert(Row* row, int at/*= -1*/)
     return Insert(row, at, false);
 }
 
+ListBox::Row* ListBox::Erase(iterator it)
+{ return Erase(it, false); }
+
 ListBox::Row* ListBox::Erase(int idx)
-{
-    return Erase(idx, false);
-}
+{ return Erase(boost::next(m_rows.begin(), idx), false); }
 
 void ListBox::Clear()
 {
@@ -1001,6 +1008,12 @@ void ListBox::DeselectAll()
     if (emit_signal)
         SelChangedSignal(m_selections);
 }
+
+ListBox::iterator ListBox::Begin()
+{ return m_rows.begin(); }
+
+ListBox::iterator ListBox::End()
+{ return m_rows.end(); }
 
 ListBox::Row& ListBox::GetRow(int n)
 {
@@ -1238,6 +1251,9 @@ int ListBox::BottomMargin() const
 {
     return (m_hscroll ? SCROLL_WIDTH : 0);
 }
+
+int ListBox::CellMargin() const
+{ return m_cell_margin; }
 
 int ListBox::RowUnderPt(const Pt& pt) const
 {
@@ -1517,7 +1533,7 @@ int ListBox::Insert(Row* row, int at, bool dropped)
     if (dropped) {
         DroppedSignal(retval, row);
         if (0 <= dropped_row_original_index && dropped_row_original_index < static_cast<int>(m_rows.size()))
-            Erase(dropped_row_original_index, true);
+            Erase(boost::next(m_rows.begin(), dropped_row_original_index), true);
     } else {
         InsertedSignal(retval, row);
     }
@@ -1525,39 +1541,41 @@ int ListBox::Insert(Row* row, int at, bool dropped)
     return retval;
 }
 
-ListBox::Row* ListBox::Erase(int idx, bool removing_duplicate)
+ListBox::Row* ListBox::Erase(iterator it, bool removing_duplicate)
 {
-    if (0 <= idx && idx < static_cast<int>(m_rows.size())) { // remove row
-        Row* row = m_rows[idx];
+    if (it != m_rows.end()) { // remove row
+        Row* row = *it;
         int row_height = row->Height();
-        m_rows.erase(m_rows.begin() + idx);
+        m_rows.erase(it);
         if (!removing_duplicate) {
             DetachChild(row);
             row->RemoveEventFilter(this);
         }
 
         // "bump" all the hiliting and positions up one row
-        m_selections.erase(idx);
-        for (unsigned int i = idx; i < m_rows.size(); ++i) {
-            m_rows[i]->OffsetMove(Pt(0, -row_height));
-            if (m_selections.find(i + 1) != m_selections.end()) {
-                m_selections.insert(i);
-                m_selections.erase(i + 1);
+        const std::size_t ERASE_INDEX = std::distance(m_rows.begin(), it);
+        m_selections.erase(ERASE_INDEX);
+        std::size_t index = ERASE_INDEX;
+        for (iterator it2 = it; it2 != m_rows.end(); ++it2, ++index) {
+            (*it2)->OffsetMove(Pt(0, -row_height));
+            if (m_selections.find(index + 1) != m_selections.end()) {
+                m_selections.insert(index);
+                m_selections.erase(index + 1);
             }
         }
 
         // adjust any affected integer indices
-        DecrementIfGE(m_caret, idx);
-        DecrementIfGE(m_old_sel_row, idx);
-        DecrementIfGE(m_old_rdown_row, idx);
-        DecrementIfGE(m_lclick_row, idx);
-        DecrementIfGE(m_rclick_row, idx);
-        DecrementIfGE(m_last_row_browsed, idx);
+        DecrementIfGE(m_caret, ERASE_INDEX);
+        DecrementIfGE(m_old_sel_row, ERASE_INDEX);
+        DecrementIfGE(m_old_rdown_row, ERASE_INDEX);
+        DecrementIfGE(m_lclick_row, ERASE_INDEX);
+        DecrementIfGE(m_rclick_row, ERASE_INDEX);
+        DecrementIfGE(m_last_row_browsed, ERASE_INDEX);
 
         AdjustScrolls(false);
 
         if (!removing_duplicate && !m_suppress_erase_signal)
-            ErasedSignal(idx, row);
+            ErasedSignal(ERASE_INDEX, row);
 
         return row;
     } else {

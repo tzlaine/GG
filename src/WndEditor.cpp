@@ -112,9 +112,8 @@ const Wnd* WndEditor::GetWnd() const
 
 void WndEditor::Render ()
 {
-    for (int i = 0; i < m_list_box->NumRows(); ++i) {
-        if (AttributeRowBase* row = 
-            dynamic_cast<AttributeRowBase*>(&m_list_box->GetRow(i)))
+    for (ListBox::iterator it = m_list_box->Begin(); it != m_list_box->End(); ++it) {
+        if (AttributeRowBase* row = dynamic_cast<AttributeRowBase*>(*it))
             row->Refresh();
     }
 }
@@ -166,9 +165,8 @@ void WndEditor::Init()
 
 void WndEditor::AttributeChangedSlot()
 {
-    for (int i = 0; i < m_list_box->NumRows(); ++i) {
-        if (AttributeRowBase* row = 
-            dynamic_cast<AttributeRowBase*>(&m_list_box->GetRow(i)))
+    for (ListBox::iterator it = m_list_box->Begin(); it != m_list_box->End(); ++it) {
+        if (AttributeRowBase* row = dynamic_cast<AttributeRowBase*>(*it))
             row->Update();
     }
     WndChangedSignal(m_wnd);

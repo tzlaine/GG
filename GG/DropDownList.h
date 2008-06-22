@@ -61,6 +61,9 @@ public:
     typedef SelChangedSignalType::slot_type   SelChangedSlotType;  ///< type of functor(s) invoked on a SelChangedSignalType
     //@}
 
+    typedef ListBox::iterator iterator;
+    typedef ListBox::const_iterator const_iterator;
+
     /** \name Structors */ ///@{
     /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null. */
     DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags = CLICKABLE);
@@ -73,7 +76,9 @@ public:
     int            CurrentItemIndex() const; ///< returns the list index of the currently selected list item (returns -1 if none is selected)
 
     bool           Empty() const;            ///< returns true when the list is empty
-    const Row&     GetItem(int n) const;     ///< returns a const reference to the row at index \a n; not range-checked
+    const_iterator Begin() const;            ///< returns an iterator to the first list row
+    const_iterator End() const;              ///< returns an iterator to the imaginary row one past the last
+    const Row&     GetRow(int n) const;      ///< returns a const reference to the row at index \a n; not range-checked
     bool           Selected(int n) const;    ///< returns true if row \a n is selected
     Clr            InteriorColor() const;    ///< returns the color painted into the client area of the control
 
@@ -111,6 +116,8 @@ public:
     int            Insert(Row* row, int at = -1); ///< insertion sorts \a row into the list, or inserts into an unsorted list before index \a at; returns index of insertion point.  This Row becomes the property of the DropDownList and should not be deleted or inserted into any other DropDownLists
     Row*           Erase(int idx);                ///< removes and returns the row at index \a idx from the list, or 0 if no such row exists
     void           Clear();                       ///< empties the list
+    iterator       Begin();          ///< returns an iterator to the first list row
+    iterator       End();            ///< returns an iterator to the imaginary row one past the last one
     Row&           GetRow(int n);                 ///< returns a reference to the Row at row index \a n; not range-checked
 
     void           Select(int row);               ///< selects row-item \a row in the list

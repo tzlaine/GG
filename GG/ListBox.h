@@ -195,6 +195,9 @@ public:
     typedef BrowsedSignalType::slot_type       BrowsedSlotType;      ///< type of functor(s) invoked on a BrowsedSignalType
     //@}
 
+    typedef std::vector<Row*>::iterator iterator;
+    typedef std::vector<Row*>::const_iterator const_iterator;
+
     /** \name Structors */ ///@{
     /** basic ctor */
     ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
@@ -212,6 +215,8 @@ public:
     virtual Pt      ClientLowerRight() const;
 
     bool            Empty() const;          ///< returns true when the ListBox is empty
+    const_iterator  Begin() const;          ///< returns an iterator to the first list row
+    const_iterator  End() const;            ///< returns an iterator to the imaginary row one past the last
     const Row&      GetRow(int n) const;    ///< returns a const reference to the row at index \a n; not range-checked
     int             Caret() const;          ///< returns the index of the row that has the caret
     const std::set<int>&
@@ -289,12 +294,15 @@ public:
     virtual void   SetColor(Clr c);
 
     int            Insert(Row* row, int at = -1);         ///< insertion sorts \a row into the ListBox, or inserts into an unsorted ListBox before index \a at; returns index of insertion point.  This Row becomes the property of the ListBox.
+    Row*           Erase(iterator it);                    ///< removes and returns the row that \a it points to from the ListBox, or 0 if no such row exists
     Row*           Erase(int idx);                        ///< removes and returns the row at index \a idx from the ListBox, or 0 if no such row exists
     void           Clear();                               ///< empties the ListBox
     void           SelectRow(int n);                      ///< selects row \a n
     void           DeselectRow(int n);                    ///< deselects row \a n
     void           SelectAll();                           ///< selects all rows
     void           DeselectAll();                         ///< deselects all rows
+    iterator       Begin();          ///< returns an iterator to the first list row
+    iterator       End();            ///< returns an iterator to the imaginary row one past the last one
     Row&           GetRow(int n);                         ///< returns a reference to the Row at row index \a n; not range-checked
 
     void           SetSelections(const std::set<int>& s); ///< sets the set of selected rows to \a s
@@ -380,7 +388,7 @@ protected:
     /** \name Accessors */ ///@{
     int             RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar
     int             BottomMargin() const;    ///< space skipped at bottom of client area for horizontal scroll bar
-    int             CellMargin() const {return m_cell_margin;} ///< the number of pixels left between the contents of each cell and the cell boundary
+    int             CellMargin() const;      ///< the number of pixels left between the contents of each cell and the cell boundary
 
     int             RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (it may be < 0 or >= NumRows())
 
@@ -411,7 +419,7 @@ protected:
     virtual bool    EventFilter(Wnd* w, const WndEvent& event);
 
     int             Insert(Row* row, int at, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before index "at"; returns index of insertion point
-    Row*            Erase(int idx, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a duplicate removal (such as for drag-and-drops within a single ListBox) if indicated
+    Row*            Erase(iterator it, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a duplicate removal (such as for drag-and-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
     void            ResetAutoScrollVars();          ///< resets all variables related to auto-scroll to their initial values

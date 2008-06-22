@@ -130,6 +130,12 @@ DropDownList::const_iterator DropDownList::Begin() const
 DropDownList::const_iterator DropDownList::End() const
 { return m_LB->End(); }
 
+DropDownList::const_reverse_iterator DropDownList::RBegin() const
+{ return m_LB->RBegin(); }
+
+DropDownList::const_reverse_iterator DropDownList::REnd() const
+{ return m_LB->REnd(); }
+
 const DropDownList::Row& DropDownList::GetRow(int n) const
 {
     return m_LB->GetRow(n);
@@ -309,6 +315,12 @@ DropDownList::iterator DropDownList::Begin()
 
 DropDownList::iterator DropDownList::End()
 { return m_LB->End(); }
+
+DropDownList::reverse_iterator DropDownList::RBegin()
+{ return m_LB->RBegin(); }
+
+DropDownList::reverse_iterator DropDownList::REnd()
+{ return m_LB->REnd(); }
 
 DropDownList::Row& DropDownList::GetRow(int n)
 {

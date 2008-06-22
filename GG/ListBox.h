@@ -197,6 +197,8 @@ public:
 
     typedef std::vector<Row*>::iterator iterator;
     typedef std::vector<Row*>::const_iterator const_iterator;
+    typedef std::vector<Row*>::reverse_iterator reverse_iterator;
+    typedef std::vector<Row*>::const_reverse_iterator const_reverse_iterator;
 
     /** \name Structors */ ///@{
     /** basic ctor */
@@ -217,6 +219,10 @@ public:
     bool            Empty() const;          ///< returns true when the ListBox is empty
     const_iterator  Begin() const;          ///< returns an iterator to the first list row
     const_iterator  End() const;            ///< returns an iterator to the imaginary row one past the last
+    const_reverse_iterator
+                    RBegin() const;         ///< returns an iterator to the last list row
+    const_reverse_iterator
+                    REnd() const;           ///< returns an iterator to the imaginary row one past the first one
     const Row&      GetRow(int n) const;    ///< returns a const reference to the row at index \a n; not range-checked
     int             Caret() const;          ///< returns the index of the row that has the caret
     const std::set<int>&
@@ -303,6 +309,10 @@ public:
     void           DeselectAll();                         ///< deselects all rows
     iterator       Begin();          ///< returns an iterator to the first list row
     iterator       End();            ///< returns an iterator to the imaginary row one past the last one
+    reverse_iterator
+                   RBegin();         ///< returns an iterator to the last list row
+    reverse_iterator
+                   REnd();           ///< returns an iterator to the imaginary row one past the first one
     Row&           GetRow(int n);                         ///< returns a reference to the Row at row index \a n; not range-checked
 
     void           SetSelections(const std::set<int>& s); ///< sets the set of selected rows to \a s

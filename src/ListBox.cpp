@@ -475,6 +475,12 @@ ListBox::const_iterator ListBox::Begin() const
 ListBox::const_iterator ListBox::End() const
 { return m_rows.end(); }
 
+ListBox::const_reverse_iterator ListBox::RBegin() const
+{ return m_rows.rbegin(); }
+
+ListBox::const_reverse_iterator ListBox::REnd() const
+{ return m_rows.rend(); }
+
 const ListBox::Row& ListBox::GetRow(int n) const
 {
     return *m_rows.at(n);
@@ -1014,6 +1020,12 @@ ListBox::iterator ListBox::Begin()
 
 ListBox::iterator ListBox::End()
 { return m_rows.end(); }
+
+ListBox::reverse_iterator ListBox::RBegin()
+{ return m_rows.rbegin(); }
+
+ListBox::reverse_iterator ListBox::REnd()
+{ return m_rows.rend(); }
 
 ListBox::Row& ListBox::GetRow(int n)
 {

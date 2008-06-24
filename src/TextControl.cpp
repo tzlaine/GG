@@ -33,6 +33,8 @@
 using namespace GG;
 
 namespace {
+    const Pt INVALID_USABLE_SIZE(-1, -1);
+
     struct SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
     {
         SetFontAction(TextControl* text_control) : m_text_control(text_control) {}
@@ -75,6 +77,7 @@ TextControl::TextControl() :
     m_clip_text(false),
     m_set_min_size(false),
     m_fit_to_text(false),
+    m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
 {}
 
@@ -87,6 +90,7 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     m_set_min_size(false),
     m_font(font),
     m_fit_to_text(false),
+    m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
 {
     ValidateFormat();
@@ -102,6 +106,7 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
     m_set_min_size(false),
     m_font(font),
     m_fit_to_text(true),
+    m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
 {
     ValidateFormat();
@@ -110,9 +115,16 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
 
 Pt TextControl::MinUsableSize() const
 {
-    return m_font ?
-        m_font->TextExtent(WindowText(), m_format, ClientSize().x) :
-        Pt();
+    if (m_min_usable_size == INVALID_USABLE_SIZE ||
+        m_previous_client_width != ClientSize().x ||
+        m_previous_format != m_format) {
+        m_min_usable_size = m_font ?
+            m_font->TextExtent(WindowText(), m_format, ClientSize().x) :
+            Pt();
+        m_previous_client_width = ClientSize().x;
+        m_previous_format = m_format;
+    }
+    return m_min_usable_size;
 }
 
 Flags<TextFormat> TextControl::GetTextFormat() const
@@ -190,6 +202,7 @@ void TextControl::SetText(const std::string& str)
         }
     }
     m_dirty_load = false;
+    m_min_usable_size = INVALID_USABLE_SIZE;
 }
 
 void TextControl::SizeMove(const Pt& ul, const Pt& lr)

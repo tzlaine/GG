@@ -100,6 +100,16 @@ namespace {
 
     ListBox::Row* SafeDeref(const ListBox::iterator& it, const ListBox::iterator& end)
     { return it == end ? 0 : *it; }
+
+    struct ScopedSet
+    {
+        ScopedSet(ListBox::iterator*& var, ListBox::iterator* value) :
+            m_var(var = value)
+            {}
+        ~ScopedSet()
+            { m_var = 0; }
+        ListBox::iterator*& m_var;
+    };
 }
 
 ///////////////////////////////////////
@@ -399,7 +409,8 @@ ListBox::ListBox() :
     m_auto_scrolling_down(false),
     m_auto_scrolling_left(false),
     m_auto_scrolling_right(false),
-    m_auto_scroll_timer(250)
+    m_auto_scroll_timer(250),
+    m_iterator_being_erased(0)
 {
     m_auto_scroll_timer.Stop();
     m_auto_scroll_timer.Connect(this);
@@ -437,7 +448,8 @@ ListBox::ListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZER
     m_auto_scrolling_down(false),
     m_auto_scrolling_left(false),
     m_auto_scrolling_right(false),
-    m_auto_scroll_timer(250)
+    m_auto_scroll_timer(250),
+    m_iterator_being_erased(0)
 {
     Control::SetColor(color);
     ValidateStyle();
@@ -969,6 +981,9 @@ void ListBox::Clear()
 
     AdjustScrolls(false);
 
+    if (m_iterator_being_erased)
+        *m_iterator_being_erased = m_rows.end();
+
     if (signal)
         ClearedSignal();
 }
@@ -1490,6 +1505,11 @@ ListBox::iterator ListBox::Insert(Row* row, iterator it, bool dropped)
 ListBox::Row* ListBox::Erase(iterator it, bool removing_duplicate)
 {
     if (it != m_rows.end()) {
+        if (m_iterator_being_erased) {
+            *m_iterator_being_erased = m_rows.end();
+            return 0;
+        }
+
         Row* row = *it;
         int row_height = row->Height();
         if (!removing_duplicate) {
@@ -1517,11 +1537,17 @@ ListBox::Row* ListBox::Erase(iterator it, bool removing_duplicate)
             check_first_row_and_caret_for_end = true;
         }
 
+        // Tracking this iterator is necessary because the signal may indirectly
+        // cause the iterator to be invalidated.
+        ScopedSet scoped_set(m_iterator_being_erased, &it);
+
         if (!removing_duplicate && !m_suppress_erase_signal)
             ErasedSignal(it);
 
-        m_selections.erase(it);
-        m_rows.erase(it);
+        if (it != m_rows.end()) {
+            m_selections.erase(it);
+            m_rows.erase(it);
+        }
 
         if (check_first_row_and_caret_for_end && m_first_row_shown == m_rows.end() && !m_rows.empty())
             --m_first_row_shown;
@@ -1576,6 +1602,9 @@ void ListBox::Resort()
                      RowSorter(m_sort_cmp, m_sort_col, m_style & LIST_SORTDESCENDING));
     m_rows.clear();
     m_rows.insert(m_rows.begin(), rows_vec.begin(), rows_vec.end());
+
+    if (m_iterator_being_erased)
+        *m_iterator_being_erased = m_rows.end();
 
     int y = 0;
     for (iterator it = m_rows.begin(); it != m_rows.end(); ++it) {

@@ -575,6 +575,8 @@ private:
     bool            m_auto_scrolling_right;
     Timer           m_auto_scroll_timer;
 
+    iterator*       m_iterator_being_erased;
+
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
 
     friend class boost::serialization::access;

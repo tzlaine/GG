@@ -576,12 +576,12 @@ void FileDlg::CancelClicked()
     m_result.clear();
 }
 
-void FileDlg::FileSetChanged(const std::set<int>& files)
+void FileDlg::FileSetChanged(const ListBox::SelectionSet& files)
 {
     std::string all_files;
     bool dir_selected = false;
-    for (std::set<int>::const_iterator it = files.begin(); it != files.end(); ++it) {
-        std::string filename = m_files_list->GetRow(*it)[0]->WindowText();
+    for (ListBox::SelectionSet::const_iterator it = files.begin(); it != files.end(); ++it) {
+        std::string filename = (***it)[0]->WindowText();
         if (filename[0] != '[') {
             if (!all_files.empty())
                 all_files += " ";
@@ -602,11 +602,11 @@ void FileDlg::FileSetChanged(const std::set<int>& files)
         m_ok_button->SetText(m_open_str);
 }
 
-void FileDlg::FileDoubleClicked(int n, ListBox::Row* row)
+void FileDlg::FileDoubleClicked(DropDownList::iterator it)
 {
-    std::string filename = (*row)[0]->WindowText();
+    std::string filename = (**it)[0]->WindowText();
     m_files_list->DeselectAll();
-    m_files_list->SelectRow(n);
+    m_files_list->SelectRow(it);
     OkHandler(true);
 }
 
@@ -616,7 +616,7 @@ void FileDlg::FilesEditChanged(const std::string& str)
         m_ok_button->SetText(m_save_str);
 }
 
-void FileDlg::FilterChanged(int idx)
+void FileDlg::FilterChanged(DropDownList::iterator it)
 {
     UpdateList();
 }
@@ -641,7 +641,7 @@ void FileDlg::PopulateFilters()
             row->push_back(m_file_filters[i].first, m_font, m_text_color);
             m_filter_list->Insert(row);
         }
-        m_filter_list->Select(0);
+        m_filter_list->Select(m_filter_list->begin());
     }
 }
 
@@ -656,10 +656,10 @@ void FileDlg::UpdateList()
     // define file filters based on the filter strings in the filter drop list
     std::vector<rule<> > file_filters;
 
-    int idx = m_filter_list->CurrentItemIndex();
-    if (idx != -1) {
+    DropDownList::iterator it = m_filter_list->CurrentItem();
+    if (it != m_filter_list->end()) {
         std::vector<std::string> filter_specs; // the filter specifications (e.g. "*.png")
-        parse(m_file_filters[idx].second.c_str(), *(!ch_p(',') >> (+(anychar_p - ','))[append(filter_specs)]), space_p);
+        parse(m_file_filters[std::distance(m_filter_list->begin(), it)].second.c_str(), *(!ch_p(',') >> (+(anychar_p - ','))[append(filter_specs)]), space_p);
         file_filters.resize(filter_specs.size());
         for (unsigned int i = 0; i < filter_specs.size(); ++i) {
             boost::shared_ptr<std::vector<std::string> > non_wildcards(new std::vector<std::string>); // the parts of the filter spec that are not wildcards
@@ -770,10 +770,10 @@ void FileDlg::UpdateDirectoryText()
 void FileDlg::OpenDirectory()
 {
     // see if there is a directory selected; if so open the directory.  if more than one is selected, take the first one
-    const std::set<int>& sels = m_files_list->Selections();
+    const ListBox::SelectionSet& sels = m_files_list->Selections();
     std::string directory;
     if (!sels.empty()) {
-        directory = m_files_list->GetRow(*sels.begin())[0]->WindowText();
+        directory = (***sels.begin())[0]->WindowText();
         if (directory.size() < 2 || directory[0] != '[')
             return;
         directory = directory.substr(1, directory.size() - 2); // strip off '[' and ']'

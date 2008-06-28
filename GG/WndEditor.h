@@ -269,7 +269,7 @@ struct RangedAttributeRow<T, true> : AttributeRowBase
     virtual void Update();
     mutable boost::signal<void (const T&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
-    void SelectionChanged(int selection);
+    void SelectionChanged(DropDownList::iterator selection);
     T& m_value;
     T m_min;
     DropDownList* m_enum_drop_list;
@@ -337,7 +337,7 @@ struct FlagGroupAttributeRow : AttributeRowBase
     virtual void Update();
     mutable boost::signal<void (const Flags<FlagType>&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
-    void SelectionChanged(int selection);
+    void SelectionChanged(DropDownList::iterator selection);
     Flags<FlagType>& m_flags;
     FlagType m_value;
     std::vector<FlagType> m_group_values;
@@ -587,14 +587,14 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
         m_enum_drop_list->Insert(row);
     }
     push_back(m_enum_drop_list);
-    m_enum_drop_list->Select(m_value - m_min);
+    m_enum_drop_list->Select(boost::next(m_enum_drop_list->begin(), m_value - m_min));
     m_drop_list_connection = Connect(m_enum_drop_list->SelChangedSignal, &RangedAttributeRow::SelectionChanged, this);
 }
 
 template <class T>
-void RangedAttributeRow<T, true>::SelectionChanged(int selection)
+void RangedAttributeRow<T, true>::SelectionChanged(DropDownList::iterator selection)
 {
-    m_value = T(m_min + selection);
+    m_value = T(m_min + std::distance(m_enum_drop_list->begin(), selection));
     ValueChangedSignal(m_value);
     ChangedSignal();
 }
@@ -603,7 +603,7 @@ template <class T>
 void RangedAttributeRow<T, true>::Update()
 {
     m_drop_list_connection.block();
-    m_enum_drop_list->Select(m_value - m_min);
+    m_enum_drop_list->Select(boost::next(m_enum_drop_list->begin(), m_value - m_min));
     m_drop_list_connection.unblock();
 }
 
@@ -675,7 +675,8 @@ FlagGroupAttributeRow<FlagType>::FlagGroupAttributeRow(const std::string& name, 
     }
     push_back(m_flag_drop_list);
     unsigned int index = 0;
-    for (; index < m_group_values.size(); ++index) {
+    DropDownList::iterator it = m_flag_drop_list->begin();
+    for (; index < m_group_values.size(); ++index, ++it) {
         if (m_group_values[index] == value)
             break;
     }
@@ -683,15 +684,15 @@ FlagGroupAttributeRow<FlagType>::FlagGroupAttributeRow(const std::string& name, 
         throw std::runtime_error("FlagGroupAttributeRow::FlagGroupAttributeRow() : Attempted to initialize a "
                                  "flag group's drop-down list with a value that is not in the given set of group values.");
     }
-    m_flag_drop_list->Select(index);
+    m_flag_drop_list->Select(it);
     m_drop_list_connection = Connect(m_flag_drop_list->SelChangedSignal, &FlagGroupAttributeRow::SelectionChanged, this);
 }
 
 template <class FlagType>
-void FlagGroupAttributeRow<FlagType>::SelectionChanged(int selection)
+void FlagGroupAttributeRow<FlagType>::SelectionChanged(DropDownList::iterator selection)
 {
     m_flags &= ~m_value;
-    m_value = m_group_values[selection];
+    m_value = m_group_values[std::distance(m_flag_drop_list->begin(), selection)];
     m_flags |= m_value;
     ValueChangedSignal(m_flags);
     ChangedSignal();
@@ -702,11 +703,12 @@ void FlagGroupAttributeRow<FlagType>::Update()
 {
     m_drop_list_connection.block();
     unsigned int index = 0;
-    for (; index < m_group_values.size(); ++index) {
+    DropDownList::iterator it = m_flag_drop_list->begin();
+    for (; index < m_group_values.size(); ++index, ++it) {
         if (m_group_values[index] == m_value)
             break;
     }
-    m_flag_drop_list->Select(index);
+    m_flag_drop_list->Select(it);
     m_drop_list_connection.unblock();
 }
 

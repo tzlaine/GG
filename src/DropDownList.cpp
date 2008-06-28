@@ -52,9 +52,7 @@ namespace {
             AttachChild(m_lb_wnd);
         }
         virtual void Render()
-        {
-            m_lb_wnd->MoveTo(m_lb_ul);
-        }
+        { m_lb_wnd->MoveTo(m_lb_ul); }
         ~ModalListPicker()
         {
             m_lb_wnd->MoveTo(m_old_lb_ul);
@@ -65,17 +63,15 @@ namespace {
         virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys) {m_done = true;}
 
     private:
-        void LBSelChangedSlot(const std::set<int>& rows)
+        void LBSelChangedSlot(const ListBox::SelectionSet& rows)
         {
             if (!rows.empty()) {
                 m_drop_wnd->Select(*rows.begin());
                 m_done = true;
             }
         }
-        void LBLeftClickSlot(int, ListBox::Row*, const Pt&)
-        {
-            m_done = true;
-        }
+        void LBLeftClickSlot(ListBox::iterator it, const Pt&)
+        { m_done = true; }
 
         DropDownList*  m_drop_wnd;
         ListBox*       m_lb_wnd;
@@ -89,117 +85,93 @@ namespace {
 ////////////////////////////////////////////////
 DropDownList::DropDownList() :
     Control(),
-    m_current_item_idx(-1),
+    m_current_item(),
     m_LB(0)
 {}
 
 DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
-    m_current_item_idx(-1),
+    m_current_item(),
     m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))
 {
     SetStyle(LIST_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
     Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + h + 2 * m_LB->CellMargin() + 2 * BORDER_THICK));
     m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
+    m_current_item = m_LB->end();
 }
 
 DropDownList::~DropDownList()
-{
-    delete m_LB;
-}
+{ delete m_LB; }
 
-const DropDownList::Row* DropDownList::CurrentItem() const
-{
-    return m_current_item_idx == -1 ? 0 : &m_LB->GetRow(m_current_item_idx);
-}
+DropDownList::iterator DropDownList::CurrentItem() const
+{ return m_current_item; }
 
-int DropDownList::CurrentItemIndex() const
-{
-    return m_current_item_idx;
-}
+std::size_t DropDownList::CurrentItemIndex() const
+{ return IteratorToIndex(m_current_item); }
+
+std::size_t DropDownList::IteratorToIndex(iterator it) const
+{ return it == m_LB->end() ? -1 : std::distance(m_LB->begin(), it); }
+
+DropDownList::iterator DropDownList::IndexToIterator(std::size_t n) const
+{ return n < m_LB->NumRows() ? boost::next(m_LB->begin(), n) : m_LB->end(); }
 
 bool DropDownList::Empty() const
-{
-    return m_LB->Empty();
-}
+{ return m_LB->Empty(); }
 
-DropDownList::const_iterator DropDownList::Begin() const
-{ return m_LB->Begin(); }
+DropDownList::const_iterator DropDownList::begin() const
+{ return m_LB->begin(); }
 
-DropDownList::const_iterator DropDownList::End() const
-{ return m_LB->End(); }
+DropDownList::const_iterator DropDownList::end() const
+{ return m_LB->end(); }
 
-DropDownList::const_reverse_iterator DropDownList::RBegin() const
-{ return m_LB->RBegin(); }
+DropDownList::const_reverse_iterator DropDownList::rbegin() const
+{ return m_LB->rbegin(); }
 
-DropDownList::const_reverse_iterator DropDownList::REnd() const
-{ return m_LB->REnd(); }
+DropDownList::const_reverse_iterator DropDownList::rend() const
+{ return m_LB->rend(); }
 
-const DropDownList::Row& DropDownList::GetRow(int n) const
-{
-    return m_LB->GetRow(n);
-}
+const DropDownList::Row& DropDownList::GetRow(std::size_t n) const
+{ return m_LB->GetRow(n); }
 
-bool DropDownList::Selected(int n) const
-{
-    return m_LB->Selected(n);
-}
+bool DropDownList::Selected(iterator it) const
+{ return m_LB->Selected(it); }
+
+bool DropDownList::Selected(std::size_t n) const
+{ return n < m_LB->NumRows() ? m_LB->Selected(boost::next(m_LB->begin(), n)) : false; }
 
 Clr DropDownList::InteriorColor() const
-{
-    return m_LB->InteriorColor();
-}
+{ return m_LB->InteriorColor(); }
 
 int DropDownList::DropHeight() const
-{
-    return m_LB->Height();
-}
+{ return m_LB->Height(); }
 
 Flags<ListBoxStyle> DropDownList::Style() const
-{
-    return m_LB->Style();
-}
+{ return m_LB->Style(); }
 
-int DropDownList::NumRows() const
-{
-    return m_LB->NumRows();
-}
+std::size_t DropDownList::NumRows() const
+{ return m_LB->NumRows(); }
 
-int DropDownList::NumCols() const
-{
-    return m_LB->NumCols();
-}
+std::size_t DropDownList::NumCols() const
+{ return m_LB->NumCols(); }
 
-int DropDownList::SortCol() const
-{
-    return m_LB->SortCol();
-}
+std::size_t DropDownList::SortCol() const
+{ return m_LB->SortCol(); }
 
-int DropDownList::ColWidth(int n) const
-{
-    return m_LB->ColWidth(n);
-}
+int DropDownList::ColWidth(std::size_t n) const
+{ return m_LB->ColWidth(n); }
 
-Alignment DropDownList::ColAlignment(int n) const
-{
-    return m_LB->ColAlignment(n);
-}
+Alignment DropDownList::ColAlignment(std::size_t n) const
+{ return m_LB->ColAlignment(n); }
 
-Alignment DropDownList::RowAlignment(int n) const
-{
-    return m_LB->RowAlignment(n);
-}
+Alignment DropDownList::RowAlignment(iterator it) const
+{ return m_LB->RowAlignment(it); }
 
 Pt DropDownList::ClientUpperLeft() const
-{
-    return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK);
-}
+{ return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK); }
 
 Pt DropDownList::ClientLowerRight() const
-{
-    return LowerRight() - Pt(BORDER_THICK, BORDER_THICK);
-}
+{ return LowerRight() - Pt(BORDER_THICK, BORDER_THICK); }
 
 void DropDownList::Render()
 {
@@ -210,9 +182,9 @@ void DropDownList::Render()
 
     BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
 
-    // draw ListBox::Row of currently displayed item, if any
-    if (m_current_item_idx != -1) {
-        Row* current_item = &m_LB->GetRow(m_current_item_idx);
+    // Draw the ListBox::Row of currently displayed item, if any.
+    if (m_current_item != m_LB->end()) {
+        Row* current_item = *m_current_item;
         Pt offset = ClientUpperLeft() - current_item->UpperLeft();
         bool visible = current_item->Visible();
         current_item->OffsetMove(offset);
@@ -231,7 +203,7 @@ void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         ModalListPicker picker(this, m_LB);
-        const std::set<int>& LB_sels = m_LB->Selections();
+        const ListBox::SelectionSet& LB_sels = m_LB->Selections();
         if (!LB_sels.empty()) {
             if (m_LB->m_vscroll)
                 m_LB->m_vscroll->ScrollTo(0);
@@ -246,28 +218,42 @@ void DropDownList::KeyPress(Key key, Flags<ModKey> mod_keys)
     if (!Disabled()) {
         switch (key) {
         case GGK_UP: // arrow-up (not numpad arrow)
-            if (1 <= m_current_item_idx)
-                Select(std::max(0, m_current_item_idx - 1));
+            if (m_current_item != m_LB->end() && m_current_item != m_LB->begin())
+                Select(boost::prior(m_current_item));
             break;
         case GGK_DOWN: // arrow-down (not numpad arrow)
-            if (m_current_item_idx < m_LB->NumRows())
-                Select(std::min(m_current_item_idx + 1, m_LB->NumRows() - 1));
+            if (m_current_item != m_LB->end() && m_current_item != --m_LB->end())
+                Select(boost::next(m_current_item));
             break;
         case GGK_PAGEUP: // page up key (not numpad key)
-            if (m_LB->NumRows())
-                Select(std::max(0, m_current_item_idx - 10));
+            if (m_LB->NumRows() && m_current_item != m_LB->end()) {
+                std::size_t i = 10;
+                iterator it = m_current_item;
+                while (i && it != m_LB->begin()) {
+                    --it;
+                    --i;
+                }
+                Select(it);
+            }
             break;
         case GGK_PAGEDOWN: // page down key (not numpad key)
-            if (m_LB->NumRows())
-                Select(std::min(m_current_item_idx + 10, m_LB->NumRows() - 1));
+            if (m_LB->NumRows()) {
+                std::size_t i = 10;
+                iterator it = m_current_item;
+                while (i && it != --m_LB->end()) {
+                    ++it;
+                    ++i;
+                }
+                Select(it);
+            }
             break;
         case GGK_HOME: // home key (not numpad)
             if (m_LB->NumRows())
-                Select(0);
+                Select(m_LB->begin());
             break;
         case GGK_END: // end key (not numpad)
-            if (m_LB->NumRows())
-                Select(m_LB->NumRows() - 1);
+            if (m_LB->NumRows() && !m_LB->Empty())
+                Select(--m_LB->end());
             break;
         default:
             Control::KeyPress(key, mod_keys);
@@ -285,116 +271,97 @@ void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
 }
 
 void DropDownList::SetColor(Clr c)
-{
-    m_LB->SetColor(c);
-}
+{ m_LB->SetColor(c); }
 
-int DropDownList::Insert(Row* row, int at/* = -1*/)
-{
-    return m_LB->Insert(row, at);
-}
+DropDownList::iterator DropDownList::Insert(Row* row, iterator it)
+{ return m_LB->Insert(row, it); }
 
-DropDownList::Row* DropDownList::Erase(int idx)
-{
-    if (idx == m_current_item_idx)
-        m_current_item_idx = -1;
-    else if (idx < m_current_item_idx)
-        --m_current_item_idx;
+DropDownList::iterator DropDownList::Insert(Row* row)
+{ return m_LB->Insert(row); }
 
-    return m_LB->Erase(idx);
+DropDownList::Row* DropDownList::Erase(iterator it)
+{
+    if (it == m_current_item)
+        m_current_item = m_LB->end();
+    return m_LB->Erase(it);
 }
 
 void DropDownList::Clear()
 {
-    m_current_item_idx = -1;
+    m_current_item = m_LB->end();
     m_LB->Clear();
 }
 
-DropDownList::iterator DropDownList::Begin()
-{ return m_LB->Begin(); }
+DropDownList::iterator DropDownList::begin()
+{ return m_LB->begin(); }
 
-DropDownList::iterator DropDownList::End()
-{ return m_LB->End(); }
+DropDownList::iterator DropDownList::end()
+{ return m_LB->end(); }
 
-DropDownList::reverse_iterator DropDownList::RBegin()
-{ return m_LB->RBegin(); }
+DropDownList::reverse_iterator DropDownList::rbegin()
+{ return m_LB->rbegin(); }
 
-DropDownList::reverse_iterator DropDownList::REnd()
-{ return m_LB->REnd(); }
+DropDownList::reverse_iterator DropDownList::rend()
+{ return m_LB->rend(); }
 
-DropDownList::Row& DropDownList::GetRow(int n)
+DropDownList::Row& DropDownList::GetRow(std::size_t n)
+{ return m_LB->GetRow(n); }
+
+void DropDownList::Select(iterator it)
 {
-    return m_LB->GetRow(n);
-}
-
-void DropDownList::Select(int row)
-{
-    int old_m_current_item_idx = m_current_item_idx;
-    if (row <= -1 || m_LB->NumRows() <= row) {
-        m_current_item_idx = -1;
+    iterator old_m_current_item = m_current_item;
+    if (it == m_LB->end()) {
+        m_current_item = m_LB->end();
         m_LB->DeselectAll();
     } else {
-        m_current_item_idx = row;
-        m_LB->SelectRow(m_current_item_idx);
+        m_current_item = it;
+        m_LB->SelectRow(m_current_item);
     }
 
-    if (m_current_item_idx != old_m_current_item_idx)
-        SelChangedSignal(m_current_item_idx);
+    if (m_current_item != old_m_current_item)
+        SelChangedSignal(m_current_item);
 }
+
+void DropDownList::Select(std::size_t n)
+{ Select(n < m_LB->NumRows() ? boost::next(m_LB->begin(), n) : m_LB->end()); }
 
 void DropDownList::SetInteriorColor(Clr c)
-{
-    m_LB->SetInteriorColor(c);
-}
+{ m_LB->SetInteriorColor(c); }
 
 void DropDownList::SetDropHeight(int h)
-{
-    m_LB->Resize(Pt(Width(), h));
-}
+{ m_LB->Resize(Pt(Width(), h)); }
 
 void DropDownList::SetStyle(Flags<ListBoxStyle> s)
 {
     s &= ~(LIST_NOSEL | LIST_QUICKSEL | LIST_USERDELETE | LIST_BROWSEUPDATES);
     s |= LIST_SINGLESEL;
     m_LB->SetStyle(s);
-    m_current_item_idx = -1;
+    m_current_item = m_LB->end();
 }
 
-void DropDownList::SetNumCols(int n)
-{
-    m_LB->SetNumCols(n);
-}
+void DropDownList::SetNumCols(std::size_t n)
+{ m_LB->SetNumCols(n); }
 
-void DropDownList::SetSortCol(int n)
+void DropDownList::SetSortCol(std::size_t n)
 {
     m_LB->SetSortCol(n);
-    m_current_item_idx = -1;
+    m_current_item = m_LB->end();
 }
 
-void DropDownList::SetColWidth(int n, int w)
-{
-    m_LB->SetColWidth(n, w);
-}
+void DropDownList::SetColWidth(std::size_t n, int w)
+{ m_LB->SetColWidth(n, w); }
 
 void DropDownList::LockColWidths()
-{
-    m_LB->LockColWidths();
-}
+{ m_LB->LockColWidths(); }
 
 void DropDownList::UnLockColWidths()
-{
-    m_LB->UnLockColWidths();
-}
+{ m_LB->UnLockColWidths(); }
 
-void DropDownList::SetColAlignment(int n, Alignment align) 
-{
-    m_LB->SetColAlignment(n, align);
-}
+void DropDownList::SetColAlignment(std::size_t n, Alignment align) 
+{ m_LB->SetColAlignment(n, align); }
 
-void DropDownList::SetRowAlignment(int n, Alignment align) 
-{
-    m_LB->SetRowAlignment(n, align);
-}
+void DropDownList::SetRowAlignment(iterator it, Alignment align) 
+{ m_LB->SetRowAlignment(it, align); }
 
 void DropDownList::DefineAttributes(WndEditor* editor)
 {
@@ -402,10 +369,9 @@ void DropDownList::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("DropDownList");
-    editor->Attribute("Current Item", m_current_item_idx);
+    // TODO: Handle the representation of the current item.
+    //editor->Attribute("Current Item", m_current_item);
 }
 
 ListBox* DropDownList::LB()
-{
-    return m_LB;
-}
+{ return m_LB; }

@@ -29,7 +29,7 @@
 #ifndef _GG_FileDlg_h_
 #define _GG_FileDlg_h_
 
-#include <GG/ListBox.h>
+#include <GG/DropDownList.h>
 
 #include <boost/filesystem/path.hpp>
 
@@ -38,7 +38,6 @@ namespace GG {
 
 class TextControl;
 class Edit;
-class DropDownList;
 class Button;
 class Font;
 
@@ -158,10 +157,10 @@ private:
     void OkClicked();
     void OkHandler(bool double_click);
     void CancelClicked();
-    void FileSetChanged(const std::set<int>& files);
-    void FileDoubleClicked(int n, ListBox::Row* row);
+    void FileSetChanged(const ListBox::SelectionSet& files);
+    void FileDoubleClicked(DropDownList::iterator it);
     void FilesEditChanged(const std::string& str);
-    void FilterChanged(int idx);
+    void FilterChanged(DropDownList::iterator it);
     void SetWorkingDirectory(const boost::filesystem::path& p);
     void PopulateFilters();
     void UpdateList();

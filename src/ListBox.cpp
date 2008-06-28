@@ -928,6 +928,8 @@ void ListBox::TimerFiring(int ticks, Timer* timer)
 void ListBox::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
+    if (!m_header_row->empty())
+        NormalizeRow(m_header_row);
     AdjustScrolls(true);
 }
 

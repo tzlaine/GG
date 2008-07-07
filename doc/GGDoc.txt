@@ -168,7 +168,7 @@
     GG relies on a few other open-source libraries:
     - DevIL 1.6.1 - http://openil.sourceforge.net
     - FreeType 2.1.2 - http://www.freetype.org
-    - boost 1.34 - http://www.boost.org
+    - boost 1.35 - http://www.boost.org
 
     Optional libraries for input drivers:
     - SDL 1.2.7 - http://www.libsdl.org

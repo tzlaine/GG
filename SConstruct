@@ -284,6 +284,7 @@ if not env.GetOption('clean'):
 
         boost_libs = [
             ('boost_signals', 'boost/signals.hpp', 'boost::' + signals_namespace + '::connection();'),
+            ('boost_system', 'boost/system/error_code.hpp', 'boost::system::get_system_category();'),
             ('boost_filesystem', 'boost/filesystem/operations.hpp', 'boost::filesystem::initial_path();'),
             ('boost_thread', 'boost/thread/thread.hpp', 'boost::thread::yield();')
             ]

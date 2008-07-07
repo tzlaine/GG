@@ -42,10 +42,10 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/cerrno.hpp>
 #include <boost/format.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/dynamic.hpp>
+#include <boost/system/system_error.hpp>
 
 
 using namespace GG;
@@ -796,7 +796,7 @@ void FileDlg::OpenDirectory()
                 try {
                     SetWorkingDirectory(fs::path(directory + "\\"));
                 } catch (const fs::filesystem_error& e) {
-                    if (e.system_error() == EIO) {
+                    if (e.code() == boost::system::posix_error::io_error) {
                         m_in_win32_drive_selection = true;
                         m_files_edit->Clear();
                         m_curr_dir_text->SetText("");

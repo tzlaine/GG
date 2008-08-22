@@ -111,14 +111,10 @@ namespace {
     };
 
     bool WindowsRoot(const std::string& root_name)
-    {
-        return root_name.size() == 2 && std::isalpha(root_name[0]) && root_name[1] == ':';
-    }
+    { return root_name.size() == 2 && std::isalpha(root_name[0]) && root_name[1] == ':'; }
 
     bool Win32Paths()
-    {
-        return WindowsRoot(boost::filesystem::initial_path().root_name());
-    }
+    { return WindowsRoot(boost::filesystem::initial_path().root_name()); }
 
     const int H_SPACING = 10;
     const int V_SPACING = 10;
@@ -181,84 +177,52 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
 }
 
 std::set<std::string> FileDlg::Result() const
-{
-    return m_result;
-}
+{ return m_result; }
 
 bool FileDlg::SelectDirectories() const
-{
-    return m_select_directories;
-}
+{ return m_select_directories; }
 
 bool FileDlg::AppendMissingSaveExtension() const
-{
-    return m_append_missing_save_extension;
-}
+{ return m_append_missing_save_extension; }
 
 const std::string& FileDlg::FilesString() const
-{
-    return m_files_label->WindowText();
-}
+{ return m_files_label->WindowText(); }
 
 const std::string& FileDlg::FileTypesString() const
-{
-    return m_file_types_label->WindowText();
-}
+{ return m_file_types_label->WindowText(); }
 
 const std::string& FileDlg::SaveString() const
-{
-    return m_save_str;
-}
+{ return m_save_str; }
 
 const std::string& FileDlg::OpenString() const
-{
-    return m_open_str;
-}
+{ return m_open_str; }
 
 const std::string& FileDlg::CancelString() const
-{
-    return m_cancel_str;
-}
+{ return m_cancel_str; }
 
 const std::string& FileDlg::MalformedFilenameString() const
-{
-    return m_malformed_filename_str;
-}
+{ return m_malformed_filename_str; }
 
 const std::string& FileDlg::OverwritePromptString() const
-{
-    return m_overwrite_prompt_str;
-}
+{ return m_overwrite_prompt_str; }
 
 const std::string& FileDlg::InvalidFilenameString() const
-{
-    return m_invalid_filename_str;
-}
+{ return m_invalid_filename_str; }
 
 const std::string& FileDlg::FilenameIsADirectoryString() const
-{
-    return m_filename_is_a_directory_str;
-}
+{ return m_filename_is_a_directory_str; }
 
 const std::string& FileDlg::FileDoesNotExistString() const
-{
-    return m_file_does_not_exist_str;
-}
+{ return m_file_does_not_exist_str; }
 
 const std::string& FileDlg::DeviceIsNotReadyString() const
-{
-    return m_device_is_not_ready_str;
-}
+{ return m_device_is_not_ready_str; }
 
 const std::string& FileDlg::ThreeButtonDlgOKString() const
-{
-    return m_three_button_dlg_ok_str;
-}
+{ return m_three_button_dlg_ok_str; }
 
 const std::string& FileDlg::ThreeButtonDlgCancelString() const
-{
-    return m_three_button_dlg_cancel_str;
-}
+{ return m_three_button_dlg_cancel_str; }
 
 void FileDlg::Render()
 {
@@ -291,9 +255,7 @@ void FileDlg::SelectDirectories(bool directories)
 }
 
 void FileDlg::AppendMissingSaveExtension(bool append)
-{
-    m_append_missing_save_extension = append;
-}
+{ m_append_missing_save_extension = append; }
 
 void FileDlg::SetFileFilters(const std::vector<std::pair<std::string, std::string> >& filters)
 {
@@ -337,49 +299,31 @@ void FileDlg::SetCancelString(const std::string& str)
 }
 
 void FileDlg::SetMalformedFilenameString(const std::string& str)
-{
-    m_malformed_filename_str = str;
-}
+{ m_malformed_filename_str = str; }
 
 void FileDlg::SetOverwritePromptString(const std::string& str)
-{
-    m_overwrite_prompt_str = str;
-}
+{ m_overwrite_prompt_str = str; }
 
 void FileDlg::SetInvalidFilenameString(const std::string& str)
-{
-    m_invalid_filename_str = str;
-}
+{ m_invalid_filename_str = str; }
 
 void FileDlg::SetFilenameIsADirectoryString(const std::string& str)
-{
-    m_filename_is_a_directory_str = str;
-}
+{ m_filename_is_a_directory_str = str; }
 
 void FileDlg::SetFileDoesNotExistString(const std::string& str)
-{
-    m_file_does_not_exist_str = str;
-}
+{ m_file_does_not_exist_str = str; }
 
 void FileDlg::SetDeviceIsNotReadyString(const std::string& str)
-{
-    m_device_is_not_ready_str = str;
-}
+{ m_device_is_not_ready_str = str; }
 
 void FileDlg::SetThreeButtonDlgOKString(const std::string& str)
-{
-    m_three_button_dlg_ok_str = str;
-}
+{ m_three_button_dlg_ok_str = str; }
 
 void FileDlg::SetThreeButtonDlgCancelString(const std::string& str)
-{
-    m_three_button_dlg_cancel_str = str;
-}
+{ m_three_button_dlg_cancel_str = str; }
 
 const fs::path& FileDlg::WorkingDirectory()
-{
-    return s_working_dir;
-}
+{ return s_working_dir; }
 
 void FileDlg::CreateChildren(const std::string& filename, bool multi)
 {
@@ -477,9 +421,7 @@ void FileDlg::ConnectSignals()
 }
 
 void FileDlg::OkClicked()
-{
-    OkHandler(false);
-}
+{ OkHandler(false); }
 
 void FileDlg::OkHandler(bool double_click)
 {
@@ -617,9 +559,7 @@ void FileDlg::FilesEditChanged(const std::string& str)
 }
 
 void FileDlg::FilterChanged(DropDownList::iterator it)
-{
-    UpdateList();
-}
+{ UpdateList(); }
 
 void FileDlg::SetWorkingDirectory(const fs::path& p)
 {
@@ -702,17 +642,23 @@ void FileDlg::UpdateList()
             CancelClicked();
             return;
         }
+        std::multimap<std::string, ListBox::Row*> sorted_rows;
         for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
             try {
                 if (fs::exists(*it) && fs::is_directory(*it) && it->leaf()[0] != '.') {
                     ListBox::Row* row = new ListBox::Row();
-                    row->push_back("[" + it->leaf() + "]", m_font, m_text_color);
-                    m_files_list->Insert(row);
+                    std::string row_text = "[" + it->leaf() + "]";
+                    row->push_back(row_text, m_font, m_text_color);
+                    sorted_rows.insert(std::make_pair(row_text, row));
                 }
             } catch (const fs::filesystem_error& e) {
             }
         }
+        for (std::multimap<std::string, ListBox::Row*>::const_iterator it = sorted_rows.begin(); it != sorted_rows.end(); ++it) {
+            m_files_list->Insert(it->second);
+        }
         if (!m_select_directories) {
+            sorted_rows.clear();
             for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
                 try {
                     if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
@@ -724,11 +670,14 @@ void FileDlg::UpdateList()
                         if (meets_filters) {
                             ListBox::Row* row = new ListBox::Row();
                             row->push_back(it->leaf(), m_font, m_text_color);
-                            m_files_list->Insert(row);
+                            sorted_rows.insert(std::make_pair(it->leaf(), row));
                         }
                     }
                 } catch (const fs::filesystem_error& e) {
                 }
+            }
+            for (std::multimap<std::string, ListBox::Row*>::const_iterator it = sorted_rows.begin(); it != sorted_rows.end(); ++it) {
+                m_files_list->Insert(it->second);
             }
         }
     } else {

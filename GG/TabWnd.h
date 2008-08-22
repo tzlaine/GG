@@ -151,6 +151,9 @@ public:
         currently selected.  NO_TAB is returned if there is no tab currently
         selected. */
     int CurrentTabIndex() const;
+
+    /** Returns the color used to render the text in this TabBar. */
+    Clr TextColor() const;
     //@}
 
     /** \name Mutators */ ///@{
@@ -196,6 +199,10 @@ protected:
 
     /** \name Mutators */ ///@{
     virtual bool EventFilter(Wnd* w, const WndEvent& event);
+
+    /** Brings the currently-selected tab button to the top within the tab
+        button group. */
+    void RaiseCurrentTabButton();
     //@}
 
 private:

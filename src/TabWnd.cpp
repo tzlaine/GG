@@ -214,6 +214,9 @@ Pt TabBar::MinUsableSize() const
 int TabBar::CurrentTabIndex() const
 { return m_tabs->CheckedButton(); }
 
+Clr TabBar::TextColor() const
+{ return m_text_color; }
+
 void TabBar::SizeMove(const Pt& ul, const Pt& lr)
 {
     m_tabs->Resize(Pt(m_tabs->Size().x, lr.y -  ul.y));
@@ -287,7 +290,7 @@ const Button* TabBar::RightButton() const
 { return m_right_button; }
 
 void TabBar::DistinguishCurrentTab(const std::vector<StateButton*>& tab_buttons)
-{ m_tabs->RaiseCheckedButton(); }
+{ RaiseCurrentTabButton(); }
 
 void TabBar::TabChanged(int index)
 {
@@ -345,3 +348,7 @@ bool TabBar::EventFilter(Wnd* w, const WndEvent& event)
         MoveChildUp(m_left_right_button_layout);
     return false;
 }
+
+void TabBar::RaiseCurrentTabButton()
+{ m_tabs->RaiseCheckedButton(); }
+

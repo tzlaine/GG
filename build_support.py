@@ -132,6 +132,21 @@ def CreateGiGiDriverPCFile(target, source, env):
         pc_in.close()
     return None
 
+def CreateConfigHeader(target, source, env):
+    values = {
+        'use_devil' : int(env['use_devil']),
+        'have_jpeg' : env['have_jpeg'],
+        'have_png' : env['have_png'],
+        'have_tiff' : env['have_tiff']
+    }
+    for tgt, src in zip(target, source):
+        config = open(str(tgt), 'w')
+        config_in = open(str(src), 'r')
+        config.write(config_in.read() % values)
+        config.close()
+        config_in.close()
+    return None
+
 def AppendPackagePaths(package, env):
     root = OptionValue('with_' + package, env)
     inc = OptionValue('with_%s_include' % package, env)

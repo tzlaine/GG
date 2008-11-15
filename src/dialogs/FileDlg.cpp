@@ -645,9 +645,9 @@ void FileDlg::UpdateList()
         std::multimap<std::string, ListBox::Row*> sorted_rows;
         for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
             try {
-                if (fs::exists(*it) && fs::is_directory(*it) && it->leaf()[0] != '.') {
+                if (fs::exists(*it) && fs::is_directory(*it) && it->filename()[0] != '.') {
                     ListBox::Row* row = new ListBox::Row();
-                    std::string row_text = "[" + it->leaf() + "]";
+                    std::string row_text = "[" + it->filename() + "]";
                     row->push_back(row_text, m_font, m_text_color);
                     sorted_rows.insert(std::make_pair(row_text, row));
                 }
@@ -661,16 +661,16 @@ void FileDlg::UpdateList()
             sorted_rows.clear();
             for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
                 try {
-                    if (fs::exists(*it) && !fs::is_directory(*it) && it->leaf()[0] != '.') {
+                    if (fs::exists(*it) && !fs::is_directory(*it) && it->filename()[0] != '.') {
                         bool meets_filters = file_filters.empty();
                         for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
-                            if (parse(it->leaf().c_str(), file_filters[i]).full)
+                            if (parse(it->filename().c_str(), file_filters[i]).full)
                                 meets_filters = true;
                         }
                         if (meets_filters) {
                             ListBox::Row* row = new ListBox::Row();
-                            row->push_back(it->leaf(), m_font, m_text_color);
-                            sorted_rows.insert(std::make_pair(it->leaf(), row));
+                            row->push_back(it->filename(), m_font, m_text_color);
+                            sorted_rows.insert(std::make_pair(it->filename(), row));
                         }
                     }
                 } catch (const fs::filesystem_error& e) {

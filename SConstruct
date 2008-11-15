@@ -33,37 +33,47 @@ options.Add('bindir', 'Location to install executables', os.path.normpath(os.pat
 options.Add('libdir', 'Location to install libraries', os.path.normpath(os.path.join('$prefix', 'lib')))
 if not missing_pkg_config:
     options.Add('pkgconfigdir', 'Location to install pkg-config .pc files', '/usr/lib/pkgconfig')
-options.Add('with_boost', 'Root directory of boost installation')
-options.Add('with_boost_include', 'Specify exact include dir for boost headers')
-options.Add('with_boost_libdir', 'Specify exact library dir for boost library')
+options.Add('with_boost', 'Root directory of Boost installation')
+options.Add('with_boost_include', 'Specify exact include dir for Boost headers')
+options.Add('with_boost_libdir', 'Specify exact library dir for Boost library')
 options.Add('boost_lib_suffix', 'Specify the suffix placed on user-compiled Boost libraries (e.g. "-vc71-mt-gd-1_31")')
 options.Add('boost_signals_namespace',
             'Specify alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost)')
 options.Add('with_ft', 'Root directory of FreeType2 installation')
 options.Add('with_ft_include', 'Specify exact include dir for FreeType2 headers')
 options.Add('with_ft_libdir', 'Specify exact library dir for FreeType2 library')
-options.Add('with_devil', 'Root directory of DevIL installation')
-options.Add('with_devil_include', 'Specify exact include dir for DevIL headers')
-options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library')
+options.Add(BoolOption('use_devil', 'Enables optional use of the DevIL image-loading library.  This should only be enabled if you need to load image files other than PNG, JPEG, and TIFF', 0))
+options.Add('with_devil', 'Root directory of DevIL installation (only applicable if use_devil=1)')
+options.Add('with_devil_include', 'Specify exact include dir for DevIL headers (only applicable if use_devil=1)')
+options.Add('with_devil_libdir', 'Specify exact library dir for DevIL library (only applicable if use_devil=1)')
+options.Add('with_jpeg', 'Root directory of JPEG installation (only applicable if use_devil=0)')
+options.Add('with_jpeg_include', 'Specify exact include dir for JPEG headers (only applicable if use_devil=0)')
+options.Add('with_jpeg_libdir', 'Specify exact library dir for JPEG library (only applicable if use_devil=0)')
+options.Add('with_png', 'Root directory of PNG installation (only applicable if use_devil=0)')
+options.Add('with_png_include', 'Specify exact include dir for PNG headers (only applicable if use_devil=0)')
+options.Add('with_png_libdir', 'Specify exact library dir for PNG library (only applicable if use_devil=0)')
+options.Add('with_tiff', 'Root directory of TIFF installation (only applicable if use_devil=0)')
+options.Add('with_tiff_include', 'Specify exact include dir for TIFF headers (only applicable if use_devil=0)')
+options.Add('with_tiff_libdir', 'Specify exact library dir for TIFF library (only applicable if use_devil=0)')
 
 ##################################################
 # Drivers                                        #
 ##################################################
 # SDL
 options.Add(BoolOption('build_sdl_driver', 'Builds GG SDL support (the GiGiSDL library)', 1))
-options.Add('with_sdl', 'Root directory of SDL installation (only required when build_sdl_driver=1)')
-options.Add('with_sdl_include', 'Specify exact include dir for SDL headers (only required when build_sdl_driver=1)')
-options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library (only required when build_sdl_driver=1)')
+options.Add('with_sdl', 'Root directory of SDL installation (only applicable when build_sdl_driver=1)')
+options.Add('with_sdl_include', 'Specify exact include dir for SDL headers (only applicable when build_sdl_driver=1)')
+options.Add('with_sdl_libdir', 'Specify exact library dir for SDL library (only applicable when build_sdl_driver=1)')
 
 # Ogre
 options.Add(BoolOption('build_ogre_driver', 'Builds GG Ogre support (the GiGiOgre library)', 1))
-options.Add('with_ogre', 'Root directory of Ogre installation (only required when build_ogre_driver=1)')
-options.Add('with_ogre_include', 'Specify exact include dir for Ogre headers (only required when build_ogre_driver=1)')
-options.Add('with_ogre_libdir', 'Specify exact library dir for Ogre library (only required when build_ogre_driver=1)')
+options.Add('with_ogre', 'Root directory of Ogre installation (only applicable when build_ogre_driver=1)')
+options.Add('with_ogre_include', 'Specify exact include dir for Ogre headers (only applicable when build_ogre_driver=1)')
+options.Add('with_ogre_libdir', 'Specify exact library dir for Ogre library (only applicable when build_ogre_driver=1)')
 options.Add(BoolOption('build_ogre_ois_plugin', 'Builds OIS input plugin for the GiGiOgre library', 1))
-options.Add('with_ois', 'Root directory of OIS installation (only required when build_ogre_ois_plugin=1)')
-options.Add('with_ois_include', 'Specify exact include dir for OIS headers (only required when build_ogre_ois_plugin=1)')
-options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only required when build_ogre_ois_plugin=1)')
+options.Add('with_ois', 'Root directory of OIS installation (only applicable when build_ogre_ois_plugin=1)')
+options.Add('with_ois_include', 'Specify exact include dir for OIS headers (only applicable when build_ogre_ois_plugin=1)')
+options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only applicable when build_ogre_ois_plugin=1)')
 
 
 
@@ -75,6 +85,10 @@ options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only 
 # This is supposed to be detected during configuration, but sometimes isn't, and is harmless, so we're including it all
 # the time now on POSIX systems.
 env['need__vsnprintf_c'] = str(Platform()) == 'posix'
+
+env['have_jpeg'] = 0
+env['have_png'] = 0
+env['have_tiff'] = 0
 
 
 # fill Environment using saved and command-line provided options, save options for next time, and fill environment
@@ -109,7 +123,10 @@ env_cache_keys = [
     'libltdl_defines',
     'build_sdl_driver',
     'build_ogre_driver',
-    'build_ogre_ois_plugin'
+    'build_ogre_ois_plugin',
+    'have_jpeg',
+    'have_png',
+    'have_tiff'
     ]
 if not force_configure:
     try:
@@ -332,23 +349,48 @@ if not env.GetOption('clean'):
         else:
             env.Append(LIBS = [ft_win32_lib_name])
 
-        # DevIL (aka IL)
-        AppendPackagePaths('devil', env)
-        version_regex = re.compile(r'IL_VERSION\s*(\d+)')
-        if not conf.CheckVersionHeader('DevIL', 'IL/il.h', version_regex, devil_version, True, 'Checking DevIL version >= %s... ' % devil_version_string):
-            Exit(1)
-        if not conf.CheckCHeader('IL/il.h') or \
-               not conf.CheckCHeader('IL/ilu.h'):
-            Exit(1)
-        if str(Platform()) != 'win32' and (not conf.CheckLib('IL', 'ilInit') or \
-                                           not conf.CheckLib('ILU', 'iluInit')):
-            print 'Trying IL again with local _vnsprintf.c...'
-            if conf.CheckLib('IL', 'ilInit', header = '#include "../src/_vsnprintf.c"') and \
-                   conf.CheckLib('ILU', 'iluInit', header = '#include "../src/_vsnprintf.c"'):
-                env['need__vsnprintf_c'] = True
-                print 'DevIL is broken.  It depends on a function _vnsprintf that does not exist on your system.  GG will provide a vnsprintf wrapper called _vnsprintf.'
-            else:
+        # Image loading lib(s)
+        if env['use_devil']:
+            # DevIL (aka IL, aka OpenIL)
+            AppendPackagePaths('devil', env)
+            version_regex = re.compile(r'IL_VERSION\s*(\d+)')
+            if not conf.CheckVersionHeader('DevIL', 'IL/il.h', version_regex, devil_version, True, 'Checking DevIL version >= %s... ' % devil_version_string):
                 Exit(1)
+            if not conf.CheckCHeader('IL/il.h') or \
+                   not conf.CheckCHeader('IL/ilu.h'):
+                Exit(1)
+            if str(Platform()) != 'win32' and (not conf.CheckLib('IL', 'ilInit') or \
+                                               not conf.CheckLib('ILU', 'iluInit')):
+                print 'Trying IL again with local _vnsprintf.c...'
+                if conf.CheckLib('IL', 'ilInit', header = '#include "../src/_vsnprintf.c"') and \
+                       conf.CheckLib('ILU', 'iluInit', header = '#include "../src/_vsnprintf.c"'):
+                    env['need__vsnprintf_c'] = True
+                    print 'DevIL is broken.  It depends on a function _vnsprintf that does not exist on your system.  GG will provide a vnsprintf wrapper called _vnsprintf.'
+                else:
+                    Exit(1)
+        else:
+            # no DevIL
+            AppendPackagePaths('jpeg', env)
+            if not conf.CheckCHeader(['stdio.h', 'jpeglib.h']):
+                env['have_jpeg'] = 0
+            elif str(Platform()) != 'win32' and not conf.CheckLib('jpeg'):
+                env['have_jpeg'] = 0
+            else:
+                env['have_tiff'] = 1
+            AppendPackagePaths('png', env)
+            if not conf.CheckCHeader('png.h'):
+                env['have_png'] = 0
+            elif str(Platform()) != 'win32' and not conf.CheckLib('png'):
+                env['have_png'] = 0
+            else:
+                env['have_tiff'] = 1
+            AppendPackagePaths('tiff', env)
+            if not conf.CheckCHeader('tiffio.h'):
+                env['have_tiff'] = 0
+            elif str(Platform()) != 'win32' and not conf.CheckLib('tiff'):
+                env['have_tiff'] = 0
+            else:
+                env['have_tiff'] = 1
 
         # ltdl
         if str(Platform()) != 'win32':
@@ -561,6 +603,7 @@ if not env.GetOption('clean'):
     if 'configure' in command_line_args:
         Exit(0)
 
+
 ##################################################
 # define targets                                 #
 ##################################################
@@ -640,6 +683,9 @@ if not missing_pkg_config and str(Platform()) != 'win32':
         CreateGiGiDriverPCFile(['GiGiSDL.pc'], ['GiGiSDL.pc.in'], sdl_env)
     if env['build_ogre_driver']:
         CreateGiGiDriverPCFile(['GiGiOgre.pc'], ['GiGiOgre.pc.in'], ogre_env)
+
+# Generate GG/Config.h
+CreateConfigHeader(['GG/Config.h'], ['Config.h.in'], env)
 
 header_dir = os.path.normpath(os.path.join(env.subst(env['incdir']), 'GG'))
 lib_dir = os.path.normpath(env.subst(env['libdir']))

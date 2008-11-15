@@ -31,8 +31,6 @@
 
 #include <GG/Wnd.h>
 
-#include <boost/serialization/is_abstract.hpp>
-
 
 namespace GG {
 
@@ -82,8 +80,6 @@ private:
 };
 
 } // namespace GG
-
-BOOST_IS_ABSTRACT(GG::Control);
 
 // template implementations
 template <class Archive>

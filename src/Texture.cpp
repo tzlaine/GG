@@ -25,9 +25,25 @@
 #include <GG/Texture.h>
 
 #include <GG/GUI.h>
+#include <GG/Config.h>
 
-#include <IL/il.h>
-#include <IL/ilu.h>
+#if GG_USE_DEVIL_IMAGE_LOAD_LIBRARY
+# include <IL/il.h>
+# include <IL/ilu.h>
+#else
+# include <boost/filesystem/operations.hpp>
+# include "GIL/extension/dynamic_image/any_image.hpp"
+# if GG_HAVE_LIBJPEG
+#  include "GIL/extension/io/jpeg_dynamic_io.hpp"
+# endif
+# if GG_HAVE_LIBPNG
+#  include "GIL/extension/io/png_dynamic_io.hpp"
+# endif
+# if GG_HAVE_LIBTIFF
+#  include "GIL/extension/io/tiff_dynamic_io.hpp"
+# endif
+# include <boost/algorithm/string/case_conv.hpp>
+#endif
 
 #include <iostream>
 #include <iomanip>
@@ -46,6 +62,7 @@ namespace {
         return value;
     }
 
+#if GG_USE_DEVIL_IMAGE_LOAD_LIBRARY
     void CheckILErrors(const std::string& function_call)
     {
         ILuint error;
@@ -78,6 +95,21 @@ namespace {
 #undef ENUM_CASE
         return "UNKNOWN";
     }
+
+    bool g_il_initialized = false;
+    void InitDevIL()
+    {
+        if (!g_il_initialized) {
+            // ensure we're starting with an empty error stack
+            while (ilGetError() != IL_NO_ERROR) ;
+            ilInit();
+            CheckILErrors("ilInit()");
+            iluInit();
+            CheckILErrors("iluInit()");
+            g_il_initialized = true;
+        }
+    }
+#endif
 }
 
 ///////////////////////////////////////
@@ -98,79 +130,49 @@ Texture::Texture() :
     m_tex_coords(),
     m_default_width(0),
     m_default_height(0)
-{
-    Clear();
-}
+{ Clear(); }
 
 Texture::~Texture()
-{
-    Clear();
-}
+{ Clear(); }
 
 std::string Texture::Filename() const
-{
-    return m_filename;
-}
+{ return m_filename; }
 
 GLenum Texture::WrapS() const
-{
-    return m_wrap_s;
-}
+{ return m_wrap_s; }
 
 GLenum Texture::WrapT() const
-{
-    return m_wrap_t;
-}
+{ return m_wrap_t; }
 
 GLenum Texture::MinFilter() const
-{
-    return m_min_filter;
-}
+{ return m_min_filter; }
 
 GLenum Texture::MagFilter() const
-{
-    return m_mag_filter;
-}
+{ return m_mag_filter; }
 
 int Texture::BytesPP() const
-{
-    return m_bytes_pp;
-}
+{ return m_bytes_pp; }
 
 GLint Texture::Width() const
-{
-    return m_width;
-}
+{ return m_width; }
 
 GLint Texture::Height() const
-{
-    return m_height;
-}
+{ return m_height; }
 
 bool Texture::MipMapped() const
-{
-    return m_mipmaps;
-}
+{ return m_mipmaps; }
 
 GLuint Texture::OpenGLId() const
-{
-    return m_opengl_id;
-}
+{ return m_opengl_id; }
 
 const GLfloat* Texture::DefaultTexCoords() const
-{
-    return m_tex_coords;
-}
+{ return m_tex_coords; }
 
 GLint Texture::DefaultWidth() const
-{
-    return m_default_width;
-}
+{ return m_default_width; }
 
 GLint Texture::DefaultHeight() const
-{
-    return m_default_height;
-}
+{ return m_default_height; }
 
 void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/* = 0*/) const
 {
@@ -206,16 +208,16 @@ void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/
 }
 
 void Texture::OrthoBlit(const Pt& pt) const
-{
-    OrthoBlit(pt, pt + Pt(m_default_width, m_default_height), m_tex_coords);
-}
+{ OrthoBlit(pt, pt + Pt(m_default_width, m_default_height), m_tex_coords); }
 
 void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 {
     if (m_opengl_id)
         Clear();
 
-    TextureManager::InitDevIL();
+#if GG_USE_DEVIL_IMAGE_LOAD_LIBRARY
+
+    InitDevIL();
 
     ILuint id, error;
     ilGenImages(1, &id);
@@ -230,7 +232,7 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
                       << "\" (code " << error << ")\n";
         }
         CheckILErrors(call);
-        throw BadFile("Could not load temporary DevIL image from file \'" + filename + "\'");
+        throw BadFile("Could not load temporary DevIL image from file \"" + filename + "\"");
     }
 
     m_filename = filename;
@@ -258,6 +260,114 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 
     ilDeleteImages(1, &id);
     CheckILErrors("ilDeleteImages(1, &id)");
+
+#else
+
+    namespace gil = boost::gil;
+    namespace fs = boost::filesystem;
+
+    BOOST_STATIC_ASSERT((sizeof(gil::gray8_pixel_t) == 1));
+    BOOST_STATIC_ASSERT((sizeof(gil::gray_alpha8_pixel_t) == 2));
+    BOOST_STATIC_ASSERT((sizeof(gil::rgb8_pixel_t) == 3));
+    BOOST_STATIC_ASSERT((sizeof(gil::rgba8_pixel_t) == 4));
+
+    typedef boost::mpl::vector4<
+        gil::gray8_image_t,
+        gil::gray_alpha8_image_t,
+        gil::rgb8_image_t,
+        gil::rgba8_image_t
+    > ImageTypes;
+    typedef gil::any_image<ImageTypes> ImageType;
+
+    fs::path path(filename);
+
+    if (!fs::exists(path))
+        throw BadFile("Texture file \"" + filename + "\" does not exist");
+
+    if (!fs::is_regular_file(path))
+        throw BadFile("Texture \"file\" \"" + filename + "\" is not a file");
+
+    std::string extension = boost::algorithm::to_lower_copy(path.extension());
+
+    ImageType image;
+    try {
+        // First attempt -- try just to read the file in one of the default
+        // formats above.
+#if GG_HAVE_LIBJPEG
+        if (extension == ".jpg" || extension == ".jpe" || extension == ".jpeg")
+            gil::jpeg_read_image(filename, image);
+        else
+#endif
+#if GG_HAVE_LIBPNG
+        if (extension == ".png")
+            gil::png_read_image(filename, image);
+        else
+#endif
+#if GG_HAVE_LIBTIFF
+        if (extension == ".tif" || extension == ".tiff")
+            gil::tiff_read_image(filename, image);
+        else
+#endif
+            throw BadFile("Texture file \"" + filename + "\" does not have a supported file extension");
+    } catch (const std::ios_base::failure &) {
+        // Second attempt -- If *_read_image() throws, see if we can convert
+        // the image to RGBA.  This is needed for color-indexed images.
+#if GG_HAVE_LIBJPEG
+        if (extension == ".jpg" || extension == ".jpe" || extension == ".jpeg") {
+            gil::rgba8_image_t rgba_image;
+            gil::jpeg_read_and_convert_image(filename, rgba_image);
+            image.move_in(rgba_image);
+        }
+#endif
+#if GG_HAVE_LIBPNG
+        if (extension == ".png") {
+            gil::rgba8_image_t rgba_image;
+            gil::png_read_and_convert_image(filename, rgba_image);
+            image.move_in(rgba_image);
+        }
+#endif
+#if GG_HAVE_LIBTIFF
+        if (extension == ".tif" || extension == ".tiff") {
+            gil::rgba8_image_t rgba_image;
+            gil::tiff_read_and_convert_image(filename, rgba_image);
+            image.move_in(rgba_image);
+        }
+#endif
+    }
+
+    m_filename = filename;
+    m_default_width = image.width();
+    m_default_height = image.height();
+    m_type = GL_UNSIGNED_BYTE;
+
+#define IF_IMAGE_TYPE_IS(image_prefix)                                  \
+    if (image.current_type_is<image_prefix ## _image_t>()) {            \
+        m_bytes_pp = sizeof(image_prefix ## _pixel_t);                  \
+        image_data = interleaved_view_get_raw_data(                     \
+            const_view(image._dynamic_cast<image_prefix ## _image_t>())); \
+    }
+
+    const unsigned char* image_data = 0;
+
+    IF_IMAGE_TYPE_IS(gil::gray8)
+    else IF_IMAGE_TYPE_IS(gil::gray_alpha8)
+    else IF_IMAGE_TYPE_IS(gil::rgb8)
+    else IF_IMAGE_TYPE_IS(gil::rgba8)
+
+#undef IF_IMAGE_TYPE_IS
+
+    switch (m_bytes_pp) {
+    case 1:  m_format = GL_LUMINANCE; break;
+    case 2:  m_format = GL_LUMINANCE_ALPHA; break;
+    case 3:  m_format = GL_RGB; break;
+    case 4:  m_format = GL_RGBA; break;
+    default: throw BadFile("Texture file \"" + filename + "\" does not have a supported number of color channels (1-4)");
+    }
+
+    assert(image_data);
+    Init(m_default_width, m_default_height, image_data, m_format, m_type, m_bytes_pp, mipmap);
+
+#endif
 }
 
 void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
@@ -432,8 +542,7 @@ SubTexture::SubTexture() :
     m_width(0),
     m_height(0),
     m_tex_coords()
-{
-}
+{}
 
 SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
     m_texture(texture),
@@ -451,13 +560,10 @@ SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, 
 }
 
 SubTexture::~SubTexture()
-{
-}
+{}
 
 SubTexture::SubTexture(const SubTexture& rhs)
-{
-    *this = rhs;
-}
+{ *this = rhs; }
 
 const SubTexture& SubTexture::operator=(const SubTexture& rhs)
 {
@@ -474,39 +580,25 @@ const SubTexture& SubTexture::operator=(const SubTexture& rhs)
 }
 
 bool SubTexture::Empty() const
-{
-    return !m_texture;
-}
+{ return !m_texture; }
 
 const GLfloat* SubTexture::TexCoords() const
-{
-    return m_tex_coords;
-}
+{ return m_tex_coords; }
 
 GLint SubTexture::Width() const
-{
-    return m_width;
-}
+{ return m_width; }
 
 GLint SubTexture::Height() const
-{
-    return m_height;
-}
+{ return m_height; }
 
 const Texture* SubTexture::GetTexture() const
-{
-    return m_texture.get();
-}
+{ return m_texture.get(); }
 
 void SubTexture::OrthoBlit(const Pt& pt1, const Pt& pt2) const
-{
-    if (m_texture) m_texture->OrthoBlit(pt1, pt2, m_tex_coords);
-}
+{ if (m_texture) m_texture->OrthoBlit(pt1, pt2, m_tex_coords); }
 
 void SubTexture::OrthoBlit(const Pt& pt) const
-{
-    if (m_texture) m_texture->OrthoBlit(pt, pt + Pt(m_width, m_height), m_tex_coords);
-}
+{ if (m_texture) m_texture->OrthoBlit(pt, pt + Pt(m_width, m_height), m_tex_coords); }
 
 
 ///////////////////////////////////////
@@ -525,9 +617,7 @@ boost::shared_ptr<Texture> TextureManager::StoreTexture(Texture* texture, const 
 }
 
 boost::shared_ptr<Texture> TextureManager::StoreTexture(const boost::shared_ptr<Texture>& texture, const std::string& texture_name)
-{
-    return (m_textures[texture_name] = texture);
-}
+{ return (m_textures[texture_name] = texture); }
 
 boost::shared_ptr<Texture> TextureManager::GetTexture(const std::string& name, bool mipmap/* = false*/)
 {
@@ -544,19 +634,6 @@ void TextureManager::FreeTexture(const std::string& name)
     std::map<std::string, boost::shared_ptr<Texture> >::iterator it = m_textures.find(name);
     if (it != m_textures.end())
         m_textures.erase(it);
-}
-
-void TextureManager::InitDevIL()
-{
-    if (!s_il_initialized) {
-        // ensure we're starting with an empty error stack
-        while (ilGetError() != IL_NO_ERROR) ;
-        ilInit();
-        CheckILErrors("ilInit()");
-        iluInit();
-        CheckILErrors("iluInit()");
-        s_il_initialized = true;
-    }
 }
 
 boost::shared_ptr<Texture> TextureManager::LoadTexture(const std::string& filename, bool mipmap/* = false*/)

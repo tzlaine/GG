@@ -33,7 +33,6 @@
 #include <GG/Wnd.h>
 #include <GG/Font.h>
 
-#include <boost/serialization/is_abstract.hpp>
 #include <boost/serialization/version.hpp>
 
 
@@ -150,7 +149,6 @@ private:
 
 } // namespace GG
 
-BOOST_IS_ABSTRACT(GG::BrowseInfoWnd);
 BOOST_CLASS_VERSION(GG::BrowseInfoWnd, 1);
 BOOST_CLASS_VERSION(GG::TextBoxBrowseInfoWnd, 1);
 

@@ -223,8 +223,6 @@ public:
     void                FreeTexture(const std::string& name);
     //@}
 
-    static void         InitDevIL(); ///< initializes DevIL image library, if it is not already initialized
-
 private:
     TextureManager();
     boost::shared_ptr<Texture> LoadTexture(const std::string& filename, bool mipmap);

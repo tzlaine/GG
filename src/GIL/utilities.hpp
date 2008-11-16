@@ -15,7 +15,7 @@
 
 #include "gil_config.hpp"
 #include <functional>
-#include <boost/config/no_tr1/cmath.hpp>
+#include <cmath>
 #include <cstddef>
 #include <algorithm>
 #include <utility>

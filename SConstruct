@@ -376,14 +376,14 @@ if not env.GetOption('clean'):
             elif str(Platform()) != 'win32' and not conf.CheckLib('jpeg'):
                 env['have_jpeg'] = 0
             else:
-                env['have_tiff'] = 1
+                env['have_jpeg'] = 1
             AppendPackagePaths('png', env)
             if not conf.CheckCHeader('png.h'):
                 env['have_png'] = 0
             elif str(Platform()) != 'win32' and not conf.CheckLib('png'):
                 env['have_png'] = 0
             else:
-                env['have_tiff'] = 1
+                env['have_png'] = 1
             AppendPackagePaths('tiff', env)
             if not conf.CheckCHeader('tiffio.h'):
                 env['have_tiff'] = 0

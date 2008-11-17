@@ -15,7 +15,11 @@
 
 #include "gil_config.hpp"
 #include <functional>
+#if 37 <= BOOST_VERSION / 100 % 1000
+#include <boost/config/no_tr1/cmath.hpp>
+#else
 #include <cmath>
+#endif
 #include <cstddef>
 #include <algorithm>
 #include <utility>

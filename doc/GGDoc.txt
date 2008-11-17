@@ -55,7 +55,7 @@
     little computation is involved in processing a single user input event.  GG's performance is therefore usually limited only by the
     application-defined processing that is associated with manipulating the controls (e.g., a button click may trigger disk IO).
    \subsection arch_UI_element_conns UI Element Connections
-    GG UI elements are connected using signals and slots, using the boost.signals library.  This allows arbitrary 
+    GG UI elements are connected using signals and slots, using the Boost.Signals library.  This allows arbitrary 
     connections between one control and another, and between a control and any other code; there is no hierarchy of passed messages 
     as there is in some other GUIs, and no type-unsafe callbacks are used.  Refer to the \ref sigs_n_slots documentation for details.
     \subsection arch_gui_services GG::GUI Services
@@ -118,7 +118,7 @@
     signal and slot.  Also, consider this: what happens if a signal A is connected to a slot consisting of a member function
     of object B, B is deleted, and then A() is called?  A segfault, unless the B's class inherits from 
     boost::trackable, which auto-disconnects slots in its destructor.  GG::Wnd is derived from boost::trackable, so all 
-    GG::Wnd-derived classes should handle such situations gracefully.  See the boost tutorial below for details.
+    GG::Wnd-derived classes should handle such situations gracefully.  See the Boost tutorial below for details.
     \see http://boost.org/doc/html/signals.html for a tutorial on other aspects of signals and slots; you can create 
     connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
     the return values of such slots (take the first return value, the last, the average of all of them, etc.).
@@ -133,10 +133,10 @@
     method that returns a string describing what kind of data the GG::Wnd
     represents.  The string can be a MIME type, or any arbitrary string the user
     likes.  During the dragging portion of the operation, a GG::Wnd under the
-    cursor has its GG::Wnd::DropAcceptable() member called, in which it can
+    cursor has its GG::Wnd::DropsAcceptable() member called, in which it can
     examine the data type string and other relevant aspects of each dragged
     GG::Wnd and decide whether or not to accept it.  On the drop, the GG::Wnd
-    under the cursor has its GG::Wnd::AcceptDrop() method called with those
+    under the cursor has its GG::Wnd::AcceptDrops() method called with those
     GG::Wnd's it has previously deemed accepted in GG::Wnd::DropAcceptable().
     GG::Wnd's accepted by the drop target are removed from their original
     parent, if any, through a call to GG::Wnd::ChildrenDraggedAway().
@@ -166,9 +166,16 @@
     GG requires GCC 3.4 or later, or MSVC++ 8.0 SP1 or later.  Note that both are available for free download.
     <p>
     GG relies on a few other open-source libraries:
-    - DevIL 1.6.1 - http://openil.sourceforge.net
     - FreeType 2.1.2 - http://www.freetype.org
-    - boost 1.35 - http://www.boost.org
+    - Boost 1.36 - http://www.boost.org
+
+    Image loading library/libraries:
+    - DevIL 1.6.1 - http://openil.sourceforge.net
+
+    Or, at least one of:
+    - libpng - http://www.libpng.org/pub/png/libpng.html
+    - libjpeg - http://www.ijg.org
+    - libtiff - http://www.libtiff.org
 
     Optional libraries for input drivers:
     - SDL 1.2.7 - http://www.libsdl.org
@@ -181,67 +188,90 @@
     \section howto_build How To Build GG
 
     \subsection howto_build_all_platforms All Platforms
-    You will need to have first built the buildable portions of the boost libraries.  See http://boost.org/more/getting_started/index.html for details on building boost.  There are usually pre-built binaries available for download for the latest Microsoft C++ compiler.
+
+    You will need to have first built the buildable portions of the Boost
+    libraries.  See http://boost.org/more/getting_started/index.html for
+    details on building Boost.  There are often pre-built binaries available
+    for download for the latest Microsoft C++ compiler.  You will also need to
+    decide whether to use DevIL, or GG's built-in image loading code.  The
+    built-in image loader only supports PNG, JPEG, and TIFF formats, using a
+    modified version of Boost.GIL from Boost 1.37.  DevIL supports more image
+    formats, but is less portable.  If you choose not to use DevIL, you must
+    make at least one of the PNG, JPEG, and TIFF format-specific libraries
+    available instead.  To choose to use DevIL, pass "use_devil=1" to "scons
+    configure"; by default, it will not be used.  The "scons configure" step
+    will also look for SDL, Ogre, and OIS by default.  If it finds them, it
+    will build the relevant drivers for them.  To disable any of these
+    drivers, pass "build_X=0", where "X" is one of "sdl_driver",
+    "ogre_driver", or "ogre_ois_plugin".
 
     \subsection howto_build_linux Linux
-    To build GG, you will need to have SCons installed.  These libraries and all the boost
-    includes should be available in your path.  You will of course also need to build and make available all of
-    the libraries listed in the requirements above.
-   
-    Once this is done, Linux, Cygwin, and MinGW users can simply type
-    \verbatim
-      scons
-      scons install [as root, if necessary]\endverbatim
-    from within the root of the GG directory tree.  Type
+
+    To build GG, you will need to have SCons installed.  The headers and built
+    binaries for the libraries you intend to use should be available in your
+    include and link paths, respectively.  You can let SCons know about any
+    nonstandard paths to these headers and library binaries by providing
+    "with_X=PATHNAME", etc., to SCons on the command line.  To see all the
+    path options for the build, type
     \verbatim
       scons -h\endverbatim
-    to see all the options for the build, including specifying nonstandard locations for libraries required by GG, which may 
-    be especially useful on Cygwin/MinGW systems.
+
+    Once this is done, Linux, Cygwin, and MinGW users can simply type
+    \verbatim
+      scons configure
+      scons
+      scons install [as root, if necessary]\endverbatim
+
+    If you encounter any problems during the "scons configure" step, look at
+    the contents of config.log.  The problem is unsually that SCons does not
+    have the right header or link path to a certain library.  Such problems
+    are usually easily diagnosed.
 
     \subsection howto_build_win32_gcc Windows (GCC)
 
-    GG works quite well with GCC on Windows, under MinGW or Cygwin, using SCons.  See the SCons documentation for how to
-    force SCons to use Cygwin or MinGW on the Windows platform (this will probably only be necessary if you also have
-    the MSVC compiler), then refer to the Linux section above.  Also note that the DLLs for all the required libraries
-    except the boost libraries can be found on the net pre-compiled.  You can just use the ones for win32/MSVC; since
-    they're all C code, there will be no ABI compatibility issues.  You must compile the boost libraries yourself, since
-    they are C++ code.
+    GG works quite well with GCC on Windows, under MinGW or Cygwin, using
+    SCons.  See the SCons documentation for how to force SCons to use Cygwin
+    or MinGW on the Windows platform (this will probably only be necessary if
+    you also have the MSVC compiler), then refer to the Linux section above.
+    Also note that the DLLs for all the required libraries except the Boost
+    libraries can be found on the net pre-compiled.  You can just use the ones
+    for win32/MSVC; since they're all C code, there will be no ABI
+    compatibility issues.  You must compile the Boost libraries yourself,
+    since they are C++ code.
 
     \subsection howto_build_win32_microsoft Windows (Microsoft C++)
 
-    For those of you who use the Microsoft compiler, SCons will also work from the command line.  You need to install
-    SCons and Python, and make sure that python is in your path.  There is also a standalone version of SCons available
-    somewhere on the SCons site.  Then you just open up a command prompt window, cd to the root of the GG directory
-    tree, and type scons.  I have only been able to get the current version of GG to compile on MSVC++ 8.0 SP1, the version
-    that comes with .NET 2005.
-    <p>There is experimental support for generated MSVC project files.  To enable this, you can uncomment the large
-    block of commented-out lines at the end of SConstruct and near the top of build_support.py (all the lines starting
-    with "##").  After this, assuming you are using a recent-enough version of SCons, scons --help should give you all
-    the instructions you need ot generate MSVC project files.  Note that you can get precompiled MSVC-compatible DLLs
-    for many of the required libraries.  DevIL's 1.6.5 pre-compiled library can be substituted for the latest one, if
-    there is no pre-compiled version available.
-    <p>
-    Finally, note that the solution file is set up to grab all include and library directories rooted at c:\, not just the boost 
-    ones.  If you'd like to keep them somewhere else, you'll need to change the project settings.
+    For those of you who use the Microsoft compiler, SCons will also work from
+    the command line.  You need to install SCons and Python, and make sure
+    that python is in your path.  There is also a standalone version of SCons
+    available somewhere on the SCons site.  Then you just open up a command
+    prompt window, cd to the root of the GG directory tree, and type "scons
+    configure", then "scons".  See the info in the Linux section if you have
+    problems with "scons configure".  Note that I have only been able to get
+    the current version of GG to compile on MSVC++ 8.0 SP1 (the version that
+    comes with .NET 2005) or later.
 
     \subsection howto_build_macos Macintosh
-    It would be nice to have access to a Mac OS X and/or Classic Mac box, to be able to ensure that GG even compiles on such a 
-    thing.  Let me know if you have or are interested in testing out a Mac build, or even taking on porting duties.
+
+    It would be nice to have access to a Mac OS X and/or Classic Mac box, to
+    be able to ensure that GG even compiles on such a thing.  Let me know if
+    you have or are interested in testing out a Mac build, or even taking on
+    porting duties.
 */
 
 /** \page serialization Serialization
     \section serialization_motivation Motivation
     One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
     capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
-    elements for network transmission and receipt.  To satisfy all these requirements, GG uses the boost.serialization 
+    elements for network transmission and receipt.  To satisfy all these requirements, GG uses the Boost.Serialization 
     library to serialize GG::Wnd-derived objects.
     \section serialization_approach Details
     GG does not contain any actual code that will serialize a GG::Wnd.  Instead, each GG::Wnd subclass contains a serialize() template
-    method which may be invoked by user code to perform serialization.  The user must then create a boost serialization
+    method which may be invoked by user code to perform serialization.  The user must then create a Boost.Serialization
     archive, and save/load the desired windows to/from the archive.  To be serializable, user-created subclasses need to define
     a serialize method that first serializes its base class, then serializes any subclass-specific data; see any GG::Wnd subclass
     for example code.  For full details on how the serialization works, see the serialization tutorial and the
-    boost.serialization documentation.
+    Boost.Serialization documentation.
     \section caveats Caveats
     Signals are not currently serializable.  This means that when a class is created from an input serialization
     archive, all its signals must be reconnected to their slots (and any signals connected to it should be reconnected
@@ -269,9 +299,9 @@
     Event filtering allows one to use a GG::Wnd to intrusively handle the events
     sent to another GG::Wnd.  This can be useful, for example, in a control (the
     parent) that is composed of multiple controls (the children), but which
-    needs to handle certain events uniformly.  Perhaps left-clicks should always
+    needs to handle certain events uniformly.  Perhaps right-clicks should always
     bring up a context menu, for instance.  Without event filtering, each child
-    control would have to explicitly forward its left-clicks instead of
+    control would have to explicitly forward its right-clicks instead of
     processing them normally, which would in turn require subclassing.  Event
     filters remove the need for such subclassing.  \see The GG::Wnd description,
     GG::Wnd::EventFilter(), GG::Wnd::InstallEventFilter(), and
@@ -329,7 +359,7 @@
     C++ enums, such as implicit conversion to integral types, which in turn
     leads to comparability of arbitrary enumeration values from different
     enumerations.  For instance, it is impossible (due to a compile-time
-    error) to accidentally pass the (nonsensical) flag FORMAT_NONE to the \a
+    error) to accidentally pass the (nonsensical) flag GG::FORMAT_NONE to the \a
     flags parameter of GG::Wnd::Wnd().  With built-in C++ enums, this would
     not be caught by the compiler.  GG provides two classes, GG::Flags and
     GG::FlagSpec, that allow the user to extend the sets of flags used in GG,
@@ -368,7 +398,7 @@
 
     \section tour_timers Timers
 
-    Timers are available, to which slots can be connected.  A timer fires its
+    Timers are available to which slots can be connected.  A timer fires its
     signal after at least T time has elapsed, where T is a user-provided time
     interval.  Note the use of "at least".  Timers are only evaluated during
     GG's normal processing loop, so if the application is cycling slowly (due
@@ -377,7 +407,7 @@
 
     \section tour_event_pumps Event Pumps
 
-    GG abstracts out the inner loop that processes events and renders frames,
+    GG abstracts out the inner loop that processes events and renders frames
     into a class called GG::EventPump.  Most users will never need to use
     event pumps, but those users writing a new input driver will.
 

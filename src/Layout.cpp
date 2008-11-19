@@ -505,16 +505,16 @@ void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
         Parent()->MouseWheel(pt, move, mod_keys);
 }
 
-void Layout::KeyPress(Key key, Flags<ModKey> mod_keys)
+void Layout::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->KeyPress(key, mod_keys);
+        Parent()->KeyPress(key, key_code_point, mod_keys);
 }
 
-void Layout::KeyRelease(Key key, Flags<ModKey> mod_keys)
+void Layout::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (Parent())
-        Parent()->KeyRelease(key, mod_keys);
+        Parent()->KeyRelease(key, key_code_point, mod_keys);
 }
 
 void Layout::Add(Wnd* wnd, int row, int column, Flags<Alignment> alignment/* = ALIGN_NONE*/)

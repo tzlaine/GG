@@ -92,7 +92,7 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void Render();
-    virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     /** Set this to true if this FileDlg should select directories instead of files.  Note that this will only have an
         effect in file-open mode. */

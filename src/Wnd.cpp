@@ -976,9 +976,9 @@ void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, F
 
 void Wnd::DragDropLeave() {}
 
-void Wnd::KeyPress(Key key, Flags<ModKey> mod_keys) {}
+void Wnd::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys) {}
 
-void Wnd::KeyRelease(Key key, Flags<ModKey> mod_keys) {}
+void Wnd::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys) {}
 
 void Wnd::GainingFocus() {}
 
@@ -1179,10 +1179,10 @@ void Wnd::HandleEvent(const WndEvent& event)
         MouseWheel(event.Point(), event.WheelMove(), event.ModKeys());
         break;
     case WndEvent::KeyPress:
-        KeyPress(event.GetKey(), event.ModKeys());
+        KeyPress(event.GetKey(), event.KeyCodePoint(), event.ModKeys());
         break;
     case WndEvent::KeyRelease:
-        KeyRelease(event.GetKey(), event.ModKeys());
+        KeyRelease(event.GetKey(), event.KeyCodePoint(), event.ModKeys());
         break;
     case WndEvent::GainingFocus:
         GainingFocus();

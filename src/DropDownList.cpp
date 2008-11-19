@@ -213,7 +213,7 @@ void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
     }
 }
 
-void DropDownList::KeyPress(Key key, Flags<ModKey> mod_keys)
+void DropDownList::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         switch (key) {
@@ -256,10 +256,10 @@ void DropDownList::KeyPress(Key key, Flags<ModKey> mod_keys)
                 Select(--m_LB->end());
             break;
         default:
-            Control::KeyPress(key, mod_keys);
+            Control::KeyPress(key, key_code_point, mod_keys);
         }
     } else {
-        Control::KeyPress(key, mod_keys);
+        Control::KeyPress(key, key_code_point, mod_keys);
     }
 }
 

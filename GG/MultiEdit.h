@@ -93,7 +93,7 @@ public:
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
     virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
 

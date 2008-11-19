@@ -54,6 +54,7 @@
 #include <GG/glext.h>
 
 // include useful boost headers
+#include <boost/cstdint.hpp>
 #include <boost/signal.hpp>
 
 // other headers

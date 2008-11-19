@@ -125,8 +125,8 @@ public:
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-    virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
-    virtual void KeyRelease(Key key, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     /** inserts \a w into the layout in the indicated cell, expanding the layout grid as necessary.  Note that \a row
         and \a column must not be negative, though this is not checked. \throw GG::Layout::AttemptedOverwrite Throws if

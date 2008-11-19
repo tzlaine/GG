@@ -262,7 +262,7 @@ public:
     void SetCancelString(const std::string& str);     ///< sets the text to use to label the cancel button to \a str Default: "Cancel"
 
     virtual void Render();
-    virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     //@}
 
 protected:

@@ -141,7 +141,7 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void Render();
-    virtual void KeyPress(Key key, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
@@ -331,7 +331,7 @@ void Spin<T>::Render()
 }
 
 template<class T>
-void Spin<T>::KeyPress(Key key, Flags<ModKey> mod_keys)
+void Spin<T>::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     switch (key) {
     case GGK_HOME:

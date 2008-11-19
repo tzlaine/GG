@@ -169,6 +169,8 @@ void SDLGUI::SDLInit()
         Exit(1);
     }
 
+    SDL_EnableUNICODE(1);
+
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
     EnableMouseButtonDownRepeat(SDL_DEFAULT_REPEAT_DELAY / 2, SDL_DEFAULT_REPEAT_INTERVAL / 2);
 
@@ -200,6 +202,7 @@ void SDLGUI::HandleSystemEvents()
         bool send_to_gg = false;
         EventType gg_event = MOUSEMOVE;
         Key key = GGK_UNKNOWN;
+        boost::uint32_t key_code_point = 0;
         Flags<ModKey> mod_keys = GetSDLModKeys();
         Pt mouse_pos(event.motion.x, event.motion.y);
         Pt mouse_rel(event.motion.xrel, event.motion.yrel);
@@ -208,6 +211,7 @@ void SDLGUI::HandleSystemEvents()
         case SDL_KEYDOWN:
         case SDL_KEYUP:
             key = GGKeyFromSDLKey(event.key.keysym);
+            key_code_point = event.key.keysym.unicode;
             if (key < GGK_NUMLOCK)
                 send_to_gg = true;
             gg_event = (event.type == SDL_KEYDOWN) ? KEYPRESS : KEYRELEASE;
@@ -239,7 +243,7 @@ void SDLGUI::HandleSystemEvents()
         }
 
         if (send_to_gg)
-            HandleGGEvent(gg_event, key, mod_keys, mouse_pos, mouse_rel);
+            HandleGGEvent(gg_event, key, key_code_point, mod_keys, mouse_pos, mouse_rel);
         else
             HandleNonGGEvent(event);
     }

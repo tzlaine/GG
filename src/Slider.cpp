@@ -178,7 +178,7 @@ void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
     SlideTo(m_posn + (m_posn < PtToPosn(pt) ? PageSize() : -PageSize()));
 }
 
-void Slider::KeyPress(Key key, Flags<ModKey> mod_keys)
+void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         switch (key) {
@@ -213,11 +213,11 @@ void Slider::KeyPress(Key key, Flags<ModKey> mod_keys)
             SlideTo(m_posn - 1);
             break;
         default:
-            Control::KeyPress(key, mod_keys);
+            Control::KeyPress(key, key_code_point, mod_keys);
             break;
         }
     } else {
-        Control::KeyPress(key, mod_keys);
+        Control::KeyPress(key, key_code_point, mod_keys);
     }
 }
 

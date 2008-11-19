@@ -121,7 +121,7 @@ extern "C" {
 
     //  TODO: Override this with your own StyleFactory subclass.
     GG_PLUGIN_API
-    Button* GetStyleFactory()
+    boost::shared_ptr<StyleFactory> GetStyleFactory()
     {
         static boost::shared_ptr<StyleFactory> style_factory(new StyleFactory());
         return style_factory;

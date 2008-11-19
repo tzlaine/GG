@@ -619,7 +619,7 @@ void GUI::operator()()
     Run();
 }
 
-void GUI::HandleGGEvent(EventType event, Key key, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel)
+void GUI::HandleGGEvent(EventType event, Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel)
 {
     s_impl->m_mod_keys = mod_keys;
 
@@ -668,7 +668,14 @@ void GUI::HandleGGEvent(EventType event, Key key, Flags<ModKey> mod_keys, const 
                 processed = AcceleratorSignal(key, massaged_mods)();
         }
         if (!processed && FocusWnd())
-            FocusWnd()->HandleEvent(WndEvent(WndEvent::KeyPress, key, mod_keys));
+            FocusWnd()->HandleEvent(WndEvent(WndEvent::KeyPress, key, key_code_point, mod_keys));
+        break; }
+    case KEYRELEASE: {
+        s_impl->m_browse_info_wnd.reset();
+        s_impl->m_browse_info_mode = -1;
+        s_impl->m_browse_target = 0;
+        if (FocusWnd())
+            FocusWnd()->HandleEvent(WndEvent(WndEvent::KeyRelease, key, key_code_point, mod_keys));
         break; }
     case MOUSEMOVE: {
         s_impl->m_curr_wnd_under_cursor = CheckedGetWindowUnder(pos, mod_keys);
@@ -912,9 +919,9 @@ void GUI::RemoveAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
     s_impl->m_accelerators.erase(std::make_pair(key, mod_keys));
 }
 
-boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts, unsigned int range/* = Font::ALL_CHARS*/)
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts)
 {
-    return GetFontManager().GetFont(font_filename, pts, range);
+    return GetFontManager().GetFont(font_filename, pts);
 }
 
 void GUI::FreeFont(const std::string& font_filename, int pts)

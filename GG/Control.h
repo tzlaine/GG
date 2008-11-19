@@ -55,8 +55,8 @@ public:
     virtual void   AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt);
     virtual void   Render() = 0;
     virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
-    virtual void   KeyRelease(Key key, Flags<ModKey> mod_keys);
+    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void   KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     virtual void   SetColor(Clr c);        ///< sets the color of the control
     virtual void   Disable(bool b = true); ///< disables/enables the control; disabled controls appear greyed

@@ -195,7 +195,7 @@ public:
     /** handles all waiting system events (from SDL, DirectInput, etc.).  This function should only be called from
         custom EventPump event handlers. */
     virtual void   HandleSystemEvents() = 0;
-    void           HandleGGEvent(EventType event, Key key, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel); ///< event handler for GG events
+    void           HandleGGEvent(EventType event, Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel); ///< event handler for GG events
 
     void           SetFocusWnd(Wnd* wnd);        ///< sets the input focus window to \a wnd
     virtual void   Wait(int ms);                 ///< suspends the GUI thread for \a ms milliseconds.  Singlethreaded GUI subclasses may do nothing here, or may pause for \a ms milliseconds.
@@ -234,8 +234,19 @@ public:
     /** removes a keyboard accelerator.  Any key modifiers may be specified, or none at all. */
     void           RemoveAccelerator(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE);
 
-    boost::shared_ptr<Font>    GetFont(const std::string& font_filename, int pts, unsigned int range = Font::ALL_CHARS); ///< returns a shared_ptr to the desired font
-    void                       FreeFont(const std::string& font_filename, int pts); ///< removes the desired font from the managed pool; since shared_ptr's are used, the font may be deleted much later
+    /** returns a shared_ptr to the desired font, supporting all printable
+        ASCII characters. */
+    boost::shared_ptr<Font>    GetFont(const std::string& font_filename, int pts);
+
+    /** returns a shared_ptr to the desired font, supporting all the
+        characters in the UnicodeCharsets in the range [first, last). */
+    template <class CharSetIter>
+    boost::shared_ptr<Font>    GetFont(const std::string& font_filename, int pts,
+                                       CharSetIter first, CharSetIter last);
+
+    /** removes the desired font from the managed pool; since shared_ptr's are
+        used, the font may be deleted much later */
+    void                       FreeFont(const std::string& font_filename, int pts);
 
     /** adds an already-constructed texture to the managed pool \warning calling code <b>must not</b> delete \a texture; the texture pool will do that. */
     boost::shared_ptr<Texture> StoreTexture(Texture* texture, const std::string& texture_name);
@@ -328,6 +339,11 @@ bool GUI::OrCombiner::operator()(InIt first, InIt last) const
         retval |= static_cast<bool>(*first++);
     return retval;
 }
+
+template <class CharSetIter>
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts,
+                                     CharSetIter first, CharSetIter last)
+{ return GetFontManager().GetFont(font_filename, pts, first, last); }
 
 template <class T>
 void GUI::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)

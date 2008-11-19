@@ -31,6 +31,7 @@ sources = [
     'TextControl.cpp',
     'Texture.cpp',
     'Timer.cpp',
+    'UnicodeCharsets.cpp',
     'Wnd.cpp',
     'WndEditor.cpp',
     'WndEvent.cpp',

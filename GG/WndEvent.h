@@ -118,7 +118,7 @@ public:
 
     /** constructs an WndEvent that is used to invoke a function taking parameters (Key key, Flags<ModKey> mod_keys), eg
         KeyPress(). */
-    WndEvent(EventType type, Key key, Flags<ModKey> mod_keys);
+    WndEvent(EventType type, Key key, boost::uint32_t code_point, Flags<ModKey> mod_keys);
 
     /** constructs an WndEvent that is used to invoke a function taking parameters (int, Timer*), eg TimerFiring(). */
     WndEvent(EventType type, int ticks, Timer* timer);
@@ -129,6 +129,7 @@ public:
     EventType                 Type() const;         ///< returns the type of the WndEvent
     const Pt&                 Point() const;        ///< returns the point at which the event took place, if any
     Key                       GetKey() const;       ///< returns the key pressed or released in the WndEvent, if any
+    boost::uint32_t           KeyCodePoint() const; ///< returns the Unicode code point for the key pressed or released in the WndEvent, if any.  \note This may be zero, even in a KeyPress or KeyRelease event, if Unicode support is unavailable.
     Flags<ModKey>             ModKeys() const;      ///< returns the modifiers to the WndEvent's keypress, if any
     const Pt&                 DragMove() const;     ///< returns the amount of drag movement represented by the WndEvent, if any
     int                       WheelMove() const;    ///< returns the ammount of mouse wheel movement represented by the WndEvent, if any
@@ -140,6 +141,7 @@ private:
     EventType          m_type;
     Pt                 m_point;
     Key                m_key;
+    boost::uint32_t    m_key_code_point;
     Flags<ModKey>      m_mod_keys;
     Pt                 m_drag_move;
     int                m_wheel_move;

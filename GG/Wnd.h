@@ -498,13 +498,13 @@ public:
         its children.  For instance, Control-derived classes pass KeyPress() messages to their Parent() windows by
         default.  \note Though mouse clicks consist of a press and a release, all Control classes by default respond
         immediately to KeyPress(), not KeyRelease(); in fact, by default no Wnd class does anything at all on a
-        KeyRelease event. */
-    virtual void   KeyPress(Key key, Flags<ModKey> mod_keys);
+        KeyRelease event.  \note \a key_code_point will be zero if Unicode support is unavailable. */
+    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     /** respond to up-keystrokes (focus window only).  A window may receive KeyRelease() messages passed up to it from
         its children.  For instance, Control-derived classes pass KeyRelease() messages to their Parent() windows by
-        default. */
-    virtual void   KeyRelease(Key key, Flags<ModKey> mod_keys);
+        default.  \note \a key_code_point will be zero if Unicode support is unavailable. */
+    virtual void   KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     virtual void   GainingFocus();                         ///< respond to this window gaining the input focus
     virtual void   LosingFocus();                          ///< respond to this window losing the input focus

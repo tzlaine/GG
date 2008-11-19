@@ -43,7 +43,7 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
         int time = gui->Ticks();
 
         // send an idle message, so that the gui has timely updates for triggering browse info windows, etc.
-        gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, gui->ModKeys(), gui->MousePosition(), Pt());
+        gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, 0, gui->ModKeys(), gui->MousePosition(), Pt());
 
         // govern FPS speed if needed
         if (double max_FPS = gui->MaxFPS()) {

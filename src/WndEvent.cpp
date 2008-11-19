@@ -79,6 +79,7 @@ WndEvent::WndEvent(EventType type, const Pt& pt, Flags<ModKey> mod_keys) :
     m_type(type),
     m_point(pt),
     m_key(GGK_UNKNOWN),
+    m_key_code_point(0),
     m_mod_keys(mod_keys),
     m_wheel_move(0),
     m_ticks(0),
@@ -89,6 +90,7 @@ WndEvent::WndEvent(EventType type, const Pt& pt, const Pt& move, Flags<ModKey> m
     m_type(type),
     m_point(pt),
     m_key(GGK_UNKNOWN),
+    m_key_code_point(0),
     m_mod_keys(mod_keys),
     m_drag_move(move),
     m_wheel_move(0),
@@ -100,6 +102,7 @@ WndEvent::WndEvent(EventType type, const Pt& pt, int move, Flags<ModKey> mod_key
     m_type(type),
     m_point(pt),
     m_key(GGK_UNKNOWN),
+    m_key_code_point(0),
     m_mod_keys(mod_keys),
     m_wheel_move(move),
     m_ticks(0),
@@ -110,6 +113,7 @@ WndEvent::WndEvent(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_
     m_type(type),
     m_point(pt),
     m_key(GGK_UNKNOWN),
+    m_key_code_point(0),
     m_mod_keys(mod_keys),
     m_wheel_move(0),
     m_drag_drop_wnds(drag_drop_wnds),
@@ -117,9 +121,10 @@ WndEvent::WndEvent(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_
     m_timer(0)
 {}
 
-WndEvent::WndEvent(EventType type, Key key, Flags<ModKey> mod_keys) :
+WndEvent::WndEvent(EventType type, Key key, boost::uint32_t code_point, Flags<ModKey> mod_keys) :
     m_type(type),
     m_key(key),
+    m_key_code_point(code_point),
     m_mod_keys(mod_keys),
     m_wheel_move(0),
     m_ticks(0),
@@ -129,6 +134,7 @@ WndEvent::WndEvent(EventType type, Key key, Flags<ModKey> mod_keys) :
 WndEvent::WndEvent(EventType type, int ticks, Timer* timer) :
     m_type(type),
     m_key(GGK_UNKNOWN),
+    m_key_code_point(0),
     m_mod_keys(),
     m_wheel_move(0),
     m_ticks(ticks),
@@ -138,6 +144,7 @@ WndEvent::WndEvent(EventType type, int ticks, Timer* timer) :
 WndEvent::WndEvent(EventType type) :
     m_type(type),
     m_key(GGK_UNKNOWN),
+    m_key_code_point(0),
     m_mod_keys(), 
     m_wheel_move(0),
     m_ticks(0),
@@ -152,6 +159,9 @@ const Pt& WndEvent::Point() const
 
 Key WndEvent::GetKey() const
 { return m_key; }
+
+boost::uint32_t WndEvent::KeyCodePoint() const
+{ return m_key_code_point; }
 
 Flags<ModKey> WndEvent::ModKeys() const
 { return m_mod_keys; }

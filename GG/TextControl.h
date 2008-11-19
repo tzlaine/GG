@@ -137,11 +137,12 @@ public:
         strung together.  \throw boost::bad_lexical_cast boost::lexical_cast throws boost::bad_lexical_cast when it is confused.*/
     template <class T> void operator<<(T t);
 
-    void  operator+=(const std::string& str); ///< appends \a str to text string by way of SetText()
-    void  operator+=(char ch);                ///< appends \a ch to text string by way of SetText()
-    void  Clear();                            ///< sets text string to ""
-    void  Insert(int pos, char ch);           ///< allows access to text string much as a std::string
-    void  Erase(int pos, int num = 1);        ///< allows access to text string much as a std::string
+    void  operator+=(const std::string& str);    ///< appends \a str to text string by way of SetText()
+    void  operator+=(char ch);                   ///< appends \a ch to text string by way of SetText()
+    void  Clear();                               ///< sets text string to ""
+    void  Insert(int pos, char ch);              ///< allows modification of text string much as a std::string
+    void  Insert(int pos, const std::string& s); ///< allows modification of text string much as a std::string
+    void  Erase(int pos, int num = 1);           ///< allows modification of text string much as a std::string
 
     virtual void DefineAttributes(WndEditor* editor);
     //@}
@@ -201,15 +202,11 @@ void GG::TextControl::operator>>(T& t) const
 
 template <class T>
 T GG::TextControl::GetValue() const
-{
-    return boost::lexical_cast<T, std::string>(Control::m_text);
-}
+{ return boost::lexical_cast<T, std::string>(Control::m_text); }
 
 template <class T>
 void GG::TextControl::operator<<(T t)
-{
-    SetText(boost::lexical_cast<std::string>(t));
-}
+{ SetText(boost::lexical_cast<std::string>(t)); }
 
 template <class Archive>
 void GG::TextControl::serialize(Archive& ar, const unsigned int version)

@@ -744,7 +744,7 @@ void ListBox::Render()
     }
 }
 
-void ListBox::KeyPress(Key key, Flags<ModKey> mod_keys)
+void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         bool bring_caret_into_view = true;
@@ -826,7 +826,7 @@ void ListBox::KeyPress(Key key, Flags<ModKey> mod_keys)
 
         // any other key gets passed along to the parent
         default:
-            Control::KeyPress(key, mod_keys);
+            Control::KeyPress(key, key_code_point, mod_keys);
             bring_caret_into_view = false;
         }
 
@@ -835,7 +835,7 @@ void ListBox::KeyPress(Key key, Flags<ModKey> mod_keys)
             BringCaretIntoView();
         }
     } else {
-        Control::KeyPress(key, mod_keys);
+        Control::KeyPress(key, key_code_point, mod_keys);
    }
 }
 

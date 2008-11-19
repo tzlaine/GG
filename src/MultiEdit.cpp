@@ -317,7 +317,7 @@ void MultiEdit::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
     }
 }
 
-void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
+void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         if (!(m_style & MULTI_READ_ONLY)) {
@@ -482,6 +482,7 @@ void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
             default: {
                 // only process it if it's a printable character, and no significant modifiers are in use
                 KeypadKeyToPrintable(key, mod_keys);
+                // TODO: use code point if nonzero
                 if (key < GGK_DELETE && isprint(key) && !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
                     if (MultiSelected())
                         ClearSelected();
@@ -502,7 +503,7 @@ void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
                     m_cursor_end = m_cursor_begin;
                     emit_signal = true;
                 } else {
-                    Edit::KeyPress(key, mod_keys);
+                    Edit::KeyPress(key, key_code_point, mod_keys);
                 }
                 break;
             }
@@ -512,7 +513,7 @@ void MultiEdit::KeyPress(Key key, Flags<ModKey> mod_keys)
                 EditedSignal(WindowText());
         }
     } else {
-        Edit::KeyPress(key, mod_keys);
+        Edit::KeyPress(key, key_code_point, mod_keys);
     }
 }
 

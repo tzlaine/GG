@@ -349,9 +349,9 @@ bool OISInput::mouseMoved(const OIS::MouseEvent &event)
     Pt mouse_pos(event.state.X.abs, event.state.Y.abs);
     assert(OgreGUI::GetGUI());
     if (event.state.Z.rel)
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt(0, 0 < event.state.Z.rel ? 1 : -1));
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt(0, 0 < event.state.Z.rel ? 1 : -1));
     else
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt(event.state.X.rel, event.state.Y.rel));
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt(event.state.X.rel, event.state.Y.rel));
     return true;
 }
 
@@ -367,7 +367,7 @@ bool OISInput::mousePressed(const OIS::MouseEvent &event, OIS::MouseButtonID id)
     }
     assert(OgreGUI::GetGUI());
     if (gg_event != GUI::IDLE)
-        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt());
+        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt());
     return true;
 }
 
@@ -383,7 +383,7 @@ bool OISInput::mouseReleased(const OIS::MouseEvent &event, OIS::MouseButtonID id
     }
     assert(OgreGUI::GetGUI());
     if (gg_event != GUI::IDLE)
-        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, GetModKeys(m_keyboard), mouse_pos, Pt());
+        OgreGUI::GetGUI()->HandleGGEvent(gg_event, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt());
     return true;
 }
 
@@ -393,7 +393,7 @@ bool OISInput::keyPressed(const OIS::KeyEvent& event)
     Key key = GGKeyFromOISKey(event, mods, m_keyboard->getTextTranslation());
     assert(OgreGUI::GetGUI());
     if (key != GGK_UNKNOWN)
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::KEYPRESS, key, mods, Pt(), Pt());
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::KEYPRESS, key, 0, mods, Pt(), Pt());
     return true;
 }
 
@@ -403,7 +403,7 @@ bool OISInput::keyReleased(const OIS::KeyEvent& event)
     Key key = GGKeyFromOISKey(event, mods, m_keyboard->getTextTranslation());
     assert(OgreGUI::GetGUI());
     if (key != GGK_UNKNOWN)
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::KEYRELEASE, key, mods, Pt(), Pt());
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::KEYRELEASE, key, 0, mods, Pt(), Pt());
     return true;
 }
 

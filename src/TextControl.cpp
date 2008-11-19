@@ -128,49 +128,31 @@ Pt TextControl::MinUsableSize() const
 }
 
 Flags<TextFormat> TextControl::GetTextFormat() const
-{
-    return m_format;
-}
+{ return m_format; }
 
 Clr TextControl::TextColor() const
-{
-    return m_text_color;
-}
+{ return m_text_color; }
 
 bool TextControl::ClipText() const
-{
-    return m_clip_text;
-}
+{ return m_clip_text; }
 
 bool TextControl::SetMinSize() const
-{
-    return m_set_min_size;
-}
+{ return m_set_min_size; }
 
 TextControl::operator const std::string&() const
-{
-    return Control::m_text;
-}
+{ return Control::m_text; }
 
 bool TextControl::Empty() const
-{
-    return Control::m_text.empty();
-}
+{ return Control::m_text.empty(); }
 
 int TextControl::Length() const
-{
-    return Control::m_text.length();
-}
+{ return Control::m_text.length(); }
 
 Pt TextControl::TextUpperLeft() const
-{
-    return UpperLeft() + m_text_ul;
-}
+{ return UpperLeft() + m_text_ul; }
 
 Pt TextControl::TextLowerRight() const
-{
-    return UpperLeft() + m_text_lr;
-}
+{ return UpperLeft() + m_text_lr; }
 
 void TextControl::Render()
 {
@@ -219,9 +201,7 @@ void TextControl::SetTextFormat(Flags<TextFormat> format)
 }
 
 void TextControl::SetTextColor(Clr color)
-{
-    m_text_color = color;
-}
+{ m_text_color = color; }
 
 void TextControl::SetColor(Clr c)
 {
@@ -230,9 +210,7 @@ void TextControl::SetColor(Clr c)
 }
 
 void TextControl::ClipText(bool b)
-{
-    m_clip_text = b;
-}
+{ m_clip_text = b; }
 
 void TextControl::SetMinSize(bool b)
 {
@@ -241,23 +219,23 @@ void TextControl::SetMinSize(bool b)
 }
 
 void TextControl::operator+=(const std::string& str)
-{
-    SetText(Control::m_text + str);
-}
+{ SetText(Control::m_text + str); }
 
 void TextControl::operator+=(char ch)
-{
-    SetText(Control::m_text + ch);
-}
+{ SetText(Control::m_text + ch); }
 
 void TextControl::Clear()
-{
-    SetText("");
-}
+{ SetText(""); }
 
 void TextControl::Insert(int pos, char ch)
 {
     Control::m_text.insert(pos, 1, ch);
+    SetText(Control::m_text);
+}
+
+void TextControl::Insert(int pos, const std::string& s)
+{
+    Control::m_text.insert(pos, s);
     SetText(Control::m_text);
 }
 
@@ -296,24 +274,16 @@ void TextControl::DefineAttributes(WndEditor* editor)
 }
 
 const std::vector<Font::LineData>& TextControl::GetLineData() const
-{
-    return m_line_data;
-}
+{ return m_line_data; }
 
 const boost::shared_ptr<Font>& TextControl::GetFont() const
-{
-    return m_font;
-}
+{ return m_font; }
 
 bool TextControl::FitToText() const
-{
-    return m_fit_to_text;
-}
+{ return m_fit_to_text; }
 
 bool TextControl::DirtyLoad() const
-{
-    return m_dirty_load;
-}
+{ return m_dirty_load; }
 
 void TextControl::ValidateFormat()
 {

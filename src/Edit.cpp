@@ -28,6 +28,7 @@
 #include <GG/DrawUtil.h>
 #include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
+#include <GG/utf8/checked.h>
 
 
 using namespace GG;
@@ -70,9 +71,7 @@ Edit::Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<
     m_recently_edited(false),
     m_last_button_down_time(0),
     m_in_double_click_mode(false)
-{
-    SetColor(color);
-}
+{ SetColor(color); }
 
 Pt Edit::MinUsableSize() const
 { return Pt(4 * PIXEL_MARGIN, HeightFromFont(GetFont(), PIXEL_MARGIN)); }
@@ -204,7 +203,7 @@ void Edit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 void Edit::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 { ClearDoubleButtonDownMode(); }
 
-void Edit::KeyPress(Key key, Flags<ModKey> mod_keys)
+void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         bool shift_down = mod_keys & (MOD_KEY_LSHIFT | MOD_KEY_RSHIFT);
@@ -274,29 +273,53 @@ void Edit::KeyPress(Key key, Flags<ModKey> mod_keys)
         case GGK_RETURN:
         case GGK_KP_ENTER:
             FocusUpdateSignal(WindowText());
-            TextControl::KeyPress(key, mod_keys);
+            TextControl::KeyPress(key, key_code_point, mod_keys);
             m_recently_edited = false;
             break;
         default:
             // only process it if it's a printable character, and no significant modifiers are in use
-            KeypadKeyToPrintable(key, mod_keys);
-            if (key < GGK_DELETE && isprint(key) && !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
-                if (MultiSelected())
-                    ClearSelected();
-                Insert(m_cursor_pos.first, key);                // insert character after caret
-                m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd one
-                emit_signal = true;                             // notify parent that text has changed
-                if (LastVisibleChar() <= m_cursor_pos.first)    // when we over-run our writing space with typing, scroll the window
-                    AdjustView();
+            if (key_code_point) {
+                std::string translated_code_point;
+                try {
+                    boost::uint32_t chars[] = { key_code_point };
+                    utf8::utf32to8(chars, chars + 1, std::back_inserter(translated_code_point));
+                } catch (const utf8::invalid_code_point&) {
+                    translated_code_point.clear();
+                }
+                if (!translated_code_point.empty() &&
+                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
+                    if (MultiSelected())
+                        ClearSelected();
+                    Insert(m_cursor_pos.first, translated_code_point);  // insert code point after caret
+                    m_cursor_pos.first += translated_code_point.size(); // then move the caret fwd
+                    m_cursor_pos.second = m_cursor_pos.first;
+                    emit_signal = true;                                 // notify parent that text has changed
+                    if (LastVisibleChar() <= m_cursor_pos.first)        // when we over-run our writing space with typing, scroll the window
+                        AdjustView();
+                } else {
+                    TextControl::KeyPress(key, key_code_point, mod_keys);
+                }
             } else {
-                TextControl::KeyPress(key, mod_keys);
+                KeypadKeyToPrintable(key, mod_keys);
+                if (key < GGK_DELETE && isprint(key) &&
+                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
+                    if (MultiSelected())
+                        ClearSelected();
+                    Insert(m_cursor_pos.first, key);                // insert character after caret
+                    m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd one
+                    emit_signal = true;                             // notify parent that text has changed
+                    if (LastVisibleChar() <= m_cursor_pos.first)    // when we over-run our writing space with typing, scroll the window
+                        AdjustView();
+                } else {
+                    TextControl::KeyPress(key, key_code_point, mod_keys);
+                }
             }
             break;
         }
         if (emit_signal)
             EditedSignal(WindowText());
     } else {
-        TextControl::KeyPress(key, mod_keys);
+        TextControl::KeyPress(key, key_code_point, mod_keys);
     }
 }
 

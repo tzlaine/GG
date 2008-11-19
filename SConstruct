@@ -391,6 +391,8 @@ if not env.GetOption('clean'):
                 env['have_tiff'] = 0
             else:
                 env['have_tiff'] = 1
+            if not (env['have_jpeg'] or env['have_png'] or not env['have_tiff']):
+                Exit(1)
 
         # ltdl
         if str(Platform()) != 'win32':

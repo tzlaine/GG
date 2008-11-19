@@ -62,7 +62,7 @@ bool GG::operator==(const UnicodeCharset& lhs, const UnicodeCharset& rhs)
 bool GG::operator<(const UnicodeCharset& lhs, const UnicodeCharset& rhs)
 { return lhs.m_first_char < rhs.m_first_char; }
 
-const std::vector<UnicodeCharset>& GG::AllUncodeCharsets()
+const std::vector<UnicodeCharset>& GG::AllUnicodeCharsets()
 {
     static const std::vector<UnicodeCharset> ALL_UNICODE_CHARSETS = boost::assign::list_of
         (UnicodeCharset("Basic Latin", 0x0000, 0x007F))
@@ -204,7 +204,7 @@ const std::vector<UnicodeCharset>& GG::AllUncodeCharsets()
     return ALL_UNICODE_CHARSETS;
 }
 
-std::set<UnicodeCharset> GG::UncodeCharsetsToRender(const std::string& str)
+std::set<UnicodeCharset> GG::UnicodeCharsetsToRender(const std::string& str)
 {
     std::set<UnicodeCharset> retval;
     std::string::const_iterator it = str.begin();
@@ -220,12 +220,12 @@ const UnicodeCharset* GG::CharsetContaining(boost::uint32_t c)
 {
     static std::vector<const UnicodeCharset*> s_charset_blocks;
     if (s_charset_blocks.empty()) {
-        s_charset_blocks.resize(AllUncodeCharsets().back().m_last_char / BLOCK_SIZE);
-        for (std::size_t i = 0; i < AllUncodeCharsets().size(); ++i) {
-            std::size_t first_block = AllUncodeCharsets()[i].m_first_char / BLOCK_SIZE;
-            std::size_t last_block = AllUncodeCharsets()[i].m_last_char / BLOCK_SIZE;
+        s_charset_blocks.resize(AllUnicodeCharsets().back().m_last_char / BLOCK_SIZE);
+        for (std::size_t i = 0; i < AllUnicodeCharsets().size(); ++i) {
+            std::size_t first_block = AllUnicodeCharsets()[i].m_first_char / BLOCK_SIZE;
+            std::size_t last_block = AllUnicodeCharsets()[i].m_last_char / BLOCK_SIZE;
             for (std::size_t j = first_block; j != last_block; ++j) {
-                s_charset_blocks[j] = &AllUncodeCharsets()[i];
+                s_charset_blocks[j] = &AllUnicodeCharsets()[i];
             }
         }
     }
@@ -237,8 +237,8 @@ const UnicodeCharset* GG::CharsetWithName(const std::string& name)
 {
     static std::map<std::string, const UnicodeCharset*> s_name_map;
     if (s_name_map.empty()) {
-        for (std::size_t i = 0; i < AllUncodeCharsets().size(); ++i) {
-            s_name_map[AllUncodeCharsets()[i].m_script_name] = &AllUncodeCharsets()[i];
+        for (std::size_t i = 0; i < AllUnicodeCharsets().size(); ++i) {
+            s_name_map[AllUnicodeCharsets()[i].m_script_name] = &AllUnicodeCharsets()[i];
         }
     }
     std::map<std::string, const UnicodeCharset*>::const_iterator it = s_name_map.find(name);

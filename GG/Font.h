@@ -66,7 +66,7 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
     rendered glyphs from a requested font file at the requested point size,
     including only the requested ranges of characters.  Once the textures have
     been created, text is rendered to the display by rendering quads textured
-    with portions of the glyph images.  The characters are rendered to the
+    with portions of the glyph textures.  The characters are rendered to the
     textures in white, with alpha blending used for antialiasing.  The user
     should set the desired text color with a call to glColor*() before any
     call to RenderText().  When text is rendered, DetermineLines() is called
@@ -77,11 +77,10 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
     to RenderText() repeatedly.  When this is done, the iteration through the
     text to determine line breaks is not necessary at render time.  The user
     is responsible for ensuring that the line data applies to the text string
-    supplied to RenderText().  The total range of characters covered by
-    ALL_DEFINED_RANGES is 0x20 (' ') to 0x7E ('~').  SYMBOL covers everything
-    in that range that isn't a letter or digit.  ALL_CHARS covers all 256
-    ASCII character codes from 0x00 to 0xFF.  The other ranges are
-    self-explanatory.  Point sizes above 250 are not supported.
+    supplied to RenderText().  See UnicodeCharsets.h for the ranges of
+    characters available, including a function that allow one to determine
+    which ranges are necessary for rendering a certain string.  Point sizes
+    above 250 are not supported.
 
     <br><h3>Text Formatting Tags</h3>
 

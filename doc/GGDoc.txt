@@ -124,6 +124,47 @@
     the return values of such slots (take the first return value, the last, the average of all of them, etc.).
 */
 
+/** \page text_handling Text Handling
+    \section text_handling_unicode_support Unicode Support
+
+    GG supports Unicode characters.  All strings that are rendered as text in
+    GG are considered to be UTF-8 encoded.  GG uses the utfcpp library
+    (http://utfcpp.sourceforge.net) to handle conversions from UTF-8 encoded
+    strings to Unicode code points.  A detail that you must know about utfcpp
+    is that it throws exceptions on invalid input.  Any time you pass a string
+    to a GG function, you run the risk of generating an exception if the
+    string is not UTF-8 encoded.  Note that ISO-8859-1 (commonly called
+    "Latin-1"), Windows-1252, and other common single-byte encodings are not
+    usable as UTF-8 strings.
+
+    \section text_handling_all_chars_considered_utf8 All Characters Are Considered UTF-8 Encoded
+
+    Yes, all characters!  Even if you call GG::Font::RenderGlyph() with a char
+    parameter, that char had better conform to UTF-8 requirements for a valid
+    codepoint (in particular, it's value must be in the range [0x0, 0x7f]).
+
+    \section text_handling_font_support Font Support
+
+    Be sure to use a TrueType font capable of rendering the character sets you
+    need for whatever language(s) you need to support.  Note that due to the
+    large number of Unicode characters and the space requirements of using
+    textured fonts, GG::Font requires you to supply it with the Unicode
+    character sets you want at construction time.  A useful pattern for
+    constructing a GG::Font with the right character set coverage is to use
+    UnicodeCharsetsToRender().  You simply pass it a string containing
+    representative characters, and it returns a set of GG::UnicodeCharsets
+    that covers all the characters in the string.
+
+    \section text_handling_user_input User Input
+
+    Unicode characters can be input by the user, as long as the input driver
+    handles Unicode input.  The SDL reference driver does.  The Ogre OIS input
+    plugin does not.  GG will convert any Unicode input to a multibyte UTF-8
+    sequence before adding it to a user-editable string (e.g. as in a
+    GG::Edit).
+
+*/
+
 /** \page drag_n_drop Drag and Drop
     \section drag_n_drop_basics Basics
 
@@ -430,6 +471,7 @@
     -# \ref design
     -# \ref architecture
     -# \ref sigs_n_slots
+    -# \ref text_handling
     -# \ref drag_n_drop
     -# \ref serialization
     -# \ref brief_tour

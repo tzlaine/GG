@@ -61,10 +61,10 @@ GG_API bool operator<(const GG::UnicodeCharset& lhs, const GG::UnicodeCharset& r
 
 
 /** Returns a vector containing all defined UnicodeCharset's. */
-GG_API const std::vector<UnicodeCharset>& AllUncodeCharsets();
+GG_API const std::vector<UnicodeCharset>& AllUnicodeCharsets();
 
 /** Returns the set of the UnicodeCharset's required to render \a str. */
-GG_API std::set<UnicodeCharset> UncodeCharsetsToRender(const std::string& str);
+GG_API std::set<UnicodeCharset> UnicodeCharsetsToRender(const std::string& str);
 
 /** Returns the UnicodeCharset in which \a c can be found, or 0 if no such
     UnicodeCharset exists. */

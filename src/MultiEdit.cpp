@@ -29,6 +29,7 @@
 #include <GG/StyleFactory.h>
 #include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
+#include <GG/utf8/checked.h>
 
 #include <boost/assign/list_of.hpp>
 
@@ -237,9 +238,11 @@ void MultiEdit::Render()
             }
         }
         // if there's no selected text, but this row contains the caret (and MULTI_READ_ONLY is not in effect)
-        if (!MultiSelected() && m_cursor_begin.first == row && !(m_style & MULTI_READ_ONLY)) {
+        if (GUI::GetGUI()->FocusWnd() == this &&
+            !MultiSelected() && m_cursor_begin.first == row && !(m_style & MULTI_READ_ONLY)) {
             int caret_x = CharXOffset(m_cursor_begin.first, m_cursor_begin.second) + initial_text_x_pos;
             glDisable(GL_TEXTURE_2D);
+            glColor(text_color_to_use);
             glBegin(GL_LINES);
             glVertex2i(caret_x, row_y_pos);
             glVertex2i(caret_x, row_y_pos + GetFont()->Lineskip());
@@ -449,7 +452,8 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     emit_signal = true;
                 } else if (0 < m_cursor_begin.second) {
                     m_cursor_end.second = --m_cursor_begin.second;
-                    Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
+                    std::pair<int, int> range = StringRangeOf(m_cursor_begin.first, m_cursor_begin.second);
+                    Erase(range.first, range.second - range.first);
                     emit_signal = true;
                 } else if (0 < m_cursor_begin.first) {
                     m_cursor_end.first = --m_cursor_begin.first;
@@ -457,7 +461,8 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_begin.first, WindowText()))
                         --m_cursor_begin.second;
                     m_cursor_end.second = m_cursor_begin.second;
-                    Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
+                    std::pair<int, int> range = StringRangeOf(m_cursor_begin.first, m_cursor_begin.second);
+                    Erase(range.first, range.second - range.first);
                     emit_signal = true;
                 }
                 break;
@@ -468,7 +473,8 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     ClearSelected();
                     emit_signal = true;
                 } else if (m_cursor_begin.second < static_cast<int>(GetLineData()[m_cursor_begin.first].char_data.size())) {
-                    Erase(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second));
+                    std::pair<int, int> range = StringRangeOf(m_cursor_begin.first, m_cursor_begin.second);
+                    Erase(range.first, range.second - range.first);
                     emit_signal = true;
                 } else if (m_cursor_begin.first < static_cast<int>(GetLineData().size()) - 1) {
                     int begin = StringIndexOf(m_cursor_begin.first, m_cursor_begin.second);
@@ -480,10 +486,23 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
             }
 
             default: {
-                // only process it if it's a printable character, and no significant modifiers are in use
-                KeypadKeyToPrintable(key, mod_keys);
-                // TODO: use code point if nonzero
-                if (key < GGK_DELETE && isprint(key) && !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
+                // only process it if it's a valid code point or a known
+                // printable key, and no significant modifiers are in use
+                std::string translated_code_point;
+                if (key_code_point) {
+                    try {
+                        boost::uint32_t chars[] = { key_code_point };
+                        utf8::utf32to8(chars, chars + 1, std::back_inserter(translated_code_point));
+                    } catch (const utf8::invalid_code_point&) {
+                        translated_code_point.clear();
+                    }
+                } else {
+                    KeypadKeyToPrintable(key, mod_keys);
+                    if (GGK_DELETE <= key || !std::isprint(key))
+                        translated_code_point.clear();
+                }
+                if (!translated_code_point.empty() &&
+                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
                     if (MultiSelected())
                         ClearSelected();
                     // insert the character to the right of the caret
@@ -503,7 +522,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     m_cursor_end = m_cursor_begin;
                     emit_signal = true;
                 } else {
-                    Edit::KeyPress(key, key_code_point, mod_keys);
+                    TextControl::KeyPress(key, key_code_point, mod_keys);
                 }
                 break;
             }
@@ -513,7 +532,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                 EditedSignal(WindowText());
         }
     } else {
-        Edit::KeyPress(key, key_code_point, mod_keys);
+        TextControl::KeyPress(key, key_code_point, mod_keys);
     }
 }
 
@@ -726,7 +745,9 @@ int MultiEdit::StringIndexOf(int row, int char_idx, const std::vector<Font::Line
         char_idx = lines[row].char_data.size();
     }
     if (char_idx == static_cast<int>(lines[row].char_data.size())) {
-        retval = lines[row].char_data.back().original_char_index + 1;
+        std::string::const_iterator it = m_text.begin() + lines[row].char_data.back().original_char_index;
+        utf8::next(it, m_text.end());
+        retval = std::distance(m_text.begin(), it);
     } else {
         retval = lines[row].char_data[char_idx].original_char_index;
         // "rewind" the first position to encompass all tag text that is associated with that position
@@ -734,6 +755,16 @@ int MultiEdit::StringIndexOf(int row, int char_idx, const std::vector<Font::Line
             retval -= lines[row].char_data[char_idx].tags[i]->OriginalStringChars();
         }
     }
+    return retval;
+}
+
+std::pair<int, int> MultiEdit::StringRangeOf(int row, int char_idx, const std::vector<Font::LineData>* line_data/* = 0*/) const
+{
+    std::pair<int, int> retval;
+    retval.first = StringIndexOf(row, char_idx, line_data);
+    std::string::const_iterator it = m_text.begin() + retval.first;
+    utf8::next(it, m_text.end());
+    retval.second = std::distance(m_text.begin(), it);
     return retval;
 }
 

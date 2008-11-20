@@ -106,7 +106,7 @@ public:
     operator const std::string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
 
     bool  Empty() const;   ///< returns true when text string equals ""
-    int   Length() const;  ///< returns length of text string
+    int   Length() const;  ///< returns code points (not characters!) in text string
 
     /** returns the upper-left corner of the text as it is would be rendered if it were not bound to the dimensions of
         this control. */
@@ -169,6 +169,7 @@ private:
     bool                        m_clip_text;
     bool                        m_set_min_size;
     std::vector<Font::LineData> m_line_data;
+    int                         m_code_points;
     boost::shared_ptr<Font>     m_font;
     bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
@@ -217,6 +218,7 @@ void GG::TextControl::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_clip_text)
         & BOOST_SERIALIZATION_NVP(m_set_min_size)
         & BOOST_SERIALIZATION_NVP(m_line_data)
+        & BOOST_SERIALIZATION_NVP(m_code_points)
         & BOOST_SERIALIZATION_NVP(m_font)
         & BOOST_SERIALIZATION_NVP(m_fit_to_text)
         & BOOST_SERIALIZATION_NVP(m_text_ul)

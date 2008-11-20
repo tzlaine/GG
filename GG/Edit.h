@@ -34,18 +34,32 @@
 
 namespace GG {
 
-/** This is a single-line text input control.  This is a simple edit box control.  It inherits from TextControl, so it
-    can be treated in many ways very similarly to a std::string.  Note that the second set of constructors determine the
-    height of the control based on the height of the font used and the value of the constant PIXEL_MARGIN.  There are
-    two types of signals emitted by an Edit control.  The first is EditedSignal; this is emitted every time the contents
-    of the Edit change.  Sometimes, however, you don't want that.  For instance, say you want to keep the value of the
-    text in the Edit to between (numerical values) 100 and 300.  If the Edit currently reads "200", the user may decide
-    to highlight the "2", hit delete, then type a "1".  If updates are immediate, you will receive notification that the
-    Edit says "00" (an invalid value), when that is just a temporary value you don't care about.  In such situations the
-    other signal, FocusUpdateSignal, should be useful.  It is only emitted when the Edit is losing the input focus and
-    the contents have changed since it gained the input focus.  So you would only receive a single update, namely "100",
-    which is a valid number for that control, and you would receive it only when it is certain that the user is finished
-    editing the text (when the focus changes).  Note that both signals may be used at the same time, if desired.*/
+/** This is a single-line edit box control.  It inherits from TextControl, so
+    it can be treated in many ways very similarly to a std::string.  Note that
+    the constructor determines the height of the control based on the height
+    of the font used and the value of the constant PIXEL_MARGIN.  There are
+    two types of signals emitted by an Edit control.  The first is
+    EditedSignal; this is emitted every time the contents of the Edit change.
+    Sometimes, however, you don't want that.  For instance, say you want to
+    keep the value of the text in the Edit to between (numerical values) 100
+    and 300.  If the Edit currently reads "200", the user may decide to
+    highlight the "2", hit delete, then type a "1".  If updates are immediate,
+    you will receive notification that the Edit says "00" (an invalid value),
+    when that is just a temporary value you don't care about.  In such
+    situations, the other signal, FocusUpdateSignal, should be useful.  It is
+    only emitted when the Edit is losing the input focus and the contents have
+    changed since it gained the input focus.  So you would only receive a
+    single update, namely "100", which is a valid number for that control, and
+    you would receive it only when it is certain that the user is finished
+    editing the text (when the focus changes).  Note that both signals may be
+    used at the same time, if desired.
+
+    <br>Implementation note: All character index values taken as arguments and
+    returned by member functions of this class are considered to be indices of
+    code points (characters as they appear in the control), not raw characters
+    (individual characters in the underlying UTF-8 encoded string).  There are
+    two exceptions to this, however.  StringIndexOf() and StringRangeOf()
+    return indices into the underlying UTF-8 encoded string. */
 class GG_API Edit : public TextControl
 {
 public:
@@ -120,6 +134,18 @@ protected:
     int                     ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
     int                     LastVisibleChar() const;        ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
     int                     LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
+
+    /** returns index into WindowText() of the start of the UTF-8 sequence for
+        the code point at \a char_idx, using \a line_data instead of the
+        current line data, if it is supplied.  Not range-checked. */
+    int     StringIndexOf(int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+
+    /** returns range of indices into WindowText() of the UTF-8 sequence for
+        the code point at \a char_idx, using \a line_data instead of the
+        current line data, if it is supplied.  Not range-checked. */
+    std::pair<int, int>
+            StringRangeOf(int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+
     bool                    InDoubleButtonDownMode() const; ///< returns true iff the button is still down after being pressed twice within GUI::DoubleClickInterval() ticks
     std::pair<int, int>     DoubleButtonDownCursorPos() const; ///< returns the cursor position at the time of the most recent double-button-down
     //@}
@@ -150,7 +176,7 @@ private:
         selected (when range is selected, caret is considered at .second) */
     std::pair<int, int> m_cursor_pos;
 
-    int                 m_first_char_shown; ///< index into the string of the first character on the left end of the control's viewable area
+    int                 m_first_char_shown; ///< index of the first character on the left end of the control's viewable area
     Clr                 m_int_color;        ///< color of background inside text box
     Clr                 m_hilite_color;     ///< color behind selected range
     Clr                 m_sel_text_color;   ///< color of selected text

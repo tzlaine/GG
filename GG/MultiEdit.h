@@ -55,18 +55,31 @@ extern GG_API const MultiEditStyle MULTI_NO_HSCROLL;       ///< Horizontal scrol
 extern GG_API const Flags<MultiEditStyle> MULTI_NO_SCROLL; ///< Scrolls are not used for this control.
 
 
-/** This is a multi-line text input and display control.  MultiEdit is designed to be used as a basic text-input control
-    for text longer than one line, or to display large amounts of formatted or unformatted text.  MultiEdit supports
-    text formatting tags.  See GG::Font for details.  Several style flags are available.  If the MULTI_TERMINAL_STYLE
-    flag is in use, lines that exceed the history limit will be removed from the beginning of the text; otherwise, they
-    are removed from the end.  If either MULTI_LINEWRAP of MULTI_WORDBREAK are in use, MULTI_NO_HSCROLL must be in use
-    as well.  MULTI_VCENTER is not an allowed style; if it is specified, MULTI_TOP will be used in its place.  The
-    justification introduced by text formatting tags is very different from that introduced by the TF_* styles.  The
-    former justifies lines within the space taken up by the text.  The latter justifies the entire block of text within
-    the client area of the control.  So if you specify MULTI_LEFT and use \<right> formatting tags on the entire text,
-    the text will appear to be right-justified, but you will probably only see the extreme left of the text area without
-    scrolling.  If none of the no-scroll style flags are in use, the scrolls are created and destroyed automatically, as
-    needed. */
+/** This is a multi-line text input and display control.  MultiEdit is
+    designed to be used as a basic text-input control for text longer than one
+    line, or to display large amounts of formatted or unformatted text.
+    MultiEdit supports text formatting tags.  See GG::Font for details.
+    Several style flags are available.  If the MULTI_TERMINAL_STYLE flag is in
+    use, lines that exceed the history limit will be removed from the
+    beginning of the text; otherwise, they are removed from the end.  If
+    either MULTI_LINEWRAP of MULTI_WORDBREAK are in use, MULTI_NO_HSCROLL must
+    be in use as well.  MULTI_VCENTER is not an allowed style; if it is
+    specified, MULTI_TOP will be used in its place.  The justification
+    introduced by text formatting tags is very different from that introduced
+    by the TF_* styles.  The former justifies lines within the space taken up
+    by the text.  The latter justifies the entire block of text within the
+    client area of the control.  So if you specify MULTI_LEFT and use \<right>
+    formatting tags on the entire text, the text will appear to be
+    right-justified, but you will probably only see the extreme left of the
+    text area without scrolling.  If none of the no-scroll style flags are in
+    use, the scrolls are created and destroyed automatically, as needed.
+
+    <br>Implementation note: All character index values taken as arguments and
+    returned by member functions of this class are considered to be indices of
+    code points (characters as they appear in the control), not raw characters
+    (individual characters in the underlying UTF-8 encoded string).  There are
+    two exceptions to this, however.  StringIndexOf() and StringRangeOf()
+    return indices into the underlying UTF-8 encoded string. */
 class GG_API MultiEdit : public Edit
 {
 public:
@@ -124,9 +137,22 @@ protected:
 
     Pt      ScrollPosition() const;         ///< returns the positions of the scrollbars, in pixels
 
-    /** returns index into WindowText() of position \a char_idx in row \a row, using \a line_data instead of the current
-        line data, if it is supplied.  Not range-checked. */
+    /** returns index into WindowText() of the start of the UTF-8 sequence for
+        the code point at \a char_idx in row \a row, using \a line_data
+        instead of the current line data, if it is supplied.  If \a row, \a
+        char_idx refers to a character preceeded by formatting tags, the index
+        of the first chracter of the first formatting tag is returned instead.
+        Not range-checked. */
     int     StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+
+    /** returns range of indices into WindowText() of the UTF-8 sequence for
+        the code point at \a char_idx in row \a row, using \a line_data
+        instead of the current line data, if it is supplied.  If \a row, \a
+        char_idx refers to a character preceeded by formatting tags, the index
+        of the first chracter of the first formatting tag is returned instead.
+        Not range-checked. */
+    std::pair<int, int>
+            StringRangeOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
 
     int     RowStartX(int row) const;       ///< returns the the x-coordinate of the beginning of row \a row, in cleint-space coordinates.  Not range-checked.
     int     CharXOffset(int row, int idx) const; ///< returns the distance in pixels from the start of row \a row to the character at index idx.  Not range-checked.

@@ -113,6 +113,7 @@ void Edit::Render()
     int first_char_offset = FirstCharOffset();
     int text_y_pos = ul.y + static_cast<int>(((lr.y - ul.y) - GetFont()->Height()) / 2.0 + 0.5);
     int last_visible_char = LastVisibleChar();
+    const int STRING_INDEX_END = StringIndexOf(last_visible_char);
     if (MultiSelected())   { // if one or more chars are selected, hilite, then draw the range in the selected-text color
         int low_cursor_pos  = std::min(m_cursor_pos.first, m_cursor_pos.second);
         int high_cursor_pos = std::max(m_cursor_pos.first, m_cursor_pos.second);
@@ -122,23 +123,25 @@ void Edit::Render()
         hilite_lr(client_ul.x + static_cast<int>(char_data[high_cursor_pos - 1].extent) - first_char_offset, client_lr.y);
         FlatRectangle(hilite_ul.x, hilite_ul.y, hilite_lr.x, hilite_lr.y, hilite_color_to_use, CLR_ZERO, 0);
 
-        // idx0 to idx1 is unhilited, idx1 to idx2 is hilited, and idx2 to idx3 is unhilited; each range may be empty
-        int idx0 = m_first_char_shown;
-        int idx1 = std::max(low_cursor_pos, m_first_char_shown);
-        int idx2 = std::min(high_cursor_pos, last_visible_char);
-        int idx3 = last_visible_char;
+        // STRING_INDEX_0 to STRING_INDEX_1 is unhilited, STRING_INDEX_1 to
+        // STRING_INDEX_2 is hilited, and STRING_INDEX_2 to STRING_INDEX_3 is
+        // unhilited; each range may be empty
+        const int STRING_INDEX_0 = StringIndexOf(m_first_char_shown);
+        const int STRING_INDEX_1 = StringIndexOf(std::max(low_cursor_pos, m_first_char_shown));
+        const int STRING_INDEX_2 = StringIndexOf(std::min(high_cursor_pos, last_visible_char));
 
         // draw text
         int text_x_pos = ul.x + PIXEL_MARGIN;
         glColor(text_color_to_use);
-        text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(idx0, idx1 - idx0));
+        text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(STRING_INDEX_0, STRING_INDEX_1 - STRING_INDEX_0));
         glColor(sel_text_color_to_use);
-        text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(idx1, idx2 - idx1));
+        text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(STRING_INDEX_1, STRING_INDEX_2 - STRING_INDEX_1));
         glColor(text_color_to_use);
-        text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(idx2, idx3 - idx2));
+        text_x_pos += GetFont()->RenderText(text_x_pos, text_y_pos, WindowText().substr(STRING_INDEX_2, STRING_INDEX_END - STRING_INDEX_2));
     } else { // no selected text
         glColor(text_color_to_use);
-        GetFont()->RenderText(client_ul.x, text_y_pos, WindowText().substr(m_first_char_shown, last_visible_char - m_first_char_shown));
+        const int STRING_INDEX_0 = StringIndexOf(m_first_char_shown);
+        GetFont()->RenderText(client_ul.x, text_y_pos, WindowText().substr(STRING_INDEX_0, STRING_INDEX_END - STRING_INDEX_0));
         if (GUI::GetGUI()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
             int caret_x = ScreenPosOfChar(m_cursor_pos.second);
             glDisable(GL_TEXTURE_2D);
@@ -255,7 +258,8 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
                 emit_signal = true;
             } else if (0 < m_cursor_pos.first) {
                 m_cursor_pos.second = --m_cursor_pos.first;
-                Erase(m_cursor_pos.first);
+                std::pair<int, int> range = StringRangeOf(m_cursor_pos.first);
+                Erase(range.first, range.second - range.first);
                 emit_signal = true;
             }
             AdjustView();
@@ -265,7 +269,8 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
                 ClearSelected();
                 emit_signal = true;
             } else if (m_cursor_pos.first < Length()) {
-                Erase(m_cursor_pos.first);
+                std::pair<int, int> range = StringRangeOf(m_cursor_pos.first);
+                Erase(range.first, range.second - range.first);
                 emit_signal = true;
             }
             AdjustView();
@@ -277,42 +282,33 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
             m_recently_edited = false;
             break;
         default:
-            // only process it if it's a printable character, and no significant modifiers are in use
+            // only process it if it's a valid code point or a known printable
+            // key, and no significant modifiers are in use
+            std::string translated_code_point;
             if (key_code_point) {
-                std::string translated_code_point;
                 try {
                     boost::uint32_t chars[] = { key_code_point };
                     utf8::utf32to8(chars, chars + 1, std::back_inserter(translated_code_point));
                 } catch (const utf8::invalid_code_point&) {
                     translated_code_point.clear();
                 }
-                if (!translated_code_point.empty() &&
-                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
-                    if (MultiSelected())
-                        ClearSelected();
-                    Insert(m_cursor_pos.first, translated_code_point);  // insert code point after caret
-                    m_cursor_pos.first += translated_code_point.size(); // then move the caret fwd
-                    m_cursor_pos.second = m_cursor_pos.first;
-                    emit_signal = true;                                 // notify parent that text has changed
-                    if (LastVisibleChar() <= m_cursor_pos.first)        // when we over-run our writing space with typing, scroll the window
-                        AdjustView();
-                } else {
-                    TextControl::KeyPress(key, key_code_point, mod_keys);
-                }
             } else {
                 KeypadKeyToPrintable(key, mod_keys);
-                if (key < GGK_DELETE && isprint(key) &&
-                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
-                    if (MultiSelected())
-                        ClearSelected();
-                    Insert(m_cursor_pos.first, key);                // insert character after caret
-                    m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd one
-                    emit_signal = true;                             // notify parent that text has changed
-                    if (LastVisibleChar() <= m_cursor_pos.first)    // when we over-run our writing space with typing, scroll the window
-                        AdjustView();
-                } else {
-                    TextControl::KeyPress(key, key_code_point, mod_keys);
-                }
+                if (GGK_DELETE <= key || !std::isprint(key))
+                    translated_code_point.clear();
+            }
+            if (!translated_code_point.empty() &&
+                !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
+                if (MultiSelected())
+                    ClearSelected();
+                Insert(StringIndexOf(m_cursor_pos.first),       // insert code point after caret
+                       translated_code_point);
+                m_cursor_pos.second = ++m_cursor_pos.first;     // then move the caret fwd
+                emit_signal = true;                             // notify parent that text has changed
+                if (LastVisibleChar() <= m_cursor_pos.first)    // when we over-run our writing space with typing, scroll the window
+                    AdjustView();
+            } else {
+                TextControl::KeyPress(key, key_code_point, mod_keys);
             }
             break;
         }
@@ -346,7 +342,7 @@ void Edit::SetSelectedTextColor(Clr c)
 
 void Edit::SelectAll()
 {
-    m_cursor_pos.first = Length(); 
+    m_cursor_pos.first = Length();
     m_cursor_pos.second = 0;
     AdjustView();
 }
@@ -439,6 +435,29 @@ int Edit::LastVisibleChar() const
 int Edit::LastButtonDownTime() const
 { return m_last_button_down_time; }
 
+int Edit::StringIndexOf(int char_idx, const std::vector<Font::LineData>* line_data) const
+{
+    int retval;
+    const Font::LineData& line = (line_data ? *line_data : GetLineData())[0];
+    if (line.char_data.empty())
+        retval = 0;
+    else if (char_idx == static_cast<int>(line.char_data.size()))
+        retval = m_text.size();
+    else
+        retval = line.char_data[char_idx].original_char_index;
+    return retval;
+}
+
+std::pair<int, int> Edit::StringRangeOf(int char_idx, const std::vector<Font::LineData>* line_data/* = 0*/) const
+{
+    std::pair<int, int> retval;
+    retval.first = StringIndexOf(char_idx, line_data);
+    std::string::const_iterator it = m_text.begin() + retval.first;
+    utf8::next(it, m_text.end());
+    retval.second = std::distance(m_text.begin(), it);
+    return retval;
+}
+
 bool Edit::InDoubleButtonDownMode() const
 { return m_in_double_click_mode; }
 
@@ -478,8 +497,8 @@ void Edit::ClearDoubleButtonDownMode()
 
 void Edit::ClearSelected()
 {
-    int erase_start = std::min(m_cursor_pos.first, m_cursor_pos.second);
-    int erase_amount = abs(m_cursor_pos.second - m_cursor_pos.first);
+    int erase_start = StringIndexOf(std::min(m_cursor_pos.first, m_cursor_pos.second));
+    int erase_amount = StringIndexOf(std::max(m_cursor_pos.first, m_cursor_pos.second)) - erase_start;
     if (m_cursor_pos.first < m_cursor_pos.second)
         m_cursor_pos.second = m_cursor_pos.first;
     else

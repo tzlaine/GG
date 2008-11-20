@@ -26,6 +26,7 @@
 
 #include <GG/DrawUtil.h>
 #include <GG/WndEditor.h>
+#include <GG/utf8/checked.h>
 
 #include <boost/assign/list_of.hpp>
 
@@ -76,6 +77,7 @@ TextControl::TextControl() :
     m_format(FORMAT_NONE),
     m_clip_text(false),
     m_set_min_size(false),
+    m_code_points(0),
     m_fit_to_text(false),
     m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
@@ -88,6 +90,7 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     m_text_color(color),
     m_clip_text(false),
     m_set_min_size(false),
+    m_code_points(0),
     m_font(font),
     m_fit_to_text(false),
     m_min_usable_size(INVALID_USABLE_SIZE),
@@ -104,6 +107,7 @@ TextControl::TextControl(int x, int y, const std::string& str, const boost::shar
     m_text_color(color),
     m_clip_text(false),
     m_set_min_size(false),
+    m_code_points(0),
     m_font(font),
     m_fit_to_text(true),
     m_min_usable_size(INVALID_USABLE_SIZE),
@@ -140,13 +144,13 @@ bool TextControl::SetMinSize() const
 { return m_set_min_size; }
 
 TextControl::operator const std::string&() const
-{ return Control::m_text; }
+{ return m_text; }
 
 bool TextControl::Empty() const
-{ return Control::m_text.empty(); }
+{ return m_text.empty(); }
 
 int TextControl::Length() const
-{ return Control::m_text.length(); }
+{ return m_code_points; }
 
 Pt TextControl::TextUpperLeft() const
 { return UpperLeft() + m_text_ul; }
@@ -171,9 +175,10 @@ void TextControl::Render()
 
 void TextControl::SetText(const std::string& str)
 {
-    Control::m_text = str;
+    m_text = str;
     if (m_font) {
         Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
+        m_code_points = utf8::distance(m_text.begin(), m_text.end());
         m_text_ul = Pt();
         m_text_lr = text_sz;
         AdjustMinimumSize();
@@ -219,30 +224,30 @@ void TextControl::SetMinSize(bool b)
 }
 
 void TextControl::operator+=(const std::string& str)
-{ SetText(Control::m_text + str); }
+{ SetText(m_text + str); }
 
 void TextControl::operator+=(char ch)
-{ SetText(Control::m_text + ch); }
+{ SetText(m_text + ch); }
 
 void TextControl::Clear()
 { SetText(""); }
 
 void TextControl::Insert(int pos, char ch)
 {
-    Control::m_text.insert(pos, 1, ch);
-    SetText(Control::m_text);
+    m_text.insert(pos, 1, ch);
+    SetText(m_text);
 }
 
 void TextControl::Insert(int pos, const std::string& s)
 {
-    Control::m_text.insert(pos, s);
-    SetText(Control::m_text);
+    m_text.insert(pos, s);
+    SetText(m_text);
 }
 
 void TextControl::Erase(int pos, int num/* = 1*/)
 {
-    Control::m_text.erase(pos, num);
-    SetText(Control::m_text);
+    m_text.erase(pos, num);
+    SetText(m_text);
 }
 
 void TextControl::DefineAttributes(WndEditor* editor)

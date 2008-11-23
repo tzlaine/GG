@@ -692,6 +692,13 @@ if env['build_sdl_driver']:
             '/OPT:ICF',
             '/MACHINE:X86'
             ])
+    else:
+        serialization_lib_name = 'boost_serialization'
+        suffix = OptionValue('boost_lib_suffix', tutorial_env)
+        if suffix:
+            serialization_lib_name += suffix
+        tutorial_env.AppendUnique(LIBS = [serialization_lib_name])
+
     tutorials = [
         tutorial_env.Program('minimal', ['tutorial/minimal.cpp']),
         tutorial_env.Program('controls', ['tutorial/controls.cpp']),

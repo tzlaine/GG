@@ -456,8 +456,7 @@
 
 /** \page tutorials Tutorials
     \section tut_using Using the Tutorials
-    The following tutorials are available in the tutorial directory.  You can build them all using SCons.  SCons can be
-    found at http://www.scons.org .  An MSVC solution file is also provided.
+    The following tutorials are available in the tutorial directory.  They are built by default when you build GG with SCons.
     \section tut_1 Tutorial 1: Minimal (minimal.cpp)
     This is the minimal interesting GG application, and uses one of the default input drivers, SDL.
     \section tut_2 Tutorial 2: Controls (controls.cpp)

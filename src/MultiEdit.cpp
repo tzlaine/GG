@@ -498,7 +498,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     }
                 } else {
                     KeypadKeyToPrintable(key, mod_keys);
-                    if (GGK_DELETE <= key || !std::isprint(key))
+                    if (GGK_DELETE <= key || !isprint(key))
                         translated_code_point.clear();
                 }
                 if (!translated_code_point.empty() &&

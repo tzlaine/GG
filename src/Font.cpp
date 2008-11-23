@@ -830,7 +830,7 @@ void Font::ClearKnownTags()
 
 void Font::ThrowBadGlyph(const std::string& format_str, boost::uint32_t c)
 {
-    boost::format format(std::isprint(c) ? "%c" : "U+%x");
+    boost::format format(isprint(c) ? "%c" : "U+%x");
     throw BadGlyph(boost::io::str(boost::format(format_str) % boost::io::str(format % c)));
 }
 

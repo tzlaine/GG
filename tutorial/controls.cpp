@@ -27,7 +27,7 @@
 // below for the signal-connection code.
 void QuitButtonClicked()
 {
-    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("Vera.ttf", 12),
+    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
                                 GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
     quit_dlg.Run();
 
@@ -42,7 +42,7 @@ struct BrowseFilesFunctor
 {
     void operator()()
     {
-        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12),
+        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
                              GG::CLR_GRAY, GG::CLR_GRAY);
         file_dlg.Run();
     }
@@ -78,7 +78,7 @@ struct CustomTextRow : GG::ListBox::Row
     CustomTextRow(const std::string& text) :
         Row()
     {
-        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
     }
 
     template <class T>
@@ -86,8 +86,8 @@ struct CustomTextRow : GG::ListBox::Row
         Row()
     {
         std::string t_str = boost::lexical_cast<std::string>(t);
-        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
-        push_back(GG::ListBox::Row::CreateControl(t_str, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(t_str, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
     }
 };
 
@@ -228,7 +228,7 @@ void ControlsTestApp::Initialize()
 {
     SDL_WM_SetCaption("Control-Test GG App", "Control-Test GG App");
 
-    boost::shared_ptr<GG::Font> font = GetFont("Vera.ttf", 12);
+    boost::shared_ptr<GG::Font> font = GetFont("tutorial/Vera.ttf", 12);
 
     // We're creating a layout for this window, so that we don't have to come up with position coordinates for all the
     // Controls.
@@ -344,7 +344,7 @@ void ControlsTestApp::Initialize()
 
     // These two lines load my crappy image of circles used for the next two controls, and then restores the state of
     // GL_TEXTURE_2D, which is changed in the process.
-    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("hatchcircle.png");
+    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("tutorial/hatchcircle.png");
     glDisable(GL_TEXTURE_2D);
 
     // A slideshow-type changing graphic control.

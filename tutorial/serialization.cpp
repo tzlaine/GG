@@ -41,7 +41,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 void QuitButtonClicked()
 {
-    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("Vera.ttf", 12),
+    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
                                 GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
     quit_dlg.Run();
 
@@ -53,7 +53,7 @@ struct BrowseFilesFunctor
 {
     void operator()()
     {
-        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12),
+        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
                              GG::CLR_GRAY, GG::CLR_GRAY);
         file_dlg.Run();
     }
@@ -87,7 +87,7 @@ CustomTextRow::CustomTextRow() :
 CustomTextRow::CustomTextRow(const std::string& text) :
     Row()
 {
-    push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("Vera.ttf", 12), GG::CLR_WHITE));
+    push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
 }
 
 
@@ -222,7 +222,7 @@ void ControlsTestApp::Initialize()
 {
     SDL_WM_SetCaption("Control-Test GG App", "Control-Test GG App");
 
-    boost::shared_ptr<GG::Font> font = GetFont("Vera.ttf", 12);
+    boost::shared_ptr<GG::Font> font = GetFont("tutorial/Vera.ttf", 12);
 
     GG::Layout* layout = new GG::Layout(0, 0, AppWidth(), AppHeight(), 1, 1, 10);
 
@@ -311,7 +311,7 @@ void ControlsTestApp::Initialize()
     scroll->SetMaxSize(GG::Pt(14, 1000));
     layout->Add(scroll, 4, 1, 3, 1);
 
-    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("hatchcircle.png");
+    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("tutorial/hatchcircle.png");
     glDisable(GL_TEXTURE_2D);
     GG::DynamicGraphic* dynamic_graphic =
         new GG::DynamicGraphic(0, 0, 64, 64, true, 64, 64, 0, std::vector<boost::shared_ptr<GG::Texture> >(1, circle_texture));

@@ -641,6 +641,64 @@ if env['build_sdl_driver']:
 
     Depends(lib_gigi_sdl, lib_gigi)
 
+    # The tutorials depend on libGiGiSDL, so we add targets for them here
+    tutorial_env = sdl_env.Copy()
+    tutorial_env.AppendUnique(LIBPATH = ['.'])
+    tutorial_env.AppendUnique(LIBS = ['GiGi', 'GiGiSDL'])
+    if str(Platform()) == 'win32':
+        tutorial_env.AppendUnique(LIBS = [
+            'opengl32',
+            'glu32',
+            'wsock32',
+            'kernel32',
+            'user32',
+            'gdi32.lib',
+            'winspool.lib',
+            'comdlg32.lib',
+            'SDLmain',
+            ])
+        tutorial_env.AppendUnique(CCFLAGS = [
+            '/D "WIN32"',
+            '/D "_WINDOWS"',
+            '/D "BOOST_SIGNALS_STATIC_LINK"',
+            '/D "_MBCS"',
+            '/FD',
+            '/EHsc',
+            '/MD',
+            '/GS',
+            '/Zc:forScope',
+            '/GR',
+            '/W3',
+            '/nologo',
+            '/c',
+            '/Wp64',
+            '/Zi',
+            '/wd4099',
+            '/wd4251',
+            '/wd4800',
+            '/wd4267',
+            '/wd4275',
+            '/wd4244',
+            '/wd4101',
+            '/wd4258'
+            ])
+        tutorial_env.AppendUnique(LINKFLAGS = [
+            '/INCREMENTAL:NO',
+            '/NOLOGO',
+            '/NODEFAULTLIB:"LIBCMT"',
+            '/DEBUG',
+            '/SUBSYSTEM:CONSOLE',
+            '/OPT:REF',
+            '/OPT:ICF',
+            '/MACHINE:X86'
+            ])
+    tutorials = [
+        tutorial_env.Program('minimal', ['tutorial/minimal.cpp']),
+        tutorial_env.Program('controls', ['tutorial/controls.cpp']),
+        tutorial_env.Program('serialization', ['tutorial/serialization.cpp', 'tutorial/saveload.cpp'])
+        ]
+
+
 # define libGiGiOgre objects
 if env['build_ogre_driver']:
     if str(Platform()) == 'win32':
@@ -791,6 +849,7 @@ env.Precious(uninstall)
 default_targets = [lib_gigi]
 if env['build_sdl_driver']:
     default_targets += lib_gigi_sdl
+    default_targets += tutorials
 if env['build_ogre_driver']:
     default_targets += lib_gigi_ogre
 if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:

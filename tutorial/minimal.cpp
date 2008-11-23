@@ -180,7 +180,7 @@ void MinimalGGApp::Initialize()
     // calls you like to a GG::Wnd's Render() method, sandwiched between Exit2DMode() and Enter2DMode().
 
     GG::Wnd* quit_dlg =
-        new GG::ThreeButtonDlg(200, 100, "Are we done yet?", GetFont("Vera.ttf", 12), GG::CLR_SHADOW, 
+        new GG::ThreeButtonDlg(200, 100, "Are we done yet?", GetFont("tutorial/Vera.ttf", 12), GG::CLR_SHADOW, 
                                GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
     quit_dlg->Run();
 

@@ -576,7 +576,7 @@ void FileDlg::PopulateFilters()
         m_file_types_label->Disable();
         m_filter_list->Disable();
     } else {
-        for (unsigned int i = 0; i < m_file_filters.size(); ++i) {
+        for (std::size_t i = 0; i < m_file_filters.size(); ++i) {
             ListBox::Row* row = new ListBox::Row();
             row->push_back(m_file_filters[i].first, m_font, m_text_color);
             m_filter_list->Insert(row);
@@ -601,7 +601,7 @@ void FileDlg::UpdateList()
         std::vector<std::string> filter_specs; // the filter specifications (e.g. "*.png")
         parse(m_file_filters[std::distance(m_filter_list->begin(), it)].second.c_str(), *(!ch_p(',') >> (+(anychar_p - ','))[append(filter_specs)]), space_p);
         file_filters.resize(filter_specs.size());
-        for (unsigned int i = 0; i < filter_specs.size(); ++i) {
+        for (std::size_t i = 0; i < filter_specs.size(); ++i) {
             boost::shared_ptr<std::vector<std::string> > non_wildcards(new std::vector<std::string>); // the parts of the filter spec that are not wildcards
             parse(filter_specs[i].c_str(), *(*ch_p('*') >> (+(anychar_p - '*'))[append(*non_wildcards)]));
 
@@ -663,7 +663,7 @@ void FileDlg::UpdateList()
                 try {
                     if (fs::exists(*it) && !fs::is_directory(*it) && it->filename()[0] != '.') {
                         bool meets_filters = file_filters.empty();
-                        for (unsigned int i = 0; i < file_filters.size() && !meets_filters; ++i) {
+                        for (std::size_t i = 0; i < file_filters.size() && !meets_filters; ++i) {
                             if (parse(it->filename().c_str(), file_filters[i]).full)
                                 meets_filters = true;
                         }

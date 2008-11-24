@@ -146,7 +146,7 @@ MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const
 Pt MenuBar::MinUsableSize() const
 {
     Pt retval;
-    for (unsigned int i = 0; i < m_menu_labels.size(); ++i) {
+    for (std::size_t i = 0; i < m_menu_labels.size(); ++i) {
         Pt min_size = m_menu_labels[i]->MinUsableSize();
         retval.y = std::max(retval.y, min_size.y);
         retval.x += min_size.x;
@@ -233,7 +233,7 @@ void MenuBar::Render()
 void MenuBar::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        for (int i = 0; i < static_cast<int>(m_menu_labels.size()); ++i) {
+        for (std::size_t i = 0; i < m_menu_labels.size(); ++i) {
             if (m_menu_labels[i]->InWindow(pt)) {
                 m_caret = -1;
                 BrowsedSignal(0);
@@ -260,7 +260,7 @@ void MenuBar::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         m_caret = -1;
-        for (unsigned int i = 0; i < m_menu_data.next_level.size(); ++i) {
+        for (std::size_t i = 0; i < m_menu_data.next_level.size(); ++i) {
             if (m_menu_labels[i]->InWindow(pt)) {
                 m_caret = i;
                 break;
@@ -371,7 +371,7 @@ void MenuBar::AdjustLayout(bool reset/* = false*/)
     }
 
     // create any needed labels
-    for (unsigned int i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
+    for (std::size_t i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
         m_menu_labels.push_back(GetStyleFactory()->NewTextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));
         m_menu_labels.back()->Resize(Pt(m_menu_labels.back()->Width() + 2 * MENU_SEPARATION, m_font->Lineskip()));
         AttachChild(m_menu_labels.back());
@@ -380,7 +380,7 @@ void MenuBar::AdjustLayout(bool reset/* = false*/)
     // determine rows layout
     std::vector<int> menu_rows; // each element is the last + 1 index displayable on that row
     int space = Width();
-    for (unsigned int i = 0; i < m_menu_labels.size(); ++i) {
+    for (std::size_t i = 0; i < m_menu_labels.size(); ++i) {
         space -= m_menu_labels[i]->Width();
         if (space < 0) { // if this menu's text won't fit in the available space
             space = Width();
@@ -398,7 +398,7 @@ void MenuBar::AdjustLayout(bool reset/* = false*/)
 
     // place labels
     int label_i = 0;
-    for (unsigned int row = 0; row < menu_rows.size(); ++row) {
+    for (std::size_t row = 0; row < menu_rows.size(); ++row) {
         int x = 0;
         for (; label_i < menu_rows[row]; ++label_i) {
             m_menu_labels[label_i]->MoveTo(Pt(x, row * m_font->Lineskip()));
@@ -493,18 +493,18 @@ void PopupMenu::Render()
 
         int next_menu_x_offset = 0;
         int next_menu_y_offset = 0;
-        for (unsigned int i = 0; i < m_caret.size(); ++i) {
+        for (std::size_t i = 0; i < m_caret.size(); ++i) {
             bool needs_indicator = false;
 
             // get the correct submenu
             MenuItem* menu_ptr = &m_menu_data;
-            for (unsigned int j = 0; j < i; ++j)
+            for (std::size_t j = 0; j < i; ++j)
                 menu_ptr = &menu_ptr->next_level[m_caret[j]];
             MenuItem& menu = *menu_ptr;
 
             // determine the total size of the menu, render it, and record its bounding rect
             std::string str;
-            for (unsigned int j = 0; j < menu.next_level.size(); ++j) {
+            for (std::size_t j = 0; j < menu.next_level.size(); ++j) {
                 str += menu.next_level[j].label + (static_cast<int>(j) < static_cast<int>(menu.next_level.size()) - 1 ? "\n" : "");
                 if (menu.next_level[j].next_level.size() || menu.next_level[j].checked)
                     needs_indicator = true;
@@ -551,7 +551,7 @@ void PopupMenu::Render()
             Rect line_rect = r;
             line_rect.ul.x += HORIZONTAL_MARGIN;
             line_rect.lr.x -= HORIZONTAL_MARGIN;
-            for (unsigned int j = 0; j < menu.next_level.size(); ++j) {
+            for (std::size_t j = 0; j < menu.next_level.size(); ++j) {
                 Clr clr = (m_caret[i] == static_cast<int>(j)) ?
                           (menu.next_level[j].disabled ? DisabledColor(m_sel_text_color) : m_sel_text_color) :
                                   (menu.next_level[j].disabled ? DisabledColor(m_text_color) : m_text_color);
@@ -580,7 +580,7 @@ void PopupMenu::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (m_caret[0] != -1) {
         MenuItem* menu_ptr = &m_menu_data;
-        for (unsigned int i = 0; i < m_caret.size(); ++i)
+        for (std::size_t i = 0; i < m_caret.size(); ++i)
             menu_ptr = &menu_ptr->next_level[m_caret[i]];
         if (!menu_ptr->disabled) {
             m_item_selected = menu_ptr;
@@ -630,7 +630,7 @@ void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
     int update_ID = 0;
     if (m_caret[0] != -1) {
         MenuItem* menu_ptr = &m_menu_data;
-        for (unsigned int i = 0; i < m_caret.size(); ++i)
+        for (std::size_t i = 0; i < m_caret.size(); ++i)
             menu_ptr = &menu_ptr->next_level[m_caret[i]];
         update_ID = menu_ptr->item_ID;
     }

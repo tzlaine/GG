@@ -1006,13 +1006,13 @@ void Wnd::SetBrowseModeTime(int time, int mode/* = 0*/)
     if (static_cast<int>(m_browse_modes.size()) <= mode) {
         if (m_browse_modes.empty()) {
             m_browse_modes.resize(mode + 1);
-            for (unsigned int i = 0; i < m_browse_modes.size() - 1; ++i) {
+            for (std::size_t i = 0; i < m_browse_modes.size() - 1; ++i) {
                 m_browse_modes[i].time = time;
             }
         } else {
-            unsigned int original_size = m_browse_modes.size();
+            std::size_t original_size = m_browse_modes.size();
             m_browse_modes.resize(mode + 1);
-            for (unsigned int i = original_size; i < m_browse_modes.size() - 1; ++i) {
+            for (std::size_t i = original_size; i < m_browse_modes.size() - 1; ++i) {
                 m_browse_modes[i].time = m_browse_modes[original_size - 1].time;
             }
         }
@@ -1106,9 +1106,11 @@ bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
 
 void Wnd::HandleEvent(const WndEvent& event)
 {
-    for (int i = static_cast<int>(m_filters.size()) - 1; i >= 0; --i) {
-        if (m_filters[i]->EventFilter(this, event))
-            return;
+    if (!m_filters.empty()) {
+        for (std::size_t i = m_filters.size() - 1; 0 <= i; --i) {
+            if (m_filters[i]->EventFilter(this, event))
+                return;
+        }
     }
 
     switch (event.Type()) {

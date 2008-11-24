@@ -475,7 +475,7 @@ void WndEditor::FlagGroup(const std::string& name, const std::vector<FlagType>& 
     }
     bool value_found = false;
     FlagType value;
-    for (unsigned int i = 0; i < group_values.size(); ++i) {
+    for (std::size_t i = 0; i < group_values.size(); ++i) {
         if (*flags_and_action.m_flags & group_values[i]) {
             value = group_values[i];
             value_found = true;
@@ -668,13 +668,13 @@ FlagGroupAttributeRow<FlagType>::FlagGroupAttributeRow(const std::string& name, 
     Resize(m_flag_drop_list->Size());
     m_flag_drop_list->SetInteriorColor(CLR_WHITE);
     m_flag_drop_list->SetStyle(LIST_NOSORT);
-    for (unsigned int i = 0; i < m_group_values.size(); ++i) {
+    for (std::size_t i = 0; i < m_group_values.size(); ++i) {
         Row* row = new ListBox::Row();
         row->push_back(CreateControl(boost::lexical_cast<std::string>(m_group_values[i]), font, CLR_BLACK));
         m_flag_drop_list->Insert(row);
     }
     push_back(m_flag_drop_list);
-    unsigned int index = 0;
+    std::size_t index = 0;
     DropDownList::iterator it = m_flag_drop_list->begin();
     for (; index < m_group_values.size(); ++index, ++it) {
         if (m_group_values[index] == value)
@@ -702,7 +702,7 @@ template <class FlagType>
 void FlagGroupAttributeRow<FlagType>::Update()
 {
     m_drop_list_connection.block();
-    unsigned int index = 0;
+    std::size_t index = 0;
     DropDownList::iterator it = m_flag_drop_list->begin();
     for (; index < m_group_values.size(); ++index, ++it) {
         if (m_group_values[index] == m_value)

@@ -335,7 +335,7 @@ std::ostream& operator<<(std::ostream& os, Flags<FlagType> flags)
 {
     unsigned int flags_data = flags.m_flags;
     bool flag_printed = false;
-    for (unsigned int i = 0; i < sizeof(flags_data) * 8; ++i) {
+    for (std::size_t i = 0; i < sizeof(flags_data) * 8; ++i) {
         if (flags_data & 1) {
             if (flag_printed)
                 os << " | ";

@@ -276,7 +276,7 @@ void DynamicGraphic::AddFrames(const std::vector<boost::shared_ptr<Texture> >& t
 {
     if (!textures.empty()) {
         int old_frames = m_frames;
-        for (unsigned int i = 0; i < textures.size() - 1; ++i)
+        for (std::size_t i = 0; i < textures.size() - 1; ++i)
             AddFrames(textures[i], -1);
         AddFrames(textures.back(), m_frames - old_frames);
     }
@@ -378,7 +378,7 @@ void DynamicGraphic::SetFrameIndex(int idx)
                 m_curr_subtexture = 0;
             } else {
                 m_curr_texture = 0;
-                for (unsigned int i = 0; i < m_textures.size(); ++i) {
+                for (std::size_t i = 0; i < m_textures.size(); ++i) {
                     if (0 <= idx - m_textures[i].frames) {
                         idx -= m_textures[i].frames;
                         m_curr_texture++;

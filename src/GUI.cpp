@@ -1089,19 +1089,21 @@ bool GUI::ProcessBrowseInfoImpl(Wnd* wnd)
 {
     bool retval = false;
     const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
-    int delta_t = Ticks() - s_impl->m_prev_wnd_under_cursor_time;
-    for (int i = static_cast<int>(browse_modes.size()) - 1; 0 <= i; --i) {
-        if (browse_modes[i].time < delta_t) {
-            if (browse_modes[i].wnd && browse_modes[i].wnd->WndHasBrowseInfo(wnd, i)) {
-                if (s_impl->m_browse_target != wnd || s_impl->m_browse_info_wnd != browse_modes[i].wnd || s_impl->m_browse_info_mode != i) {
-                    s_impl->m_browse_target = wnd;
-                    s_impl->m_browse_info_wnd = browse_modes[i].wnd;
-                    s_impl->m_browse_info_mode = i;
-                    s_impl->m_browse_info_wnd->SetCursorPosition(s_impl->m_mouse_pos);
+    if (!browse_modes.empty()) {
+        int delta_t = Ticks() - s_impl->m_prev_wnd_under_cursor_time;
+        for (std::size_t i = browse_modes.size() - 1; 0 <= i; --i) {
+            if (browse_modes[i].time < delta_t) {
+                if (browse_modes[i].wnd && browse_modes[i].wnd->WndHasBrowseInfo(wnd, i)) {
+                    if (s_impl->m_browse_target != wnd || s_impl->m_browse_info_wnd != browse_modes[i].wnd || s_impl->m_browse_info_mode != static_cast<int>(i)) {
+                        s_impl->m_browse_target = wnd;
+                        s_impl->m_browse_info_wnd = browse_modes[i].wnd;
+                        s_impl->m_browse_info_mode = i;
+                        s_impl->m_browse_info_wnd->SetCursorPosition(s_impl->m_mouse_pos);
+                    }
+                    retval = true;
                 }
-                retval = true;
+                break;
             }
-            break;
         }
     }
     return retval;

@@ -50,7 +50,7 @@ TabWnd::TabWnd() :
 
 TabWnd::~TabWnd()
 {
-    for (unsigned int i = 0; i < m_wnds.size(); ++i) {
+    for (std::size_t i = 0; i < m_wnds.size(); ++i) {
         delete m_wnds[i].first;
     }
 }
@@ -102,7 +102,7 @@ Wnd* TabWnd::RemoveWnd(const std::string& name)
 {
     Wnd* retval = 0;
     int index = NO_WND;
-    for (unsigned int i = 0; i < m_wnds.size(); ++i) {
+    for (std::size_t i = 0; i < m_wnds.size(); ++i) {
         if (m_wnds[i].second == name) {
             index = i;
             break;
@@ -203,7 +203,7 @@ TabBar::TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr col
 Pt TabBar::MinUsableSize() const
 {
     int y = 0;
-    for (unsigned int i = 0; i < m_tab_buttons.size(); ++i) {
+    for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
         int button_min_y = m_tab_buttons[i]->MinUsableSize().y;
         if (y < button_min_y)
             y = button_min_y;
@@ -262,7 +262,7 @@ void TabBar::InsertTab(int index, const std::string& name)
 void TabBar::RemoveTab(const std::string& name)
 {
     int index = NO_TAB;
-    for (unsigned int i = 0; i < m_tab_buttons.size(); ++i) {
+    for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
         if (m_tab_buttons[i]->WindowText() == name) {
             index = i;
             break;

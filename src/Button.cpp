@@ -572,7 +572,7 @@ RadioButtonGroup::RadioButtonGroup(int x, int y, int w, int h, Orientation orien
 Pt RadioButtonGroup::MinUsableSize() const
 {
     Pt retval;
-    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+    for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
         Pt min_usable_size = m_button_slots[i].button->MinUsableSize();
         if (m_orientation == VERTICAL) {
             retval.x = std::max(retval.x, min_usable_size.x);
@@ -693,7 +693,7 @@ void RadioButtonGroup::InsertButton(int index, StateButton* bn)
             layout->ResizeLayout(1, layout->Columns() + CELLS_PER_BUTTON);
             layout->SetColumnStretch(layout->Columns() - CELLS_PER_BUTTON, X_STRETCH);
         }
-        for (int i = m_button_slots.size() - 1; index <= i; --i) {
+        for (std::size_t i = m_button_slots.size() - 1; static_cast<std::size_t>(index) <= i; --i) {
             layout->Remove(m_button_slots[i].button);
             layout->Add(m_button_slots[i].button,
                         m_orientation == VERTICAL ? i * CELLS_PER_BUTTON + CELLS_PER_BUTTON : 0,
@@ -732,7 +732,7 @@ void RadioButtonGroup::InsertButton(int index, const std::string& text, const bo
 void RadioButtonGroup::RemoveButton(StateButton* button)
 {
     int index = -1;
-    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+    for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
         if (m_button_slots[i].button == button) {
             index = i;
             break;
@@ -743,7 +743,7 @@ void RadioButtonGroup::RemoveButton(StateButton* button)
     const int CELLS_PER_BUTTON = m_expand_buttons ? 1 : 2;
     Layout* layout = GetLayout();
     layout->Remove(m_button_slots[index].button);
-    for (unsigned int i = index + 1; i < m_button_slots.size(); ++i) {
+    for (std::size_t i = index + 1; i < m_button_slots.size(); ++i) {
         layout->Remove(m_button_slots[i].button);
         if (m_orientation == VERTICAL) {
             layout->Add(m_button_slots[i].button, i * CELLS_PER_BUTTON - CELLS_PER_BUTTON, 0);
@@ -787,7 +787,7 @@ void RadioButtonGroup::ExpandButtons(bool expand)
             RemoveButton(button);
         }
         m_expand_buttons = expand;
-        for (unsigned int i = 0; i < buttons.size(); ++i) {
+        for (std::size_t i = 0; i < buttons.size(); ++i) {
             AddButton(buttons[i]);
         }
         SetCheck(old_checked_button);
@@ -805,7 +805,7 @@ void RadioButtonGroup::ExpandButtonsProportionally(bool proportional)
             RemoveButton(button);
         }
         m_expand_buttons_proportionally = proportional;
-        for (unsigned int i = 0; i < buttons.size(); ++i) {
+        for (std::size_t i = 0; i < buttons.size(); ++i) {
             AddButton(buttons[i]);
         }
         SetCheck(old_checked_button);
@@ -834,7 +834,7 @@ const std::vector<RadioButtonGroup::ButtonSlot>& RadioButtonGroup::ButtonSlots()
 
 void RadioButtonGroup::ConnectSignals()
 {
-    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+    for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
         m_button_slots[i].connection = Connect(m_button_slots[i].button->CheckedSignal, ButtonClickedFunctor(this, m_button_slots[i].button, i));
     }
     SetCheck(m_checked_button);
@@ -859,7 +859,7 @@ void RadioButtonGroup::HandleRadioClick(int index, bool set_check)
 
 void RadioButtonGroup::Reconnect()
 {
-    for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+    for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
         m_button_slots[i].connection.disconnect();
     }
     ConnectSignals();

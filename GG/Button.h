@@ -420,14 +420,14 @@ void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
         std::vector<StateButton*> m_buttons;
         if (Archive::is_saving::value) {
             m_buttons.resize(m_button_slots.size());
-            for (unsigned int i = 0; i < m_button_slots.size(); ++i) {
+            for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
                 m_buttons[i] = m_button_slots[i].button;
             }
         }
         ar  & BOOST_SERIALIZATION_NVP(m_buttons);
         if (Archive::is_loading::value) {
             m_button_slots.resize(m_buttons.size());
-            for (unsigned int i = 0; i < m_buttons.size(); ++i) {
+            for (std::size_t i = 0; i < m_buttons.size(); ++i) {
                 m_button_slots[i].button = m_buttons[i];
             }
         }

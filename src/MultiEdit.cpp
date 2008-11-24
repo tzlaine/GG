@@ -585,7 +585,7 @@ void MultiEdit::SetText(const std::string& str)
                 if (cursor_begin_idx != -1 && cursor_end_idx != -1) {
                     bool found_cursor_begin = false;
                     bool found_cursor_end = false;
-                    for (unsigned int i = 0; i < GetLineData().size(); ++i) {
+                    for (std::size_t i = 0; i < GetLineData().size(); ++i) {
                         if (!found_cursor_begin && cursor_begin_idx <= GetLineData()[i].char_data.back().original_char_index) {
                             m_cursor_begin.first = i;
                             m_cursor_begin.second = cursor_begin_idx - StringIndexOf(i, 0);
@@ -711,8 +711,8 @@ std::pair<int, int> MultiEdit::CharAt(int string_idx) const
         const std::vector<Font::LineData>& lines = GetLineData();
         bool found_it = false;
         int prev_original_char_index = -1;
-        for (unsigned int i = 0; i < lines.size() && !found_it; ++i) {
-            for (unsigned int j = 0; j < lines[i].char_data.size(); ++j) {
+        for (std::size_t i = 0; i < lines.size() && !found_it; ++i) {
+            for (std::size_t j = 0; j < lines[i].char_data.size(); ++j) {
                 int current_idx = lines[i].char_data[j].original_char_index;
                 if (prev_original_char_index < string_idx && string_idx <= current_idx) {
                     retval.first = i;
@@ -751,7 +751,7 @@ int MultiEdit::StringIndexOf(int row, int char_idx, const std::vector<Font::Line
     } else {
         retval = lines[row].char_data[char_idx].original_char_index;
         // "rewind" the first position to encompass all tag text that is associated with that position
-        for (unsigned int i = 0; i < lines[row].char_data[char_idx].tags.size(); ++i) {
+        for (std::size_t i = 0; i < lines[row].char_data[char_idx].tags.size(); ++i) {
             retval -= lines[row].char_data[char_idx].tags[i]->OriginalStringChars();
         }
     }

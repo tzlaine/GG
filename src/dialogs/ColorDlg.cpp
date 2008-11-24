@@ -189,7 +189,7 @@ void HueSaturationPicker::Render()
     glScaled(size.x, size.y, 1.0);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-    for (unsigned int i = 0; i < m_vertices.size(); ++i) {
+    for (std::size_t i = 0; i < m_vertices.size(); ++i) {
         glVertexPointer(2, GL_DOUBLE, 0, &m_vertices[i][0]);
         glColorPointer(4, GL_UNSIGNED_BYTE, 0, &m_colors[i][0]);
         glDrawArrays(GL_QUAD_STRIP, 0, m_vertices[i].size());
@@ -838,7 +838,7 @@ void ColorDlg::Init(const boost::shared_ptr<Font>& font)
 
 void ColorDlg::ConnectSignals()
 {
-    for (unsigned int i = 0; i < m_color_buttons.size(); ++i) {
+    for (std::size_t i = 0; i < m_color_buttons.size(); ++i) {
         Connect(m_color_buttons[i]->ClickedSignal, ColorButtonClickFunctor(i, this));
     }
     Connect(m_sliders[R]->SlidSignal, &ColorDlg::RedSliderChanged, this);

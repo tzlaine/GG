@@ -1106,11 +1106,9 @@ bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
 
 void Wnd::HandleEvent(const WndEvent& event)
 {
-    if (!m_filters.empty()) {
-        for (std::size_t i = m_filters.size() - 1; 0 <= i; --i) {
-            if (m_filters[i]->EventFilter(this, event))
-                return;
-        }
+    for (std::vector<Wnd*>::reverse_iterator it = m_filters.rbegin(); it != m_filters.rend(); ++it) {
+        if ((*it)->EventFilter(this, event))
+            return;
     }
 
     switch (event.Type()) {

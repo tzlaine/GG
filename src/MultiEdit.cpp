@@ -500,6 +500,8 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     KeypadKeyToPrintable(key, mod_keys);
                     if (GGK_DELETE <= key || !isprint(key))
                         translated_code_point.clear();
+                    else
+                        translated_code_point = key;
                 }
                 if (!translated_code_point.empty() &&
                     !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {

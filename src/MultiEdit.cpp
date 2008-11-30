@@ -504,7 +504,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                         translated_code_point = key;
                 }
                 if (!translated_code_point.empty() &&
-                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META | MOD_KEY_MODE))) {
+                    !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META))) {
                     if (MultiSelected())
                         ClearSelected();
                     // insert the character to the right of the caret

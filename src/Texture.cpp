@@ -242,9 +242,9 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     }
 
     m_filename = filename;
-    m_default_width = ilGetInteger(IL_IMAGE_WIDTH);
+    m_default_width = X(ilGetInteger(IL_IMAGE_WIDTH));
     CheckILErrors("ilGetInteger(IL_IMAGE_WIDTH)");
-    m_default_height = ilGetInteger(IL_IMAGE_HEIGHT);
+    m_default_height = Y(ilGetInteger(IL_IMAGE_HEIGHT));
     CheckILErrors("ilGetInteger(IL_IMAGE_HEIGHT)");
     m_bytes_pp = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
     CheckILErrors("ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL)");

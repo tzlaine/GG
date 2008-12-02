@@ -67,7 +67,7 @@ public:
 
     /** \name Structors */ ///@{
     /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null. */
-    DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags = CLICKABLE);
+    DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color, Flags<WndFlag> flags = CLICKABLE);
 
     ~DropDownList(); ///< dtor
     //@}
@@ -91,7 +91,7 @@ public:
     bool           Selected(std::size_t n) const; ///< returns true if row at position \a n is selected
     Clr            InteriorColor() const;    ///< returns the color painted into the client area of the control
 
-    int            DropHeight() const; ///< returns the height of the drop-down list
+    Y         DropHeight() const; ///< returns the height of the drop-down list
 
     /** returns the style flags of the list \see GG::ListBoxStyle */
     Flags<ListBoxStyle> Style() const;
@@ -104,7 +104,7 @@ public:
         the user; it may be >= NumCols(). */
     std::size_t    SortCol() const;
 
-    int            ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
+    X         ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
     Alignment      ColAlignment(std::size_t n) const; ///< returns the alignment of column \a n; must be LIST_LEFT, LIST_CENTER, or LIST_RIGHT; not range-checked
     Alignment      RowAlignment(iterator it) const;   ///< returns the alignment of row \a n; must be LIST_TOP, LIST_VCENTER, or LIST_BOTTOM; not range-checked
 
@@ -149,14 +149,14 @@ public:
     void           Select(std::size_t n);         ///< selects row-item \a it in the list
 
     void           SetInteriorColor(Clr c);       ///< sets the color painted into the client area of the control
-    void           SetDropHeight(int h);          ///< sets the height of the drop-down list
+    void           SetDropHeight(Y h);       ///< sets the height of the drop-down list
 
     /** sets the style flags for the list to \a s (invalidates currently selected item). \see GG::ListBoxStyle */
     void           SetStyle(Flags<ListBoxStyle> s);
 
-    void           SetNumCols(std::size_t n);         ///< sets the number of columns in each list item to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
-    void           SetSortCol(std::size_t n);         ///< sets the index of the column used to sort rows when sorting is enabled (invalidates currently selected item); not range-checked
-    void           SetColWidth(std::size_t n, int w); ///< sets the width of column \n to \a w; not range-checked
+    void           SetNumCols(std::size_t n);            ///< sets the number of columns in each list item to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
+    void           SetSortCol(std::size_t n);            ///< sets the index of the column used to sort rows when sorting is enabled (invalidates currently selected item); not range-checked
+    void           SetColWidth(std::size_t n, X w); ///< sets the width of column \n to \a w; not range-checked
 
     /** fixes the column widths; by default, an empty list will take on the number of columns of its first added row. \note The number 
         of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called. */
@@ -196,12 +196,12 @@ template <class Archive>
 void GG::DropDownList::serialize(Archive& ar, const unsigned int version)
 {
     std::size_t current_item;
-    if (Archive::is_saving)
+    if (Archive::is_saving::value)
         current_item = std::distance(m_LB->begin(), m_current_item);
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
         & BOOST_SERIALIZATION_NVP(current_item)
         & BOOST_SERIALIZATION_NVP(m_LB);
-    if (Archive::is_loading)
+    if (Archive::is_loading::value)
         m_current_item = boost::next(m_LB->begin(), current_item);
 }
 

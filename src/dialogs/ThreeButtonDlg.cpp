@@ -43,10 +43,9 @@ ThreeButtonDlg::ThreeButtonDlg() :
     m_button_0(0),
     m_button_1(0),
     m_button_2(0)
-{
-}
+{}
 
-ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
+ThreeButtonDlg::ThreeButtonDlg(X x, Y y, X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/,
                                const std::string& two/* = ""*/) :
@@ -61,11 +60,9 @@ ThreeButtonDlg::ThreeButtonDlg(int x, int y, int w, int h, const std::string& ms
     m_button_0(0),
     m_button_1(0),
     m_button_2(0)
-{
-    Init(msg, font, buttons, zero, one, two);
-}
+{ Init(msg, font, buttons, zero, one, two); }
 
-ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
+ThreeButtonDlg::ThreeButtonDlg(X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
     Wnd((GUI::GetGUI()->AppWidth() - w) / 2, (GUI::GetGUI()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
@@ -79,34 +76,22 @@ ThreeButtonDlg::ThreeButtonDlg(int w, int h, const std::string& msg, const boost
     m_button_0(0),
     m_button_1(0),
     m_button_2(0)
-{
-    Init(msg, font, buttons, zero, one, two);
-}
+{ Init(msg, font, buttons, zero, one, two); }
 
 Clr ThreeButtonDlg::ButtonColor() const
-{
-    return m_button_color;
-}
+{ return m_button_color; }
 
 int ThreeButtonDlg::Result() const
-{
-    return m_result;
-}
+{ return m_result; }
 
 int ThreeButtonDlg::DefaultButton() const
-{
-    return m_default;
-}
+{ return m_default; }
 
 int ThreeButtonDlg::EscapeButton() const
-{
-    return m_escape;
-}
+{ return m_escape; }
 
 void ThreeButtonDlg::Render()
-{
-    FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
-}
+{ FlatRectangle(UpperLeft(), LowerRight(), m_color, m_border_color, 1); }
 
 void ThreeButtonDlg::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
@@ -173,31 +158,31 @@ void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>&
         buttons = 3;
 
     const int SPACING = 10;
-    const int BUTTON_HEIGHT = font->Height() + 10;
+    const Y BUTTON_HEIGHT = font->Height() + 10;
 
-    Layout* layout = new Layout(0, 0, 1, 1, 2, 1, 10);
-    Layout* button_layout = new Layout(0, 0, 1, 1, 1, buttons, 0, 10);
+    Layout* layout = new Layout(X0, Y0, X1, Y1, 2, 1, 10);
+    Layout* button_layout = new Layout(X0, Y0, X1, Y1, 1, buttons, 0, 10);
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
-    TextControl* message_text = style->NewTextControl(0, 0, ClientWidth() - 2 * SPACING, Height(), msg, font, m_text_color,
+    TextControl* message_text = style->NewTextControl(X0, Y0, ClientWidth() - 2 * SPACING, Height(), msg, font, m_text_color,
                                                       FORMAT_CENTER | FORMAT_VCENTER | FORMAT_WORDBREAK);
     message_text->SetMinSize(true);
     layout->Add(message_text, 0, 0);
     layout->SetRowStretch(0, 1);
     layout->SetMinimumRowHeight(1, BUTTON_HEIGHT);
 
-    m_button_0 = style->NewButton(0, 0, 1, 1, (zero == "" ? (buttons < 3 ? "Ok" : "Yes") : zero),
+    m_button_0 = style->NewButton(X0, Y0, X1, Y1, (zero == "" ? (buttons < 3 ? "Ok" : "Yes") : zero),
                                   font, m_button_color, m_text_color);
     button_layout->Add(m_button_0, 0, 0);
 
     if (2 <= buttons) {
-        m_button_1 = style->NewButton(0, 0, 1, 1, (one == "" ? (buttons < 3 ? "Cancel" : "No") : one),
+        m_button_1 = style->NewButton(X0, Y0, X1, Y1, (one == "" ? (buttons < 3 ? "Cancel" : "No") : one),
                                       font, m_button_color, m_text_color);
         button_layout->Add(m_button_1, 0, 1);
     }
     if (3 <= buttons) {
-        m_button_2 = style->NewButton(0, 0, 1, 1, (two == "" ? "Cancel" : two),
+        m_button_2 = style->NewButton(X0, Y0, X1, Y1, (two == "" ? "Cancel" : two),
                                       font, m_button_color, m_text_color);
         button_layout->Add(m_button_2, 0, 2);
     }

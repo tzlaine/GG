@@ -51,26 +51,26 @@ namespace {
     struct IsLeft
     {
         bool operator()(const Pt& lhs, const Pt& rhs) const {return lhs.x < rhs.x;}
-        bool operator()(int x, const Pt& pt) const          {return x < pt.x;}
-        bool operator()(const Pt& pt, int x) const          {return pt.x < x;}
+        bool operator()(X x, const Pt& pt) const       {return x < pt.x;}
+        bool operator()(const Pt& pt, X x) const       {return pt.x < x;}
     };
     struct IsTop
     {
         bool operator()(const Pt& lhs, const Pt& rhs) const {return lhs.y < rhs.y;}
-        bool operator()(int y, const Pt& pt) const          {return y < pt.y;}
-        bool operator()(const Pt& pt, int y) const          {return pt.y < y;}
+        bool operator()(Y y, const Pt& pt) const       {return y < pt.y;}
+        bool operator()(const Pt& pt, Y y) const       {return pt.y < y;}
     };
     struct IsRight
     {
         bool operator()(const Pt& lhs, const Pt& rhs) const {return rhs.x < lhs.x;}
-        bool operator()(int x, const Pt& pt) const          {return pt.x < x;}
-        bool operator()(const Pt& pt, int x) const          {return x < pt.x;}
+        bool operator()(X x, const Pt& pt) const       {return pt.x < x;}
+        bool operator()(const Pt& pt, X x) const       {return x < pt.x;}
     };
     struct IsBottom
     {
         bool operator()(const Pt& lhs, const Pt& rhs) const {return rhs.y < lhs.y;}
-        bool operator()(int y, const Pt& pt) const          {return pt.y < y;}
-        bool operator()(const Pt& pt, int y) const          {return y < pt.y;}
+        bool operator()(Y y, const Pt& pt) const       {return pt.y < y;}
+        bool operator()(const Pt& pt, Y y) const       {return y < pt.y;}
     };
     struct Pointer {};
     struct Left {};
@@ -95,12 +95,14 @@ namespace {
 
     struct WndHorizontalLess
     {
-        bool operator()(const Wnd* lhs, const Wnd* rhs) const {return lhs->UpperLeft().x < rhs->UpperLeft().x;}
+        bool operator()(const Wnd* lhs, const Wnd* rhs) const
+            {return lhs->UpperLeft().x < rhs->UpperLeft().x;}
     };
 
     struct WndVerticalLess
     {
-        bool operator()(const Wnd* lhs, const Wnd* rhs) const {return lhs->UpperLeft().y < rhs->UpperLeft().y;}
+        bool operator()(const Wnd* lhs, const Wnd* rhs) const
+            {return lhs->UpperLeft().y < rhs->UpperLeft().y;}
     };
 
     const int DEFAULT_LAYOUT_BORDER_MARGIN = 0;
@@ -184,7 +186,7 @@ Wnd::Wnd() :
     m_zorder(0),
     m_visible(true),
     m_clip_children(false),
-    m_max_size(1 << 30, 1 << 30),
+    m_max_size(X(1 << 30), Y(1 << 30)),
     m_layout(0),
     m_containing_layout(0),
     m_flags()
@@ -194,7 +196,7 @@ Wnd::Wnd() :
     m_browse_modes[0].wnd = s_default_browse_info_wnd;
 }
 
-Wnd::Wnd(int x, int y, int w, int h, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
+Wnd::Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
     m_done(false),
     m_parent(0),
     m_zorder(0),
@@ -202,7 +204,7 @@ Wnd::Wnd(int x, int y, int w, int h, Flags<WndFlag> flags/* = CLICKABLE | DRAGAB
     m_clip_children(false),
     m_upperleft(x, y),
     m_lowerright(x + w, y + h),
-    m_max_size(1 << 30, 1 << 30),
+    m_max_size(X(1 << 30), Y(1 << 30)),
     m_layout(0),
     m_containing_layout(0),
     m_flags(flags)
@@ -236,54 +238,34 @@ Wnd::~Wnd()
 }
 
 bool Wnd::Clickable() const
-{
-    return m_flags & CLICKABLE;
-}
+{ return m_flags & CLICKABLE; }
 
 bool Wnd::RepeatButtonDown() const
-{
-    return m_flags & REPEAT_BUTTON_DOWN;
-}
+{ return m_flags & REPEAT_BUTTON_DOWN; }
 
 bool Wnd::Dragable() const
-{
-    return m_flags & DRAGABLE;
-}
+{ return m_flags & DRAGABLE; }
 
 bool Wnd::Resizable() const
-{
-    return m_flags & RESIZABLE;
-}
+{ return m_flags & RESIZABLE; }
 
 bool Wnd::OnTop() const
-{
-    return !m_parent && m_flags & ONTOP;
-}
+{ return !m_parent && m_flags & ONTOP; }
 
 bool Wnd::Modal() const
-{
-    return !m_parent && m_flags & MODAL;
-}
+{ return !m_parent && m_flags & MODAL; }
 
 bool Wnd::ClipChildren() const
-{
-    return m_clip_children;
-}
+{ return m_clip_children; }
 
 bool Wnd::Visible() const
-{
-    return m_visible;
-}
+{ return m_visible; }
 
 const std::string& Wnd::WindowText() const
-{
-    return m_text;
-}
+{ return m_text; }
 
 const std::string& Wnd::DragDropDataType() const
-{
-    return m_drag_drop_data_type;
-}
+{ return m_drag_drop_data_type; }
 
 void Wnd::DropsAcceptable(DropsAcceptableIter first,
                           DropsAcceptableIter last,
@@ -311,104 +293,64 @@ Pt Wnd::LowerRight() const
 }
 
 Pt Wnd::RelativeUpperLeft() const
-{
-    return m_upperleft;
-}
+{ return m_upperleft; }
 
 Pt Wnd::RelativeLowerRight() const
-{
-    return m_lowerright;
-}
+{ return m_lowerright; }
 
-int Wnd::Width() const
-{
-    return m_lowerright.x - m_upperleft.x;
-}
+X Wnd::Width() const
+{ return m_lowerright.x - m_upperleft.x; }
 
-int Wnd::Height() const
-{
-    return m_lowerright.y - m_upperleft.y;
-}
+Y Wnd::Height() const
+{ return m_lowerright.y - m_upperleft.y; }
 
 int Wnd::ZOrder() const
-{
-    return m_zorder;
-}
+{ return m_zorder; }
 
 Pt Wnd::Size() const
-{
-    return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y);
-}
+{ return Pt(m_lowerright.x - m_upperleft.x, m_lowerright.y - m_upperleft.y); }
 
 Pt Wnd::MinSize() const
-{
-    return m_min_size;
-}
+{ return m_min_size; }
 
 Pt Wnd::MaxSize() const
-{
-    return m_max_size;
-}
+{ return m_max_size; }
 
 Pt Wnd::MinUsableSize() const
-{
-    return Size();
-}
+{ return Size(); }
 
 Pt Wnd::ClientUpperLeft() const
-{
-    return UpperLeft();
-}
+{ return UpperLeft(); }
 
 Pt Wnd::ClientLowerRight() const
-{
-    return LowerRight();
-}
+{ return LowerRight(); }
 
 Pt Wnd::ClientSize() const
-{
-    return ClientLowerRight() - ClientUpperLeft();
-}
+{ return ClientLowerRight() - ClientUpperLeft(); }
 
-int Wnd::ClientWidth() const
-{
-    return ClientLowerRight().x - ClientUpperLeft().x;
-}
+X Wnd::ClientWidth() const
+{ return ClientLowerRight().x - ClientUpperLeft().x; }
 
-int Wnd::ClientHeight() const
-{
-    return ClientLowerRight().y - ClientUpperLeft().y;
-}
+Y Wnd::ClientHeight() const
+{ return ClientLowerRight().y - ClientUpperLeft().y; }
 
 Pt Wnd::ScreenToWindow(const Pt& pt) const
-{
-    return pt - UpperLeft();
-}
+{ return pt - UpperLeft(); }
 
 Pt Wnd::ScreenToClient(const Pt& pt) const
-{
-    return pt - ClientUpperLeft();
-}
+{ return pt - ClientUpperLeft(); }
 
 bool Wnd::InWindow(const Pt& pt) const
-{
-    return pt >= UpperLeft() && pt < LowerRight();
-}
+{ return pt >= UpperLeft() && pt < LowerRight(); }
 
 bool Wnd::InClient(const Pt& pt) const
-{
-    return pt >= ClientUpperLeft() && pt < ClientLowerRight();
-}
+{ return pt >= ClientUpperLeft() && pt < ClientLowerRight(); }
 
 const std::list<Wnd*>& Wnd::Children() const
-{
-    return m_children;
-}
+{ return m_children; }
 
 Wnd* Wnd::Parent() const
-{
-    return m_parent;
-}
+{ return m_parent; }
 
 Wnd* Wnd::RootParent() const
 {
@@ -420,29 +362,19 @@ Wnd* Wnd::RootParent() const
 }
 
 Layout* Wnd::GetLayout() const
-{
-    return m_layout;
-}
+{ return m_layout; }
 
 Layout* Wnd::ContainingLayout() const
-{
-    return m_containing_layout;
-}
+{ return m_containing_layout; }
 
 const std::vector<Wnd::BrowseInfoMode>& Wnd::BrowseModes() const
-{
-    return m_browse_modes;
-}
+{ return m_browse_modes; }
 
 const std::string& Wnd::BrowseInfoText(int mode) const
-{
-    return m_browse_modes.at(mode).text;
-}
+{ return m_browse_modes.at(mode).text; }
 
 const boost::shared_ptr<StyleFactory>& Wnd::GetStyleFactory() const
-{
-    return m_style_factory ? m_style_factory : GUI::GetGUI()->GetStyleFactory();
-}
+{ return m_style_factory ? m_style_factory : GUI::GetGUI()->GetStyleFactory(); }
 
 WndRegion Wnd::WindowRegion(const Pt& pt) const
 {
@@ -472,9 +404,7 @@ WndRegion Wnd::WindowRegion(const Pt& pt) const
 }
 
 void Wnd::SetDragDropDataType(const std::string& data_type)
-{
-    m_drag_drop_data_type = data_type;
-}
+{ m_drag_drop_data_type = data_type; }
 
 void Wnd::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
 {}
@@ -492,9 +422,7 @@ void Wnd::ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destinat
 }
 
 void Wnd::SetText(const std::string& str)
-{
-    m_text = str;
-}
+{ m_text = str; }
 
 void Wnd::Hide(bool children/* = true*/)
 {
@@ -517,33 +445,22 @@ void Wnd::Show(bool children/* = true*/)
 }
 
 void Wnd::ModalInit()
-{
-}
+{}
 
 void Wnd::EnableChildClipping(bool enable/* = true*/)
-{
-    m_clip_children = enable;
-}
+{ m_clip_children = enable; }
 
 void Wnd::BeginClipping()
-{
-    BeginScissorClipping(ClientUpperLeft(), ClientLowerRight());
-}
+{ BeginScissorClipping(ClientUpperLeft(), ClientLowerRight()); }
 
 void Wnd::EndClipping()
-{
-    EndScissorClipping();
-}
+{ EndScissorClipping(); }
 
 void Wnd::MoveTo(const Pt& pt)
-{
-    SizeMove(pt, pt + Size());
-}
+{ SizeMove(pt, pt + Size()); }
 
 void Wnd::OffsetMove(const Pt& pt)
-{
-    SizeMove(m_upperleft + pt, m_lowerright + pt);
-}
+{ SizeMove(m_upperleft + pt, m_lowerright + pt); }
 
 void Wnd::SizeMove(const Pt& ul_, const Pt& lr_)
 {
@@ -593,9 +510,7 @@ void Wnd::SizeMove(const Pt& ul_, const Pt& lr_)
 }
 
 void Wnd::Resize(const Pt& sz)
-{
-    SizeMove(m_upperleft, m_upperleft + sz);
-}
+{ SizeMove(m_upperleft, m_upperleft + sz); }
 
 void Wnd::SetMinSize(const Pt& sz)
 {
@@ -719,7 +634,7 @@ void Wnd::HorizontalLayout()
         wnds.insert(*it);
     }
 
-    m_layout = new Layout(0, 0, ClientSize().x, ClientSize().y,
+    m_layout = new Layout(X0, Y0, ClientSize().x, ClientSize().y,
                           1, wnds.size(),
                           DEFAULT_LAYOUT_BORDER_MARGIN, DEFAULT_LAYOUT_CELL_MARGIN);
     AttachChild(m_layout);
@@ -743,7 +658,7 @@ void Wnd::VerticalLayout()
         wnds.insert(*it);
     }
 
-    m_layout = new Layout(0, 0, ClientSize().x, ClientSize().y,
+    m_layout = new Layout(X0, Y0, ClientSize().x, ClientSize().y,
                           wnds.size(), 1,
                           DEFAULT_LAYOUT_BORDER_MARGIN, DEFAULT_LAYOUT_CELL_MARGIN);
     AttachChild(m_layout);
@@ -774,7 +689,7 @@ void Wnd::GridLayout()
         ++it2;
         for (; it2 != m_children.end(); ++it2) {
             Rect other_wnd_rect((*it2)->RelativeUpperLeft(), (*it2)->RelativeLowerRight());
-            if (other_wnd_rect.Contains(wnd_ul) || other_wnd_rect.Contains(wnd_lr - Pt(1, 1)))
+            if (other_wnd_rect.Contains(wnd_ul) || other_wnd_rect.Contains(wnd_lr - Pt(X1, Y1)))
                 throw BadLayout("Wnd::GridLayout() : Two or more child windows overlap");
         }
 
@@ -786,7 +701,7 @@ void Wnd::GridLayout()
     for (LeftIter it = grid_layout.get<Left>().begin(); it != grid_layout.get<Left>().end(); ++it) {
         Pt ul = it->ul;
         Pt lr = it->lr;
-        for (int x = ul.x - 1; x >= 0; --x) {
+        for (X x = ul.x - 1; x >= 0; --x) {
             if (grid_layout.get<Right>().find(x + 1, IsRight()) != grid_layout.get<Right>().end()) {
                 break;
             } else if (grid_layout.get<Left>().find(x, IsLeft()) != grid_layout.get<Left>().end()) {
@@ -802,7 +717,7 @@ void Wnd::GridLayout()
     for (RightIter it = grid_layout.get<Right>().begin(); it != grid_layout.get<Right>().end(); ++it) {
         Pt ul = it->ul;
         Pt lr = it->lr;
-        for (int x = lr.x + 1; x < client_sz.x; ++x) {
+        for (X x = lr.x + 1; x < client_sz.x; ++x) {
             if (grid_layout.get<Left>().find(x - 1, IsLeft()) != grid_layout.get<Left>().end()) {
                 break;
             } else if (grid_layout.get<Right>().find(x, IsRight()) != grid_layout.get<Right>().end()) {
@@ -818,7 +733,7 @@ void Wnd::GridLayout()
     for (TopIter it = grid_layout.get<Top>().begin(); it != grid_layout.get<Top>().end(); ++it) {
         Pt ul = it->ul;
         Pt lr = it->lr;
-        for (int y = ul.y - 1; y >= 0; --y) {
+        for (Y y = ul.y - 1; y >= 0; --y) {
             if (grid_layout.get<Bottom>().find(y + 1, IsBottom()) != grid_layout.get<Bottom>().end()) {
                 break;
             } else if (grid_layout.get<Top>().find(y, IsTop()) != grid_layout.get<Top>().end()) {
@@ -834,7 +749,7 @@ void Wnd::GridLayout()
     for (BottomIter it = grid_layout.get<Bottom>().begin(); it != grid_layout.get<Bottom>().end(); ++it) {
         Pt ul = it->ul;
         Pt lr = it->lr;
-        for (int y = lr.y + 1; y < client_sz.y; ++y) {
+        for (Y y = lr.y + 1; y < client_sz.y; ++y) {
             if (grid_layout.get<Top>().find(y - 1, IsTop()) != grid_layout.get<Top>().end()) {
                 break;
             } else if (grid_layout.get<Bottom>().find(y, IsBottom()) != grid_layout.get<Bottom>().end()) {
@@ -847,8 +762,8 @@ void Wnd::GridLayout()
     }
 
     // create an actual layout with a more reasonable number of cells from the pixel-grid layout
-    std::set<int> unique_lefts;
-    std::set<int> unique_tops;
+    std::set<X> unique_lefts;
+    std::set<Y> unique_tops;
     for (LeftIter it = grid_layout.get<Left>().begin(); it != grid_layout.get<Left>().end(); ++it) {
         unique_lefts.insert(it->ul.x);
     }
@@ -859,7 +774,7 @@ void Wnd::GridLayout()
     if (unique_lefts.empty() || unique_tops.empty())
         return;
 
-    m_layout = new Layout(0, 0, ClientSize().x, ClientSize().y,
+    m_layout = new Layout(X0, Y0, ClientSize().x, ClientSize().y,
                           unique_tops.size(), unique_lefts.size(),
                           DEFAULT_LAYOUT_BORDER_MARGIN, DEFAULT_LAYOUT_CELL_MARGIN);
     AttachChild(m_layout);
@@ -894,7 +809,7 @@ void Wnd::SetLayout(Layout* layout)
     }
     AttachChild(layout);
     m_layout = layout;
-    m_layout->SizeMove(Pt(0, 0), Pt(ClientWidth(), ClientHeight()));
+    m_layout->SizeMove(Pt(), Pt(ClientWidth(), ClientHeight()));
 }
 
 void Wnd::RemoveLayout()
@@ -1021,24 +936,16 @@ void Wnd::SetBrowseModeTime(int time, int mode/* = 0*/)
 }
 
 void Wnd::SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, int mode/* = 0*/)
-{
-    m_browse_modes.at(mode).wnd = wnd;
-}
+{ m_browse_modes.at(mode).wnd = wnd; }
 
 void Wnd::SetBrowseText(const std::string& text, int mode/* = 0*/)
-{
-    m_browse_modes.at(mode).text = text;
-}
+{ m_browse_modes.at(mode).text = text; }
 
 void Wnd::SetBrowseModes(const std::vector<BrowseInfoMode>& modes)
-{
-    m_browse_modes = modes;
-}
+{ m_browse_modes = modes; }
 
 void Wnd::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
-{
-    m_style_factory = factory;
-}
+{ m_style_factory = factory; }
 
 void Wnd::DefineAttributes(WndEditor* editor)
 {
@@ -1066,24 +973,16 @@ void Wnd::DefineAttributes(WndEditor* editor)
 }
 
 int Wnd::DefaultBrowseTime()
-{
-    return s_default_browse_time;
-}
+{ return s_default_browse_time; }
 
 void Wnd::SetDefaultBrowseTime(int time)
-{
-    s_default_browse_time = time;
-}
+{ s_default_browse_time = time; }
 
 const boost::shared_ptr<BrowseInfoWnd>& Wnd::DefaultBrowseInfoWnd()
-{
-    return s_default_browse_info_wnd;
-}
+{ return s_default_browse_info_wnd; }
 
 void Wnd::SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd)
-{
-    s_default_browse_info_wnd = browse_info_wnd;
-}
+{ s_default_browse_info_wnd = browse_info_wnd; }
 
 Wnd::DragDropRenderingState Wnd::GetDragDropRenderingState() const
 {
@@ -1100,9 +999,7 @@ Wnd::DragDropRenderingState Wnd::GetDragDropRenderingState() const
 }
 
 bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
-{
-    return false;
-}
+{ return false; }
 
 void Wnd::HandleEvent(const WndEvent& event)
 {

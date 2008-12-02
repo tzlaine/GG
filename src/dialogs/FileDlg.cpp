@@ -116,14 +116,16 @@ namespace {
     bool Win32Paths()
     { return WindowsRoot(boost::filesystem::initial_path().root_name()); }
 
-    const int H_SPACING = 10;
-    const int V_SPACING = 10;
+    const X H_SPACING(10);
+    const Y V_SPACING(10);
 }
 
 namespace fs = boost::filesystem;
 
 // static member definition(s)
 fs::path FileDlg::s_working_dir = fs::current_path();
+const X FileDlg::DEFAULT_WIDTH(400);
+const Y FileDlg::DEFAULT_HEIGHT(350);
 
 
 FileDlg::FileDlg() :
@@ -143,7 +145,7 @@ FileDlg::FileDlg() :
 
 FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi,
                  const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color/* = CLR_BLACK*/) : 
-    Wnd((GUI::GetGUI()->AppWidth() - WIDTH) / 2, (GUI::GetGUI()->AppHeight() - HEIGHT) / 2, WIDTH, HEIGHT, CLICKABLE | DRAGABLE | MODAL),
+    Wnd((GUI::GetGUI()->AppWidth() - DEFAULT_WIDTH) / 2, (GUI::GetGUI()->AppHeight() - DEFAULT_HEIGHT) / 2, DEFAULT_WIDTH, DEFAULT_HEIGHT, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
     m_text_color(text_color),
@@ -226,7 +228,7 @@ const std::string& FileDlg::ThreeButtonDlgCancelString() const
 
 void FileDlg::Render()
 {
-    FlatRectangle(UpperLeft().x, UpperLeft().y, LowerRight().x, LowerRight().y, m_color, m_border_color, 1);
+    FlatRectangle(UpperLeft(), LowerRight(), m_color, m_border_color, 1);
     try {
         fs::directory_iterator test(s_working_dir);
     } catch (const fs::filesystem_error& e) {
@@ -330,30 +332,30 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
     if (m_save)
         multi = false;
 
-    const int USABLE_WIDTH = Width() - 4 * H_SPACING;
-    const int BUTTON_WIDTH = USABLE_WIDTH / 4;
+    const X USABLE_WIDTH = Width() - 4 * H_SPACING;
+    const X BUTTON_WIDTH = USABLE_WIDTH / 4;
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
     fs::path filename_path = fs::complete(fs::path(filename));
-    m_files_edit = style->NewEdit(0, 0, 1, "", m_font, m_border_color, m_text_color);
+    m_files_edit = style->NewEdit(X0, Y0, X1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
-    m_filter_list = style->NewDropDownList(0, 0, 100, m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
+    m_filter_list = style->NewDropDownList(X0, Y0, X(100), m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LIST_NOSORT);
 
-    m_files_edit->Resize(Pt(100, m_font->Height() + 2 * 5));
-    m_files_edit->MoveTo(Pt(0, 0));
-    m_filter_list->Resize(Pt(100, m_filter_list->Height()));
-    m_filter_list->MoveTo(Pt(0, 0));
+    m_files_edit->Resize(Pt(X(100), m_font->Height() + 2 * 5));
+    m_files_edit->MoveTo(Pt());
+    m_filter_list->Resize(Pt(X(100), m_filter_list->Height()));
+    m_filter_list->MoveTo(Pt());
 
-    const int BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
+    const Y BUTTON_HEIGHT = m_files_edit->Height(); // use the edit's height for the buttons as well
 
     m_curr_dir_text = style->NewTextControl(H_SPACING, V_SPACING / 2, "", m_font, m_text_color);
-    m_files_label = style->NewTextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, m_text_color, FORMAT_RIGHT | FORMAT_VCENTER);
-    m_file_types_label = style->NewTextControl(0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, m_text_color, FORMAT_RIGHT | FORMAT_VCENTER);
+    m_files_label = style->NewTextControl(X0, Height() - (BUTTON_HEIGHT + V_SPACING) * 2, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "File(s):", m_font, m_text_color, FORMAT_RIGHT | FORMAT_VCENTER);
+    m_file_types_label = style->NewTextControl(X0, Height() - (BUTTON_HEIGHT + V_SPACING) * 1, Width() - (3 * BUTTON_WIDTH + 3 * H_SPACING), BUTTON_HEIGHT, "Type(s):", m_font, m_text_color, FORMAT_RIGHT | FORMAT_VCENTER);
 
-    m_ok_button = style->NewButton(0, 0, 1, 1, m_save ? m_save_str : m_open_str, m_font, m_color, m_text_color);
-    m_cancel_button = style->NewButton(0, 0, 1, 1, m_cancel_str, m_font, m_color, m_text_color);
+    m_ok_button = style->NewButton(X0, Y0, X1, Y1, m_save ? m_save_str : m_open_str, m_font, m_color, m_text_color);
+    m_cancel_button = style->NewButton(X0, Y0, X1, Y1, m_cancel_str, m_font, m_color, m_text_color);
 
     m_ok_button->Resize(Pt(BUTTON_WIDTH, BUTTON_HEIGHT));
     m_ok_button->MoveTo(Pt(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING) * 2));
@@ -361,23 +363,23 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
     m_cancel_button->MoveTo(Pt(Width() - (BUTTON_WIDTH + H_SPACING), Height() - (BUTTON_HEIGHT + V_SPACING)));
 
     // finally, we can create the listbox with the files in it, sized to fill the available space
-    m_files_list = style->NewListBox(0, 0, 1, 1, m_border_color);
+    m_files_list = style->NewListBox(X0, Y0, X1, Y1, m_border_color);
     m_files_list->SetStyle(LIST_NOSORT | (multi ? LIST_NONE : LIST_SINGLESEL));
 
     PlaceLabelsAndEdits(BUTTON_WIDTH, BUTTON_HEIGHT);
 }
 
-void FileDlg::PlaceLabelsAndEdits(int button_width, int button_height)
+void FileDlg::PlaceLabelsAndEdits(X button_width, Y button_height)
 {
-    int file_list_top = m_curr_dir_text->Height() + V_SPACING;
+    Y file_list_top = m_curr_dir_text->Height() + V_SPACING;
     m_files_list->Resize(Pt(Width() - 2 * H_SPACING,
                             Height() - (button_height + V_SPACING) * 2 - file_list_top - V_SPACING));
     m_files_list->MoveTo(Pt(H_SPACING, file_list_top));
 
     // determine the space needed to display both text labels in the chosen font; use this to expand the edit as far as
     // possible
-    int labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
-                                m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
+    X labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
+                                   m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
     m_files_label->Resize(Pt(labels_width - H_SPACING / 2, m_files_label->Height()));
     m_file_types_label->Resize(Pt(labels_width - H_SPACING / 2, m_file_types_label->Height()));
     m_files_edit->SizeMove(Pt(labels_width, Height() - (button_height + V_SPACING) * 2),
@@ -451,7 +453,7 @@ void FileDlg::OkHandler(bool double_click)
             }
             if (!fs::native(save_file)) {
                 boost::shared_ptr<ThreeButtonDlg> dlg(
-                    style->NewThreeButtonDlg(150, 75, m_malformed_filename_str, m_font, m_color, m_border_color, m_color,
+                    style->NewThreeButtonDlg(X(150), Y(75), m_malformed_filename_str, m_font, m_color, m_border_color, m_color,
                                              m_text_color, 1, m_three_button_dlg_ok_str));
                 dlg->Run();
                 return;
@@ -462,7 +464,7 @@ void FileDlg::OkHandler(bool double_click)
             if (fs::exists(p)) {
                 std::string msg_str = boost::str(boost::format(m_overwrite_prompt_str) % save_file);
                 boost::shared_ptr<ThreeButtonDlg> dlg(
-                    style->NewThreeButtonDlg(300, 125, msg_str, m_font, m_color, m_border_color, m_color, m_text_color,
+                    style->NewThreeButtonDlg(X(300), Y(125), msg_str, m_font, m_color, m_border_color, m_color, m_text_color,
                                              2, m_three_button_dlg_ok_str, m_three_button_dlg_cancel_str));
                 dlg->Run();
                 results_valid = (dlg->Result() == 0);
@@ -476,7 +478,7 @@ void FileDlg::OkHandler(bool double_click)
                 if (!fs::native(*it)) {
                     std::string msg_str = boost::str(boost::format(m_invalid_filename_str) % (*it));
                     boost::shared_ptr<ThreeButtonDlg> dlg(
-                        style->NewThreeButtonDlg(300, 125, msg_str, m_font, m_color, m_border_color, m_color,
+                        style->NewThreeButtonDlg(X(300), Y(125), msg_str, m_font, m_color, m_border_color, m_color,
                                                  m_text_color, 1, m_three_button_dlg_ok_str));
                     dlg->Run();
                     results_valid = false;
@@ -488,7 +490,7 @@ void FileDlg::OkHandler(bool double_click)
                     if (!m_select_directories && p_is_directory) {
                         std::string msg_str = boost::str(boost::format(m_filename_is_a_directory_str) % (*it));
                         boost::shared_ptr<ThreeButtonDlg> dlg(
-                            style->NewThreeButtonDlg(300, 125, msg_str, m_font, m_color, m_border_color, m_color,
+                            style->NewThreeButtonDlg(X(300), Y(125), msg_str, m_font, m_color, m_border_color, m_color,
                                                      m_text_color, 1, m_three_button_dlg_ok_str));
                         dlg->Run();
                         results_valid = false;
@@ -499,7 +501,7 @@ void FileDlg::OkHandler(bool double_click)
                 } else {
                     std::string msg_str = boost::str(boost::format(m_file_does_not_exist_str) % (*it));
                     boost::shared_ptr<ThreeButtonDlg> dlg(
-                        style->NewThreeButtonDlg(300, 125, msg_str, m_font, m_color, m_border_color, m_color,
+                        style->NewThreeButtonDlg(X(300), Y(125), msg_str, m_font, m_color, m_border_color, m_color,
                                                  m_text_color, 1, m_three_button_dlg_ok_str));
                     dlg->Run();
                     results_valid = false;
@@ -698,7 +700,7 @@ void FileDlg::UpdateList()
 void FileDlg::UpdateDirectoryText()
 {
     std::string str = s_working_dir.native_directory_string();
-    const int H_SPACING = 10;
+    const X H_SPACING(10);
     while (m_font->TextExtent(str).x > Width() - 2 * H_SPACING) {
         std::string::size_type slash_idx = str.find('/', 1);
         std::string::size_type backslash_idx = str.find('\\', 1);
@@ -752,7 +754,7 @@ void FileDlg::OpenDirectory()
                         PlaceLabelsAndEdits(Width() / 4 - H_SPACING, m_files_edit->Height());
                         UpdateList();
                         boost::shared_ptr<ThreeButtonDlg> dlg(
-                            GetStyleFactory()->NewThreeButtonDlg(175, 75, m_device_is_not_ready_str, m_font, m_color,
+                            GetStyleFactory()->NewThreeButtonDlg(X(175), Y(75), m_device_is_not_ready_str, m_font, m_color,
                                                                  m_border_color, m_color, m_text_color, 1));
                         dlg->Run();
                     } else {

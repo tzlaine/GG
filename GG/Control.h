@@ -67,7 +67,7 @@ public:
 protected:
     /** \name Structors */ ///@{
     Control(); ///< default ctor
-    Control(int x, int y, int w, int h, Flags<WndFlag> flags = CLICKABLE); ///< basic ctor
+    Control(X x, Y y, X w, Y h, Flags<WndFlag> flags = CLICKABLE); ///< basic ctor
     //@}
 
     Clr      m_color;    ///< the color of the control

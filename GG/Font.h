@@ -141,14 +141,14 @@ public:
         TextElement(bool ws, bool nl); ///< Ctor.  \a ws indicates that the element contains only whitespace; \a nl indicates that it is a newline element.
         virtual ~TextElement(); ///< Virtual dtor.
 
-        int Width() const;                       ///< Returns the width of the element, in pixels
+        X Width() const;                    ///< Returns the width of the element, in pixels
         virtual TextElementType Type() const;    ///< Returns the TextElementType of the element.
         virtual int OriginalStringChars() const; ///< Returns the number of characters in the original string that the element represents.
 
-        std::string      text;       ///< The text represented by the element, or the name of the tag, if the element is a FormattingTag.
-        std::vector<int> widths;     ///< The widths of the characters in \a text.
-        const bool       whitespace; ///< True iff this is a whitespace element.
-        const bool       newline;    ///< True iff this is a newline element.
+        std::string         text;       ///< The text represented by the element, or the name of the tag, if the element is a FormattingTag.
+        std::vector<X> widths;     ///< The widths of the characters in \a text.
+        const bool          whitespace; ///< True iff this is a whitespace element.
+        const bool          newline;    ///< True iff this is a newline element.
 
     protected:
         TextElement();
@@ -190,12 +190,12 @@ public:
         struct GG_API CharData
         {
             CharData(); ///< Defauilt ctor.
-            CharData(int extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_); ///< Ctor.
+            CharData(X extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_); ///< Ctor.
 
-            int extent;              ///< The furthest-right extent in pixels of this character as it appears on the line.
-            int original_char_index; ///< The position in the original string of this character.  For UTF-8 strings, this represents the first character of the code point.
+            X extent;              ///< The furthest-right extent in pixels of this character as it appears on the line.
+            int    original_char_index; ///< The position in the original string of this character.  For UTF-8 strings, this represents the first character of the code point.
             std::vector<boost::shared_ptr<FormattingTag> >
-                tags;                ///< The text formatting tags that should be applied before rendering this character.
+                   tags;                ///< The text formatting tags that should be applied before rendering this character.
 
         private:
             friend class boost::serialization::access;
@@ -203,7 +203,7 @@ public:
             void serialize(Archive& ar, const unsigned int version);
         };
 
-        int         Width() const; ///< returns the width of the line, in pixels
+        X      Width() const; ///< returns the width of the line, in pixels
         bool        Empty() const; ///< returns true iff char_data has size 0
 
         std::vector<CharData> char_data;     ///< Data on each individual character.
@@ -252,23 +252,18 @@ public:
     const std::vector<UnicodeCharset>&
                       UnicodeCharsets() const;
 
-    int               Ascent() const;     ///< returns the maximum amount above the baseline the text can go, in pixels
-    int               Descent() const;    ///< returns the maximum amount below the baseline the text can go, in pixels
-    int               Height() const;     ///< returns (Ascent() - Descent()), in pixels
-    int               Lineskip() const;   ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
-    int               SpaceWidth() const; ///< returns the width in pixels of the glyph for the space character
-    int               RenderGlyph(const Pt& pt, char c) const; ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderGlyph(int x, int y, char c) const; ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderGlyph(const Pt& pt, boost::uint32_t c) const; ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderGlyph(int x, int y, boost::uint32_t c) const; ///< renders glyph for \a c and returns advance of glyph rendered
-    int               RenderText(const Pt& pt, const std::string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
-    int               RenderText(int x, int y, const std::string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
+    Y            Ascent() const;     ///< returns the maximum amount above the baseline the text can go, in pixels
+    Y            Descent() const;    ///< returns the maximum amount below the baseline the text can go, in pixels
+    Y            Height() const;     ///< returns (Ascent() - Descent()), in pixels
+    Y            Lineskip() const;   ///< returns the distance that should be placed between lines, in pixels.  This is usually not equal to Height().
+    X            SpaceWidth() const; ///< returns the width in pixels of the glyph for the space character
+    X            RenderGlyph(const Pt& pt, char c) const; ///< renders glyph for \a c and returns advance of glyph rendered
+    X            RenderGlyph(const Pt& pt, boost::uint32_t c) const; ///< renders glyph for \a c and returns advance of glyph rendered
+    X            RenderText(const Pt& pt, const std::string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
     void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
-    void              RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
     void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
-    void              RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
-    Pt                DetermineLines(const std::string& text, Flags<TextFormat>& format, int box_width, std::vector<LineData>& lines) const; ///< returns the maximum dimensions of the string in x and y
-    Pt                TextExtent(const std::string& text, Flags<TextFormat> format = FORMAT_NONE, int box_width = 0) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
+    Pt                DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width, std::vector<LineData>& lines) const; ///< returns the maximum dimensions of the string in x and y
+    Pt                TextExtent(const std::string& text, Flags<TextFormat> format = FORMAT_NONE, X box_width = X0) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
     //@}
 
     static void       RegisterKnownTag(const std::string& tag); ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
@@ -313,34 +308,33 @@ private:
         created at GG::Font creation time.*/
     struct Glyph
     {
-        Glyph() : left_bearing(0), advance(0), width(0) {} ///< default ctor
-        Glyph(const boost::shared_ptr<Texture>& texture, int x1, int y1, int x2, int y2, int lb, int adv) : 
-            sub_texture(texture, x1, y1, x2, y2), left_bearing(lb), advance(adv), width(x2 - x1) {} ///< ctor
+        Glyph(); ///< default ctor
+        Glyph(const boost::shared_ptr<Texture>& texture, const Pt& ul, const Pt& lr, X lb, X adv); ///< ctor
 
         SubTexture  sub_texture;   ///< the subtexture containing just this glyph
-        int         left_bearing;  ///< the space that should remain before the glyph
-        int         advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
-        int         width;         ///< the width of the glyph only
+        X      left_bearing;  ///< the space that should remain before the glyph
+        X      advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
+        X      width;         ///< the width of the glyph only
     };
     struct HandleTagFunctor;
 
     void              Init(const std::string& font_filename, int pts);
     bool              GenerateGlyph(FT_Face font, boost::uint32_t ch);
-    inline int        RenderGlyph(int x, int y, const Glyph& glyph, const RenderState* render_state) const;
+    inline X     RenderGlyph(const Pt& pt, const Glyph& glyph, const RenderState* render_state) const;
     void              HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const;
 
     std::string          m_font_filename;
     int                  m_pt_sz;
     std::vector<UnicodeCharset>
                          m_charsets;    ///< the sets of glyphs that are covered by this font object
-    int                  m_ascent;      ///< maximum amount above the baseline the text can go
-    int                  m_descent;     ///< maximum amount below the baseline the text can go
-    int                  m_height;      ///< ascent - descent
-    int                  m_lineskip;    ///< distance that should be placed between lines
+    Y               m_ascent;      ///< maximum amount above the baseline the text can go
+    Y               m_descent;     ///< maximum amount below the baseline the text can go
+    Y               m_height;      ///< ascent - descent
+    Y               m_lineskip;    ///< distance that should be placed between lines
     double               m_underline_offset; ///< amount below the baseline that the underline sits
     double               m_underline_height; ///< height (thickness) of underline
     double               m_italics_offset;   ///< amount that the top of an italicized glyph is left of the bottom
-    int                  m_space_width; ///< the width in pixels of the glyph for the space character
+    X               m_space_width; ///< the width in pixels of the glyph for the space character
     std::map<boost::uint32_t, Glyph>
                          m_glyphs;      ///< the locations of the images of each glyph within the textures
     std::vector<boost::shared_ptr<Texture> >

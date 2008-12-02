@@ -29,10 +29,12 @@
 
 // Tutorial 3: Serialization
 
-// This file is part of the third tutorial.  The other two files are serialization.h, saveload.h, and saveload.cpp.  It
-// extends the Tutorial 2 by serializing all the controls to a file called test.xml, deleting them, and recreating them
-// from the XML file before showing them on the screen.  This demonstrates how GG serialization works in detail.  For
-// further reference material, see the boost serialization documentation.
+// This file is part of the third tutorial.  The other files are
+// serialization.h, saveload.h, and saveload.cpp.  It extends the Tutorial 2
+// by serializing all the controls to a file called test.xml, deleting them,
+// and recreating them from the XML file before showing them on the screen.
+// This demonstrates how GG serialization works in detail.  For further
+// reference material, see the Boost.Serialization documentation.
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 void QuitButtonClicked()
 {
-    GG::ThreeButtonDlg quit_dlg(200, 100, "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
+    GG::ThreeButtonDlg quit_dlg(GG::X(200), GG::Y(100), "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
                                 GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
     quit_dlg.Run();
 
@@ -126,13 +128,13 @@ void ControlsTestApp::Enter2DMode()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glViewport(0, 0, AppWidth(), AppHeight());
+    glViewport(0, 0, Value(AppWidth()), Value(AppHeight()));
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
 
-    glOrtho(0.0, AppWidth(), AppHeight(), 0.0, 0.0, AppWidth());
+    glOrtho(0.0, Value(AppWidth()), Value(AppHeight()), 0.0, 0.0, Value(AppWidth()));
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -202,13 +204,13 @@ void ControlsTestApp::Render()
 
 void ControlsTestApp::GLInit()
 {
-    double ratio = AppWidth() / (float)(AppHeight());
+    double ratio = Value(AppWidth() * 1.0) / Value(AppHeight());
 
     glEnable(GL_BLEND);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, AppWidth(), AppHeight());
+    glViewport(0, 0, Value(AppWidth()), Value(AppHeight()));
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(50.0, ratio, 1.0, 10.0);
@@ -224,28 +226,28 @@ void ControlsTestApp::Initialize()
 
     boost::shared_ptr<GG::Font> font = GetFont("tutorial/Vera.ttf", 12);
 
-    GG::Layout* layout = new GG::Layout(0, 0, AppWidth(), AppHeight(), 1, 1, 10);
+    GG::Layout* layout = new GG::Layout(GG::X0, GG::Y0, AppWidth(), AppHeight(), 1, 1, 10);
 
     GG::MenuItem menu_contents;
     GG::MenuItem file_menu("File", 0, false, false);
     file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, GG::MenuItem::SelectedSlotType(BrowseFilesFunctor())));
     menu_contents.next_level.push_back(file_menu);
     GG::MenuBar* menu_bar =
-        new GG::MenuBar(0, 0, AppWidth(), font, menu_contents, GG::CLR_WHITE);
+        new GG::MenuBar(GG::X0, GG::Y0, AppWidth(), font, menu_contents, GG::CLR_WHITE);
     layout->Add(menu_bar, 0, 0, 1, 2, GG::ALIGN_TOP);
 
-    GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(10, 10, 200, 25, GG::HORIZONTAL);
+    GG::RadioButtonGroup* radio_button_group = new GG::RadioButtonGroup(GG::X(10), GG::Y(10), GG::X(200), GG::Y(25), GG::HORIZONTAL);
     radio_button_group->AddButton("Plan 8", font, GG::FORMAT_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
     radio_button_group->AddButton("Plan 9", font, GG::FORMAT_LEFT, GG::CLR_GRAY, GG::CLR_WHITE);
     layout->Add(radio_button_group, 1, 0);
 
     GG::TextControl* plan_text_control =
-        new GG::TextControl(0, 0, 150, 25, "", font, GG::CLR_WHITE);
+        new GG::TextControl(GG::X0, GG::Y0, GG::X(150), GG::Y(25), "", font, GG::CLR_WHITE);
     layout->Add(plan_text_control, 1, 1);
 
     GG::ListBox::Row* row;
     GG::DropDownList* drop_down_list =
-        new GG::DropDownList(0, 0, 150, 25, 150, GG::CLR_GRAY);
+        new GG::DropDownList(GG::X0, GG::Y0, GG::X(150), GG::Y(25), GG::Y(150), GG::CLR_GRAY);
     drop_down_list->SetInteriorColor(GG::CLR_GRAY);
     drop_down_list->SetStyle(GG::LIST_NOSORT);
     row = new GG::ListBox::Row();
@@ -272,11 +274,11 @@ void ControlsTestApp::Initialize()
     drop_down_list->Select(0);
     layout->Add(drop_down_list, 2, 0);
 
-    GG::Edit* edit = new GG::Edit(0, 0, 100, "Edit me.", font, GG::CLR_GRAY, GG::CLR_WHITE, GG::CLR_SHADOW);
-    edit->Resize(GG::Pt(100, 35));
+    GG::Edit* edit = new GG::Edit(GG::X0, GG::Y0, GG::X(100), "Edit me.", font, GG::CLR_GRAY, GG::CLR_WHITE, GG::CLR_SHADOW);
+    edit->Resize(GG::Pt(GG::X(100), GG::Y(35)));
     layout->Add(edit, 2, 1);
 
-    GG::ListBox* list_box = new GG::ListBox(0, 0, 300, 200, GG::CLR_GRAY);
+    GG::ListBox* list_box = new GG::ListBox(GG::X0, GG::Y0, GG::X(300), GG::Y(200), GG::CLR_GRAY);
     list_box->Insert(new CustomTextRow("Item 1"));
     list_box->Insert(new CustomTextRow("Item 2"));
     list_box->Insert(new CustomTextRow("Item 3"));
@@ -287,44 +289,44 @@ void ControlsTestApp::Initialize()
     layout->Add(list_box, 3, 0);
 
     GG::MultiEdit* multi_edit =
-        new GG::MultiEdit(0, 0, 300, 200, "Edit me\ntoo.", font, GG::CLR_GRAY, GG::MULTI_LINEWRAP, GG::CLR_WHITE, GG::CLR_SHADOW);
+        new GG::MultiEdit(GG::X0, GG::Y0, GG::X(300), GG::Y(200), "Edit me\ntoo.", font, GG::CLR_GRAY, GG::MULTI_LINEWRAP, GG::CLR_WHITE, GG::CLR_SHADOW);
     layout->Add(multi_edit, 3, 1);
 
     GG::Slider* slider =
-        new GG::Slider(0, 0, 300, 14, 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
+        new GG::Slider(GG::X0, GG::Y0, GG::X(300), GG::Y(14), 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
     layout->Add(slider, 4, 0);
 
     GG::Spin<int>* spin_int =
-        new GG::Spin<int>(0, 0, 50, 1, 1, -5, 5, false, font, GG::CLR_GRAY, GG::CLR_WHITE);
-    spin_int->Resize(GG::Pt(50, 30));
-    spin_int->SetMaxSize(GG::Pt(75, 30));
+        new GG::Spin<int>(GG::X0, GG::Y0, GG::X(50), 1, 1, -5, 5, false, font, GG::CLR_GRAY, GG::CLR_WHITE);
+    spin_int->Resize(GG::Pt(GG::X(50), GG::Y(30)));
+    spin_int->SetMaxSize(GG::Pt(GG::X(75), GG::Y(30)));
     layout->Add(spin_int, 5, 0);
 
     GG::Spin<double>* spin_double =
-        new GG::Spin<double>(0, 0, 50, 1.0, 1.5, -0.5, 16.0, true, font, GG::CLR_GRAY, GG::CLR_WHITE);
-    spin_double->Resize(GG::Pt(50, 30));
-    spin_double->SetMaxSize(GG::Pt(75, 30));
+        new GG::Spin<double>(GG::X0, GG::Y0, GG::X(50), 1, 1.5, -0.5, 16.0, true, font, GG::CLR_GRAY, GG::CLR_WHITE);
+    spin_double->Resize(GG::Pt(GG::X(50), GG::Y(30)));
+    spin_double->SetMaxSize(GG::Pt(GG::X(75), GG::Y(30)));
     layout->Add(spin_double, 6, 0);
 
     GG::Scroll* scroll =
-        new GG::Scroll(0, 0, 14, 200, GG::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
-    scroll->SetMaxSize(GG::Pt(14, 1000));
+        new GG::Scroll(GG::X0, GG::Y0, GG::X(14), GG::Y(200), GG::VERTICAL, GG::CLR_GRAY, GG::CLR_GRAY);
+    scroll->SetMaxSize(GG::Pt(GG::X(14), GG::Y(1000)));
     layout->Add(scroll, 4, 1, 3, 1);
 
     boost::shared_ptr<GG::Texture> circle_texture = GetTexture("tutorial/hatchcircle.png");
     glDisable(GL_TEXTURE_2D);
     GG::DynamicGraphic* dynamic_graphic =
-        new GG::DynamicGraphic(0, 0, 64, 64, true, 64, 64, 0, std::vector<boost::shared_ptr<GG::Texture> >(1, circle_texture));
-    dynamic_graphic->SetMaxSize(GG::Pt(64, 64));
+        new GG::DynamicGraphic(GG::X0, GG::Y0, GG::X(64), GG::Y(64), true, GG::X(64), GG::Y(64), 0, std::vector<boost::shared_ptr<GG::Texture> >(1, circle_texture));
+    dynamic_graphic->SetMaxSize(GG::Pt(GG::X(64), GG::Y(64)));
     layout->Add(dynamic_graphic, 7, 0);
     GG::StaticGraphic* static_graphic =
-        new GG::StaticGraphic(0, 0, 320, 128, circle_texture);
+        new GG::StaticGraphic(GG::X0, GG::Y0, GG::X(320), GG::Y(128), circle_texture);
     layout->Add(static_graphic, 7, 1);
 
     GG::Button* quit_button =
-        new GG::Button(0, 0, 75, 25, "Quit...", font, GG::CLR_GRAY);
+        new GG::Button(GG::X0, GG::Y0, GG::X(75), GG::Y(25), "Quit...", font, GG::CLR_GRAY);
     GG::Button* files_button =
-        new GG::Button(0, 0, 75, 25, "Files...", font, GG::CLR_GRAY);
+        new GG::Button(GG::X0, GG::Y0, GG::X(75), GG::Y(25), "Files...", font, GG::CLR_GRAY);
     layout->Add(quit_button, 8, 0);
     layout->Add(files_button, 8, 1);
 
@@ -333,27 +335,34 @@ void ControlsTestApp::Initialize()
 ////////////////////////////////////////////////////////////////////////////////
 
     // this is not actually displayed; it's just here to make sure that ColorDlg serialization works
-    GG::ColorDlg* color_dlg = new GG::ColorDlg(100, 100, font, GG::CLR_GRAY, GG::CLR_GRAY);
+    GG::ColorDlg* color_dlg = new GG::ColorDlg(GG::X(100), GG::Y(100), font, GG::CLR_GRAY, GG::CLR_GRAY);
 
-    // Since we're saving to and then immediately reloading from test.xml, we need to enclose the serialiaztion code
-    // inside of code blocks, so that the boost::archive::xml_*archive objects will be destroyed when they go out of
-    // scope, allowing another archive to be associated with the file.  This is because there is no way to explicitly
-    // close a boost serialization archive.
+    // Since we're saving to and then immediately reloading from test.xml, we
+    // need to enclose the serialiaztion code inside of code blocks, so that
+    // the boost::archive::xml_*archive objects will be destroyed when they go
+    // out of scope, allowing another archive to be associated with the file.
+    // This is because there is no way to explicitly close a boost
+    // serialization archive.
 
     {
         std::ofstream ofs("test.xml");
         boost::archive::xml_oarchive oa(ofs);
         SaveWnd(layout, "layout", oa);
 
-        // Somthing a little odd is happening here.  We're saving these four objects singly, but they're already being
-        // saved as children of layout.  Since signals do not survive serialization, we have to wait to connect the
-        // signals below.  But this means that since we are going to delete all these objects a few lines below, we must
-        // save these objects so that we have pointers to them when we need to connect the signals below.  Note that we
-        // are not reconnecting the File->Browse.. menu item to a BrowseFilesFunctor.  Reconnecting this is left as an
-        // excercise for the reader.  Also note that since the boost.serialization library is so damn smart, only one
-        // copy of each of these objects is saved in the XML file.  This applies to all serialized pointers; if you save
-        // 10 pointers to a single object, only one object is actually saved, and all 10 pointers will point to the same
-        // object when they are loaded.
+        // Somthing a little odd is happening here.  We're saving these four
+        // objects singly, but they're already being saved as children of
+        // layout.  Since signals do not survive serialization, we have to
+        // wait to connect the signals below.  But this means that since we
+        // are going to delete all these objects a few lines below, we must
+        // save these objects so that we have pointers to them when we need to
+        // connect the signals below.  Note that we are not reconnecting the
+        // File->Browse.. menu item to a BrowseFilesFunctor.  Reconnecting
+        // this is left as an excercise for the reader.  Also note that since
+        // the boost.serialization library is so damn smart, only one copy of
+        // each of these objects is saved in the XML file.  This applies to
+        // all serialized pointers; if you save 10 pointers to a single
+        // object, only one object is actually saved, and all 10 pointers will
+        // point to the same object when they are loaded.
 
         SaveWnd(radio_button_group, "radio_button_group", oa);
         SaveWnd(plan_text_control, "plan_text_control", oa);
@@ -364,8 +373,9 @@ void ControlsTestApp::Initialize()
         SaveWnd(color_dlg, "color_dialog", oa);
     }
 
-    // Here, we delete the layout (which automatically causes all its children to be freed as well).  After doing this,
-    // if we see the windows on the screen, we know they came from the reload of the XML file.
+    // Here, we delete the layout (which automatically causes all its children
+    // to be freed as well).  After doing this, if we see the windows on the
+    // screen, we know they came from the reload of the XML file.
     delete layout;
     layout = 0;
     plan_text_control = 0;

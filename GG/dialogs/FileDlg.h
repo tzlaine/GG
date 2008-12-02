@@ -141,7 +141,8 @@ public:
     //@}
 
 protected:
-    enum {WIDTH = 400, HEIGHT = 350}; ///< default width and height values for the dialog, in pixels
+    static const X DEFAULT_WIDTH;  ///< default width for the dialog
+    static const Y DEFAULT_HEIGHT; ///< default height for the dialog
 
     /** \name Structors */ ///@{
     FileDlg(); ///< default ctor
@@ -149,7 +150,7 @@ protected:
 
 private:
     void CreateChildren(const std::string& filename, bool multi);
-    void PlaceLabelsAndEdits(int button_width, int button_height);
+    void PlaceLabelsAndEdits(X button_width, Y button_height);
     void AttachSignalChildren();
     void DetachSignalChildren();
     void Init(const std::string& directory);
@@ -213,7 +214,6 @@ private:
 
 } // namespace GG
 
-BOOST_CLASS_VERSION(GG::FileDlg, 1)
 
 // template implementations
 template <class Archive>
@@ -245,12 +245,9 @@ void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_ok_button)
         & BOOST_SERIALIZATION_NVP(m_cancel_button)
         & BOOST_SERIALIZATION_NVP(m_files_label)
-        & BOOST_SERIALIZATION_NVP(m_file_types_label);
-
-    if (1 <= version) {
-        ar  & BOOST_SERIALIZATION_NVP(m_select_directories)
-            & BOOST_SERIALIZATION_NVP(m_append_missing_save_extension);
-    }
+        & BOOST_SERIALIZATION_NVP(m_file_types_label)
+        & BOOST_SERIALIZATION_NVP(m_select_directories)
+        & BOOST_SERIALIZATION_NVP(m_append_missing_save_extension);
 
     if (Archive::is_loading::value)
         ConnectSignals();

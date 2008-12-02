@@ -53,11 +53,12 @@ namespace {
     const boost::uint32_t WIDE_FF = '\f';
     const boost::uint32_t WIDE_TAB = '\t';
 
-    int NextPowerOfTwo(int input)
+    template <class T>
+    T NextPowerOfTwo(T input)
     {
-        int value = 1;
+        T value(1);
         while (value < input)
-            value <<= 1;
+            value *= 2;
         return value;
     }
 
@@ -69,11 +70,11 @@ namespace {
     struct TempGlyphData
     {
         TempGlyphData() {} ///< default ctor
-        TempGlyphData(int i, int _x1, int _y1, int _x2, int _y2, int lb, int a) : idx(i), x1(_x1), y1(_y1), x2(_x2), y2(_y2), left_b(lb), adv(a) {} ///< ctor
-        int      idx;              ///< index into m_textures of texture that contains this glyph
-        int      x1, y1, x2, y2;   ///< area of glyph subtexture within texture
-        int      left_b;           ///< left bearing (see Glyph)
-        int      adv;              ///< advance of glyph (see Glyph)
+        TempGlyphData(int i, const Pt& ul_, const Pt& lr_, X lb, X a) : idx(i), ul(ul_), lr(lr_), left_b(lb), adv(a) {} ///< ctor
+        int    idx;      ///< index into m_textures of texture that contains this glyph
+        Pt     ul, lr;   ///< area of glyph subtexture within texture
+        X left_b;   ///< left bearing (see Glyph)
+        X adv;      ///< advance of glyph (see Glyph)
     };
 
     struct FTLibraryWrapper
@@ -251,8 +252,8 @@ Font::TextElement::TextElement(bool ws, bool nl) :
 Font::TextElement::~TextElement()
 {}
 
-int Font::TextElement::Width() const
-{ return std::accumulate(widths.begin(), widths.end(), 0); }
+X Font::TextElement::Width() const
+{ return std::accumulate(widths.begin(), widths.end(), X0); }
 
 Font::TextElement::TextElementType Font::TextElement::Type() const
 { return newline ? NEWLINE : (whitespace ? WHITESPACE : TEXT); }
@@ -288,8 +289,8 @@ Font::LineData::LineData() :
     justification(ALIGN_CENTER)
 {}
 
-int Font::LineData::Width() const
-{ return char_data.empty() ? 0 : char_data.back().extent; }
+X Font::LineData::Width() const
+{ return char_data.empty() ? X0 : char_data.back().extent; }
 
 bool Font::LineData::Empty() const
 { return char_data.empty(); }
@@ -313,7 +314,7 @@ Font::LineData::CharData::CharData() :
     original_char_index(0)
 {}
 
-Font::LineData::CharData::CharData(int extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_) :
+Font::LineData::CharData::CharData(X extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_) :
     extent(extent_),
     original_char_index(original_index),
     tags()
@@ -322,6 +323,23 @@ Font::LineData::CharData::CharData(int extent_, int original_index, const std::v
         tags.push_back(boost::dynamic_pointer_cast<FormattingTag>(tags_[i]));
     }
 }
+
+
+///////////////////////////////////////
+// struct GG::Font::Glyph
+///////////////////////////////////////
+Font::Glyph::Glyph() :
+    left_bearing(0),
+    advance(0),
+    width(0)
+{}
+
+Font::Glyph::Glyph(const boost::shared_ptr<Texture>& texture, const Pt& ul, const Pt& lr, X lb, X adv) :
+    sub_texture(texture, ul.x, ul.y, lr.x, lr.y),
+    left_bearing(lb),
+    advance(adv),
+    width(ul.x - lr.x)
+{}
 
 
 ///////////////////////////////////////
@@ -407,25 +425,22 @@ int Font::PointSize() const
 const std::vector<UnicodeCharset>& Font::UnicodeCharsets() const
 { return m_charsets; }
 
-int Font::Ascent() const       
+Y Font::Ascent() const       
 { return m_ascent; }
 
-int Font::Descent() const      
+Y Font::Descent() const      
 { return m_descent; }
 
-int Font::Height() const       
+Y Font::Height() const       
 { return m_height; }
 
-int Font::Lineskip() const     
+Y Font::Lineskip() const     
 { return m_lineskip; }
 
-int Font::SpaceWidth() const   
+X Font::SpaceWidth() const   
 { return m_space_width; }
 
-int Font::RenderGlyph(const Pt& pt, char c) const
-{ return RenderGlyph(pt.x, pt.y, c); }
-
-int Font::RenderGlyph(int x, int y, char c) const
+X Font::RenderGlyph(const Pt& pt, char c) const
 {
     if (c < 0x0 || 0x7f < c)
         throw utf8::invalid_utf8(c);
@@ -433,39 +448,30 @@ int Font::RenderGlyph(int x, int y, char c) const
     std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(CharToUint32_t(c));
     if (it == m_glyphs.end())
         it = m_glyphs.find(WIDE_SPACE); // print a space when an unrendered glyph is requested
-    return RenderGlyph(x, y, it->second, 0);
+    return RenderGlyph(pt, it->second, 0);
 }
 
-int Font::RenderGlyph(const Pt& pt, boost::uint32_t c) const
-{ return RenderGlyph(pt.x, pt.y, c); }
-
-int Font::RenderGlyph(int x, int y, boost::uint32_t c) const
+X Font::RenderGlyph(const Pt& pt, boost::uint32_t c) const
 {
     std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(c);
     if (it == m_glyphs.end())
         it = m_glyphs.find(WIDE_SPACE); // print a space when an unrendered glyph is requested
-    return RenderGlyph(x, y, it->second, 0);
+    return RenderGlyph(pt, it->second, 0);
 }
 
-int Font::RenderText(const Pt& pt, const std::string& text) const
-{ return RenderText(pt.x, pt.y, text); }
-
-int Font::RenderText(int x, int y, const std::string& text) const
+X Font::RenderText(const Pt& pt_, const std::string& text) const
 {
-    int orig_x = x;
+    Pt pt = pt_;
+    X orig_x = pt.x;
     std::string::const_iterator it = text.begin();
     std::string::const_iterator end_it = text.end();
     while (it != end_it) {
-        x += RenderGlyph(x, y, utf8::next(it, end_it));
+        pt.x += RenderGlyph(pt, utf8::next(it, end_it));
     }
-    return x - orig_x;
+    return pt.x - orig_x;
 }
 
-void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data/* = 0*/,
-                      RenderState* render_state/* = 0*/) const
-{ RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data, render_state); }
-
-void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data/* = 0*/,
+void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data/* = 0*/,
                       RenderState* render_state/* = 0*/) const
 {
     RenderState state;
@@ -475,22 +481,15 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, F
     // get breakdown of how text is divided into lines
     std::vector<LineData> lines;
     if (!line_data) {
-        DetermineLines(text, format, x2 - x1, lines);
+        DetermineLines(text, format, lr.x - ul.x, lines);
         line_data = &lines;
     }
 
-    RenderText(x1, y1, x2, y2, text, format, *line_data,
+    RenderText(ul, lr, text, format, *line_data,
                *render_state, 0, 0, line_data->size(), line_data->back().char_data.size());
 }
 
-void Font::RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state,
-                      int begin_line, int begin_char, int end_line, int end_char) const
-{
-    RenderText(pt1.x, pt1.y, pt2.x, pt2.y, text, format, line_data,
-               render_state, begin_line, begin_char, end_line, end_char);
-}
-
-void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state,
+void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state,
                       int begin_line, int begin_char, int end_line, int end_char) const
 {
     double orig_color[4];
@@ -499,21 +498,21 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, F
     if (render_state.color_set)
         glColor(render_state.curr_color);
 
-    int y_origin = y1; // default value for FORMAT_TOP
+    Y y_origin = ul.y; // default value for FORMAT_TOP
     if (format & FORMAT_BOTTOM)
-        y_origin = y2 - ((end_line - begin_line - 1) * m_lineskip + m_height);
+        y_origin = lr.y - ((end_line - begin_line - 1) * m_lineskip + m_height);
     else if (format & FORMAT_VCENTER)
-        y_origin = y1 + static_cast<int>(((y2 - y1) - ((end_line - begin_line - 1) * m_lineskip + m_height)) / 2.0);
+        y_origin = ul.y + ((lr.y - ul.y) - ((end_line - begin_line - 1) * m_lineskip + m_height)) / 2.0;
 
     for (int i = begin_line; i < end_line; ++i) {
         const LineData& line = line_data[i];
-        int x_origin = x1; // default value for FORMAT_LEFT
+        X x_origin = ul.x; // default value for FORMAT_LEFT
         if (line.justification == ALIGN_RIGHT)
-            x_origin = x2 - line.Width();
+            x_origin = lr.x - line.Width();
         else if (line.justification == ALIGN_CENTER)
-            x_origin = x1 + static_cast<int>(((x2 - x1) - line.Width()) / 2.0);
-        int y = y_origin + (i - begin_line) * m_lineskip;
-        int x = x_origin;
+            x_origin = ul.x + ((lr.x - ul.x) - line.Width()) / 2.0;
+        Y y = y_origin + (i - begin_line) * m_lineskip;
+        X x = x_origin;
 
         std::string::const_iterator string_end_it = text.end();
         for (int j = ((i == begin_line) ? begin_char : 0); j < ((i == end_line - 1) ? end_char : static_cast<int>(line.char_data.size())); ++j) {
@@ -528,14 +527,14 @@ void Font::RenderText(int x1, int y1, int x2, int y2, const std::string& text, F
             if (it == m_glyphs.end())
                 x = x_origin + line.char_data[j].extent; // move forward by the extent of the character when a whitespace or unprintable glyph is requested
             else
-                x += RenderGlyph(x, y, it->second, &render_state);
+                x += RenderGlyph(Pt(x, y), it->second, &render_state);
         }
     }
 
     glColor4dv(orig_color);
 }
 
-Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int box_width, std::vector<LineData>& line_data) const
+Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width, std::vector<LineData>& line_data) const
 {
     Pt retval;
 
@@ -591,7 +590,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
         std::string::iterator it = text_elements[i]->text.begin();
         std::string::iterator end_it = text_elements[i]->text.end();
         while (it != end_it) {
-            text_elements[i]->widths.push_back(0);
+            text_elements[i]->widths.push_back(X0);
             boost::uint32_t c = utf8::next(it, end_it);
             if (c != WIDE_NEWLINE) {
                 std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(c);
@@ -631,7 +630,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
 
     RenderState render_state;
     int tab_width = 8; // default tab width
-    int tab_pixel_width = tab_width * m_space_width; // get the length of a tab stop
+    X tab_pixel_width = tab_width * m_space_width; // get the length of a tab stop
     bool expand_tabs = format & FORMAT_LEFT; // tab expansion only takes place when the lines are left-justified (otherwise, tabs are just spaces)
     Alignment orig_just = ALIGN_NONE;
     if (format & FORMAT_LEFT)
@@ -646,7 +645,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
     line_data.push_back(LineData());
     line_data.back().justification = orig_just;
 
-    int x = 0;
+    X x = X0;
     int original_string_offset = 0; // the position within the original string of the current TextElement
     std::vector<boost::shared_ptr<TextElement> > pending_formatting_tags;
     for (std::size_t i = 0; i < text_elements.size(); ++i) {
@@ -654,7 +653,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
         if (elem->Type() == TextElement::NEWLINE) { // if a newline is explicitly requested, start a new one
             line_data.push_back(LineData());
             SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
-            x = 0; // reset the x-position to 0
+            x = X0; // reset the x-position to 0
         } else if (elem->Type() == TextElement::WHITESPACE) {
             std::string::iterator it = elem->text.begin();
             std::string::iterator end_it = elem->text.end();
@@ -662,18 +661,18 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
                 std::size_t char_index = std::distance(elem->text.begin(), it);
                 boost::uint32_t c = utf8::next(it, end_it);
                 if (c != WIDE_CR && c != WIDE_FF) {
-                    int advance_position = x + m_space_width;
+                    X advance_position = x + m_space_width;
                     if (c == WIDE_TAB && expand_tabs)
                         advance_position = (((x / tab_pixel_width) + 1) * tab_pixel_width);
                     else if (c == WIDE_NEWLINE)
                         advance_position = x;
-                    int advance = advance_position - x;
+                    X advance = advance_position - x;
                     if ((format & FORMAT_LINEWRAP) && box_width < advance_position) { // if we're using linewrap and this space won't fit on this line,
                         if (!x && box_width < advance) {
                             // if the space is larger than the line and alone on the line, let the space overrun this
                             // line and then start a new one
                             line_data.push_back(LineData());
-                            x = 0; // reset the x-position to 0
+                            x = X0; // reset the x-position to 0
                             SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
                         } else { // otherwise start a new line and put the space there:
                             line_data.push_back(LineData());
@@ -693,7 +692,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
             if (format & FORMAT_WORDBREAK) {
                 if (box_width < x + elem->Width() && x) { // if the text "word" overruns this line, and isn't alone on this line, move it down to the next line
                     line_data.push_back(LineData());
-                    x = 0;
+                    x = X0;
                     SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
                 }
                 std::string::iterator it = elem->text.begin();
@@ -791,7 +790,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
         if (retval.x < line_data[i].Width())
             retval.x = line_data[i].Width();
     }
-    retval.y = text.empty() ? 0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
+    retval.y = text.empty() ? Y0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
 
 #if DEBUG_DETERMINELINES
     std::cout << "String Size:(" << retval.x << ", " << retval.y << ")\n" << std::endl;
@@ -800,10 +799,10 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, int 
     return retval;
 }
 
-Pt Font::TextExtent(const std::string& text, Flags<TextFormat> format/* = FORMAT_NONE*/, int box_width/* = 0*/) const
+Pt Font::TextExtent(const std::string& text, Flags<TextFormat> format/* = FORMAT_NONE*/, X box_width/* = X0*/) const
 {
     std::vector<LineData> lines;
-    return DetermineLines(text, format, box_width ? box_width : 1 << 15, lines);
+    return DetermineLines(text, format, box_width ? box_width : X(1 << 15), lines);
 }
 
 void Font::RegisterKnownTag(const std::string& tag)
@@ -857,10 +856,10 @@ void Font::Init(const std::string& font_filename, int pts)
 
     // Get the scalable font metrics for this font
     scale = face->size->metrics.y_scale;
-    m_ascent  = static_cast<int>(face->size->metrics.ascender / 64.0); // convert from fixed-point 26.6 format
-    m_descent  = static_cast<int>(face->size->metrics.descender / 64.0); // convert from fixed-point 26.6 format
-    m_height  = m_ascent - m_descent + 1;
-    m_lineskip = static_cast<int>(face->size->metrics.height / 64.0);
+    m_ascent = Y(static_cast<int>(face->size->metrics.ascender / 64.0)); // convert from fixed-point 26.6 format
+    m_descent = Y(static_cast<int>(face->size->metrics.descender / 64.0)); // convert from fixed-point 26.6 format
+    m_height = m_ascent - m_descent + 1;
+    m_lineskip = Y(static_cast<int>(face->size->metrics.height / 64.0));
     // underline info
     m_underline_offset = std::floor(FT_MulFix(face->underline_position, scale) / 64.0);
     m_underline_height = std::ceil(FT_MulFix(face->underline_thickness, scale) / 64.0);
@@ -868,7 +867,7 @@ void Font::Init(const std::string& font_filename, int pts)
         m_underline_height = 1.0;
     }
     // italics info
-    m_italics_offset = ITALICS_FACTOR * m_height / 2.0;
+    m_italics_offset = Value(ITALICS_FACTOR * m_height / 2.0);
 
     // we always need these whitespace, number, and punctuation characters
     std::vector<std::pair<boost::uint32_t, boost::uint32_t> > range_vec(
@@ -889,9 +888,9 @@ void Font::Init(const std::string& font_filename, int pts)
     }
 
     // define default image buffer size
-    const int BUF_WIDTH = 256;
-    const int BUF_HEIGHT = 256;
-    const int BUF_SZ = BUF_WIDTH * BUF_HEIGHT;
+    const X BUF_WIDTH(256);
+    const Y BUF_HEIGHT(256);
+    const int BUF_SZ = Value(BUF_WIDTH) * Value(BUF_HEIGHT);
 
     // declare std::vector of image buffers into which we will copy glyph images and create first buffer
     std::vector<boost::uint16_t*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
@@ -904,7 +903,9 @@ void Font::Init(const std::string& font_filename, int pts)
     buffer_vec.push_back(temp_buf);
     buffer_sizes.push_back(Pt(BUF_WIDTH, BUF_HEIGHT));
 
-    int x = 0, y = 0, max_x = 0;
+    X x = X0;
+    Y y = Y0;
+    X max_x = X0;
     for (std::size_t i = 0; i < range_vec.size(); ++i) {
         boost::uint32_t low = range_vec[i].first;
         boost::uint32_t high = range_vec[i].second;
@@ -916,16 +917,18 @@ void Font::Init(const std::string& font_filename, int pts)
 
                 if (x + glyph_bitmap.width >= BUF_WIDTH) { // start a new row of glyph images
                     if (x > max_x) max_x = x;
-                    x = 0;
+                    x = X0;
                     y += m_height;
                     if (y + m_height >= BUF_HEIGHT) { // if there's not enough room for another row, create a new buffer
                         // cut off bottom portion of buffer just written, if it is possible to do so and maintain power-of-two height
-                        int pow_of_2_x = NextPowerOfTwo(max_x), pow_of_2_y = NextPowerOfTwo(y + m_height);
+                        X pow_of_2_x(NextPowerOfTwo(max_x));
+                        Y pow_of_2_y(NextPowerOfTwo(y + m_height));
                         if (pow_of_2_y < buffer_sizes.back().y)
                             buffer_sizes.back().y = pow_of_2_y;
                         if (pow_of_2_x < buffer_sizes.back().x)
                             buffer_sizes.back().x = pow_of_2_x;
-                        x = y = 0;
+                        x = X0;
+                        y = Y0;
                         temp_buf = new boost::uint16_t[BUF_SZ];
                         for (int i = 0; i < BUF_SZ; ++i) {
                             temp_buf[i] = 0;
@@ -936,13 +939,13 @@ void Font::Init(const std::string& font_filename, int pts)
                 }
 
                 boost::uint8_t*  src_start = glyph_bitmap.buffer;
-                boost::uint16_t* dst_start = buffer_vec.back() + y * BUF_WIDTH + x;
+                boost::uint16_t* dst_start = buffer_vec.back() + Value(y) * Value(BUF_WIDTH) + Value(x);
 
-                int y_offset = m_height - 1 + m_descent - face->glyph->bitmap_top + FT_MAGIC_NUMBER;
+                Y y_offset = m_height - 1 + m_descent - face->glyph->bitmap_top + FT_MAGIC_NUMBER;
 
                 for (int row = 0; row < glyph_bitmap.rows; ++row) {
                     boost::uint8_t*  src = src_start + row * glyph_bitmap.pitch;
-                    boost::uint16_t* dst = dst_start + (row + y_offset) * BUF_WIDTH;
+                    boost::uint16_t* dst = dst_start + (row + Value(y_offset)) * Value(BUF_WIDTH);
                     for (int col = 0; col < glyph_bitmap.width; ++col) {
 #ifdef __BIG_ENDIAN__
                         *dst++ = *src++ | (255 << 8); // big-endian uses different byte ordering
@@ -953,10 +956,11 @@ void Font::Init(const std::string& font_filename, int pts)
                 }
 
                 // record info on how to find and use this glyph later
-                temp_glyph_data[c] = TempGlyphData(static_cast<int>(buffer_vec.size()) - 1,
-                                                   x, y + FT_MAGIC_NUMBER, x + glyph_bitmap.width, y + m_height + FT_MAGIC_NUMBER,
-                                                   static_cast<int>((std::ceil(face->glyph->metrics.horiBearingX / 64.0))), // convert from 26.6 fixed point format and round up
-                                                   static_cast<int>((std::ceil(face->glyph->metrics.horiAdvance / 64.0)))); // convert from 26.6 fixed point format and round up
+                temp_glyph_data[c] =
+                    TempGlyphData(static_cast<int>(buffer_vec.size()) - 1,
+                                  Pt(x, y + FT_MAGIC_NUMBER), Pt(x + glyph_bitmap.width, y + m_height + FT_MAGIC_NUMBER),
+                                  X(static_cast<int>((std::ceil(face->glyph->metrics.horiBearingX / 64.0)))),
+                                  X(static_cast<int>((std::ceil(face->glyph->metrics.horiAdvance / 64.0)))));
 
                 // advance buffer write-position
                 x += glyph_bitmap.width;
@@ -966,7 +970,8 @@ void Font::Init(const std::string& font_filename, int pts)
 
     // cut off bottom portion of last buffer, if it is possible to do so and maintain power-of-two height
     if (x > max_x) max_x = x;
-    int pow_of_2_x = NextPowerOfTwo(max_x), pow_of_2_y = NextPowerOfTwo(y + m_height);
+    X pow_of_2_x(NextPowerOfTwo(max_x));
+    Y pow_of_2_y(NextPowerOfTwo(y + m_height));
     if (pow_of_2_y < buffer_sizes.back().y)
         buffer_sizes.back().y = pow_of_2_y;
     if (pow_of_2_x < buffer_sizes.back().x)
@@ -975,14 +980,14 @@ void Font::Init(const std::string& font_filename, int pts)
     // create opengl texture from buffer(s) and release buffer(s)
     for (std::size_t i = 0; i < buffer_vec.size(); ++i) {
         boost::shared_ptr<Texture> temp_texture(new Texture);
-        temp_texture->Init(0, 0, buffer_sizes[i].x, buffer_sizes[i].y, BUF_WIDTH, (unsigned char*)(buffer_vec[i]), GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 2);
+        temp_texture->Init(X0, Y0, buffer_sizes[i].x, buffer_sizes[i].y, BUF_WIDTH, (unsigned char*)(buffer_vec[i]), GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 2);
         m_textures.push_back(temp_texture);
         delete [] buffer_vec[i];
     }
 
     // create Glyph objects from temp glyph data
     for (std::map<boost::uint32_t, TempGlyphData>::iterator it = temp_glyph_data.begin(); it != temp_glyph_data.end(); ++it)
-        m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.x1, it->second.y1, it->second.x2, it->second.y2, it->second.left_b, it->second.adv);
+        m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.ul, it->second.lr, it->second.left_b, it->second.adv);
 
     // record the width of the space character
     std::map<boost::uint32_t, Glyph>::const_iterator glyph_it = m_glyphs.find(WIDE_SPACE);
@@ -1016,35 +1021,35 @@ bool Font::GenerateGlyph(FT_Face face, boost::uint32_t ch)
     return retval;
 }
 
-int Font::RenderGlyph(int x, int y, const Glyph& glyph, const Font::RenderState* render_state) const
+X Font::RenderGlyph(const Pt& pt, const Glyph& glyph, const Font::RenderState* render_state) const
 {
     if (render_state && render_state->use_italics) {
         // render subtexture to tilted rhombus instead of rectangle
         glBindTexture(GL_TEXTURE_2D, glyph.sub_texture.GetTexture()->OpenGLId());
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[1]);
-        glVertex2d(x + glyph.left_bearing + m_italics_offset, y);
+        glVertex(pt.x + glyph.left_bearing + m_italics_offset, pt.y);
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[1]);
-        glVertex2d(x + glyph.left_bearing + m_italics_offset + glyph.sub_texture.Width(), y);
+        glVertex(pt.x + glyph.sub_texture.Width() + glyph.left_bearing + m_italics_offset, pt.y);
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[3]);
-        glVertex2d(x + glyph.left_bearing - m_italics_offset, y + glyph.sub_texture.Height());
+        glVertex(pt.x + glyph.left_bearing - m_italics_offset, pt.y + glyph.sub_texture.Height());
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[3]);
-        glVertex2d(x + glyph.left_bearing - m_italics_offset + glyph.sub_texture.Width(), y + glyph.sub_texture.Height());
+        glVertex(pt.x + glyph.sub_texture.Width() + glyph.left_bearing - m_italics_offset, pt.y + glyph.sub_texture.Height());
         glEnd();
     } else {
-        glyph.sub_texture.OrthoBlit(Pt(x + glyph.left_bearing, y));
+        glyph.sub_texture.OrthoBlit(Pt(pt.x + glyph.left_bearing, pt.y));
     }
     if (render_state && render_state->draw_underline) {
-        double x1 = x;
-        double y1 = y + m_height + m_descent - m_underline_offset;
-        double x2 = x1 + glyph.advance;
-        double y2 = y1 + m_underline_height;
+        X x1 = pt.x;
+        Y_d y1 = pt.y + m_height + m_descent - m_underline_offset;
+        X x2 = x1 + glyph.advance;
+        Y_d y2 = y1 + m_underline_height;
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
-        glVertex2d(x1, y2);
-        glVertex2d(x1, y1);
-        glVertex2d(x2, y1);
-        glVertex2d(x2, y2);
+        glVertex(x1, y2);
+        glVertex(x1, y1);
+        glVertex(x2, y1);
+        glVertex(x2, y2);
         glEnd();
         glEnable(GL_TEXTURE_2D);
     }

@@ -50,8 +50,7 @@ PluginInterface::PluginInterface() :
     m_handle(0),
     m_out_archive(0),
     m_in_archive(0)
-{
-}
+{}
 
 PluginInterface::PluginInterface(const std::string& lib_name) : 
     PluginName(0),
@@ -63,9 +62,7 @@ PluginInterface::PluginInterface(const std::string& lib_name) :
     m_handle(0),
     m_out_archive(0),
     m_in_archive(0)
-{
-    Load(lib_name);
-}
+{ Load(lib_name); }
 
 PluginInterface::~PluginInterface()
 {
@@ -82,9 +79,7 @@ PluginInterface::~PluginInterface()
 }
 
 PluginInterface::operator int PluginInterface::ConvertibleToBoolDummy::* () const
-{
-    return m_handle ? &ConvertibleToBoolDummy::_ : 0;
-}
+{ return m_handle ? &ConvertibleToBoolDummy::_ : 0; }
 
 bool PluginInterface::Load(const std::string& lib_name)
 {

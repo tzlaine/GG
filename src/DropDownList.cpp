@@ -41,7 +41,7 @@ namespace {
     {
     public:
         ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-            Wnd(0, 0, GUI::GetGUI()->AppWidth(), GUI::GetGUI()->AppHeight(), CLICKABLE | MODAL),
+            Wnd(X0, Y0, GUI::GetGUI()->AppWidth(), GUI::GetGUI()->AppHeight(), CLICKABLE | MODAL),
             m_drop_wnd(drop_wnd),
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
@@ -51,8 +51,10 @@ namespace {
             m_lb_ul = m_old_lb_ul + m_drop_wnd->UpperLeft();
             AttachChild(m_lb_wnd);
         }
+
         virtual void Render()
         { m_lb_wnd->MoveTo(m_lb_ul); }
+
         ~ModalListPicker()
         {
             m_lb_wnd->MoveTo(m_old_lb_ul);
@@ -70,6 +72,7 @@ namespace {
                 m_done = true;
             }
         }
+
         void LBLeftClickSlot(ListBox::iterator it, const Pt&)
         { m_done = true; }
 
@@ -89,7 +92,7 @@ DropDownList::DropDownList() :
     m_LB(0)
 {}
 
-DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, Flags<WndFlag> flags/* = CLICKABLE*/) :
+DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_current_item(),
     m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))
@@ -97,7 +100,7 @@ DropDownList::DropDownList(int x, int y, int w, int h, int drop_ht, Clr color, F
     SetStyle(LIST_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
     Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + h + 2 * m_LB->CellMargin() + 2 * BORDER_THICK));
-    m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
+    m_LB->SizeMove(Pt(X0, Height()), Pt(Width(), Height() + m_LB->Height()));
     m_current_item = m_LB->end();
 }
 
@@ -143,7 +146,7 @@ bool DropDownList::Selected(std::size_t n) const
 Clr DropDownList::InteriorColor() const
 { return m_LB->InteriorColor(); }
 
-int DropDownList::DropHeight() const
+Y DropDownList::DropHeight() const
 { return m_LB->Height(); }
 
 Flags<ListBoxStyle> DropDownList::Style() const
@@ -158,7 +161,7 @@ std::size_t DropDownList::NumCols() const
 std::size_t DropDownList::SortCol() const
 { return m_LB->SortCol(); }
 
-int DropDownList::ColWidth(std::size_t n) const
+X DropDownList::ColWidth(std::size_t n) const
 { return m_LB->ColWidth(n); }
 
 Alignment DropDownList::ColAlignment(std::size_t n) const
@@ -168,10 +171,10 @@ Alignment DropDownList::RowAlignment(iterator it) const
 { return m_LB->RowAlignment(it); }
 
 Pt DropDownList::ClientUpperLeft() const
-{ return UpperLeft() + Pt(BORDER_THICK, BORDER_THICK); }
+{ return UpperLeft() + Pt(X(BORDER_THICK), Y(BORDER_THICK)); }
 
 Pt DropDownList::ClientLowerRight() const
-{ return LowerRight() - Pt(BORDER_THICK, BORDER_THICK); }
+{ return LowerRight() - Pt(X(BORDER_THICK), Y(BORDER_THICK)); }
 
 void DropDownList::Render()
 {
@@ -180,7 +183,7 @@ void DropDownList::Render()
     Clr color_to_use = Disabled() ? DisabledColor(m_LB->Color()) : m_LB->Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(m_LB->m_int_color) : m_LB->m_int_color;
 
-    BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
+    BeveledRectangle(ul, lr, int_color_to_use, color_to_use, false, BORDER_THICK);
 
     // Draw the ListBox::Row of currently displayed item, if any.
     if (m_current_item != m_LB->end()) {
@@ -267,7 +270,7 @@ void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
 {
     // adjust size to keep correct height based on row height, etc.
     Wnd::SizeMove(ul, lr);
-    m_LB->SizeMove(Pt(0, Height()), Pt(Width(), Height() + m_LB->Height()));
+    m_LB->SizeMove(Pt(X0, Height()), Pt(Width(), Height() + m_LB->Height()));
 }
 
 void DropDownList::SetColor(Clr c)
@@ -328,7 +331,7 @@ void DropDownList::Select(std::size_t n)
 void DropDownList::SetInteriorColor(Clr c)
 { m_LB->SetInteriorColor(c); }
 
-void DropDownList::SetDropHeight(int h)
+void DropDownList::SetDropHeight(Y h)
 { m_LB->Resize(Pt(Width(), h)); }
 
 void DropDownList::SetStyle(Flags<ListBoxStyle> s)
@@ -348,7 +351,7 @@ void DropDownList::SetSortCol(std::size_t n)
     m_current_item = m_LB->end();
 }
 
-void DropDownList::SetColWidth(std::size_t n, int w)
+void DropDownList::SetColWidth(std::size_t n, X w)
 { m_LB->SetColWidth(n, w); }
 
 void DropDownList::LockColWidths()

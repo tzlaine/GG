@@ -48,7 +48,7 @@ Control::Control() :
     m_disabled(false)
 {}
 
-Control::Control(int x, int y, int w, int h, Flags<WndFlag> flags/* = CLICKABLE*/) :
+Control::Control(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Wnd(x, y, w, h, flags),
     m_disabled(false)
 {}
@@ -62,14 +62,10 @@ void Control::DropsAcceptable(DropsAcceptableIter first,
 }
 
 Clr Control::Color() const
-{
-    return m_color;
-}
+{ return m_color; }
 
 bool Control::Disabled() const
-{
-    return m_disabled;
-}
+{ return m_disabled; }
 
 void Control::AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt)
 {
@@ -96,14 +92,10 @@ void Control::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
 }
 
 void Control::SetColor(Clr c)
-{
-    m_color = c;
-}
+{ m_color = c; }
 
 void Control::Disable(bool b/* = true*/)
-{
-    m_disabled = b;
-}
+{ m_disabled = b; }
 
 void Control::DefineAttributes(WndEditor* editor)
 {

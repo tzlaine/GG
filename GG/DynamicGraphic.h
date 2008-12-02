@@ -79,7 +79,7 @@ public:
         indicates all possible area is considered to contain valid frames.  Regardless of the value of \a frames, all
         Textures but the last are assumed to have the maximum number of frames based on their sizes.  This ctor allows
         specification of a frame size different from the size of the DynamicGraphic's size. */
-    DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>());
+    DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height, int margin, const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ ///@{
@@ -97,8 +97,8 @@ public:
     int     EndFrame() const;
 
     int     Margin() const;      ///< returns the number of pixels placed between frames and between the frames and the Texture edges
-    int     FrameWidth() const;  ///< returns the original width of the control (and the width of the frame images)
-    int     FrameHeight() const; ///< returns the original height of the control (and the height of the frame images)
+    X  FrameWidth() const;  ///< returns the original width of the control (and the width of the frame images)
+    Y  FrameHeight() const; ///< returns the original height of the control (and the height of the frame images)
 
     /** returns the style of the DynamicGraphic \see StaticGraphicStyle */
     Flags<GraphicStyle>  Style() const;
@@ -196,9 +196,9 @@ protected:
     int LastFrameTime() const;     ///< returns the time index in ms of the most recent frame shown (should be m_curr_frame); -1 if none
     //@}
 
-    const int   m_margin;          ///< the number of pixels placed between frames and between the frames and the Texture edges
-    const int   m_frame_width;     ///< the width of each frame 
-    const int   m_frame_height;    ///< the height of each frame 
+    const int    m_margin;          ///< the number of pixels placed between frames and between the frames and the Texture edges
+    const X m_frame_width;     ///< the width of each frame 
+    const Y m_frame_height;    ///< the height of each frame 
 
 private:
     void ValidateStyle();            ///< ensures that the style flags are consistent
@@ -247,8 +247,8 @@ void GG::DynamicGraphic::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
         & boost::serialization::make_nvp("m_margin", const_cast<int&>(m_margin))
-        & boost::serialization::make_nvp("m_frame_width", const_cast<int&>(m_frame_width))
-        & boost::serialization::make_nvp("m_frame_height", const_cast<int&>(m_frame_height))
+        & boost::serialization::make_nvp("m_frame_width", const_cast<X&>(m_frame_width))
+        & boost::serialization::make_nvp("m_frame_height", const_cast<Y&>(m_frame_height))
         & BOOST_SERIALIZATION_NVP(m_textures)
         & BOOST_SERIALIZATION_NVP(m_FPS)
         & BOOST_SERIALIZATION_NVP(m_playing)

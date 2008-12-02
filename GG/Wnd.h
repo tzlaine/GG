@@ -229,8 +229,8 @@ public:
         coordinates if no parent exists. */
     Pt             RelativeLowerRight() const;
 
-    int            Width() const;        ///< returns width of window in pixels
-    int            Height() const;       ///< returns width of window in pixels
+    X         Width() const;        ///< returns width of window in pixels
+    Y         Height() const;       ///< returns width of window in pixels
     int            ZOrder() const;       ///< returns the position of this window in the z-order (root (non-child) windows only)
     Pt             Size() const;         ///< returns a \a Pt packed with width in \a x and height in \a y
     Pt             MinSize() const;      ///< returns the minimum allowable size of window
@@ -255,8 +255,8 @@ public:
     /** returns the size of the client area \see Size() */
     Pt             ClientSize() const;
 
-    int            ClientWidth() const;                 ///< returns the width of the client area
-    int            ClientHeight() const;                ///< returns the height of the client area
+    X         ClientWidth() const;                 ///< returns the width of the client area
+    Y         ClientHeight() const;                ///< returns the height of the client area
 
     Pt             ScreenToWindow(const Pt& pt) const;  ///< returns \a pt translated from screen- to window-coordinates
     Pt             ScreenToClient(const Pt& pt) const;  ///< returns \a pt translated from screen- to client-coordinates
@@ -591,7 +591,7 @@ protected:
     Wnd(); ///< default ctor
 
     /** ctor that allows a size and position to be specified, as well as creation flags */
-    Wnd(int x, int y, int w, int h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
+    Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
     //@}
 
     /** \name Accessors */ ///@{

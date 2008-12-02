@@ -58,10 +58,9 @@ DynamicGraphic::DynamicGraphic() :
     m_last_frame_time(-1),
     m_first_frame_idx(0),
     m_style(GRAPHIC_NONE)
-{
-}
+{}
 
-DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height, int margin, 
+DynamicGraphic::DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height, int margin, 
                                const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, int frames/* = -1*/, 
                                Flags<WndFlag> flags/* = Flags<WndFlags>()*/) :
     Control(x, y, w, h, flags),
@@ -87,64 +86,40 @@ DynamicGraphic::DynamicGraphic(int x, int y, int w, int h, bool loop, int frame_
 }
 
 int DynamicGraphic::Frames() const       
-{
-    return m_frames;
-}
+{ return m_frames; }
 
 bool DynamicGraphic::Playing() const
-{
-    return m_playing;
-}
+{ return m_playing; }
 
 bool DynamicGraphic::Looping() const
-{
-    return m_looping;
-}
+{ return m_looping; }
 
 double DynamicGraphic::FPS() const
-{
-    return m_FPS;
-}
+{ return m_FPS; }
 
 int DynamicGraphic::FrameIndex() const
-{
-    return m_curr_frame;
-}
+{ return m_curr_frame; }
 
 int DynamicGraphic::TimeIndex() const
-{
-    return m_last_frame_time;
-}
+{ return m_last_frame_time; }
 
 int DynamicGraphic::StartFrame() const
-{
-    return m_first_frame_idx;
-}
+{ return m_first_frame_idx; }
 
 int DynamicGraphic::EndFrame() const
-{
-    return m_last_frame_idx;
-}
+{ return m_last_frame_idx; }
 
 int DynamicGraphic::Margin() const
-{
-    return m_margin;
-}
+{ return m_margin; }
 
-int DynamicGraphic::FrameWidth() const
-{
-    return m_frame_width;
-}
+X DynamicGraphic::FrameWidth() const
+{ return m_frame_width; }
 
-int DynamicGraphic::FrameHeight() const
-{
-    return m_frame_height;
-}
+Y DynamicGraphic::FrameHeight() const
+{ return m_frame_height; }
 
 Flags<GraphicStyle> DynamicGraphic::Style() const
-{
-    return m_style;
-}
+{ return m_style; }
 
 void DynamicGraphic::Render()
 {
@@ -185,9 +160,9 @@ void DynamicGraphic::Render()
         Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
         glColor(color_to_use);
 
-        int cols = m_textures[m_curr_texture].texture->DefaultWidth() / (m_frame_width + m_margin);
-        int x = (m_curr_subtexture % cols) * (m_frame_width + m_margin) + m_margin;
-        int y = (m_curr_subtexture / cols) * (m_frame_height + m_margin) + m_margin;
+        int cols = Value(m_textures[m_curr_texture].texture->DefaultWidth() / (m_frame_width + m_margin));
+        X x = (m_curr_subtexture % cols) * (m_frame_width + m_margin) + m_margin;
+        Y y = (m_curr_subtexture / cols) * (m_frame_height + m_margin) + m_margin;
         SubTexture st(m_textures[m_curr_texture].texture, x, y, x + m_frame_width, y + m_frame_height);
 
         Pt ul = UpperLeft(), lr = LowerRight();
@@ -196,46 +171,47 @@ void DynamicGraphic::Render()
         Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
         if (m_style & GRAPHIC_FITGRAPHIC) {
             if (m_style & GRAPHIC_PROPSCALE) {
-                double scale_x = window_sz.x / double(graphic_sz.x),
-                    scale_y = window_sz.y / double(graphic_sz.y);
-                double scale = (scale_x < scale_y) ? scale_x : scale_y;
-                pt2.x = int(graphic_sz.x * scale);
-                pt2.y = int(graphic_sz.y * scale);
+                X_d scale_x = window_sz.x / (graphic_sz.x * 1.0);
+                Y_d scale_y = window_sz.y / (graphic_sz.y * 1.0);
+                double scale = std::min(Value(scale_x), Value(scale_y));
+                pt2.x = graphic_sz.x * scale;
+                pt2.y = graphic_sz.y * scale;
             } else {
                 pt2 = window_sz;
             }
         } else if (m_style & GRAPHIC_SHRINKFIT) {
             if (m_style & GRAPHIC_PROPSCALE) {
-                double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
-                    scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
-                double scale = (scale_x < scale_y) ? scale_x : scale_y;
-                pt2.x = int(graphic_sz.x * scale);
-                pt2.y = int(graphic_sz.y * scale);
+                X_d scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / (graphic_sz.x * 1.0) : X_d(1.0);
+                Y_d scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / (graphic_sz.y * 1.0) : Y_d(1.0);
+                double scale = std::min(Value(scale_x), Value(scale_y));
+                pt2.x = graphic_sz.x * scale;
+                pt2.y = graphic_sz.y * scale;
             } else {
                 pt2 = window_sz;
             }
         }
 
-        int shift = 0;
+        X x_shift(0);
         if (m_style & GRAPHIC_LEFT) {
-            shift = ul.x;
+            x_shift = ul.x;
         } else if (m_style & GRAPHIC_CENTER) {
-            shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
+            x_shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
         } else { // m_style & GRAPHIC_RIGHT
-            shift = lr.x - (pt2.x - pt1.x);
+            x_shift = lr.x - (pt2.x - pt1.x);
         }
-        pt1.x += shift;
-        pt2.x += shift;
+        pt1.x += x_shift;
+        pt2.x += x_shift;
 
+        Y y_shift(0);
         if (m_style & GRAPHIC_TOP) {
-            shift = ul.y;
+            y_shift = ul.y;
         } else if (m_style & GRAPHIC_VCENTER) {
-            shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
+            y_shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
         } else { // m_style & GRAPHIC_BOTTOM
-            shift = lr.y - (pt2.y - pt1.y);
+            y_shift = lr.y - (pt2.y - pt1.y);
         }
-        pt1.y += shift;
-        pt2.y += shift;
+        pt1.y += y_shift;
+        pt2.y += y_shift;
 
         st.OrthoBlit(pt1, pt2);
 
@@ -293,9 +269,7 @@ void DynamicGraphic::Play()
 }
 
 void DynamicGraphic::Pause()
-{
-    m_playing = false;
-}
+{ m_playing = false; }
 
 void DynamicGraphic::NextFrame()
 {
@@ -340,14 +314,10 @@ void DynamicGraphic::Stop()
 }
 
 void DynamicGraphic::Loop(bool b/* = true*/)
-{
-    m_looping = b;
-}
+{ m_looping = b; }
 
 void DynamicGraphic::SetFPS(double fps)
-{
-    m_FPS = fps;
-}
+{ m_FPS = fps; }
 
 void DynamicGraphic::SetFrameIndex(int idx)
 {
@@ -444,8 +414,8 @@ void DynamicGraphic::DefineAttributes(WndEditor* editor)
     Control::DefineAttributes(editor);
     editor->Label("DynamicGraphic");
     editor->Attribute("Frame Margin", const_cast<int&>(m_margin));
-    editor->Attribute("Frame Width", const_cast<int&>(m_frame_width));
-    editor->Attribute("Frame Height", const_cast<int&>(m_frame_height));
+    editor->Attribute("Frame Width", const_cast<X&>(m_frame_width));
+    editor->Attribute("Frame Height", const_cast<Y&>(m_frame_height));
     // TODO: handle setting frame(s)
     editor->Attribute("Frames Per Second", m_FPS);
     editor->Attribute("Playing", m_playing);
@@ -463,35 +433,25 @@ void DynamicGraphic::DefineAttributes(WndEditor* editor)
 
 int DynamicGraphic::FramesInTexture(const Texture* t) const
 {
-    int cols = t->DefaultWidth() / (m_frame_width + m_margin);
-    int rows = t->DefaultHeight() / (m_frame_height + m_margin);
+    int cols = Value(t->DefaultWidth() / (m_frame_width + m_margin));
+    int rows = Value(t->DefaultHeight() / (m_frame_height + m_margin));
     return cols * rows;
 }
 
 const std::vector<DynamicGraphic::FrameSet>& DynamicGraphic::Textures() const
-{
-    return m_textures;
-}
+{ return m_textures; }
 
 int DynamicGraphic::CurrentTexture() const
-{
-    return m_curr_texture;
-}
+{ return m_curr_texture; }
 
 int DynamicGraphic::CurrentSubTexture() const
-{
-    return m_curr_texture;
-}
+{ return m_curr_texture; }
 
 int DynamicGraphic::FirstFrameTime() const
-{
-    return m_first_frame_time;
-}
+{ return m_first_frame_time; }
 
 int DynamicGraphic::LastFrameTime() const
-{
-    return m_last_frame_time;
-}
+{ return m_last_frame_time; }
 
 void DynamicGraphic::ValidateStyle()
 {

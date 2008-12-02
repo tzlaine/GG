@@ -62,7 +62,7 @@ void OgreGUIInputPlugin::DisconnectHandlers()
     m_close_connection.disconnect();
 }
 
-void OgreGUIInputPlugin::HandleWindowResize(int width, int height)
+void OgreGUIInputPlugin::HandleWindowResize(X width, Y height)
 {}
 
 void OgreGUIInputPlugin::HandleWindowClose()

@@ -42,8 +42,8 @@
 namespace GG {
 
 namespace detail {
-    GG_API extern const int ATTRIBUTE_ROW_HEIGHT;
-    GG_API extern const int ATTRIBUTE_ROW_CONTROL_WIDTH;
+    GG_API extern const X ATTRIBUTE_ROW_CONTROL_WIDTH;
+    GG_API extern const Y ATTRIBUTE_ROW_HEIGHT;
 }
 
 struct AttributeRowBase;
@@ -74,7 +74,7 @@ public:
     };
 
     /** basic ctor.  Note that WndEditor has an integral width. */
-    WndEditor(int h, const boost::shared_ptr<Font>& font);
+    WndEditor(Y h, const boost::shared_ptr<Font>& font);
 
     /** Returns the font used by this WndEditor to create its attribute rows. */
     const boost::shared_ptr<Font>& GetFont() const;
@@ -495,7 +495,7 @@ AttributeRow<T>::AttributeRow(const std::string& name, T& value, const boost::sh
     m_edit(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_edit = new Edit(X0, Y0, X1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_edit->Height()));
     Resize(m_edit->Size());
     push_back(m_edit);
@@ -533,7 +533,7 @@ RangedAttributeRow<T, is_enum>::RangedAttributeRow(const std::string& name, T& v
     m_edit(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_edit = new Edit(X0, Y0, X1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     m_edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_edit->Height()));
     Resize(m_edit->Size());
     push_back(m_edit);
@@ -572,7 +572,7 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
     m_enum_drop_list(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_enum_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * (max - min + 1) + 4, CLR_GRAY);
+    m_enum_drop_list = new DropDownList(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, detail::ATTRIBUTE_ROW_HEIGHT * (max - min + 1) + 4, CLR_GRAY);
     m_enum_drop_list->SetInteriorColor(CLR_WHITE);
     m_enum_drop_list->SetStyle(LIST_NOSORT);
     for (T i = min; i <= max; i = T(i + 1)) {
@@ -613,7 +613,7 @@ ConstAttributeRow<T>::ConstAttributeRow(const std::string& name, const T& value,
     m_value_text(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, boost::lexical_cast<std::string>(m_value), font, CLR_BLACK, FORMAT_LEFT);
+    m_value_text = new TextControl(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, boost::lexical_cast<std::string>(m_value), font, CLR_BLACK, FORMAT_LEFT);
     push_back(m_value_text);
 }
 
@@ -631,7 +631,7 @@ FlagAttributeRow<FlagType>::FlagAttributeRow(const std::string& name, Flags<Flag
 {
     boost::shared_ptr<Font> font_to_use = GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 2);
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_check_box = new StateButton(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font_to_use, FORMAT_LEFT, CLR_GRAY);
+    m_check_box = new StateButton(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, "", font_to_use, FORMAT_LEFT, CLR_GRAY);
     m_check_box->SetCheck(m_flags & m_value);
     push_back(m_check_box);
     m_check_box_connection = Connect(m_check_box->CheckedSignal, &FlagAttributeRow::CheckChanged, this);
@@ -664,7 +664,7 @@ FlagGroupAttributeRow<FlagType>::FlagGroupAttributeRow(const std::string& name, 
     m_flag_drop_list(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_flag_drop_list = new DropDownList(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, font->Height() + 8, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY);
+    m_flag_drop_list = new DropDownList(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, font->Height() + 8, detail::ATTRIBUTE_ROW_HEIGHT * static_cast<int>(m_group_values.size()) + 4, CLR_GRAY);
     Resize(m_flag_drop_list->Size());
     m_flag_drop_list->SetInteriorColor(CLR_WHITE);
     m_flag_drop_list->SetStyle(LIST_NOSORT);
@@ -719,7 +719,7 @@ CustomTextRow<T>::CustomTextRow(const std::string& name, const T& functor, const
     m_display_text(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_display_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, m_functor(m_wnd), font, CLR_BLACK, FORMAT_LEFT);
+    m_display_text = new TextControl(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, m_functor(m_wnd), font, CLR_BLACK, FORMAT_LEFT);
     Resize(m_display_text->Size());
     push_back(m_display_text);
 }

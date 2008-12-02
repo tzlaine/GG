@@ -92,11 +92,11 @@ boost::shared_ptr<ModalEventPump> OgreGUI::CreateModalEventPump(bool& done)
 int OgreGUI::Ticks() const
 { return m_timer.getMilliseconds(); }
 
-int OgreGUI::AppWidth() const
-{ return m_window->getWidth(); }
+X OgreGUI::AppWidth() const
+{ return X(m_window->getWidth()); }
 
-int OgreGUI::AppHeight() const
-{ return m_window->getHeight(); }
+Y OgreGUI::AppHeight() const
+{ return Y(m_window->getHeight()); }
 
 const Ogre::SharedPtr<Ogre::DataStream>& OgreGUI::ConfigFileStream() const
 { return m_config_file_data; }
@@ -146,7 +146,7 @@ void OgreGUI::Enter2DMode()
     render_system->_setViewMatrix(Matrix4::IDENTITY);
     render_system->_setProjectionMatrix(Matrix4::IDENTITY);
 
-    glOrtho(0.0, AppWidth(), AppHeight(), 0.0, 0.0, AppWidth());
+    glOrtho(0.0, Value(AppWidth()), Value(AppHeight()), 0.0, 0.0, Value(AppWidth()));
 
     // initialise render settings
     render_system->setLightingEnabled(false);
@@ -235,7 +235,7 @@ void OgreGUI::windowResized(Ogre::RenderWindow* window)
         unsigned int width, height, depth;
         int left, top;
         window->getMetrics(width, height, depth, left, top);
-        WindowResizedSignal(width, height);
+        WindowResizedSignal(X(width), Y(height));
     }
 }
 

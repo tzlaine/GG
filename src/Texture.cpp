@@ -26,6 +26,7 @@
 
 #include <GG/GUI.h>
 #include <GG/Config.h>
+#include <GG/DrawUtil.h>
 
 #if GG_USE_DEVIL_IMAGE_LOAD_LIBRARY
 # include <IL/il.h>
@@ -54,11 +55,12 @@ using namespace GG;
 namespace {
     const bool VERBOSE_DEVIL_ERROR_REPORTING = true;
 
-    int PowerOfTwo(int input)
+    template <class T>
+    T PowerOfTwo(T input)
     {
-        int value = 1;
+        T value(1);
         while (value < input)
-            value <<= 1;
+            value *= 2;
         return value;
     }
 
@@ -153,10 +155,10 @@ GLenum Texture::MagFilter() const
 int Texture::BytesPP() const
 { return m_bytes_pp; }
 
-GLint Texture::Width() const
+X Texture::Width() const
 { return m_width; }
 
-GLint Texture::Height() const
+Y Texture::Height() const
 { return m_height; }
 
 bool Texture::MipMapped() const
@@ -168,10 +170,10 @@ GLuint Texture::OpenGLId() const
 const GLfloat* Texture::DefaultTexCoords() const
 { return m_tex_coords; }
 
-GLint Texture::DefaultWidth() const
+X Texture::DefaultWidth() const
 { return m_default_width; }
 
-GLint Texture::DefaultHeight() const
+Y Texture::DefaultHeight() const
 { return m_default_height; }
 
 void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/* = 0*/) const
@@ -194,10 +196,14 @@ void Texture::OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords/
 
         // render texture
         glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(tex_coords[0], tex_coords[1]); glVertex2i(pt1.x, pt1.y);
-        glTexCoord2f(tex_coords[2], tex_coords[1]); glVertex2i(pt2.x, pt1.y);
-        glTexCoord2f(tex_coords[0], tex_coords[3]); glVertex2i(pt1.x, pt2.y);
-        glTexCoord2f(tex_coords[2], tex_coords[3]); glVertex2i(pt2.x, pt2.y);
+        glTexCoord2f(tex_coords[0], tex_coords[1]);
+        glVertex(pt1.x, pt1.y);
+        glTexCoord2f(tex_coords[2], tex_coords[1]);
+        glVertex(pt2.x, pt1.y);
+        glTexCoord2f(tex_coords[0], tex_coords[3]);
+        glVertex(pt1.x, pt2.y);
+        glTexCoord2f(tex_coords[2], tex_coords[3]);
+        glVertex(pt2.x, pt2.y);
         glEnd();
 
         if (need_min_filter_change)
@@ -336,8 +342,8 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     }
 
     m_filename = filename;
-    m_default_width = image.width();
-    m_default_height = image.height();
+    m_default_width = X(image.width());
+    m_default_height = Y(image.height());
     m_type = GL_UNSIGNED_BYTE;
 
 #define IF_IMAGE_TYPE_IS(image_prefix)                                  \
@@ -370,14 +376,14 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 #endif
 }
 
-void Texture::Init(int x, int y, int width, int height, int image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
+void Texture::Init(X x, Y y, X width, Y height, X image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
     glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
     glPixelStorei(GL_UNPACK_LSB_FIRST, false);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, image_width);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, y);
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, x);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, Value(image_width));
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, Value(y));
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, Value(x));
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     try {
@@ -390,7 +396,7 @@ void Texture::Init(int x, int y, int width, int height, int image_width, const u
     glPopClientAttrib();
 }
 
-void Texture::Init(int width, int height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
+void Texture::Init(X width, Y height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
     glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
@@ -440,8 +446,8 @@ void Texture::Clear()
     m_filename = "";
 
     m_bytes_pp = 4;
-    m_default_width = m_width = 0;
-    m_default_height = m_height = 0;
+    m_default_width = m_width = X0;
+    m_default_height = m_height = Y0;
 
     m_wrap_s = m_wrap_t = GL_REPEAT;
     m_min_filter = GL_LINEAR_MIPMAP_LINEAR;
@@ -456,7 +462,7 @@ void Texture::Clear()
     m_tex_coords[2] = m_tex_coords[3] = 1.0f;   // max x, y
 }
 
-void Texture::InitFromRawData(int width, int height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap)
+void Texture::InitFromRawData(X width, Y height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap)
 {
     if (!image)
         return;
@@ -464,8 +470,8 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
     if (m_opengl_id)
         Clear();
 
-    int GL_texture_width = PowerOfTwo(width);
-    int GL_texture_height = PowerOfTwo(height);
+    X GL_texture_width = PowerOfTwo(width);
+    Y GL_texture_height = PowerOfTwo(height);
 
     glGenTextures(1, &m_opengl_id);
     glBindTexture(GL_TEXTURE_2D, m_opengl_id);
@@ -475,40 +481,45 @@ void Texture::InitFromRawData(int width, int height, const unsigned char* image,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrap_s);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrap_t);
 
-    glTexImage2D(GL_PROXY_TEXTURE_2D, 0, format, GL_texture_width, GL_texture_height, 0, format, type, image);
+    glTexImage2D(GL_PROXY_TEXTURE_2D, 0, format, Value(GL_texture_width), Value(GL_texture_height), 0, format, type, image);
     GLint checked_format;
     glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &checked_format);
     if (!checked_format)
         throw InsufficientResources("Insufficient resources to create requested OpenGL texture");
     bool image_is_power_of_two = width == GL_texture_width && height == GL_texture_height;
     if (image_is_power_of_two) {
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, image);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, Value(width), Value(height), 0, format, type, image);
     } else {
-        std::vector<unsigned char> zero_data(bytes_per_pixel * GL_texture_width * GL_texture_height);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, GL_texture_width, GL_texture_height, 0, format, type, &zero_data[0]);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, image);
+        std::vector<unsigned char> zero_data(bytes_per_pixel * Value(GL_texture_width) * Value(GL_texture_height));
+        glTexImage2D(GL_TEXTURE_2D, 0, format, Value(GL_texture_width), Value(GL_texture_height), 0, format, type, &zero_data[0]);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Value(width), Value(height), format, type, image);
     }
 
     m_mipmaps = mipmap;
     m_default_width = width;
     m_default_height = height;
     m_bytes_pp = bytes_per_pixel;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_width);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_height);
-    m_tex_coords[2] = m_default_width / double(m_width);
-    m_tex_coords[3] = m_default_height / double(m_height);
+    {
+        int w, h;
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
+        m_width = X(w);
+        m_height = Y(h);
+    }
+    m_tex_coords[2] = Value(1.0 * m_default_width / m_width);
+    m_tex_coords[3] = Value(1.0 * m_default_height / m_height);
 
     if (mipmap) {
         std::auto_ptr<unsigned char> image_copy;
         if (!image_is_power_of_two)
             image_copy.reset(GetRawBytes());
         unsigned char* image_to_use = image_copy.get() ? image_copy.get() : const_cast<unsigned char*>(image);
-        gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, format, GL_texture_width, GL_texture_height, format, type, image_to_use);
+        gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, format, Value(GL_texture_width), Value(GL_texture_height), format, type, image_to_use);
         GLint checked_format;
         glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &checked_format);
         if (!checked_format)
             throw InsufficientResources("Insufficient resources to create requested mipmapped OpenGL texture");
-        gluBuild2DMipmaps(GL_TEXTURE_2D, format, GL_texture_width, GL_texture_height, format, type, image_to_use);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, format, Value(GL_texture_width), Value(GL_texture_height), format, type, image_to_use);
     } else {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -528,7 +539,7 @@ unsigned char* Texture::GetRawBytes()
 
     // get pixel data
     typedef unsigned char uchar;
-    retval = new uchar[m_width * m_height * m_bytes_pp];
+    retval = new uchar[Value(m_width) * Value(m_height) * m_bytes_pp];
     glGetTexImage(GL_TEXTURE_2D, 0, m_format, m_type, retval);
     glPopClientAttrib();
     return retval;
@@ -544,7 +555,7 @@ SubTexture::SubTexture() :
     m_tex_coords()
 {}
 
-SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2) :
+SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, X x1, Y y1, X x2, Y y2) :
     m_texture(texture),
     m_width(x2 - x1),
     m_height(y2 - y1),
@@ -553,10 +564,10 @@ SubTexture::SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, 
     if (!m_texture) throw BadTexture("Attempted to contruct subtexture from invalid texture");
     if (x2 < x1 || y2 < y1) throw InvalidTextureCoordinates("Attempted to contruct subtexture from invalid coordinates");
 
-    m_tex_coords[0] = static_cast<double>(x1) / texture->Width();
-    m_tex_coords[1] = static_cast<double>(y1) / texture->Height();
-    m_tex_coords[2] = static_cast<double>(x2) / texture->Width();
-    m_tex_coords[3] = static_cast<double>(y2) / texture->Height();
+    m_tex_coords[0] = Value(x1 * 1.0 / texture->Width());
+    m_tex_coords[1] = Value(y1 * 1.0 / texture->Height());
+    m_tex_coords[2] = Value(x2 * 1.0 / texture->Width());
+    m_tex_coords[3] = Value(y2 * 1.0 / texture->Height());
 }
 
 SubTexture::~SubTexture()
@@ -585,10 +596,10 @@ bool SubTexture::Empty() const
 const GLfloat* SubTexture::TexCoords() const
 { return m_tex_coords; }
 
-GLint SubTexture::Width() const
+X SubTexture::Width() const
 { return m_width; }
 
-GLint SubTexture::Height() const
+Y SubTexture::Height() const
 { return m_height; }
 
 const Texture* SubTexture::GetTexture() const

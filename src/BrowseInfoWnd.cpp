@@ -40,7 +40,7 @@ BrowseInfoWnd::BrowseInfoWnd() :
     Wnd()
 {}
 
-BrowseInfoWnd::BrowseInfoWnd(int x, int y, int w, int h) :
+BrowseInfoWnd::BrowseInfoWnd(X x, Y y, X w, Y h) :
     Wnd(x, y, w, h)
 {}
 
@@ -52,11 +52,11 @@ void BrowseInfoWnd::Update(int mode, const Wnd* target)
     if (GUI::GetGUI()->AppWidth() <= lr.x)
         ul.x += GUI::GetGUI()->AppWidth() - lr.x;
     else if (ul.x < 0)
-        ul.x = 0;
+        ul.x = X0;
     if (GUI::GetGUI()->AppHeight() <= lr.y)
         ul.y += GUI::GetGUI()->AppHeight() - lr.y;
     else if (ul.y < 0)
-        ul.y = 0;
+        ul.y = Y0;
     MoveTo(ul);
 }
 
@@ -78,16 +78,16 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd() :
     m_text_control(0)
 {}
 
-TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
+TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(X w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
                                            Flags<TextFormat> format/* = FORMAT_LEFT | FORMAT_WORDBREAK*/, int border_width/* = 2*/, int text_margin/* = 4*/) :
-    BrowseInfoWnd(0, 0, w, 100),
+    BrowseInfoWnd(X0, Y0, w, Y(100)),
     m_text_from_target(true),
     m_font(font),
     m_color(color),
     m_border_color(border_color),
     m_border_width(border_width),
     m_preferred_width(w),
-    m_text_control(GetStyleFactory()->NewTextControl(0, 0, w, 1, "", m_font, text_color, format))
+    m_text_control(GetStyleFactory()->NewTextControl(X0, Y0, w, Y1, "", m_font, text_color, format))
 {
     AttachChild(m_text_control);
     GridLayout();
@@ -102,108 +102,74 @@ bool TextBoxBrowseInfoWnd::WndHasBrowseInfo(const Wnd* wnd, int mode) const
 }
 
 bool TextBoxBrowseInfoWnd::TextFromTarget() const
-{
-    return m_text_from_target;
-}
+{ return m_text_from_target; }
 
 const std::string& TextBoxBrowseInfoWnd::Text() const
-{
-    return m_text_control->WindowText();
-}
+{ return m_text_control->WindowText(); }
 
 const boost::shared_ptr<Font>& TextBoxBrowseInfoWnd::GetFont() const
-{
-    return m_font;
-}
+{ return m_font; }
 
 Clr TextBoxBrowseInfoWnd::Color() const
-{
-    return m_color;
-}
+{ return m_color; }
 
 Clr TextBoxBrowseInfoWnd::TextColor() const
-{
-    return m_text_control->TextColor();
-}
+{ return m_text_control->TextColor(); }
 
 Flags<TextFormat> TextBoxBrowseInfoWnd::GetTextFormat() const
-{
-    return m_text_control->GetTextFormat();
-}
+{ return m_text_control->GetTextFormat(); }
 
 Clr TextBoxBrowseInfoWnd::BorderColor() const
-{
-    return m_border_color;
-}
+{ return m_border_color; }
 
 int TextBoxBrowseInfoWnd::BorderWidth() const
-{
-    return m_border_width;
-}
+{ return m_border_width; }
 
 int TextBoxBrowseInfoWnd::TextMargin() const
-{
-    return GetLayout()->BorderMargin();
-}
+{ return GetLayout()->BorderMargin(); }
 
 void TextBoxBrowseInfoWnd::SetText(const std::string& str)
 {
     m_text = str;
-    Resize(Pt(m_preferred_width, 1));
+    Resize(Pt(m_preferred_width, Y1));
     m_text_control->SetText(str);
     if (str.empty())
         Hide();
     else
         Show();
-    Resize(Pt(1, 1));
+    Resize(Pt(X1, Y1));
     Resize(Pt(std::min(m_preferred_width, GetLayout()->MinUsableSize().x), GetLayout()->MinUsableSize().y));
 }
 
 void TextBoxBrowseInfoWnd::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
-    FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_color, m_border_color, m_border_width);
+    FlatRectangle(ul, lr, m_color, m_border_color, m_border_width);
 }
 
 void TextBoxBrowseInfoWnd::SetTextFromTarget(bool b)
-{
-    m_text_from_target = b;
-}
+{ m_text_from_target = b; }
 
 void TextBoxBrowseInfoWnd::SetFont(const boost::shared_ptr<Font>& font)
-{
-    m_font = font;
-}
+{ m_font = font; }
 
 void TextBoxBrowseInfoWnd::SetColor(Clr color)
-{
-    m_color = color;
-}
+{ m_color = color; }
 
 void TextBoxBrowseInfoWnd::SetBorderColor(Clr border_color)
-{
-    m_border_color = border_color;
-}
+{ m_border_color = border_color; }
 
 void TextBoxBrowseInfoWnd::SetTextColor(Clr text_color)
-{
-    m_text_control->SetTextColor(text_color);
-}
+{ m_text_control->SetTextColor(text_color); }
 
 void TextBoxBrowseInfoWnd::SetTextFormat(Flags<TextFormat> format)
-{
-    m_text_control->SetTextFormat(format);
-}
+{ m_text_control->SetTextFormat(format); }
 
 void TextBoxBrowseInfoWnd::SetBorderWidth(int border_width)
-{
-    m_border_width = border_width;
-}
+{ m_border_width = border_width; }
 
 void TextBoxBrowseInfoWnd::SetTextMargin(int text_margin)
-{
-    SetLayoutBorderMargin(text_margin);
-}
+{ SetLayoutBorderMargin(text_margin); }
 
 void TextBoxBrowseInfoWnd::UpdateImpl(int mode, const Wnd* target)
 {

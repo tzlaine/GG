@@ -30,6 +30,8 @@
 #ifndef _GG_Enum_h_
 #define _GG_Enum_h_
 
+#include <boost/config.hpp>
+
 #include <map>
 #include <string>
 
@@ -39,17 +41,17 @@ namespace GG {
 /** A base type for all templated EnumMap types. */
 struct EnumMapBase
 {
-    enum {BAD_VALUE = -5000000};
+    BOOST_STATIC_CONSTANT(long int, BAD_VALUE = -5000000);
 
     virtual ~EnumMapBase() {} ///< Virtual dtor.
 
     /** Returns the string associated with the enumeration value \a i, or the
         empty string if \a i is unknown. */
-    virtual const std::string& FromEnum(int i) const = 0;
+    virtual const std::string& FromEnum(long int i) const = 0;
 
     /** Returns the enumeration value associated with the string \a str, or
         BAD_VALUE if \a str is unknown. */
-    virtual int FromString (const std::string& str) const = 0;
+    virtual long int FromString (const std::string& str) const = 0;
 };
 
 /** A mapping between the values of an enum and the string representations of the enum's values.  A specialization
@@ -57,9 +59,9 @@ struct EnumMapBase
 template <class E> struct EnumMap : EnumMapBase
 {
     virtual ~EnumMap() {} ///< Virtual dtor.
-    virtual const std::string& FromEnum(int) const
+    virtual const std::string& FromEnum(long int) const
     { static std::string empty; return empty; }
-    virtual int FromString (const std::string&) const {return 0;}
+    virtual long int FromString (const std::string&) const {return 0;}
 };
 
 /** Returns a map of the values of an enum to the corresponding string representation of that value. */
@@ -92,14 +94,14 @@ template <> struct EnumMap< name > : EnumMapBase                        \
 /** Declares the end of a template specialization of EnumMap, for enumerated type \a name. */
 #define GG_ENUM_MAP_END                                                 \
     }                                                                   \
-    virtual const std::string& FromEnum(int i) const                    \
+    virtual const std::string& FromEnum(long int i) const               \
     {                                                                   \
         static const std::string ERROR_STR;                             \
         std::map<EnumType, std::string>::const_iterator it =            \
             m_map.find(EnumType(i));                                    \
         return it == m_map.end() ? ERROR_STR : it->second;              \
     }                                                                   \
-    int FromString (const std::string &str) const                       \
+    long int FromString (const std::string &str) const                  \
     {                                                                   \
         for (MapType::const_iterator it = m_map.begin();                \
              it != m_map.end();                                         \

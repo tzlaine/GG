@@ -106,9 +106,9 @@ public:
     /** Creates a modal event pump suitable for use with Ogre. */
     virtual boost::shared_ptr<ModalEventPump> CreateModalEventPump(bool& done);
 
-    virtual int  Ticks() const;
-    virtual int  AppWidth() const;
-    virtual int  AppHeight() const;
+    virtual int    Ticks() const;
+    virtual X AppWidth() const;
+    virtual Y AppHeight() const;
 
     /** Returns an Ogre::DataStream containing the contents of the \a
         config_filename ctor parameter.  This will be null if \a
@@ -122,7 +122,7 @@ public:
     boost::signal<void ()> HandleSystemEventsSignal;
 
     /** Emitted whenever the OgreGUI's AppWidth() and/or AppHeight() change. */
-    boost::signal<void (int, int)> WindowResizedSignal;
+    boost::signal<void (X, Y)> WindowResizedSignal;
 
     /** Emitted when the Ogre::RenderWindow in which the OgreGUI is operating
         closes or is about to close. */

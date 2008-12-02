@@ -80,8 +80,8 @@ struct GG::GUIImpl
 {
     GUIImpl() :
         m_focus_wnd(0),
-        m_mouse_pos(-1000, -1000),
-        m_mouse_rel(0, 0),
+        m_mouse_pos(X(-1000), Y(-1000)),
+        m_mouse_rel(X(0), Y(0)),
         m_mod_keys(),
         m_button_down_repeat_delay(250),
         m_button_down_repeat_interval(66),
@@ -241,7 +241,7 @@ void GUIImpl::HandleDrag(int mouse_button, const Pt& pos, int curr_ticks)
 {
     if (m_wnd_region == WR_MIDDLE || m_wnd_region == WR_NONE) { // send drag message to window or initiate drag-and-drop
         Pt diff = m_prev_button_press_pos - pos;
-        int drag_distance = diff.x * diff.x + diff.y * diff.y;
+        int drag_distance = Value(diff.x * diff.x) + Value(diff.y * diff.y);
         // ensure that the minimum drag requirements are met
         if (m_min_drag_time < (curr_ticks - m_prev_button_press_time) &&
             (m_min_drag_distance * m_min_drag_distance < drag_distance) &&
@@ -465,9 +465,7 @@ GUI::~GUI()
 { Wnd::s_default_browse_info_wnd.reset(); }
 
 Wnd* GUI::FocusWnd() const
-{
-    return s_impl->m_modal_wnds.empty() ? s_impl->m_focus_wnd : s_impl->m_modal_wnds.back().second;
-}
+{ return s_impl->m_modal_wnds.empty() ? s_impl->m_focus_wnd : s_impl->m_modal_wnds.back().second; }
 
 Wnd* GUI::GetWindowUnder(const Pt& pt) const
 {
@@ -479,64 +477,40 @@ Wnd* GUI::GetWindowUnder(const Pt& pt) const
 }
 
 int GUI::DeltaT() const
-{
-    return s_impl->m_delta_t;
-}
+{ return s_impl->m_delta_t; }
 
 bool GUI::RenderingDragDropWnds() const
-{
-    return s_impl->m_rendering_drag_drop_wnds;
-}
+{ return s_impl->m_rendering_drag_drop_wnds; }
 
 bool GUI::FPSEnabled() const
-{
-    return s_impl->m_calc_FPS;
-}
+{ return s_impl->m_calc_FPS; }
 
 double GUI::FPS() const
-{
-    return s_impl->m_FPS;
-}
+{ return s_impl->m_FPS; }
 
 std::string GUI::FPSString() const
-{
-    return boost::io::str(boost::format("%.2f frames per second") % s_impl->m_FPS);
-}
+{ return boost::io::str(boost::format("%.2f frames per second") % s_impl->m_FPS); }
 
 double GUI::MaxFPS() const
-{
-    return s_impl->m_max_FPS;
-}
+{ return s_impl->m_max_FPS; }
 
 int GUI::ButtonDownRepeatDelay() const
-{
-    return s_impl->m_button_down_repeat_delay;
-}
+{ return s_impl->m_button_down_repeat_delay; }
 
 int GUI::ButtonDownRepeatInterval() const
-{
-    return s_impl->m_button_down_repeat_interval;
-}
+{ return s_impl->m_button_down_repeat_interval; }
 
 int GUI::DoubleClickInterval() const
-{
-    return s_impl->m_double_click_interval;
-}
+{ return s_impl->m_double_click_interval; }
 
 int GUI::MinDragTime() const
-{
-    return s_impl->m_min_drag_time;
-}
+{ return s_impl->m_min_drag_time; }
 
 int GUI::MinDragDistance() const
-{
-    return s_impl->m_min_drag_distance;
-}
+{ return s_impl->m_min_drag_distance; }
 
 bool GUI::DragDropWnd(const Wnd* wnd) const
-{
-    return s_impl->m_drag_drop_wnds.find(const_cast<Wnd*>(wnd)) != s_impl->m_drag_drop_wnds.end();
-}
+{ return s_impl->m_drag_drop_wnds.find(const_cast<Wnd*>(wnd)) != s_impl->m_drag_drop_wnds.end(); }
 
 bool GUI::AcceptedDragDropWnd(const Wnd* wnd) const
 {
@@ -545,24 +519,16 @@ bool GUI::AcceptedDragDropWnd(const Wnd* wnd) const
 }
 
 bool GUI::MouseButtonDown(int bn) const
-{
-    return (bn >= 0 && bn <= 2) ? s_impl->m_button_state[bn] : false;
-}
+{ return (bn >= 0 && bn <= 2) ? s_impl->m_button_state[bn] : false; }
 
 Pt GUI::MousePosition() const
-{
-    return s_impl->m_mouse_pos;
-}
+{ return s_impl->m_mouse_pos; }
 
 Pt GUI::MouseMovement() const
-{
-    return s_impl->m_mouse_rel;
-}
+{ return s_impl->m_mouse_rel; }
 
 Flags<ModKey> GUI::ModKeys() const
-{
-    return s_impl->m_mod_keys;
-}
+{ return s_impl->m_mod_keys; }
 
 std::set<std::pair<int, int> > GUI::FindWords(const std::string& str) const
 {
@@ -580,19 +546,13 @@ std::set<std::pair<int, int> > GUI::FindWords(const std::string& str) const
 }
 
 const boost::shared_ptr<StyleFactory>& GUI::GetStyleFactory() const
-{
-    return s_impl->m_style_factory;
-}
+{ return s_impl->m_style_factory; }
 
 bool GUI::RenderCursor() const
-{
-    return s_impl->m_render_cursor;
-}
+{ return s_impl->m_render_cursor; }
 
 const boost::shared_ptr<Cursor>& GUI::GetCursor() const
-{
-    return s_impl->m_cursor;
-}
+{ return s_impl->m_cursor; }
 
 GUI::const_accel_iterator GUI::accel_begin() const
 {
@@ -615,9 +575,7 @@ GUI::AcceleratorSignalType& GUI::AcceleratorSignal(Key key, Flags<ModKey> mod_ke
 }
 
 void GUI::operator()()
-{
-    Run();
-}
+{ Run(); }
 
 void GUI::HandleGGEvent(EventType event, Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel)
 {
@@ -718,7 +676,7 @@ void GUI::HandleGGEvent(EventType event, Key key, boost::uint32_t key_code_point
         s_impl->m_prev_wnd_under_cursor_time = curr_ticks;
         // don't send out 0-movement wheel messages, or send wheel messages when a button is depressed
         if (s_impl->m_curr_wnd_under_cursor && rel.y && !(s_impl->m_button_state[0] || s_impl->m_button_state[1] || s_impl->m_button_state[2]))
-            s_impl->m_curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::MouseWheel, pos, rel.y, mod_keys));
+            s_impl->m_curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::MouseWheel, pos, Value(rel.y), mod_keys));
         s_impl->m_prev_wnd_under_cursor = s_impl->m_curr_wnd_under_cursor; // update this for the next time around
         break; }
     default:
@@ -753,9 +711,7 @@ void GUI::Wait(int ms)
 }
 
 void GUI::Register(Wnd* wnd)
-{
-    if (wnd) s_impl->m_zlist.Add(wnd);
-}
+{ if (wnd) s_impl->m_zlist.Add(wnd); }
 
 void GUI::RegisterModal(Wnd* wnd)
 {
@@ -839,19 +795,13 @@ void GUI::SetMaxFPS(double max)
 }
 
 void GUI::MoveUp(Wnd* wnd)
-{
-    if (wnd) s_impl->m_zlist.MoveUp(wnd);
-}
+{ if (wnd) s_impl->m_zlist.MoveUp(wnd); }
 
 void GUI::MoveDown(Wnd* wnd)
-{
-    if (wnd) s_impl->m_zlist.MoveDown(wnd);
-}
+{ if (wnd) s_impl->m_zlist.MoveDown(wnd); }
 
 boost::shared_ptr<ModalEventPump> GUI::CreateModalEventPump(bool& done)
-{
-    return boost::shared_ptr<ModalEventPump>(new ModalEventPump(done));
-}
+{ return boost::shared_ptr<ModalEventPump>(new ModalEventPump(done)); }
 
 void GUI::RegisterDragDropWnd(Wnd* wnd, const Pt& offset, Wnd* originating_wnd)
 {
@@ -872,14 +822,10 @@ void GUI::CancelDragDrop()
 }
 
 void GUI::RegisterTimer(Timer& timer)
-{
-    s_impl->m_timers.insert(&timer);
-}
+{ s_impl->m_timers.insert(&timer); }
 
 void GUI::RemoveTimer(Timer& timer)
-{
-    s_impl->m_timers.erase(&timer);
-}
+{ s_impl->m_timers.erase(&timer); }
 
 void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
 {
@@ -893,19 +839,13 @@ void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
 }
 
 void GUI::SetDoubleClickInterval(int interval)
-{
-    s_impl->m_double_click_interval = interval;
-}
+{ s_impl->m_double_click_interval = interval; }
 
 void GUI::SetMinDragTime(int time)
-{
-    s_impl->m_min_drag_time = time;
-}
+{ s_impl->m_min_drag_time = time; }
 
 void GUI::SetMinDragDistance(int distance)
-{
-    s_impl->m_min_drag_distance = distance;
-}
+{ s_impl->m_min_drag_distance = distance; }
 
 void GUI::SetAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
 {
@@ -920,34 +860,22 @@ void GUI::RemoveAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
 }
 
 boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts)
-{
-    return GetFontManager().GetFont(font_filename, pts);
-}
+{ return GetFontManager().GetFont(font_filename, pts); }
 
 void GUI::FreeFont(const std::string& font_filename, int pts)
-{
-    GetFontManager().FreeFont(font_filename, pts);
-}
+{ GetFontManager().FreeFont(font_filename, pts); }
 
 boost::shared_ptr<Texture> GUI::StoreTexture(Texture* texture, const std::string& texture_name)
-{
-    return GetTextureManager().StoreTexture(texture, texture_name);
-}
+{ return GetTextureManager().StoreTexture(texture, texture_name); }
 
 boost::shared_ptr<Texture> GUI::StoreTexture(const boost::shared_ptr<Texture>& texture, const std::string& texture_name)
-{
-    return GetTextureManager().StoreTexture(texture, texture_name);
-}
+{ return GetTextureManager().StoreTexture(texture, texture_name); }
 
 boost::shared_ptr<Texture> GUI::GetTexture(const std::string& name, bool mipmap/* = false*/)
-{
-    return GetTextureManager().GetTexture(name, mipmap);
-}
+{ return GetTextureManager().GetTexture(name, mipmap); }
 
 void GUI::FreeTexture(const std::string& name)
-{
-    GetTextureManager().FreeTexture(name);
-}
+{ GetTextureManager().FreeTexture(name); }
 
 void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
 {
@@ -957,14 +885,10 @@ void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
 }
 
 void GUI::RenderCursor(bool render)
-{
-    s_impl->m_render_cursor = render;
-}
+{ s_impl->m_render_cursor = render; }
 
 void GUI::SetCursor(const boost::shared_ptr<Cursor>& cursor)
-{
-    s_impl->m_cursor = cursor;
-}
+{ s_impl->m_cursor = cursor; }
 
 void GUI::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
 {
@@ -981,14 +905,10 @@ void GUI::LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchi
 }
 
 void GUI::SetSaveWndFunction(SaveWndFn fn)
-{
-    s_impl->m_save_wnd_fn = fn;
-}
+{ s_impl->m_save_wnd_fn = fn; }
 
 void GUI::SetLoadWndFunction(LoadWndFn fn)
-{
-    s_impl->m_load_wnd_fn = fn;
-}
+{ s_impl->m_load_wnd_fn = fn; }
 
 void GUI::SetSaveLoadFunctions(const PluginInterface& interface)
 {
@@ -997,9 +917,7 @@ void GUI::SetSaveLoadFunctions(const PluginInterface& interface)
 }
 
 GUI* GUI::GetGUI()
-{
-    return s_gui;
-}
+{ return s_gui; }
 
 void GUI::RenderWindow(Wnd* wnd)
 {
@@ -1174,14 +1092,10 @@ Wnd* GUI::CheckedGetWindowUnder(const Pt& pt, Flags<ModKey> mod_keys)
 }
 
 void GUI::SetFPS(double FPS)
-{
-    s_impl->m_FPS = FPS;
-}
+{ s_impl->m_FPS = FPS; }
 
 void GUI::SetDeltaT(int delta_t)
-{
-    s_impl->m_delta_t = delta_t;
-}
+{ s_impl->m_delta_t = delta_t; }
 
 
 bool GG::MatchesOrContains(const Wnd* lwnd, const Wnd* rwnd)

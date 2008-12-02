@@ -60,7 +60,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    Button(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
+    Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color = CLR_BLACK, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
@@ -153,7 +153,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    StateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
+    StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 Flags<WndFlag> flags = CLICKABLE); ///< Ctor
     //@}
@@ -218,11 +218,14 @@ private:
 };
 
 
-/** This is a class that encapsulates multiple GG::StateButtons into a single radio-button control.  RadioButtonGroup
-    emits a signal whenever its currently-checked button changes.  The signal indicates which button has been pressed,
-    by passing the index of the button; the currently-checked button index is NO_BUTTON when no button is checked.  Any
-    StateButton-derived controls can be used in a RadioButtonGroup.  However, if you want to automatically serialize a
-    RadioButtonGroup that has custom buttons, you must register the new types.  See the boost serialization
+/** This is a class that encapsulates multiple GG::StateButtons into a single
+    radio-button control.  RadioButtonGroup emits a signal whenever its
+    currently-checked button changes.  The signal indicates which button has
+    been pressed, by passing the index of the button; the currently-checked
+    button index is NO_BUTTON when no button is checked.  Any
+    StateButton-derived controls can be used in a RadioButtonGroup.  However,
+    if you want to automatically serialize a RadioButtonGroup that has custom
+    buttons, you must register the new types.  See the boost serialization
     documentation for details. */
 class GG_API RadioButtonGroup : public Control
 {
@@ -236,7 +239,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    RadioButtonGroup(int x, int y, int w, int h, Orientation orientation); ///< ctor
+    RadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation); ///< ctor
     //@}
 
     /** \name Accessors */ ///@{
@@ -379,7 +382,6 @@ private:
 
 } // namespace GG
 
-BOOST_CLASS_VERSION(GG::RadioButtonGroup, 1)
 
 // template implementations
 template <class Archive>
@@ -414,30 +416,11 @@ template <class Archive>
 void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation));
-
-    if (version == 0) {
-        std::vector<StateButton*> m_buttons;
-        if (Archive::is_saving::value) {
-            m_buttons.resize(m_button_slots.size());
-            for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
-                m_buttons[i] = m_button_slots[i].button;
-            }
-        }
-        ar  & BOOST_SERIALIZATION_NVP(m_buttons);
-        if (Archive::is_loading::value) {
-            m_button_slots.resize(m_buttons.size());
-            for (std::size_t i = 0; i < m_buttons.size(); ++i) {
-                m_button_slots[i].button = m_buttons[i];
-            }
-        }
-    } else {
-        ar  & BOOST_SERIALIZATION_NVP(m_button_slots)
-            & BOOST_SERIALIZATION_NVP(m_expand_buttons)
-            & BOOST_SERIALIZATION_NVP(m_expand_buttons_proportionally);
-    }
-
-    ar  & BOOST_SERIALIZATION_NVP(m_checked_button)
+        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation))
+        & BOOST_SERIALIZATION_NVP(m_button_slots)
+        & BOOST_SERIALIZATION_NVP(m_expand_buttons)
+        & BOOST_SERIALIZATION_NVP(m_expand_buttons_proportionally)
+        & BOOST_SERIALIZATION_NVP(m_checked_button)
         & BOOST_SERIALIZATION_NVP(m_render_outline);
 
     if (Archive::is_loading::value)

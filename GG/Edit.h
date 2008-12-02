@@ -74,7 +74,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    Edit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE); ///< ctor that does not required height. Height is determined from the font and point size used.
+    Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE); ///< ctor that does not required height. Height is determined from the font and point size used.
     //@}
 
     /** \name Accessors */ ///@{
@@ -119,7 +119,7 @@ public:
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
-   
+
 protected:
     /** \name Structors */ ///@{
     Edit(); ///< default ctor
@@ -129,9 +129,9 @@ protected:
     virtual bool            MultiSelected() const;          ///< returns true if >= 1 characters selected
     int                     FirstCharShown() const;         ///< returns the index of the first character visible in the Edit
     bool                    RecentlyEdited() const;         ///< returns true iff the contents have been changed since the last time the focus was gained
-    int                     CharIndexOf(int x) const;       ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
-    int                     FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
-    int                     ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
+    int                     CharIndexOf(X x) const;    ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
+    X                  FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
+    X                  ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
     int                     LastVisibleChar() const;        ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
     int                     LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
 

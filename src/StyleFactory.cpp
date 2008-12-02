@@ -50,276 +50,198 @@ StyleFactory::StyleFactory()
 StyleFactory::~StyleFactory()
 {}
 
-Button* StyleFactory::NewButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font,
+Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new Button(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return new Button(x, y, w, h, str, font, color, text_color, flags); }
 
-StateButton* StyleFactory::NewStateButton(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font,
+StateButton* StyleFactory::NewStateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                           Flags<TextFormat> format, Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                           StateButtonStyle style/* = SBSTYLE_3D_XBOX*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new StateButton(x, y, w, h, str, font, format, color, text_color, interior, style, flags);
-}
+{ return new StateButton(x, y, w, h, str, font, format, color, text_color, interior, style, flags); }
 
-RadioButtonGroup* StyleFactory::NewRadioButtonGroup(int x, int y, int w, int h, Orientation orientation) const
-{
-    return new RadioButtonGroup(x, y, w, h, orientation);
-}
+RadioButtonGroup* StyleFactory::NewRadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation) const
+{ return new RadioButtonGroup(x, y, w, h, orientation); }
 
-DropDownList* StyleFactory::NewDropDownList(int x, int y, int w, int h, int drop_ht, Clr color,
+DropDownList* StyleFactory::NewDropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color,
                                             Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new DropDownList(x, y, w, h, drop_ht, color, flags);
-}
+{ return new DropDownList(x, y, w, h, drop_ht, color, flags); }
 
-DynamicGraphic* StyleFactory::NewDynamicGraphic(int x, int y, int w, int h, bool loop, int frame_width, int frame_height,
+DynamicGraphic* StyleFactory::NewDynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height,
                                                 int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
                                                 Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, int frames/* = -1*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
-{
-    return new DynamicGraphic(x, y, w, h, loop, frame_width, frame_height, margin, textures, style, frames, flags);
-}
+{ return new DynamicGraphic(x, y, w, h, loop, frame_width, frame_height, margin, textures, style, frames, flags); }
 
-Edit* StyleFactory::NewEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
+Edit* StyleFactory::NewEdit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font,
                             Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                             Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new Edit(x, y, w, str, font, color, text_color, interior, flags);
-}
+{ return new Edit(x, y, w, str, font, color, text_color, interior, flags); }
 
-ListBox* StyleFactory::NewListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
+ListBox* StyleFactory::NewListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
                                   Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new ListBox(x, y, w, h, color, interior, flags);
-}
+{ return new ListBox(x, y, w, h, color, interior, flags); }
 
-MenuBar* StyleFactory::NewMenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color/* = CLR_WHITE*/,
+MenuBar* StyleFactory::NewMenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_color/* = CLR_WHITE*/,
                                   Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) const
-{
-    return new MenuBar(x, y, w, font, text_color, color, interior);
-}
+{ return new MenuBar(x, y, w, font, text_color, color, interior); }
 
-MultiEdit* StyleFactory::NewMultiEdit(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font,
+MultiEdit* StyleFactory::NewMultiEdit(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                       Clr color, Flags<MultiEditStyle> style/* = MULTI_LINEWRAP*/, Clr text_color/* = CLR_BLACK*/,
                                       Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new MultiEdit(x, y, w, h, str, font, color, style, text_color, interior, flags);
-}
+{ return new MultiEdit(x, y, w, h, str, font, color, style, text_color, interior, flags); }
 
-Scroll* StyleFactory::NewScroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
+Scroll* StyleFactory::NewScroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior,
                                 Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return new Scroll(x, y, w, h, orientation, color, interior, flags);
-}
+{ return new Scroll(x, y, w, h, orientation, color, interior, flags); }
 
-Slider* StyleFactory::NewSlider(int x, int y, int w, int h, int min, int max, Orientation orientation,
+Slider* StyleFactory::NewSlider(X x, Y y, X w, Y h, int min, int max, Orientation orientation,
                                 SliderLineStyle style, Clr color, int tab_width, int line_width/* = 5*/,
                                 Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new Slider(x, y, w, h, min, max, orientation, style, color, tab_width, line_width, flags);
-}
+{ return new Slider(x, y, w, h, min, max, orientation, style, color, tab_width, line_width, flags); }
 
-Spin<int>* StyleFactory::NewIntSpin(int x, int y, int w, int value, int step, int min, int max, bool edits,
+Spin<int>* StyleFactory::NewIntSpin(X x, Y y, X w, int value, int step, int min, int max, bool edits,
                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                     Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new Spin<int>(x, y, w, value, step, min, max, edits, font, color, text_color, interior, flags);
-}
+{ return new Spin<int>(x, y, w, value, step, min, max, edits, font, color, text_color, interior, flags); }
 
-Spin<double>* StyleFactory::NewDoubleSpin(int x, int y, int w, double value, double step, double min, double max, bool edits,
+Spin<double>* StyleFactory::NewDoubleSpin(X x, Y y, X w, double value, double step, double min, double max, bool edits,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new Spin<double>(x, y, w, value, step, min, max, edits, font, color, text_color, interior, flags);
-}
+{ return new Spin<double>(x, y, w, value, step, min, max, edits, font, color, text_color, interior, flags); }
 
-StaticGraphic* StyleFactory::NewStaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture,
+StaticGraphic* StyleFactory::NewStaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture>& texture,
                                               Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
-{
-    return new StaticGraphic(x, y, w, h, texture, style, flags);
-}
+{ return new StaticGraphic(x, y, w, h, texture, style, flags); }
 
-TextControl* StyleFactory::NewTextControl(int x, int y, int w, int h, const std::string& str,
+TextControl* StyleFactory::NewTextControl(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                                           Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
-{
-    return new TextControl(x, y, w, h, str, font, color, format, flags);
-}
+{ return new TextControl(x, y, w, h, str, font, color, format, flags); }
 
-TextControl* StyleFactory::NewTextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font,
+TextControl* StyleFactory::NewTextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font,
                                           Clr color/* = CLR_BLACK*/, Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
-{
-    return new TextControl(x, y, str, font, color, format, flags);
-}
+{ return new TextControl(x, y, str, font, color, format, flags); }
 
-TabBar* StyleFactory::NewTabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
+TabBar* StyleFactory::NewTabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                 TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return new TabBar(x, y, w, font, color, text_color, style, flags);
-}
+{ return new TabBar(x, y, w, font, color, text_color, style, flags); }
 
-ListBox* StyleFactory::NewDropDownListListBox(int x, int y, int w, int h, Clr color, Clr interior/* = CLR_ZERO*/,
+ListBox* StyleFactory::NewDropDownListListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
                                               Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewListBox(x, y, w, h, color, interior, flags);
-}
+{ return NewListBox(x, y, w, h, color, interior, flags); }
 
-Scroll* StyleFactory::NewListBoxVScroll(int x, int y, int w, int h, Clr color, Clr interior,
+Scroll* StyleFactory::NewListBoxVScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
                                         Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewScroll(x, y, w, h, VERTICAL, color, interior, flags);
-}
+{ return NewScroll(x, y, w, h, VERTICAL, color, interior, flags); }
 
-Scroll* StyleFactory::NewListBoxHScroll(int x, int y, int w, int h, Clr color, Clr interior,
+Scroll* StyleFactory::NewListBoxHScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
                                         Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewScroll(x, y, w, h, HORIZONTAL, color, interior, flags);
-}
+{ return NewScroll(x, y, w, h, HORIZONTAL, color, interior, flags); }
 
-Scroll* StyleFactory::NewMultiEditVScroll(int x, int y, int w, int h, Clr color, Clr interior,
+Scroll* StyleFactory::NewMultiEditVScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
                                           Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewScroll(x, y, w, h, VERTICAL, color, interior, flags);
-}
+{ return NewScroll(x, y, w, h, VERTICAL, color, interior, flags); }
 
-Scroll* StyleFactory::NewMultiEditHScroll(int x, int y, int w, int h, Clr color, Clr interior,
+Scroll* StyleFactory::NewMultiEditHScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
                                           Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewScroll(x, y, w, h, HORIZONTAL, color, interior, flags);
-}
+{ return NewScroll(x, y, w, h, HORIZONTAL, color, interior, flags); }
 
-Button* StyleFactory::NewScrollUpButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewScrollUpButton(X x, Y y, X w, Y h, const std::string& str,
                                         const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                         Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewScrollDownButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewScrollDownButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewVScrollTabButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewVScrollTabButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewScrollLeftButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewScrollLeftButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewScrollRightButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewScrollRightButton(X x, Y y, X w, Y h, const std::string& str,
                                            const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                            Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewHScrollTabButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewHScrollTabButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewVSliderTabButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewVSliderTabButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewHSliderTabButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewHSliderTabButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewSpinIncrButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewSpinIncrButton(X x, Y y, X w, Y h, const std::string& str,
                                         const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                         Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewSpinDecrButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewSpinDecrButton(X x, Y y, X w, Y h, const std::string& str,
                                         const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                         Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Edit* StyleFactory::NewSpinEdit(int x, int y, int w, const std::string& str, const boost::shared_ptr<Font>& font,
+Edit* StyleFactory::NewSpinEdit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                 Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewEdit(x, y, w, str, font, color, text_color, interior, flags);
-}
+{ return NewEdit(x, y, w, str, font, color, text_color, interior, flags); }
 
-StateButton* StyleFactory::NewTabBarTab(int x, int y, int w, int h, const std::string& str,
+StateButton* StyleFactory::NewTabBarTab(X x, Y y, X w, Y h, const std::string& str,
                                         const boost::shared_ptr<Font>& font, Flags<TextFormat> format, Clr color,
                                         Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                         StateButtonStyle style/* = SBSTYLE_3D_TOP_ATTACHED_TAB*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
 {
     StateButton* retval = NewStateButton(x, y, w, h, str, font, format, color, text_color, interior, style, flags);
-    retval->Resize(retval->MinUsableSize() + Pt(12, 0));
+    retval->Resize(retval->MinUsableSize() + Pt(X(12), Y0));
     return retval;
 }
 
-Button* StyleFactory::NewTabBarLeftButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewTabBarLeftButton(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                           Flags<WndFlag> flags/* = CLICKABLE*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-Button* StyleFactory::NewTabBarRightButton(int x, int y, int w, int h, const std::string& str,
+Button* StyleFactory::NewTabBarRightButton(X x, Y y, X w, Y h, const std::string& str,
                                            const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                            Flags<WndFlag> flags /*= CLICKABLE*/) const
-{
-    return NewButton(x, y, w, h, str, font, color, text_color, flags);
-}
+{ return NewButton(x, y, w, h, str, font, color, text_color, flags); }
 
-TabWnd* StyleFactory::NewTabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color,
+TabWnd* StyleFactory::NewTabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color,
                                 Clr text_color/* = CLR_BLACK*/, TabBarStyle style/* = TAB_BAR_ATTACHED*/,
                                 Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) const
-{
-    return new TabWnd(x, y, w, h, font, color, text_color, style, flags);
-}
+{ return new TabWnd(x, y, w, h, font, color, text_color, style, flags); }
 
-ColorDlg* StyleFactory::NewColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
+ColorDlg* StyleFactory::NewColorDlg(X x, Y y, const boost::shared_ptr<Font>& font,
                                     Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) const
-{
-    return new ColorDlg(x, y, font, dialog_color, border_color, text_color);
-}
+{ return new ColorDlg(x, y, font, dialog_color, border_color, text_color); }
 
 
-ColorDlg* StyleFactory::NewColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Font>& font,
+ColorDlg* StyleFactory::NewColorDlg(X x, Y y, Clr original_color, const boost::shared_ptr<Font>& font,
                                     Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) const
-{
-    return new ColorDlg(x, y, original_color, font, dialog_color, border_color, text_color);
-}
+{ return new ColorDlg(x, y, original_color, font, dialog_color, border_color, text_color); }
 
 
 FileDlg* StyleFactory::NewFileDlg(const std::string& directory, const std::string& filename, bool save, bool multi,
                                   const boost::shared_ptr<Font>& font, Clr color, Clr border_color,
                                   Clr text_color/* = CLR_BLACK*/) const
-{
-    return new FileDlg(directory, filename, save, multi, font, color, border_color, text_color);
-}
+{ return new FileDlg(directory, filename, save, multi, font, color, border_color, text_color); }
 
 
-ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(int x, int y, int w, int h, const std::string& msg,
+ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(X x, Y y, X w, Y h, const std::string& msg,
                                                 const boost::shared_ptr<Font>& font, Clr color, Clr border_color,
                                                 Clr button_color, Clr text_color, int buttons,
                                                 const std::string& zero/* = ""*/, const std::string& one/* = ""*/,
@@ -329,7 +251,7 @@ ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(int x, int y, int w, int h, cons
                               buttons, zero, one, two);
 }
 
-ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(int w, int h, const std::string& msg, const boost::shared_ptr<Font>& font,
+ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                                 Clr color, Clr border_color, Clr button_color, Clr text_color,
                                                 int buttons, const std::string& zero/* = ""*/,
                                                 const std::string& one/* = ""*/, const std::string& two/* = ""*/) const
@@ -339,6 +261,4 @@ ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(int w, int h, const std::string&
 }
 
 void StyleFactory::DeleteWnd(Wnd* wnd) const
-{
-    delete wnd;
-}
+{ delete wnd; }

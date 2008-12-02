@@ -57,33 +57,22 @@ SDLGUI::SDLGUI(int w/* = 1024*/, int h/* = 768*/, bool calc_FPS/* = false*/, con
     GUI(app_name),
     m_app_width(w),
     m_app_height(h)
-{
-}
+{}
 
 SDLGUI::~SDLGUI()
-{
-    SDLQuit();
-}
+{ SDLQuit(); }
 
-int SDLGUI::AppWidth() const
-{
-    return m_app_width;
-}
+X SDLGUI::AppWidth() const
+{ return m_app_width; }
 
-int SDLGUI::AppHeight() const
-{
-    return m_app_height;
-}
+Y SDLGUI::AppHeight() const
+{ return m_app_height; }
 
 int SDLGUI::Ticks() const
-{
-    return SDL_GetTicks();
-}
+{ return SDL_GetTicks(); }
 
 void SDLGUI::operator()()
-{
-    GUI::operator()();
-}
+{ GUI::operator()(); }
 
 void SDLGUI::Exit(int code)
 {
@@ -94,9 +83,7 @@ void SDLGUI::Exit(int code)
 }
 
 SDLGUI* SDLGUI::GetGUI()
-{
-    return dynamic_cast<SDLGUI*>(GUI::GetGUI());
-}
+{ return dynamic_cast<SDLGUI*>(GUI::GetGUI()); }
 
 Key SDLGUI::GGKeyFromSDLKey(const SDL_keysym& key)
 {
@@ -164,7 +151,7 @@ void SDLGUI::SDLInit()
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    if (SDL_SetVideoMode(m_app_width, m_app_height, 16, SDL_OPENGL) == 0) {
+    if (SDL_SetVideoMode(Value(m_app_width), Value(m_app_height), 16, SDL_OPENGL) == 0) {
         std::cerr << "Video mode set failed: " << SDL_GetError();
         Exit(1);
     }
@@ -179,7 +166,7 @@ void SDLGUI::SDLInit()
 
 void SDLGUI::GLInit()
 {
-    double ratio = m_app_width / (float)(m_app_height);
+    double ratio = Value(m_app_width * 1.0) / Value(m_app_height);
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -188,7 +175,7 @@ void SDLGUI::GLInit()
     glEnable(GL_BLEND);
     glShadeModel(GL_SMOOTH);
     glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, m_app_width, m_app_height);
+    glViewport(0, 0, Value(m_app_width), Value(m_app_height));
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(50.0, ratio, 1.0, 10.0);
@@ -204,8 +191,8 @@ void SDLGUI::HandleSystemEvents()
         Key key = GGK_UNKNOWN;
         boost::uint32_t key_code_point = 0;
         Flags<ModKey> mod_keys = GetSDLModKeys();
-        Pt mouse_pos(event.motion.x, event.motion.y);
-        Pt mouse_rel(event.motion.xrel, event.motion.yrel);
+        Pt mouse_pos(X(event.motion.x), Y(event.motion.y));
+        Pt mouse_rel(X(event.motion.xrel), Y(event.motion.yrel));
 
         switch (event.type) {
         case SDL_KEYDOWN:
@@ -226,8 +213,8 @@ void SDLGUI::HandleSystemEvents()
                 case SDL_BUTTON_LEFT:      gg_event = LPRESS; break;
                 case SDL_BUTTON_MIDDLE:    gg_event = MPRESS; break;
                 case SDL_BUTTON_RIGHT:     gg_event = RPRESS; break;
-                case SDL_BUTTON_WHEELUP:   gg_event = MOUSEWHEEL; mouse_rel = Pt(0, 1); break;
-                case SDL_BUTTON_WHEELDOWN: gg_event = MOUSEWHEEL; mouse_rel = Pt(0, -1); break;
+                case SDL_BUTTON_WHEELUP:   gg_event = MOUSEWHEEL; mouse_rel = Pt(X0, Y1); break;
+                case SDL_BUTTON_WHEELDOWN: gg_event = MOUSEWHEEL; mouse_rel = Pt(X0, -Y1); break;
             }
             mod_keys = GetSDLModKeys();
             break;
@@ -259,18 +246,13 @@ void SDLGUI::HandleNonGGEvent(const SDL_Event& event)
 }
 
 void SDLGUI::RenderBegin()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
+{ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
 void SDLGUI::RenderEnd()
-{
-    SDL_GL_SwapBuffers();
-}
+{ SDL_GL_SwapBuffers(); }
 
 void SDLGUI::FinalCleanup()
-{
-}
+{}
 
 void SDLGUI::SDLQuit()
 {

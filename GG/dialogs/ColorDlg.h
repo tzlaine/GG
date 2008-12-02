@@ -66,7 +66,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    HueSaturationPicker(int x, int y, int w, int h); ///< basic ctor
+    HueSaturationPicker(X x, Y y, X w, Y h); ///< basic ctor
     //@}
 
     /** \name Mutators */ ///@{
@@ -112,7 +112,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    ValuePicker(int x, int y, int w, int h, Clr arrow_color); ///< basic ctor
+    ValuePicker(X x, Y y, X w, Y h, Clr arrow_color); ///< basic ctor
     //@}
 
     /** \name Mutators */ ///@{
@@ -219,11 +219,11 @@ public:
 
     /** \name Structors */ ///@{
     /** ctor */
-    ColorDlg(int x, int y, const boost::shared_ptr<Font>& font,
+    ColorDlg(X x, Y y, const boost::shared_ptr<Font>& font,
              Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
 
     /** ctor */
-    ColorDlg(int x, int y, Clr original_color, const boost::shared_ptr<Font>& font,
+    ColorDlg(X x, Y y, Clr original_color, const boost::shared_ptr<Font>& font,
              Clr dialog_color, Clr border_color, Clr text_color = CLR_BLACK);
     //@}
 

@@ -29,19 +29,27 @@
 #include <boost/serialization/export.hpp>
 
 // Tutorial 3: Serialization
-// This file is part of the third tutorial.  The other two files are serialization.h, serialization.cpp, and saveload.h.
-// It extends the Tutorial 2 by serializing all the controls to a file called test.xml, deleting them, and recreating
-// them from the XML file before showing them on the screen.  This demonstrates how GG serialization works in detail.
-// For further reference material, see the boost serialization documentation.
 
-// Below are registrations for all the classes in the GG::Wnd hierarchy.  Classes must be registered whenever they are
-// to be serialized through a pointer to a base class.  Apparently, the boost serialization XML parser cannot handle
-// angle brackets (<>) inside of attribute text strings, so Spin<int> and Spin<double> must be registered using
-// BOOST_CLASS_EXPORT_GUID, with a name that includes no angle brackets.  By convention, '_' is used in place of '<' and
-// '>' throughout the GG serialization code.
+// This file is part of the third tutorial.  The other two files are
+// serialization.h, serialization.cpp, and saveload.h.  It extends the
+// Tutorial 2 by serializing all the controls to a file called test.xml,
+// deleting them, and recreating them from the XML file before showing them on
+// the screen.  This demonstrates how GG serialization works in detail.  For
+// further reference material, see the boost serialization documentation.
 
-// Note that CustomTextRow is also registered here, along with the GG-defined GG::Wnd subclasses.  Any GG::Wnd
-// subclasses you create must also be registered if they are to be serialized automatically through GG::Wnd* pointers.
+// Below are registrations for all the classes in the GG::Wnd hierarchy.
+// Classes must be registered whenever they are to be serialized through a
+// pointer to a base class.  Apparently, the boost serialization XML parser
+// cannot handle angle brackets (<>) inside of attribute text strings, so
+// Spin<int> and Spin<double> must be registered using
+// BOOST_CLASS_EXPORT_GUID, with a name that includes no angle brackets.  By
+// convention, '_' is used in place of '<' and '>' throughout the GG
+// serialization code.
+
+// Note that CustomTextRow is also registered here, along with the GG-defined
+// GG::Wnd subclasses.  Any GG::Wnd subclasses you create must also be
+// registered if they are to be serialized automatically through GG::Wnd*
+// pointers.
 
 BOOST_CLASS_EXPORT(GG::Wnd)
 BOOST_CLASS_EXPORT(GG::DropDownList)

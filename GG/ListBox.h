@@ -157,7 +157,7 @@ public:
 
         /** \name Structors */ ///@{
         Row(); ///< default ctor
-        Row(int w, int h, const std::string& drag_drop_data_type, Alignment align = ALIGN_VCENTER, int margin = 2); ///< ctor
+        Row(X w, Y h, const std::string& drag_drop_data_type, Alignment align = ALIGN_VCENTER, int margin = 2); ///< ctor
         virtual ~Row();
         //@}
 
@@ -171,7 +171,7 @@ public:
 
         Alignment   RowAlignment() const;       ///< returns the vertical alignment of this Row
         Alignment   ColAlignment(std::size_t n) const; ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
-        int         ColWidth(std::size_t n) const; ///< returns the width of the \a nth cell of this Row; not range checked
+        X      ColWidth(std::size_t n) const; ///< returns the width of the \a nth cell of this Row; not range checked
         int         Margin() const;             ///< returns the amount of space left between the contents of adjacent cells, in pixels
 
         Control*    CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const; ///< creates a "shrink-fit" TextControl from text, font, and color parameters
@@ -192,9 +192,9 @@ public:
         Control*    RemoveCell(std::size_t n); ///< returns a pointer to the Control in the \a nth cell of this Row, and sets the contents of the cell to 0; not range checked
         void        SetRowAlignment(Alignment align); ///< sets the vertical alignment of this Row
         void        SetColAlignment(std::size_t n, Alignment align); ///< sets the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
-        void        SetColWidth(std::size_t n, int width); ///< sets the width of the \a nth cell of this Row; not range checked
+        void        SetColWidth(std::size_t n, X width); ///< sets the width of the \a nth cell of this Row; not range checked
         void        SetColAlignments(const std::vector<Alignment>& aligns); ///< sets the horizontal alignment of all the Controls in this Row; not range checked
-        void        SetColWidths(const std::vector<int>& widths); ///< sets all the widths of the cells of this Row; not range checked
+        void        SetColWidths(const std::vector<X>& widths); ///< sets all the widths of the cells of this Row; not range checked
         void        SetMargin(int margin); ///< sets the amount of space left between the contents of adjacent cells, in pixels
         //@}
 
@@ -204,7 +204,7 @@ public:
         std::vector<Control*>  m_cells;          ///< the Controls in this Row (each may be null)
         Alignment              m_row_alignment;  ///< row alignment; one of ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM
         std::vector<Alignment> m_col_alignments; ///< column alignments; each is one of ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM
-        std::vector<int>       m_col_widths;     ///< column widths
+        std::vector<X>    m_col_widths;     ///< column widths
         int                    m_margin;         ///< the amount of space left between the contents of adjacent cells, in pixels
 
         bool                   m_ignore_adjust_layout;
@@ -257,7 +257,7 @@ public:
 
     /** \name Structors */ ///@{
     /** basic ctor */
-    ListBox(int x, int y, int w, int h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
+    ListBox(X x, Y y, X w, Y h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
 
     virtual ~ListBox(); ///< virtual dtor
     //@}
@@ -307,7 +307,7 @@ public:
         the user; it may be < 0 or >= NumCols(). */
     std::size_t     SortCol() const;
 
-    int             ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
+    X          ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
     Alignment       ColAlignment(std::size_t n) const; ///< returns the alignment of column \a n; must be ALIGN_LEFT, ALIGN_CENTER, or ALIGN_RIGHT; not range-checked
     Alignment       RowAlignment(iterator it) const;   ///< returns the alignment of row \a it; must be ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM; not range-checked
 
@@ -394,7 +394,7 @@ public:
     void           SetColHeaders(Row* r);                 ///< sets the row used as headings for the columns; this Row becomes property of the ListBox.
     void           RemoveColHeaders();                    ///< removes any columns headings set
 
-    void           SetColWidth(std::size_t n, int w);     ///< sets the width of column \n to \a w; not range-checked
+    void           SetColWidth(std::size_t n, X w);  ///< sets the width of column \n to \a w; not range-checked
     void           SetNumCols(std::size_t n);             ///< sets the number of columns in the ListBox to \a n; if no column widths exist before this call, proportional widths are calulated and set, otherwise no column widths are set
     void           SetSortCol(std::size_t n);             ///< sets the index of the column used to sort rows when sorting is enabled; not range-checked
 
@@ -476,8 +476,8 @@ protected:
     //@}
 
     /** \name Accessors */ ///@{
-    int             RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar
-    int             BottomMargin() const;    ///< space skipped at bottom of client area for horizontal scroll bar
+    X          RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar
+    Y          BottomMargin() const;    ///< space skipped at bottom of client area for horizontal scroll bar
     int             CellMargin() const;      ///< the number of pixels left between the contents of each cell and the cell boundary
 
     iterator        RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (i.e. it may be end())
@@ -498,7 +498,7 @@ protected:
         determining the first row when the last row is visible, then determining
         how much left over space would result if only the range first-row-shown
         to last-row were visible. */
-    int VerticalScrollPadding(int client_height_without_horizontal_scroll);
+    Y VerticalScrollPadding(Y client_height_without_horizontal_scroll);
 
     /** Returns the amount of horizontal padding it is necessary to add to the
         combined width of all columns to make the horizontal scroll the proper
@@ -506,7 +506,7 @@ protected:
         determining the first column when the last column is visible, then
         determining how much left over space would result if only the range
         first-column-shown to last-column were visible. */
-    int HorizontalScrollPadding(int client_width_without_vertical_scroll);
+    X HorizontalScrollPadding(X client_width_without_vertical_scroll);
     //@}
 
     /** \name Mutators */ ///@{
@@ -528,8 +528,8 @@ private:
     void            HScrolled(int tab_low, int tab_high, int low, int high); ///< signals from the horizontal scroll bar are caught here
     void            ClickAtRow(iterator it, Flags<ModKey> mod_keys); ///< handles to a mouse-click or spacebar-click on \a it, modified by \a keys
     void            NormalizeRow(Row* row); ///< adjusts a Row so that it has the same number of cells as other rows, and that each cell has the correct width and alignment
-    iterator        FirstRowShownWhenBottomIs(iterator bottom_row, int client_height); ///< Returns the first row shown when the last row shown is \a bottom_row
-    std::size_t     FirstColShownWhenRightIs(std::size_t right_col, int client_width); ///< Returns the index of the first column shown when the last column shown is \a right_col
+    iterator        FirstRowShownWhenBottomIs(iterator bottom_row, Y client_height); ///< Returns the first row shown when the last row shown is \a bottom_row
+    std::size_t     FirstColShownWhenRightIs(std::size_t right_col, X client_width); ///< Returns the index of the first column shown when the last column shown is \a right_col
 
     std::list<Row*> m_rows;             ///< line item data
 
@@ -547,7 +547,7 @@ private:
 
     iterator        m_first_row_shown;  ///< index of row at top of visible area (always begin() for non-empty ListBox with LIST_NOSCROLL set)
     std::size_t     m_first_col_shown;  ///< like above, but index of column at left
-    std::vector<int>
+    std::vector<X>
                     m_col_widths;       ///< the width of each of the columns goes here
     std::vector<Alignment> 
                     m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
@@ -586,7 +586,6 @@ private:
 
 } // namespace GG
 
-BOOST_CLASS_VERSION(GG::ListBox, 1)
 
 // template implementations
 template <class Cont>
@@ -638,20 +637,35 @@ bool GG::ListBox::DefaultRowCmp<RowType>::operator()(const GG::ListBox::Row& lhs
 template <class Archive>
 void GG::ListBox::serialize(Archive& ar, const unsigned int version)
 {
+    std::size_t caret_index = std::distance(m_rows.begin(), m_caret);
+    std::size_t old_sel_row_index = std::distance(m_rows.begin(), m_old_sel_row);
+    std::size_t old_rdown_row_index = std::distance(m_rows.begin(), m_old_rdown_row);
+    std::size_t lclick_row_index = std::distance(m_rows.begin(), m_lclick_row);
+    std::size_t rclick_row_index = std::distance(m_rows.begin(), m_rclick_row);
+    std::size_t last_row_browsed_index = std::distance(m_rows.begin(), m_last_row_browsed);
+    std::size_t first_row_shown_index = std::distance(m_rows.begin(), m_first_row_shown);
+    std::set<std::size_t> selection_indices;
+
+    if (Archive::is_saving::value) {
+        for (SelectionSet::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
+            selection_indices.insert(std::distance(m_rows.begin(), *it));
+        }
+    }
+
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_rows)
         & BOOST_SERIALIZATION_NVP(m_vscroll)
         & BOOST_SERIALIZATION_NVP(m_hscroll)
-        & BOOST_SERIALIZATION_NVP(m_caret)
-        & BOOST_SERIALIZATION_NVP(m_selections)
-        & BOOST_SERIALIZATION_NVP(m_old_sel_row)
+        & BOOST_SERIALIZATION_NVP(caret_index)
+        & BOOST_SERIALIZATION_NVP(selection_indices)
+        & BOOST_SERIALIZATION_NVP(old_sel_row_index)
         & BOOST_SERIALIZATION_NVP(m_old_sel_row_selected)
-        & BOOST_SERIALIZATION_NVP(m_old_rdown_row)
-        & BOOST_SERIALIZATION_NVP(m_lclick_row)
-        & BOOST_SERIALIZATION_NVP(m_rclick_row)
-        & BOOST_SERIALIZATION_NVP(m_last_row_browsed)
+        & BOOST_SERIALIZATION_NVP(old_rdown_row_index)
+        & BOOST_SERIALIZATION_NVP(lclick_row_index)
+        & BOOST_SERIALIZATION_NVP(rclick_row_index)
+        & BOOST_SERIALIZATION_NVP(last_row_browsed_index)
         & BOOST_SERIALIZATION_NVP(m_suppress_erase_signal)
-        & BOOST_SERIALIZATION_NVP(m_rows)
-        & BOOST_SERIALIZATION_NVP(m_first_row_shown)
+        & BOOST_SERIALIZATION_NVP(first_row_shown_index)
         & BOOST_SERIALIZATION_NVP(m_first_col_shown)
         & BOOST_SERIALIZATION_NVP(m_col_widths)
         & BOOST_SERIALIZATION_NVP(m_col_alignments)
@@ -663,19 +677,28 @@ void GG::ListBox::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_keep_col_widths)
         & BOOST_SERIALIZATION_NVP(m_clip_cells)
         & BOOST_SERIALIZATION_NVP(m_sort_col)
-        & BOOST_SERIALIZATION_NVP(m_allowed_drop_types);
-
-    if (1 <= version) {
-        ar  & BOOST_SERIALIZATION_NVP(m_auto_scroll_during_drag_drops)
-            & BOOST_SERIALIZATION_NVP(m_auto_scroll_margin)
-            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_up)
-            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_down)
-            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_left)
-            & BOOST_SERIALIZATION_NVP(m_auto_scrolling_right)
-            & BOOST_SERIALIZATION_NVP(m_auto_scroll_timer);
-    }
+        & BOOST_SERIALIZATION_NVP(m_allowed_drop_types)
+        & BOOST_SERIALIZATION_NVP(m_auto_scroll_during_drag_drops)
+        & BOOST_SERIALIZATION_NVP(m_auto_scroll_margin)
+        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_up)
+        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_down)
+        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_left)
+        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_right)
+        & BOOST_SERIALIZATION_NVP(m_auto_scroll_timer);
 
     if (Archive::is_loading::value) {
+        m_caret = boost::next(m_rows.begin(), caret_index);
+        m_old_sel_row = boost::next(m_rows.begin(), old_sel_row_index);
+        m_old_rdown_row = boost::next(m_rows.begin(), old_rdown_row_index);
+        m_lclick_row = boost::next(m_rows.begin(), lclick_row_index);
+        m_rclick_row = boost::next(m_rows.begin(), rclick_row_index);
+        m_last_row_browsed = boost::next(m_rows.begin(), last_row_browsed_index);
+        m_first_row_shown = boost::next(m_rows.begin(), first_row_shown_index);
+
+        for (std::set<std::size_t>::iterator it = selection_indices.begin(); it != selection_indices.end(); ++it) {
+            m_selections.insert(boost::next(m_rows.begin(), *it));
+        }
+
         ValidateStyle();
         ConnectSignals();
     }

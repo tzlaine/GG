@@ -83,9 +83,7 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, con
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{
-    SelectedIDSignal->connect(slot);
-}
+{ SelectedIDSignal->connect(slot); }
 
 MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedSlotType& slot) : 
     SelectedIDSignal(new SelectedIDSignalType()),
@@ -94,9 +92,7 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, con
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{
-    SelectedSignal->connect(slot);
-}
+{ SelectedSignal->connect(slot); }
 
 MenuItem::~MenuItem()
 {}
@@ -110,7 +106,7 @@ MenuBar::MenuBar() :
     m_caret(-1)
 {}
 
-MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color/* = CLR_WHITE*/,
+MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_color/* = CLR_WHITE*/,
                  Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
     Control(x, y, w, font->Lineskip()),
     m_font(font),
@@ -126,7 +122,7 @@ MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr t
     AdjustLayout();
 }
 
-MenuBar::MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m,
+MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuItem& m,
                  Clr text_color/* = CLR_WHITE*/, Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
     Control(x, y, w, font->Lineskip()),
     m_font(font),
@@ -155,9 +151,7 @@ Pt MenuBar::MinUsableSize() const
 }
 
 const MenuItem& MenuBar::AllMenus() const
-{
-    return m_menu_data;
-}
+{ return m_menu_data; }
 
 bool MenuBar::ContainsMenu(const std::string& str) const
 {
@@ -172,9 +166,7 @@ bool MenuBar::ContainsMenu(const std::string& str) const
 }
 
 int MenuBar::NumMenus() const
-{
-    return m_menu_data.next_level.size();
-}
+{ return m_menu_data.next_level.size(); }
 
 const MenuItem& MenuBar::GetMenu(const std::string& str) const
 {
@@ -187,46 +179,34 @@ const MenuItem& MenuBar::GetMenu(const std::string& str) const
 }
 
 const MenuItem& MenuBar::GetMenu(int n) const
-{
-    return *(m_menu_data.next_level.begin() + n);
-}
+{ return *(m_menu_data.next_level.begin() + n); }
 
 Clr MenuBar::BorderColor() const        
-{
-    return m_border_color;
-}
+{ return m_border_color; }
 
 Clr MenuBar::InteriorColor() const
-{
-    return m_int_color;
-}
+{ return m_int_color; }
 
 Clr MenuBar::TextColor() const
-{
-    return m_text_color;
-}
+{ return m_text_color; }
 
 Clr MenuBar::HiliteColor() const
-{
-    return m_hilite_color;
-}
+{ return m_hilite_color; }
 
 Clr MenuBar::SelectedTextColor() const
-{
-    return m_sel_text_color;
-}
+{ return m_sel_text_color; }
 
 void MenuBar::Render()
 {
     Pt ul = UpperLeft();
     Pt lr = LowerRight();
-    FlatRectangle(ul.x, ul.y, lr.x, lr.y, m_int_color, m_border_color, BORDER_THICKNESS);
+    FlatRectangle(ul, lr, m_int_color, m_border_color, BORDER_THICKNESS);
 
     // paint caret, if any
     if (m_caret != -1) {
-        Pt caret_ul = m_menu_labels[m_caret]->UpperLeft() + Pt((!m_caret ? BORDER_THICKNESS : 0), BORDER_THICKNESS);
-        Pt caret_lr = m_menu_labels[m_caret]->LowerRight() - Pt((m_caret == static_cast<int>(m_menu_labels.size()) - 1 ? BORDER_THICKNESS : 0), BORDER_THICKNESS);
-        FlatRectangle(caret_ul.x, caret_ul.y, caret_lr.x, caret_lr.y, m_hilite_color, CLR_ZERO, 0);
+        Pt caret_ul = m_menu_labels[m_caret]->UpperLeft() + Pt(X(!m_caret ? BORDER_THICKNESS : 0), Y(BORDER_THICKNESS));
+        Pt caret_lr = m_menu_labels[m_caret]->LowerRight() - Pt(X(m_caret == static_cast<int>(m_menu_labels.size()) - 1 ? BORDER_THICKNESS : 0), Y(BORDER_THICKNESS));
+        FlatRectangle(caret_ul, caret_lr, m_hilite_color, CLR_ZERO, 0);
     }
 }
 
@@ -270,9 +250,7 @@ void MenuBar::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 }
 
 void MenuBar::MouseLeave()
-{
-    m_caret = -1;
-}
+{ m_caret = -1; }
 
 void MenuBar::SizeMove(const Pt& ul, const Pt& lr)
 {
@@ -281,9 +259,7 @@ void MenuBar::SizeMove(const Pt& ul, const Pt& lr)
 }
 
 MenuItem& MenuBar::AllMenus()
-{
-    return m_menu_data;
-}
+{ return m_menu_data; }
 
 MenuItem& MenuBar::GetMenu(const std::string& str)
 {
@@ -296,9 +272,7 @@ MenuItem& MenuBar::GetMenu(const std::string& str)
 }
 
 MenuItem& MenuBar::GetMenu(int n)
-{
-    return m_menu_data.next_level[n];
-}
+{ return m_menu_data.next_level[n]; }
 
 void MenuBar::AddMenu(const MenuItem& menu)
 {
@@ -307,29 +281,19 @@ void MenuBar::AddMenu(const MenuItem& menu)
 }
 
 void MenuBar::SetBorderColor(Clr clr)
-{
-    m_border_color = clr;
-}
+{ m_border_color = clr; }
 
 void MenuBar::SetInteriorColor(Clr clr)
-{
-    m_int_color = clr;
-}
+{ m_int_color = clr; }
 
 void MenuBar::SetTextColor(Clr clr)
-{
-    m_text_color = clr;
-}
+{ m_text_color = clr; }
 
 void MenuBar::SetHiliteColor(Clr clr)
-{
-    m_hilite_color = clr;
-}
+{ m_hilite_color = clr; }
 
 void MenuBar::SetSelectedTextColor(Clr clr)
-{
-    m_sel_text_color = clr;
-}
+{ m_sel_text_color = clr; }
 
 void MenuBar::DefineAttributes(WndEditor* editor)
 {
@@ -349,19 +313,13 @@ void MenuBar::DefineAttributes(WndEditor* editor)
 }
 
 const boost::shared_ptr<Font>& MenuBar::GetFont() const
-{
-    return m_font;
-}
+{ return m_font; }
 
 const std::vector<TextControl*>& MenuBar::MenuLabels() const
-{
-    return m_menu_labels;
-}
+{ return m_menu_labels; }
 
 int MenuBar::Caret() const
-{
-    return m_caret;
-}
+{ return m_caret; }
 
 void MenuBar::AdjustLayout(bool reset/* = false*/)
 {
@@ -372,14 +330,14 @@ void MenuBar::AdjustLayout(bool reset/* = false*/)
 
     // create any needed labels
     for (std::size_t i = m_menu_labels.size(); i < m_menu_data.next_level.size(); ++i) {
-        m_menu_labels.push_back(GetStyleFactory()->NewTextControl(0, 0, m_menu_data.next_level[i].label, m_font, m_text_color));
+        m_menu_labels.push_back(GetStyleFactory()->NewTextControl(X0, Y0, m_menu_data.next_level[i].label, m_font, m_text_color));
         m_menu_labels.back()->Resize(Pt(m_menu_labels.back()->Width() + 2 * MENU_SEPARATION, m_font->Lineskip()));
         AttachChild(m_menu_labels.back());
     }
 
     // determine rows layout
     std::vector<int> menu_rows; // each element is the last + 1 index displayable on that row
-    int space = Width();
+    X space = Width();
     for (std::size_t i = 0; i < m_menu_labels.size(); ++i) {
         space -= m_menu_labels[i]->Width();
         if (space < 0) { // if this menu's text won't fit in the available space
@@ -399,35 +357,34 @@ void MenuBar::AdjustLayout(bool reset/* = false*/)
     // place labels
     int label_i = 0;
     for (std::size_t row = 0; row < menu_rows.size(); ++row) {
-        int x = 0;
+        X x(0);
         for (; label_i < menu_rows[row]; ++label_i) {
-            m_menu_labels[label_i]->MoveTo(Pt(x, row * m_font->Lineskip()));
+            m_menu_labels[label_i]->MoveTo(Pt(x, static_cast<int>(row) * m_font->Lineskip()));
             x += m_menu_labels[label_i]->Width();
         }
     }
 
     // resize MenuBar if needed
-    int desired_ht = std::max(size_t(1), menu_rows.size()) * m_font->Lineskip();
+    Y desired_ht = static_cast<int>(std::max(1u, menu_rows.size())) * m_font->Lineskip();
     if (Height() != desired_ht)
         Resize(Pt(Width(), desired_ht));
 }
 
 void MenuBar::BrowsedSlot(int n)
-{
-    BrowsedSignal(n);
-}
+{ BrowsedSignal(n); }
 
 
 ////////////////////////////////////////////////
 // GG::PopupMenu
 ////////////////////////////////////////////////
 namespace {
-const int HORIZONTAL_MARGIN = 3; // distance to leave between edge of PopupMenu contents and the control's border
+    // distance to leave between edge of PopupMenu contents and the control's border
+    const X HORIZONTAL_MARGIN(3);
 }
 
-PopupMenu::PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = CLR_WHITE*/,
+PopupMenu::PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = CLR_WHITE*/,
                      Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
-    Wnd(0, 0, GUI::GetGUI()->AppWidth() - 1, GUI::GetGUI()->AppHeight() - 1, CLICKABLE | MODAL),
+    Wnd(X0, Y0, GUI::GetGUI()->AppWidth() - 1, GUI::GetGUI()->AppHeight() - 1, CLICKABLE | MODAL),
     m_font(font),
     m_border_color(color),
     m_int_color(interior),
@@ -436,7 +393,7 @@ PopupMenu::PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const Me
     m_menu_data(m),
     m_open_levels(),
     m_caret(std::vector<int>(1, -1)),
-    m_origin(Pt(x, y)),
+    m_origin(x, y),
     m_item_selected(0)
 {
     // use opaque interior color as hilite color
@@ -446,39 +403,25 @@ PopupMenu::PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const Me
 }
 
 Pt PopupMenu::ClientUpperLeft() const
-{
-    return m_origin;
-}
+{ return m_origin; }
 
 int PopupMenu::MenuID() const
-{
-    return (m_item_selected ? m_item_selected->item_ID : 0);
-}
+{ return (m_item_selected ? m_item_selected->item_ID : 0); }
 
 Clr PopupMenu::BorderColor() const
-{
-    return m_border_color;
-}
+{ return m_border_color; }
 
 Clr PopupMenu::InteriorColor() const
-{
-    return m_int_color;
-}
+{ return m_int_color; }
 
 Clr PopupMenu::TextColor() const
-{
-    return m_text_color;
-}
+{ return m_text_color; }
 
 Clr PopupMenu::HiliteColor() const
-{
-    return m_hilite_color;
-}
+{ return m_hilite_color; }
 
 Clr PopupMenu::SelectedTextColor() const
-{
-    return m_sel_text_color;
-}
+{ return m_sel_text_color; }
 
 void PopupMenu::Render()
 {
@@ -486,13 +429,13 @@ void PopupMenu::Render()
     {
         Pt ul = ClientUpperLeft();
 
-        const int INDICATOR_VERTICAL_MARGIN = 3;
-        const int INDICATOR_HEIGHT = m_font->Lineskip() - 2 * INDICATOR_VERTICAL_MARGIN;
-        const int CHECK_HEIGHT = INDICATOR_HEIGHT;
-        const int CHECK_WIDTH = CHECK_HEIGHT;
+        const Y INDICATOR_VERTICAL_MARGIN(3);
+        const Y INDICATOR_HEIGHT = m_font->Lineskip() - 2 * INDICATOR_VERTICAL_MARGIN;
+        const Y CHECK_HEIGHT = INDICATOR_HEIGHT;
+        const X CHECK_WIDTH(Value(CHECK_HEIGHT));
 
-        int next_menu_x_offset = 0;
-        int next_menu_y_offset = 0;
+        X next_menu_x_offset(0);
+        Y next_menu_y_offset(0);
         for (std::size_t i = 0; i < m_caret.size(); ++i) {
             bool needs_indicator = false;
 
@@ -511,7 +454,7 @@ void PopupMenu::Render()
             }
             std::vector<Font::LineData> lines;
             Flags<TextFormat> fmt = FORMAT_LEFT | FORMAT_TOP;
-            Pt menu_sz = m_font->DetermineLines(str, fmt, 0, lines); // get dimensions of text in menu
+            Pt menu_sz = m_font->DetermineLines(str, fmt, X0, lines); // get dimensions of text in menu
             menu_sz.x += 2 * HORIZONTAL_MARGIN;
             if (needs_indicator)
                 menu_sz.x += CHECK_WIDTH + 2 * HORIZONTAL_MARGIN; // make room for the little arrow
@@ -519,18 +462,18 @@ void PopupMenu::Render()
                    ul.x + next_menu_x_offset + menu_sz.x, ul.y + next_menu_y_offset + menu_sz.y);
 
             if (r.lr.x > GUI::GetGUI()->AppWidth()) {
-                int offset = r.lr.x - GUI::GetGUI()->AppWidth();
+                X offset = r.lr.x - GUI::GetGUI()->AppWidth();
                 r.ul.x -= offset;
                 r.lr.x -= offset;
             }
             if (r.lr.y > GUI::GetGUI()->AppHeight()) {
-                int offset = r.lr.y - GUI::GetGUI()->AppHeight();
+                Y offset = r.lr.y - GUI::GetGUI()->AppHeight();
                 r.ul.y -= offset;
                 r.lr.y -= offset;
             }
             next_menu_x_offset = menu_sz.x;
             next_menu_y_offset = m_caret[i] * m_font->Lineskip();
-            FlatRectangle(r.ul.x, r.ul.y, r.lr.x, r.lr.y, m_int_color, m_border_color, BORDER_THICKNESS);
+            FlatRectangle(r.ul, r.lr, m_int_color, m_border_color, BORDER_THICKNESS);
             m_open_levels[i] = r;
 
             // paint caret, if any
@@ -544,7 +487,7 @@ void PopupMenu::Render()
                     tmp_r.ul.y += BORDER_THICKNESS;
                 if (m_caret[i] == static_cast<int>(menu.next_level.size()) - 1)
                     tmp_r.lr.y -= BORDER_THICKNESS;
-                FlatRectangle(tmp_r.ul.x, tmp_r.ul.y, tmp_r.lr.x, tmp_r.lr.y, m_hilite_color, CLR_ZERO, 0);
+                FlatRectangle(tmp_r.ul, tmp_r.lr, m_hilite_color, CLR_ZERO, 0);
             }
 
             // paint menu text and submenu indicator arrows
@@ -556,17 +499,18 @@ void PopupMenu::Render()
                           (menu.next_level[j].disabled ? DisabledColor(m_sel_text_color) : m_sel_text_color) :
                                   (menu.next_level[j].disabled ? DisabledColor(m_text_color) : m_text_color);
                 glColor3ub(clr.r, clr.g, clr.b);
-                m_font->RenderText(line_rect.ul.x, line_rect.ul.y, line_rect.lr.x, line_rect.lr.y, menu.next_level[j].label, fmt);
+                m_font->RenderText(line_rect.ul, line_rect.lr, menu.next_level[j].label, fmt);
                 if (menu.next_level[j].checked) {
-                    FlatCheck(line_rect.lr.x - CHECK_WIDTH - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN,
-                              line_rect.lr.x - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN + CHECK_HEIGHT, clr);
+                    FlatCheck(Pt(line_rect.lr.x - CHECK_WIDTH - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN),
+                              Pt(line_rect.lr.x - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN + CHECK_HEIGHT),
+                              clr);
                 }
                 if (menu.next_level[j].next_level.size()) {
                     glDisable(GL_TEXTURE_2D);
                     glBegin(GL_TRIANGLES);
-                    glVertex2d(line_rect.lr.x - INDICATOR_HEIGHT / 2.0 - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN);
-                    glVertex2d(line_rect.lr.x - INDICATOR_HEIGHT / 2.0 - HORIZONTAL_MARGIN, line_rect.ul.y + m_font->Lineskip() - INDICATOR_VERTICAL_MARGIN);
-                    glVertex2d(line_rect.lr.x - HORIZONTAL_MARGIN,                          line_rect.ul.y + m_font->Lineskip() / 2.0);
+                    glVertex(line_rect.lr.x - Value(INDICATOR_HEIGHT / 2.0) - HORIZONTAL_MARGIN, line_rect.ul.y + INDICATOR_VERTICAL_MARGIN);
+                    glVertex(line_rect.lr.x - Value(INDICATOR_HEIGHT / 2.0) - HORIZONTAL_MARGIN, line_rect.ul.y + m_font->Lineskip() - INDICATOR_VERTICAL_MARGIN);
+                    glVertex(line_rect.lr.x - HORIZONTAL_MARGIN,                                 line_rect.ul.y + m_font->Lineskip() / 2.0);
                     glEnd();
                     glEnable(GL_TEXTURE_2D);
                 }
@@ -591,9 +535,7 @@ void PopupMenu::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 }
 
 void PopupMenu::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    LButtonUp(pt, mod_keys);
-}
+{ LButtonUp(pt, mod_keys); }
 
 void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
@@ -607,7 +549,7 @@ void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 
         if (pt.x >= m_open_levels[i].ul.x && pt.x <= m_open_levels[i].lr.x &&
                 pt.y >= m_open_levels[i].ul.y && pt.y <= m_open_levels[i].lr.y) {
-            int row_selected = (pt.y - m_open_levels[i].ul.y) / m_font->Lineskip();
+            int row_selected = Value((pt.y - m_open_levels[i].ul.y) / m_font->Lineskip());
             if (row_selected == m_caret[i]) {
                 cursor_is_in_menu = true;
             } else if (row_selected >= 0 && row_selected < static_cast<int>(menu.next_level.size())) {
@@ -638,19 +580,13 @@ void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 }
 
 void PopupMenu::RButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    LButtonUp(pt, mod_keys);
-}
+{ LButtonUp(pt, mod_keys); }
 
 void PopupMenu::RClick(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    LButtonUp(pt, mod_keys);
-}
+{ LButtonUp(pt, mod_keys); }
 
 void PopupMenu::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    LDrag(pt, Pt(), mod_keys);
-}
+{ LDrag(pt, Pt(), mod_keys); }
 
 int PopupMenu::Run()
 {
@@ -663,51 +599,31 @@ int PopupMenu::Run()
 }
 
 void PopupMenu::SetBorderColor(Clr clr)
-{
-    m_border_color = clr;
-}
+{ m_border_color = clr; }
 
 void PopupMenu::SetInteriorColor(Clr clr)     
-{
-    m_int_color = clr;
-}
+{ m_int_color = clr; }
 
 void PopupMenu::SetTextColor(Clr clr)         
-{
-    m_text_color = clr;
-}
+{ m_text_color = clr; }
 
 void PopupMenu::SetHiliteColor(Clr clr)       
-{
-    m_hilite_color = clr;
-}
+{ m_hilite_color = clr; }
 
 void PopupMenu::SetSelectedTextColor(Clr clr)
-{
-    m_sel_text_color = clr;
-}
+{ m_sel_text_color = clr; }
 
 const boost::shared_ptr<Font>& PopupMenu::GetFont() const     
-{
-    return m_font;
-}
+{ return m_font; }
 
 const MenuItem& PopupMenu::MenuData() const    
-{
-    return m_menu_data;
-}
+{ return m_menu_data; }
 
 const std::vector<Rect>& PopupMenu::OpenLevels() const  
-{
-    return m_open_levels;
-}
+{ return m_open_levels; }
 
 const std::vector<int>& PopupMenu::Caret() const       
-{
-    return m_caret;
-}
+{ return m_caret; }
 
 const MenuItem* PopupMenu::ItemSelected() const
-{
-    return m_item_selected;
-}
+{ return m_item_selected; }

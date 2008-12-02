@@ -100,23 +100,17 @@ extern "C" {
     // provides the name of the plugin
     GG_PLUGIN_API 
     const char* PluginName()
-    {
-        return PLUGIN_NAME;
-    }
+    { return PLUGIN_NAME; }
 
     // provides the name of the default font to be used with this plugin
     GG_PLUGIN_API 
     const char* DefaultFontName()
-    {
-        return DEFAULT_FONT_NAME;
-    }
+    { return DEFAULT_FONT_NAME; }
 
     // provides the size of the default font to be used with this plugin
     GG_PLUGIN_API 
     int DefaultFontSize()
-    {
-        return DEFAULT_FONT_SIZE;
-    }
+    { return DEFAULT_FONT_SIZE; }
 
 
     //  TODO: Override this with your own StyleFactory subclass.
@@ -130,13 +124,9 @@ extern "C" {
     // Serialization functions
     GG_PLUGIN_API
     void SaveWnd(const GG::Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
-    {
-        ar & boost::serialization::make_nvp(name.c_str(), wnd);
-    }
+    { ar & boost::serialization::make_nvp(name.c_str(), wnd); }
 
     GG_PLUGIN_API
     void LoadWnd(GG::Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
-    {
-        ar & boost::serialization::make_nvp(name.c_str(), wnd);
-    }
+    { ar & boost::serialization::make_nvp(name.c_str(), wnd); }
 }

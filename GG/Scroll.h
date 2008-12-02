@@ -68,7 +68,7 @@ public:
 
     /** \name Structors */ ///@{
     /** ctor. */
-    Scroll(int x, int y, int w, int h, Orientation orientation, Clr color, Clr interior,
+    Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior,
            Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN);
     //@}
 

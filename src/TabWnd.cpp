@@ -33,7 +33,7 @@
 using namespace GG;
 
 namespace {
-    int TabHeightFromFont(const boost::shared_ptr<Font>& font)
+    Y TabHeightFromFont(const boost::shared_ptr<Font>& font)
     { return font->Lineskip() + 10; }
 }
 
@@ -55,13 +55,13 @@ TabWnd::~TabWnd()
     }
 }
 
-TabWnd::TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
+TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
     Wnd(x, y, w, h, flags),
-    m_tab_bar(GetStyleFactory()->NewTabBar(0, 0, w, font, color, text_color, style, CLICKABLE)),
+    m_tab_bar(GetStyleFactory()->NewTabBar(X0, Y0, w, font, color, text_color, style, CLICKABLE)),
     m_current_wnd(0)
 {
-    Layout* layout = new Layout(0, 0, w, h, 2, 1);
+    Layout* layout = new Layout(X0, Y0, w, h, 2, 1);
     layout->SetRowStretch(1, 1.0);
     layout->Add(m_tab_bar, 0, 0);
     SetLayout(layout);
@@ -145,7 +145,7 @@ void TabWnd::TabChanged(int index)
 ////////////////////////////////////////////////
 // static(s)
 const int TabBar::NO_TAB = TabWnd::NO_WND;
-const int TabBar::BUTTON_WIDTH = 10;
+const X TabBar::BUTTON_WIDTH(10);
 
 TabBar::TabBar() :
     Control(),
@@ -158,14 +158,14 @@ TabBar::TabBar() :
     m_first_tab_shown(0)
 {}
 
-TabBar::TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
+TabBar::TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, TabHeightFromFont(font), flags),
     m_tabs(0),
     m_font(font),
     m_left_button(0),
     m_right_button(0),
-    m_left_right_button_layout(new Layout(0, 0, w, TabHeightFromFont(font), 1, 3)),
+    m_left_right_button_layout(new Layout(X0, Y0, w, TabHeightFromFont(font), 1, 3)),
     m_text_color(text_color),
     m_style(style),
     m_first_tab_shown(0)
@@ -176,7 +176,7 @@ TabBar::TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr col
 
     boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
 
-    m_tabs = style_factory->NewRadioButtonGroup(0, 0, w, TabHeightFromFont(font), HORIZONTAL);
+    m_tabs = style_factory->NewRadioButtonGroup(X0, Y0, w, TabHeightFromFont(font), HORIZONTAL);
     m_tabs->ExpandButtons(true);
     m_tabs->ExpandButtonsProportionally(true);
 
@@ -184,8 +184,8 @@ TabBar::TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr col
     m_left_right_button_layout->SetColumnStretch(1, 0);
     m_left_right_button_layout->SetColumnStretch(2, 0);
 
-    m_left_button = style_factory->NewTabBarLeftButton(0, 0, BUTTON_WIDTH, Height(), "-", m_font, Color(), m_text_color);
-    m_right_button = style_factory->NewTabBarRightButton(0, 0, BUTTON_WIDTH, Height(), "+", m_font, Color(), m_text_color);
+    m_left_button = style_factory->NewTabBarLeftButton(X0, Y0, BUTTON_WIDTH, Height(), "-", m_font, Color(), m_text_color);
+    m_right_button = style_factory->NewTabBarRightButton(X0, Y0, BUTTON_WIDTH, Height(), "+", m_font, Color(), m_text_color);
     m_left_right_button_layout->SetMinimumColumnWidth(1, m_left_button->Width());
     m_left_right_button_layout->SetMinimumColumnWidth(2, m_right_button->Width());
     m_left_right_button_layout->Add(m_left_button, 0, 1);
@@ -202,9 +202,9 @@ TabBar::TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr col
 
 Pt TabBar::MinUsableSize() const
 {
-    int y = 0;
+    Y y(0);
     for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
-        int button_min_y = m_tab_buttons[i]->MinUsableSize().y;
+        Y button_min_y = m_tab_buttons[i]->MinUsableSize().y;
         if (y < button_min_y)
             y = button_min_y;
     }
@@ -220,7 +220,7 @@ Clr TabBar::TextColor() const
 void TabBar::SizeMove(const Pt& ul, const Pt& lr)
 {
     m_tabs->Resize(Pt(m_tabs->Size().x, lr.y -  ul.y));
-    m_left_right_button_layout->SizeMove(Pt(0, 0), lr - ul);
+    m_left_right_button_layout->SizeMove(Pt(), lr - ul);
     Control::SizeMove(ul, lr);
 }
 
@@ -238,7 +238,7 @@ void TabBar::InsertTab(int index, const std::string& name)
 {
     assert(0 <= index && index <= static_cast<int>(m_tab_buttons.size()));
     boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
-    StateButton* button = style_factory->NewTabBarTab(0, 0, 1, 1, name,
+    StateButton* button = style_factory->NewTabBarTab(X0, Y0, X1, Y1, name,
                                                       m_font, FORMAT_CENTER, Color(),
                                                       m_text_color, CLR_ZERO,
                                                       m_style == TAB_BAR_ATTACHED ?
@@ -250,7 +250,7 @@ void TabBar::InsertTab(int index, const std::string& name)
     if (Width() < m_tabs->Width()) {
         m_left_right_button_layout->Show();
         m_left_button->Disable(m_first_tab_shown == 0);
-        int right_side = m_left_right_button_layout->Visible() ?
+        X right_side = m_left_right_button_layout->Visible() ?
             m_left_button->UpperLeft().x :
             LowerRight().x;
         m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
@@ -304,7 +304,7 @@ void TabBar::TabChanged(int index)
 void TabBar::LeftClicked()
 {
     assert(0 < m_first_tab_shown);
-    m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown - 1]->UpperLeft().x, 0));
+    m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown - 1]->UpperLeft().x, Y0));
     --m_first_tab_shown;
     m_left_button->Disable(m_first_tab_shown == 0);
     m_right_button->Disable(false);
@@ -313,9 +313,9 @@ void TabBar::LeftClicked()
 void TabBar::RightClicked()
 {
     assert(m_first_tab_shown < static_cast<int>(m_tab_buttons.size()) - 1);
-    m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown + 1]->UpperLeft().x, 0));
+    m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown + 1]->UpperLeft().x, Y0));
     ++m_first_tab_shown;
-    int right_side = m_left_right_button_layout->Visible() ?
+    X right_side = m_left_right_button_layout->Visible() ?
         m_left_button->UpperLeft().x :
         LowerRight().x;
     m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
@@ -327,7 +327,7 @@ void TabBar::BringTabIntoView(int index)
     while (m_tab_buttons[index]->UpperLeft().x < UpperLeft().x) {
         LeftClicked();
     }
-    int right_side = m_left_right_button_layout->Visible() ?
+    X right_side = m_left_right_button_layout->Visible() ?
         m_left_button->UpperLeft().x :
         LowerRight().x;
     if (m_tab_buttons[index]->Width() < Width()) {
@@ -335,7 +335,7 @@ void TabBar::BringTabIntoView(int index)
             RightClicked();
         }
     } else {
-        m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[index]->UpperLeft().x, 0));
+        m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[index]->UpperLeft().x, Y0));
         m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
         m_left_button->Disable(false);
     }
@@ -351,4 +351,3 @@ bool TabBar::EventFilter(Wnd* w, const WndEvent& event)
 
 void TabBar::RaiseCurrentTabButton()
 { m_tabs->RaiseCheckedButton(); }
-

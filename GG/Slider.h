@@ -58,7 +58,7 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    Slider(int x, int y, int w, int h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
+    Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
     /** \name Accessors */ ///@{
@@ -140,7 +140,6 @@ private:
 
 } // namespace GG
 
-BOOST_CLASS_VERSION(GG::Slider, 1)
 
 // template implementations
 template <class Archive>
@@ -155,10 +154,8 @@ void GG::Slider::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_tab_width)
         & BOOST_SERIALIZATION_NVP(m_line_style)
         & BOOST_SERIALIZATION_NVP(m_tab_drag_offset)
-        & BOOST_SERIALIZATION_NVP(m_tab);
-
-    if (1 <= version)
-        ar & BOOST_SERIALIZATION_NVP(m_page_sz);
+        & BOOST_SERIALIZATION_NVP(m_tab)
+        & BOOST_SERIALIZATION_NVP(m_page_sz);
 }
 
 #endif // _GG_Slider_h_

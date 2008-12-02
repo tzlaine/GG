@@ -84,29 +84,22 @@ namespace {
 StaticGraphic::StaticGraphic() :
     Control(),
     m_style(GRAPHIC_NONE)
-{
-}
+{}
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const boost::shared_ptr<Texture>& texture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
+StaticGraphic::StaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture>& texture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
                              Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
-{
-    Init(SubTexture(texture, 0, 0, texture->DefaultWidth(), texture->DefaultHeight()));
-}
+{ Init(SubTexture(texture, X0, Y0, texture->DefaultWidth(), texture->DefaultHeight())); }
 
-StaticGraphic::StaticGraphic(int x, int y, int w, int h, const SubTexture& subtexture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
+StaticGraphic::StaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
                              Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
-{
-    Init(subtexture);
-}
+{ Init(subtexture); }
 
 Flags<GraphicStyle> StaticGraphic::Style() const
-{
-    return m_style;
-}
+{ return m_style; }
 
 Rect StaticGraphic::RenderedArea() const
 {
@@ -116,46 +109,47 @@ Rect StaticGraphic::RenderedArea() const
     Pt pt1, pt2(graphic_sz); // (unscaled) default graphic size
     if (m_style & GRAPHIC_FITGRAPHIC) {
         if (m_style & GRAPHIC_PROPSCALE) {
-            double scale_x = window_sz.x / double(graphic_sz.x),
-                             scale_y = window_sz.y / double(graphic_sz.y);
-            double scale = (scale_x < scale_y) ? scale_x : scale_y;
-            pt2.x = int(graphic_sz.x * scale);
-            pt2.y = int(graphic_sz.y * scale);
+            double scale_x = Value(window_sz.x) / static_cast<double>(Value(graphic_sz.x));
+            double scale_y = Value(window_sz.y) / static_cast<double>(Value(graphic_sz.y));
+            double scale = std::min(scale_x, scale_y);
+            pt2.x = graphic_sz.x * scale;
+            pt2.y = graphic_sz.y * scale;
         } else {
             pt2 = window_sz;
         }
     } else if (m_style & GRAPHIC_SHRINKFIT) {
         if (m_style & GRAPHIC_PROPSCALE) {
-            double scale_x = (graphic_sz.x > window_sz.x) ? window_sz.x / double(graphic_sz.x) : 1.0,
-                             scale_y = (graphic_sz.y > window_sz.y) ? window_sz.y / double(graphic_sz.y) : 1.0;
-            double scale = (scale_x < scale_y) ? scale_x : scale_y;
-            pt2.x = int(graphic_sz.x * scale);
-            pt2.y = int(graphic_sz.y * scale);
+            double scale_x = (graphic_sz.x > window_sz.x) ? Value(window_sz.x) / static_cast<double>(Value(graphic_sz.x)) : 1.0;
+            double scale_y = (graphic_sz.y > window_sz.y) ? Value(window_sz.y) / static_cast<double>(Value(graphic_sz.y)) : 1.0;
+            double scale = std::min(scale_x, scale_y);
+            pt2.x = graphic_sz.x * scale;
+            pt2.y = graphic_sz.y * scale;
         } else {
             pt2 = window_sz;
         }
     }
 
-    int shift = 0;
+    X x_shift(0);
     if (m_style & GRAPHIC_LEFT) {
-        shift = ul.x;
+        x_shift = ul.x;
     } else if (m_style & GRAPHIC_CENTER) {
-        shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
+        x_shift = ul.x + (window_sz.x - (pt2.x - pt1.x)) / 2;
     } else { // m_style & GRAPHIC_RIGHT
-        shift = lr.x - (pt2.x - pt1.x);
+        x_shift = lr.x - (pt2.x - pt1.x);
     }
-    pt1.x += shift;
-    pt2.x += shift;
+    pt1.x += x_shift;
+    pt2.x += x_shift;
 
+    Y y_shift(0);
     if (m_style & GRAPHIC_TOP) {
-        shift = ul.y;
+        y_shift = ul.y;
     } else if (m_style & GRAPHIC_VCENTER) {
-        shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
+        y_shift = ul.y + (window_sz.y - (pt2.y - pt1.y)) / 2;
     } else { // m_style & GRAPHIC_BOTTOM
-        shift = lr.y - (pt2.y - pt1.y);
+        y_shift = lr.y - (pt2.y - pt1.y);
     }
-    pt1.y += shift;
-    pt2.y += shift;
+    pt1.y += y_shift;
+    pt2.y += y_shift;
 
     return Rect(pt1, pt2);
 }

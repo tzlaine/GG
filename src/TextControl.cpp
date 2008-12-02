@@ -34,7 +34,7 @@
 using namespace GG;
 
 namespace {
-    const Pt INVALID_USABLE_SIZE(-1, -1);
+    const Pt INVALID_USABLE_SIZE(-X1, -Y1);
 
     struct SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
     {
@@ -83,7 +83,7 @@ TextControl::TextControl() :
     m_dirty_load(false)
 {}
 
-TextControl::TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
+TextControl::TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                          Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
     Control(x, y, w, h, flags),
     m_format(format),
@@ -100,9 +100,9 @@ TextControl::TextControl(int x, int y, int w, int h, const std::string& str, con
     SetText(str);
 }
 
-TextControl::TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
+TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                          Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
-    Control(x, y, 0, 0, flags),
+    Control(x, y, X0, Y0, flags),
     m_format(format),
     m_text_color(color),
     m_clip_text(false),
@@ -321,15 +321,15 @@ void TextControl::AdjustMinimumSize()
 void TextControl::RecomputeTextBounds()
 {
     Pt text_sz = TextLowerRight() - TextUpperLeft();
-    m_text_ul.y = 0; // default value for FORMAT_TOP
+    m_text_ul.y = Y0; // default value for FORMAT_TOP
     if (m_format & FORMAT_BOTTOM)
         m_text_ul.y = Size().y - text_sz.y;
     else if (m_format & FORMAT_VCENTER)
-        m_text_ul.y = static_cast<int>((Size().y - text_sz.y) / 2.0);
-    m_text_ul.x = 0; // default for FORMAT_LEFT
+        m_text_ul.y = (Size().y - text_sz.y) / 2.0;
+    m_text_ul.x = X0; // default for FORMAT_LEFT
     if (m_format & FORMAT_RIGHT)
         m_text_ul.x = Size().x - text_sz.x;
     else if (m_format & FORMAT_CENTER)
-        m_text_ul.x = static_cast<int>((Size().x - text_sz.x) / 2.0);
+        m_text_ul.x = (Size().x - text_sz.x) / 2.0;
     m_text_lr = m_text_ul + text_sz;
 }

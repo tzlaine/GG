@@ -71,7 +71,7 @@ public:
 protected:
     /** \name Structors */ ///@{
     BrowseInfoWnd(); ///< default ctor
-    BrowseInfoWnd(int x, int y, int w, int h); ///< basic ctor
+    BrowseInfoWnd(X x, Y y, X w, Y h); ///< basic ctor
     //@}
 
 private:
@@ -94,7 +94,7 @@ class GG_API TextBoxBrowseInfoWnd : public BrowseInfoWnd
 public:
     /** \name Structors */ ///@{
     /** basic ctor */
-    TextBoxBrowseInfoWnd(int w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
+    TextBoxBrowseInfoWnd(X w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
                          Flags<TextFormat> format = FORMAT_LEFT | FORMAT_WORDBREAK, int border_width = 2, int text_margin = 4);
     //@}
 
@@ -139,7 +139,7 @@ private:
     Clr                     m_color;
     Clr                     m_border_color;
     int                     m_border_width;
-    int                     m_preferred_width;
+    X                  m_preferred_width;
     TextControl*            m_text_control;
 
     friend class boost::serialization::access;
@@ -149,16 +149,13 @@ private:
 
 } // namespace GG
 
-BOOST_CLASS_VERSION(GG::BrowseInfoWnd, 1);
-BOOST_CLASS_VERSION(GG::TextBoxBrowseInfoWnd, 1);
 
 // template implementations
 template <class Archive>
 void GG::BrowseInfoWnd::serialize(Archive& ar, const unsigned int version)
 {
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd);
-    if (1 <= version)
-        ar & BOOST_SERIALIZATION_NVP(m_cursor_pos);
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_cursor_pos);
 }
 
 template <class Archive>
@@ -170,9 +167,8 @@ void GG::TextBoxBrowseInfoWnd::serialize(Archive& ar, const unsigned int version
         & BOOST_SERIALIZATION_NVP(m_color)
         & BOOST_SERIALIZATION_NVP(m_border_color)
         & BOOST_SERIALIZATION_NVP(m_border_width)
-        & BOOST_SERIALIZATION_NVP(m_text_control);
-    if (1 <= version)
-        ar & BOOST_SERIALIZATION_NVP(m_preferred_width);
+        & BOOST_SERIALIZATION_NVP(m_text_control)
+        & BOOST_SERIALIZATION_NVP(m_preferred_width);
 }
 
 #endif // _GG_BrowseInfoWnd_h_

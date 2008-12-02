@@ -80,8 +80,8 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual int    AppWidth() const;
-    virtual int    AppHeight() const;
+    virtual X AppWidth() const;
+    virtual Y AppHeight() const;
     virtual int    Ticks() const;
     //@}
 
@@ -117,8 +117,8 @@ protected:
     virtual void   Run();
 
 private:
-    int            m_app_width;      ///< application width and height (defaults to 1024 x 768)
-    int            m_app_height;
+    X         m_app_width;      ///< application width and height (defaults to 1024 x 768)
+    Y         m_app_height;
 };
 
 } // namespace GG

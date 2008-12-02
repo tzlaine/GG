@@ -308,8 +308,8 @@ void OISInput::initialise()
     m_mouse->setEventCallback(this);
 
     const OIS::MouseState& mouse_state = m_mouse->getMouseState();
-    mouse_state.width = gui->AppWidth();
-    mouse_state.height = gui->AppHeight();
+    mouse_state.width = Value(gui->AppWidth());
+    mouse_state.height = Value(gui->AppHeight());
 
     ConnectHandlers();
 }
@@ -346,18 +346,18 @@ void OISInput::HandleWindowClose()
 
 bool OISInput::mouseMoved(const OIS::MouseEvent &event)
 {
-    Pt mouse_pos(event.state.X.abs, event.state.Y.abs);
+    Pt mouse_pos(X(event.state.X.abs), Y(event.state.Y.abs));
     assert(OgreGUI::GetGUI());
     if (event.state.Z.rel)
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt(0, 0 < event.state.Z.rel ? 1 : -1));
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEWHEEL, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt(X0, 0 < event.state.Z.rel ? Y1 : -Y1));
     else
-        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt(event.state.X.rel, event.state.Y.rel));
+        OgreGUI::GetGUI()->HandleGGEvent(GUI::MOUSEMOVE, GGK_UNKNOWN, 0, GetModKeys(m_keyboard), mouse_pos, Pt(X(event.state.X.rel), Y(event.state.Y.rel)));
     return true;
 }
 
 bool OISInput::mousePressed(const OIS::MouseEvent &event, OIS::MouseButtonID id)
 {
-    Pt mouse_pos(event.state.X.abs, event.state.Y.abs);
+    Pt mouse_pos(X(event.state.X.abs), Y(event.state.Y.abs));
     GUI::EventType gg_event = GUI::IDLE;
     switch (id) {
     case OIS::MB_Left:   gg_event = GUI::LPRESS; break;
@@ -373,7 +373,7 @@ bool OISInput::mousePressed(const OIS::MouseEvent &event, OIS::MouseButtonID id)
 
 bool OISInput::mouseReleased(const OIS::MouseEvent &event, OIS::MouseButtonID id)
 {
-    Pt mouse_pos(event.state.X.abs, event.state.Y.abs);
+    Pt mouse_pos(X(event.state.X.abs), Y(event.state.Y.abs));
     GUI::EventType gg_event = GUI::IDLE;
     switch (id) {
     case OIS::MB_Left:   gg_event = GUI::LRELEASE; break;

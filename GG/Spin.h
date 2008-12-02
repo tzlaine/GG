@@ -77,10 +77,10 @@ namespace spin_details {
     };
 
     template <class T>
-    struct SetButtonWidthAction : AttributeChangedAction<int>
+    struct SetButtonWidthAction : AttributeChangedAction<X>
     {
         SetButtonWidthAction(Spin<T>* spin) : m_spin(spin) {}
-        void operator()(const int& width) {m_spin->SetButtonWidth(width);}
+        void operator()(const X& width) {m_spin->SetButtonWidth(width);}
     private:
         Spin<T>* m_spin;
     };
@@ -114,7 +114,7 @@ public:
 
     /** \name Structors */ ///@{
     /** ctor that does not required height. Height is determined from the font and point size used.*/
-    Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
+    Spin(X x, Y y, X w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
 
     ~Spin(); // dtor
@@ -123,18 +123,18 @@ public:
     /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
 
-    T     Value() const;              ///< returns the current value of the control's text
-    T     StepSize() const;           ///< returns the step size of the control
-    T     MinValue() const;           ///< returns the minimum value of the control
-    T     MaxValue() const;           ///< returns the maximum value of the control
-    bool  Editable() const;           ///< returns true if the spinbox can have its value typed in directly
+    T      Value() const;              ///< returns the current value of the control's text
+    T      StepSize() const;           ///< returns the step size of the control
+    T      MinValue() const;           ///< returns the minimum value of the control
+    T      MaxValue() const;           ///< returns the maximum value of the control
+    bool   Editable() const;           ///< returns true if the spinbox can have its value typed in directly
 
-    int   ButtonWidth() const;        ///< returns the width used for the up and down buttons
+    X ButtonWidth() const;        ///< returns the width used for the up and down buttons
 
-    Clr   TextColor() const;          ///< returns the text color
-    Clr   InteriorColor() const;      ///< returns the the interior color of the control
-    Clr   HiliteColor() const;        ///< returns the color used to render hiliting around selected text
-    Clr   SelectedTextColor() const;  ///< returns the color used to render selected text
+    Clr    TextColor() const;          ///< returns the text color
+    Clr    InteriorColor() const;      ///< returns the the interior color of the control
+    Clr    HiliteColor() const;        ///< returns the color used to render hiliting around selected text
+    Clr    SelectedTextColor() const;  ///< returns the color used to render selected text
 
     mutable ValueChangedSignalType ValueChangedSignal; ///< the value changed signal object for this DynamicGraphic
     //@}
@@ -162,7 +162,7 @@ public:
     /** turns on or off the mode that allows the user to edit the value in the spinbox directly. */
     void AllowEdits(bool b = true);
 
-    void SetButtonWidth(int width);    ///< sets the width used for the up and down buttons
+    void SetButtonWidth(X width); ///< sets the width used for the up and down buttons
 
     void SetTextColor(Clr c);          ///< sets the text color
     void SetInteriorColor(Clr c);      ///< sets the interior color of the control
@@ -207,7 +207,7 @@ private:
     Button*    m_up_button;
     Button*    m_down_button;
 
-    int        m_button_width;
+    X     m_button_width;
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -231,7 +231,7 @@ Spin<T>::Spin() :
 {}
 
 template<class T>
-Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
+Spin<T>::Spin(X x, Y y, X w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
               Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) : 
     Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
     m_value(value),
@@ -243,9 +243,7 @@ Spin<T>::Spin(int x, int y, int w, T value, T step, T min, T max, bool edits, co
     m_up_button(0),
     m_down_button(0),
     m_button_width(15)
-{
-    Init(font, color, text_color, interior, flags);
-}
+{ Init(font, color, text_color, interior, flags); }
 
 template<class T>
 Spin<T>::~Spin()
@@ -263,63 +261,43 @@ Pt Spin<T>::MinUsableSize() const
 
 template<class T>
 T Spin<T>::Value() const
-{
-    return m_value;
-}
+{ return m_value; }
 
 template<class T>
 T Spin<T>::StepSize() const
-{
-    return m_step_size;
-}
+{ return m_step_size; }
 
 template<class T>
 T Spin<T>::MinValue() const
-{
-    return m_min_value;
-}
+{ return m_min_value; }
 
 template<class T>
 T Spin<T>::MaxValue() const
-{
-    return m_max_value;
-}
+{ return m_max_value; }
 
 template<class T>
 bool Spin<T>::Editable() const 
-{
-    return m_editable;
-}
+{ return m_editable; }
 
 template<class T>
-int Spin<T>::ButtonWidth() const
-{
-    return m_button_width;
-}
+X Spin<T>::ButtonWidth() const
+{ return m_button_width; }
 
 template<class T>
 Clr Spin<T>::TextColor() const
-{
-    return m_edit->TextColor();
-}
+{ return m_edit->TextColor(); }
 
 template<class T>
 Clr Spin<T>::InteriorColor() const
-{
-    return m_edit->InteriorColor();
-}
+{ return m_edit->InteriorColor(); }
 
 template<class T>
 Clr Spin<T>::HiliteColor() const
-{
-    return m_edit->HiliteColor();
-}
+{ return m_edit->HiliteColor(); }
 
 template<class T>
 Clr Spin<T>::SelectedTextColor() const
-{
-    return m_edit->SelectedTextColor();
-}
+{ return m_edit->SelectedTextColor(); }
 
 template<class T>
 void Spin<T>::Render()
@@ -327,7 +305,7 @@ void Spin<T>::Render()
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
     Pt ul = UpperLeft(), lr = LowerRight();
-    BeveledRectangle(ul.x, ul.y, lr.x, lr.y, int_color_to_use, color_to_use, false, BORDER_THICK);
+    BeveledRectangle(ul, lr, int_color_to_use, color_to_use, false, BORDER_THICK);
 }
 
 template<class T>
@@ -372,10 +350,10 @@ template<class T>
 void Spin<T>::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
-    const int BUTTON_X_POS = Width() - m_button_width - BORDER_THICK;
-    const int BUTTONS_HEIGHT = Height() - 2 * BORDER_THICK; // height of *both* buttons
-    m_edit->SizeMove(Pt(0, 0), Pt(Width() - m_button_width, Height()));
-    m_up_button->SizeMove(Pt(BUTTON_X_POS, BORDER_THICK),
+    const X BUTTON_X_POS = Width() - m_button_width - BORDER_THICK;
+    const Y BUTTONS_HEIGHT = Height() - 2 * BORDER_THICK; // height of *both* buttons
+    m_edit->SizeMove(Pt(), Pt(Width() - m_button_width, Height()));
+    m_up_button->SizeMove(Pt(BUTTON_X_POS, Y(BORDER_THICK)),
                           Pt(BUTTON_X_POS + m_button_width, BORDER_THICK + BUTTONS_HEIGHT / 2));
     m_down_button->SizeMove(Pt(BUTTON_X_POS, BORDER_THICK + BUTTONS_HEIGHT / 2),
                             Pt(BUTTON_X_POS + m_button_width, BORDER_THICK + BUTTONS_HEIGHT));
@@ -400,15 +378,11 @@ void Spin<T>::SetColor(Clr c)
 
 template<class T>
 void Spin<T>::Incr()
-{
-    SetValue(m_value + m_step_size);
-}
+{ SetValue(m_value + m_step_size); }
 
 template<class T>
 void Spin<T>::Decr()
-{
-    SetValue(m_value - m_step_size);
-}
+{ SetValue(m_value - m_step_size); }
 
 template<class T>
 void Spin<T>::SetValue(T value)
@@ -459,12 +433,10 @@ void Spin<T>::SetMaxValue(T value)
 
 template<class T>
 void Spin<T>::SetTextColor(Clr c)
-{
-    m_edit->SetTextColor(c);
-}
+{ m_edit->SetTextColor(c); }
 
 template<class T>
-void Spin<T>::SetButtonWidth(int width)
+void Spin<T>::SetButtonWidth(X width)
 {
     if (1 <= width) {
         if (Width() - 2 * BORDER_THICK - 1 < width)
@@ -476,21 +448,15 @@ void Spin<T>::SetButtonWidth(int width)
 
 template<class T>
 void Spin<T>::SetInteriorColor(Clr c)
-{
-    m_edit->SetInteriorColor(c);
-}
+{ m_edit->SetInteriorColor(c); }
 
 template<class T>
 void Spin<T>::SetHiliteColor(Clr c)
-{
-    m_edit->SetHiliteColor(c);
-}
+{ m_edit->SetHiliteColor(c); }
 
 template<class T>
 void Spin<T>::SetSelectedTextColor(Clr c)
-{
-    m_edit->SetSelectedTextColor(c);
-}
+{ m_edit->SetSelectedTextColor(c); }
 
 template<class T>
 void Spin<T>::DefineAttributes(WndEditor* editor)
@@ -513,26 +479,20 @@ void Spin<T>::DefineAttributes(WndEditor* editor)
     editor->Attribute<T>("Max Value", m_max_value, set_max_value_action);
     editor->Attribute("Editable", m_editable);
     boost::shared_ptr<spin_details::SetButtonWidthAction<T> > set_button_width_action(new spin_details::SetButtonWidthAction<T>(this));
-    editor->Attribute<int>("Button Width", m_button_width, set_button_width_action);
+    editor->Attribute<X>("Button Width", m_button_width, set_button_width_action);
 }
 
 template<class T>
 Button* Spin<T>::UpButton() const
-{
-    return m_up_button;
-}
+{ return m_up_button; }
 
 template<class T>
 Button* Spin<T>::DownButton() const
-{
-    return m_down_button;
-}
+{ return m_down_button; }
 
 template<class T>
 Edit* Spin<T>::GetEdit() const
-{
-    return m_edit;
-}
+{ return m_edit; }
 
 template<class T>
 bool Spin<T>::EventFilter(Wnd* w, const WndEvent& event)
@@ -561,10 +521,10 @@ void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_colo
 {
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     Control::SetColor(color);
-    m_edit = style->NewSpinEdit(0, 0, 1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
+    m_edit = style->NewSpinEdit(X0, Y0, X1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
     boost::shared_ptr<Font> small_font = GUI::GetGUI()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
-    m_up_button = style->NewSpinIncrButton(0, 0, 1, 1, "+", small_font, color);
-    m_down_button = style->NewSpinDecrButton(0, 0, 1, 1, "-", small_font, color);
+    m_up_button = style->NewSpinIncrButton(X0, Y0, X1, Y1, "+", small_font, color);
+    m_down_button = style->NewSpinDecrButton(X0, Y0, X1, Y1, "-", small_font, color);
     m_edit->InstallEventFilter(this);
     m_up_button->InstallEventFilter(this);
     m_down_button->InstallEventFilter(this);

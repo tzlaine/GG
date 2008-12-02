@@ -121,8 +121,8 @@ public:
 
     /** \name Structors */ ///@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
-    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
-    MenuBar(int x, int y, int w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing menus with which to populate the MenuBar
+    MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
+    MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing menus with which to populate the MenuBar
     //@}
 
     /** \name Accessors */ ///@{
@@ -233,7 +233,7 @@ public:
 
     /** \name Structors */ ///@{
     /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
-    PopupMenu(int x, int y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
+    PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
     //@}
 
     /** \name Accessors */ ///@{

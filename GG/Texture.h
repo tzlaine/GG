@@ -67,13 +67,13 @@ public:
     GLenum           MinFilter() const;        ///< returns minimization filter modes associated with this opengl texture
     GLenum           MagFilter() const;        ///< returns maximization filter modes associated with this opengl texture
     int              BytesPP() const;          ///< returns the image's color depth in bytes
-    GLint            Width() const;            ///< returns width of entire texture
-    GLint            Height() const;           ///< returns height of entire texture
+    X           Width() const;            ///< returns width of entire texture
+    Y           Height() const;           ///< returns height of entire texture
     bool             MipMapped() const;        ///< returns true if the texture has mipmaps
     GLuint           OpenGLId() const;         ///< GLuint "name" of the opengl texture object associated with this object
     const GLfloat*   DefaultTexCoords() const; ///< texture coordinates to use by default when blitting this texture
-    GLint            DefaultWidth() const;     ///< returns width in pixels, based on initial image (0 if texture was not loaded)
-    GLint            DefaultHeight() const;    ///< returns height in pixels, based on initial image (0 if texture was not loaded)
+    X           DefaultWidth() const;     ///< returns width in pixels, based on initial image (0 if texture was not loaded)
+    Y           DefaultHeight() const;    ///< returns height in pixels, based on initial image (0 if texture was not loaded)
 
     /** blit any portion of texture to any place on screen, scaling as necessary*/
     void OrthoBlit(const Pt& pt1, const Pt& pt2, const GLfloat* tex_coords = 0) const;
@@ -90,11 +90,11 @@ public:
 
     /** frees any currently-held memory and creates a texture from supplied array \a image.  \throw
         GG::Texture::Exception Throws applicable subclass if the texture creation fails in one of the specified ways. */
-    void Init(int width, int height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap = false);
+    void Init(X width, Y height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap = false);
 
     /** frees any currently-held memory and creates a texture from subarea of supplied array \a image.  \throw
         GG::Texture::Exception Throws applicable subclass if the texture creation fails in one of the specified ways. */
-    void Init(int x, int y, int width, int height, int image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap = false);
+    void Init(X x, Y y, X width, Y height, X image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap = false);
 
     void SetWrap(GLenum s, GLenum t);         ///< sets the opengl texture wrap modes associated with opengl texture m_opengl_id
     void SetFilters(GLenum min, GLenum mag);  ///< sets the opengl min/mag filter modes associated with opengl texture m_opengl_id
@@ -118,14 +118,14 @@ public:
 private:
     Texture(const Texture& rhs);             ///< disabled
     Texture& operator=(const Texture& rhs);  ///< disabled
-    void InitFromRawData(int width, int height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap);
+    void InitFromRawData(X width, Y height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap);
     unsigned char* GetRawBytes();
 
     std::string m_filename;   ///< filename from which this Texture was constructed ("" if not loaded from a file)
 
     int         m_bytes_pp;
-    GLint       m_width;
-    GLint       m_height;
+    X      m_width;
+    Y      m_height;
 
     GLenum      m_wrap_s, m_wrap_t;
     GLenum      m_min_filter, m_mag_filter;
@@ -137,8 +137,8 @@ private:
 
     /// each of these is used for a non-power-of-two-sized graphic loaded into a power-of-two-sized texture
     GLfloat     m_tex_coords[4];  ///< the texture coords used to blit from this texture by default (reflecting original image width and height)
-    GLint       m_default_width;  ///< the original width and height of this texture to be used in blitting 
-    GLint       m_default_height;
+    X      m_default_width;  ///< the original width and height of this texture to be used in blitting 
+    Y      m_default_height;
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -155,7 +155,7 @@ public:
     /** creates a SubTexture from a GG::Texture and coordinates into it.  \throw GG::SubTexture::BadTexture Throws if
         the given Texture is null.  \throw GG::SubTexture::InvalidTextureCoordinates Throws if the texture coordinates
         are not well formed.*/
-    SubTexture(const boost::shared_ptr<const Texture>& texture, int x1, int y1, int x2, int y2);  
+    SubTexture(const boost::shared_ptr<const Texture>& texture, X x1, Y y1, X x2, Y y2);
 
     SubTexture(const SubTexture& rhs); ///< copy ctor
     const SubTexture& operator=(const SubTexture& rhs); ///< assignment operator
@@ -165,8 +165,8 @@ public:
     /** \name Accessors */ ///@{
     bool             Empty() const;     ///< returns true if this object has no associated GG::Texture
     const GLfloat*   TexCoords() const; ///< texture coordinates to use when blitting this sub-texture
-    GLint            Width() const;     ///< width of sub-texture in pixels
-    GLint            Height() const;    ///< height of sub-texture in pixels
+    X           Width() const;     ///< width of sub-texture in pixels
+    Y           Height() const;    ///< height of sub-texture in pixels
     const Texture*   GetTexture() const;///< returns the texture the SubTexture is a part of
 
     /** blit sub-texture to any place on screen, scaling as necessary \see GG::Texture::OrthoBlit*/
@@ -189,8 +189,8 @@ public:
 
 private:
     boost::shared_ptr<const Texture> m_texture;        ///< shared_ptr to texture object with entire image
-    GLint                            m_width;
-    GLint                            m_height;
+    X                           m_width;
+    Y                           m_height;
     GLfloat                          m_tex_coords[4];  ///< position of element within containing texture 
 
     friend class boost::serialization::access;
@@ -264,7 +264,7 @@ void GG::Texture::serialize(Archive& ar, const unsigned int version)
         if (m_filename == "" && m_opengl_id)
             raw_data_bytes = GetRawBytes();
         if (raw_data_bytes)
-            raw_data_size = static_cast<std::size_t>(m_width * m_height * m_bytes_pp);
+            raw_data_size = static_cast<std::size_t>(Value(m_width) * Value(m_height) * m_bytes_pp);
     }
     ar & BOOST_SERIALIZATION_NVP(raw_data_size);
     if (raw_data_size) {
@@ -278,7 +278,7 @@ void GG::Texture::serialize(Archive& ar, const unsigned int version)
 
     if (Archive::is_loading::value) {
         if (raw_data_size) {
-            Init(0, 0, m_default_width, m_default_height, m_width, raw_data_bytes, m_format, m_type, m_bytes_pp, m_mipmaps);
+            Init(X0, Y0, m_default_width, m_default_height, m_width, raw_data_bytes, m_format, m_type, m_bytes_pp, m_mipmaps);
         } else {
             try {
                 Load(m_filename);

@@ -5,8 +5,8 @@
 using namespace GG;
 
 namespace {
-    const int WND_EDITOR_WIDTH = 400;
-    const int WND_EDITOR_TEXT_WIDTH = 125;
+    const X WND_EDITOR_WIDTH(400);
+    const X WND_EDITOR_TEXT_WIDTH(125);
 
     template <class T>
     struct WrappedEditChangedFunctor
@@ -20,7 +20,7 @@ namespace {
         {
             try {
                 int value = boost::lexical_cast<int>(value_text);
-                m_value = value;
+                m_value = T(value);
                 m_edit->SetTextColor(CLR_BLACK);
                 m_signal();
             } catch (const boost::bad_lexical_cast& e) {
@@ -64,17 +64,15 @@ namespace {
     {
     public:
         MultiControlWrapper() :
-            Control(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT),
+            Control(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT),
             m_children(0)
         {
-            m_layout = new Layout(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, 1, 1);
+            m_layout = new Layout(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, 1, 1);
             AttachChild(m_layout);
         }
         virtual void Render() {}
         void Add(Wnd* w)
-        {
-            m_layout->Add(w, 0, m_children++);
-        }
+        { m_layout->Add(w, 0, m_children++); }
     private:
         Layout* m_layout;
         int m_children;
@@ -82,33 +80,27 @@ namespace {
 }
 
 namespace GG { namespace detail {
-    const int ATTRIBUTE_ROW_HEIGHT = 22;
-    const int ATTRIBUTE_ROW_CONTROL_WIDTH = WND_EDITOR_WIDTH - WND_EDITOR_TEXT_WIDTH - 14 - 4;
+    const Y ATTRIBUTE_ROW_HEIGHT(22);
+    const X ATTRIBUTE_ROW_CONTROL_WIDTH = WND_EDITOR_WIDTH - WND_EDITOR_TEXT_WIDTH - 14 - 4;
 } }
 
 ////////////////////////////////////////////////
 // GG::WndEditor
 ////////////////////////////////////////////////
-WndEditor::WndEditor(int h, const boost::shared_ptr<Font>& font) :
-    Wnd(0, 0, WND_EDITOR_WIDTH, h),
+WndEditor::WndEditor(Y h, const boost::shared_ptr<Font>& font) :
+    Wnd(X0, Y0, WND_EDITOR_WIDTH, h),
     m_wnd(0),
-    m_list_box(new ListBox(0, 0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
+    m_list_box(new ListBox(X0, Y0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
     m_font(font),
     m_label_font(GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 4)),
     m_current_flags_and_action()
-{
-    Init();
-}
+{ Init(); }
 
 const boost::shared_ptr<Font>& WndEditor::GetFont() const
-{
-    return m_font;
-}
+{ return m_font; }
 
 const Wnd* WndEditor::GetWnd() const
-{
-    return m_wnd;
-}
+{ return m_wnd; }
 
 void WndEditor::Render ()
 {
@@ -125,7 +117,7 @@ void WndEditor::SetWnd(Wnd* wnd, const std::string& name/* = ""*/)
     if (name != "") {
         ListBox::Row* row = new ListBox::Row();
         row->push_back("Name", m_font, CLR_BLACK);
-        Edit* edit = new Edit(0, 0, 1, "", m_font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+        Edit* edit = new Edit(X0, Y0, X1, "", m_font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
         edit->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, edit->Height()));
         row->Resize(edit->Size());
         row->push_back(edit);
@@ -173,9 +165,7 @@ void WndEditor::AttributeChangedSlot()
 }
 
 void WndEditor::NameChangedSlot(const std::string& name)
-{
-    WndNameChangedSignal(m_wnd, name);
-}
+{ WndNameChangedSignal(m_wnd, name); }
 
 ////////////////////////////////////////////////
 // GG::AttributeRowBase
@@ -196,16 +186,16 @@ AttributeRow<Pt>::AttributeRow(const std::string& name, Pt& value, const boost::
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     MultiControlWrapper* edits = new MultiControlWrapper();
-    m_x_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_y_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_x_edit = new Edit(X0, Y0, X1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_y_edit = new Edit(X0, Y0, X1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     edits->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_x_edit->Height()));
     *m_x_edit << m_value.x;
     *m_y_edit << m_value.y;
     edits->Add(m_x_edit);
     edits->Add(m_y_edit);
     Resize(edits->Size());
-    m_x_connection = Connect(m_x_edit->FocusUpdateSignal, WrappedEditChangedFunctor<int>(m_value.x, m_x_edit, ChangedSignal));
-    m_y_connection = Connect(m_y_edit->FocusUpdateSignal, WrappedEditChangedFunctor<int>(m_value.y, m_y_edit, ChangedSignal));
+    m_x_connection = Connect(m_x_edit->FocusUpdateSignal, WrappedEditChangedFunctor<X>(m_value.x, m_x_edit, ChangedSignal));
+    m_y_connection = Connect(m_y_edit->FocusUpdateSignal, WrappedEditChangedFunctor<Y>(m_value.y, m_y_edit, ChangedSignal));
     push_back(edits);
 }
 
@@ -230,14 +220,14 @@ AttributeRow<Clr>::AttributeRow(const std::string& name, Clr& value, const boost
     push_back(CreateControl(name, font, CLR_BLACK));
     m_color_button = new ColorDlg::ColorButton(CLR_GRAY);
     m_color_button->SetRepresentedColor(m_value);
-    m_color_button->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, 22));
+    m_color_button->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, Y(22)));
     Connect(m_color_button->ClickedSignal, &AttributeRow::ColorButtonClicked, this);
     push_back(m_color_button);
 }
 
 void AttributeRow<Clr>::ColorButtonClicked()
 {
-    ColorDlg dlg(0, 0, m_value, m_font, CLR_GRAY, CLR_GRAY);
+    ColorDlg dlg(X0, Y0, m_value, m_font, CLR_GRAY, CLR_GRAY);
     dlg.MoveTo(Pt((GUI::GetGUI()->AppWidth() - dlg.Width()) / 2,
                   (GUI::GetGUI()->AppHeight() - dlg.Height()) / 2));
     dlg.Run();
@@ -250,9 +240,7 @@ void AttributeRow<Clr>::ColorButtonClicked()
 }
 
 void AttributeRow<Clr>::Update()
-{
-    m_color_button->SetRepresentedColor(m_value);
-}
+{ m_color_button->SetRepresentedColor(m_value); }
 
 ////////////////////////////////////////////////
 // GG::AttributeRow<bool>
@@ -262,7 +250,7 @@ AttributeRow<bool>::AttributeRow(const std::string& name, bool& value, const boo
     m_radio_button_group(0)
 {
     push_back(CreateControl(name, font, CLR_BLACK));
-    m_radio_button_group = new RadioButtonGroup(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, HORIZONTAL);
+    m_radio_button_group = new RadioButtonGroup(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, HORIZONTAL);
     m_radio_button_group->AddButton("True", font, FORMAT_LEFT, CLR_GRAY);
     m_radio_button_group->AddButton("False", font, FORMAT_LEFT, CLR_GRAY);
     m_radio_button_group->SetCheck(!value);
@@ -294,8 +282,8 @@ AttributeRow<boost::shared_ptr<Font> >::AttributeRow(const std::string& name, bo
 {
     push_back(CreateControl(name, font, CLR_BLACK));
     MultiControlWrapper* edits = new MultiControlWrapper();
-    m_filename_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
-    m_points_edit = new Edit(0, 0, 1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_filename_edit = new Edit(X0, Y0, X1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
+    m_points_edit = new Edit(X0, Y0, X1, "", font, CLR_GRAY, CLR_BLACK, CLR_WHITE);
     edits->Resize(Pt(detail::ATTRIBUTE_ROW_CONTROL_WIDTH, m_filename_edit->Height()));
     *m_filename_edit << m_value->FontName();
     *m_points_edit << m_value->PointSize();
@@ -358,7 +346,7 @@ ConstAttributeRow<Pt>::ConstAttributeRow(const std::string& name, const Pt& valu
     push_back(CreateControl(name, font, CLR_BLACK));
     std::stringstream value_stream;
     value_stream << "(" << m_value.x << ", " << m_value.y << ")";
-    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, FORMAT_LEFT);
+    m_value_text = new TextControl(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, FORMAT_LEFT);
     push_back(m_value_text);
 }
 
@@ -379,7 +367,7 @@ ConstAttributeRow<Clr>::ConstAttributeRow(const std::string& name, const Clr& va
     push_back(CreateControl(name, font, CLR_BLACK));
     std::stringstream value_stream;
     value_stream << "(" << m_value.r << ", " << m_value.g << ", " << m_value.b << ", " << m_value.a << ")";
-    m_value_text = new TextControl(0, 0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, FORMAT_LEFT);
+    m_value_text = new TextControl(X0, Y0, detail::ATTRIBUTE_ROW_CONTROL_WIDTH, detail::ATTRIBUTE_ROW_HEIGHT, value_stream.str(), font, CLR_BLACK, FORMAT_LEFT);
     push_back(m_value_text);
 }
 

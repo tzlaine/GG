@@ -24,6 +24,7 @@
    
 #include <GG/Cursor.h>
 
+#include <GG/DrawUtil.h>
 #include <GG/Texture.h>
 
 
@@ -44,8 +45,8 @@ TextureCursor::TextureCursor(const boost::shared_ptr<Texture>& texture,
     m_texture(texture),
     m_hotspot(hotspot)
 {
-    m_hotspot.x = std::max(0, std::min(m_hotspot.x, static_cast<int>(m_texture->DefaultWidth() - 1)));
-    m_hotspot.y = std::max(0, std::min(m_hotspot.y, static_cast<int>(m_texture->DefaultHeight() - 1)));
+    m_hotspot.x = std::max(X0, std::min(m_hotspot.x, m_texture->DefaultWidth() - 1));
+    m_hotspot.y = std::max(Y0, std::min(m_hotspot.y, m_texture->DefaultHeight() - 1));
 }
 
 void TextureCursor::Render(const Pt& pt)
@@ -57,10 +58,10 @@ void TextureCursor::Render(const Pt& pt)
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_LINE_LOOP);
         glColor3ub(255, 0, 0);
-        glVertex2i(lr.x, ul.y);
-        glVertex2i(ul.x, ul.y);
-        glVertex2i(ul.x, lr.y);
-        glVertex2i(lr.x, lr.y);
+        glVertex(lr.x, ul.y);
+        glVertex(ul.x, ul.y);
+        glVertex(ul.x, lr.y);
+        glVertex(lr.x, lr.y);
         glEnd();
         glEnable(GL_TEXTURE_2D);
     }

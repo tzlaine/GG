@@ -86,7 +86,7 @@ class GG_API Layout : public Wnd
 public:
     /** \name Structors */ ///@{
     /** ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is negative. */
-    Layout(int x, int y, int w, int h, int rows, int columns, int border_margin = 0, int cell_margin = -1);
+    Layout(X x, Y y, X w, Y h, int rows, int columns, int border_margin = 0, int cell_margin = -1);
     //@}
 
     /** \name Accessors */ ///@{
@@ -100,8 +100,8 @@ public:
     int    CellMargin() const;                       ///< returns the number of pixels the layout leaves between the edges of windows in adjacent cells
     double RowStretch(int row) const;                ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.
     double ColumnStretch(int column) const;          ///< returns the stretch factor for column \a column.  Note that \a column is not range-checked.
-    int    MinimumRowHeight(int row) const;          ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
-    int    MinimumColumnWidth(int column) const;     ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
+    Y MinimumRowHeight(int row) const;          ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
+    X MinimumColumnWidth(int column) const;     ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
     std::vector<std::vector<const Wnd*> >
            Cells() const;                            ///< returns a matrix of the Wnds that can be found in each cell
     std::vector<std::vector<Rect> >
@@ -172,10 +172,10 @@ public:
     void SetColumnStretch(int column, double stretch);
 
     /** sets the minimum height of row \a row to \a height.  Note that \a row is not range-checked. */
-    void SetMinimumRowHeight(int row, int height);
+    void SetMinimumRowHeight(int row, Y height);
 
     /** sets the minimum width of column \a column to \a width.  Note that \a column is not range-checked. */
-    void SetMinimumColumnWidth(int column, int width);
+    void SetMinimumColumnWidth(int column, X width);
 
     /** set this to true if this layout should render an outline of itself; this is sometimes useful for debugging
         purposes */
@@ -247,8 +247,8 @@ private:
     };
 
     double TotalStretch(const std::vector<RowColParams>& params_vec) const;
-    int    TotalMinWidth() const;
-    int    TotalMinHeight() const;
+    X TotalMinWidth() const;
+    Y TotalMinHeight() const;
     void   ValidateAlignment(Flags<Alignment>& alignment);
     void   RedoLayout();
     void   ChildSizeOrMinSizeOrMaxSizeChanged();
@@ -275,7 +275,6 @@ private:
 
 } // namespace GG
 
-BOOST_CLASS_VERSION(GG::Layout, 1)
 
 // template implementations
 template <class Archive>
@@ -312,10 +311,8 @@ void GG::Layout::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_wnd_positions)
         & BOOST_SERIALIZATION_NVP(m_ignore_child_resize)
         & BOOST_SERIALIZATION_NVP(m_render_outline)
-        & BOOST_SERIALIZATION_NVP(m_outline_color);
-
-    if (1 <= version)
-        ar & BOOST_SERIALIZATION_NVP(m_min_usable_size);
+        & BOOST_SERIALIZATION_NVP(m_outline_color)
+        & BOOST_SERIALIZATION_NVP(m_min_usable_size);
 }
 
 #endif // _GG_Layout_h_

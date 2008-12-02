@@ -32,6 +32,8 @@
 
 #include <OgrePlugin.h>
 
+#include <GG/PtRect.h>
+
 #include <boost/signals.hpp>
 
 
@@ -76,7 +78,7 @@ protected:
 
 private:
     virtual void HandleSystemEvents() = 0;
-    virtual void HandleWindowResize(int width, int height);
+    virtual void HandleWindowResize(X width, Y height);
     virtual void HandleWindowClose();
 
     boost::signals::connection m_handle_events_connection;

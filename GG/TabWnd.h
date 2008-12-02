@@ -54,7 +54,7 @@ public:
 
     /** \name Structors */ ///@{
     /** Basic ctor. */
-    TabWnd(int x, int y, int w, int h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+    TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
            TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE);
     ~TabWnd();
     //@}
@@ -140,7 +140,7 @@ public:
 
     /** \name Structors */ ///@{
     /** Basic ctor. */
-    TabBar(int x, int y, int w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
+    TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
            TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE);
     //@}
 
@@ -185,7 +185,7 @@ public:
     static const int NO_TAB;
 
     /** The default width to use for the left and right buttons. */
-    static const int BUTTON_WIDTH;
+    static const X BUTTON_WIDTH;
 
 protected:
     /** \name Structors */ ///@{

@@ -57,12 +57,12 @@ public:
     using Wnd::SetMinSize;
 
     /** \name Structors */ ///@{
-    TextControl(int x, int y, int w, int h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
+    TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
 
     /** ctor that does not require window size.
         Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
         and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
-    TextControl(int x, int y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>());
+    TextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ ///@{
@@ -177,7 +177,7 @@ private:
 
     // variables for caching the results of MinUsableSize()
     mutable Pt                  m_min_usable_size;
-    mutable int                 m_previous_client_width;
+    mutable X              m_previous_client_width;
     mutable Flags<TextFormat>   m_previous_format;
 
     friend class boost::serialization::access;

@@ -139,7 +139,7 @@ private:
     Clr                     m_color;
     Clr                     m_border_color;
     int                     m_border_width;
-    X                  m_preferred_width;
+    X                       m_preferred_width;
     TextControl*            m_text_control;
 
     friend class boost::serialization::access;

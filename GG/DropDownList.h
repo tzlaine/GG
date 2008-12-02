@@ -104,7 +104,7 @@ public:
         the user; it may be >= NumCols(). */
     std::size_t    SortCol() const;
 
-    X         ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
+    X              ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
     Alignment      ColAlignment(std::size_t n) const; ///< returns the alignment of column \a n; must be LIST_LEFT, LIST_CENTER, or LIST_RIGHT; not range-checked
     Alignment      RowAlignment(iterator it) const;   ///< returns the alignment of row \a n; must be LIST_TOP, LIST_VCENTER, or LIST_BOTTOM; not range-checked
 

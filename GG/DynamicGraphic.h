@@ -97,8 +97,8 @@ public:
     int     EndFrame() const;
 
     int     Margin() const;      ///< returns the number of pixels placed between frames and between the frames and the Texture edges
-    X  FrameWidth() const;  ///< returns the original width of the control (and the width of the frame images)
-    Y  FrameHeight() const; ///< returns the original height of the control (and the height of the frame images)
+    X       FrameWidth() const;  ///< returns the original width of the control (and the width of the frame images)
+    Y       FrameHeight() const; ///< returns the original height of the control (and the height of the frame images)
 
     /** returns the style of the DynamicGraphic \see StaticGraphicStyle */
     Flags<GraphicStyle>  Style() const;
@@ -197,8 +197,8 @@ protected:
     //@}
 
     const int    m_margin;          ///< the number of pixels placed between frames and between the frames and the Texture edges
-    const X m_frame_width;     ///< the width of each frame 
-    const Y m_frame_height;    ///< the height of each frame 
+    const X      m_frame_width;     ///< the width of each frame 
+    const Y      m_frame_height;    ///< the height of each frame 
 
 private:
     void ValidateStyle();            ///< ensures that the style flags are consistent

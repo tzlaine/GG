@@ -157,8 +157,8 @@ public:
     double         FPS() const;                        ///< returns the frames per second at which the GUI is rendering
     std::string    FPSString() const;                  ///< returns a string of the form "[m_FPS] frames per second"
     double         MaxFPS() const;                     ///< returns the maximum allowed frames per second of rendering speed.  0 indicates no limit.
-    virtual X AppWidth() const = 0;               ///< returns the width of the application window/screen
-    virtual Y AppHeight() const = 0;              ///< returns the height of the application window/screen
+    virtual X      AppWidth() const = 0;               ///< returns the width of the application window/screen
+    virtual Y      AppHeight() const = 0;              ///< returns the height of the application window/screen
     int            ButtonDownRepeatDelay() const;      ///< returns the \a delay value set by EnableMouseButtonDownRepeat()
     int            ButtonDownRepeatInterval() const;   ///< returns the \a interval value set by EnableMouseButtonDownRepeat()
     int            DoubleClickInterval() const;        ///< returns the maximum interval allowed between clicks that is still considered a double-click, in ms

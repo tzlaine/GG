@@ -128,8 +128,8 @@ protected:
 
     /** \name Accessors */ ///@{
     virtual bool MultiSelected() const;     ///< returns true if >= 1 characters are selected
-    X  RightMargin() const;            ///< returns the width of the scrollbar on the right side of the control (0 if none)
-    Y  BottomMargin() const;           ///< returns the width of the scrollbar at the bottom of the control (0 if none)
+    X       RightMargin() const;            ///< returns the width of the scrollbar on the right side of the control (0 if none)
+    Y       BottomMargin() const;           ///< returns the width of the scrollbar at the bottom of the control (0 if none)
     std::pair<int, int>
             CharAt(const Pt& pt) const;     ///< returns row and character index of \a pt, or (0, 0) if \a pt falls outside the text.  \a pt is in client-space coordinates
     std::pair<int, int>
@@ -154,8 +154,8 @@ protected:
     std::pair<int, int>
             StringRangeOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
 
-    X  RowStartX(int row) const;       ///< returns the the x-coordinate of the beginning of row \a row, in cleint-space coordinates.  Not range-checked.
-    X  CharXOffset(int row, int idx) const; ///< returns the distance in pixels from the start of row \a row to the character at index idx.  Not range-checked.
+    X       RowStartX(int row) const;       ///< returns the the x-coordinate of the beginning of row \a row, in cleint-space coordinates.  Not range-checked.
+    X       CharXOffset(int row, int idx) const; ///< returns the distance in pixels from the start of row \a row to the character at index idx.  Not range-checked.
     int     RowAt(Y y) const;          ///< returns the line that falls under y coordinate \a y.  \a y must be in client-space coordinates.
     int     CharAt(int row, X x) const;///< returns the index of the character in row \a row that falls under x coordinate \a x.  \a x must be in client-space coordinates.
     int     FirstVisibleRow() const;        ///< returns the index of the first visible row, or 0 if none
@@ -201,8 +201,8 @@ private:
 
     Pt          m_contents_sz;          ///< the size of the entire text block in the control (not just the visible part)
 
-    X      m_first_col_shown;      ///< the position (counted from the left side of the text) of the first pixel shown
-    Y      m_first_row_shown;      ///< the position (counted from the top of the text) of the first pixel shown
+    X           m_first_col_shown;      ///< the position (counted from the left side of the text) of the first pixel shown
+    Y           m_first_row_shown;      ///< the position (counted from the top of the text) of the first pixel shown
 
     int         m_max_lines_history;
 

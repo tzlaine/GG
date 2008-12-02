@@ -129,7 +129,7 @@ public:
     T      MaxValue() const;           ///< returns the maximum value of the control
     bool   Editable() const;           ///< returns true if the spinbox can have its value typed in directly
 
-    X ButtonWidth() const;        ///< returns the width used for the up and down buttons
+    X      ButtonWidth() const;        ///< returns the width used for the up and down buttons
 
     Clr    TextColor() const;          ///< returns the text color
     Clr    InteriorColor() const;      ///< returns the the interior color of the control
@@ -207,7 +207,7 @@ private:
     Button*    m_up_button;
     Button*    m_down_button;
 
-    X     m_button_width;
+    X          m_button_width;
 
     friend class boost::serialization::access;
     template <class Archive>

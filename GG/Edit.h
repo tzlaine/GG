@@ -130,8 +130,8 @@ protected:
     int                     FirstCharShown() const;         ///< returns the index of the first character visible in the Edit
     bool                    RecentlyEdited() const;         ///< returns true iff the contents have been changed since the last time the focus was gained
     int                     CharIndexOf(X x) const;    ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
-    X                  FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
-    X                  ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
+    X                       FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
+    X                       ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
     int                     LastVisibleChar() const;        ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
     int                     LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
 

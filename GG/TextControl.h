@@ -177,7 +177,7 @@ private:
 
     // variables for caching the results of MinUsableSize()
     mutable Pt                  m_min_usable_size;
-    mutable X              m_previous_client_width;
+    mutable X                   m_previous_client_width;
     mutable Flags<TextFormat>   m_previous_format;
 
     friend class boost::serialization::access;

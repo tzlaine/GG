@@ -171,7 +171,7 @@ public:
 
         Alignment   RowAlignment() const;       ///< returns the vertical alignment of this Row
         Alignment   ColAlignment(std::size_t n) const; ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
-        X      ColWidth(std::size_t n) const; ///< returns the width of the \a nth cell of this Row; not range checked
+        X           ColWidth(std::size_t n) const; ///< returns the width of the \a nth cell of this Row; not range checked
         int         Margin() const;             ///< returns the amount of space left between the contents of adjacent cells, in pixels
 
         Control*    CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const; ///< creates a "shrink-fit" TextControl from text, font, and color parameters
@@ -204,7 +204,7 @@ public:
         std::vector<Control*>  m_cells;          ///< the Controls in this Row (each may be null)
         Alignment              m_row_alignment;  ///< row alignment; one of ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM
         std::vector<Alignment> m_col_alignments; ///< column alignments; each is one of ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM
-        std::vector<X>    m_col_widths;     ///< column widths
+        std::vector<X>         m_col_widths;     ///< column widths
         int                    m_margin;         ///< the amount of space left between the contents of adjacent cells, in pixels
 
         bool                   m_ignore_adjust_layout;
@@ -307,7 +307,7 @@ public:
         the user; it may be < 0 or >= NumCols(). */
     std::size_t     SortCol() const;
 
-    X          ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
+    X               ColWidth(std::size_t n) const;     ///< returns the width of column \a n in pixels; not range-checked
     Alignment       ColAlignment(std::size_t n) const; ///< returns the alignment of column \a n; must be ALIGN_LEFT, ALIGN_CENTER, or ALIGN_RIGHT; not range-checked
     Alignment       RowAlignment(iterator it) const;   ///< returns the alignment of row \a it; must be ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM; not range-checked
 
@@ -476,8 +476,8 @@ protected:
     //@}
 
     /** \name Accessors */ ///@{
-    X          RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar
-    Y          BottomMargin() const;    ///< space skipped at bottom of client area for horizontal scroll bar
+    X               RightMargin() const;     ///< space skipped at right of client area for vertical scroll bar
+    Y               BottomMargin() const;    ///< space skipped at bottom of client area for horizontal scroll bar
     int             CellMargin() const;      ///< the number of pixels left between the contents of each cell and the cell boundary
 
     iterator        RowUnderPt(const Pt& pt) const; ///< returns row under pt, if any; value must be checked (i.e. it may be end())
@@ -547,8 +547,7 @@ private:
 
     iterator        m_first_row_shown;  ///< index of row at top of visible area (always begin() for non-empty ListBox with LIST_NOSCROLL set)
     std::size_t     m_first_col_shown;  ///< like above, but index of column at left
-    std::vector<X>
-                    m_col_widths;       ///< the width of each of the columns goes here
+    std::vector<X>  m_col_widths;       ///< the width of each of the columns goes here
     std::vector<Alignment> 
                     m_col_alignments;   ///< the horizontal alignment of each of the columns goes here
     int             m_cell_margin;      ///< the amount of space left between each edge of the cell and its contents, in pixels

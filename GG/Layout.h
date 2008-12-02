@@ -100,8 +100,8 @@ public:
     int    CellMargin() const;                       ///< returns the number of pixels the layout leaves between the edges of windows in adjacent cells
     double RowStretch(int row) const;                ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.
     double ColumnStretch(int column) const;          ///< returns the stretch factor for column \a column.  Note that \a column is not range-checked.
-    Y MinimumRowHeight(int row) const;          ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
-    X MinimumColumnWidth(int column) const;     ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
+    Y      MinimumRowHeight(int row) const;          ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
+    X      MinimumColumnWidth(int column) const;     ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
     std::vector<std::vector<const Wnd*> >
            Cells() const;                            ///< returns a matrix of the Wnds that can be found in each cell
     std::vector<std::vector<Rect> >
@@ -247,8 +247,8 @@ private:
     };
 
     double TotalStretch(const std::vector<RowColParams>& params_vec) const;
-    X TotalMinWidth() const;
-    Y TotalMinHeight() const;
+    X      TotalMinWidth() const;
+    Y      TotalMinHeight() const;
     void   ValidateAlignment(Flags<Alignment>& alignment);
     void   RedoLayout();
     void   ChildSizeOrMinSizeOrMaxSizeChanged();

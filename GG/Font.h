@@ -36,6 +36,7 @@
 #include <GG/UnicodeCharsets.h>
 
 #include <set>
+#include <stack>
 
 #include <boost/serialization/access.hpp>
 
@@ -86,23 +87,23 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
 
     GG::Font supports a few text formatting tags for convenience.  These tags
     are similar to HTML or XML tags; there is an opening version "<tag>" and a
-    closing version "</tag>" of each tag.  It is important to note that
-    GG::Font tags represent state change, and so cannot be meaningfully
-    nested.  For instance, consider the use of the italics tag \<i> here:
+    closing version "</tag>" of each tag.  Tags can be nested.  For instance,
+    consider the use of the italics tag \<i> here:
 
     \verbatim
-      <i>some text <i>and </i>some more text</i> \endverbatim
+      <i>some text <i>and </i>some more </i>text \endverbatim
 
-    In this example, everything is italicized except for "some more text".
-    Each \<i> tag establishes that italics should be used for all further text
-    until the next \</i> tag.  So the second \<i> tag is redundant, as is the
-    second \</i> tag.  Each respectively activates or deactivates italics when
-    that is already the current state.  The text justification tags are used
-    on a per-line basis, since it makes no sense to right-justify only a part
-    of a line and center the rest, for instance. When more than one
-    justification tag appears on a line, the last one is used.  A
-    justification close-tag indicates that a line is to be the last one with
-    that justification, and only applies if that justification is active.
+    In this example, everything is italicized except for "text".  Each \<i>
+    tag establishes that italics should be used for all further text until the
+    next \a matching \</i> tag.  The first \<i> tag matches the second \</i>
+    tag, and the two inner tags are matched.  Note that unmatched close-tags
+    (e.g. \</i>) are ignored by the text parser Font uses to find tags.  The
+    text justification tags are used on a per-line basis, since it makes no
+    sense to, for instance, right-justify only a part of a line and center the
+    rest. When more than one justification tag appears on a line, the last one
+    is used.  A justification close-tag indicates that a line is to be the
+    last one with that justification, and only applies if that justification
+    is active.
 
     <br>The supported tags are:
     - \verbatim<i></i> \endverbatim                 Italics
@@ -111,7 +112,7 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
     - \verbatim<left></left> \endverbatim           Left-justified text.
     - \verbatim<center></center> \endverbatim       Centered text.
     - \verbatim<right></right> \endverbatim         Right-justified text.
-    - \verbatim<pre></pre> \endverbatim             Preformatted.  Similar to HTML \<pre\> tag, except this one only causes all tags to be ignored until a subsequent \</pre\> tag is seen.
+    - \verbatim<pre></pre> \endverbatim             Preformatted.  Similar to HTML \<pre\> tag, except this one only causes all tags to be ignored until a subsequent \</pre\> tag is seen.  Note that due to their semantics, \<pre> tags cannot be nested.
 
     <p>Users of Font may wish to create their own tags as well.  Though Font
     will not be able to handle new tags without reworking the Font code, it is
@@ -215,17 +216,21 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** Holds the state of tags during rendering of text.  By keeping track of this state across multiple calls to
-        RenderText(), the user can preserve the functionality of the text formatting tags, if present.*/
+    /** Holds the state of tags during rendering of text.  By keeping track of
+        this state across multiple calls to RenderText(), the user can
+        preserve the functionality of the text formatting tags, if present.*/
     struct GG_API RenderState
     {
-        RenderState(); ///< default ctor
+        RenderState(); ///< Default ctor.
 
-        bool    ignore_tags;        ///< set to true upon encountering a \<pre\> tag, and to false when a \</pre\> tag is seen
-        bool    use_italics;        ///< set to true upon encountering an \<i> tag, and to false when an \</i> tag is seen
-        bool    draw_underline;     ///< set to true upon encountering an \<u> tag, and to false when an \</u> tag is seen
-        bool    color_set;          ///< true when a tag has set the current color
-        Clr     curr_color;         ///< the current text color (as set by a tag)
+        /** The count of open \<i> tags seen since the last \</i> seen. */
+        std::size_t     use_italics;
+
+        /** The count of open \<u> tags seen since the last \</u> seen. */
+        std::size_t     draw_underline;
+
+        /** The stack of text colors (as set by previous tags). */
+        std::stack<Clr> colors;
     };
 
     /** \name Structors */ ///@{
@@ -316,7 +321,6 @@ private:
         X           advance;       ///< the amount of space the glyph should occupy, including glyph graphic and inter-glyph spacing
         X           width;         ///< the width of the glyph only
     };
-    struct HandleTagFunctor;
 
     void              Init(const std::string& font_filename, int pts);
     bool              GenerateGlyph(FT_Face font, boost::uint32_t ch);
@@ -342,8 +346,6 @@ private:
 
     static std::set<std::string>   s_action_tags; ///< embedded tags that Font must act upon when rendering are stored here
     static std::set<std::string>   s_known_tags;  ///< embedded tags that Font knows about but should not act upon are stored here
-
-    friend struct HandleTagFunctor;
 
     friend class boost::serialization::access;
     template <class Archive>

@@ -34,7 +34,8 @@
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/spirit.hpp>
+#include <boost/xpressive/xpressive.hpp>
+#include <boost/xpressive/regex_actions.hpp>
 #include <boost/assign/list_of.hpp>
 
 #include <cmath>
@@ -88,74 +89,49 @@ namespace {
         FT_Library library;
     } g_library;
 
-    struct AppendToken
+    struct MatchesKnownTag
     {
-        AppendToken(std::vector<std::string>& token_vec) : tokens(token_vec) {}
-        void operator()(const char* first, const char* last) const {tokens.push_back(std::string(first, last));}
-    private:
-        std::vector<std::string>& tokens;
-    };
-
-    struct HandlePreTagFunctor
-    {
-        HandlePreTagFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements, bool& ignore_tag_status, bool close_tag) :
-            elements(text_elements), ignore_tags(ignore_tag_status), close(close_tag) {}
-        void operator()(const char* first, const char* last) const
+        MatchesKnownTag(const std::set<std::string>& known_tags,
+                        std::stack<std::string>& tag_stack,
+                        bool& ignore_tags) :
+            m_known_tags(known_tags),
+            m_tag_stack(tag_stack),
+            m_ignore_tags(ignore_tags)
+            {}
+        bool operator()(const boost::xpressive::ssub_match& sub) const
             {
-                if (ignore_tags && !close) {
-                    boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
-                    element->text = std::string(first, last);
-                    elements.push_back(element);
-                } else {
-                    boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
-                    element->text = "pre";
-                    element->original_tag_text = std::string(first, last);
-                    elements.push_back(element);
-                    ignore_tags = !close;
+                bool retval = m_ignore_tags ? false : m_known_tags.find(sub.str()) != m_known_tags.end();
+                if (retval) {
+                    m_tag_stack.push(sub.str());
+                    if (sub.str() == "pre")
+                        m_ignore_tags = true;
                 }
+                return retval;
             }
-    private:
-        std::vector<boost::shared_ptr<Font::TextElement> >& elements;
-        bool& ignore_tags;
-        const bool close;
+        const std::set<std::string>& m_known_tags;
+        std::stack<std::string>& m_tag_stack;
+        bool& m_ignore_tags;
     };
 
-    struct HandleTextFunctor
+    struct MatchesTopOfStack
     {
-        HandleTextFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
-        void operator()(const char* first, const char* last) const
+        MatchesTopOfStack(std::stack<std::string>& tag_stack,
+                          bool& ignore_tags) :
+            m_tag_stack(tag_stack),
+            m_ignore_tags(ignore_tags)
+            {}
+        bool operator()(const boost::xpressive::ssub_match& sub) const
             {
-                boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
-                element->text = std::string(first, last);
-                elements.push_back(element);
-            }
-    private:
-        std::vector<boost::shared_ptr<Font::TextElement> >& elements;
-    };
-
-    boost::spirit::rule<> ws_p = (*boost::spirit::blank_p >> (boost::spirit::eol_p | '\n' | '\r' | '\f')) | +boost::spirit::blank_p;
-
-    struct HandleWhitespaceFunctor
-    {
-        HandleWhitespaceFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements) : elements(text_elements) {}
-        void operator()(const char* first, const char* last) const
-            {
-                std::vector<std::string> string_vec;
-                using namespace boost::spirit;
-                std::string ws_str = std::string(first, last);
-                parse(ws_str.c_str(), ws_p[AppendToken(string_vec)]);
-                for (std::size_t i = 0; i < string_vec.size(); ++i) {
-                    boost::shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
-                    element->text = std::string(first, last);
-                    elements.push_back(element);
-                    if (string_vec[i].substr(string_vec[i].size() - 1).find_first_of("\n\f\r") != std::string::npos) {
-                        boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
-                        elements.push_back(element);
-                    }
+                bool retval = m_tag_stack.empty() ? false : sub.str() == m_tag_stack.top();
+                if (retval) {
+                    m_tag_stack.pop();
+                    if (m_tag_stack.empty() || m_tag_stack.top() != "pre")
+                        m_ignore_tags = false;
                 }
+                return retval;
             }
-    private:
-        std::vector<boost::shared_ptr<Font::TextElement> >& elements;
+        std::stack<std::string>& m_tag_stack;
+        bool& m_ignore_tags;
     };
 
     void SetJustification(bool& last_line_of_curr_just, Font::LineData& line_data, Alignment orig_just, Alignment prev_just)
@@ -299,10 +275,8 @@ bool Font::LineData::Empty() const
 // class GG::Font::RenderState
 ///////////////////////////////////////
 Font::RenderState::RenderState() :
-    ignore_tags(false),
-    use_italics(false),
-    draw_underline(false),
-    color_set(false)
+    use_italics(0),
+    draw_underline(0)
 {}
 
 
@@ -340,43 +314,6 @@ Font::Glyph::Glyph(const boost::shared_ptr<Texture>& texture, const Pt& ul, cons
     advance(adv),
     width(ul.x - lr.x)
 {}
-
-
-///////////////////////////////////////
-// struct GG::Font::HandleTagFunctor
-///////////////////////////////////////
-struct Font::HandleTagFunctor
-{
-    HandleTagFunctor(std::vector<boost::shared_ptr<Font::TextElement> >& text_elements, const bool& ignore_tag_status, bool close_tag) :
-        elements(text_elements), ignore_tags(ignore_tag_status), close(close_tag) {}
-    void operator()(const char* first, const char* last) const
-        {
-            std::string tag_str = std::string(first, last);
-            using namespace boost::spirit;
-            std::vector<std::string> param_vec;
-            rule<> tag_begin = ch_p('<');
-            if (close)
-                tag_begin = str_p("</");
-            rule<> tag_token_parser = tag_begin >> +(*space_p >> (+(anychar_p - (space_p | '>')))[AppendToken(param_vec)]) >> '>';
-            parse(tag_str.c_str(), tag_token_parser);
-            if (!ignore_tags && Font::s_known_tags.find(param_vec.front()) != Font::s_known_tags.end()) {
-                boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(close));
-                element->text = param_vec.front();
-                if (!close)
-                    element->params.insert(element->params.end(), param_vec.begin() + 1, param_vec.end());
-                element->original_tag_text = tag_str;
-                elements.push_back(element);
-            } else {
-                boost::shared_ptr<Font::TextElement> text_element(new Font::TextElement(false, false));
-                text_element->text = tag_str;
-                elements.push_back(text_element);
-            }
-        }
-private:
-    std::vector<boost::shared_ptr<Font::TextElement> >& elements;
-    const bool& ignore_tags;
-    const bool close;
-};
 
 
 ///////////////////////////////////////
@@ -489,14 +426,15 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
                *render_state, 0, 0, line_data->size(), line_data->back().char_data.size());
 }
 
-void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state,
+void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format,
+                      const std::vector<LineData>& line_data, RenderState& render_state,
                       int begin_line, int begin_char, int end_line, int end_char) const
 {
     double orig_color[4];
     glGetDoublev(GL_CURRENT_COLOR, orig_color);
     
-    if (render_state.color_set)
-        glColor(render_state.curr_color);
+    if (!render_state.colors.empty())
+        glColor(render_state.colors.top());
 
     Y y_origin = ul.y; // default value for FORMAT_TOP
     if (format & FORMAT_BOTTOM)
@@ -563,26 +501,97 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
 #endif
 
     std::vector<boost::shared_ptr<TextElement> > text_elements;
-    using namespace boost::spirit;
-    rule<> open_pre_tag_p = str_p("<pre>");
-    rule<> close_pre_tag_p = str_p("</pre>");
-    rule<> close_tag_p = str_p("</") >> +(anychar_p - '>') >> '>';
-    rule<> open_tag_p = ch_p('<') >> +(anychar_p - '>') >> '>';
-    rule<> text_p = +(anychar_p - (close_tag_p | open_tag_p | space_p));
-    if (format & FORMAT_IGNORETAGS) {
-        text_p = +(anychar_p - space_p);
-        rule<> lines_parser = *(text_p[HandleTextFunctor(text_elements)] |
-                                ws_p[HandleWhitespaceFunctor(text_elements)]);
-        parse(text.c_str(), lines_parser);
-    } else {
-        bool ignore_tags = false;
-        rule<> lines_parser = *(open_pre_tag_p[HandlePreTagFunctor(text_elements, ignore_tags, false)] |
-                                close_pre_tag_p[HandlePreTagFunctor(text_elements, ignore_tags, true)] |
-                                close_tag_p[HandleTagFunctor(text_elements, ignore_tags, true)] |
-                                open_tag_p[HandleTagFunctor(text_elements, ignore_tags, false)] |
-                                text_p[HandleTextFunctor(text_elements)] |
-                                ws_p[HandleWhitespaceFunctor(text_elements)]);
-        parse(text.c_str(), lines_parser);
+    {
+        using namespace boost::xpressive;
+
+        std::stack<std::string> tag_stack;
+        bool ignore_tags = format & FORMAT_IGNORETAGS;
+        MatchesKnownTag matches_known_tag(s_known_tags, tag_stack, ignore_tags);
+        MatchesTopOfStack matches_tag_stack(tag_stack, ignore_tags);
+
+        mark_tag tag_name_tag(1);
+        mark_tag open_bracket_tag(2);
+        mark_tag close_bracket_tag(3);
+        mark_tag whitespace_tag(4);
+        mark_tag text_tag(5);
+
+        sregex param =
+            -+~set[_s | '<'];
+        sregex open_tag_name =
+            (+_w)[check(matches_known_tag)];
+        sregex close_tag_name =
+            (+_w)[check(matches_tag_stack)];
+        sregex whitespace =
+            (*blank >> (_ln | (set = '\n', '\r', '\f'))) | +blank;
+        sregex text_ =
+            ('<' >> *~set[_s | '<']) | (+~set[_s | '<']);
+        sregex everything =
+            ('<' >> (tag_name_tag = open_tag_name) >> repeat<0, 9>(+blank >> param) >> (open_bracket_tag = '>')) |
+            ("</" >> (tag_name_tag = close_tag_name) >> (close_bracket_tag = '>')) |
+            (whitespace_tag = whitespace) |
+            (text_tag = text_);
+
+        sregex_iterator it(text.begin(), text.end(), everything);
+        sregex_iterator end_it;
+        while (it != end_it)
+        {
+            // consolidate adjacent blocks of text
+            bool need_increment = false;
+            std::string combined_text;
+            if ((*it)[text_tag].matched) {
+                while (it != end_it && (*it)[text_tag].matched) {
+                    combined_text += (*it)[text_tag];
+                    ++it;
+                }
+            } else {
+                need_increment = true;
+            }
+
+            if (combined_text.empty()) {
+                if ((*it)[open_bracket_tag].matched) {
+                    boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(false));
+                    std::string tag_name((*it)[tag_name_tag].first, (*it)[tag_name_tag].second);
+                    std::swap(element->text, tag_name);
+                    if (1 < (*it).nested_results().size()) {
+                        element->params.reserve((*it).nested_results().size() - 1);
+                        for (smatch::nested_results_type::const_iterator nested_it =
+                                 ++(*it).nested_results().begin();
+                             nested_it != (*it).nested_results().end();
+                             ++nested_it) {
+                            element->params.push_back((*nested_it)[0]);
+                        }
+                    }
+                    std::string original_tag_text((*it)[0].first, (*it)[0].second);
+                    std::swap(element->original_tag_text, original_tag_text);
+                    text_elements.push_back(element);
+                } else if ((*it)[close_bracket_tag].matched) {
+                    boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(true));
+                    std::string tag_name((*it)[tag_name_tag].first, (*it)[tag_name_tag].second);
+                    std::swap(element->text, tag_name);
+                    std::string original_tag_text((*it)[0].first, (*it)[0].second);
+                    std::swap(element->original_tag_text, original_tag_text);
+                    text_elements.push_back(element);
+                } else if ((*it)[whitespace_tag].matched) {
+                    boost::shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
+                    std::string whitespace((*it)[whitespace_tag].first, (*it)[whitespace_tag].second);
+                    std::swap(element->text, whitespace);
+                    text_elements.push_back(element);
+                    if (*element->text.rbegin() == '\n' ||
+                        *element->text.rbegin() == '\f' ||
+                        *element->text.rbegin() == '\r') {
+                        boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
+                        text_elements.push_back(element);
+                    }
+                }
+            } else {
+                boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
+                std::swap(element->text, combined_text);
+                text_elements.push_back(element);
+            }
+
+            if (need_increment)
+                ++it;
+        }
     }
 
     // fill in the widths of characters (or code points, for UTF-8 strings) in each element
@@ -1060,13 +1069,22 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
 {
     using boost::lexical_cast;
     if (tag->text == "i") {
-        render_state.use_italics = !tag->close_tag;
+        if (tag->close_tag)
+            --render_state.use_italics;
+        else
+            ++render_state.use_italics;
     } else if (tag->text == "u") {
-        render_state.draw_underline = !tag->close_tag;
+        if (tag->close_tag)
+            --render_state.draw_underline;
+        else
+            ++render_state.draw_underline;
     } else if (tag->text == "rgba") {
         if (tag->close_tag) {
-            glColor4dv(orig_color);
-            render_state.color_set = false;
+            render_state.colors.pop();
+            if (render_state.colors.empty())
+                glColor4dv(orig_color);
+            else
+                glColor(render_state.colors.top());
         } else {
             bool well_formed_tag = true;
             if (4 <= tag->params.size()) {
@@ -1084,8 +1102,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                         color[2] = temp_color[2];
                         color[3] = temp_color[3];
                         glColor4ubv(color);
-                        render_state.curr_color = Clr(color[0], color[1], color[2], color[3]);
-                        render_state.color_set = true;
+                        render_state.colors.push(Clr(color[0], color[1], color[2], color[3]));
                     } else {
                         well_formed_tag = false;
                     }
@@ -1099,8 +1116,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                         if (0.0 <= color[0] && color[0] <= 1.0 && 0.0 <= color[1] && color[1] <= 1.0 &&
                             0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0) {
                             glColor4dv(color);
-                            render_state.curr_color = FloatClr(color[0], color[1], color[2], color[3]);
-                            render_state.color_set = true;
+                            render_state.colors.push(FloatClr(color[0], color[1], color[2], color[3]));
                         } else {
                             well_formed_tag = false;
                         }

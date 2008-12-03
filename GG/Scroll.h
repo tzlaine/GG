@@ -150,6 +150,7 @@ private:
     Button*           m_decr;        ///< the decrease button (line up/line left)
     ScrollRegion      m_initial_depressed_region; ///< the part of the scrollbar originally under cursor in LButtonDown msg
     ScrollRegion      m_depressed_region;         ///< the part of the scrollbar currently being "depressed" by held-down mouse button
+    bool              m_dragging_tab;
 
     friend class boost::serialization::access;
     template <class Archive>

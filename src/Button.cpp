@@ -77,18 +77,10 @@ const SubTexture& Button::RolloverGraphic() const
 
 void Button::Render()
 {
-    switch (m_state)
-    {
-    case BN_PRESSED:
-        RenderPressed();
-        break;
-    case BN_UNPRESSED:
-    case BN_ROLLOVER:
-        if (m_state == BN_UNPRESSED)
-            RenderUnpressed();
-        else
-            RenderRollover();
-        break;
+    switch (m_state) {
+    case BN_PRESSED:   RenderPressed(); break;
+    case BN_UNPRESSED: RenderUnpressed(); break;
+    case BN_ROLLOVER:  RenderRollover(); break;
     }
 }
 

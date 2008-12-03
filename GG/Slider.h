@@ -132,6 +132,7 @@ private:
     SliderLineStyle           m_line_style;
     int                       m_tab_drag_offset;
     Button*                   m_tab;
+    bool                      m_dragging_tab;
 
     friend class boost::serialization::access;
     template <class Archive>

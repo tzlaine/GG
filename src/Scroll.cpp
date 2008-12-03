@@ -52,7 +52,8 @@ Scroll::Scroll() :
     m_incr(0),
     m_decr(0),
     m_initial_depressed_region(SBR_NONE),
-    m_depressed_region(SBR_NONE)
+    m_depressed_region(SBR_NONE),
+    m_dragging_tab(false)
 {}
 
 Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior, Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) :
@@ -68,7 +69,8 @@ Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr inter
     m_incr(0),
     m_decr(0),
     m_initial_depressed_region(SBR_NONE),
-    m_depressed_region(SBR_NONE)
+    m_depressed_region(SBR_NONE),
+    m_dragging_tab(false)
 {
     Control::SetColor(color);
     boost::shared_ptr<Font> null_font;
@@ -372,6 +374,15 @@ bool Scroll::EventFilter(Wnd* w, const WndEvent& event)
             }
             return true;
         }
+        case WndEvent::LButtonDown:
+            m_dragging_tab = true;
+            break;
+        case WndEvent::LButtonUp:
+        case WndEvent::LClick:
+            m_dragging_tab = false;
+            break;
+        case WndEvent::MouseLeave:
+            return m_dragging_tab;
         default:
             break;
         }

@@ -44,7 +44,8 @@ Slider::Slider() :
     m_tab_width(5),
     m_line_style(RAISED),
     m_tab_drag_offset(-1),
-    m_tab(0)
+    m_tab(0),
+    m_dragging_tab(false)
 {}
 
 Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color,
@@ -61,7 +62,8 @@ Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, Sl
     m_tab_drag_offset(-1),
     m_tab(m_orientation == VERTICAL ?
           GetStyleFactory()->NewVSliderTabButton(X0, Y0, Width(), Y(m_tab_width), "", boost::shared_ptr<Font>(), color) :
-          GetStyleFactory()->NewHSliderTabButton(X0, Y0, X(m_tab_width), Height(), "", boost::shared_ptr<Font>(), color))
+          GetStyleFactory()->NewHSliderTabButton(X0, Y0, X(m_tab_width), Height(), "", boost::shared_ptr<Font>(), color)),
+    m_dragging_tab(false)
 {
     Control::SetColor(color);
     AttachChild(m_tab);
@@ -147,12 +149,18 @@ bool Slider::EventFilter(Wnd* w, const WndEvent& event)
             }
             return true;
         }
+        case WndEvent::LButtonDown:
+            m_dragging_tab = true;
+            break;
         case WndEvent::LButtonUp:
         case WndEvent::LClick: {
             if (!Disabled())
                 SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
+            m_dragging_tab = false;
             break;
         }
+        case WndEvent::MouseLeave:
+            return m_dragging_tab;
         default:
             break;
         }

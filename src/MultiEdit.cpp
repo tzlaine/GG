@@ -502,7 +502,8 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     if (MultiSelected())
                         ClearSelected();
                     // insert the character to the right of the caret
-                    Insert(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second), key);
+                    Insert(StringIndexOf(m_cursor_begin.first, m_cursor_begin.second),
+                           translated_code_point);
                     // then move the caret fwd one.
                     if (m_cursor_begin.second < static_cast<int>(GetLineData()[m_cursor_begin.first].char_data.size())) {
                         ++m_cursor_begin.second;

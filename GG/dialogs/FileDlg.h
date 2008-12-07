@@ -41,23 +41,30 @@ class Edit;
 class Button;
 class Font;
 
-/** the default file open/save dialog box.  This dialog, like all the common GG dialogs, is modal.  It asks the user for
-    one or more filenames, which the caller may retrieve with a call to Result() after the dialog is closed.  Note that
-    all strings displayed during the run of the FileDlg are customizable.  Sometimes, the FileDlg will pop up a message
-    box (a ThreeButtonDlg) and notify the user of something or ask for input.  These message strings are also
-    customizable.  Some of these strings include the filename as part of the message.  When replacing these strings with
-    your own, you need to include the placement of the filename in the message with the character sequence "%1%" (see
-    boost.format for details). */
+/** The default file open/save dialog box.  This dialog, like all the common
+    GG dialogs, is modal.  It asks the user for one or more filenames, which
+    the caller may retrieve with a call to Result() after the dialog is
+    closed.  Note that all strings displayed during the run of the FileDlg are
+    customizable.  Sometimes, the FileDlg will pop up a message box (a
+    ThreeButtonDlg) and notify the user of something or ask for input.  These
+    message strings are also customizable.  Some of these strings include the
+    filename as part of the message.  When replacing these strings with your
+    own, you need to include the placement of the filename in the message with
+    the character sequence "%1%" (see boost.format for details). */
 class GG_API FileDlg : public Wnd
 {
 public:
     /** \name Structors */ ///@{
-    /** basic ctor.  Parameters \a directory and \a filename pass an initial directory and filename to the dialog, if
-        desired (such as when "Save As..." is selected in an app, and there is a current filename).  If \a directory is
-        specified, it is taken as-is if it is absolute, or relative to boost::filesystem::initial_path() if it is
-        relative.  If \a directory is "", the initial directory is WorkingDirectory().  \a save indicates whether this
-        is a save or load dialog; \a multi indicates whether multiple file selections are allowed.  \throw
-        GG::FileDlg::BadInitialDirectory Throws when \a directory is invalid. */
+    /** Basic ctor.  Parameters \a directory and \a filename pass an initial
+        directory and filename to the dialog, if desired (such as when "Save
+        As..." is selected in an app, and there is a current filename).  If \a
+        directory is specified, it is taken as-is if it is absolute, or
+        relative to boost::filesystem::initial_path() if it is relative.  If
+        \a directory is "", the initial directory is WorkingDirectory().  \a
+        save indicates whether this is a save or load dialog; \a multi
+        indicates whether multiple file selections are allowed.  \throw
+        GG::FileDlg::BadInitialDirectory Throws when \a directory is
+        invalid. */
     FileDlg(const std::string& directory, const std::string& filename, bool save, bool multi, const boost::shared_ptr<Font>& font,
             Clr color, Clr border_color, Clr text_color = CLR_BLACK);
     //@}
@@ -68,9 +75,11 @@ public:
     /** Returns true iff this FileDlg will select directories instead of files. */
     bool SelectDirectories() const;
 
-    /** Returns true iff this FileDlg will append the missing extension to a file when in save mode.  Note that action
-        is only taken if there is a single file filter containing exactly one wildcard in its first position (i.e. it is
-        of the form "*foo").  If precondition is satisfied, any filename the user selects that does not end in "foo"
+    /** Returns true iff this FileDlg will append the missing extension to a
+        file when in save mode.  Note that action is only taken if there is a
+        single file filter containing exactly one wildcard in its first
+        position (i.e. it is of the form "*foo").  If precondition is
+        satisfied, any filename the user selects that does not end in "foo"
         will have "foo" appended to it. */
     bool AppendMissingSaveExtension() const;
 
@@ -94,23 +103,29 @@ public:
     virtual void Render();
     virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
-    /** Set this to true if this FileDlg should select directories instead of files.  Note that this will only have an
-        effect in file-open mode. */
+    /** Set this to true if this FileDlg should select directories instead of
+        files.  Note that this will only have an effect in file-open mode. */
     void SelectDirectories(bool directories);
 
-    /** Set this to true if this FileDlg should append the missing extension to a file when in save mode.  Note that
-        action is only taken if there is a single file filter containing exactly one wildcard in its first position
-        (i.e. it is of the form "*foo").  If precondition is satisfied, any filename the user selects that does not end
-        in "foo" will have "foo" appended to it. */
+    /** Set this to true if this FileDlg should append the missing extension
+        to a file when in save mode.  Note that action is only taken if there
+        is a single file filter containing exactly one wildcard in its first
+        position (i.e. it is of the form "*foo").  If precondition is
+        satisfied, any filename the user selects that does not end in "foo"
+        will have "foo" appended to it. */
     void AppendMissingSaveExtension(bool append);
 
-    /** sets the allowed file types.  Each pair in the \a types parameter contains a description of the file type in its
-        .first member, and wildcarded file types in its .second member.  For example, an entry might be ("Text Files
-        (*.txt)", "*.txt"). Only the '*' character is supported as a wildcard.  More than one wildcard expression can be
-        specified in a filter; if so, they must be separated by a comma and exactly one space (", ").  Each filter is
-        considered OR-ed together with the others, so passing "*.tga, *.png" specifies listing any file that is either a
-        Targa or a PNG file.  Note that an empty filter is considered to match all files, so ("All Files", "") is
-        perfectly correct. */
+    /** Sets the allowed file types.  Each pair in the \a types parameter
+        contains a description of the file type in its .first member, and
+        wildcarded file types in its .second member.  For example, an entry
+        might be ("Text Files (*.txt)", "*.txt"). Only the '*' character is
+        supported as a wildcard.  More than one wildcard expression can be
+        specified in a filter; if so, they must be separated by a comma and
+        exactly one space (", ").  Each filter is considered OR-ed together
+        with the others, so passing "*.tga, *.png" specifies listing any file
+        that is either a Targa or a PNG file.  Note that an empty filter is
+        considered to match all files, so ("All Files", "") is perfectly
+        correct. */
     void SetFileFilters(const std::vector<std::pair<std::string, std::string> >& filters);
 
     void SetFilesString(const std::string& str);                ///< sets the text label next to the files edit box to \a str Default: "File(s):"
@@ -129,7 +144,8 @@ public:
     void SetThreeButtonDlgCancelString(const std::string& str); ///< sets the text of the 3-button dialog's cancel button to \a str Default: "Cancel"
     //@}
 
-    /** returns the current directory (the one that will be used by default on the next invocation of FileDlg::Run()) */
+    /** Returns the current directory (the one that will be used by default on
+        the next invocation of FileDlg::Run()) */
     static const boost::filesystem::path& WorkingDirectory();
 
     /** \name Exceptions */ ///@{

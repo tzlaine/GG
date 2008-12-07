@@ -24,12 +24,14 @@
    whatwasthataddress@gmail.com */
 
 /** \file StyleFactory.h
-    Contains the StyleFactory class, which creates new controls for internal use by dialogs and other controls. */
+    Contains the StyleFactory class, which creates new controls for internal
+    use by dialogs and other controls. */
 
 #ifndef _GG_StyleFactory_h_
 #define _GG_StyleFactory_h_
 
 #include  <GG/Font.h>
+#include  <GG/DynamicGraphic.h>
 #include  <GG/MultiEdit.h>
 #include  <GG/StaticGraphic.h>
 
@@ -55,14 +57,19 @@ class TextControl;
 class Texture;
 class ThreeButtonDlg;
 
-/** Creates new dialogs and Controls.  This class can be used to create a look for the entire GUI by providing
-    user-defined subclasses of the standard Controls.  A Control or dialog can then use the StyleFactory to create the
-    dialogs/controls it needs (e.g. a vertical Scroll uses NewVScrollTabButton() to create its tab).  This reduces the
-    amount of subclass code that is required to produce a set of custom GG classes.  Note that the subcontrol factory
-    methods below may be the same as or different from their generic counterparts, allowing greater flexibility in which
-    controls are created in different contexts.  For example, NewButton() may create a generic, basic GG Button, but
-    NewHSliderTabButton() may produce a specialized button that looks better on horizontal sliders.  By default, all
-    subcontrol methods invoke the more generic control method for the type of control they each return. */
+/** Creates new dialogs and Controls.  This class can be used to create a look
+    for the entire GUI by providing user-defined subclasses of the standard
+    Controls.  A Control or dialog can then use the StyleFactory to create the
+    dialogs/controls it needs (e.g. a vertical Scroll uses
+    NewVScrollTabButton() to create its tab).  This reduces the amount of
+    subclass code that is required to produce a set of custom GG classes.
+    Note that the subcontrol factory methods below may be the same as or
+    different from their generic counterparts, allowing greater flexibility in
+    which controls are created in different contexts.  For example,
+    NewButton() may create a generic, basic GG Button, but
+    NewHSliderTabButton() may produce a specialized button that looks better
+    on horizontal sliders.  By default, all subcontrol methods invoke the more
+    generic control method for the type of control they each return. */
 class GG_API StyleFactory
 {
 public:
@@ -93,7 +100,8 @@ public:
     /** Returns a new GG DynamicGraphic. */
     virtual DynamicGraphic*    NewDynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height,
                                                  int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
-                                                 Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = -1, Flags<WndFlag> flags = Flags<WndFlag>()) const;
+                                                 Flags<GraphicStyle> style = GRAPHIC_NONE, int frames = DynamicGraphic::ALL_FRAMES,
+                                                 Flags<WndFlag> flags = Flags<WndFlag>()) const;
 
     /** Returns a new GG Edit. */
     virtual Edit*              NewEdit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font,
@@ -274,15 +282,16 @@ public:
                                                  Clr button_color, Clr text_color, int buttons, const std::string& zero = "",
                                                  const std::string& one = "", const std::string& two = "") const;
 
-    /** Returns a new GG ThreeButtonDlg that automatically centers itself in the app. */
+    /** Returns a new GG ThreeButtonDlg that automatically centers itself in
+        the app. */
     virtual ThreeButtonDlg*    NewThreeButtonDlg(X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                                  Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
                                                  const std::string& zero = "", const std::string& one = "",
                                                  const std::string& two = "") const;
     //@}
 
-    /** Deletes \a wnd.  It is only necessary to use this method to destroy Wnds when the factory that created them
-        exists in a plugin. */
+    /** Deletes \a wnd.  It is only necessary to use this method to destroy
+        Wnds when the factory that created them exists in a plugin. */
     virtual void               DeleteWnd(Wnd* wnd) const;
 
     template <class Archive>

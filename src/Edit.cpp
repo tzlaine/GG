@@ -434,7 +434,7 @@ int Edit::LastVisibleChar() const
     return retval;
 }
 
-int Edit::LastButtonDownTime() const
+unsigned int Edit::LastButtonDownTime() const
 { return m_last_button_down_time; }
 
 int Edit::StringIndexOf(int char_idx, const std::vector<Font::LineData>* line_data) const
@@ -474,8 +474,9 @@ std::pair<int, int> Edit::GetDoubleButtonDownWordIndices(int char_index)
     m_last_button_down_time = ticks;
     m_double_click_cursor_pos = std::pair<int, int>();
     if (m_in_double_click_mode) {
-        std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
-        std::set<std::pair<int, int> >::const_iterator it =
+        std::set<std::pair<std::size_t, std::size_t> > words =
+            GUI::GetGUI()->FindWords(WindowText());
+        std::set<std::pair<std::size_t, std::size_t> >::const_iterator it =
             std::find_if(words.begin(), words.end(), InRange(char_index));
         if (it != words.end())
             m_double_click_cursor_pos = *it;
@@ -486,8 +487,9 @@ std::pair<int, int> Edit::GetDoubleButtonDownWordIndices(int char_index)
 std::pair<int, int> Edit::GetDoubleButtonDownDragWordIndices(int char_index)
 {
     std::pair<int, int> retval;
-    std::set<std::pair<int, int> > words = GUI::GetGUI()->FindWords(WindowText());
-    std::set<std::pair<int, int> >::const_iterator it =
+    std::set<std::pair<std::size_t, std::size_t> > words =
+        GUI::GetGUI()->FindWords(WindowText());
+    std::set<std::pair<std::size_t, std::size_t> >::const_iterator it =
         std::find_if(words.begin(), words.end(), InRange(char_index));
     if (it != words.end())
         retval = *it;

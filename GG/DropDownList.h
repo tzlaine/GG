@@ -35,7 +35,7 @@
 
 namespace GG {
 
-/** displays a single choice, and allows the user to select items from a
+/** Displays a single choice, and allows the user to select items from a
     drop-down list.  DropDownList is similar to GG::ListBox, but has
     significant restrictions over the functionality of GG::ListBox.
     Specifically, all list items must have the same height, and there is no
@@ -93,13 +93,13 @@ public:
 
     Y         DropHeight() const; ///< returns the height of the drop-down list
 
-    /** returns the style flags of the list \see GG::ListBoxStyle */
+    /** Returns the style flags of the list \see GG::ListBoxStyle */
     Flags<ListBoxStyle> Style() const;
 
     std::size_t    NumRows() const;          ///< returns the total number of items in the list
     std::size_t    NumCols() const;          ///< returns the total number of columns in each list item
 
-    /** returns the index of the column used to sort items, when sorting is
+    /** Returns the index of the column used to sort items, when sorting is
         enabled.  \note The sort column is not range checked when it is set by
         the user; it may be >= NumCols(). */
     std::size_t    SortCol() const;
@@ -123,13 +123,13 @@ public:
 
     virtual void   SetColor(Clr c);
 
-    /** insertion sorts \a row into a sorted list, or inserts into an unsorted
+    /** Insertion sorts \a row into a sorted list, or inserts into an unsorted
         list before \a it; returns index of insertion point.  This Row becomes
         the property of the DropDownList and should not be deleted or inserted
         into any other DropDownLists */
     iterator       Insert(Row* row, iterator it);
 
-    /** insertion sorts \a row into a sorted list, or inserts into an unsorted
+    /** Insertion sorts \a row into a sorted list, or inserts into an unsorted
         list at the end of the list; returns index of insertion point.  This
         Row becomes the property of the DropDownList and should not be deleted
         or inserted into any other DropDownLists */
@@ -158,11 +158,14 @@ public:
     void           SetSortCol(std::size_t n);            ///< sets the index of the column used to sort rows when sorting is enabled (invalidates currently selected item); not range-checked
     void           SetColWidth(std::size_t n, X w); ///< sets the width of column \n to \a w; not range-checked
 
-    /** fixes the column widths; by default, an empty list will take on the number of columns of its first added row. \note The number 
-        of columns and their widths may still be set via SetNumCols() and SetColWidth() after this function has been called. */
+    /** Fixes the column widths; by default, an empty list will take on the
+        number of columns of its first added row. \note The number of columns
+        and their widths may still be set via SetNumCols() and SetColWidth()
+        after this function has been called. */
     void           LockColWidths();
 
-    /** allows the number of columns to be determined by the first row added to an empty ListBox */
+    /** Allows the number of columns to be determined by the first row added
+        to an empty ListBox */
     void           UnLockColWidths();
 
     void           SetColAlignment(std::size_t n, Alignment align); ///< sets the alignment of column \a n to \a align; not range-checked

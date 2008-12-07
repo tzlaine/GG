@@ -131,7 +131,7 @@ WndEvent::WndEvent(EventType type, Key key, boost::uint32_t code_point, Flags<Mo
     m_timer(0)
 {}
 
-WndEvent::WndEvent(EventType type, int ticks, Timer* timer) :
+WndEvent::WndEvent(EventType type, unsigned int ticks, Timer* timer) :
     m_type(type),
     m_key(GGK_UNKNOWN),
     m_key_code_point(0),
@@ -175,7 +175,7 @@ int WndEvent::WheelMove() const
 const std::map<Wnd*, Pt>& WndEvent::DragDropWnds() const
 { return m_drag_drop_wnds; }
 
-int WndEvent::Ticks() const
+unsigned int WndEvent::Ticks() const
 { return m_ticks; }
 
 Timer* WndEvent::GetTimer() const

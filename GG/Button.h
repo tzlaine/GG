@@ -24,8 +24,10 @@
    whatwasthataddress@gmail.com */
 
 /** \file Button.h
-    Contains the Button push-button control class; the StateButton control class, which represents check boxes and radio 
-    buttons; and the RadioButtonGroup control class, which allows multiple radio buttons to be combined into a single control. */
+    Contains the Button push-button control class; the StateButton control
+    class, which represents check boxes and radio buttons; and the
+    RadioButtonGroup control class, which allows multiple radio buttons to be
+    combined into a single control. */
 
 #ifndef _GG_Button_h_
 #define _GG_Button_h_
@@ -37,9 +39,11 @@
 
 namespace GG {
 
-/** This is a basic button control.  Has three states: BN_UNPRESSED, BN_PRESSED, and BN_ROLLOVER.  BN_ROLLOVER is when
-    the cursor "rolls over" the button, without depressing it, allowing rollover effects on the button.  To create a
-    bitmap button, simply set the unpressed, pressed, and/or rollover graphics to the desired SubTextures. \see
+/** This is a basic button control.  Has three states: BN_UNPRESSED,
+    BN_PRESSED, and BN_ROLLOVER.  BN_ROLLOVER is when the cursor "rolls over"
+    the button, without depressing it, allowing rollover effects on the
+    button.  To create a bitmap button, simply set the unpressed, pressed,
+    and/or rollover graphics to the desired SubTextures. \see
     GG::SubTexture */
 class GG_API Button : public TextControl
 {
@@ -132,15 +136,20 @@ GG_ENUM_STREAM_IN(Button::ButtonState)
 GG_ENUM_STREAM_OUT(Button::ButtonState)
 
 
-/** This is a basic state button control.  This class is for checkboxes and radio buttons, etc.  The button/checkbox
-    area can be provided via the bn_* contructor parameters, or it can be determined from the text height and format;
-    the button height and width will be the text height, and the the button will be positioned to the left of the text
-    and vertically the same as the text, unless the text is centered, in which case the button and text will be
-    centered, and the button will appear above or below the text.  Whenever there is not room to place the button and
-    the text in the proper orientation because the entire control's size is too small, the button and text are
-    positioned in their default spots (button on left, text on right, centered vertically).  If no text format flags are
-    provided, the default text orientation is FORMAT_VCENTER | FORMAT_LEFT.  Note that the bn_x and bn_y paramters are
-    taken to be relative to the control's x and y position.*/
+/** This is a basic state button control.  This class is for checkboxes and
+    radio buttons, etc.  The button/checkbox area can be provided via the bn_*
+    contructor parameters, or it can be determined from the text height and
+    format; the button height and width will be the text height, and the the
+    button will be positioned to the left of the text and vertically the same
+    as the text, unless the text is centered, in which case the button and
+    text will be centered, and the button will appear above or below the text.
+    Whenever there is not room to place the button and the text in the proper
+    orientation because the entire control's size is too small, the button and
+    text are positioned in their default spots (button on left, text on right,
+    centered vertically).  If no text format flags are provided, the default
+    text orientation is FORMAT_VCENTER | FORMAT_LEFT.  Note that the bn_x and
+    bn_y paramters are taken to be relative to the control's x and y
+    position.*/
 class GG_API StateButton : public TextControl
 {
 public:
@@ -231,7 +240,7 @@ class GG_API RadioButtonGroup : public Control
 {
 public:
     /** \name Signal Types */ ///@{
-    typedef boost::signal<void (int)> ButtonChangedSignalType; ///< emitted when the currently-selected button has changed; the new selected button's index in the group is provided (this may be NO_BUTTON if no button is currently selected)
+    typedef boost::signal<void (std::size_t)> ButtonChangedSignalType; ///< emitted when the currently-selected button has changed; the new selected button's index in the group is provided (this may be NO_BUTTON if no button is currently selected)
     //@}
 
     /** \name Slot Types */ ///@{
@@ -249,23 +258,26 @@ public:
     Orientation      GetOrientation() const;
 
     /** Returns the number of buttons in this control */
-    int              NumButtons() const;
+    std::size_t      NumButtons() const;
 
-    /** Returns the index of the currently checked button, or NO_BUTTON if none are checked */
-    int              CheckedButton() const;
+    /** Returns the index of the currently checked button, or NO_BUTTON if
+        none are checked */
+    std::size_t      CheckedButton() const;
 
-    /** Returns true iff the buttons in the group are to be expanded to fill the group's available space.  If false,
-        this indicates that the buttons are to be spaced out evenly, and that they should all be their
+    /** Returns true iff the buttons in the group are to be expanded to fill
+        the group's available space.  If false, this indicates that the
+        buttons are to be spaced out evenly, and that they should all be their
         MinUsableSize()s. */
     bool             ExpandButtons() const;
 
-    /** Returns true iff the buttons in the group are to be expanded in proportion to their initial sizes.  If false,
-        this indicates that the buttons are to be expanded evenly.  Note that this has no effect if ExpandButtons() is
-        false. */
+    /** Returns true iff the buttons in the group are to be expanded in
+        proportion to their initial sizes.  If false, this indicates that the
+        buttons are to be expanded evenly.  Note that this has no effect if
+        ExpandButtons() is false. */
     bool             ExpandButtonsProportionally() const;
 
-    /** Returns true iff this button group will render an outline of itself; this is sometimes useful for debugging
-        purposes */
+    /** Returns true iff this button group will render an outline of itself;
+        this is sometimes useful for debugging purposes */
     bool             RenderOutline() const;
 
     mutable ButtonChangedSignalType ButtonChangedSignal; ///< The button changed signal object for this RadioButtonGroup
@@ -274,62 +286,75 @@ public:
     /** \name Mutators */ ///@{
     virtual void Render();
 
-    /** Checks the index-th button, and unchecks all others.  If there is no index-th button, they are all unchecked,
-        and the currently-checked button index is set to NO_BUTTON. */
-    void SetCheck(int index);
+    /** Checks the index-th button, and unchecks all others.  If there is no
+        index-th button, they are all unchecked, and the currently-checked
+        button index is set to NO_BUTTON. */
+    void SetCheck(std::size_t index);
 
-    /** Disables (with b == true) or enables (with b == false) the index-th button, if it exists.  If the button exists,
-        is being disabled, and is the one currently checked, the currently-checked button index is set to NO_BUTTON. */
-    void DisableButton(int index, bool b = true); 
+    /** Disables (with b == true) or enables (with b == false) the index-th
+        button, if it exists.  If the button exists, is being disabled, and is
+        the one currently checked, the currently-checked button index is set
+        to NO_BUTTON. */
+    void DisableButton(std::size_t index, bool b = true); 
 
     /** Adds a button to the end of the group. */
     void AddButton(StateButton* bn);
 
-    /** creates a StateButton from the given parameters and adds it to the end of the group. */
+    /** creates a StateButton from the given parameters and adds it to the end
+        of the group. */
     void AddButton(const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
                    Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                    StateButtonStyle style = SBSTYLE_3D_RADIO);
 
-    /** Adds a button to the group at position \a index.  \a index must be in the range [0, NumButtons()]. */
-    void InsertButton(int index, StateButton* bn);
+    /** Adds a button to the group at position \a index.  \a index must be in
+        the range [0, NumButtons()]. */
+    void InsertButton(std::size_t index, StateButton* bn);
 
-    /** Creates a StateButton from the given parameters and adds it to the group at position \a index.  \a index must be
-        in the range [0, NumButtons()]. */
-    void InsertButton(int index, const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
+    /** Creates a StateButton from the given parameters and adds it to the
+        group at position \a index.  \a index must be in the range [0,
+        NumButtons()]. */
+    void InsertButton(std::size_t index, const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
                       Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                       StateButtonStyle style = SBSTYLE_3D_RADIO);
 
-    /** Removes \a button from the group.  If \a button is at index i, and is the currently-checked button, the
-        currently-checked button index is set to NO_BUTTON.  If the currently-checked button is after i, the
-        currently-checked button index will be decremented.  In either case, a ButtonChangedSignal will be emitted.
-        Note that this causes the layout to relinquish responsibility for \a wnd's memory management. */
+    /** Removes \a button from the group.  If \a button is at index i, and is
+        the currently-checked button, the currently-checked button index is
+        set to NO_BUTTON.  If the currently-checked button is after i, the
+        currently-checked button index will be decremented.  In either case, a
+        ButtonChangedSignal will be emitted.  Note that this causes the layout
+        to relinquish responsibility for \a wnd's memory management. */
     void RemoveButton(StateButton* button);
 
-    /** Set this to true if the buttons in the group are to be expanded to fill the group's available space.  If set to
-        false, the buttons are to be spaced out evenly, and they will all be at least their MinUsableSize()s. */
+    /** Set this to true if the buttons in the group are to be expanded to
+        fill the group's available space.  If set to false, the buttons are to
+        be spaced out evenly, and they will all be at least their
+        MinUsableSize()s. */
     void ExpandButtons(bool expand);
 
-    /** Set this to true if the buttons in the group are to be expanded in proportion to their initial sizes.  If set to
-        false, this indicates that the buttons are to be expanded evenly.  Note that this has no effect if
-        ExpandButtons() is false. */
+    /** Set this to true if the buttons in the group are to be expanded in
+        proportion to their initial sizes.  If set to false, this indicates
+        that the buttons are to be expanded evenly.  Note that this has no
+        effect if ExpandButtons() is false. */
     void ExpandButtonsProportionally(bool proportional);
 
-    /** Set this to true if this button group should render an outline of itself; this is sometimes useful for debugging
-        purposes */
+    /** Set this to true if this button group should render an outline of
+        itself; this is sometimes useful for debugging purposes */
     void RenderOutline(bool render_outline);
 
-    /** Raises the currently-selected button to the top of the child z-order.  If there is no currently-selected button,
-        no action is taken. */
+    /** Raises the currently-selected button to the top of the child z-order.
+        If there is no currently-selected button, no action is taken. */
     void RaiseCheckedButton();
 
     virtual void DefineAttributes(WndEditor* editor);
 
-    /** The invalid button position index that there is no currently-checked button. */
-    static const int NO_BUTTON;
+    /** The invalid button position index that there is no currently-checked
+        button. */
+    static const std::size_t NO_BUTTON;
     //@}
 
 protected:
-    /** Encapsulates all data pertaining ot a single button in a RadioButtonGroup. */
+    /** Encapsulates all data pertaining ot a single button in a
+        RadioButtonGroup. */
     struct GG_API ButtonSlot
     {
         ButtonSlot();
@@ -353,22 +378,22 @@ private:
     class ButtonClickedFunctor // for catching button-click signals from the contained buttons
     {
     public:
-        ButtonClickedFunctor(RadioButtonGroup* group, StateButton* button, int index);
+        ButtonClickedFunctor(RadioButtonGroup* group, StateButton* button, std::size_t index);
         void operator()(bool checked);
     private:
         RadioButtonGroup* m_group;
         StateButton*      m_button;
-        int               m_index;
+        std::size_t       m_index;
         bool              m_ignore_clicks;
     };
 
     void ConnectSignals();
-    void HandleRadioClick(int index, bool set_check);
+    void HandleRadioClick(std::size_t index, bool set_check);
     void Reconnect();
 
     const Orientation       m_orientation;
     std::vector<ButtonSlot> m_button_slots;
-    int                     m_checked_button; ///< the index of the currently-checked button; NO_BUTTON if none is clicked
+    std::size_t             m_checked_button; ///< the index of the currently-checked button; NO_BUTTON if none is clicked
     bool                    m_expand_buttons;
     bool                    m_expand_buttons_proportionally;
     bool                    m_render_outline;

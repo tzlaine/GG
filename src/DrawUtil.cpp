@@ -42,15 +42,15 @@ namespace { // file-scope constants and functions
     /// this doesn't serve as a cache, but does allow us to prevent numerous constructions and destructions of Clr valarrays.
     std::map<int, std::valarray<Clr> > color_arrays;
 
-    void Rectangle(Pt ul, Pt lr, Clr color, Clr border_color1, Clr border_color2, int bevel_thick,
+    void Rectangle(Pt ul, Pt lr, Clr color, Clr border_color1, Clr border_color2, unsigned int bevel_thick,
                    bool bevel_left, bool bevel_top, bool bevel_right, bool bevel_bottom)
     {
         glDisable(GL_TEXTURE_2D);
 
-        X inner_x1 = ul.x + (bevel_left ? bevel_thick : 0);
-        Y inner_y1 = ul.y + (bevel_top ? bevel_thick : 0);
-        X inner_x2 = lr.x - (bevel_right ? bevel_thick : 0);
-        Y inner_y2 = lr.y - (bevel_bottom ? bevel_thick : 0);
+        X inner_x1 = ul.x + (bevel_left ? static_cast<int>(bevel_thick) : 0);
+        Y inner_y1 = ul.y + (bevel_top ? static_cast<int>(bevel_thick) : 0);
+        X inner_x2 = lr.x - (bevel_right ? static_cast<int>(bevel_thick) : 0);
+        Y inner_y2 = lr.y - (bevel_bottom ? static_cast<int>(bevel_thick) : 0);
 
         int vertices[] = {
             Value(inner_x2), Value(inner_y1),
@@ -325,7 +325,7 @@ namespace { // file-scope constants and functions
         glEnable(GL_TEXTURE_2D);
     }
 
-    void CircleArc(Pt ul, Pt lr, Clr color, Clr border_color1, Clr border_color2, int bevel_thick, double theta1, double theta2)
+    void CircleArc(Pt ul, Pt lr, Clr color, Clr border_color1, Clr border_color2, unsigned int bevel_thick, double theta1, double theta2)
     {
         X wd = lr.x - ul.x;
         Y ht = lr.y - ul.y;
@@ -417,7 +417,7 @@ namespace { // file-scope constants and functions
         glEnable(GL_TEXTURE_2D);
     }
 
-    void RoundedRectangle(Pt ul, Pt lr, Clr color, Clr border_color1, Clr border_color2, int corner_radius, int thick)
+    void RoundedRectangle(Pt ul, Pt lr, Clr color, Clr border_color1, Clr border_color2, unsigned int corner_radius, int thick)
     {
         int circle_diameter = corner_radius * 2;
         CircleArc(Pt(lr.x - circle_diameter, ul.y), Pt(lr.x, ul.y + circle_diameter), color, border_color2, border_color1, thick, 0, 0.5 * PI);  // ur corner
@@ -434,18 +434,18 @@ namespace { // file-scope constants and functions
                    GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
                    GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         glBegin(GL_QUADS);
-        glVertex(lr.x - corner_radius, ul.y);
-        glVertex(ul.x + corner_radius, ul.y);
-        glVertex(ul.x + corner_radius, ul.y + thick);
-        glVertex(lr.x - corner_radius, ul.y + thick);
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y);
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y);
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y + thick);
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y + thick);
         glEnd();
 
         // left (uses color scale factor (SQRT2OVER2 * (1 + 0) + 1) / 2, which equals that of top
         glBegin(GL_QUADS);
-        glVertex(ul.x + thick, ul.y + corner_radius);
-        glVertex(ul.x, ul.y + corner_radius);
-        glVertex(ul.x, lr.y - corner_radius);
-        glVertex(ul.x + thick, lr.y - corner_radius);
+        glVertex(ul.x + thick, ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x, ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x, lr.y - static_cast<int>(corner_radius));
+        glVertex(ul.x + thick, lr.y - static_cast<int>(corner_radius));
         glEnd();
 
         // right
@@ -455,42 +455,42 @@ namespace { // file-scope constants and functions
                    GLubyte(border_color2.b * (1 - color_scale_factor) + border_color1.b * color_scale_factor),
                    GLubyte(border_color2.a * (1 - color_scale_factor) + border_color1.a * color_scale_factor));
         glBegin(GL_QUADS);
-        glVertex(lr.x, ul.y + corner_radius);
-        glVertex(lr.x - thick, ul.y + corner_radius);
-        glVertex(lr.x - thick, lr.y - corner_radius);
-        glVertex(lr.x, lr.y - corner_radius);
+        glVertex(lr.x, ul.y + static_cast<int>(corner_radius));
+        glVertex(lr.x - thick, ul.y + static_cast<int>(corner_radius));
+        glVertex(lr.x - thick, lr.y - static_cast<int>(corner_radius));
+        glVertex(lr.x, lr.y - static_cast<int>(corner_radius));
         glEnd();
 
         // bottom (uses color scale factor (SQRT2OVER2 * (0 + -1) + 1) / 2, which equals that of left
         glBegin(GL_QUADS);
-        glVertex(lr.x - corner_radius, lr.y - thick);
-        glVertex(ul.x + corner_radius, lr.y - thick);
-        glVertex(ul.x + corner_radius, lr.y);
-        glVertex(lr.x - corner_radius, lr.y);
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y - thick);
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y - thick);
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y);
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y);
         glEnd();
 
         // middle
         glColor(color);
         glBegin(GL_QUADS);
-        glVertex(lr.x - corner_radius, ul.y + thick);
-        glVertex(ul.x + corner_radius, ul.y + thick);
-        glVertex(ul.x + corner_radius, lr.y - thick);
-        glVertex(lr.x - corner_radius, lr.y - thick);
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y + thick);
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y + thick);
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y - thick);
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y - thick);
 
-        glVertex(lr.x - thick, ul.y + corner_radius);
-        glVertex(lr.x - corner_radius, ul.y + corner_radius);
-        glVertex(lr.x - corner_radius, lr.y - corner_radius);
-        glVertex(lr.x - thick, lr.y - corner_radius);
+        glVertex(lr.x - thick, ul.y + static_cast<int>(corner_radius));
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
+        glVertex(lr.x - thick, lr.y - static_cast<int>(corner_radius));
 
-        glVertex(ul.x + thick, ul.y + corner_radius);
-        glVertex(ul.x + corner_radius, ul.y + corner_radius);
-        glVertex(ul.x + corner_radius, lr.y - corner_radius);
-        glVertex(ul.x + thick, lr.y - corner_radius);
+        glVertex(ul.x + thick, ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
+        glVertex(ul.x + thick, lr.y - static_cast<int>(corner_radius));
         glEnd();
         glEnable(GL_TEXTURE_2D);
     }
 
-    void BubbleRectangle(Pt ul, Pt lr, Clr color1, Clr color2, Clr color3, int corner_radius)
+    void BubbleRectangle(Pt ul, Pt lr, Clr color1, Clr color2, Clr color3, unsigned int corner_radius)
     {
         int circle_diameter = corner_radius * 2;
         BubbleArc(Pt(lr.x - circle_diameter, ul.y), Pt(lr.x, ul.y + circle_diameter), color1, color3, color2, 0, 0.5 * PI);  // ur corner
@@ -508,21 +508,21 @@ namespace { // file-scope constants and functions
                          GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glBegin(GL_QUADS);
         glColor(scaled_color);
-        glVertex(lr.x - corner_radius, ul.y);
-        glVertex(ul.x + corner_radius, ul.y);
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y);
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y);
         glColor(color1);
-        glVertex(ul.x + corner_radius, ul.y + corner_radius);
-        glVertex(lr.x - corner_radius, ul.y + corner_radius);
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
         glEnd();
 
         // left (uses color scale factor (SQRT2OVER2 * (1 + 0) + 1) / 2, which equals that of top
         glBegin(GL_QUADS);
         glColor(scaled_color);
-        glVertex(ul.x, ul.y + corner_radius);
-        glVertex(ul.x, lr.y - corner_radius);
+        glVertex(ul.x, ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x, lr.y - static_cast<int>(corner_radius));
         glColor(color1);
-        glVertex(ul.x + corner_radius, lr.y - corner_radius);
-        glVertex(ul.x + corner_radius, ul.y + corner_radius);
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
         glEnd();
 
         // right
@@ -533,30 +533,30 @@ namespace { // file-scope constants and functions
                            GLubyte(color3.a * (1 - color_scale_factor) + color2.a * color_scale_factor));
         glBegin(GL_QUADS);
         glColor(color1);
-        glVertex(lr.x - corner_radius, ul.y + corner_radius);
-        glVertex(lr.x - corner_radius, lr.y - corner_radius);
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
         glColor(scaled_color);
-        glVertex(lr.x, lr.y - corner_radius);
-        glVertex(lr.x, ul.y + corner_radius);
+        glVertex(lr.x, lr.y - static_cast<int>(corner_radius));
+        glVertex(lr.x, ul.y + static_cast<int>(corner_radius));
         glEnd();
 
         // bottom (uses color scale factor (SQRT2OVER2 * (0 + -1) + 1) / 2, which equals that of left
         glBegin(GL_QUADS);
         glColor(color1);
-        glVertex(lr.x - corner_radius, lr.y - corner_radius);
-        glVertex(ul.x + corner_radius, lr.y - corner_radius);
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
         glColor(scaled_color);
-        glVertex(ul.x + corner_radius, lr.y);
-        glVertex(lr.x - corner_radius, lr.y);
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y);
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y);
         glEnd();
 
         // middle
         glBegin(GL_QUADS);
         glColor(color1);
-        glVertex(lr.x - corner_radius, ul.y + corner_radius);
-        glVertex(ul.x + corner_radius, ul.y + corner_radius);
-        glVertex(ul.x + corner_radius, lr.y - corner_radius);
-        glVertex(lr.x - corner_radius, lr.y - corner_radius);
+        glVertex(lr.x - static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x + static_cast<int>(corner_radius), ul.y + static_cast<int>(corner_radius));
+        glVertex(ul.x + static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
+        glVertex(lr.x - static_cast<int>(corner_radius), lr.y - static_cast<int>(corner_radius));
         glEnd();
         glEnable(GL_TEXTURE_2D);
     }
@@ -644,10 +644,10 @@ namespace GG {
         }
     }
 
-    void FlatRectangle(Pt ul, Pt lr, Clr color, Clr border_color, int border_thick/* = 2*/)
+    void FlatRectangle(Pt ul, Pt lr, Clr color, Clr border_color, unsigned int border_thick/* = 2*/)
     { Rectangle(ul, lr, color, border_color, border_color, border_thick, true, true, true, true); }
 
-    void BeveledRectangle(Pt ul, Pt lr, Clr color, Clr border_color, bool up, int bevel_thick/* = 2*/,
+    void BeveledRectangle(Pt ul, Pt lr, Clr color, Clr border_color, bool up, unsigned int bevel_thick/* = 2*/,
                           bool bevel_left/* = true*/, bool bevel_top/* = true*/, bool bevel_right/* = true*/, bool bevel_bottom/* = true*/)
     {
         Rectangle(ul, lr, color,
@@ -656,10 +656,10 @@ namespace GG {
                   bevel_thick, bevel_left, bevel_top, bevel_right, bevel_bottom);
     }
 
-    void FlatRoundedRectangle(Pt ul, Pt lr, Clr color, Clr border_color, int corner_radius/* = 5*/, int border_thick/* = 2*/)
+    void FlatRoundedRectangle(Pt ul, Pt lr, Clr color, Clr border_color, unsigned int corner_radius/* = 5*/, unsigned int border_thick/* = 2*/)
     { RoundedRectangle(ul, lr, color, border_color, border_color, corner_radius, border_thick); }
 
-    void BeveledRoundedRectangle(Pt ul, Pt lr, Clr color, Clr border_color, bool up, int corner_radius/* = 5*/, int bevel_thick/* = 2*/)
+    void BeveledRoundedRectangle(Pt ul, Pt lr, Clr color, Clr border_color, bool up, unsigned int corner_radius/* = 5*/, unsigned int bevel_thick/* = 2*/)
     {
         RoundedRectangle(ul, lr, color,
                          (up ? LightColor(border_color) : DarkColor(border_color)),
@@ -687,10 +687,10 @@ namespace GG {
                   0, 0);
     }
 
-    void FlatCircle(Pt ul, Pt lr, Clr color, Clr border_color, int thick/* = 2*/)
+    void FlatCircle(Pt ul, Pt lr, Clr color, Clr border_color, unsigned int thick/* = 2*/)
     { CircleArc(ul, lr, color, border_color, border_color, thick, 0, 0); }
 
-    void BeveledCircle(Pt ul, Pt lr, Clr color, Clr border_color, bool up/* = true*/, int bevel_thick/* = 2*/)
+    void BeveledCircle(Pt ul, Pt lr, Clr color, Clr border_color, bool up/* = true*/, unsigned int bevel_thick/* = 2*/)
     {
         CircleArc(ul, lr, color, 
                   (up ? DarkColor(border_color) : LightColor(border_color)),
@@ -698,7 +698,7 @@ namespace GG {
                   bevel_thick, 0, 0);
     }
 
-    void BubbleRectangle(Pt ul, Pt lr, Clr color, bool up, int corner_radius/* = 5*/)
+    void BubbleRectangle(Pt ul, Pt lr, Clr color, bool up, unsigned int corner_radius/* = 5*/)
     {
         ::BubbleRectangle(ul, lr, color,
                           (up ? LightColor(color) : DarkColor(color)),

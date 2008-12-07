@@ -24,7 +24,8 @@
    whatwasthataddress@gmail.com */
    
 /** \file OISInput.h
-    Contains OISInput, the OgreGUIInputPlugin subclass that provides OgreGUI with OIS input. */
+    Contains OISInput, the OgreGUIInputPlugin subclass that provides OgreGUI
+    with OIS input. */
 
 #include "OgreGUIInputPlugin.h"
 
@@ -36,8 +37,8 @@ namespace OIS { class InputManager; }
 
 /** An Ogre plugin that provides input functionality to OgreGUI using OIS.
     OISInput is configured from the configuration data in
-    OgreGUI::ConfigFileStream(), if any.  See OISInput.cfg for an example config
-    file. */
+    OgreGUI::ConfigFileStream(), if any.  See OISInput.cfg for an example
+    config file. */
 class GG_OGRE_PLUGIN_API OISInput :
     public GG::OgreGUIInputPlugin,
     public OIS::MouseListener,
@@ -55,7 +56,7 @@ public:
 
 private:
     virtual void HandleSystemEvents();
-    virtual void HandleWindowResize(int width, int height);
+    virtual void HandleWindowResize(GG::X width, GG::Y height);
     virtual void HandleWindowClose();
 
     virtual bool mouseMoved(const OIS::MouseEvent &event);
@@ -67,7 +68,7 @@ private:
 
     void CleanupInputManager();
 
-	OIS::InputManager*  m_input_manager;
-	OIS::Mouse*         m_mouse;
-	OIS::Keyboard*      m_keyboard;
+    OIS::InputManager*  m_input_manager;
+    OIS::Mouse*         m_mouse;
+    OIS::Keyboard*      m_keyboard;
 };

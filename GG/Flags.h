@@ -42,11 +42,11 @@
 namespace GG {
 
 namespace detail {
-    inline int OneBits(unsigned int num)
+    inline std::size_t OneBits(unsigned int num)
     {
-        int retval = 0;
-        const int NUM_BITS = sizeof(num) * 8;
-        for (int i = 0; i < NUM_BITS; ++i) {
+        std::size_t retval = 0;
+        const std::size_t NUM_BITS = sizeof(num) * 8;
+        for (std::size_t i = 0; i < NUM_BITS; ++i) {
             if (num & 1)
                 ++retval;
             num >>= 1;
@@ -56,14 +56,17 @@ namespace detail {
 }
 
 
-/** Metafunction predicate that evaluates as true iff \a T is a GG flag type, declared by using GG_FLAG_TYPE. */
+/** Metafunction predicate that evaluates as true iff \a T is a GG flag type,
+    declared by using GG_FLAG_TYPE. */
 template <class T>
 struct is_flag_type : boost::mpl::false_ {};
 
 
-/** Defines a new type \a name that is usable as a bit-flag type that can be used by Flags and FlagSpec.  The resulting
-    code defines a specialization for is_flag_type, the flag class itself, streaming operators for the flag type, and
-    the forward declaration of FlagSpec::instance() for the flag type.  The user must define FlagSpec::instance(). */
+/** Defines a new type \a name that is usable as a bit-flag type that can be
+    used by Flags and FlagSpec.  The resulting code defines a specialization
+    for is_flag_type, the flag class itself, streaming operators for the flag
+    type, and the forward declaration of FlagSpec::instance() for the flag
+    type.  The user must define FlagSpec::instance(). */
 #define GG_FLAG_TYPE(name)                                              \
     class name;                                                         \
                                                                         \
@@ -77,7 +80,7 @@ struct is_flag_type : boost::mpl::false_ {};
         explicit name(unsigned int value) :                             \
             m_value(value)                                              \
             {                                                           \
-                if (1 < detail::OneBits(value))                         \
+                if (1u < detail::OneBits(value))                        \
                     throw std::invalid_argument(                        \
                         "Non-bitflag passed to " #name " constructor"); \
             }                                                           \
@@ -125,22 +128,29 @@ struct is_flag_type : boost::mpl::false_ {};
     }
 
 
-/** A singleton that encapsulates the set of known flags of type \a FlagType.  New user-defined flags must be registered
-    with FlagSpec in order to be used in Flags objects for operator~ to work properly with flags of type \a FlagType.
-    FlagSpec is designed to be extensible.  That is, it is understood that the flags used by GG may be insufficient for
-    all subclasses that users may write, and FlagSpec allows authors of GG-derived classes to add flags.  For instance,
-    a subclass of Wnd may want to add a MINIMIZABLE flag.  Doing so is as simple as declaring it and registering it with
-    \verbatim FlagSpec<WndFlag>::instance.insert(MINIMIZABLE, "MINIMIZABLE") \endverbatim.  If user-defined subclasses
-    and their associated user-defined flags are loaded in a runtime-loaded library, users should take care to erase them
-    from the FlagSpec when the library is unloaded.  \note All user-instantiated FlagSpecs must provide their own
-    implementations of the instance() static function (all the GG-provided FlagSpec instantiations provide such
-    implementations already). */
+/** A singleton that encapsulates the set of known flags of type \a FlagType.
+    New user-defined flags must be registered with FlagSpec in order to be
+    used in Flags objects for operator~ to work properly with flags of type \a
+    FlagType.  FlagSpec is designed to be extensible.  That is, it is
+    understood that the flags used by GG may be insufficient for all
+    subclasses that users may write, and FlagSpec allows authors of GG-derived
+    classes to add flags.  For instance, a subclass of Wnd may want to add a
+    MINIMIZABLE flag.  Doing so is as simple as declaring it and registering
+    it with \verbatim FlagSpec<WndFlag>::instance.insert(MINIMIZABLE,
+    "MINIMIZABLE") \endverbatim.  If user-defined subclasses and their
+    associated user-defined flags are loaded in a runtime-loaded library,
+    users should take care to erase them from the FlagSpec when the library is
+    unloaded.  \note All user-instantiated FlagSpecs must provide their own
+    implementations of the instance() static function (all the GG-provided
+    FlagSpec instantiations provide such implementations already). */
 template <class FlagType>
 class GG_API FlagSpec
 {
 public:
-    // If you have received an error message directing you to the line below, it means you probably have tried to use
-    // this class with a FlagsType that is not a type generated by GG_FLAG_TYPE.  Use that to generate new flag types.
+    // If you have received an error message directing you to the line below,
+    // it means you probably have tried to use this class with a FlagsType
+    // that is not a type generated by GG_FLAG_TYPE.  Use that to generate new
+    // flag types.
     BOOST_MPL_ASSERT((is_flag_type<FlagType>));
 
     /** Iterator over all known flags. */
@@ -166,11 +176,12 @@ public:
     /** Returns true iff FlagSpec contains \a flag. */
     bool contains(FlagType flag) const
         { return find(flag) != end(); }
-    /** Returns true iff \a flag is a "permanent" flag -- a flag used internally by the GG library, as opposed to a
-        user-added flag. */
+    /** Returns true iff \a flag is a "permanent" flag -- a flag used
+        internally by the GG library, as opposed to a user-added flag. */
     bool permanent(FlagType flag) const
         { return m_permanent.find(flag) != m_permanent.end(); }
-    /** Returns an iterator to \a flag, if flag is in the FlagSpec, or end() otherwise. */
+    /** Returns an iterator to \a flag, if flag is in the FlagSpec, or end()
+        otherwise. */
     const_iterator find(FlagType flag) const
         { return m_flags.find(flag); }
     /** Returns an iterator to the first flag in the FlagSpec. */
@@ -179,8 +190,9 @@ public:
     /** Returns an iterator to one past the last flag in the FlagSpec. */
     const_iterator end() const
         { return m_flags.end(); }
-    /** Returns the stringification of \a flag provided when \a flag was added to the FlagSpec.  \throw Throws
-        GG::FlagSpec::UnknownFlag if an unknown flag's stringification is requested. */
+    /** Returns the stringification of \a flag provided when \a flag was added
+        to the FlagSpec.  \throw Throws GG::FlagSpec::UnknownFlag if an
+        unknown flag's stringification is requested. */
     const std::string& ToString(FlagType flag) const
         {
             typename std::map<FlagType, std::string>::const_iterator it = m_strings.find(flag);
@@ -188,8 +200,8 @@ public:
                 throw UnknownFlag("Could not find string corresponding to unknown flag");
             return it->second;
         }
-    /** Returns the flag whose stringification is \a str.  \throw Throws GG::FlagSpec::UnknownString if an unknown
-        string is provided. */
+    /** Returns the flag whose stringification is \a str.  \throw Throws
+        GG::FlagSpec::UnknownString if an unknown string is provided. */
     FlagType FromString(const std::string& str) const
         {
             for (typename std::map<FlagType, std::string>::const_iterator it = m_strings.begin();
@@ -204,9 +216,10 @@ public:
     //@}
 
     /** \name Mutators */ ///@{
-    /** Adds \a flag, with stringification string \a name, to the FlagSpec.  If \a permanent is true, this flag becomes
-        non-removable.  Alls flags added by GG are added as permanent flags.  User-added flags should not be added as
-        permanent. */
+    /** Adds \a flag, with stringification string \a name, to the FlagSpec.
+        If \a permanent is true, this flag becomes non-removable.  Alls flags
+        added by GG are added as permanent flags.  User-added flags should not
+        be added as permanent. */
     void insert(FlagType flag, const std::string& name, bool permanent = false)
         {
             bool insert_successful = m_flags.insert(flag).second;
@@ -215,9 +228,11 @@ public:
                 m_permanent.insert(flag);
             m_strings[flag] = name;
         }
-    /** Removes \a flag from the FlagSpec, returning whether the flag was actually removed or not.  Permanent flags are
-        not removed.  The removal of flags will probably only be necessary in cases where flags were added for classes
-        in a runtime-loaded DLL/shared library at DLL/shared library unload-time. */
+    /** Removes \a flag from the FlagSpec, returning whether the flag was
+        actually removed or not.  Permanent flags are not removed.  The
+        removal of flags will probably only be necessary in cases where flags
+        were added for classes in a runtime-loaded DLL/shared library at
+        DLL/shared library unload-time. */
     bool erase(FlagType flag)
         {
             bool retval = true;
@@ -247,8 +262,9 @@ class Flags;
 template <class FlagType>
 std::ostream& operator<<(std::ostream& os, Flags<FlagType> flags);
 
-/** A set of flags of the same type.  Individual flags and sets of flags can be passed as parameters and/or be stored as
-    member variables in Flags objects. */
+/** A set of flags of the same type.  Individual flags and sets of flags can
+    be passed as parameters and/or be stored as member variables in Flags
+    objects. */
 template <class FlagType>
 class Flags
 {
@@ -256,8 +272,10 @@ private:
     struct ConvertibleToBoolDummy {int _;};
 
 public:
-    // If you have received an error message directing you to the line below, it means you probably have tried to use
-    // this class with a FlagsType that is not a type generated by GG_FLAG_TYPE.  Use that to generate new flag types.
+    // If you have received an error message directing you to the line below,
+    // it means you probably have tried to use this class with a FlagsType
+    // that is not a type generated by GG_FLAG_TYPE.  Use that to generate new
+    // flag types.
     BOOST_MPL_ASSERT((is_flag_type<FlagType>));
 
     /** \name Exceptions */ ///@{
@@ -271,8 +289,9 @@ public:
     /** \name Structors */ ///@{
     /** Default ctor. */
     Flags() : m_flags(0) {}
-    /** Ctor.  Note that this ctor allows implicit conversions from FlagType to Flags.  \throw Throws
-        GG::Flags::UnknownFlag if \a flag is not found in FlagSpec<FlagType>::instance(). */
+    /** Ctor.  Note that this ctor allows implicit conversions from FlagType
+        to Flags.  \throw Throws GG::Flags::UnknownFlag if \a flag is not
+        found in FlagSpec<FlagType>::instance(). */
     Flags(FlagType flag) :
         m_flags(flag.m_value)
         {
@@ -282,8 +301,9 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    /** Conversion to bool, so that a Flags object can be used as a boolean test.  It is convertible to true when it
-        contains one or more flags, and convertible to false otherwise. */
+    /** Conversion to bool, so that a Flags object can be used as a boolean
+        test.  It is convertible to true when it contains one or more flags,
+        and convertible to false otherwise. */
     operator int ConvertibleToBoolDummy::* () const
         { return m_flags ? &ConvertibleToBoolDummy::_ : 0; }
     /** Returns true iff *this contains the same flags as \a rhs. */
@@ -292,26 +312,30 @@ public:
     /** Returns true iff *this does not contain the same flags as \a rhs. */
     bool operator!=(Flags<FlagType> rhs) const
         { return m_flags != rhs.m_flags; }
-    /** Returns true iff the underlying storage of *this is less than the underlying storage of \a rhs.  Note that this
-        is here for use in associative containers only; it is otherwise meaningless. */
+    /** Returns true iff the underlying storage of *this is less than the
+        underlying storage of \a rhs.  Note that this is here for use in
+        associative containers only; it is otherwise meaningless. */
     bool operator<(Flags<FlagType> rhs) const
         { return m_flags < rhs.m_flags; }
     //@}
 
     /** \name Mutators */ ///@{
-    /** Performs a bitwise-or of *this and \a rhs, placing the result in *this. */
+    /** Performs a bitwise-or of *this and \a rhs, placing the result in
+        *this. */
     Flags<FlagType>& operator|=(Flags<FlagType> rhs)
         {
             m_flags |= rhs.m_flags;
             return *this;
         }
-    /** Performs a bitwise-and of *this and \a rhs, placing the result in *this. */
+    /** Performs a bitwise-and of *this and \a rhs, placing the result in
+        *this. */
     Flags<FlagType>& operator&=(Flags<FlagType> rhs)
         {
             m_flags &= rhs.m_flags;
             return *this;
         }
-    /** Performs a bitwise-xor of *this and \a rhs, placing the result in *this. */
+    /** Performs a bitwise-xor of *this and \a rhs, placing the result in
+        *this. */
     Flags<FlagType>& operator^=(Flags<FlagType> rhs)
         {
             m_flags ^= rhs.m_flags;
@@ -347,7 +371,8 @@ std::ostream& operator<<(std::ostream& os, Flags<FlagType> flags)
     return os;
 }
 
-/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator|(Flags<FlagType> lhs, Flags<FlagType> rhs)
 {
@@ -356,17 +381,20 @@ Flags<FlagType> operator|(Flags<FlagType> lhs, Flags<FlagType> rhs)
     return retval;
 }
 
-/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator|(Flags<FlagType> lhs, FlagType rhs)
 { return lhs | Flags<FlagType>(rhs); }
 
-/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator|(FlagType lhs, Flags<FlagType> rhs)
 { return Flags<FlagType>(lhs) | rhs; }
 
-/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-or of \a lhs and \a
+    rhs. */
 template <class FlagType>
 typename boost::enable_if<
     is_flag_type<FlagType>,
@@ -375,7 +403,8 @@ typename boost::enable_if<
 operator|(FlagType lhs, FlagType rhs)
 { return Flags<FlagType>(lhs) | Flags<FlagType>(rhs); }
 
-/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator&(Flags<FlagType> lhs, Flags<FlagType> rhs)
 {
@@ -384,17 +413,20 @@ Flags<FlagType> operator&(Flags<FlagType> lhs, Flags<FlagType> rhs)
     return retval;
 }
 
-/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator&(Flags<FlagType> lhs, FlagType rhs)
 { return lhs & Flags<FlagType>(rhs); }
 
-/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator&(FlagType lhs, Flags<FlagType> rhs)
 { return Flags<FlagType>(lhs) & rhs; }
 
-/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-and of \a lhs and \a
+    rhs. */
 template <class FlagType>
 typename boost::enable_if<
     is_flag_type<FlagType>,
@@ -403,7 +435,8 @@ typename boost::enable_if<
 operator&(FlagType lhs, FlagType rhs)
 { return Flags<FlagType>(lhs) & Flags<FlagType>(rhs); }
 
-/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator^(Flags<FlagType> lhs, Flags<FlagType> rhs)
 {
@@ -412,17 +445,20 @@ Flags<FlagType> operator^(Flags<FlagType> lhs, Flags<FlagType> rhs)
     return retval;
 }
 
-/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator^(Flags<FlagType> lhs, FlagType rhs)
 { return lhs ^ Flags<FlagType>(rhs); }
 
-/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a
+    rhs. */
 template <class FlagType>
 Flags<FlagType> operator^(FlagType lhs, Flags<FlagType> rhs)
 { return Flags<FlagType>(lhs) ^ rhs; }
 
-/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a rhs. */
+/** Returns a Flags object that consists of the bitwise-xor of \a lhs and \a
+    rhs. */
 template <class FlagType>
 typename boost::enable_if<
     is_flag_type<FlagType>,
@@ -431,7 +467,8 @@ typename boost::enable_if<
 operator^(FlagType lhs, FlagType rhs)
 { return Flags<FlagType>(lhs) ^ Flags<FlagType>(rhs); }
 
-/** Returns a Flags object that consists of all the flags known to FlagSpec<FlagType>::instance() except those in \a flags. */
+/** Returns a Flags object that consists of all the flags known to
+    FlagSpec<FlagType>::instance() except those in \a flags. */
 template <class FlagType>
 Flags<FlagType> operator~(Flags<FlagType> flags)
 {
@@ -444,7 +481,8 @@ Flags<FlagType> operator~(Flags<FlagType> flags)
     return retval;
 }
 
-/** Returns a Flags object that consists of all the flags known to FlagSpec<FlagType>::instance() except \a flag. */
+/** Returns a Flags object that consists of all the flags known to
+    FlagSpec<FlagType>::instance() except \a flag. */
 template <class FlagType>
 typename boost::enable_if<
     is_flag_type<FlagType>,

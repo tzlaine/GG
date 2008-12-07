@@ -96,9 +96,10 @@ public:
 
     Flags<MultiEditStyle> Style() const; ///< returns the style flags for this MultiEdit to \a style
 
-    /** returns the maximum number of lines of text that the control keeps. This number includes the lines that are 
-        visible in the control.  A value <= 0 indicates that there is no limit.*/
-    int MaxLinesOfHistory() const;
+    /** Returns the maximum number of lines of text that the control
+        keeps. This number includes the lines that are visible in the control.
+        A value <= 0 indicates that there is no limit.*/
+    std::size_t MaxLinesOfHistory() const;
     //@}
 
     /** \name Mutators */ ///@{
@@ -116,7 +117,7 @@ public:
     void           SetStyle(Flags<MultiEditStyle> style); ///< sets the style flags for this MultiEdit to \a style
 
     /** sets the maximum number of rows of text that the control will keep */
-    void           SetMaxLinesOfHistory(int max);
+    void           SetMaxLinesOfHistory(std::size_t max);
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
@@ -137,7 +138,7 @@ protected:
 
     Pt      ScrollPosition() const;         ///< returns the positions of the scrollbars, in pixels
 
-    /** returns index into WindowText() of the start of the UTF-8 sequence for
+    /** Returns index into WindowText() of the start of the UTF-8 sequence for
         the code point at \a char_idx in row \a row, using \a line_data
         instead of the current line data, if it is supplied.  If \a row, \a
         char_idx refers to a character preceeded by formatting tags, the index
@@ -145,7 +146,7 @@ protected:
         Not range-checked. */
     int     StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
 
-    /** returns range of indices into WindowText() of the UTF-8 sequence for
+    /** Returns range of indices into WindowText() of the UTF-8 sequence for
         the code point at \a char_idx in row \a row, using \a line_data
         instead of the current line data, if it is supplied.  If \a row, \a
         char_idx refers to a character preceeded by formatting tags, the index
@@ -173,16 +174,18 @@ protected:
     /** \name Mutators */ ///@{
     void    RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
 
-    /** ensures that the next call to SetText() preserves the positioning of the text.  This should only be called if it
-        is known that the call to SetText() will not put the text-position in an illegal state.  For instance, if
-        creating a MultiEdit that contains hyperlink text then coloring or underlining a link may require a call to
-        SetText(), but may be guaranteed not to change the text layout.  Without a call to this function, the scroll
-        positions will be reset. */
+    /** Ensures that the next call to SetText() preserves the positioning of
+        the text.  This should only be called if it is known that the call to
+        SetText() will not put the text-position in an illegal state.  For
+        instance, if creating a MultiEdit that contains hyperlink text then
+        coloring or underlining a link may require a call to SetText(), but
+        may be guaranteed not to change the text layout.  Without a call to
+        this function, the scroll positions will be reset. */
     void    PreserveTextPositionOnNextSetText();
     //@}
 
-    static const int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls
-    static const int BORDER_THICK;          ///< the thickness with which to render the border of the control
+    static const unsigned int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls
+    static const unsigned int BORDER_THICK;          ///< the thickness with which to render the border of the control
 
 private:
     void    Init();
@@ -204,7 +207,7 @@ private:
     X           m_first_col_shown;      ///< the position (counted from the left side of the text) of the first pixel shown
     Y           m_first_row_shown;      ///< the position (counted from the top of the text) of the first pixel shown
 
-    int         m_max_lines_history;
+    std::size_t m_max_lines_history;
 
     Scroll*     m_vscroll;
     Scroll*     m_hscroll;

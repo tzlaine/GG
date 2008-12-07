@@ -24,7 +24,8 @@
    whatwasthataddress@gmail.com */
 
 /** \file WndEvent.h
-    Contains the WndEvent class, which is used internally by GG to dispatch event messages to Wnds. */
+    Contains the WndEvent class, which is used internally by GG to dispatch
+    event messages to Wnds. */
 
 #ifndef _GG_WndEvent_h_
 #define _GG_WndEvent_h_
@@ -60,16 +61,20 @@ extern GG_API const Flags<ModKey> MOD_KEY_SHIFT; ///< Either Shift key.
 extern GG_API const Flags<ModKey> MOD_KEY_ALT;   ///< Either Alt key.
 extern GG_API const Flags<ModKey> MOD_KEY_META;  ///< Either Meta key.
 
-/** encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.  The various types of WndEvents correspond
-    to the various message member functions of Wnd, some of which have different parameterizations.  Rather than have a
-    less-efficient but more-easily-extensible hierarchy of WndEvent types, a single WndEvent type exists that has all
-    possible parameters to a Wnd message function call.  Therefore, not all of WndEvent's accessors will return sensical
-    results, depending on the WndEventType of the WndEvent.  Note that Wnd events may be filtered before they actually
-    reach the target Wnd \see Wnd */
+/** Encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.
+    The various types of WndEvents correspond to the various message member
+    functions of Wnd, some of which have different parameterizations.  Rather
+    than have a less-efficient but more-easily-extensible hierarchy of
+    WndEvent types, a single WndEvent type exists that has all possible
+    parameters to a Wnd message function call.  Therefore, not all of
+    WndEvent's accessors will return sensical results, depending on the
+    WndEventType of the WndEvent.  Note that Wnd events may be filtered before
+    they actually reach the target Wnd \see Wnd */
 class GG_API WndEvent
 {
 public:
-    /** the types of Wnd events.  Each of these corresponds to a Wnd member function of the same name. */
+    /** The types of Wnd events.  Each of these corresponds to a Wnd member
+        function of the same name. */
     enum EventType {
         LButtonDown,
         LDrag,
@@ -100,30 +105,36 @@ public:
         TimerFiring
     };
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const GG::Pt& pt, Flags<ModKey> mod_keys), eg
+    /** Constructs an WndEvent that is used to invoke a function taking
+        parameters (const GG::Pt& pt, Flags<ModKey> mod_keys), eg
         LButtonDown(). */
     WndEvent(EventType type, const Pt& pt, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, const Pt& move,  Flags<ModKey>
-        mod_keys), eg LDrag(). */
+    /** Constructs an WndEvent that is used to invoke a function taking
+        parameters (const Pt& pt, const Pt& move, Flags<ModKey> mod_keys), eg
+        LDrag(). */
     WndEvent(EventType type, const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, int move,  Flags<ModKey>
-        mod_keys), eg MouseWheel(). */
+    /** Constructs an WndEvent that is used to invoke a function taking
+        parameters (const Pt& pt, int move, Flags<ModKey> mod_keys), eg
+        MouseWheel(). */
     WndEvent(EventType type, const Pt& pt, int move, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (const Pt& pt, const std::map<Wnd*,
-        Pt>& drag_drop_wnds, Flags<ModKey> mod_keys), eg DragDropEnter(). */
+    /** Constructs an WndEvent that is used to invoke a function taking
+        parameters (const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds,
+        Flags<ModKey> mod_keys), eg DragDropEnter(). */
     WndEvent(EventType type, const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (Key key, Flags<ModKey> mod_keys), eg
-        KeyPress(). */
+    /** Constructs an WndEvent that is used to invoke a function taking
+        parameters (Key key, Flags<ModKey> mod_keys), eg KeyPress(). */
     WndEvent(EventType type, Key key, boost::uint32_t code_point, Flags<ModKey> mod_keys);
 
-    /** constructs an WndEvent that is used to invoke a function taking parameters (int, Timer*), eg TimerFiring(). */
-    WndEvent(EventType type, int ticks, Timer* timer);
+    /** Constructs an WndEvent that is used to invoke a function taking
+        parameters (unsigned int, Timer*), eg TimerFiring(). */
+    WndEvent(EventType type, unsigned int ticks, Timer* timer);
 
-    /** constructs an WndEvent that is used to invoke a function taking no parameters, eg GainingFocus(). */
+    /** Constructs an WndEvent that is used to invoke a function taking no
+        parameters, eg GainingFocus(). */
     explicit WndEvent(EventType type);
 
     EventType                 Type() const;         ///< returns the type of the WndEvent
@@ -134,7 +145,7 @@ public:
     const Pt&                 DragMove() const;     ///< returns the amount of drag movement represented by the WndEvent, if any
     int                       WheelMove() const;    ///< returns the ammount of mouse wheel movement represented by the WndEvent, if any
     const std::map<Wnd*, Pt>& DragDropWnds() const; ///< returns the drag-and-drop wnds represented by the WndEvent, if any
-    int                       Ticks() const;        ///< returns the number of ticks represented by the WndEvent. if any
+    unsigned int              Ticks() const;        ///< returns the number of ticks represented by the WndEvent. if any
     Timer*                    GetTimer() const;     ///< returns the Timer represented by the WndEvent. if any
 
 private:
@@ -146,7 +157,7 @@ private:
     Pt                 m_drag_move;
     int                m_wheel_move;
     std::map<Wnd*, Pt> m_drag_drop_wnds;
-    int                m_ticks;
+    unsigned int       m_ticks;
     Timer*             m_timer;
 };
 

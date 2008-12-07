@@ -106,7 +106,7 @@ public:
     /** Creates a modal event pump suitable for use with Ogre. */
     virtual boost::shared_ptr<ModalEventPump> CreateModalEventPump(bool& done);
 
-    virtual int    Ticks() const;
+    virtual unsigned int Ticks() const;
     virtual X AppWidth() const;
     virtual Y AppHeight() const;
 

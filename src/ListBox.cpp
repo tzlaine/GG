@@ -181,7 +181,7 @@ ListBox::Row::Row() :
 {}
 
 ListBox::Row::Row(X w, Y h, const std::string& drag_drop_data_type,
-                  Alignment align/* = ALIGN_VCENTER*/, int margin/* = 2*/) : 
+                  Alignment align/* = ALIGN_VCENTER*/, unsigned int margin/* = 2*/) : 
     Control(X0, Y0, w, h),
     m_row_alignment(align),
     m_margin(margin),
@@ -215,7 +215,7 @@ Alignment ListBox::Row::ColAlignment(std::size_t n) const
 X ListBox::Row::ColWidth(std::size_t n) const
 { return m_col_widths[n]; }
 
-int ListBox::Row::Margin() const
+unsigned int ListBox::Row::Margin() const
 { return m_margin; }
 
 Control* ListBox::Row::CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const
@@ -242,7 +242,7 @@ void ListBox::Row::push_back(const std::string& str, const boost::shared_ptr<Fon
                              Clr color/* = CLR_BLACK*/)
 { push_back(CreateControl(str, font, color)); }
 
-void ListBox::Row::push_back(const std::string& str, const std::string& font_filename, int pts,
+void ListBox::Row::push_back(const std::string& str, const std::string& font_filename, unsigned int pts,
                              Clr color/* = CLR_BLACK*/)
 { push_back(CreateControl(str, GUI::GetGUI()->GetFont(font_filename, pts), color)); }
 
@@ -336,7 +336,7 @@ void ListBox::Row::SetColWidths(const std::vector<X>& widths)
     AdjustLayout();
 }
 
-void ListBox::Row::SetMargin(int margin)
+void ListBox::Row::SetMargin(unsigned int margin)
 {
     if (margin == m_margin)
         return;
@@ -378,7 +378,7 @@ void ListBox::Row::AdjustLayout(bool adjust_for_push_back/* = false*/)
 // GG::ListBox
 ////////////////////////////////////////////////
 // static(s)
-const int ListBox::BORDER_THICK = 2;
+const unsigned int ListBox::BORDER_THICK = 2;
 
 ListBox::ListBox() :
     Control(),
@@ -488,11 +488,11 @@ Pt ListBox::MinUsableSize() const
 Pt ListBox::ClientUpperLeft() const
 {
     return UpperLeft() +
-        Pt(X(BORDER_THICK), BORDER_THICK + (m_header_row->empty() ? Y0 : m_header_row->Height()));
+        Pt(X(BORDER_THICK), static_cast<int>(BORDER_THICK) + (m_header_row->empty() ? Y0 : m_header_row->Height()));
 }
 
 Pt ListBox::ClientLowerRight() const
-{ return LowerRight() - Pt(BORDER_THICK + RightMargin(), BORDER_THICK + BottomMargin()); }
+{ return LowerRight() - Pt(static_cast<int>(BORDER_THICK) + RightMargin(), static_cast<int>(BORDER_THICK) + BottomMargin()); }
 
 bool ListBox::Empty() const
 { return m_rows.empty(); }
@@ -600,10 +600,10 @@ const std::set<std::string>& ListBox::AllowedDropTypes() const
 bool ListBox::AutoScrollDuringDragDrops() const
 { return m_auto_scroll_during_drag_drops; }
 
-int ListBox::AutoScrollMargin() const
+unsigned int ListBox::AutoScrollMargin() const
 { return m_auto_scroll_margin; }
 
-int ListBox::AutoScrollInterval() const
+unsigned int ListBox::AutoScrollInterval() const
 { return m_auto_scroll_timer.Interval(); }
 
 void ListBox::StartingChildDragDrop(const Wnd* wnd, const Pt& offset)
@@ -717,8 +717,8 @@ void ListBox::Render()
     // HACK! This gets around the issue of how to render headers and scrolls,
     // which do not fall within the client area.
     if (!m_header_row->empty()) {
-        Rect header_area(Pt(ul.x + BORDER_THICK, m_header_row->UpperLeft().y),
-                         Pt(lr.x - BORDER_THICK, m_header_row->LowerRight().y));
+        Rect header_area(Pt(ul.x + static_cast<int>(BORDER_THICK), m_header_row->UpperLeft().y),
+                         Pt(lr.x - static_cast<int>(BORDER_THICK), m_header_row->LowerRight().y));
         BeginScissorClipping(header_area.ul, header_area.lr);
         GUI::GetGUI()->RenderWindow(m_header_row);
         EndScissorClipping();
@@ -894,7 +894,7 @@ void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnd
 void ListBox::DragDropLeave()
 { ResetAutoScrollVars(); }
 
-void ListBox::TimerFiring(int ticks, Timer* timer)
+void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
 {
     if (timer == &m_auto_scroll_timer && !m_rows.empty()) {
         if (m_vscroll) {
@@ -1207,10 +1207,10 @@ void ListBox::DisallowDropType(const std::string& str)
 void ListBox::AutoScrollDuringDragDrops(bool auto_scroll)
 { m_auto_scroll_during_drag_drops = auto_scroll; }
 
-void ListBox::SetAutoScrollMargin(int margin)
+void ListBox::SetAutoScrollMargin(unsigned int margin)
 { m_auto_scroll_margin = margin; }
 
-void ListBox::SetAutoScrollInterval(int interval)
+void ListBox::SetAutoScrollInterval(unsigned int interval)
 { m_auto_scroll_timer.SetInterval(interval); }
 
 void ListBox::DefineAttributes(WndEditor* editor)
@@ -1253,7 +1253,7 @@ X ListBox::RightMargin() const
 Y ListBox::BottomMargin() const
 { return Y(m_hscroll ? SCROLL_WIDTH : 0); }
 
-int ListBox::CellMargin() const
+unsigned int ListBox::CellMargin() const
 { return m_cell_margin; }
 
 ListBox::iterator ListBox::RowUnderPt(const Pt& pt) const
@@ -1675,7 +1675,7 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
 {
     // this client area calculation disregards the thickness of scrolls
     Pt cl_sz = (LowerRight() - Pt(X(BORDER_THICK), Y(BORDER_THICK))) -
-        (UpperLeft() + Pt(X(BORDER_THICK), BORDER_THICK + (m_header_row->empty() ? Y0 : m_header_row->Height())));
+        (UpperLeft() + Pt(X(BORDER_THICK), static_cast<int>(BORDER_THICK) + (m_header_row->empty() ? Y0 : m_header_row->Height())));
 
     X total_x_extent = std::accumulate(m_col_widths.begin(), m_col_widths.end(), X0);
     Y total_y_extent(0);
@@ -1743,8 +1743,8 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
         Connect(m_hscroll->ScrolledSignal, &ListBox::HScrolled, this);
     }
 
-    assert(!m_vscroll || m_vscroll->PageSize() == ClientHeight());
-    assert(!m_hscroll || m_hscroll->PageSize() == ClientWidth());
+    assert(!m_vscroll || static_cast<int>(m_vscroll->PageSize()) == ClientHeight() || ClientHeight() < 0);
+    assert(!m_hscroll || static_cast<int>(m_hscroll->PageSize()) == ClientWidth() || ClientWidth() < 0);
 }
 
 void ListBox::VScrolled(int tab_low, int tab_high, int low, int high)

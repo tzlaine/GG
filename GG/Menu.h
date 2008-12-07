@@ -24,8 +24,9 @@
    whatwasthataddress@gmail.com */
 
 /** \file Menu.h
-    Contains the MenuItem class, which represents menu data; the MenuBar control class; and the PopupMenu class, which is 
-    used to provide immediate context menus. */
+    Contains the MenuItem class, which represents menu data; the MenuBar
+    control class; and the PopupMenu class, which is used to provide immediate
+    context menus. */
 
 #ifndef _GG_Menu_h_
 #define _GG_Menu_h_
@@ -38,11 +39,14 @@ namespace GG {
 class Font;
 class TextControl;
 
-/** serves as a single menu entry in a GG::MenuBar or GG::PopupMenu; may include a submenu.  All legal item_IDs are
-    positive (and so non-zero); any item_ID <= 0 is considered invalid.  Each MenuItem has a signal that is emmitted
-    with its menu_ID member whenever it is selected. Such signals may be emitted even when the menu_ID is 0.  These
-    signals allow each MenuItem to be attached directly to code that should be executed when that item is selected.
-    Note that the signal is not serialized.  The user must restore it after the MenuItem is reloaded. */
+/** Serves as a single menu entry in a GG::MenuBar or GG::PopupMenu; may
+    include a submenu.  All legal item_IDs are positive (and so non-zero); any
+    item_ID <= 0 is considered invalid.  Each MenuItem has a signal that is
+    emmitted with its menu_ID member whenever it is selected. Such signals may
+    be emitted even when the menu_ID is 0.  These signals allow each MenuItem
+    to be attached directly to code that should be executed when that item is
+    selected.  Note that the signal is not serialized.  The user must restore
+    it after the MenuItem is reloaded. */
 struct GG_API MenuItem
 {
     /** \name Signal Types */ ///@{
@@ -59,17 +63,21 @@ struct GG_API MenuItem
     MenuItem(); ///< default ctor
     MenuItem(const std::string& str, int id, bool disable, bool check); ///< ctor
 
-    /** ctor that allows direct attachment of this item's signal to a "slot" function or functor */
+    /** Ctor that allows direct attachment of this item's signal to a "slot"
+        function or functor */
     MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedIDSlotType& slot);
 
-    /** ctor that allows direct attachment of this item's signal to a "slot" function or functor */
+    /** Ctor that allows direct attachment of this item's signal to a "slot"
+        function or functor */
     MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedSlotType& slot);
 
-    /** ctor that allows direct attachment of this item's signal to a "slot" member function of a specific object */
+    /** Ctor that allows direct attachment of this item's signal to a "slot"
+        member function of a specific object */
     template <class T1, class T2>
     MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(int), T2* obj);
 
-    /** ctor that allows direct attachment of this item's signal to a "slot" member function of a specific object */
+    /** Ctor that allows direct attachment of this item's signal to a "slot"
+        member function of a specific object */
     template <class T1, class T2>
     MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(), T2* obj);
 
@@ -97,17 +105,23 @@ private:
 struct SetFontAction;
 struct SetTextColorAction;
 
-/** a menu bar control providing "browse" updates to user navigation of the menu.  Whenever a menu item is selected, a
-    signal is emitted which includes the ID of the selected item.  It is recommended that the user attach each menu item
-    to an appropriate function the will execute the actions associated with the menu item, rather than attaching all the
-    items to a single slot which uses the int ID parameter to deduce the appropriate action.  The int ID parameter is
-    best used when there are several menu items that should execute the same code with different parameters.  For
-    instance, if a submenu contains a list of recently used files, each item that contains a filename might be attached
-    to a Reopen(int) function, and the int can be used to determine which file from the list should be opened. If some
-    action is to be taken as the user browses the menu items, such as displaying some visual cue to indicate the result
-    of chosing a particular menu entry, you can attach a slot function to the BrowsedSignalType object returned by
-    BrowsedSignal.  Whenever the mouse moves to a new menu item, this signal is emitted with the ID number of the item
-    under the cursor.  */
+/** A menu bar control providing "browse" updates to user navigation of the
+    menu.  Whenever a menu item is selected, a signal is emitted which
+    includes the ID of the selected item.  It is recommended that the user
+    attach each menu item to an appropriate function the will execute the
+    actions associated with the menu item, rather than attaching all the items
+    to a single slot which uses the int ID parameter to deduce the appropriate
+    action.  The int ID parameter is best used when there are several menu
+    items that should execute the same code with different parameters.  For
+    instance, if a submenu contains a list of recently used files, each item
+    that contains a filename might be attached to a Reopen(int) function, and
+    the int can be used to determine which file from the list should be
+    opened. If some action is to be taken as the user browses the menu items,
+    such as displaying some visual cue to indicate the result of chosing a
+    particular menu entry, you can attach a slot function to the
+    BrowsedSignalType object returned by BrowsedSignal.  Whenever the mouse
+    moves to a new menu item, this signal is emitted with the ID number of the
+    item under the cursor.  */
 class GG_API MenuBar : public Control
 {
 public:
@@ -120,7 +134,8 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
+    /** Ctor.  Parameter \a m should contain the desired menu in its
+        next_level member. */
     MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor
     MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW); ///< ctor that takes a MenuItem containing menus with which to populate the MenuBar
     //@}
@@ -130,12 +145,12 @@ public:
 
     const MenuItem&   AllMenus() const;                           ///< returns a const reference to the MenuItem that contains all the menus and their contents
     bool              ContainsMenu(const std::string& str) const; ///< returns true if there is a top-level menu in the MenuBar whose label is \a str
-    int               NumMenus() const;                           ///< returns the number of top-level menus in the MenuBar
+    std::size_t       NumMenus() const;                           ///< returns the number of top-level menus in the MenuBar
 
     /** returns a const reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists. */
     const MenuItem&   GetMenu(const std::string& str) const;
 
-    const MenuItem&   GetMenu(int n) const;      ///< returns a const reference to the \a nth menu in the MenuBar; not range-checked
+    const MenuItem&   GetMenu(std::size_t n) const;///< returns a const reference to the \a nth menu in the MenuBar; not range-checked
 
     Clr               BorderColor() const;       ///< returns the color used to render the border of the control
     Clr               InteriorColor() const;     ///< returns the color used to render the interior of the control
@@ -156,7 +171,8 @@ public:
 
     MenuItem&      AllMenus();                    ///< returns a reference to the MenuItem that contains all the menus and their contents
 
-    /** returns a reference to the top-level menu in the MenuBar whose label is \a str.  \note No check is made to ensure such a menu exists. */
+    /** Returns a reference to the top-level menu in the MenuBar whose label
+        is \a str.  \note No check is made to ensure such a menu exists. */
     MenuItem&      GetMenu(const std::string& str);
 
     MenuItem&      GetMenu(int n);                ///< returns a reference to the \a nth menu in the MenuBar; not range-checked
@@ -171,6 +187,8 @@ public:
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
+    static const std::size_t INVALID_CARET;
+
 protected:
     /** \name Structors */ ///@{
     MenuBar(); ///< default ctor
@@ -179,11 +197,12 @@ protected:
     /** \name Accessors */ ///@{
     const boost::shared_ptr<Font>&   GetFont() const;    ///< returns the font used to render text in the control
     const std::vector<TextControl*>& MenuLabels() const; ///< returns the text for each top-level menu item
-    int                              Caret() const;      ///< returns the current position of the caret
+    std::size_t                      Caret() const;      ///< returns the current position of the caret
     //@}
 
 private:
-    /** determines the rects in m_menu_labels, and puts the menus in multiple rows if they will not fit in one */
+    /** Determines the rects in m_menu_labels, and puts the menus in multiple
+        rows if they will not fit in one */
     void AdjustLayout(bool reset = false);
 
     void BrowsedSlot(int n); ///< responds to a browse in a PopupMenu submenu, and passes it along
@@ -197,7 +216,7 @@ private:
 
     MenuItem                  m_menu_data;      ///< this is not just a single menu item; the next_level element represents the entire menu
     std::vector<TextControl*> m_menu_labels;    ///< the text for each top-level menu item
-    int                       m_caret;          ///< the currently indicated top-level menu (open or under the cursor)
+    std::size_t               m_caret;          ///< the currently indicated top-level menu (open or under the cursor)
 
     friend struct SetFontAction;
     friend struct SetTextColorAction;
@@ -208,18 +227,24 @@ private:
 };
 
 
-/** this is a modal pop-up menu.  PopupMenu gives calling code the abiltiy to create a pop-up menu (usually in response
-    to a right mouse click), allow the pop-up to execute, and then obtain an integer ID representing the selected menu
-    item, by calling MenuID().  If no menu item has been selected, MenuID() returns 0.  Though every MenuItem in a
-    PopupMenu may be attached to a slot directly, it is not recommended.  The intent of this class is to act as a tool
-    to get immediate input from the user, inline.  However, attaching MenuItem signals directly to slots will work, and
-    it will certainly be useful in some cases to do this.  Note also that there is no way to serialize a PopupMenu.
-    This is also because of the intent to use PopupMenus in an immediate, short-lived manner.  If you wish to save an
-    often-used popup menu, simply create the MenuItem that the popup is based on, and save and load that.  Also, if some
-    action is to be taken as the user browses the menu items, such as displaying some visual cue to indicate the result
-    of chosing a particular menu entry, you can attach a slot function to the BrowsedSignalType object returned by
-    BrowsedSignal.  Whenever the mouse moves to a new menu item, this signal is emitted with the ID number of the item
-    under the cursor. */
+/** This is a modal pop-up menu.  PopupMenu gives calling code the abiltiy to
+    create a pop-up menu (usually in response to a right mouse click), allow
+    the pop-up to execute, and then obtain an integer ID representing the
+    selected menu item, by calling MenuID().  If no menu item has been
+    selected, MenuID() returns 0.  Though every MenuItem in a PopupMenu may be
+    attached to a slot directly, it is not recommended.  The intent of this
+    class is to act as a tool to get immediate input from the user, inline.
+    However, attaching MenuItem signals directly to slots will work, and it
+    will certainly be useful in some cases to do this.  Note also that there
+    is no way to serialize a PopupMenu.  This is also because of the intent to
+    use PopupMenus in an immediate, short-lived manner.  If you wish to save
+    an often-used popup menu, simply create the MenuItem that the popup is
+    based on, and save and load that.  Also, if some action is to be taken as
+    the user browses the menu items, such as displaying some visual cue to
+    indicate the result of chosing a particular menu entry, you can attach a
+    slot function to the BrowsedSignalType object returned by BrowsedSignal.
+    Whenever the mouse moves to a new menu item, this signal is emitted with
+    the ID number of the item under the cursor. */
 class GG_API PopupMenu : public Wnd
 {
 public:
@@ -232,7 +257,8 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    /** ctor.  Parameter \a m should contain the desired menu in its next_level member. */
+    /** Ctor.  Parameter \a m should contain the desired menu in its
+        next_level member. */
     PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color = CLR_WHITE, Clr color = CLR_BLACK, Clr interior = CLR_SHADOW);
     //@}
 
@@ -267,14 +293,15 @@ public:
     void           SetSelectedTextColor(Clr clr); ///< sets the color used to render a hilited menu item's text
     //@}
 
+    static const std::size_t INVALID_CARET;
+
 protected:
     /** \name Accessors */ ///@{
-    const boost::shared_ptr<Font>&
-                             GetFont() const;      ///< returns the font used to render text in the control
-    const MenuItem&          MenuData() const;     ///< returns a const reference to the MenuItem that contains all the menu contents
-    const std::vector<Rect>& OpenLevels() const;   ///< returns the bounding rectangles for each open submenu, used to detect clicks in them
-    const std::vector<int>&  Caret() const;        ///< returns the stack representing the caret's location's path (eg 0th subitem of 1st subitem of item 3) back() is the most recent push
-    const MenuItem*          ItemSelected() const; ///< returns the menu item selected (0 if none)
+    const boost::shared_ptr<Font>&  GetFont() const;      ///< returns the font used to render text in the control
+    const MenuItem&                 MenuData() const;     ///< returns a const reference to the MenuItem that contains all the menu contents
+    const std::vector<Rect>&        OpenLevels() const;   ///< returns the bounding rectangles for each open submenu, used to detect clicks in them
+    const std::vector<std::size_t>& Caret() const;        ///< returns the stack representing the caret's location's path (eg 0th subitem of 1st subitem of item 3) back() is the most recent push
+    const MenuItem*                 ItemSelected() const; ///< returns the menu item selected (0 if none)
     //@}
 
 private:
@@ -289,7 +316,8 @@ private:
     MenuItem          m_menu_data;   ///< this is not just a single menu item; the next_level element represents the entire menu
 
     std::vector<Rect> m_open_levels; ///< bounding rectangles for each open submenu, used to detect clicks in them
-    std::vector<int>  m_caret;       ///< stack representing the caret's location's path (eg 0th subitem of 1st subitem of item 3) back() is the most recent push
+    std::vector<std::size_t>
+                      m_caret;       ///< stack representing the caret's location's path (eg 0th subitem of 1st subitem of item 3) back() is the most recent push
 
     const Pt          m_origin;         ///< the upper left hand corner of the control's visible area
     MenuItem*         m_item_selected;  ///< the menu item selected (0 if none)
@@ -306,9 +334,7 @@ GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check,
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{
-    SelectedIDSignal->connect(boost::bind(slot, obj, _1));
-}
+{ SelectedIDSignal->connect(boost::bind(slot, obj, _1)); }
 
 template <class T1, class T2>
 GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, void (T1::* slot)(), T2* obj) :
@@ -318,9 +344,7 @@ GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check,
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{
-    SelectedSignal->connect(boost::bind(slot, obj));
-}
+{ SelectedSignal->connect(boost::bind(slot, obj)); }
 
 template <class Archive>
 void GG::MenuItem::serialize(Archive& ar, const unsigned int version)

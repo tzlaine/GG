@@ -38,8 +38,10 @@ namespace GG {
 
 class Texture;
 
-/** Cursor is the base class for GUI-renderable cursors.  A Cursor can be set in the GUI and will be rendered if GUI's
-    RenderCursor() member returns true.  Note that it may be necessary to disable the underlying platform's cursor . */
+/** Cursor is the base class for GUI-renderable cursors.  A Cursor can be set
+    in the GUI and will be rendered if GUI's RenderCursor() member returns
+    true.  Note that it may be necessary to disable the underlying platform's
+    cursor . */
 class GG_API Cursor
 {
 public:
@@ -49,8 +51,8 @@ public:
     //@}
 
     /** \name Mutators */ ///@{
-    /** Renders the cursor at the specified location.  Subclasses should take care to ensure that the cursor's "hotspot"
-        is rendered at \a pt. */
+    /** Renders the cursor at the specified location.  Subclasses should take
+        care to ensure that the cursor's "hotspot" is rendered at \a pt. */
     virtual void Render(const Pt& pt) = 0;
     //@}
 
@@ -60,15 +62,17 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** TextureCursor is a very simple subclass of Cursor.  It renders a texture such that the point within the texture that
-    represents the hotspot of the cursor is rendered at the click-point of the cursor. */
+/** TextureCursor is a very simple subclass of Cursor.  It renders a texture
+    such that the point within the texture that represents the hotspot of the
+    cursor is rendered at the click-point of the cursor. */
 class GG_API TextureCursor :
     public Cursor
 {
 public:
     /** \name Structors */ ///@{
-    /** Ctor.  \a texture is the texture to render and \a hotspot is the offset within \a texture where the click-point
-        is located.  \a hotspot is clamped to \a texture's valid area. */
+    /** Ctor.  \a texture is the texture to render and \a hotspot is the
+        offset within \a texture where the click-point is located.  \a hotspot
+        is clamped to \a texture's valid area. */
     TextureCursor(const boost::shared_ptr<Texture>& texture, const Pt& hotspot = Pt());
     //@}
 

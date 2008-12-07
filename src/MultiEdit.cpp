@@ -105,8 +105,8 @@ const Flags<MultiEditStyle> GG::MULTI_NO_SCROLL (MULTI_NO_VSCROLL | MULTI_NO_HSC
 // GG::MultiEdit
 ////////////////////////////////////////////////
 // static(s)
-const int MultiEdit::SCROLL_WIDTH = 14;
-const int MultiEdit::BORDER_THICK = 2;
+const unsigned int MultiEdit::SCROLL_WIDTH = 14;
+const unsigned int MultiEdit::BORDER_THICK = 2;
 
 MultiEdit::MultiEdit() :
     Edit(),
@@ -159,7 +159,7 @@ Pt MultiEdit::ClientLowerRight() const
 Flags<MultiEditStyle> MultiEdit::Style() const
 { return m_style; }
 
-int MultiEdit::MaxLinesOfHistory() const
+std::size_t MultiEdit::MaxLinesOfHistory() const
 { return m_max_lines_history; }
 
 void MultiEdit::Render()
@@ -562,7 +562,7 @@ void MultiEdit::SetText(const std::string& str)
         if (0 < m_max_lines_history) {
             std::vector<Font::LineData> lines;
             GetFont()->DetermineLines(str, format, cl_sz.x, lines);
-            if (m_max_lines_history < static_cast<int>(lines.size())) {
+            if (m_max_lines_history < lines.size()) {
                 int first_line = 0;
                 int last_line = m_max_lines_history - 1;
                 int cursor_begin_idx = -1; // used to correct the cursor range when lines get chopped
@@ -648,7 +648,7 @@ void MultiEdit::SetStyle(Flags<MultiEditStyle> style)
     SetText(WindowText());
 }
 
-void MultiEdit::SetMaxLinesOfHistory(int max)
+void MultiEdit::SetMaxLinesOfHistory(std::size_t max)
 {
     m_max_lines_history = max;
     SetText(m_text);
@@ -999,12 +999,15 @@ void MultiEdit::AdjustScrolls()
     contents_sz.y = static_cast<int>(GetLineData().size()) * GetFont()->Lineskip();
     X excess_width = contents_sz.x - cl_sz.x;
 
+    const int INT_SCROLL_WIDTH = static_cast<int>(SCROLL_WIDTH);
     need_vert =
-        (!(m_style & MULTI_NO_VSCROLL) && (contents_sz.y > cl_sz.y ||
-                                           (contents_sz.y > cl_sz.y - SCROLL_WIDTH && contents_sz.x > cl_sz.x - SCROLL_WIDTH)));
+        (!(m_style & MULTI_NO_VSCROLL) &&
+         (contents_sz.y > cl_sz.y ||
+          (contents_sz.y > cl_sz.y - INT_SCROLL_WIDTH && contents_sz.x > cl_sz.x - INT_SCROLL_WIDTH)));
     need_horz =
-        (!(m_style & MULTI_NO_HSCROLL) && (contents_sz.x > cl_sz.x ||
-                                           (contents_sz.x > cl_sz.x - SCROLL_WIDTH && contents_sz.y > cl_sz.y - SCROLL_WIDTH)));
+        (!(m_style & MULTI_NO_HSCROLL) &&
+         (contents_sz.x > cl_sz.x ||
+          (contents_sz.x > cl_sz.x - INT_SCROLL_WIDTH && contents_sz.y > cl_sz.y - INT_SCROLL_WIDTH)));
 
     Pt orig_cl_sz = ClientSize();
 
@@ -1022,21 +1025,23 @@ void MultiEdit::AdjustScrolls()
     Y vscroll_max = vscroll_min + contents_sz.y - 1;
     X hscroll_max = hscroll_min + contents_sz.x - 1;
 
+    const int INT_GAP = static_cast<int>(GAP);
     if (m_vscroll) { // if scroll already exists...
         if (!need_vert) { // remove scroll
             DeleteChild(m_vscroll);
             m_vscroll = 0;
         } else { // ensure vertical scroll has the right logical and physical dimensions
             m_vscroll->SizeScroll(Value(vscroll_min), Value(vscroll_max),
-                                  Value(cl_sz.y / 8), Value(cl_sz.y - (need_horz ? SCROLL_WIDTH : 0)));
-            X scroll_x = cl_sz.x + GAP - SCROLL_WIDTH;
+                                  Value(cl_sz.y / 8), Value(cl_sz.y - (need_horz ? INT_SCROLL_WIDTH : 0)));
+            X scroll_x = cl_sz.x + INT_GAP - INT_SCROLL_WIDTH;
             Y scroll_y(-GAP);
-            m_vscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0)));
+            m_vscroll->SizeMove(Pt(scroll_x, scroll_y),
+                                Pt(scroll_x + INT_SCROLL_WIDTH, scroll_y + cl_sz.y + 2 * INT_GAP - (need_horz ? INT_SCROLL_WIDTH : 0)));
         }
     } else if (!m_vscroll && need_vert) { // if scroll doesn't exist but is needed
-        m_vscroll = style->NewMultiEditVScroll(cl_sz.x + GAP - SCROLL_WIDTH, Y(-GAP), X(SCROLL_WIDTH), cl_sz.y + 2 * GAP - (need_horz ? SCROLL_WIDTH : 0), m_color, CLR_SHADOW);
+        m_vscroll = style->NewMultiEditVScroll(cl_sz.x + INT_GAP - INT_SCROLL_WIDTH, Y(-GAP), X(SCROLL_WIDTH), cl_sz.y + 2 * INT_GAP - (need_horz ? INT_SCROLL_WIDTH : 0), m_color, CLR_SHADOW);
         m_vscroll->SizeScroll(Value(vscroll_min), Value(vscroll_max),
-                              Value(cl_sz.y / 8), Value(cl_sz.y - (need_horz ? SCROLL_WIDTH : 0)));
+                              Value(cl_sz.y / 8), Value(cl_sz.y - (need_horz ? INT_SCROLL_WIDTH : 0)));
         AttachChild(m_vscroll);
         Connect(m_vscroll->ScrolledSignal, &MultiEdit::VScrolled, this);
     }
@@ -1047,15 +1052,16 @@ void MultiEdit::AdjustScrolls()
             m_hscroll = 0;
         } else { // ensure horizontal scroll has the right logical and physical dimensions
             m_hscroll->SizeScroll(Value(hscroll_min), Value(hscroll_max),
-                                  Value(cl_sz.x / 8), Value(cl_sz.x - (need_vert ? SCROLL_WIDTH : 0)));
+                                  Value(cl_sz.x / 8), Value(cl_sz.x - (need_vert ? INT_SCROLL_WIDTH : 0)));
             X scroll_x(-GAP);
-            Y scroll_y = cl_sz.y + GAP - SCROLL_WIDTH;
-            m_hscroll->SizeMove(Pt(scroll_x, scroll_y), Pt(scroll_x + cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH));
+            Y scroll_y = cl_sz.y + INT_GAP - INT_SCROLL_WIDTH;
+            m_hscroll->SizeMove(Pt(scroll_x, scroll_y),
+                                Pt(scroll_x + cl_sz.x + 2 * INT_GAP - (need_vert ? INT_SCROLL_WIDTH : 0), scroll_y + INT_SCROLL_WIDTH));
         }
     } else if (!m_hscroll && need_horz) { // if scroll doesn't exist but is needed
-        m_hscroll = style->NewMultiEditHScroll(X(-GAP), cl_sz.y + GAP - SCROLL_WIDTH, cl_sz.x + 2 * GAP - (need_vert ? SCROLL_WIDTH : 0), Y(SCROLL_WIDTH), m_color, CLR_SHADOW);
+        m_hscroll = style->NewMultiEditHScroll(X(-GAP), cl_sz.y + GAP - INT_SCROLL_WIDTH, cl_sz.x + 2 * GAP - (need_vert ? INT_SCROLL_WIDTH : 0), Y(SCROLL_WIDTH), m_color, CLR_SHADOW);
         m_hscroll->SizeScroll(Value(hscroll_min), Value(hscroll_max),
-                              Value(cl_sz.x / 8), Value(cl_sz.x - (need_vert ? SCROLL_WIDTH : 0)));
+                              Value(cl_sz.x / 8), Value(cl_sz.x - (need_vert ? INT_SCROLL_WIDTH : 0)));
         AttachChild(m_hscroll);
         Connect(m_hscroll->ScrolledSignal, &MultiEdit::HScrolled, this);
     }

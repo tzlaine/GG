@@ -35,6 +35,8 @@
 
 using namespace GG;
 
+const std::size_t ThreeButtonDlg::NO_BUTTON = std::numeric_limits<std::size_t>::max();
+
 ThreeButtonDlg::ThreeButtonDlg() :
     Wnd(),
     m_default(0),
@@ -46,7 +48,7 @@ ThreeButtonDlg::ThreeButtonDlg() :
 {}
 
 ThreeButtonDlg::ThreeButtonDlg(X x, Y y, X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
-                               Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
+                               Clr color, Clr border_color, Clr button_color, Clr text_color, std::size_t buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/,
                                const std::string& two/* = ""*/) :
     Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
@@ -63,7 +65,7 @@ ThreeButtonDlg::ThreeButtonDlg(X x, Y y, X w, Y h, const std::string& msg, const
 { Init(msg, font, buttons, zero, one, two); }
 
 ThreeButtonDlg::ThreeButtonDlg(X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
-                               Clr color, Clr border_color, Clr button_color, Clr text_color, int buttons,
+                               Clr color, Clr border_color, Clr button_color, Clr text_color, std::size_t buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
     Wnd((GUI::GetGUI()->AppWidth() - w) / 2, (GUI::GetGUI()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
     m_color(color),
@@ -81,13 +83,13 @@ ThreeButtonDlg::ThreeButtonDlg(X w, Y h, const std::string& msg, const boost::sh
 Clr ThreeButtonDlg::ButtonColor() const
 { return m_button_color; }
 
-int ThreeButtonDlg::Result() const
+std::size_t ThreeButtonDlg::Result() const
 { return m_result; }
 
-int ThreeButtonDlg::DefaultButton() const
+std::size_t ThreeButtonDlg::DefaultButton() const
 { return m_default; }
 
-int ThreeButtonDlg::EscapeButton() const
+std::size_t ThreeButtonDlg::EscapeButton() const
 { return m_escape; }
 
 void ThreeButtonDlg::Render()
@@ -95,14 +97,14 @@ void ThreeButtonDlg::Render()
 
 void ThreeButtonDlg::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
-    if (key == GGK_RETURN || key == GGK_KP_ENTER && m_default != -1) {
+    if (key == GGK_RETURN || key == GGK_KP_ENTER) {
         if (m_default == 0)
             Button0Clicked();
         else if (m_default == 1)
             Button1Clicked();
-        else if (m_default == 1)
+        else if (m_default == 2)
             Button2Clicked();
-    } else if (key == GGK_ESCAPE && m_escape != -1) {
+    } else if (key == GGK_ESCAPE) {
         if (m_escape == 0)
             Button0Clicked();
         else if (m_escape == 1)
@@ -123,25 +125,25 @@ void ThreeButtonDlg::SetButtonColor(Clr color)
         m_button_2->SetColor(color);
 }
 
-void ThreeButtonDlg::SetDefaultButton(int i)
+void ThreeButtonDlg::SetDefaultButton(std::size_t i)
 {
-    if (i < 0 || NumButtons() <= i)
-        m_default = -1;
+    if (NumButtons() <= i)
+        m_default = NO_BUTTON;
     else
         m_default = i;
 }
 
-void ThreeButtonDlg::SetEscapeButton(int i)
+void ThreeButtonDlg::SetEscapeButton(std::size_t i)
 {
-    if (i < 0 || NumButtons() <= i)
-        m_escape = -1;
+    if (NumButtons() <= i)
+        m_escape = NO_BUTTON;
     else
         m_escape = i;
 }
 
-int ThreeButtonDlg::NumButtons() const
+std::size_t ThreeButtonDlg::NumButtons() const
 {
-    int retval = 1;
+    std::size_t retval = 1;
     if (m_button_2)
         retval = 3;
     else if (m_button_1)
@@ -149,8 +151,9 @@ int ThreeButtonDlg::NumButtons() const
     return retval;
 }
 
-void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>& font, int buttons,
-                          const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/)
+void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>& font, std::size_t buttons,
+                          const std::string& zero/* = ""*/, const std::string& one/* = ""*/,
+                          const std::string& two/* = ""*/)
 {
     if (buttons < 1)
         buttons = 1;

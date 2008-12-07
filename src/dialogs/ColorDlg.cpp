@@ -405,7 +405,7 @@ void ColorDlg::ColorDisplay::Render()
 
 
 // ColorDlg::ColorButtonClickFunctor
-ColorDlg::ColorButtonClickFunctor::ColorButtonClickFunctor(int id, ColorDlg* picker_) :
+ColorDlg::ColorButtonClickFunctor::ColorButtonClickFunctor(std::size_t id, ColorDlg* picker_) :
     button_id(id),
     picker(picker_)
 {}
@@ -418,6 +418,7 @@ void ColorDlg::ColorButtonClickFunctor::operator()()
 
 // static(s)
 std::vector<Clr> ColorDlg::s_custom_colors;
+const std::size_t ColorDlg::INVALID_COLOR_BUTTON = std::numeric_limits<std::size_t>::max();
 
 ColorDlg::ColorDlg() :
     Wnd(),
@@ -432,7 +433,7 @@ ColorDlg::ColorDlg() :
     m_old_color_square_text(0),
     m_color_squares_layout(0),
     m_color_buttons_layout(0),
-    m_current_color_button(-1),
+    m_current_color_button(INVALID_COLOR_BUTTON),
     m_ignore_sliders(false),
     m_ok(0),
     m_cancel(0),
@@ -465,7 +466,7 @@ ColorDlg::ColorDlg(X x, Y y, const boost::shared_ptr<Font>& font,
     m_old_color_square_text(0),
     m_color_squares_layout(0),
     m_color_buttons_layout(0),
-    m_current_color_button(-1),
+    m_current_color_button(INVALID_COLOR_BUTTON),
     m_ignore_sliders(false),
     m_ok(0),
     m_cancel(0),
@@ -501,7 +502,7 @@ ColorDlg::ColorDlg(X x, Y y, Clr original_color, const boost::shared_ptr<Font>& 
     m_old_color_square_text(0),
     m_color_squares_layout(0),
     m_color_buttons_layout(0),
-    m_current_color_button(-1),
+    m_current_color_button(INVALID_COLOR_BUTTON),
     m_ignore_sliders(false),
     m_ok(0),
     m_cancel(0),
@@ -620,7 +621,7 @@ void ColorDlg::Render()
 {
     Pt ul = UpperLeft(), lr = LowerRight();
     FlatRectangle(ul, lr, m_color, m_border_color, 1);
-    if (m_current_color_button != -1) {
+    if (m_current_color_button != INVALID_COLOR_BUTTON) {
         Pt button_ul = m_color_buttons[m_current_color_button]->UpperLeft() - Pt(X(2), Y(2));
         Pt button_lr = m_color_buttons[m_current_color_button]->LowerRight() + Pt(X(2), Y(2));
         FlatRectangle(button_ul, button_lr, CLR_ZERO, m_text_color, 2);
@@ -813,7 +814,7 @@ void ColorDlg::ColorChanged(HSVClr color)
     m_value_picker->SetValue(m_current_color.v);
     Clr rgb_color = Convert(m_current_color);
     m_new_color_square->SetColor(rgb_color);
-    if (m_current_color_button != -1) {
+    if (m_current_color_button != INVALID_COLOR_BUTTON) {
         m_color_buttons[m_current_color_button]->SetRepresentedColor(rgb_color);
         s_custom_colors[m_current_color_button] = rgb_color;
     }
@@ -866,7 +867,7 @@ void ColorDlg::ColorChangeFromRGBSlider()
     m_value_picker->SetHueSaturation(m_current_color.h, m_current_color.s);
     m_value_picker->SetValue(m_current_color.v);
     m_new_color_square->SetColor(color);
-    if (m_current_color_button != -1) {
+    if (m_current_color_button != INVALID_COLOR_BUTTON) {
         m_color_buttons[m_current_color_button]->SetRepresentedColor(color);
         s_custom_colors[m_current_color_button] = color;
     }
@@ -875,7 +876,7 @@ void ColorDlg::ColorChangeFromRGBSlider()
     m_ignore_sliders = false;
 }
 
-void ColorDlg::ColorButtonClicked(int i)
+void ColorDlg::ColorButtonClicked(std::size_t i)
 {
     m_current_color_button = i;
     m_current_color = Convert(m_color_buttons[m_current_color_button]->RepresentedColor());

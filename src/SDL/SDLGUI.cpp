@@ -68,7 +68,7 @@ X SDLGUI::AppWidth() const
 Y SDLGUI::AppHeight() const
 { return m_app_height; }
 
-int SDLGUI::Ticks() const
+unsigned int SDLGUI::Ticks() const
 { return SDL_GetTicks(); }
 
 void SDLGUI::operator()()

@@ -37,8 +37,8 @@ namespace GG {
 class Font;
 class Slider;
     
-/** contains the necessary data to represent a color in HSV space, with an alpha value thrown in to make conversions to
-    and from GG::Clr possible. */
+/** Contains the necessary data to represent a color in HSV space, with an
+    alpha value thrown in to make conversions to and from GG::Clr possible. */
 struct GG_API HSVClr
 {
     HSVClr(); ///< default ctor
@@ -52,8 +52,8 @@ struct GG_API HSVClr
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** a control specifically designed for ColorDlg that allows the user to select a point in the Hue-Saturation subspace
-    of the HSV color space. */
+/** A control specifically designed for ColorDlg that allows the user to
+    select a point in the Hue-Saturation subspace of the HSV color space. */
 class GG_API HueSaturationPicker : public Control
 {
 public:
@@ -98,8 +98,8 @@ private:
 };
 
 
-/** a control specifically designed for ColorDlg that allows the user to select a point in the Value subspace of the HSV
-    color space. */
+/** A control specifically designed for ColorDlg that allows the user to
+    select a point in the Value subspace of the HSV color space. */
 class GG_API ValuePicker : public Control
 {
 public:
@@ -120,8 +120,8 @@ public:
     virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
 
-    /** sets the current hue and saturation.  These are only used to render the control, and do not otherwise influence
-        its operation. */
+    /** Sets the current hue and saturation.  These are only used to render
+        the control, and do not otherwise influence its operation. */
     void SetHueSaturation(double hue, double saturation);
     void SetValue(double value); ///< sets the current value.  Note that this does not cause a signal to be emitted.
     //@}
@@ -148,10 +148,12 @@ private:
 };
 
 
-/** a dialog box used to get a color selection from the user.  The user may select a certain number of custom colors,
-    which will remain available for the duration of that run of the application in the ColorDlg's static space.  If
-    desired, an optional previous color can be provided to the ColorDlg ctor, which will cause this previous color to be
-    shown next to the new color for comparison purposes. */
+/** A dialog box used to get a color selection from the user.  The user may
+    select a certain number of custom colors, which will remain available for
+    the duration of that run of the application in the ColorDlg's static
+    space.  If desired, an optional previous color can be provided to the
+    ColorDlg ctor, which will cause this previous color to be shown next to
+    the new color for comparison purposes. */
 class GG_API ColorDlg : public Wnd
 {
 public:
@@ -192,9 +194,10 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** a simple control that only displays a rectangle filled with the given color.  The color is shown in full alpha
-        in the upper-left portion of the rectangle, and the color is shown in its given alpha in the lower-left of the
-        rectangle. */
+    /** A simple control that only displays a rectangle filled with the given
+        color.  The color is shown in full alpha in the upper-left portion of
+        the rectangle, and the color is shown in its given alpha in the
+        lower-left of the rectangle. */
     class GG_API ColorDisplay : public Control
     {
     public:
@@ -228,8 +231,9 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    /** returns true iff the user selected a color and then clicked the "Ok" button.  Otherwise, the color returned by
-        Result() will be the original color if one was selected, or undefined if one was not. */
+    /** Returns true iff the user selected a color and then clicked the "Ok"
+        button.  Otherwise, the color returned by Result() will be the
+        original color if one was selected, or undefined if one was not. */
     bool ColorWasSelected() const;
 
     /** returns the color selected by the user, if the "Ok" button was used to close the dialog. */
@@ -265,6 +269,8 @@ public:
     virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     //@}
 
+    static const std::size_t INVALID_COLOR_BUTTON;
+
 protected:
     /** \name Structors */ ///@{
     ColorDlg(); ///< default ctor
@@ -273,9 +279,9 @@ protected:
 private:
     struct ColorButtonClickFunctor
     {
-        ColorButtonClickFunctor(int id, ColorDlg* picker_);
+        ColorButtonClickFunctor(std::size_t id, ColorDlg* picker_);
         void operator()();
-        const int button_id;
+        const std::size_t button_id;
         ColorDlg* picker;
     };
 
@@ -289,7 +295,7 @@ private:
     void UpdateRGBSliders();
     void UpdateHSVSliders();
     void ColorChangeFromRGBSlider();
-    void ColorButtonClicked(int i);
+    void ColorButtonClicked(std::size_t i);
     void RedSliderChanged(int value, int low, int high);
     void GreenSliderChanged(int value, int low, int high);
     void BlueSliderChanged(int value, int low, int high);
@@ -327,7 +333,7 @@ private:
     Layout*                   m_color_squares_layout;
     std::vector<ColorButton*> m_color_buttons;
     Layout*                   m_color_buttons_layout;
-    int                       m_current_color_button;
+    std::size_t               m_current_color_button;
     std::vector<TextControl*> m_slider_labels;
     std::vector<TextControl*> m_slider_values;
     std::vector<Slider*>      m_sliders;

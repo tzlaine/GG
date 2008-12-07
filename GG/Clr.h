@@ -37,10 +37,13 @@
 
 namespace GG {
 
-/** A simple 32-bit structure that can act as a packed 32-bit unsigned integer representation of a RGBA color, a vector
-    of the four unsigned bytes that compose an RGBA color, or the individual unsigned bytes "a", "r", "g", and "b", each
-    of which represents a color channel.  You should not use literals to initialize Color objects; depending on the
-    endian-ness of the machine, 0x00FFFFFF would be transparent white (little-endian) or opaque yellow (big-endian).*/
+/** A simple 32-bit structure that can act as a packed 32-bit unsigned integer
+    representation of a RGBA color, a vector of the four unsigned bytes that
+    compose an RGBA color, or the individual unsigned bytes "a", "r", "g", and
+    "b", each of which represents a color channel.  You should not use
+    literals to initialize Color objects; depending on the endian-ness of the
+    machine, 0x00FFFFFF would be transparent white (little-endian) or opaque
+    yellow (big-endian).*/
 struct GG_API Clr
 {
     /** \name Structors */ ///@{

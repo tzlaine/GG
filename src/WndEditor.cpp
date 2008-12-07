@@ -258,7 +258,7 @@ AttributeRow<bool>::AttributeRow(const std::string& name, bool& value, const boo
     push_back(m_radio_button_group);
 }
 
-void AttributeRow<bool>::SelectionChanged(int selection)
+void AttributeRow<bool>::SelectionChanged(std::size_t selection)
 {
     m_value = !selection;
     ValueChangedSignal(m_value);

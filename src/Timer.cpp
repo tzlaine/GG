@@ -14,7 +14,7 @@ Timer::Timer() :
     m_last_fire(0)
 { GUI::GetGUI()->RegisterTimer(*this); }
 
-Timer::Timer(int interval, int start_time/* = 0*/) :
+Timer::Timer(unsigned int interval, unsigned int start_time/* = 0*/) :
     m_interval(interval),
     m_running(true),
     m_last_fire(start_time ? start_time : GUI::GetGUI()->Ticks())
@@ -26,22 +26,22 @@ Timer::~Timer()
 bool Timer::Connected() const
 { return !m_wnds.empty(); }
 
-int Timer::Interval() const
+unsigned int Timer::Interval() const
 { return m_interval; }
 
 bool Timer::Running() const
 { return m_running; }
 
-bool Timer::ShouldFire(int ticks) const
+bool Timer::ShouldFire(unsigned int ticks) const
 { return m_running && !m_wnds.empty() && m_interval < ticks - m_last_fire; }
 
 const std::set<Wnd*>& Timer::Wnds() const
 { return m_wnds; }
 
-void Timer::Reset(int start_time/* = 0*/)
+void Timer::Reset(unsigned int start_time/* = 0*/)
 { m_last_fire = start_time ? start_time : GUI::GetGUI()->Ticks(); }
 
-void Timer::SetInterval(int interval)
+void Timer::SetInterval(unsigned int interval)
 { m_interval = interval; }
 
 void Timer::Connect(Wnd* wnd)

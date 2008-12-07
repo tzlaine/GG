@@ -41,7 +41,7 @@ namespace {
 // GG::TabWnd
 ////////////////////////////////////////////////
 // static(s)
-const int TabWnd::NO_WND = RadioButtonGroup::NO_BUTTON;
+const std::size_t TabWnd::NO_WND = RadioButtonGroup::NO_BUTTON;
 
 TabWnd::TabWnd() :
     m_tab_bar(0),
@@ -55,8 +55,9 @@ TabWnd::~TabWnd()
     }
 }
 
-TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
-               TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
+TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color,
+               Clr text_color/* = CLR_BLACK*/, TabBarStyle style/* = TAB_BAR_ATTACHED*/,
+               Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
     Wnd(x, y, w, h, flags),
     m_tab_bar(GetStyleFactory()->NewTabBar(X0, Y0, w, font, color, text_color, style, CLICKABLE)),
     m_current_wnd(0)
@@ -78,20 +79,20 @@ Pt TabWnd::MinUsableSize() const
 Wnd* TabWnd::CurrentWnd() const
 { return m_current_wnd; }
 
-int TabWnd::CurrentWndIndex() const
+std::size_t TabWnd::CurrentWndIndex() const
 { return m_tab_bar->CurrentTabIndex(); }
 
 void TabWnd::Render()
 {}
 
-int TabWnd::AddWnd(Wnd* wnd, const std::string& name)
+std::size_t TabWnd::AddWnd(Wnd* wnd, const std::string& name)
 {
-    int retval = m_wnds.size();
+    std::size_t retval = m_wnds.size();
     InsertWnd(m_wnds.size(), wnd, name);
     return retval;
 }
 
-void TabWnd::InsertWnd(int index, Wnd* wnd, const std::string& name)
+void TabWnd::InsertWnd(std::size_t index, Wnd* wnd, const std::string& name)
 {
     m_wnds.insert(m_wnds.begin() + index, std::make_pair(wnd, name));
     m_tab_bar->InsertTab(index, name);
@@ -101,7 +102,7 @@ void TabWnd::InsertWnd(int index, Wnd* wnd, const std::string& name)
 Wnd* TabWnd::RemoveWnd(const std::string& name)
 {
     Wnd* retval = 0;
-    int index = NO_WND;
+    std::size_t index = NO_WND;
     for (std::size_t i = 0; i < m_wnds.size(); ++i) {
         if (m_wnds[i].second == name) {
             index = i;
@@ -117,7 +118,7 @@ Wnd* TabWnd::RemoveWnd(const std::string& name)
     return retval;
 }
 
-void TabWnd::SetCurrentWnd(int index)
+void TabWnd::SetCurrentWnd(std::size_t index)
 { m_tab_bar->SetCurrentTab(index); }
 
 const TabBar* TabWnd::GetTabBar() const
@@ -126,9 +127,9 @@ const TabBar* TabWnd::GetTabBar() const
 const std::vector<std::pair<Wnd*, std::string> >& TabWnd::Wnds() const
 { return m_wnds; }
 
-void TabWnd::TabChanged(int index)
+void TabWnd::TabChanged(std::size_t index)
 {
-    assert(0 <= index && index < static_cast<int>(m_wnds.size()));
+    assert(index < m_wnds.size());
     Wnd* old_current_wnd = m_current_wnd;
     m_current_wnd = m_wnds[index].first;
     if (m_current_wnd != old_current_wnd) {
@@ -144,7 +145,7 @@ void TabWnd::TabChanged(int index)
 // GG::TabBar
 ////////////////////////////////////////////////
 // static(s)
-const int TabBar::NO_TAB = TabWnd::NO_WND;
+const std::size_t TabBar::NO_TAB = TabWnd::NO_WND;
 const X TabBar::BUTTON_WIDTH(10);
 
 TabBar::TabBar() :
@@ -211,7 +212,7 @@ Pt TabBar::MinUsableSize() const
     return Pt(4 * BUTTON_WIDTH, y);
 }
 
-int TabBar::CurrentTabIndex() const
+std::size_t TabBar::CurrentTabIndex() const
 { return m_tabs->CheckedButton(); }
 
 Clr TabBar::TextColor() const
@@ -227,16 +228,16 @@ void TabBar::SizeMove(const Pt& ul, const Pt& lr)
 void TabBar::Render()
 {}
 
-int TabBar::AddTab(const std::string& name)
+std::size_t TabBar::AddTab(const std::string& name)
 {
-    int retval = m_tab_buttons.size();
+    std::size_t retval = m_tab_buttons.size();
     InsertTab(m_tab_buttons.size(), name);
     return retval;
 }
 
-void TabBar::InsertTab(int index, const std::string& name)
+void TabBar::InsertTab(std::size_t index, const std::string& name)
 {
-    assert(0 <= index && index <= static_cast<int>(m_tab_buttons.size()));
+    assert(index <= m_tab_buttons.size());
     boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
     StateButton* button = style_factory->NewTabBarTab(X0, Y0, X1, Y1, name,
                                                       m_font, FORMAT_CENTER, Color(),
@@ -261,14 +262,14 @@ void TabBar::InsertTab(int index, const std::string& name)
 
 void TabBar::RemoveTab(const std::string& name)
 {
-    int index = NO_TAB;
+    std::size_t index = NO_TAB;
     for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
         if (m_tab_buttons[i]->WindowText() == name) {
             index = i;
             break;
         }
     }
-    assert(0 <= index && index < static_cast<int>(m_tab_buttons.size()));
+    assert(index < m_tab_buttons.size());
 
     m_tab_buttons[index]->RemoveEventFilter(this);
     m_tabs->RemoveButton(m_tab_buttons[index]);
@@ -280,7 +281,7 @@ void TabBar::RemoveTab(const std::string& name)
         m_tabs->SetCheck(0);
 }
 
-void TabBar::SetCurrentTab(int index)
+void TabBar::SetCurrentTab(std::size_t index)
 { m_tabs->SetCheck(index); }
 
 const Button* TabBar::LeftButton() const
@@ -292,7 +293,7 @@ const Button* TabBar::RightButton() const
 void TabBar::DistinguishCurrentTab(const std::vector<StateButton*>& tab_buttons)
 { RaiseCurrentTabButton(); }
 
-void TabBar::TabChanged(int index)
+void TabBar::TabChanged(std::size_t index)
 {
     if (index != RadioButtonGroup::NO_BUTTON) {
         BringTabIntoView(index);
@@ -312,7 +313,7 @@ void TabBar::LeftClicked()
 
 void TabBar::RightClicked()
 {
-    assert(m_first_tab_shown < static_cast<int>(m_tab_buttons.size()) - 1);
+    assert(m_first_tab_shown < m_tab_buttons.size() - 1);
     m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown + 1]->UpperLeft().x, Y0));
     ++m_first_tab_shown;
     X right_side = m_left_right_button_layout->Visible() ?
@@ -322,7 +323,7 @@ void TabBar::RightClicked()
     m_left_button->Disable(false);
 }
 
-void TabBar::BringTabIntoView(int index)
+void TabBar::BringTabIntoView(std::size_t index)
 {
     while (m_tab_buttons[index]->UpperLeft().x < UpperLeft().x) {
         LeftClicked();

@@ -68,7 +68,8 @@ DropDownList* StyleFactory::NewDropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr c
 
 DynamicGraphic* StyleFactory::NewDynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height,
                                                 int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
-                                                Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, int frames/* = -1*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+                                                Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
+                                                int frames/* = DynamicGraphic::ALL_FRAMES*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 { return new DynamicGraphic(x, y, w, h, loop, frame_width, frame_height, margin, textures, style, frames, flags); }
 
 Edit* StyleFactory::NewEdit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font,

@@ -41,10 +41,10 @@ struct GG_API EventPumpState
 {
     EventPumpState(); ///< default ctor.
 
-    int last_FPS_time;    ///< The last time an FPS calculation was done.
-    int last_frame_time;  ///< The time of the last frame rendered.
-    int most_recent_time; ///< The time recorded on the previous iteration of the event pump loop.
-    int frames;           ///< The number of frames rendered since \a last_frame_time.
+    unsigned int last_FPS_time;    ///< The last time an FPS calculation was done.
+    unsigned int last_frame_time;  ///< The time of the last frame rendered.
+    unsigned int most_recent_time; ///< The time recorded on the previous iteration of the event pump loop.
+    std::size_t  frames;           ///< The number of frames rendered since \a last_frame_time.
 };
 
 /** the base type for all EventPump types.  The action taken by EventPumpBase is a part of the basic GG::GUI

@@ -71,7 +71,7 @@ namespace {
         return mod_keys;
     }
 
-    WndEvent::EventType ButtonEvent(WndEvent::EventType left_type, int mouse_button)
+    WndEvent::EventType ButtonEvent(WndEvent::EventType left_type, unsigned int mouse_button)
     { return WndEvent::EventType(left_type + (WndEvent::MButtonDown - WndEvent::LButtonDown) * mouse_button); }
 }
 
@@ -118,9 +118,9 @@ struct GG::GUIImpl
         m_drag_wnds[0] = m_drag_wnds[1] = m_drag_wnds[2] = 0;
     }
 
-    void HandlePress(int mouse_button, const GG::Pt& pos, int curr_ticks);
-    void HandleDrag(int mouse_button, const GG::Pt& pos, int curr_ticks);
-    void HandleRelease(int mouse_button, const GG::Pt& pos, int curr_ticks);
+    void HandlePress(unsigned int mouse_button, const GG::Pt& pos, int curr_ticks);
+    void HandleDrag(unsigned int mouse_button, const GG::Pt& pos, int curr_ticks);
+    void HandleRelease(unsigned int mouse_button, const GG::Pt& pos, int curr_ticks);
 
     std::string  m_app_name;              // the user-defined name of the apllication
 
@@ -180,7 +180,7 @@ struct GG::GUIImpl
     double       m_max_FPS;               // the maximum allowed frames per second rendering speed
 
     Wnd*         m_double_click_wnd;      // GUI window most recently clicked
-    int          m_double_click_button;   // the index of the mouse button used in the last click
+    unsigned int m_double_click_button;   // the index of the mouse button used in the last click
     int          m_double_click_start_time;// the time from which we started measuring double_click_time, in ms
     int          m_double_click_time;     // time elapsed since last click, in ms
 
@@ -194,7 +194,7 @@ struct GG::GUIImpl
     GUI::LoadWndFn    m_load_wnd_fn;
 };
 
-void GUIImpl::HandlePress(int mouse_button, const Pt& pos, int curr_ticks)
+void GUIImpl::HandlePress(unsigned int mouse_button, const Pt& pos, int curr_ticks)
 {
     m_curr_wnd_under_cursor = GUI::s_gui->CheckedGetWindowUnder(pos, m_mod_keys);
     m_last_button_down_repeat_time = 0;
@@ -237,7 +237,7 @@ void GUIImpl::HandlePress(int mouse_button, const Pt& pos, int curr_ticks)
     m_prev_wnd_under_cursor = m_curr_wnd_under_cursor; // update this for the next time around
 }
 
-void GUIImpl::HandleDrag(int mouse_button, const Pt& pos, int curr_ticks)
+void GUIImpl::HandleDrag(unsigned int mouse_button, const Pt& pos, int curr_ticks)
 {
     if (m_wnd_region == WR_MIDDLE || m_wnd_region == WR_NONE) { // send drag message to window or initiate drag-and-drop
         Pt diff = m_prev_button_press_pos - pos;
@@ -348,7 +348,7 @@ void GUIImpl::HandleDrag(int mouse_button, const Pt& pos, int curr_ticks)
     }
 }
 
-void GUIImpl::HandleRelease(int mouse_button, const GG::Pt& pos, int curr_ticks)
+void GUIImpl::HandleRelease(unsigned int mouse_button, const GG::Pt& pos, int curr_ticks)
 {
     m_curr_wnd_under_cursor = GUI::s_gui->CheckedGetWindowUnder(pos, m_mod_keys);
     m_last_button_down_repeat_time = 0;
@@ -476,7 +476,7 @@ Wnd* GUI::GetWindowUnder(const Pt& pt) const
     return s_impl->m_zlist.Pick(pt, ModalWindow());
 }
 
-int GUI::DeltaT() const
+unsigned int GUI::DeltaT() const
 { return s_impl->m_delta_t; }
 
 bool GUI::RenderingDragDropWnds() const
@@ -494,19 +494,19 @@ std::string GUI::FPSString() const
 double GUI::MaxFPS() const
 { return s_impl->m_max_FPS; }
 
-int GUI::ButtonDownRepeatDelay() const
+unsigned int GUI::ButtonDownRepeatDelay() const
 { return s_impl->m_button_down_repeat_delay; }
 
-int GUI::ButtonDownRepeatInterval() const
+unsigned int GUI::ButtonDownRepeatInterval() const
 { return s_impl->m_button_down_repeat_interval; }
 
-int GUI::DoubleClickInterval() const
+unsigned int GUI::DoubleClickInterval() const
 { return s_impl->m_double_click_interval; }
 
-int GUI::MinDragTime() const
+unsigned int GUI::MinDragTime() const
 { return s_impl->m_min_drag_time; }
 
-int GUI::MinDragDistance() const
+unsigned int GUI::MinDragDistance() const
 { return s_impl->m_min_drag_distance; }
 
 bool GUI::DragDropWnd(const Wnd* wnd) const
@@ -518,7 +518,7 @@ bool GUI::AcceptedDragDropWnd(const Wnd* wnd) const
     return it != s_impl->m_drag_drop_wnds_acceptable.end() && it->second;
 }
 
-bool GUI::MouseButtonDown(int bn) const
+bool GUI::MouseButtonDown(unsigned int bn) const
 { return (bn >= 0 && bn <= 2) ? s_impl->m_button_state[bn] : false; }
 
 Pt GUI::MousePosition() const
@@ -530,14 +530,14 @@ Pt GUI::MouseMovement() const
 Flags<ModKey> GUI::ModKeys() const
 { return s_impl->m_mod_keys; }
 
-std::set<std::pair<int, int> > GUI::FindWords(const std::string& str) const
+std::set<std::pair<std::size_t, std::size_t> > GUI::FindWords(const std::string& str) const
 {
-    std::set<std::pair<int, int> > retval;
+    std::set<std::pair<std::size_t, std::size_t> > retval;
     using namespace boost::xpressive;
     sregex_iterator it(str.begin(), str.end(), WORD_REGEX);
     sregex_iterator end_it;
     for ( ; it != end_it; ++it) {
-        std::pair<int, int> indices;
+        std::pair<std::size_t, std::size_t> indices;
         indices.first = it->position();
         indices.second = indices.first + it->length();
         retval.insert(indices);
@@ -697,14 +697,14 @@ void GUI::SetFocusWnd(Wnd* wnd)
         FocusWnd()->HandleEvent(WndEvent(WndEvent::GainingFocus));
 }
 
-void GUI::Wait(int ms)
+void GUI::Wait(unsigned int ms)
 {
     boost::xtime t;
     boost::xtime_get(&t, boost::TIME_UTC);
-    int ns_sum = t.nsec + ms * 1000000;
-    const int NANOSECONDS_PER_SECOND = 1000000000;
-    int delta_secs = ns_sum / NANOSECONDS_PER_SECOND;
-    int nanosecs = ns_sum % NANOSECONDS_PER_SECOND;
+    unsigned int ns_sum = t.nsec + ms * 1000000;
+    const unsigned int NANOSECONDS_PER_SECOND = 1000000000;
+    unsigned int delta_secs = ns_sum / NANOSECONDS_PER_SECOND;
+    unsigned int nanosecs = ns_sum % NANOSECONDS_PER_SECOND;
     t.sec += delta_secs;
     t.nsec = nanosecs;
     boost::thread::sleep(t);
@@ -827,7 +827,7 @@ void GUI::RegisterTimer(Timer& timer)
 void GUI::RemoveTimer(Timer& timer)
 { s_impl->m_timers.erase(&timer); }
 
-void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
+void GUI::EnableMouseButtonDownRepeat(unsigned int delay, unsigned int interval)
 {
     if (!delay) { // setting delay = 0 completely disables mouse drag repeat
         s_impl->m_button_down_repeat_delay = 0;
@@ -838,13 +838,13 @@ void GUI::EnableMouseButtonDownRepeat(int delay, int interval)
     }
 }
 
-void GUI::SetDoubleClickInterval(int interval)
+void GUI::SetDoubleClickInterval(unsigned int interval)
 { s_impl->m_double_click_interval = interval; }
 
-void GUI::SetMinDragTime(int time)
+void GUI::SetMinDragTime(unsigned int time)
 { s_impl->m_min_drag_time = time; }
 
-void GUI::SetMinDragDistance(int distance)
+void GUI::SetMinDragDistance(unsigned int distance)
 { s_impl->m_min_drag_distance = distance; }
 
 void GUI::SetAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
@@ -859,10 +859,10 @@ void GUI::RemoveAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
     s_impl->m_accelerators.erase(std::make_pair(key, mod_keys));
 }
 
-boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, int pts)
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned int pts)
 { return GetFontManager().GetFont(font_filename, pts); }
 
-void GUI::FreeFont(const std::string& font_filename, int pts)
+void GUI::FreeFont(const std::string& font_filename, unsigned int pts)
 { GetFontManager().FreeFont(font_filename, pts); }
 
 boost::shared_ptr<Texture> GUI::StoreTexture(Texture* texture, const std::string& texture_name)
@@ -1008,7 +1008,7 @@ bool GUI::ProcessBrowseInfoImpl(Wnd* wnd)
     bool retval = false;
     const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
     if (!browse_modes.empty()) {
-        int delta_t = Ticks() - s_impl->m_prev_wnd_under_cursor_time;
+        unsigned int delta_t = Ticks() - s_impl->m_prev_wnd_under_cursor_time;
         std::size_t i = 0;
         for (std::vector<Wnd::BrowseInfoMode>::const_reverse_iterator it = browse_modes.rbegin();
              it != browse_modes.rend();
@@ -1094,7 +1094,7 @@ Wnd* GUI::CheckedGetWindowUnder(const Pt& pt, Flags<ModKey> mod_keys)
 void GUI::SetFPS(double FPS)
 { s_impl->m_FPS = FPS; }
 
-void GUI::SetDeltaT(int delta_t)
+void GUI::SetDeltaT(unsigned int delta_t)
 { s_impl->m_delta_t = delta_t; }
 
 

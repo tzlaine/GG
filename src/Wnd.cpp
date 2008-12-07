@@ -177,7 +177,7 @@ namespace {
 // class GG::Wnd
 ///////////////////////////////////////
 // static(s)
-int Wnd::s_default_browse_time = 1500;
+unsigned int Wnd::s_default_browse_time = 1500;
 boost::shared_ptr<BrowseInfoWnd> Wnd::s_default_browse_info_wnd;
 
 Wnd::Wnd() :
@@ -370,7 +370,7 @@ Layout* Wnd::ContainingLayout() const
 const std::vector<Wnd::BrowseInfoMode>& Wnd::BrowseModes() const
 { return m_browse_modes; }
 
-const std::string& Wnd::BrowseInfoText(int mode) const
+const std::string& Wnd::BrowseInfoText(std::size_t mode) const
 { return m_browse_modes.at(mode).text; }
 
 const boost::shared_ptr<StyleFactory>& Wnd::GetStyleFactory() const
@@ -833,13 +833,13 @@ Layout* Wnd::DetachLayout()
     return retval;
 }
 
-void Wnd::SetLayoutBorderMargin(int margin)
+void Wnd::SetLayoutBorderMargin(unsigned int margin)
 {
     if (m_layout)
         m_layout->SetBorderMargin(margin);
 }
 
-void Wnd::SetLayoutCellMargin(int margin)
+void Wnd::SetLayoutCellMargin(unsigned int margin)
 {
     if (m_layout)
         m_layout->SetCellMargin(margin);
@@ -899,7 +899,7 @@ void Wnd::GainingFocus() {}
 
 void Wnd::LosingFocus() {}
 
-void Wnd::TimerFiring(int ticks, Timer* timer) {}
+void Wnd::TimerFiring(unsigned int ticks, Timer* timer) {}
 
 int Wnd::Run()
 {
@@ -916,9 +916,9 @@ int Wnd::Run()
     return retval;
 }
 
-void Wnd::SetBrowseModeTime(int time, int mode/* = 0*/)
+void Wnd::SetBrowseModeTime(unsigned int time, std::size_t mode/* = 0*/)
 {
-    if (static_cast<int>(m_browse_modes.size()) <= mode) {
+    if (m_browse_modes.size() <= mode) {
         if (m_browse_modes.empty()) {
             m_browse_modes.resize(mode + 1);
             for (std::size_t i = 0; i < m_browse_modes.size() - 1; ++i) {
@@ -935,10 +935,10 @@ void Wnd::SetBrowseModeTime(int time, int mode/* = 0*/)
     m_browse_modes[mode].time = time;
 }
 
-void Wnd::SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, int mode/* = 0*/)
+void Wnd::SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, std::size_t mode/* = 0*/)
 { m_browse_modes.at(mode).wnd = wnd; }
 
-void Wnd::SetBrowseText(const std::string& text, int mode/* = 0*/)
+void Wnd::SetBrowseText(const std::string& text, std::size_t mode/* = 0*/)
 { m_browse_modes.at(mode).text = text; }
 
 void Wnd::SetBrowseModes(const std::vector<BrowseInfoMode>& modes)
@@ -972,10 +972,10 @@ void Wnd::DefineAttributes(WndEditor* editor)
     // TODO: handle creation and modification of browse info modes
 }
 
-int Wnd::DefaultBrowseTime()
+unsigned int Wnd::DefaultBrowseTime()
 { return s_default_browse_time; }
 
-void Wnd::SetDefaultBrowseTime(int time)
+void Wnd::SetDefaultBrowseTime(unsigned int time)
 { s_default_browse_time = time; }
 
 const boost::shared_ptr<BrowseInfoWnd>& Wnd::DefaultBrowseInfoWnd()

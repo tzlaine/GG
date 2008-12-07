@@ -24,7 +24,8 @@
    whatwasthataddress@gmail.com */
 
 /** \file TextControl.h
-    Contains the TextControl class, a control which represents a certain text string in a certain font, justification, etc. */
+    Contains the TextControl class, a control which represents a certain text
+    string in a certain font, justification, etc. */
 
 #ifndef _GG_TextControl_h_
 #define _GG_TextControl_h_
@@ -37,20 +38,27 @@
 
 namespace GG {
 
-/** The name says it all.  All TextControl objects know how to center, left- or right-justify, etc. themselves within
-    their window areas.  The format flags used with TextControl are defined in enum GG::TextFormat in
-    GGBase.h. TextControl has std::string-like operators and functions that allow the m_text member string to be
-    manipulated directly.  In addition, the << and >> operators allow virtually any type (int, float, char, etc.) to be
-    read from a Text object as if it were an input or output stream, thanks to boost::lexical_cast.  Note that the Text
-    stream operators only read the first instance of the specified type from m_text, and overwrite the entire m_text
-    string when writing to it; both operators may throw.  This is a text control based on pre-rendered font glyphs.  The
-    text is rendered character by character from a prerendered font. The font used is gotten from the GUI's font
-    manager.  Since a shared_ptr to the font is kept, the font is guaranteed to live at least as long as the TextControl
-    object that refers to it.  This also means that if the font is explicitly released from the font manager but is
-    still held by at least one TextControl object, it will not be destroyed, due to the shared_ptr.  Note that if "" is
-    supplied as the font_filename parameter, no text will be rendered, but a valid TextControl object will be
-    constructed, which may later contain renderable text. TextControl objects support text with formatting tags. See
-    GG::Font for details.*/
+/** The name says it all.  All TextControl objects know how to center, left-
+    or right-justify, etc. themselves within their window areas.  The format
+    flags used with TextControl are defined in enum GG::TextFormat in
+    GGBase.h. TextControl has std::string-like operators and functions that
+    allow the m_text member string to be manipulated directly.  In addition,
+    the << and >> operators allow virtually any type (int, float, char, etc.) 
+    to be read from a Text object as if it were an input or output stream,
+    thanks to boost::lexical_cast.  Note that the Text stream operators only
+    read the first instance of the specified type from m_text, and overwrite
+    the entire m_text string when writing to it; both operators may throw.
+    This is a text control based on pre-rendered font glyphs.  The text is
+    rendered character by character from a prerendered font. The font used is
+    gotten from the GUI's font manager.  Since a shared_ptr to the font is
+    kept, the font is guaranteed to live at least as long as the TextControl
+    object that refers to it.  This also means that if the font is explicitly
+    released from the font manager but is still held by at least one
+    TextControl object, it will not be destroyed, due to the shared_ptr.  Note
+    that if "" is supplied as the font_filename parameter, no text will be
+    rendered, but a valid TextControl object will be constructed, which may
+    later contain renderable text. TextControl objects support text with
+    formatting tags. See GG::Font for details.*/
 class GG_API TextControl : public Control
 {
 public:
@@ -59,48 +67,64 @@ public:
     /** \name Structors */ ///@{
     TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
 
-    /** ctor that does not require window size.
-        Window size is determined from the string and font; the window will be large enough to fit the text as rendered, 
-        and no larger.  The private member m_fit_to_text is also set to true. \see TextControl::SetText() */
+    /** Ctor that does not require window size.  Window size is determined
+        from the string and font; the window will be large enough to fit the
+        text as rendered, and no larger.  The private member m_fit_to_text is
+        also set to true. \see TextControl::SetText() */
     TextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ ///@{
     virtual Pt        MinUsableSize() const;
 
-    /** returns the text format (vertical and horizontal justification, use of word breaks and line wrapping, etc.) */
+    /** Returns the text format (vertical and horizontal justification, use of
+        word breaks and line wrapping, etc.) */
     Flags<TextFormat> GetTextFormat() const;
 
-    /** returns the text color (this may differ from the Control::Color() in some subclasses) */
+    /** Returns the text color (this may differ from the Control::Color() in
+        some subclasses) */
     Clr               TextColor() const;
 
-    /** returns true iff the text control clips its text to its client area; by default this is not done */
+    /** Returns true iff the text control clips its text to its client area;
+        by default this is not done */
     bool              ClipText() const;
 
-    /** returns true iff the text control sets its MinSize() when the bounds of its text change because of a call to
-        SetText() or SetTextFormat(); by default this is not done.  The minimum size of the control in each dimension
-        will be the larger of the text size and the current MinSize(), if any has been set.  Note that this operates
-        independently of fit-to-text behavior, which sets the window size, not its minimum size. */
+    /** Returns true iff the text control sets its MinSize() when the bounds
+        of its text change because of a call to SetText() or SetTextFormat();
+        by default this is not done.  The minimum size of the control in each
+        dimension will be the larger of the text size and the current
+        MinSize(), if any has been set.  Note that this operates independently
+        of fit-to-text behavior, which sets the window size, not its minimum
+        size. */
     bool              SetMinSize() const;
 
-    /** sets the value of \a t to the interpreted value of the control's text.
-        If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
-        then the >> operator will do so.  Note that the return type is void, so multiple >> operations cannot be strung 
-        together.  Also, because lexical_cast attempts to convert the entire contents of the string to a single value, a 
-        TextControl containing the string "4.15 3.8" will fill a float with 0.0 (the default construction of float), 
-        even though there is a perfectly valid 4.15 value that occurs first in the string.  \note boost::lexical_cast 
-        usually throws boost::bad_lexical_cast when it cannot perform a requested cast, though >> will return a 
-        default-constructed T if one cannot be deduced from the control's text. */
+    /** Sets the value of \a t to the interpreted value of the control's text.
+        If the control's text can be interpreted as an object of type T by
+        boost::lexical_cast (and thus by a stringstream), then the >> operator
+        will do so.  Note that the return type is void, so multiple >>
+        operations cannot be strung together.  Also, because lexical_cast
+        attempts to convert the entire contents of the string to a single
+        value, a TextControl containing the string "4.15 3.8" will fill a
+        float with 0.0 (the default construction of float), even though there
+        is a perfectly valid 4.15 value that occurs first in the string.
+        \note boost::lexical_cast usually throws boost::bad_lexical_cast when
+        it cannot perform a requested cast, though >> will return a
+        default-constructed T if one cannot be deduced from the control's
+        text. */
     template <class T> void operator>>(T& t) const;
 
-    /** returns the value of the control's text, interpreted as an object of type T.
-        If the control's text can be interpreted as an object of type T by boost::lexical_cast (and thus by a stringstream), 
-        then GetValue() will do so.  Because lexical_cast attempts to convert the entire contents of the string to a 
-        single value, a TextControl containing the string "4.15 3.8" will throw, even though there is a perfectly 
-        valid 4.15 value that occurs first in the string.  \throw boost::bad_lexical_cast boost::lexical_cast throws 
-        boost::bad_lexical_cast when it cannot perform a requested cast. This is handy for validating data in a dialog box;
-        Otherwise, using operator>>(), you may get the default value, even though the text in the control may not be the 
-        default value at all, but garbage. */
+    /** Returns the value of the control's text, interpreted as an object of
+        type T.  If the control's text can be interpreted as an object of type
+        T by boost::lexical_cast (and thus by a stringstream), then GetValue()
+        will do so.  Because lexical_cast attempts to convert the entire
+        contents of the string to a single value, a TextControl containing the
+        string "4.15 3.8" will throw, even though there is a perfectly valid
+        4.15 value that occurs first in the string.  \throw
+        boost::bad_lexical_cast boost::lexical_cast throws
+        boost::bad_lexical_cast when it cannot perform a requested cast. This
+        is handy for validating data in a dialog box; Otherwise, using
+        operator>>(), you may get the default value, even though the text in
+        the control may not be the default value at all, but garbage. */
     template <class T> T GetValue() const;
 
     operator const std::string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
@@ -108,21 +132,22 @@ public:
     bool  Empty() const;   ///< returns true when text string equals ""
     int   Length() const;  ///< returns code points (not characters!) in text string
 
-    /** returns the upper-left corner of the text as it is would be rendered if it were not bound to the dimensions of
-        this control. */
+    /** Returns the upper-left corner of the text as it is would be rendered
+        if it were not bound to the dimensions of this control. */
     Pt    TextUpperLeft() const;
 
-    /** returns the lower-right corner of the text as it is would be rendered if it were not bound to the dimensions of
-        this control. */
+    /** Returns the lower-right corner of the text as it is would be rendered
+        if it were not bound to the dimensions of this control. */
     Pt    TextLowerRight() const;
     //@}
 
     /** \name Mutators */ ///@{
     virtual void Render();
 
-    /** sets the text to \a str; may resize the window.  If the private member m_fit_to_text is true (i.e. if the second 
-        ctor type was used), calls to this function cause the window to be resized to whatever space the newly rendered 
-        text occupies. */
+    /** Sets the text to \a str; may resize the window.  If the private member
+        m_fit_to_text is true (i.e. if the second ctor type was used), calls
+        to this function cause the window to be resized to whatever space the
+        newly rendered text occupies. */
     virtual void   SetText(const std::string& str);
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
     void           SetTextFormat(Flags<TextFormat> format); ///< sets the text format; ensures that the flags are sane
@@ -132,9 +157,12 @@ public:
     void           SetMinSize(bool b);           ///< enables/disables setting the minimum size of the window to be the text size
 
     /** Sets the value of the control's text to the stringified version of t.
-        If t can be converted to a string representation by a boost::lexical_cast (and thus by a stringstream), then the << operator
-        will do so, eg double(4.15) to string("4.15").  Note that the return type is void, so multiple << operations cannot be 
-        strung together.  \throw boost::bad_lexical_cast boost::lexical_cast throws boost::bad_lexical_cast when it is confused.*/
+        If t can be converted to a string representation by a
+        boost::lexical_cast (and thus by a stringstream), then the << operator
+        will do so, eg double(4.15) to string("4.15").  Note that the return
+        type is void, so multiple << operations cannot be strung together.
+        \throw boost::bad_lexical_cast boost::lexical_cast throws
+        boost::bad_lexical_cast when it is confused.*/
     template <class T> void operator<<(T t);
 
     void  operator+=(const std::string& str);    ///< appends \a str to text string by way of SetText()

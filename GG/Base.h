@@ -117,7 +117,7 @@ enum TabBarStyle {
 };
 
 
-/** adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added */
+/** Adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added */
 enum Key {
     // The keyboard symbols have been cleverly chosen to map to ASCII
     GGK_UNKNOWN      = 0,

@@ -42,6 +42,10 @@ namespace {
     const double DEFAULT_FPS = 15.0;
 }
 
+const std::size_t DynamicGraphic::ALL_FRAMES = std::numeric_limits<std::size_t>::max();
+const std::size_t DynamicGraphic::INVALID_INDEX = std::numeric_limits<std::size_t>::max();
+const unsigned int DynamicGraphic::INVALID_TIME = std::numeric_limits<unsigned int>::max();
+
 DynamicGraphic::DynamicGraphic() :
     Control(),
     m_margin(0),
@@ -54,14 +58,15 @@ DynamicGraphic::DynamicGraphic() :
     m_curr_subtexture(0),
     m_frames(0),
     m_curr_frame(0),
-    m_first_frame_time(-1),
-    m_last_frame_time(-1),
+    m_first_frame_time(INVALID_TIME),
+    m_last_frame_time(INVALID_TIME),
     m_first_frame_idx(0),
     m_style(GRAPHIC_NONE)
 {}
 
-DynamicGraphic::DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height, int margin, 
-                               const std::vector<boost::shared_ptr<Texture> >& textures, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, int frames/* = -1*/, 
+DynamicGraphic::DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height,
+                               unsigned int margin, const std::vector<boost::shared_ptr<Texture> >& textures,
+                               Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, std::size_t frames/* = ALL_FRAMES*/,
                                Flags<WndFlag> flags/* = Flags<WndFlags>()*/) :
     Control(x, y, w, h, flags),
     m_margin(margin),
@@ -74,8 +79,8 @@ DynamicGraphic::DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y f
     m_curr_subtexture(0),
     m_frames(0),
     m_curr_frame(0),
-    m_first_frame_time(-1),
-    m_last_frame_time(-1),
+    m_first_frame_time(INVALID_TIME),
+    m_last_frame_time(INVALID_TIME),
     m_first_frame_idx(0),
     m_style(style)
 {
@@ -85,7 +90,7 @@ DynamicGraphic::DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y f
     m_last_frame_idx = m_frames - 1;
 }
 
-int DynamicGraphic::Frames() const       
+std::size_t DynamicGraphic::Frames() const       
 { return m_frames; }
 
 bool DynamicGraphic::Playing() const
@@ -97,19 +102,19 @@ bool DynamicGraphic::Looping() const
 double DynamicGraphic::FPS() const
 { return m_FPS; }
 
-int DynamicGraphic::FrameIndex() const
+std::size_t DynamicGraphic::FrameIndex() const
 { return m_curr_frame; }
 
-int DynamicGraphic::TimeIndex() const
+unsigned int DynamicGraphic::TimeIndex() const
 { return m_last_frame_time; }
 
-int DynamicGraphic::StartFrame() const
+std::size_t DynamicGraphic::StartFrame() const
 { return m_first_frame_idx; }
 
-int DynamicGraphic::EndFrame() const
+std::size_t DynamicGraphic::EndFrame() const
 { return m_last_frame_idx; }
 
-int DynamicGraphic::Margin() const
+unsigned int DynamicGraphic::Margin() const
 { return m_margin; }
 
 X DynamicGraphic::FrameWidth() const
@@ -123,31 +128,35 @@ Flags<GraphicStyle> DynamicGraphic::Style() const
 
 void DynamicGraphic::Render()
 {
-    if (0 <= m_curr_texture && m_curr_texture < static_cast<int>(m_textures.size()) &&
-        0 <= m_curr_subtexture && m_curr_subtexture < m_textures[m_curr_texture].frames) {
+    if (m_curr_texture < m_textures.size() && m_curr_subtexture < m_textures[m_curr_texture].frames) {
         bool send_stopped_signal = false;
         bool send_end_frame_signal = false;
 
         // advance frames
-        int initial_frame_idx = (0.0 <= m_FPS ? m_first_frame_idx : m_last_frame_idx);
-        int final_frame_idx =   (0.0 <= m_FPS ? m_last_frame_idx : m_first_frame_idx);
+        std::size_t initial_frame_idx = (0.0 <= m_FPS ? m_first_frame_idx : m_last_frame_idx);
+        std::size_t final_frame_idx =   (0.0 <= m_FPS ? m_last_frame_idx : m_first_frame_idx);
         if (m_playing) {
-            if (m_first_frame_time == -1) {
+            if (m_first_frame_time == INVALID_TIME) {
                 m_last_frame_time = m_first_frame_time = GUI::GetGUI()->Ticks();
-                if (0.0 != m_FPS) // needed if a start index was set
-                    m_first_frame_time = static_cast<int>(m_first_frame_time - 1000.0 / m_FPS * m_curr_frame);
+                if (m_FPS)
+                    m_first_frame_time -= static_cast<unsigned int>(1000.0 / m_FPS * m_curr_frame);
             } else {
-                int old_frame = m_curr_frame;
-                int curr_time = GUI::GetGUI()->Ticks();
-                SetFrameIndex(initial_frame_idx + static_cast<int>((curr_time - m_first_frame_time) / 1000.0 * m_FPS) % (m_last_frame_idx - m_first_frame_idx + 1));
+                std::size_t old_frame = m_curr_frame;
+                std::size_t curr_time = GUI::GetGUI()->Ticks();
+                SetFrameIndex(initial_frame_idx +
+                              static_cast<std::size_t>((curr_time - m_first_frame_time) * m_FPS / 1000.0) %
+                              (m_last_frame_idx - m_first_frame_idx + 1));
 
                 // determine whether the final frame was passed
-                int frames_passed = static_cast<int>((curr_time - m_last_frame_time) / 1000.0 * m_FPS);
-                if (m_frames <= frames_passed || (0.0 <= m_FPS ? m_curr_frame < old_frame : m_curr_frame > old_frame)) { // if we passed the final frame
+                std::size_t frames_passed =
+                    static_cast<std::size_t>((curr_time - m_last_frame_time) * m_FPS / 1000.0);
+                if (m_frames <= frames_passed ||
+                    (0.0 <= m_FPS ? m_curr_frame < old_frame : old_frame < m_curr_frame)) {
                     send_end_frame_signal = true;
-                    if (!m_looping) { // if looping isn't allowed, stop at the last frame
+                    // if looping isn't allowed, stop at the last frame
+                    if (!m_looping) {
                         m_playing = false;
-                        m_first_frame_time = -1;
+                        m_first_frame_time = INVALID_TIME;
                         SetFrameIndex(final_frame_idx);
                         send_stopped_signal = true;
                     }
@@ -160,9 +169,12 @@ void DynamicGraphic::Render()
         Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
         glColor(color_to_use);
 
-        int cols = Value(m_textures[m_curr_texture].texture->DefaultWidth() / (m_frame_width + m_margin));
-        X x = (m_curr_subtexture % cols) * (m_frame_width + m_margin) + m_margin;
-        Y y = (m_curr_subtexture / cols) * (m_frame_height + m_margin) + m_margin;
+        const int INT_MARGIN = m_margin;
+        std::size_t cols =
+            Value(m_textures[m_curr_texture].texture->DefaultWidth() /
+                  (m_frame_width + INT_MARGIN));
+        X x = static_cast<int>(m_curr_subtexture % cols) * (m_frame_width + INT_MARGIN) + INT_MARGIN;
+        Y y = static_cast<int>(m_curr_subtexture / cols) * (m_frame_height + INT_MARGIN) + INT_MARGIN;
         SubTexture st(m_textures[m_curr_texture].texture, x, y, x + m_frame_width, y + m_frame_height);
 
         Pt ul = UpperLeft(), lr = LowerRight();
@@ -222,38 +234,39 @@ void DynamicGraphic::Render()
     }
 }
 
-void DynamicGraphic::AddFrames(const Texture* texture, int frames/* = -1*/)
+void DynamicGraphic::AddFrames(const Texture* texture, std::size_t frames/* = ALL_FRAMES*/)
 {
-    int frames_in_texture = FramesInTexture(texture);
+    std::size_t frames_in_texture = FramesInTexture(texture);
     if (!frames_in_texture)
         throw CannotAddFrame("DynamicGraphic::AddFrames : attempted to add frames from a Texture too small for even one frame");
 
     FrameSet fs;
     fs.texture.reset(texture);
-    fs.frames = frames < 0 ? frames_in_texture : std::min(frames_in_texture, std::max(frames, 1));
+    fs.frames = std::min(frames_in_texture, std::max(frames, static_cast<std::size_t>(1)));
     m_textures.push_back(fs);
     m_frames += fs.frames;
 }
 
-void DynamicGraphic::AddFrames(const boost::shared_ptr<Texture>& texture, int frames/* = -1*/)
+void DynamicGraphic::AddFrames(const boost::shared_ptr<Texture>& texture, std::size_t frames/* = ALL_FRAMES*/)
 {
-    int frames_in_texture = FramesInTexture(texture.get());
+    std::size_t frames_in_texture = FramesInTexture(texture.get());
     if (!frames_in_texture)
         throw CannotAddFrame("DynamicGraphic::AddFrames : attempted to add frames from a Texture too small for even one frame");
 
     FrameSet fs;
     fs.texture = texture;
-    fs.frames = frames < 0 ? frames_in_texture : std::min(frames_in_texture, std::max(frames, 1));
+    fs.frames = std::min(frames_in_texture, std::max(frames, static_cast<std::size_t>(1)));
     m_textures.push_back(fs);
     m_frames += fs.frames;
 }
 
-void DynamicGraphic::AddFrames(const std::vector<boost::shared_ptr<Texture> >& textures, int frames/* = -1*/)
+void DynamicGraphic::AddFrames(const std::vector<boost::shared_ptr<Texture> >& textures, std::size_t frames/* = ALL_FRAMES*/)
 {
     if (!textures.empty()) {
-        int old_frames = m_frames;
-        for (std::size_t i = 0; i < textures.size() - 1; ++i)
-            AddFrames(textures[i], -1);
+        std::size_t old_frames = m_frames;
+        for (std::size_t i = 0; i < textures.size() - 1; ++i) {
+            AddFrames(textures[i], ALL_FRAMES);
+        }
         AddFrames(textures.back(), m_frames - old_frames);
     }
 }
@@ -273,7 +286,9 @@ void DynamicGraphic::Pause()
 
 void DynamicGraphic::NextFrame()
 {
-    if (0 <= m_curr_texture && 0 <= m_curr_subtexture && m_textures.size()) { // if these are reasonable values
+    if (m_curr_texture != INVALID_INDEX &&
+        m_curr_subtexture != INVALID_INDEX &&
+        !m_textures.empty()) {
         m_playing = false;
         if (m_curr_frame == m_last_frame_idx) { // if this is the very last frame
             if (m_looping) // only wrap around if looping is turned on
@@ -291,7 +306,9 @@ void DynamicGraphic::NextFrame()
 
 void DynamicGraphic::PrevFrame()
 {
-    if (0 <= m_curr_texture && 0 <= m_curr_subtexture && m_textures.size()) { // if these are reasonable values
+    if (m_curr_texture != INVALID_INDEX &&
+        m_curr_subtexture != INVALID_INDEX &&
+        !m_textures.empty()) {
         m_playing = false;
         if (m_curr_frame == m_first_frame_idx) { // if this is the very first frame
             if (m_looping) // only wrap around if looping is turned on
@@ -319,18 +336,18 @@ void DynamicGraphic::Loop(bool b/* = true*/)
 void DynamicGraphic::SetFPS(double fps)
 { m_FPS = fps; }
 
-void DynamicGraphic::SetFrameIndex(int idx)
+void DynamicGraphic::SetFrameIndex(std::size_t idx)
 {
     if (m_textures.empty()) { // if there are no valid texture data
-        m_curr_texture = -1;
-        m_curr_subtexture = -1;
-        m_curr_frame = -1;
-    } else if (idx < 0) { // if idx is too low
+        m_curr_texture = INVALID_INDEX;
+        m_curr_subtexture = INVALID_INDEX;
+        m_curr_frame = INVALID_INDEX;
+    } else if (idx == INVALID_INDEX) { // if idx is too low
         m_curr_texture = 0;
         m_curr_subtexture = 0;
         m_curr_frame = 0;
     } else if (m_frames <= idx) { // if idx is too high
-        m_curr_texture = static_cast<int>(m_textures.size()) - 1;
+        m_curr_texture = m_textures.size() - 1;
         m_curr_subtexture = m_textures[m_curr_texture].frames - 1;
         m_curr_frame = m_frames - 1;
     } else {
@@ -347,37 +364,37 @@ void DynamicGraphic::SetFrameIndex(int idx)
                 m_curr_texture = 0;
                 m_curr_subtexture = 0;
             } else {
-                m_curr_texture = 0;
-                for (std::size_t i = 0; i < m_textures.size(); ++i) {
-                    if (0 <= idx - m_textures[i].frames) {
-                        idx -= m_textures[i].frames;
-                        m_curr_texture++;
+                m_curr_subtexture = INVALID_INDEX;
+                for (m_curr_texture = 0; m_curr_texture < m_textures.size(); ++m_curr_texture) {
+                    if (m_textures[m_curr_texture].frames <= idx) {
+                        idx -= m_textures[m_curr_texture].frames;
                     } else {
                         m_curr_subtexture = idx;
                         break;
                     }
                 }
+                assert(m_curr_subtexture != INVALID_INDEX);
             }
         }
     }
 }
 
-void DynamicGraphic::SetTimeIndex(int idx)
+void DynamicGraphic::SetTimeIndex(unsigned int time)
 {
-    int initial_frame_idx = 0.0 <= m_FPS ? m_first_frame_idx : m_last_frame_idx;
-    int final_frame_idx = 0.0 <= m_FPS ? m_last_frame_idx : m_first_frame_idx;
-    int frames_in_sequence = (m_last_frame_idx - m_first_frame_idx + 1);
-    if (idx < 0)
+    std::size_t initial_frame_idx = 0.0 <= m_FPS ? m_first_frame_idx : m_last_frame_idx;
+    std::size_t final_frame_idx = 0.0 <= m_FPS ? m_last_frame_idx : m_first_frame_idx;
+    std::size_t frames_in_sequence = (m_last_frame_idx - m_first_frame_idx + 1);
+    if (time == INVALID_TIME)
         SetFrameIndex(initial_frame_idx);
-    else if (frames_in_sequence * m_FPS <= idx && !m_looping)
+    else if (frames_in_sequence * m_FPS <= time && !m_looping)
         SetFrameIndex(final_frame_idx);
     else
-        SetFrameIndex(initial_frame_idx + static_cast<int>(idx / 1000.0 * m_FPS) % frames_in_sequence);
+        SetFrameIndex(initial_frame_idx + static_cast<unsigned int>(time * m_FPS / 1000.0) % frames_in_sequence);
 }
 
-void DynamicGraphic::SetStartFrame(int idx)
+void DynamicGraphic::SetStartFrame(std::size_t idx)
 {
-    if (idx < 0)
+    if (idx == INVALID_INDEX)
         m_first_frame_idx = 0;
     else if (m_frames <= idx)
         m_first_frame_idx = m_frames - 1;
@@ -388,9 +405,9 @@ void DynamicGraphic::SetStartFrame(int idx)
         SetFrameIndex(m_first_frame_idx);
 }
 
-void DynamicGraphic::SetEndFrame(int idx)
+void DynamicGraphic::SetEndFrame(std::size_t idx)
 {
-    if (idx < 0)
+    if (idx == INVALID_INDEX)
         m_last_frame_idx = 0;
     else if (m_frames <= idx)
         m_last_frame_idx = m_frames - 1;
@@ -413,7 +430,7 @@ void DynamicGraphic::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("DynamicGraphic");
-    editor->Attribute("Frame Margin", const_cast<int&>(m_margin));
+    editor->Attribute("Frame Margin", const_cast<unsigned int&>(m_margin));
     editor->Attribute("Frame Width", const_cast<X&>(m_frame_width));
     editor->Attribute("Frame Height", const_cast<Y&>(m_frame_height));
     // TODO: handle setting frame(s)
@@ -431,26 +448,27 @@ void DynamicGraphic::DefineAttributes(WndEditor* editor)
     editor->EndFlags();
 }
 
-int DynamicGraphic::FramesInTexture(const Texture* t) const
+std::size_t DynamicGraphic::FramesInTexture(const Texture* t) const
 {
-    int cols = Value(t->DefaultWidth() / (m_frame_width + m_margin));
-    int rows = Value(t->DefaultHeight() / (m_frame_height + m_margin));
+    const int INT_MARGIN = m_margin;
+    std::size_t cols = Value(t->DefaultWidth() / (m_frame_width + INT_MARGIN));
+    std::size_t rows = Value(t->DefaultHeight() / (m_frame_height + INT_MARGIN));
     return cols * rows;
 }
 
 const std::vector<DynamicGraphic::FrameSet>& DynamicGraphic::Textures() const
 { return m_textures; }
 
-int DynamicGraphic::CurrentTexture() const
+std::size_t DynamicGraphic::CurrentTexture() const
 { return m_curr_texture; }
 
-int DynamicGraphic::CurrentSubTexture() const
+std::size_t DynamicGraphic::CurrentSubTexture() const
 { return m_curr_texture; }
 
-int DynamicGraphic::FirstFrameTime() const
+unsigned int DynamicGraphic::FirstFrameTime() const
 { return m_first_frame_time; }
 
-int DynamicGraphic::LastFrameTime() const
+unsigned int DynamicGraphic::LastFrameTime() const
 { return m_last_frame_time; }
 
 void DynamicGraphic::ValidateStyle()

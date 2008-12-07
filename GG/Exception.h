@@ -51,9 +51,10 @@
 
 namespace GG {
 
-/** This is the base class for all GG exceptions.  It is based on the std::exception class.  As required by its
-    inheritance from std::exceptions not throw other exceptions, the no-throw exception specification has been added to
-    every member function. */
+/** This is the base class for all GG exceptions.  It is based on the
+    std::exception class.  As required by its inheritance from std::exceptions
+    not throw other exceptions, the no-throw exception specification has been
+    added to every member function. */
 class GG_API ExceptionBase : public std::exception
 {
 public:
@@ -68,7 +69,8 @@ private:
     std::string m_msg; ///< the text message associated with this Exception (may be "")
 };
 
-/** Declares a GG exception class.  This should be used to declare GG exceptions at global scope. */
+/** Declares a GG exception class.  This should be used to declare GG
+    exceptions at global scope. */
 #define GG_EXCEPTION( name )                                            \
     class GG_API name : public ExceptionBase                            \
     {                                                                   \
@@ -79,9 +81,9 @@ private:
             {return "GG::" # name ;}                                    \
     };
 
-/** Declares an abstract base for further GG exception class
-    inheritance.  This should be used along with GG_CONCRETE_EXCEPTION to group all exceptions from a
-    single GG class under one subhierarchy. */
+/** Declares an abstract base for further GG exception class inheritance.
+    This should be used along with GG_CONCRETE_EXCEPTION to group all
+    exceptions from a single GG class under one subhierarchy. */
 #define GG_ABSTRACT_EXCEPTION( name )                                   \
     class GG_API name : public ExceptionBase                            \
     {                                                                   \
@@ -91,8 +93,9 @@ private:
         virtual const char* type() const throw() = 0;                   \
     };
 
-/** Declares a concrete exception class derived from \a superclass.  This should be used along with GG_ABSTRACT_EXCEPTION to group all exceptions from a
-    single GG class under one subhierarchy. */
+/** Declares a concrete exception class derived from \a superclass.  This
+    should be used along with GG_ABSTRACT_EXCEPTION to group all exceptions
+    from a single GG class under one subhierarchy. */
 #define GG_CONCRETE_EXCEPTION( name, class_name, superclass )           \
     class GG_API name : public superclass                               \
     {                                                                   \

@@ -53,11 +53,11 @@ extern GG_API const X X1;
 extern GG_API const Y Y0;
 extern GG_API const Y Y1;
 
-/** a GG screen coordinate class */
+/** A GG screen coordinate class */
 struct GG_API Pt
 {
     /** \name Structors */ ///@{
-    Pt();                         ///< default ctor
+    Pt();               ///< default ctor
     Pt(X x_, Y y_);     ///< ctor that creates a Pt ( \a _x , \a y )
     Pt(X_d x_, Y y_);   ///< ctor that creates a Pt ( \a _x , \a y )
     Pt(X x_, Y_d y_);   ///< ctor that creates a Pt ( \a _x , \a y )
@@ -65,8 +65,9 @@ struct GG_API Pt
     //@}
 
     /** \name Accessors */ ///@{
-    /** returns true if x < \a rhs.x or returns true if x == \a rhs.x and y <\a rhs.y.  This is useful for sorting Pts 
-        in STL containers and algorithms*/
+    /** Returns true if x < \a rhs.x or returns true if x == \a rhs.x and y
+        <\a rhs.y.  This is useful for sorting Pts in STL containers and
+        algorithms*/
     bool Less(const Pt& rhs) const
         { return x < rhs.x ? true : (x == rhs.x ? (y < rhs.y ? true : false) : false); }
     //@}
@@ -86,7 +87,8 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** a GG rectangle class. this is essentially just two points that bound the rectangle*/
+/** a GG rectangle class. this is essentially just two points that bound the
+    rectangle*/
 struct GG_API Rect
 {
     /** \name Structors */ ///@{

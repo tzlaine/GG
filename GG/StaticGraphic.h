@@ -49,33 +49,36 @@ extern GG_API const GraphicStyle GRAPHIC_SHRINKFIT;   ///< Like GRAPHIC_FITGRAPH
 extern GG_API const GraphicStyle GRAPHIC_PROPSCALE;   ///< If GRAPHIC_FITGRAPHIC or GRAPHIC_SHRINKFIT is used, this ensures scaling is done proportionally.
 
 
-/** This is a simple, non-interactive window that displays a GG::SubTexture.  Though the SubTexture displayed in a
-    StaticGraphic is fixed, its size is not; the image can be scaled (proportionately or not) to fit in the
-    StaticGraphic's window area. \see StaticGraphicStyle*/
+/** This is a simple, non-interactive window that displays a GG::SubTexture.
+    Though the SubTexture displayed in a StaticGraphic is fixed, its size is
+    not; the image can be scaled (proportionately or not) to fit in the
+    StaticGraphic's window area. \see GraphicStyle*/
 class GG_API StaticGraphic : public Control
 {
 public:
     /** \name Structors */ ///@{
-    /** creates a StaticGraphic from a pre-existing Texture.
-        \warning Calling code <b>must not</b> delete \a texture; \a texture becomes the property of a shared_ptr inside 
-        a SubTexture. */
+    /** Creates a StaticGraphic from a pre-existing Texture.  \warning Calling
+        code <b>must not</b> delete \a texture; \a texture becomes the
+        property of a shared_ptr inside a SubTexture. */
     StaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture>& texture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing Texture.
     StaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing SubTexture.
     //@}
 
     /** \name Accessors */ ///@{
-    /** returns the style of the StaticGraphic \see StaticGraphicStyle */
+    /** Returns the style of the StaticGraphic \see GraphicStyle */
     Flags<GraphicStyle> Style() const;
 
-    /** returns the area in which the graphic is actually rendered, in UpperLeft()-relative coordinates.  This may not
-        be the entire area of the StaticGraphic, based on the style being used. */
+    /** Returns the area in which the graphic is actually rendered, in
+        UpperLeft()-relative coordinates.  This may not be the entire area of
+        the StaticGraphic, based on the style being used. */
     Rect RenderedArea() const;
     //@}
 
     /** \name Mutators */ ///@{
     virtual void Render();
 
-    /** sets the style flags, and perfroms sanity checking \see StaticGraphicStyle */
+    /** Sets the style flags, and perfroms sanity checking \see
+        GraphicStyle */
     void SetStyle(Flags<GraphicStyle> style);
 
     virtual void DefineAttributes(WndEditor* editor);

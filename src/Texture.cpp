@@ -152,7 +152,7 @@ GLenum Texture::MinFilter() const
 GLenum Texture::MagFilter() const
 { return m_mag_filter; }
 
-int Texture::BytesPP() const
+unsigned int Texture::BytesPP() const
 { return m_bytes_pp; }
 
 X Texture::Width() const
@@ -376,7 +376,8 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 #endif
 }
 
-void Texture::Init(X x, Y y, X width, Y height, X image_width, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
+void Texture::Init(X x, Y y, X width, Y height, X image_width, const unsigned char* image,
+                   GLenum format, GLenum type, unsigned int bytes_per_pixel, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
     glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
@@ -396,7 +397,8 @@ void Texture::Init(X x, Y y, X width, Y height, X image_width, const unsigned ch
     glPopClientAttrib();
 }
 
-void Texture::Init(X width, Y height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap/* = false*/)
+void Texture::Init(X width, Y height, const unsigned char* image, GLenum format, GLenum type,
+                   unsigned int bytes_per_pixel, bool mipmap/* = false*/)
 {
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
     glPixelStorei(GL_UNPACK_SWAP_BYTES, false);
@@ -462,7 +464,8 @@ void Texture::Clear()
     m_tex_coords[2] = m_tex_coords[3] = 1.0f;   // max x, y
 }
 
-void Texture::InitFromRawData(X width, Y height, const unsigned char* image, GLenum format, GLenum type, int bytes_per_pixel, bool mipmap)
+void Texture::InitFromRawData(X width, Y height, const unsigned char* image, GLenum format, GLenum type,
+                              unsigned int bytes_per_pixel, bool mipmap)
 {
     if (!image)
         return;

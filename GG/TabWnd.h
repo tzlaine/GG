@@ -43,9 +43,10 @@ class GG_API TabWnd : public Wnd
 {
 public:
     /** \name Signal Types */ ///@{
-    /** Emitted when the currently-selected Wnd has changed; the new selected Wnd's index in the group is provided (this
-        may be NO_WND if no Wnd is currently selected). */
-    typedef boost::signal<void (int)> WndChangedSignalType;
+    /** Emitted when the currently-selected Wnd has changed; the new selected
+        Wnd's index in the group is provided (this may be NO_WND if no Wnd is
+        currently selected). */
+    typedef boost::signal<void (std::size_t)> WndChangedSignalType;
     //@}
 
     /** \name Slot Types */ ///@{
@@ -68,36 +69,37 @@ public:
     /** Returns the index into the sequence of Wnds in this TabWnd of the Wnd
         currently shown.  NO_WND is returned if there is no Wnd currently
         visible. */
-    int  CurrentWndIndex() const;
+    std::size_t  CurrentWndIndex() const;
     //@}
 
     /** \name Mutators */ ///@{
     virtual void Render();
 
     /** Adds \a wnd to the sequence of Wnds in this TabWnd, with name \a name.
-        \a name can be used later to remove the Wnd (\a name is not checked for
-        uniqueness).  Returns the index at which \a wnd is placed. */
-    int  AddWnd(Wnd* wnd, const std::string& name);
+        \a name can be used later to remove the Wnd (\a name is not checked
+        for uniqueness).  Returns the index at which \a wnd is placed. */
+    std::size_t AddWnd(Wnd* wnd, const std::string& name);
 
-    /** Adds \a wnd to the sequence of Wnds in this TabWnd, inserting it at the
-        \a index location within the sequence.  \a name can be used later to
-        remove the Wnd (\a name is not checked for uniqueness).  Not range
+    /** Adds \a wnd to the sequence of Wnds in this TabWnd, inserting it at
+        the \a index location within the sequence.  \a name can be used later
+        to remove the Wnd (\a name is not checked for uniqueness).  Not range
         checked. */
-    void InsertWnd(int index, Wnd* wnd, const std::string& name);
+    void InsertWnd(std::size_t index, Wnd* wnd, const std::string& name);
 
-    /** Removes and returns the first Wnd previously added witht he name \a name
-        from the sequence of Wnds in this TabWnd. */
+    /** Removes and returns the first Wnd previously added witht he name \a
+        name from the sequence of Wnds in this TabWnd. */
     Wnd* RemoveWnd(const std::string& name);
 
     /** Sets the currently visible Wnd in the sequence to the Wnd in the \a
         index position within the sequence.  Not range checked. */
-    void SetCurrentWnd(int index);
+    void SetCurrentWnd(std::size_t index);
     //@}
 
     mutable WndChangedSignalType WndChangedSignal; ///< The Wnd change signal object for this Button
 
-    /** The invalid Wnd position index that there is no currently-selected Wnd. */
-    static const int NO_WND;
+    /** The invalid Wnd position index that there is no currently-selected
+        Wnd. */
+    static const std::size_t NO_WND;
 
 protected:
     /** \name Structors */ ///@{
@@ -110,7 +112,7 @@ protected:
     //@}
 
 private:
-    void TabChanged(int tab_index);
+    void TabChanged(std::size_t tab_index);
 
     TabBar*                                    m_tab_bar;
     std::vector<std::pair<Wnd*, std::string> > m_wnds;
@@ -129,9 +131,10 @@ class GG_API TabBar : public Control
 {
 public:
     /** \name Signal Types */ ///@{
-    /** Emitted when the currently-selected tab has changed; the new selected tab's index in the group is provided (this
-        may be NO_TAB if no tab is currently selected). */
-    typedef boost::signal<void (int)> TabChangedSignalType;
+    /** Emitted when the currently-selected tab has changed; the new selected
+        tab's index in the group is provided (this may be NO_TAB if no tab is
+        currently selected). */
+    typedef boost::signal<void (std::size_t)> TabChangedSignalType;
     //@}
 
     /** \name Slot Types */ ///@{
@@ -150,7 +153,7 @@ public:
     /** Returns the index into the sequence of tabs in this TabBar of the tab
         currently selected.  NO_TAB is returned if there is no tab currently
         selected. */
-    int CurrentTabIndex() const;
+    std::size_t CurrentTabIndex() const;
 
     /** Returns the color used to render the text in this TabBar. */
     Clr TextColor() const;
@@ -163,26 +166,28 @@ public:
     /** Adds a tab called \a name to the sequence of tabs in this TabBar.  \a
         name can be used later to remove the tab (\a name is not checked for
         uniqueness).  Returns the index at which the tab is placed. */
-    int  AddTab(const std::string& name);
+    std::size_t AddTab(const std::string& name);
 
-    /** Adds tab to the sequence of tabs in this TabBar, inserting it at the \a
-        index location within the sequence.  \a name can be used later to remove
-        the tab (\a name is not checked for uniqueness).  Not range checked. */
-    void InsertTab(int index, const std::string& name);
+    /** Adds tab to the sequence of tabs in this TabBar, inserting it at the
+        \a index location within the sequence.  \a name can be used later to
+        remove the tab (\a name is not checked for uniqueness).  Not range
+        checked. */
+    void InsertTab(std::size_t index, const std::string& name);
 
     /** Removes the first tab previously added witht he name \a name from the
         sequence of tab in this TabBar. */
     void RemoveTab(const std::string& name);
 
-    /** Sets the current tab in the sequence to the tab in the \a index position
-        within the sequence.  Not range checked. */
-    void SetCurrentTab(int index);
+    /** Sets the current tab in the sequence to the tab in the \a index
+        position within the sequence.  Not range checked. */
+    void SetCurrentTab(std::size_t index);
     //@}
 
     mutable TabChangedSignalType TabChangedSignal; ///< The tab change signal object for this Button
 
-    /** The invalid tab position index that there is no currently-selected tab. */
-    static const int NO_TAB;
+    /** The invalid tab position index that there is no currently-selected
+        tab. */
+    static const std::size_t NO_TAB;
 
     /** The default width to use for the left and right buttons. */
     static const X BUTTON_WIDTH;
@@ -208,10 +213,10 @@ protected:
 private:
     virtual void DistinguishCurrentTab(const std::vector<StateButton*>& tab_buttons);
 
-    void TabChanged(int index);
+    void TabChanged(std::size_t index);
     void LeftClicked();
     void RightClicked();
-    void BringTabIntoView(int index);
+    void BringTabIntoView(std::size_t index);
 
     RadioButtonGroup*         m_tabs;
     std::vector<StateButton*> m_tab_buttons;
@@ -222,7 +227,7 @@ private:
     Flags<TextFormat>         m_format;
     Clr                       m_text_color;
     TabBarStyle               m_style;
-    int                       m_first_tab_shown;
+    std::size_t               m_first_tab_shown;
 
     friend class boost::serialization::access;
     template <class Archive>

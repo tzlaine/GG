@@ -70,7 +70,7 @@ public:
     {
         m_text_control = text_control;
     }
-    void SelectText(int index)
+    void SelectText(std::size_t index)
     {
         if (index)
             m_text_control->SetText("Plan to execute: Plan 9!");

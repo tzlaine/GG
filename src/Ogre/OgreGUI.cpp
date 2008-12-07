@@ -89,7 +89,7 @@ OgreGUI::~OgreGUI()
 boost::shared_ptr<ModalEventPump> OgreGUI::CreateModalEventPump(bool& done)
 { return boost::shared_ptr<ModalEventPump>(new OgreModalEventPump(done)); }
 
-int OgreGUI::Ticks() const
+unsigned int OgreGUI::Ticks() const
 { return m_timer.getMilliseconds(); }
 
 X OgreGUI::AppWidth() const

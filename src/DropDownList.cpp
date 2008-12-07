@@ -99,7 +99,7 @@ DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color, Flags<WndFl
 {
     SetStyle(LIST_SINGLESEL);
     // adjust size to keep correct height based on row height, etc.
-    Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + h + 2 * m_LB->CellMargin() + 2 * BORDER_THICK));
+    Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + h + 2 * static_cast<int>(m_LB->CellMargin()) + 2 * BORDER_THICK));
     m_LB->SizeMove(Pt(X0, Height()), Pt(Width(), Height() + m_LB->Height()));
     m_current_item = m_LB->end();
 }

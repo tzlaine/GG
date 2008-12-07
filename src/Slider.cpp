@@ -33,12 +33,14 @@
 
 using namespace GG;
 
+const std::size_t Slider::INVALID_PAGE_SIZE = std::numeric_limits<std::size_t>::max();
+
 Slider::Slider() :
     Control(),
     m_posn(0),
     m_range_min(0),
     m_range_max(99),
-    m_page_sz(-1),
+    m_page_sz(INVALID_PAGE_SIZE),
     m_orientation(VERTICAL),
     m_line_width(5),
     m_tab_width(5),
@@ -48,13 +50,14 @@ Slider::Slider() :
     m_dragging_tab(false)
 {}
 
-Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color,
-               int tab_width, int line_width/* = 5*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
+Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, SliderLineStyle style,
+               Clr color, int unsigned tab_width, int unsigned line_width/* = 5*/,
+               Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_posn(min),
     m_range_min(min),
     m_range_max(max),
-    m_page_sz(-1),
+    m_page_sz(INVALID_PAGE_SIZE),
     m_orientation(orientation),
     m_line_width(line_width),
     m_tab_width(tab_width),
@@ -84,16 +87,16 @@ int Slider::Posn() const
 std::pair<int, int> Slider::SliderRange() const
 { return std::pair<int, int>(m_range_min, m_range_max); }
 
-int Slider::PageSize() const
-{ return 0 <= m_page_sz ? m_page_sz : (m_range_max - m_range_min) / 10; }
+unsigned int Slider::PageSize() const
+{ return m_page_sz != INVALID_PAGE_SIZE ? m_page_sz : (m_range_max - m_range_min) / 10; }
 
 Orientation Slider::GetOrientation() const
 { return m_orientation; }
 
-int Slider::TabWidth() const
+unsigned int Slider::TabWidth() const
 { return m_tab_width; }
 
-int Slider::LineWidth() const
+unsigned int Slider::LineWidth() const
 { return m_line_width; }
 
 SliderLineStyle Slider::LineStyle() const
@@ -107,15 +110,15 @@ void Slider::Render()
     int tab_width = m_orientation == VERTICAL ? Value(m_tab->Height()) : Value(m_tab->Width());
     Pt ul, lr;
     if (m_orientation == VERTICAL) {
-        ul.x = ((LR.x + UL.x) - m_line_width) / 2;
-        lr.x = ul.x + m_line_width;
+        ul.x = ((LR.x + UL.x) - static_cast<int>(m_line_width)) / 2;
+        lr.x = ul.x + static_cast<int>(m_line_width);
         ul.y = UL.y + tab_width / 2;
         lr.y = LR.y - tab_width / 2;
     } else {
         ul.x = UL.x + tab_width / 2;
         lr.x = LR.x - tab_width / 2;
-        ul.y = ((LR.y + UL.y) - m_line_width) / 2;
-        lr.y = ul.y + m_line_width;
+        ul.y = ((LR.y + UL.y) - static_cast<int>(m_line_width)) / 2;
+        lr.y = ul.y + static_cast<int>(m_line_width);
     }
     switch (m_line_style) {
     case FLAT:
@@ -271,7 +274,7 @@ void Slider::SlideTo(int p)
     }
 }
 
-void Slider::SetPageSize(int size)
+void Slider::SetPageSize(unsigned int size)
 { m_page_sz = size; }
 
 void Slider::SetLineStyle(SliderLineStyle style)

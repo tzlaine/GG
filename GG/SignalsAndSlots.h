@@ -40,12 +40,14 @@
 #include <GG/Signal8.h>
 
 /** \file SignalsAndSlots.h
-    Contains the Connect() functions, which simplify the connection of boost signals and slots. */
+    Contains the Connect() functions, which simplify the connection of boost
+    signals and slots. */
 
 namespace GG {
 
-/** connects a signal to a slot functor of the same signature, putting \a _slot in slot group 0, at position \a at
-    within group 0.  Slot call groups are called in ascending order. */
+/** Connects a signal to a slot functor of the same signature, putting \a
+    _slot in slot group 0, at position \a at within group 0.  Slot call groups
+    are called in ascending order. */
 template <class SigT> inline 
 boost::signals::connection 
 Connect(SigT& sig, const typename SigT::slot_type& _slot, boost::signals::connect_position at = boost::signals::at_back)
@@ -53,8 +55,9 @@ Connect(SigT& sig, const typename SigT::slot_type& _slot, boost::signals::connec
     return sig.connect(_slot, at);
 }
 
-/** connects a signal to a slot functor of the same signature, putting \a _slot in slot group \a grp, at position \a at
-    within group \a grp.  Slot call groups are called in ascending order. */
+/** Connects a signal to a slot functor of the same signature, putting \a
+    _slot in slot group \a grp, at position \a at within group \a grp.  Slot
+    call groups are called in ascending order. */
 template <class SigT> inline 
 boost::signals::connection 
 Connect(SigT& sig, const typename SigT::slot_type& _slot, int grp, boost::signals::connect_position at = boost::signals::at_back)

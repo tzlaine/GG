@@ -24,9 +24,10 @@
    whatwasthataddress@gmail.com */
 
 /** \file Font.h
-    Contains the Font class, a class that encapsulates the rendering of a single FreeType-compatible fonts in 
-    italics, with underlining, left-, right-, or center- justified, etc., and the FontManager class which provides 
-    application-wide management of Font objects. */
+    Contains the Font class, a class that encapsulates the rendering of a
+    single FreeType-compatible fonts in italics, with underlining, left-,
+    right-, or center- justified, etc., and the FontManager class which
+    provides application-wide management of Font objects. */
 
 #ifndef _GG_Font_h_
 #define _GG_Font_h_
@@ -46,7 +47,8 @@ typedef struct FT_FaceRec_*  FT_Face;
 
 namespace GG {
 
-/** returns a string of the form "<rgba r g b a>" from a Clr object with color channels r, b, g, a.*/
+/** Returns a string of the form "<rgba r g b a>" from a Clr object with color
+    channels r, b, g, a.*/
 GG_API std::string RgbaTag(const Clr& c);
 
 /** Text formatting flags. */
@@ -144,7 +146,7 @@ public:
 
         X Width() const;                    ///< Returns the width of the element, in pixels
         virtual TextElementType Type() const;    ///< Returns the TextElementType of the element.
-        virtual int OriginalStringChars() const; ///< Returns the number of characters in the original string that the element represents.
+        virtual std::size_t OriginalStringChars() const; ///< Returns the number of characters in the original string that the element represents.
 
         std::string         text;       ///< The text represented by the element, or the name of the tag, if the element is a FormattingTag.
         std::vector<X>      widths;     ///< The widths of the characters in \a text.
@@ -166,7 +168,7 @@ public:
         FormattingTag(bool close); ///< Ctor.  \a close indicates that the tag is a close-tag (e.g. "</rgba>").
 
         virtual TextElementType Type() const;
-        virtual int OriginalStringChars() const;
+        virtual std::size_t OriginalStringChars() const;
 
         std::vector<std::string> params;            ///< The parameter strings within the tag, eg "0", "0", "0", and "255" for the tag "<rgba 0 0 0 255>".
         std::string              original_tag_text; ///< The text as it appears in the original string.
@@ -179,15 +181,17 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** Holds the essential data on each line that a string occupies when rendered with given format flags.
-        \a char_data contains the visible characters for each line, plus any text formatting tags present
-        on that line as well. */
+    /** Holds the essential data on each line that a string occupies when
+        rendered with given format flags.  \a char_data contains the visible
+        characters for each line, plus any text formatting tags present on
+        that line as well. */
     struct GG_API LineData
     {
         LineData(); ///< Default ctor.
 
-        /** Contains the extent in pixels, the index into the original string, and the text formatting tags that should
-            be applied before rendering of a visible character. */
+        /** Contains the extent in pixels, the index into the original string,
+            and the text formatting tags that should be applied before
+            rendering of a visible character. */
         struct GG_API CharData
         {
             CharData(); ///< Defauilt ctor.
@@ -237,21 +241,21 @@ public:
     /** ctor.  Construct a font using only the printable characters in the
         extended ASCII set.  \throw Font::Exception Throws a subclass of
         Exception if the condition specified for the subclass is met. */
-    Font(const std::string& font_filename, int pts);
+    Font(const std::string& font_filename, unsigned int pts);
 
     /** ctor.  Construct a font using all the characters in the
         UnicodeCharsets in the range [first, last).  \throw Font::Exception
         Throws a subclass of Exception if the condition specified for the
         subclass is met. */
     template <class CharSetIter>
-    Font(const std::string& font_filename, int pts, CharSetIter first, CharSetIter last);
+    Font(const std::string& font_filename, unsigned int pts, CharSetIter first, CharSetIter last);
 
     virtual ~Font(); ///< virtual dtor
     //@}
 
     /** \name Accessors */ ///@{
     const std::string&FontName() const;   ///< returns the name of the file from which this font was created
-    int               PointSize() const;  ///< returns the point size in which the characters in the font object are rendered
+    unsigned int      PointSize() const;  ///< returns the point size in which the characters in the font object are rendered
 
     /** returns the range(s) of characters rendered in the font */
     const std::vector<UnicodeCharset>&
@@ -285,22 +289,27 @@ public:
     /** Thrown when a nonpositive font size is requested. */
     GG_CONCRETE_EXCEPTION(InvalidPointSize, GG::Font, Exception);
 
-    /** Thrown when a FreeType font could be loaded, but the resulting font is not scalable, making it unusable by GG. */
+    /** Thrown when a FreeType font could be loaded, but the resulting font is
+        not scalable, making it unusable by GG. */
     GG_CONCRETE_EXCEPTION(UnscalableFont, GG::Font, Exception);
 
-    /** Thrown when an attempt is made to create a glyph from null font face object. */
+    /** Thrown when an attempt is made to create a glyph from null font face
+        object. */
     GG_CONCRETE_EXCEPTION(BadFace, GG::Font, Exception);
 
-    /** Thrown when an attempt to set the size of a FreeType font face fails. */
+    /** Thrown when an attempt to set the size of a FreeType font face
+        fails. */
     GG_CONCRETE_EXCEPTION(BadPointSize, GG::Font, Exception);
 
-    /** Thrown when FreeType is unable to fulfill a request to load or render a glpyh. */
+    /** Thrown when FreeType is unable to fulfill a request to load or render
+        a glpyh. */
     GG_CONCRETE_EXCEPTION(BadGlyph, GG::Font, Exception);
     //@}
 
-    /** Throws a BadGlyph exception, with \a c converted to a printable ASCII character (if possible), or as a Unicode
-        character point.  \a format_str should contain the Boost.Format positional notation formatting tag "%1%" where
-        the character should appear. */
+    /** Throws a BadGlyph exception, with \a c converted to a printable ASCII
+        character (if possible), or as a Unicode character point.  \a
+        format_str should contain the Boost.Format positional notation
+        formatting tag "%1%" where the character should appear. */
     static void ThrowBadGlyph(const std::string& format_str, boost::uint32_t c);
 
 protected:
@@ -309,8 +318,8 @@ protected:
     //@}
 
 private:
-    /** This just holds the essential data necessary to render a glyph from the OpenGL texture(s) 
-        created at GG::Font creation time.*/
+    /** This just holds the essential data necessary to render a glyph from
+        the OpenGL texture(s) created at GG::Font creation time.*/
     struct Glyph
     {
         Glyph(); ///< default ctor
@@ -322,13 +331,13 @@ private:
         X           width;         ///< the width of the glyph only
     };
 
-    void              Init(const std::string& font_filename, int pts);
+    void              Init(const std::string& font_filename, unsigned int pts);
     bool              GenerateGlyph(FT_Face font, boost::uint32_t ch);
     inline X          RenderGlyph(const Pt& pt, const Glyph& glyph, const RenderState* render_state) const;
     void              HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const;
 
     std::string          m_font_filename;
-    int                  m_pt_sz;
+    unsigned int         m_pt_sz;
     std::vector<UnicodeCharset>
                          m_charsets;    ///< the sets of glyphs that are covered by this font object
     Y                    m_ascent;      ///< maximum amount above the baseline the text can go
@@ -370,14 +379,15 @@ private:
 class GG_API FontManager
 {
 private:
-    /// This GG::FontManager-private struct is used as a key type for the map of rendered fonts.
+    /// This GG::FontManager-private struct is used as a key type for the map
+    /// of rendered fonts.
     struct GG_API FontKey
     {
-        FontKey(const std::string& str, int pts); ///< ctor
+        FontKey(const std::string& str, unsigned int pts); ///< ctor
         bool operator<(const FontKey& rhs) const; ///< lexocograhpical ordering on filename then points
 
-        std::string filename;   ///< the name of the file from which this font was created
-        int         points;     ///< the point size in which this font was rendered
+        std::string  filename;   ///< the name of the file from which this font was created
+        unsigned int points;     ///< the point size in which this font was rendered
     };
 
 public:
@@ -385,18 +395,18 @@ public:
     /** returns a shared_ptr to the requested font, supporting all printable
         ASCII characters.  \note May load font if unavailable at time of
         request. */
-    boost::shared_ptr<Font> GetFont(const std::string& font_filename, int pts);
+    boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts);
 
     /** returns a shared_ptr to the requested font, supporting all the
         characters in the UnicodeCharsets in the range [first, last).  \note
         May load font if unavailable at time of request. */
     template <class CharSetIter>
-    boost::shared_ptr<Font> GetFont(const std::string& font_filename, int pts,
+    boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts,
                                     CharSetIter first, CharSetIter last);
 
     /** removes the indicated font from the font manager.  Due to shared_ptr
         semantics, the font may not be deleted until much later. */
-    void                    FreeFont(const std::string& font_filename, int pts);
+    void                    FreeFont(const std::string& font_filename, unsigned int pts);
     //@}
 
 private:
@@ -452,7 +462,7 @@ void GG::Font::LineData::serialize(Archive& ar, const unsigned int version)
 }
 
 template <class CharSetIter>
-GG::Font::Font(const std::string& font_filename, int pts, CharSetIter first, CharSetIter last) :
+GG::Font::Font(const std::string& font_filename, unsigned int pts, CharSetIter first, CharSetIter last) :
     m_font_filename(font_filename),
     m_pt_sz(pts),
     m_charsets(first, last),
@@ -488,7 +498,7 @@ void GG::Font::serialize(Archive& ar, const unsigned int version)
 
 template <class CharSetIter>
 boost::shared_ptr<GG::Font>
-GG::FontManager::GetFont(const std::string& font_filename, int pts,
+GG::FontManager::GetFont(const std::string& font_filename, unsigned int pts,
                          CharSetIter first, CharSetIter last)
 {
     FontKey key(font_filename, pts);

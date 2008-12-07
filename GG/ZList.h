@@ -38,23 +38,28 @@
 namespace GG {
     class Wnd;
 
-/** a Z-ordering (depth-ordering) of the windows in the GUI. Windows being moved up, inserted, or added to the top of
-    the list are checked against other windows at the insertion point and after; if any of these windows are modal or
-    on-top windows, the inserted window is placed after them if it is not also modal or on-top. Z-values decrease into
-    the screen.  Windows in the z-list are kept in front-to-back order.  No windows may share the same z-value.  Add,
-    Remove, MoveUp, and MoveDown all also add/remove/move all descendent windows.*/
+/** A Z-ordering (depth-ordering) of the windows in the GUI. Windows being
+    moved up, inserted, or added to the top of the list are checked against
+    other windows at the insertion point and after; if any of these windows
+    are modal or on-top windows, the inserted window is placed after them if
+    it is not also modal or on-top. Z-values decrease into the screen.
+    Windows in the z-list are kept in front-to-back order.  No windows may
+    share the same z-value.  Add, Remove, MoveUp, and MoveDown all also
+    add/remove/move all descendent windows.*/
 class GG_API ZList : public std::list<Wnd*>
 {
 public:
     /** \name Accessors */ ///@{
-    /** returns pointer to the window under the point pt; constrains pick to modal if nonzero, and ignores \a ignore if nonzero */
+    /** Returns pointer to the window under the point pt; constrains pick to
+        modal if nonzero, and ignores \a ignore if nonzero */
     Wnd* Pick(const Pt& pt, Wnd* modal, Wnd* ignore = 0) const;
     //@}
 
     /** \name Mutators */ ///@{
-    /** Add() places \a wnd in the list in front of the first entry with z-value <= wnd->ZOrder(), or at the end of the list, 
-        whichever comes first. If wnd->ZOrder() == 0, Add() inserts \a wnd at the front of the list, and updates \a 
-        wnd's z-value. */
+    /** Add() places \a wnd in the list in front of the first entry with
+        z-value <= wnd->ZOrder(), or at the end of the list, whichever comes
+        first. If wnd->ZOrder() == 0, Add() inserts \a wnd at the front of the
+        list, and updates \a wnd's z-value. */
     void Add(Wnd* wnd);
     bool Remove(Wnd* wnd);   ///< removes \a wnd from z-order
     bool MoveUp(Wnd* wnd);   ///< moves \a wnd from its current position to the beginning of list; updates wnd's z-value

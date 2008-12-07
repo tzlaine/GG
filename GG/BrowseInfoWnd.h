@@ -41,28 +41,33 @@ namespace GG {
 class Font;
 class TextControl;
 
-/** The abstract base class for all browse-info display windows.  Each frame that a BrowseInfoWnd is displayed, its
-    Update() method is called.  The Wnd* parameter passed in this call is the window about which the BrowseInfoWnd is
-    displaying info (the target Wnd); the BrowseInfoWnd can collect whatever information it requires from the target Wnd
-    before it is rendered.  Note that a BrowseInfoWnd should never be CLICKABLE. */
+/** The abstract base class for all browse-info display windows.  Each frame
+    that a BrowseInfoWnd is displayed, its Update() method is called.  The
+    Wnd* parameter passed in this call is the window about which the
+    BrowseInfoWnd is displaying info (the target Wnd); the BrowseInfoWnd can
+    collect whatever information it requires from the target Wnd before it is
+    rendered.  Note that a BrowseInfoWnd should never be CLICKABLE. */
 class GG_API BrowseInfoWnd : public Wnd
 {
 public:
     /** \name Accessors */ ///@{
-    /** Returns true iff \a wnd's browse mode \a mode contains browse info that is usable by this BrowseInfoWnd.  This
-        method is used by GUI to determine whether a Wnd w has suitable browse info available; if not, w's ancestors may
-        instead be asked for browse info recursively. */
-    virtual bool WndHasBrowseInfo(const Wnd* wnd, int mode) const = 0;
+    /** Returns true iff \a wnd's browse mode \a mode contains browse info
+        that is usable by this BrowseInfoWnd.  This method is used by GUI to
+        determine whether a Wnd w has suitable browse info available; if not,
+        w's ancestors may instead be asked for browse info recursively. */
+    virtual bool WndHasBrowseInfo(const Wnd* wnd, std::size_t mode) const = 0;
     //@}
 
     /** \name Mutators */ ///@{
     virtual void Render() = 0;
 
-    /** Collects data from \a target that is needed by Render().  Note that the one datum that is always available for
-        any Wnd is the text to display for \a mode, accessible through Wnd::BrowseInfoText() (though this may be the
-        empty string).  Other data that are provided by a Wnd subclass can be recovered by casting \a target to its
-        actual subclass type. */
-    void Update(int mode, const Wnd* target);
+    /** Collects data from \a target that is needed by Render().  Note that
+        the one datum that is always available for any Wnd is the text to
+        display for \a mode, accessible through Wnd::BrowseInfoText() (though
+        this may be the empty string).  Other data that are provided by a Wnd
+        subclass can be recovered by casting \a target to its actual subclass
+        type. */
+    void Update(std::size_t mode, const Wnd* target);
 
     /** Sets the current cursor position to the one given. */
     void SetCursorPosition(const Pt& cursor_pos);
@@ -77,7 +82,7 @@ protected:
 private:
     Pt m_cursor_pos;
 
-    virtual void UpdateImpl(int mode, const Wnd* target);
+    virtual void UpdateImpl(std::size_t mode, const Wnd* target);
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -85,21 +90,23 @@ private:
 };
 
 
-/** A subclass of BrowseInfoWnd that displays text in a box, optionally with a border.  The typical use case is for
-    TextBoxBrowseInfoWnd to get the appropriate text for the current mode by calling BrowseInfoText() on its target Wnd.
-    It may also be used to display static text, by setting SetTextFromTarget(false) and setting the desired text with
-    SetText(). */
+/** A subclass of BrowseInfoWnd that displays text in a box, optionally with a
+    border.  The typical use case is for TextBoxBrowseInfoWnd to get the
+    appropriate text for the current mode by calling BrowseInfoText() on its
+    target Wnd.  It may also be used to display static text, by setting
+    SetTextFromTarget(false) and setting the desired text with SetText(). */
 class GG_API TextBoxBrowseInfoWnd : public BrowseInfoWnd
 {
 public:
     /** \name Structors */ ///@{
     /** basic ctor */
     TextBoxBrowseInfoWnd(X w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
-                         Flags<TextFormat> format = FORMAT_LEFT | FORMAT_WORDBREAK, int border_width = 2, int text_margin = 4);
+                         Flags<TextFormat> format = FORMAT_LEFT | FORMAT_WORDBREAK,
+                         unsigned int border_width = 2, unsigned int text_margin = 4);
     //@}
 
     /** \name Accessors */ ///@{
-    virtual bool                   WndHasBrowseInfo(const Wnd* wnd, int mode) const;
+    virtual bool                   WndHasBrowseInfo(const Wnd* wnd, std::size_t mode) const;
 
     bool                           TextFromTarget() const; ///< returns true iff the text to display will be read from the target wnd
     const std::string&             Text () const;          ///< returns the text currently set for display
@@ -108,8 +115,8 @@ public:
     Clr                            BorderColor() const;    ///< returns the color used to render the text box border
     Clr                            TextColor() const;      ///< returns the color used to render the text
     Flags<TextFormat>              GetTextFormat() const;  ///< returns the text format used to render the text
-    int                            BorderWidth() const;    ///< returns the width of the text box border
-    int                            TextMargin() const;     ///< returns the margin to leave between the text and the text box
+    unsigned int                   BorderWidth() const;    ///< returns the width of the text box border
+    unsigned int                   TextMargin() const;     ///< returns the margin to leave between the text and the text box
     //@}
 
     /** \name Mutators */ ///@{
@@ -122,8 +129,8 @@ public:
     void SetBorderColor(Clr border_color);             ///< sets the color used to render the text box border
     void SetTextColor(Clr text_color);                 ///< sets the color used to render the text
     void SetTextFormat(Flags<TextFormat> format);      ///< sets the text format used to render the text
-    void SetBorderWidth(int border_width);             ///< sets the width of the text box border
-    void SetTextMargin(int text_margin);               ///< sets the margin to leave between the text and the text box
+    void SetBorderWidth(unsigned int border_width);    ///< sets the width of the text box border
+    void SetTextMargin(unsigned int text_margin);      ///< sets the margin to leave between the text and the text box
     //@}
 
 protected:
@@ -132,13 +139,13 @@ protected:
     //@}
 
 private:
-    virtual void UpdateImpl(int mode, const Wnd* target);
+    virtual void UpdateImpl(std::size_t mode, const Wnd* target);
 
     bool                    m_text_from_target;
     boost::shared_ptr<Font> m_font;
     Clr                     m_color;
     Clr                     m_border_color;
-    int                     m_border_width;
+    unsigned int            m_border_width;
     X                       m_preferred_width;
     TextControl*            m_text_control;
 

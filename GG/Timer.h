@@ -24,7 +24,8 @@
    whatwasthataddress@gmail.com */
 
 /** \file Timer.h
-    Contains the Timer class, which allows Wnds to receive regular notifications of the passage of time. */
+    Contains the Timer class, which allows Wnds to receive regular
+    notifications of the passage of time. */
 
 #ifndef _GG_Timer_h_
 #define _GG_Timer_h_
@@ -38,32 +39,35 @@ namespace GG {
 
 class Wnd;
 
-/** Timer provides a means for one or more Wnds to receive periodic notifications of the passage of time.  The rate at
-    which the Timer fires is not realtime.  That is, there are no guarantees on the interval between firings other than
-    that a minimum of Interval() ms will have elapsed.  Note that Timers do not rely on Boost signals to propagate
-    firing messages, so a Timers's Wnd connections will survive a serialization-deserialization cycle. */
+/** Timer provides a means for one or more Wnds to receive periodic
+    notifications of the passage of time.  The rate at which the Timer fires
+    is not realtime.  That is, there are no guarantees on the interval between
+    firings other than that a minimum of Interval() ms will have elapsed.
+    Note that Timers do not rely on Boost signals to propagate firing
+    messages, so a Timers's Wnd connections will survive a
+    serialization-deserialization cycle. */
 class GG_API Timer
 {
 public:
     /** \name Structors */ ///@{
-    /** Basic ctor.  Takes an interval and a start time in ms; if the start time is ommitted, the start time will be
-        immediate. */
-    explicit Timer(int interval, int start_time = 0);
+    /** Basic ctor.  Takes an interval and a start time in ms; if the start
+        time is ommitted, the start time will be immediate. */
+    explicit Timer(unsigned int interval, unsigned int start_time = 0);
 
     ~Timer(); ///< Dtor.
     //@}
 
     /** \name Accessors */ ///@{
     bool Connected() const;             ///< Returns true iff this Timer has Wnds listening to it
-    int Interval() const;               ///< Returns the interval in ms between firings of the timer
+    unsigned int Interval() const;      ///< Returns the interval in ms between firings of the timer
     bool Running() const;               ///< Returns true iff the timer is operating.  When false, this indicates that no firings will occur until Start() is called.
-    bool ShouldFire(int ticks) const;   ///< Returns true iff the timer is connected, running, and the last time it fired is is more than Interval() ms ago.
+    bool ShouldFire(unsigned int ticks) const; ///< Returns true iff the timer is connected, running, and the last time it fired is is more than Interval() ms ago.
     const std::set<Wnd*>& Wnds() const; ///< Returns the Wnds connected to this timer.  Note that the GUI will disconnect dying Wnds automatically.
     //@}
 
     /** \name Mutators */ ///@{
-    void Reset(int start_time = 0); ///< Resets the last-firing time of the timer to \a start_time (in ms), or the current time if \a start_time is ommitted.
-    void SetInterval(int interval); ///< Sets the interval in ms between firings of the timer
+    void Reset(unsigned int start_time = 0); ///< Resets the last-firing time of the timer to \a start_time (in ms), or the current time if \a start_time is ommitted.
+    void SetInterval(unsigned int interval); ///< Sets the interval in ms between firings of the timer
     void Connect(Wnd* wnd);         ///< Connects this timer to \a wnd, meaning that \a wnd will be notified when the timer fires.
     void Disconnect(Wnd* wnd);      ///< Disconnects this timer from \a wnd.
     void Start();                   ///< Starts the timer firing; does not reset the timer.
@@ -75,9 +79,9 @@ private:
     Timer(const Timer&); // disabled
 
     std::set<Wnd*> m_wnds;
-    int            m_interval;
+    unsigned int   m_interval;
     bool           m_running;
-    int            m_last_fire;
+    unsigned int   m_last_fire;
 
     friend class boost::serialization::access;
     template <class Archive>

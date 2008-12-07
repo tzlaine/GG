@@ -106,10 +106,13 @@ public:
     void           SetHiliteColor(Clr c);       ///< sets the color used to render hiliting around selected text
     void           SetSelectedTextColor(Clr c); ///< sets the color used to render selected text
 
-    /** selects all text in the given range.  When \a from == \a to, this function just places the caret at \a from.  Note that it is legal to
-        pass values such that \a to < \a from.  The difference is that \a from < \a to simulates a drag-selection from left to right, and \a to < 
-        \a from simulates one from right to left.  The direction of the simulated drag affects which part of the text is visible at the end of 
-        the function call. */
+    /** Selects all text in the given range.  When \a from == \a to, this
+        function just places the caret at \a from.  Note that it is legal to
+        pass values such that \a to < \a from.  The difference is that \a from
+        < \a to simulates a drag-selection from left to right, and \a to < \a
+        from simulates one from right to left.  The direction of the simulated
+        drag affects which part of the text is visible at the end of the
+        function call. */
     virtual void   SelectRange(int from, int to);
 
     /** selects all text in the entire control.  This function leaves the beginning of the text in view; see SelectRange(). */
@@ -133,14 +136,14 @@ protected:
     X                       FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
     X                       ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
     int                     LastVisibleChar() const;        ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
-    int                     LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
+    unsigned int            LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
 
-    /** returns index into WindowText() of the start of the UTF-8 sequence for
+    /** Returns index into WindowText() of the start of the UTF-8 sequence for
         the code point at \a char_idx, using \a line_data instead of the
         current line data, if it is supplied.  Not range-checked. */
     int     StringIndexOf(int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
 
-    /** returns range of indices into WindowText() of the UTF-8 sequence for
+    /** Returns range of indices into WindowText() of the UTF-8 sequence for
         the code point at \a char_idx, using \a line_data instead of the
         current line data, if it is supplied.  Not range-checked. */
     std::pair<int, int>
@@ -151,15 +154,20 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
-    /** Does a bit more than its name suggests.  Records the current time, and if it's within GUI::DoubleClickInterval()
-        of the last button down time, returns the indices into WindowText() that delimit the word around index \a
-        char_index.  If not within the time limit, or if no such word exists, the returned range will be empty (its
-        .first and .second members will be equal).  This function should be called in LButtonDown() overrides. */
+    /** Does a bit more than its name suggests.  Records the current time, and
+        if it's within GUI::DoubleClickInterval() of the last button down
+        time, returns the indices into WindowText() that delimit the word
+        around index \a char_index.  If not within the time limit, or if no
+        such word exists, the returned range will be empty (its .first and
+        .second members will be equal).  This function should be called in
+        LButtonDown() overrides. */
     std::pair<int, int>     GetDoubleButtonDownWordIndices(int char_index);
 
-    /** Returns the indices into WindowText() that delimit the word around index \a char_index.  If no such word exists,
-        the returned range will be empty (its .first and .second members will be equal).  This function should be called
-        in LDrag() overrides, when InDoubleButtonDownMode() is true. */
+    /** Returns the indices into WindowText() that delimit the word around
+        index \a char_index.  If no such word exists, the returned range will
+        be empty (its .first and .second members will be equal).  This
+        function should be called in LDrag() overrides, when
+        InDoubleButtonDownMode() is true. */
     std::pair<int, int>     GetDoubleButtonDownDragWordIndices(int char_index);
 
     /** Sets the value of InDoubleButtonDownMode() to false.  This should be called in LClick() overrides. */
@@ -172,8 +180,9 @@ private:
     void         ClearSelected();       ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
     void         AdjustView();          ///< makes sure the caret ends up in view after an arbitrary move
 
-    /** if .first == .second, the caret is drawn before character at m_cursor_pos.first; otherwise, the range is
-        selected (when range is selected, caret is considered at .second) */
+    /** If .first == .second, the caret is drawn before character at
+        m_cursor_pos.first; otherwise, the range is selected (when range is
+        selected, caret is considered at .second) */
     std::pair<int, int> m_cursor_pos;
 
     int                 m_first_char_shown; ///< index of the first character on the left end of the control's viewable area
@@ -183,7 +192,7 @@ private:
 
     bool                m_recently_edited;  ///< the contents when the focus was last gained
 
-    int                 m_last_button_down_time;
+    unsigned int        m_last_button_down_time;
     bool                m_in_double_click_mode;
     std::pair<int, int> m_double_click_cursor_pos;
 

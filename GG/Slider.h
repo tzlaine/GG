@@ -24,8 +24,8 @@
    whatwasthataddress@gmail.com */
 
 /** \file Slider.h
-    Contains the Slider class, which provides a slider control that allows the user to select a value from a range 
-    if integers. */
+    Contains the Slider class, which provides a slider control that allows the
+    user to select a value from a range if integers. */
 
 #ifndef _GG_Slider_h_
 #define _GG_Slider_h_
@@ -40,10 +40,12 @@ namespace GG {
 class Button;
 class WndEvent;
 
-/** a slider control.  This control allows the user to drag a tab to a desired setting; it is somewhat like a Scroll.
-    Sliders can be either vertical or horizontal, but cannot switch between the two.  Unlike vertical Scrolls, whose
-    values increase downward, vertical Sliders increase upward by default.  Note that it is acceptible to define a range
-    that increases from min to max, or one that decreases from min to max; both are legal. */
+/** A slider control.  This control allows the user to drag a tab to a desired
+    setting; it is somewhat like a Scroll.  Sliders can be either vertical or
+    horizontal, but cannot switch between the two.  Unlike vertical Scrolls,
+    whose values increase downward, vertical Sliders increase upward by
+    default.  Note that it is acceptible to define a range that increases from
+    min to max, or one that decreases from min to max; both are legal. */
 class GG_API Slider : public Control
 {
 public:
@@ -58,7 +60,9 @@ public:
     //@}
 
     /** \name Structors */ ///@{
-    Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, SliderLineStyle style, Clr color, int tab_width, int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
+    Slider(X x, Y y, X w, Y h, int min, int max,
+           Orientation orientation, SliderLineStyle style, Clr color,
+           unsigned int tab_width, unsigned int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
     //@}
 
     /** \name Accessors */ ///@{
@@ -67,13 +71,14 @@ public:
     int                  Posn() const;           ///< returns the current tab position
     std::pair<int, int>  SliderRange() const;    ///< returns the defined possible range of control
 
-    /** returns the current page size, or the amount that the slider increments/decrements when a click occurs off of
-        the tab.  If not set, this defaults to 10% of the slider's range. */
-    int                  PageSize() const;
+    /** Returns the current page size, or the amount that the slider
+        increments/decrements when a click occurs off of the tab.  If not set,
+        this defaults to 10% of the slider's range. */
+    unsigned int         PageSize() const;
 
     Orientation          GetOrientation() const; ///< returns the orientation of the slider (VERTICAL or HORIZONTAL)
-    int                  TabWidth() const;       ///< returns the width of the slider's tab, in pixels
-    int                  LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
+    unsigned int         TabWidth() const;       ///< returns the width of the slider's tab, in pixels
+    unsigned int         LineWidth() const;      ///< returns the width of the line along which the tab slides, in pixels
     SliderLineStyle      LineStyle() const;      ///< returns the style of line used to render the control
 
     mutable SlidSignalType           SlidSignal;           ///< returns the slid signal object for this Slider
@@ -93,15 +98,18 @@ public:
     void           SetMin(int min);              ///< sets the minimum value of the control
     void           SlideTo(int p);               ///< slides the control to a certain spot
 
-    /** sets the size of a "page", or the amount that the slider increments/decrements when a click occurs off of the
-        tab.  If not set, this defaults to 10% of the slider's range.  To disable clicks off the tab, set the page size
-        to 0. */
-    void           SetPageSize(int size);
+    /** Sets the size of a "page", or the amount that the slider
+        increments/decrements when a click occurs off of the tab.  If not set,
+        this defaults to 10% of the slider's range.  To disable clicks off the
+        tab, set the page size to 0. */
+    void           SetPageSize(unsigned int size);
 
     void           SetLineStyle(SliderLineStyle style); ///< returns the style of line used to render the control
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
+
+    static const std::size_t INVALID_PAGE_SIZE;
 
 protected:
     /** \name Structors */ ///@{
@@ -125,10 +133,10 @@ private:
     int                       m_posn;
     int                       m_range_min;
     int                       m_range_max;
-    int                       m_page_sz;
+    unsigned int              m_page_sz;
     Orientation               m_orientation;
-    int                       m_line_width;
-    int                       m_tab_width;
+    unsigned int              m_line_width;
+    unsigned int              m_tab_width;
     SliderLineStyle           m_line_style;
     int                       m_tab_drag_offset;
     Button*                   m_tab;

@@ -34,7 +34,7 @@
 using namespace GG;
 
 namespace {
-    const int MIN_TAB_SIZE = 5;
+    const unsigned int MIN_TAB_SIZE = 5;
 }
 
 ////////////////////////////////////////////////
@@ -116,10 +116,10 @@ std::pair<int, int> Scroll::PosnRange() const
 std::pair<int, int> Scroll::ScrollRange() const
 { return std::pair<int, int>(m_range_min, m_range_max); }
 
-int Scroll::LineSize() const
+unsigned int Scroll::LineSize() const
 { return m_line_sz; }
 
-int Scroll::PageSize() const
+unsigned int Scroll::PageSize() const
 { return m_page_sz; }
     
 Clr Scroll::InteriorColor() const
@@ -204,19 +204,22 @@ void Scroll::SetColor(Clr c)
 void Scroll::SetInteriorColor(Clr c)
 { m_int_color = c; }
 
-void Scroll::SizeScroll(int min, int max, int line, int page)
+void Scroll::SizeScroll(int min, int max, unsigned int line, unsigned int page)
 {
     m_line_sz = line;
     m_range_min = std::min(min, max);
     m_range_max = std::max(min, max);
     int old_posn = m_posn;
     m_page_sz = page;
-    if (m_page_sz > (m_range_max - m_range_min + 1)) m_page_sz = (m_range_max - m_range_min + 1);
-    if (m_posn > m_range_max - (m_page_sz - 1)) m_posn = m_range_max - (m_page_sz - 1);
-    if (m_posn < m_range_min) m_posn = m_range_min;
+    if (m_page_sz > static_cast<unsigned int>(m_range_max - m_range_min + 1))
+        m_page_sz = (m_range_max - m_range_min + 1);
+    if (m_posn > m_range_max - static_cast<int>(m_page_sz - 1))
+        m_posn = m_range_max - (m_page_sz - 1);
+    if (m_posn < m_range_min)
+        m_posn = m_range_min;
     Pt tab_ul = m_tab->RelativeUpperLeft();
-    Pt tab_lr = m_orientation == VERTICAL ? Pt(m_tab->RelativeLowerRight().x, tab_ul.y + TabWidth()):
-    Pt(tab_ul.x + TabWidth(), m_tab->RelativeLowerRight().y);
+    Pt tab_lr = m_orientation == VERTICAL ? Pt(m_tab->RelativeLowerRight().x, tab_ul.y + static_cast<int>(TabWidth())):
+        Pt(tab_ul.x + static_cast<int>(TabWidth()), m_tab->RelativeLowerRight().y);
     m_tab->SizeMove(tab_ul, tab_lr);
     MoveTabToPosn();
     if (old_posn != m_posn) {
@@ -231,10 +234,10 @@ void Scroll::SetMax(int max)
 void Scroll::SetMin(int min)        
 { SizeScroll(min, m_range_max, m_line_sz, m_page_sz); }
 
-void Scroll::SetLineSize(int line)
+void Scroll::SetLineSize(unsigned int line)
 { SizeScroll(m_range_min, m_range_max, line, m_page_sz); }
 
-void Scroll::SetPageSize(int page)  
+void Scroll::SetPageSize(unsigned int page)  
 { SizeScroll(m_range_min, m_range_max, m_line_sz, page); }
 
 void Scroll::ScrollTo(int p)
@@ -242,7 +245,7 @@ void Scroll::ScrollTo(int p)
     int old_posn = m_posn;
     if (p < m_range_min)
         m_posn = m_range_min;
-    else if (p > m_range_max - m_page_sz)
+    else if (p > static_cast<int>(m_range_max - m_page_sz))
         m_posn = m_range_max - m_page_sz;
     else
         m_posn = p;
@@ -270,7 +273,7 @@ void Scroll::ScrollLineIncr()
 void Scroll::ScrollLineDecr()
 {
     int old_posn = m_posn;
-    if (m_posn - m_line_sz >= m_range_min)
+    if (static_cast<int>(m_posn - m_line_sz) >= m_range_min)
         m_posn -= m_line_sz;
     else
         m_posn = m_range_min;
@@ -298,7 +301,7 @@ void Scroll::ScrollPageIncr()
 void Scroll::ScrollPageDecr()
 {
     int old_posn = m_posn;
-    if (m_posn - m_page_sz >= m_range_min)
+    if (static_cast<int>(m_posn - m_page_sz) >= m_range_min)
         m_posn -= m_page_sz;
     else
         m_posn = m_range_min;
@@ -322,7 +325,7 @@ void Scroll::DefineAttributes(WndEditor* editor)
     editor->Attribute("Page Size", m_page_sz);
 }
 
-int Scroll::TabSpace() const
+unsigned int Scroll::TabSpace() const
 {
     // tab_space is the space the tab has to move about in (the control's width less the width of the incr & decr buttons)
     return (m_orientation == VERTICAL ?
@@ -330,7 +333,7 @@ int Scroll::TabSpace() const
             Value(Size().x - m_incr->Size().x - m_decr->Size().x));
 }
 
-int Scroll::TabWidth() const
+unsigned int Scroll::TabWidth() const
 { return std::max(TabSpace() * m_page_sz / (m_range_max - m_range_min + 1), MIN_TAB_SIZE); }
 
 Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
@@ -398,7 +401,7 @@ void Scroll::UpdatePosn()
                       Value(m_tab->RelativeUpperLeft().x - m_decr->Size().x));
     int tab_space = TabSpace();
     m_posn = static_cast<int>(m_range_min + static_cast<double>(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
-    m_posn = std::min(m_range_max - m_page_sz + 1, std::max(m_range_min, m_posn));
+    m_posn = std::min(static_cast<int>(m_range_max - m_page_sz + 1), std::max(m_range_min, m_posn));
     if (old_posn != m_posn)
         ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
 }

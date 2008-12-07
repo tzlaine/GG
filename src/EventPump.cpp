@@ -40,7 +40,7 @@ EventPumpState::EventPumpState() :
 void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_rendering, bool do_rendering)
 {
     if (do_non_rendering) {
-        int time = gui->Ticks();
+        unsigned int time = gui->Ticks();
 
         // send an idle message, so that the gui has timely updates for triggering browse info windows, etc.
         gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, 0, gui->ModKeys(), gui->MousePosition(), Pt());
@@ -50,7 +50,7 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
             double min_ms_per_frame = 1000.0 * 1.0 / max_FPS;
             double ms_to_wait = min_ms_per_frame - (time - state.last_frame_time);
             if (0.0 < ms_to_wait)
-                gui->Wait(static_cast<int>(ms_to_wait));
+                gui->Wait(static_cast<unsigned int>(ms_to_wait));
         }
         state.last_frame_time = time;
 

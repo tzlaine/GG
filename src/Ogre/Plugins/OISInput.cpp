@@ -331,11 +331,11 @@ void OISInput::HandleSystemEvents()
     m_keyboard->capture();
 }
 
-void OISInput::HandleWindowResize(int width, int height)
+void OISInput::HandleWindowResize(X width, Y height)
 {
     const OIS::MouseState& mouse_state = m_mouse->getMouseState();
-    mouse_state.width = width;
-    mouse_state.height = height;
+    mouse_state.width = Value(width);
+    mouse_state.height = Value(height);
 }
 
 void OISInput::HandleWindowClose()

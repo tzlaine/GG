@@ -101,9 +101,11 @@ MenuItem::~MenuItem()
 ////////////////////////////////////////////////
 // GG::MenuBar
 ////////////////////////////////////////////////
+const std::size_t MenuBar::INVALID_CARET = std::numeric_limits<std::size_t>::max();
+
 MenuBar::MenuBar() :
     Control(),
-    m_caret(-1)
+    m_caret(INVALID_CARET)
 {}
 
 MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_color/* = CLR_WHITE*/,
@@ -114,7 +116,7 @@ MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_co
     m_int_color(interior),
     m_text_color(text_color),
     m_sel_text_color(text_color),
-    m_caret(-1)
+    m_caret(INVALID_CARET)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -131,7 +133,7 @@ MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuI
     m_text_color(text_color),
     m_sel_text_color(text_color),
     m_menu_data(m),
-    m_caret(-1)
+    m_caret(INVALID_CARET)
 {
     // use opaque interior color as hilite color
     interior.a = 255;
@@ -165,7 +167,7 @@ bool MenuBar::ContainsMenu(const std::string& str) const
     return retval;
 }
 
-int MenuBar::NumMenus() const
+std::size_t MenuBar::NumMenus() const
 { return m_menu_data.next_level.size(); }
 
 const MenuItem& MenuBar::GetMenu(const std::string& str) const
@@ -178,7 +180,7 @@ const MenuItem& MenuBar::GetMenu(const std::string& str) const
     return *it;
 }
 
-const MenuItem& MenuBar::GetMenu(int n) const
+const MenuItem& MenuBar::GetMenu(std::size_t n) const
 { return *(m_menu_data.next_level.begin() + n); }
 
 Clr MenuBar::BorderColor() const        
@@ -203,9 +205,9 @@ void MenuBar::Render()
     FlatRectangle(ul, lr, m_int_color, m_border_color, BORDER_THICKNESS);
 
     // paint caret, if any
-    if (m_caret != -1) {
+    if (m_caret != INVALID_CARET) {
         Pt caret_ul = m_menu_labels[m_caret]->UpperLeft() + Pt(X(!m_caret ? BORDER_THICKNESS : 0), Y(BORDER_THICKNESS));
-        Pt caret_lr = m_menu_labels[m_caret]->LowerRight() - Pt(X(m_caret == static_cast<int>(m_menu_labels.size()) - 1 ? BORDER_THICKNESS : 0), Y(BORDER_THICKNESS));
+        Pt caret_lr = m_menu_labels[m_caret]->LowerRight() - Pt(X(m_caret == m_menu_labels.size() - 1 ? BORDER_THICKNESS : 0), Y(BORDER_THICKNESS));
         FlatRectangle(caret_ul, caret_lr, m_hilite_color, CLR_ZERO, 0);
     }
 }
@@ -215,7 +217,7 @@ void MenuBar::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
     if (!Disabled()) {
         for (std::size_t i = 0; i < m_menu_labels.size(); ++i) {
             if (m_menu_labels[i]->InWindow(pt)) {
-                m_caret = -1;
+                m_caret = INVALID_CARET;
                 BrowsedSignal(0);
                 // since a MenuBar is usually modeless, but becomes modal when a menu is opened, we do something kludgey here:
                 // we launch a PopupMenu whenever a menu item is selected, then use the ID returned from it to find the
@@ -239,7 +241,7 @@ void MenuBar::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 void MenuBar::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
-        m_caret = -1;
+        m_caret = INVALID_CARET;
         for (std::size_t i = 0; i < m_menu_data.next_level.size(); ++i) {
             if (m_menu_labels[i]->InWindow(pt)) {
                 m_caret = i;
@@ -250,7 +252,7 @@ void MenuBar::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 }
 
 void MenuBar::MouseLeave()
-{ m_caret = -1; }
+{ m_caret = INVALID_CARET; }
 
 void MenuBar::SizeMove(const Pt& ul, const Pt& lr)
 {
@@ -318,7 +320,7 @@ const boost::shared_ptr<Font>& MenuBar::GetFont() const
 const std::vector<TextControl*>& MenuBar::MenuLabels() const
 { return m_menu_labels; }
 
-int MenuBar::Caret() const
+std::size_t MenuBar::Caret() const
 { return m_caret; }
 
 void MenuBar::AdjustLayout(bool reset/* = false*/)
@@ -382,6 +384,8 @@ namespace {
     const X HORIZONTAL_MARGIN(3);
 }
 
+const std::size_t PopupMenu::INVALID_CARET = std::numeric_limits<std::size_t>::max();
+
 PopupMenu::PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = CLR_WHITE*/,
                      Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
     Wnd(X0, Y0, GUI::GetGUI()->AppWidth() - 1, GUI::GetGUI()->AppHeight() - 1, CLICKABLE | MODAL),
@@ -392,7 +396,7 @@ PopupMenu::PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuIt
     m_sel_text_color(text_color),
     m_menu_data(m),
     m_open_levels(),
-    m_caret(std::vector<int>(1, -1)),
+    m_caret(1, INVALID_CARET),
     m_origin(x, y),
     m_item_selected(0)
 {
@@ -472,20 +476,20 @@ void PopupMenu::Render()
                 r.lr.y -= offset;
             }
             next_menu_x_offset = menu_sz.x;
-            next_menu_y_offset = m_caret[i] * m_font->Lineskip();
+            next_menu_y_offset = static_cast<int>(m_caret[i]) * m_font->Lineskip();
             FlatRectangle(r.ul, r.lr, m_int_color, m_border_color, BORDER_THICKNESS);
             m_open_levels[i] = r;
 
             // paint caret, if any
-            if (m_caret[i] != -1) {
+            if (m_caret[i] != INVALID_CARET) {
                 Rect tmp_r = r;
-                tmp_r.ul.y += m_caret[i] * m_font->Lineskip();
+                tmp_r.ul.y += static_cast<int>(m_caret[i]) * m_font->Lineskip();
                 tmp_r.lr.y = tmp_r.ul.y + m_font->Lineskip() + 3;
                 tmp_r.ul.x += BORDER_THICKNESS;
                 tmp_r.lr.x -= BORDER_THICKNESS;
                 if (m_caret[i] == 0)
                     tmp_r.ul.y += BORDER_THICKNESS;
-                if (m_caret[i] == static_cast<int>(menu.next_level.size()) - 1)
+                if (m_caret[i] == menu.next_level.size() - 1)
                     tmp_r.lr.y -= BORDER_THICKNESS;
                 FlatRectangle(tmp_r.ul, tmp_r.lr, m_hilite_color, CLR_ZERO, 0);
             }
@@ -495,7 +499,7 @@ void PopupMenu::Render()
             line_rect.ul.x += HORIZONTAL_MARGIN;
             line_rect.lr.x -= HORIZONTAL_MARGIN;
             for (std::size_t j = 0; j < menu.next_level.size(); ++j) {
-                Clr clr = (m_caret[i] == static_cast<int>(j)) ?
+                Clr clr = (m_caret[i] == j) ?
                           (menu.next_level[j].disabled ? DisabledColor(m_sel_text_color) : m_sel_text_color) :
                                   (menu.next_level[j].disabled ? DisabledColor(m_text_color) : m_text_color);
                 glColor3ub(clr.r, clr.g, clr.b);
@@ -522,7 +526,7 @@ void PopupMenu::Render()
 
 void PopupMenu::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    if (m_caret[0] != -1) {
+    if (m_caret[0] != INVALID_CARET) {
         MenuItem* menu_ptr = &m_menu_data;
         for (std::size_t i = 0; i < m_caret.size(); ++i)
             menu_ptr = &menu_ptr->next_level[m_caret[i]];
@@ -549,10 +553,10 @@ void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 
         if (pt.x >= m_open_levels[i].ul.x && pt.x <= m_open_levels[i].lr.x &&
                 pt.y >= m_open_levels[i].ul.y && pt.y <= m_open_levels[i].lr.y) {
-            int row_selected = Value((pt.y - m_open_levels[i].ul.y) / m_font->Lineskip());
+            std::size_t row_selected = Value((pt.y - m_open_levels[i].ul.y) / m_font->Lineskip());
             if (row_selected == m_caret[i]) {
                 cursor_is_in_menu = true;
-            } else if (row_selected >= 0 && row_selected < static_cast<int>(menu.next_level.size())) {
+            } else if (row_selected < menu.next_level.size()) {
                 m_caret[i] = row_selected;
                 m_open_levels.resize(i + 1);
                 m_caret.resize(i + 1);
@@ -567,10 +571,10 @@ void PopupMenu::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
     if (!cursor_is_in_menu) {
         m_open_levels.resize(1);
         m_caret.resize(1);
-        m_caret[0] = -1;
+        m_caret[0] = INVALID_CARET;
     }
     int update_ID = 0;
-    if (m_caret[0] != -1) {
+    if (m_caret[0] != INVALID_CARET) {
         MenuItem* menu_ptr = &m_menu_data;
         for (std::size_t i = 0; i < m_caret.size(); ++i)
             menu_ptr = &menu_ptr->next_level[m_caret[i]];
@@ -601,28 +605,28 @@ int PopupMenu::Run()
 void PopupMenu::SetBorderColor(Clr clr)
 { m_border_color = clr; }
 
-void PopupMenu::SetInteriorColor(Clr clr)     
+void PopupMenu::SetInteriorColor(Clr clr)
 { m_int_color = clr; }
 
-void PopupMenu::SetTextColor(Clr clr)         
+void PopupMenu::SetTextColor(Clr clr)
 { m_text_color = clr; }
 
-void PopupMenu::SetHiliteColor(Clr clr)       
+void PopupMenu::SetHiliteColor(Clr clr)
 { m_hilite_color = clr; }
 
 void PopupMenu::SetSelectedTextColor(Clr clr)
 { m_sel_text_color = clr; }
 
-const boost::shared_ptr<Font>& PopupMenu::GetFont() const     
+const boost::shared_ptr<Font>& PopupMenu::GetFont() const
 { return m_font; }
 
-const MenuItem& PopupMenu::MenuData() const    
+const MenuItem& PopupMenu::MenuData() const
 { return m_menu_data; }
 
-const std::vector<Rect>& PopupMenu::OpenLevels() const  
+const std::vector<Rect>& PopupMenu::OpenLevels() const
 { return m_open_levels; }
 
-const std::vector<int>& PopupMenu::Caret() const       
+const std::vector<std::size_t>& PopupMenu::Caret() const
 { return m_caret; }
 
 const MenuItem* PopupMenu::ItemSelected() const

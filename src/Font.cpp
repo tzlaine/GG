@@ -234,7 +234,7 @@ X Font::TextElement::Width() const
 Font::TextElement::TextElementType Font::TextElement::Type() const
 { return newline ? NEWLINE : (whitespace ? WHITESPACE : TEXT); }
 
-int Font::TextElement::OriginalStringChars() const
+std::size_t Font::TextElement::OriginalStringChars() const
 { return text.size(); }
 
 
@@ -254,7 +254,7 @@ Font::FormattingTag::FormattingTag(bool close) :
 Font::FormattingTag::TextElementType Font::FormattingTag::Type() const
 { return close_tag ? CLOSE_TAG : OPEN_TAG; }
 
-int Font::FormattingTag::OriginalStringChars() const
+std::size_t Font::FormattingTag::OriginalStringChars() const
 { return original_tag_text.size(); }
 
 
@@ -334,7 +334,7 @@ Font::Font() :
     m_space_width(0)
 {}
 
-Font::Font(const std::string& font_filename, int pts) :
+Font::Font(const std::string& font_filename, unsigned int pts) :
     m_font_filename(font_filename),
     m_pt_sz(pts),
     m_ascent(0),
@@ -356,7 +356,7 @@ Font::~Font()
 const std::string& Font::FontName() const     
 { return m_font_filename; }
 
-int Font::PointSize() const    
+unsigned int Font::PointSize() const    
 { return m_pt_sz; }
 
 const std::vector<UnicodeCharset>& Font::UnicodeCharsets() const
@@ -842,7 +842,7 @@ void Font::ThrowBadGlyph(const std::string& format_str, boost::uint32_t c)
     throw BadGlyph(boost::io::str(boost::format(format_str) % boost::io::str(format % c)));
 }
 
-void Font::Init(const std::string& font_filename, int pts)
+void Font::Init(const std::string& font_filename, unsigned int pts)
 {
     if (s_action_tags.empty()) // if this is the first Font to get initialized, it needs to initialize some static members
         ClearKnownTags();
@@ -1138,7 +1138,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
 // class GG::FontManager
 ///////////////////////////////////////
 // FontKey 
-FontManager::FontKey::FontKey(const std::string& str, int pts) :
+FontManager::FontKey::FontKey(const std::string& str, unsigned int pts) :
     filename(str),
     points(pts)
 {}
@@ -1153,14 +1153,14 @@ const boost::shared_ptr<Font> FontManager::EMPTY_FONT(new Font("", 0));
 FontManager::FontManager()
 {}
 
-boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, int pts)
+boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, unsigned int pts)
 {
     std::vector<UnicodeCharset> v;
     std::vector<UnicodeCharset>::iterator it = v.end();
     return GetFont(font_filename, pts, it, it);
 }
 
-void FontManager::FreeFont(const std::string& font_filename, int pts)
+void FontManager::FreeFont(const std::string& font_filename, unsigned int pts)
 {
     FontKey key(font_filename, pts);
     std::map<FontKey, boost::shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);

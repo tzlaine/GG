@@ -48,9 +48,10 @@ namespace detail {
 
 struct AttributeRowBase;
 
-/** This is the base class for functors that respond to a change in a Wnd attribute edited by a WndEditor.  This is
-    needed when a change in a value within a Wnd must be accompanied by some action that is taken in response to that
-    change. */
+/** This is the base class for functors that respond to a change in a Wnd
+    attribute edited by a WndEditor.  This is needed when a change in a value
+    within a Wnd must be accompanied by some action that is taken in response
+    to that change. */
 template <class T>
 struct AttributeChangedAction
 {
@@ -58,14 +59,16 @@ struct AttributeChangedAction
     virtual void operator()(const T& value) {}
 };
 
-/** Allows Wnds to be edited texually in a GUI, primarily for use in GG Sketch.  WndEditor takes an assigned Wnd and
-    queries it for controls that can be used to edit it.  Each Wnd to be edited calls methods in the WndEditor that
-    create the appropriate controls, and provides references to its internal members that may be altered by the controls
-    created.*/
+/** Allows Wnds to be edited texually in a GUI, primarily for use in GG
+    Sketch.  WndEditor takes an assigned Wnd and queries it for controls that
+    can be used to edit it.  Each Wnd to be edited calls methods in the
+    WndEditor that create the appropriate controls, and provides references to
+    its internal members that may be altered by the controls created.*/
 class GG_API WndEditor : public Wnd
 {
 public:
-    /** Contains a Flags object and the AttributeChangedAction associated with it. */
+    /** Contains a Flags object and the AttributeChangedAction associated with
+        it. */
     template <class FlagType>
     struct FlagsAndAction
     {
@@ -84,65 +87,75 @@ public:
 
     virtual void Render ();
 
-    /** sets the edited window to \a wnd, and updates the contents of WndEditor's controls to contain the controls that
-        edit the new Wnd. */
+    /** Sets the edited window to \a wnd, and updates the contents of
+        WndEditor's controls to contain the controls that edit the new Wnd. */
     void SetWnd(Wnd* wnd, const std::string& name = "");
 
-    /** creates a row containing just the text \a name. */
+    /** Creates a row containing just the text \a name. */
     void Label(const std::string& name);
 
-    /** adds \a row and attaches to its ChangedSignal */
+    /** Adds \a row and attaches to its ChangedSignal */
     void Attribute(AttributeRowBase* row);
 
-    /** creates a row containing an edit box controlling the value of \a value. */
+    /** Creates a row containing an edit box controlling the value of \a
+        value. */
     template <class T>
     void Attribute(const std::string& name, T& value,
                    const boost::shared_ptr<AttributeChangedAction<T> >& attribute_changed_action);
 
-    /** creates a row containing an edit box controlling the value of \a value. */
+    /** Creates a row containing an edit box controlling the value of \a
+        value. */
     template <class T>
     void Attribute(const std::string& name, T& value);
 
-    /** creates a row containing an edit box controlling the value of \a value.  The legal values for \a value are
-        restricted to the range [\a min, \a max].*/
+    /** Creates a row containing an edit box controlling the value of \a
+        value.  The legal values for \a value are restricted to the range [\a
+        min, \a max].*/
     template <class T>
     void Attribute(const std::string& name, T& value, const T& min, const T& max,
                    const boost::shared_ptr<AttributeChangedAction<T> >& attribute_changed_action);
 
-    /** creates a row containing an edit box controlling the value of \a value.  The legal values for \a value are
-        restricted to the range [\a min, \a max].*/
+    /** Creates a row containing an edit box controlling the value of \a
+        value.  The legal values for \a value are restricted to the range [\a
+        min, \a max].*/
     template <class T>
     void Attribute(const std::string& name, T& value, const T& min, const T& max);
 
-    /** creates a row containing the uneditable string representation of \a value. */
+    /** Creates a row containing the uneditable string representation of \a
+        value. */
     template <class T>
     void ConstAttribute(const std::string& name, const T& value);
 
-    /** creates a row that displays the uneditable result of calling \a functor on the edited Wnd. */
+    /** Creates a row that displays the uneditable result of calling \a
+        functor on the edited Wnd. */
     template <class T>
     void CustomText(const std::string& name, const T& functor);
 
-    /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
-        FlagGroup() calls will set values in \a flags. */
+    /** Marks the beginning of a section of flag and flag-group rows.  Until
+        EndFlags() is called, all Flag() and FlagGroup() calls will set values
+        in \a flags. */
     template <class FlagType>
     void BeginFlags(Flags<FlagType>& flags,
                     const boost::shared_ptr<AttributeChangedAction<Flags<FlagType> > >& attribute_changed_action);
 
-    /** marks the beginning of a section of flag and flag-group rows.  Until EndFlags() is called, all Flag() and
-        FlagGroup() calls will set values in \a flags. */
+    /** Marks the beginning of a section of flag and flag-group rows.  Until
+        EndFlags() is called, all Flag() and FlagGroup() calls will set values
+        in \a flags. */
     template <class FlagType>
     void BeginFlags(Flags<FlagType>& flags);
 
-    /** creates a row representing a single bit flag in the currently-set flags variable. */
+    /** Creates a row representing a single bit flag in the currently-set
+        flags variable. */
     template <class FlagType>
     void Flag(const std::string& name, FlagType flag);
 
-    /** creates a row representing a group of bit flags in the currently-set flags variable.  Exactly one of the given
-        flags will be enabled at one time. */
+    /** Creates a row representing a group of bit flags in the currently-set
+        flags variable.  Exactly one of the given flags will be enabled at one
+        time. */
     template <class FlagType>
     void FlagGroup(const std::string& name, const std::vector<FlagType>& group_values);
 
-    /** marks the end of a section of flag and flag-group rows. */
+    /** Marks the end of a section of flag and flag-group rows. */
     void EndFlags();
 
     mutable boost::signal<void (Wnd*, const std::string&)> WndNameChangedSignal; ///< emitted when the edited window's name has been changed
@@ -160,8 +173,8 @@ private:
     boost::any m_current_flags_and_action;
 };
 
-/** the base class for the hierarchy of rows of controls used by WndEditor to accept user modifications of its edited
-    Wnd. */
+/** The base class for the hierarchy of rows of controls used by WndEditor to
+    accept user modifications of its edited Wnd. */
 struct GG_API AttributeRowBase : ListBox::Row
 {
     virtual void Refresh(); ///< refreshes the contents of the row to match the value associated with the row every frame
@@ -169,7 +182,8 @@ struct GG_API AttributeRowBase : ListBox::Row
     mutable boost::signal<void ()> ChangedSignal; ///< emitted when the row has modified its associated value
 };
 
-/** the most general form of attribute row, which displays an editable value in an edit box. */
+/** The most general form of attribute row, which displays an editable value
+    in an edit box. */
 template <class T>
 struct AttributeRow : AttributeRowBase
 {
@@ -183,7 +197,7 @@ private:
     boost::signals::connection m_edit_connection;
 };
 
-/** the specialization of AttributeRow<T> for Pt. */
+/** The specialization of AttributeRow<T> for Pt. */
 template <>
 struct GG_API AttributeRow<Pt> : AttributeRowBase
 {
@@ -198,7 +212,7 @@ private:
     boost::signals::connection m_y_connection;
 };
 
-/** the specialization of AttributeRow<T> for Clr. */
+/** The specialization of AttributeRow<T> for Clr. */
 template <>
 struct GG_API AttributeRow<Clr> : AttributeRowBase
 {
@@ -212,7 +226,7 @@ private:
     boost::shared_ptr<Font> m_font;
 };
 
-/** the specialization of AttributeRow<T> for bool. */
+/** The specialization of AttributeRow<T> for bool. */
 template <>
 struct GG_API AttributeRow<bool> : AttributeRowBase
 {
@@ -220,13 +234,13 @@ struct GG_API AttributeRow<bool> : AttributeRowBase
     virtual void Update();
     mutable boost::signal<void (const bool&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
 private:
-    void SelectionChanged(int selection);
+    void SelectionChanged(std::size_t selection);
     bool& m_value;
     RadioButtonGroup* m_radio_button_group;
     boost::signals::connection m_button_group_connection;
 };
 
-/** the specialization of AttributeRow<T> for Font shared pointers. */
+/** The specialization of AttributeRow<T> for Font shared pointers. */
 template <>
 struct GG_API AttributeRow<boost::shared_ptr<Font> > : AttributeRowBase
 {
@@ -243,9 +257,10 @@ private:
     boost::signals::connection m_points_connection;
 };
 
-/** a AttributeRowBase subclass that is restricted to a certain range of values.  Note that all this type of row should
-    be used for all enum types, since the range of valid enum values must be known for the control to display them
-    all. */
+/** A AttributeRowBase subclass that is restricted to a certain range of
+    values.  Note that all this type of row should be used for all enum types,
+    since the range of valid enum values must be known for the control to
+    display them all. */
 template <class T, bool is_enum = boost::is_enum<T>::value>
 struct RangedAttributeRow : AttributeRowBase
 {
@@ -261,7 +276,7 @@ private:
     boost::signals::connection m_edit_connection;
 };
 
-/** the specialization of RangedAttributeRow<T, bool> for enum types. */
+/** The specialization of RangedAttributeRow<T, bool> for enum types. */
 template <class T>
 struct RangedAttributeRow<T, true> : AttributeRowBase
 {
@@ -276,7 +291,7 @@ private:
     boost::signals::connection m_drop_list_connection;
 };
 
-/** an uneditable attribute row. */
+/** An uneditable attribute row. */
 template <class T>
 struct ConstAttributeRow : AttributeRowBase
 {
@@ -287,7 +302,7 @@ private:
     TextControl* m_value_text;
 };
 
-/** the specialization of ConstAttributeRow<T> for Pt. */
+/** The specialization of ConstAttributeRow<T> for Pt. */
 template <>
 struct GG_API ConstAttributeRow<Pt> : AttributeRowBase
 {
@@ -298,7 +313,7 @@ private:
     TextControl* m_value_text;
 };
 
-/** the specialization of ConstAttributeRow<Clr> for Pt. */
+/** The specialization of ConstAttributeRow<Clr> for Pt. */
 template <>
 struct GG_API ConstAttributeRow<Clr> : AttributeRowBase
 {
@@ -309,12 +324,13 @@ private:
     TextControl* m_value_text;
 };
 
-/** the subclass of AttributeRowBase used to represent a single flag attribute. */
+/** The subclass of AttributeRowBase used to represent a single flag
+    attribute. */
 template <class FlagType>
 struct FlagAttributeRow : AttributeRowBase
 {
-    /** basic ctor.  \a flags should be the variable that holds all the flag values, and \a value should be the flag
-        represented by this row. */
+    /** Basic ctor.  \a flags should be the variable that holds all the flag
+        values, and \a value should be the flag represented by this row. */
     FlagAttributeRow(const std::string& name, Flags<FlagType>& flags, FlagType value, const boost::shared_ptr<Font>& font);
     virtual void Update();
     mutable boost::signal<void (const Flags<FlagType>&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
@@ -326,13 +342,15 @@ private:
     boost::signals::connection m_check_box_connection;
 };
 
-/** the AttributeRowBase subclass used to represent a group of mutually-exclusive flag attributes, one of which must be
-    set to true at all times. */
+/** The AttributeRowBase subclass used to represent a group of
+    mutually-exclusive flag attributes, one of which must be set to true at
+    all times. */
 template <class FlagType>
 struct FlagGroupAttributeRow : AttributeRowBase
 {
-    /** basic ctor.  \a flags should be the variable that holds all the flag values, and \a min and \a max should define
-        the range of flags represented by this row. */
+    /** Basic ctor.  \a flags should be the variable that holds all the flag
+        values, and \a min and \a max should define the range of flags
+        represented by this row. */
     FlagGroupAttributeRow(const std::string& name, Flags<FlagType>& flags, FlagType value, const std::vector<FlagType>& group_values, const boost::shared_ptr<Font>& font);
     virtual void Update();
     mutable boost::signal<void (const Flags<FlagType>&)> ValueChangedSignal; ///< when the row has modified its associated value, this emits the new value
@@ -345,11 +363,13 @@ private:
     boost::signals::connection m_drop_list_connection;
 };
 
-/** the AttributeRowBase subclass used to display some custom text about a Wnd, that does not necessarily correspond to
-    a single data member in that Wnd.  CustomTextRow accepts a functor with the signature std::string (const Wnd*);
-    when the row's Refresh() method is called, the row will set its text to <i>functor</i>(<i>m_wnd</i>).  This allows a
-    Wnd subclass to display arbitrary (uneditable) information about itself, without being restricted to displaying just
-    data members. */
+/** The AttributeRowBase subclass used to display some custom text about a
+    Wnd, that does not necessarily correspond to a single data member in that
+    Wnd.  CustomTextRow accepts a functor with the signature std::string
+    (const Wnd*); when the row's Refresh() method is called, the row will set
+    its text to <i>functor</i>(<i>m_wnd</i>).  This allows a Wnd subclass to
+    display arbitrary (uneditable) information about itself, without being
+    restricted to displaying just data members. */
 template <class T>
 struct CustomTextRow : AttributeRowBase
 {

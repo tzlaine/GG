@@ -44,7 +44,7 @@ BrowseInfoWnd::BrowseInfoWnd(X x, Y y, X w, Y h) :
     Wnd(x, y, w, h)
 {}
 
-void BrowseInfoWnd::Update(int mode, const Wnd* target)
+void BrowseInfoWnd::Update(std::size_t mode, const Wnd* target)
 {
     UpdateImpl(mode, target);
     MoveTo(m_cursor_pos - Pt(Width() / 2, Height()));
@@ -63,7 +63,7 @@ void BrowseInfoWnd::Update(int mode, const Wnd* target)
 void BrowseInfoWnd::SetCursorPosition(const Pt& cursor_pos)
 { m_cursor_pos = cursor_pos; }
 
-void BrowseInfoWnd::UpdateImpl(int mode, const Wnd* target)
+void BrowseInfoWnd::UpdateImpl(std::size_t mode, const Wnd* target)
 {}
 
 
@@ -79,7 +79,8 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd() :
 {}
 
 TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(X w, const boost::shared_ptr<Font>& font, Clr color, Clr border_color, Clr text_color,
-                                           Flags<TextFormat> format/* = FORMAT_LEFT | FORMAT_WORDBREAK*/, int border_width/* = 2*/, int text_margin/* = 4*/) :
+                                           Flags<TextFormat> format/* = FORMAT_LEFT | FORMAT_WORDBREAK*/,
+                                           unsigned int border_width/* = 2*/, unsigned int text_margin/* = 4*/) :
     BrowseInfoWnd(X0, Y0, w, Y(100)),
     m_text_from_target(true),
     m_font(font),
@@ -94,10 +95,10 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(X w, const boost::shared_ptr<Font>& f
     SetLayoutBorderMargin(text_margin);
 }
 
-bool TextBoxBrowseInfoWnd::WndHasBrowseInfo(const Wnd* wnd, int mode) const
+bool TextBoxBrowseInfoWnd::WndHasBrowseInfo(const Wnd* wnd, std::size_t mode) const
 {
     const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
-    assert(0 <= mode && mode <= static_cast<int>(browse_modes.size()));
+    assert(mode <= browse_modes.size());
     return !wnd->BrowseInfoText(mode).empty();
 }
 
@@ -122,10 +123,10 @@ Flags<TextFormat> TextBoxBrowseInfoWnd::GetTextFormat() const
 Clr TextBoxBrowseInfoWnd::BorderColor() const
 { return m_border_color; }
 
-int TextBoxBrowseInfoWnd::BorderWidth() const
+unsigned int TextBoxBrowseInfoWnd::BorderWidth() const
 { return m_border_width; }
 
-int TextBoxBrowseInfoWnd::TextMargin() const
+unsigned int TextBoxBrowseInfoWnd::TextMargin() const
 { return GetLayout()->BorderMargin(); }
 
 void TextBoxBrowseInfoWnd::SetText(const std::string& str)
@@ -165,13 +166,13 @@ void TextBoxBrowseInfoWnd::SetTextColor(Clr text_color)
 void TextBoxBrowseInfoWnd::SetTextFormat(Flags<TextFormat> format)
 { m_text_control->SetTextFormat(format); }
 
-void TextBoxBrowseInfoWnd::SetBorderWidth(int border_width)
+void TextBoxBrowseInfoWnd::SetBorderWidth(unsigned int border_width)
 { m_border_width = border_width; }
 
-void TextBoxBrowseInfoWnd::SetTextMargin(int text_margin)
+void TextBoxBrowseInfoWnd::SetTextMargin(unsigned int text_margin)
 { SetLayoutBorderMargin(text_margin); }
 
-void TextBoxBrowseInfoWnd::UpdateImpl(int mode, const Wnd* target)
+void TextBoxBrowseInfoWnd::UpdateImpl(std::size_t mode, const Wnd* target)
 {
     if (m_text_from_target)
         SetText(target->BrowseInfoText(mode));

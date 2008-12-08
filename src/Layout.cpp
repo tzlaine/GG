@@ -82,6 +82,8 @@ Layout::WndPosition::WndPosition(std::size_t first_row_, std::size_t first_colum
 {}
 
 // Layout
+const unsigned int Layout::INVALID_CELL_MARGIN = std::numeric_limits<unsigned int>::max();
+
 Layout::Layout() :
     Wnd(),
     m_border_margin(0),
@@ -93,11 +95,11 @@ Layout::Layout() :
 {}
 
 Layout::Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns,
-               unsigned int border_margin/* = 0*/, unsigned int cell_margin/* = -1u*/) :
+               unsigned int border_margin/* = 0*/, unsigned int cell_margin/* = INVALID_CELL_MARGIN*/) :
     Wnd(x, y, w, h, Flags<WndFlag>()),
     m_cells(rows, std::vector<Wnd*>(columns)),
     m_border_margin(border_margin),
-    m_cell_margin(cell_margin == -1u ? border_margin : cell_margin),
+    m_cell_margin(cell_margin == INVALID_CELL_MARGIN ? border_margin : cell_margin),
     m_row_params(rows),
     m_column_params(columns),
     m_ignore_child_resize(false),

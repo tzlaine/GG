@@ -105,9 +105,8 @@ class GG_API Layout : public Wnd
 {
 public:
     /** \name Structors */ ///@{
-    /** Ctor.  \throw GG::Layout::InvalidMargin Throws if \a border_margin is
-        negative. */
-    Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns, unsigned int border_margin = 0, unsigned int cell_margin = -1u);
+    /** Ctor. */
+    Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns, unsigned int border_margin = 0, unsigned int cell_margin = INVALID_CELL_MARGIN);
     //@}
 
     /** \name Accessors */ ///@{
@@ -150,20 +149,17 @@ public:
     virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     /** Inserts \a w into the layout in the indicated cell, expanding the
-        layout grid as necessary.  Note that \a row and \a column must not be
-        negative, though this is not checked. \throw
-        GG::Layout::AttemptedOverwrite Throws if there is already a Wnd in the
-        given cell. */
+        layout grid as necessary.  \throw GG::Layout::AttemptedOverwrite
+        Throws if there is already a Wnd in the given cell. */
     void Add(Wnd* wnd, std::size_t row, std::size_t column, Flags<Alignment> alignment = ALIGN_NONE);
 
     /** Inserts \a w into the layout, covering the indicated cell(s),
         expanding the layout grid as necessary.  The num_rows and num_columns
         indicate how many rows and columns \a w covers, respectively.  So
         Add(foo, 1, 2, 2, 3) covers cells (1, 2) through (2, 4), inclusive.
-        Note that \a row, and \a column must be nonnegative and \a num_rows
-        and \a num_columns must be positive, though this is not
-        checked. \throw GG::Layout::AttemptedOverwrite Throws if there is
-        already a Wnd in one of the given cells. */
+        Note that \a num_rows and \a num_columns must be positive, though this
+        is not checked. \throw GG::Layout::AttemptedOverwrite Throws if there
+        is already a Wnd in one of the given cells. */
     void Add(Wnd* wnd, std::size_t row, std::size_t column, std::size_t num_rows, std::size_t num_columns, Flags<Alignment> alignment = ALIGN_NONE);
 
     /** Removes \a w from the layout, recalculating the layout as needed.
@@ -243,6 +239,8 @@ public:
         cell. */
     GG_CONCRETE_EXCEPTION(AttemptedOverwrite, GG::Layout, Exception);
     //@}
+
+    static const unsigned int INVALID_CELL_MARGIN;
 
 protected:
     /** \name Structors */ ///@{

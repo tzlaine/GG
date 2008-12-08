@@ -172,7 +172,7 @@ bool Slider::EventFilter(Wnd* w, const WndEvent& event)
 }
 
 void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ SlideTo(m_posn + (m_posn < PtToPosn(pt) ? PageSize() : -PageSize())); }
+{ SlideTo((m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize())); }
 
 void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {

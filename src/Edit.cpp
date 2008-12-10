@@ -446,7 +446,7 @@ int Edit::StringIndexOf(int char_idx, const std::vector<Font::LineData>* line_da
     else if (char_idx == static_cast<int>(line.char_data.size()))
         retval = m_text.size();
     else
-        retval = line.char_data[char_idx].original_char_index;
+        retval = line.char_data[char_idx].string_index;
     return retval;
 }
 

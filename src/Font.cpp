@@ -54,6 +54,11 @@ namespace {
     const boost::uint32_t WIDE_FF = '\f';
     const boost::uint32_t WIDE_TAB = '\t';
 
+    const std::string ALIGN_LEFT_TAG = "left";
+    const std::string ALIGN_CENTER_TAG = "center";
+    const std::string ALIGN_RIGHT_TAG = "right";
+    const std::string PRE_TAG = "pre";
+
     template <class T>
     T NextPowerOfTwo(T input)
     {
@@ -70,12 +75,13 @@ namespace {
         of Font's constructor.*/
     struct TempGlyphData
     {
-        TempGlyphData() {} ///< default ctor
-        TempGlyphData(int i, const Pt& ul_, const Pt& lr_, X lb, X a) : idx(i), ul(ul_), lr(lr_), left_b(lb), adv(a) {} ///< ctor
-        int    idx;      ///< index into m_textures of texture that contains this glyph
-        Pt     ul, lr;   ///< area of glyph subtexture within texture
-        X left_b;   ///< left bearing (see Glyph)
-        X adv;      ///< advance of glyph (see Glyph)
+        TempGlyphData() {}
+        TempGlyphData(std::size_t i, const Pt& ul_, const Pt& lr_, X lb, X a) :
+            idx(i), ul(ul_), lr(lr_), left_b(lb), adv(a) {}
+        std::size_t idx;      ///< index into m_textures of texture that contains this glyph
+        Pt          ul, lr;   ///< area of glyph subtexture within texture
+        X           left_b;   ///< left bearing (see Glyph)
+        X           adv;      ///< advance of glyph (see Glyph)
     };
 
     struct FTLibraryWrapper
@@ -92,45 +98,51 @@ namespace {
     struct MatchesKnownTag
     {
         MatchesKnownTag(const std::set<std::string>& known_tags,
-                        std::stack<std::string>& tag_stack,
                         bool& ignore_tags) :
             m_known_tags(known_tags),
-            m_tag_stack(tag_stack),
             m_ignore_tags(ignore_tags)
             {}
         bool operator()(const boost::xpressive::ssub_match& sub) const
-            {
-                bool retval = m_ignore_tags ? false : m_known_tags.find(sub.str()) != m_known_tags.end();
-                if (retval) {
-                    m_tag_stack.push(sub.str());
-                    if (sub.str() == "pre")
-                        m_ignore_tags = true;
-                }
-                return retval;
-            }
+            { return m_ignore_tags ? false : m_known_tags.find(sub.str()) != m_known_tags.end(); }
         const std::set<std::string>& m_known_tags;
-        std::stack<std::string>& m_tag_stack;
         bool& m_ignore_tags;
     };
 
+    struct PushSubmatchOntoStack
+    {
+        typedef void result_type;
+        void operator()(std::stack<Font::Substring>& tag_stack,
+                        bool& ignore_tags,
+                        const boost::xpressive::ssub_match& sub) const
+            {
+                tag_stack.push(static_cast<Font::Substring::Base>(sub));
+                if (tag_stack.top() == PRE_TAG)
+                    ignore_tags = true;
+            }
+    };
+    const boost::xpressive::function<PushSubmatchOntoStack>::type Push = {{}};
+
     struct MatchesTopOfStack
     {
-        MatchesTopOfStack(std::stack<std::string>& tag_stack,
+        MatchesTopOfStack(std::stack<Font::Substring>& tag_stack,
                           bool& ignore_tags) :
             m_tag_stack(tag_stack),
             m_ignore_tags(ignore_tags)
             {}
         bool operator()(const boost::xpressive::ssub_match& sub) const
             {
-                bool retval = m_tag_stack.empty() ? false : sub.str() == m_tag_stack.top();
+                bool retval = m_tag_stack.empty() ?
+                    false :
+                    m_tag_stack.top().size() == static_cast<std::size_t>(sub.length()) &&
+                    !std::memcmp(&*m_tag_stack.top().begin(), &*sub.first, m_tag_stack.top().size());
                 if (retval) {
                     m_tag_stack.pop();
-                    if (m_tag_stack.empty() || m_tag_stack.top() != "pre")
+                    if (m_tag_stack.empty() || m_tag_stack.top() != PRE_TAG)
                         m_ignore_tags = false;
                 }
                 return retval;
             }
-        std::stack<std::string>& m_tag_stack;
+        std::stack<Font::Substring>& m_tag_stack;
         bool& m_ignore_tags;
     };
 
@@ -213,6 +225,70 @@ namespace {
 
 
 ///////////////////////////////////////
+// class GG::Font::Substring
+///////////////////////////////////////
+Font::Substring::Substring() :
+    Base()
+{
+    std::string temp;
+    second = first = temp.end();
+}
+
+Font::Substring::Substring(std::string::const_iterator first_,
+                           std::string::const_iterator second_) :
+    Base(first_, second_)
+{ assert(first <= second); }
+
+Font::Substring::Substring(const Base& pair) :
+    Base(pair)
+{ assert(first <= second); }
+
+std::string::const_iterator Font::Substring::begin() const
+{ return first; }
+
+std::string::const_iterator Font::Substring::end() const
+{ return second; }
+
+bool Font::Substring::empty() const
+{ return first == second; }
+
+std::size_t Font::Substring::size() const
+{ return second - first; }
+
+Font::Substring::operator std::string() const
+{ return std::string(first, second); }
+
+bool Font::Substring::operator==(const std::string& rhs) const
+{ return size() == rhs.size() && !std::memcmp(&*first, rhs.data(), rhs.size()); }
+
+bool Font::Substring::operator!=(const std::string& rhs) const
+{ return !operator==(rhs); }
+
+Font::Substring& Font::Substring::operator=(const Base& rhs)
+{
+    assert(first <= second);
+    first = rhs.first;
+    second = rhs.second;
+    return *this;
+}
+
+Font::Substring& Font::Substring::operator+=(const Base& rhs)
+{
+    assert(rhs.first <= rhs.second);
+    assert(rhs.first == second);
+    second = rhs.second;
+    return *this;
+}
+
+std::ostream& GG::operator<<(std::ostream& os, const Font::Substring& substr)
+{
+    std::ostream_iterator<char> out_it(os);
+    std::copy(substr.begin(), substr.end(), out_it);
+    return os;
+}
+
+
+///////////////////////////////////////
 // class GG::Font::TextElement
 ///////////////////////////////////////
 Font::TextElement::TextElement() :
@@ -285,12 +361,12 @@ Font::RenderState::RenderState() :
 ///////////////////////////////////////
 Font::LineData::CharData::CharData() :
     extent(0),
-    original_char_index(0)
+    string_index(0)
 {}
 
-Font::LineData::CharData::CharData(X extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_) :
+Font::LineData::CharData::CharData(X extent_, std::size_t str_index, const std::vector<boost::shared_ptr<TextElement> >& tags_) :
     extent(extent_),
-    original_char_index(original_index),
+    string_index(str_index),
     tags()
 {
     for (std::size_t i = 0; i < tags_.size(); ++i) {
@@ -408,8 +484,8 @@ X Font::RenderText(const Pt& pt_, const std::string& text) const
     return pt.x - orig_x;
 }
 
-void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data/* = 0*/,
-                      RenderState* render_state/* = 0*/) const
+void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format,
+                      const std::vector<LineData>* line_data/* = 0*/, RenderState* render_state/* = 0*/) const
 {
     RenderState state;
     if (!render_state)
@@ -422,13 +498,14 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
         line_data = &lines;
     }
 
-    RenderText(ul, lr, text, format, *line_data,
-               *render_state, 0, 0, line_data->size(), line_data->back().char_data.size());
+    RenderText(ul, lr, text, format, *line_data, *render_state,
+               0, 0, line_data->size(), line_data->back().char_data.size());
 }
 
 void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format,
                       const std::vector<LineData>& line_data, RenderState& render_state,
-                      int begin_line, int begin_char, int end_line, int end_char) const
+                      std::size_t begin_line, std::size_t begin_char,
+                      std::size_t end_line, std::size_t end_char) const
 {
     double orig_color[4];
     glGetDoublev(GL_CURRENT_COLOR, orig_color);
@@ -438,27 +515,29 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
 
     Y y_origin = ul.y; // default value for FORMAT_TOP
     if (format & FORMAT_BOTTOM)
-        y_origin = lr.y - ((end_line - begin_line - 1) * m_lineskip + m_height);
+        y_origin = lr.y - (static_cast<int>(end_line - begin_line - 1) * m_lineskip + m_height);
     else if (format & FORMAT_VCENTER)
-        y_origin = ul.y + ((lr.y - ul.y) - ((end_line - begin_line - 1) * m_lineskip + m_height)) / 2.0;
+        y_origin = ul.y + ((lr.y - ul.y) - (static_cast<int>(end_line - begin_line - 1) * m_lineskip + m_height)) / 2.0;
 
-    for (int i = begin_line; i < end_line; ++i) {
+    for (std::size_t i = begin_line; i < end_line; ++i) {
         const LineData& line = line_data[i];
         X x_origin = ul.x; // default value for FORMAT_LEFT
         if (line.justification == ALIGN_RIGHT)
             x_origin = lr.x - line.Width();
         else if (line.justification == ALIGN_CENTER)
             x_origin = ul.x + ((lr.x - ul.x) - line.Width()) / 2.0;
-        Y y = y_origin + (i - begin_line) * m_lineskip;
+        Y y = y_origin + static_cast<int>(i - begin_line) * m_lineskip;
         X x = x_origin;
 
         std::string::const_iterator string_end_it = text.end();
-        for (int j = ((i == begin_line) ? begin_char : 0); j < ((i == end_line - 1) ? end_char : static_cast<int>(line.char_data.size())); ++j) {
+        for (std::size_t j = ((i == begin_line) ? begin_char : 0);
+             j < ((i == end_line - 1) ? end_char : line.char_data.size());
+             ++j) {
             for (std::size_t k = 0; k < line.char_data[j].tags.size(); ++k) {
                 HandleTag(line.char_data[j].tags[k], orig_color, render_state);
             }
-            boost::uint32_t c = utf8::peek_next(text.begin() + line.char_data[j].original_char_index, string_end_it);
-            assert((text[line.char_data[j].original_char_index] == '\n') == (c == WIDE_NEWLINE));
+            boost::uint32_t c = utf8::peek_next(text.begin() + line.char_data[j].string_index, string_end_it);
+            assert((text[line.char_data[j].string_index] == '\n') == (c == WIDE_NEWLINE));
             if (c == WIDE_NEWLINE)
                 continue;
             std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(c);
@@ -472,29 +551,27 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
     glColor4dv(orig_color);
 }
 
+void Font::ProcessTagsBefore(const std::vector<LineData>& line_data, RenderState& render_state,
+                             std::size_t begin_line, std::size_t begin_char) const
+{
+    double orig_color[4];
+    glGetDoublev(GL_CURRENT_COLOR, orig_color);
+
+    for (std::size_t i = 0; i < begin_line; ++i) {
+        const LineData& line = line_data[i];
+        for (std::size_t j = 0;
+             j < ((i == begin_line - 1) ? begin_char : line.char_data.size());
+             ++j) {
+            for (std::size_t k = 0; k < line.char_data[j].tags.size(); ++k) {
+                HandleTag(line.char_data[j].tags[k], orig_color, render_state);
+            }
+        }
+    }
+}
+
 Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width, std::vector<LineData>& line_data) const
 {
-    Pt retval;
-
-    // correct any disagreements in the format flags
-    int dup_ct = 0;   // duplication count
-    if (format & FORMAT_LEFT) ++dup_ct;
-    if (format & FORMAT_RIGHT) ++dup_ct;
-    if (format & FORMAT_CENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_LEFT by default
-        format &= ~(FORMAT_RIGHT | FORMAT_CENTER);
-        format |= FORMAT_LEFT;
-    }
-    dup_ct = 0;
-    if (format & FORMAT_TOP) ++dup_ct;
-    if (format & FORMAT_BOTTOM) ++dup_ct;
-    if (format & FORMAT_VCENTER) ++dup_ct;
-    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_TOP by default
-        format &= ~(FORMAT_BOTTOM | FORMAT_VCENTER);
-        format |= FORMAT_TOP;
-    }
-    if ((format & FORMAT_WORDBREAK) && (format & FORMAT_LINEWRAP))   // only one of these can be picked; FORMAT_WORDBREAK overrides FORMAT_LINEWRAP
-        format &= ~FORMAT_LINEWRAP;
+    ValidateFormat(format);
 
 #if DEBUG_DETERMINELINES
     std::cout << "Font::DetermineLines(text=\"" << text << "\" format=" << format << " box_width=" << box_width << ")" << std::endl;
@@ -504,9 +581,9 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
     {
         using namespace boost::xpressive;
 
-        std::stack<std::string> tag_stack;
+        std::stack<Substring> tag_stack;
         bool ignore_tags = format & FORMAT_IGNORETAGS;
-        MatchesKnownTag matches_known_tag(s_known_tags, tag_stack, ignore_tags);
+        MatchesKnownTag matches_known_tag(s_known_tags, ignore_tags);
         MatchesTopOfStack matches_tag_stack(tag_stack, ignore_tags);
 
         mark_tag tag_name_tag(1);
@@ -515,32 +592,36 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
         mark_tag whitespace_tag(4);
         mark_tag text_tag(5);
 
-        sregex param =
+        const sregex TAG_PARAM =
             -+~set[_s | '<'];
-        sregex open_tag_name =
+        const sregex OPEN_TAG_NAME =
             (+_w)[check(matches_known_tag)];
-        sregex close_tag_name =
+        const sregex CLOSE_TAG_NAME =
             (+_w)[check(matches_tag_stack)];
-        sregex whitespace =
+        const sregex WHITESPACE =
             (*blank >> (_ln | (set = '\n', '\r', '\f'))) | +blank;
-        sregex text_ =
+        const sregex TEXT =
             ('<' >> *~set[_s | '<']) | (+~set[_s | '<']);
-        sregex everything =
-            ('<' >> (tag_name_tag = open_tag_name) >> repeat<0, 9>(+blank >> param) >> (open_bracket_tag = '>')) |
-            ("</" >> (tag_name_tag = close_tag_name) >> (close_bracket_tag = '>')) |
-            (whitespace_tag = whitespace) |
-            (text_tag = text_);
+        const sregex EVERYTHING =
+            ('<' >> (tag_name_tag = OPEN_TAG_NAME) >> repeat<0, 9>(+blank >> TAG_PARAM) >> (open_bracket_tag = '>'))
+            [Push(ref(tag_stack), ref(ignore_tags), tag_name_tag)] |
+            ("</" >> (tag_name_tag = CLOSE_TAG_NAME) >> (close_bracket_tag = '>')) |
+            (whitespace_tag = WHITESPACE) |
+            (text_tag = TEXT);
 
-        sregex_iterator it(text.begin(), text.end(), everything);
+        sregex_iterator it(text.begin(), text.end(), EVERYTHING);
         sregex_iterator end_it;
         while (it != end_it)
         {
             // consolidate adjacent blocks of text
             bool need_increment = false;
-            std::string combined_text;
+            Substring combined_text;
             if ((*it)[text_tag].matched) {
                 while (it != end_it && (*it)[text_tag].matched) {
-                    combined_text += (*it)[text_tag];
+                    if (combined_text.empty())
+                        combined_text = (*it)[text_tag];
+                    else
+                        combined_text += (*it)[text_tag];
                     ++it;
                 }
             } else {
@@ -550,35 +631,29 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             if (combined_text.empty()) {
                 if ((*it)[open_bracket_tag].matched) {
                     boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(false));
-                    std::string tag_name((*it)[tag_name_tag].first, (*it)[tag_name_tag].second);
-                    std::swap(element->text, tag_name);
+                    element->text = (*it)[tag_name_tag];
                     if (1 < (*it).nested_results().size()) {
                         element->params.reserve((*it).nested_results().size() - 1);
                         for (smatch::nested_results_type::const_iterator nested_it =
                                  ++(*it).nested_results().begin();
                              nested_it != (*it).nested_results().end();
                              ++nested_it) {
-                            element->params.push_back((*nested_it)[0]);
+                            element->params.push_back(static_cast<Substring::Base>((*nested_it)[0]));
                         }
                     }
-                    std::string original_tag_text((*it)[0].first, (*it)[0].second);
-                    std::swap(element->original_tag_text, original_tag_text);
+                    element->original_tag_text = (*it)[0];
                     text_elements.push_back(element);
                 } else if ((*it)[close_bracket_tag].matched) {
                     boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(true));
-                    std::string tag_name((*it)[tag_name_tag].first, (*it)[tag_name_tag].second);
-                    std::swap(element->text, tag_name);
-                    std::string original_tag_text((*it)[0].first, (*it)[0].second);
-                    std::swap(element->original_tag_text, original_tag_text);
+                    element->text = (*it)[tag_name_tag];
+                    element->original_tag_text = (*it)[0];
                     text_elements.push_back(element);
                 } else if ((*it)[whitespace_tag].matched) {
                     boost::shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
-                    std::string whitespace((*it)[whitespace_tag].first, (*it)[whitespace_tag].second);
-                    std::swap(element->text, whitespace);
+                    element->text = (*it)[whitespace_tag];
                     text_elements.push_back(element);
-                    if (*element->text.rbegin() == '\n' ||
-                        *element->text.rbegin() == '\f' ||
-                        *element->text.rbegin() == '\r') {
+                    char last_char = *boost::prior(element->text.end());
+                    if (last_char == '\n' || last_char == '\f' || last_char == '\r') {
                         boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, true));
                         text_elements.push_back(element);
                     }
@@ -596,8 +671,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
 
     // fill in the widths of characters (or code points, for UTF-8 strings) in each element
     for (std::size_t i = 0; i < text_elements.size(); ++i) {
-        std::string::iterator it = text_elements[i]->text.begin();
-        std::string::iterator end_it = text_elements[i]->text.end();
+        std::string::const_iterator it = text_elements[i]->text.begin();
+        std::string::const_iterator end_it = text_elements[i]->text.end();
         while (it != end_it) {
             text_elements[i]->widths.push_back(X0);
             boost::uint32_t c = utf8::next(it, end_it);
@@ -655,7 +730,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
     line_data.back().justification = orig_just;
 
     X x = X0;
-    int original_string_offset = 0; // the position within the original string of the current TextElement
+    std::size_t original_string_offset(0); // the position within the original string of the current TextElement
     std::vector<boost::shared_ptr<TextElement> > pending_formatting_tags;
     for (std::size_t i = 0; i < text_elements.size(); ++i) {
         boost::shared_ptr<TextElement> elem = text_elements[i];
@@ -664,8 +739,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
             x = X0; // reset the x-position to 0
         } else if (elem->Type() == TextElement::WHITESPACE) {
-            std::string::iterator it = elem->text.begin();
-            std::string::iterator end_it = elem->text.end();
+            std::string::const_iterator it = elem->text.begin();
+            std::string::const_iterator end_it = elem->text.end();
             while (it != end_it) {
                 std::size_t char_index = std::distance(elem->text.begin(), it);
                 boost::uint32_t c = utf8::next(it, end_it);
@@ -704,8 +779,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                     x = X0;
                     SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
                 }
-                std::string::iterator it = elem->text.begin();
-                std::string::iterator end_it = elem->text.end();
+                std::string::const_iterator it = elem->text.begin();
+                std::string::const_iterator end_it = elem->text.end();
                 std::size_t i = 0;
                 while (it != end_it) {
                     std::size_t char_index = std::distance(elem->text.begin(), it);
@@ -716,8 +791,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                     ++i;
                 }
             } else {
-                std::string::iterator it = elem->text.begin();
-                std::string::iterator end_it = elem->text.end();
+                std::string::const_iterator it = elem->text.begin();
+                std::string::const_iterator end_it = elem->text.end();
                 std::size_t i = 0;
                 while (it != end_it) {
                     std::size_t char_index = std::distance(elem->text.begin(), it);
@@ -737,21 +812,21 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                 }
             }
         } else if (elem->Type() == TextElement::OPEN_TAG) {
-            if (elem->text == "left")
+            if (elem->text == ALIGN_LEFT_TAG)
                 line_data.back().justification = ALIGN_LEFT;
-            else if (elem->text == "center")
+            else if (elem->text == ALIGN_CENTER_TAG)
                 line_data.back().justification = ALIGN_CENTER;
-            else if (elem->text == "right")
+            else if (elem->text == ALIGN_RIGHT_TAG)
                 line_data.back().justification = ALIGN_RIGHT;
-            else if (elem->text != "pre")
+            else if (elem->text != PRE_TAG)
                 pending_formatting_tags.push_back(elem);
             last_line_of_curr_just = false;
         } else if (elem->Type() == TextElement::CLOSE_TAG) {
-            if ((elem->text == "left" && line_data.back().justification == ALIGN_LEFT) ||
-                (elem->text == "center" && line_data.back().justification == ALIGN_CENTER) ||
-                (elem->text == "right" && line_data.back().justification == ALIGN_RIGHT))
+            if ((elem->text == ALIGN_LEFT_TAG && line_data.back().justification == ALIGN_LEFT) ||
+                (elem->text == ALIGN_CENTER_TAG && line_data.back().justification == ALIGN_CENTER) ||
+                (elem->text == ALIGN_RIGHT_TAG && line_data.back().justification == ALIGN_RIGHT))
                 last_line_of_curr_just = true;
-            else if (elem->text != "pre")
+            else if (elem->text != PRE_TAG)
                 pending_formatting_tags.push_back(elem);
         }
         original_string_offset += elem->OriginalStringChars();
@@ -767,11 +842,11 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
         }
         std::cout << "\n    orig. indices=";
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
-            std::cout << line_data[i].char_data[j].original_char_index << " ";
+            std::cout << line_data[i].char_data[j].string_index << " ";
         }
         std::cout << "\n    chars on line: \"";
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
-            std::cout << text[line_data[i].char_data[j].original_char_index];
+            std::cout << text[line_data[i].char_data[j].string_index];
         }
         std::cout << "\"" << std::endl;
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
@@ -795,23 +870,24 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
     }
 #endif
 
-    for (std::size_t i = 0; i < line_data.size(); ++i) {
-        if (retval.x < line_data[i].Width())
-            retval.x = line_data[i].Width();
-    }
-    retval.y = text.empty() ? Y0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
-
-#if DEBUG_DETERMINELINES
-    std::cout << "String Size:(" << retval.x << ", " << retval.y << ")\n" << std::endl;
-#endif
-
-    return retval;
+    return TextExtent(text, line_data);
 }
 
 Pt Font::TextExtent(const std::string& text, Flags<TextFormat> format/* = FORMAT_NONE*/, X box_width/* = X0*/) const
 {
     std::vector<LineData> lines;
     return DetermineLines(text, format, box_width ? box_width : X(1 << 15), lines);
+}
+
+Pt Font::TextExtent(const std::string& text, const std::vector<LineData>& line_data) const
+{
+    Pt retval;
+    for (std::size_t i = 0; i < line_data.size(); ++i) {
+        if (retval.x < line_data[i].Width())
+            retval.x = line_data[i].Width();
+    }
+    retval.y = text.empty() ? Y0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
+    return retval;
 }
 
 void Font::RegisterKnownTag(const std::string& tag)
@@ -829,10 +905,10 @@ void Font::ClearKnownTags()
     s_action_tags.insert("i");
     s_action_tags.insert("u");
     s_action_tags.insert("rgba");
-    s_action_tags.insert("left");
-    s_action_tags.insert("center");
-    s_action_tags.insert("right");
-    s_action_tags.insert("pre");
+    s_action_tags.insert(ALIGN_LEFT_TAG);
+    s_action_tags.insert(ALIGN_CENTER_TAG);
+    s_action_tags.insert(ALIGN_RIGHT_TAG);
+    s_action_tags.insert(PRE_TAG);
     s_known_tags = s_action_tags;
 }
 
@@ -899,16 +975,14 @@ void Font::Init(const std::string& font_filename, unsigned int pts)
     // define default image buffer size
     const X BUF_WIDTH(256);
     const Y BUF_HEIGHT(256);
-    const int BUF_SZ = Value(BUF_WIDTH) * Value(BUF_HEIGHT);
+    const std::size_t BUF_SZ = Value(BUF_WIDTH) * Value(BUF_HEIGHT);
 
     // declare std::vector of image buffers into which we will copy glyph images and create first buffer
     std::vector<boost::uint16_t*> buffer_vec; // 16 bpp: we are creating a luminance + alpha image
     std::vector<Pt> buffer_sizes;
     std::map<boost::uint32_t, TempGlyphData> temp_glyph_data;
     boost::uint16_t* temp_buf = new boost::uint16_t[BUF_SZ]; // 16 bpp: we are creating a luminance + alpha image
-    for (int i = 0; i < BUF_SZ; ++i) {
-        temp_buf[i] = 0;
-    }
+    std::memset(temp_buf, 0, BUF_SZ);
     buffer_vec.push_back(temp_buf);
     buffer_sizes.push_back(Pt(BUF_WIDTH, BUF_HEIGHT));
 
@@ -939,9 +1013,7 @@ void Font::Init(const std::string& font_filename, unsigned int pts)
                         x = X0;
                         y = Y0;
                         temp_buf = new boost::uint16_t[BUF_SZ];
-                        for (int i = 0; i < BUF_SZ; ++i) {
-                            temp_buf[i] = 0;
-                        }
+                        std::memset(temp_buf, 0, BUF_SZ);
                         buffer_vec.push_back(temp_buf);
                         buffer_sizes.push_back(Pt(BUF_WIDTH, BUF_HEIGHT));
                     }
@@ -1030,10 +1102,33 @@ bool Font::GenerateGlyph(FT_Face face, boost::uint32_t ch)
     return retval;
 }
 
+void Font::ValidateFormat(Flags<TextFormat>& format) const
+{
+    // correct any disagreements in the format flags
+    int dup_ct = 0;   // duplication count
+    if (format & FORMAT_LEFT) ++dup_ct;
+    if (format & FORMAT_RIGHT) ++dup_ct;
+    if (format & FORMAT_CENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_LEFT by default
+        format &= ~(FORMAT_RIGHT | FORMAT_CENTER);
+        format |= FORMAT_LEFT;
+    }
+    dup_ct = 0;
+    if (format & FORMAT_TOP) ++dup_ct;
+    if (format & FORMAT_BOTTOM) ++dup_ct;
+    if (format & FORMAT_VCENTER) ++dup_ct;
+    if (dup_ct != 1) {   // exactly one must be picked; when none or multiples are picked, use FORMAT_TOP by default
+        format &= ~(FORMAT_BOTTOM | FORMAT_VCENTER);
+        format |= FORMAT_TOP;
+    }
+    if ((format & FORMAT_WORDBREAK) && (format & FORMAT_LINEWRAP))   // only one of these can be picked; FORMAT_WORDBREAK overrides FORMAT_LINEWRAP
+        format &= ~FORMAT_LINEWRAP;
+}
+
 X Font::RenderGlyph(const Pt& pt, const Glyph& glyph, const Font::RenderState* render_state) const
 {
     if (render_state && render_state->use_italics) {
-        // render subtexture to tilted rhombus instead of rectangle
+        // render subtexture to rhombus instead of rectangle
         glBindTexture(GL_TEXTURE_2D, glyph.sub_texture.GetTexture()->OpenGLId());
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[1]);

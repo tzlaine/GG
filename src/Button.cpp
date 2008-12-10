@@ -367,6 +367,7 @@ void StateButton::RepositionButton()
         X bn_x = m_button_ul.x;
         Y bn_y = m_button_ul.y;
         Flags<TextFormat> format = GetTextFormat();
+        Flags<TextFormat> original_format = format;
         const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
         if (format & FORMAT_VCENTER)       // center button vertically
             bn_y = (h - BN_H) / 2.0 + 0.5;
@@ -397,7 +398,8 @@ void StateButton::RepositionButton()
             if (format & FORMAT_VCENTER)
                 m_text_ul.x = -BN_W * (1 + SPACING) + 0.5;
         }
-        SetTextFormat(format);
+        if (format != original_format)
+            SetTextFormat(format);
         m_button_ul = Pt(bn_x, bn_y);
         m_button_lr = m_button_ul + Pt(BN_W, BN_H);
     }

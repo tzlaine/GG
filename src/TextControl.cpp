@@ -123,7 +123,7 @@ Pt TextControl::MinUsableSize() const
         m_previous_client_width != ClientSize().x ||
         m_previous_format != m_format) {
         m_min_usable_size = m_font ?
-            m_font->TextExtent(WindowText(), m_format, ClientSize().x) :
+            m_font->TextExtent(WindowText(), m_line_data) :
             Pt();
         m_previous_client_width = ClientSize().x;
         m_previous_format = m_format;
@@ -202,7 +202,8 @@ void TextControl::SetTextFormat(Flags<TextFormat> format)
 {
     m_format = format;
     ValidateFormat();
-    SetText(WindowText());
+    if (m_format != format)
+        SetText(WindowText());
 }
 
 void TextControl::SetTextColor(Clr color)

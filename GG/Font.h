@@ -61,15 +61,15 @@ extern GG_API const TextFormat FORMAT_CENTER;      ///< Centers text horizontall
 extern GG_API const TextFormat FORMAT_LEFT;        ///< Aligns text to the left. 
 extern GG_API const TextFormat FORMAT_RIGHT;       ///< Aligns text to the right. 
 extern GG_API const TextFormat FORMAT_WORDBREAK;   ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle. (As always, a '\\n' also breaks the line.)
-extern GG_API const TextFormat FORMAT_LINEWRAP;    ///< Lines are automatically broken when the next character (or space) would be drawn outside the the text rectangle.
+extern GG_API const TextFormat FORMAT_LINEWRAP;    ///< Lines are automatically broken when the next glyph would be drawn outside the the text rectangle.
 extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
 
 
 /** This class creates one or more 16-bpp OpenGL textures that contain
     rendered glyphs from a requested font file at the requested point size,
-    including only the requested ranges of characters.  Once the textures have
+    including only the requested ranges of code points.  Once the textures have
     been created, text is rendered to the display by rendering quads textured
-    with portions of the glyph textures.  The characters are rendered to the
+    with portions of the glyph textures.  The glyphs are rendered to the
     textures in white, with alpha blending used for antialiasing.  The user
     should set the desired text color with a call to glColor*() before any
     call to RenderText().  When text is rendered, DetermineLines() is called
@@ -81,7 +81,7 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
     text to determine line breaks is not necessary at render time.  The user
     is responsible for ensuring that the line data applies to the text string
     supplied to RenderText().  See UnicodeCharsets.h for the ranges of
-    characters available, including a function that allow one to determine
+    code points available, including a function that allow one to determine
     which ranges are necessary for rendering a certain string.  Point sizes
     above 250 are not supported.
 
@@ -117,39 +117,95 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
     - \verbatim<pre></pre> \endverbatim             Preformatted.  Similar to HTML \<pre\> tag, except this one only causes all tags to be ignored until a subsequent \</pre\> tag is seen.  Note that due to their semantics, \<pre> tags cannot be nested.
 
     <p>Users of Font may wish to create their own tags as well.  Though Font
-    will not be able to handle new tags without reworking the Font code, it is
-    possible to let Font know about other tags, in order for Font to render
-    them invisible as it does with the tags listed above.  See the static
-    methods RegisterKnownTag(), RemoveKnownTag(), and ClearKnownTags() for
-    details.  It is not possible to remove the built-in tags using these
-    methods.  If you wish not to use tags at all, call DetermineLines() and
-    RenderText() with the format parameter containing FORMAT_IGNORETAGS, or
-    include a \<pre\> tag at the beginning of the text to be rendered.
+    will know nothing about the semantics of the new tags, it is possible to
+    let Font know about them, in order for Font to render them invisible as it
+    does with the tags listed above.  See the static methods
+    RegisterKnownTag(), RemoveKnownTag(), and ClearKnownTags() for details.
+    It is not possible to remove the built-in tags using these methods.  If
+    you wish not to use tags at all, call DetermineLines() and RenderText()
+    with the format parameter containing FORMAT_IGNORETAGS, or include a
+    \<pre\> tag at the beginning of the text to be rendered.
    */
 class GG_API Font
 {
 public:
-    /** Used to encapsulate a token-like piece of text to be rendered using GG::Font. */
+    /** A range of pointers into a std::string that defines a substring found
+        in a string being rendered by Font. */
+    class Substring :
+        private std::pair<std::string::const_iterator, std::string::const_iterator>
+    {
+    public:
+        typedef std::pair<std::string::const_iterator, std::string::const_iterator> Base;
+
+        /** Default ctor.  Sets .first and .second to be invalid, but
+            nonsingular, iterators, with .first == .second. */
+        Substring();
+
+        /** Ctor.  \a first_ must be <= \a second_. */
+        Substring(std::string::const_iterator first_,
+                  std::string::const_iterator second_);
+
+        /** Implicit conversion from base.  \a pair.first must be <= \a
+            pair.second. */
+        Substring(const Base& pair);
+
+        /** Returns an iterator to the beginning of the substring. */
+        std::string::const_iterator begin() const;
+
+        /** Returns an iterator to one-past-the-end of the substring. */
+        std::string::const_iterator end() const;
+
+        /** True iff .first == .second. */
+        bool empty() const;
+
+        /** Length in original string chars, of the substring. */
+        std::size_t size() const;
+
+        /** Implicit conversion to std::string. */
+        operator std::string() const;
+
+        /** Comparison with std::string. */
+        bool operator==(const std::string& rhs) const;
+
+        /** Comparison with std::string. */
+        bool operator!=(const std::string& rhs) const;
+
+        /** Assignment from base.  \a rhs.first must be <= \a rhs.second. */
+        Substring& operator=(const Base& rhs);
+
+        /** Concatenation with base.  \a rhs.first must be <= \a rhs.second.
+            *this and \a rhs must be contiguous. */
+        Substring& operator+=(const Base& rhs);
+
+    private:
+        friend class boost::serialization::access;
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version);
+    };
+
+    /** Used to encapsulate a token-like piece of text to be rendered using
+        GG::Font. */
     struct GG_API TextElement
     {
-        /** The types of token-like entities that can be represented by a TextElement. */
+        /** The types of token-like entities that can be represented by a
+            TextElement. */
         enum TextElementType {
             OPEN_TAG,   ///< An opening text formatting tag (eg "<rgba 0 0 0 255>").
             CLOSE_TAG,  ///< A closing text formatting tag (eg "</rgba>").
             TEXT,       ///< Some non-whitespace text (eg "The").
             WHITESPACE, ///< Some whitespace text (eg "  \n").
-            NEWLINE     ///< A newline.  Newline TextElements represent the newline character when it is encountered in a rendered string, though they do not contain the actual newline character -- their \a text members are always "").
+            NEWLINE     ///< A newline.  Newline TextElements represent the newline code point when it is encountered in a rendered string, though they do not contain the actual newline character -- their \a text members are always "").
         };
 
         TextElement(bool ws, bool nl); ///< Ctor.  \a ws indicates that the element contains only whitespace; \a nl indicates that it is a newline element.
         virtual ~TextElement(); ///< Virtual dtor.
 
-        X Width() const;                    ///< Returns the width of the element, in pixels
-        virtual TextElementType Type() const;    ///< Returns the TextElementType of the element.
+        X Width() const;                      ///< Returns the width of the element, in pixels
+        virtual TextElementType Type() const; ///< Returns the TextElementType of the element.
         virtual std::size_t OriginalStringChars() const; ///< Returns the number of characters in the original string that the element represents.
 
-        std::string         text;       ///< The text represented by the element, or the name of the tag, if the element is a FormattingTag.
-        std::vector<X>      widths;     ///< The widths of the characters in \a text.
+        Substring           text;       ///< The text represented by the element, or the name of the tag, if the element is a FormattingTag.
+        std::vector<X>      widths;     ///< The widths of the glyphs in \a text.
         const bool          whitespace; ///< True iff this is a whitespace element.
         const bool          newline;    ///< True iff this is a newline element.
 
@@ -170,9 +226,9 @@ public:
         virtual TextElementType Type() const;
         virtual std::size_t OriginalStringChars() const;
 
-        std::vector<std::string> params;            ///< The parameter strings within the tag, eg "0", "0", "0", and "255" for the tag "<rgba 0 0 0 255>".
-        std::string              original_tag_text; ///< The text as it appears in the original string.
-        const bool               close_tag;         ///< True iff this is a close-tag.
+        std::vector<Substring> params;            ///< The parameter strings within the tag, eg "0", "0", "0", and "255" for the tag "<rgba 0 0 0 255>".
+        Substring              original_tag_text; ///< The text as it appears in the original string.
+        const bool             close_tag;         ///< True iff this is a close-tag.
 
     private:
         FormattingTag();
@@ -183,7 +239,7 @@ public:
 
     /** Holds the essential data on each line that a string occupies when
         rendered with given format flags.  \a char_data contains the visible
-        characters for each line, plus any text formatting tags present on
+        glyphs for each line, plus any text formatting tags present on
         that line as well. */
     struct GG_API LineData
     {
@@ -191,16 +247,20 @@ public:
 
         /** Contains the extent in pixels, the index into the original string,
             and the text formatting tags that should be applied before
-            rendering of a visible character. */
+            rendering of a visible glyph. */
         struct GG_API CharData
         {
-            CharData(); ///< Defauilt ctor.
-            CharData(X extent_, int original_index, const std::vector<boost::shared_ptr<TextElement> >& tags_); ///< Ctor.
+            /** Defauilt ctor. */
+            CharData();
 
-            X      extent;              ///< The furthest-right extent in pixels of this character as it appears on the line.
-            int    original_char_index; ///< The position in the original string of this character.  For UTF-8 strings, this represents the first character of the code point.
+            /** Ctor. */
+            CharData(X extent_, std::size_t str_index,
+                     const std::vector<boost::shared_ptr<TextElement> >& tags_);
+
+            X           extent;           ///< The furthest-right extent in pixels of this glyph as it appears on the line.
+            std::size_t string_index;     ///< The position in the original string of the start of this glyph.
             std::vector<boost::shared_ptr<FormattingTag> >
-                   tags;                ///< The text formatting tags that should be applied before rendering this character.
+                        tags;             ///< The text formatting tags that should be applied before rendering this glyph.
 
         private:
             friend class boost::serialization::access;
@@ -211,7 +271,7 @@ public:
         X           Width() const; ///< returns the width of the line, in pixels
         bool        Empty() const; ///< returns true iff char_data has size 0
 
-        std::vector<CharData> char_data;     ///< Data on each individual character.
+        std::vector<CharData> char_data;     ///< Data on each individual glyph.
         Alignment             justification; ///< FORMAT_LEFT, FORMAT_CENTER, or FORMAT_RIGHT; derived from text format flags and/or formatting tags in the text
 
     private:
@@ -243,21 +303,21 @@ public:
         Exception if the condition specified for the subclass is met. */
     Font(const std::string& font_filename, unsigned int pts);
 
-    /** ctor.  Construct a font using all the characters in the
+    /** ctor.  Construct a font using all the code points in the
         UnicodeCharsets in the range [first, last).  \throw Font::Exception
         Throws a subclass of Exception if the condition specified for the
         subclass is met. */
     template <class CharSetIter>
     Font(const std::string& font_filename, unsigned int pts, CharSetIter first, CharSetIter last);
 
-    virtual ~Font(); ///< virtual dtor
+    ~Font(); ///< Dtor.
     //@}
 
     /** \name Accessors */ ///@{
     const std::string&FontName() const;   ///< returns the name of the file from which this font was created
     unsigned int      PointSize() const;  ///< returns the point size in which the characters in the font object are rendered
 
-    /** returns the range(s) of characters rendered in the font */
+    /** returns the range(s) of code points rendered in the font */
     const std::vector<UnicodeCharset>&
                       UnicodeCharsets() const;
 
@@ -270,9 +330,11 @@ public:
     X                 RenderGlyph(const Pt& pt, boost::uint32_t c) const; ///< renders glyph for \a c and returns advance of glyph rendered
     X                 RenderText(const Pt& pt, const std::string& text) const; ///< unformatted text rendering; repeatedly calls RenderGlyph, then returns advance of entire string
     void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>* line_data = 0, RenderState* render_state = 0) const; ///< formatted text rendering
-    void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state, int begin_line, int begin_char, int end_line, int end_char) const; ///< formatted text rendering over a subset of lines and characters
-    Pt                DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width, std::vector<LineData>& lines) const; ///< returns the maximum dimensions of the string in x and y
+    void              RenderText(const Pt& pt1, const Pt& pt2, const std::string& text, Flags<TextFormat>& format, const std::vector<LineData>& line_data, RenderState& render_state, std::size_t begin_line, std::size_t begin_char, std::size_t end_line, std::size_t end_char) const; ///< formatted text rendering over a subset of lines and code points
+    void              ProcessTagsBefore(const std::vector<LineData>& line_data, RenderState& render_state, std::size_t begin_line, std::size_t begin_char) const; ///< Sets \a render_state as if all the text before (<i>begin_line</i>, <i>begin_char</i>) had just been rendered.
+    Pt                DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width, std::vector<LineData>& line_data) const; ///< returns the maximum dimensions of the string in x and y
     Pt                TextExtent(const std::string& text, Flags<TextFormat> format = FORMAT_NONE, X box_width = X0) const; ///< returns the maximum dimensions of the string in x and y.  Provided as a convenience; it just calls DetermineLines with the given parameters.
+    Pt                TextExtent(const std::string& text, const std::vector<LineData>& line_data) const; ///< returns the maximum dimensions of the text in x and y.
     //@}
 
     static void       RegisterKnownTag(const std::string& tag); ///< adds \a tag to the list of embedded tags that Font should not print when rendering text.  Passing "foo" will cause Font to treat "<foo>", \<foo [arg1 [arg2 ...]]>, and "</foo>" as tags.
@@ -307,9 +369,9 @@ public:
     //@}
 
     /** Throws a BadGlyph exception, with \a c converted to a printable ASCII
-        character (if possible), or as a Unicode character point.  \a
-        format_str should contain the Boost.Format positional notation
-        formatting tag "%1%" where the character should appear. */
+        character (if possible), or as a Unicode code point.  \a format_str
+        should contain the Boost.Format positional notation formatting tag
+        "%1%" where the code point should appear. */
     static void ThrowBadGlyph(const std::string& format_str, boost::uint32_t c);
 
 protected:
@@ -333,6 +395,7 @@ private:
 
     void              Init(const std::string& font_filename, unsigned int pts);
     bool              GenerateGlyph(FT_Face font, boost::uint32_t ch);
+    void              ValidateFormat(Flags<TextFormat>& format) const;
     inline X          RenderGlyph(const Pt& pt, const Glyph& glyph, const RenderState* render_state) const;
     void              HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const;
 
@@ -361,6 +424,9 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
+/** Stream ooutput operator for Font::Substring. */
+std::ostream& operator<<(std::ostream& os, const Font::Substring& substr);
+
 
 /** This singleton class is essentially a very thin wrapper around a map of
     Font smart pointers, keyed on font filename/point size pairs.  The user
@@ -368,7 +434,7 @@ private:
     size needs to be created, the font is created at the requestd size, a
     shared_ptr to it is kept, and a copy of the shared_ptr is returned.  If
     the font has been created at the desired size, but the request includes
-    character range(s) not already created, the font at the requested size is
+    code point range(s) not already created, the font at the requested size is
     created with the union of the reqested and existing ranges, stored, and
     returned as above; the only difference is that the original shared_ptr is
     destroyed.  Due to the shared_ptr semantics, the object pointed to by the
@@ -398,7 +464,7 @@ public:
     boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts);
 
     /** returns a shared_ptr to the requested font, supporting all the
-        characters in the UnicodeCharsets in the range [first, last).  \note
+        code points in the UnicodeCharsets in the range [first, last).  \note
         May load font if unavailable at time of request. */
     template <class CharSetIter>
     boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts,
@@ -429,6 +495,13 @@ GG_EXCEPTION(FailedFTLibraryInit);
 
 // template implementations
 template <class Archive>
+void GG::Font::Substring::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(first)
+        & BOOST_SERIALIZATION_NVP(second);
+}
+
+template <class Archive>
 void GG::Font::TextElement::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_NVP(text)
@@ -450,7 +523,7 @@ template <class Archive>
 void GG::Font::LineData::CharData::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_NVP(extent)
-        & BOOST_SERIALIZATION_NVP(original_char_index)
+        & BOOST_SERIALIZATION_NVP(string_index)
         & BOOST_SERIALIZATION_NVP(tags);
 }
 

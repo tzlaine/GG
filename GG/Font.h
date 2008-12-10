@@ -25,7 +25,7 @@
 
 /** \file Font.h
     Contains the Font class, a class that encapsulates the rendering of a
-    single FreeType-compatible fonts in italics, with underlining, left-,
+    single FreeType-compatible font in italics, with underlining, left-,
     right-, or center- justified, etc., and the FontManager class which
     provides application-wide management of Font objects. */
 
@@ -39,8 +39,8 @@
 #include <set>
 #include <stack>
 
+#include <boost/unordered_map.hpp>
 #include <boost/serialization/access.hpp>
-
 
 struct FT_FaceRec_;
 typedef struct FT_FaceRec_*  FT_Face;
@@ -393,6 +393,8 @@ private:
         X           width;         ///< the width of the glyph only
     };
 
+    typedef boost::unordered_map<boost::uint32_t, Glyph> GlyphMap;
+
     void              Init(const std::string& font_filename, unsigned int pts);
     bool              GenerateGlyph(FT_Face font, boost::uint32_t ch);
     void              ValidateFormat(Flags<TextFormat>& format) const;
@@ -411,8 +413,7 @@ private:
     double               m_underline_height; ///< height (thickness) of underline
     double               m_italics_offset;   ///< amount that the top of an italicized glyph is left of the bottom
     X                    m_space_width; ///< the width in pixels of the glyph for the space character
-    std::map<boost::uint32_t, Glyph>
-                         m_glyphs;      ///< the locations of the images of each glyph within the textures
+    GlyphMap             m_glyphs;      ///< the locations of the images of each glyph within the textures
     std::vector<boost::shared_ptr<Texture> >
                          m_textures;    ///< the OpenGL texture objects in which the glyphs can be found
 

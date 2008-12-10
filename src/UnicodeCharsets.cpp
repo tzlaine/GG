@@ -230,7 +230,7 @@ const UnicodeCharset* GG::CharsetContaining(boost::uint32_t c)
         }
     }
     std::size_t block = c / BLOCK_SIZE;
-    return 0 <= block && block < s_charset_blocks.size() ? s_charset_blocks[block] : 0;
+    return block < s_charset_blocks.size() ? s_charset_blocks[block] : 0;
 }
 
 const UnicodeCharset* GG::CharsetWithName(const std::string& name)

@@ -429,28 +429,28 @@ Font::Font(const std::string& font_filename, unsigned int pts) :
 Font::~Font()
 {}
 
-const std::string& Font::FontName() const     
+const std::string& Font::FontName() const
 { return m_font_filename; }
 
-unsigned int Font::PointSize() const    
+unsigned int Font::PointSize() const
 { return m_pt_sz; }
 
 const std::vector<UnicodeCharset>& Font::UnicodeCharsets() const
 { return m_charsets; }
 
-Y Font::Ascent() const       
+Y Font::Ascent() const
 { return m_ascent; }
 
-Y Font::Descent() const      
+Y Font::Descent() const
 { return m_descent; }
 
-Y Font::Height() const       
+Y Font::Height() const
 { return m_height; }
 
-Y Font::Lineskip() const     
+Y Font::Lineskip() const
 { return m_lineskip; }
 
-X Font::SpaceWidth() const   
+X Font::SpaceWidth() const
 { return m_space_width; }
 
 X Font::RenderGlyph(const Pt& pt, char c) const
@@ -458,7 +458,7 @@ X Font::RenderGlyph(const Pt& pt, char c) const
     if (c < 0x0 || 0x7f < c)
         throw utf8::invalid_utf8(c);
 
-    std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(CharToUint32_t(c));
+    GlyphMap::const_iterator it = m_glyphs.find(CharToUint32_t(c));
     if (it == m_glyphs.end())
         it = m_glyphs.find(WIDE_SPACE); // print a space when an unrendered glyph is requested
     return RenderGlyph(pt, it->second, 0);
@@ -466,7 +466,7 @@ X Font::RenderGlyph(const Pt& pt, char c) const
 
 X Font::RenderGlyph(const Pt& pt, boost::uint32_t c) const
 {
-    std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(c);
+    GlyphMap::const_iterator it = m_glyphs.find(c);
     if (it == m_glyphs.end())
         it = m_glyphs.find(WIDE_SPACE); // print a space when an unrendered glyph is requested
     return RenderGlyph(pt, it->second, 0);
@@ -540,7 +540,7 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
             assert((text[line.char_data[j].string_index] == '\n') == (c == WIDE_NEWLINE));
             if (c == WIDE_NEWLINE)
                 continue;
-            std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(c);
+            GlyphMap::const_iterator it = m_glyphs.find(c);
             if (it == m_glyphs.end())
                 x = x_origin + line.char_data[j].extent; // move forward by the extent of the character when a whitespace or unprintable glyph is requested
             else
@@ -677,7 +677,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             text_elements[i]->widths.push_back(X0);
             boost::uint32_t c = utf8::next(it, end_it);
             if (c != WIDE_NEWLINE) {
-                std::map<boost::uint32_t, Glyph>::const_iterator it = m_glyphs.find(c);
+                GlyphMap::const_iterator it = m_glyphs.find(c);
                 if (it == m_glyphs.end())
                     it = m_glyphs.find(WIDE_SPACE); // use a space when an unrendered glyph is requested (the space chararacter is always renderable)
                 text_elements[i]->widths.back() = it->second.advance;
@@ -1071,7 +1071,7 @@ void Font::Init(const std::string& font_filename, unsigned int pts)
         m_glyphs[it->first] = Glyph(m_textures[it->second.idx], it->second.ul, it->second.lr, it->second.left_b, it->second.adv);
 
     // record the width of the space character
-    std::map<boost::uint32_t, Glyph>::const_iterator glyph_it = m_glyphs.find(WIDE_SPACE);
+    GlyphMap::const_iterator glyph_it = m_glyphs.find(WIDE_SPACE);
     assert(glyph_it != m_glyphs.end());
     m_space_width = glyph_it->second.advance;
 }

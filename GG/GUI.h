@@ -149,7 +149,13 @@ public:
         MOUSEWHEEL   ///< rolling of the mouse wheel; this event is accompanied by the amount of roll in the y-component of the mouse's relative position (+ is up, - is down)
     };
 
-    typedef std::set<std::pair<Key, Flags<ModKey> > >::const_iterator const_accel_iterator; ///< the type of iterator returned by accel_begin() and accel_end()
+    /** The type of iterator returned by non-const accel_begin() and
+        accel_end(). */
+    typedef std::set<std::pair<Key, Flags<ModKey> > >::iterator accel_iterator;
+
+    /** The type of iterator returned by const accel_begin() and
+        accel_end(). */
+    typedef std::set<std::pair<Key, Flags<ModKey> > >::const_iterator const_accel_iterator;
 
     /** The type of function used to serialize Wnds. */
     typedef void (*SaveWndFn)(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
@@ -199,8 +205,11 @@ public:
     bool                                   RenderCursor() const; ///< returns true iff the GUI is responsible for rendering the cursor
     const boost::shared_ptr<Cursor>&       GetCursor() const; ///< returns the currently-installed cursor
 
-    const_accel_iterator accel_begin() const;    ///< returns an iterator to the first defined keyboard accelerator
-    const_accel_iterator accel_end() const;      ///< returns an iterator to the last + 1 defined keyboard accelerator
+    /** Returns an iterator to one past the first defined keyboard accelerator. */
+    const_accel_iterator accel_begin() const;
+
+    /** Returns an iterator to one past the last defined keyboard accelerator. */
+    const_accel_iterator accel_end() const;
 
     /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
     AcceleratorSignalType& AcceleratorSignal(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE) const;
@@ -249,6 +258,12 @@ public:
     void           SetMinDragTime(unsigned int time);     ///< sets the minimum time (in ms) an item must be dragged before it is a valid drag
     void           SetMinDragDistance(unsigned int distance); ///< sets the minimum distance an item must be dragged before it is a valid drag
 
+    /** Returns an iterator to the first defined keyboard accelerator. */
+    accel_iterator accel_begin();
+
+    /** Returns an iterator to one past the last defined keyboard accelerator. */
+    accel_iterator accel_end();
+
     /** Establishes a keyboard accelerator.  Any key modifiers may be
         specified, or none at all. */
     void           SetAccelerator(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE);
@@ -256,6 +271,9 @@ public:
     /** Removes a keyboard accelerator.  Any key modifiers may be specified,
         or none at all. */
     void           RemoveAccelerator(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE);
+
+    /** Removes a keyboard accelerator. */
+    void           RemoveAccelerator(accel_iterator it);
 
     /** Returns a shared_ptr to the desired font, supporting all printable
         ASCII characters. */

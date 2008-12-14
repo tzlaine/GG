@@ -555,16 +555,10 @@ const boost::shared_ptr<Cursor>& GUI::GetCursor() const
 { return s_impl->m_cursor; }
 
 GUI::const_accel_iterator GUI::accel_begin() const
-{
-    const GUIImpl* impl = s_impl.get();
-    return impl->m_accelerators.begin();
-}
+{ return s_impl->m_accelerators.begin(); }
 
 GUI::const_accel_iterator GUI::accel_end() const
-{
-    const GUIImpl* impl = s_impl.get();
-    return impl->m_accelerators.end();
-}
+{ return s_impl->m_accelerators.end(); }
 
 GUI::AcceleratorSignalType& GUI::AcceleratorSignal(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/) const
 {
@@ -846,6 +840,12 @@ void GUI::SetMinDragTime(unsigned int time)
 
 void GUI::SetMinDragDistance(unsigned int distance)
 { s_impl->m_min_drag_distance = distance; }
+
+GUI::accel_iterator GUI::accel_begin()
+{ return s_impl->m_accelerators.begin(); }
+
+GUI::accel_iterator GUI::accel_end()
+{ return s_impl->m_accelerators.end(); }
 
 void GUI::SetAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
 {

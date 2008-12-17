@@ -111,11 +111,12 @@ namespace {
     struct PushSubmatchOntoStack
     {
         typedef void result_type;
-        void operator()(std::stack<Font::Substring>& tag_stack,
+        void operator()(const std::string& str,
+                        std::stack<Font::Substring>& tag_stack,
                         bool& ignore_tags,
                         const boost::xpressive::ssub_match& sub) const
             {
-                tag_stack.push(static_cast<Font::Substring::Base>(sub));
+                tag_stack.push(Font::Substring(str, sub));
                 if (tag_stack.top() == PRE_TAG)
                     ignore_tags = true;
             }
@@ -228,20 +229,33 @@ namespace {
 // class GG::Font::Substring
 ///////////////////////////////////////
 Font::Substring::Substring() :
-    Base()
+    str(0),
+    first(),
+    second()
 {
     std::string temp;
     second = first = temp.end();
 }
 
-Font::Substring::Substring(std::string::const_iterator first_,
+Font::Substring::Substring(const std::string& str_,
+                           std::string::const_iterator first_,
                            std::string::const_iterator second_) :
-    Base(first_, second_)
-{ assert(first <= second); }
+    str(&str_),
+    first(first_),
+    second(second_)
+{
+    assert(str->begin() <= first);
+    assert(first <= second);
+}
 
-Font::Substring::Substring(const Base& pair) :
-    Base(pair)
-{ assert(first <= second); }
+Font::Substring::Substring(const std::string& str_, const IterPair& pair) :
+    str(&str_),
+    first(pair.first),
+    second(pair.second)
+{
+    assert(str->begin() <= first);
+    assert(first <= second);
+}
 
 std::string::const_iterator Font::Substring::begin() const
 { return first; }
@@ -264,15 +278,7 @@ bool Font::Substring::operator==(const std::string& rhs) const
 bool Font::Substring::operator!=(const std::string& rhs) const
 { return !operator==(rhs); }
 
-Font::Substring& Font::Substring::operator=(const Base& rhs)
-{
-    assert(first <= second);
-    first = rhs.first;
-    second = rhs.second;
-    return *this;
-}
-
-Font::Substring& Font::Substring::operator+=(const Base& rhs)
+Font::Substring& Font::Substring::operator+=(const IterPair& rhs)
 {
     assert(rhs.first <= rhs.second);
     assert(rhs.first == second);
@@ -604,7 +610,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             ('<' >> *~set[_s | '<']) | (+~set[_s | '<']);
         const sregex EVERYTHING =
             ('<' >> (tag_name_tag = OPEN_TAG_NAME) >> repeat<0, 9>(+blank >> TAG_PARAM) >> (open_bracket_tag = '>'))
-            [Push(ref(tag_stack), ref(ignore_tags), tag_name_tag)] |
+            [Push(ref(text), ref(tag_stack), ref(ignore_tags), tag_name_tag)] |
             ("</" >> (tag_name_tag = CLOSE_TAG_NAME) >> (close_bracket_tag = '>')) |
             (whitespace_tag = WHITESPACE) |
             (text_tag = TEXT);
@@ -619,7 +625,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             if ((*it)[text_tag].matched) {
                 while (it != end_it && (*it)[text_tag].matched) {
                     if (combined_text.empty())
-                        combined_text = (*it)[text_tag];
+                        combined_text = Substring(text, (*it)[text_tag]);
                     else
                         combined_text += (*it)[text_tag];
                     ++it;
@@ -631,26 +637,27 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             if (combined_text.empty()) {
                 if ((*it)[open_bracket_tag].matched) {
                     boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(false));
-                    element->text = (*it)[tag_name_tag];
+                    element->text = Substring(text, (*it)[tag_name_tag]);
                     if (1 < (*it).nested_results().size()) {
                         element->params.reserve((*it).nested_results().size() - 1);
                         for (smatch::nested_results_type::const_iterator nested_it =
                                  ++(*it).nested_results().begin();
                              nested_it != (*it).nested_results().end();
                              ++nested_it) {
-                            element->params.push_back(static_cast<Substring::Base>((*nested_it)[0]));
+                            element->params.push_back(
+                                Substring(text, (*nested_it)[0]));
                         }
                     }
-                    element->original_tag_text = (*it)[0];
+                    element->original_tag_text = Substring(text, (*it)[0]);
                     text_elements.push_back(element);
                 } else if ((*it)[close_bracket_tag].matched) {
                     boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(true));
-                    element->text = (*it)[tag_name_tag];
-                    element->original_tag_text = (*it)[0];
+                    element->text = Substring(text, (*it)[tag_name_tag]);
+                    element->original_tag_text = Substring(text, (*it)[0]);
                     text_elements.push_back(element);
                 } else if ((*it)[whitespace_tag].matched) {
                     boost::shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
-                    element->text = (*it)[whitespace_tag];
+                    element->text = Substring(text, (*it)[whitespace_tag]);
                     text_elements.push_back(element);
                     char last_char = *boost::prior(element->text.end());
                     if (last_char == '\n' || last_char == '\f' || last_char == '\r') {
@@ -660,7 +667,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                 }
             } else {
                 boost::shared_ptr<Font::TextElement> element(new Font::TextElement(false, false));
-                std::swap(element->text, combined_text);
+                element->text = combined_text;
                 text_elements.push_back(element);
             }
 
@@ -1138,7 +1145,8 @@ X Font::RenderGlyph(const Pt& pt, const Glyph& glyph, const Font::RenderState* r
         glTexCoord2f(glyph.sub_texture.TexCoords()[0], glyph.sub_texture.TexCoords()[3]);
         glVertex(pt.x + glyph.left_bearing - m_italics_offset, pt.y + glyph.sub_texture.Height());
         glTexCoord2f(glyph.sub_texture.TexCoords()[2], glyph.sub_texture.TexCoords()[3]);
-        glVertex(pt.x + glyph.sub_texture.Width() + glyph.left_bearing - m_italics_offset, pt.y + glyph.sub_texture.Height());
+        glVertex(pt.x + glyph.sub_texture.Width() + glyph.left_bearing - m_italics_offset,
+                 pt.y + glyph.sub_texture.Height());
         glEnd();
     } else {
         glyph.sub_texture.OrthoBlit(Pt(pt.x + glyph.left_bearing, pt.y));
@@ -1160,29 +1168,35 @@ X Font::RenderGlyph(const Pt& pt, const Glyph& glyph, const Font::RenderState* r
     return glyph.advance;
 }
 
-void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const
+void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color,
+                     RenderState& render_state) const
 {
-    using boost::lexical_cast;
     if (tag->text == "i") {
-        if (tag->close_tag)
+        if (tag->close_tag) {
+            assert(render_state.use_italics);
             --render_state.use_italics;
-        else
+        } else {
             ++render_state.use_italics;
+        }
     } else if (tag->text == "u") {
-        if (tag->close_tag)
+        if (tag->close_tag) {
+            assert(render_state.draw_underline);
             --render_state.draw_underline;
-        else
+        } else {
             ++render_state.draw_underline;
+        }
     } else if (tag->text == "rgba") {
         if (tag->close_tag) {
+            assert(!render_state.colors.empty());
             render_state.colors.pop();
             if (render_state.colors.empty())
                 glColor4dv(orig_color);
             else
                 glColor(render_state.colors.top());
         } else {
+            using boost::lexical_cast;
             bool well_formed_tag = true;
-            if (4 <= tag->params.size()) {
+            if (4 == tag->params.size()) {
                 try {
                     int temp_color[4];
                     GLubyte color[4];
@@ -1190,8 +1204,10 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                     temp_color[1] = lexical_cast<int>(tag->params[1]);
                     temp_color[2] = lexical_cast<int>(tag->params[2]);
                     temp_color[3] = lexical_cast<int>(tag->params[3]);
-                    if (0 <= temp_color[0] && temp_color[0] <= 255 && 0 <= temp_color[1] && temp_color[1] <= 255 &&
-                        0 <= temp_color[2] && temp_color[2] <= 255 && 0 <= temp_color[3] && temp_color[3] <= 255) {
+                    if (0 <= temp_color[0] && temp_color[0] <= 255 &&
+                        0 <= temp_color[1] && temp_color[1] <= 255 &&
+                        0 <= temp_color[2] && temp_color[2] <= 255 &&
+                        0 <= temp_color[3] && temp_color[3] <= 255) {
                         color[0] = temp_color[0];
                         color[1] = temp_color[1];
                         color[2] = temp_color[2];
@@ -1208,8 +1224,10 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
                         color[1] = lexical_cast<double>(tag->params[1]);
                         color[2] = lexical_cast<double>(tag->params[2]);
                         color[3] = lexical_cast<double>(tag->params[3]);
-                        if (0.0 <= color[0] && color[0] <= 1.0 && 0.0 <= color[1] && color[1] <= 1.0 &&
-                            0.0 <= color[2] && color[2] <= 1.0 && 0.0 <= color[3] && color[3] <= 1.0) {
+                        if (0.0 <= color[0] && color[0] <= 1.0 &&
+                            0.0 <= color[1] && color[1] <= 1.0 &&
+                            0.0 <= color[2] && color[2] <= 1.0 &&
+                            0.0 <= color[3] && color[3] <= 1.0) {
                             glColor4dv(color);
                             render_state.colors.push(FloatClr(color[0], color[1], color[2], color[3]));
                         } else {
@@ -1222,8 +1240,10 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
             } else {
                 well_formed_tag = false;
             }
-            if (!well_formed_tag)
-                std::cerr << "GG::Font : Encountered malformed <rgba> formatting tag: " << tag->original_tag_text;
+            if (!well_formed_tag) {
+                std::cerr << "GG::Font : Encountered malformed <rgba> formatting tag: "
+                          << tag->original_tag_text;
+            }
         }
     }
 }

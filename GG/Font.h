@@ -129,25 +129,27 @@ extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.
 class GG_API Font
 {
 public:
-    /** A range of pointers into a std::string that defines a substring found
-        in a string being rendered by Font. */
-    class Substring :
-        private std::pair<std::string::const_iterator, std::string::const_iterator>
+    /** A range of iterators into a std::string that defines a substring found
+        in a string being rendered by Font.  Due to the requirements of
+        serializing Substring, it must contain a reference to the string of
+        which it is a substring. */
+    class Substring
     {
     public:
-        typedef std::pair<std::string::const_iterator, std::string::const_iterator> Base;
+        typedef std::pair<std::string::const_iterator, std::string::const_iterator> IterPair;
 
         /** Default ctor.  Sets .first and .second to be invalid, but
             nonsingular, iterators, with .first == .second. */
         Substring();
 
         /** Ctor.  \a first_ must be <= \a second_. */
-        Substring(std::string::const_iterator first_,
+        Substring(const std::string& str_,
+                  std::string::const_iterator first_,
                   std::string::const_iterator second_);
 
-        /** Implicit conversion from base.  \a pair.first must be <= \a
+        /** Construction from base.  \a pair.first must be <= \a
             pair.second. */
-        Substring(const Base& pair);
+        Substring(const std::string& str_, const IterPair& pair);
 
         /** Returns an iterator to the beginning of the substring. */
         std::string::const_iterator begin() const;
@@ -170,14 +172,16 @@ public:
         /** Comparison with std::string. */
         bool operator!=(const std::string& rhs) const;
 
-        /** Assignment from base.  \a rhs.first must be <= \a rhs.second. */
-        Substring& operator=(const Base& rhs);
-
         /** Concatenation with base.  \a rhs.first must be <= \a rhs.second.
-            *this and \a rhs must be contiguous. */
-        Substring& operator+=(const Base& rhs);
+            .second must be equal to \a rhs.first (*this and \a rhs must be
+            contiguous). */
+        Substring& operator+=(const IterPair& rhs);
 
     private:
+        const std::string* str;
+        std::string::const_iterator first;
+        std::string::const_iterator second;
+
         friend class boost::serialization::access;
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version);
@@ -492,14 +496,39 @@ GG_API FontManager& GetFontManager();
 /** Thrown when initialization of the FreeType library fails. */
 GG_EXCEPTION(FailedFTLibraryInit);
 
-} // template GG
+} // namespace GG
+
 
 // template implementations
+namespace GG { namespace detail {
+    struct SerializableString : public std::string
+    {
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version)
+            { ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(std::string); }
+    };
+} }
+
 template <class Archive>
 void GG::Font::Substring::serialize(Archive& ar, const unsigned int version)
 {
-    ar  & BOOST_SERIALIZATION_NVP(first)
-        & BOOST_SERIALIZATION_NVP(second);
+    std::size_t first_offset = std::distance(str->begin(), first);
+    std::size_t second_offset = std::distance(str->begin(), second);
+    detail::SerializableString* mutable_str =
+        static_cast<detail::SerializableString*>(const_cast<std::string*>(str));
+    ar  & BOOST_SERIALIZATION_NVP(mutable_str)
+        & BOOST_SERIALIZATION_NVP(first_offset)
+        & BOOST_SERIALIZATION_NVP(second_offset);
+    if (Archive::is_loading::value) {
+        if ((str = mutable_str)) {
+            first = second = str->begin();
+            std::advance(first, first_offset);
+            std::advance(second, second_offset);
+        } else {
+            std::string temp;
+            first = second = temp.begin();
+        }
+    }
 }
 
 template <class Archive>

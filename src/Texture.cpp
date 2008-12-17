@@ -513,10 +513,10 @@ void Texture::InitFromRawData(X width, Y height, const unsigned char* image, GLe
     m_tex_coords[3] = Value(1.0 * m_default_height / m_height);
 
     if (mipmap) {
-        std::auto_ptr<unsigned char> image_copy;
+        boost::scoped_array<unsigned char> image_copy;
         if (!image_is_power_of_two)
             image_copy.reset(GetRawBytes());
-        unsigned char* image_to_use = image_copy.get() ? image_copy.get() : const_cast<unsigned char*>(image);
+        unsigned char* image_to_use = image_copy ? image_copy.get() : const_cast<unsigned char*>(image);
         gluBuild2DMipmaps(GL_PROXY_TEXTURE_2D, format, Value(GL_texture_width), Value(GL_texture_height), format, type, image_to_use);
         GLint checked_format;
         glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &checked_format);

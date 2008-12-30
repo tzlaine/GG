@@ -643,7 +643,7 @@ if env['build_sdl_driver']:
 
     # The tutorials depend on libGiGiSDL, so we add targets for them here
     tutorial_env = sdl_env.Copy()
-    tutorial_env.AppendUnique(LIBPATH = ['.'])
+    tutorial_env.PrependUnique(LIBPATH = ['.'])
     tutorial_env.AppendUnique(LIBS = ['GiGi', 'GiGiSDL'])
     if str(Platform()) == 'win32':
         tutorial_env.AppendUnique(LIBS = [

@@ -23,9 +23,10 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file DropDownList.h
-    Contains the DropDownList class, a control that displays a current selection, and allows the user to select one 
-    of several options from a list that drops down when the control is clicked. */
+/** \file DropDownList.h \brief Contains the DropDownList class, a control
+    that displays a current selection, and allows the user to select one of
+    several options from a list that drops down when the control is
+    clicked. */
 
 #ifndef _GG_DropDownList_h_
 #define _GG_DropDownList_h_
@@ -35,17 +36,19 @@
 
 namespace GG {
 
-/** Displays a single choice, and allows the user to select items from a
-    drop-down list.  DropDownList is similar to GG::ListBox, but has
-    significant restrictions over the functionality of GG::ListBox.
-    Specifically, all list items must have the same height, and there is no
-    dragging or dropping.  Though any Control-derived object may be placed in
-    an item cell, the items are only interactive in the drop-down list; the
-    currently selected item is displayed only.  Most of the ListBox interface
-    is duplicated in DropDownList.  Though you can still set the alignment,
-    etc. of individual rows, as in ListBox, the currently-selected row will
-    have the same alignment, etc. when displayed in the control in its
-    unopened state.  Note that this may look quite ugly. */
+/** \brief Displays a single choice, and allows the user to select items from
+    a drop-down list.
+
+    DropDownList is similar to GG::ListBox, but has significant restrictions
+    over the functionality of GG::ListBox.  Specifically, all list items must
+    have the same height, and there is no dragging or dropping.  Though any
+    Control-derived object may be placed in an item cell, the items are only
+    interactive in the drop-down list; the currently selected item is
+    displayed only.  Most of the ListBox interface is duplicated in
+    DropDownList.  Though you can still set the alignment, etc. of individual
+    rows, as in ListBox, the currently-selected row will have the same
+    alignment, etc. when displayed in the control in its unopened state.  Note
+    that this may look quite ugly. */
 class GG_API DropDownList : public Control
 {
 public:

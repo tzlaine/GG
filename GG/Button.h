@@ -23,11 +23,10 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Button.h
-    Contains the Button push-button control class; the StateButton control
-    class, which represents check boxes and radio buttons; and the
-    RadioButtonGroup control class, which allows multiple radio buttons to be
-    combined into a single control. */
+/** \file Button.h \brief Contains the Button push-button control class; the
+    StateButton control class, which represents check boxes and radio buttons;
+    and the RadioButtonGroup control class, which allows multiple radio
+    buttons to be combined into a single control. */
 
 #ifndef _GG_Button_h_
 #define _GG_Button_h_
@@ -39,12 +38,13 @@
 
 namespace GG {
 
-/** This is a basic button control.  Has three states: BN_UNPRESSED,
-    BN_PRESSED, and BN_ROLLOVER.  BN_ROLLOVER is when the cursor "rolls over"
-    the button, without depressing it, allowing rollover effects on the
-    button.  To create a bitmap button, simply set the unpressed, pressed,
-    and/or rollover graphics to the desired SubTextures. \see
-    GG::SubTexture */
+/** \brief This is a basic button control.
+
+    Has three states: BN_UNPRESSED, BN_PRESSED, and BN_ROLLOVER.  BN_ROLLOVER
+    is when the cursor "rolls over" the button, without depressing it,
+    allowing rollover effects on the button.  To create a bitmap button,
+    simply set the unpressed, pressed, and/or rollover graphics to the desired
+    SubTextures. \see GG::SubTexture */
 class GG_API Button : public TextControl
 {
 public:
@@ -136,20 +136,21 @@ GG_ENUM_STREAM_IN(Button::ButtonState)
 GG_ENUM_STREAM_OUT(Button::ButtonState)
 
 
-/** This is a basic state button control.  This class is for checkboxes and
-    radio buttons, etc.  The button/checkbox area can be provided via the bn_*
-    contructor parameters, or it can be determined from the text height and
-    format; the button height and width will be the text height, and the the
-    button will be positioned to the left of the text and vertically the same
-    as the text, unless the text is centered, in which case the button and
-    text will be centered, and the button will appear above or below the text.
-    Whenever there is not room to place the button and the text in the proper
-    orientation because the entire control's size is too small, the button and
-    text are positioned in their default spots (button on left, text on right,
-    centered vertically).  If no text format flags are provided, the default
-    text orientation is FORMAT_VCENTER | FORMAT_LEFT.  Note that the bn_x and
-    bn_y paramters are taken to be relative to the control's x and y
-    position.*/
+/** \brief This is a basic state button control.
+
+    This class is for checkboxes and radio buttons, etc.  The button/checkbox
+    area can be provided via the bn_* contructor parameters, or it can be
+    determined from the text height and format; the button height and width
+    will be the text height, and the the button will be positioned to the left
+    of the text and vertically the same as the text, unless the text is
+    centered, in which case the button and text will be centered, and the
+    button will appear above or below the text.  Whenever there is not room to
+    place the button and the text in the proper orientation because the entire
+    control's size is too small, the button and text are positioned in their
+    default spots (button on left, text on right, centered vertically).  If no
+    text format flags are provided, the default text orientation is
+    FORMAT_VCENTER | FORMAT_LEFT.  Note that the bn_x and bn_y paramters are
+    taken to be relative to the control's x and y position.*/
 class GG_API StateButton : public TextControl
 {
 public:
@@ -227,15 +228,16 @@ private:
 };
 
 
-/** This is a class that encapsulates multiple GG::StateButtons into a single
-    radio-button control.  RadioButtonGroup emits a signal whenever its
-    currently-checked button changes.  The signal indicates which button has
-    been pressed, by passing the index of the button; the currently-checked
-    button index is NO_BUTTON when no button is checked.  Any
-    StateButton-derived controls can be used in a RadioButtonGroup.  However,
-    if you want to automatically serialize a RadioButtonGroup that has custom
-    buttons, you must register the new types.  See the boost serialization
-    documentation for details. */
+/** \brief This is a class that encapsulates multiple GG::StateButtons into a
+    single radio-button control.
+
+    RadioButtonGroup emits a signal whenever its currently-checked button
+    changes.  The signal indicates which button has been pressed, by passing
+    the index of the button; the currently-checked button index is NO_BUTTON
+    when no button is checked.  Any StateButton-derived controls can be used
+    in a RadioButtonGroup.  However, if you want to automatically serialize a
+    RadioButtonGroup that has custom buttons, you must register the new types.
+    See the boost serialization documentation for details. */
 class GG_API RadioButtonGroup : public Control
 {
 public:
@@ -353,7 +355,7 @@ public:
     //@}
 
 protected:
-    /** Encapsulates all data pertaining ot a single button in a
+    /** \brief Encapsulates all data pertaining ot a single button in a
         RadioButtonGroup. */
     struct GG_API ButtonSlot
     {

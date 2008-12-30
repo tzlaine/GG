@@ -24,9 +24,8 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-/** \file checked.h
-    Contains part of the utfcpp library.  See http://utfcpp.sourceforge.net
-    for documentation. */
+/** \file checked.h \brief Contains part of the utfcpp library.  See
+    http://utfcpp.sourceforge.net for documentation. */
 
 
 #ifndef UTF8_FOR_CPP_CHECKED_H_2675DCD0_9480_4c0c_B92A_CC14C027B731
@@ -314,6 +313,67 @@ namespace utf8
           return temp;
       }
     }; // class iterator
+
+    // The wchar_t iterator class
+    template <typename octet_iterator>
+    class wchar_iterator :
+        public std::iterator<std::bidirectional_iterator_tag, wchar_t>
+    { 
+        octet_iterator it;
+        octet_iterator range_start;
+        octet_iterator range_end;
+    public:
+        wchar_iterator () {};
+        wchar_iterator (const octet_iterator& octet_it, 
+                        const octet_iterator& range_start,
+                        const octet_iterator& range_end) :
+            it(octet_it), range_start(range_start), range_end(range_end)
+        {
+            if (it < range_start || it > range_end)
+                throw std::out_of_range("Invalid utf-8 iterator position");
+        }
+        // the default "big three" are OK
+        octet_iterator base () const { return it; }
+        wchar_t operator * () const
+        {
+            octet_iterator temp = it;
+            uint32_t retval = next(temp, range_end);
+            assert(retval <= WCHAR_MAX);
+            return retval;
+        }
+        bool operator == (const wchar_iterator& rhs) const 
+        { 
+            if (range_start != rhs.range_start || range_end != rhs.range_end)
+                throw std::logic_error("Comparing utf-8 iterators defined with different ranges");
+            return (it == rhs.it);
+        }
+        bool operator != (const wchar_iterator& rhs) const
+        {
+            return !(operator == (rhs));
+        }
+        wchar_iterator& operator ++ () 
+        {
+            next(it, range_end);
+            return *this;
+        }
+        wchar_iterator operator ++ (int)
+        {
+            wchar_iterator temp = *this;
+            next(it, range_end);
+            return temp;
+        }  
+        wchar_iterator& operator -- ()
+        {
+            prior(it, range_start);
+            return *this;
+        }
+        wchar_iterator operator -- (int)
+        {
+            wchar_iterator temp = *this;
+            prior(it, range_start);
+            return temp;
+        }
+    };
 
 } // namespace utf8
 

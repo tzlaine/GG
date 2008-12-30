@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file StaticGraphic.h
-    Contains the StaticGraphic class, a fixed image control. */
+/** \file StaticGraphic.h \brief Contains the StaticGraphic class, a fixed
+    image control. */
 
 #ifndef _GG_StaticGraphic_h_
 #define _GG_StaticGraphic_h_
@@ -49,7 +49,8 @@ extern GG_API const GraphicStyle GRAPHIC_SHRINKFIT;   ///< Like GRAPHIC_FITGRAPH
 extern GG_API const GraphicStyle GRAPHIC_PROPSCALE;   ///< If GRAPHIC_FITGRAPHIC or GRAPHIC_SHRINKFIT is used, this ensures scaling is done proportionally.
 
 
-/** This is a simple, non-interactive window that displays a GG::SubTexture.
+/** \brief A simple, non-interactive window that displays a GG::SubTexture.
+
     Though the SubTexture displayed in a StaticGraphic is fixed, its size is
     not; the image can be scaled (proportionately or not) to fit in the
     StaticGraphic's window area. \see GraphicStyle*/

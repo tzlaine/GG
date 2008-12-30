@@ -23,11 +23,10 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Texture.h
-    Contains the Texture class, which encapsulates an OpenGL texture object;
-    the SubTexture class, which represents a portion of an OpenGL texture
-    object; and the TextureManager class, which provides GUI-wide management
-    of Texture objects. */
+/** \file Texture.h \brief Contains the Texture class, which encapsulates an
+    OpenGL texture object; the SubTexture class, which represents a portion of
+    an OpenGL texture object; and the TextureManager class, which provides
+    GUI-wide management of Texture objects. */
 
 #ifndef _GG_Texture_h_
 #define _GG_Texture_h_
@@ -41,26 +40,28 @@
 
 namespace GG {
 
-/** This class encapsulates OpenGL texture objects.  If the dimensions of the
-    image used to initialize the texture are not both powers of two, the
-    texture is created with dimensions of the next largest (or equal) powers
-    of two.  The original image occupies the region near the texture's origin,
-    and the rest is zero-initialized.  This is done to prevent the image from
-    being scaled, since textures used in a GUI almost always must maintain
-    pixel accuracy.  The original image size and corresponding texture coords
-    are saved, and can be accessed through DefaultWidth(), DefaultHeight(),
-    and DefaultTexCoords(), respectively.  These are kept so that only the
-    originally-loaded-image part of the texture can be used, if desired.  All
-    initialization functions first free the OpenGL texture currently in use by
-    the texture (if any) and create a new one.  When the load filename is ""
-    or the image parameter is 0, all initialization functions fail silently,
-    performing no initialization and allocating no memory or OpenGL texture.
-    Serialized Textures save the filename associated with the texture when
-    available, so the originally loaded file can be reloaded again later.  If
-    no such file exists, such as when a Texture is created from in-memory
-    image data, the contents of the Texture are read from video memory and
-    saved as binary data.  A default-constructed Texture will have niether a
-    filename nor raw image data. */
+/** \brief This class encapsulates an OpenGL texture object.
+
+    If the dimensions of the image used to initialize the texture are not both
+    powers of two, the texture is created with dimensions of the next largest
+    (or equal) powers of two.  The original image occupies the region near the
+    texture's origin, and the rest is zero-initialized.  This is done to
+    prevent the image from being scaled, since textures used in a GUI almost
+    always must maintain pixel accuracy.  The original image size and
+    corresponding texture coords are saved, and can be accessed through
+    DefaultWidth(), DefaultHeight(), and DefaultTexCoords(), respectively.
+    These are kept so that only the originally-loaded-image part of the
+    texture can be used, if desired.  All initialization functions first free
+    the OpenGL texture currently in use by the texture (if any) and create a
+    new one.  When the load filename is "" or the image parameter is 0, all
+    initialization functions fail silently, performing no initialization and
+    allocating no memory or OpenGL texture.  Serialized Textures save the
+    filename associated with the texture when available, so the originally
+    loaded file can be reloaded again later.  If no such file exists, such as
+    when a Texture is created from in-memory image data, the contents of the
+    Texture are read from video memory and saved as binary data.  A
+    default-constructed Texture will have niether a filename nor raw image
+    data. */
 class GG_API Texture
 {
 public:
@@ -165,8 +166,8 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** This class is a convenient way to store the info needed to use a portion
-    of an OpenGL texture. */
+/** \brief This class is a convenient way to store the info needed to use a
+    portion of an OpenGL texture. */
 class GG_API SubTexture
 {
 public:
@@ -224,9 +225,11 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** This singleton class is essentially a very thin wrapper around a map of
-    Texture smart pointers, keyed on std::string texture names.  The user need
-    only request a texture through GetTexture(); if the texture is not already
+/** \brief A singleton that loads and stores textures for use by GG.
+
+    This class is essentially a very thin wrapper around a map of Texture
+    smart pointers, keyed on std::string texture names.  The user need only
+    request a texture through GetTexture(); if the texture is not already
     resident, it will be loaded.  If the user would like to create her own
     images and store them in the manager, that can be accomplished via
     StoreTexture() calls.*/

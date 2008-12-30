@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Base.h
-    Contains enums, utility classes, and free functions used throughout GG. */
+/** \file Base.h \brief Contains enums, utility classes, and free functions
+    used throughout GG. */
 
 #ifndef _GG_Base_h_
 #define _GG_Base_h_
@@ -64,15 +64,16 @@
 #include <GG/SignalsAndSlots.h>
 
 
-/** \namespace GG
-    The namespace that encloses all GG classes, functions, typedefs, enums, etc. */
+/** \namespace GG \brief The namespace that encloses all GG classes,
+    functions, typedefs, enums, etc. */
 namespace GG {
 
 template <class FlagType>
 class Flags;
 class ModKey;
 
-/** "Regions" of a window; used eg to determine direction(s) of drag when a window that has a drag-frame is clicked*/
+/** "Regions" of a window; used e.g. to determine direction(s) of drag when a
+    window that has a drag-frame is clicked. */
 enum WndRegion {
     WR_NONE = -1, 
     WR_TOPLEFT = 0, 
@@ -88,19 +89,25 @@ enum WndRegion {
 
 /** The orientations for scrollbars, sliders, etc. */
 enum Orientation {
-    VERTICAL,
-    HORIZONTAL
+    VERTICAL,  ///< Vertical orientation.
+    HORIZONTAL ///< Horizontal orientation.
 };
 
 /** The built-in visual styles of state buttons. */
 enum StateButtonStyle {
-    SBSTYLE_3D_XBOX,             ///< draws a down-beveled box with a 3D x-mark inside
-    SBSTYLE_3D_CHECKBOX,         ///< draws a down-beveled box with a 3D check-mark inside
-    SBSTYLE_3D_RADIO,            ///< draws a down-beveled circle with a 3D "dot" or "bubble" inside
-    SBSTYLE_3D_BUTTON,           ///< draws a button that toggles bewtween popped up and pushed down
-    SBSTYLE_3D_ROUND_BUTTON,     ///< draws a down-beveled circle with an up-beveled circle inside
-    SBSTYLE_3D_TOP_ATTACHED_TAB, ///< draws an up-beveled rectagular tab that is brighter and larger when pressed; it's bottom is unbeveled
-    SBSTYLE_3D_TOP_DETACHED_TAB  ///< draws an up-beveled rectagular tab that is brighter and larger when pressed; it's bottom is beveled
+    SBSTYLE_3D_XBOX,         ///< Draws a down-beveled box with a 3D x-mark inside.
+    SBSTYLE_3D_CHECKBOX,     ///< Draws a down-beveled box with a 3D check-mark inside.
+    SBSTYLE_3D_RADIO,        ///< Draws a down-beveled circle with a 3D "dot" or "bubble" inside.
+    SBSTYLE_3D_BUTTON,       ///< Draws a button that toggles bewtween popped up and pushed down.
+    SBSTYLE_3D_ROUND_BUTTON, ///< Draws a down-beveled circle with an up-beveled circle inside.
+
+    /** Draws an up-beveled rectagular tab that is brighter and larger when
+        pressed; it's bottom is unbeveled. */
+    SBSTYLE_3D_TOP_ATTACHED_TAB,
+
+    /** Draws an up-beveled rectagular tab that is brighter and larger when
+        pressed; it's bottom is beveled. */
+    SBSTYLE_3D_TOP_DETACHED_TAB
 };
 
 /** The rendering styles of the line the tab slides over in a Slider. */
@@ -112,12 +119,18 @@ enum SliderLineStyle {
 
 /** The styles of display for a TabBar. */
 enum TabBarStyle {
-    TAB_BAR_ATTACHED, ///< The currently active tab should appear to be connected to the area below the bar.
-    TAB_BAR_DETACHED  ///< The currently active tab should appear to be unconnected to the area below the bar.
+    /** The currently active tab should appear to be connected to the area
+        below the bar. */
+    TAB_BAR_ATTACHED,
+
+    /** The currently active tab should appear to be unconnected to the area
+        below the bar. */
+    TAB_BAR_DETACHED
 };
 
 
-/** Adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital letter keys added */
+/** Adpated from SDLKey enum in SDL_keysym.h of the SDL library; capital
+    letter keys added. */
 enum Key {
     // The keyboard symbols have been cleverly chosen to map to ASCII
     GGK_UNKNOWN      = 0,
@@ -222,7 +235,7 @@ enum Key {
     // End of ASCII mapped keysyms
 
     // International keyboard syms
-    GGK_WORLD_0      = 160,      ///< 0xA0
+    GGK_WORLD_0      = 160,      // 0xA0
     GGK_WORLD_1      = 161,
     GGK_WORLD_2      = 162,
     GGK_WORLD_3      = 163,
@@ -317,7 +330,7 @@ enum Key {
     GGK_WORLD_92     = 252,
     GGK_WORLD_93     = 253,
     GGK_WORLD_94     = 254,
-    GGK_WORLD_95     = 255,      ///< 0xFF
+    GGK_WORLD_95     = 255,      // 0xFF
 
     // Numeric keypad
     GGK_KP0          = 256,
@@ -378,10 +391,10 @@ enum Key {
     GGK_LALT         = 308,
     GGK_RMETA        = 309,
     GGK_LMETA        = 310,
-    GGK_LSUPER       = 311,      ///< Left "Windows" key
-    GGK_RSUPER       = 312,      ///< Right "Windows" key
-    GGK_MODE         = 313,      ///< "Alt Gr" key
-    GGK_COMPOSE      = 314,      ///< Multi-key compose key
+    GGK_LSUPER       = 311,      // Left "Windows" key
+    GGK_RSUPER       = 312,      // Right "Windows" key
+    GGK_MODE         = 313,      // "Alt Gr" key
+    GGK_COMPOSE      = 314,      // Multi-key compose key
 
     // Miscellaneous function keys
     GGK_HELP         = 315,
@@ -389,18 +402,20 @@ enum Key {
     GGK_SYSREQ       = 317,
     GGK_BREAK        = 318,
     GGK_MENU         = 319,
-    GGK_POWER        = 320,      ///< Power Macintosh power key
-    GGK_EURO         = 321,      ///< Some european keyboards
-    GGK_UNDO         = 322,      ///< Atari keyboard has Undo
+    GGK_POWER        = 320,      // Power Macintosh power key
+    GGK_EURO         = 321,      // Some european keyboards
+    GGK_UNDO         = 322,      // Atari keyboard has Undo
 
     // Add any other keys here
 
     GGK_LAST
 };
 
-/** Translates a printable key combination from a keypad press to the equivalent main-keyboard press.  \a key is \a only
-    modified if it is a keypad value, and numlock is taken into account.  For instance, with numlock on, a GGK_KP7
-    (which is equal to a nonprintable char value) becomes a GGK_7 (which equals '7', and is printable). */
+/** Translates a printable key combination from a keypad press to the
+    equivalent main-keyboard press.  \a key is \a only modified if it is a
+    keypad value.  NumLock is taken into account.  For instance, with numlock
+    on, a GGK_KP7 (which is equal to a nonprintable char value) becomes a
+    GGK_7 (which equals '7', and is printable). */
 void KeypadKeyToPrintable(Key& key, Flags<ModKey> mod_keys);
 
 

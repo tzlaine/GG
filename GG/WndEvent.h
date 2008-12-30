@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file WndEvent.h
-    Contains the WndEvent class, which is used internally by GG to dispatch
-    event messages to Wnds. */
+/** \file WndEvent.h \brief Contains the WndEvent class, which is used
+    internally by GG to dispatch event messages to Wnds. */
 
 #ifndef _GG_WndEvent_h_
 #define _GG_WndEvent_h_
@@ -61,7 +60,9 @@ extern GG_API const Flags<ModKey> MOD_KEY_SHIFT; ///< Either Shift key.
 extern GG_API const Flags<ModKey> MOD_KEY_ALT;   ///< Either Alt key.
 extern GG_API const Flags<ModKey> MOD_KEY_META;  ///< Either Meta key.
 
-/** Encapsulates a Wnd event that is passed from the singleton GUI to a Wnd.
+/** \brief Encapsulates a Wnd event that is passed from the singleton GUI to a
+    Wnd.
+
     The various types of WndEvents correspond to the various message member
     functions of Wnd, some of which have different parameterizations.  Rather
     than have a less-efficient but more-easily-extensible hierarchy of

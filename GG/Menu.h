@@ -23,10 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Menu.h
-    Contains the MenuItem class, which represents menu data; the MenuBar
-    control class; and the PopupMenu class, which is used to provide immediate
-    context menus. */
+/** \file Menu.h \brief Contains the MenuItem class, which represents menu
+    data; the MenuBar control class; and the PopupMenu class, which is used to
+    provide immediate context menus. */
 
 #ifndef _GG_Menu_h_
 #define _GG_Menu_h_
@@ -39,14 +38,15 @@ namespace GG {
 class Font;
 class TextControl;
 
-/** Serves as a single menu entry in a GG::MenuBar or GG::PopupMenu; may
-    include a submenu.  All legal item_IDs are positive (and so non-zero); any
-    item_ID <= 0 is considered invalid.  Each MenuItem has a signal that is
-    emmitted with its menu_ID member whenever it is selected. Such signals may
-    be emitted even when the menu_ID is 0.  These signals allow each MenuItem
-    to be attached directly to code that should be executed when that item is
-    selected.  Note that the signal is not serialized.  The user must restore
-    it after the MenuItem is reloaded. */
+/** \brief Serves as a single menu entry in a GG::MenuBar or GG::PopupMenu.
+
+    May include a submenu.  All legal item_IDs are positive (and so non-zero);
+    any item_ID <= 0 is considered invalid.  Each MenuItem has a signal that
+    is emmitted with its menu_ID member whenever it is selected. Such signals
+    may be emitted even when the menu_ID is 0.  These signals allow each
+    MenuItem to be attached directly to code that should be executed when that
+    item is selected.  Note that the signal is not serialized.  The user must
+    restore it after the MenuItem is reloaded. */
 struct GG_API MenuItem
 {
     /** \name Signal Types */ ///@{
@@ -105,23 +105,25 @@ private:
 struct SetFontAction;
 struct SetTextColorAction;
 
-/** A menu bar control providing "browse" updates to user navigation of the
-    menu.  Whenever a menu item is selected, a signal is emitted which
-    includes the ID of the selected item.  It is recommended that the user
-    attach each menu item to an appropriate function the will execute the
-    actions associated with the menu item, rather than attaching all the items
-    to a single slot which uses the int ID parameter to deduce the appropriate
-    action.  The int ID parameter is best used when there are several menu
-    items that should execute the same code with different parameters.  For
-    instance, if a submenu contains a list of recently used files, each item
-    that contains a filename might be attached to a Reopen(int) function, and
-    the int can be used to determine which file from the list should be
-    opened. If some action is to be taken as the user browses the menu items,
-    such as displaying some visual cue to indicate the result of chosing a
-    particular menu entry, you can attach a slot function to the
-    BrowsedSignalType object returned by BrowsedSignal.  Whenever the mouse
-    moves to a new menu item, this signal is emitted with the ID number of the
-    item under the cursor.  */
+/** \brief A menu bar control providing "browse" updates to user navigation of
+    the menu.
+
+    Whenever a menu item is selected, a signal is emitted which includes the
+    ID of the selected item.  It is recommended that the user attach each menu
+    item to an appropriate function the will execute the actions associated
+    with the menu item, rather than attaching all the items to a single slot
+    which uses the int ID parameter to deduce the appropriate action.  The int
+    ID parameter is best used when there are several menu items that should
+    execute the same code with different parameters.  For instance, if a
+    submenu contains a list of recently used files, each item that contains a
+    filename might be attached to a Reopen(int) function, and the int can be
+    used to determine which file from the list should be opened. If some
+    action is to be taken as the user browses the menu items, such as
+    displaying some visual cue to indicate the result of chosing a particular
+    menu entry, you can attach a slot function to the BrowsedSignalType object
+    returned by BrowsedSignal.  Whenever the mouse moves to a new menu item,
+    this signal is emitted with the ID number of the item under the
+    cursor.  */
 class GG_API MenuBar : public Control
 {
 public:
@@ -227,24 +229,26 @@ private:
 };
 
 
-/** This is a modal pop-up menu.  PopupMenu gives calling code the abiltiy to
-    create a pop-up menu (usually in response to a right mouse click), allow
-    the pop-up to execute, and then obtain an integer ID representing the
-    selected menu item, by calling MenuID().  If no menu item has been
-    selected, MenuID() returns 0.  Though every MenuItem in a PopupMenu may be
-    attached to a slot directly, it is not recommended.  The intent of this
-    class is to act as a tool to get immediate input from the user, inline.
-    However, attaching MenuItem signals directly to slots will work, and it
-    will certainly be useful in some cases to do this.  Note also that there
-    is no way to serialize a PopupMenu.  This is also because of the intent to
-    use PopupMenus in an immediate, short-lived manner.  If you wish to save
-    an often-used popup menu, simply create the MenuItem that the popup is
-    based on, and save and load that.  Also, if some action is to be taken as
-    the user browses the menu items, such as displaying some visual cue to
-    indicate the result of chosing a particular menu entry, you can attach a
-    slot function to the BrowsedSignalType object returned by BrowsedSignal.
-    Whenever the mouse moves to a new menu item, this signal is emitted with
-    the ID number of the item under the cursor. */
+/** \brief A modal pop-up menu.
+
+    PopupMenu gives calling code the abiltiy to create a pop-up menu (usually
+    in response to a right mouse click), allow the pop-up to execute, and then
+    obtain an integer ID representing the selected menu item, by calling
+    MenuID().  If no menu item has been selected, MenuID() returns 0.  Though
+    every MenuItem in a PopupMenu may be attached to a slot directly, it is
+    not recommended.  The intent of this class is to act as a tool to get
+    immediate input from the user, inline.  However, attaching MenuItem
+    signals directly to slots will work, and it will certainly be useful in
+    some cases to do this.  Note also that there is no way to serialize a
+    PopupMenu.  This is also because of the intent to use PopupMenus in an
+    immediate, short-lived manner.  If you wish to save an often-used popup
+    menu, simply create the MenuItem that the popup is based on, and save and
+    load that.  Also, if some action is to be taken as the user browses the
+    menu items, such as displaying some visual cue to indicate the result of
+    chosing a particular menu entry, you can attach a slot function to the
+    BrowsedSignalType object returned by BrowsedSignal.  Whenever the mouse
+    moves to a new menu item, this signal is emitted with the ID number of the
+    item under the cursor. */
 class GG_API PopupMenu : public Wnd
 {
 public:

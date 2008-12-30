@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file GUI.h
-    Contains GUI class, which encapsulates the state and behavior of the entire GG GUI. */
+/** \file GUI.h \brief Contains GUI class, which encapsulates the state and
+    behavior of the entire GG GUI. */
 
 #ifndef _GG_GUI_h_
 #define _GG_GUI_h_
@@ -50,7 +50,8 @@ class Texture;
 class Timer;
 struct GUIImpl;
 
-/** An abstract base for an GUI framework class to drive the GG GUI.
+/** \brief An abstract base for an GUI framework class to drive the GG GUI.
+
     This class has all the essential services that GG requires: 
     - GUI initialization and emergency exit
     - GG event handling
@@ -194,11 +195,12 @@ public:
     Pt             MouseMovement() const;              ///< returns the relative position of mouse, based on the last mouse motion event
     Flags<ModKey>  ModKeys() const;                    ///< returns the set of modifier keys that are currently depressed, based on the last event
 
-    /** Returns the (begin, end) indices of all the word-tokens in the given
-        string.  This is perhaps an odd place for this function to exist, but
-        the notion of what a "word" is is so application-specific that it was
-        placed here so that users can customize this behavior. */
-    virtual std::set<std::pair<std::size_t, std::size_t> > FindWords(const std::string& str) const;
+    /** Returns the (begin, end) indices of the code points of all the
+        word-tokens in the given string.  This is perhaps an odd place for
+        this function to exist, but the notion of what a "word" is is so
+        application-specific that it was placed here so that users can
+        customize this behavior. */
+    virtual std::set<std::pair<CPSize, CPSize> > FindWords(const std::string& str) const;
 
     const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory
 

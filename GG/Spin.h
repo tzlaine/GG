@@ -23,10 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Spin.h
-    Contains the Spin class template, which provides a spin-box control that
-    allows the user to select a value from a range an arbitrary type (int,
-    double, an enum, etc.). */
+/** \file Spin.h \brief Contains the Spin class template, which provides a
+    spin-box control that allows the user to select a value from a range an
+    arbitrary type (int, double, an enum, etc.). */
 
 #ifndef _GG_Spin_h_
 #define _GG_Spin_h_
@@ -88,26 +87,28 @@ namespace spin_details {
 }
 
 
-/** A spin box control.  This control class is templated so that arbitrary
-    data types can be used with Spin.  All the built-in numeric types are
-    supported by the code here.  If you want to use some other type, such as
-    an enum type, you need to define operator+(), operator-(), and template
-    specializations of spin_details::mod() and spin_details::div().  Spin
-    controls are optionally directly editable by the user.  When the user
-    inputs a value that is not valid for the Spin's parameters (not on a step
-    boundary, or outside the allowed range), the input gets locked to the
-    nearest valid value.  The user is responsible for selecting a min, max,
-    and step size that make sense.  For instance, min = 0, max = 4, step = 3
-    may produce odd results if the user increments all the way to the top,
-    then back down, to produce the sequence 0, 3, 4, 1, 0.  To avoid this,
-    choose the values so that (max - min) mod step == 0.  It is possible to
-    provide custom buttons for a Spin to use; if you choose to add custom
-    buttons, make sure they look alright at arbitrary sizes, and note that
-    Spin buttons are always H wide by H/2 tall, where H is the height of the
-    Spin, less the thickness of the Spin's border.  Note that if you want Spin
-    controls to be automatically serialized in your application, you need to
-    export each instantiation of Spin<> yourself (e.g. Spin<int> or
-    Spin<double>).  See the boost serialization documentation for details. */
+/** \brief A spin box control.
+
+    This control class is templated so that arbitrary data types can be used
+    with Spin.  All the built-in numeric types are supported by the code here.
+    If you want to use some other type, such as an enum type, you need to
+    define operator+(), operator-(), and template specializations of
+    spin_details::mod() and spin_details::div().  Spin controls are optionally
+    directly editable by the user.  When the user inputs a value that is not
+    valid for the Spin's parameters (not on a step boundary, or outside the
+    allowed range), the input gets locked to the nearest valid value.  The
+    user is responsible for selecting a min, max, and step size that make
+    sense.  For instance, min = 0, max = 4, step = 3 may produce odd results
+    if the user increments all the way to the top, then back down, to produce
+    the sequence 0, 3, 4, 1, 0.  To avoid this, choose the values so that (max
+    - min) mod step == 0.  It is possible to provide custom buttons for a Spin
+    to use; if you choose to add custom buttons, make sure they look alright
+    at arbitrary sizes, and note that Spin buttons are always H wide by H/2
+    tall, where H is the height of the Spin, less the thickness of the Spin's
+    border.  Note that if you want Spin controls to be automatically
+    serialized in your application, you need to export each instantiation of
+    Spin<> yourself (e.g. Spin<int> or Spin<double>).  See the boost
+    serialization documentation for details. */
 template <class T>
 class Spin : public Control
 {

@@ -23,8 +23,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file FileDlg.h
-    Contains the standard GG file dialog. */
+/** \file FileDlg.h \brief Contains the standard GG file dialog. */
 
 #ifndef _GG_FileDlg_h_
 #define _GG_FileDlg_h_
@@ -41,16 +40,18 @@ class Edit;
 class Button;
 class Font;
 
-/** The default file open/save dialog box.  This dialog, like all the common
-    GG dialogs, is modal.  It asks the user for one or more filenames, which
-    the caller may retrieve with a call to Result() after the dialog is
-    closed.  Note that all strings displayed during the run of the FileDlg are
-    customizable.  Sometimes, the FileDlg will pop up a message box (a
-    ThreeButtonDlg) and notify the user of something or ask for input.  These
-    message strings are also customizable.  Some of these strings include the
-    filename as part of the message.  When replacing these strings with your
-    own, you need to include the placement of the filename in the message with
-    the character sequence "%1%" (see boost.format for details). */
+/** \brief The default file open/save dialog box.
+
+    This dialog, like all the common GG dialogs, is modal.  It asks the user
+    for one or more filenames, which the caller may retrieve with a call to
+    Result() after the dialog is closed.  Note that all strings displayed
+    during the run of the FileDlg are customizable.  Sometimes, the FileDlg
+    will pop up a message box (a ThreeButtonDlg) and notify the user of
+    something or ask for input.  These message strings are also customizable.
+    Some of these strings include the filename as part of the message.  When
+    replacing these strings with your own, you need to include the placement
+    of the filename in the message with the character sequence "%1%" (see
+    boost.format for details). */
 class GG_API FileDlg : public Wnd
 {
 public:

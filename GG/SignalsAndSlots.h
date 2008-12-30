@@ -39,9 +39,8 @@
 #include <GG/Signal7.h>
 #include <GG/Signal8.h>
 
-/** \file SignalsAndSlots.h
-    Contains the Connect() functions, which simplify the connection of boost
-    signals and slots. */
+/** \file SignalsAndSlots.h \brief Contains the Connect() functions, which
+    simplify the connection of boost signals and slots. */
 
 namespace GG {
 

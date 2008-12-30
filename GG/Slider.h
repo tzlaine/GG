@@ -23,9 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Slider.h
-    Contains the Slider class, which provides a slider control that allows the
-    user to select a value from a range if integers. */
+/** \file Slider.h \brief Contains the Slider class, which provides a slider
+    control that allows the user to select a value from a range if
+    integers. */
 
 #ifndef _GG_Slider_h_
 #define _GG_Slider_h_
@@ -40,12 +40,14 @@ namespace GG {
 class Button;
 class WndEvent;
 
-/** A slider control.  This control allows the user to drag a tab to a desired
-    setting; it is somewhat like a Scroll.  Sliders can be either vertical or
-    horizontal, but cannot switch between the two.  Unlike vertical Scrolls,
-    whose values increase downward, vertical Sliders increase upward by
-    default.  Note that it is acceptible to define a range that increases from
-    min to max, or one that decreases from min to max; both are legal. */
+/** \brief A slider control.
+
+    This control allows the user to drag a tab to a desired setting; it is
+    somewhat like a Scroll.  Sliders can be either vertical or horizontal, but
+    cannot switch between the two.  Unlike vertical Scrolls, whose values
+    increase downward, vertical Sliders increase upward by default.  Note that
+    it is acceptible to define a range that increases from min to max, or one
+    that decreases from min to max; both are legal. */
 class GG_API Slider : public Control
 {
 public:

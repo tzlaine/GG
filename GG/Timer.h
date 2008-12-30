@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Timer.h
-    Contains the Timer class, which allows Wnds to receive regular
-    notifications of the passage of time. */
+/** \file Timer.h \brief Contains the Timer class, which allows Wnds to
+    receive regular notifications of the passage of time. */
 
 #ifndef _GG_Timer_h_
 #define _GG_Timer_h_
@@ -39,13 +38,14 @@ namespace GG {
 
 class Wnd;
 
-/** Timer provides a means for one or more Wnds to receive periodic
-    notifications of the passage of time.  The rate at which the Timer fires
-    is not realtime.  That is, there are no guarantees on the interval between
-    firings other than that a minimum of Interval() ms will have elapsed.
-    Note that Timers do not rely on Boost signals to propagate firing
-    messages, so a Timers's Wnd connections will survive a
-    serialization-deserialization cycle. */
+/** \brief Timer provides a means for one or more Wnds to receive periodic
+    notifications of the passage of time.
+
+    The rate at which the Timer fires is not realtime.  That is, there are no
+    guarantees on the interval between firings other than that a minimum of
+    Interval() ms will have elapsed.  Note that Timers do not rely on Boost
+    signals to propagate firing messages, so a Timers's Wnd connections will
+    survive a serialization-deserialization cycle. */
 class GG_API Timer
 {
 public:

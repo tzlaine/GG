@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file Cursor.h
-    Contains Cursor class, which encapsulates the rendering of the input cursor. */
+/** \file Cursor.h \brief Contains Cursor class, which encapsulates the
+    rendering of the input cursor. */
 
 #ifndef _GG_Cursor_h_
 #define _GG_Cursor_h_
@@ -38,10 +38,11 @@ namespace GG {
 
 class Texture;
 
-/** Cursor is the base class for GUI-renderable cursors.  A Cursor can be set
-    in the GUI and will be rendered if GUI's RenderCursor() member returns
-    true.  Note that it may be necessary to disable the underlying platform's
-    cursor . */
+/** \brief Cursor is the base class for GUI-renderable cursors.
+
+    A Cursor can be set in the GUI and will be rendered if GUI's
+    RenderCursor() member returns true.  Note that it may be necessary to
+    disable the underlying platform's cursor . */
 class GG_API Cursor
 {
 public:
@@ -62,9 +63,11 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** TextureCursor is a very simple subclass of Cursor.  It renders a texture
-    such that the point within the texture that represents the hotspot of the
-    cursor is rendered at the click-point of the cursor. */
+/** \brief TextureCursor is a very simple subclass of Cursor.
+
+    It renders a texture such that the point within the texture that
+    represents the hotspot of the cursor is rendered at the click-point of the
+    cursor. */
 class GG_API TextureCursor :
     public Cursor
 {

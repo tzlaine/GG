@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file OgreGUI.h
-    Contains OgreGUI, the input driver for using Ogre with GG. */
+/** \file OgreGUI.h \brief Contains OgreGUI, the input driver for using Ogre
+    with GG. */
 
 #ifndef _GG_OgreGUI_h_ 
 #define _GG_OgreGUI_h_
@@ -54,9 +54,9 @@ namespace Ogre {
 
 namespace GG {
 
-/** This is an abstract singleton class that represents the GUI framework of an
-    Ogre OpenGL application.
-    <p>
+/** \brief This is an abstract singleton class that represents the GUI
+    framework of an Ogre OpenGL application.
+
     Usage:<br>
     Any application including an object of this class should declare that object
     as a local variable in main(). The name of this variable will herein be

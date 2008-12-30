@@ -23,8 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file PluginInterface.h
-    Contains the PluginInterface class, an interface to custom-control plugins that allow runtime control selection. */
+/** \file PluginInterface.h \brief Contains the PluginInterface class, an
+    interface to custom-control plugins that allow runtime control
+    selection. */
 
 #ifndef _GG_PluginInterface_h_
 #define _GG_PluginInterface_h_
@@ -47,20 +48,22 @@ namespace boost { namespace archive {
 
 namespace GG {
 
-/** The interface to custom-control plugins.  This class is used to access
-    derived GG controls and dialogs that are unknown until runtime, but are
-    available for dynamic loading in shared libraries/DLLs.  The interface
-    basically allows you to create custom controls and dialogs (anything a
-    StyleFactory can produce) from a dynamic-link library, which in turn
-    allows you to change the styles of the controls in an application without
-    recompiling, or even relinking.  While the interface is in an unloaded
-    state, the functions in the interface are all null, and calling any of
-    them will crash your app.  Once a plugin has been loaded, all the
-    functions in the interface should be valid (if the plugin author did
-    everything correctly).  The plugin interface also provides SaveWnd() and
-    LoadWnd() methods to serialize all types in the GG::Wnd hierarchy.  Note
-    that includes all the original GG types, not just the ones added by the
-    plugin; if Wnd is not serializable, none of its descendents are either. */
+/** \brief The interface to custom-control plugins.
+
+    This class is used to access derived GG controls and dialogs that are
+    unknown until runtime, but are available for dynamic loading in shared
+    libraries/DLLs.  The interface basically allows you to create custom
+    controls and dialogs (anything a StyleFactory can produce) from a
+    dynamic-link library, which in turn allows you to change the styles of the
+    controls in an application without recompiling, or even relinking.  While
+    the interface is in an unloaded state, the functions in the interface are
+    all null, and calling any of them will crash your app.  Once a plugin has
+    been loaded, all the functions in the interface should be valid (if the
+    plugin author did everything correctly).  The plugin interface also
+    provides SaveWnd() and LoadWnd() methods to serialize all types in the
+    GG::Wnd hierarchy.  Note that includes all the original GG types, not just
+    the ones added by the plugin; if Wnd is not serializable, none of its
+    descendents are either. */
 class GG_API PluginInterface
 {
 private:
@@ -128,7 +131,9 @@ private:
     boost::archive::xml_iarchive* m_in_archive;
 };
 
-/** This singleton class is essentially a very thin wrapper around a map of
+/** \brief A singleton that loads and stores textures for use by GG.
+
+    This class is essentially a very thin wrapper around a map of
     PluginInterface smart pointers, keyed on std::string plugin names.  The
     user need only request a plugin through GetPlugin(); if the plugin is not
     already resident, it will be loaded.*/

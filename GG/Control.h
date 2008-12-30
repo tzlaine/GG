@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Control.h
-    Contains the Control class, the base class for all GG controls. */
+/** \file Control.h \brief Contains the Control class, the base class for all
+    GG controls. */
 
 #ifndef _GG_Control_h_
 #define _GG_Control_h_
@@ -34,14 +34,15 @@
 
 namespace GG {
 
-/** This is an abstract base class for all control classes.  Each control has
-    (like all windows) coordinates offset from the upper-left corner of it's
-    parent's client area.  All controls may be disabled.  By default, a
-    Control passes keyboard input to its parent Wnd.  Any class derived from
-    Control should do the same with any keyboard input it does not need for
-    its own use.  For instance, an Edit control needs to know about arrow key
-    keyboard input, but it should pass other key presses like 'ESC' to its
-    parent.*/
+/** \brief An abstract base class for all control classes.
+
+    Each control has (like all windows) coordinates offset from the upper-left
+    corner of it's parent's client area.  All controls may be disabled.  By
+    default, a Control passes keyboard input to its parent Wnd.  Any class
+    derived from Control should do the same with any keyboard input it does
+    not need for its own use.  For instance, an Edit control needs to know
+    about arrow key keyboard input, but it should pass other key presses like
+    'ESC' to its parent.*/
 class GG_API Control : public Wnd
 {
 public:

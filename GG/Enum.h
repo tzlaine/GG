@@ -23,9 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file Enum.h
-    Contains the utility classes and macros that allow for easy conversion to and from an enum 
-    value and its textual representation. */
+/** \file Enum.h \brief Contains the utility classes and macros that allow for
+    easy conversion to and from an enum value and its textual
+    representation. */
 
 #ifndef _GG_Enum_h_
 #define _GG_Enum_h_
@@ -38,7 +38,7 @@
 
 namespace GG {
 
-/** A base type for all templated EnumMap types. */
+/** \brief A base type for all templated EnumMap types. */
 struct EnumMapBase
 {
     BOOST_STATIC_CONSTANT(long int, BAD_VALUE = -5000000);
@@ -54,8 +54,11 @@ struct EnumMapBase
     virtual long int FromString (const std::string& str) const = 0;
 };
 
-/** A mapping between the values of an enum and the string representations of the enum's values.  A specialization
-    should be declared for each enumerated type for which an EnumMap is desired. */
+/** \brief A mapping between the values of an enum and the string
+    representations of the enum's values.
+
+    A specialization should be declared for each enumerated type for which an
+    EnumMap is desired. */
 template <class E> struct EnumMap : EnumMapBase
 {
     virtual ~EnumMap() {} ///< Virtual dtor.
@@ -64,16 +67,18 @@ template <class E> struct EnumMap : EnumMapBase
     virtual long int FromString (const std::string&) const {return 0;}
 };
 
-/** Returns a map of the values of an enum to the corresponding string representation of that value. */
+/** Returns a map of the values of an enum to the corresponding string
+    representation of that value. */
 template <class E> EnumMap<E> GetEnumMap()
 {
     static EnumMap<E> enum_map;
     return enum_map;
 }
 
-/** Declares the beginning of a template specialization of EnumMap, for enumerated type \a name.
-    Text-to-enum conversion is one of those places that calls for macro magic.  To use these for 
-    e.g. "enum Foo {FOO, BAR};", write: 
+/** Declares the beginning of a template specialization of EnumMap, for
+    enumerated type \a name.  Text-to-enum conversion is one of those places
+    that calls for macro magic.  To use these for e.g. "enum Foo {FOO, BAR};",
+    write:
     \verbatim 
     GG_ENUM_MAP_BEGIN( Foo ) 
         GG_ENUM_MAP_INSERT( FOO )
@@ -88,10 +93,12 @@ template <> struct EnumMap< name > : EnumMapBase                        \
     EnumMap ()                                                          \
     {
 
-/** Adds a single value from an enumerated type, and its corresponding string representation, to an EnumMap. */
+/** Adds a single value from an enumerated type, and its corresponding string
+    representation, to an EnumMap. */
 #define GG_ENUM_MAP_INSERT( value ) m_map[ value ] = #value ;
 
-/** Declares the end of a template specialization of EnumMap, for enumerated type \a name. */
+/** Declares the end of a template specialization of EnumMap, for enumerated
+    type \a name. */
 #define GG_ENUM_MAP_END                                                 \
     }                                                                   \
     virtual const std::string& FromEnum(long int i) const               \
@@ -114,7 +121,8 @@ template <> struct EnumMap< name > : EnumMapBase                        \
     MapType m_map;                                                      \
 };
 
-/** Defines an input stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
+/** Defines an input stream operator for enumerated type \a name.  Note that
+    the generated function requires that EnumMap<name> be defined. */
 #define GG_ENUM_STREAM_IN( name )                                       \
     inline std::istream& operator>>(std::istream& is, name& v)          \
     {                                                                   \
@@ -124,7 +132,8 @@ template <> struct EnumMap< name > : EnumMapBase                        \
         return is;                                                      \
     }
 
-/** Defines an output stream operator for enumerated type \a name.  Note that the generated function requires that EnumMap<name> be defined. */
+/** Defines an output stream operator for enumerated type \a name.  Note that
+    the generated function requires that EnumMap<name> be defined. */
 #define GG_ENUM_STREAM_OUT( name )                                      \
     inline std::ostream& operator<<(std::ostream& os, name v)           \
     {                                                                   \

@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Edit.h
-    Contains the Edit class, a single-line editable text-box control. */
+/** \file Edit.h \brief Contains the Edit class, a single-line editable
+    text-box control. */
 
 #ifndef _GG_Edit_h_
 #define _GG_Edit_h_
@@ -34,11 +34,11 @@
 
 namespace GG {
 
-/** This is a single-line edit box control.  It inherits from TextControl, so
-    it can be treated in many ways very similarly to a std::string.  Note that
-    the constructor determines the height of the control based on the height
-    of the font used and the value of the constant PIXEL_MARGIN.  There are
-    two types of signals emitted by an Edit control.  The first is
+/** \brief This is a single-line edit box control.
+
+    Note that the constructor determines the height of the control based on
+    the height of the font used and the value of the constant PIXEL_MARGIN.
+    There are two types of signals emitted by an Edit control.  The first is
     EditedSignal; this is emitted every time the contents of the Edit change.
     Sometimes, however, you don't want that.  For instance, say you want to
     keep the value of the text in the Edit to between (numerical values) 100
@@ -47,64 +47,85 @@ namespace GG {
     you will receive notification that the Edit says "00" (an invalid value),
     when that is just a temporary value you don't care about.  In such
     situations, the other signal, FocusUpdateSignal, should be useful.  It is
-    only emitted when the Edit is losing the input focus and the contents have
-    changed since it gained the input focus.  So you would only receive a
-    single update, namely "100", which is a valid number for that control, and
-    you would receive it only when it is certain that the user is finished
-    editing the text (when the focus changes).  Note that both signals may be
-    used at the same time, if desired.
-
-    <br>Implementation note: All character index values taken as arguments and
-    returned by member functions of this class are considered to be indices of
-    code points (characters as they appear in the control), not raw characters
-    (individual characters in the underlying UTF-8 encoded string).  There are
-    two exceptions to this, however.  StringIndexOf() and StringRangeOf()
-    return indices into the underlying UTF-8 encoded string. */
+    only emitted when the Edit has changed and is losing focus, or one of
+    enter or return is pressed.  So you would only receive a single update,
+    namely "100", which is a valid number for that control, and you would
+    receive it only when it is certain that the user is finished editing the
+    text (when the focus changes).  Note that both signals may be used at the
+    same time, if desired. */
 class GG_API Edit : public TextControl
 {
 public:
     /** \name Signal Types */ ///@{
-    typedef boost::signal<void (const std::string&)> EditedSignalType; ///< emitted whenever the contents of the Edit are altered (keypresses, deletes, etc.); provides the new contents of the Edit
-    typedef boost::signal<void (const std::string&)> FocusUpdateSignalType; ///< emitted whenever the Edit loses the input focus, and its contents have changed since it gained the focus; provides the new contents of the Edit
+    /** Emitted whenever the text of the Edit are altered (keypresses,
+        deletes, etc.); provides the new text of the Edit. */
+    typedef boost::signal<void (const std::string&)> EditedSignalType;
+
+    /** Emitted whenever the Edit has changed and has lost the input focus, or
+        one of enter or return has been pressed; provides the new text of the
+        Edit. */
+    typedef boost::signal<void (const std::string&)> FocusUpdateSignalType;
     //@}
 
     /** \name Slot Types */ ///@{
-    typedef EditedSignalType::slot_type       EditedSlotType;      ///< type of functor(s) invoked on a EditedSignalType
-    typedef FocusUpdateSignalType::slot_type  FocusUpdateSlotType; ///< type of functor(s) invoked on a FocusUpdateSignalType
+    /** Type of functor(s) invoked on a EditedSignalType. */
+    typedef EditedSignalType::slot_type EditedSlotType;
+
+    /** Type of functor(s) invoked on a FocusUpdateSignalType. */
+    typedef FocusUpdateSignalType::slot_type FocusUpdateSlotType;
     //@}
 
     /** \name Structors */ ///@{
-    Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE); ///< ctor that does not required height. Height is determined from the font and point size used.
+    /** Ctor. Height is determined from the font and point size used. */
+    Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt     MinUsableSize() const;
-    virtual Pt     ClientUpperLeft() const;
-    virtual Pt     ClientLowerRight() const;
+    virtual Pt MinUsableSize() const;
+    virtual Pt ClientUpperLeft() const;
+    virtual Pt ClientLowerRight() const;
 
-    const std::pair<int, int>&
-                   CursorPosn() const;         ///< returns the current position of the cursor (first selected character to the last + 1 selected one)
-    Clr            InteriorColor() const;      ///< returns the interior color of the control
-    Clr            HiliteColor() const;        ///< returns the color used to render hiliting around selected text
-    Clr            SelectedTextColor() const;  ///< returns the color used to render selected text
+    /** Returns the current position of the cursor (first selected character
+        to one past the last selected one). */
+    const std::pair<CPSize, CPSize>& CursorPosn() const;
 
-    mutable EditedSignalType      EditedSignal;       ///< returns the edited signal object for this Edit
-    mutable FocusUpdateSignalType FocusUpdateSignal;  ///< returns the focus update signal object for this Edit
+    /** Returns the color used to render the iterior of the control. */
+    Clr InteriorColor() const;
+
+    /** Returns the color used to render hiliting around selected text. */
+    Clr HiliteColor() const;
+
+    /** Returns the color used to render selected text. */
+    Clr SelectedTextColor() const;
+
+    /** The edited signal object for this Edit. */
+    mutable EditedSignalType EditedSignal;
+
+    /** The focus update signal object for this Edit. */
+    mutable FocusUpdateSignalType FocusUpdateSignal;
     //@}
 
     /** \name Mutators */ ///@{
-    virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
-    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void   GainingFocus();
-    virtual void   LosingFocus();
+    virtual void Render();
+    virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+    virtual void LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void GainingFocus();
+    virtual void LosingFocus();
 
-    virtual void   SetColor(Clr c);
-    void           SetInteriorColor(Clr c);     ///< sets the interior color of the control
-    void           SetHiliteColor(Clr c);       ///< sets the color used to render hiliting around selected text
-    void           SetSelectedTextColor(Clr c); ///< sets the color used to render selected text
+    virtual void SetColor(Clr c);
+
+    /** Sets the interior color of the control. */
+    void SetInteriorColor(Clr c);
+
+    /** Sets the color used to render hiliting around selected text. */
+    void SetHiliteColor(Clr c);
+
+    /** Sets the color used to render selected text. */
+    void SetSelectedTextColor(Clr c);
 
     /** Selects all text in the given range.  When \a from == \a to, this
         function just places the caret at \a from.  Note that it is legal to
@@ -113,88 +134,106 @@ public:
         from simulates one from right to left.  The direction of the simulated
         drag affects which part of the text is visible at the end of the
         function call. */
-    virtual void   SelectRange(int from, int to);
+    virtual void SelectRange(CPSize from, CPSize to);
 
-    /** selects all text in the entire control.  This function leaves the beginning of the text in view; see SelectRange(). */
-    virtual void   SelectAll();
+    /** Selects all text in the entire control.  This function leaves the
+        beginning of the text in view; see SelectRange(). */
+    virtual void SelectAll();
 
-    virtual void   SetText(const std::string& str);
+    virtual void SetText(const std::string& str);
 
-    virtual void   DefineAttributes(WndEditor* editor);
+    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
     /** \name Structors */ ///@{
-    Edit(); ///< default ctor
+    Edit(); ///< Default ctor.
     //@}
 
     /** \name Accessors */ ///@{
-    virtual bool            MultiSelected() const;          ///< returns true if >= 1 characters selected
-    int                     FirstCharShown() const;         ///< returns the index of the first character visible in the Edit
-    bool                    RecentlyEdited() const;         ///< returns true iff the contents have been changed since the last time the focus was gained
-    int                     CharIndexOf(X x) const;    ///< returns index into WindowText() of the character \a x pixels from left edge of visible portion of string
-    X                       FirstCharOffset() const;        ///< returns the pixel distance from the beginning of the string to just before the first visible character
-    X                       ScreenPosOfChar(int idx) const; ///< returns the screen x-coordinate of the left side of the character at index \a idx in WindowText()
-    int                     LastVisibleChar() const;        ///< actually, this returns the last + 1 visible char, for use in "for (i=0;i<last_vis_char;++i)", etc.
-    unsigned int            LastButtonDownTime() const;     ///< returns the value of GUI::Ticks() at the last left button press
+    /** Returns true if >= 1 characters selected. */
+    virtual bool MultiSelected() const;
 
-    /** Returns index into WindowText() of the start of the UTF-8 sequence for
-        the code point at \a char_idx, using \a line_data instead of the
-        current line data, if it is supplied.  Not range-checked. */
-    int     StringIndexOf(int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+    /** Returns the index of the first character visible in the Edit. */
+    CPSize FirstCharShown() const;
 
-    /** Returns range of indices into WindowText() of the UTF-8 sequence for
-        the code point at \a char_idx, using \a line_data instead of the
-        current line data, if it is supplied.  Not range-checked. */
-    std::pair<int, int>
-            StringRangeOf(int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+    /** Returns true iff the contents have been changed since the last time
+        the focus was gained. */
+    bool RecentlyEdited() const;
 
-    bool                    InDoubleButtonDownMode() const; ///< returns true iff the button is still down after being pressed twice within GUI::DoubleClickInterval() ticks
-    std::pair<int, int>     DoubleButtonDownCursorPos() const; ///< returns the cursor position at the time of the most recent double-button-down
+    /** Returns the index of the code point \a x pixels from left edge of
+        visible portion of string. */
+    CPSize CharIndexOf(X x) const;
+
+    /** Returns the distance from the beginning of the string to just before
+        the first visible character. */
+    X FirstCharOffset() const;
+
+    /** Returns the screen x-coordinate of the left side of the code point at
+        index \a idx. */
+    X ScreenPosOfChar(CPSize idx) const;
+
+    /** Returns the last visible char (\a not one past the last visible
+        char). */
+    CPSize LastVisibleChar() const;
+
+    /** Returns the value of GUI::Ticks() at the last left button press. */
+    unsigned int LastButtonDownTime() const;
+
+    /** Returns true iff the button is still down after being pressed twice
+        within GUI::DoubleClickInterval() ticks. */
+    bool InDoubleButtonDownMode() const;
+
+    /** Returns the cursor position at the time of the most recent
+        double-button-down. */
+    std::pair<CPSize, CPSize> DoubleButtonDownCursorPos() const;
     //@}
 
     /** \name Mutators */ ///@{
     /** Does a bit more than its name suggests.  Records the current time, and
         if it's within GUI::DoubleClickInterval() of the last button down
-        time, returns the indices into WindowText() that delimit the word
-        around index \a char_index.  If not within the time limit, or if no
-        such word exists, the returned range will be empty (its .first and
-        .second members will be equal).  This function should be called in
+        time, returns the code point indices that delimit the word around
+        index \a char_index.  If not within the time limit, or if no such word
+        exists, the returned range will be empty (its .first and .second
+        members will be equal).  This function should be called in
         LButtonDown() overrides. */
-    std::pair<int, int>     GetDoubleButtonDownWordIndices(int char_index);
+    std::pair<CPSize, CPSize> GetDoubleButtonDownWordIndices(CPSize char_index);
 
-    /** Returns the indices into WindowText() that delimit the word around
-        index \a char_index.  If no such word exists, the returned range will
-        be empty (its .first and .second members will be equal).  This
-        function should be called in LDrag() overrides, when
-        InDoubleButtonDownMode() is true. */
-    std::pair<int, int>     GetDoubleButtonDownDragWordIndices(int char_index);
+    /** Returns the code point indices that delimit the word around index \a
+        char_index.  If no such word exists, the returned range will be empty
+        (its .first and .second members will be equal).  This function should
+        be called in LDrag() overrides when InDoubleButtonDownMode() is
+        true. */
+    std::pair<CPSize, CPSize> GetDoubleButtonDownDragWordIndices(CPSize char_index);
 
-    /** Sets the value of InDoubleButtonDownMode() to false.  This should be called in LClick() overrides. */
-    void                    ClearDoubleButtonDownMode();
+    /** Sets the value of InDoubleButtonDownMode() to false.  This should be
+        called in LClick() and LButtonUp() overrides. */
+    void ClearDoubleButtonDownMode();
     //@}
 
-    static const int PIXEL_MARGIN; ///< the number of pixels to leave between the text and the control's frame
+    /** The number of pixels to leave between the text and the control's
+        frame. */
+    static const int PIXEL_MARGIN;
 
 private:
-    void         ClearSelected();       ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
-    void         AdjustView();          ///< makes sure the caret ends up in view after an arbitrary move
+    void ClearSelected(); ///< Clears (deletes) selected characters, as when a del, backspace, or character is entered
+    void AdjustView();    ///< Makes sure the caret ends up in view after an arbitrary move
 
     /** If .first == .second, the caret is drawn before character at
         m_cursor_pos.first; otherwise, the range is selected (when range is
         selected, caret is considered at .second) */
-    std::pair<int, int> m_cursor_pos;
+    std::pair<CPSize, CPSize> m_cursor_pos;
 
-    int                 m_first_char_shown; ///< index of the first character on the left end of the control's viewable area
-    Clr                 m_int_color;        ///< color of background inside text box
-    Clr                 m_hilite_color;     ///< color behind selected range
-    Clr                 m_sel_text_color;   ///< color of selected text
+    CPSize       m_first_char_shown; ///< Index of the first character on the left end of the control's viewable area
+    Clr          m_int_color;        ///< Color of background inside text box
+    Clr          m_hilite_color;     ///< Color behind selected range
+    Clr          m_sel_text_color;   ///< Color of selected text
 
-    bool                m_recently_edited;  ///< the contents when the focus was last gained
+    bool         m_recently_edited;  ///< The contents when the focus was last gained
 
-    unsigned int        m_last_button_down_time;
-    bool                m_in_double_click_mode;
-    std::pair<int, int> m_double_click_cursor_pos;
+    unsigned int m_last_button_down_time;
+    bool         m_in_double_click_mode;
+    std::pair<CPSize, CPSize> m_double_click_cursor_pos;
 
     friend class boost::serialization::access;
     template <class Archive>

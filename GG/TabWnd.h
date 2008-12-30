@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file TabWnd.h
-    Contains the TabWnd class, which encapsulates a set of tabbed windows. */
+/** \file TabWnd.h \brief Contains the TabWnd class, which encapsulates a set
+    of tabbed windows. */
 
 #ifndef _GG_TabWnd_h_
 #define _GG_TabWnd_h_
@@ -37,8 +37,8 @@ namespace GG {
 class TabBar;
 class WndEvent;
 
-/** Contains several Wnds and a TabBar, and only displays the Wnd currently
-    selected in the TabBar. */
+/** \brief Contains several Wnds and a TabBar, and only displays the Wnd
+    currently selected in the TabBar. */
 class GG_API TabWnd : public Wnd
 {
 public:
@@ -124,9 +124,11 @@ private:
 };
 
 
-/** Contains a sequence of buttons (hereafter "tabs") that act together in a
-    RadioButtonGroup.  This class is intended to be used to select the current
-    Wnd in a TabWnd. */
+/** \brief Contains a sequence of buttons (hereafter "tabs") that act together
+    in a RadioButtonGroup.
+
+    This class is intended to be used to select the current Wnd in a
+    TabWnd. */
 class GG_API TabBar : public Control
 {
 public:

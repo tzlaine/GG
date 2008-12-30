@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Layout.h
-    Contains the Layout class, which is used to size and align GG windows. */
+/** \file Layout.h \brief Contains the Layout class, which is used to size and
+    align GG windows. */
 
 #ifndef _GG_Layout_h_
 #define _GG_Layout_h_
@@ -39,7 +39,8 @@ namespace GG {
 
 struct SetMarginAction;
 
-/** An invisible Wnd subclass whose only purpose is to arrange its child Wnds.
+/** \brief An invisible Wnd subclass that arranges its child Wnds.
+
     A Layout consists of a grid of cells.  A cell may have at most one Wnd
     covering it, but need not contain a Wnd at all.  A Wnd may cover any
     rectangular region of cells, though they will commonly only cover one.

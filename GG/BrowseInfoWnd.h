@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file BrowseInfoWnd.h
-    Contains the BrowseInfoWnd class, and its subclass TextBoxBrowseInfoWnd.  These classes display info on another
+/** \file BrowseInfoWnd.h \brief Contains the BrowseInfoWnd class, and its
+    subclass TextBoxBrowseInfoWnd.  These classes display info on another
     window. */
 
 #ifndef _GG_BrowseInfoWnd_h_
@@ -41,12 +41,13 @@ namespace GG {
 class Font;
 class TextControl;
 
-/** The abstract base class for all browse-info display windows.  Each frame
-    that a BrowseInfoWnd is displayed, its Update() method is called.  The
-    Wnd* parameter passed in this call is the window about which the
-    BrowseInfoWnd is displaying info (the target Wnd); the BrowseInfoWnd can
-    collect whatever information it requires from the target Wnd before it is
-    rendered.  Note that a BrowseInfoWnd should never be CLICKABLE. */
+/** \brief The abstract base class for all browse-info display windows.
+
+    Each frame that a BrowseInfoWnd is displayed, its Update() method is
+    called.  The Wnd* parameter passed in this call is the window about which
+    the BrowseInfoWnd is displaying info (the target Wnd); the BrowseInfoWnd
+    can collect whatever information it requires from the target Wnd before it
+    is rendered.  Note that a BrowseInfoWnd should never be CLICKABLE. */
 class GG_API BrowseInfoWnd : public Wnd
 {
 public:
@@ -90,10 +91,12 @@ private:
 };
 
 
-/** A subclass of BrowseInfoWnd that displays text in a box, optionally with a
-    border.  The typical use case is for TextBoxBrowseInfoWnd to get the
-    appropriate text for the current mode by calling BrowseInfoText() on its
-    target Wnd.  It may also be used to display static text, by setting
+/** \brief A subclass of BrowseInfoWnd that displays text in a box, optionally
+    with a border.
+
+    The typical use case is for TextBoxBrowseInfoWnd to get the appropriate
+    text for the current mode by calling BrowseInfoText() on its target Wnd.
+    It may also be used to display static text, by setting
     SetTextFromTarget(false) and setting the desired text with SetText(). */
 class GG_API TextBoxBrowseInfoWnd : public BrowseInfoWnd
 {

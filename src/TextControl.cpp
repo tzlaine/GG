@@ -149,7 +149,7 @@ TextControl::operator const std::string&() const
 bool TextControl::Empty() const
 { return m_text.empty(); }
 
-int TextControl::Length() const
+CPSize TextControl::Length() const
 { return m_code_points; }
 
 Pt TextControl::TextUpperLeft() const
@@ -178,7 +178,7 @@ void TextControl::SetText(const std::string& str)
     m_text = str;
     if (m_font) {
         Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
-        m_code_points = utf8::distance(m_text.begin(), m_text.end());
+        m_code_points = CPSize(utf8::distance(m_text.begin(), m_text.end()));
         m_text_ul = Pt();
         m_text_lr = text_sz;
         AdjustMinimumSize();
@@ -224,30 +224,59 @@ void TextControl::SetMinSize(bool b)
     AdjustMinimumSize();
 }
 
-void TextControl::operator+=(const std::string& str)
-{ SetText(m_text + str); }
+void TextControl::operator+=(const std::string& s)
+{ SetText(m_text + s); }
 
-void TextControl::operator+=(char ch)
-{ SetText(m_text + ch); }
+void TextControl::operator+=(char c)
+{
+    if (!detail::ValidUTFChar<char>()(c))
+        throw utf8::invalid_utf8(c);
+    SetText(m_text + c);
+}
 
 void TextControl::Clear()
 { SetText(""); }
 
-void TextControl::Insert(int pos, char ch)
+void TextControl::Insert(CPSize pos, char c)
 {
-    m_text.insert(pos, 1, ch);
+    std::size_t line;
+    boost::tie(line, pos) = LinePositionOf(pos, m_line_data);
+    Insert(line, pos, c);
+}
+
+void TextControl::Insert(CPSize pos, const std::string& s)
+{
+    std::size_t line;
+    boost::tie(line, pos) = LinePositionOf(pos, m_line_data);
+    Insert(line, pos, s);
+}
+
+void TextControl::Erase(CPSize pos, CPSize num/* = CP1*/)
+{
+    std::size_t line;
+    boost::tie(line, pos) = LinePositionOf(pos, m_line_data);
+    Erase(line, pos, num);
+}
+
+void TextControl::Insert(std::size_t line, CPSize pos, char c)
+{
+    if (!detail::ValidUTFChar<char>()(c))
+        throw utf8::invalid_utf8(c);
+    m_text.insert(Value(StringIndexOf(line, pos, m_line_data)), 1, c);
     SetText(m_text);
 }
 
-void TextControl::Insert(int pos, const std::string& s)
+void TextControl::Insert(std::size_t line, CPSize pos, const std::string& s)
 {
-    m_text.insert(pos, s);
+    m_text.insert(Value(StringIndexOf(line, pos, m_line_data)), s);
     SetText(m_text);
 }
 
-void TextControl::Erase(int pos, int num/* = 1*/)
+void TextControl::Erase(std::size_t line, CPSize pos, CPSize num/* = CP1*/)
 {
-    m_text.erase(pos, num);
+    std::string::iterator it = m_text.begin() + Value(StringIndexOf(line, pos, m_line_data));
+    std::string::iterator end_it = m_text.begin() + Value(StringIndexOf(line, pos + num, m_line_data));
+    m_text.erase(it, end_it);
     SetText(m_text);
 }
 

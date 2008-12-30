@@ -176,6 +176,16 @@ namespace {
         (std::pair<boost::uint32_t, boost::uint32_t>(0x7B, 0x7F));
 }
 
+///////////////////////////////////////
+// Constants
+///////////////////////////////////////
+const StrSize GG::S0(0);
+const StrSize GG::S1(1);
+const StrSize GG::INVALID_STR_SIZE(std::numeric_limits<std::size_t>::max());
+const CPSize GG::CP0(0);
+const CPSize GG::CP1(1);
+const CPSize GG::INVALID_CP_SIZE(std::numeric_limits<std::size_t>::max());
+
 
 ///////////////////////////////////////
 // function GG::RgbaTag
@@ -183,8 +193,12 @@ namespace {
 std::string GG::RgbaTag(const Clr& c)
 {
     std::stringstream stream;
-    stream << "<rgba " << static_cast<int>(c.r) << " " << static_cast<int>(c.g) << " " << 
-        static_cast<int>(c.b) << " " << static_cast<int>(c.a) << ">";
+    stream << "<rgba "
+           << static_cast<int>(c.r) << " "
+           << static_cast<int>(c.g) << " "
+           << static_cast<int>(c.b) << " "
+           << static_cast<int>(c.a)
+           << ">";
     return stream.str();
 }
 
@@ -286,11 +300,89 @@ Font::Substring& Font::Substring::operator+=(const IterPair& rhs)
     return *this;
 }
 
+
+///////////////////////////////////////
+// Free Functions
+///////////////////////////////////////
 std::ostream& GG::operator<<(std::ostream& os, const Font::Substring& substr)
 {
     std::ostream_iterator<char> out_it(os);
     std::copy(substr.begin(), substr.end(), out_it);
     return os;
+}
+
+CPSize GG::CodePointIndexOf(std::size_t line, CPSize index, const std::vector<Font::LineData>& line_data)
+{
+    CPSize retval(0);
+    if (line_data.size() <= line) {
+        std::vector<Font::LineData>::const_reverse_iterator it = line_data.rbegin();
+        std::vector<Font::LineData>::const_reverse_iterator end_it = line_data.rend();
+        while (it != end_it) {
+            if (!it->char_data.empty()) {
+                retval = it->char_data.back().code_point_index + 1;
+                break;
+            }
+            ++it;
+        }
+    } else if (index < line_data[line].char_data.size()) {
+        retval = line_data[line].char_data[Value(index)].code_point_index;
+    } else {
+        std::vector<Font::LineData>::const_reverse_iterator it =
+            line_data.rbegin() + (line_data.size() - 1 - line);
+        std::vector<Font::LineData>::const_reverse_iterator end_it = line_data.rend();
+        while (it != end_it) {
+            if (!it->char_data.empty()) {
+                retval = it->char_data.back().code_point_index + 1;
+                break;
+            }
+            ++it;
+        }
+    }
+    return retval;
+}
+
+StrSize GG::StringIndexOf(std::size_t line, CPSize index, const std::vector<Font::LineData>& line_data)
+{
+    StrSize retval(0);
+    if (line_data.size() <= line) {
+        std::vector<Font::LineData>::const_reverse_iterator it = line_data.rbegin();
+        std::vector<Font::LineData>::const_reverse_iterator end_it = line_data.rend();
+        while (it != end_it) {
+            if (!it->char_data.empty()) {
+                retval = it->char_data.back().string_index + it->char_data.back().string_size;
+                break;
+            }
+            ++it;
+        }
+    } else if (index < line_data[line].char_data.size()) {
+        retval = line_data[line].char_data[Value(index)].string_index;
+    } else {
+        std::vector<Font::LineData>::const_reverse_iterator it =
+            line_data.rbegin() + (line_data.size() - 1 - line);
+        std::vector<Font::LineData>::const_reverse_iterator end_it = line_data.rend();
+        while (it != end_it) {
+            if (!it->char_data.empty()) {
+                retval = it->char_data.back().string_index + it->char_data.back().string_size;
+                break;
+            }
+            ++it;
+        }
+    }
+    return retval;
+}
+
+std::pair<std::size_t, CPSize> GG::LinePositionOf(CPSize index, const std::vector<Font::LineData>& line_data)
+{
+    std::pair<std::size_t, CPSize> retval(std::numeric_limits<std::size_t>::max(), INVALID_CP_SIZE);
+    for (std::size_t i = 0; i < line_data.size(); ++i) {
+        if (line_data[i].char_data.front().code_point_index <= index &&
+            index <= line_data[i].char_data.back().code_point_index) {
+            retval.first = i;
+            retval.second = index - line_data[i].char_data.front().code_point_index;
+            break;
+        }
+    }
+    return retval;
 }
 
 
@@ -310,14 +402,17 @@ Font::TextElement::TextElement(bool ws, bool nl) :
 Font::TextElement::~TextElement()
 {}
 
-X Font::TextElement::Width() const
-{ return std::accumulate(widths.begin(), widths.end(), X0); }
-
 Font::TextElement::TextElementType Font::TextElement::Type() const
 { return newline ? NEWLINE : (whitespace ? WHITESPACE : TEXT); }
 
-std::size_t Font::TextElement::OriginalStringChars() const
-{ return text.size(); }
+X Font::TextElement::Width() const
+{ return std::accumulate(widths.begin(), widths.end(), X0); }
+
+StrSize Font::TextElement::StringSize() const
+{ return StrSize(text.size()); }
+
+CPSize Font::TextElement::CodePointSize() const
+{ return CPSize(widths.size()); }
 
 
 ///////////////////////////////////////
@@ -335,9 +430,6 @@ Font::FormattingTag::FormattingTag(bool close) :
 
 Font::FormattingTag::TextElementType Font::FormattingTag::Type() const
 { return close_tag ? CLOSE_TAG : OPEN_TAG; }
-
-std::size_t Font::FormattingTag::OriginalStringChars() const
-{ return original_tag_text.size(); }
 
 
 ///////////////////////////////////////
@@ -370,9 +462,12 @@ Font::LineData::CharData::CharData() :
     string_index(0)
 {}
 
-Font::LineData::CharData::CharData(X extent_, std::size_t str_index, const std::vector<boost::shared_ptr<TextElement> >& tags_) :
+Font::LineData::CharData::CharData(X extent_, StrSize str_index, StrSize str_size, CPSize cp_index,
+                                   const std::vector<boost::shared_ptr<TextElement> >& tags_) :
     extent(extent_),
     string_index(str_index),
+    string_size(str_size),
+    code_point_index(cp_index),
     tags()
 {
     for (std::size_t i = 0; i < tags_.size(); ++i) {
@@ -461,7 +556,7 @@ X Font::SpaceWidth() const
 
 X Font::RenderGlyph(const Pt& pt, char c) const
 {
-    if (c < 0x0 || 0x7f < c)
+    if (!detail::ValidUTFChar<char>()(c))
         throw utf8::invalid_utf8(c);
 
     GlyphMap::const_iterator it = m_glyphs.find(CharToUint32_t(c));
@@ -505,13 +600,13 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
     }
 
     RenderText(ul, lr, text, format, *line_data, *render_state,
-               0, 0, line_data->size(), line_data->back().char_data.size());
+               0, CP0, line_data->size(), CPSize(line_data->back().char_data.size()));
 }
 
 void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags<TextFormat>& format,
                       const std::vector<LineData>& line_data, RenderState& render_state,
-                      std::size_t begin_line, std::size_t begin_char,
-                      std::size_t end_line, std::size_t end_char) const
+                      std::size_t begin_line, CPSize begin_char,
+                      std::size_t end_line, CPSize end_char) const
 {
     double orig_color[4];
     glGetDoublev(GL_CURRENT_COLOR, orig_color);
@@ -536,19 +631,19 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
         X x = x_origin;
 
         std::string::const_iterator string_end_it = text.end();
-        for (std::size_t j = ((i == begin_line) ? begin_char : 0);
-             j < ((i == end_line - 1) ? end_char : line.char_data.size());
+        for (CPSize j = ((i == begin_line) ? begin_char : CP0);
+             j < ((i == end_line - 1) ? end_char : CPSize(line.char_data.size()));
              ++j) {
-            for (std::size_t k = 0; k < line.char_data[j].tags.size(); ++k) {
-                HandleTag(line.char_data[j].tags[k], orig_color, render_state);
+            for (std::size_t k = 0; k < line.char_data[Value(j)].tags.size(); ++k) {
+                HandleTag(line.char_data[Value(j)].tags[k], orig_color, render_state);
             }
-            boost::uint32_t c = utf8::peek_next(text.begin() + line.char_data[j].string_index, string_end_it);
-            assert((text[line.char_data[j].string_index] == '\n') == (c == WIDE_NEWLINE));
+            boost::uint32_t c = utf8::peek_next(text.begin() + Value(line.char_data[Value(j)].string_index), string_end_it);
+            assert((text[Value(line.char_data[Value(j)].string_index)] == '\n') == (c == WIDE_NEWLINE));
             if (c == WIDE_NEWLINE)
                 continue;
             GlyphMap::const_iterator it = m_glyphs.find(c);
             if (it == m_glyphs.end())
-                x = x_origin + line.char_data[j].extent; // move forward by the extent of the character when a whitespace or unprintable glyph is requested
+                x = x_origin + line.char_data[Value(j)].extent; // move forward by the extent of the character when a whitespace or unprintable glyph is requested
             else
                 x += RenderGlyph(Pt(x, y), it->second, &render_state);
         }
@@ -558,18 +653,18 @@ void Font::RenderText(const Pt& ul, const Pt& lr, const std::string& text, Flags
 }
 
 void Font::ProcessTagsBefore(const std::vector<LineData>& line_data, RenderState& render_state,
-                             std::size_t begin_line, std::size_t begin_char) const
+                             std::size_t begin_line, CPSize begin_char) const
 {
     double orig_color[4];
     glGetDoublev(GL_CURRENT_COLOR, orig_color);
 
     for (std::size_t i = 0; i < begin_line; ++i) {
         const LineData& line = line_data[i];
-        for (std::size_t j = 0;
-             j < ((i == begin_line - 1) ? begin_char : line.char_data.size());
+        for (CPSize j = CP0;
+             j < ((i == begin_line - 1) ? begin_char : CPSize(line.char_data.size()));
              ++j) {
-            for (std::size_t k = 0; k < line.char_data[j].tags.size(); ++k) {
-                HandleTag(line.char_data[j].tags[k], orig_color, render_state);
+            for (std::size_t k = 0; k < line.char_data[Value(j)].tags.size(); ++k) {
+                HandleTag(line.char_data[Value(j)].tags[k], orig_color, render_state);
             }
         }
     }
@@ -637,7 +732,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             if (combined_text.empty()) {
                 if ((*it)[open_bracket_tag].matched) {
                     boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(false));
-                    element->text = Substring(text, (*it)[tag_name_tag]);
+                    element->text = Substring(text, (*it)[0]);
                     if (1 < (*it).nested_results().size()) {
                         element->params.reserve((*it).nested_results().size() - 1);
                         for (smatch::nested_results_type::const_iterator nested_it =
@@ -648,12 +743,12 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                                 Substring(text, (*nested_it)[0]));
                         }
                     }
-                    element->original_tag_text = Substring(text, (*it)[0]);
+                    element->tag_name = Substring(text, (*it)[tag_name_tag]);
                     text_elements.push_back(element);
                 } else if ((*it)[close_bracket_tag].matched) {
                     boost::shared_ptr<Font::FormattingTag> element(new Font::FormattingTag(true));
-                    element->text = Substring(text, (*it)[tag_name_tag]);
-                    element->original_tag_text = Substring(text, (*it)[0]);
+                    element->text = Substring(text, (*it)[0]);
+                    element->tag_name = Substring(text, (*it)[tag_name_tag]);
                     text_elements.push_back(element);
                 } else if ((*it)[whitespace_tag].matched) {
                     boost::shared_ptr<Font::TextElement> element(new Font::TextElement(true, false));
@@ -676,7 +771,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
         }
     }
 
-    // fill in the widths of characters (or code points, for UTF-8 strings) in each element
+    // fill in the widths of code points in each TextElement
+    const GlyphMap::const_iterator WIDE_SPACE_IT = m_glyphs.find(WIDE_SPACE);
     for (std::size_t i = 0; i < text_elements.size(); ++i) {
         std::string::const_iterator it = text_elements[i]->text.begin();
         std::string::const_iterator end_it = text_elements[i]->text.end();
@@ -685,8 +781,10 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             boost::uint32_t c = utf8::next(it, end_it);
             if (c != WIDE_NEWLINE) {
                 GlyphMap::const_iterator it = m_glyphs.find(c);
+                // use a space when an unrendered glyph is requested (the
+                // space chararacter is always renderable)
                 if (it == m_glyphs.end())
-                    it = m_glyphs.find(WIDE_SPACE); // use a space when an unrendered glyph is requested (the space chararacter is always renderable)
+                    it = WIDE_SPACE_IT;
                 text_elements[i]->widths.back() = it->second.advance;
             }
         }
@@ -704,7 +802,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             for (std::size_t j = 0; j < tag_elem->params.size(); ++j) {
                 std::cout << "        \"" << tag_elem->params[j] << "\"\n";
             }
-            std::cout << "    original_tag_text=\"" << tag_elem->original_tag_text << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
+            std::cout << "    tag_name=\"" << tag_elem->tag_name << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
         } else {
             boost::shared_ptr<TextElement> elem = text_elements[i];
             std::cout << "TextElement\n    text=\"" << elem->text << "\"\n    widths=";
@@ -713,7 +811,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             }
             std::cout << "\n    whitespace=" << elem->whitespace << "\n    newline=" << elem->newline << "\n";
         }
-        std::cout << "    original_string_chars=" << text_elements[i]->OriginalStringChars() << "\n";
+        std::cout << "    string_size=" << text_elements[i]->StringSize() << "\n";
         std::cout << "\n";
     }
     std::cout << std::endl;
@@ -737,20 +835,28 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
     line_data.back().justification = orig_just;
 
     X x = X0;
-    std::size_t original_string_offset(0); // the position within the original string of the current TextElement
+    // the position within the original string of the current TextElement
+    StrSize original_string_offset(0);
+    // the index of the first code point of the current TextElement
+    CPSize code_point_offset(0);
     std::vector<boost::shared_ptr<TextElement> > pending_formatting_tags;
     for (std::size_t i = 0; i < text_elements.size(); ++i) {
         boost::shared_ptr<TextElement> elem = text_elements[i];
-        if (elem->Type() == TextElement::NEWLINE) { // if a newline is explicitly requested, start a new one
+        // if a newline is explicitly requested, start a new one
+        if (elem->Type() == TextElement::NEWLINE) {
             line_data.push_back(LineData());
-            SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
-            x = X0; // reset the x-position to 0
+            SetJustification(last_line_of_curr_just,
+                             line_data.back(),
+                             orig_just,
+                             line_data[line_data.size() - 2].justification);
+            x = X0;
         } else if (elem->Type() == TextElement::WHITESPACE) {
             std::string::const_iterator it = elem->text.begin();
             std::string::const_iterator end_it = elem->text.end();
             while (it != end_it) {
-                std::size_t char_index = std::distance(elem->text.begin(), it);
+                StrSize char_index(std::distance(elem->text.begin(), it));
                 boost::uint32_t c = utf8::next(it, end_it);
+                StrSize char_size = std::distance(elem->text.begin(), it) - char_index;
                 if (c != WIDE_CR && c != WIDE_FF) {
                     X advance_position = x + m_space_width;
                     if (c == WIDE_TAB && expand_tabs)
@@ -758,87 +864,148 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                     else if (c == WIDE_NEWLINE)
                         advance_position = x;
                     X advance = advance_position - x;
-                    if ((format & FORMAT_LINEWRAP) && box_width < advance_position) { // if we're using linewrap and this space won't fit on this line,
+                    // if we're using linewrap and this space won't fit on
+                    // this line
+                    if ((format & FORMAT_LINEWRAP) && box_width < advance_position) {
                         if (!x && box_width < advance) {
-                            // if the space is larger than the line and alone on the line, let the space overrun this
-                            // line and then start a new one
+                            // if the space is larger than the line and alone
+                            // on the line, let the space overrun this line
+                            // and then start a new one
                             line_data.push_back(LineData());
                             x = X0; // reset the x-position to 0
-                            SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
-                        } else { // otherwise start a new line and put the space there:
+                            SetJustification(last_line_of_curr_just,
+                                             line_data.back(),
+                                             orig_just,
+                                             line_data[line_data.size() - 2].justification);
+                        } else {
+                            // otherwise start a new line and put the space there
                             line_data.push_back(LineData());
                             x = advance;
-                            line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + char_index, pending_formatting_tags));
+                            line_data.back().char_data.push_back(
+                                LineData::CharData(x,
+                                                   original_string_offset + char_index,
+                                                   char_size,
+                                                   code_point_offset,
+                                                   pending_formatting_tags));
                             pending_formatting_tags.clear();
-                            SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+                            SetJustification(last_line_of_curr_just,
+                                             line_data.back(),
+                                             orig_just,
+                                             line_data[line_data.size() - 2].justification);
                         }
                     } else { // there's room for the space, or we're not using linewrap
                         x += advance;
-                        line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + char_index, pending_formatting_tags));
+                        line_data.back().char_data.push_back(
+                            LineData::CharData(x,
+                                               original_string_offset + char_index,
+                                               char_size,
+                                               code_point_offset,
+                                               pending_formatting_tags));
                         pending_formatting_tags.clear();
                     }
                 }
+                ++code_point_offset;
             }
         } else if (elem->Type() == TextElement::TEXT) {
             if (format & FORMAT_WORDBREAK) {
-                if (box_width < x + elem->Width() && x) { // if the text "word" overruns this line, and isn't alone on this line, move it down to the next line
+                // if the text "word" overruns this line, and isn't alone on
+                // this line, move it down to the next line
+                if (box_width < x + elem->Width() && x) {
                     line_data.push_back(LineData());
                     x = X0;
-                    SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
+                    SetJustification(last_line_of_curr_just,
+                                     line_data.back(),
+                                     orig_just,
+                                     line_data[line_data.size() - 2].justification);
                 }
                 std::string::const_iterator it = elem->text.begin();
                 std::string::const_iterator end_it = elem->text.end();
                 std::size_t i = 0;
                 while (it != end_it) {
-                    std::size_t char_index = std::distance(elem->text.begin(), it);
+                    StrSize char_index(std::distance(elem->text.begin(), it));
                     utf8::next(it, end_it);
+                    StrSize char_size = std::distance(elem->text.begin(), it) - char_index;
                     x += elem->widths[i];
-                    line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + char_index, pending_formatting_tags));
+                    line_data.back().char_data.push_back(
+                        LineData::CharData(x,
+                                           original_string_offset + char_index,
+                                           char_size,
+                                           code_point_offset,
+                                           pending_formatting_tags));
                     pending_formatting_tags.clear();
                     ++i;
+                    ++code_point_offset;
                 }
             } else {
                 std::string::const_iterator it = elem->text.begin();
                 std::string::const_iterator end_it = elem->text.end();
                 std::size_t i = 0;
                 while (it != end_it) {
-                    std::size_t char_index = std::distance(elem->text.begin(), it);
+                    StrSize char_index(std::distance(elem->text.begin(), it));
                     utf8::next(it, end_it);
-                    if ((format & FORMAT_LINEWRAP) && box_width < x + elem->widths[i] && x) { // if the char overruns this line, and isn't alone on this line, move it down to the next line
+                    StrSize char_size = std::distance(elem->text.begin(), it) - char_index;
+                    // if the char overruns this line, and isn't alone on this
+                    // line, move it down to the next line
+                    if ((format & FORMAT_LINEWRAP) && box_width < x + elem->widths[i] && x) {
                         line_data.push_back(LineData());
                         x = elem->widths[i];
-                        line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + char_index, pending_formatting_tags));
+                        line_data.back().char_data.push_back(
+                            LineData::CharData(x,
+                                               original_string_offset + char_index,
+                                               char_size,
+                                               code_point_offset,
+                                               pending_formatting_tags));
                         pending_formatting_tags.clear();
-                        SetJustification(last_line_of_curr_just, line_data.back(), orig_just, line_data[line_data.size() - 2].justification);
-                    } else { // there's room for this char on this line, or there's no wrapping in use
+                        SetJustification(last_line_of_curr_just,
+                                         line_data.back(),
+                                         orig_just,
+                                         line_data[line_data.size() - 2].justification);
+                    } else {
+                        // there's room for this char on this line, or there's
+                        // no wrapping in use
                         x += elem->widths[i];
-                        line_data.back().char_data.push_back(LineData::CharData(x, original_string_offset + char_index, pending_formatting_tags));
+                        line_data.back().char_data.push_back(
+                            LineData::CharData(x,
+                                               original_string_offset + char_index, 
+                                               char_size,
+                                               code_point_offset,
+                                               pending_formatting_tags));
                         pending_formatting_tags.clear();
                     }
                     ++i;
+                    ++code_point_offset;
                 }
             }
         } else if (elem->Type() == TextElement::OPEN_TAG) {
-            if (elem->text == ALIGN_LEFT_TAG)
+            assert(boost::dynamic_pointer_cast<FormattingTag>(elem));
+            boost::shared_ptr<FormattingTag> elem_as_tag =
+                boost::static_pointer_cast<FormattingTag>(elem);
+            if (elem_as_tag->tag_name == ALIGN_LEFT_TAG)
                 line_data.back().justification = ALIGN_LEFT;
-            else if (elem->text == ALIGN_CENTER_TAG)
+            else if (elem_as_tag->tag_name == ALIGN_CENTER_TAG)
                 line_data.back().justification = ALIGN_CENTER;
-            else if (elem->text == ALIGN_RIGHT_TAG)
+            else if (elem_as_tag->tag_name == ALIGN_RIGHT_TAG)
                 line_data.back().justification = ALIGN_RIGHT;
-            else if (elem->text != PRE_TAG)
+            else if (elem_as_tag->tag_name != PRE_TAG)
                 pending_formatting_tags.push_back(elem);
             last_line_of_curr_just = false;
+            code_point_offset += elem->CodePointSize();
         } else if (elem->Type() == TextElement::CLOSE_TAG) {
-            if ((elem->text == ALIGN_LEFT_TAG && line_data.back().justification == ALIGN_LEFT) ||
-                (elem->text == ALIGN_CENTER_TAG && line_data.back().justification == ALIGN_CENTER) ||
-                (elem->text == ALIGN_RIGHT_TAG && line_data.back().justification == ALIGN_RIGHT))
+            assert(boost::dynamic_pointer_cast<FormattingTag>(elem));
+            boost::shared_ptr<FormattingTag> elem_as_tag =
+                boost::static_pointer_cast<FormattingTag>(elem);
+            if ((elem_as_tag->tag_name == ALIGN_LEFT_TAG && line_data.back().justification == ALIGN_LEFT) ||
+                (elem_as_tag->tag_name == ALIGN_CENTER_TAG && line_data.back().justification == ALIGN_CENTER) ||
+                (elem_as_tag->tag_name == ALIGN_RIGHT_TAG && line_data.back().justification == ALIGN_RIGHT))
                 last_line_of_curr_just = true;
-            else if (elem->text != PRE_TAG)
+            else if (elem_as_tag->tag_name != PRE_TAG)
                 pending_formatting_tags.push_back(elem);
+            code_point_offset += elem->CodePointSize();
         }
-        original_string_offset += elem->OriginalStringChars();
+        original_string_offset += elem->StringSize();
     }
-    // disregard the final pending formatting tag, if any, since this is the end of the text, and so it cannot have any effect
+    // disregard the final pending formatting tag, if any, since this is the
+    // end of the text, and so it cannot have any effect
 
 #if DEBUG_DETERMINELINES
     std::cout << "Line breakdown:\n";
@@ -847,13 +1014,17 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
             std::cout << line_data[i].char_data[j].extent << " ";
         }
-        std::cout << "\n    orig. indices=";
+        std::cout << "\n    string indices=";
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
             std::cout << line_data[i].char_data[j].string_index << " ";
         }
+        std::cout << "\n    code point indices=";
+        for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
+            std::cout << line_data[i].char_data[j].code_point_index << " ";
+        }
         std::cout << "\n    chars on line: \"";
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
-            std::cout << text[line_data[i].char_data[j].string_index];
+            std::cout << text[Value(line_data[i].char_data[j].string_index)];
         }
         std::cout << "\"" << std::endl;
         for (std::size_t j = 0; j < line_data[i].char_data.size(); ++j) {
@@ -868,7 +1039,7 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
                     for (std::size_t l = 0; l < tag_elem->params.size(); ++l) {
                         std::cout << "        \"" << tag_elem->params[l] << "\"\n";
                     }
-                    std::cout << "    original_tag_text=\"" << tag_elem->original_tag_text << "\"\n    close_tag="
+                    std::cout << "    tag_name=\"" << tag_elem->tag_name << "\"\n    close_tag="
                               << tag_elem->close_tag << std::endl;
                 }
             }
@@ -938,8 +1109,8 @@ void Font::Init(const std::string& font_filename, unsigned int pts)
     error = FT_New_Face(g_library.library, font_filename.c_str(), 0, &face);
     if (error || !face)
         throw BadFile("Face object created from \"" + font_filename + "\" was invalid");
-    if (pts <= 0)
-        throw InvalidPointSize("Attempted to create font \"" + font_filename + "\" with non-positive point size");
+    if (!pts)
+        throw InvalidPointSize("Attempted to create font \"" + font_filename + "\" with 0 point size");
     if (!FT_IS_SCALABLE(face))
         throw UnscalableFont("Attempted to create font \"" + font_filename + "\" with uscalable font face");
     // Set the character size and use default 72 DPI
@@ -1171,21 +1342,21 @@ X Font::RenderGlyph(const Pt& pt, const Glyph& glyph, const Font::RenderState* r
 void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color,
                      RenderState& render_state) const
 {
-    if (tag->text == "i") {
+    if (tag->tag_name == "i") {
         if (tag->close_tag) {
             assert(render_state.use_italics);
             --render_state.use_italics;
         } else {
             ++render_state.use_italics;
         }
-    } else if (tag->text == "u") {
+    } else if (tag->tag_name == "u") {
         if (tag->close_tag) {
             assert(render_state.draw_underline);
             --render_state.draw_underline;
         } else {
             ++render_state.draw_underline;
         }
-    } else if (tag->text == "rgba") {
+    } else if (tag->tag_name == "rgba") {
         if (tag->close_tag) {
             assert(!render_state.colors.empty());
             render_state.colors.pop();
@@ -1242,7 +1413,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
             }
             if (!well_formed_tag) {
                 std::cerr << "GG::Font : Encountered malformed <rgba> formatting tag: "
-                          << tag->original_tag_text;
+                          << tag->text;
             }
         }
     }

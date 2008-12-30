@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file SDLGUI.h
-    Contains SDLGUI, the input driver for using SDL with GG. */
+/** \file SDLGUI.h \brief Contains SDLGUI, the input driver for using SDL with
+    GG. */
 
 #ifndef _GG_SDLGUI_h_
 #define _GG_SDLGUI_h_
@@ -46,8 +46,8 @@
 
 namespace GG {
 
-/** This is an abstract singleton class that represents the GUI framework of
-    an SDL OpenGL application.
+/** \brief This is an abstract singleton class that represents the GUI
+    framework of an SDL OpenGL application.
 
     <p>Usage:
 

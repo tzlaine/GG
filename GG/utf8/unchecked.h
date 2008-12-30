@@ -24,9 +24,8 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-/** \file unchecked.h
-    Contains part of the utfcpp library.  See http://utfcpp.sourceforge.net
-    for documentation. */
+/** \file unchecked.h \brief Contains part of the utfcpp library.  See
+    http://utfcpp.sourceforge.net for documentation. */
 
 
 #ifndef UTF8_FOR_CPP_UNCHECKED_H_2675DCD0_9480_4c0c_B92A_CC14C027B731

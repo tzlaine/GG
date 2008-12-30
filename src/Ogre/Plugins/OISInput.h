@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file OISInput.h
-    Contains OISInput, the OgreGUIInputPlugin subclass that provides OgreGUI
-    with OIS input. */
+/** \file OISInput.h \brief Contains OISInput, the OgreGUIInputPlugin subclass
+    that provides OgreGUI with OIS input. */
 
 #include "OgreGUIInputPlugin.h"
 
@@ -35,7 +34,9 @@
 
 namespace OIS { class InputManager; }
 
-/** An Ogre plugin that provides input functionality to OgreGUI using OIS.
+/** \brief An Ogre plugin that provides input functionality to OgreGUI using
+    OIS.
+
     OISInput is configured from the configuration data in
     OgreGUI::ConfigFileStream(), if any.  See OISInput.cfg for an example
     config file. */

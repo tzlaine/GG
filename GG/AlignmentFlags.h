@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file AlignmentFlags.h
-    Contains the Alignment flag type and the global alignment flag constants. */
+/** \file AlignmentFlags.h \brief Contains the Alignment flag type and the
+    global alignment flag constants. */
 
 #ifndef _GG_AlignmentFlags_h_
 #define _GG_AlignmentFlags_h_

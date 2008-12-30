@@ -23,8 +23,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Scroll.h
-    Contains the Scroll scrollbar control class. */
+/** \file Scroll.h \brief Contains the Scroll scrollbar control class. */
 
 #ifndef _GG_Scroll_h_
 #define _GG_Scroll_h_
@@ -36,15 +35,17 @@ namespace GG {
 
 class Button;
 
-/** This is a basic scrollbar control.  The range of the values the scrollbar
-    represents is [m_range_min, m_range_max].  However, m_posn can only range
-    over [m_range_min, m_range_max - m_page_sz], because the tab has a logical
-    width of m_page_sz.  So the region of the scrollbar's range being viewed
-    at any one time is [m_posn, m_posn + m_page_sz].  (m_posn + m_page_sz is
-    actually the last + 1 element of the range.)  The parent of the control is
-    notified of a scroll via ScrolledSignalType signals; these are emitted
-    from the Scroll*() functions and the UpdatePosn() function.  This should
-    cover every instance in which m_posn is altered.  The parent can poll the
+/** \brief This is a basic scrollbar control.
+
+    The range of the values the scrollbar represents is [m_range_min,
+    m_range_max].  However, m_posn can only range over [m_range_min,
+    m_range_max - m_page_sz], because the tab has a logical width of
+    m_page_sz.  So the region of the scrollbar's range being viewed at any one
+    time is [m_posn, m_posn + m_page_sz].  (m_posn + m_page_sz is actually the
+    last + 1 element of the range.)  The parent of the control is notified of
+    a scroll via ScrolledSignalType signals; these are emitted from the
+    Scroll*() functions and the UpdatePosn() function.  This should cover
+    every instance in which m_posn is altered.  The parent can poll the
     control to get its current view area with a call to GetPosnRange().  An
     increase in a vertical scroll is down, and a decrease is up; since GG
     assumes the y-coordinates are downwardly increasing.  The rather plain

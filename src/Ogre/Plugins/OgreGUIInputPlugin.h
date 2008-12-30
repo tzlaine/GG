@@ -23,9 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file OgreGUIInputPlugin.h
-    Contains OgreGUIInputPlugin, the Ogre::Plugin base class for making plugins
-    that provide OgreGUI with keyboard and mouse input. */
+/** \file OgreGUIInputPlugin.h \brief Contains OgreGUIInputPlugin, the
+    Ogre::Plugin base class for making plugins that provide OgreGUI with
+    keyboard and mouse input. */
 
 #ifndef _GG_OgreGUIInputPlugin_h_ 
 #define _GG_OgreGUIInputPlugin_h_
@@ -51,14 +51,16 @@ namespace Ogre { class RenderWindow; }
 
 namespace GG {
 
-/** The base class for Ogre plugins that provides input functionality to
-    OgreGUI.  Derived classes must implement HandleWindowResize(),
-    HandleWindowClose(), and HandleSystemEvents().  The last of these is where
-    the input-system specific code resides.  This function must obtain mouse
-    moves and clicks, keyboard events, etc., from the underlying system and
-    translate them to the associated GG events.  Derived classes must also call
-    ConnectHandlers() sometime in their contructors.  See OISInput for a sample
-    implementation. */
+/** \brief The base class for Ogre plugins that provides input functionality
+    to OgreGUI.
+
+    Derived classes must implement HandleWindowResize(), HandleWindowClose(),
+    and HandleSystemEvents().  The last of these is where the input-system
+    specific code resides.  This function must obtain mouse moves and clicks,
+    keyboard events, etc., from the underlying system and translate them to
+    the associated GG events.  Derived classes must also call
+    ConnectHandlers() sometime in their contructors.  See OISInput for a
+    sample implementation. */
 class GG_OGRE_PLUGIN_API OgreGUIInputPlugin :
     public Ogre::Plugin
 {

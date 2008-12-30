@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file MultiEdit.h
-    Contains the MultiEdit class, a multi-line text box control. */
+/** \file MultiEdit.h \brief Contains the MultiEdit class, a multi-line text
+    box control. */
 
 #ifndef _GG_MultiEdit_h_
 #define _GG_MultiEdit_h_
@@ -55,50 +55,49 @@ extern GG_API const MultiEditStyle MULTI_NO_HSCROLL;       ///< Horizontal scrol
 extern GG_API const Flags<MultiEditStyle> MULTI_NO_SCROLL; ///< Scrolls are not used for this control.
 
 
-/** This is a multi-line text input and display control.  MultiEdit is
-    designed to be used as a basic text-input control for text longer than one
-    line, or to display large amounts of formatted or unformatted text.
-    MultiEdit supports text formatting tags.  See GG::Font for details.
-    Several style flags are available.  If the MULTI_TERMINAL_STYLE flag is in
-    use, lines that exceed the history limit will be removed from the
-    beginning of the text; otherwise, they are removed from the end.  If
-    either MULTI_LINEWRAP of MULTI_WORDBREAK are in use, MULTI_NO_HSCROLL must
-    be in use as well.  MULTI_VCENTER is not an allowed style; if it is
-    specified, MULTI_TOP will be used in its place.  The justification
-    introduced by text formatting tags is very different from that introduced
-    by the TF_* styles.  The former justifies lines within the space taken up
-    by the text.  The latter justifies the entire block of text within the
-    client area of the control.  So if you specify MULTI_LEFT and use \<right>
-    formatting tags on the entire text, the text will appear to be
-    right-justified, but you will probably only see the extreme left of the
-    text area without scrolling.  If none of the no-scroll style flags are in
-    use, the scrolls are created and destroyed automatically, as needed.
+/** \brief This is a multi-line text input and display control.
 
-    <br>Implementation note: All character index values taken as arguments and
-    returned by member functions of this class are considered to be indices of
-    code points (characters as they appear in the control), not raw characters
-    (individual characters in the underlying UTF-8 encoded string).  There are
-    two exceptions to this, however.  StringIndexOf() and StringRangeOf()
-    return indices into the underlying UTF-8 encoded string. */
+    MultiEdit is designed to be used as a basic text-input control for text
+    longer than one line, or to display large amounts of formatted or
+    unformatted text.  MultiEdit supports text formatting tags.  See GG::Font
+    for details.  Several style flags are available.  If the
+    MULTI_TERMINAL_STYLE flag is in use, lines that exceed the history limit
+    will be removed from the beginning of the text; otherwise, they are
+    removed from the end.  If either MULTI_LINEWRAP of MULTI_WORDBREAK are in
+    use, MULTI_NO_HSCROLL must be in use as well.  MULTI_VCENTER is not an
+    allowed style; if it is specified, MULTI_TOP will be used in its place.
+    The justification introduced by text formatting tags is very different
+    from that introduced by the TF_* styles.  The former justifies lines
+    within the space taken up by the text.  The latter justifies the entire
+    block of text within the client area of the control.  So if you specify
+    MULTI_LEFT and use \<right> formatting tags on the entire text, the text
+    will appear to be right-justified, but you will probably only see the
+    extreme left of the text area without scrolling.  If none of the no-scroll
+    style flags are in use, the scrolls are created and destroyed
+    automatically, as needed. */
 class GG_API MultiEdit : public Edit
 {
 public:
     /** \name Structors */ ///@{
-    MultiEdit(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
-              Flags<MultiEditStyle> style = MULTI_LINEWRAP, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, 
-              Flags<WndFlag> flags = CLICKABLE); ///< ctor
-    virtual ~MultiEdit(); ///< dtor
+    /** Ctor. */
+    MultiEdit(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
+              Clr color, Flags<MultiEditStyle> style = MULTI_LINEWRAP, Clr text_color = CLR_BLACK,
+              Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
+
+    /** Dtor. */
+    virtual ~MultiEdit();
     //@}
 
     /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
     virtual Pt ClientLowerRight() const;
 
-    Flags<MultiEditStyle> Style() const; ///< returns the style flags for this MultiEdit to \a style
+    /** Returns the style flags for this MultiEdit. */
+    Flags<MultiEditStyle> Style() const;
 
     /** Returns the maximum number of lines of text that the control
         keeps. This number includes the lines that are visible in the control.
-        A value <= 0 indicates that there is no limit.*/
+        A value of ALL_LINES indicates that there is no limit. */
     std::size_t MaxLinesOfHistory() const;
     //@}
 
@@ -114,65 +113,102 @@ public:
     virtual void   SelectAll();
     virtual void   SetText(const std::string& str);
 
-    void           SetStyle(Flags<MultiEditStyle> style); ///< sets the style flags for this MultiEdit to \a style
+    /** Sets the style flags for this MultiEdit to \a style. */
+    void           SetStyle(Flags<MultiEditStyle> style);
 
-    /** sets the maximum number of rows of text that the control will keep */
+    /** Sets the maximum number of rows of text that the control will keep.
+        ALL_LINES indicates no limit. */
     void           SetMaxLinesOfHistory(std::size_t max);
 
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
+    static const std::size_t ALL_LINES;
+
 protected:
     /** \name Structors */ ///@{
-    MultiEdit(); ///< defalt ctor
+    MultiEdit(); ///< Default ctor.
     //@}
 
     /** \name Accessors */ ///@{
-    virtual bool MultiSelected() const;     ///< returns true if >= 1 characters are selected
-    X       RightMargin() const;            ///< returns the width of the scrollbar on the right side of the control (0 if none)
-    Y       BottomMargin() const;           ///< returns the width of the scrollbar at the bottom of the control (0 if none)
-    std::pair<int, int>
-            CharAt(const Pt& pt) const;     ///< returns row and character index of \a pt, or (0, 0) if \a pt falls outside the text.  \a pt is in client-space coordinates
-    std::pair<int, int>
-            CharAt(int string_idx) const;   ///< returns row and character index of char at string index, or (0, 0) if \a string_idx falls outside the text, or if \a string_idx refers to a non-visible character
+    /** Returns true if >= 1 characters are selected. */
+    virtual bool MultiSelected() const;
 
-    Pt      ScrollPosition() const;         ///< returns the positions of the scrollbars, in pixels
+    /** Returns the width of the scrollbar on the right side of the control (0
+        if none). */
+    X RightMargin() const;
 
-    /** Returns index into WindowText() of the start of the UTF-8 sequence for
-        the code point at \a char_idx in row \a row, using \a line_data
+    /** Returns the width of the scrollbar at the bottom of the control (0 if
+        none). */
+    Y BottomMargin() const;
+
+    /** Returns row and character index of \a pt, or (0, 0) if \a pt falls
+        outside the text.  \a pt is in client-space coordinates. */
+    std::pair<std::size_t, CPSize> CharAt(const Pt& pt) const;
+
+    /** Returns row and character index of char at \a idx, or (0, 0) if \a idx
+        falls outside the text, or if \a idx refers to a non-visible
+        character. */
+    std::pair<std::size_t, CPSize> CharAt(CPSize idx) const;
+
+    /** Returns the positions of the scrollbars. */
+    Pt ScrollPosition() const;
+
+    /** Returns the code point index of the start of the UTF-8 sequence for
+        the code point at \a <i>char_idx</i> in row \a row, using \a line_data
         instead of the current line data, if it is supplied.  If \a row, \a
         char_idx refers to a character preceeded by formatting tags, the index
         of the first chracter of the first formatting tag is returned instead.
         Not range-checked. */
-    int     StringIndexOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+    CPSize CharIndexOf(std::size_t row, CPSize char_idx,
+                       const std::vector<Font::LineData>* line_data = 0) const;
 
-    /** Returns range of indices into WindowText() of the UTF-8 sequence for
-        the code point at \a char_idx in row \a row, using \a line_data
-        instead of the current line data, if it is supplied.  If \a row, \a
-        char_idx refers to a character preceeded by formatting tags, the index
-        of the first chracter of the first formatting tag is returned instead.
-        Not range-checked. */
-    std::pair<int, int>
-            StringRangeOf(int row, int char_idx, const std::vector<Font::LineData>* line_data = 0) const;
+    /** Returns the the x-coordinate of the beginning of row \a row, in
+        cleint-space coordinates.  Not range-checked. */
+    X RowStartX(std::size_t row) const;
 
-    X       RowStartX(int row) const;       ///< returns the the x-coordinate of the beginning of row \a row, in cleint-space coordinates.  Not range-checked.
-    X       CharXOffset(int row, int idx) const; ///< returns the distance in pixels from the start of row \a row to the character at index idx.  Not range-checked.
-    int     RowAt(Y y) const;          ///< returns the line that falls under y coordinate \a y.  \a y must be in client-space coordinates.
-    int     CharAt(int row, X x) const;///< returns the index of the character in row \a row that falls under x coordinate \a x.  \a x must be in client-space coordinates.
-    int     FirstVisibleRow() const;        ///< returns the index of the first visible row, or 0 if none
-    int     LastVisibleRow() const;         ///< returns the index of the last visible row, or 0 if none
-    int     FirstFullyVisibleRow() const;   ///< returns the index of the first fully visible row, or 0 if none
-    int     LastFullyVisibleRow() const;    ///< returns the index of the last fully visible row, or 0 if none
-    int     FirstVisibleChar(int row) const;///< returns the index of the first visible character of row \a row, or 0 if none
-    int     LastVisibleChar(int row) const; ///< returns the index of the last visible character of row \a row, or 0 if none
-    std::pair<int, int>
-            HighCursorPos() const;          ///< returns the greater of m_cursor_begin and m_cursor_end
-    std::pair<int, int>
-            LowCursorPos() const;           ///< returns the lesser of m_cursor_begin and m_cursor_end
+    /** Returns the distance from the start of row \a row to the character at
+        index idx.  Not range-checked. */
+    X CharXOffset(std::size_t row, CPSize idx) const;
+
+    /** Returns the line that falls under Y coordinate \a y.  \a y must be in
+        client-space coordinates. */
+    std::size_t RowAt(Y y) const;
+
+    /** Returns the index of the character in row \a row that falls under X
+        coordinate \a x.  \a x must be in client-space coordinates. */
+    CPSize CharAt(std::size_t row, X x) const;
+
+    /** Returns the index of the first visible row, or 0 if none. */
+    std::size_t FirstVisibleRow() const;
+
+    /** Returns the index of the last visible row, or 0 if none. */
+    std::size_t LastVisibleRow() const;
+
+    /** Returns the index of the first fully visible row, or 0 if none. */
+    std::size_t FirstFullyVisibleRow() const;
+
+    /** Returns the index of the last fully visible row, or 0 if none. */
+    std::size_t LastFullyVisibleRow() const;
+
+    /** Returns the index of the first visible character of row \a row, or 0
+        if none. */
+    CPSize FirstVisibleChar(std::size_t row) const;
+
+    /** Returns the index of the last visible character of row \a row, or 0 if
+        none. */
+    CPSize LastVisibleChar(std::size_t row) const;
+
+    /** Returns the greater of m_cursor_begin and m_cursor_end. */
+    std::pair<std::size_t, CPSize> HighCursorPos() const;
+
+    /** Returns the lesser of m_cursor_begin and m_cursor_end. */
+    std::pair<std::size_t, CPSize> LowCursorPos() const;
     //@}
 
     /** \name Mutators */ ///@{
-    void    RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
+    /** Recreates the vertical and horizontal scrolls as needed. */
+    void RecreateScrolls();
 
     /** Ensures that the next call to SetText() preserves the positioning of
         the text.  This should only be called if it is known that the call to
@@ -181,31 +217,35 @@ protected:
         coloring or underlining a link may require a call to SetText(), but
         may be guaranteed not to change the text layout.  Without a call to
         this function, the scroll positions will be reset. */
-    void    PreserveTextPositionOnNextSetText();
+    void PreserveTextPositionOnNextSetText();
     //@}
 
-    static const unsigned int SCROLL_WIDTH;          ///< the width used to create the control's vertical and horizontal Scrolls
-    static const unsigned int BORDER_THICK;          ///< the thickness with which to render the border of the control
+    /** The width used to create the control's vertical and horizontal
+        Scrolls. */
+    static const unsigned int SCROLL_WIDTH;
+
+    /** The thickness with which to render the border of the control. */
+    static const unsigned int BORDER_THICK;
 
 private:
     void    Init();
     void    ValidateStyle();
-    void    ClearSelected();   ///< clears (deletes) selected characters, as when a del, backspace, or character is entered
-    void    AdjustView();      ///< makes sure the caret ends up in view after an arbitrary move or SetText()
-    void    AdjustScrolls();   ///< sets the sizes of the scroll-space and the screen-space of the scrolls
+    void    ClearSelected();   ///< Clears (deletes) selected characters, as when a del, backspace, or character is entered
+    void    AdjustView();      ///< Makes sure the caret ends up in view after an arbitrary move or SetText()
+    void    AdjustScrolls();   ///< Sets the sizes of the scroll-space and the screen-space of the scrolls
     void    VScrolled(int upper, int lower, int range_upper, int range_lower);
     void    HScrolled(int upper, int lower, int range_upper, int range_lower);
 
     Flags<MultiEditStyle> m_style;
 
-    std::pair<int, int>  m_cursor_begin; ///< the row and character index of the first character in the hilited selection
-    std::pair<int, int>  m_cursor_end;   ///< the row and character index + 1 of the last character in the hilited selection
-                                         // if m_cursor_begin == m_cursor_end, the caret is draw at m_cursor_end
+    std::pair<std::size_t, CPSize> m_cursor_begin; ///< The row and character index of the first character in the hilited selection
+    std::pair<std::size_t, CPSize> m_cursor_end;   ///< The row and character index + 1 of the last character in the hilited selection
+    // if m_cursor_begin == m_cursor_end, the caret is draw at m_cursor_end
 
-    Pt          m_contents_sz;          ///< the size of the entire text block in the control (not just the visible part)
+    Pt          m_contents_sz;          ///< The size of the entire text block in the control (not just the visible part)
 
-    X           m_first_col_shown;      ///< the position (counted from the left side of the text) of the first pixel shown
-    Y           m_first_row_shown;      ///< the position (counted from the top of the text) of the first pixel shown
+    X           m_first_col_shown;      ///< The position (counted from the left side of the text) of the first pixel shown
+    Y           m_first_row_shown;      ///< The position (counted from the top of the text) of the first pixel shown
 
     std::size_t m_max_lines_history;
 

@@ -23,8 +23,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file PtRect.h
-    Contains the utility classes Pt and Rect. */
+/** \file PtRect.h \brief Contains the utility classes Pt and Rect. */
 
 #ifndef _GG_PtRect_h_
 #define _GG_PtRect_h_
@@ -38,13 +37,15 @@
 namespace GG {
 
 /** \class GG::X
-    The x-coordinate value type.  X has an underlying value type of int.
-    \see GG_STRONG_INTEGRAL_TYPEDEF */
+    \brief The x-coordinate value type.
+
+    X has an underlying value type of int.  \see GG_STRONG_INTEGRAL_TYPEDEF */
 GG_STRONG_INTEGRAL_TYPEDEF(X, int);
 
 /** \class GG::Y
-    The y-coordinate value type.  Y has an underlying value type of int.
-    \see GG_STRONG_INTEGRAL_TYPEDEF */
+    \brief The y-coordinate value type.
+
+    Y has an underlying value type of int.  \see GG_STRONG_INTEGRAL_TYPEDEF */
 GG_STRONG_INTEGRAL_TYPEDEF(Y, int);
 
 // some useful coordinate constants
@@ -53,33 +54,33 @@ extern GG_API const X X1;
 extern GG_API const Y Y0;
 extern GG_API const Y Y1;
 
-/** A GG screen coordinate class */
+/** \brief A GG screen coordinate class. */
 struct GG_API Pt
 {
     /** \name Structors */ ///@{
-    Pt();               ///< default ctor
-    Pt(X x_, Y y_);     ///< ctor that creates a Pt ( \a _x , \a y )
-    Pt(X_d x_, Y y_);   ///< ctor that creates a Pt ( \a _x , \a y )
-    Pt(X x_, Y_d y_);   ///< ctor that creates a Pt ( \a _x , \a y )
-    Pt(X_d x_, Y_d y_); ///< ctor that creates a Pt ( \a _x , \a y )
+    Pt();               ///< Default ctor.
+    Pt(X x_, Y y_);     ///< Ctor that creates a Pt ( \a _x , \a y ).
+    Pt(X_d x_, Y y_);   ///< Ctor that creates a Pt ( \a _x , \a y ).
+    Pt(X x_, Y_d y_);   ///< Ctor that creates a Pt ( \a _x , \a y ).
+    Pt(X_d x_, Y_d y_); ///< Ctor that creates a Pt ( \a _x , \a y ).
     //@}
 
     /** \name Accessors */ ///@{
     /** Returns true if x < \a rhs.x or returns true if x == \a rhs.x and y
         <\a rhs.y.  This is useful for sorting Pts in STL containers and
-        algorithms*/
+        algorithms. */
     bool Less(const Pt& rhs) const
         { return x < rhs.x ? true : (x == rhs.x ? (y < rhs.y ? true : false) : false); }
     //@}
 
     /** \name Mutators */ ///@{
-    void  operator+=(const Pt& rhs)      { x += rhs.x; y += rhs.y; } ///< adds \a rhs to Pt
-    void  operator-=(const Pt& rhs)      { x -= rhs.x; y -= rhs.y; } ///< subtracts \a rhs to Pt
-    Pt    operator-() const              { return Pt(-x, -y); }      ///< negates Pt
+    void  operator+=(const Pt& rhs)      { x += rhs.x; y += rhs.y; } ///< Adds \a rhs to Pt.
+    void  operator-=(const Pt& rhs)      { x -= rhs.x; y -= rhs.y; } ///< Subtracts \a rhs to Pt.
+    Pt    operator-() const              { return Pt(-x, -y); }      ///< Negates Pt.
     //@}
 
-    X x; ///< the x component
-    Y y; ///< the y component
+    X x; ///< The x component.
+    Y y; ///< The y component.
 
 private:
     friend class boost::serialization::access;
@@ -87,8 +88,9 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** a GG rectangle class. this is essentially just two points that bound the
-    rectangle*/
+/** \brief A GG rectangle class.
+
+    This is essentially just two points that bound the rectangle. */
 struct GG_API Rect
 {
     /** \name Structors */ ///@{

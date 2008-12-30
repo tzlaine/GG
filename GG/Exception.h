@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file Exception.h
-    Contains the GG::Exception base class and macros that ease declaring subclasses. */
+/** \file Exception.h \brief Contains the GG::Exception base class and macros
+    that ease declaring subclasses. */
 
 #ifndef _GG_Exception_h_
 #define _GG_Exception_h_
@@ -51,10 +51,11 @@
 
 namespace GG {
 
-/** This is the base class for all GG exceptions.  It is based on the
-    std::exception class.  As required by its inheritance from std::exceptions
-    not throw other exceptions, the no-throw exception specification has been
-    added to every member function. */
+/** \brief The base class for all GG exceptions.
+
+    It is based on the std::exception class.  As required by its inheritance
+    from std::exceptions not throw other exceptions, the no-throw exception
+    specification has been added to every member function. */
 class GG_API ExceptionBase : public std::exception
 {
 public:

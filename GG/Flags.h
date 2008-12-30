@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Flags.h
-    Contains Flags and related classes, used to ensure typesafety when using bitflags. */
+/** \file Flags.h \brief Contains Flags and related classes, used to ensure
+    typesafety when using bitflags. */
 
 #ifndef _GG_Flags_h_
 #define _GG_Flags_h_
@@ -56,17 +56,19 @@ namespace detail {
 }
 
 
-/** Metafunction predicate that evaluates as true iff \a T is a GG flag type,
-    declared by using GG_FLAG_TYPE. */
+/** \brief Metafunction predicate that evaluates as true iff \a T is a GG flag
+    type, declared by using GG_FLAG_TYPE. */
 template <class T>
 struct is_flag_type : boost::mpl::false_ {};
 
 
-/** Defines a new type \a name that is usable as a bit-flag type that can be
-    used by Flags and FlagSpec.  The resulting code defines a specialization
-    for is_flag_type, the flag class itself, streaming operators for the flag
-    type, and the forward declaration of FlagSpec::instance() for the flag
-    type.  The user must define FlagSpec::instance(). */
+/** \brief Defines a new type \a name that is usable as a bit-flag type that
+    can be used by Flags and FlagSpec.
+
+    The resulting code defines a specialization for is_flag_type, the flag
+    class itself, streaming operators for the flag type, and the forward
+    declaration of FlagSpec::instance() for the flag type.  The user must
+    define FlagSpec::instance(). */
 #define GG_FLAG_TYPE(name)                                              \
     class name;                                                         \
                                                                         \
@@ -118,7 +120,8 @@ struct is_flag_type : boost::mpl::false_ {};
     }
 
 
-/** Defines the implementation of FlagSpec::instance() for the flag type \a name. */
+/** Defines the implementation of FlagSpec::instance() for the flag type \a
+    name. */
 #define GG_FLAGSPEC_IMPL(name)                          \
     template <>                                         \
     FlagSpec<name>& FlagSpec<name>::instance()          \
@@ -128,7 +131,9 @@ struct is_flag_type : boost::mpl::false_ {};
     }
 
 
-/** A singleton that encapsulates the set of known flags of type \a FlagType.
+/** \brief A singleton that encapsulates the set of known flags of type \a
+    FlagType.
+
     New user-defined flags must be registered with FlagSpec in order to be
     used in Flags objects for operator~ to work properly with flags of type \a
     FlagType.  FlagSpec is designed to be extensible.  That is, it is
@@ -262,9 +267,10 @@ class Flags;
 template <class FlagType>
 std::ostream& operator<<(std::ostream& os, Flags<FlagType> flags);
 
-/** A set of flags of the same type.  Individual flags and sets of flags can
-    be passed as parameters and/or be stored as member variables in Flags
-    objects. */
+/** \brief A set of flags of the same type.
+
+    Individual flags and sets of flags can be passed as parameters and/or be
+    stored as member variables in Flags objects. */
 template <class FlagType>
 class Flags
 {

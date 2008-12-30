@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file TextControl.h
-    Contains the TextControl class, a control which represents a certain text
-    string in a certain font, justification, etc. */
+/** \file TextControl.h \brief Contains the TextControl class, a control which
+    represents a certain text string in a certain font, justification, etc. */
 
 #ifndef _GG_TextControl_h_
 #define _GG_TextControl_h_
@@ -38,20 +37,23 @@
 
 namespace GG {
 
-/** The name says it all.  All TextControl objects know how to center, left-
-    or right-justify, etc. themselves within their window areas.  The format
-    flags used with TextControl are defined in enum GG::TextFormat in
-    GGBase.h. TextControl has std::string-like operators and functions that
-    allow the m_text member string to be manipulated directly.  In addition,
-    the << and >> operators allow virtually any type (int, float, char, etc.) 
-    to be read from a Text object as if it were an input or output stream,
-    thanks to boost::lexical_cast.  Note that the Text stream operators only
-    read the first instance of the specified type from m_text, and overwrite
-    the entire m_text string when writing to it; both operators may throw.
-    This is a text control based on pre-rendered font glyphs.  The text is
+/** \brief Displays a piece of text.
+
+    TextControl's know how to center, left- or right-justify, etc. themselves
+    within their window areas.  The format flags used with TextControl are
+    defined in enum TextFormat in Base.h. TextControl has std::string-like
+    operators and functions that allow the m_text member string to be
+    manipulated directly.  In addition, the << and >> operators allow
+    virtually any type (int, float, char, etc.) to be read from a TextControl
+    object as if it were an input or output stream, thanks to
+    boost::lexical_cast.  Note that the TextControl stream operators only read
+    the first instance of the specified type from m_text, and overwrite the
+    entire m_text string when writing to it; both operators may throw.
+
+    <br>TextControl is based on pre-rendered font glyphs.  The text is
     rendered character by character from a prerendered font. The font used is
     gotten from the GUI's font manager.  Since a shared_ptr to the font is
-    kept, the font is guaranteed to live at least as long as the TextControl
+    kept, the font is guaranteed to exist at least as long as the TextControl
     object that refers to it.  This also means that if the font is explicitly
     released from the font manager but is still held by at least one
     TextControl object, it will not be destroyed, due to the shared_ptr.  Note
@@ -65,13 +67,18 @@ public:
     using Wnd::SetMinSize;
 
     /** \name Structors */ ///@{
-    TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< ctor taking a font directly
+    /** Ctor. */
+    TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
+                Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE,
+                Flags<WndFlag> flags = Flags<WndFlag>());
 
     /** Ctor that does not require window size.  Window size is determined
         from the string and font; the window will be large enough to fit the
-        text as rendered, and no larger.  The private member m_fit_to_text is
-        also set to true. \see TextControl::SetText() */
-    TextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE, Flags<WndFlag> flags = Flags<WndFlag>());
+        text as rendered, and no larger.  The private member FitToText() will
+        also return true. \see TextControl::SetText() */
+    TextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font,
+                Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE,
+                Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ ///@{
@@ -86,7 +93,7 @@ public:
     Clr               TextColor() const;
 
     /** Returns true iff the text control clips its text to its client area;
-        by default this is not done */
+        by default this is not done. */
     bool              ClipText() const;
 
     /** Returns true iff the text control sets its MinSize() when the bounds
@@ -127,64 +134,113 @@ public:
         the control may not be the default value at all, but garbage. */
     template <class T> T GetValue() const;
 
-    operator const std::string&() const; ///< returns the control's text; allows TextControl's to be used as std::string's
+    /** Returns the control's text; allows TextControl's to be used as
+        std::string's. */
+    operator const std::string&() const;
 
-    bool  Empty() const;   ///< returns true when text string equals ""
-    int   Length() const;  ///< returns code points (not characters!) in text string
+    bool   Empty() const;   ///< Returns true iff text string equals "".
+    CPSize Length() const;  ///< Returns the number of code points in the text.
 
     /** Returns the upper-left corner of the text as it is would be rendered
         if it were not bound to the dimensions of this control. */
-    Pt    TextUpperLeft() const;
+    Pt TextUpperLeft() const;
 
     /** Returns the lower-right corner of the text as it is would be rendered
         if it were not bound to the dimensions of this control. */
-    Pt    TextLowerRight() const;
+    Pt TextLowerRight() const;
     //@}
 
     /** \name Mutators */ ///@{
     virtual void Render();
 
-    /** Sets the text to \a str; may resize the window.  If the private member
-        m_fit_to_text is true (i.e. if the second ctor type was used), calls
-        to this function cause the window to be resized to whatever space the
-        newly rendered text occupies. */
-    virtual void   SetText(const std::string& str);
-    virtual void   SizeMove(const Pt& ul, const Pt& lr);
-    void           SetTextFormat(Flags<TextFormat> format); ///< sets the text format; ensures that the flags are sane
-    void           SetTextColor(Clr color);      ///< sets the text color
-    virtual void   SetColor(Clr c);              ///< just like Control::SetColor(), except that this one also adjusts the text color
-    void           ClipText(bool b);             ///< enables/disables text clipping to the client area
-    void           SetMinSize(bool b);           ///< enables/disables setting the minimum size of the window to be the text size
+    /** Sets the text to \a str.  May resize the window.  If FitToText()
+        returns true (i.e. if the second ctor was used), calls to this
+        function cause the window to be resized to whatever space the newly
+        rendered text occupies. */
+    virtual void SetText(const std::string& str);
+
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
+
+    /** Sets the text format; ensures that the flags are sane. */
+    void         SetTextFormat(Flags<TextFormat> format);
+
+    /** Sets the text color. */
+    void         SetTextColor(Clr color);
+
+    /** Just like Control::SetColor(), except that this one also adjusts the
+        text color. */
+    virtual void SetColor(Clr c);
+
+    /** Enables/disables text clipping to the client area. */
+    void         ClipText(bool b);
+
+    /** Enables/disables setting the minimum size of the window to be the text
+        size. */
+    void         SetMinSize(bool b);
 
     /** Sets the value of the control's text to the stringified version of t.
         If t can be converted to a string representation by a
         boost::lexical_cast (and thus by a stringstream), then the << operator
-        will do so, eg double(4.15) to string("4.15").  Note that the return
+        will do so, e.g. double(4.15) to string("4.15").  Note that the return
         type is void, so multiple << operations cannot be strung together.
         \throw boost::bad_lexical_cast boost::lexical_cast throws
         boost::bad_lexical_cast when it is confused.*/
-    template <class T> void operator<<(T t);
+    template <class T>
+    void operator<<(T t);
 
-    void  operator+=(const std::string& str);    ///< appends \a str to text string by way of SetText()
-    void  operator+=(char ch);                   ///< appends \a ch to text string by way of SetText()
-    void  Clear();                               ///< sets text string to ""
-    void  Insert(int pos, char ch);              ///< allows modification of text string much as a std::string
-    void  Insert(int pos, const std::string& s); ///< allows modification of text string much as a std::string
-    void  Erase(int pos, int num = 1);           ///< allows modification of text string much as a std::string
+    void  operator+=(const std::string& s); ///< Appends \a s to text.
+    void  operator+=(char c);               ///< Appends \a c to text.
+    void  Clear();                          ///< Sets text to the empty string.
+
+    /** Inserts \a c at position \a pos within the text.  \note Just as with
+        most string parameters throughout GG, \a c must be a valid UTF-8
+        sequence. */
+    void  Insert(CPSize pos, char c);
+
+    /** Inserts \a s at position \a pos within the text. */
+    void  Insert(CPSize pos, const std::string& s);
+    
+    /** Erases \a num code points from the text starting at position \a
+        pos. */
+    void  Erase(CPSize pos, CPSize num = CP1);
+
+    /** Inserts \a c at text position \a pos within line \a line.  \note Just
+        as with most string parameters throughout GG, \a c must be a valid
+        UTF-8 sequence. */
+    void  Insert(std::size_t line, CPSize pos, char c);
+
+    /** Inserts \a s at text position \a pos within line \a line. */
+    void  Insert(std::size_t line, CPSize pos, const std::string& s);
+
+    /** Erases \a num code points from the text starting at position \a
+        pos within line \a line. */
+    void  Erase(std::size_t line, CPSize pos, CPSize num = CP1);
 
     virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
     /** \name Structors */ ///@{
-    TextControl(); ///< default ctor
+    TextControl(); ///< Default ctor.
     //@}
 
     /** \name Accessors */ ///@{
-    const std::vector<Font::LineData>&  GetLineData() const;
-    const boost::shared_ptr<Font>&      GetFont() const;
-    bool                                FitToText() const;
-    bool                                DirtyLoad() const;
+    /** Returns the line data for the text in this TextControl. */
+    const std::vector<Font::LineData>& GetLineData() const;
+
+    /** Returns the Font used by this TextControl to render its text. */
+    const boost::shared_ptr<Font>& GetFont() const;
+
+    /** Returns true iff this TextControl was constructed using the ctor
+        without width and height parameters.  \see TextControl::SetText() */
+    bool FitToText() const;
+
+    /** Returns true iff the object has just been loaded from a serialized
+        form, meaning changes may have been made that leave the control in an
+        inconsistent state; this must be remedied by calling
+        <code>SetText(WindowText());</code> the next time Render() is
+        called. */
+    bool DirtyLoad() const;
     //@}
 
 private:
@@ -197,7 +253,7 @@ private:
     bool                        m_clip_text;
     bool                        m_set_min_size;
     std::vector<Font::LineData> m_line_data;
-    int                         m_code_points;
+    CPSize                      m_code_points;
     boost::shared_ptr<Font>     m_font;
     bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
@@ -211,8 +267,7 @@ private:
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);
-    // true iff the object has just been loaded from a serialized form, meaning changes may have been made that leave
-    // the control in an inconsistent state; this must be remedied the next time Render() is called
+
     bool m_dirty_load;
 };
 

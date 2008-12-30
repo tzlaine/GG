@@ -25,9 +25,8 @@
    
 /* This class is based on earlier work with GG by Tony Casale.  Thanks, Tony.*/
 
-/** \file DynamicGraphic.h
-    Contains the DynamicGraphic class, a control that allows display of a
-    slideshow or animated sequence of images. */
+/** \file DynamicGraphic.h \brief Contains the DynamicGraphic class, a control
+    that allows display of a slideshow or animated sequence of images. */
 
 #ifndef _GG_DynamicGraphic_h_
 #define _GG_DynamicGraphic_h_
@@ -39,32 +38,33 @@
 namespace GG {
 class Texture;
 
-/** A control that replays images in sequence, forwards or backwards, animated
-    or one frame at a time.  Frames of animation are stored in GG::Textures.
-    The frames are assumed to be laid out in rows from right to left, top to
-    bottom, like text.  The location of each frame is calculated by
-    DynamicGraphic; the user just needs to lay out the frames in the right
-    order in the Texture(s) and give them to DynamicGraphic.  If a Texture is
-    to be used that has "dead space" where there are no frames, that space
-    must be at the end of the Texture, and the number of frames in the Texture
-    should be supplied when the Texture is added.  When laying out the frames
-    in the textures, the user can leave a margin between the frames and
-    between the frames and the edge of the overall image, to make Texture
-    creation and editing easier.  The width of this margin must be supplied to
-    DynamicGraphic's ctor, and is constant once set.  The margin applies to
-    the top and left of \a each image, so the margins at the right and bottom
-    edges of the texture are optional.  The multiple-Texture ctor assumes that
-    all Textures but the last are packed with frames; if you need to specify
-    multiple Textures with dead space, construct with an empty \a textures
-    parameter and use AddFrames().  Note that DynamicGraphic doesn't have
-    "animated" in its name; it can replay images at any speed, and moreover it
-    can be used as a sort of slideshow, and doesn't necessarily need to be
-    animated at all. \note This is a situation in which the "last+1" idiom
-    used throughout GG does not apply; when you set the end frame index to N,
-    the last frame to be shown will be N, not N - 1. Also, while this control
-    does not need to be the same size as the frames replayed within it, the
-    size of the frames is taken from the size of the control when it is
-    contructed. */
+/** \brief A control that replays images in sequence, forwards or backwards,
+    animated or one frame at a time.
+
+    Frames of animation are stored in GG::Textures.  The frames are assumed to
+    be laid out in rows from right to left, top to bottom, like text.  The
+    location of each frame is calculated by DynamicGraphic; the user just
+    needs to lay out the frames in the right order in the Texture(s) and give
+    them to DynamicGraphic.  If a Texture is to be used that has "dead space"
+    where there are no frames, that space must be at the end of the Texture,
+    and the number of frames in the Texture should be supplied when the
+    Texture is added.  When laying out the frames in the textures, the user
+    can leave a margin between the frames and between the frames and the edge
+    of the overall image, to make Texture creation and editing easier.  The
+    width of this margin must be supplied to DynamicGraphic's ctor, and is
+    constant once set.  The margin applies to the top and left of \a each
+    image, so the margins at the right and bottom edges of the texture are
+    optional.  The multiple-Texture ctor assumes that all Textures but the
+    last are packed with frames; if you need to specify multiple Textures with
+    dead space, construct with an empty \a textures parameter and use
+    AddFrames().  Note that DynamicGraphic doesn't have "animated" in its
+    name; it can replay images at any speed, and moreover it can be used as a
+    sort of slideshow, and doesn't necessarily need to be animated at
+    all. \note This is a situation in which the "last+1" idiom used throughout
+    GG does not apply; when you set the end frame index to N, the last frame
+    to be shown will be N, not N - 1. Also, while this control does not need
+    to be the same size as the frames replayed within it, the size of the
+    frames is taken from the size of the control when it is contructed. */
 class GG_API DynamicGraphic : public Control
 {
 public:

@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file WndEditor.h
-    Contains the WndEditor class, a window that contains controls that can alter the properties of a Wnd
-    interactively. */
+/** \file WndEditor.h \brief Contains the WndEditor class, a window that
+    contains controls that can alter the properties of a Wnd interactively. */
 
 #ifndef _GG_WndEditor_h_
 #define _GG_WndEditor_h_

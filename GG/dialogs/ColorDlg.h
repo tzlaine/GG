@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file ColorDlg.h
-    Contains the Wnd class, upon which all GG GUI elements are based. */
+/** \file ColorDlg.h \brief Contains the Wnd class, upon which all GG GUI
+    elements are based. */
 
 #ifndef _GG_ColorDlg_h_
 #define _GG_ColorDlg_h_
@@ -37,8 +37,9 @@ namespace GG {
 class Font;
 class Slider;
     
-/** Contains the necessary data to represent a color in HSV space, with an
-    alpha value thrown in to make conversions to and from GG::Clr possible. */
+/** \brief Contains the necessary data to represent a color in HSV space, with
+    an alpha value thrown in to make conversions to and from GG::Clr
+    possible. */
 struct GG_API HSVClr
 {
     HSVClr(); ///< default ctor
@@ -52,8 +53,9 @@ struct GG_API HSVClr
     void serialize(Archive& ar, const unsigned int version);
 };
 
-/** A control specifically designed for ColorDlg that allows the user to
-    select a point in the Hue-Saturation subspace of the HSV color space. */
+/** \brief A control specifically designed for ColorDlg that allows the user
+    to select a point in the Hue-Saturation subspace of the HSV color
+    space. */
 class GG_API HueSaturationPicker : public Control
 {
 public:
@@ -98,8 +100,8 @@ private:
 };
 
 
-/** A control specifically designed for ColorDlg that allows the user to
-    select a point in the Value subspace of the HSV color space. */
+/** \brief A control specifically designed for ColorDlg that allows the user
+    to select a point in the Value subspace of the HSV color space. */
 class GG_API ValuePicker : public Control
 {
 public:
@@ -148,16 +150,17 @@ private:
 };
 
 
-/** A dialog box used to get a color selection from the user.  The user may
-    select a certain number of custom colors, which will remain available for
-    the duration of that run of the application in the ColorDlg's static
-    space.  If desired, an optional previous color can be provided to the
-    ColorDlg ctor, which will cause this previous color to be shown next to
-    the new color for comparison purposes. */
+/** \brief A dialog box used to get a color selection from the user.
+
+    The user may select a certain number of custom colors, which will remain
+    available for the duration of that run of the application in the
+    ColorDlg's static space.  If desired, an optional previous color can be
+    provided to the ColorDlg ctor, which will cause this previous color to be
+    shown next to the new color for comparison purposes. */
 class GG_API ColorDlg : public Wnd
 {
 public:
-    /** the button used to select the custom colors in ColorDlg. */
+    /** \brief The button used to select the custom colors in ColorDlg. */
     class GG_API ColorButton : public Button
     {
     public:
@@ -194,10 +197,12 @@ public:
         void serialize(Archive& ar, const unsigned int version);
     };
 
-    /** A simple control that only displays a rectangle filled with the given
-        color.  The color is shown in full alpha in the upper-left portion of
-        the rectangle, and the color is shown in its given alpha in the
-        lower-left of the rectangle. */
+    /** \brief A simple control that only displays a rectangle filled with the
+        given color.
+
+        The color is shown in full alpha in the upper-left portion of the
+        rectangle, and the color is shown in its given alpha in the lower-left
+        of the rectangle. */
     class GG_API ColorDisplay : public Control
     {
     public:

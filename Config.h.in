@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file Config.h
-    Contains build-generated configuration macros used throughout GG. */
+/** \file Config.h \brief Contains build-generated configuration macros used
+    throughout GG. */
 
 #ifndef _GG_Config_h_
 #define _GG_Config_h_

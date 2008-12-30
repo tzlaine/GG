@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file ListBox.h
-    Contains the ListBox class, a control that contains rows of other controls,
-    commonly TextControls. */
+/** \file ListBox.h \brief Contains the ListBox class, a control that contains
+    rows of other controls, commonly TextControls. */
 
 #ifndef _GG_ListBox_h_
 #define _GG_ListBox_h_
@@ -64,26 +63,27 @@ extern GG_API const ListBoxStyle LIST_USERDELETE;     ///< Allows user to remove
 extern GG_API const ListBoxStyle LIST_BROWSEUPDATES;  ///< Causes a signal to be emitted whenever the mouse moves over ("browses") a row.
 
 
-/** A flexible control that can contain rows and columns of other controls,
-    even other ListBoxes.  A ListBox consists of rows of controls, usually
-    text or graphics.  Each row represents one item; rows can be added or
-    removed, but not columns or individual controls (though the individual
-    controls can be removed from a row by accessing it directly).  Each Row in
-    a ListBox must have the same number of cells and the same cell widths as
-    all the others.  If you add a row that has fewer cells than the ListBox
-    you are adding it to, it will be padded with empty cells; likewise, if it
-    has too many cells to fit into the Listbox, it will have cells removed.
-    ListBoxes are designed to be easy to use in common cases, and useful in
-    uncommon cases with only a little work.  Adding a row to an empty ListBox
-    will cause the ListBox to take on the number of columns that the row has
-    cells, and each column will have an equal portion of the ListBox's width
-    (any remainder is placed in the last column).  This allows you to just add
-    rows to a ListBox without worrying about setting up the ListBox in any way
-    ahead of time.  Use LockColWidths() to prevent empty ListBoxes from taking
-    on a new row's number of columns.  To create a ListBox with user-defined
-    widths, use the ctor designed for that, or call SetNumCols(), set
-    individual widths with SetColWidth(), and lock the column widths with
-    LockColWidths().
+/** \brief A flexible control that can contain rows and columns of other
+    controls, even other ListBoxes.
+
+    A ListBox consists of rows of controls, usually text or graphics.  Each
+    row represents one item; rows can be added or removed, but not columns or
+    individual controls (though the individual controls can be removed from a
+    row by accessing it directly).  Each Row in a ListBox must have the same
+    number of cells and the same cell widths as all the others.  If you add a
+    row that has fewer cells than the ListBox you are adding it to, it will be
+    padded with empty cells; likewise, if it has too many cells to fit into
+    the Listbox, it will have cells removed.  ListBoxes are designed to be
+    easy to use in common cases, and useful in uncommon cases with only a
+    little work.  Adding a row to an empty ListBox will cause the ListBox to
+    take on the number of columns that the row has cells, and each column will
+    have an equal portion of the ListBox's width (any remainder is placed in
+    the last column).  This allows you to just add rows to a ListBox without
+    worrying about setting up the ListBox in any way ahead of time.  Use
+    LockColWidths() to prevent empty ListBoxes from taking on a new row's
+    number of columns.  To create a ListBox with user-defined widths, use the
+    ctor designed for that, or call SetNumCols(), set individual widths with
+    SetColWidth(), and lock the column widths with LockColWidths().
 
     <br>Note that Rows are stored by pointer.  If you want to move a Row from
     one ListBox to another, use GetRow() and Insert().
@@ -101,8 +101,10 @@ extern GG_API const ListBoxStyle LIST_BROWSEUPDATES;  ///< Causes a signal to be
 class GG_API ListBox : public Control
 {
 public:
-    /** Sorts iterators to ListBox::Row*s from a container of ListBox::Row*s,
-        for instance for use in a std::map<> or std::set<> (eg,
+    /** \brief Sorts iterators to ListBox::Row*s from a container of
+        ListBox::Row*s.
+
+        For instance for use in a std::map<> or std::set<> (eg,
         ListBox::SelectionSet).  The iterators must refer to pointers to
         ListBox::Rows that are laid out vertically (as in a ListBox).  This
         layout is used to define a y-ordering that is used to sort the
@@ -119,28 +121,30 @@ public:
         Cont* m_container;
     };
 
-    /** This is a single item in a listbox.  A Row is primarily a container
-        for Controls.  Each cell in a Row contains pointer to a
-        Control-derived object.  As always, each such Control can be connected
-        to arbitrary functionality using signals and slots.  During dragging
-        and dropping, the data type associated with a Row (DragDropDataType())
-        indicates to potential drop targets what type of data the Row
-        represents; the target may accept or decline the drop based on the
-        data type.  Rows are stored in ListBoxes by reference, not value; this
-        means that you can subclass from Row to create your own custom Row
-        types.  This is the recommended method for associating a row with the
-        non-GUI object that it represents.  Note that all subclasses of Row
-        must declare a SortKeyType, if it differs from std::string, and must
-        provide a SortKey() method if it should differ from the default
-        SortKey() that Row provides.  Note that SortKey is not virtual; this
-        part of its interface is used for compile-time polymorphism --
-        whatever sorter is used with a Row subclass must know the most-derived
-        type of the Row subclass.  \note The margin, column alignment, and
-        width cell data are included so that each Row has all the necessary
-        information with which to render itself (this is primarily needed to
-        facilitate drag-and-drop); these data are duplicates of the margin,
-        alignment, and column widths data found in the owning ListBox, and may
-        be overwritten by the ListBox at any time. */
+    /** \brief A single item in a listbox.
+
+        A Row is primarily a container for Controls.  Each cell in a Row
+        contains pointer to a Control-derived object.  As always, each such
+        Control can be connected to arbitrary functionality using signals and
+        slots.  During dragging and dropping, the data type associated with a
+        Row (DragDropDataType()) indicates to potential drop targets what type
+        of data the Row represents; the target may accept or decline the drop
+        based on the data type.  Rows are stored in ListBoxes by reference,
+        not value; this means that you can subclass from Row to create your
+        own custom Row types.  This is the recommended method for associating
+        a row with the non-GUI object that it represents.  Note that all
+        subclasses of Row must declare a SortKeyType, if it differs from
+        std::string, and must provide a SortKey() method if it should differ
+        from the default SortKey() that Row provides.  Note that SortKey is
+        not virtual; this part of its interface is used for compile-time
+        polymorphism -- whatever sorter is used with a Row subclass must know
+        the most-derived type of the Row subclass.  \note The margin, column
+        alignment, and width cell data are included so that each Row has all
+        the necessary information with which to render itself (this is
+        primarily needed to facilitate drag-and-drop); these data are
+        duplicates of the margin, alignment, and column widths data found in
+        the owning ListBox, and may be overwritten by the ListBox at any
+        time. */
     struct GG_API Row : public Control
     {
         /** Allows multiple mutators on a Row to be called, with only one call
@@ -450,10 +454,11 @@ public:
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
-    /** Sorts two Rows of a ListBox using operator<() on the Row::SortKeyType
-        provided by the rows' SortKey() methods.  If you want to use operator<()
-        with a Row subclass DerivedRow that has a custom SortKeyType, use
-        DefaultRowCmp<DerivedRow>. */
+    /** \brief Sorts two Rows of a ListBox using operator<() on the
+        Row::SortKeyType provided by the rows' SortKey() methods.
+
+        If you want to use operator<() with a Row subclass DerivedRow that has
+        a custom SortKeyType, use DefaultRowCmp<DerivedRow>. */
     template <class RowType>
     struct DefaultRowCmp
     {

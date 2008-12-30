@@ -23,9 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file StyleFactory.h
-    Contains the StyleFactory class, which creates new controls for internal
-    use by dialogs and other controls. */
+/** \file StyleFactory.h \brief Contains the StyleFactory class, which creates
+    new controls for internal use by dialogs and other controls. */
 
 #ifndef _GG_StyleFactory_h_
 #define _GG_StyleFactory_h_
@@ -57,16 +56,17 @@ class TextControl;
 class Texture;
 class ThreeButtonDlg;
 
-/** Creates new dialogs and Controls.  This class can be used to create a look
-    for the entire GUI by providing user-defined subclasses of the standard
-    Controls.  A Control or dialog can then use the StyleFactory to create the
-    dialogs/controls it needs (e.g. a vertical Scroll uses
-    NewVScrollTabButton() to create its tab).  This reduces the amount of
-    subclass code that is required to produce a set of custom GG classes.
-    Note that the subcontrol factory methods below may be the same as or
-    different from their generic counterparts, allowing greater flexibility in
-    which controls are created in different contexts.  For example,
-    NewButton() may create a generic, basic GG Button, but
+/** \brief Creates new dialogs and Controls.
+
+    This class can be used to create a look for the entire GUI by providing
+    user-defined subclasses of the standard Controls.  A Control or dialog can
+    then use the StyleFactory to create the dialogs/controls it needs (e.g. a
+    vertical Scroll uses NewVScrollTabButton() to create its tab).  This
+    reduces the amount of subclass code that is required to produce a set of
+    custom GG classes.  Note that the subcontrol factory methods below may be
+    the same as or different from their generic counterparts, allowing greater
+    flexibility in which controls are created in different contexts.  For
+    example, NewButton() may create a generic, basic GG Button, but
     NewHSliderTabButton() may produce a specialized button that looks better
     on horizontal sliders.  By default, all subcontrol methods invoke the more
     generic control method for the type of control they each return. */

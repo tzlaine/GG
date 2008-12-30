@@ -33,6 +33,7 @@
 #include <GG/StyleFactory.h>
 #include <GG/Timer.h>
 #include <GG/ZList.h>
+#include <GG/utf8/checked.h>
 
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
@@ -51,9 +52,6 @@
 using namespace GG;
 
 namespace {
-    const boost::xpressive::sregex WORD_REGEX =
-        +boost::xpressive::set[boost::xpressive::_w | '-'];
-
     /* returns the storage value of mod_keys that should be used with keyboard accelerators the accelerators don't care
        which side of the keyboard you use for CTRL, SHIFT, etc., and whether or not the numlock or capslock are
        engaged.*/
@@ -73,6 +71,13 @@ namespace {
 
     WndEvent::EventType ButtonEvent(WndEvent::EventType left_type, unsigned int mouse_button)
     { return WndEvent::EventType(left_type + (WndEvent::MButtonDown - WndEvent::LButtonDown) * mouse_button); }
+
+    typedef utf8::wchar_iterator<std::string::const_iterator> utf8_wchar_iterator;
+    typedef boost::xpressive::basic_regex<utf8_wchar_iterator> word_regex;
+    typedef boost::xpressive::regex_iterator<utf8_wchar_iterator> word_regex_iterator;
+    const wchar_t WIDE_DASH = '-';
+    const word_regex DEFAULT_WORD_REGEX =
+        +boost::xpressive::set[boost::xpressive::_w | WIDE_DASH];
 }
 
 // implementation data types
@@ -530,17 +535,17 @@ Pt GUI::MouseMovement() const
 Flags<ModKey> GUI::ModKeys() const
 { return s_impl->m_mod_keys; }
 
-std::set<std::pair<std::size_t, std::size_t> > GUI::FindWords(const std::string& str) const
+std::set<std::pair<CPSize, CPSize> > GUI::FindWords(const std::string& str) const
 {
-    std::set<std::pair<std::size_t, std::size_t> > retval;
-    using namespace boost::xpressive;
-    sregex_iterator it(str.begin(), str.end(), WORD_REGEX);
-    sregex_iterator end_it;
+    std::set<std::pair<CPSize, CPSize> > retval;
+    utf8_wchar_iterator first(str.begin(), str.begin(), str.end());
+    utf8_wchar_iterator last(str.end(), str.begin(), str.end());
+    word_regex_iterator it(first, last, DEFAULT_WORD_REGEX);
+    word_regex_iterator end_it;
     for ( ; it != end_it; ++it) {
-        std::pair<std::size_t, std::size_t> indices;
-        indices.first = it->position();
-        indices.second = indices.first + it->length();
-        retval.insert(indices);
+        retval.insert(std::pair<CPSize, CPSize>(
+                          CPSize(it->position()),
+                          CPSize(it->position() + it->length())));
     }
     return retval;
 }

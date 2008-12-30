@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file DrawUtil.h
-    Contains numerous 2D rendering convenience functions, for rendering rectangles, circles, etc. */
+/** \file DrawUtil.h \brief Contains numerous 2D rendering convenience
+    functions, for rendering rectangles, circles, etc. */
 
 #ifndef _GG_DrawUtil_h_
 #define _GG_DrawUtil_h_

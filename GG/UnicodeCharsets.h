@@ -23,9 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file UnicodeCharsets.h
-    Contains the UnicodeCharsets class, and functions related to the character
-    sets defined in the Unicode standard. */
+/** \file UnicodeCharsets.h \brief Contains the UnicodeCharsets class, and
+    functions related to the character sets defined in the Unicode
+    standard. */
 
 #ifndef _UnicodeCharsets_h_
 #define _UnicodeCharsets_h_
@@ -39,7 +39,9 @@
 
 namespace GG {
 
-/** Represents the name and character range of a set of Unicode characters.
+/** \brief Represents the name and character range of a set of Unicode
+    characters.
+
     Such sets are known as "scripts" in Unicode parlance.  Note that the last
     character in the range is actually one past the last character, in the style
     of the STL. */
@@ -51,6 +53,11 @@ struct GG_API UnicodeCharset
     std::string m_script_name;
     boost::uint32_t m_first_char;
     boost::uint32_t m_last_char;
+
+private:
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** Returns true iff all of \a lhs's and \a rhs's members compare equal. */
@@ -75,5 +82,14 @@ GG_API const UnicodeCharset* CharsetContaining(boost::uint32_t c);
 GG_API const UnicodeCharset* CharsetWithName(const std::string& name);
 
 } // namespace GG
+
+// template implementations
+template <class Archive>
+void GG::UnicodeCharset::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_NVP(m_script_name)
+        & BOOST_SERIALIZATION_NVP(m_first_char)
+        & BOOST_SERIALIZATION_NVP(m_last_char);
+}
 
 #endif // _UnicodeCharsets_h_

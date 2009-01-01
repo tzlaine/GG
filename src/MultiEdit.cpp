@@ -956,7 +956,7 @@ void MultiEdit::AdjustView()
     } else if (cl_sz.x <= client_char_posn && m_hscroll) { // if the caret is moving to a place right of the current visible area
         if (m_cursor_end.second - last_visible_char < 5) { // if the caret is fewer than five characters after last_visible_char
             // try to move the caret by five characters
-            CPSize last_char_of_line(GetLineData()[m_cursor_end.first].char_data.size() - 1);
+            CPSize last_char_of_line = CodePointIndexOf(m_cursor_end.first, INVALID_CP_SIZE, GetLineData());
             X five_char_distance =
                 CharXOffset(m_cursor_end.first, (last_visible_char + 5 < last_char_of_line) ? last_visible_char + 5 : last_char_of_line) -
                 CharXOffset(m_cursor_end.first, last_visible_char);

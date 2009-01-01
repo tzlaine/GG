@@ -500,7 +500,7 @@ void Edit::ClearSelected()
     if (GetLineData()[0].char_data.empty())
         m_first_char_shown = CP0;
     else if (GetLineData()[0].char_data.size() <= m_first_char_shown)
-        m_first_char_shown = CPSize(GetLineData()[0].char_data.size() - 1);
+        m_first_char_shown = CodePointIndexOf(0, INVALID_CP_SIZE, GetLineData());
 }
 
 void Edit::AdjustView()
@@ -512,9 +512,9 @@ void Edit::AdjustView()
             m_first_char_shown = (0 <= m_first_char_shown - 5) ? m_first_char_shown - 5 : CP0; // try to move the caret by five characters
         else // if the caret is more than five characters before m_first_char_shown, just move straight to that spot
             m_first_char_shown = m_cursor_pos.second;
-    } else if (text_space <= (m_cursor_pos.second ? GetLineData()[0].char_data[Value(m_cursor_pos.second - 1)].extent : X0) - first_char_offset) { // if the caret is moving to a place right of the current visible area
+    } else if (Length() && text_space <= (m_cursor_pos.second ? GetLineData()[0].char_data[Value(m_cursor_pos.second - 1)].extent : X0) - first_char_offset) { // if the caret is moving to a place right of the current visible area
         // try to move the text by five characters, or to the end if caret is at a location before the end - 5th character
-        CPSize last_idx_to_use = (m_cursor_pos.second + 5 <= Length() - 1) ? m_cursor_pos.second + 5 : Length() - 1; // try to move the caret by five characters
+        CPSize last_idx_to_use = (m_cursor_pos.second + 5 <= Length() - 1) ? m_cursor_pos.second + 5 : Length() - 1;
         const std::vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
         // number of pixels that the caret position overruns the right side of text area
         X pixels_to_move = (char_data[Value(last_idx_to_use)].extent - first_char_offset) - text_space;
@@ -522,8 +522,9 @@ void Edit::AdjustView()
             pixels_to_move += static_cast<int>(Value(m_cursor_pos.second + 5 - Length() - 1)) * GetFont()->SpaceWidth();
         CPSize move_to = m_first_char_shown;
         while (move_to < char_data.size() &&
-               char_data[Value(move_to)].extent - first_char_offset < pixels_to_move)
+               char_data[Value(move_to)].extent - first_char_offset < pixels_to_move) {
             ++move_to;
+        }
         m_first_char_shown = move_to;
     }
 }

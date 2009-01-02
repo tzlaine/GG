@@ -481,9 +481,8 @@ void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
         if (checked) {
             m_group->HandleRadioClick(m_index, false);
         } else {
-            m_ignore_clicks = true;
+            ScopedAssign<bool> assignment(m_ignore_clicks, true);
             m_button->SetCheck(true);
-            m_ignore_clicks = false;
         }
     }
 }

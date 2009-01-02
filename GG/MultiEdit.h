@@ -253,6 +253,7 @@ private:
     Scroll*     m_hscroll;
 
     bool        m_preserve_text_position_on_next_set_text;
+    bool        m_ignore_adjust_scrolls;
 
     friend class boost::serialization::access;
     template <class Archive>

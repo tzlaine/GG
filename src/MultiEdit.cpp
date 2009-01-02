@@ -121,7 +121,8 @@ MultiEdit::MultiEdit() :
     m_max_lines_history(ALL_LINES),
     m_vscroll(0),
     m_hscroll(0),
-    m_preserve_text_position_on_next_set_text(false)
+    m_preserve_text_position_on_next_set_text(false),
+    m_ignore_adjust_scrolls(false)
 {}
 
 MultiEdit::MultiEdit(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
@@ -136,7 +137,8 @@ MultiEdit::MultiEdit(X x, Y y, X w, Y h, const std::string& str, const boost::sh
     m_max_lines_history(ALL_LINES),
     m_vscroll(0),
     m_hscroll(0),
-    m_preserve_text_position_on_next_set_text(false)
+    m_preserve_text_position_on_next_set_text(false),
+    m_ignore_adjust_scrolls(false)
 {
     SetColor(color);
     Resize(Pt(w, h));
@@ -969,6 +971,11 @@ void MultiEdit::AdjustView()
 
 void MultiEdit::AdjustScrolls()
 {
+    if (m_ignore_adjust_scrolls)
+        return;
+
+    ScopedAssign<bool> assignment(m_ignore_adjust_scrolls, true);
+
     bool need_vert = false, need_horz = false;
 
     // this client area calculation disregards the thickness of scrolls

@@ -72,6 +72,22 @@ template <class FlagType>
 class Flags;
 class ModKey;
 
+template <class T>
+class ScopedAssign
+{
+public:
+    ScopedAssign(T& t, T val) :
+        m_old_val(t),
+        m_t(t)
+        { m_t = val; }
+    ~ScopedAssign()
+        { m_t = m_old_val; }
+
+private:
+    T m_old_val;
+    T& m_t;
+};
+
 /** "Regions" of a window; used e.g. to determine direction(s) of drag when a
     window that has a drag-frame is clicked. */
 enum WndRegion {

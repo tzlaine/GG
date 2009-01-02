@@ -352,9 +352,8 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
             Pt parent_min_size = parent->MinSize();
             new_parent_min_size.x = std::max(parent_min_size.x, new_parent_min_size.x);
             new_parent_min_size.y = std::max(parent_min_size.y, new_parent_min_size.y);
-            m_ignore_parent_resize = true;
+            ScopedAssign<bool> assignment(m_ignore_parent_resize, true);
             parent->SetMinSize(Pt(new_parent_min_size.x, new_parent_min_size.y));
-            m_ignore_parent_resize = false;
         }
     }
 

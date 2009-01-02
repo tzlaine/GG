@@ -252,7 +252,8 @@ void GUIImpl::HandleDrag(unsigned int mouse_button, const Pt& pos, int curr_tick
             (m_min_drag_distance * m_min_drag_distance < drag_distance) &&
             m_drag_drop_wnds.find(m_drag_wnds[mouse_button]) == m_drag_drop_wnds.end()) {
             if (!m_drag_wnds[mouse_button]->Dragable() &&
-                m_drag_wnds[mouse_button]->DragDropDataType() != "") {
+                m_drag_wnds[mouse_button]->DragDropDataType() != "" &&
+                mouse_button == 0) {
                 Wnd* parent = m_drag_wnds[mouse_button]->Parent();
                 Pt offset = m_prev_button_press_pos - m_drag_wnds[mouse_button]->UpperLeft();
                 GUI::s_gui->RegisterDragDropWnd(m_drag_wnds[mouse_button], offset, parent);
@@ -270,7 +271,9 @@ void GUIImpl::HandleDrag(unsigned int mouse_button, const Pt& pos, int curr_tick
             }
         }
         // notify wnd under cursor of presence of drag-and-drop wnd(s)
-        if (m_curr_drag_wnd_dragged && !m_drag_wnds[mouse_button]->DragDropDataType().empty() ||
+        if (m_curr_drag_wnd_dragged &&
+            m_drag_wnds[mouse_button]->DragDropDataType() != "" &&
+            mouse_button == 0 ||
             !m_drag_drop_wnds.empty()) {
             bool unregistered_drag = m_drag_drop_wnds.empty();
             m_curr_wnd_under_cursor = m_zlist.Pick(pos, GUI::s_gui->ModalWindow(), unregistered_drag ? m_drag_wnds[mouse_button] : 0);
@@ -397,7 +400,7 @@ void GUIImpl::HandleRelease(unsigned int mouse_button, const GG::Pt& pos, int cu
             click_wnd->HandleEvent(WndEvent(ButtonEvent(WndEvent::LButtonUp, mouse_button), pos, m_mod_keys));
         if (m_curr_wnd_under_cursor) {
             if (m_drag_drop_wnds.empty()) {
-                if (click_wnd && click_wnd->DragDropDataType() != "") {
+                if (click_wnd && click_wnd->DragDropDataType() != "" && mouse_button == 0) {
                     m_drag_drop_originating_wnd = click_wnd->Parent();
                     m_curr_wnd_under_cursor->HandleEvent(WndEvent(WndEvent::DragDropLeave));
                     m_curr_drag_drop_here_wnd = 0;

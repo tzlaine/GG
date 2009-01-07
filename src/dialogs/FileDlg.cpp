@@ -40,9 +40,10 @@
 #undef int64_t
 #endif
 
+#include <boost/cast.hpp>
+#include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/format.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/dynamic.hpp>
 #include <boost/system/system_error.hpp>
@@ -188,10 +189,10 @@ bool FileDlg::AppendMissingSaveExtension() const
 { return m_append_missing_save_extension; }
 
 const std::string& FileDlg::FilesString() const
-{ return m_files_label->WindowText(); }
+{ return m_files_label->Text(); }
 
 const std::string& FileDlg::FileTypesString() const
-{ return m_file_types_label->WindowText(); }
+{ return m_file_types_label->Text(); }
 
 const std::string& FileDlg::SaveString() const
 { return m_save_str; }
@@ -280,7 +281,7 @@ void FileDlg::SetFileTypesString(const std::string& str)
 
 void FileDlg::SetSaveString(const std::string& str)
 {
-    bool set_button_text = m_ok_button->WindowText() == m_save_str;
+    bool set_button_text = m_ok_button->Text() == m_save_str;
     m_save_str = str;
     if (set_button_text)
         m_ok_button->SetText(m_save_str);
@@ -288,7 +289,7 @@ void FileDlg::SetSaveString(const std::string& str)
 
 void FileDlg::SetOpenString(const std::string& str)
 {
-    bool set_button_text = m_ok_button->WindowText() == m_open_str;
+    bool set_button_text = m_ok_button->Text() == m_open_str;
     m_open_str = str;
     if (set_button_text)
         m_ok_button->SetText(m_open_str);
@@ -378,8 +379,8 @@ void FileDlg::PlaceLabelsAndEdits(X button_width, Y button_height)
 
     // determine the space needed to display both text labels in the chosen font; use this to expand the edit as far as
     // possible
-    X labels_width = std::max(m_font->TextExtent(m_files_label->WindowText()).x, 
-                                   m_font->TextExtent(m_file_types_label->WindowText()).x) + H_SPACING;
+    X labels_width = std::max(m_font->TextExtent(m_files_label->Text()).x, 
+                              m_font->TextExtent(m_file_types_label->Text()).x) + H_SPACING;
     m_files_label->Resize(Pt(labels_width - H_SPACING / 2, m_files_label->Height()));
     m_file_types_label->Resize(Pt(labels_width - H_SPACING / 2, m_file_types_label->Height()));
     m_files_edit->SizeMove(Pt(labels_width, Height() - (button_height + V_SPACING) * 2),
@@ -433,13 +434,13 @@ void FileDlg::OkHandler(bool double_click)
     m_result.clear();
 
     std::vector<std::string> files;
-    parse(m_files_edit->WindowText().c_str(), (+anychar_p)[append(files)], space_p);
+    parse(m_files_edit->Text().c_str(), (+anychar_p)[append(files)], space_p);
     std::sort(files.begin(), files.end());
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
     if (m_save) { // file save case
-        if (m_ok_button->WindowText() != m_save_str) {
+        if (m_ok_button->Text() != m_save_str) {
             OpenDirectory();
         } else if (files.size() == 1) {
             results_valid = true;
@@ -525,7 +526,7 @@ void FileDlg::FileSetChanged(const ListBox::SelectionSet& files)
     std::string all_files;
     bool dir_selected = false;
     for (ListBox::SelectionSet::const_iterator it = files.begin(); it != files.end(); ++it) {
-        std::string filename = (***it)[0]->WindowText();
+        std::string filename = boost::polymorphic_downcast<TextControl*>((***it)[0])->Text();
         if (filename[0] != '[') {
             if (!all_files.empty())
                 all_files += " ";
@@ -540,15 +541,14 @@ void FileDlg::FileSetChanged(const ListBox::SelectionSet& files)
         }
     }
     *m_files_edit << all_files;
-    if (m_save && !dir_selected && m_ok_button->WindowText() != m_save_str)
+    if (m_save && !dir_selected && m_ok_button->Text() != m_save_str)
         m_ok_button->SetText(m_save_str);
-    else if (m_save && dir_selected && m_ok_button->WindowText() == m_save_str)
+    else if (m_save && dir_selected && m_ok_button->Text() == m_save_str)
         m_ok_button->SetText(m_open_str);
 }
 
 void FileDlg::FileDoubleClicked(DropDownList::iterator it)
 {
-    std::string filename = (**it)[0]->WindowText();
     m_files_list->DeselectAll();
     m_files_list->SelectRow(it);
     OkHandler(true);
@@ -556,7 +556,7 @@ void FileDlg::FileDoubleClicked(DropDownList::iterator it)
 
 void FileDlg::FilesEditChanged(const std::string& str)
 {
-    if (m_save && m_ok_button->WindowText() != m_save_str)
+    if (m_save && m_ok_button->Text() != m_save_str)
         m_ok_button->SetText(m_save_str);
 }
 
@@ -724,7 +724,7 @@ void FileDlg::OpenDirectory()
     const ListBox::SelectionSet& sels = m_files_list->Selections();
     std::string directory;
     if (!sels.empty()) {
-        directory = (***sels.begin())[0]->WindowText();
+        directory = boost::polymorphic_downcast<TextControl*>((***sels.begin())[0])->Text();
         if (directory.size() < 2 || directory[0] != '[')
             return;
         directory = directory.substr(1, directory.size() - 2); // strip off '[' and ']'
@@ -763,7 +763,7 @@ void FileDlg::OpenDirectory()
                 }
             }
         }
-        if (m_save && m_ok_button->WindowText() != m_save_str)
+        if (m_save && m_ok_button->Text() != m_save_str)
             m_ok_button->SetText(m_save_str);
     }
 }

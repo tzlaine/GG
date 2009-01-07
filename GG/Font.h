@@ -167,8 +167,7 @@ public:
     public:
         typedef std::pair<std::string::const_iterator, std::string::const_iterator> IterPair;
 
-        /** Default ctor.  Sets .first and .second to be invalid, but
-            nonsingular, iterators, with .first == .second. */
+        /** Default ctor. */
         Substring();
 
         /** Ctor.  \a first_ must be <= \a second_. */
@@ -208,8 +207,10 @@ public:
 
     private:
         const std::string* str;
-        std::string::const_iterator first;
-        std::string::const_iterator second;
+        std::ptrdiff_t first;
+        std::ptrdiff_t second;
+
+        static const std::string EMPTY_STRING;
 
         friend class boost::serialization::access;
         template <class Archive>
@@ -688,23 +689,13 @@ namespace detail {
 template <class Archive>
 void GG::Font::Substring::serialize(Archive& ar, const unsigned int version)
 {
-    std::size_t first_offset = std::distance(str->begin(), first);
-    std::size_t second_offset = std::distance(str->begin(), second);
     detail::SerializableString* mutable_str =
         static_cast<detail::SerializableString*>(const_cast<std::string*>(str));
     ar  & BOOST_SERIALIZATION_NVP(mutable_str)
-        & BOOST_SERIALIZATION_NVP(first_offset)
-        & BOOST_SERIALIZATION_NVP(second_offset);
-    if (Archive::is_loading::value) {
-        if ((str = mutable_str)) {
-            first = second = str->begin();
-            std::advance(first, first_offset);
-            std::advance(second, second_offset);
-        } else {
-            std::string temp;
-            first = second = temp.begin();
-        }
-    }
+        & BOOST_SERIALIZATION_NVP(first)
+        & BOOST_SERIALIZATION_NVP(second);
+    if (Archive::is_loading::value)
+        str = mutable_str;
 }
 
 template <class Archive>

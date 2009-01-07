@@ -106,7 +106,7 @@ bool TextBoxBrowseInfoWnd::TextFromTarget() const
 { return m_text_from_target; }
 
 const std::string& TextBoxBrowseInfoWnd::Text() const
-{ return m_text_control->WindowText(); }
+{ return m_text_control->Text(); }
 
 const boost::shared_ptr<Font>& TextBoxBrowseInfoWnd::GetFont() const
 { return m_font; }
@@ -131,7 +131,6 @@ unsigned int TextBoxBrowseInfoWnd::TextMargin() const
 
 void TextBoxBrowseInfoWnd::SetText(const std::string& str)
 {
-    m_text = str;
     Resize(Pt(m_preferred_width, Y1));
     m_text_control->SetText(str);
     if (str.empty())

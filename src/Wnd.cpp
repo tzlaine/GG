@@ -131,18 +131,6 @@ namespace {
             return stream.str();
         }
     };
-
-    struct SetWindowTextAction : AttributeChangedAction<std::string>
-    {
-        SetWindowTextAction(Wnd* wnd) : m_wnd(wnd) {}
-        virtual void operator()(const std::string& value)
-        {
-            if (TextControl* text_control = dynamic_cast<TextControl*>(m_wnd))
-                text_control->SetText(value);
-        }
-    private:
-        Wnd* m_wnd;
-    };
 }
 
 ///////////////////////////////////////
@@ -261,8 +249,8 @@ bool Wnd::ClipChildren() const
 bool Wnd::Visible() const
 { return m_visible; }
 
-const std::string& Wnd::WindowText() const
-{ return m_text; }
+const std::string& Wnd::Name() const
+{ return m_name; }
 
 const std::string& Wnd::DragDropDataType() const
 { return m_drag_drop_data_type; }
@@ -421,8 +409,8 @@ void Wnd::ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destinat
     }
 }
 
-void Wnd::SetText(const std::string& str)
-{ m_text = str; }
+void Wnd::SetName(const std::string& name)
+{ m_name = name; }
 
 void Wnd::Hide(bool children/* = true*/)
 {
@@ -952,8 +940,6 @@ void Wnd::DefineAttributes(WndEditor* editor)
     if (!editor)
         return;
     editor->Label("Wnd");
-    boost::shared_ptr<SetWindowTextAction> action(new SetWindowTextAction(this));
-    editor->Attribute<std::string>("Window Text", m_text, action);
     editor->ConstAttribute("Upper Left", m_upperleft);
     editor->ConstAttribute("Lower Right", m_lowerright);
     editor->CustomText("Size", WndSizeFunctor());

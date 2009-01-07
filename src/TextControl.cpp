@@ -36,10 +36,18 @@ using namespace GG;
 namespace {
     const Pt INVALID_USABLE_SIZE(-X1, -Y1);
 
+    struct SetTextAction : AttributeChangedAction<std::string>
+    {
+        SetTextAction(TextControl* text_control) : m_text_control(text_control) {}
+        virtual void operator()(const std::string& value) { m_text_control->SetText(value); }
+    private:
+        TextControl* m_text_control;
+    };
+
     struct SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
     {
         SetFontAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const boost::shared_ptr<Font>&) {m_text_control->SetText(m_text_control->WindowText());}
+        void operator()(const boost::shared_ptr<Font>&) { m_text_control->SetText(m_text_control->Text()); }
     private:
         TextControl* m_text_control;
     };
@@ -47,7 +55,7 @@ namespace {
     struct SetFormatAction : AttributeChangedAction<Flags<TextFormat> >
     {
         SetFormatAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const Flags<TextFormat>& format) {m_text_control->SetTextFormat(format);}
+        void operator()(const Flags<TextFormat>& format) { m_text_control->SetTextFormat(format); }
     private:
         TextControl* m_text_control;
     };
@@ -55,7 +63,7 @@ namespace {
     struct FitToTextAction : AttributeChangedAction<bool>
     {
         FitToTextAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const bool&) {m_text_control->SetText(m_text_control->WindowText());}
+        void operator()(const bool&) { m_text_control->SetText(m_text_control->Text()); }
     private:
         TextControl* m_text_control;
     };
@@ -63,7 +71,7 @@ namespace {
     struct SetMinSizeAction : AttributeChangedAction<bool>
     {
         SetMinSizeAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const bool& set_min_size) {m_text_control->SetMinSize(set_min_size);}
+        void operator()(const bool& set_min_size) { m_text_control->SetMinSize(set_min_size); }
     private:
         TextControl* m_text_control;
     };
@@ -123,13 +131,16 @@ Pt TextControl::MinUsableSize() const
         m_previous_client_width != ClientSize().x ||
         m_previous_format != m_format) {
         m_min_usable_size = m_font ?
-            m_font->TextExtent(WindowText(), m_line_data) :
+            m_font->TextExtent(m_text, m_line_data) :
             Pt();
         m_previous_client_width = ClientSize().x;
         m_previous_format = m_format;
     }
     return m_min_usable_size;
 }
+
+const std::string& TextControl::Text() const
+{ return m_text; }
 
 Flags<TextFormat> TextControl::GetTextFormat() const
 { return m_format; }
@@ -161,7 +172,7 @@ Pt TextControl::TextLowerRight() const
 void TextControl::Render()
 {
     if (m_dirty_load)
-        SetText(WindowText());
+        SetText(m_text);
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor(clr_to_use);
     if (m_font) {
@@ -177,7 +188,7 @@ void TextControl::SetText(const std::string& str)
 {
     m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(WindowText(), m_format, ClientSize().x, m_line_data);
+        Pt text_sz = m_font->DetermineLines(m_text, m_format, ClientSize().x, m_line_data);
         m_code_points = CPSize(utf8::distance(m_text.begin(), m_text.end()));
         m_text_ul = Pt();
         m_text_lr = text_sz;
@@ -203,7 +214,7 @@ void TextControl::SetTextFormat(Flags<TextFormat> format)
     m_format = format;
     ValidateFormat();
     if (m_format != format)
-        SetText(WindowText());
+        SetText(m_text);
 }
 
 void TextControl::SetTextColor(Clr color)
@@ -286,6 +297,8 @@ void TextControl::DefineAttributes(WndEditor* editor)
         return;
     Control::DefineAttributes(editor);
     editor->Label("TextControl");
+    boost::shared_ptr<SetTextAction> action(new SetTextAction(this));
+    editor->Attribute<std::string>("Text", m_text, action);
     boost::shared_ptr<SetFontAction> set_font_action(new SetFontAction(this));
     editor->Attribute<boost::shared_ptr<Font> >("Font", m_font, set_font_action);
     boost::shared_ptr<SetFormatAction> set_format_action(new SetFormatAction(this));

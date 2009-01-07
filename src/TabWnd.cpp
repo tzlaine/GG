@@ -264,7 +264,7 @@ void TabBar::RemoveTab(const std::string& name)
 {
     std::size_t index = NO_TAB;
     for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
-        if (m_tab_buttons[i]->WindowText() == name) {
+        if (m_tab_buttons[i]->Text() == name) {
             index = i;
             break;
         }

@@ -123,6 +123,12 @@ namespace {
     };
     const boost::xpressive::function<PushSubmatchOntoStack>::type Push = {{}};
 
+    bool operator==(const Font::Substring& lhs, const boost::xpressive::ssub_match& rhs)
+    {
+        return lhs.size() == static_cast<std::size_t>(rhs.length()) &&
+            !std::memcmp(&*lhs.begin(), &*rhs.first, lhs.size());
+    }
+
     struct MatchesTopOfStack
     {
         MatchesTopOfStack(std::stack<Font::Substring>& tag_stack,
@@ -132,10 +138,7 @@ namespace {
             {}
         bool operator()(const boost::xpressive::ssub_match& sub) const
             {
-                bool retval = m_tag_stack.empty() ?
-                    false :
-                    m_tag_stack.top().size() == static_cast<std::size_t>(sub.length()) &&
-                    !std::memcmp(&*m_tag_stack.top().begin(), &*sub.first, m_tag_stack.top().size());
+                bool retval = m_tag_stack.empty() ? false : m_tag_stack.top() == sub;
                 if (retval) {
                     m_tag_stack.pop();
                     if (m_tag_stack.empty() || m_tag_stack.top() != PRE_TAG)
@@ -242,40 +245,45 @@ namespace {
 ///////////////////////////////////////
 // class GG::Font::Substring
 ///////////////////////////////////////
+const std::string Font::Substring::EMPTY_STRING;
+
 Font::Substring::Substring() :
-    str(0),
-    first(),
-    second()
-{
-    std::string temp;
-    second = first = temp.end();
-}
+    str(&EMPTY_STRING),
+    first(0),
+    second(0)
+{}
 
 Font::Substring::Substring(const std::string& str_,
                            std::string::const_iterator first_,
                            std::string::const_iterator second_) :
     str(&str_),
-    first(first_),
-    second(second_)
+    first(0),
+    second(0)
 {
-    assert(str->begin() <= first);
-    assert(first <= second);
+    assert(str->begin() <= first_);
+    assert(first_ <= second_);
+    assert(second_ <= str->end());
+    first = std::distance(str->begin(), first_);
+    second = std::distance(str->begin(), second_);
 }
 
 Font::Substring::Substring(const std::string& str_, const IterPair& pair) :
     str(&str_),
-    first(pair.first),
-    second(pair.second)
+    first(0),
+    second(0)
 {
-    assert(str->begin() <= first);
-    assert(first <= second);
+    assert(str->begin() <= pair.first);
+    assert(pair.first <= pair.second);
+    assert(pair.second <= str->end());
+    first = std::distance(str->begin(), pair.first);
+    second = std::distance(str->begin(), pair.second);
 }
 
 std::string::const_iterator Font::Substring::begin() const
-{ return first; }
+{ return boost::next(str->begin(), first); }
 
 std::string::const_iterator Font::Substring::end() const
-{ return second; }
+{ return boost::next(str->begin(), second); }
 
 bool Font::Substring::empty() const
 { return first == second; }
@@ -284,10 +292,10 @@ std::size_t Font::Substring::size() const
 { return second - first; }
 
 Font::Substring::operator std::string() const
-{ return std::string(first, second); }
+{ return std::string(begin(), end()); }
 
 bool Font::Substring::operator==(const std::string& rhs) const
-{ return size() == rhs.size() && !std::memcmp(&*first, rhs.data(), rhs.size()); }
+{ return size() == rhs.size() && !std::memcmp(str->data() + first, rhs.data(), rhs.size()); }
 
 bool Font::Substring::operator!=(const std::string& rhs) const
 { return !operator==(rhs); }
@@ -295,8 +303,8 @@ bool Font::Substring::operator!=(const std::string& rhs) const
 Font::Substring& Font::Substring::operator+=(const IterPair& rhs)
 {
     assert(rhs.first <= rhs.second);
-    assert(rhs.first == second);
-    second = rhs.second;
+    assert(std::distance(str->begin(), rhs.first) == second);
+    second = std::distance(str->begin(), rhs.second);
     return *this;
 }
 
@@ -675,7 +683,9 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
     ValidateFormat(format);
 
 #if DEBUG_DETERMINELINES
-    std::cout << "Font::DetermineLines(text=\"" << text << "\" format=" << format << " box_width=" << box_width << ")" << std::endl;
+    std::cout << "Font::DetermineLines(text=\"" << text << "\" (@ "
+              << static_cast<const void*>(&*text.begin()) << ") format="
+              << format << " box_width=" << box_width << ")" << std::endl;
 #endif
 
     std::vector<boost::shared_ptr<TextElement> > text_elements;
@@ -794,7 +804,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
     std::cout << "results of parse:\n";
     for (std::size_t i = 0; i < text_elements.size(); ++i) {
         if (boost::shared_ptr<FormattingTag> tag_elem = boost::dynamic_pointer_cast<FormattingTag>(text_elements[i])) {
-            std::cout << "FormattingTag\n    text=\"" << tag_elem->text << "\"\n    widths=";
+            std::cout << "FormattingTag\n    text=\"" << tag_elem->text << "\" (@ "
+                      << static_cast<const void*>(&*tag_elem->text.begin()) << ")\n    widths=";
             for (std::size_t j = 0; j < tag_elem->widths.size(); ++j) {
                 std::cout << tag_elem->widths[j] << " ";
             }
@@ -805,7 +816,8 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             std::cout << "    tag_name=\"" << tag_elem->tag_name << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
         } else {
             boost::shared_ptr<TextElement> elem = text_elements[i];
-            std::cout << "TextElement\n    text=\"" << elem->text << "\"\n    widths=";
+            std::cout << "TextElement\n    text=\"" << elem->text << "\" (@ "
+                      << static_cast<const void*>(&*elem->text.begin()) << ")\n    widths=";
             for (std::size_t j = 0; j < elem->widths.size(); ++j) {
                 std::cout << elem->widths[j] << " ";
             }

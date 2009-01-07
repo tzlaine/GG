@@ -51,7 +51,7 @@ namespace {
     {
         SetStyleAction(MultiEdit* multi_edit) : m_multi_edit(multi_edit) {}
         void operator()(const Flags<MultiEditStyle>& style)
-            { m_multi_edit->SetText(m_multi_edit->WindowText()); }
+            { m_multi_edit->SetText(m_multi_edit->Text()); }
     private:
         MultiEdit* m_multi_edit;
     };
@@ -170,7 +170,7 @@ std::size_t MultiEdit::MaxLinesOfHistory() const
 void MultiEdit::Render()
 {
     if (DirtyLoad())
-        SetText(WindowText());
+        SetText(Text());
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
     Clr sel_text_color_to_use = Disabled() ? DisabledColor(SelectedTextColor()) : SelectedTextColor();
@@ -211,14 +211,14 @@ void MultiEdit::Render()
                 CPSize idx0(0);
                 CPSize idx1 = low_cursor_pos.first == row ? std::max(idx0, low_cursor_pos.second) : idx0;
                 CPSize idx3(lines[row].char_data.size());
-                if (LineEndsWithEndlineCharacter(lines, row, WindowText()))
+                if (LineEndsWithEndlineCharacter(lines, row, Text()))
                     --idx3;
                 CPSize idx2 = high_cursor_pos.first == row ? std::min(high_cursor_pos.second, idx3) : idx3;
 
                 // draw text
                 glColor(text_color_to_use);
                 Pt text_lr((idx0 != idx1 ? initial_text_x_pos + lines[row].char_data[Value(idx1 - 1)].extent : text_pos.x), text_pos.y + GetFont()->Height());
-                GetFont()->RenderText(text_pos, text_lr, WindowText(), text_format, lines, state, row, idx0, row + 1, idx1);
+                GetFont()->RenderText(text_pos, text_lr, Text(), text_format, lines, state, row, idx0, row + 1, idx1);
                 text_pos.x = text_lr.x;
 
                 // draw hiliting
@@ -226,16 +226,16 @@ void MultiEdit::Render()
                 FlatRectangle(text_pos, Pt(text_lr.x, text_pos.y + GetFont()->Lineskip()), hilite_color_to_use, CLR_ZERO, 0);
                 // draw hilited text
                 glColor(sel_text_color_to_use);
-                GetFont()->RenderText(text_pos, text_lr, WindowText(), text_format, lines, state, row, idx1, row + 1, idx2);
+                GetFont()->RenderText(text_pos, text_lr, Text(), text_format, lines, state, row, idx1, row + 1, idx2);
                 text_pos.x = text_lr.x;
 
                 glColor(text_color_to_use);
                 text_lr.x = idx2 != idx3 ? initial_text_x_pos + lines[row].char_data[Value(idx3 - 1)].extent : text_lr.x;
-                GetFont()->RenderText(text_pos, text_lr, WindowText(), text_format, lines, state, row, idx2, row + 1, idx3);
+                GetFont()->RenderText(text_pos, text_lr, Text(), text_format, lines, state, row, idx2, row + 1, idx3);
             } else { // just draw normal text on this line
                 Pt lr = text_pos + Pt(lines[row].char_data.back().extent, GetFont()->Height());
                 glColor(text_color_to_use);
-                GetFont()->RenderText(text_pos, text_pos + Pt(lines[row].char_data.back().extent, GetFont()->Height()), WindowText(), text_format, lines, state, row, CP0, row + 1, CPSize(lines[row].char_data.size()));
+                GetFont()->RenderText(text_pos, text_pos + Pt(lines[row].char_data.back().extent, GetFont()->Height()), Text(), text_format, lines, state, row, CP0, row + 1, CPSize(lines[row].char_data.size()));
             }
         }
         // if there's no selected text, but this row contains the caret (and MULTI_READ_ONLY is not in effect)
@@ -341,7 +341,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                 if (GetLineData().size() <= m_cursor_end.first) {
                     m_cursor_end.first = GetLineData().size() - 1;
                     m_cursor_end.second = CPSize(GetLineData()[m_cursor_end.first].char_data.size());
-                    if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, WindowText()))
+                    if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, Text()))
                         --m_cursor_end.second;
                 }
                 m_cursor_begin = m_cursor_end;
@@ -357,7 +357,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                 } else if (0 < m_cursor_end.first) {
                     --m_cursor_end.first;
                     m_cursor_end.second = CPSize(GetLineData()[m_cursor_end.first].char_data.size());
-                    if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, WindowText()))
+                    if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, Text()))
                         --m_cursor_end.second;
                 }
                 if (!shift_down)
@@ -370,7 +370,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                     m_cursor_begin = m_cursor_end = HighCursorPos();
                 } else if (m_cursor_end.second <
                            GetLineData()[m_cursor_end.first].char_data.size() -
-                           (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, WindowText()) ? 1 : 0)) {
+                           (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, Text()) ? 1 : 0)) {
                     ++m_cursor_end.second;
                 } else if (m_cursor_end.first < GetLineData().size() - 1) {
                     ++m_cursor_end.first;
@@ -418,7 +418,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
 
             case GGK_END: {
                 m_cursor_end.second = CPSize(GetLineData()[m_cursor_end.first].char_data.size());
-                if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, WindowText()))
+                if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_end.first, Text()))
                     --m_cursor_end.second;
                 if (!shift_down)
                     m_cursor_begin = m_cursor_end;
@@ -460,7 +460,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
                 } else if (0 < m_cursor_begin.first) {
                     m_cursor_end.first = --m_cursor_begin.first;
                     m_cursor_begin.second = CPSize(GetLineData()[m_cursor_begin.first].char_data.size());
-                    if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_begin.first, WindowText()))
+                    if (LineEndsWithEndlineCharacter(GetLineData(), m_cursor_begin.first, Text()))
                         --m_cursor_begin.second;
                     m_cursor_end.second = m_cursor_begin.second;
                     Erase(m_cursor_begin.first, m_cursor_begin.second, CP1);
@@ -529,7 +529,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
             }
             AdjustView();
             if (emit_signal)
-                EditedSignal(WindowText());
+                EditedSignal(Text());
         }
     } else {
         TextControl::KeyPress(key, key_code_point, mod_keys);
@@ -544,7 +544,7 @@ void MultiEdit::SizeMove(const Pt& ul, const Pt& lr)
     bool resized = lower_right - ul != Size();
     Edit::SizeMove(ul, lower_right);
     if (resized)
-        SetText(WindowText());
+        SetText(Text());
 }
 
 void MultiEdit::SelectAll()
@@ -618,7 +618,7 @@ void MultiEdit::SetText(const std::string& str)
         }
         m_cursor_begin = m_cursor_end; // eliminate any hiliting
 
-        m_contents_sz = GetFont()->TextExtent(WindowText(), GetLineData());
+        m_contents_sz = GetFont()->TextExtent(Text(), GetLineData());
 
         AdjustScrolls();
         AdjustView();
@@ -652,13 +652,13 @@ void MultiEdit::SetStyle(Flags<MultiEditStyle> style)
     if (m_style & MULTI_RIGHT)
         format |= FORMAT_RIGHT;
     SetTextFormat(format);
-    SetText(WindowText());
+    SetText(Text());
 }
 
 void MultiEdit::SetMaxLinesOfHistory(std::size_t max)
 {
     m_max_lines_history = max;
-    SetText(m_text);
+    SetText(Text());
 }
 
 void MultiEdit::DefineAttributes(WndEditor* editor)
@@ -704,7 +704,7 @@ std::pair<std::size_t, CPSize> MultiEdit::CharAt(const Pt& pt) const
 std::pair<std::size_t, CPSize> MultiEdit::CharAt(CPSize idx) const
 {
     std::pair<std::size_t, CPSize> retval(0, CP0);
-    if (idx <= WindowText().size())
+    if (idx <= Text().size())
     {
         const std::vector<Font::LineData>& lines = GetLineData();
         retval = LinePositionOf(idx, lines);
@@ -1055,7 +1055,7 @@ void MultiEdit::AdjustScrolls()
     Pt new_cl_sz = ClientSize();
     if (orig_cl_sz != new_cl_sz && (new_cl_sz.x != m_contents_sz.x || new_cl_sz.y != m_contents_sz.y) && 
         (m_style & (MULTI_WORDBREAK | MULTI_LINEWRAP))) {
-        SetText(WindowText());
+        SetText(Text());
     }
 }
 

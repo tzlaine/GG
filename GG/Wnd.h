@@ -280,8 +280,9 @@ public:
     /** Returns true iff this Wnd will be rendered if it is registered. */
     bool Visible() const;
 
-    /** Returns the text associated with this window. */
-    const std::string& WindowText() const;
+    /** Returns the name of this Wnd.  This name is not used by GG in any way;
+        it only exists for user convenience. */
+     const std::string& Name() const;
 
     /** Returns the string key that defines the type of data that this Wnd
         represents in drag-and-drop drags.  Returns the empty string when this
@@ -444,7 +445,9 @@ public:
     virtual void ChildrenDraggedAway(const std::vector<Wnd*>& wnds,
                                      const Wnd* destination);
 
-    virtual void SetText(const std::string& str); ///< Sets window text.
+    /** Sets a name for this Wnd.  This name is not used by GG in any way; it
+        only exists for user convenience. */
+    void SetName(const std::string& name);
 
     /** Suppresses rendering of this window (and possibly its children) during
         render loop. */
@@ -815,10 +818,6 @@ protected:
     void HandleEvent(const WndEvent& event);
     //@}
 
-    /** Text associated with the window, such as a window title or button
-        label, etc. */
-    std::string m_text;
-
     /** Modal Wnd's set this to true to stop modal loop. */
     bool m_done;
 
@@ -826,6 +825,7 @@ private:
     void ValidateFlags();              ///< Sanity-checks the window creation flags
 
     Wnd*              m_parent;        ///< Ptr to this window's parent; may be 0
+    std::string       m_name;          ///< A user-significant name for this Wnd
     std::list<Wnd*>   m_children;      ///< List of ptrs to child windows kept in order of decreasing area
     int               m_zorder;        ///< Where this window is in the z-order (root (non-child) windows only)
     bool              m_visible;
@@ -885,9 +885,9 @@ void GG::Wnd::BrowseInfoMode::serialize(Archive& ar, const unsigned int version)
 template <class Archive>
 void GG::Wnd::serialize(Archive& ar, const unsigned int version)
 {
-    ar  & BOOST_SERIALIZATION_NVP(m_text)
-        & BOOST_SERIALIZATION_NVP(m_done)
+    ar  & BOOST_SERIALIZATION_NVP(m_done)
         & BOOST_SERIALIZATION_NVP(m_parent)
+        & BOOST_SERIALIZATION_NVP(m_name)
         & BOOST_SERIALIZATION_NVP(m_children)
         & BOOST_SERIALIZATION_NVP(m_zorder)
         & BOOST_SERIALIZATION_NVP(m_visible)

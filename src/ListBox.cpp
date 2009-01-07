@@ -192,7 +192,10 @@ ListBox::Row::~Row()
 {}
 
 std::string ListBox::Row::SortKey(std::size_t column) const
-{ return at(column)->WindowText(); }
+{
+    const TextControl* text_control = dynamic_cast<const TextControl*>(at(column));
+    return text_control ? text_control->Text() : "";
+}
 
 std::size_t ListBox::Row::size() const
 { return m_cells.size(); }
@@ -453,7 +456,6 @@ ListBox::ListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
 {
     Control::SetColor(color);
     ValidateStyle();
-    SetText("ListBox");
     EnableChildClipping();
     m_auto_scroll_timer.Stop();
     m_auto_scroll_timer.Connect(this);

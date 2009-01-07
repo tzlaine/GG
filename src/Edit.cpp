@@ -138,19 +138,19 @@ void Edit::Render()
 
         text_x_pos +=
             GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
-                                  WindowText().substr(Value(INDEX_0), Value(INDEX_1 - INDEX_0)));
+                                  Text().substr(Value(INDEX_0), Value(INDEX_1 - INDEX_0)));
         glColor(sel_text_color_to_use);
         text_x_pos +=
             GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
-                                  WindowText().substr(Value(INDEX_1), Value(INDEX_2 - INDEX_1)));
+                                  Text().substr(Value(INDEX_1), Value(INDEX_2 - INDEX_1)));
         glColor(text_color_to_use);
         text_x_pos +=
             GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
-                                  WindowText().substr(Value(INDEX_2), Value(INDEX_END - INDEX_2)));
+                                  Text().substr(Value(INDEX_2), Value(INDEX_END - INDEX_2)));
     } else { // no selected text
         glColor(text_color_to_use);
         const CPSize INDEX_0 = m_first_char_shown;
-        GetFont()->RenderText(Pt(client_ul.x, text_y_pos), WindowText().substr(Value(INDEX_0), Value(INDEX_END - INDEX_0)));
+        GetFont()->RenderText(Pt(client_ul.x, text_y_pos), Text().substr(Value(INDEX_0), Value(INDEX_END - INDEX_0)));
         if (GUI::GetGUI()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
             X caret_x = ScreenPosOfChar(m_cursor_pos.second);
             glDisable(GL_TEXTURE_2D);
@@ -288,7 +288,7 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
             break;
         case GGK_RETURN:
         case GGK_KP_ENTER:
-            FocusUpdateSignal(WindowText());
+            FocusUpdateSignal(Text());
             TextControl::KeyPress(key, key_code_point, mod_keys);
             m_recently_edited = false;
             break;
@@ -325,7 +325,7 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
             break;
         }
         if (emit_signal)
-            EditedSignal(WindowText());
+            EditedSignal(Text());
     } else {
         TextControl::KeyPress(key, key_code_point, mod_keys);
     }
@@ -337,7 +337,7 @@ void Edit::GainingFocus()
 void Edit::LosingFocus()
 {
     if (m_recently_edited)
-        FocusUpdateSignal(WindowText());
+        FocusUpdateSignal(Text());
 }
 
 void Edit::SetColor(Clr c)
@@ -462,7 +462,7 @@ std::pair<CPSize, CPSize> Edit::GetDoubleButtonDownWordIndices(CPSize char_index
     m_double_click_cursor_pos = std::pair<CPSize, CPSize>(CP0, CP0);
     if (m_in_double_click_mode) {
         std::set<std::pair<CPSize, CPSize> > words =
-            GUI::GetGUI()->FindWords(WindowText());
+            GUI::GetGUI()->FindWords(Text());
         std::set<std::pair<CPSize, CPSize> >::const_iterator it =
             std::find_if(words.begin(), words.end(), InRange(char_index));
         if (it != words.end())
@@ -475,7 +475,7 @@ std::pair<CPSize, CPSize> Edit::GetDoubleButtonDownDragWordIndices(CPSize char_i
 {
     std::pair<CPSize, CPSize> retval(CP0, CP0);
     std::set<std::pair<CPSize, CPSize> > words =
-        GUI::GetGUI()->FindWords(WindowText());
+        GUI::GetGUI()->FindWords(Text());
     std::set<std::pair<CPSize, CPSize> >::const_iterator it =
         std::find_if(words.begin(), words.end(), InRange(char_index));
     if (it != words.end())

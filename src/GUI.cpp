@@ -479,7 +479,7 @@ Wnd* GUI::GetWindowUnder(const Pt& pt) const
 {
 #if INSTRUMENT_GET_WINDOW_UNDER
     if (Wnd* w = s_impl->m_zlist.Pick(pt, ModalWindow()))
-        std::cerr << "GUI::GetWindowUnder() : " << w->WindowText() << " @ " << w << std::endl;
+        std::cerr << "GUI::GetWindowUnder() : " << w->Name() << " @ " << w << std::endl;
 #endif
     return s_impl->m_zlist.Pick(pt, ModalWindow());
 }

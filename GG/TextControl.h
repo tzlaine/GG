@@ -84,6 +84,9 @@ public:
     /** \name Accessors */ ///@{
     virtual Pt        MinUsableSize() const;
 
+    /** Returns the text displayed in this control. */
+    const std::string& Text() const;
+
     /** Returns the text format (vertical and horizontal justification, use of
         word breaks and line wrapping, etc.) */
     Flags<TextFormat> GetTextFormat() const;
@@ -153,10 +156,10 @@ public:
     /** \name Mutators */ ///@{
     virtual void Render();
 
-    /** Sets the text to \a str.  May resize the window.  If FitToText()
-        returns true (i.e. if the second ctor was used), calls to this
-        function cause the window to be resized to whatever space the newly
-        rendered text occupies. */
+    /** Sets the text displayed in this control to \a str.  May resize the
+        window.  If FitToText() returns true (i.e. if the second ctor was
+        used), calls to this function cause the window to be resized to
+        whatever space the newly rendered text occupies. */
     virtual void SetText(const std::string& str);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
@@ -238,7 +241,7 @@ protected:
     /** Returns true iff the object has just been loaded from a serialized
         form, meaning changes may have been made that leave the control in an
         inconsistent state; this must be remedied by calling
-        <code>SetText(WindowText());</code> the next time Render() is
+        <code>SetText(Text());</code> the next time Render() is
         called. */
     bool DirtyLoad() const;
     //@}
@@ -248,6 +251,7 @@ private:
     void AdjustMinimumSize();
     void RecomputeTextBounds(); ///< recalculates m_text_ul and m_text_lr
 
+    std::string                 m_text;
     Flags<TextFormat>           m_format;      ///< the formatting used to display the text (vertical and horizontal alignment, etc.)
     Clr                         m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
     bool                        m_clip_text;
@@ -278,7 +282,7 @@ template <class T>
 void GG::TextControl::operator>>(T& t) const
 {
     try {
-        t = boost::lexical_cast<T>(Control::m_text);
+        t = boost::lexical_cast<T>(m_text);
     } catch (boost::bad_lexical_cast) {
         t = T();
     }
@@ -286,7 +290,7 @@ void GG::TextControl::operator>>(T& t) const
 
 template <class T>
 T GG::TextControl::GetValue() const
-{ return boost::lexical_cast<T, std::string>(Control::m_text); }
+{ return boost::lexical_cast<T, std::string>(m_text); }
 
 template <class T>
 void GG::TextControl::operator<<(T t)
@@ -296,6 +300,7 @@ template <class Archive>
 void GG::TextControl::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
+        & BOOST_SERIALIZATION_NVP(m_text)
         & BOOST_SERIALIZATION_NVP(m_format)
         & BOOST_SERIALIZATION_NVP(m_text_color)
         & BOOST_SERIALIZATION_NVP(m_clip_text)

@@ -189,7 +189,7 @@ void TextControl::SetText(const std::string& str)
     m_text = str;
     if (m_font) {
         Pt text_sz = m_font->DetermineLines(m_text, m_format, ClientSize().x, m_line_data);
-        m_code_points = CPSize(utf8::distance(m_text.begin(), m_text.end()));
+        m_code_points = CPSize(utf8::distance(str.begin(), str.end()));
         m_text_ul = Pt();
         m_text_lr = text_sz;
         AdjustMinimumSize();

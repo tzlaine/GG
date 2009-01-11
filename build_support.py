@@ -83,7 +83,8 @@ def CreateGiGiPCFile(target, source, env):
         'incdir' : env.subst(env['incdir']),
         'version' : gigi_version,
         'gigi_libs' : '',
-        'boost_include' : ''
+        'boost_include' : '',
+        'devil_libs' : env['use_devil'] and '-lIL -lILU' or ''
     }
     for flag in env['LINKFLAGS']:
         pc_file_link_flags_used.append(flag)

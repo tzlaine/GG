@@ -86,9 +86,9 @@ options.Add('with_ois_libdir', 'Specify exact library dir for OIS library (only 
 # the time now on POSIX systems.
 env['need__vsnprintf_c'] = str(Platform()) == 'posix'
 
-env['have_jpeg'] = 0
-env['have_png'] = 0
-env['have_tiff'] = 0
+env['have_jpeg'] = False
+env['have_png'] = False
+env['have_tiff'] = False
 
 
 # fill Environment using saved and command-line provided options, save options for next time, and fill environment
@@ -372,25 +372,28 @@ if not env.GetOption('clean'):
             # no DevIL
             AppendPackagePaths('jpeg', env)
             if not conf.CheckCHeader(['stdio.h', 'jpeglib.h']):
-                env['have_jpeg'] = 0
+                env['have_jpeg'] = False
             elif str(Platform()) != 'win32' and not conf.CheckLib('jpeg'):
-                env['have_jpeg'] = 0
+                env['have_jpeg'] = False
             else:
-                env['have_jpeg'] = 1
+                env['have_jpeg'] = True
+                env.AppendUnique(LIBS = ['jpeg'])
             AppendPackagePaths('png', env)
             if not conf.CheckCHeader('png.h'):
-                env['have_png'] = 0
+                env['have_png'] = False
             elif str(Platform()) != 'win32' and not conf.CheckLib('png'):
-                env['have_png'] = 0
+                env['have_png'] = False
             else:
-                env['have_png'] = 1
+                env['have_png'] = True
+                env.AppendUnique(LIBS = ['png'])
             AppendPackagePaths('tiff', env)
             if not conf.CheckCHeader('tiffio.h'):
-                env['have_tiff'] = 0
+                env['have_tiff'] = False
             elif str(Platform()) != 'win32' and not conf.CheckLib('tiff'):
-                env['have_tiff'] = 0
+                env['have_tiff'] = False
             else:
-                env['have_tiff'] = 1
+                env['have_tiff'] = True
+                env.AppendUnique(LIBS = ['tiff'])
             if not (env['have_jpeg'] or env['have_png'] or not env['have_tiff']):
                 Exit(1)
 

@@ -136,9 +136,9 @@ def CreateGiGiDriverPCFile(target, source, env):
 def CreateConfigHeader(target, source, env):
     values = {
         'use_devil' : int(env['use_devil']),
-        'have_jpeg' : env['have_jpeg'],
-        'have_png' : env['have_png'],
-        'have_tiff' : env['have_tiff']
+        'have_jpeg' : env['have_jpeg'] and '1' or '0',
+        'have_png' : env['have_png'] and '1' or '0',
+        'have_tiff' : env['have_tiff'] and '1' or '0'
     }
     for tgt, src in zip(target, source):
         config = open(str(tgt), 'w')

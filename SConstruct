@@ -202,7 +202,7 @@ if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_
             break
 
 if not force_configure and env['build_sdl_driver']:
-    sdl_env = env.Copy()
+    sdl_env = env.Clone()
     try:
         f = open('sdl_config.cache', 'r')
         up = pickle.Unpickler(f)
@@ -217,7 +217,7 @@ if not force_configure and env['build_sdl_driver']:
         pass
 
 if not force_configure and env['build_ogre_driver']:
-    ogre_env = env.Copy()
+    ogre_env = env.Clone()
     try:
         f = open('ogre_config.cache', 'r')
         up = pickle.Unpickler(f)
@@ -232,7 +232,7 @@ if not force_configure and env['build_ogre_driver']:
         pass
 
 if not force_configure and env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
-    ogre_ois_env = ogre_env.Copy()
+    ogre_ois_env = ogre_env.Clone()
     try:
         f = open('ogre_ois_config.cache', 'r')
         up = pickle.Unpickler(f)
@@ -515,7 +515,7 @@ if not env.GetOption('clean'):
     # SDL
     if not sdl_preconfigured and env['build_sdl_driver']:
         print 'Configuring GiGiSDL driver...'
-        sdl_env = env.Copy()
+        sdl_env = env.Clone()
         sdl_conf = sdl_env.Configure(custom_tests = custom_tests_dict)
         sdl_config_script = WhereIs('sdl-config')
         if not sdl_conf.CheckSDL(options, sdl_conf, sdl_config_script, not ms_linker):
@@ -534,7 +534,7 @@ if not env.GetOption('clean'):
     # Ogre
     if not ogre_preconfigured and env['build_ogre_driver']:
         print 'Configuring GiGiOgre driver...'
-        ogre_env = env.Copy()
+        ogre_env = env.Clone()
         ogre_conf = ogre_env.Configure(custom_tests = custom_tests_dict)
         pkg_config = ogre_conf.CheckPkgConfig('0.15.0')
         AppendPackagePaths('ogre', ogre_env)
@@ -573,7 +573,7 @@ if not env.GetOption('clean'):
     # Ogre OIS Plugin
     if not ogre_ois_preconfigured and env['build_ogre_driver'] and env['build_ogre_ois_plugin']:
         print "Configuring GiGiOgre's OIS plugin..."
-        ogre_ois_env = ogre_env.Copy()
+        ogre_ois_env = ogre_env.Clone()
         ogre_ois_conf = ogre_ois_env.Configure(custom_tests = custom_tests_dict)
         pkg_config = ogre_ois_conf.CheckPkgConfig('0.15.0')
         ois_config_failed = False
@@ -615,7 +615,7 @@ if not env.GetOption('clean'):
 Export('env')
 
 # define libGiGi objects
-gigi_env = env.Copy()
+gigi_env = env.Clone()
 if str(Platform()) == 'win32' and gigi_env['dynamic']:
     gigi_env.AppendUnique(CPPDEFINES = ['GIGI_EXPORTS'])
 gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'), exports = 'gigi_env')
@@ -645,7 +645,7 @@ if env['build_sdl_driver']:
     Depends(lib_gigi_sdl, lib_gigi)
 
     # The tutorials depend on libGiGiSDL, so we add targets for them here
-    tutorial_env = sdl_env.Copy()
+    tutorial_env = sdl_env.Clone()
     tutorial_env.PrependUnique(LIBPATH = ['.'])
     tutorial_env.AppendUnique(LIBS = ['GiGi', 'GiGiSDL'])
     if str(Platform()) == 'win32':

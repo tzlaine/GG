@@ -180,7 +180,7 @@ void OgreGUI::Enter2DMode()
     render_system->_setTextureUnitFiltering(0, FO_LINEAR, FO_LINEAR, FO_POINT);
     render_system->_setTextureAddressingMode(0, uvw_address_mode);
     render_system->_setTextureMatrix(0, Matrix4::IDENTITY);
-    render_system->_setAlphaRejectSettings(CMPF_ALWAYS_PASS, 0);
+    render_system->_setAlphaRejectSettings(CMPF_ALWAYS_PASS, 0, false);
     render_system->_setTextureBlendMode(0, colour_blend_mode);
     render_system->_setTextureBlendMode(0, alpha_blend_mode);
     render_system->_disableTextureUnitsFrom(0);

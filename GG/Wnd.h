@@ -720,6 +720,12 @@ public:
         std::out_of_range if \a mode is not a valid browse mode. */
     void SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, std::size_t mode = 0);
 
+    /** Removes the Wnd that is used to show browse info about this Wnd in the
+        browse info mode \a mode (but does nothing to the mode itself).
+        \throw std::out_of_range May throw std::out_of_range if \a mode is not
+        a valid browse mode. */
+    void ClearBrowseInfoWnd(std::size_t mode = 0);
+
     /** Sets the browse info window for mode \a mode to a Wnd with the
         specified color and border color which contains the specified text.
         \throw std::out_of_range May throw std::out_of_range if \a mode is not

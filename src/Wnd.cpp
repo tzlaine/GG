@@ -926,6 +926,9 @@ void Wnd::SetBrowseModeTime(unsigned int time, std::size_t mode/* = 0*/)
 void Wnd::SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, std::size_t mode/* = 0*/)
 { m_browse_modes.at(mode).wnd = wnd; }
 
+void Wnd::ClearBrowseInfoWnd(std::size_t mode/* = 0*/)
+{ m_browse_modes.at(mode).wnd.reset(); }
+
 void Wnd::SetBrowseText(const std::string& text, std::size_t mode/* = 0*/)
 { m_browse_modes.at(mode).text = text; }
 

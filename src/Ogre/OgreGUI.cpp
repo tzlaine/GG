@@ -183,7 +183,7 @@ void OgreGUI::Enter2DMode()
     render_system->_setAlphaRejectSettings(CMPF_ALWAYS_PASS, 0, false);
     render_system->_setTextureBlendMode(0, colour_blend_mode);
     render_system->_setTextureBlendMode(0, alpha_blend_mode);
-    render_system->_disableTextureUnitsFrom(0);
+    render_system->_disableTextureUnitsFrom(1);
 
     // enable alpha blending
     render_system->_setSceneBlending(SBF_SOURCE_ALPHA, SBF_ONE_MINUS_SOURCE_ALPHA);

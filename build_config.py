@@ -11,7 +11,7 @@ devil_version = ''.join(devil_version_string.split('.'))
 
 sdl_version = '1.2.7'
 
-ogre_version = '1.6.0'
+ogre_version = '1.6.1'
 
 ois_version = '1.0.0'
 

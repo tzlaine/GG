@@ -227,7 +227,11 @@ void OgreGUI::Exit2DMode()
 }
 
 void OgreGUI::postRenderTargetUpdate(const Ogre::RenderTargetEvent& event)
-{ Render(); }
+{
+    RenderBegin();
+    Render();
+    RenderEnd();
+}
 
 void OgreGUI::windowResized(Ogre::RenderWindow* window)
 {

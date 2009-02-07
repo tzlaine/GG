@@ -100,9 +100,10 @@ ogre_preconfigured = False
 ogre_ois_preconfigured = False
 force_configure = False
 command_line_args = sys.argv[1:]
+help_only = ('-h' in command_line_args) or ('--help' in command_line_args)
 if 'configure' in command_line_args:
     force_configure = True
-elif ('-h' in command_line_args) or ('--help' in command_line_args):
+elif help_only:
     # ensure configuration gets skipped when help is requested
     gigi_preconfigured = True
     sdl_preconfigured = True
@@ -258,8 +259,7 @@ if str(Platform()) == 'win32':
             env['dynamic'] = 0
 
 
-if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_preconfigured and \
-       ('-h' not in command_line_args) and ('--help' not in command_line_args):
+if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_preconfigured and not help_only:
     print 'Using previous successful configuration; if you want to re-run the configuration step, run "scons configure".'
 
 
@@ -605,6 +605,34 @@ if not env.GetOption('clean'):
             cache_dict[i] = ogre_ois_env.has_key(i) and ogre_ois_env.Dictionary(i) or []
         p.dump(cache_dict)
 
+    print '''
+Summary:
+    Build GiGi....................Yes
+    Build GiGiSDL.................%s
+    Build GiGiOgre................%s
+    Build GiGiOgrePlugin_OIS......%s
+
+Image Loading:
+    Use DevIL.....................%s
+''' % \
+    (TruthStr(env['build_sdl_driver']),
+     TruthStr(env['build_ogre_driver']),
+     TruthStr(env['build_ogre_ois_plugin']),
+     TruthStr(env['use_devil']))
+    if env['use_devil']:
+        print '''    PNG Files.....................[Via DevIL]
+    JPEG Files....................[Via DevIL]
+    TIFF Files....................[Via DevIL]
+'''
+    else:
+        print '''    PNG Files.....................%s
+    JPEG Files....................%s
+    TIFF Files....................%s
+''' % \
+    (TruthStr(env['have_png']),
+     TruthStr(env['have_jpeg']),
+     TruthStr(env['have_tiff']))
+
     if 'configure' in command_line_args:
         Exit(0)
 
@@ -618,16 +646,18 @@ Export('env')
 gigi_env = env.Clone()
 if str(Platform()) == 'win32' and gigi_env['dynamic']:
     gigi_env.AppendUnique(CPPDEFINES = ['GIGI_EXPORTS'])
-gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'), exports = 'gigi_env')
-result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript'), exports = 'gigi_env')
-gigi_objects += result_objects
-gigi_sources += result_sources
-
-if env['dynamic']:
-    lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
+if help_only:
+    lib_gigi = ['gigi']
 else:
-    lib_gigi = env.StaticLibrary('GiGi', gigi_objects)
+    gigi_objects, gigi_sources = SConscript(os.path.normpath('src/SConscript'), exports = 'gigi_env')
+    result_objects, result_sources = SConscript(os.path.normpath('libltdl/SConscript'), exports = 'gigi_env')
+    gigi_objects += result_objects
+    gigi_sources += result_sources
 
+    if env['dynamic']:
+        lib_gigi = env.SharedLibrary('GiGi', gigi_objects)
+    else:
+        lib_gigi = env.StaticLibrary('GiGi', gigi_objects)
 
 # define libGiGiSDL objects
 if env['build_sdl_driver']:
@@ -747,7 +777,7 @@ if env['build_ogre_driver']:
         Depends(lib_gigi_ogre_plugins[key], lib_gigi_ogre)
 
 # Generate pkg-config .pc files
-if not missing_pkg_config and str(Platform()) != 'win32':
+if not missing_pkg_config and str(Platform()) != 'win32' and not help_only:
     CreateGiGiPCFile(['GiGi.pc'], ['GiGi.pc.in'], env)
     if env['build_sdl_driver']:
         CreateGiGiDriverPCFile(['GiGiSDL.pc'], ['GiGiSDL.pc.in'], sdl_env)

@@ -11,6 +11,9 @@ def OgrePluginName(name):
 def OptionValue(key, env):
     return env.subst('$' + key)
 
+def TruthStr(str_):
+    return str_ and 'Yes' or 'No '
+
 def ParseOptionsCacheFile(filename):
     retval = {}
     try:

@@ -55,6 +55,7 @@ options.Add('with_png_libdir', 'Specify exact library dir for PNG library (only 
 options.Add('with_tiff', 'Root directory of TIFF installation (only applicable if use_devil=0)')
 options.Add('with_tiff_include', 'Specify exact include dir for TIFF headers (only applicable if use_devil=0)')
 options.Add('with_tiff_libdir', 'Specify exact library dir for TIFF library (only applicable if use_devil=0)')
+options.Add(BoolOption('build_tutorials', 'Build tutorial apps (requires SDL driver).', 1))
 
 ##################################################
 # Drivers                                        #
@@ -608,27 +609,29 @@ if not env.GetOption('clean'):
     if not help_only:
         print '''
 Summary:
-    Build GiGi....................Yes
-    Build GiGiSDL.................%s
-    Build GiGiOgre................%s
-    Build GiGiOgrePlugin_OIS......%s
+    Build GiGi.........................................Yes
+    Build GiGiSDL......................................%s
+    Build GiGiOgre.....................................%s
+    Build GiGiOgrePlugin_OIS...........................%s
+    Build Tutorials (requires GiGiSDL).................%s
 
 Image Loading:
-    Use DevIL.....................%s
+    Use DevIL..........................................%s
 ''' % \
         (TruthStr(env['build_sdl_driver']),
          TruthStr(env['build_ogre_driver']),
          TruthStr(env['build_ogre_driver'] and env['build_ogre_ois_plugin']),
+         TruthStr(env['build_tutorials']),
          TruthStr(env['use_devil']))
         if env['use_devil']:
-            print '''    PNG Files.....................[Via DevIL]
-    JPEG Files....................[Via DevIL]
-    TIFF Files....................[Via DevIL]
+            print '''    PNG Files..........................................[Via DevIL]
+    JPEG Files.........................................[Via DevIL]
+    TIFF Files.........................................[Via DevIL]
 '''
         else:
-            print '''    PNG Files.....................%s
-    JPEG Files....................%s
-    TIFF Files....................%s
+            print '''    PNG Files..........................................%s
+    JPEG Files.........................................%s
+    TIFF Files.........................................%s
 ''' % \
             (TruthStr(env['have_png']),
              TruthStr(env['have_jpeg']),
@@ -890,7 +893,8 @@ env.Precious(uninstall)
 default_targets = [lib_gigi]
 if env['build_sdl_driver']:
     default_targets += lib_gigi_sdl
-    default_targets += tutorials
+    if env['build_tutorials']:
+        default_targets += tutorials
 if env['build_ogre_driver']:
     default_targets += lib_gigi_ogre
 if env['build_ogre_driver'] and env['build_ogre_ois_plugin']:

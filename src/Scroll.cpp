@@ -334,7 +334,7 @@ unsigned int Scroll::TabSpace() const
 }
 
 unsigned int Scroll::TabWidth() const
-{ return std::max(TabSpace() * m_page_sz / (m_range_max - m_range_min + 1), MIN_TAB_SIZE); }
+{ return std::max(static_cast<unsigned int>(TabSpace() / (m_range_max - m_range_min + 1.0) * m_page_sz + 0.5), MIN_TAB_SIZE); }
 
 Scroll::ScrollRegion Scroll::RegionUnder(const Pt& pt)
 {
@@ -399,9 +399,10 @@ void Scroll::UpdatePosn()
     int before_tab = (m_orientation == VERTICAL ?   // the tabspace before the tab's lower-value side
                       Value(m_tab->RelativeUpperLeft().y - m_decr->Size().y) :
                       Value(m_tab->RelativeUpperLeft().x - m_decr->Size().x));
-    int tab_space = TabSpace();
-    m_posn = static_cast<int>(m_range_min + static_cast<double>(before_tab) / tab_space * (m_range_max - m_range_min + 1) + 0.5);
-    m_posn = std::min(static_cast<int>(m_range_max - m_page_sz + 1), std::max(m_range_min, m_posn));
+    int tab_space = TabSpace() - (m_orientation == VERTICAL ? Value(m_tab->Size().y) : Value(m_tab->Size().x));
+    int max_posn = static_cast<int>(m_range_max - m_page_sz + 1);
+    m_posn = static_cast<int>(m_range_min + static_cast<double>(before_tab) / tab_space * (max_posn - m_range_min) + 0.5);
+    m_posn = std::max(m_range_min, std::min(m_posn, max_posn));
     if (old_posn != m_posn)
         ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
 }
@@ -411,13 +412,12 @@ void Scroll::MoveTabToPosn()
     int start_tabspace = (m_orientation == VERTICAL ?    // the tab's lowest posible extent
                           Value(m_decr->Size().y) :
                           Value(m_decr->Size().x));
-    int end_tabspace = (m_orientation == VERTICAL ?      // its highest
-                        Value(Size().y - m_incr->Size().y) :
-                        Value(Size().x - m_incr->Size().x));
-    double tab_size =
-        (m_posn - m_range_min) / (m_range_max - m_range_min + 1.0) * (end_tabspace - start_tabspace + 1) + start_tabspace;
+    int tab_space = TabSpace() - (m_orientation == VERTICAL ? Value(m_tab->Size().y) : Value(m_tab->Size().x));
+    int max_posn = static_cast<int>(m_range_max - m_page_sz + 1);
+    double tab_location =
+        (m_posn - m_range_min) / static_cast<double>(max_posn - m_range_min) * tab_space + start_tabspace + 0.5;
 
     m_tab->MoveTo(m_orientation == VERTICAL ?
-                  Pt(m_tab->RelativeUpperLeft().x, Y(static_cast<int>(tab_size))) :
-                  Pt(X(static_cast<int>(tab_size)), m_tab->RelativeUpperLeft().y));
+                  Pt(m_tab->RelativeUpperLeft().x, Y(static_cast<int>(tab_location))) :
+                  Pt(X(static_cast<int>(tab_location)), m_tab->RelativeUpperLeft().y));
 }

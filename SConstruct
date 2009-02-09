@@ -605,7 +605,8 @@ if not env.GetOption('clean'):
             cache_dict[i] = ogre_ois_env.has_key(i) and ogre_ois_env.Dictionary(i) or []
         p.dump(cache_dict)
 
-    print '''
+    if not help_only:
+        print '''
 Summary:
     Build GiGi....................Yes
     Build GiGiSDL.................%s
@@ -615,23 +616,23 @@ Summary:
 Image Loading:
     Use DevIL.....................%s
 ''' % \
-    (TruthStr(env['build_sdl_driver']),
-     TruthStr(env['build_ogre_driver']),
-     TruthStr(env['build_ogre_ois_plugin']),
-     TruthStr(env['use_devil']))
-    if env['use_devil']:
-        print '''    PNG Files.....................[Via DevIL]
+        (TruthStr(env['build_sdl_driver']),
+         TruthStr(env['build_ogre_driver']),
+         TruthStr(env['build_ogre_driver'] and env['build_ogre_ois_plugin']),
+         TruthStr(env['use_devil']))
+        if env['use_devil']:
+            print '''    PNG Files.....................[Via DevIL]
     JPEG Files....................[Via DevIL]
     TIFF Files....................[Via DevIL]
 '''
-    else:
-        print '''    PNG Files.....................%s
+        else:
+            print '''    PNG Files.....................%s
     JPEG Files....................%s
     TIFF Files....................%s
 ''' % \
-    (TruthStr(env['have_png']),
-     TruthStr(env['have_jpeg']),
-     TruthStr(env['have_tiff']))
+            (TruthStr(env['have_png']),
+             TruthStr(env['have_jpeg']),
+             TruthStr(env['have_tiff']))
 
     if 'configure' in command_line_args:
         Exit(0)

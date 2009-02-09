@@ -615,6 +615,11 @@ Summary:
     Build GiGiOgrePlugin_OIS...........................%s
     Build Tutorials (requires GiGiSDL).................%s
 
+Code generation:
+    Debug/Release......................................%s
+    Single-/Multi-threaded.............................%s
+    Dynamic/Static.....................................%s
+
 Image Loading:
     Use DevIL..........................................%s
 ''' % \
@@ -622,6 +627,9 @@ Image Loading:
          TruthStr(env['build_ogre_driver']),
          TruthStr(env['build_ogre_driver'] and env['build_ogre_ois_plugin']),
          TruthStr(env['build_tutorials']),
+         env['debug'] and 'Debug' or 'Release',
+         env['multithreaded'] and 'Multi-threaded' or 'Single-threaded',
+         env['dynamic'] and 'Dynamic' or 'Static',
          TruthStr(env['use_devil']))
         if env['use_devil']:
             print '''    PNG Files..........................................[Via DevIL]

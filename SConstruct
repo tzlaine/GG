@@ -626,7 +626,7 @@ Image Loading:
         (TruthStr(env['build_sdl_driver']),
          TruthStr(env['build_ogre_driver']),
          TruthStr(env['build_ogre_driver'] and env['build_ogre_ois_plugin']),
-         TruthStr(env['build_tutorials']),
+         TruthStr(env['build_sdl_driver'] and env['build_tutorials']),
          env['debug'] and 'Debug' or 'Release',
          env['multithreaded'] and 'Multi-threaded' or 'Single-threaded',
          env['dynamic'] and 'Dynamic' or 'Static',

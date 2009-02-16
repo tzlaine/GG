@@ -21,6 +21,8 @@ missing_pkg_config = not WhereIs('pkg-config')
 options_cache_filename = 'options.cache'
 old_options_cache = ParseOptionsCacheFile(options_cache_filename)
 options = Options(options_cache_filename)
+options.Add('CC', 'The C-Compiler used to compile C-Files')
+options.Add('CXX', 'The C++-Compiler used to compile C++-Files')
 options.Add(BoolOption('debug', 'Generate debug code', 0))
 options.Add(BoolOption('multithreaded', 'Generate multithreaded code', 1))
 options.Add(BoolOption('dynamic', 'Generate a shared (dynamic-link) library', 1))
@@ -118,6 +120,8 @@ elif help_only:
 ms_linker = 'msvs' in env['TOOLS'] or 'msvc' in env['TOOLS']
 
 env_cache_keys = [
+    'CC',
+    'CXX',
     'CCFLAGS',
     'CPPDEFINES',
     'CPPFLAGS',
@@ -147,6 +151,9 @@ if not force_configure:
         pass
 
 options.Update(env)
+
+if os.environ.has_key('PKG_CONFIG_PATH'):
+    env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
 
 if env.has_key('use_distcc') and env['use_distcc']:
     env['CC'] = 'distcc %s' % env['CC']
@@ -273,9 +280,6 @@ if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_
 # check configuration                            #
 ##################################################
 if not env.GetOption('clean'):
-    if os.environ.has_key('PKG_CONFIG_PATH'):
-        env['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH']
-
     custom_tests_dict = {'CheckVersionHeader' : CheckVersionHeader,
                          'CheckPkgConfig' : CheckPkgConfig,
                          'CheckPkg' : CheckPkg,

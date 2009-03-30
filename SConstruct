@@ -1,4 +1,4 @@
-#-*- Python -*-
+-*- Python -*-
 
 import os
 import pickle
@@ -109,7 +109,7 @@ ogre_ois_preconfigured = False
 force_configure = False
 command_line_args = sys.argv[1:]
 help_only = ('-h' in command_line_args) or ('--help' in command_line_args)
-if 'configure' in command_line_args:
+if 'configure' in command_line_args and not help_only:
     force_configure = True
 elif help_only:
     # ensure configuration gets skipped when help is requested
@@ -195,9 +195,9 @@ if env.has_key('use_ccache') and env['use_ccache']:
             env['ENV'][i] = os.environ[i]
 
 Help(GenerateHelpText(options, env))
-options.Save('options.cache', env)
+options.Save(options_cache_filename, env)
 
-new_options_cache = ParseOptionsCacheFile('options.cache')
+new_options_cache = ParseOptionsCacheFile(options_cache_filename)
 if gigi_preconfigured and sdl_preconfigured and ogre_preconfigured and ogre_ois_preconfigured:
     for i in old_options_cache.keys():
         if not new_options_cache.has_key(i) or old_options_cache[i] != new_options_cache[i]:

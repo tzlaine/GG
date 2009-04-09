@@ -478,9 +478,9 @@ if not env.GetOption('clean'):
                 ])
         else:
             if env['debug']:
-                env.Append(CCFLAGS = ['-Wall', '-g', '-O0'])
+                env.Append(CCFLAGS = ['-Wall', '-Wno-parentheses', '-g', '-O0'])
             else:
-                env.Append(CCFLAGS = ['-Wall', '-O2'])
+                env.Append(CCFLAGS = ['-Wall', '-Wno-parentheses', '-O2'])
 
         env['libltdl_defines'] = [
             'HAVE_CONFIG_H'

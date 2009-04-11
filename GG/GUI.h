@@ -130,10 +130,6 @@ public:
     typedef boost::signal<bool (), OrCombiner> AcceleratorSignalType;
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef AcceleratorSignalType::slot_type   AcceleratorSlotType; ///< type of functor(s) invoked on a AcceleratorSignalType
-    //@}
-
     /// These are the only events absolutely necessary for GG to function
     /// properly
     enum EventType {

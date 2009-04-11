@@ -230,7 +230,9 @@ void ControlsTestApp::Initialize()
 
     GG::MenuItem menu_contents;
     GG::MenuItem file_menu("File", 0, false, false);
-    file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, GG::MenuItem::SelectedSlotType(BrowseFilesFunctor())));
+    file_menu.next_level.push_back(
+        GG::MenuItem("Browse...", 1, false, false,
+                     GG::MenuItem::SelectedSignalType::slot_type(BrowseFilesFunctor())));
     menu_contents.next_level.push_back(file_menu);
     GG::MenuBar* menu_bar =
         new GG::MenuBar(GG::X0, GG::Y0, AppWidth(), font, menu_contents, GG::CLR_WHITE);

@@ -49,10 +49,6 @@ public:
     typedef boost::signal<void (std::size_t)> WndChangedSignalType;
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef WndChangedSignalType::slot_type WndChangedSlotType; ///< Type of functor(s) invoked on a WndChangedSignalType.
-    //@}
-
     /** \name Structors */ ///@{
     /** Basic ctor. */
     TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
@@ -112,7 +108,7 @@ protected:
     //@}
 
 private:
-    void TabChanged(std::size_t tab_index);
+    void TabChanged(std::size_t tab_index, bool signal);
 
     TabBar*                                    m_tab_bar;
     std::vector<std::pair<Wnd*, std::string> > m_wnds;
@@ -137,10 +133,6 @@ public:
         tab's index in the group is provided (this may be NO_TAB if no tab is
         currently selected). */
     typedef boost::signal<void (std::size_t)> TabChangedSignalType;
-    //@}
-
-    /** \name Slot Types */ ///@{
-    typedef TabChangedSignalType::slot_type TabChangedSlotType; ///< Type of functor(s) invoked on a TabChangedSignalType.
     //@}
 
     /** \name Structors */ ///@{
@@ -215,7 +207,7 @@ protected:
 private:
     virtual void DistinguishCurrentTab(const std::vector<StateButton*>& tab_buttons);
 
-    void TabChanged(std::size_t index);
+    void TabChanged(std::size_t index, bool signal);
     void LeftClicked();
     void RightClicked();
     void BringTabIntoView(std::size_t index);

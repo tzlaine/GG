@@ -68,11 +68,6 @@ public:
     typedef boost::signal<void (int, int, int, int)> ScrolledAndStoppedSignalType; ///< emitted when the scrollbar's tab is stopped after being dragged, the scrollbar is adjusted using the keyboard, or the scrollbar is moved programmatically; the upper and lower extents of the tab and the upper and lower bounds of the scroll's range are indicated, respectively
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef ScrolledSignalType::slot_type ScrolledSlotType; ///< type of functor(s) invoked on a ScrolledSignalType
-    typedef ScrolledAndStoppedSignalType::slot_type ScrolledAndStoppedSlotType; ///< type of functor(s) invoked on a ScrolledAndStoppedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     /** Ctor. */
     Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior,
@@ -144,6 +139,8 @@ protected:
 private:
     void              UpdatePosn();        ///< adjusts m_posn due to a tab-drag
     void              MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
+    void              ScrollLineIncrImpl(bool signal);
+    void              ScrollLineDecrImpl(bool signal);
 
     Clr               m_int_color;   ///< color inside border of slide area
     const Orientation m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)
@@ -158,6 +155,7 @@ private:
     ScrollRegion      m_initial_depressed_region; ///< the part of the scrollbar originally under cursor in LButtonDown msg
     ScrollRegion      m_depressed_region;         ///< the part of the scrollbar currently being "depressed" by held-down mouse button
     bool              m_dragging_tab;
+    bool              m_tab_dragged;
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -173,6 +171,11 @@ GG_ENUM_MAP_END
 
 GG_ENUM_STREAM_IN(Scroll::ScrollRegion)
 GG_ENUM_STREAM_OUT(Scroll::ScrollRegion)
+
+/** A convenience function that signals \a scroll's position, via
+    Scroll::ScrolledSignal.  If \a stopped is true, the position is
+    additionally signalled on Scroll::ScrolledAndStoppedSignal. */
+void SignalScroll(const Scroll& scroll, bool stopped);
 
 } // namespace GG
 

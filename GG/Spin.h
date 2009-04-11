@@ -117,10 +117,6 @@ public:
     typedef typename boost::signal<void (T)> ValueChangedSignalType;  ///< emitted whenever the value of the Spin has changed
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef typename ValueChangedSignalType::slot_type ValueChangedSlotType;   ///< type of functor(s) invoked on a ValueChangedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     /** Ctor that does not required height. Height is determined from the font
         and point size used.*/
@@ -205,6 +201,9 @@ private:
     void ConnectSignals();
     void Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_color, Clr interior, Flags<WndFlag> flags);
     void ValueUpdated(const std::string& val_text);
+    void IncrImpl(bool signal);
+    void DecrImpl(bool signal);
+    void SetValueImpl(T value, bool signal);
 
     T          m_value;
     T          m_step_size;
@@ -218,6 +217,8 @@ private:
     Button*    m_down_button;
 
     X          m_button_width;
+
+    static void ValueChangedEcho(const T& value);
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -253,7 +254,12 @@ Spin<T>::Spin(X x, Y y, X w, T value, T step, T min, T max, bool edits, const bo
     m_up_button(0),
     m_down_button(0),
     m_button_width(15)
-{ Init(font, color, text_color, interior, flags); }
+{
+    Init(font, color, text_color, interior, flags);
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(ValueChangedSignal, &ValueChangedEcho);
+}
 
 template<class T>
 Spin<T>::~Spin()
@@ -323,22 +329,22 @@ void Spin<T>::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mo
 {
     switch (key) {
     case GGK_HOME:
-        SetValue(m_min_value);
+        SetValueImpl(m_min_value, true);
         break;
     case GGK_END:
-        SetValue(m_max_value);
+        SetValueImpl(m_max_value, true);
         break;
     case GGK_PAGEUP:
     case GGK_UP:
     case GGK_PLUS:
     case GGK_KP_PLUS:
-        Incr();
+        IncrImpl(true);
         break;
     case GGK_PAGEDOWN:
     case GGK_DOWN:
     case GGK_MINUS:
     case GGK_KP_MINUS:
-        Decr();
+        DecrImpl(true);
         break;
     default:
         break;
@@ -349,10 +355,10 @@ template<class T>
 void Spin<T>::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     for (int i = 0; i < move; ++i) {
-        Incr();
+        IncrImpl(true);
     }
     for (int i = 0; i < -move; ++i) {
-        Decr();
+        DecrImpl(true);
     }
 }
 
@@ -388,35 +394,15 @@ void Spin<T>::SetColor(Clr c)
 
 template<class T>
 void Spin<T>::Incr()
-{ SetValue(m_value + m_step_size); }
+{ SetValueImpl(m_value + m_step_size, false); }
 
 template<class T>
 void Spin<T>::Decr()
-{ SetValue(m_value - m_step_size); }
+{ SetValueImpl(m_value - m_step_size, false); }
 
 template<class T>
 void Spin<T>::SetValue(T value)
-{
-    T old_value = m_value;
-    if (value < m_min_value) {
-        m_value = m_min_value;
-    } else if (m_max_value < value) {
-        m_value = m_max_value;
-    } else {
-        // if the value supplied does not equal a valid value
-        if (std::abs(spin_details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
-            // find nearest valid value to the one supplied
-            T closest_below = spin_details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
-            T closest_above = closest_below + m_step_size;
-            m_value = ((value - closest_below) < (closest_above - value) ? closest_below : closest_above);
-        } else {
-            m_value = value;
-        }
-    }
-    *m_edit << m_value;
-    if (m_value != old_value)
-        ValueChangedSignal(m_value);
-}
+{ SetValueImpl(value, false); }
 
 template<class T>
 void Spin<T>::SetStepSize(T step)
@@ -522,8 +508,8 @@ template<class T>
 void Spin<T>::ConnectSignals()
 {
     Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
-    Connect(m_up_button->ClickedSignal, &Spin::Incr, this);
-    Connect(m_down_button->ClickedSignal, &Spin::Decr, this);
+    Connect(m_up_button->ClickedSignal, boost::bind(&Spin::IncrImpl, this, true));
+    Connect(m_down_button->ClickedSignal, boost::bind(&Spin::DecrImpl, this, true));
 }
 
 template<class T>
@@ -552,11 +538,48 @@ void Spin<T>::ValueUpdated(const std::string& val_text)
     try {
         value = boost::lexical_cast<T>(val_text);
     } catch (boost::bad_lexical_cast) {
-        SetValue(m_min_value);
+        SetValueImpl(m_min_value, true);
         return;
     }
-    SetValue(value);
+    SetValueImpl(value, true);
 }
+
+template<class T>
+void Spin<T>::IncrImpl(bool signal)
+{ SetValueImpl(m_value + m_step_size, signal); }
+
+template<class T>
+void Spin<T>::DecrImpl(bool signal)
+{ SetValueImpl(m_value - m_step_size, signal); }
+
+template<class T>
+void Spin<T>::SetValueImpl(T value, bool signal)
+{
+    T old_value = m_value;
+    if (value < m_min_value) {
+        m_value = m_min_value;
+    } else if (m_max_value < value) {
+        m_value = m_max_value;
+    } else {
+        // if the value supplied does not equal a valid value
+        if (std::abs(spin_details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
+            // find nearest valid value to the one supplied
+            T closest_below = spin_details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
+            T closest_above = closest_below + m_step_size;
+            m_value = ((value - closest_below) < (closest_above - value) ? closest_below : closest_above);
+        } else {
+            m_value = value;
+        }
+    }
+    *m_edit << m_value;
+    if (signal && m_value != old_value)
+        ValueChangedSignal(m_value);
+}
+
+template <class T>
+void Spin<T>::ValueChangedEcho(const T& value)
+{ std::cerr << "GG SIGNAL : Spin<>::ValueChangedSignal(value=" << value << ")\n"; }
+
 
 template <class T>
 template <class Archive>

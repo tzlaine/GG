@@ -68,6 +68,8 @@
     functions, typedefs, enums, etc. */
 namespace GG {
 
+extern const bool INSTRUMENT_ALL_SIGNALS;
+
 template <class FlagType>
 class Flags;
 class ModKey;

@@ -39,6 +39,14 @@
 using namespace GG;
 
 namespace {
+    struct SignalEcho
+    {
+        SignalEcho(const std::string& name) : m_name(name) {}
+        void operator()(std::size_t index)
+            { std::cerr << "GG SIGNAL : " << m_name << "(index=" << index << ")\n"; }
+        std::string m_name;
+    };
+
     const double DEFAULT_FPS = 15.0;
 }
 
@@ -88,6 +96,11 @@ DynamicGraphic::DynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y f
     SetColor(CLR_WHITE);
     AddFrames(textures, frames);
     m_last_frame_idx = m_frames - 1;
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(StoppedSignal, SignalEcho("DynamicGraphic::StoppedSignal"));
+        Connect(EndFrameSignal, SignalEcho("DynamicGraphic::EndFrameSignal"));
+    }
 }
 
 std::size_t DynamicGraphic::Frames() const       

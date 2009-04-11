@@ -59,10 +59,6 @@ public:
     typedef boost::signal<void ()> ClickedSignalType; ///< Emitted when the button is clicked by the user
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef ClickedSignalType::slot_type ClickedSlotType; ///< Type of functor(s) invoked on a ClickedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color = CLR_BLACK, Flags<WndFlag> flags = CLICKABLE); ///< ctor
@@ -158,10 +154,6 @@ public:
     typedef boost::signal<void (bool)> CheckedSignalType; ///< Emitted when the StateButton is checked or unchecked; the checked/unchecked status is indicated by the bool parameter
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef CheckedSignalType::slot_type CheckedSlotType; ///< Type of functor(s) invoked on a CheckedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
@@ -243,10 +235,6 @@ class GG_API RadioButtonGroup : public Control
 public:
     /** \name Signal Types */ ///@{
     typedef boost::signal<void (std::size_t)> ButtonChangedSignalType; ///< emitted when the currently-selected button has changed; the new selected button's index in the group is provided (this may be NO_BUTTON if no button is currently selected)
-    //@}
-
-    /** \name Slot Types */ ///@{
-    typedef ButtonChangedSignalType::slot_type ButtonChangedSlotType; ///< type of functor(s) invoked on a ButtonChangedSignalType
     //@}
 
     /** \name Structors */ ///@{
@@ -386,11 +374,10 @@ private:
         RadioButtonGroup* m_group;
         StateButton*      m_button;
         std::size_t       m_index;
-        bool              m_ignore_clicks;
     };
 
     void ConnectSignals();
-    void HandleRadioClick(std::size_t index, bool set_check);
+    void SetCheckImpl(std::size_t index, bool signal);
     void Reconnect();
 
     const Orientation       m_orientation;

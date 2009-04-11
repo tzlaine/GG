@@ -131,10 +131,6 @@ public:
     typedef boost::signal<void (int)> BrowsedSignalType; ///< emits the ID of an item in the menu when the cursor moves over it
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef BrowsedSignalType::slot_type  BrowsedSlotType;   ///< type of functor(s) invoked on a BrowsedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     /** Ctor.  Parameter \a m should contain the desired menu in its
         next_level member. */
@@ -207,8 +203,6 @@ private:
         rows if they will not fit in one */
     void AdjustLayout(bool reset = false);
 
-    void BrowsedSlot(int n); ///< responds to a browse in a PopupMenu submenu, and passes it along
-
     boost::shared_ptr<Font>   m_font;           ///< the font used to render the text in the control
     Clr                       m_border_color;   ///< the color of the menu's border
     Clr                       m_int_color;      ///< color painted into the client area of the control
@@ -254,10 +248,6 @@ class GG_API PopupMenu : public Wnd
 public:
     /** \name Signal Types */ ///@{
     typedef boost::signal<void (int)> BrowsedSignalType; ///< emits the ID of an item in the menu when the cursor moves over it
-    //@}
-
-    /** \name Slot Types */ ///@{
-    typedef BrowsedSignalType::slot_type  BrowsedSlotType;   ///< type of functor(s) invoked on a BrowsedSignalType
     //@}
 
     /** \name Structors */ ///@{

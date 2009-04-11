@@ -44,6 +44,38 @@
 using namespace GG;
 
 namespace {
+    struct ListSignalEcho
+    {
+        ListSignalEcho(const ListBox& lb, const std::string& name) :
+            m_LB(lb),
+            m_name(name)
+            {}
+        void operator()()
+            { std::cerr << "GG SIGNAL : " << m_name << "()\n"; }
+        void operator()(const ListBox::SelectionSet& sels)
+            {
+                std::cerr << "GG SIGNAL : " << m_name
+                          << "(sels=[ ";
+                for (ListBox::SelectionSet::const_iterator it = sels.begin();
+                     it != sels.end();
+                     ++it) {
+                    std::cerr << RowIndex(*it) << ' ';
+                }
+                std::cerr << "])\n";
+            }
+        void operator()(ListBox::const_iterator it)
+            { std::cerr << "GG SIGNAL : " << m_name << "(row=" << RowIndex(it) << ")\n"; }
+        void operator()(ListBox::const_iterator it, const Pt& pt)
+            {
+                std::cerr << "GG SIGNAL : " << m_name
+                          << "(row=" << RowIndex(it) << " pt=" << pt << ")\n";
+            }
+        std::size_t RowIndex(ListBox::const_iterator it)
+            { return std::distance(m_LB.begin(), it); }
+        const ListBox& m_LB;
+        std::string m_name;
+    };
+
     const int SCROLL_WIDTH = 14;
     const X DEFAULT_ROW_WIDTH(50);
     const Y DEFAULT_ROW_HEIGHT(22);
@@ -396,7 +428,6 @@ ListBox::ListBox() :
     m_lclick_row(m_rows.end()),
     m_rclick_row(m_rows.end()),
     m_last_row_browsed(m_rows.end()),
-    m_suppress_erase_signal(false),
     m_first_row_shown(m_rows.end()),
     m_first_col_shown(0),
     m_cell_margin(2),
@@ -433,7 +464,6 @@ ListBox::ListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
     m_lclick_row(m_rows.end()),
     m_rclick_row(m_rows.end()),
     m_last_row_browsed(m_rows.end()),
-    m_suppress_erase_signal(false),
     m_first_row_shown(m_rows.end()),
     m_first_col_shown(0),
     m_cell_margin(2),
@@ -459,6 +489,19 @@ ListBox::ListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
     EnableChildClipping();
     m_auto_scroll_timer.Stop();
     m_auto_scroll_timer.Connect(this);
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(ClearedSignal, ListSignalEcho(*this, "ListBox::ClearedSignal"));
+        Connect(InsertedSignal, ListSignalEcho(*this, "ListBox::InsertedSignal"));
+        Connect(SelChangedSignal, ListSignalEcho(*this, "ListBox::SelChangedSignal"));
+        Connect(DroppedSignal, ListSignalEcho(*this, "ListBox::DroppedSignal"));
+        Connect(DropAcceptableSignal, ListSignalEcho(*this, "ListBox::DropAcceptableSignal"));
+        Connect(LeftClickedSignal, ListSignalEcho(*this, "ListBox::LeftClickedSignal"));
+        Connect(RightClickedSignal, ListSignalEcho(*this, "ListBox::RightClickedSignal"));
+        Connect(DoubleClickedSignal, ListSignalEcho(*this, "ListBox::DoubleClickedSignal"));
+        Connect(ErasedSignal, ListSignalEcho(*this, "ListBox::ErasedSignal"));
+        Connect(BrowsedSignal, ListSignalEcho(*this, "ListBox::BrowsedSignal"));
+    }
 }
 
 ListBox::~ListBox()
@@ -649,7 +692,7 @@ void ListBox::ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* dest
             Row* row = boost::polymorphic_downcast<Row*>(*it);
             iterator row_it = std::find(m_rows.begin(), m_rows.end(), row);
             assert(row_it != m_rows.end());
-            Erase(row_it);
+            Erase(row_it, false, true);
         }
     }
 }
@@ -761,10 +804,10 @@ void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mo
             if (m_style & LIST_USERDELETE) {
                 if (m_style & LIST_NOSEL) {
                     if (m_caret != m_rows.end())
-                        delete Erase(m_caret);
+                        delete Erase(m_caret, false, true);
                 } else {
                     for (SelectionSet::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
-                        delete Erase(*it);
+                        delete Erase(*it, false, true);
                     }
                     m_selections.clear();
                 }
@@ -811,6 +854,7 @@ void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mo
                 --m_first_col_shown;
                 m_hscroll->ScrollTo(
                     Value(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, X0)));
+                SignalScroll(*m_hscroll, true);
             }
             break;
         case GGK_RIGHT:{ // right key (not numpad)
@@ -823,6 +867,7 @@ void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mo
                 ++m_first_col_shown;
                 m_hscroll->ScrollTo(
                     Value(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, X0)));
+                SignalScroll(*m_hscroll, true);
             }
             break;}
 
@@ -845,14 +890,18 @@ void ListBox::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     if (m_vscroll) {
         for (int i = 0; i < move; ++i) {
-            if (m_first_row_shown != m_rows.end() && m_first_row_shown != m_rows.begin())
+            if (m_first_row_shown != m_rows.end() && m_first_row_shown != m_rows.begin()) {
                 m_vscroll->ScrollTo(m_vscroll->PosnRange().first -
                                     Value((*boost::prior(m_first_row_shown))->Height()));
+                SignalScroll(*m_vscroll, true);
+            }
         }
         for (int i = 0; i < -move; ++i) {
-            if (m_first_row_shown != m_rows.end() && m_first_row_shown != --m_rows.end())
+            if (m_first_row_shown != m_rows.end() && m_first_row_shown != --m_rows.end()) {
                 m_vscroll->ScrollTo(m_vscroll->PosnRange().first +
                                     Value((*m_first_row_shown)->Height()));
+                SignalScroll(*m_vscroll, true);
+            }
         }
     }
 }
@@ -905,6 +954,7 @@ void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
                 m_first_row_shown != m_rows.begin()) {
                 m_vscroll->ScrollTo(m_vscroll->PosnRange().first -
                                     Value((*boost::prior(m_first_row_shown))->Height()));
+                SignalScroll(*m_vscroll, true);
             }
             if (m_auto_scrolling_down) {
                 iterator last_visible_row = LastVisibleRow();
@@ -913,19 +963,24 @@ void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
                      ClientLowerRight().y < (*last_visible_row)->LowerRight().y)) {
                     m_vscroll->ScrollTo(m_vscroll->PosnRange().first +
                                         Value((*m_first_row_shown)->Height()));
+                    SignalScroll(*m_vscroll, true);
                 }
             }
         }
         if (m_hscroll) {
-            if (m_auto_scrolling_left && 0 < m_first_col_shown)
+            if (m_auto_scrolling_left && 0 < m_first_col_shown) {
                 m_hscroll->ScrollTo(m_hscroll->PosnRange().first -
                                     Value(m_col_widths[m_first_col_shown - 1]));
+                SignalScroll(*m_hscroll, true);
+            }
             if (m_auto_scrolling_right) {
                 std::size_t last_visible_col = LastVisibleCol();
                 if (last_visible_col < m_col_widths.size() - 1 ||
-                    ClientLowerRight().x < m_rows.front()->LowerRight().x)
+                    ClientLowerRight().x < m_rows.front()->LowerRight().x) {
                     m_hscroll->ScrollTo(m_hscroll->PosnRange().first +
                                         Value(m_col_widths[m_first_col_shown]));
+                    SignalScroll(*m_hscroll, true);
+                }
             }
         }
     }
@@ -964,11 +1019,10 @@ ListBox::iterator ListBox::Insert(Row* row)
 { return Insert(row, m_rows.end(), false); }
 
 ListBox::Row* ListBox::Erase(iterator it)
-{ return Erase(it, false); }
+{ return Erase(it, false, false); }
 
 void ListBox::Clear()
 {
-    bool signal = !m_rows.empty(); // inhibit signal if the list box was already empty
     m_rows.clear();
     m_caret = m_rows.end();
     DetachChild(m_header_row);
@@ -991,9 +1045,6 @@ void ListBox::Clear()
 
     if (m_iterator_being_erased)
         *m_iterator_being_erased = m_rows.end();
-
-    if (signal)
-        ClearedSignal();
 }
 
 void ListBox::SelectRow(iterator it)
@@ -1002,16 +1053,13 @@ void ListBox::SelectRow(iterator it)
         if (m_style & LIST_SINGLESEL)
             m_selections.clear();
         m_selections.insert(it);
-        SelChangedSignal(m_selections);
     }
 }
 
 void ListBox::DeselectRow(iterator it)
 {
-    if (m_selections.find(it) != m_selections.end()) {
+    if (m_selections.find(it) != m_selections.end())
         m_selections.erase(it);
-        SelChangedSignal(m_selections);
-    }
 }
 
 void ListBox::SelectAll()
@@ -1020,7 +1068,6 @@ void ListBox::SelectAll()
         for (iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
             m_selections.insert(it);
         }
-        SelChangedSignal(m_selections);
     }
 }
 
@@ -1029,7 +1076,6 @@ void ListBox::DeselectAll()
     if (!m_selections.empty()) {
         m_selections.clear();
         m_caret = m_rows.end();
-        SelChangedSignal(m_selections);
     }
 }
 
@@ -1072,6 +1118,7 @@ void ListBox::BringRowIntoView(iterator it)
             for (iterator it2 = m_rows.begin(); it2 != m_first_row_shown; ++it2)
                 acc += (*it)->Height();
             m_vscroll->ScrollTo(Value(acc));
+            SignalScroll(*m_vscroll, true);
         }
     }
 }
@@ -1502,15 +1549,13 @@ ListBox::iterator ListBox::Insert(Row* row, iterator it, bool dropped)
         // semantically clearer if they were.
         DroppedSignal(retval);
         if (original_dropped_position != m_rows.end())
-            Erase(original_dropped_position, true);
-    } else {
-        InsertedSignal(retval);
+            Erase(original_dropped_position, true, false);
     }
 
     return retval;
 }
 
-ListBox::Row* ListBox::Erase(iterator it, bool removing_duplicate)
+ListBox::Row* ListBox::Erase(iterator it, bool removing_duplicate, bool signal)
 {
     if (it != m_rows.end()) {
         if (m_iterator_being_erased) {
@@ -1549,7 +1594,7 @@ ListBox::Row* ListBox::Erase(iterator it, bool removing_duplicate)
         // cause the iterator to be invalidated.
         ScopedSet scoped_set(m_iterator_being_erased, &it);
 
-        if (!removing_duplicate && !m_suppress_erase_signal)
+        if (signal && !removing_duplicate)
             ErasedSignal(it);
 
         if (it != m_rows.end()) {

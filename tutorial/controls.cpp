@@ -244,7 +244,9 @@ void ControlsTestApp::Initialize()
     GG::MenuItem file_menu("File", 0, false, false);
     // Notice that the menu item can be directly attached to a slot right in
     // its ctor.  In this case, the slot is a functor.
-    file_menu.next_level.push_back(GG::MenuItem("Browse...", 1, false, false, GG::MenuItem::SelectedSlotType(BrowseFilesFunctor())));
+    file_menu.next_level.push_back(
+        GG::MenuItem("Browse...", 1, false, false,
+                     GG::MenuItem::SelectedSignalType::slot_type(BrowseFilesFunctor())));
     menu_contents.next_level.push_back(file_menu);
     GG::MenuBar* menu_bar =
         new GG::MenuBar(GG::X0, GG::Y0, AppWidth(), font, menu_contents, GG::CLR_WHITE);
@@ -310,6 +312,7 @@ void ControlsTestApp::Initialize()
     // have each row contain a reference to the object that it represents in
     // the list.
     GG::ListBox* list_box = new GG::ListBox(GG::X0, GG::Y0, GG::X(300), GG::Y(200), GG::CLR_GRAY);
+    list_box->SetStyle(GG::LIST_USERDELETE);
     list_box->SetColHeaders(new CustomTextRow("Type", "Value"));
     list_box->Insert(new CustomTextRow("Number", 1));
     list_box->Insert(new CustomTextRow("Number", 2));

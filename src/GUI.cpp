@@ -40,18 +40,33 @@
 #include <boost/xpressive/xpressive.hpp>
 
 #include <cassert>
+#include <iostream>
 #include <fstream>
 #include <list>
 
 
 #define INSTRUMENT_GET_WINDOW_UNDER 0
-#if INSTRUMENT_GET_WINDOW_UNDER
-#include <iostream>
-#endif
 
 using namespace GG;
 
 namespace {
+    struct AcceleratorEcho
+    {
+        AcceleratorEcho(Key key, Flags<ModKey> mod_keys) :
+            m_str("GG SIGNAL : GUI::AcceleratorSignal(key=" +
+                  boost::lexical_cast<std::string>(key) +
+                  " mod_keys=" +
+                  boost::lexical_cast<std::string>(mod_keys) +
+                  ")\n")
+            {}
+        bool operator()()
+            {
+                std::cerr << m_str;
+                return false;
+            }
+        std::string m_str;
+    };
+
     /* returns the storage value of mod_keys that should be used with keyboard accelerators the accelerators don't care
        which side of the keyboard you use for CTRL, SHIFT, etc., and whether or not the numlock or capslock are
        engaged.*/
@@ -573,6 +588,8 @@ GUI::AcceleratorSignalType& GUI::AcceleratorSignal(Key key, Flags<ModKey> mod_ke
     boost::shared_ptr<AcceleratorSignalType>& sig_ptr = s_impl->m_accelerator_sigs[std::make_pair(key, mod_keys)];
     if (!sig_ptr)
         sig_ptr.reset(new AcceleratorSignalType());
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(*sig_ptr, AcceleratorEcho(key, mod_keys));
     return *sig_ptr;
 }
 

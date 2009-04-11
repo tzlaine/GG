@@ -33,6 +33,14 @@
 using namespace GG;
 
 namespace {
+    struct TabChangedEcho
+    {
+        TabChangedEcho(const std::string& name) : m_name(name) {}
+        void operator()(std::size_t index)
+            { std::cerr << "GG SIGNAL : " << m_name << "(index=" << index << ")\n"; }
+        std::string m_name;
+    };
+
     Y TabHeightFromFont(const boost::shared_ptr<Font>& font)
     { return font->Lineskip() + 10; }
 }
@@ -66,7 +74,10 @@ TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr colo
     layout->SetRowStretch(1, 1.0);
     layout->Add(m_tab_bar, 0, 0);
     SetLayout(layout);
-    Connect(m_tab_bar->TabChangedSignal, &TabWnd::TabChanged, this);
+    Connect(m_tab_bar->TabChangedSignal, boost::bind(&TabWnd::TabChanged, this, _1, true));
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(WndChangedSignal, TabChangedEcho("TabWnd::WndChangedSignal"));
 }
 
 Pt TabWnd::MinUsableSize() const
@@ -119,7 +130,10 @@ Wnd* TabWnd::RemoveWnd(const std::string& name)
 }
 
 void TabWnd::SetCurrentWnd(std::size_t index)
-{ m_tab_bar->SetCurrentTab(index); }
+{
+    m_tab_bar->SetCurrentTab(index);
+    TabChanged(index, false);
+}
 
 const TabBar* TabWnd::GetTabBar() const
 { return m_tab_bar; }
@@ -127,7 +141,7 @@ const TabBar* TabWnd::GetTabBar() const
 const std::vector<std::pair<Wnd*, std::string> >& TabWnd::Wnds() const
 { return m_wnds; }
 
-void TabWnd::TabChanged(std::size_t index)
+void TabWnd::TabChanged(std::size_t index, bool signal)
 {
     assert(index < m_wnds.size());
     Wnd* old_current_wnd = m_current_wnd;
@@ -137,7 +151,8 @@ void TabWnd::TabChanged(std::size_t index)
         layout->Remove(old_current_wnd);
         layout->Add(m_current_wnd, 1, 0);
     }
-    WndChangedSignal(index);
+    if (signal)
+        WndChangedSignal(index);
 }
 
 
@@ -196,9 +211,12 @@ TabBar::TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Cl
     AttachChild(m_tabs);
     AttachChild(m_left_right_button_layout);
 
-    Connect(m_tabs->ButtonChangedSignal, &TabBar::TabChanged, this);
+    Connect(m_tabs->ButtonChangedSignal, boost::bind(&TabBar::TabChanged, this, _1, true));
     Connect(m_left_button->ClickedSignal, &TabBar::LeftClicked, this);
     Connect(m_right_button->ClickedSignal, &TabBar::RightClicked, this);
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(TabChangedSignal, TabChangedEcho("TabBar::TabChangedSignal"));
 }
 
 Pt TabBar::MinUsableSize() const
@@ -257,7 +275,7 @@ void TabBar::InsertTab(std::size_t index, const std::string& name)
         m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
     }
     if (m_tabs->CheckedButton() == RadioButtonGroup::NO_BUTTON)
-        m_tabs->SetCheck(0);
+        SetCurrentTab(0);
 }
 
 void TabBar::RemoveTab(const std::string& name)
@@ -282,7 +300,10 @@ void TabBar::RemoveTab(const std::string& name)
 }
 
 void TabBar::SetCurrentTab(std::size_t index)
-{ m_tabs->SetCheck(index); }
+{
+    m_tabs->SetCheck(index);
+    TabChanged(index, false);
+}
 
 const Button* TabBar::LeftButton() const
 { return m_left_button; }
@@ -293,12 +314,13 @@ const Button* TabBar::RightButton() const
 void TabBar::DistinguishCurrentTab(const std::vector<StateButton*>& tab_buttons)
 { RaiseCurrentTabButton(); }
 
-void TabBar::TabChanged(std::size_t index)
+void TabBar::TabChanged(std::size_t index, bool signal)
 {
     if (index != RadioButtonGroup::NO_BUTTON) {
         BringTabIntoView(index);
         DistinguishCurrentTab(m_tab_buttons);
-        TabChangedSignal(index);
+        if (signal)
+            TabChangedSignal(index);
     }
 }
 

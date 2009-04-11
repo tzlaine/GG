@@ -287,7 +287,6 @@ private:
     T& m_value;
     T m_min;
     DropDownList* m_enum_drop_list;
-    boost::signals::connection m_drop_list_connection;
 };
 
 /** An uneditable attribute row. */
@@ -359,7 +358,6 @@ private:
     FlagType m_value;
     std::vector<FlagType> m_group_values;
     DropDownList* m_flag_drop_list;
-    boost::signals::connection m_drop_list_connection;
 };
 
 /** The AttributeRowBase subclass used to display some custom text about a
@@ -607,7 +605,7 @@ RangedAttributeRow<T, true>::RangedAttributeRow(const std::string& name, T& valu
     }
     push_back(m_enum_drop_list);
     m_enum_drop_list->Select(boost::next(m_enum_drop_list->begin(), m_value - m_min));
-    m_drop_list_connection = Connect(m_enum_drop_list->SelChangedSignal, &RangedAttributeRow::SelectionChanged, this);
+    Connect(m_enum_drop_list->SelChangedSignal, &RangedAttributeRow::SelectionChanged, this);
 }
 
 template <class T>
@@ -620,11 +618,7 @@ void RangedAttributeRow<T, true>::SelectionChanged(DropDownList::iterator select
 
 template <class T>
 void RangedAttributeRow<T, true>::Update()
-{
-    m_drop_list_connection.block();
-    m_enum_drop_list->Select(boost::next(m_enum_drop_list->begin(), m_value - m_min));
-    m_drop_list_connection.unblock();
-}
+{ m_enum_drop_list->Select(boost::next(m_enum_drop_list->begin(), m_value - m_min)); }
 
 template <class T>
 ConstAttributeRow<T>::ConstAttributeRow(const std::string& name, const T& value, const boost::shared_ptr<Font>& font) :
@@ -704,7 +698,7 @@ FlagGroupAttributeRow<FlagType>::FlagGroupAttributeRow(const std::string& name, 
                                  "flag group's drop-down list with a value that is not in the given set of group values.");
     }
     m_flag_drop_list->Select(it);
-    m_drop_list_connection = Connect(m_flag_drop_list->SelChangedSignal, &FlagGroupAttributeRow::SelectionChanged, this);
+    Connect(m_flag_drop_list->SelChangedSignal, &FlagGroupAttributeRow::SelectionChanged, this);
 }
 
 template <class FlagType>
@@ -720,7 +714,6 @@ void FlagGroupAttributeRow<FlagType>::SelectionChanged(DropDownList::iterator se
 template <class FlagType>
 void FlagGroupAttributeRow<FlagType>::Update()
 {
-    m_drop_list_connection.block();
     std::size_t index = 0;
     DropDownList::iterator it = m_flag_drop_list->begin();
     for (; index < m_group_values.size(); ++index, ++it) {
@@ -728,7 +721,6 @@ void FlagGroupAttributeRow<FlagType>::Update()
             break;
     }
     m_flag_drop_list->Select(it);
-    m_drop_list_connection.unblock();
 }
 
 template <class T>

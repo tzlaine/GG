@@ -434,7 +434,6 @@ ColorDlg::ColorDlg() :
     m_color_squares_layout(0),
     m_color_buttons_layout(0),
     m_current_color_button(INVALID_COLOR_BUTTON),
-    m_ignore_sliders(false),
     m_ok(0),
     m_cancel(0),
     m_sliders_ok_cancel_layout(0)
@@ -467,7 +466,6 @@ ColorDlg::ColorDlg(X x, Y y, const boost::shared_ptr<Font>& font,
     m_color_squares_layout(0),
     m_color_buttons_layout(0),
     m_current_color_button(INVALID_COLOR_BUTTON),
-    m_ignore_sliders(false),
     m_ok(0),
     m_cancel(0),
     m_sliders_ok_cancel_layout(0),
@@ -503,7 +501,6 @@ ColorDlg::ColorDlg(X x, Y y, Clr original_color, const boost::shared_ptr<Font>& 
     m_color_squares_layout(0),
     m_color_buttons_layout(0),
     m_current_color_button(INVALID_COLOR_BUTTON),
-    m_ignore_sliders(false),
     m_ok(0),
     m_cancel(0),
     m_sliders_ok_cancel_layout(0),
@@ -818,10 +815,8 @@ void ColorDlg::ColorChanged(HSVClr color)
         m_color_buttons[m_current_color_button]->SetRepresentedColor(rgb_color);
         s_custom_colors[m_current_color_button] = rgb_color;
     }
-    m_ignore_sliders = true;
     UpdateRGBSliders();
     UpdateHSVSliders();
-    m_ignore_sliders = false;
 }
 
 void ColorDlg::HueSaturationPickerChanged(double hue, double saturation)
@@ -871,9 +866,7 @@ void ColorDlg::ColorChangeFromRGBSlider()
         m_color_buttons[m_current_color_button]->SetRepresentedColor(color);
         s_custom_colors[m_current_color_button] = color;
     }
-    m_ignore_sliders = true;
     UpdateHSVSliders();
-    m_ignore_sliders = false;
 }
 
 void ColorDlg::ColorButtonClicked(std::size_t i)
@@ -885,76 +878,54 @@ void ColorDlg::ColorButtonClicked(std::size_t i)
 
 void ColorDlg::RedSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
-    m_ignore_sliders = true;
     Clr color = Convert(m_current_color);
     color.r = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
     *m_slider_values[R] << value;
-    m_ignore_sliders = false;
 }
 
 void ColorDlg::GreenSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
-    m_ignore_sliders = true;
     Clr color = Convert(m_current_color);
     color.g = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
     *m_slider_values[G] << value;
-    m_ignore_sliders = false;
 }
 
 void ColorDlg::BlueSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
-    m_ignore_sliders = true;
     Clr color = Convert(m_current_color);
     color.b = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
     *m_slider_values[B] << value;
-    m_ignore_sliders = false;
 }
 
 void ColorDlg::AlphaSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
-    m_ignore_sliders = true;
     Clr color = Convert(m_current_color);
     color.a = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
     *m_slider_values[A] << value;
-    m_ignore_sliders = false;
 }
 
 void ColorDlg::HueSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
     m_current_color.h = value / static_cast<double>(high - low);
     ColorChanged(m_current_color);
 }
 
 void ColorDlg::SaturationSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
     m_current_color.s = value / static_cast<double>(high - low);
     ColorChanged(m_current_color);
 }
 
 void ColorDlg::ValueSliderChanged(int value, int low, int high)
 {
-    if (m_ignore_sliders)
-        return;
     m_current_color.v = value / static_cast<double>(high - low);
     ColorChanged(m_current_color);
 }

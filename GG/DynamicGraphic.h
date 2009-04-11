@@ -84,11 +84,6 @@ public:
     typedef boost::signal<void (std::size_t)> EndFrameSignalType;
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef StoppedSignalType::slot_type StoppedSlotType;    ///< type of functor(s) invoked on a StoppedSignalType
-    typedef EndFrameSignalType::slot_type EndFrameSlotType;  ///< type of functor(s) invoked on a EndFrameSignalType
-    //@}
-
     /** \name Structors */ ///@{
     /** Ctor taking a vector of GG::Textures and the number of frames in those
         Textures.  The default \a frames value ALL_FRAMES indicates all

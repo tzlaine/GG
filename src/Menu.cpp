@@ -35,6 +35,16 @@
 using namespace GG;
 
 namespace {
+    struct MenuSignalEcho
+    {
+        MenuSignalEcho(const std::string& name) : m_name(name) {}
+        void operator()()
+            { std::cerr << "GG SIGNAL : " << m_name << "()\n"; }
+        void operator()(int id)
+            { std::cerr << "GG SIGNAL : " << m_name << "(id=" << id << ")\n"; }
+        std::string m_name;
+    };
+
     const int BORDER_THICKNESS = 1; // thickness with which to draw menu borders
     const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in pixels
 }
@@ -74,7 +84,12 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check) :
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{}
+{
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(*SelectedIDSignal, MenuSignalEcho("MenuItem::SelectedIDSignal"));
+        Connect(*SelectedSignal, MenuSignalEcho("MenuItem::SelectedSignal"));
+    }
+}
 
 MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedIDSlotType& slot) : 
     SelectedIDSignal(new SelectedIDSignalType()),
@@ -83,7 +98,14 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, con
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{ SelectedIDSignal->connect(slot); }
+{
+    SelectedIDSignal->connect(slot);
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(*SelectedIDSignal, MenuSignalEcho("MenuItem::SelectedIDSignal"));
+        Connect(*SelectedSignal, MenuSignalEcho("MenuItem::SelectedSignal"));
+    }
+}
 
 MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, const SelectedSlotType& slot) : 
     SelectedIDSignal(new SelectedIDSignalType()),
@@ -92,7 +114,14 @@ MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check, con
     item_ID(id), 
     disabled(disable), 
     checked(check)
-{ SelectedSignal->connect(slot); }
+{
+    SelectedSignal->connect(slot);
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(*SelectedIDSignal, MenuSignalEcho("MenuItem::SelectedIDSignal"));
+        Connect(*SelectedSignal, MenuSignalEcho("MenuItem::SelectedSignal"));
+    }
+}
 
 MenuItem::~MenuItem()
 {}
@@ -122,6 +151,9 @@ MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr text_co
     interior.a = 255;
     m_hilite_color = interior;
     AdjustLayout();
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(BrowsedSignal, MenuSignalEcho("MenuBar::BrowsedSignal"));
 }
 
 MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuItem& m,
@@ -139,6 +171,9 @@ MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuI
     interior.a = 255;
     m_hilite_color = interior;
     AdjustLayout();
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(BrowsedSignal, MenuSignalEcho("MenuBar::BrowsedSignal"));
 }
 
 Pt MenuBar::MinUsableSize() const
@@ -230,7 +265,7 @@ void MenuBar::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
                     PopupMenu menu(m_menu_labels[i]->UpperLeft().x, m_menu_labels[i]->LowerRight().y, m_font, m_menu_data.next_level[i], m_text_color, m_border_color, m_int_color);
                     menu.SetHiliteColor(m_hilite_color);
                     menu.SetSelectedTextColor(m_sel_text_color);
-                    Connect(menu.BrowsedSignal, &MenuBar::BrowsedSlot, this);
+                    Connect(menu.BrowsedSignal, boost::ref(BrowsedSignal));
                     menu.Run();
                 }
             }
@@ -372,9 +407,6 @@ void MenuBar::AdjustLayout(bool reset/* = false*/)
         Resize(Pt(Width(), desired_ht));
 }
 
-void MenuBar::BrowsedSlot(int n)
-{ BrowsedSignal(n); }
-
 
 ////////////////////////////////////////////////
 // GG::PopupMenu
@@ -404,6 +436,9 @@ PopupMenu::PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuIt
     interior.a = 255;
     m_hilite_color = interior;
     m_open_levels.resize(1);
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(BrowsedSignal, MenuSignalEcho("PopupMenu::BrowsedSignal"));
 }
 
 Pt PopupMenu::ClientUpperLeft() const

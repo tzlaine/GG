@@ -63,10 +63,6 @@ public:
     typedef boost::signal<void (double, double)> ChangedSignalType; ///< emitted whenever the hue or saturation in the picker changes
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef ChangedSignalType::slot_type         ChangedSlotType;   ///< type of functor(s) invoked on a ChangedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     HueSaturationPicker(X x, Y y, X w, Y h); ///< basic ctor
     //@}
@@ -107,10 +103,6 @@ class GG_API ValuePicker : public Control
 public:
     /** \name Signal Types */ ///@{
     typedef boost::signal<void (double)> ChangedSignalType; ///< emitted whenever the hue or saturation in the picker changes
-    //@}
-
-    /** \name Slot Types */ ///@{
-    typedef ChangedSignalType::slot_type ChangedSlotType;   ///< type of functor(s) invoked on a ChangedSignalType
     //@}
 
     /** \name Structors */ ///@{
@@ -342,7 +334,6 @@ private:
     std::vector<TextControl*> m_slider_labels;
     std::vector<TextControl*> m_slider_values;
     std::vector<Slider*>      m_sliders;
-    bool                      m_ignore_sliders;
     Button*                   m_ok;
     Button*                   m_cancel;
     Layout*                   m_sliders_ok_cancel_layout;
@@ -438,7 +429,6 @@ void GG::ColorDlg::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_slider_labels)
         & BOOST_SERIALIZATION_NVP(m_slider_values)
         & BOOST_SERIALIZATION_NVP(m_sliders)
-        & BOOST_SERIALIZATION_NVP(m_ignore_sliders)
         & BOOST_SERIALIZATION_NVP(m_ok)
         & BOOST_SERIALIZATION_NVP(m_cancel)
         & BOOST_SERIALIZATION_NVP(m_sliders_ok_cancel_layout)

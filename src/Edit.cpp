@@ -34,6 +34,14 @@
 using namespace GG;
 
 namespace {
+    struct EditedEcho
+    {
+        EditedEcho(const std::string& name) : m_name(name) {}
+        void operator()(const std::string& str)
+            { std::cerr << "GG SIGNAL : " << m_name << "(str=" << str << ")\n"; }
+        std::string m_name;
+    };
+
     struct InRange
     {
         InRange(CPSize value) : m_value(value) {}
@@ -71,7 +79,14 @@ Edit::Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>&
     m_recently_edited(false),
     m_last_button_down_time(0),
     m_in_double_click_mode(false)
-{ SetColor(color); }
+{
+    SetColor(color);
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(EditedSignal, EditedEcho("Edit::EditedSignal"));
+        Connect(FocusUpdateSignal, EditedEcho("Edit::FocusUpdateSignal"));
+    }
+}
 
 Pt Edit::MinUsableSize() const
 { return Pt(X(4 * PIXEL_MARGIN), HeightFromFont(GetFont(), PIXEL_MARGIN)); }
@@ -383,8 +398,6 @@ void Edit::SetText(const std::string& str)
     }
 
     m_recently_edited = true;
-
-    EditedSignal(str);
 }
 
 void Edit::DefineAttributes(WndEditor* editor)

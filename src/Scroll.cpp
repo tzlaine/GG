@@ -34,6 +34,19 @@
 using namespace GG;
 
 namespace {
+    struct ScrolledEcho
+    {
+        ScrolledEcho(const std::string& name) : m_name(name) {}
+        void operator()(int tab_min, int tab_max, int scroll_min, int scroll_max)
+            {
+                std::cerr << "GG SIGNAL : " << m_name
+                          << "(tab_min=" << tab_min << " tab_max=" << tab_max
+                          << " scroll_min=" << scroll_min << " scroll_max=" << scroll_max
+                          << ")\n";
+            }
+        std::string m_name;
+    };
+
     const unsigned int MIN_TAB_SIZE = 5;
 }
 
@@ -53,7 +66,8 @@ Scroll::Scroll() :
     m_decr(0),
     m_initial_depressed_region(SBR_NONE),
     m_depressed_region(SBR_NONE),
-    m_dragging_tab(false)
+    m_dragging_tab(false),
+    m_tab_dragged(false)
 {}
 
 Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior, Flags<WndFlag> flags/* = CLICKABLE | REPEAT_BUTTON_DOWN*/) :
@@ -70,7 +84,8 @@ Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr inter
     m_decr(0),
     m_initial_depressed_region(SBR_NONE),
     m_depressed_region(SBR_NONE),
-    m_dragging_tab(false)
+    m_dragging_tab(false),
+    m_tab_dragged(false)
 {
     Control::SetColor(color);
     boost::shared_ptr<Font> null_font;
@@ -87,9 +102,14 @@ Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr inter
     AttachChild(m_decr);
     AttachChild(m_incr);
     AttachChild(m_tab);
-    Connect(m_decr->ClickedSignal, &Scroll::ScrollLineDecr, this);
-    Connect(m_incr->ClickedSignal, &Scroll::ScrollLineIncr, this);
+    Connect(m_decr->ClickedSignal, boost::bind(&Scroll::ScrollLineDecrImpl, this, true));
+    Connect(m_incr->ClickedSignal, boost::bind(&Scroll::ScrollLineIncrImpl, this, true));
     m_tab->InstallEventFilter(this);
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(ScrolledSignal, ScrolledEcho("Scroll::ScrolledSignal"));
+        Connect(ScrolledAndStoppedSignal, ScrolledEcho("Scroll::ScrolledAndStoppedSignal"));
+    }
 }
 
 Pt Scroll::MinUsableSize() const
@@ -146,12 +166,24 @@ void Scroll::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
         if (m_depressed_region == m_initial_depressed_region) {
             switch (m_depressed_region)
             {
-            case SBR_PAGE_DN:
+            case SBR_PAGE_DN: {
+                int old_posn = m_posn;
                 ScrollPageDecr();
+                if (old_posn != m_posn) {
+                    ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                    ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                }
                 break;
-            case SBR_PAGE_UP:
+            }
+            case SBR_PAGE_UP: {
+                int old_posn = m_posn;
                 ScrollPageIncr();
+                if (old_posn != m_posn) {
+                    ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                    ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                }
                 break;
+            }
             default: break;
             }
         }
@@ -209,7 +241,6 @@ void Scroll::SizeScroll(int min, int max, unsigned int line, unsigned int page)
     m_line_sz = line;
     m_range_min = std::min(min, max);
     m_range_max = std::max(min, max);
-    int old_posn = m_posn;
     m_page_sz = page;
     if (m_page_sz > static_cast<unsigned int>(m_range_max - m_range_min + 1))
         m_page_sz = (m_range_max - m_range_min + 1);
@@ -222,10 +253,6 @@ void Scroll::SizeScroll(int min, int max, unsigned int line, unsigned int page)
         Pt(tab_ul.x + static_cast<int>(TabWidth()), m_tab->RelativeLowerRight().y);
     m_tab->SizeMove(tab_ul, tab_lr);
     MoveTabToPosn();
-    if (old_posn != m_posn) {
-        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-    }
 }
 
 void Scroll::SetMax(int max)        
@@ -242,7 +269,6 @@ void Scroll::SetPageSize(unsigned int page)
 
 void Scroll::ScrollTo(int p)
 {
-    int old_posn = m_posn;
     if (p < m_range_min)
         m_posn = m_range_min;
     else if (p > static_cast<int>(m_range_max - m_page_sz))
@@ -250,66 +276,30 @@ void Scroll::ScrollTo(int p)
     else
         m_posn = p;
     MoveTabToPosn();
-    if (old_posn != m_posn) {
-        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-    }
 }
 
 void Scroll::ScrollLineIncr()
-{
-    int old_posn = m_posn;
-    if (m_posn + m_line_sz <= m_range_max - m_page_sz)
-        m_posn += m_line_sz;
-    else
-        m_posn = m_range_max - (m_page_sz - 1);
-    MoveTabToPosn();
-    if (old_posn != m_posn) {
-        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-    }
-}
+{ ScrollLineIncrImpl(false); }
 
 void Scroll::ScrollLineDecr()
-{
-    int old_posn = m_posn;
-    if (static_cast<int>(m_posn - m_line_sz) >= m_range_min)
-        m_posn -= m_line_sz;
-    else
-        m_posn = m_range_min;
-    MoveTabToPosn();
-    if (old_posn != m_posn) {
-        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-    }
-}
+{ ScrollLineDecrImpl(false); }
 
 void Scroll::ScrollPageIncr()
 {
-    int old_posn = m_posn;
     if (m_posn + m_page_sz <= m_range_max - m_page_sz)
         m_posn += m_page_sz;
     else
         m_posn = m_range_max - (m_page_sz - 1);
     MoveTabToPosn();
-    if (old_posn != m_posn) {
-        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-    }
 }
 
 void Scroll::ScrollPageDecr()
 {
-    int old_posn = m_posn;
     if (static_cast<int>(m_posn - m_page_sz) >= m_range_min)
         m_posn -= m_page_sz;
     else
         m_posn = m_range_min;
     MoveTabToPosn();
-    if (old_posn != m_posn) {
-        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-    }
 }
 
 void Scroll::DefineAttributes(WndEditor* editor)
@@ -367,10 +357,12 @@ bool Scroll::EventFilter(Wnd* w, const WndEvent& event)
                     new_ul.x = m_tab->RelativeUpperLeft().x;
                     new_ul.y = std::max(0 + m_decr->Height(),
                                         std::min(new_ul.y, ClientHeight() - m_incr->Height() - m_tab->Height()));
+                    m_tab_dragged |= bool(m_tab->RelativeUpperLeft().y - new_ul.y);
                 } else {
                     new_ul.x = std::max(0 + m_decr->Width(),
                                         std::min(new_ul.x, ClientWidth() - m_incr->Width() - m_tab->Width()));
                     new_ul.y = m_tab->RelativeUpperLeft().y;
+                    m_tab_dragged |= bool(m_tab->RelativeUpperLeft().x - new_ul.x);
                 }
                 m_tab->MoveTo(new_ul);
                 UpdatePosn();
@@ -382,7 +374,10 @@ bool Scroll::EventFilter(Wnd* w, const WndEvent& event)
             break;
         case WndEvent::LButtonUp:
         case WndEvent::LClick:
+            if (m_tab_dragged)
+                ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
             m_dragging_tab = false;
+            m_tab_dragged = false;
             break;
         case WndEvent::MouseLeave:
             return m_dragging_tab;
@@ -420,4 +415,45 @@ void Scroll::MoveTabToPosn()
     m_tab->MoveTo(m_orientation == VERTICAL ?
                   Pt(m_tab->RelativeUpperLeft().x, Y(static_cast<int>(tab_location))) :
                   Pt(X(static_cast<int>(tab_location)), m_tab->RelativeUpperLeft().y));
+}
+
+void Scroll::ScrollLineIncrImpl(bool signal)
+{
+    int old_posn = m_posn;
+    if (m_posn + m_line_sz <= m_range_max - m_page_sz)
+        m_posn += m_line_sz;
+    else
+        m_posn = m_range_max - (m_page_sz - 1);
+    MoveTabToPosn();
+    if (signal && old_posn != m_posn) {
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
+}
+
+void Scroll::ScrollLineDecrImpl(bool signal)
+{
+    int old_posn = m_posn;
+    if (static_cast<int>(m_posn - m_line_sz) >= m_range_min)
+        m_posn -= m_line_sz;
+    else
+        m_posn = m_range_min;
+    MoveTabToPosn();
+    if (signal && old_posn != m_posn) {
+        ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+        ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+    }
+}
+
+
+////////////////////////////////////////////////
+// free functions
+////////////////////////////////////////////////
+void GG::SignalScroll(const Scroll& scroll, bool stopped)
+{
+    std::pair<int, int> pr = scroll.PosnRange();
+    std::pair<int, int> sr = scroll.ScrollRange();
+    scroll.ScrolledSignal(pr.first, pr.second, sr.first, sr.second);
+    if (stopped)
+        scroll.ScrolledAndStoppedSignal(pr.first, pr.second, sr.first, sr.second);
 }

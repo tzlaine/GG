@@ -33,6 +33,19 @@
 
 using namespace GG;
 
+namespace {
+    struct SlidEcho
+    {
+        SlidEcho(const std::string& name) : m_name(name) {}
+        void operator()(int pos, int min, int max)
+            {
+                std::cerr << "GG SIGNAL : " << m_name
+                          << "(pos=" << pos << " min=" << min << " max=" << max << ")\n";
+            }
+        std::string m_name;
+    };
+}
+
 const std::size_t Slider::INVALID_PAGE_SIZE = std::numeric_limits<std::size_t>::max();
 
 Slider::Slider() :
@@ -72,6 +85,11 @@ Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, Sl
     AttachChild(m_tab);
     m_tab->InstallEventFilter(this);
     SizeMove(UpperLeft(), LowerRight());
+
+    if (INSTRUMENT_ALL_SIGNALS) {
+        Connect(SlidSignal, SlidEcho("Slider::SlidSignal"));
+        Connect(SlidAndStoppedSignal, SlidEcho("Slider::SlidAndStoppedSignal"));
+    }
 }
 
 Pt Slider::MinUsableSize() const
@@ -172,41 +190,41 @@ bool Slider::EventFilter(Wnd* w, const WndEvent& event)
 }
 
 void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ SlideTo((m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize())); }
+{ SlideToImpl(m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize(), true); }
 
 void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
         switch (key) {
         case GGK_HOME:
-            SlideTo(m_range_min);
+            SlideToImpl(m_range_min, true);
             break;
         case GGK_END:
-            SlideTo(m_range_max);
+            SlideToImpl(m_range_max, true);
             break;
         case GGK_UP:
             if (m_orientation != HORIZONTAL)
-                SlideTo(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1));
+                SlideToImpl(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1), true);
             break;
         case GGK_RIGHT:
             if (m_orientation != VERTICAL)
-                SlideTo(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1));
+                SlideToImpl(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1), true);
             break;
         case GGK_DOWN:
             if (m_orientation != HORIZONTAL)
-                SlideTo(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1));
+                SlideToImpl(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1), true);
             break;
         case GGK_LEFT:
             if (m_orientation != VERTICAL)
-                SlideTo(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1));
+                SlideToImpl(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1), true);
             break;
         case GGK_PLUS:
         case GGK_KP_PLUS:
-            SlideTo(m_posn + 1);
+            SlideToImpl(m_posn + 1, true);
             break;
         case GGK_MINUS:
         case GGK_KP_MINUS:
-            SlideTo(m_posn - 1);
+            SlideToImpl(m_posn - 1, true);
             break;
         default:
             Control::KeyPress(key, key_code_point, mod_keys);
@@ -245,9 +263,9 @@ void Slider::SizeSlider(int min, int max)
     m_range_min = min;
     m_range_max = max;
     if (m_posn < m_range_min)
-        SlideTo(m_range_min);
+        SlideToImpl(m_range_min, false);
     else if (m_range_max < m_posn)
-        SlideTo(m_range_max);
+        SlideToImpl(m_range_max, false);
     else
         MoveTabToPosn();
 }
@@ -259,20 +277,7 @@ void Slider::SetMin(int min)
 { SizeSlider(min, m_range_max); }
 
 void Slider::SlideTo(int p)
-{
-    int old_posn = m_posn;
-    if (0 < (m_range_max - m_range_min) ? p < m_range_min : p > m_range_min)
-        m_posn = m_range_min;
-    else if (0 < (m_range_max - m_range_min) ? m_range_max < p : m_range_max > p)
-        m_posn = m_range_max;
-    else
-        m_posn = p;
-    MoveTabToPosn();
-    if (m_posn != old_posn) {
-        SlidSignal(m_posn, m_range_min, m_range_max);
-        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
-    }
-}
+{ SlideToImpl(p, false); }
 
 void Slider::SetPageSize(unsigned int size)
 { m_page_sz = size; }
@@ -339,4 +344,20 @@ void Slider::UpdatePosn()
     m_posn = m_range_min + static_cast<int>((m_range_max - m_range_min) * fractional_distance);
     if (m_posn != old_posn)
         SlidSignal(m_posn, m_range_min, m_range_max);
+}
+
+void Slider::SlideToImpl(int p, bool signal)
+{
+    int old_posn = m_posn;
+    if (0 < (m_range_max - m_range_min) ? p < m_range_min : p > m_range_min)
+        m_posn = m_range_min;
+    else if (0 < (m_range_max - m_range_min) ? m_range_max < p : m_range_max > p)
+        m_posn = m_range_max;
+    else
+        m_posn = p;
+    MoveTabToPosn();
+    if (signal && m_posn != old_posn) {
+        SlidSignal(m_posn, m_range_min, m_range_max);
+        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
+    }
 }

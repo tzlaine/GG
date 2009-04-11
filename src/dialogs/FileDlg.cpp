@@ -341,6 +341,7 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
     fs::path filename_path = fs::complete(fs::path(filename));
     m_files_edit = style->NewEdit(X0, Y0, X1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
+    FilesEditChanged(m_files_edit->Text());
     m_filter_list = style->NewDropDownList(X0, Y0, X(100), m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LIST_NOSORT);
 
@@ -551,6 +552,7 @@ void FileDlg::FileDoubleClicked(DropDownList::iterator it)
 {
     m_files_list->DeselectAll();
     m_files_list->SelectRow(it);
+    FileSetChanged(m_files_list->Selections());
     OkHandler(true);
 }
 
@@ -566,6 +568,7 @@ void FileDlg::FilterChanged(DropDownList::iterator it)
 void FileDlg::SetWorkingDirectory(const fs::path& p)
 {
     m_files_edit->Clear();
+    FilesEditChanged(m_files_edit->Text());
     s_working_dir = p;
     UpdateDirectoryText();
     UpdateList();
@@ -584,6 +587,7 @@ void FileDlg::PopulateFilters()
             m_filter_list->Insert(row);
         }
         m_filter_list->Select(m_filter_list->begin());
+        m_filter_list->SelChangedSignal(m_filter_list->CurrentItem());
     }
 }
 
@@ -735,6 +739,7 @@ void FileDlg::OpenDirectory()
             } else {
                 m_in_win32_drive_selection = true;
                 m_files_edit->Clear();
+                FilesEditChanged(m_files_edit->Text());
                 m_curr_dir_text->SetText("");
                 PlaceLabelsAndEdits(Width() / 4 - H_SPACING, m_files_edit->Height());
                 UpdateList();
@@ -750,6 +755,7 @@ void FileDlg::OpenDirectory()
                     if (e.code() == boost::system::posix_error::io_error) {
                         m_in_win32_drive_selection = true;
                         m_files_edit->Clear();
+                        FilesEditChanged(m_files_edit->Text());
                         m_curr_dir_text->SetText("");
                         PlaceLabelsAndEdits(Width() / 4 - H_SPACING, m_files_edit->Height());
                         UpdateList();

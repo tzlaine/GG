@@ -67,14 +67,6 @@ public:
     typedef boost::signal<void (const std::string&)> FocusUpdateSignalType;
     //@}
 
-    /** \name Slot Types */ ///@{
-    /** Type of functor(s) invoked on a EditedSignalType. */
-    typedef EditedSignalType::slot_type EditedSlotType;
-
-    /** Type of functor(s) invoked on a FocusUpdateSignalType. */
-    typedef FocusUpdateSignalType::slot_type FocusUpdateSlotType;
-    //@}
-
     /** \name Structors */ ///@{
     /** Ctor. Height is determined from the font and point size used. */
     Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,

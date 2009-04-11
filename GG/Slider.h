@@ -56,11 +56,6 @@ public:
     typedef boost::signal<void (int, int, int)> SlidAndStoppedSignalType; ///< emitted when the slider's tab is stopped after being dragged, the slider is adjusted using the keyboard, or the slider is moved programmatically; the tab position and the upper and lower bounds of the slider's range are indicated, respectively
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef SlidSignalType::slot_type SlidSlotType;           ///< type of functor(s) invoked on a SlidSignalType
-    typedef SlidSignalType::slot_type SlidAndStoppedSlotType; ///< type of functor(s) invoked on a SlidAndStoppedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     Slider(X x, Y y, X w, Y h, int min, int max,
            Orientation orientation, SliderLineStyle style, Clr color,
@@ -130,6 +125,7 @@ protected:
     //@}
 
 private:
+    void SlideToImpl(int p, bool signal);
     void UpdatePosn();
 
     int                       m_posn;

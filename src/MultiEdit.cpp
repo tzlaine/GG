@@ -316,10 +316,14 @@ void MultiEdit::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 void MultiEdit::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 {
     if (!Disabled() && m_vscroll) {
-        for (int i = 0; i < move; ++i)
+        for (int i = 0; i < move; ++i) {
             m_vscroll->ScrollLineDecr();
-        for (int i = 0; i < -move; ++i)
+            SignalScroll(*m_vscroll, i == move - 1);
+        }
+        for (int i = 0; i < -move; ++i) {
             m_vscroll->ScrollLineIncr();
+            SignalScroll(*m_vscroll, i == -move - 1);
+        }
     }
 }
 
@@ -428,6 +432,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
             case GGK_PAGEUP: {
                 if (m_vscroll) {
                     m_vscroll->ScrollPageDecr();
+                    SignalScroll(*m_vscroll, true);
                     std::size_t rows_moved = m_vscroll->PageSize() / Value(GetFont()->Lineskip());
                     m_cursor_end.first = m_cursor_end.first < rows_moved ? 0 : m_cursor_end.first - rows_moved;
                     if (GetLineData()[m_cursor_end.first].char_data.size() < m_cursor_end.second)
@@ -440,6 +445,7 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
             case GGK_PAGEDOWN: {
                 if (m_vscroll) {
                     m_vscroll->ScrollPageIncr();
+                    SignalScroll(*m_vscroll, true);
                     std::size_t rows_moved = m_vscroll->PageSize() / Value(GetFont()->Lineskip());
                     m_cursor_end.first = std::min(m_cursor_end.first + rows_moved, GetLineData().size() - 1);
                     if (GetLineData()[m_cursor_end.first].char_data.size() < m_cursor_end.second)
@@ -622,12 +628,12 @@ void MultiEdit::SetText(const std::string& str)
 
         AdjustScrolls();
         AdjustView();
-        if (scroll_to_end && m_vscroll)
+        if (scroll_to_end && m_vscroll) {
             m_vscroll->ScrollTo(m_vscroll->ScrollRange().second - m_vscroll->PageSize());
+            SignalScroll(*m_vscroll, true);
+        }
     }
     m_preserve_text_position_on_next_set_text = false;
-
-    EditedSignal(str);
 }
 
 void MultiEdit::SetStyle(Flags<MultiEditStyle> style)
@@ -919,26 +925,32 @@ void MultiEdit::AdjustView()
     }
 
     // make sure that m_first_row_shown and m_first_col_shown are within sane bounds
-    if (excess_width <= 0 || !m_hscroll)
+    if (excess_width <= 0 || !m_hscroll) {
         m_first_col_shown = X0;
-    else
+    } else {
         m_hscroll->ScrollTo(Value(std::max(horz_min, std::min(m_first_col_shown, horz_max))));
+        SignalScroll(*m_hscroll, true);
+    }
 
-    if (excess_height <= 0 || !m_vscroll)
+    if (excess_height <= 0 || !m_vscroll) {
         m_first_row_shown = Y0;
-    else
+    } else {
         m_vscroll->ScrollTo(Value(std::max(vert_min, std::min(m_first_row_shown, vert_max))));
+        SignalScroll(*m_vscroll, true);
+    }
 
     // adjust m_first_row_shown position to bring the cursor into view
     std::size_t first_fully_vis_row = FirstFullyVisibleRow();
     if (m_cursor_end.first < first_fully_vis_row && m_vscroll) {
         std::size_t diff = (first_fully_vis_row - m_cursor_end.first);
         m_vscroll->ScrollTo(Value(std::max(vert_min, m_first_row_shown) - GetFont()->Lineskip() * static_cast<int>(diff)));
+        SignalScroll(*m_vscroll, true);
     }
     std::size_t last_fully_vis_row = LastFullyVisibleRow();
     if (last_fully_vis_row < m_cursor_end.first && m_vscroll) {
         std::size_t diff = (m_cursor_end.first - last_fully_vis_row);
         m_vscroll->ScrollTo(Value(std::min(m_first_row_shown + GetFont()->Lineskip() * static_cast<int>(diff), vert_max)));
+        SignalScroll(*m_vscroll, true);
     }
 
     // adjust m_first_col_shown position to bring the cursor into view
@@ -952,8 +964,10 @@ void MultiEdit::AdjustView()
                 CharXOffset(m_cursor_end.first, first_visible_char) -
                 CharXOffset(m_cursor_end.first, (5 < first_visible_char) ? first_visible_char - 5 : CP0);
             m_hscroll->ScrollTo(Value(m_first_col_shown - five_char_distance));
+            SignalScroll(*m_hscroll, true);
         } else { // if the caret is more than five characters before m_first_char_shown, just move straight to that spot
             m_hscroll->ScrollTo(Value(horz_min + m_first_col_shown + client_char_posn));
+            SignalScroll(*m_hscroll, true);
         }
     } else if (cl_sz.x <= client_char_posn && m_hscroll) { // if the caret is moving to a place right of the current visible area
         if (m_cursor_end.second - last_visible_char < 5) { // if the caret is fewer than five characters after last_visible_char
@@ -963,8 +977,10 @@ void MultiEdit::AdjustView()
                 CharXOffset(m_cursor_end.first, (last_visible_char + 5 < last_char_of_line) ? last_visible_char + 5 : last_char_of_line) -
                 CharXOffset(m_cursor_end.first, last_visible_char);
             m_hscroll->ScrollTo(Value(m_first_col_shown + five_char_distance));
+            SignalScroll(*m_hscroll, true);
         } else { // if the caret is more than five characters before m_first_char_shown, just move straight to that spot
             m_hscroll->ScrollTo(Value(std::min(horz_min + m_first_col_shown + client_char_posn, horz_max)));
+            SignalScroll(*m_hscroll, true);
         }
     }
 }

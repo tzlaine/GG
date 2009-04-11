@@ -35,19 +35,36 @@
 using namespace GG;
 
 namespace {
+    struct SelChangedEcho
+    {
+        SelChangedEcho(const DropDownList& drop_list) :
+            m_drop_list(drop_list)
+            {}
+        void operator()(const DropDownList::iterator& it)
+            {
+                std::cerr << "GG SIGNAL : DropDownList::SelChangedSignal(row="
+                          << m_drop_list.IteratorToIndex(it)
+                          << ")\n";
+            }
+        const DropDownList& m_drop_list;
+    };
+
     const int BORDER_THICK = 2; // should be the same as the BORDER_THICK value in GGListBox.h
 
     class ModalListPicker : public Wnd
     {
     public:
         ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
-            Wnd(X0, Y0, GUI::GetGUI()->AppWidth(), GUI::GetGUI()->AppHeight(), CLICKABLE | MODAL),
+            Wnd(X0, Y0, GUI::GetGUI()->AppWidth(), GUI::GetGUI()->AppHeight(),
+                CLICKABLE | MODAL),
             m_drop_wnd(drop_wnd),
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
         {
-            Connect(m_lb_wnd->SelChangedSignal, &ModalListPicker::LBSelChangedSlot, this);
-            Connect(m_lb_wnd->LeftClickedSignal, &ModalListPicker::LBLeftClickSlot, this);
+            m_connection_1 =
+                Connect(m_lb_wnd->SelChangedSignal, &ModalListPicker::LBSelChangedSlot, this);
+            m_connection_2 =
+                Connect(m_lb_wnd->LeftClickedSignal, &ModalListPicker::LBLeftClickSlot, this);
             m_lb_ul = m_old_lb_ul + m_drop_wnd->UpperLeft();
             AttachChild(m_lb_wnd);
         }
@@ -62,13 +79,15 @@ namespace {
         }
 
     protected:
-        virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys) {m_done = true;}
+        virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys)
+        { m_done = true; }
 
     private:
         void LBSelChangedSlot(const ListBox::SelectionSet& rows)
         {
             if (!rows.empty()) {
                 m_drop_wnd->Select(*rows.begin());
+                m_drop_wnd->SelChangedSignal(m_drop_wnd->CurrentItem());
                 m_done = true;
             }
         }
@@ -80,6 +99,9 @@ namespace {
         ListBox*       m_lb_wnd;
         Pt             m_old_lb_ul;
         Pt             m_lb_ul;
+
+        boost::signals::scoped_connection m_connection_1;
+        boost::signals::scoped_connection m_connection_2;
     };
 }
 
@@ -92,7 +114,8 @@ DropDownList::DropDownList() :
     m_LB(0)
 {}
 
-DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color, Flags<WndFlag> flags/* = CLICKABLE*/) :
+DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color,
+                           Flags<WndFlag> flags/* = CLICKABLE*/) :
     Control(x, y, w, h, flags),
     m_current_item(),
     m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))
@@ -102,6 +125,9 @@ DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color, Flags<WndFl
     Wnd::SizeMove(Pt(x, y), Pt(x + Size().x, y + h + 2 * static_cast<int>(m_LB->CellMargin()) + 2 * BORDER_THICK));
     m_LB->SizeMove(Pt(X0, Height()), Pt(Width(), Height() + m_LB->Height()));
     m_current_item = m_LB->end();
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(SelChangedSignal, SelChangedEcho(*this));
 }
 
 DropDownList::~DropDownList()
@@ -208,8 +234,10 @@ void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
         ModalListPicker picker(this, m_LB);
         const ListBox::SelectionSet& LB_sels = m_LB->Selections();
         if (!LB_sels.empty()) {
-            if (m_LB->m_vscroll)
+            if (m_LB->m_vscroll) {
                 m_LB->m_vscroll->ScrollTo(0);
+                SignalScroll(*m_LB->m_vscroll, true);
+            }
         }
         m_LB->m_first_col_shown = 0;
         picker.Run();
@@ -222,11 +250,11 @@ void DropDownList::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKe
         switch (key) {
         case GGK_UP: // arrow-up (not numpad arrow)
             if (m_current_item != m_LB->end() && m_current_item != m_LB->begin())
-                Select(boost::prior(m_current_item));
+                SelectImpl(boost::prior(m_current_item), true);
             break;
         case GGK_DOWN: // arrow-down (not numpad arrow)
             if (m_current_item != m_LB->end() && m_current_item != --m_LB->end())
-                Select(boost::next(m_current_item));
+                SelectImpl(boost::next(m_current_item), true);
             break;
         case GGK_PAGEUP: // page up key (not numpad key)
             if (m_LB->NumRows() && m_current_item != m_LB->end()) {
@@ -236,7 +264,7 @@ void DropDownList::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKe
                     --it;
                     --i;
                 }
-                Select(it);
+                SelectImpl(it, true);
             }
             break;
         case GGK_PAGEDOWN: // page down key (not numpad key)
@@ -247,16 +275,16 @@ void DropDownList::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKe
                     ++it;
                     ++i;
                 }
-                Select(it);
+                SelectImpl(it, true);
             }
             break;
         case GGK_HOME: // home key (not numpad)
             if (m_LB->NumRows())
-                Select(m_LB->begin());
+                SelectImpl(m_LB->begin(), true);
             break;
         case GGK_END: // end key (not numpad)
             if (m_LB->NumRows() && !m_LB->Empty())
-                Select(--m_LB->end());
+                SelectImpl(--m_LB->end(), true);
             break;
         default:
             Control::KeyPress(key, key_code_point, mod_keys);
@@ -311,22 +339,10 @@ DropDownList::Row& DropDownList::GetRow(std::size_t n)
 { return m_LB->GetRow(n); }
 
 void DropDownList::Select(iterator it)
-{
-    iterator old_m_current_item = m_current_item;
-    if (it == m_LB->end()) {
-        m_current_item = m_LB->end();
-        m_LB->DeselectAll();
-    } else {
-        m_current_item = it;
-        m_LB->SelectRow(m_current_item);
-    }
-
-    if (m_current_item != old_m_current_item)
-        SelChangedSignal(m_current_item);
-}
+{ SelectImpl(it, false); }
 
 void DropDownList::Select(std::size_t n)
-{ Select(n < m_LB->NumRows() ? boost::next(m_LB->begin(), n) : m_LB->end()); }
+{ SelectImpl(n < m_LB->NumRows() ? boost::next(m_LB->begin(), n) : m_LB->end(), false); }
 
 void DropDownList::SetInteriorColor(Clr c)
 { m_LB->SetInteriorColor(c); }
@@ -378,3 +394,18 @@ void DropDownList::DefineAttributes(WndEditor* editor)
 
 ListBox* DropDownList::LB()
 { return m_LB; }
+
+void DropDownList::SelectImpl(iterator it, bool signal)
+{
+    iterator old_m_current_item = m_current_item;
+    if (it == m_LB->end()) {
+        m_current_item = m_LB->end();
+        m_LB->DeselectAll();
+    } else {
+        m_current_item = it;
+        m_LB->SelectRow(m_current_item);
+    }
+
+    if (signal && m_current_item != old_m_current_item)
+        SelChangedSignal(m_current_item);
+}

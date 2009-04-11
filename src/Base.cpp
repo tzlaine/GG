@@ -25,10 +25,12 @@
 #include <GG/WndEvent.h>
 
 
-using namespace GG;
+const bool GG::INSTRUMENT_ALL_SIGNALS = false;
 
 void GG::KeypadKeyToPrintable(Key& key, Flags<ModKey> mod_keys)
 {
+    using namespace GG;
+
     if (GGK_KP0 <= key && key <= GGK_KP9 && (mod_keys & MOD_KEY_NUM)) {
         key = Key(GGK_0 + (key - GGK_KP0));
     } else {

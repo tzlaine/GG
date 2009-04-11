@@ -64,10 +64,6 @@ public:
     typedef boost::signal<void (iterator)>   SelChangedSignalType; ///< emitted when a new item is selected; will be end() when no item is selected
     //@}
 
-    /** \name Slot Types */ ///@{
-    typedef SelChangedSignalType::slot_type  SelChangedSlotType;   ///< type of functor(s) invoked on a SelChangedSignalType
-    //@}
-
     /** \name Structors */ ///@{
     /** basic ctor.  DropDownList retains ownership of \a lb, if it is non-null. */
     DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color, Flags<WndFlag> flags = CLICKABLE);
@@ -187,6 +183,8 @@ protected:
     //@}
 
 private:
+    void           SelectImpl(iterator it, bool signal);
+
     iterator       m_current_item;  ///< the currently-selected list item (end() if none is selected)
     ListBox*       m_LB;            ///< the ListBox used to render the selected row and the popup list
 

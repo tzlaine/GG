@@ -216,7 +216,7 @@ public:
 
         bool                   m_ignore_adjust_layout;
 
-        friend class ScopedIgnoreAdjustLayout;
+        friend class DeferAdjustLayout;
 
         friend class boost::serialization::access;
         template <class Archive>
@@ -231,35 +231,20 @@ public:
     typedef std::set<iterator, RowPtrIteratorLess<std::list<Row*> > > SelectionSet;
 
     /** \name Signal Types */ ///@{
-    typedef boost::signal<void ()>             ClearedSignalType;        ///< emitted when the list box is cleared
-    typedef boost::signal<void (const SelectionSet&)>
-                                               SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
-    typedef boost::signal<void (iterator)>
-                                               RowSignalType;            ///< the signature of row-change-notification signals
-    typedef boost::signal<void (const_iterator)>
-                                               ConstRowSignalType;       ///< the signature of row-change-notification signals
-    typedef boost::signal<void (iterator, const Pt&)>
-                                               RowClickSignalType;       ///< the signature of row-click-notification signals
-    typedef RowSignalType                      InsertedSignalType;       ///< emitted when a row is inserted into the list box; provides the insertion point and the Row inserted
-    typedef RowSignalType                      DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop; provides the drop point and the Row dropped
-    typedef ConstRowSignalType                 DropAcceptableSignalType; ///< emitted when a row may be inserted into the list box via drag-and-drop; provides the drop point and the Row dropped
-    typedef RowClickSignalType                 LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the row left-clicked and the clicked point
-    typedef RowClickSignalType                 RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the row right-clicked and the clicked point
-    typedef RowSignalType                      DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked; provides the row double-clicked and the clicked point
-    typedef boost::signal<void (iterator)>     ErasedSignalType;         ///< emitted when a row in the listbox is erased; provides the deleted Row, and is emitted before the row is removed
-    typedef boost::signal<void (iterator)>     BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the browsed row
-    //@}
+    typedef boost::signal<void ()>                    ClearedSignalType;    ///< emitted when the list box is cleared
+    typedef boost::signal<void (const SelectionSet&)> SelChangedSignalType; ///< emitted when one or more rows are selected or deselected
+    typedef boost::signal<void (iterator)>            RowSignalType;        ///< the signature of row-change-notification signals
+    typedef boost::signal<void (const_iterator)>      ConstRowSignalType;   ///< the signature of const row-change-notification signals
+    typedef boost::signal<void (iterator, const Pt&)> RowClickSignalType;   ///< the signature of row-click-notification signals
 
-    /** \name Slot Types */ ///@{
-    typedef ClearedSignalType::slot_type       ClearedSlotType;      ///< type of functor(s) invoked on a ClearedSignalType
-    typedef SelChangedSignalType::slot_type    SelChangedSlotType;   ///< type of functor(s) invoked on a SelChangedSignalType
-    typedef InsertedSignalType::slot_type      InsertedSlotType;     ///< type of functor(s) invoked on a InsertedSignalType
-    typedef LeftClickedSignalType::slot_type   LeftClickedSlotType;  ///< type of functor(s) invoked on a LeftClickedSignalType
-    typedef RightClickedSignalType::slot_type  RightClickedSlotType; ///< type of functor(s) invoked on a RightClickedSignalType
-    typedef DoubleClickedSignalType::slot_type DoubleClickedSlotType;///< type of functor(s) invoked on a DoubleClickedSignalType
-    typedef ErasedSignalType::slot_type        ErasedSlotType;       ///< type of functor(s) invoked on a ErasedSignalType
-    typedef DroppedSignalType::slot_type       DroppedSlotType;      ///< type of functor(s) invoked on a DropAcceptableSignalType
-    typedef BrowsedSignalType::slot_type       BrowsedSlotType;      ///< type of functor(s) invoked on a BrowsedSignalType
+    typedef RowSignalType      InsertedSignalType;       ///< emitted when a row is inserted into the list box
+    typedef RowSignalType      DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop
+    typedef ConstRowSignalType DropAcceptableSignalType; ///< emitted when a row may be inserted into the list box via drag-and-drop
+    typedef RowClickSignalType LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the row left-clicked and the clicked point
+    typedef RowClickSignalType RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the row right-clicked and the clicked point
+    typedef RowSignalType      DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked
+    typedef RowSignalType      ErasedSignalType;         ///< emitted when a row in the listbox is erased; provides the deleted Row, and is emitted before the row is removed
+    typedef RowSignalType      BrowsedSignalType;        ///< emitted when a row in the listbox is "browsed" (rolled over) by the cursor; provides the browsed row
     //@}
 
     /** \name Structors */ ///@{
@@ -270,9 +255,9 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual void   DropsAcceptable(DropsAcceptableIter first,
-                                   DropsAcceptableIter last,
-                                   const Pt& pt) const;
+    virtual void    DropsAcceptable(DropsAcceptableIter first,
+                                    DropsAcceptableIter last,
+                                    const Pt& pt) const;
 
     virtual Pt      MinUsableSize() const;
     virtual Pt      ClientUpperLeft() const;
@@ -335,9 +320,19 @@ public:
         auto-scrolling. */
     unsigned int    AutoScrollInterval() const;
 
-    mutable ClearedSignalType        ClearedSignal;        ///< the cleared signal object for this ListBox
+    /** The cleared signal object for this ListBox.  Note that this signal is
+        never emitted by the ListBox.  It is provided here for convenience, to
+        provide users of a ListBox with a canonical signal with which to
+        communicate about ListBox clears. */
+    mutable ClearedSignalType        ClearedSignal;
+
+    /** The inserted signal object for this ListBox.  Note that this signal is
+        never emitted by the ListBox.  It is provided here for convenience, to
+        provide users of a ListBox with a canonical signal with which to
+        communicate about ListBox insertions. */
+    mutable InsertedSignalType       InsertedSignal;
+
     mutable SelChangedSignalType     SelChangedSignal;     ///< the selection change signal object for this ListBox
-    mutable InsertedSignalType       InsertedSignal;       ///< the inserted signal object for this ListBox
     mutable DroppedSignalType        DroppedSignal;        ///< the dropped signal object for this ListBox
     mutable DropAcceptableSignalType DropAcceptableSignal; ///< the drop-acceptability signal object for this ListBox
     mutable LeftClickedSignalType    LeftClickedSignal;    ///< the left click signal object for this ListBox
@@ -521,7 +516,7 @@ protected:
     virtual bool    EventFilter(Wnd* w, const WndEvent& event);
 
     iterator        Insert(Row* row, iterator it, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before \a it; returns insertion point
-    Row*            Erase(iterator it, bool removing_duplicate); ///< erases the row at index \a idx, handling it as a duplicate removal (such as for drag-and-drops within a single ListBox) if indicated
+    Row*            Erase(iterator it, bool removing_duplicate, bool signal); ///< erases the row at index \a idx, handling it as a duplicate removal (such as for drag-and-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
     void            RecreateScrolls();              ///< recreates the vertical and horizontal scrolls as needed.
     void            ResetAutoScrollVars();          ///< resets all variables related to auto-scroll to their initial values
@@ -551,7 +546,6 @@ private:
     iterator        m_lclick_row;       ///< the row most recently left-clicked
     iterator        m_rclick_row;       ///< the row most recently right-clicked
     iterator        m_last_row_browsed; ///< the last row sent out as having been browsed (used to prevent duplicate browse signals)
-    bool            m_suppress_erase_signal; ///< needed to use erase internally-only when a drop is refused
 
     iterator        m_first_row_shown;  ///< index of row at top of visible area (always begin() for non-empty ListBox with LIST_NOSCROLL set)
     std::size_t     m_first_col_shown;  ///< like above, but index of column at left
@@ -671,7 +665,6 @@ void GG::ListBox::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(lclick_row_index)
         & BOOST_SERIALIZATION_NVP(rclick_row_index)
         & BOOST_SERIALIZATION_NVP(last_row_browsed_index)
-        & BOOST_SERIALIZATION_NVP(m_suppress_erase_signal)
         & BOOST_SERIALIZATION_NVP(first_row_shown_index)
         & BOOST_SERIALIZATION_NVP(m_first_col_shown)
         & BOOST_SERIALIZATION_NVP(m_col_widths)

@@ -36,6 +36,18 @@
 using namespace GG;
 
 namespace {
+    void ClickedEcho()
+    { std::cerr << "GG SIGNAL : Button::ClickedSignal()\n"; }
+
+    void CheckedEcho(bool checked)
+    { std::cerr << "GG SIGNAL : StateButton::CheckedSignal(checked=" << checked << ")\n"; }
+
+    void ButtonChangedEcho(std::size_t index)
+    {
+        std::cerr << "GG SIGNAL : RadioButtonGroup::ButtonChangedSignal(index="
+                  << index << ")\n";
+    }
+
     struct SetCheckedButtonAction : AttributeChangedAction<std::size_t>
     {
         SetCheckedButtonAction(RadioButtonGroup* radio_button_group) :
@@ -61,7 +73,12 @@ Button::Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_p
                Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
     TextControl(x, y, w, h, str, font, text_color, FORMAT_NONE, flags),
     m_state(BN_UNPRESSED)
-{ m_color = color; }
+{
+    m_color = color;
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(ClickedSignal, &ClickedEcho);
+}
 
 Button::ButtonState Button::State() const
 { return m_state; }
@@ -230,6 +247,9 @@ StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost
 {
     m_color = color;
     SetDefaultButtonPosition();
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(CheckedSignal, &CheckedEcho);
 }
 
 Pt StateButton::MinUsableSize() const
@@ -336,8 +356,10 @@ void StateButton::Render()
 
 void StateButton::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    if (!Disabled())
+    if (!Disabled()) {
         SetCheck(!m_checked);
+        CheckedSignal(m_checked);
+    }
 }
 
 void StateButton::SizeMove(const Pt& ul, const Pt& lr)
@@ -350,7 +372,7 @@ void StateButton::Reset()
 { SetCheck(false); }
 
 void StateButton::SetCheck(bool b/* = true*/)
-{ CheckedSignal(m_checked = b); }
+{ m_checked = b; }
 
 void StateButton::RepositionButton()
 {
@@ -471,20 +493,15 @@ Pt StateButton::TextUpperLeft() const
 RadioButtonGroup::ButtonClickedFunctor::ButtonClickedFunctor(RadioButtonGroup* group, StateButton* button, std::size_t index) :
     m_group(group),
     m_button(button),
-    m_index(index),
-    m_ignore_clicks(false)
+    m_index(index)
 {}
 
 void RadioButtonGroup::ButtonClickedFunctor::operator()(bool checked)
 {
-    if (!m_ignore_clicks) {
-        if (checked) {
-            m_group->HandleRadioClick(m_index, false);
-        } else {
-            ScopedAssign<bool> assignment(m_ignore_clicks, true);
-            m_button->SetCheck(true);
-        }
-    }
+    if (checked)
+        m_group->SetCheckImpl(m_index, true);
+    else
+        m_button->SetCheck(true);
 }
 
 // ButtonSlot
@@ -516,7 +533,12 @@ RadioButtonGroup::RadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation) 
     m_expand_buttons(false),
     m_expand_buttons_proportionally(false),
     m_render_outline(false)
-{ SetColor(CLR_YELLOW); }
+{
+    SetColor(CLR_YELLOW);
+
+    if (INSTRUMENT_ALL_SIGNALS)
+        Connect(ButtonChangedSignal, &ButtonChangedEcho);
+}
 
 Pt RadioButtonGroup::MinUsableSize() const
 {
@@ -569,11 +591,9 @@ void RadioButtonGroup::Render()
 
 void RadioButtonGroup::SetCheck(std::size_t index)
 {
-    if (index == m_checked_button)
-        return;
     if (m_button_slots.size() <= index)
         index = NO_BUTTON;
-    HandleRadioClick(index, true);
+    SetCheckImpl(index, false);
 }
 
 void RadioButtonGroup::DisableButton(std::size_t index, bool b/* = true*/)
@@ -644,12 +664,9 @@ void RadioButtonGroup::InsertButton(std::size_t index, StateButton* bn)
         layout->SetMinimumColumnWidth(index * CELLS_PER_BUTTON, bn_sz.x);
     m_button_slots.insert(m_button_slots.begin() + index, ButtonSlot(bn));
 
-    std::size_t old_checked_button = m_checked_button;
     if (m_checked_button != NO_BUTTON && index <= m_checked_button)
         ++m_checked_button;
     Reconnect();
-    if (m_checked_button != old_checked_button)
-        ButtonChangedSignal(m_checked_button);
 }
 
 void RadioButtonGroup::InsertButton(std::size_t index, const std::string& text, const boost::shared_ptr<Font>& font, Flags<TextFormat> format,
@@ -699,14 +716,11 @@ void RadioButtonGroup::RemoveButton(StateButton* button)
             layout->ResizeLayout(1, layout->Columns() - CELLS_PER_BUTTON);
     }
 
-    std::size_t old_checked_button = m_checked_button;
     if (index == m_checked_button)
         m_checked_button = NO_BUTTON;
     else if (index <= m_checked_button)
         --m_checked_button;
     Reconnect();
-    if (m_checked_button != old_checked_button)
-        ButtonChangedSignal(m_checked_button);
 }
 
 void RadioButtonGroup::ExpandButtons(bool expand)
@@ -764,25 +778,23 @@ const std::vector<RadioButtonGroup::ButtonSlot>& RadioButtonGroup::ButtonSlots()
 void RadioButtonGroup::ConnectSignals()
 {
     for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
-        m_button_slots[i].connection = Connect(m_button_slots[i].button->CheckedSignal, ButtonClickedFunctor(this, m_button_slots[i].button, i));
+        m_button_slots[i].connection =
+            Connect(m_button_slots[i].button->CheckedSignal,
+                    ButtonClickedFunctor(this, m_button_slots[i].button, i));
     }
     SetCheck(m_checked_button);
 }
 
-void RadioButtonGroup::HandleRadioClick(std::size_t index, bool set_check)
+void RadioButtonGroup::SetCheckImpl(std::size_t index, bool signal)
 {
     assert(m_checked_button == NO_BUTTON || m_checked_button < m_button_slots.size());
-    if (m_checked_button != NO_BUTTON) {
-        m_button_slots[m_checked_button].connection.block();
+    if (m_checked_button != NO_BUTTON)
         m_button_slots[m_checked_button].button->SetCheck(false);
-        m_button_slots[m_checked_button].connection.unblock();
-    }
-    if (set_check && index != NO_BUTTON) {
-        m_button_slots[index].connection.block();
+    if (index != NO_BUTTON)
         m_button_slots[index].button->SetCheck(true);
-        m_button_slots[index].connection.unblock();
-    }
-    ButtonChangedSignal(m_checked_button = index);
+    m_checked_button = index;
+    if (signal)
+        ButtonChangedSignal(m_checked_button);
 }
 
 void RadioButtonGroup::Reconnect()

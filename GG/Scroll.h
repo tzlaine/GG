@@ -175,7 +175,7 @@ GG_ENUM_STREAM_OUT(Scroll::ScrollRegion)
 /** A convenience function that signals \a scroll's position, via
     Scroll::ScrolledSignal.  If \a stopped is true, the position is
     additionally signalled on Scroll::ScrolledAndStoppedSignal. */
-void SignalScroll(const Scroll& scroll, bool stopped);
+GG_API void SignalScroll(const Scroll& scroll, bool stopped);
 
 } // namespace GG
 

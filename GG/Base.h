@@ -68,7 +68,7 @@
     functions, typedefs, enums, etc. */
 namespace GG {
 
-extern const bool INSTRUMENT_ALL_SIGNALS;
+extern GG_API const bool INSTRUMENT_ALL_SIGNALS;
 
 template <class FlagType>
 class Flags;

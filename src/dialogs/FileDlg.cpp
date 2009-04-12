@@ -341,7 +341,6 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
     fs::path filename_path = fs::complete(fs::path(filename));
     m_files_edit = style->NewEdit(X0, Y0, X1, "", m_font, m_border_color, m_text_color);
     m_files_edit->SetText(filename_path.leaf());
-    FilesEditChanged(m_files_edit->Text());
     m_filter_list = style->NewDropDownList(X0, Y0, X(100), m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LIST_NOSORT);
 

@@ -727,7 +727,7 @@ Pt MultiEdit::ScrollPosition() const
 
 CPSize MultiEdit::CharIndexOf(std::size_t row, CPSize char_idx, const std::vector<Font::LineData>* line_data) const
 {
-    CPSize retval;
+    CPSize retval = CP0;
     const std::vector<Font::LineData>& lines = line_data ? *line_data : GetLineData();
     if (lines[row].Empty()) {
         if (!row)

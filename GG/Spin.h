@@ -546,11 +546,11 @@ void Spin<T>::ValueUpdated(const std::string& val_text)
 
 template<class T>
 void Spin<T>::IncrImpl(bool signal)
-{ SetValueImpl(m_value + m_step_size, signal); }
+{ SetValueImpl(static_cast<T>(m_value + m_step_size), signal); }
 
 template<class T>
 void Spin<T>::DecrImpl(bool signal)
-{ SetValueImpl(m_value - m_step_size, signal); }
+{ SetValueImpl(static_cast<T>(m_value - m_step_size), signal); }
 
 template<class T>
 void Spin<T>::SetValueImpl(T value, bool signal)
@@ -562,11 +562,18 @@ void Spin<T>::SetValueImpl(T value, bool signal)
         m_value = m_max_value;
     } else {
         // if the value supplied does not equal a valid value
-        if (std::abs(spin_details::mod((value - m_min_value), m_step_size)) > std::numeric_limits<T>::epsilon()) {
+        if (std::abs(spin_details::mod(static_cast<T>(value - m_min_value), m_step_size)) >
+            std::numeric_limits<T>::epsilon()) {
             // find nearest valid value to the one supplied
-            T closest_below = spin_details::div((value - m_min_value), m_step_size) * m_step_size + m_min_value;
-            T closest_above = closest_below + m_step_size;
-            m_value = ((value - closest_below) < (closest_above - value) ? closest_below : closest_above);
+            T closest_below =
+                static_cast<T>(
+                    spin_details::div(static_cast<T>(value - m_min_value), m_step_size) *
+                    static_cast<T>(m_step_size + m_min_value));
+            T closest_above =
+                static_cast<T>(closest_below + m_step_size);
+            m_value =
+                ((value - closest_below) < (closest_above - value) ?
+                 closest_below : closest_above);
         } else {
             m_value = value;
         }
@@ -602,7 +609,7 @@ void Spin<T>::serialize(Archive& ar, const unsigned int version)
 namespace spin_details {
     // provides a typesafe mod function
     template <class T> inline 
-    T mod (T dividend, T divisor) {return dividend % divisor;}
+    T mod (T dividend, T divisor) {return static_cast<T>(dividend % divisor);}
 
     // template specializations
     template <> inline 
@@ -614,7 +621,7 @@ namespace spin_details {
 
     // provides a typesafe div function
     template <class T> inline 
-    T div (T dividend, T divisor) {return dividend / divisor;}
+    T div (T dividend, T divisor) {return static_cast<T>(dividend / divisor);}
 
     // template specializations
     template <> inline 

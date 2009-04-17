@@ -543,6 +543,8 @@ EXCLUDE                = ../config.h \
                          ../build_config.py \
                          ../build_support.py \
                          ../src/GIL \
+                         ../src/adobe \
+                         ../GG/adobe \
                          ../GG/gen_signals.py \
                          ../GG/ltdl.h \
                          ../GG/ltdl_config.h \

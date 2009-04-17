@@ -3,6 +3,7 @@
 Import('gigi_env')
 
 sources = [
+    'AdamGlue.cpp',
     'AlignmentFlags.cpp',
     'Base.cpp',
     'BrowseInfoWnd.cpp',
@@ -35,7 +36,28 @@ sources = [
     'Wnd.cpp',
     'WndEditor.cpp',
     'WndEvent.cpp',
-    'ZList.cpp'
+    'ZList.cpp',
+    'adobe/adam.cpp',
+    'adobe/adam_evaluate.cpp',
+    'adobe/adam_parser.cpp',
+    'adobe/basic_sheet.cpp',
+    'adobe/eve.cpp',
+    'adobe/eve_evaluate.cpp',
+    'adobe/eve_parser.cpp',
+    'adobe/expression_filter.cpp',
+    'adobe/expression_parser.cpp',
+    'adobe/istream.cpp',
+    'adobe/lex_shared.cpp',
+    'adobe/lex_stream.cpp',
+    'adobe/localization.cpp',
+    'adobe/memory.cpp',
+    'adobe/name.cpp',
+    'adobe/parser_shared.cpp',
+    'adobe/string.cpp',
+    'adobe/string_pool.cpp',
+    'adobe/token.cpp',
+    'adobe/typeinfo.cpp',
+    'adobe/virtual_machine.cpp'
     ]
 
 if gigi_env['need__vsnprintf_c']:

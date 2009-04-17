@@ -451,7 +451,8 @@ if not env.GetOption('clean'):
             env.Append(CPPDEFINES = [
                 (env['debug'] and '_DEBUG' or 'NDEBUG'),
                 'WIN32',
-                '_WINDOWS'
+                '_WINDOWS',
+                'ADOBE_TEST_MICROSOFT_NO_DEPRECATE=0'
                 ])
             if env['dynamic']:
                 env.Append(CPPDEFINES = [
@@ -757,7 +758,8 @@ if env['build_sdl_driver']:
     tutorials = [
         tutorial_env.Program('minimal', ['tutorial/minimal.cpp']),
         tutorial_env.Program('controls', ['tutorial/controls.cpp']),
-        tutorial_env.Program('serialization', ['tutorial/serialization.cpp', 'tutorial/saveload.cpp'])
+        tutorial_env.Program('serialization', ['tutorial/serialization.cpp', 'tutorial/saveload.cpp']),
+        tutorial_env.Program('adam', ['tutorial/adam.cpp'])
         ]
 
 

@@ -489,6 +489,9 @@ if not env.GetOption('clean'):
         if env.has_key('CPPDEFINES'):
             env['libltdl_defines'] += env['CPPDEFINES']
 
+        if env['debug']:
+            env.AppendUnique(CPPDEFINES = ['ADOBE_STD_SERIALIZATION'])
+
         # finish config and save results for later
         conf.CheckConfigSuccess(True)
         conf.Finish();

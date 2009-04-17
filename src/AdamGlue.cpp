@@ -30,6 +30,8 @@
 #include <GG/Slider.h>
 #include <GG/Spin.h>
 #include <GG/TextControl.h>
+#include <GG/adobe/adam_parser.hpp>
+#include <GG/adobe/adam_evaluate.hpp>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/string.hpp>
 
@@ -233,6 +235,20 @@ void AdamCellGlue<Slider, double, int>::ControlChanged(int tab_posn, int min, in
 ////////////////////////////////////////
 // AdamSheetGlue
 ////////////////////////////////////////
-AdamSheetGlue::AdamSheetGlue(adobe::sheet_t& sheet) :
-    m_sheet(&sheet)
-{}
+AdamSheetGlue::AdamSheetGlue(const std::string& str) :
+    m_sheet()
+{
+    std::istringstream stream(str);
+    Init(stream);
+}
+
+AdamSheetGlue::AdamSheetGlue(std::istream& stream) :
+    m_sheet()
+{ Init(stream); }
+
+void AdamSheetGlue::Init(std::istream& stream)
+{
+    m_sheet.machine_m.set_variable_lookup(boost::bind(&adobe::sheet_t::get, &m_sheet, _1));
+    adobe::parse(stream, adobe::line_position_t("m_sheet"), adobe::bind_to_sheet(m_sheet));
+    m_sheet.update();
+}

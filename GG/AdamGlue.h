@@ -221,7 +221,8 @@ private:
 
 struct AdamSheetGlue
 {
-    AdamSheetGlue(adobe::sheet_t& sheet);
+    AdamSheetGlue(const std::string& str);
+    AdamSheetGlue(std::istream& stream);
 
     template <
         class AdamValueType,
@@ -231,7 +232,9 @@ struct AdamSheetGlue
     void AddCell(ControlType& control, adobe::name_t cell);
 
 private:
-    adobe::sheet_t* m_sheet;
+    void Init(std::istream& stream);
+
+    adobe::sheet_t m_sheet;
     std::vector<boost::shared_ptr<AdamCellGlueBase> > m_cells;
 };
 
@@ -328,7 +331,7 @@ void AdamSheetGlue::AddCell(ControlType& control, adobe::name_t cell)
     m_cells.push_back(
         boost::shared_ptr<AdamCellGlueBase>(
             new AdamCellGlue<ControlType, AdamValueType, GGValueType>(
-                control, *m_sheet, cell)));
+                control, m_sheet, cell)));
 }
 
 }

@@ -1,8 +1,6 @@
 #include <GG/AdamGlue.h>
 #include <GG/Layout.h>
 #include <GG/SDL/SDLGUI.h>
-#include <GG/adobe/adam_parser.hpp>
-#include <GG/adobe/adam_evaluate.hpp>
 
 #include <iostream>
 
@@ -53,9 +51,11 @@ private:
     GG::Edit* m_flatness_edit;
     GG::Button* m_ok;
 
-    adobe::sheet_t m_sheet;
     GG::AdamSheetGlue m_adam_glue;
 };
+
+
+// implementations
 
 std::ostream& operator<<(std::ostream& os, PathTypes p)
 {
@@ -75,8 +75,8 @@ const GG::X AdamDialog::WIDTH(250);
 const GG::Y AdamDialog::HEIGHT(75);
 
 AdamDialog::AdamDialog() :
-    Wnd(AdamGGApp::GetGUI()->AppWidth() / 2 - WIDTH,
-        AdamGGApp::GetGUI()->AppHeight() / 2 - HEIGHT,
+    Wnd((AdamGGApp::GetGUI()->AppWidth() - WIDTH) / 2,
+        (AdamGGApp::GetGUI()->AppHeight() - HEIGHT) / 2,
         WIDTH, HEIGHT, GG::CLICKABLE | GG::MODAL),
     m_font(AdamGGApp::GetGUI()->GetFont("tutorial/Vera.ttf", 12)),
     m_path_spin(new GG::Spin<PathTypes>(GG::X0, GG::Y0, GG::X(50),
@@ -86,10 +86,7 @@ AdamDialog::AdamDialog() :
                                  "0.0", m_font, GG::CLR_SHADOW, GG::CLR_WHITE)),
     m_ok(new GG::Button(GG::X0, GG::Y0, GG::X(50), GG::Y(25),
                         "Ok", m_font, GG::CLR_SHADOW, GG::CLR_WHITE)),
-    m_sheet(),
-    m_adam_glue(m_sheet)
-{
-    const char* sheet_spec =
+    m_adam_glue(
         "sheet clipping_path"
         "{"
         "output:"
@@ -98,8 +95,8 @@ AdamDialog::AdamDialog() :
         "interface:"
         "    unlink flatness : 0.0   <== (path == 0) ? 0.0 : flatness;"
         "    path            : 1;"
-        "}";
-
+        "}")
+{
     GG::TextControl* path_label =
         new GG::TextControl(GG::X0, GG::Y0, GG::X(50), GG::Y(25),
                             "Path:", m_font, GG::CLR_WHITE, GG::FORMAT_RIGHT);
@@ -119,11 +116,6 @@ AdamDialog::AdamDialog() :
 
     GG::Connect(m_ok->ClickedSignal, &AdamDialog::OkClicked, this);
 
-    m_sheet.machine_m.set_variable_lookup(boost::bind(&adobe::sheet_t::get, &m_sheet, _1));
-    std::istringstream is(sheet_spec);
-    adobe::parse(is, adobe::line_position_t("m_sheet"), adobe::bind_to_sheet(m_sheet));
-    m_sheet.update();
-
     m_adam_glue.AddCell<double, PathTypes>(*m_path_spin, adobe::name_t("path"));
     m_adam_glue.AddCell<double, double>(*m_flatness_edit, adobe::name_t("flatness"));
 }
@@ -134,12 +126,9 @@ void AdamDialog::Render()
 void AdamDialog::OkClicked()
 { m_done = true; }
 
-// implementations
-
 AdamGGApp::AdamGGApp() : 
     SDLGUI(1024, 768, false, "Adam App")
-{
-}
+{}
 
 void AdamGGApp::Enter2DMode()
 {
@@ -259,8 +248,7 @@ void AdamGGApp::Initialize()
 // This gets called as the application is exit()ing, and as the name says,
 // performs all necessary cleanup at the end of the app's run.
 void AdamGGApp::FinalCleanup()
-{
-}
+{}
 
 extern "C" // Note the use of C-linkage, as required by SDL.
 int main(int argc, char* argv[])

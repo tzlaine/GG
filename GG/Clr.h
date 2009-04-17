@@ -29,10 +29,24 @@
 #ifndef _GG_Clr_h_
 #define _GG_Clr_h_
 
-#include <GG/Base.h>
-
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
+
+#ifndef GG_API
+# ifdef _MSC_VER
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#  undef min
+#  undef max
+#  ifdef GIGI_EXPORTS
+#   define GG_API __declspec(dllexport)
+#  else
+#   define GG_API __declspec(dllimport)
+#  endif
+# else
+#  define GG_API
+# endif
+#endif
 
 
 namespace GG {
@@ -48,14 +62,20 @@ namespace GG {
 struct GG_API Clr
 {
     /** \name Structors */ ///@{
-    Clr();                                                       ///< default ctor
-    Clr(GLubyte r_, GLubyte g_, GLubyte b_, GLubyte a_);         ///< ctor that constructs a Clr from four ints that represent the color channels
+    /** default ctor */
+    Clr();
+
+    /** ctor that constructs a Clr from four ints that represent the color channels */
+    Clr(unsigned char r_,
+        unsigned char g_,
+        unsigned char b_,
+        unsigned char a_);
     //@}
 
-    GLubyte r;   ///< the red channel
-    GLubyte g;   ///< the green channel
-    GLubyte b;   ///< the blue channel
-    GLubyte a;   ///< the alpha channel
+    unsigned char r;   ///< the red channel
+    unsigned char g;   ///< the green channel
+    unsigned char b;   ///< the blue channel
+    unsigned char a;   ///< the alpha channel
 
 private:
     friend class boost::serialization::access;

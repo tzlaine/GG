@@ -48,7 +48,7 @@ Clr::Clr() :
     a(0)
 {}
 
-Clr::Clr(GLubyte r_, GLubyte g_, GLubyte b_, GLubyte a_) :
+Clr::Clr(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_) :
     r(r_),
     g(g_),
     b(b_),
@@ -61,10 +61,10 @@ Clr::Clr(GLubyte r_, GLubyte g_, GLubyte b_, GLubyte a_) :
 ////////////////////////////////////////////////
 Clr GG::FloatClr(float r, float g, float b, float a)
 {
-    return Clr(static_cast<GLubyte>(r * 255),
-               static_cast<GLubyte>(g * 255),
-               static_cast<GLubyte>(b * 255),
-               static_cast<GLubyte>(a * 255));
+    return Clr(static_cast<unsigned char>(r * 255),
+               static_cast<unsigned char>(g * 255),
+               static_cast<unsigned char>(b * 255),
+               static_cast<unsigned char>(a * 255));
 }
 
 bool GG::operator==(const Clr& rhs, const Clr& lhs) 

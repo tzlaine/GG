@@ -29,6 +29,8 @@
 #ifndef _GG_Flags_h_
 #define _GG_Flags_h_
 
+#include <GG/Exception.h>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -36,7 +38,6 @@
 #include <iosfwd>
 #include <map>
 #include <set>
-#include <stdexcept>
 
 
 namespace GG {

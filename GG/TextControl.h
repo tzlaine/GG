@@ -41,7 +41,7 @@ namespace GG {
 
     TextControl's know how to center, left- or right-justify, etc. themselves
     within their window areas.  The format flags used with TextControl are
-    defined in enum TextFormat in Base.h. TextControl has std::string-like
+    defined in the TextFormat flag type. TextControl has std::string-like
     operators and functions that allow the m_text member string to be
     manipulated directly.  In addition, the << and >> operators allow
     virtually any type (int, float, char, etc.) to be read from a TextControl

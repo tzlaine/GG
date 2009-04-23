@@ -518,7 +518,7 @@ void Spin<T>::Init(const boost::shared_ptr<Font>& font, Clr color, Clr text_colo
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
     Control::SetColor(color);
     m_edit = style->NewSpinEdit(X0, Y0, X1, boost::lexical_cast<std::string>(m_value), font, CLR_ZERO, text_color, interior);
-    boost::shared_ptr<Font> small_font = GUI::GetGUI()->GetFont(font->FontName(), static_cast<int>(font->PointSize() * 0.75));
+    boost::shared_ptr<Font> small_font = GUI::GetGUI()->GetFont(font, static_cast<int>(font->PointSize() * 0.75));
     m_up_button = style->NewSpinIncrButton(X0, Y0, X1, Y1, "+", small_font, color);
     m_down_button = style->NewSpinDecrButton(X0, Y0, X1, Y1, "-", small_font, color);
     m_edit->InstallEventFilter(this);

@@ -30,7 +30,7 @@
 // code.
 void QuitButtonClicked()
 {
-    GG::ThreeButtonDlg quit_dlg(GG::X(200), GG::Y(100), "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
+    GG::ThreeButtonDlg quit_dlg(GG::X(200), GG::Y(100), "Are you sure... I mean, really sure?", GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(),
                                 GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_GRAY, GG::CLR_WHITE, 2);
     quit_dlg.Run();
 
@@ -46,7 +46,7 @@ struct BrowseFilesFunctor
 {
     void operator()()
     {
-        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12),
+        GG::FileDlg file_dlg("", "", false, false, GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(),
                              GG::CLR_GRAY, GG::CLR_GRAY);
         file_dlg.Run();
     }
@@ -83,7 +83,7 @@ struct CustomTextRow : GG::ListBox::Row
     CustomTextRow(const std::string& text) :
         Row()
     {
-        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(), GG::CLR_WHITE));
     }
 
     template <class T>
@@ -91,8 +91,8 @@ struct CustomTextRow : GG::ListBox::Row
         Row()
     {
         std::string t_str = boost::lexical_cast<std::string>(t);
-        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
-        push_back(GG::ListBox::Row::CreateControl(t_str, GG::GUI::GetGUI()->GetFont("tutorial/Vera.ttf", 12), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(text, GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(), GG::CLR_WHITE));
+        push_back(GG::ListBox::Row::CreateControl(t_str, GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(), GG::CLR_WHITE));
     }
 };
 
@@ -233,7 +233,7 @@ void ControlsTestApp::Initialize()
 {
     SDL_WM_SetCaption("Control-Test GG App", "Control-Test GG App");
 
-    boost::shared_ptr<GG::Font> font = GetFont("tutorial/Vera.ttf", 12);
+    boost::shared_ptr<GG::Font> font = GetStyleFactory()->DefaultFont();
 
     // We're creating a layout for this window, so that we don't have to come up with position coordinates for all the
     // Controls.

@@ -277,11 +277,27 @@ public:
         ASCII characters. */
     boost::shared_ptr<Font>    GetFont(const std::string& font_filename, unsigned int pts);
 
+    /** Returns a shared_ptr to the desired font, supporting all printable
+        ASCII characters, from the in-memory contents \a file_contents. */
+    boost::shared_ptr<Font>    GetFont(const std::string& font_filename, unsigned int pts,
+                                       const std::vector<unsigned char>& file_contents);
+
     /** Returns a shared_ptr to the desired font, supporting all the
         characters in the UnicodeCharsets in the range [first, last). */
     template <class CharSetIter>
     boost::shared_ptr<Font>    GetFont(const std::string& font_filename, unsigned int pts,
                                        CharSetIter first, CharSetIter last);
+
+    /** Returns a shared_ptr to the desired font, supporting all the
+        characters in the UnicodeCharsets in the range [first, last), from the
+        in-memory contents \a file_contents. */
+    template <class CharSetIter>
+    boost::shared_ptr<Font>    GetFont(const std::string& font_filename, unsigned int pts,
+                                       const std::vector<unsigned char>& file_contents,
+                                       CharSetIter first, CharSetIter last);
+
+    /** Returns a shared_ptr to existing font \a font in a new size, \a pts. */
+    boost::shared_ptr<Font>    GetFont(const boost::shared_ptr<Font>& font, unsigned int pts);
 
     /** Removes the desired font from the managed pool; since shared_ptr's are
         used, the font may be deleted much later */
@@ -391,6 +407,12 @@ template <class CharSetIter>
 boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned int pts,
                                      CharSetIter first, CharSetIter last)
 { return GetFontManager().GetFont(font_filename, pts, first, last); }
+
+template <class CharSetIter>
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned int pts,
+                                     const std::vector<unsigned char>& file_contents,
+                                     CharSetIter first, CharSetIter last)
+{ return GetFontManager().GetFont(font_filename, pts, file_contents, first, last); }
 
 template <class T>
 void GUI::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)

@@ -42,6 +42,9 @@
 #include <GG/dialogs/FileDlg.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
 
+#include "DefaultFont.h"
+
+
 using namespace GG;
 
 StyleFactory::StyleFactory()
@@ -49,6 +52,9 @@ StyleFactory::StyleFactory()
 
 StyleFactory::~StyleFactory()
 {}
+
+boost::shared_ptr<Font> StyleFactory::DefaultFont(unsigned int pts/* = 12*/) const
+{ return GG::GUI::GetGUI()->GetFont(DefaultFontName(), pts, VeraTTFBytes()); }
 
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = CLICKABLE*/) const
@@ -263,3 +269,9 @@ ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(X w, Y h, const std::string& msg
 
 void StyleFactory::DeleteWnd(Wnd* wnd) const
 { delete wnd; }
+
+const std::string& StyleFactory::DefaultFontName()
+{
+    static std::string retval = DEFAULT_FONT_NAME;
+    return retval;
+}

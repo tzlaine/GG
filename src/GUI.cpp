@@ -890,6 +890,23 @@ void GUI::RemoveAccelerator(accel_iterator it)
 boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned int pts)
 { return GetFontManager().GetFont(font_filename, pts); }
 
+boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned int pts,
+                                     const std::vector<unsigned char>& file_contents)
+{ return GetFontManager().GetFont(font_filename, pts, file_contents); }
+
+boost::shared_ptr<Font> GUI::GetFont(const boost::shared_ptr<Font>& font, unsigned int pts)
+{
+    boost::shared_ptr<Font> retval;
+    if (font->FontName() == StyleFactory::DefaultFontName()) {
+        retval = GetStyleFactory()->DefaultFont(pts);
+    } else {
+        retval = GetFont(font->FontName(), font->PointSize(),
+                         font->UnicodeCharsets().begin(),
+                         font->UnicodeCharsets().end());
+    }
+    return retval;
+}
+
 void GUI::FreeFont(const std::string& font_filename, unsigned int pts)
 { GetFontManager().FreeFont(font_filename, pts); }
 

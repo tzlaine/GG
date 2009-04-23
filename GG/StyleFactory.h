@@ -29,10 +29,9 @@
 #ifndef _GG_StyleFactory_h_
 #define _GG_StyleFactory_h_
 
-#include  <GG/Font.h>
 #include  <GG/DynamicGraphic.h>
-#include  <GG/MultiEdit.h>
-#include  <GG/StaticGraphic.h>
+#include  <GG/FontFwd.h>
+#include  <GG/MultiEditFwd.h>
 
 
 namespace GG {
@@ -42,14 +41,18 @@ class ColorDlg;
 class DropDownList;
 class DynamicGraphic;
 class FileDlg;
+class Edit;
+class Font;
 class ListBox;
 class MenuBar;
+class MultiEdit;
 class RadioButtonGroup;
 class Scroll;
 class Slider;
 template <class T>
 class Spin;
 class StateButton;
+class StaticGraphic;
 class TabBar;
 class TabWnd;
 class TextControl;
@@ -77,6 +80,9 @@ public:
     StyleFactory(); ///< Default ctor.
     virtual ~StyleFactory(); ///< Virtual dtor.
     //@}
+
+    /** Returns the default font for this style, in the size \a pts. */
+    virtual boost::shared_ptr<Font> DefaultFont(unsigned int pts = 12) const;
 
     /** \name Controls */ ///@{
     /** Returns a new GG Button. */
@@ -293,6 +299,9 @@ public:
     /** Deletes \a wnd.  It is only necessary to use this method to destroy
         Wnds when the factory that created them exists in a plugin. */
     virtual void               DeleteWnd(Wnd* wnd) const;
+
+    /** The "filename" of the default font. */
+    static const std::string&  DefaultFontName();
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version) {}

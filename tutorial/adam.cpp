@@ -78,7 +78,7 @@ AdamDialog::AdamDialog() :
     Wnd((AdamGGApp::GetGUI()->AppWidth() - WIDTH) / 2,
         (AdamGGApp::GetGUI()->AppHeight() - HEIGHT) / 2,
         WIDTH, HEIGHT, GG::CLICKABLE | GG::MODAL),
-    m_font(AdamGGApp::GetGUI()->GetFont("tutorial/Vera.ttf", 12)),
+    m_font(AdamGGApp::GetGUI()->GetStyleFactory()->DefaultFont()),
     m_path_spin(new GG::Spin<PathTypes>(GG::X0, GG::Y0, GG::X(50),
                                         NONE, PathTypes(1), NONE, PATH_1,
                                         false, m_font, GG::CLR_SHADOW, GG::CLR_WHITE)),

@@ -1,3 +1,4 @@
+#include <GG/StyleFactory.h>
 #include <GG/SDL/SDLGUI.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
 #include <GG/dialogs/FileDlg.h>
@@ -200,7 +201,7 @@ void MinimalGGApp::Initialize()
     // sandwiched between Exit2DMode() and Enter2DMode().
 
     GG::Wnd* quit_dlg =
-        new GG::ThreeButtonDlg(GG::X(200), GG::Y(100), "Are we done yet?", GetFont("tutorial/Vera.ttf", 12), GG::CLR_SHADOW, 
+        new GG::ThreeButtonDlg(GG::X(200), GG::Y(100), "Are we done yet?", GetStyleFactory()->DefaultFont(), GG::CLR_SHADOW, 
                                GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
     quit_dlg->Run();
 

@@ -27,6 +27,7 @@
 #include <GG/GUI.h>
 #include <GG/Base.h>
 #include <GG/DrawUtil.h>
+#include <GG/StyleFactory.h>
 #include <GG/utf8/checked.h>
 
 #include <ft2build.h>
@@ -44,6 +45,17 @@
 #include <sstream>
 
 #define DEBUG_DETERMINELINES 0
+
+namespace GG { namespace detail {
+
+    FTFaceWrapper::FTFaceWrapper() :
+        m_face(0)
+    {}
+
+    FTFaceWrapper::~FTFaceWrapper()
+    { if (m_face) FT_Done_Face(m_face); }
+
+} }
 
 using namespace GG;
 
@@ -86,13 +98,13 @@ namespace {
 
     struct FTLibraryWrapper
     {
-        FTLibraryWrapper() : library(0)
+        FTLibraryWrapper() : m_library(0)
         {
-            if (!library && FT_Init_FreeType(&library)) // if no library exists and we can't create one...
+            if (!m_library && FT_Init_FreeType(&m_library)) // if no library exists and we can't create one...
                 throw FailedFTLibraryInit("Unable to initialize FreeType font library object");
         }
-        ~FTLibraryWrapper() {FT_Done_FreeType(library);}
-        FT_Library library;
+        ~FTLibraryWrapper() { FT_Done_FreeType(m_library); }
+        FT_Library m_library;
     } g_library;
 
     struct MatchesKnownTag
@@ -531,8 +543,32 @@ Font::Font(const std::string& font_filename, unsigned int pts) :
     m_italics_offset(0.0),
     m_space_width(0)
 {
-    if (font_filename != "")
-        Init(font_filename, pts);
+    if (m_font_filename != "") {
+        detail::FTFaceWrapper wrapper;
+        FT_Error error = GetFace(wrapper.m_face);
+        CheckFace(wrapper.m_face, error);
+        Init(wrapper.m_face);
+    }
+}
+
+Font::Font(const std::string& font_filename, unsigned int pts,
+           const std::vector<unsigned char>& file_contents) :
+    m_font_filename(font_filename),
+    m_pt_sz(pts),
+    m_ascent(0),
+    m_descent(0),
+    m_height(0),
+    m_lineskip(0),
+    m_underline_offset(0.0),
+    m_underline_height(0.0),
+    m_italics_offset(0.0),
+    m_space_width(0)
+{
+    assert(!file_contents.empty());
+    detail::FTFaceWrapper wrapper;
+    FT_Error error = GetFace(file_contents, wrapper.m_face);
+    CheckFace(wrapper.m_face, error);
+    Init(wrapper.m_face);
 }
 
 Font::~Font()
@@ -1108,26 +1144,40 @@ void Font::ThrowBadGlyph(const std::string& format_str, boost::uint32_t c)
     throw BadGlyph(boost::io::str(boost::format(format_str) % boost::io::str(format % c)));
 }
 
-void Font::Init(const std::string& font_filename, unsigned int pts)
+FT_Error Font::GetFace(FT_Face& face)
+{ return FT_New_Face(g_library.m_library, m_font_filename.c_str(), 0, &face); }
+
+FT_Error Font::GetFace(const std::vector<unsigned char>& file_contents, FT_Face& face)
+{
+    return FT_New_Memory_Face(g_library.m_library, &file_contents[0],
+                              file_contents.size(), 0, &face);
+}
+
+void Font::CheckFace(FT_Face face, FT_Error error)
+{
+    if (error || !face)
+        throw BadFile("Face object created from \"" + m_font_filename + "\" was invalid");
+    if (!FT_IS_SCALABLE(face)) {
+        throw UnscalableFont("Attempted to create font \"" + m_font_filename +
+                             "\" with uscalable font face");
+    }
+}
+
+void Font::Init(FT_Face& face)
 {
     if (s_action_tags.empty()) // if this is the first Font to get initialized, it needs to initialize some static members
         ClearKnownTags();
 
-    FT_Error error;
-    FT_Face face;
     FT_Fixed scale;
 
-    // Open the font and create ancillary data
-    error = FT_New_Face(g_library.library, font_filename.c_str(), 0, &face);
-    if (error || !face)
-        throw BadFile("Face object created from \"" + font_filename + "\" was invalid");
-    if (!pts)
-        throw InvalidPointSize("Attempted to create font \"" + font_filename + "\" with 0 point size");
-    if (!FT_IS_SCALABLE(face))
-        throw UnscalableFont("Attempted to create font \"" + font_filename + "\" with uscalable font face");
+    if (!m_pt_sz) {
+        throw InvalidPointSize("Attempted to create font \"" + m_font_filename +
+                               "\" with 0 point size");
+    }
+
     // Set the character size and use default 72 DPI
-    if (FT_Set_Char_Size(face, 0, pts * 64, 0, 0)) // if error is returned
-        throw BadPointSize("Could not set font size while attempting to create font \"" + font_filename + "\"");
+    if (FT_Set_Char_Size(face, 0, m_pt_sz * 64, 0, 0)) // if error is returned
+        throw BadPointSize("Could not set font size while attempting to create font \"" + m_font_filename + "\"");
 
     // Get the scalable font metrics for this font
     scale = face->size->metrics.y_scale;
@@ -1431,6 +1481,12 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
     }
 }
 
+bool Font::IsDefaultFont()
+{ return m_font_filename == StyleFactory::DefaultFontName(); }
+
+boost::shared_ptr<Font> Font::GetDefaultFont(unsigned int pts)
+{ return GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(pts); }
+
 
 ///////////////////////////////////////
 // class GG::FontManager
@@ -1456,6 +1512,14 @@ boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, u
     std::vector<UnicodeCharset> v;
     std::vector<UnicodeCharset>::iterator it = v.end();
     return GetFont(font_filename, pts, it, it);
+}
+
+boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, unsigned int pts,
+                                             const std::vector<unsigned char>& file_contents)
+{
+    std::vector<UnicodeCharset> v;
+    std::vector<UnicodeCharset>::iterator it = v.end();
+    return GetFont(font_filename, pts, file_contents, it, it);
 }
 
 void FontManager::FreeFont(const std::string& font_filename, unsigned int pts)

@@ -92,7 +92,7 @@ WndEditor::WndEditor(Y h, const boost::shared_ptr<Font>& font) :
     m_wnd(0),
     m_list_box(new ListBox(X0, Y0, WND_EDITOR_WIDTH, h, CLR_GRAY, CLR_WHITE)),
     m_font(font),
-    m_label_font(GUI::GetGUI()->GetFont(font->FontName(), font->PointSize() + 4)),
+    m_label_font(GUI::GetGUI()->GetFont(font, font->PointSize() + 4)),
     m_current_flags_and_action()
 { Init(); }
 
@@ -314,7 +314,7 @@ void AttributeRow<boost::shared_ptr<Font> >::PointsChanged(const std::string& po
         int points = boost::lexical_cast<int>(points_text);
         if (points < 4 || 200 < points)
             throw boost::bad_lexical_cast();
-        boost::shared_ptr<Font> font = GUI::GetGUI()->GetFont(m_value->FontName(), points);
+        boost::shared_ptr<Font> font = GUI::GetGUI()->GetFont(m_value, points);
         m_value = font;
         m_points_edit->SetTextColor(CLR_BLACK);
         ValueChangedSignal(m_value);

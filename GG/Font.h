@@ -33,6 +33,7 @@
 #define _GG_Font_h_
 
 #include <GG/AlignmentFlags.h>
+#include <GG/FontFwd.h>
 #include <GG/Texture.h>
 #include <GG/UnicodeCharsets.h>
 
@@ -45,48 +46,13 @@
 
 struct FT_FaceRec_;
 typedef struct FT_FaceRec_*  FT_Face;
+typedef int FT_Error;
 
 namespace GG {
 
 /** Returns a string of the form "<rgba r g b a>" from a Clr object with color
     channels r, b, g, a.*/
 GG_API std::string RgbaTag(const Clr& c);
-
-/** Text formatting flags. */
-GG_FLAG_TYPE(TextFormat);
-extern GG_API const TextFormat FORMAT_NONE;        ///< Default format selected.
-extern GG_API const TextFormat FORMAT_VCENTER;     ///< Centers text vertically.
-extern GG_API const TextFormat FORMAT_TOP;         ///< Top-justifies text.
-extern GG_API const TextFormat FORMAT_BOTTOM;      ///< Justifies the text to the bottom of the rectangle.
-extern GG_API const TextFormat FORMAT_CENTER;      ///< Centers text horizontally in the rectangle.
-extern GG_API const TextFormat FORMAT_LEFT;        ///< Aligns text to the left. 
-extern GG_API const TextFormat FORMAT_RIGHT;       ///< Aligns text to the right. 
-extern GG_API const TextFormat FORMAT_WORDBREAK;   ///< Breaks words. Lines are automatically broken between words if a word would extend past the edge of the control's bounding rectangle.  As always, a '\\n' also breaks the line.
-extern GG_API const TextFormat FORMAT_LINEWRAP;    ///< Lines are automatically broken when the next glyph would be drawn outside the the text rectangle.  As always, a '\\n' also breaks the line.
-extern GG_API const TextFormat FORMAT_IGNORETAGS;  ///< Text formatting tags (e.g. <rgba 0 0 0 255>) are treated as regular text.
-
-/** \class GG::StrSize
-    \brief The string size and index value type.
-
-    Such values refer to indices into UTF-8 encoded strings, \a not code
-    points.  \see GG_STRONG_SIZE_TYPEDEF */
-GG_STRONG_SIZE_TYPEDEF(StrSize);
-
-/** \class GG::CPSize
-    \brief The code point size and index value type.
-
-    Such values refer to indices of code points in Unicode strings, \a not
-    indices into underlying UTF-8 encoded strings.  \see
-    GG_STRONG_SIZE_TYPEDEF */
-GG_STRONG_SIZE_TYPEDEF(CPSize);
-
-// some useful size constants
-extern GG_API const StrSize S0;
-extern GG_API const StrSize S1;
-extern GG_API const StrSize INVALID_STR_SIZE;
-extern GG_API const CPSize CP0;
-extern GG_API const CPSize CP1;
-extern GG_API const CPSize INVALID_CP_SIZE;
 
 
 /** \brief A bitmapped font rendering class.
@@ -386,12 +352,29 @@ public:
         condition specified for the subclass is met. */
     Font(const std::string& font_filename, unsigned int pts);
 
+    /** Ctor.  Construct a font using only the printable ASCII characters,
+        from the in-memory contents \a file_contents.  \throw Font::Exception
+        Throws a subclass of Font::Exception if the condition specified for
+        the subclass is met. */
+    Font(const std::string& font_filename, unsigned int pts,
+         const std::vector<unsigned char>& file_contents);
+
     /** Ctor.  Construct a font using all the code points in the
         UnicodeCharsets in the range [first, last).  \throw Font::Exception
         Throws a subclass of Font::Exception if the condition specified for
         the subclass is met. */
     template <class CharSetIter>
     Font(const std::string& font_filename, unsigned int pts,
+         CharSetIter first, CharSetIter last);
+
+    /** Ctor.  Construct a font using all the code points in the
+        UnicodeCharsets in the range [first, last), from the in-memory
+        contents \a file_contents.  \throw Font::Exception Throws a subclass
+        of Font::Exception if the condition specified for the subclass is
+        met. */
+    template <class CharSetIter>
+    Font(const std::string& font_filename, unsigned int pts,
+         const std::vector<unsigned char>& file_contents,
          CharSetIter first, CharSetIter last);
 
     ~Font(); ///< Dtor.
@@ -526,7 +509,8 @@ private:
     struct Glyph
     {
         Glyph(); ///< Default ctor
-        Glyph(const boost::shared_ptr<Texture>& texture, const Pt& ul, const Pt& lr, X lb, X adv); ///< Ctor
+        Glyph(const boost::shared_ptr<Texture>& texture, const Pt& ul, const Pt& lr,
+              X lb, X adv); ///< Ctor
 
         SubTexture  sub_texture;   ///< The subtexture containing just this glyph
         X           left_bearing;  ///< The space that should remain before the glyph
@@ -536,11 +520,19 @@ private:
 
     typedef boost::unordered_map<boost::uint32_t, Glyph> GlyphMap;
 
-    void              Init(const std::string& font_filename, unsigned int pts);
+    FT_Error          GetFace(FT_Face& face);
+    FT_Error          GetFace(const std::vector<unsigned char>& file_contents, FT_Face& face);
+    void              CheckFace(FT_Face font, FT_Error error);
+    void              Init(FT_Face& font);
     bool              GenerateGlyph(FT_Face font, boost::uint32_t ch);
     void              ValidateFormat(Flags<TextFormat>& format) const;
-    inline X          RenderGlyph(const Pt& pt, const Glyph& glyph, const RenderState* render_state) const;
-    void              HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color, RenderState& render_state) const;
+    inline X          RenderGlyph(const Pt& pt, const Glyph& glyph,
+                                  const RenderState* render_state) const;
+    void              HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_color,
+                                RenderState& render_state) const;
+    bool              IsDefaultFont();
+    boost::shared_ptr<Font>
+                      GetDefaultFont(unsigned int pts);
 
     std::string          m_font_filename;
     unsigned int         m_pt_sz;
@@ -606,7 +598,7 @@ LinePositionOf(CPSize index, const std::vector<Font::LineData>& line_data);
     shared_ptr is deleted if and only if the last shared_ptr that refers to it
     is deleted.  So any requested font can be used as long as the caller
     desires, even when another caller tells the FontManager to free the
-    font.*/
+    font. */
 class GG_API FontManager
 {
 private:
@@ -628,11 +620,26 @@ public:
         request. */
     boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts);
 
+    /** Returns a shared_ptr to the requested font, supporting all printable
+        ASCII characters, from the in-memory contents \a file_contents.  \note
+        May load font if unavailable at time of request. */
+    boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts,
+                                    const std::vector<unsigned char>& file_contents);
+
     /** Returns a shared_ptr to the requested font, supporting all the
         code points in the UnicodeCharsets in the range [first, last).  \note
         May load font if unavailable at time of request. */
     template <class CharSetIter>
     boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts,
+                                    CharSetIter first, CharSetIter last);
+
+    /** Returns a shared_ptr to the requested font, supporting all the code
+        points in the UnicodeCharsets in the range [first, last), from the
+        in-memory contents \a file_contents.  \note May load font if
+        unavailable at time of request. */
+    template <class CharSetIter>
+    boost::shared_ptr<Font> GetFont(const std::string& font_filename, unsigned int pts,
+                                    const std::vector<unsigned char>& file_contents,
                                     CharSetIter first, CharSetIter last);
 
     /** Removes the indicated font from the font manager.  Due to shared_ptr
@@ -642,6 +649,10 @@ public:
 
 private:
     FontManager();
+    template <class CharSetIter>
+    boost::shared_ptr<Font> GetFontImpl(const std::string& font_filename, unsigned int pts,
+                                        const std::vector<unsigned char>* file_contents,
+                                        CharSetIter first, CharSetIter last);
 
     std::map<FontKey, boost::shared_ptr<Font> > m_rendered_fonts;
 
@@ -679,6 +690,13 @@ namespace detail {
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version)
             { ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(std::string); }
+    };
+
+    struct FTFaceWrapper
+    {
+        FTFaceWrapper();
+        ~FTFaceWrapper();
+        FT_Face m_face;
     };
 }
 
@@ -734,7 +752,8 @@ void GG::Font::LineData::serialize(Archive& ar, const unsigned int version)
 }
 
 template <class CharSetIter>
-GG::Font::Font(const std::string& font_filename, unsigned int pts, CharSetIter first, CharSetIter last) :
+GG::Font::Font(const std::string& font_filename, unsigned int pts,
+               CharSetIter first, CharSetIter last) :
     m_font_filename(font_filename),
     m_pt_sz(pts),
     m_charsets(first, last),
@@ -747,8 +766,35 @@ GG::Font::Font(const std::string& font_filename, unsigned int pts, CharSetIter f
     m_italics_offset(0.0),
     m_space_width(0)
 {
-    if (font_filename != "")
-        Init(font_filename, pts);
+    if (m_font_filename != "") {
+        detail::FTFaceWrapper wrapper;
+        FT_Error error = GetFace(wrapper.m_face);
+        CheckFace(wrapper.m_face, error);
+        Init(wrapper.m_face);
+    }
+}
+
+template <class CharSetIter>
+GG::Font::Font(const std::string& font_filename, unsigned int pts,
+               const std::vector<unsigned char>& file_contents,
+               CharSetIter first, CharSetIter last) :
+    m_font_filename(font_filename),
+    m_pt_sz(pts),
+    m_charsets(first, last),
+    m_ascent(0),
+    m_descent(0),
+    m_height(0),
+    m_lineskip(0),
+    m_underline_offset(0.0),
+    m_underline_height(0.0),
+    m_italics_offset(0.0),
+    m_space_width(0)
+{
+    assert(!file_contents.empty());
+    detail::FTFaceWrapper wrapper;
+    FT_Error error = GetFace(file_contents, wrapper.m_face);
+    CheckFace(wrapper.m_face, error);
+    Init(wrapper.m_face);
 }
 
 template <class Archive>
@@ -761,7 +807,14 @@ void GG::Font::serialize(Archive& ar, const unsigned int version)
     if (Archive::is_loading::value) {
         if (!m_font_filename.empty() && 0 < m_pt_sz) {
             try {
-                Init(m_font_filename, m_pt_sz);
+                if (IsDefaultFont()) {
+                    *this = *GetDefaultFont(m_pt_sz);
+                } else if (m_font_filename != "") {
+                    detail::FTFaceWrapper wrapper;
+                    FT_Error error = GetFace(wrapper.m_face);
+                    CheckFace(wrapper.m_face, error);
+                    Init(wrapper.m_face);
+                }
             } catch (const Exception& e) {
                 // take no action; the Font must have been uninitialized when saved
             }
@@ -773,6 +826,21 @@ template <class CharSetIter>
 boost::shared_ptr<GG::Font>
 GG::FontManager::GetFont(const std::string& font_filename, unsigned int pts,
                          CharSetIter first, CharSetIter last)
+{ return GetFontImpl(font_filename, pts, 0, first, last); }
+
+template <class CharSetIter>
+boost::shared_ptr<GG::Font>
+GG::FontManager::GetFont(const std::string& font_filename, unsigned int pts,
+                         const std::vector<unsigned char>& file_contents,
+                         CharSetIter first, CharSetIter last)
+{ return GetFontImpl(font_filename, pts, &file_contents, first, last); }
+
+
+template <class CharSetIter>
+boost::shared_ptr<GG::Font>
+GG::FontManager::GetFontImpl(const std::string& font_filename, unsigned int pts,
+                             const std::vector<unsigned char>* file_contents,
+                             CharSetIter first, CharSetIter last)
 {
     FontKey key(font_filename, pts);
     std::map<FontKey, boost::shared_ptr<Font> >::iterator it = m_rendered_fonts.find(key);
@@ -782,22 +850,34 @@ GG::FontManager::GetFont(const std::string& font_filename, unsigned int pts,
             // filename that shouldn't throw
             return EMPTY_FONT;
         } else {
-            m_rendered_fonts[key] = boost::shared_ptr<Font>(new Font(font_filename, pts, first, last));
+            boost::shared_ptr<Font> font(
+                file_contents ?
+                new Font(font_filename, pts, *file_contents, first, last) :
+                new Font(font_filename, pts, first, last)
+            );
+            m_rendered_fonts[key] = font;
             return m_rendered_fonts[key];
         }
     // if a font like this has been created, but it doesn't have all the right
     // glyphs, release it and create a new one
     } else {
         std::set<UnicodeCharset> requested_charsets(first, last);
-        std::set<UnicodeCharset> found_charsets(it->second->UnicodeCharsets().begin(), it->second->UnicodeCharsets().end());
+        std::set<UnicodeCharset> found_charsets(it->second->UnicodeCharsets().begin(),
+                                                it->second->UnicodeCharsets().end());
         if (requested_charsets != found_charsets) {
             std::vector<UnicodeCharset> united_charsets;
             std::set_union(requested_charsets.begin(), requested_charsets.end(),
                            found_charsets.begin(), found_charsets.end(),
                            std::back_inserter(united_charsets));
             m_rendered_fonts.erase(it);
-            m_rendered_fonts[key] =
-                boost::shared_ptr<Font>(new Font(font_filename, pts, united_charsets.begin(), united_charsets.end()));
+            boost::shared_ptr<Font> font(
+                file_contents ?
+                new Font(font_filename, pts, *file_contents,
+                         united_charsets.begin(), united_charsets.end()) :
+                new Font(font_filename, pts,
+                         united_charsets.begin(), united_charsets.end())
+            );
+            m_rendered_fonts[key] = font;
             return m_rendered_fonts[key];
         } else { // otherwise, the font we found works, so just return it
             return it->second;

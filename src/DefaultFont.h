@@ -73,7 +73,7 @@ Copyright for Vera*.ttf:
 */
 
 namespace {
-    void DecodeBase64(std::vector<unsigned char>& data, const char* str, std::size_t strlen)
+    void DecodeBase64(std::vector<unsigned char>& data, const std::string& str)
     {
         static std::vector<unsigned int> table(256, 0);
 
@@ -91,7 +91,7 @@ namespace {
             table['/'] = 63;
         }
 
-        int len = strlen;
+        int len = str.size();
         int groups = len / 4;
         data.resize(groups * 3);
 
@@ -124,7 +124,7 @@ namespace {
         }
     }
 
-    const char VERA_TTF[] =
+    const char VERA_TTF_PART_1[] =
         "AAEAAAARAQAABAAQT1MvMrRf9GMAAOtwAAAAVlBDTFTRil6XAADryAAAADZj"
         "bWFwpMPooAAAsWwAAANYY3Z0IP/THTkAAB78AAAB/GZwZ23ntPHEAAAmYAAA"
         "AItnYXNwAAcABwABAUgAAAAMZ2x5Zgx0Qc8AACbsAACKfmhkbXg08CEOAADs"
@@ -729,7 +729,9 @@ namespace {
         "EQ8hHxEhDyFCDBsPDQkDwRUJHpUNCY4gHB4dHBggHyENEgYOGAwGGwBWGBwP"
         "BlYSHCEiENTE1OwyENTuMhE5ETkREjkROTkREjk5MQAvPObW7hDU7hESOTk5"
         "MEtTWAcQBe0HBe0HEAjtBxAF7QcQBe0HBe0HBe0HEAjtWSKyICMBAV1AIBoM"
-        "cwybDAMHDwgbUCNmDWkOdQ17DnkceR12IHYhgCMMXQBdATQmIyIGFRQWMzI2"
+        "cwybDAMHDwgbUCNmDWkOdQ17DnkceR12IHYhgCMMXQBdATQmIyIGFRQWMzI2";
+
+    const char VERA_TTF_PART_2[] =
         "AwEhAS4BNTQ2MzIWFRQGBwEjAyEDIwNUWT9AV1g/P1mY/vACIf5YPT6fc3Kh"
         "PzwCFNKI/V+I1QZaP1lXQT9YWP7z/RkDTilzSXOgoXJGdin6iwF//oEA//8A"
         "c/51BScF8AInACYAAAAAAAcA3QEtAAD//wDJAAAEiwdrAicAKAAAAAAABwEE"
@@ -1595,8 +1597,11 @@ namespace {
     const std::vector<unsigned char>& VeraTTFBytes()
     {
         static std::vector<unsigned char> retval;
-        if (retval.empty())
-            DecodeBase64(retval, VERA_TTF, sizeof(VERA_TTF));
+        if (retval.empty()) {
+            std::string chars(VERA_TTF_PART_1);
+            chars += VERA_TTF_PART_2;
+            DecodeBase64(retval, chars);
+        }
         return retval;
     }
 

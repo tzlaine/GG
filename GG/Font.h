@@ -692,7 +692,7 @@ namespace detail {
             { ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(std::string); }
     };
 
-    struct FTFaceWrapper
+    struct GG_API FTFaceWrapper
     {
         FTFaceWrapper();
         ~FTFaceWrapper();

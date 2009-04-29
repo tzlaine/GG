@@ -49,6 +49,10 @@ class Wnd;
 class GG_API Timer
 {
 public:
+    /** \name Signal Types */ ///@{
+    typedef boost::signal<void (unsigned int, Timer*)> FiredSignalType; ///< Emitted when the timer fires
+    //@}
+
     /** \name Structors */ ///@{
     /** Basic ctor.  Takes an interval and a start time in ms; if the start
         time is ommitted, the start time will be immediate. */
@@ -58,11 +62,8 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    bool Connected() const;             ///< Returns true iff this Timer has Wnds listening to it
     unsigned int Interval() const;      ///< Returns the interval in ms between firings of the timer
     bool Running() const;               ///< Returns true iff the timer is operating.  When false, this indicates that no firings will occur until Start() is called.
-    bool ShouldFire(unsigned int ticks) const; ///< Returns true iff the timer is connected, running, and the last time it fired is is more than Interval() ms ago.
-    const std::set<Wnd*>& Wnds() const; ///< Returns the Wnds connected to this timer.  Note that the GUI will disconnect dying Wnds automatically.
     //@}
 
     /** \name Mutators */ ///@{
@@ -72,13 +73,18 @@ public:
     void Disconnect(Wnd* wnd);      ///< Disconnects this timer from \a wnd.
     void Start();                   ///< Starts the timer firing; does not reset the timer.
     void Stop();                    ///< Stops the timer firing until Start() is called.
+    void Update(unsigned int ticks); ///< Signals listeners iff the timer is running and the last time it fired is is more than Interval() ms ago.
     //@}
 
+    mutable FiredSignalType FiredSignal; ///< The fired signal object for this Timer
+
 private:
+    typedef std::map<Wnd*, boost::signals::connection> ConnectionMap;
+
     Timer();
     Timer(const Timer&); // disabled
 
-    std::set<Wnd*> m_wnds;
+    ConnectionMap  m_wnd_connections;
     unsigned int   m_interval;
     bool           m_running;
     unsigned int   m_last_fire;
@@ -94,10 +100,24 @@ private:
 template <class Archive>
 void GG::Timer::serialize(Archive& ar, const unsigned int version)
 {
-    ar  & BOOST_SERIALIZATION_NVP(m_wnds)
+    std::set<Wnd*> wnds;
+    for (ConnectionMap::iterator it = m_wnd_connections.begin();
+         it != m_wnd_connections.end();
+         ++it)
+    {
+        wnds.insert(it->first);
+    }
+
+    ar  & BOOST_SERIALIZATION_NVP(wnds)
         & BOOST_SERIALIZATION_NVP(m_interval)
         & BOOST_SERIALIZATION_NVP(m_last_fire)
         & BOOST_SERIALIZATION_NVP(m_running);
+
+    if (Archive::is_loading::value) {
+        for (std::set<Wnd*>::iterator it = wnds.begin(); it != wnds.end(); ++it) {
+            Connect(*it);
+        }
+    }
 }
 
 #endif

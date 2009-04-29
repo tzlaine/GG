@@ -793,9 +793,6 @@ void GUI::WndDying(Wnd* wnd)
             s_impl->m_double_click_start_time = -1;
             s_impl->m_double_click_time = -1;
         }
-        for (std::set<Timer*>::iterator it = s_impl->m_timers.begin(); it != s_impl->m_timers.end(); ++it) {
-            (*it)->Disconnect(wnd);
-        }
     }
 }
 
@@ -997,13 +994,7 @@ void GUI::Render()
     // handle timers
     int ticks = Ticks();
     for (std::set<Timer*>::iterator it = s_impl->m_timers.begin(); it != s_impl->m_timers.end(); ++it) {
-        Timer* timer = *it;
-        if (timer->ShouldFire(ticks)) {
-            const std::set<Wnd*>& wnds = timer->Wnds();
-            for (std::set<Wnd*>::const_iterator wnd_it = wnds.begin(); wnd_it != wnds.end(); ++wnd_it) {
-                (*wnd_it)->HandleEvent(WndEvent(WndEvent::TimerFiring, ticks, timer));
-            }
-        }
+        (*it)->Update(ticks);
     }
 
     Enter2DMode();

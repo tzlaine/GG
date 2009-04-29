@@ -232,6 +232,11 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
+void GG_API GetTranslatedCodePoint(Key key,
+                                   boost::uint32_t key_code_point,
+                                   Flags<ModKey> mod_keys,
+                                   std::string& translated_code_point);
+
 } // namespace GG
 
 // template implementations

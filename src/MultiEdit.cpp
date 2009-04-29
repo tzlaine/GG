@@ -490,23 +490,8 @@ void MultiEdit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
             }
 
             default: {
-                // only process it if it's a valid code point or a known
-                // printable key, and no significant modifiers are in use
                 std::string translated_code_point;
-                if (key_code_point) {
-                    try {
-                        boost::uint32_t chars[] = { key_code_point };
-                        utf8::utf32to8(chars, chars + 1, std::back_inserter(translated_code_point));
-                    } catch (const utf8::invalid_code_point&) {
-                        translated_code_point.clear();
-                    }
-                } else {
-                    KeypadKeyToPrintable(key, mod_keys);
-                    if (GGK_DELETE <= key || !isprint(key))
-                        translated_code_point.clear();
-                    else
-                        translated_code_point = key;
-                }
+                GetTranslatedCodePoint(key, key_code_point, mod_keys, translated_code_point);
                 if (!translated_code_point.empty() &&
                     !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META))) {
                     if (MultiSelected())

@@ -43,10 +43,10 @@ can be moved to elide copying in such situations as well as utilities to assist 
 \par Implementing a Movable Type
 
 A movable type models \ref concept_movable. There are three components of a movable type:
-	- Satisfy the requirements of concept \ref concept_regular_type.
-	- Implement a move-ctor using move_from<>.
-	- Modify the assignment operator to take the operand by value and consume it.
-	
+        - Satisfy the requirements of concept \ref concept_regular_type.
+        - Implement a move-ctor using move_from<>.
+        - Modify the assignment operator to take the operand by value and consume it.
+        
 A typical implementation of the move-ctor will simply extract the remote part, leaving the
 source in a destructible state.
 
@@ -54,7 +54,7 @@ The assignment operator takes the operand parameter by value. Typically the simp
 to destory the local remote part and consume the remote part of the operand is to swap
 contents with the operand. This is similar to the copy-ctor and swap idiom for implementing
 assignment.
-	
+        
 Listing 1 shows an example movable class that implements a typical pointer-to-implementation
 (PiPl) idiom and shows that it can be used as any regular type.
 
@@ -178,9 +178,9 @@ function.
 
 struct sink
 {
-	explicit sink(movable x) : member(adobe::move(x)) { }
-	
-	movable member;
+        explicit sink(movable x) : member(adobe::move(x)) { }
+        
+        movable member;
 };
 
 int main()
@@ -287,14 +287,14 @@ class test_can_convert_anything { };
 /*************************************************************************************************/
 
 /*
-	REVISIT (sparent@adobe.com): This is a work around for Boost 1.34.1 and VC++ 2008 where
-	boost::is_convertible<T, T> fails to compile.
+        REVISIT (sparent@adobe.com): This is a work around for Boost 1.34.1 and VC++ 2008 where
+        boost::is_convertible<T, T> fails to compile.
 */
 
 template <typename T, typename U>
 struct is_convertible : boost::mpl::or_<
-	boost::is_same<T, U>,
-	boost::is_convertible<T, U>
+        boost::is_same<T, U>,
+        boost::is_convertible<T, U>
 > { };
 
 /*!

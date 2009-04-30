@@ -113,8 +113,8 @@ public:
         applicable subclass if the texture creation fails in one of the
         specified ways. */
     void Init(X x, Y y, X width, Y height, X image_width,
-              const unsigned char* image, GLenum format, GLenum type, unsigned int bytes_per_pixel,
-              bool mipmap = false);
+              const unsigned char* image, GLenum format, GLenum type,
+              unsigned int bytes_per_pixel, bool mipmap = false);
 
     void SetWrap(GLenum s, GLenum t);         ///< sets the opengl texture wrap modes associated with opengl texture m_opengl_id
     void SetFilters(GLenum min, GLenum mag);  ///< sets the opengl min/mag filter modes associated with opengl texture m_opengl_id
@@ -145,8 +145,8 @@ private:
     std::string m_filename;   ///< filename from which this Texture was constructed ("" if not loaded from a file)
 
     unsigned int m_bytes_pp;
-    X           m_width;
-    Y           m_height;
+    X            m_width;
+    Y            m_height;
 
     GLenum       m_wrap_s, m_wrap_t;
     GLenum       m_min_filter, m_mag_filter;

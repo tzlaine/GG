@@ -91,7 +91,7 @@ class closed_hash_iterator : public boost::iterator_facade<closed_hash_iterator<
 
     explicit closed_hash_iterator(node_t* node) : node_m(node) { }
     
-	friend class version_1::closed_hash_set<value_type, typename T::key_transform, typename T::hasher,
+        friend class version_1::closed_hash_set<value_type, typename T::key_transform, typename T::hasher,
             typename T::key_equal, typename T::allocator_type>;
     friend class boost::iterator_core_access;
     friend struct unsafe::set_next_fn<closed_hash_iterator>;
@@ -270,7 +270,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
     typedef boost::compressed_pair< hasher,
                                     boost::compressed_pair< key_equal,
                                                             boost::compressed_pair< key_transform,
-																					header_t*
+                                                                                                                                                                        header_t*
                                                                                   >
                                                           >
                                   > data_t;

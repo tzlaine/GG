@@ -364,41 +364,41 @@ private:
 template <typename D,typename IT,typename S_FN> inline
 bool operator>(const step_iterator_adaptor<D,IT,S_FN>& p1, const step_iterator_adaptor<D,IT,S_FN>& p2) 
 { 
-	return p1.step()>0 ? p1.base()> p2.base() : p1.base()< p2.base(); 
+        return p1.step()>0 ? p1.base()> p2.base() : p1.base()< p2.base(); 
 }
 
 
 template <typename D,typename IT,typename S_FN> inline
 bool operator<(const step_iterator_adaptor<D,IT,S_FN>& p1, const step_iterator_adaptor<D,IT,S_FN>& p2) 
 { 
-	return p1.step()>0 ? p1.base()< p2.base() : p1.base()> p2.base(); 
+        return p1.step()>0 ? p1.base()< p2.base() : p1.base()> p2.base(); 
 }
 
 template <typename D,typename IT,typename S_FN> inline
 bool operator>=(const step_iterator_adaptor<D,IT,S_FN>& p1, const step_iterator_adaptor<D,IT,S_FN>& p2) 
 { 
-	return p1.step()>0 ? p1.base()>=p2.base() : p1.base()<=p2.base(); 
+        return p1.step()>0 ? p1.base()>=p2.base() : p1.base()<=p2.base(); 
 }
 
 
 template <typename D,typename IT,typename S_FN> inline
 bool operator<=(const step_iterator_adaptor<D,IT,S_FN>& p1, const step_iterator_adaptor<D,IT,S_FN>& p2) 
 { 
-	return p1.step()>0 ? p1.base()<=p2.base() : p1.base()>=p2.base(); 
+        return p1.step()>0 ? p1.base()<=p2.base() : p1.base()>=p2.base(); 
 }
 
 
 template <typename D,typename IT,typename S_FN> inline
 bool operator==(const step_iterator_adaptor<D,IT,S_FN>& p1, const step_iterator_adaptor<D,IT,S_FN>& p2) 
 { 
-	return p1.base()==p2.base(); 
+        return p1.base()==p2.base(); 
 }
 
 
 template <typename D,typename IT,typename S_FN> inline
 bool operator!=(const step_iterator_adaptor<D,IT,S_FN>& p1, const step_iterator_adaptor<D,IT,S_FN>& p2) 
 { 
-	return p1.base()!=p2.base(); 
+        return p1.base()!=p2.base(); 
 }
 
 /*************************************************************************************************/

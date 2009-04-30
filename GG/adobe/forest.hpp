@@ -235,13 +235,13 @@ class filter_fullorder_iterator
 
 template <typename I> // I models a FullorderIterator
 class reverse_fullorder_iterator : public boost::iterator_facade<reverse_fullorder_iterator<I>,
-	   typename boost::iterator_value<I>::type, std::bidirectional_iterator_tag,
+           typename boost::iterator_value<I>::type, std::bidirectional_iterator_tag,
        typename boost::iterator_reference<I>::type>
 {
     typedef typename boost::iterator_facade<reverse_fullorder_iterator<I>,
-		typename boost::iterator_value<I>::type, std::bidirectional_iterator_tag,
-		typename boost::iterator_reference<I>::type> 
-	inherited_t;
+                typename boost::iterator_value<I>::type, std::bidirectional_iterator_tag,
+                typename boost::iterator_reference<I>::type> 
+        inherited_t;
  public:
     typedef I iterator_type;
     typedef typename inherited_t::reference reference;

@@ -25,7 +25,7 @@
 #include <GG/WndEvent.h>
 
 
-const bool GG::INSTRUMENT_ALL_SIGNALS = true;
+const bool GG::INSTRUMENT_ALL_SIGNALS = false;
 
 void GG::KeypadKeyToPrintable(Key& key, Flags<ModKey> mod_keys)
 {

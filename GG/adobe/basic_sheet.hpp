@@ -42,14 +42,14 @@ class basic_sheet_t : boost::noncopyable
  public:
     
     typedef boost::signals::connection connection_t;
-	typedef boost::function<void (const any_regular_t&)> monitor_value_t;
+        typedef boost::function<void (const any_regular_t&)> monitor_value_t;
     typedef boost::signal<void (const any_regular_t&)>   monitor_value_list_t;
-	void add_constant(name_t, const any_regular_t&);
+        void add_constant(name_t, const any_regular_t&);
     void add_interface(name_t, const any_regular_t&);
     
     std::size_t count_interface(name_t) const;
     
-	connection_t monitor_value(name_t name, const monitor_value_t& monitor);
+        connection_t monitor_value(name_t name, const monitor_value_t& monitor);
     
     void set(name_t, const any_regular_t&); // interface cell
     void set(const dictionary_t& cell_set); // interface cell set
@@ -77,8 +77,8 @@ class basic_sheet_t : boost::noncopyable
             // monitor_m is not copied - nor can it be
             return *this;
         }
-		
-		monitor_value_list_t monitor_value_m;
+                
+                monitor_value_list_t monitor_value_m;
     };
     
     typedef std::map<const char*, interface_cell_t*, str_less_t>    interface_index_t;

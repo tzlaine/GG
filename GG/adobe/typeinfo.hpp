@@ -58,7 +58,7 @@ template <typename O> // O models OutputIterator
 // requires value_type(O) == char
 O serialize(const type_instance_t& x, O out)
 {
-	if (x.type_info_m) { return copy_sentinal(x.type_info_m->name(), out).second; }
+        if (x.type_info_m) { return copy_sentinal(x.type_info_m->name(), out).second; }
     out = copy_sentinal(x.name_m, out).second;
     if (x.parameter_m[0]) {
         *out++ = '<'; out = serialize(*x.parameter_m[0], out);

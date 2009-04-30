@@ -22,9 +22,9 @@ namespace adobe {
 /*************************************************************************************************/
 
 /*
-translation_unit		= { sheet_specifier }.
-sheet_specifier			= [lead_comment] "sheet" identifier "{" { qualified_cell_decl } "}"
-							[trail_comment].
+translation_unit                = { sheet_specifier }.
+sheet_specifier                 = [lead_comment] "sheet" identifier "{" { qualified_cell_decl } "}"
+                                                        [trail_comment].
 
 qualified_cell_decl     = interface_set_decl | input_set_decl | output_set_decl
                             | constant_set_decl | logic_set_decl | invariant_set_decl.
@@ -44,10 +44,10 @@ constant_cell_decl      = identifier initializer end_statement.
 logic_cell_decl         = named_decl | relate_decl.
 invariant_cell_decl     = named_decl.
 
-relate_decl				= [conditional] "relate" "{" relate_expression relate_expression
-							{ relate_expression } "}" [trail_comment].
-relate_expression		= [lead_comment] named_decl.
-named_decl				= identifier define_expression end_statement.
+relate_decl                             = [conditional] "relate" "{" relate_expression relate_expression
+                                                        { relate_expression } "}" [trail_comment].
+relate_expression               = [lead_comment] named_decl.
+named_decl                              = identifier define_expression end_statement.
 
 initializer             = ":" expression.
 conditional             = "when" "(" expression ")".
@@ -56,8 +56,8 @@ define_expression       = "<==" expression.
 
 end_statement           = ";" [trail_comment].
 
-keywords           		+= "sheet" | "interface" | "input" | "output" | "constant" | "logic"
-               				 | "invariant" | "unlink" | "when" | "relate"
+keywords                        += "sheet" | "interface" | "input" | "output" | "constant" | "logic"
+                                         | "invariant" | "unlink" | "when" | "relate"
 */
 
 /*************************************************************************************************/

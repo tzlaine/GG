@@ -425,6 +425,6 @@ extern "C" void GG_OGRE_PLUGIN_API dllStartPlugin(void)
 
 extern "C" void GG_OGRE_PLUGIN_API dllStopPlugin(void)
 {
-	Ogre::Root::getSingleton().uninstallPlugin(gOISInputPlugin);
+        Ogre::Root::getSingleton().uninstallPlugin(gOISInputPlugin);
     delete gOISInputPlugin;
 }

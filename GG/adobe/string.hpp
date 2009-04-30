@@ -171,7 +171,7 @@ namespace version_1 {
 //!\ingroup abi_misc
 template <typename Derived>
 class empty_base_t { }; // Empty base to reduce size of adobe::string
-	
+        
 /*************************************************************************************************/
 
 /*!
@@ -201,268 +201,268 @@ class string_t : boost::totally_ordered<string_t, string_t, empty_base_t<string_
     typedef std::reverse_iterator<const char*> const_reverse_iterator;
 
  private:
-	typedef vector<value_type>				   storage_type;
-	
-	storage_type storage_m;
+        typedef vector<value_type>                                 storage_type;
+        
+        storage_type storage_m;
 
-	/*
-		NOTE (eberdahl@adobe.com): Because c_str is required to return a null-terminated sequence,
-		we ensure that the storage vector is always null-terminated. This means that the storage
-		is always either empty or contains one extra character to hold the null-character.
-	*/
-	template <typename ForwardIterator>
-	void assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
-	{
-		storage_type tmp;
-		if (first != last)
-		{
-			const size_type len(std::distance(first, last));
-			tmp.reserve(len + 1);
-			tmp.insert(tmp.end(), first, last);
-			tmp.push_back(char(0));
-		}
-		storage_m.swap(tmp);
-	}
+        /*
+                NOTE (eberdahl@adobe.com): Because c_str is required to return a null-terminated sequence,
+                we ensure that the storage vector is always null-terminated. This means that the storage
+                is always either empty or contains one extra character to hold the null-character.
+        */
+        template <typename ForwardIterator>
+        void assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
+        {
+                storage_type tmp;
+                if (first != last)
+                {
+                        const size_type len(std::distance(first, last));
+                        tmp.reserve(len + 1);
+                        tmp.insert(tmp.end(), first, last);
+                        tmp.push_back(char(0));
+                }
+                storage_m.swap(tmp);
+        }
 
-	template <typename InputIterator>
-	void assign(InputIterator first, InputIterator last, std::input_iterator_tag)
-	{
-		storage_type tmp;
-		if (first != last)
-		{
-			tmp.insert(tmp.end(), first, last);
-			tmp.push_back(char(0));
-		}
-		storage_m.swap(tmp);
-	}
+        template <typename InputIterator>
+        void assign(InputIterator first, InputIterator last, std::input_iterator_tag)
+        {
+                storage_type tmp;
+                if (first != last)
+                {
+                        tmp.insert(tmp.end(), first, last);
+                        tmp.push_back(char(0));
+                }
+                storage_m.swap(tmp);
+        }
 
-	template <typename Iterator>
-	void assign(Iterator first, Iterator last)
-	{
-		assign(first, last,
-			   typename std::iterator_traits<Iterator>::iterator_category());
-	}
-	
+        template <typename Iterator>
+        void assign(Iterator first, Iterator last)
+        {
+                assign(first, last,
+                           typename std::iterator_traits<Iterator>::iterator_category());
+        }
+        
  public:
-	/*!
-		Constructs an empty string.
-	*/
-	string_t() { }
-	
-	/*!
-		Copy constructor.
-	 */
-	string_t(const string_t& s) : storage_m(s.storage_m) { }
+        /*!
+                Constructs an empty string.
+        */
+        string_t() { }
+        
+        /*!
+                Copy constructor.
+         */
+        string_t(const string_t& s) : storage_m(s.storage_m) { }
     
     /*!
         Move constructor.
     */
     string_t(move_from<string_t> x) : storage_m(move(x.source.storage_m)) { }
 
-	/*!
-		Constructs a string_t from a regular C string (including string literals).
+        /*!
+                Constructs a string_t from a regular C string (including string literals).
 
-		\param[in] s null-terminated string from which to construct the string_t
-	 */
-	string_t(const char* s);
+                \param[in] s null-terminated string from which to construct the string_t
+         */
+        string_t(const char* s);
 
-	/*!
-		Constructs a string from a char sequence.
+        /*!
+                Constructs a string from a char sequence.
 
-		\param[in] s character sequence from which to construct the string_t
-		\param[in] length number of elements from s from which to construct the string_t
-	 */
-	string_t(const char* s, std::size_t length);
-	
-	/*!
-		Constructs a string_t from a generic sequence.
-	 
-		\param[in] first start of sequence from which to construct the string_t
-		\param[in] last end of sequence from which to construct the string_t
-	 */
-	template <typename Iterator>
-	string_t(Iterator first, Iterator last)
-		{ assign(first, last); }
+                \param[in] s character sequence from which to construct the string_t
+                \param[in] length number of elements from s from which to construct the string_t
+         */
+        string_t(const char* s, std::size_t length);
+        
+        /*!
+                Constructs a string_t from a generic sequence.
+         
+                \param[in] first start of sequence from which to construct the string_t
+                \param[in] last end of sequence from which to construct the string_t
+         */
+        template <typename Iterator>
+        string_t(Iterator first, Iterator last)
+                { assign(first, last); }
 
-	/*!
-		Constructs a string_t from a std::string.
-	 
-		\param[in] s std::string from which to construct the string_t
-	 */
-	string_t(const std::string& s);
-	
-	/*!
-		Destructor.
-	 */
-	~string_t() { }
+        /*!
+                Constructs a string_t from a std::string.
+         
+                \param[in] s std::string from which to construct the string_t
+         */
+        string_t(const std::string& s);
+        
+        /*!
+                Destructor.
+         */
+        ~string_t() { }
 
-	/*!
-		Assignment operator.
-	 */
+        /*!
+                Assignment operator.
+         */
 
-	string_t& operator=(string_t s) { storage_m = move(s.storage_m); return *this; }
+        string_t& operator=(string_t s) { storage_m = move(s.storage_m); return *this; }
 
-	/*!
-		Conversion operator to std::string.
-	 */
-	/*
-		NOTE (eberdahl@adobe.com): This function was created to support extracting std::string
-		from any_regular_t (N.B. any_regular_t stores strings as string_t). Using conversion
-		member functions may not be the best way to support the required conversion. Until
-		any_regular_t changes the way it extracts data, we'll need this function.
-	 */
-	operator std::string() const
-		{ return std::string(begin(), end()); }
-	
-	/*!
-		Returns const pointer to a regular C string, identical to the string_t. The returned
-		string is null-terminated.
-	 */
-	const char* c_str() const
-		{ return empty() ? "" : &storage_m[0]; }
+        /*!
+                Conversion operator to std::string.
+         */
+        /*
+                NOTE (eberdahl@adobe.com): This function was created to support extracting std::string
+                from any_regular_t (N.B. any_regular_t stores strings as string_t). Using conversion
+                member functions may not be the best way to support the required conversion. Until
+                any_regular_t changes the way it extracts data, we'll need this function.
+         */
+        operator std::string() const
+                { return std::string(begin(), end()); }
+        
+        /*!
+                Returns const pointer to a regular C string, identical to the string_t. The returned
+                string is null-terminated.
+         */
+        const char* c_str() const
+                { return empty() ? "" : &storage_m[0]; }
 
-	/*!
-		Appends one element to the end of the string.
-	 */
-	void push_back(value_type c);
+        /*!
+                Appends one element to the end of the string.
+         */
+        void push_back(value_type c);
 
-	/*!
-		Appends a character sequence to the end of the string
-	 */
-	template <typename Iterator>
-	void append(Iterator first, Iterator last)
-	{
-		if (first != last)
-		{
-			if (!storage_m.empty())
-				storage_m.pop_back();
-			
-			storage_m.insert(storage_m.end(), first, last);
-			storage_m.push_back(0);
-		}
-	}
+        /*!
+                Appends a character sequence to the end of the string
+         */
+        template <typename Iterator>
+        void append(Iterator first, Iterator last)
+        {
+                if (first != last)
+                {
+                        if (!storage_m.empty())
+                                storage_m.pop_back();
+                        
+                        storage_m.insert(storage_m.end(), first, last);
+                        storage_m.push_back(0);
+                }
+        }
 
-	/*!
-		Appends another string this one
-	 */
-	void append(const string_t& s)
-		{ append(s.begin(), s.end()); }
+        /*!
+                Appends another string this one
+         */
+        void append(const string_t& s)
+                { append(s.begin(), s.end()); }
 
-	/*!
-		Appends null-terminated char sequence to the string
-	 */
-	void append(const char* s)
-		{ append(s, s + std::strlen(s)); }
+        /*!
+                Appends null-terminated char sequence to the string
+         */
+        void append(const char* s)
+                { append(s, s + std::strlen(s)); }
 
-	/*!
-		Appends a number of characters from a sequence to the string
-	 */
-	void append(const char* s, std::size_t length)
-		{ append(s, s + length); }
+        /*!
+                Appends a number of characters from a sequence to the string
+         */
+        void append(const char* s, std::size_t length)
+                { append(s, s + length); }
 
-	/*!
-		Appends the contents of a std::string to the string
-	 */
-	void append(const std::string& s)
-		{ append(s.begin(), s.end()); }
+        /*!
+                Appends the contents of a std::string to the string
+         */
+        void append(const std::string& s)
+                { append(s.begin(), s.end()); }
 
-	/*!
-		Appends another string this one
-	 */
-	string_t& operator+=(const string_t& s)
-		{ append(s); return *this; }
-	
-	/*!
-		Appends null-terminated char sequence to the string
-	 */
-	string_t& operator+=(const char* s)
-		{ append(s); return *this; }
-	
-	/*!
-		Appends the contents of a std::string to the string
-	 */
-	string_t& operator+=(const std::string& s)
-		{ append(s); return *this; }
-	
-	/*!
-		Returns an iterator to the first element of the string.
-	 */
-	const_iterator begin() const
-		{ return storage_m.begin(); }
+        /*!
+                Appends another string this one
+         */
+        string_t& operator+=(const string_t& s)
+                { append(s); return *this; }
+        
+        /*!
+                Appends null-terminated char sequence to the string
+         */
+        string_t& operator+=(const char* s)
+                { append(s); return *this; }
+        
+        /*!
+                Appends the contents of a std::string to the string
+         */
+        string_t& operator+=(const std::string& s)
+                { append(s); return *this; }
+        
+        /*!
+                Returns an iterator to the first element of the string.
+         */
+        const_iterator begin() const
+                { return storage_m.begin(); }
 
-	/*!
-		Returns an iterator just past the end of the string.
-	 */
-	const_iterator end() const
-		{ return storage_m.empty() ? storage_m.end() : boost::prior(storage_m.end()); }
+        /*!
+                Returns an iterator just past the end of the string.
+         */
+        const_iterator end() const
+                { return storage_m.empty() ? storage_m.end() : boost::prior(storage_m.end()); }
 
-	/*!
-		Returns a reverse_iterator to the end of the current string.
-	 */
-	const_reverse_iterator rbegin() const
-		{ return const_reverse_iterator(end()); }
+        /*!
+                Returns a reverse_iterator to the end of the current string.
+         */
+        const_reverse_iterator rbegin() const
+                { return const_reverse_iterator(end()); }
 
-	/*!
-		Returns a reverse_iterator to the beginning of the current string.
-	 */
-	const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+        /*!
+                Returns a reverse_iterator to the beginning of the current string.
+         */
+        const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-	/*!
-		Returns the size of the allocated storage space for the
-		elements of the string.
-	 */
-	size_type capacity() const;
-	
-	/*!
-		Requests that the capacity of the allocated storage space for
-		the elements of the string be at least enough to hold n
-		elements.
-	 */
-	void reserve(size_type n)
-		{ storage_m.reserve(0 == n ? 0 : n + 1); }
+        /*!
+                Returns the size of the allocated storage space for the
+                elements of the string.
+         */
+        size_type capacity() const;
+        
+        /*!
+                Requests that the capacity of the allocated storage space for
+                the elements of the string be at least enough to hold n
+                elements.
+         */
+        void reserve(size_type n)
+                { storage_m.reserve(0 == n ? 0 : n + 1); }
 
-	/*!
-		Changes the string to be zero-length.
-	 */
-	void clear()
-		{ storage_m.clear(); }
-	
-	/*!
-		Returns the number of elements in the current string.
-	 */
+        /*!
+                Changes the string to be zero-length.
+         */
+        void clear()
+                { storage_m.clear(); }
+        
+        /*!
+                Returns the number of elements in the current string.
+         */
     size_type size() const
-		{ return storage_m.empty() ? 0 : storage_m.size() - 1; }
+                { return storage_m.empty() ? 0 : storage_m.size() - 1; }
 
-	/*!
-		Returns true if the string has no elements, false otherwise.
-	 */
+        /*!
+                Returns true if the string has no elements, false otherwise.
+         */
     bool empty() const
-		{ return storage_m.empty(); }
+                { return storage_m.empty(); }
 
-	/*!
-		Exchanges the elements of the current string with those of from s.
-	 */
-	void swap(string_t& s)
-		{ storage_m.swap(s.storage_m); }
-	
-	friend bool operator==(const string_t& x, const string_t& y)
-	{
-		return x.storage_m == y.storage_m;
-	}
+        /*!
+                Exchanges the elements of the current string with those of from s.
+         */
+        void swap(string_t& s)
+                { storage_m.swap(s.storage_m); }
+        
+        friend bool operator==(const string_t& x, const string_t& y)
+        {
+                return x.storage_m == y.storage_m;
+        }
 
-	friend bool operator<(const string_t& x, const string_t& y)
-	{
-		return x.storage_m < y.storage_m;
-	}
+        friend bool operator<(const string_t& x, const string_t& y)
+        {
+                return x.storage_m < y.storage_m;
+        }
     
     friend inline void swap(string_t& x, string_t& y)
-		{ x.storage_m.swap(y.storage_m); }
+                { x.storage_m.swap(y.storage_m); }
 };
 
 /*!
-	Concatenate an entity to a string.
-	Anything that can be concatenated using string_t::operator+=
-	may also be concatenated to a string_t using operator+.
+        Concatenate an entity to a string.
+        Anything that can be concatenated using string_t::operator+=
+        may also be concatenated to a string_t using operator+.
  */
 inline string_t operator+(string_t s1, const string_t& s2)     { return move(s1 += s2); }
 inline string_t operator+(string_t s1, const std::string& s2)  { return move(s1 += s2); }
@@ -501,237 +501,237 @@ public:
     typedef const boost::uint16_t*                        const_iterator;
     typedef std::reverse_iterator<boost::uint16_t*>       reverse_iterator;
     typedef std::reverse_iterator<const boost::uint16_t*> const_reverse_iterator;
-	
+        
 private:
-	typedef vector<value_type>							  storage_type;
+        typedef vector<value_type>                                                        storage_type;
 
-	storage_type storage_m;
-	
-	/*
-		NOTE (eberdahl@adobe.com): Because c_str is required to return a null-terminated sequence,
-		we ensure that the storage vector is always null-terminated. This means that the storage
-		is always either empty or contains one extra character to hold the null-character.
-	 */
-	template <typename ForwardIterator>
-	void assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
-	{
-		storage_type tmp;
-		if (first != last)
-		{
-			const size_type len(std::distance(first, last));
-			tmp.reserve(len + 1);
-			tmp.insert(tmp.end(), first, last);
-			tmp.push_back(boost::uint16_t(0));
-		}
-		storage_m.swap(tmp);
-	}
-	
-	template <typename InputIterator>
-	void assign(InputIterator first, InputIterator last, std::input_iterator_tag)
-	{
-		storage_type tmp;
-		if (first != last)
-		{
-			tmp.insert(tmp.end(), first, last);
-			tmp.push_back(boost::uint16_t(0));
-		}
-		storage_m.swap(tmp);
-	}
-	
-	template <typename Iterator>
-	void assign(Iterator first, Iterator last)
-	{
-		assign(first, last,
-			   typename std::iterator_traits<Iterator>::iterator_category());
-	}
-	
+        storage_type storage_m;
+        
+        /*
+                NOTE (eberdahl@adobe.com): Because c_str is required to return a null-terminated sequence,
+                we ensure that the storage vector is always null-terminated. This means that the storage
+                is always either empty or contains one extra character to hold the null-character.
+         */
+        template <typename ForwardIterator>
+        void assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
+        {
+                storage_type tmp;
+                if (first != last)
+                {
+                        const size_type len(std::distance(first, last));
+                        tmp.reserve(len + 1);
+                        tmp.insert(tmp.end(), first, last);
+                        tmp.push_back(boost::uint16_t(0));
+                }
+                storage_m.swap(tmp);
+        }
+        
+        template <typename InputIterator>
+        void assign(InputIterator first, InputIterator last, std::input_iterator_tag)
+        {
+                storage_type tmp;
+                if (first != last)
+                {
+                        tmp.insert(tmp.end(), first, last);
+                        tmp.push_back(boost::uint16_t(0));
+                }
+                storage_m.swap(tmp);
+        }
+        
+        template <typename Iterator>
+        void assign(Iterator first, Iterator last)
+        {
+                assign(first, last,
+                           typename std::iterator_traits<Iterator>::iterator_category());
+        }
+        
 public:
-	/*!
-		Constructs an empty string.
-	 */
-	string16_t() { }
-	
-	/*!
-		Copy constructor.
-	 */	
-	string16_t(const string16_t& s) : storage_m(s.storage_m) { }
+        /*!
+                Constructs an empty string.
+         */
+        string16_t() { }
+        
+        /*!
+                Copy constructor.
+         */     
+        string16_t(const string16_t& s) : storage_m(s.storage_m) { }
 
     /*!
         Move constructor.
-	 */
+         */
     string16_t(move_from<string16_t> x) : storage_m(move(x.source.storage_m)) { }
 
-	/*!
-		Constructs a string16_t from a null-terminated sequence of 16-bit elements.
-	 
-		\param[in] s null-terminated sequence from which to construct the string16_t
-	 */
-	string16_t(const boost::uint16_t* s);
+        /*!
+                Constructs a string16_t from a null-terminated sequence of 16-bit elements.
+         
+                \param[in] s null-terminated sequence from which to construct the string16_t
+         */
+        string16_t(const boost::uint16_t* s);
 
-	/*!
-		Constructs a string from a sequence of 16-bit elements.
-	 
-		\param[in] s sequence of 16-bit elements from which to construct the string16_t
-		\param[in] length number of elements from s from which to construct the string16_t
-	 */
-	string16_t(const boost::uint16_t* s, std::size_t length);
-	
-	/*!
-		Constructs a string from a generic sequence.
-	 
-		\param[in] first start of sequence from which to construct the string16_t
-		\param[in] last end of sequence from which to construct the string16_t
-	 */
-	template <typename Iterator>
-	string16_t(Iterator first, Iterator last)
-		{ assign(first, last); }
+        /*!
+                Constructs a string from a sequence of 16-bit elements.
+         
+                \param[in] s sequence of 16-bit elements from which to construct the string16_t
+                \param[in] length number of elements from s from which to construct the string16_t
+         */
+        string16_t(const boost::uint16_t* s, std::size_t length);
+        
+        /*!
+                Constructs a string from a generic sequence.
+         
+                \param[in] first start of sequence from which to construct the string16_t
+                \param[in] last end of sequence from which to construct the string16_t
+         */
+        template <typename Iterator>
+        string16_t(Iterator first, Iterator last)
+                { assign(first, last); }
 
-	/*!
-		Destructor.
-	 */
-	~string16_t() { }
-	
-	/*!
-		Assignment operator.
-	 */
-	string16_t& operator=(string16_t s)
-		{ storage_m = move(s.storage_m); return *this; }
-	
-	/*!
-		Returns const pointer to a null-terminated sequence of 16-bit elements, identical to
-		the string16_t.
-	 */
-	const boost::uint16_t* c_str() const;
-	
-	/*!
-		Appends one element to the end of the string.
-	 */
-	void push_back(value_type c);
-	
-	/*!
-		Appends a character sequence to the end of the string
-	 */
-	template <typename Iterator>
-	void append(Iterator first, Iterator last)
-	{
-		if (first != last)
-		{
-			if (!storage_m.empty())
-				storage_m.pop_back();
-			
-			storage_m.insert(storage_m.end(), first, last);
-			storage_m.push_back(0);
-		}
-	}
-	
-	/*!
-		Appends another string this one
-	 */
-	void append(const string16_t& s)
-		{ append(s.begin(), s.end()); }
-	
-	/*!
-		Appends null-terminated character sequence to the string
-	 */
-	void append(const boost::uint16_t* s);
-	
-	/*!
-		Appends a number of characters from a sequence to the string
-	 */
-	void append(const boost::uint16_t* s, std::size_t length)
-		{ append(s, s + length); }
-	
-	/*!
-		Appends another string this one
-	 */
-	string16_t& operator+=(const string16_t& s)
-		{ append(s); return *this; }
-	
-	/*!
-		Appends null-terminated character sequence to the string
-	 */
-	string16_t& operator+=(const boost::uint16_t* s)
-		{ append(s); return *this; }
-	
-	/*!
-		Returns an iterator to the first element of the string.
-	 */
-	const_iterator begin() const
-		{ return storage_m.begin(); }
-	
-	/*!
-		Returns an iterator just past the end of the string.
-	 */
-	const_iterator end() const
-		{ return storage_m.empty() ? storage_m.end() : boost::prior(storage_m.end()); }
-	
-	/*!
-		Returns a reverse_iterator to the end of the current string.
-	 */
-	const_reverse_iterator rbegin() const
-		{ return const_reverse_iterator(end()); }
-	
-	/*!
-		Returns a reverse_iterator to the beginning of the current string.
-	 */
-	const_reverse_iterator rend() const
-		{ return const_reverse_iterator(begin()); }
-	
-	/*!
-		Returns the size of the allocated storage space for the
-		elements of the string.
-	 */
-	size_type capacity() const;
-	
-	/*!
-		Requests that the capacity of the allocated storage space for
-		the elements of the string be at least enough to hold n
-		elements.
-	 */
-	void reserve(size_type n)
-		{ storage_m.reserve(0 == n ? 0 : n + 1); }
-	
-	/*!
-		Changes the string to be zero-length.
-	 */
-	void clear()
-		{ storage_m.clear(); }
-	
-	/*!
-		Returns the number of elements in the current string.
-	 */
+        /*!
+                Destructor.
+         */
+        ~string16_t() { }
+        
+        /*!
+                Assignment operator.
+         */
+        string16_t& operator=(string16_t s)
+                { storage_m = move(s.storage_m); return *this; }
+        
+        /*!
+                Returns const pointer to a null-terminated sequence of 16-bit elements, identical to
+                the string16_t.
+         */
+        const boost::uint16_t* c_str() const;
+        
+        /*!
+                Appends one element to the end of the string.
+         */
+        void push_back(value_type c);
+        
+        /*!
+                Appends a character sequence to the end of the string
+         */
+        template <typename Iterator>
+        void append(Iterator first, Iterator last)
+        {
+                if (first != last)
+                {
+                        if (!storage_m.empty())
+                                storage_m.pop_back();
+                        
+                        storage_m.insert(storage_m.end(), first, last);
+                        storage_m.push_back(0);
+                }
+        }
+        
+        /*!
+                Appends another string this one
+         */
+        void append(const string16_t& s)
+                { append(s.begin(), s.end()); }
+        
+        /*!
+                Appends null-terminated character sequence to the string
+         */
+        void append(const boost::uint16_t* s);
+        
+        /*!
+                Appends a number of characters from a sequence to the string
+         */
+        void append(const boost::uint16_t* s, std::size_t length)
+                { append(s, s + length); }
+        
+        /*!
+                Appends another string this one
+         */
+        string16_t& operator+=(const string16_t& s)
+                { append(s); return *this; }
+        
+        /*!
+                Appends null-terminated character sequence to the string
+         */
+        string16_t& operator+=(const boost::uint16_t* s)
+                { append(s); return *this; }
+        
+        /*!
+                Returns an iterator to the first element of the string.
+         */
+        const_iterator begin() const
+                { return storage_m.begin(); }
+        
+        /*!
+                Returns an iterator just past the end of the string.
+         */
+        const_iterator end() const
+                { return storage_m.empty() ? storage_m.end() : boost::prior(storage_m.end()); }
+        
+        /*!
+                Returns a reverse_iterator to the end of the current string.
+         */
+        const_reverse_iterator rbegin() const
+                { return const_reverse_iterator(end()); }
+        
+        /*!
+                Returns a reverse_iterator to the beginning of the current string.
+         */
+        const_reverse_iterator rend() const
+                { return const_reverse_iterator(begin()); }
+        
+        /*!
+                Returns the size of the allocated storage space for the
+                elements of the string.
+         */
+        size_type capacity() const;
+        
+        /*!
+                Requests that the capacity of the allocated storage space for
+                the elements of the string be at least enough to hold n
+                elements.
+         */
+        void reserve(size_type n)
+                { storage_m.reserve(0 == n ? 0 : n + 1); }
+        
+        /*!
+                Changes the string to be zero-length.
+         */
+        void clear()
+                { storage_m.clear(); }
+        
+        /*!
+                Returns the number of elements in the current string.
+         */
     size_type size() const
-		{ return storage_m.empty() ? 0 : storage_m.size() - 1; }
-	
-	/*!
-		Returns true if the string has no elements, false otherwise.
-	 */
+                { return storage_m.empty() ? 0 : storage_m.size() - 1; }
+        
+        /*!
+                Returns true if the string has no elements, false otherwise.
+         */
     bool empty() const
-		{ return storage_m.empty(); }
-	
-	/*!
-		Exchanges the elements of the current string with those of from s.
-	 */
-	void swap(string16_t& s)
-		{ storage_m.swap(s.storage_m); }
-	
-	friend bool operator==(const string16_t& x, const string16_t& y)
-	{
-		return x.storage_m == y.storage_m;
-	}
-	
-	friend bool operator<(const string16_t& x, const string16_t& y)
-	{
-		return x.storage_m < y.storage_m;
-	}
+                { return storage_m.empty(); }
+        
+        /*!
+                Exchanges the elements of the current string with those of from s.
+         */
+        void swap(string16_t& s)
+                { storage_m.swap(s.storage_m); }
+        
+        friend bool operator==(const string16_t& x, const string16_t& y)
+        {
+                return x.storage_m == y.storage_m;
+        }
+        
+        friend bool operator<(const string16_t& x, const string16_t& y)
+        {
+                return x.storage_m < y.storage_m;
+        }
     
     friend inline void swap(string16_t& x, string16_t& y) { x.storage_m.swap(y.storage_m); }
 };
 
 /*!
-	Concatenate an entity to a string.
-	Anything that can be concatenated using string16_t::operator+=
-	may also be concatenated to a string16_t using operator+.
+        Concatenate an entity to a string.
+        Anything that can be concatenated using string16_t::operator+=
+        may also be concatenated to a string16_t using operator+.
  */
 
 inline string16_t operator+(string16_t s1, const string16_t& s2)      { return move(s1 += s2); }

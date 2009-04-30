@@ -332,7 +332,7 @@ void vector<T, A>::append(I f, I l, std::forward_iterator_tag)
 {
     size_type n(std::distance(f, l));
     
-	if (remaining() < n) reserve((adobe::max)(size() + n, 2 * size()));
+        if (remaining() < n) reserve((adobe::max)(size() + n, 2 * size()));
     set_finish(std::uninitialized_copy(f, l, end()));
 }
     
@@ -342,7 +342,7 @@ void vector<T, A>::move_append(I f, I l, std::forward_iterator_tag)
 {
     size_type n(std::distance(f, l));
     
-	if (remaining() < n) reserve((adobe::max)(size() + n, 2 * size()));
+        if (remaining() < n) reserve((adobe::max)(size() + n, 2 * size()));
     set_finish(uninitialized_move(f, l, end()));
 }
     

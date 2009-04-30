@@ -67,7 +67,7 @@ Equivalent to std::size_t.
 Creates a circular_queue.
 
 \param capacity
-	Capacity for this queue.
+        Capacity for this queue.
 */
 /*!
 \fn adobe::circular_queue::size_type adobe::circular_queue::size() const

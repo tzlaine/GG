@@ -137,7 +137,7 @@ void OgreGUI::Enter2DMode()
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
-	using namespace Ogre;
+    using namespace Ogre;
 
     Ogre::RenderSystem* render_system = Ogre::Root::getSingleton().getRenderSystem();
 

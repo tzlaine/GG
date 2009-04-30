@@ -562,7 +562,7 @@ void virtual_machine_t::implementation_t::index_operator()
     else
     {
         const array_t&  array = operand1.cast<array_t>();
-		std::size_t     index = operand2.cast<std::size_t>();
+                std::size_t     index = operand2.cast<std::size_t>();
         
         if (!(index < array.size())) throw std::runtime_error("index: array index out of range");
         

@@ -45,11 +45,11 @@
 #include <list>
 
 
-#define INSTRUMENT_GET_WINDOW_UNDER 0
-
 using namespace GG;
 
 namespace {
+    const bool INSTRUMENT_GET_WINDOW_UNDER = false;
+
     struct AcceleratorEcho
     {
         AcceleratorEcho(Key key, Flags<ModKey> mod_keys) :
@@ -170,7 +170,7 @@ struct GG::GUIImpl
     Wnd*         m_drag_wnds[3];          // GUI window currently being clicked or dragged by each mouse button
     Pt           m_prev_wnd_drag_position;// the upper-left corner of the dragged window when the last *Drag message was generated
     Pt           m_wnd_drag_offset;       // the offset from the upper left corner of the dragged window to the cursor for the current drag
-    bool         m_curr_drag_wnd_dragged; // true iff the currently-pressed window (drag_wnd[N]) has actually been dragged some distance (in which case releasing the mouse button is not a click)
+    bool         m_curr_drag_wnd_dragged; // true iff the currently-pressed window (m_drag_wnds[N]) has actually been dragged some distance (in which case releasing the mouse button is not a click)
     Wnd*         m_curr_drag_wnd;         // nonzero iff m_curr_drag_wnd_dragged is true (that is, we have actually started dragging the Wnd, not just pressed the mouse button); will always be one of m_drag_wnds
     Wnd*         m_curr_drag_drop_here_wnd;// the Wnd that most recently received a DragDropEnter or DragDropHere message (0 if DragDropLeave was sent as well, or if none)
     Pt           m_wnd_resize_offset;     // offset from the cursor of either the upper-left or lower-right corner of the GUI window currently being resized
@@ -492,10 +492,10 @@ Wnd* GUI::FocusWnd() const
 
 Wnd* GUI::GetWindowUnder(const Pt& pt) const
 {
-#if INSTRUMENT_GET_WINDOW_UNDER
-    if (Wnd* w = s_impl->m_zlist.Pick(pt, ModalWindow()))
-        std::cerr << "GUI::GetWindowUnder() : " << w->Name() << " @ " << w << std::endl;
-#endif
+    if (INSTRUMENT_GET_WINDOW_UNDER) {
+        if (Wnd* w = s_impl->m_zlist.Pick(pt, ModalWindow()))
+            std::cerr << "GUI::GetWindowUnder() : " << w->Name() << " @ " << w << std::endl;
+    }
     return s_impl->m_zlist.Pick(pt, ModalWindow());
 }
 

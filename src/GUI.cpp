@@ -382,11 +382,16 @@ void GUIImpl::HandleRelease(unsigned int mouse_button, const GG::Pt& pos, int cu
 
     Wnd* click_wnd = m_drag_wnds[mouse_button];
     m_curr_wnd_under_cursor = m_zlist.Pick(pos, GUI::s_gui->ModalWindow(), m_curr_drag_wnd_dragged ? click_wnd : 0);
+
+    bool in_drag_drop =
+        !m_drag_drop_wnds.empty() ||
+        m_curr_drag_wnd_dragged && click_wnd && click_wnd->DragDropDataType() != "" && mouse_button == 0;
+
     m_button_state[mouse_button] = false;
     m_drag_wnds[mouse_button] = 0; // if the mouse button is released, stop the tracking the drag window
     m_wnd_region = WR_NONE;        // and clear this, just in case
     // if the release is over the Wnd where the button-down event occurred, and that Wnd has not been dragged
-    if (click_wnd && m_curr_wnd_under_cursor == click_wnd) {
+    if (!in_drag_drop && click_wnd && m_curr_wnd_under_cursor == click_wnd) {
         // if this is second click over a window that just received an click within
         // the time limit -- it's a double-click, not a click
         if (m_double_click_time > 0 && m_double_click_wnd == click_wnd &&

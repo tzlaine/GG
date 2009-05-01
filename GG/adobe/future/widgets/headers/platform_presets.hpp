@@ -22,7 +22,7 @@
 
 
 namespace GG {
-    class Wnd;
+    class Button;
 }
 
 /****************************************************************************************************/
@@ -108,7 +108,7 @@ struct presets_t : boost::noncopyable
     void snapshot_callback(const model_snapshot_proc_t& proc)
     { snapshot_proc_m = proc; }
 
-    GG::Control*          control_m; // TODO
+    GG::Button*           control_m;
     dictionary_t          localization_set_m;
     popup_t               category_popup_m; // the category popup
     popup_t               popup_m;          // the actual preset popup

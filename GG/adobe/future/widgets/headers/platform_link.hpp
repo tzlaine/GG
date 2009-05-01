@@ -19,17 +19,29 @@
 #include <GG/adobe/widget_attributes.hpp>
 
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <string>
 
 
 namespace GG {
-    class Control;
+    class TextControl;
+    class StaticGraphic;
 }
 
 /****************************************************************************************************/
 
 namespace adobe {
+
+/****************************************************************************************************/
+
+namespace implementation {
+
+/****************************************************************************************************/
+
+class LinkTextFilter;
+
+} // namespace implementation
 
 /****************************************************************************************************/
 
@@ -54,8 +66,8 @@ struct link_t
 
     void monitor(const setter_type& proc);
 
-    GG::Control*         control_m;
-    GG::Control*         link_icon_m;
+    GG::TextControl*     control_m;
+    GG::StaticGraphic*   link_icon_m;
     std::string          alt_text_m;
     any_regular_t        on_value_m;
     any_regular_t        off_value_m;
@@ -65,6 +77,9 @@ struct link_t
     any_regular_t        value_m;
     point_2d_t           tl_m;
     setter_type          hit_proc_m;
+
+    boost::shared_ptr<implementation::LinkTextFilter>
+                         filter_m;
 };
 
 /****************************************************************************************************/

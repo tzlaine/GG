@@ -102,7 +102,7 @@ void button_t::measure(extents_t& result)
     result.width() += width_additional;
     result.height() += height_additional;
 
-    result.width() = (std::max)(result.width(), 70L); // TODO: 70L? WTF?
+    result.width() = (std::max)(result.width(), 70L);
 }
 
 /****************************************************************************************************/

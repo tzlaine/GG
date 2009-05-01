@@ -103,13 +103,15 @@ const GG::Y fixed_height(Value(fixed_width));
 
 void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& view)
 {
-    boost::shared_ptr<GG::Texture> texture;// TODO = GG::GUI::GetGUI()->GetTexture();
-
     delete image.window_m;
 
     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    image.window_m = style->NewStaticGraphic(GG::X0, GG::Y0, fixed_width, fixed_height, texture,
-                                             GG::GRAPHIC_NONE, GG::CLICKABLE);
+    image.window_m =
+        style->NewStaticGraphic(
+            GG::X0, GG::Y0,
+            image.image_m->DefaultWidth(), image.image_m->DefaultHeight(),
+            view, GG::GRAPHIC_NONE, GG::CLICKABLE
+        );
     image.filter_m.reset(new adobe::implementation::ImageFilter(image));
     image.window_m->InstallEventFilter(image.filter_m.get());
 }
@@ -163,8 +165,8 @@ void place(image_t& value, const place_data_t& place_data)
     {
         dictionary_t old_metadata(value.metadata_m);
 
-        double width(std::min<double>(Value(fixed_width), value.image_m.width()));
-        double height(std::min<double>(Value(fixed_height), value.image_m.height()));
+        double width(Value(std::min(fixed_width, value.image_m->DefaultWidth())));
+        double height(Value(std::min(fixed_height, value.image_m->DefaultHeight())));
 
         value.metadata_m.insert(dictionary_t::value_type(static_name_t("width"), any_regular_t(width)));
         value.metadata_m.insert(dictionary_t::value_type(static_name_t("height"), any_regular_t(height)));
@@ -181,12 +183,13 @@ void measure(image_t& value, extents_t& result)
     if (value.callback_m)
         result.horizontal().length_m = Value(fixed_width);
     else
-        result.horizontal().length_m = (long)value.image_m.width();
+        result.horizontal().length_m = Value(value.image_m->DefaultWidth());
 }
 
 /****************************************************************************************************/
 
-void measure_vertical(image_t& value, extents_t& result, const place_data_t& placed_horizontal)
+void measure_vertical(image_t& value, extents_t& result,
+                      const place_data_t& placed_horizontal)
 {
     if (value.callback_m) {
         result.vertical().length_m = Value(fixed_height);
@@ -196,7 +199,9 @@ void measure_vertical(image_t& value, extents_t& result, const place_data_t& pla
         //                   the case when the image grew based on how it
         //                   is being laid out.
 
-        float aspect_ratio(value.image_m.height() / static_cast<float>(value.image_m.width()));
+        float aspect_ratio =
+            Value(value.image_m->DefaultHeight()) /
+            static_cast<float>(Value(value.image_m->DefaultWidth()));
 
         result.vertical().length_m =
             static_cast<long>(placed_horizontal.horizontal().length_m * aspect_ratio);
@@ -215,30 +220,8 @@ platform_display_type insert<image_t>(display_t&             display,
                                       platform_display_type& parent,
                                       image_t&               element)
 {
-    assert(!"image_t's cannot be created until the construction of them from gil::image's is defined");
-#if 0
-    HWND parent_hwnd(parent);
-
-    value.window_m = ::CreateWindowExA(WS_EX_COMPOSITED, "STATIC",
-                                       NULL,
-                                       WS_CHILD | WS_VISIBLE | SS_BITMAP,
-                                       0, 0,
-                                       hackery::cast<int>(value.image_m.width()),
-                                       hackery::cast<int>(value.image_m.height()),
-                                       parent,
-                                       NULL,
-                                       ::GetModuleHandle(NULL),
-                                       NULL);
-
-    if (value.window_m == NULL)
-        ADOBE_THROW_LAST_ERROR;
-
-    value.handler_m->install<implementation_proc_name>(value.window_m);
-
-    // now set up the bitmap
-
-    reset_image(value.window_m, value.image_m);
-#endif
+    assert(!element.window_m);
+    reset_image(element, element.image_m);
     return display.insert(parent, get_display(element));
 }
 

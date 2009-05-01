@@ -140,85 +140,34 @@ popup_t::popup_t(const std::string& name,
 
 void popup_t::measure(extents_t& result)
 {
-#if 0
     assert(control_m);
-    //
-    // Make sure that metrics_t is initialized.
-    //
-    metrics::set_window(control_m);
+
     //
     // The popup_t has multiple text items. We need to find the one with
     // the widest extents (when drawn). Then we can make sure that we get
     // enough space to draw our largest text item.
     //
+    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+    boost::shared_ptr<GG::Font> font = style->DefaultFont();
+
     menu_item_set_t::iterator first(menu_items_m.begin());
     menu_item_set_t::iterator last(menu_items_m.end());
-    RECT largest_extents = { 0, 0, 0, 0 };
+    GG::Pt largest_extent;
     bool have_extents = false;
-    //
-    // Now iterate through all of our text.
-    //
-    while (first != last)
+    for (; first != last; ++first)
     {
-        //
-        // Discover the extents of this text!
-        //
-        RECT extents;
-        if (metrics::get_text_extents(CP_DROPDOWNBUTTON, hackery::convert_utf(first->first), extents))
-        {
-            //
-            // Alright, we were able to obtain the required extents.
-            // Now we just need to see if they are larger than the
-            // ones we already have.
-            //
-            if ((extents.right - extents.left) > (largest_extents.right - largest_extents.left))
-                largest_extents = extents;
-            have_extents = true;
-        }
-        ++first;
+        GG::Pt extent = font->TextExtent(first->first);
+        if (largest_extent.x < extent.x)
+            largest_extent = extent;
+        have_extents = true;
     }
-    //
-    // We don't really use much of UxTheme to discover the bounds of
-    // the combobox. We can use the GetComboboxInfo function to get
-    // most of the information we require (such as where the text will
-    // lie).
-    //
-    TEXTMETRIC font_metrics;
-    int border;
-    bool have_metrics = metrics::get_font_metrics(CP_DROPDOWNBUTTON, font_metrics);
-    bool have_border = metrics::get_integer(CP_DROPDOWNBUTTON, TMT_BORDERSIZE, border);
-    COMBOBOXINFO cbi;
-    cbi.cbSize = sizeof(cbi);
-    if (GetComboBoxInfo(control_m, &cbi))
-    {
-        RECT text = { 0, 0, 0, 0 };
-        // currently unused
-        //  RECT size = { 0, 0, 0, 0 };
-        WINDOWINFO wi = { 0 };
-        wi.cbSize = sizeof(wi);
-        if (!GetWindowInfo(control_m, &wi)) ADOBE_THROW_LAST_ERROR;
-        //
-        // Figure out the borders around the text entry area.
-        //
-        text.left = wi.rcClient.left - wi.rcWindow.left + cbi.rcItem.left;
-        text.right = wi.rcWindow.right - wi.rcClient.right + cbi.rcItem.right;
-        text.top = wi.rcClient.top - wi.rcWindow.top + cbi.rcItem.top;
-        text.bottom = wi.rcWindow.bottom - wi.rcWindow.bottom + cbi.rcItem.bottom;
-        //
-        // Figure out the dimensions for the entire control.
-        //
-        result.width() = text.left + largest_extents.right - largest_extents.left + cbi.rcButton.right - cbi.rcButton.left;
-        result.height() = wi.rcWindow.bottom - wi.rcWindow.top;
-        //
-        // Deduce the baseline from the text rectangle.
-        //
-        int baseline = 0;
-        if (have_metrics) {
-            baseline = text.top + font_metrics.tmAscent;
-            if (have_border) baseline += border;
-        }
-        result.vertical().guide_set_m.push_back(baseline);
-    } else ADOBE_THROW_LAST_ERROR;
+
+    result.width() =
+        Value(largest_extent.x + control_m->Width() - control_m->ClientWidth());
+    result.height() =
+        Value(largest_extent.y + control_m->Height() - control_m->ClientHeight());
+    GG::Y baseline = control_m->ClientUpperLeft().y + font->Ascent();
+    result.vertical().guide_set_m.push_back(Value(baseline));
 
     //
     // If we have a label (always on our left side?) then we
@@ -234,8 +183,8 @@ void popup_t::measure(extents_t& result)
     // figure out how much to offset it when positioning
     // the widgets in set_bounds.
     //
-    extents_t label_bounds;
-    measure_label_text(name_m, label_bounds, ::GetParent(control_m));
+    extents_t label_bounds(measure_text(name_m.name_m, font));
+    label_bounds.vertical().guide_set_m.push_back(Value(font->Ascent()));
     static_height_m = label_bounds.height();
     static_baseline_m = label_bounds.vertical().guide_set_m[0];
     //
@@ -253,14 +202,13 @@ void popup_t::measure(extents_t& result)
     //
     // Don't let the width of the popup go too crazy now...
     //
-    result.width() = std::min<long>(static_cast<long>(result.width()), 300); // REVISIT (fbrereto) : fixed width
+    result.width() = std::min(result.width(), 300L); // REVISIT (fbrereto) : fixed width
 
     //
     // Add a point-of-interest where the label ends.
     // We put the label to the left of the popup.
     //
     result.horizontal().guide_set_m.push_back(label_bounds.width());
-#endif
 }
 
 /****************************************************************************************************/

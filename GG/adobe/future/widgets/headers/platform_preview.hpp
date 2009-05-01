@@ -17,7 +17,11 @@
 #include <GG/adobe/controller_concept.hpp>
 
 #include <boost/function.hpp>
-#include <boost/gil/gil_all.hpp>
+
+
+namespace GG {
+    class Texture;
+}
 
 /****************************************************************************************************/
 
@@ -39,7 +43,7 @@ struct preview_t
 {
     /// model types for this widget
     typedef dictionary_t                                         controller_model_type;
-    typedef boost::gil::rgba8_image_t                            view_model_type;
+    typedef boost::shared_ptr<GG::Texture>                       view_model_type;
     typedef boost::function<void (const controller_model_type&)> setter_proc_type;
 
     /// constructor for this widget

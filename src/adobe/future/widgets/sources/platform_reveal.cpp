@@ -14,7 +14,9 @@
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 
-#include <GG/TextControl.h>
+#include <GG/Button.h>
+#include <GG/GUI.h>
+#include <GG/StyleFactory.h>
 
 
 /****************************************************************************************************/
@@ -22,41 +24,23 @@
 namespace {
 
 /****************************************************************************************************/
-#if 0 // TODO
-HBITMAP bitmap_showing()
+GG::SubTexture showing_image()
 {
-    static HBITMAP bitmap_s(0);
-
-    if (bitmap_s == 0)
-    {
-        boost::gil::rgba8_image_t image;
-
-        adobe::image_slurp("windows_reveal_down.tga", image);
-
-        bitmap_s = adobe::to_bitmap(image);
-    }
-
-    return bitmap_s;
+    static boost::shared_ptr<GG::Texture> texture_s;
+    if (!texture_s)
+        texture_s = GG::GUI::GetGUI()->GetTexture("reveal_up.png");
+    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
 }
 
 /****************************************************************************************************/
 
-HBITMAP bitmap_hidden()
+GG::SubTexture hidden_image()
 {
-    static HBITMAP bitmap_s(0);
-
-    if (bitmap_s == 0)
-    {
-        boost::gil::rgba8_image_t image;
-
-        adobe::image_slurp("windows_reveal_up.tga", image);
-
-        bitmap_s = adobe::to_bitmap(image);
-    }
-
-    return bitmap_s;
+    static boost::shared_ptr<GG::Texture> texture_s;
+    if (!texture_s)
+        texture_s = GG::GUI::GetGUI()->GetTexture("reveal_down.png");
+    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
 }
-#endif
 
 /****************************************************************************************************/
 
@@ -164,10 +148,11 @@ void reveal_t::display(const any_regular_t& new_value)
 
     current_value_m = new_value;
 
-#if 0 // TODO
-    HBITMAP new_map = current_value_m == show_value_m ? bitmap_showing() : bitmap_hidden();
-    ::SendMessage(control_m, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) new_map);
-#endif
+    const GG::SubTexture& subtexture =
+        current_value_m == show_value_m ? showing_image() : hidden_image();
+    control_m->SetUnpressedGraphic(subtexture);
+    control_m->SetPressedGraphic(subtexture);
+    control_m->SetRolloverGraphic(subtexture);
 }
 
 /****************************************************************************************************/
@@ -189,20 +174,18 @@ platform_display_type insert<reveal_t>(display_t&             display,
 {
     assert(!element.control_m);
 
-    assert(!"Cannot create reveal_t's until the texture creation issues are resolved.");
-#if 0 // TODO
-    element.control_m = ::CreateWindowExW(  WS_EX_COMPOSITED | WS_EX_TRANSPARENT, L"STATIC",
-                                    NULL,
-                                    WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY,
-                                    0, 0, 100, 20,
-                                    parent,
-                                    0,
-                                    ::GetModuleHandle(NULL),
-                                    NULL);
+    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+    element.control_m = style->NewButton(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
+                                         "", style->DefaultFont(), GG::CLR_GRAY);
+
+    const GG::SubTexture& subtexture =
+        element.current_value_m == element.show_value_m ? showing_image() : hidden_image();
+    element.control_m->SetUnpressedGraphic(subtexture);
+    element.control_m->SetPressedGraphic(subtexture);
+    element.control_m->SetRolloverGraphic(subtexture);
 
     GG::Connect(element.control_m->ClickedSignal,
                 boost::bind(&reveal_clicked, boost::ref(element)));
-#endif
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.control_m, element.alt_text_m);

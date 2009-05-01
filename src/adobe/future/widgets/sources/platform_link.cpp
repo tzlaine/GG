@@ -12,40 +12,42 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 
-#include <GG/Control.h>
+#include <GG/GUI.h>
+#include <GG/StaticGraphic.h>
+#include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
-
-/****************************************************************************************************/
-
-namespace {
-
-/****************************************************************************************************/
-
-#if 0 // TODO
-HBITMAP link_bitmap()
-{
-    static HBITMAP bitmap_s(0);
-
-    if (bitmap_s == 0)
-    {
-        boost::gil::rgba8_image_t image;
-
-        adobe::image_slurp("link_icon.tga", image);
-
-        bitmap_s = adobe::to_bitmap(image);
-    }
-
-    return bitmap_s;
-}
-#endif
-
-/****************************************************************************************************/
-
-} // namespace
 
 /****************************************************************************************************/
 
 namespace adobe {
+
+/****************************************************************************************************/
+
+namespace implementation {
+
+/*************************************************************************************************/
+
+class LinkTextFilter :
+    public GG::Wnd
+{
+public:
+    LinkTextFilter(link_t& link) : m_link(link) {}
+
+    virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
+        {
+            bool retval = false;
+            if (event.Type() == GG::WndEvent::LClick) {
+                m_link.hit_proc_m(m_link.off_value_m);
+                retval = true;
+            }
+            return retval;
+        }
+
+    link_t& m_link;
+};
+
+} // namespace implementation
 
 /****************************************************************************************************/
 
@@ -136,33 +138,30 @@ platform_display_type insert<link_t>(display_t&             display,
 {
     assert(!element.control_m);
 
-    assert(!"Cannot create link_t's until the texture loading issue is resolved");
-#if 0 // TODO
-    element.control_m = ::CreateWindowExW(WS_EX_COMPOSITED, L"STATIC",
-                                          NULL,
-                                          WS_CHILD | WS_VISIBLE,
-                                          0, 0, 50, 50,
-                                          parent_hwnd,
-                                          0,
-                                          ::GetModuleHandle(NULL),
-                                          NULL);
-#endif
+    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+
+    // TODO: This looks wrong when compared to the windows platform version of link_t.
+
+    element.control_m =
+        style->NewTextControl(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
+                              "", style->DefaultFont(),
+                              GG::CLR_BLACK, GG::FORMAT_NONE, GG::CLICKABLE);
+    element.filter_m.reset(new adobe::implementation::LinkTextFilter(element));
+    element.control_m->InstallEventFilter(element.filter_m.get());
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.control_m, element.alt_text_m);
 
-#if 0 // TODO
-    element.link_icon_m = ::CreateWindowExW(WS_EX_COMPOSITED | WS_EX_TRANSPARENT, L"STATIC",
-                                            NULL,
-                                            WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY,
-                                            0, 0, 9, 16,
-                                            parent_hwnd,
-                                            0,
-                                            ::GetModuleHandle(NULL),
-                                            NULL);
+    assert(!element.link_icon_m);
 
-    ::SendMessage(element.link_icon_m, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) link_bitmap());
-#endif
+    boost::shared_ptr<GG::Texture> link_texture =
+        GG::GUI::GetGUI()->GetTexture("link_icon.png");
+    element.link_icon_m =
+        style->NewStaticGraphic(
+            GG::X0, GG::Y0,
+            link_texture->DefaultWidth(), link_texture->DefaultHeight(),
+            link_texture
+        );
 
     display.insert(parent, element.link_icon_m);
 

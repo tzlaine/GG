@@ -95,11 +95,6 @@ platform_display_type insert<progress_bar_t>(display_t&              display,
                     ::GetModuleHandle(NULL),
                     NULL);
 
-    if (control_m == NULL)
-        ADOBE_THROW_LAST_ERROR;
-
-    set_font(control_m, PP_BAR);
-
     if (bar_style_m == pb_style_indeterminate_bar_s)
     {
         (void) ::SendMessageW((HWND) control_m,    // handle to destination control     

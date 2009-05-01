@@ -33,7 +33,7 @@
     #include <GG/adobe/iomanip_asl_cel.hpp>
 #endif
 
-#include <GG/Control.h>
+#include <GG/Button.h>
 
 
 /****************************************************************************************************/

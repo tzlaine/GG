@@ -21,7 +21,11 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/gil/gil_all.hpp>
+
+
+namespace GG {
+    class Texture;
+}
 
 /**************************************************************************************************/
 
@@ -47,7 +51,7 @@ any_regular_t vm_array_image_proc(const array_t& argument_set);
 
     \todo replace this with something correct.
 */
-std::ostream& operator<<(std::ostream& s, const boost::gil::rgba8_image_t& image);
+std::ostream& operator<<(std::ostream& s, const boost::shared_ptr<GG::Texture>& image);
 
 /**************************************************************************************************/
 

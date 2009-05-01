@@ -22,7 +22,7 @@
 
 
 namespace GG {
-    class Wnd;
+    class Control;
 }
 
 /****************************************************************************************************/
@@ -41,7 +41,7 @@ struct group_t
 
     void place(const place_data_t& place_data);
 
-    GG::Wnd*             control_m; // TODO
+    GG::Control*         control_m; // TODO
     std::string          name_m;
     std::string          alt_text_m;
     theme_t              theme_m;

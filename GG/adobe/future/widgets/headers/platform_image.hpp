@@ -16,7 +16,6 @@
 #include <GG/adobe/layout_attributes.hpp>
 
 #include <boost/function.hpp>
-#include <boost/gil/gil_all.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <string>
@@ -26,6 +25,7 @@
 
 namespace GG {
     class StaticGraphic;
+    class Texture;
     class Wnd;
 }
 
@@ -49,7 +49,7 @@ struct image_t : boost::noncopyable
 {
     /// model types for this widget
     typedef dictionary_t                                         controller_model_type;
-    typedef boost::gil::rgba8_image_t                            view_model_type;
+    typedef boost::shared_ptr<GG::Texture>                       view_model_type;
     typedef boost::function<void (const controller_model_type&)> setter_proc_type;
 
     image_t(const view_model_type& image);

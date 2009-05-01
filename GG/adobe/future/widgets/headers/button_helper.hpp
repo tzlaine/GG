@@ -18,12 +18,13 @@
 #include <GG/adobe/widget_attributes.hpp>
 
 #include <boost/function.hpp>
-#include <boost/gil/gil_all.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 
 #include <vector>
 #include <string>
+
 
 /*!
     \defgroup apl_widgets_button_helper Button Widget Helpers
@@ -42,6 +43,10 @@
     the algorithms specified in the \ref apl_widgets_button_helper
     section of the documentation can also be used for image_button_t.
 */
+
+namespace GG {
+    class Texture;
+}
 
 /****************************************************************************************************/
 
@@ -133,7 +138,7 @@ typedef std::vector<button_state_descriptor_t> button_state_set_t;
 */
 struct image_button_state_descriptor_t
 {
-    typedef boost::gil::rgba8_image_t image_type;
+    typedef boost::shared_ptr<GG::Texture> image_type;
 
     /*!
         Default constructor.

@@ -18,68 +18,59 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <GG/Control.h>
+#include <GG/Button.h>
+#include <GG/GUI.h>
+#include <GG/StyleFactory.h>
 
 
 /****************************************************************************************************/
 
 namespace {
 
-#if 0 // TODO
 /****************************************************************************************************/
 
-HBITMAP bitmap_normal()
+GG::SubTexture normal_image()
 {
-    static HBITMAP bitmap_s(0);
-
-    if (bitmap_s == 0)
-    {
-        boost::gil::rgba8_image_t image;
-
-        adobe::image_slurp("preset_button_u_n.tga", image);
-
-        bitmap_s = adobe::to_bitmap(image);
-    }
-
-    return bitmap_s;
+    static boost::shared_ptr<GG::Texture> texture_s;
+    if (!texture_s)
+        texture_s = GG::GUI::GetGUI()->GetTexture("preset_button_unpressed.png");
+    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
 }
 
 /****************************************************************************************************/
 
-HBITMAP bitmap_clicked()
+GG::SubTexture clicked_image()
 {
-    static HBITMAP bitmap_s(0);
-
-    if (bitmap_s == 0)
-    {
-        boost::gil::rgba8_image_t image;
-
-        adobe::image_slurp("preset_button_d_n.tga", image);
-
-        bitmap_s = adobe::to_bitmap(image);
-    }
-
-    return bitmap_s;
+    static boost::shared_ptr<GG::Texture> texture_s;
+    if (!texture_s)
+        texture_s = GG::GUI::GetGUI()->GetTexture("preset_button_pressed.png");
+    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
 }
 
 /****************************************************************************************************/
 
-HBITMAP bitmap_disabled()
+GG::SubTexture disabled_image()
 {
-    static HBITMAP bitmap_s(0);
-
-    if (bitmap_s == 0)
-    {
-        boost::gil::rgba8_image_t image;
-
-        adobe::image_slurp("preset_button_u_d.tga", image);
-
-        bitmap_s = adobe::to_bitmap(image);
-    }
-
-    return bitmap_s;
+    static boost::shared_ptr<GG::Texture> texture_s;
+    if (!texture_s)
+        texture_s = GG::GUI::GetGUI()->GetTexture("preset_button_disabled.png");
+    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
 }
-#endif
+
+/****************************************************************************************************/
+
+void reset_textures(adobe::presets_t& preset)
+{
+    if (!preset.control_m->Disabled()) {
+        preset.control_m->SetUnpressedGraphic(normal_image());
+        preset.control_m->SetPressedGraphic(clicked_image());
+        preset.control_m->SetRolloverGraphic(normal_image());
+    } else {
+        preset.control_m->SetUnpressedGraphic(disabled_image());
+        preset.control_m->SetPressedGraphic(disabled_image());
+        preset.control_m->SetRolloverGraphic(disabled_image());
+    }
+}
 
 /****************************************************************************************************/
 
@@ -239,39 +230,26 @@ template <> platform_display_type insert<presets_t>(display_t&             displ
                                                     platform_display_type& parent,
                                                     presets_t&             element)
 {
-    assert(!"Cannot create presets_t's until the GG texture issue is resolved.");
-#if 0
-    HWND parent_hwnd(parent);
+    assert(!element.control_m);
 
     insert(display, parent, element.category_popup_m);
 
     insert(display, parent, element.popup_m);
 
-    assert(!element.control_m);
+    GG::X width(26);
+    GG::Y height(21);
+    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+    element.control_m = style->NewButton(GG::X0, GG::Y0, width, height,
+                                         "", style->DefaultFont(), GG::CLR_GRAY);
+    reset_textures(element);
 
-    long width(26);
-    long height(21);
-
-    element.control_m = ::CreateWindowExW(  WS_EX_COMPOSITED | WS_EX_TRANSPARENT, L"STATIC",
-                                            NULL,
-                                            WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY,
-                                            0, 0, width, height,
-                                            parent,
-                                            0,
-                                            ::GetModuleHandle(NULL),
-                                            NULL);
-
-    if (element.control_m == NULL) ADOBE_THROW_LAST_ERROR;
-
-    ::SetWindowSubclass(element.control_m, presets_subclass_proc, reinterpret_cast<UINT_PTR>(&element), 0);
+    GG::Connect(element.control_m->ClickedSignal,
+                boost::bind(&presets_button_clicked, boost::ref(element)));
 
     element.popup_m.monitor(boost::bind(&presets_t::do_imbue, boost::ref(element), _1));
 
-    ::SendMessage(element.control_m, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) bitmap_normal()); 
-
     if (!element.alt_text_m.empty())
         adobe::implementation::set_control_alt_text(element.control_m, element.alt_text_m);
-#endif
 
     return display.insert(parent, element.control_m);
 }
@@ -298,16 +276,10 @@ boost::filesystem::path preset_directory(const presets_t& control)
 void enable(presets_t& control, bool enable)
 {
     assert(control.control_m);
-
     control.control_m->Disable(!enable);
-
-#if 0 // TODO
-    ::SendMessage(control.control_m, STM_SETIMAGE, IMAGE_BITMAP, 
-        hackery::cast<LPARAM>(enable ? bitmap_normal() : bitmap_disabled()));
-#endif
+    reset_textures(control);
 }
 
-    
 /****************************************************************************************************/
 
 } // namespace adobe

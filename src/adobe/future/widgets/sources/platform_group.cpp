@@ -86,11 +86,6 @@ platform_display_type insert<group_t>(display_t&             display,
                                           0,
                                           ::GetModuleHandle(NULL),
                                           NULL);
-
-    if (element.control_m == NULL)
-        ADOBE_THROW_LAST_ERROR;
-
-    set_font(element.control_m, BP_GROUPBOX);
 #endif
 
     return display.insert(parent, element.control_m);

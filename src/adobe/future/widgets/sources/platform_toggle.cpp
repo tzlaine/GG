@@ -12,6 +12,8 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
 #include <GG/Button.h>
+#include <GG/GUI.h>
+#include <GG/StyleFactory.h>
 
 
 /****************************************************************************************************/
@@ -20,9 +22,27 @@ namespace {
 
 /****************************************************************************************************/
 
-const adobe::toggle_t::image_type& current_image(adobe::toggle_t& toggle)
+void reset_textures(adobe::toggle_t& toggle)
 {
     if (!toggle.control_m->Disabled()) {
+        bool on = toggle.last_m == toggle.value_on_m;
+        const GG::SubTexture& unpressed = on ? toggle.image_on_m : toggle.image_off_m;
+        const GG::SubTexture& pressed = on ? toggle.image_off_m : toggle.image_on_m;
+        toggle.control_m->SetUnpressedGraphic(unpressed);
+        toggle.control_m->SetPressedGraphic(pressed);
+        toggle.control_m->SetRolloverGraphic(unpressed);
+    } else {
+        toggle.control_m->SetUnpressedGraphic(toggle.image_disabled_m);
+        toggle.control_m->SetPressedGraphic(toggle.image_disabled_m);
+        toggle.control_m->SetRolloverGraphic(toggle.image_disabled_m);
+    }
+}
+
+/****************************************************************************************************/
+
+const GG::SubTexture& current_subtexture(adobe::toggle_t& toggle)
+{
+    if (toggle.control_m->Disabled()) {
         if (toggle.last_m == toggle.value_on_m)
             return toggle.image_on_m;
         else
@@ -31,24 +51,6 @@ const adobe::toggle_t::image_type& current_image(adobe::toggle_t& toggle)
         return toggle.image_disabled_m;
     }
 }
-
-/****************************************************************************************************/
-#if 0 // TODO
-HBITMAP current_bitmap(adobe::toggle_t& toggle)
-{
-    if (::IsWindowEnabled(toggle.control_m))
-    {
-        if (toggle.last_m == toggle.value_on_m)
-            return toggle.bitmap_on_m;
-        else
-            return toggle.bitmap_off_m;
-    }
-    else // disabled_button
-    {
-        return toggle.bitmap_disabled_m;
-    }
-}
-#endif
 
 /****************************************************************************************************/
 
@@ -85,16 +87,19 @@ toggle_t::toggle_t(const std::string&  alt_text,
     control_m(0),
     theme_m(theme),
     alt_text_m(alt_text),
-    image_on_m(image_on),
-    image_off_m(image_off),
-    image_disabled_m(image_disabled),
+    image_on_m(
+        image_on, GG::X0, GG::Y0,
+        image_on->DefaultWidth(), image_on->DefaultHeight()
+    ),
+    image_off_m(
+        image_off, GG::X0, GG::Y0,
+        image_off->DefaultWidth(), image_off->DefaultHeight()
+    ),
+    image_disabled_m(
+        image_disabled, GG::X0, GG::Y0,
+        image_disabled->DefaultWidth(), image_disabled->DefaultHeight()
+    ),
     value_on_m(value_on)
-#if 0 // TODO
-    ,
-    texture_on_m(to_texture(image_on)),
-    texture_off_m(to_texture(image_off)),
-    texture_disabled_m(to_texture(image_disabled))
-#endif
 { }
 
 /****************************************************************************************************/
@@ -105,10 +110,10 @@ void toggle_t::measure(extents_t& result)
 
     result = extents_t();
 
-    const adobe::toggle_t::image_type& image(current_image(*this));
+    const subtexture_type& image(current_subtexture(*this));
 
-    result.height() = static_cast<long>(image.height());
-    result.width() = static_cast<long>(image.width());
+    result.height() = Value(image.Height());
+    result.width() = Value(image.Width());
 }
 
 /****************************************************************************************************/
@@ -122,9 +127,7 @@ void toggle_t::enable(bool make_enabled)
 {
     assert(control_m);
     control_m->Disable(!make_enabled);
-#if 0 // TODO
-    ::SendMessage(control_m, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) current_bitmap(*this));
-#endif
+    reset_textures(*this);
 }
 
 /****************************************************************************************************/
@@ -137,9 +140,7 @@ void toggle_t::display(const any_regular_t& to_value)
         return;
 
     last_m = to_value;
-#if 0 // TODO
-    ::SendMessage(control_m, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) current_bitmap(*this));
-#endif
+    reset_textures(*this);
 }
 
 /****************************************************************************************************/
@@ -159,20 +160,13 @@ platform_display_type insert<toggle_t>(display_t&             display,
 {
     assert(!element.control_m);
 
-    assert(!"Cannot create toggle_t's until the texture creation issues are resolved");
-#if 0 // TODO
-    element.control_m = ::CreateWindowExW(  WS_EX_COMPOSITED | WS_EX_TRANSPARENT, L"STATIC",
-                                    NULL,
-                                    WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY,
-                                    0, 0, 100, 20,
-                                    parent,
-                                    0,
-                                    ::GetModuleHandle(NULL),
-                                    NULL);
+    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+    element.control_m = style->NewButton(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
+                                         "", style->DefaultFont(), GG::CLR_GRAY);
+    reset_textures(element);
 
     GG::Connect(element.control_m->ClickedSignal,
                 boost::bind(&toggle_clicked, boost::ref(element)));
-#endif
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.control_m, element.alt_text_m);

@@ -18,6 +18,9 @@
 #include <GG/adobe/name.hpp>
 #include <GG/adobe/string.hpp>
 
+#include <GG/GUI.h>
+
+
 /**************************************************************************************************/
 
 namespace {
@@ -55,15 +58,13 @@ any_regular_t vm_dictionary_image_proc(const dictionary_t& named_argument_set)
     if (named_argument_set.empty())
         return any_regular_t(empty_t());
 
-    std::string               filename;
-    boost::gil::rgba8_image_t the_image;
+    std::string                    filename;
+    boost::shared_ptr<GG::Texture> the_image;
 
     get_value(named_argument_set, key_name, filename);
 
-#if 0 // TODO
     if (!filename.empty())
-        image_slurp(boost::filesystem::path(filename, boost::filesystem::native), the_image);
-#endif
+        the_image = GG::GUI::GetGUI()->GetTexture(filename);
 
     return any_regular_t(the_image);
 }
@@ -75,15 +76,13 @@ any_regular_t vm_array_image_proc(const array_t& argument_set)
     if (argument_set.empty())
         return any_regular_t(empty_t());
 
-    std::string               filename;
-    boost::gil::rgba8_image_t the_image;
+    std::string                    filename;
+    boost::shared_ptr<GG::Texture> the_image;
 
     argument_set[0].cast(filename);
 
-#if 0 // TODO
     if (!filename.empty())
-        image_slurp(boost::filesystem::path(filename, boost::filesystem::native), the_image);
-#endif
+        the_image = GG::GUI::GetGUI()->GetTexture(filename);
 
     return any_regular_t(the_image);
 }
@@ -94,10 +93,10 @@ any_regular_t vm_array_image_proc(const array_t& argument_set)
 
 /**************************************************************************************************/
 
-std::ostream& operator<<(std::ostream& s, const boost::gil::rgba8_image_t& /*image*/)
+std::ostream& operator<<(std::ostream& s, const boost::shared_ptr<GG::Texture>& /*image*/)
 {
     s << "FIXME: " << __FILE__ << __LINE__ << ": "
-      << "operator<<(std::ostream& s, const boost::gil::rgba8_image_t& image)"
+      << "operator<<(std::ostream& s, const boost::shared_ptr<GG::Texture>& image)"
       << std::endl;
 
     return s;

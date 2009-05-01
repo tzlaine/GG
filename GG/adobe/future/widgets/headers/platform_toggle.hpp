@@ -19,12 +19,12 @@
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/gil/gil_all.hpp>
+
+#include <GG/Texture.h>
 
 
 namespace GG {
     class Button;
-    class Texture;
 }
 
 /****************************************************************************************************/
@@ -39,7 +39,8 @@ struct toggle_t
 
     typedef boost::function<void (const model_type&)> setter_type;
 
-    typedef boost::gil::rgba8_image_t image_type;
+    typedef boost::shared_ptr<GG::Texture> image_type;
+    typedef GG::SubTexture                 subtexture_type;
 
     toggle_t(const std::string&  alt_text,
              const any_regular_t value_on,
@@ -61,9 +62,9 @@ struct toggle_t
     GG::Button*                    control_m;
     theme_t                        theme_m;
     std::string                    alt_text_m;
-    image_type                     image_on_m;
-    image_type                     image_off_m;
-    image_type                     image_disabled_m;
+    subtexture_type                image_on_m;
+    subtexture_type                image_off_m;
+    subtexture_type                image_disabled_m;
     setter_type                    setter_proc_m;
     any_regular_t                  value_on_m;
     any_regular_t                  last_m;

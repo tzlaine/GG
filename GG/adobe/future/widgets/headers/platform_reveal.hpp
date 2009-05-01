@@ -21,7 +21,7 @@
 
 
 namespace GG {
-    class Control;
+    class Button;
 }
 
 /****************************************************************************************************/
@@ -49,7 +49,7 @@ struct reveal_t : boost::noncopyable
 
     void monitor(const setter_type& proc);
 
-    GG::Control*        control_m;
+    GG::Button*         control_m;
     theme_t             theme_m;
     label_t             name_m;
     bool                using_label_m;

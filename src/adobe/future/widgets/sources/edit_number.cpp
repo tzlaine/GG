@@ -136,37 +136,19 @@ const adobe_cursor_t edit_number_t::scrubby_cursor()
 
 bool edit_number_t::handle_key(key_type key, bool pressed, modifiers_t /*modifiers*/)
 {
-#if 0 // TODO
-    if (!implementation::is_focused(edit_text_m) || pressed == false)
+    if (!implementation::is_focused(edit_text_m.control_m) || !pressed)
         return false;
 
     bool handled(true);
 
-#if ADOBE_PLATFORM_MAC
-    if (key == 30) // arrow up
-#else
-    if (key == 38) // arrow up
-#endif
-    {
+    if (key.first == GG::GGK_UP)
         increment(true);
-    }
-#if ADOBE_PLATFORM_MAC
-    else if (key == 31) // arrow down
-#else
-    else if (key == 40) // arrow down
-#endif
-    {
+    else if (key.first == GG::GGK_DOWN)
         increment(false);
-    }
     else
-    {
         handled = false;
-    }
 
     return handled;
-#else
-    return true;
-#endif
 }
 
 /*************************************************************************************************/

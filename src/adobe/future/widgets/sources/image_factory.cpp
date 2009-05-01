@@ -18,6 +18,9 @@
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
+#include <GG/GUI.h>
+
+
 /*************************************************************************************************/
 
 namespace adobe {
@@ -28,19 +31,14 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         /*size*/,
                    image_t*&           widget)
 {
-    std::string              static_image;
+    std::string              image_filename;
     image_t::view_model_type actual_image;
 
-    get_value(parameters, key_image, static_image);
+    get_value(parameters, key_image, image_filename);
 
     try
-    {
-#if 0 // TODO
-        image_slurp(static_image, actual_image);
-#endif
-    }
-    catch(...)
-    { }
+    { actual_image = GG::GUI::GetGUI()->GetTexture(image_filename); }
+    catch (...) {}
 
     widget = new image_t(actual_image);
 }

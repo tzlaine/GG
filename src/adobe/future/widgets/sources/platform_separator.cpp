@@ -29,13 +29,14 @@ separator_t::separator_t(bool    is_vertical,
 
 void separator_t::measure(extents_t& result)
 {
-    // TODO
+#if 0 // TODO
 #ifdef BOOST_MSVC
     result.horizontal().length_m   = 2;
     result.vertical().length_m     = 2;
 #elif ADOBE_PLATFORM_MAC
     result.horizontal().length_m   = is_vertical_m ? 5 : 6;
     result.vertical().length_m     = is_vertical_m ? 6 : 5;
+#endif
 #endif
 }
 

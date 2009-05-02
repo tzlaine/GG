@@ -249,6 +249,10 @@ def CheckBoostLib(context, lib_tuple, conf):
         lib_name = lib_name + '-mt'
         if conf.CheckLibWithHeader(lib_name, lib_tuple[1], 'C++', lib_tuple[2]):
             ret = lib_name
+            if suffix:
+                context.env['boost_lib_suffix'] = suffix + '-mt'
+            else:
+                context.env['boost_lib_suffix'] = '-mt'
     return ret
 
 def CheckBoost(context, required_version, lib_tuples, conf, check_libs):

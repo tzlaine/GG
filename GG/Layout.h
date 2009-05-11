@@ -145,9 +145,6 @@ public:
     virtual void ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination);
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
-    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     /** Inserts \a w into the layout in the indicated cell, expanding the
         layout grid as necessary.  \throw GG::Layout::AttemptedOverwrite
@@ -246,6 +243,12 @@ public:
 protected:
     /** \name Structors */ ///@{
     Layout(); ///< default ctor
+    //@}
+
+    /** \name Mutators */ ///@{
+    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     //@}
 
 private:

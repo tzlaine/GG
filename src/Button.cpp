@@ -101,6 +101,29 @@ void Button::Render()
     }
 }
 
+void Button::SetColor(Clr c)
+{ Control::SetColor(c); }
+
+void Button::SetState(ButtonState state)
+{ m_state = state; }
+
+void Button::SetUnpressedGraphic(const SubTexture& st)
+{ m_unpressed_graphic = st; }
+
+void Button::SetPressedGraphic(const SubTexture& st)
+{ m_pressed_graphic = st; }
+
+void Button::SetRolloverGraphic(const SubTexture& st)
+{ m_rollover_graphic = st; }
+
+void Button::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    TextControl::DefineAttributes(editor);
+    // TODO: handle setting graphics
+}
+
 void Button::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
@@ -144,42 +167,6 @@ void Button::MouseLeave()
         m_state = BN_UNPRESSED;
 }
 
-void Button::SetColor(Clr c)
-{ Control::SetColor(c); }
-
-void Button::SetState(ButtonState state)
-{ m_state = state; }
-
-void Button::SetUnpressedGraphic(const SubTexture& st)
-{ m_unpressed_graphic = st; }
-
-void Button::SetPressedGraphic(const SubTexture& st)
-{ m_pressed_graphic = st; }
-
-void Button::SetRolloverGraphic(const SubTexture& st)
-{ m_rollover_graphic = st; }
-
-void Button::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    TextControl::DefineAttributes(editor);
-    // TODO: handle setting graphics
-}
-
-void Button::RenderPressed()
-{
-    if (!m_pressed_graphic.Empty()) {
-        glColor(Disabled() ? DisabledColor(m_color) : m_color);
-        m_pressed_graphic.OrthoBlit(UpperLeft(), LowerRight());
-    } else {
-        RenderDefault();
-    }
-    OffsetMove(Pt(X1, Y1));
-    TextControl::Render();
-    OffsetMove(Pt(-X1, -Y1));
-}
-
 void Button::RenderUnpressed()
 {
     if (!m_unpressed_graphic.Empty()) {
@@ -197,6 +184,19 @@ void Button::RenderUnpressed()
     SetTextColor(temp);    // restore original color
     // draw text
     TextControl::Render();
+}
+
+void Button::RenderPressed()
+{
+    if (!m_pressed_graphic.Empty()) {
+        glColor(Disabled() ? DisabledColor(m_color) : m_color);
+        m_pressed_graphic.OrthoBlit(UpperLeft(), LowerRight());
+    } else {
+        RenderDefault();
+    }
+    OffsetMove(Pt(X1, Y1));
+    TextControl::Render();
+    OffsetMove(Pt(-X1, -Y1));
 }
 
 void Button::RenderRollover()

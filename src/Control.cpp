@@ -73,24 +73,6 @@ void Control::AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt)
         Parent()->AcceptDrops(wnds, pt);
 }
 
-void Control::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{
-    if (Parent())
-        Parent()->MouseWheel(pt, move, mod_keys);
-}
-
-void Control::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (Parent())
-        Parent()->KeyPress(key, key_code_point, mod_keys);
-}
-
-void Control::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (Parent())
-        Parent()->KeyRelease(key, key_code_point, mod_keys);
-}
-
 void Control::SetColor(Clr c)
 { m_color = c; }
 
@@ -107,3 +89,12 @@ void Control::DefineAttributes(WndEditor* editor)
     editor->Attribute<Clr>("Color", m_color, action);
     editor->Attribute("Disabled", m_disabled);
 }
+
+void Control::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(WndEvent(WndEvent::MouseWheel, pt, move, mod_keys)); }
+
+void Control::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(WndEvent(WndEvent::KeyPress, key, key_code_point, mod_keys)); }
+
+void Control::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(WndEvent(WndEvent::KeyRelease, key, key_code_point, mod_keys)); }

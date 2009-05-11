@@ -460,7 +460,7 @@ public:
     /** Called during Run(), after a modal window is registered, this is the
         place that subclasses should put specialized modal window
         initialization, such as setting focus to child controls. */
-    virtual void   ModalInit();
+    virtual void ModalInit();
 
     /** Enables or disables clipping of child windows to the boundaries of
         this Wnd. */
@@ -477,7 +477,7 @@ public:
 
     /** Resizes and/or moves window to new upper-left and lower right
         boundaries. */
-    virtual void   SizeMove(const Pt& ul, const Pt& lr);
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
 
     /** Resizes window without moving upper-left corner. */
     void Resize(const Pt& sz);
@@ -567,6 +567,117 @@ public:
         GUI::GetGUI()->RenderingDragDropWnds(). */
     virtual void Render();
 
+    /** This executes a modal window and gives it its modality.  For non-modal
+        windows, this function is a no-op.  It returns 0 if the window is
+        non-modal, or non-zero after successful modal execution.*/
+    virtual int Run();
+
+    /** Sets the time cutoff (in milliseconds) for a browse info mode.  If \a
+        mode is not less than the current number of modes, extra modes will be
+        created as needed.  The extra nodes will be set to the value of the
+        last time at the time the method is called, or \a time if there were
+        initially no modes. */
+    void SetBrowseModeTime(unsigned int time, std::size_t mode = 0);
+
+    /** Sets the Wnd that is used to show browse info about this Wnd in the
+        browse info mode \a mode.  \throw std::out_of_range May throw
+        std::out_of_range if \a mode is not a valid browse mode. */
+    void SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, std::size_t mode = 0);
+
+    /** Removes the Wnd that is used to show browse info about this Wnd in the
+        browse info mode \a mode (but does nothing to the mode itself).
+        \throw std::out_of_range May throw std::out_of_range if \a mode is not
+        a valid browse mode. */
+    void ClearBrowseInfoWnd(std::size_t mode = 0);
+
+    /** Sets the browse info window for mode \a mode to a Wnd with the
+        specified color and border color which contains the specified text.
+        \throw std::out_of_range May throw std::out_of_range if \a mode is not
+        a valid browse mode. */
+    void SetBrowseText(const std::string& text, std::size_t mode = 0);
+
+    /** Sets the browse modes for the Wnd, including time cutoffs (in
+        milliseconds), the BrowseInfoWnds to be displayed for each browse info
+        mode, and the text (if any) to be displayed in each mode.  As the time
+        that the cursor is over this Wnd exceeds each mode's time, the
+        corresponding Wnd is shown superimposed over this Wnd and its
+        children.  Set the first time cutoff to 0 for immediate browse info
+        display. */
+    void SetBrowseModes(const std::vector<BrowseInfoMode>& modes);
+
+    /** Sets the currently-installed style factory. */
+    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory);
+
+    /** Provides the attributes of this object that are appropriate for a user
+        to edit in a WndEditor; see WndEditor for details. */
+    virtual void DefineAttributes(WndEditor* editor);
+    //@}
+
+
+    /** Returns the single time to place in the browse modes during Wnd
+        construction. */
+    static unsigned int DefaultBrowseTime();
+
+    /** Sets the single time to place in the browse modes during Wnd
+        construction. */
+    static void SetDefaultBrowseTime(unsigned int time);
+
+    /** Returns the single BrowseInfoWnd to place in the browse modes during
+        Wnd construction.  This returns a TextBoxBrowseInfoWnd with a default
+        parameterization. */
+    static const boost::shared_ptr<BrowseInfoWnd>& DefaultBrowseInfoWnd();
+
+    /** Sets the single BrowseInfoWnd to place in the browse modes during Wnd
+        construction. */
+    static void SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd);
+
+    /** \name Exceptions */ ///@{
+    /** The base class for Wnd exceptions. */
+    GG_ABSTRACT_EXCEPTION(Exception);
+
+    /** Thrown when a request to perform a layout fails due to child Wnds in
+        illegal starting positions, or when a SetLayout() call would result in
+        an illegal state. */
+    GG_CONCRETE_EXCEPTION(BadLayout, GG::Wnd, Exception);
+    //@}
+
+protected:
+    /** The states a Wnd may be in, with respect to drag-and-drop operations.
+        Wnds may wish to consider the current state when rendering to provide
+        visual feedback to the user. */
+    enum DragDropRenderingState {
+        /** No drag-and-drop is taking place at all with this Wnd. */
+        NOT_DRAGGED,
+
+        /** This Wnd is being dragged-and-dropped, but we're currently rendering
+            the unmoving copy.  The dragged copy is rendered at another time. */
+        IN_PLACE_COPY,
+
+        /** This Wnd is being dragged-and-dropped, and it is currently over a
+            drop target that \b will \b not accept it. */
+        DRAGGED_OVER_UNACCEPTING_DROP_TARGET,
+
+        /** This Wnd is being dragged-and-dropped, and it is currently over a
+            drop target that \b will accept it. */
+        DRAGGED_OVER_ACCEPTING_DROP_TARGET
+    };
+
+    /** \name Structors */ ///@{
+    Wnd(); ///< Default ctor.
+
+    /** Ctor that allows a size and position to be specified, as well as
+        creation flags. */
+    Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
+    //@}
+
+    /** \name Accessors */ ///@{
+    /** Returns the states the Wnd is in, with respect to drag-and-drop
+        operations.  Wnds may wish to consider the current state when
+        rendering to provide visual feedback to the user. */
+    DragDropRenderingState GetDragDropRenderingState() const;
+    //@}
+
+    /** \name Mutators */ ///@{
     /** Respond to left button down msg.  A window receives this whenever any
         input device button changes from up to down while over the window.
         \note If this Wnd was created with the REPEAT_BUTTON_DOWN flag, this
@@ -702,118 +813,6 @@ public:
     /** Respond to Timer \a timer firing at time \a ticks. */
     virtual void TimerFiring(unsigned int ticks, Timer* timer);
 
-
-    /** This executes a modal window and gives it its modality.  For non-modal
-        windows, this function is a no-op.  It returns 0 if the window is
-        non-modal, or non-zero after successful modal execution.*/
-    virtual int Run();
-
-    /** Sets the time cutoff (in milliseconds) for a browse info mode.  If \a
-        mode is not less than the current number of modes, extra modes will be
-        created as needed.  The extra nodes will be set to the value of the
-        last time at the time the method is called, or \a time if there were
-        initially no modes. */
-    void SetBrowseModeTime(unsigned int time, std::size_t mode = 0);
-
-    /** Sets the Wnd that is used to show browse info about this Wnd in the
-        browse info mode \a mode.  \throw std::out_of_range May throw
-        std::out_of_range if \a mode is not a valid browse mode. */
-    void SetBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& wnd, std::size_t mode = 0);
-
-    /** Removes the Wnd that is used to show browse info about this Wnd in the
-        browse info mode \a mode (but does nothing to the mode itself).
-        \throw std::out_of_range May throw std::out_of_range if \a mode is not
-        a valid browse mode. */
-    void ClearBrowseInfoWnd(std::size_t mode = 0);
-
-    /** Sets the browse info window for mode \a mode to a Wnd with the
-        specified color and border color which contains the specified text.
-        \throw std::out_of_range May throw std::out_of_range if \a mode is not
-        a valid browse mode. */
-    void SetBrowseText(const std::string& text, std::size_t mode = 0);
-
-    /** Sets the browse modes for the Wnd, including time cutoffs (in
-        milliseconds), the BrowseInfoWnds to be displayed for each browse info
-        mode, and the text (if any) to be displayed in each mode.  As the time
-        that the cursor is over this Wnd exceeds each mode's time, the
-        corresponding Wnd is shown superimposed over this Wnd and its
-        children.  Set the first time cutoff to 0 for immediate browse info
-        display. */
-    void SetBrowseModes(const std::vector<BrowseInfoMode>& modes);
-
-    /** Sets the currently-installed style factory. */
-    void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory);
-
-    /** Provides the attributes of this object that are appropriate for a user
-        to edit in a WndEditor; see WndEditor for details. */
-    virtual void DefineAttributes(WndEditor* editor);
-    //@}
-
-
-    /** Returns the single time to place in the browse modes during Wnd
-        construction. */
-    static unsigned int DefaultBrowseTime();
-
-    /** Sets the single time to place in the browse modes during Wnd
-        construction. */
-    static void SetDefaultBrowseTime(unsigned int time);
-
-    /** Returns the single BrowseInfoWnd to place in the browse modes during
-        Wnd construction.  This returns a TextBoxBrowseInfoWnd with a default
-        parameterization. */
-    static const boost::shared_ptr<BrowseInfoWnd>& DefaultBrowseInfoWnd();
-
-    /** Sets the single BrowseInfoWnd to place in the browse modes during Wnd
-        construction. */
-    static void SetDefaultBrowseInfoWnd(const boost::shared_ptr<BrowseInfoWnd>& browse_info_wnd);
-
-    /** \name Exceptions */ ///@{
-    /** The base class for Wnd exceptions. */
-    GG_ABSTRACT_EXCEPTION(Exception);
-
-    /** Thrown when a request to perform a layout fails due to child Wnds in
-        illegal starting positions, or when a SetLayout() call would result in
-        an illegal state. */
-    GG_CONCRETE_EXCEPTION(BadLayout, GG::Wnd, Exception);
-    //@}
-
-protected:
-    /** The states a Wnd may be in, with respect to drag-and-drop operations.
-        Wnds may wish to consider the current state when rendering to provide
-        visual feedback to the user. */
-    enum DragDropRenderingState {
-        /** No drag-and-drop is taking place at all with this Wnd. */
-        NOT_DRAGGED,
-
-        /** This Wnd is being dragged-and-dropped, but we're currently rendering
-            the unmoving copy.  The dragged copy is rendered at another time. */
-        IN_PLACE_COPY,
-
-        /** This Wnd is being dragged-and-dropped, and it is currently over a
-            drop target that \b will \b not accept it. */
-        DRAGGED_OVER_UNACCEPTING_DROP_TARGET,
-
-        /** This Wnd is being dragged-and-dropped, and it is currently over a
-            drop target that \b will accept it. */
-        DRAGGED_OVER_ACCEPTING_DROP_TARGET
-    };
-
-    /** \name Structors */ ///@{
-    Wnd(); ///< Default ctor.
-
-    /** Ctor that allows a size and position to be specified, as well as
-        creation flags. */
-    Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
-    //@}
-
-    /** \name Accessors */ ///@{
-    /** Returns the states the Wnd is in, with respect to drag-and-drop
-        operations.  Wnds may wish to consider the current state when
-        rendering to provide visual feedback to the user. */
-    DragDropRenderingState GetDragDropRenderingState() const;
-    //@}
-
-    /** \name Mutators */ ///@{
     /** Handles an WndEvent destined for Wnd \a w, but which this Wnd is
         allowed to handle first.  Returns true if this filter processed the
         message. */
@@ -822,6 +821,9 @@ protected:
     /** Handles all messages, and calls appropriate function (LButtonDown(),
         LDrag(), etc.). */
     void HandleEvent(const WndEvent& event);
+
+    /** Sends \a event to Parent() for processing, if Parent() is non-null. */
+    void ForwardEventToParent(const WndEvent& event);
     //@}
 
     /** Modal Wnd's set this to true to stop modal loop. */

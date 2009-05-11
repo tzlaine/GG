@@ -155,57 +155,6 @@ void Scroll::Render()
     FlatRectangle(ul, lr, int_color_to_use, CLR_ZERO, 0);
 }
 
-void Scroll::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    if (!Disabled()) {
-        // when a button is pressed, record the region of the control the cursor is over
-        ScrollRegion region = RegionUnder(pt);
-        if (m_initial_depressed_region == SBR_NONE)
-            m_initial_depressed_region = region;
-        m_depressed_region = region;
-        if (m_depressed_region == m_initial_depressed_region) {
-            switch (m_depressed_region)
-            {
-            case SBR_PAGE_DN: {
-                int old_posn = m_posn;
-                ScrollPageDecr();
-                if (old_posn != m_posn) {
-                    ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-                    ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-                }
-                break;
-            }
-            case SBR_PAGE_UP: {
-                int old_posn = m_posn;
-                ScrollPageIncr();
-                if (old_posn != m_posn) {
-                    ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-                    ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-                }
-                break;
-            }
-            default: break;
-            }
-        }
-    }
-}
-
-void Scroll::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    if (!Disabled()) {
-        m_decr->SetState(Button::BN_UNPRESSED);
-        m_incr->SetState(Button::BN_UNPRESSED);
-        m_initial_depressed_region = SBR_NONE;
-        m_depressed_region = SBR_NONE;
-    }
-}
-
-void Scroll::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ LButtonUp(pt, mod_keys); }
-
-void Scroll::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
-{ LButtonUp(pt, mod_keys); }
-
 void Scroll::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
@@ -345,6 +294,57 @@ Button* Scroll::IncrButton() const
 
 Button* Scroll::DecrButton() const
 { return m_decr; }
+
+void Scroll::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
+{
+    if (!Disabled()) {
+        // when a button is pressed, record the region of the control the cursor is over
+        ScrollRegion region = RegionUnder(pt);
+        if (m_initial_depressed_region == SBR_NONE)
+            m_initial_depressed_region = region;
+        m_depressed_region = region;
+        if (m_depressed_region == m_initial_depressed_region) {
+            switch (m_depressed_region)
+            {
+            case SBR_PAGE_DN: {
+                int old_posn = m_posn;
+                ScrollPageDecr();
+                if (old_posn != m_posn) {
+                    ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                    ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                }
+                break;
+            }
+            case SBR_PAGE_UP: {
+                int old_posn = m_posn;
+                ScrollPageIncr();
+                if (old_posn != m_posn) {
+                    ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                    ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+                }
+                break;
+            }
+            default: break;
+            }
+        }
+    }
+}
+
+void Scroll::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
+{
+    if (!Disabled()) {
+        m_decr->SetState(Button::BN_UNPRESSED);
+        m_incr->SetState(Button::BN_UNPRESSED);
+        m_initial_depressed_region = SBR_NONE;
+        m_depressed_region = SBR_NONE;
+    }
+}
+
+void Scroll::LClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ LButtonUp(pt, mod_keys); }
+
+void Scroll::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
+{ LButtonUp(pt, mod_keys); }
 
 bool Scroll::EventFilter(Wnd* w, const WndEvent& event)
 {

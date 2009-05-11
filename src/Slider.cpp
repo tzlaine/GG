@@ -151,90 +151,6 @@ void Slider::Render()
     }
 }
 
-bool Slider::EventFilter(Wnd* w, const WndEvent& event)
-{
-    if (w == m_tab) {
-        switch (event.Type()) {
-        case WndEvent::LDrag: {
-            if (!Disabled()) {
-                Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
-                if (m_orientation == VERTICAL) {
-                    new_ul.x = m_tab->RelativeUpperLeft().x;
-                    new_ul.y = std::max(Y0, std::min(new_ul.y, ClientHeight() - m_tab->Height()));
-                } else {
-                    new_ul.x = std::max(X0, std::min(new_ul.x, ClientWidth() - m_tab->Width()));
-                    new_ul.y = m_tab->RelativeUpperLeft().y;
-                }
-                m_tab->MoveTo(new_ul);
-                UpdatePosn();
-            }
-            return true;
-        }
-        case WndEvent::LButtonDown:
-            m_dragging_tab = true;
-            break;
-        case WndEvent::LButtonUp:
-        case WndEvent::LClick: {
-            if (!Disabled())
-                SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
-            m_dragging_tab = false;
-            break;
-        }
-        case WndEvent::MouseLeave:
-            return m_dragging_tab;
-        default:
-            break;
-        }
-    }
-    return false;
-}
-
-void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ SlideToImpl(m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize(), true); }
-
-void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (!Disabled()) {
-        switch (key) {
-        case GGK_HOME:
-            SlideToImpl(m_range_min, true);
-            break;
-        case GGK_END:
-            SlideToImpl(m_range_max, true);
-            break;
-        case GGK_UP:
-            if (m_orientation != HORIZONTAL)
-                SlideToImpl(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1), true);
-            break;
-        case GGK_RIGHT:
-            if (m_orientation != VERTICAL)
-                SlideToImpl(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1), true);
-            break;
-        case GGK_DOWN:
-            if (m_orientation != HORIZONTAL)
-                SlideToImpl(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1), true);
-            break;
-        case GGK_LEFT:
-            if (m_orientation != VERTICAL)
-                SlideToImpl(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1), true);
-            break;
-        case GGK_PLUS:
-        case GGK_KP_PLUS:
-            SlideToImpl(m_posn + 1, true);
-            break;
-        case GGK_MINUS:
-        case GGK_KP_MINUS:
-            SlideToImpl(m_posn - 1, true);
-            break;
-        default:
-            Control::KeyPress(key, key_code_point, mod_keys);
-            break;
-        }
-    } else {
-        Control::KeyPress(key, key_code_point, mod_keys);
-    }
-}
-
 void Slider::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
@@ -319,6 +235,90 @@ int Slider::PtToPosn(const Pt& pt) const
     }
     double fractional_distance = static_cast<double>(pixel_nearest_to_pt_on_line) / (line_max - line_min);
     return m_range_min + static_cast<int>((m_range_max - m_range_min) * fractional_distance);
+}
+
+void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ SlideToImpl(m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize(), true); }
+
+void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{
+    if (!Disabled()) {
+        switch (key) {
+        case GGK_HOME:
+            SlideToImpl(m_range_min, true);
+            break;
+        case GGK_END:
+            SlideToImpl(m_range_max, true);
+            break;
+        case GGK_UP:
+            if (m_orientation != HORIZONTAL)
+                SlideToImpl(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1), true);
+            break;
+        case GGK_RIGHT:
+            if (m_orientation != VERTICAL)
+                SlideToImpl(m_posn + (0 < (m_range_max - m_range_min) ? 1 : -1), true);
+            break;
+        case GGK_DOWN:
+            if (m_orientation != HORIZONTAL)
+                SlideToImpl(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1), true);
+            break;
+        case GGK_LEFT:
+            if (m_orientation != VERTICAL)
+                SlideToImpl(m_posn - (0 < (m_range_max - m_range_min) ? 1 : -1), true);
+            break;
+        case GGK_PLUS:
+        case GGK_KP_PLUS:
+            SlideToImpl(m_posn + 1, true);
+            break;
+        case GGK_MINUS:
+        case GGK_KP_MINUS:
+            SlideToImpl(m_posn - 1, true);
+            break;
+        default:
+            Control::KeyPress(key, key_code_point, mod_keys);
+            break;
+        }
+    } else {
+        Control::KeyPress(key, key_code_point, mod_keys);
+    }
+}
+
+bool Slider::EventFilter(Wnd* w, const WndEvent& event)
+{
+    if (w == m_tab) {
+        switch (event.Type()) {
+        case WndEvent::LDrag: {
+            if (!Disabled()) {
+                Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
+                if (m_orientation == VERTICAL) {
+                    new_ul.x = m_tab->RelativeUpperLeft().x;
+                    new_ul.y = std::max(Y0, std::min(new_ul.y, ClientHeight() - m_tab->Height()));
+                } else {
+                    new_ul.x = std::max(X0, std::min(new_ul.x, ClientWidth() - m_tab->Width()));
+                    new_ul.y = m_tab->RelativeUpperLeft().y;
+                }
+                m_tab->MoveTo(new_ul);
+                UpdatePosn();
+            }
+            return true;
+        }
+        case WndEvent::LButtonDown:
+            m_dragging_tab = true;
+            break;
+        case WndEvent::LButtonUp:
+        case WndEvent::LClick: {
+            if (!Disabled())
+                SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
+            m_dragging_tab = false;
+            break;
+        }
+        case WndEvent::MouseLeave:
+            return m_dragging_tab;
+        default:
+            break;
+        }
+    }
+    return false;
 }
 
 void Slider::MoveTabToPosn()

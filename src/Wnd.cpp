@@ -835,60 +835,6 @@ void Wnd::SetLayoutCellMargin(unsigned int margin)
 
 void Wnd::Render() {}
 
-void Wnd::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {if (Dragable()) OffsetMove(move);}
-
-void Wnd::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::LClick(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {LClick(pt, mod_keys);}
-
-void Wnd::MButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::MDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {}
-
-void Wnd::MButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::MClick(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::MDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {MClick(pt, mod_keys);}
-
-void Wnd::RButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::RDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {}
-
-void Wnd::RButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::RClick(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::RDoubleClick(const Pt& pt, Flags<ModKey> mod_keys) {RClick(pt, mod_keys);}
-
-void Wnd::MouseEnter(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::MouseHere(const Pt& pt, Flags<ModKey> mod_keys) {}
-
-void Wnd::MouseLeave() {}
-
-void Wnd::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys) {}
-
-void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys) {}
-
-void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys) {}
-
-void Wnd::DragDropLeave() {}
-
-void Wnd::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys) {}
-
-void Wnd::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys) {}
-
-void Wnd::GainingFocus() {}
-
-void Wnd::LosingFocus() {}
-
-void Wnd::TimerFiring(unsigned int ticks, Timer* timer) {}
-
 int Wnd::Run()
 {
     int retval = 0;
@@ -987,6 +933,64 @@ Wnd::DragDropRenderingState Wnd::GetDragDropRenderingState() const
     return retval;
 }
 
+void Wnd::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
+{ if (Dragable()) OffsetMove(move); }
+
+void Wnd::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::LClick(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ LClick(pt, mod_keys); }
+
+void Wnd::MButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {}
+
+void Wnd::MButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MClick(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MDoubleClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ MClick(pt, mod_keys); }
+
+void Wnd::RButtonDown(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::RDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys) {}
+
+void Wnd::RButtonUp(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::RClick(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::RDoubleClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ RClick(pt, mod_keys); }
+
+void Wnd::MouseEnter(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MouseHere(const Pt& pt, Flags<ModKey> mod_keys) {}
+
+void Wnd::MouseLeave() {}
+
+void Wnd::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys) {}
+
+void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys) {}
+
+void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys) {}
+
+void Wnd::DragDropLeave() {}
+
+void Wnd::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys) {}
+
+void Wnd::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys) {}
+
+void Wnd::GainingFocus() {}
+
+void Wnd::LosingFocus() {}
+
+void Wnd::TimerFiring(unsigned int ticks, Timer* timer) {}
+
 bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
 { return false; }
 
@@ -1082,6 +1086,12 @@ void Wnd::HandleEvent(const WndEvent& event)
     default:
         break;
     }
+}
+
+void Wnd::ForwardEventToParent(const WndEvent& event)
+{
+    if (Wnd* p = Parent())
+        p->HandleEvent(event);
 }
 
 void Wnd::ValidateFlags()

@@ -77,12 +77,6 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
-    virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   MouseLeave();
 
     virtual void   SetColor(Clr c); ///< Sets the control's color; does not affect the text color
 
@@ -102,6 +96,13 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+    virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   MouseLeave();
+
     virtual void   RenderUnpressed();   ///< Draws the button unpressed.  If an unpressed graphic has been supplied, it is used.
     virtual void   RenderPressed();     ///< Draws the button pressed.  If an pressed graphic has been supplied, it is used.
     virtual void   RenderRollover();    ///< Draws the button rolled-over.  If an rollover graphic has been supplied, it is used.
@@ -174,7 +175,6 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void     Render();
-    virtual void     LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void     SizeMove(const Pt& ul, const Pt& lr);
 
     void             Reset();                 ///< Unchecks button
@@ -202,6 +202,8 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys);
+
     void RepositionButton();      ///< Places the button at the appropriate position based on the style flags, without resizing it
     //@}
 

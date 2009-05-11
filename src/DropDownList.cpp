@@ -228,72 +228,6 @@ void DropDownList::Render()
     }
 }
 
-void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{
-    if (!Disabled()) {
-        ModalListPicker picker(this, m_LB);
-        const ListBox::SelectionSet& LB_sels = m_LB->Selections();
-        if (!LB_sels.empty()) {
-            if (m_LB->m_vscroll) {
-                m_LB->m_vscroll->ScrollTo(0);
-                SignalScroll(*m_LB->m_vscroll, true);
-            }
-        }
-        m_LB->m_first_col_shown = 0;
-        picker.Run();
-    }
-}
-
-void DropDownList::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (!Disabled()) {
-        switch (key) {
-        case GGK_UP: // arrow-up (not numpad arrow)
-            if (m_current_item != m_LB->end() && m_current_item != m_LB->begin())
-                SelectImpl(boost::prior(m_current_item), true);
-            break;
-        case GGK_DOWN: // arrow-down (not numpad arrow)
-            if (m_current_item != m_LB->end() && m_current_item != --m_LB->end())
-                SelectImpl(boost::next(m_current_item), true);
-            break;
-        case GGK_PAGEUP: // page up key (not numpad key)
-            if (m_LB->NumRows() && m_current_item != m_LB->end()) {
-                std::size_t i = 10;
-                iterator it = m_current_item;
-                while (i && it != m_LB->begin()) {
-                    --it;
-                    --i;
-                }
-                SelectImpl(it, true);
-            }
-            break;
-        case GGK_PAGEDOWN: // page down key (not numpad key)
-            if (m_LB->NumRows()) {
-                std::size_t i = 10;
-                iterator it = m_current_item;
-                while (i && it != --m_LB->end()) {
-                    ++it;
-                    ++i;
-                }
-                SelectImpl(it, true);
-            }
-            break;
-        case GGK_HOME: // home key (not numpad)
-            if (m_LB->NumRows())
-                SelectImpl(m_LB->begin(), true);
-            break;
-        case GGK_END: // end key (not numpad)
-            if (m_LB->NumRows() && !m_LB->Empty())
-                SelectImpl(--m_LB->end(), true);
-            break;
-        default:
-            Control::KeyPress(key, key_code_point, mod_keys);
-        }
-    } else {
-        Control::KeyPress(key, key_code_point, mod_keys);
-    }
-}
-
 void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
 {
     // adjust size to keep correct height based on row height, etc.
@@ -390,6 +324,72 @@ void DropDownList::DefineAttributes(WndEditor* editor)
     editor->Label("DropDownList");
     // TODO: Handle the representation of the current item.
     //editor->Attribute("Current Item", m_current_item);
+}
+
+void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
+{
+    if (!Disabled()) {
+        ModalListPicker picker(this, m_LB);
+        const ListBox::SelectionSet& LB_sels = m_LB->Selections();
+        if (!LB_sels.empty()) {
+            if (m_LB->m_vscroll) {
+                m_LB->m_vscroll->ScrollTo(0);
+                SignalScroll(*m_LB->m_vscroll, true);
+            }
+        }
+        m_LB->m_first_col_shown = 0;
+        picker.Run();
+    }
+}
+
+void DropDownList::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{
+    if (!Disabled()) {
+        switch (key) {
+        case GGK_UP: // arrow-up (not numpad arrow)
+            if (m_current_item != m_LB->end() && m_current_item != m_LB->begin())
+                SelectImpl(boost::prior(m_current_item), true);
+            break;
+        case GGK_DOWN: // arrow-down (not numpad arrow)
+            if (m_current_item != m_LB->end() && m_current_item != --m_LB->end())
+                SelectImpl(boost::next(m_current_item), true);
+            break;
+        case GGK_PAGEUP: // page up key (not numpad key)
+            if (m_LB->NumRows() && m_current_item != m_LB->end()) {
+                std::size_t i = 10;
+                iterator it = m_current_item;
+                while (i && it != m_LB->begin()) {
+                    --it;
+                    --i;
+                }
+                SelectImpl(it, true);
+            }
+            break;
+        case GGK_PAGEDOWN: // page down key (not numpad key)
+            if (m_LB->NumRows()) {
+                std::size_t i = 10;
+                iterator it = m_current_item;
+                while (i && it != --m_LB->end()) {
+                    ++it;
+                    ++i;
+                }
+                SelectImpl(it, true);
+            }
+            break;
+        case GGK_HOME: // home key (not numpad)
+            if (m_LB->NumRows())
+                SelectImpl(m_LB->begin(), true);
+            break;
+        case GGK_END: // end key (not numpad)
+            if (m_LB->NumRows() && !m_LB->Empty())
+                SelectImpl(--m_LB->end(), true);
+            break;
+        default:
+            Control::KeyPress(key, key_code_point, mod_keys);
+        }
+    } else {
+        Control::KeyPress(key, key_code_point, mod_keys);
+    }
 }
 
 ListBox* DropDownList::LB()

@@ -180,6 +180,117 @@ void Edit::Render()
     EndScissorClipping();
 }
 
+void Edit::SetColor(Clr c)
+{ Control::SetColor(c); }
+
+void Edit::SetInteriorColor(Clr c)
+{ m_int_color = c; }
+
+void Edit::SetHiliteColor(Clr c)
+{ m_hilite_color = c; }
+
+void Edit::SetSelectedTextColor(Clr c)
+{ m_sel_text_color = c; }
+
+void Edit::SelectAll()
+{
+    m_cursor_pos.first = Length();
+    m_cursor_pos.second = CP0;
+    AdjustView();
+}
+
+void Edit::SelectRange(CPSize from, CPSize to)
+{
+    if (from < to) {
+        m_cursor_pos.first = std::max(CP0, from);
+        m_cursor_pos.second = std::min(to, Length());
+    } else {
+        m_cursor_pos.first = std::min(from, Length());
+        m_cursor_pos.second = std::max(CP0, to);
+    }
+    AdjustView();
+}
+
+void Edit::SetText(const std::string& str)
+{
+    TextControl::SetText(str);
+    m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
+
+    // make sure the change in text did not make the cursor or view position invalid
+    if (str.empty() || GetLineData().empty() || GetLineData()[0].char_data.size() < m_cursor_pos.first) {
+        m_first_char_shown = CP0;
+        m_cursor_pos = std::make_pair(CP0, CP0);
+    }
+
+    m_recently_edited = true;
+}
+
+void Edit::DefineAttributes(WndEditor* editor)
+{
+    if (!editor)
+        return;
+    TextControl::DefineAttributes(editor);
+    editor->Label("Edit");
+    editor->Attribute("Interior Color", m_int_color);
+    editor->Attribute("Highlighting Color", m_hilite_color);
+    editor->Attribute("Selected Text Color", m_sel_text_color);
+}
+
+bool Edit::MultiSelected() const
+{ return m_cursor_pos.first != m_cursor_pos.second; }
+
+CPSize Edit::FirstCharShown() const
+{ return m_first_char_shown; }
+
+bool Edit::RecentlyEdited() const
+{ return m_recently_edited; }
+
+CPSize Edit::CharIndexOf(X x) const
+{
+    CPSize retval;
+    X first_char_offset = FirstCharOffset();
+    for (retval = CP0; retval < Length(); ++retval) {
+        X curr_extent;
+        if (x + first_char_offset <= (curr_extent = GetLineData()[0].char_data[Value(retval)].extent)) { // the point falls within the character at index retval
+            X prev_extent = retval ? GetLineData()[0].char_data[Value(retval - 1)].extent : X0;
+            X half_way = (prev_extent + curr_extent) / 2;
+            if (half_way <= x + first_char_offset) // if the point is more than halfway across the character, put the cursor *after* the character
+                ++retval;
+            break;
+        }
+    }
+    return retval;
+}
+
+X Edit::FirstCharOffset() const
+{ return (m_first_char_shown ? GetLineData()[0].char_data[Value(m_first_char_shown - 1)].extent : X0); }
+
+X Edit::ScreenPosOfChar(CPSize idx) const
+{
+    X first_char_offset = FirstCharOffset();
+    return UpperLeft().x + PIXEL_MARGIN + ((idx ? GetLineData()[0].char_data[Value(idx - 1)].extent : X0) - first_char_offset);
+}
+
+CPSize Edit::LastVisibleChar() const
+{
+    X first_char_offset = FirstCharOffset();
+    CPSize retval = m_first_char_shown;
+    for ( ; retval < Length(); ++retval) {
+        if (Size().x - 2 * PIXEL_MARGIN <= (retval ? GetLineData()[0].char_data[Value(retval - 1)].extent : X0) - first_char_offset)
+            break;
+    }
+    return retval;
+}
+
+unsigned int Edit::LastButtonDownTime() const
+{ return m_last_button_down_time; }
+
+bool Edit::InDoubleButtonDownMode() const
+{ return m_in_double_click_mode; }
+
+std::pair<CPSize, CPSize> Edit::DoubleButtonDownCursorPos() const
+{ return m_double_click_cursor_pos; }
+
 void Edit::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
@@ -339,117 +450,6 @@ void Edit::LosingFocus()
     if (m_recently_edited)
         FocusUpdateSignal(Text());
 }
-
-void Edit::SetColor(Clr c)
-{ Control::SetColor(c); }
-
-void Edit::SetInteriorColor(Clr c)
-{ m_int_color = c; }
-
-void Edit::SetHiliteColor(Clr c)
-{ m_hilite_color = c; }
-
-void Edit::SetSelectedTextColor(Clr c)
-{ m_sel_text_color = c; }
-
-void Edit::SelectAll()
-{
-    m_cursor_pos.first = Length();
-    m_cursor_pos.second = CP0;
-    AdjustView();
-}
-
-void Edit::SelectRange(CPSize from, CPSize to)
-{
-    if (from < to) {
-        m_cursor_pos.first = std::max(CP0, from);
-        m_cursor_pos.second = std::min(to, Length());
-    } else {
-        m_cursor_pos.first = std::min(from, Length());
-        m_cursor_pos.second = std::max(CP0, to);
-    }
-    AdjustView();
-}
-
-void Edit::SetText(const std::string& str)
-{
-    TextControl::SetText(str);
-    m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
-
-    // make sure the change in text did not make the cursor or view position invalid
-    if (str.empty() || GetLineData().empty() || GetLineData()[0].char_data.size() < m_cursor_pos.first) {
-        m_first_char_shown = CP0;
-        m_cursor_pos = std::make_pair(CP0, CP0);
-    }
-
-    m_recently_edited = true;
-}
-
-void Edit::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    TextControl::DefineAttributes(editor);
-    editor->Label("Edit");
-    editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Highlighting Color", m_hilite_color);
-    editor->Attribute("Selected Text Color", m_sel_text_color);
-}
-
-bool Edit::MultiSelected() const
-{ return m_cursor_pos.first != m_cursor_pos.second; }
-
-CPSize Edit::FirstCharShown() const
-{ return m_first_char_shown; }
-
-bool Edit::RecentlyEdited() const
-{ return m_recently_edited; }
-
-CPSize Edit::CharIndexOf(X x) const
-{
-    CPSize retval;
-    X first_char_offset = FirstCharOffset();
-    for (retval = CP0; retval < Length(); ++retval) {
-        X curr_extent;
-        if (x + first_char_offset <= (curr_extent = GetLineData()[0].char_data[Value(retval)].extent)) { // the point falls within the character at index retval
-            X prev_extent = retval ? GetLineData()[0].char_data[Value(retval - 1)].extent : X0;
-            X half_way = (prev_extent + curr_extent) / 2;
-            if (half_way <= x + first_char_offset) // if the point is more than halfway across the character, put the cursor *after* the character
-                ++retval;
-            break;
-        }
-    }
-    return retval;
-}
-
-X Edit::FirstCharOffset() const
-{ return (m_first_char_shown ? GetLineData()[0].char_data[Value(m_first_char_shown - 1)].extent : X0); }
-
-X Edit::ScreenPosOfChar(CPSize idx) const
-{
-    X first_char_offset = FirstCharOffset();
-    return UpperLeft().x + PIXEL_MARGIN + ((idx ? GetLineData()[0].char_data[Value(idx - 1)].extent : X0) - first_char_offset);
-}
-
-CPSize Edit::LastVisibleChar() const
-{
-    X first_char_offset = FirstCharOffset();
-    CPSize retval = m_first_char_shown;
-    for ( ; retval < Length(); ++retval) {
-        if (Size().x - 2 * PIXEL_MARGIN <= (retval ? GetLineData()[0].char_data[Value(retval - 1)].extent : X0) - first_char_offset)
-            break;
-    }
-    return retval;
-}
-
-unsigned int Edit::LastButtonDownTime() const
-{ return m_last_button_down_time; }
-
-bool Edit::InDoubleButtonDownMode() const
-{ return m_in_double_click_mode; }
-
-std::pair<CPSize, CPSize> Edit::DoubleButtonDownCursorPos() const
-{ return m_double_click_cursor_pos; }
 
 std::pair<CPSize, CPSize> Edit::GetDoubleButtonDownWordIndices(CPSize char_index)
 {

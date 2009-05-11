@@ -347,12 +347,6 @@ public:
     virtual void   AcceptDrops(const std::vector<Wnd*>& wnds, const Pt& pt);
     virtual void   ChildrenDraggedAway(const std::vector<Wnd*>& wnds, const Wnd* destination);
     virtual void   Render();
-    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void   MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-    virtual void   DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
-    virtual void   DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
-    virtual void   DragDropLeave();
-    virtual void   TimerFiring(unsigned int ticks, Timer* timer);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);  ///< resizes the control, then resizes the scrollbars as needed
 
@@ -513,6 +507,13 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void    KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void    MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+    virtual void    DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
+    virtual void    DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys);
+    virtual void    DragDropLeave();
+    virtual void    TimerFiring(unsigned int ticks, Timer* timer);
+
     virtual bool    EventFilter(Wnd* w, const WndEvent& event);
 
     iterator        Insert(Row* row, iterator it, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before \a it; returns insertion point

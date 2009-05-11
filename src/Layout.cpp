@@ -499,24 +499,6 @@ void Layout::Render()
     }
 }
 
-void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{
-    if (Parent())
-        Parent()->MouseWheel(pt, move, mod_keys);
-}
-
-void Layout::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (Parent())
-        Parent()->KeyPress(key, key_code_point, mod_keys);
-}
-
-void Layout::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (Parent())
-        Parent()->KeyRelease(key, key_code_point, mod_keys);
-}
-
 void Layout::Add(Wnd* wnd, std::size_t row, std::size_t column, Flags<Alignment> alignment/* = ALIGN_NONE*/)
 { Add(wnd, row, column, 1, 1, alignment); }
 
@@ -668,6 +650,15 @@ void Layout::DefineAttributes(WndEditor* editor)
     editor->Attribute<unsigned int>("Cell Margin", m_cell_margin, set_margin_action);
     // TODO: handle setting the number of rows and columns
 }
+
+void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(WndEvent(WndEvent::MouseWheel, pt, move, mod_keys)); }
+
+void Layout::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(WndEvent(WndEvent::KeyPress, key, key_code_point, mod_keys)); }
+
+void Layout::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(WndEvent(WndEvent::KeyRelease, key, key_code_point, mod_keys)); }
 
 double Layout::TotalStretch(const std::vector<RowColParams>& params_vec) const
 {

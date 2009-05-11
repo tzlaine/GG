@@ -100,13 +100,6 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void Render();
-    virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
-    virtual void LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void GainingFocus();
-    virtual void LosingFocus();
 
     virtual void SetColor(Clr c);
 
@@ -182,6 +175,14 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
+    virtual void LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void GainingFocus();
+    virtual void LosingFocus();
+
     /** Does a bit more than its name suggests.  Records the current time, and
         if it's within GUI::DoubleClickInterval() of the last button down
         time, returns the code point indices that delimit the word around

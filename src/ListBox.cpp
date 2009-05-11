@@ -789,203 +789,6 @@ void ListBox::Render()
     }
 }
 
-void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    if (!Disabled()) {
-        bool bring_caret_into_view = true;
-        switch (key) {
-        case GGK_SPACE: // space bar (selects item under caret like a mouse click)
-            if (m_caret != m_rows.end()) {
-                m_old_sel_row_selected = m_selections.find(m_caret) != m_selections.end();
-                ClickAtRow(m_caret, mod_keys);
-            }
-            break;
-        case GGK_DELETE: // delete key
-            if (m_style & LIST_USERDELETE) {
-                if (m_style & LIST_NOSEL) {
-                    if (m_caret != m_rows.end())
-                        delete Erase(m_caret, false, true);
-                } else {
-                    for (SelectionSet::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
-                        delete Erase(*it, false, true);
-                    }
-                    m_selections.clear();
-                }
-            }
-            break;
-
-        // vertical scrolling keys
-        case GGK_UP: // arrow-up (not numpad arrow)
-            if (m_caret != m_rows.end() && m_caret != m_rows.begin())
-                --m_caret;
-            break;
-        case GGK_DOWN: // arrow-down (not numpad arrow)
-            if (m_caret != m_rows.end() && m_caret != --m_rows.end())
-                ++m_caret;
-            break;
-        case GGK_PAGEUP: // page up key (not numpad key)
-            if (m_caret != m_rows.end()) {
-                Y space = ClientSize().y;
-                while (m_caret != m_rows.begin() && 0 < (space -= (*boost::prior(m_caret))->Height())) {
-                    --m_caret;
-                }
-            }
-            break;
-        case GGK_PAGEDOWN: // page down key (not numpad key)
-            if (m_caret != m_rows.end()) {
-                Y space = ClientSize().y;
-                while (m_caret != --m_rows.end() && 0 < (space -= (*m_caret)->Height())) {
-                    ++m_caret;
-                }
-            }
-            break;
-        case GGK_HOME: // home key (not numpad)
-            if (m_caret != m_rows.end())
-                m_caret = m_rows.begin();
-            break;
-        case GGK_END: // end key (not numpad)
-            if (m_caret != m_rows.end())
-                m_caret = --m_rows.end();
-            break;
-
-        // horizontal scrolling keys
-        case GGK_LEFT: // left key (not numpad key)
-            if (m_first_col_shown) {
-                --m_first_col_shown;
-                m_hscroll->ScrollTo(
-                    Value(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, X0)));
-                SignalScroll(*m_hscroll, true);
-            }
-            break;
-        case GGK_RIGHT:{ // right key (not numpad)
-            std::size_t last_fully_visible_col = LastVisibleCol();
-            if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, X0) >
-                ClientSize().x) {
-                --last_fully_visible_col;
-            }
-            if (last_fully_visible_col < m_col_widths.size() - 1) {
-                ++m_first_col_shown;
-                m_hscroll->ScrollTo(
-                    Value(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, X0)));
-                SignalScroll(*m_hscroll, true);
-            }
-            break;}
-
-        // any other key gets passed along to the parent
-        default:
-            Control::KeyPress(key, key_code_point, mod_keys);
-            bring_caret_into_view = false;
-        }
-
-        if (bring_caret_into_view &&
-            key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT) {
-            BringCaretIntoView();
-        }
-    } else {
-        Control::KeyPress(key, key_code_point, mod_keys);
-   }
-}
-
-void ListBox::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{
-    if (m_vscroll) {
-        for (int i = 0; i < move; ++i) {
-            if (m_first_row_shown != m_rows.end() && m_first_row_shown != m_rows.begin()) {
-                m_vscroll->ScrollTo(m_vscroll->PosnRange().first -
-                                    Value((*boost::prior(m_first_row_shown))->Height()));
-                SignalScroll(*m_vscroll, true);
-            }
-        }
-        for (int i = 0; i < -move; ++i) {
-            if (m_first_row_shown != m_rows.end() && m_first_row_shown != --m_rows.end()) {
-                m_vscroll->ScrollTo(m_vscroll->PosnRange().first +
-                                    Value((*m_first_row_shown)->Height()));
-                SignalScroll(*m_vscroll, true);
-            }
-        }
-    }
-}
-
-void ListBox::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
-{
-    ResetAutoScrollVars();
-    DragDropHere(pt, drag_drop_wnds, mod_keys);
-}
-
-void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
-{
-    if (!m_rows.empty() && m_auto_scroll_during_drag_drops && InClient(pt)) {
-        const Pt MARGIN_OFFSET = Pt(X(m_auto_scroll_margin), Y(m_auto_scroll_margin));
-        Rect client_no_scroll_hole(ClientUpperLeft() + MARGIN_OFFSET, ClientLowerRight() - MARGIN_OFFSET);
-        m_auto_scrolling_up = pt.y < client_no_scroll_hole.ul.y;
-        m_auto_scrolling_down = client_no_scroll_hole.lr.y < pt.y;
-        m_auto_scrolling_left = pt.x < client_no_scroll_hole.ul.x;
-        m_auto_scrolling_right = client_no_scroll_hole.lr.x < pt.x;
-        if (m_auto_scrolling_up || m_auto_scrolling_down || m_auto_scrolling_left || m_auto_scrolling_right) {
-            bool acceptible_drop = false;
-            for (std::map<Wnd*, GG::Pt>::const_iterator it = drag_drop_wnds.begin(); it != drag_drop_wnds.end(); ++it) {
-                if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
-                    m_allowed_drop_types.find(it->first->DragDropDataType()) != m_allowed_drop_types.end()) {
-                    acceptible_drop = true;
-                    break;
-                }
-            }
-            if (acceptible_drop) {
-                if (!m_auto_scroll_timer.Running()) {
-                    m_auto_scroll_timer.Reset(GUI::GetGUI()->Ticks());
-                    m_auto_scroll_timer.Start();
-                }
-            } else {
-                DragDropLeave();
-            }
-        }
-    }
-}
-
-void ListBox::DragDropLeave()
-{ ResetAutoScrollVars(); }
-
-void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
-{
-    if (timer == &m_auto_scroll_timer && !m_rows.empty()) {
-        if (m_vscroll) {
-            if (m_auto_scrolling_up &&
-                m_first_row_shown != m_rows.end() &&
-                m_first_row_shown != m_rows.begin()) {
-                m_vscroll->ScrollTo(m_vscroll->PosnRange().first -
-                                    Value((*boost::prior(m_first_row_shown))->Height()));
-                SignalScroll(*m_vscroll, true);
-            }
-            if (m_auto_scrolling_down) {
-                iterator last_visible_row = LastVisibleRow();
-                if (last_visible_row != m_rows.end() &&
-                    (last_visible_row != --m_rows.end() ||
-                     ClientLowerRight().y < (*last_visible_row)->LowerRight().y)) {
-                    m_vscroll->ScrollTo(m_vscroll->PosnRange().first +
-                                        Value((*m_first_row_shown)->Height()));
-                    SignalScroll(*m_vscroll, true);
-                }
-            }
-        }
-        if (m_hscroll) {
-            if (m_auto_scrolling_left && 0 < m_first_col_shown) {
-                m_hscroll->ScrollTo(m_hscroll->PosnRange().first -
-                                    Value(m_col_widths[m_first_col_shown - 1]));
-                SignalScroll(*m_hscroll, true);
-            }
-            if (m_auto_scrolling_right) {
-                std::size_t last_visible_col = LastVisibleCol();
-                if (last_visible_col < m_col_widths.size() - 1 ||
-                    ClientLowerRight().x < m_rows.front()->LowerRight().x) {
-                    m_hscroll->ScrollTo(m_hscroll->PosnRange().first +
-                                        Value(m_col_widths[m_first_col_shown]));
-                    SignalScroll(*m_hscroll, true);
-                }
-            }
-        }
-    }
-}
-
 void ListBox::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
@@ -1362,6 +1165,203 @@ X ListBox::HorizontalScrollPadding(X client_width_without_vertical_scroll)
         width_of_cols_visible_at_right += m_col_widths[i];
     }
     return client_width_without_vertical_scroll - width_of_cols_visible_at_right;
+}
+
+void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{
+    if (!Disabled()) {
+        bool bring_caret_into_view = true;
+        switch (key) {
+        case GGK_SPACE: // space bar (selects item under caret like a mouse click)
+            if (m_caret != m_rows.end()) {
+                m_old_sel_row_selected = m_selections.find(m_caret) != m_selections.end();
+                ClickAtRow(m_caret, mod_keys);
+            }
+            break;
+        case GGK_DELETE: // delete key
+            if (m_style & LIST_USERDELETE) {
+                if (m_style & LIST_NOSEL) {
+                    if (m_caret != m_rows.end())
+                        delete Erase(m_caret, false, true);
+                } else {
+                    for (SelectionSet::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
+                        delete Erase(*it, false, true);
+                    }
+                    m_selections.clear();
+                }
+            }
+            break;
+
+        // vertical scrolling keys
+        case GGK_UP: // arrow-up (not numpad arrow)
+            if (m_caret != m_rows.end() && m_caret != m_rows.begin())
+                --m_caret;
+            break;
+        case GGK_DOWN: // arrow-down (not numpad arrow)
+            if (m_caret != m_rows.end() && m_caret != --m_rows.end())
+                ++m_caret;
+            break;
+        case GGK_PAGEUP: // page up key (not numpad key)
+            if (m_caret != m_rows.end()) {
+                Y space = ClientSize().y;
+                while (m_caret != m_rows.begin() && 0 < (space -= (*boost::prior(m_caret))->Height())) {
+                    --m_caret;
+                }
+            }
+            break;
+        case GGK_PAGEDOWN: // page down key (not numpad key)
+            if (m_caret != m_rows.end()) {
+                Y space = ClientSize().y;
+                while (m_caret != --m_rows.end() && 0 < (space -= (*m_caret)->Height())) {
+                    ++m_caret;
+                }
+            }
+            break;
+        case GGK_HOME: // home key (not numpad)
+            if (m_caret != m_rows.end())
+                m_caret = m_rows.begin();
+            break;
+        case GGK_END: // end key (not numpad)
+            if (m_caret != m_rows.end())
+                m_caret = --m_rows.end();
+            break;
+
+        // horizontal scrolling keys
+        case GGK_LEFT: // left key (not numpad key)
+            if (m_first_col_shown) {
+                --m_first_col_shown;
+                m_hscroll->ScrollTo(
+                    Value(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, X0)));
+                SignalScroll(*m_hscroll, true);
+            }
+            break;
+        case GGK_RIGHT:{ // right key (not numpad)
+            std::size_t last_fully_visible_col = LastVisibleCol();
+            if (std::accumulate(m_col_widths.begin(), m_col_widths.begin() + last_fully_visible_col, X0) >
+                ClientSize().x) {
+                --last_fully_visible_col;
+            }
+            if (last_fully_visible_col < m_col_widths.size() - 1) {
+                ++m_first_col_shown;
+                m_hscroll->ScrollTo(
+                    Value(std::accumulate(m_col_widths.begin(), m_col_widths.begin() + m_first_col_shown, X0)));
+                SignalScroll(*m_hscroll, true);
+            }
+            break;}
+
+        // any other key gets passed along to the parent
+        default:
+            Control::KeyPress(key, key_code_point, mod_keys);
+            bring_caret_into_view = false;
+        }
+
+        if (bring_caret_into_view &&
+            key != GGK_SPACE && key != GGK_DELETE && key != GGK_LEFT && key != GGK_RIGHT) {
+            BringCaretIntoView();
+        }
+    } else {
+        Control::KeyPress(key, key_code_point, mod_keys);
+   }
+}
+
+void ListBox::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
+{
+    if (m_vscroll) {
+        for (int i = 0; i < move; ++i) {
+            if (m_first_row_shown != m_rows.end() && m_first_row_shown != m_rows.begin()) {
+                m_vscroll->ScrollTo(m_vscroll->PosnRange().first -
+                                    Value((*boost::prior(m_first_row_shown))->Height()));
+                SignalScroll(*m_vscroll, true);
+            }
+        }
+        for (int i = 0; i < -move; ++i) {
+            if (m_first_row_shown != m_rows.end() && m_first_row_shown != --m_rows.end()) {
+                m_vscroll->ScrollTo(m_vscroll->PosnRange().first +
+                                    Value((*m_first_row_shown)->Height()));
+                SignalScroll(*m_vscroll, true);
+            }
+        }
+    }
+}
+
+void ListBox::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
+{
+    ResetAutoScrollVars();
+    DragDropHere(pt, drag_drop_wnds, mod_keys);
+}
+
+void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
+{
+    if (!m_rows.empty() && m_auto_scroll_during_drag_drops && InClient(pt)) {
+        const Pt MARGIN_OFFSET = Pt(X(m_auto_scroll_margin), Y(m_auto_scroll_margin));
+        Rect client_no_scroll_hole(ClientUpperLeft() + MARGIN_OFFSET, ClientLowerRight() - MARGIN_OFFSET);
+        m_auto_scrolling_up = pt.y < client_no_scroll_hole.ul.y;
+        m_auto_scrolling_down = client_no_scroll_hole.lr.y < pt.y;
+        m_auto_scrolling_left = pt.x < client_no_scroll_hole.ul.x;
+        m_auto_scrolling_right = client_no_scroll_hole.lr.x < pt.x;
+        if (m_auto_scrolling_up || m_auto_scrolling_down || m_auto_scrolling_left || m_auto_scrolling_right) {
+            bool acceptible_drop = false;
+            for (std::map<Wnd*, GG::Pt>::const_iterator it = drag_drop_wnds.begin(); it != drag_drop_wnds.end(); ++it) {
+                if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
+                    m_allowed_drop_types.find(it->first->DragDropDataType()) != m_allowed_drop_types.end()) {
+                    acceptible_drop = true;
+                    break;
+                }
+            }
+            if (acceptible_drop) {
+                if (!m_auto_scroll_timer.Running()) {
+                    m_auto_scroll_timer.Reset(GUI::GetGUI()->Ticks());
+                    m_auto_scroll_timer.Start();
+                }
+            } else {
+                DragDropLeave();
+            }
+        }
+    }
+}
+
+void ListBox::DragDropLeave()
+{ ResetAutoScrollVars(); }
+
+void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
+{
+    if (timer == &m_auto_scroll_timer && !m_rows.empty()) {
+        if (m_vscroll) {
+            if (m_auto_scrolling_up &&
+                m_first_row_shown != m_rows.end() &&
+                m_first_row_shown != m_rows.begin()) {
+                m_vscroll->ScrollTo(m_vscroll->PosnRange().first -
+                                    Value((*boost::prior(m_first_row_shown))->Height()));
+                SignalScroll(*m_vscroll, true);
+            }
+            if (m_auto_scrolling_down) {
+                iterator last_visible_row = LastVisibleRow();
+                if (last_visible_row != m_rows.end() &&
+                    (last_visible_row != --m_rows.end() ||
+                     ClientLowerRight().y < (*last_visible_row)->LowerRight().y)) {
+                    m_vscroll->ScrollTo(m_vscroll->PosnRange().first +
+                                        Value((*m_first_row_shown)->Height()));
+                    SignalScroll(*m_vscroll, true);
+                }
+            }
+        }
+        if (m_hscroll) {
+            if (m_auto_scrolling_left && 0 < m_first_col_shown) {
+                m_hscroll->ScrollTo(m_hscroll->PosnRange().first -
+                                    Value(m_col_widths[m_first_col_shown - 1]));
+                SignalScroll(*m_hscroll, true);
+            }
+            if (m_auto_scrolling_right) {
+                std::size_t last_visible_col = LastVisibleCol();
+                if (last_visible_col < m_col_widths.size() - 1 ||
+                    ClientLowerRight().x < m_rows.front()->LowerRight().x) {
+                    m_hscroll->ScrollTo(m_hscroll->PosnRange().first +
+                                        Value(m_col_widths[m_first_col_shown]));
+                    SignalScroll(*m_hscroll, true);
+                }
+            }
+        }
+    }
 }
 
 bool ListBox::EventFilter(Wnd* w, const WndEvent& event)

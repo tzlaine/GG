@@ -147,8 +147,6 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void Render();
-    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
 
@@ -194,6 +192,9 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+
     virtual bool EventFilter(Wnd* w, const WndEvent& event);
     //@}
 
@@ -325,44 +326,6 @@ void Spin<T>::Render()
 }
 
 template<class T>
-void Spin<T>::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{
-    switch (key) {
-    case GGK_HOME:
-        SetValueImpl(m_min_value, true);
-        break;
-    case GGK_END:
-        SetValueImpl(m_max_value, true);
-        break;
-    case GGK_PAGEUP:
-    case GGK_UP:
-    case GGK_PLUS:
-    case GGK_KP_PLUS:
-        IncrImpl(true);
-        break;
-    case GGK_PAGEDOWN:
-    case GGK_DOWN:
-    case GGK_MINUS:
-    case GGK_KP_MINUS:
-        DecrImpl(true);
-        break;
-    default:
-        break;
-    }
-}
-
-template<class T>
-void Spin<T>::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{
-    for (int i = 0; i < move; ++i) {
-        IncrImpl(true);
-    }
-    for (int i = 0; i < -move; ++i) {
-        DecrImpl(true);
-    }
-}
-
-template<class T>
 void Spin<T>::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
@@ -489,6 +452,44 @@ Button* Spin<T>::DownButton() const
 template<class T>
 Edit* Spin<T>::GetEdit() const
 { return m_edit; }
+
+template<class T>
+void Spin<T>::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{
+    switch (key) {
+    case GGK_HOME:
+        SetValueImpl(m_min_value, true);
+        break;
+    case GGK_END:
+        SetValueImpl(m_max_value, true);
+        break;
+    case GGK_PAGEUP:
+    case GGK_UP:
+    case GGK_PLUS:
+    case GGK_KP_PLUS:
+        IncrImpl(true);
+        break;
+    case GGK_PAGEDOWN:
+    case GGK_DOWN:
+    case GGK_MINUS:
+    case GGK_KP_MINUS:
+        DecrImpl(true);
+        break;
+    default:
+        break;
+    }
+}
+
+template<class T>
+void Spin<T>::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
+{
+    for (int i = 0; i < move; ++i) {
+        IncrImpl(true);
+    }
+    for (int i = 0; i < -move; ++i) {
+        DecrImpl(true);
+    }
+}
 
 template<class T>
 bool Spin<T>::EventFilter(Wnd* w, const WndEvent& event)

@@ -115,8 +115,6 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void   Render();
-    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
@@ -179,6 +177,9 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void   KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+
     ListBox*       LB();                ///< returns the ListBox used to render the selected row and the popup list
     //@}
 

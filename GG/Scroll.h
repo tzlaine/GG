@@ -91,10 +91,6 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void   Render();
-    virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   LClick(const Pt& pt, Flags<ModKey> mod_keys);
-    virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
 
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
 
@@ -133,6 +129,11 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void  LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void  LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void  LClick(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void  MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
+
     virtual bool  EventFilter(Wnd* w, const WndEvent& event);
     //@}
 

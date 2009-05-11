@@ -65,7 +65,7 @@ Slider::Slider() :
 
 Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, SliderLineStyle style,
                Clr color, int unsigned tab_width, int unsigned line_width/* = 5*/,
-               Flags<WndFlag> flags/* = CLICKABLE*/) :
+               Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Control(x, y, w, h, flags),
     m_posn(min),
     m_range_min(min),

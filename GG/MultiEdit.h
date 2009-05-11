@@ -64,7 +64,7 @@ public:
     /** Ctor. */
     MultiEdit(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
               Clr color, Flags<MultiEditStyle> style = MULTI_LINEWRAP, Clr text_color = CLR_BLACK,
-              Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
+              Clr interior = CLR_ZERO, Flags<WndFlag> flags = INTERACTIVE);
 
     /** Dtor. */
     virtual ~MultiEdit();

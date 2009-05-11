@@ -59,7 +59,7 @@ public:
     /** \name Structors */ ///@{
     Slider(X x, Y y, X w, Y h, int min, int max,
            Orientation orientation, SliderLineStyle style, Clr color,
-           unsigned int tab_width, unsigned int line_width = 5, Flags<WndFlag> flags = CLICKABLE); ///< ctor
+           unsigned int tab_width, unsigned int line_width = 5, Flags<WndFlag> flags = INTERACTIVE); ///< ctor
     //@}
 
     /** \name Accessors */ ///@{

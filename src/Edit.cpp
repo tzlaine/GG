@@ -69,7 +69,7 @@ Edit::Edit() :
 {}
 
 Edit::Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
-           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) :
+           Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = INTERACTIVE*/) :
     TextControl(x, y, w, HeightFromFont(font, PIXEL_MARGIN), str, font, text_color, FORMAT_LEFT | FORMAT_IGNORETAGS, flags),
     m_cursor_pos(CP0, CP0),
     m_first_char_shown(CP0),

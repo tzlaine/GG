@@ -136,7 +136,7 @@ namespace {
 ///////////////////////////////////////
 // WndFlags
 ///////////////////////////////////////
-const WndFlag GG::CLICKABLE          (1 << 0);
+const WndFlag GG::INTERACTIVE        (1 << 0);
 const WndFlag GG::REPEAT_BUTTON_DOWN (1 << 1);
 const WndFlag GG::DRAGABLE           (1 << 2);
 const WndFlag GG::RESIZABLE          (1 << 3);
@@ -149,7 +149,7 @@ namespace {
     bool RegisterWndFlags()
     {
         FlagSpec<WndFlag>& spec = FlagSpec<WndFlag>::instance();
-        spec.insert(CLICKABLE, "CLICKABLE", true);
+        spec.insert(INTERACTIVE, "INTERACTIVE", true);
         spec.insert(REPEAT_BUTTON_DOWN, "REPEAT_BUTTON_DOWN", true);
         spec.insert(DRAGABLE, "DRAGABLE", true);
         spec.insert(RESIZABLE, "RESIZABLE", true);
@@ -184,7 +184,7 @@ Wnd::Wnd() :
     m_browse_modes[0].wnd = s_default_browse_info_wnd;
 }
 
-Wnd::Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = CLICKABLE | DRAGABLE*/) :
+Wnd::Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = INTERACTIVE | DRAGABLE*/) :
     m_done(false),
     m_parent(0),
     m_zorder(0),
@@ -225,8 +225,8 @@ Wnd::~Wnd()
     DeleteChildren();
 }
 
-bool Wnd::Clickable() const
-{ return m_flags & CLICKABLE; }
+bool Wnd::Interactive() const
+{ return m_flags & INTERACTIVE; }
 
 bool Wnd::RepeatButtonDown() const
 { return m_flags & REPEAT_BUTTON_DOWN; }
@@ -898,7 +898,7 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->Attribute("Clip Children", m_clip_children);
     editor->Attribute("Drag Drop Type", m_drag_drop_data_type);
     editor->BeginFlags(m_flags);
-    editor->Flag("Clickable", CLICKABLE);
+    editor->Flag("Interactive", INTERACTIVE);
     editor->Flag("Dragable", DRAGABLE);
     editor->Flag("Resizable", RESIZABLE);
     editor->Flag("Ontop", ONTOP);

@@ -70,7 +70,7 @@ public:
 protected:
     /** \name Structors */ ///@{
     Control(); ///< default ctor
-    Control(X x, Y y, X w, Y h, Flags<WndFlag> flags = CLICKABLE); ///< basic ctor
+    Control(X x, Y y, X w, Y h, Flags<WndFlag> flags = INTERACTIVE); ///< basic ctor
     //@}
 
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);

@@ -420,7 +420,7 @@ const std::size_t PopupMenu::INVALID_CARET = std::numeric_limits<std::size_t>::m
 
 PopupMenu::PopupMenu(X x, Y y, const boost::shared_ptr<Font>& font, const MenuItem& m, Clr text_color/* = CLR_WHITE*/,
                      Clr color/* = CLR_BLACK*/, Clr interior/* = CLR_SHADOW*/) :
-    Wnd(X0, Y0, GUI::GetGUI()->AppWidth() - 1, GUI::GetGUI()->AppHeight() - 1, CLICKABLE | MODAL),
+    Wnd(X0, Y0, GUI::GetGUI()->AppWidth() - 1, GUI::GetGUI()->AppHeight() - 1, INTERACTIVE | MODAL),
     m_font(font),
     m_border_color(color),
     m_int_color(interior),

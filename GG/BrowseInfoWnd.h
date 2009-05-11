@@ -47,7 +47,7 @@ class TextControl;
     called.  The Wnd* parameter passed in this call is the window about which
     the BrowseInfoWnd is displaying info (the target Wnd); the BrowseInfoWnd
     can collect whatever information it requires from the target Wnd before it
-    is rendered.  Note that a BrowseInfoWnd should never be CLICKABLE. */
+    is rendered.  Note that a BrowseInfoWnd should never be INTERACTIVE. */
 class GG_API BrowseInfoWnd : public Wnd
 {
 public:

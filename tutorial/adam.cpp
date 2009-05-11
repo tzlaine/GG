@@ -77,7 +77,7 @@ const GG::Y AdamDialog::HEIGHT(75);
 AdamDialog::AdamDialog() :
     Wnd((AdamGGApp::GetGUI()->AppWidth() - WIDTH) / 2,
         (AdamGGApp::GetGUI()->AppHeight() - HEIGHT) / 2,
-        WIDTH, HEIGHT, GG::CLICKABLE | GG::MODAL),
+        WIDTH, HEIGHT, GG::INTERACTIVE | GG::MODAL),
     m_font(AdamGGApp::GetGUI()->GetStyleFactory()->DefaultFont()),
     m_path_spin(new GG::Spin<PathTypes>(GG::X0, GG::Y0, GG::X(50),
                                         NONE, PathTypes(1), NONE, PATH_1,

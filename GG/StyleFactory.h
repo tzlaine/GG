@@ -88,20 +88,20 @@ public:
     /** Returns a new GG Button. */
     virtual Button*            NewButton(X x, Y y, X w, Y h, const std::string& str,
                                          const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                         Flags<WndFlag> flags = CLICKABLE) const;
+                                         Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG StateButton. */
     virtual StateButton*       NewStateButton(X x, Y y, X w, Y h, const std::string& str,
                                               const boost::shared_ptr<Font>& font, Flags<TextFormat> format, Clr color,
                                               Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                              StateButtonStyle style = SBSTYLE_3D_XBOX, Flags<WndFlag> flags = CLICKABLE) const;
+                                              StateButtonStyle style = SBSTYLE_3D_XBOX, Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG RadioButtonGroup. */
     virtual RadioButtonGroup*  NewRadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation) const;
 
     /** Returns a new GG DropDownList. */
     virtual DropDownList*      NewDropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color,
-                                               Flags<WndFlag> flags = CLICKABLE) const;
+                                               Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG DynamicGraphic. */
     virtual DynamicGraphic*    NewDynamicGraphic(X x, Y y, X w, Y h, bool loop, X frame_width, Y frame_height,
@@ -112,11 +112,11 @@ public:
     /** Returns a new GG Edit. */
     virtual Edit*              NewEdit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font,
                                        Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                       Flags<WndFlag> flags = CLICKABLE) const;
+                                       Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG ListBox. */
     virtual ListBox*           NewListBox(X x, Y y, X w, Y h, Clr color, Clr interior = CLR_ZERO,
-                                          Flags<WndFlag> flags = CLICKABLE) const;
+                                          Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG MenuBar. */
     virtual MenuBar*           NewMenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font,
@@ -127,26 +127,26 @@ public:
     virtual MultiEdit*         NewMultiEdit(X x, Y y, X w, Y h, const std::string& str,
                                             const boost::shared_ptr<Font>& font, Clr color, Flags<MultiEditStyle> style = MULTI_LINEWRAP,
                                             Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                            Flags<WndFlag> flags = CLICKABLE) const;
+                                            Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG Scroll. */
     virtual Scroll*            NewScroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior,
-                                         Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                         Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new GG Slider. */
     virtual Slider*            NewSlider(X x, Y y, X w, Y h, int min, int max, Orientation orientation,
                                          SliderLineStyle style, Clr color, int tab_width, int line_width = 5,
-                                         Flags<WndFlag> flags = CLICKABLE) const;
+                                         Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG Spin<int>. */
     virtual Spin<int>*         NewIntSpin(X x, Y y, X w, int value, int step, int min, int max, bool edits,
                                           const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                          Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE) const;
+                                          Clr interior = CLR_ZERO, Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG Spin<int>. */
     virtual Spin<double>*      NewDoubleSpin(X x, Y y, X w, double value, double step, double min, double max, bool edits,
                                              const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                             Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE) const;
+                                             Clr interior = CLR_ZERO, Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG StaticGraphic. */
     virtual StaticGraphic*     NewStaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture>& texture,
@@ -155,7 +155,7 @@ public:
     /** Returns a new GG TabBar. */
     virtual TabBar*            NewTabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color,
                                          Clr text_color = CLR_BLACK, TabBarStyle style = TAB_BAR_ATTACHED,
-                                         Flags<WndFlag> flags = CLICKABLE) const;
+                                         Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG TextControl. */
     virtual TextControl*       NewTextControl(X x, Y y, X w, Y h, const std::string& str,
@@ -171,101 +171,101 @@ public:
     /** \name Subcontrols */ ///@{
     /** Returns a new ListBox, to be used in a DropDownList. */
     virtual ListBox*           NewDropDownListListBox(X x, Y y, X w, Y h, Clr color, Clr interior = CLR_ZERO,
-                                                      Flags<WndFlag> flags = CLICKABLE) const;
+                                                      Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new vertical Scroll, to be used in a ListBox. */
     virtual Scroll*            NewListBoxVScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
-                                                 Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                 Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new horizontal Scroll, to be used in a ListBox. */
     virtual Scroll*            NewListBoxHScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
-                                                 Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                 Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new vertical Scroll, to be used in a MultiEdit. */
     virtual Scroll*            NewMultiEditVScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
-                                                   Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new horizontal Scroll, to be used in a MultiEdit. */
     virtual Scroll*            NewMultiEditHScroll(X x, Y y, X w, Y h, Clr color, Clr interior,
-                                                   Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new up (decrease) Button, to be used in a vertical Scroll. */
     virtual Button*            NewScrollUpButton(X x, Y y, X w, Y h, const std::string& str,
                                                  const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                 Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                 Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new down (increase) Button, to be used in a vertical Scroll. */
     virtual Button*            NewScrollDownButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new tab Button, to be used in a vertical Scroll. */
     virtual Button*            NewVScrollTabButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new left (decrease) Button, to be used in a horizontal Scroll. */
     virtual Button*            NewScrollLeftButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new right (increase) Button, to be used in a horizontal Scroll. */
     virtual Button*            NewScrollRightButton(X x, Y y, X w, Y h, const std::string& str,
                                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                    Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                    Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new tab Button, to be used in a horizontal Scroll. */
     virtual Button*            NewHScrollTabButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new tab Button, to be used in a vertical Slider. */
     virtual Button*            NewVSliderTabButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new tab Button, to be used in a horizontal Slider. */
     virtual Button*            NewHSliderTabButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new increase Button, to be used in a Spin. */
     virtual Button*            NewSpinIncrButton(X x, Y y, X w, Y h, const std::string& str,
                                                  const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                 Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                 Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new decrease Button, to be used in a Spin. */
     virtual Button*            NewSpinDecrButton(X x, Y y, X w, Y h, const std::string& str,
                                                  const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                 Flags<WndFlag> flags = CLICKABLE | REPEAT_BUTTON_DOWN) const;
+                                                 Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
     /** Returns a new Edit, to be used in an editable Spin. */
     virtual Edit*              NewSpinEdit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font,
                                            Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                           Flags<WndFlag> flags = CLICKABLE) const;
+                                           Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new StateButton, to be used in a TabBar. */
     virtual StateButton*       NewTabBarTab(X x, Y y, X w, Y h, const std::string& str,
                                             const boost::shared_ptr<Font>& font, Flags<TextFormat> format, Clr color,
                                             Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
-                                            StateButtonStyle style = SBSTYLE_3D_TOP_ATTACHED_TAB, Flags<WndFlag> flags = CLICKABLE) const;
+                                            StateButtonStyle style = SBSTYLE_3D_TOP_ATTACHED_TAB, Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new left Button, to be used in a TabBar. */
     virtual Button*            NewTabBarLeftButton(X x, Y y, X w, Y h, const std::string& str,
                                                    const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                   Flags<WndFlag> flags = CLICKABLE) const;
+                                                   Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new left Button, to be used in a TabBar. */
     virtual Button*            NewTabBarRightButton(X x, Y y, X w, Y h, const std::string& str,
                                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-                                                    Flags<WndFlag> flags = CLICKABLE) const;
+                                                    Flags<WndFlag> flags = INTERACTIVE) const;
     //@}
 
     /** \name Wnds */ ///@{
     /** Returns a new GG TabWnd. */
     virtual TabWnd*            NewTabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color,
                                          Clr text_color = CLR_BLACK, TabBarStyle style = TAB_BAR_ATTACHED,
-                                         Flags<WndFlag> flags = CLICKABLE | DRAGABLE) const;
+                                         Flags<WndFlag> flags = INTERACTIVE | DRAGABLE) const;
     //@}
 
     /** \name Dialogs */ ///@{

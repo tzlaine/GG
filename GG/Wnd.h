@@ -50,8 +50,9 @@ class WndEvent;
 /** Wnd creation flags type. */
 GG_FLAG_TYPE(WndFlag);
 
-/** Clicks hit this window, rather than passing through it. */
-extern GG_API const WndFlag CLICKABLE;
+/** Clicks hit this window, rather than passing through it, and mouse-overs
+    detect that they are over this window. */
+extern GG_API const WndFlag INTERACTIVE;
 
 /** When a mouse button is held down over this window, it expects to receive
     multiple *ButtonDown messages. */
@@ -255,8 +256,10 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    /** Returns true iff a click over this window does not pass through. */
-    bool Clickable() const;
+    /** Returns true iff a click over this window does not pass through.  Note
+        that this also determines whether a mouse-over will detect this window
+        or the ones under it. */
+    bool Interactive() const;
 
     /** Returns true iff holding a mouse button down over this Wnd generates
         multiple button-down messages. */
@@ -667,7 +670,7 @@ protected:
 
     /** Ctor that allows a size and position to be specified, as well as
         creation flags. */
-    Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = CLICKABLE | DRAGABLE);
+    Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = INTERACTIVE | DRAGABLE);
     //@}
 
     /** \name Accessors */ ///@{

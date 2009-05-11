@@ -121,7 +121,7 @@ public:
     /** Ctor that does not required height. Height is determined from the font
         and point size used.*/
     Spin(X x, Y y, X w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
+         Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = INTERACTIVE);
 
     ~Spin(); // dtor
     //@}
@@ -244,7 +244,7 @@ Spin<T>::Spin() :
 
 template<class T>
 Spin<T>::Spin(X x, Y y, X w, T value, T step, T min, T max, bool edits, const boost::shared_ptr<Font>& font, Clr color, 
-              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = CLICKABLE*/) : 
+              Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = INTERACTIVE*/) : 
     Control(x, y, w, font->Height() + 2 * PIXEL_MARGIN, flags),
     m_value(value),
     m_step_size(step),

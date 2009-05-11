@@ -160,7 +160,7 @@ HueSaturationPicker::HueSaturationPicker() :
 {}
 
 HueSaturationPicker::HueSaturationPicker(X x, Y y, X w, Y h) :
-    Control(x, y, w, h, CLICKABLE),
+    Control(x, y, w, h, INTERACTIVE),
     m_hue(0.0),
     m_saturation(0.0)
 {
@@ -250,7 +250,7 @@ ValuePicker::ValuePicker() :
 {}
 
 ValuePicker::ValuePicker(X x, Y y, X w, Y h, Clr arrow_color) :
-    Control(x, y, w, h, CLICKABLE),
+    Control(x, y, w, h, INTERACTIVE),
     m_hue(0.0),
     m_saturation(0.0),
     m_value(0.0),
@@ -441,7 +441,7 @@ ColorDlg::ColorDlg() :
 
 ColorDlg::ColorDlg(X x, Y y, const boost::shared_ptr<Font>& font,
                    Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) :
-    Wnd(x, y, X(315), Y(300), CLICKABLE | DRAGABLE | MODAL),
+    Wnd(x, y, X(315), Y(300), INTERACTIVE | DRAGABLE | MODAL),
     m_original_color(CLR_ZERO),
     m_original_color_specified(false),
     m_color_was_picked(false),
@@ -476,7 +476,7 @@ ColorDlg::ColorDlg(X x, Y y, const boost::shared_ptr<Font>& font,
 
 ColorDlg::ColorDlg(X x, Y y, Clr original_color, const boost::shared_ptr<Font>& font,
                    Clr dialog_color, Clr border_color, Clr text_color/* = CLR_BLACK*/) :
-    Wnd(x, y, X(315), Y(300), CLICKABLE | DRAGABLE | MODAL),
+    Wnd(x, y, X(315), Y(300), INTERACTIVE | DRAGABLE | MODAL),
     m_original_color(original_color),
     m_original_color_specified(true),
     m_color_was_picked(false),

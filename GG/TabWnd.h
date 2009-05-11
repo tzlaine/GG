@@ -52,7 +52,7 @@ public:
     /** \name Structors */ ///@{
     /** Basic ctor. */
     TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-           TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE);
+           TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = INTERACTIVE);
     ~TabWnd();
     //@}
 
@@ -138,7 +138,7 @@ public:
     /** \name Structors */ ///@{
     /** Basic ctor. */
     TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
-           TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = CLICKABLE);
+           TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = INTERACTIVE);
     //@}
 
     /** \name Accessors */ ///@{

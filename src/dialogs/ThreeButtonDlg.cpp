@@ -51,7 +51,7 @@ ThreeButtonDlg::ThreeButtonDlg(X x, Y y, X w, Y h, const std::string& msg, const
                                Clr color, Clr border_color, Clr button_color, Clr text_color, std::size_t buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/,
                                const std::string& two/* = ""*/) :
-    Wnd(x, y, w, h, CLICKABLE | DRAGABLE | MODAL),
+    Wnd(x, y, w, h, INTERACTIVE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
     m_text_color(text_color),
@@ -67,7 +67,7 @@ ThreeButtonDlg::ThreeButtonDlg(X x, Y y, X w, Y h, const std::string& msg, const
 ThreeButtonDlg::ThreeButtonDlg(X w, Y h, const std::string& msg, const boost::shared_ptr<Font>& font,
                                Clr color, Clr border_color, Clr button_color, Clr text_color, std::size_t buttons,
                                const std::string& zero/* = ""*/, const std::string& one/* = ""*/, const std::string& two/* = ""*/) :
-    Wnd((GUI::GetGUI()->AppWidth() - w) / 2, (GUI::GetGUI()->AppHeight() - h) / 2, w, h, CLICKABLE | DRAGABLE | MODAL),
+    Wnd((GUI::GetGUI()->AppWidth() - w) / 2, (GUI::GetGUI()->AppHeight() - h) / 2, w, h, INTERACTIVE | DRAGABLE | MODAL),
     m_color(color),
     m_border_color(border_color),
     m_text_color(text_color),

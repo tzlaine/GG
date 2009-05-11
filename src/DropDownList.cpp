@@ -56,7 +56,7 @@ namespace {
     public:
         ModalListPicker(DropDownList* drop_wnd, ListBox* lb_wnd) :
             Wnd(X0, Y0, GUI::GetGUI()->AppWidth(), GUI::GetGUI()->AppHeight(),
-                CLICKABLE | MODAL),
+                INTERACTIVE | MODAL),
             m_drop_wnd(drop_wnd),
             m_lb_wnd(lb_wnd),
             m_old_lb_ul(m_lb_wnd->UpperLeft())
@@ -115,7 +115,7 @@ DropDownList::DropDownList() :
 {}
 
 DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color,
-                           Flags<WndFlag> flags/* = CLICKABLE*/) :
+                           Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Control(x, y, w, h, flags),
     m_current_item(),
     m_LB(GetStyleFactory()->NewDropDownListListBox(x, y, w, drop_ht, color, color, flags))

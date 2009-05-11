@@ -161,7 +161,7 @@ bool ZList::MoveDown(Wnd* wnd)
 Wnd* ZList::PickWithinWindow(const Pt& pt, Wnd* wnd, Wnd* ignore) const
 {
     // if wnd is visible and clickable, return it if no child windows also catch pt
-    Wnd* retval = (wnd->Visible() && wnd->Clickable() && wnd != ignore) ? wnd : 0;
+    Wnd* retval = (wnd->Visible() && wnd->Interactive() && wnd != ignore) ? wnd : 0;
     // look through all the children of wnd, and determine whether pt lies in any of them (or their children)
     std::list<Wnd*>::reverse_iterator end_it = wnd->m_children.rend();
     for (std::list<Wnd*>::reverse_iterator it = wnd->m_children.rbegin(); it != end_it; ++it) {

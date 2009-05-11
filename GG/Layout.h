@@ -71,7 +71,7 @@ struct SetMarginAction;
     Layouts are Wnd-derived.  Like a Control, a Layout will forward all
     MouseWheel(), Key*(), and dragged-child notification calls to its parent.
     Clicks fall through as well, since Layouts are not constructed with the
-    Wnd::CLICKABLE flag.
+    Wnd::INTERACTIVE flag.
 
     <p>There are two attributes that affect the spacing of all the layout's
     child windows: border margin and cell margin.  Border margin is the space

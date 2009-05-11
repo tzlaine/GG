@@ -249,7 +249,7 @@ public:
 
     /** \name Structors */ ///@{
     /** basic ctor */
-    ListBox(X x, Y y, X w, Y h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = CLICKABLE);
+    ListBox(X x, Y y, X w, Y h, Clr color, Clr interior = CLR_ZERO, Flags<WndFlag> flags = INTERACTIVE);
 
     virtual ~ListBox(); ///< virtual dtor
     //@}

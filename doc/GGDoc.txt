@@ -34,95 +34,171 @@
 
 /** \page architecture Architecture
     \section arch_rendering Rendering Overview
-    GG uses OpenGL to render its graphics.  It is assumed that the entire GUI is being redrawn multiple times each second, as part of a high-framerate application.  
-    Each GG UI element is draw using calls to OpenGL.  Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D 
-    texture or sprite, or even a fully 3D rendering; the complexity of the graphics used to represent the UI elements is only limited
-    by the target rendering hardware and the user's skill.
+
+    GG uses OpenGL to render its graphics.  It is assumed that the entire GUI
+    is being redrawn multiple times each second, as part of a high-framerate
+    application.  Each GG UI element is draw using calls to OpenGL.
+    Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D
+    texture or sprite, or even a fully 3D rendering; the complexity of the
+    graphics used to represent the UI elements is only limited by the target
+    rendering hardware and the user's skill.
+
+    \section arch_main_loop_integration Integration With Application Render Loop
+
+    GG supplies arender loop in the form of GUI::Run().  For many
+    applications, this default render loop is sufficient.  However, for users
+    who are integrating GG with an existing application that already has its
+    own render loop, there is another way.  See the GG::EventPump
+    documentation for info on how you can update GG's GUI once per frame from
+    your application's render loop.
+
     \section arch_UI_overview UI Overview
     \subsection arch_input_events Input Events
-    GG is organized as a layer on top of an existing user input framework.  GG has no way of determining that a mouse click, mouse move, 
-    or any other user input event, has taken place.  To use GG, one must subclass off of the abstract class GG::GUI, and define several 
-    of GG::GUI's pure virtual functions.  These functions poll the underlying operating system or input framework,
-    and generate GG input messages from them.  Such messages are mouse moves and clicks, key presses and releases, joystick movement, 
-    etc. GG maintains internal state as to what part of the GUI is being dragged, clicked, etc.
+
+    GG is organized as a layer on top of an existing user input framework.  GG
+    has no way of determining that a mouse click, mouse move, or any other
+    user input event, has taken place.  To use GG, one must subclass off of
+    the abstract class GG::GUI, and define several of GG::GUI's pure virtual
+    functions.  These functions poll the underlying operating system or input
+    framework, and generate GG input messages from them.  Such messages are
+    mouse moves and clicks, key presses and releases, joystick movement,
+    etc. GG maintains internal state as to what part of the GUI is being
+    dragged, clicked, etc.
+
     \subsection arch_UI_overview_example Example:
-    Suppose the user clicks 
-    the left mouse button at screen position (50, 37).  GG will receive a message from the underlying application framework that a 
-    left mouse click has occurred; it then determines what UI element is under that screen location, if any.  If it turns out there is
-    a button under that spot, GG sets internal state indicating that the left mouse button is being held down, and that it is over the
-    button.  GG then sends a message to the button that it is depressed.  The button sets its own internal state and returns.  All 
-    processing is complete for this input; the next time the button is redrawn, it knows to draw itself in a depressed state.  Very
-    little computation is involved in processing a single user input event.  GG's performance is therefore usually limited only by the
-    application-defined processing that is associated with manipulating the controls (e.g., a button click may trigger disk IO).
-   \subsection arch_UI_element_conns UI Element Connections
-    GG UI elements are connected using signals and slots, using the Boost.Signals library.  This allows arbitrary 
-    connections between one control and another, and between a control and any other code; there is no hierarchy of passed messages 
-    as there is in some other GUIs, and no type-unsafe callbacks are used.  Refer to the \ref sigs_n_slots documentation for details.
+
+    Suppose the user clicks the left mouse button at screen position (50, 37).
+    GG will receive a message from the underlying application framework that a
+    left mouse click has occurred; it then determines what UI element is under
+    that screen location, if any.  If it turns out there is a button under
+    that spot, GG sets internal state indicating that the left mouse button is
+    being held down, and that it is over the button.  GG then sends a message
+    to the button that it is depressed.  The button sets its own internal
+    state and returns.  All processing is complete for this input; the next
+    time the button is redrawn, it knows to draw itself in a depressed state.
+    Very little computation is involved in processing a single user input
+    event.  GG's performance is therefore usually limited only by the
+    application-defined processing that is associated with manipulating the
+    controls (e.g., a button click may trigger disk IO).
+
+    \subsection arch_UI_element_conns UI Element Connections
+
+    GG UI elements are connected using signals and slots, using the
+    Boost.Signals library.  This allows arbitrary connections between one
+    control and another, and between a control and any other code; there is no
+    hierarchy of passed messages as there is in some other GUIs, and no
+    type-unsafe callbacks are used.  Refer to the \ref sigs_n_slots
+    documentation for details.
+
     \subsection arch_gui_services GG::GUI Services
-    The singleton GG::GUI object is globally available through a static member function, GG::GUI::GetGUI().  This allows all code
-    in the application to rely on GG::GUI for certain essential services.  GUI-specific services include registering windows into
-    the GUI, registering windows as always-on-top or modal windows, moving windows up or down in the z-order layers of the GUI,
-    removing windows from the GUI, getting mouse state (position and button depression), setting mouse delay repeat (see GG::GUI 
-    for a description of this), entering and exiting from an orthographic projection (2D) rendering mode, and saving/loading polymorphic
-    GUI elements to/from their serialized form.  Most of these services must be provided by the user when subclassing from GG::GUI; 
-    if either of SDLGUI or OgreGUI is used, these services are already implemented.
+
+    The singleton GG::GUI object is globally available through a static member
+    function, GG::GUI::GetGUI().  This allows all code in the application to
+    rely on GG::GUI for certain essential services.  GUI-specific services
+    include registering windows into the GUI, registering windows as
+    always-on-top or modal windows, moving windows up or down in the z-order
+    layers of the GUI, removing windows from the GUI, getting mouse state
+    (position and button depression), setting mouse delay repeat (see GG::GUI
+    for a description of this), entering and exiting from an orthographic
+    projection (2D) rendering mode, and saving/loading polymorphic GUI
+    elements to/from their serialized form.  Most of these services must be
+    provided by the user when subclassing from GG::GUI; if either of SDLGUI or
+    OgreGUI is used, these services are already implemented.
+
     <p>
-    GG::GUI does a variety of things for the user, some of which are not strictly necessary for the core GUI functionality.  
-    GG::GUI provides limited timing info via FPS() and DeltaT().  These are provided to indicate how fast the GUI is rendering, 
-    and how long it has been since the last frame was rendered.  There is also a font manager, an application-wide font "pool",
-    from which the user can request fonts.  The font pool loads and stores the fonts as needed by the application, and multiple 
-    requests for the same font at the same size will result in the creation of only one font object.  A texture manager
-    exists which does a similar job with textures.  If the user wants to programmatically create textures, she can also add them
-    to the texture pool, provide a name, and request that texture as many times as needed.  OpenGL texture objects are used as
-    the underlying texture rendering method.
-*/
+
+    GG::GUI does a variety of things for the user, some of which are not
+    strictly necessary for the core GUI functionality.  GG::GUI provides
+    limited timing info via FPS() and DeltaT().  These are provided to
+    indicate how fast the GUI is rendering, and how long it has been since the
+    last frame was rendered.  There is also a font manager, an
+    application-wide font "pool", from which the user can request fonts.  The
+    font pool loads and stores the fonts as needed by the application, and
+    multiple requests for the same font at the same size will result in the
+    creation of only one font object.  A texture manager exists which does a
+    similar job with textures.  If the user wants to programmatically create
+    textures, she can also add them to the texture pool, provide a name, and
+    request that texture as many times as needed.  OpenGL texture objects are
+    used as the underlying texture rendering method.  */
 
 /** \page sigs_n_slots Signals and Slots
     \section sigs_n_slots_definition Sig-who? Slo-what?
-    If you've never been exposed to the signals and slots pattern before, it can be a little confusing.  Simply put, a slot is a
-    function or function object that is "listening" for a signal.  A slot "listening" to a certain signal is said to be connected 
-    to that signal.  When a signal is emitted, all slots that are connected to that signal are called (since they are all functions/function
-    objects).  If a signal is emitted to which no slots are connected, nothing happens.
+
+    If you've never been exposed to the signals and slots pattern before, it
+    can be a little confusing.  Simply put, a slot is a function or function
+    object that is "listening" for a signal.  A slot "listening" to a certain
+    signal is said to be connected to that signal.  When a signal is emitted,
+    all slots that are connected to that signal are called (since they are all
+    functions/function objects).  If a signal is emitted to which no slots are
+    connected, nothing happens.
+
     \section sigs_n_slots_motivation Motivation for the Signals and Slots Pattern
     \subsection prob The Problem
-    Originally, GG used a very simple strategy for passing messages between windows/controls.  The method was to call a
-    Command() function, which passed to the callee an integer representing the type of message (button click, scroll, or
-    whatever), an ID number associated with the calling control, and a single integer parameter.  It could have been
-    made more general and even less typesafe by replacing the int parameter with a void pointer, but in either case it
-    suffers from two huge limitations.  First, the type of message and the parameter must be known to both caller and
-    callee; this means that, for example, the user must keep track of the integer value representing a button click
-    message, and make sure that separate sections of code are using the same value to represent it.  Second, any code
-    that doesn't contain a control, but that wants to know about button pushes, scrolling scrollbars, etc., must deal
-    with that control's parent (or break encapsulation).  This creates a lot of chains of passed messages, and a large
-    number of kludges to get messages to the sections of code that need them.
+
+    Originally, GG used a very simple strategy for passing messages between
+    windows/controls.  The method was to call a Command() function, which
+    passed to the callee an integer representing the type of message (button
+    click, scroll, or whatever), an ID number associated with the calling
+    control, and a single integer parameter.  It could have been made more
+    general and even less typesafe by replacing the int parameter with a void
+    pointer, but in either case it suffers from two huge limitations.  First,
+    the type of message and the parameter must be known to both caller and
+    callee; this means that, for example, the user must keep track of the
+    integer value representing a button click message, and make sure that
+    separate sections of code are using the same value to represent it.
+    Second, any code that doesn't contain a control, but that wants to know
+    about button pushes, scrolling scrollbars, etc., must deal with that
+    control's parent (or break encapsulation).  This creates a lot of chains
+    of passed messages, and a large number of kludges to get messages to the
+    sections of code that need them.
+
     \subsection sigs_n_slots_soln The Solution
-    Now, each control emits a signal every time a significant event occurs.  If no processing needs to be associated
-    with such an event, its signal need not be connected to anything.  Futhermore, no matter how many modules need to
-    react to a certain signal, they can all be connected.
+
+    Now, each control emits a signal every time a significant event occurs.
+    If no processing needs to be associated with such an event, its signal
+    need not be connected to anything.  Futhermore, no matter how many modules
+    need to react to a certain signal, they can all be connected.
+
     \section sigs_n_slots_use Using Signals and Slots
     \subsection sigs_n_slots_connecting Connecting Signals To Slots
-    There are two types of connections between signals and slots.  The first type of connection is between a signal and
-    a slot, which may be a functor (which in turn may be a boost::bind object), a free function or a static member
-    function or function object.  Just call Connect(sig, slot).  The second type is between a signal and a non-static
-    member function.  In this case, the call to Connect() requires a third parameter: a pointer to the object whose
-    member function is to be called.  For instance, if I have a class Foo and an object foo1 of class Foo, I cannot call
-    foo1.bar() by simply knowing the address of bar().  I need to call Connect(sig, &Foo::bar, &foo1) so that the signal
-    knows which object's bar() to call.  Both versions of Connect() return a connection object.  By keeping this
-    connection object, you can later disconnect() the connection you made.  In addition, signal-signal connections are
-    possible.  Calling Connect(sig1, sig2) forwards all sig1's signal emissions to sig2.  This is provided as a
-    convenience to avoid having to write dummy forwarding functions that do this.
+
+    There are two types of connections between signals and slots.  The first
+    type of connection is between a signal and a slot, which may be a functor
+    (which in turn may be a boost::bind object), a free function or a static
+    member function or function object.  Just call Connect(sig, slot).  The
+    second type is between a signal and a non-static member function.  In this
+    case, the call to Connect() requires a third parameter: a pointer to the
+    object whose member function is to be called.  For instance, if I have a
+    class Foo and an object foo1 of class Foo, I cannot call foo1.bar() by
+    simply knowing the address of bar().  I need to call Connect(sig,
+    &Foo::bar, &foo1) so that the signal knows which object's bar() to call.
+    Both versions of Connect() return a connection object.  By keeping this
+    connection object, you can later disconnect() the connection you made.  In
+    addition, signal-signal connections are possible.  Calling Connect(sig1,
+    sig2) forwards all sig1's signal emissions to sig2.  This is provided as a
+    convenience to avoid having to write dummy forwarding functions that do
+    this.
+
     \subsection sigs_n_slots_emitting Emitting Signals
-    To emit a signal from a signal object "sig", just use its function call operator ("operator()"), like this: "sig();"
+
+    To emit a signal from a signal object "sig", just use its function call
+    operator ("operator()"), like this: "sig();"
+
     \subsection disconnecting Disconnecting Signals and Slots
-    If you kept the connection object returned by Connect(), a connection_obj.disconnect() call will disconnect the associated 
-    signal and slot.  Also, consider this: what happens if a signal A is connected to a slot consisting of a member function
-    of object B, B is deleted, and then A() is called?  A segfault, unless the B's class inherits from 
-    boost::trackable, which auto-disconnects slots in its destructor.  GG::Wnd is derived from boost::trackable, so all 
-    GG::Wnd-derived classes should handle such situations gracefully.  See the Boost tutorial below for details.
-    \see http://boost.org/doc/html/signals.html for a tutorial on other aspects of signals and slots; you can create 
-    connections that have scope, control the order of the invocation of multiple slots that are called by a signal, and combine 
-    the return values of such slots (take the first return value, the last, the average of all of them, etc.).
-*/
+
+    If you kept the connection object returned by Connect(), a
+    connection_obj.disconnect() call will disconnect the associated signal and
+    slot.  Also, consider this: what happens if a signal A is connected to a
+    slot consisting of a member function of object B, B is deleted, and then
+    A() is called?  A segfault, unless the B's class inherits from
+    boost::trackable, which auto-disconnects slots in its destructor.  GG::Wnd
+    is derived from boost::trackable, so all GG::Wnd-derived classes should
+    handle such situations gracefully.  See the Boost tutorial below for
+    details.  \see http://boost.org/doc/html/signals.html for a tutorial on
+    other aspects of signals and slots; you can create connections that have
+    scope, control the order of the invocation of multiple slots that are
+    called by a signal, and combine the return values of such slots (take the
+    first return value, the last, the average of all of them, etc.).  */
 
 /** \page text_handling Text Handling
     \section text_handling_unicode_support Unicode Support
@@ -168,19 +244,20 @@
 /** \page drag_n_drop Drag and Drop
     \section drag_n_drop_basics Basics
 
-    GG has drag and drop support that allows you to potentially drag any GG::Wnd
-    and drop it onto any other GG::Wnd.  The results of this drop depend on the
-    two GG::Wnd's involved.  Each GG::Wnd has a GG::Wnd::DragDropDataType()
-    method that returns a string describing what kind of data the GG::Wnd
-    represents.  The string can be a MIME type, or any arbitrary string the user
-    likes.  During the dragging portion of the operation, a GG::Wnd under the
-    cursor has its GG::Wnd::DropsAcceptable() member called, in which it can
-    examine the data type string and other relevant aspects of each dragged
-    GG::Wnd and decide whether or not to accept it.  On the drop, the GG::Wnd
-    under the cursor has its GG::Wnd::AcceptDrops() method called with those
-    GG::Wnd's it has previously deemed accepted in GG::Wnd::DropAcceptable().
-    GG::Wnd's accepted by the drop target are removed from their original
-    parent, if any, through a call to GG::Wnd::ChildrenDraggedAway().
+    GG has drag and drop support that allows you to potentially drag any
+    GG::Wnd and drop it onto any other GG::Wnd.  The results of this drop
+    depend on the two GG::Wnd's involved.  Each GG::Wnd has a
+    GG::Wnd::DragDropDataType() method that returns a string describing what
+    kind of data the GG::Wnd represents.  The string can be a MIME type, or
+    any arbitrary string the user likes.  During the dragging portion of the
+    operation, a GG::Wnd under the cursor has its GG::Wnd::DropsAcceptable()
+    member called, in which it can examine the data type string and other
+    relevant aspects of each dragged GG::Wnd and decide whether or not to
+    accept it.  On the drop, the GG::Wnd under the cursor has its
+    GG::Wnd::AcceptDrops() method called with those GG::Wnd's it has
+    previously deemed accepted in GG::Wnd::DropAcceptable().  GG::Wnd's
+    accepted by the drop target are removed from their original parent, if
+    any, through a call to GG::Wnd::ChildrenDraggedAway().
 
     Note that only GG::Wnd's with non-empty GG::Wnd::DragDropDataType() may be
     dragged and dropped.  Within those GG::Wnd's, there are two categories: 1)
@@ -193,9 +270,9 @@
     \section drag_n_drop_advanced Advanced Use
 
     There is an extensive set of notification functions that may be called
-    during a drag and drop operation.  The drop target and the orginal parent of
-    the dragged GG::Wnd(s), if any, may be notified of various events or queried
-    (e.g. GG::Wnd::DropsAcceptable()).  Additionally,
+    during a drag and drop operation.  The drop target and the orginal parent
+    of the dragged GG::Wnd(s), if any, may be notified of various events or
+    queried (e.g. GG::Wnd::DropsAcceptable()).  Additionally,
     GG::Wnd::GetDragDropRenderingState() indicates whether a GG::Wnd is being
     dragged, whether it is over a valid drop target, etc.  See the GG::Wnd
     documentation for details.
@@ -302,34 +379,49 @@
 
 /** \page serialization Serialization
     \section serialization_motivation Motivation
-    One of the main design goals for GG is the editability of UI elements without recompilation.  Another main goal is the 
-    capability of saving and restoring the state of the GUI.  A secondary design goal is the capability of serializing UI
-    elements for network transmission and receipt.  To satisfy all these requirements, GG uses the Boost.Serialization 
-    library to serialize GG::Wnd-derived objects.
+
+    One of the main design goals for GG is the editability of UI elements
+    without recompilation.  Another main goal is the capability of saving and
+    restoring the state of the GUI.  A secondary design goal is the capability
+    of serializing UI elements for network transmission and receipt.  To
+    satisfy all these requirements, GG uses the Boost.Serialization library to
+    serialize GG::Wnd-derived objects.
+
     \section serialization_approach Details
-    GG does not contain any actual code that will serialize a GG::Wnd.  Instead, each GG::Wnd subclass contains a serialize() template
-    method which may be invoked by user code to perform serialization.  The user must then create a Boost.Serialization
-    archive, and save/load the desired windows to/from the archive.  To be serializable, user-created subclasses need to define
-    a serialize method that first serializes its base class, then serializes any subclass-specific data; see any GG::Wnd subclass
-    for example code.  For full details on how the serialization works, see the serialization tutorial and the
-    Boost.Serialization documentation.
+
+    GG does not contain any actual code that will serialize a GG::Wnd.
+    Instead, each GG::Wnd subclass contains a serialize() template method
+    which may be invoked by user code to perform serialization.  The user must
+    then create a Boost.Serialization archive, and save/load the desired
+    windows to/from the archive.  To be serializable, user-created subclasses
+    need to define a serialize method that first serializes its base class,
+    then serializes any subclass-specific data; see any GG::Wnd subclass for
+    example code.  For full details on how the serialization works, see the
+    serialization tutorial and the Boost.Serialization documentation.
+
     \section caveats Caveats
-    Signals are not currently serializable.  This means that when a class is created from an input serialization
-    archive, all its signals must be reconnected to their slots (and any signals connected to it should be reconnected
-    as well).  Many of the built-in GG controls must reconnect signals when loaded; such classes have a private
-    ConnectSignals() method that is called at load time.  See GG::RadioButtonGroup::serialize() in Button.h for an
-    example.
-    <p>GG::Font and GG::Texture objects that were part of the GUI's GG::FontManager and GG::TextureManager when
-    saved will not be added back to these two structures when they are loaded.
-*/
+
+    Signals are not currently serializable.  This means that when a class is
+    created from an input serialization archive, all its signals must be
+    reconnected to their slots (and any signals connected to it should be
+    reconnected as well).  Many of the built-in GG controls must reconnect
+    signals when loaded; such classes have a private ConnectSignals() method
+    that is called at load time.  See GG::RadioButtonGroup::serialize() in
+    Button.h for an example.
+
+    <p>
+
+    GG::Font and GG::Texture objects that were part of the GUI's
+    GG::FontManager and GG::TextureManager when saved will not be added back
+    to these two structures when they are loaded.  */
 
 /** \page brief_tour A Brief Tour
 
-    In a library as diverse in functionality as GG, it can be difficult even to
-    figure out what the library has to offer.  This "tour" is designed to
+    In a library as diverse in functionality as GG, it can be difficult even
+    to figure out what the library has to offer.  This "tour" is designed to
     provide a brief overview of the various features of GG not covered
-    elsewhere, and to point users to the more detailed information elsewhere in
-    the documentation.  The topics are covered in no particular order.
+    elsewhere, and to point users to the more detailed information elsewhere
+    in the documentation.  The topics are covered in no particular order.
 
     First off, it should be noted that there is a lot of general overview-type
     documentation in the GG::Wnd and GG::GUI detailed documentation.  Many of
@@ -337,16 +429,16 @@
 
     \section tour_event_filters Event Filters
 
-    Event filtering allows one to use a GG::Wnd to intrusively handle the events
-    sent to another GG::Wnd.  This can be useful, for example, in a control (the
-    parent) that is composed of multiple controls (the children), but which
-    needs to handle certain events uniformly.  Perhaps right-clicks should always
-    bring up a context menu, for instance.  Without event filtering, each child
-    control would have to explicitly forward its right-clicks instead of
-    processing them normally, which would in turn require subclassing.  Event
-    filters remove the need for such subclassing.  \see The GG::Wnd description,
-    GG::Wnd::EventFilter(), GG::Wnd::InstallEventFilter(), and
-    GG::Wnd::RemoveEventFilter().
+    Event filtering allows one to use a GG::Wnd to intrusively handle the
+    events sent to another GG::Wnd.  This can be useful, for example, in a
+    control (the parent) that is composed of multiple controls (the children),
+    but which needs to handle certain events uniformly.  Perhaps right-clicks
+    should always bring up a context menu, for instance.  Without event
+    filtering, each child control would have to explicitly forward its
+    right-clicks instead of processing them normally, which would in turn
+    require subclassing.  Event filters remove the need for such subclassing.
+    \see The GG::Wnd description, GG::Wnd::EventFilter(),
+    GG::Wnd::InstallEventFilter(), and GG::Wnd::RemoveEventFilter().
 
     \section tour_layouts Layouts
 
@@ -400,8 +492,8 @@
     C++ enums, such as implicit conversion to integral types, which in turn
     leads to comparability of arbitrary enumeration values from different
     enumerations.  For instance, it is impossible (due to a compile-time
-    error) to accidentally pass the (nonsensical) flag GG::FORMAT_NONE to the \a
-    flags parameter of GG::Wnd::Wnd().  With built-in C++ enums, this would
+    error) to accidentally pass the (nonsensical) flag GG::FORMAT_NONE to the
+    \a flags parameter of GG::Wnd::Wnd().  With built-in C++ enums, this would
     not be caught by the compiler.  GG provides two classes, GG::Flags and
     GG::FlagSpec, that allow the user to extend the sets of flags used in GG,
     if user-created subclasses should require more flags than the ones GG
@@ -410,12 +502,12 @@
     \section tour_text_formatting_tags Text Formatting Tags
 
     Text rendered by GG can make use of text formatting tags, similar to those
-    used in HTML documents (e.g. \<i><i>italicized text here</i>\</i>).  GG defines
-    numerous tags that control text justification, text color, bolding,
-    underlining, italicizing, etc.  Users can also add their own tags.  Though
-    GG does not associate any semantics with user-defined tags, it will treat
-    them as tags, meaning they will be automatically be removed from the text
-    as it appears when rendered.  \see The GG::Font description.
+    used in HTML documents (e.g. \<i><i>italicized text here</i>\</i>).  GG
+    defines numerous tags that control text justification, text color,
+    bolding, underlining, italicizing, etc.  Users can also add their own
+    tags.  Though GG does not associate any semantics with user-defined tags,
+    it will treat them as tags, meaning they will be automatically be removed
+    from the text as it appears when rendered.  \see The GG::Font description.
 
     \section tour_keyboard_accelerators Keyboard Accelerators
 
@@ -428,14 +520,13 @@
 
     \section tour_user_input_drivers User Input Drivers
 
-    Two input drivers are currently available for use with GG -- one for
-    <a href="http://libsdl.org">SDL</a> and one for
-    <a href="http://ogre3d.org">Ogre</a>.  Note that Ogre does not have
-    built-in support for user input.  As of this writing, it uses another
-    library called <a href="http://sourceforge.net/projects/wgois">OIS</a>.  
-    An Ogre plugin that provides OIS support is also provided in
-    src/Ogre/Plugins.  \see GG::SDLGUI, GG::OgreGUI, GG::OgreGUIInputPlugin,
-    and OISInput.
+    Two input drivers are currently available for use with GG -- one for <a
+    href="http://libsdl.org">SDL</a> and one for <a
+    href="http://ogre3d.org">Ogre</a>.  Note that Ogre does not have built-in
+    support for user input.  As of this writing, it uses another library
+    called <a href="http://sourceforge.net/projects/wgois">OIS</a>.  An Ogre
+    plugin that provides OIS support is also provided in src/Ogre/Plugins.
+    \see GG::SDLGUI, GG::OgreGUI, GG::OgreGUIInputPlugin, and OISInput.
 
     \section tour_timers Timers
 
@@ -450,7 +541,10 @@
 
     GG abstracts out the inner loop that processes events and renders frames
     into a class called GG::EventPump.  Most users will never need to use
-    event pumps, but those users writing a new input driver will.
+    event pumps, but those users writing a new input driver will.  Note that
+    if you are integrating GG with an existing application that has its own
+    render loop, you will almost certainly need to use GG::EventPump.  See the
+    GG::EventPump documnentation for details.
 
 */
 

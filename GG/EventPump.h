@@ -76,14 +76,48 @@ protected:
 
 /** \brief Encapsulates the GG event-pumping mechanism.
 
+    \section event_pump_main_section General Use
+
     Events from the application framework (i.e. SDL, DirectInput, etc.) are
     received by an EventPump, and appropriate action is taken.  The default
     action is to call GUI::HandleSystemEvents(), but any action can be taken
     in a EventPump-derived type that overrides operator()().  For example, it
     might be useful to override operator()() with a function that gives all
     GG-relevant events to a GG event-hendler, and gives all other events to a
-    system-specific handler, if your GUI-derived class does not already do
-    so. */
+    system-specific handler, if your GUI-derived class does not already do so.
+
+    \section event_pump_integration_with_app_render_loop Integration With Application Render Loop
+
+    If your application already has a render loop and you want to integrate GG
+    into it, create a subclass of EventPumpBase similar to EventPump, but
+    which only executes a single loop iteration:
+
+    \verbatim
+#include <GG/EventPump.h>
+
+class MyEventPump :
+    public GG::EventPumpBase
+{
+public:
+    void operator()()
+        { LoopBody(GG::GUI::GetGUI(), State(), true, true); }
+};
+\endverbatim
+
+    From your application's rendering loop, invoke your event pump once per
+    iteration:
+
+    \verbatim
+MyEventPump pump;
+// ...
+while (/*...*/) {
+    // Application-specific code to grab events from the OS or other
+    // lower-level driver layer and pass the GG-relevant ones to GG goes here.
+    // See SDLGUI::HandleSystemEvents() for an example.
+    pump();
+}
+\endverbatim
+*/
 class GG_API EventPump : public EventPumpBase
 {
 public:

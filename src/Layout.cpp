@@ -652,13 +652,13 @@ void Layout::DefineAttributes(WndEditor* editor)
 }
 
 void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(WndEvent(WndEvent::MouseWheel, pt, move, mod_keys)); }
+{ ForwardEventToParent(); }
 
 void Layout::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(WndEvent(WndEvent::KeyPress, key, key_code_point, mod_keys)); }
+{ ForwardEventToParent(); }
 
 void Layout::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(WndEvent(WndEvent::KeyRelease, key, key_code_point, mod_keys)); }
+{ ForwardEventToParent(); }
 
 double Layout::TotalStretch(const std::vector<RowColParams>& params_vec) const
 {

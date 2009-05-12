@@ -131,6 +131,8 @@ namespace {
             return stream.str();
         }
     };
+
+    struct ForwardToParentException {};
 }
 
 ///////////////////////////////////////
@@ -1001,98 +1003,100 @@ void Wnd::HandleEvent(const WndEvent& event)
             return;
     }
 
-    switch (event.Type()) {
-    case WndEvent::LButtonDown:
-        LButtonDown(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::LDrag:
-        LDrag(event.Point(), event.DragMove(), event.ModKeys());
-        break;
-    case WndEvent::LButtonUp:
-        LButtonUp(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::LClick:
-        LClick(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::LDoubleClick:
-        LDoubleClick(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MButtonDown:
-        MButtonDown(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MDrag:
-        MDrag(event.Point(), event.DragMove(), event.ModKeys());
-        break;
-    case WndEvent::MButtonUp:
-        MButtonUp(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MClick:
-        MClick(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MDoubleClick:
-        MDoubleClick(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::RButtonDown:
-        RButtonDown(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::RDrag:
-        RDrag(event.Point(), event.DragMove(), event.ModKeys());
-        break;
-    case WndEvent::RButtonUp:
-        RButtonUp(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::RClick:
-        RClick(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::RDoubleClick:
-        RDoubleClick(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MouseEnter:
-        MouseEnter(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MouseHere:
-        MouseHere(event.Point(), event.ModKeys());
-        break;
-    case WndEvent::MouseLeave:
-        MouseLeave();
-        break;
-    case WndEvent::DragDropEnter:
-        DragDropEnter(event.Point(), event.DragDropWnds(), event.ModKeys());
-        break;
-    case WndEvent::DragDropHere:
-        DragDropHere(event.Point(), event.DragDropWnds(), event.ModKeys());
-        break;
-    case WndEvent::DragDropLeave:
-        DragDropLeave();
-        break;
-    case WndEvent::MouseWheel:
-        MouseWheel(event.Point(), event.WheelMove(), event.ModKeys());
-        break;
-    case WndEvent::KeyPress:
-        KeyPress(event.GetKey(), event.KeyCodePoint(), event.ModKeys());
-        break;
-    case WndEvent::KeyRelease:
-        KeyRelease(event.GetKey(), event.KeyCodePoint(), event.ModKeys());
-        break;
-    case WndEvent::GainingFocus:
-        GainingFocus();
-        break;
-    case WndEvent::LosingFocus:
-        LosingFocus();
-        break;
-    case WndEvent::TimerFiring:
-        TimerFiring(event.Ticks(), event.GetTimer());
-        break;
-    default:
-        break;
+    try {
+        switch (event.Type()) {
+        case WndEvent::LButtonDown:
+            LButtonDown(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::LDrag:
+            LDrag(event.Point(), event.DragMove(), event.ModKeys());
+            break;
+        case WndEvent::LButtonUp:
+            LButtonUp(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::LClick:
+            LClick(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::LDoubleClick:
+            LDoubleClick(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MButtonDown:
+            MButtonDown(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MDrag:
+            MDrag(event.Point(), event.DragMove(), event.ModKeys());
+            break;
+        case WndEvent::MButtonUp:
+            MButtonUp(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MClick:
+            MClick(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MDoubleClick:
+            MDoubleClick(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::RButtonDown:
+            RButtonDown(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::RDrag:
+            RDrag(event.Point(), event.DragMove(), event.ModKeys());
+            break;
+        case WndEvent::RButtonUp:
+            RButtonUp(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::RClick:
+            RClick(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::RDoubleClick:
+            RDoubleClick(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MouseEnter:
+            MouseEnter(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MouseHere:
+            MouseHere(event.Point(), event.ModKeys());
+            break;
+        case WndEvent::MouseLeave:
+            MouseLeave();
+            break;
+        case WndEvent::DragDropEnter:
+            DragDropEnter(event.Point(), event.DragDropWnds(), event.ModKeys());
+            break;
+        case WndEvent::DragDropHere:
+            DragDropHere(event.Point(), event.DragDropWnds(), event.ModKeys());
+            break;
+        case WndEvent::DragDropLeave:
+            DragDropLeave();
+            break;
+        case WndEvent::MouseWheel:
+            MouseWheel(event.Point(), event.WheelMove(), event.ModKeys());
+            break;
+        case WndEvent::KeyPress:
+            KeyPress(event.GetKey(), event.KeyCodePoint(), event.ModKeys());
+            break;
+        case WndEvent::KeyRelease:
+            KeyRelease(event.GetKey(), event.KeyCodePoint(), event.ModKeys());
+            break;
+        case WndEvent::GainingFocus:
+            GainingFocus();
+            break;
+        case WndEvent::LosingFocus:
+            LosingFocus();
+            break;
+        case WndEvent::TimerFiring:
+            TimerFiring(event.Ticks(), event.GetTimer());
+            break;
+        default:
+            break;
+        }
+    } catch (const ForwardToParentException&) {
+        if (Wnd* p = Parent())
+            p->HandleEvent(event);
     }
 }
 
-void Wnd::ForwardEventToParent(const WndEvent& event)
-{
-    if (Wnd* p = Parent())
-        p->HandleEvent(event);
-}
+void Wnd::ForwardEventToParent()
+{ throw ForwardToParentException(); }
 
 void Wnd::ValidateFlags()
 {

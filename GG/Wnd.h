@@ -825,8 +825,10 @@ protected:
         LDrag(), etc.). */
     void HandleEvent(const WndEvent& event);
 
-    /** Sends \a event to Parent() for processing, if Parent() is non-null. */
-    void ForwardEventToParent(const WndEvent& event);
+    /** Sends \a event to Parent() for processing, if Parent() is non-null.
+        This must only be called from within a WndEvent handler
+        (e.g. LClick()). */
+    void ForwardEventToParent();
     //@}
 
     /** Modal Wnd's set this to true to stop modal loop. */

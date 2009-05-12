@@ -91,10 +91,10 @@ void Control::DefineAttributes(WndEditor* editor)
 }
 
 void Control::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(WndEvent(WndEvent::MouseWheel, pt, move, mod_keys)); }
+{ ForwardEventToParent(); }
 
 void Control::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(WndEvent(WndEvent::KeyPress, key, key_code_point, mod_keys)); }
+{ ForwardEventToParent(); }
 
 void Control::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(WndEvent(WndEvent::KeyRelease, key, key_code_point, mod_keys)); }
+{ ForwardEventToParent(); }

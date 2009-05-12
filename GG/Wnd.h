@@ -825,8 +825,8 @@ protected:
         LDrag(), etc.). */
     void HandleEvent(const WndEvent& event);
 
-    /** Sends \a event to Parent() for processing, if Parent() is non-null.
-        This must only be called from within a WndEvent handler
+    /** Sends the current event to Parent() for processing, if Parent() is
+        non-null.  This must only be called from within a WndEvent handler
         (e.g. LClick()). */
     void ForwardEventToParent();
     //@}

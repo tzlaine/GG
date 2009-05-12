@@ -110,14 +110,13 @@ public:
     \verbatim
 MyEventPump pump;
 // ...
-while (/*...*/) {
+while ( ... ) {
     // Application-specific code to grab events from the OS or other
     // lower-level driver layer and pass the GG-relevant ones to GG goes here.
     // See SDLGUI::HandleSystemEvents() for an example.
     pump();
 }
-\endverbatim
-*/
+\endverbatim */
 class GG_API EventPump : public EventPumpBase
 {
 public:

@@ -68,10 +68,7 @@ struct SetMarginAction;
     as arranging the controls of a dialog box.  When used this way, the Layout
     becomes the sole child of its parent, and contains the parent's children
     as its own.  This scheme allows Layouts to be easily nested, since all
-    Layouts are Wnd-derived.  Like a Control, a Layout will forward all
-    MouseWheel(), Key*(), and dragged-child notification calls to its parent.
-    Clicks fall through as well, since Layouts are not constructed with the
-    Wnd::INTERACTIVE flag.
+    Layouts are Wnd-derived.
 
     <p>There are two attributes that affect the spacing of all the layout's
     child windows: border margin and cell margin.  Border margin is the space
@@ -243,12 +240,6 @@ public:
 protected:
     /** \name Structors */ ///@{
     Layout(); ///< default ctor
-    //@}
-
-    /** \name Mutators */ ///@{
-    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     //@}
 
 private:

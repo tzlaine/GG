@@ -239,10 +239,16 @@ void DropDownList::SetColor(Clr c)
 { m_LB->SetColor(c); }
 
 DropDownList::iterator DropDownList::Insert(Row* row, iterator it)
-{ return m_LB->Insert(row, it); }
+{
+    row->SetDragDropDataType("");
+    return m_LB->Insert(row, it);
+}
 
 DropDownList::iterator DropDownList::Insert(Row* row)
-{ return m_LB->Insert(row); }
+{
+    row->SetDragDropDataType("");
+    return m_LB->Insert(row);
+}
 
 DropDownList::Row* DropDownList::Erase(iterator it)
 {

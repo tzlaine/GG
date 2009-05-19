@@ -936,81 +936,81 @@ Wnd::DragDropRenderingState Wnd::GetDragDropRenderingState() const
 }
 
 void Wnd::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (Dragable())
         OffsetMove(move);
-    else
+    else if (!Interactive())
         ForwardEventToParent();
 }
 
 void Wnd::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::LDoubleClick(const Pt& pt, Flags<ModKey> mod_keys)
 { LClick(pt, mod_keys); }
 
 void Wnd::MButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MDoubleClick(const Pt& pt, Flags<ModKey> mod_keys)
 { MClick(pt, mod_keys); }
 
 void Wnd::RButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::RDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::RButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::RClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::RDoubleClick(const Pt& pt, Flags<ModKey> mod_keys)
 { RClick(pt, mod_keys); }
 
 void Wnd::MouseEnter(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MouseLeave()
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::DragDropEnter(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnds, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::DragDropLeave()
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-{ ForwardEventToParent(); }
+{ if (!Interactive()) ForwardEventToParent(); }
 
 void Wnd::GainingFocus() {}
 

@@ -191,6 +191,9 @@ void Scroll::SizeScroll(int min, int max, unsigned int line, unsigned int page)
     m_range_min = std::min(min, max);
     m_range_max = std::max(min, max);
     m_page_sz = page;
+
+    assert(m_page_sz <= static_cast<unsigned int>(m_range_max - m_range_min + 1));
+
     if (m_page_sz > static_cast<unsigned int>(m_range_max - m_range_min + 1))
         m_page_sz = (m_range_max - m_range_min + 1);
     if (m_posn > m_range_max - static_cast<int>(m_page_sz - 1))
@@ -411,6 +414,8 @@ void Scroll::MoveTabToPosn()
     int max_posn = static_cast<int>(m_range_max - m_page_sz + 1);
     double tab_location =
         (m_posn - m_range_min) / static_cast<double>(max_posn - m_range_min) * tab_space + start_tabspace + 0.5;
+    if (m_posn - m_range_min == 0)
+        tab_location = 0.0;
 
     m_tab->MoveTo(m_orientation == VERTICAL ?
                   Pt(m_tab->RelativeUpperLeft().x, Y(static_cast<int>(tab_location))) :

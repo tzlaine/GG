@@ -986,13 +986,27 @@ void MultiEdit::AdjustScrolls()
 
     const int INT_SCROLL_WIDTH = static_cast<int>(SCROLL_WIDTH);
     need_vert =
-        (!(m_style & MULTI_NO_VSCROLL) &&
+        !(m_style & MULTI_NO_VSCROLL) &&
+        (m_first_row_shown ||
          (m_contents_sz.y > cl_sz.y ||
-          (m_contents_sz.y > cl_sz.y - INT_SCROLL_WIDTH && m_contents_sz.x > cl_sz.x - INT_SCROLL_WIDTH)));
+          (m_contents_sz.y > cl_sz.y - INT_SCROLL_WIDTH &&
+           m_contents_sz.x > cl_sz.x - INT_SCROLL_WIDTH)));
     need_horz =
-        (!(m_style & MULTI_NO_HSCROLL) &&
+        !(m_style & MULTI_NO_HSCROLL) &&
+        (m_first_col_shown ||
          (m_contents_sz.x > cl_sz.x ||
-          (m_contents_sz.x > cl_sz.x - INT_SCROLL_WIDTH && m_contents_sz.y > cl_sz.y - INT_SCROLL_WIDTH)));
+          (m_contents_sz.x > cl_sz.x - INT_SCROLL_WIDTH &&
+           m_contents_sz.y > cl_sz.y - INT_SCROLL_WIDTH)));
+
+    // This probably looks a little odd.  We only want to show scrolls if they
+    // are needed, that is if the data shown exceed the bounds of the client
+    // area.  However, if we are going to show scrolls, we want to allow them
+    // to range such that the first row shown can be any of the N rows.  Dead
+    // space after the last row is fine.
+    if (!GetLineData().empty() &&
+        !(m_style & MULTI_TERMINAL_STYLE) &&
+        GetFont()->Lineskip() < cl_sz.y)
+        m_contents_sz.y += cl_sz.y - GetFont()->Lineskip();
 
     Pt orig_cl_sz = ClientSize();
 
@@ -1001,7 +1015,7 @@ void MultiEdit::AdjustScrolls()
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
     Y vscroll_min = (m_style & MULTI_TERMINAL_STYLE) ? cl_sz.y - m_contents_sz.y : Y0;
-    X hscroll_min(0); // default values for MULTI_LEFT
+    X hscroll_min(0); // default value for MULTI_LEFT
     if (m_style & MULTI_RIGHT) {
         hscroll_min = -excess_width;
     } else if (m_style & MULTI_CENTER) {

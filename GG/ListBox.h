@@ -488,22 +488,6 @@ protected:
     bool            AutoScrollingDown() const;  ///< returns true iff the list is being autoscrolled down due to drag-and-drop
     bool            AutoScrollingLeft() const;  ///< returns true iff the list is being autoscrolled left due to drag-and-drop
     bool            AutoScrollingRight() const; ///< returns true iff the list is being autoscrolled right due to drag-and-drop
-
-    /** Returns the amount of vertical padding it is necessary to add to the
-        combined height of all rows to make the vertical scroll the proper
-        length to fully show the last row.  This is calculated by first
-        determining the first row when the last row is visible, then determining
-        how much left over space would result if only the range first-row-shown
-        to last-row were visible. */
-    Y VerticalScrollPadding(Y client_height_without_horizontal_scroll);
-
-    /** Returns the amount of horizontal padding it is necessary to add to the
-        combined width of all columns to make the horizontal scroll the proper
-        length to fully show the last column.  This is calculated by first
-        determining the first column when the last column is visible, then
-        determining how much left over space would result if only the range
-        first-column-shown to last-column were visible. */
-    X HorizontalScrollPadding(X client_width_without_vertical_scroll);
     //@}
 
     /** \name Mutators */ ///@{

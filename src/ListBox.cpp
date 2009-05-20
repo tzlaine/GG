@@ -1144,29 +1144,6 @@ bool ListBox::AutoScrollingLeft() const
 bool ListBox::AutoScrollingRight() const
 { return m_auto_scrolling_right; }
 
-Y ListBox::VerticalScrollPadding(Y client_height_without_horizontal_scroll)
-{
-    iterator first_row_shown_when_caret_at_bottom =
-        FirstRowShownWhenBottomIs(m_rows.empty() ? m_rows.end() : --m_rows.end(),
-                                  client_height_without_horizontal_scroll);
-    Y height_of_rows_visible_at_bottom(0);
-    for (iterator it = first_row_shown_when_caret_at_bottom; it != m_rows.end(); ++it) {
-        height_of_rows_visible_at_bottom += (*it)->Height();
-    }
-    return client_height_without_horizontal_scroll - height_of_rows_visible_at_bottom;
-}
-
-X ListBox::HorizontalScrollPadding(X client_width_without_vertical_scroll)
-{
-    std::size_t first_col_shown_when_caret_at_right =
-        FirstColShownWhenRightIs(m_col_widths.size() - 1, client_width_without_vertical_scroll);
-    X width_of_cols_visible_at_right(0);
-    for (std::size_t i = first_col_shown_when_caret_at_right; i < m_col_widths.size(); ++i) {
-        width_of_cols_visible_at_right += m_col_widths[i];
-    }
-    return client_width_without_vertical_scroll - width_of_cols_visible_at_right;
-}
-
 void ListBox::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
@@ -1730,13 +1707,25 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
         total_y_extent = m_rows.back()->LowerRight().y - m_rows.front()->UpperLeft().y;
 
     bool vertical_needed =
+        m_first_row_shown != m_rows.begin() ||
         m_rows.size() && (cl_sz.y < total_y_extent ||
                           (cl_sz.y < total_y_extent - SCROLL_WIDTH &&
                            cl_sz.x < total_x_extent - SCROLL_WIDTH));
     bool horizontal_needed =
+        m_first_col_shown ||
         m_rows.size() && (cl_sz.x < total_x_extent ||
                           (cl_sz.x < total_x_extent - SCROLL_WIDTH &&
                            cl_sz.y < total_y_extent - SCROLL_WIDTH));
+
+    // This probably looks a little odd.  We only want to show scrolls if they
+    // are needed, that is if the data shown exceed the bounds of the client
+    // area.  However, if we are going to show scrolls, we want to allow them
+    // to range such that the first row/column shown can be any of the N
+    // rows/columns.  Dead space after the last row/column is fine.
+    if (!m_col_widths.empty() && m_col_widths.back() < cl_sz.x)
+        total_x_extent += cl_sz.x - m_col_widths.back();
+    if (!m_rows.empty() && m_rows.back()->Height() < cl_sz.y)
+        total_y_extent += cl_sz.y - m_rows.back()->Height();
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
@@ -1751,7 +1740,6 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
                 m_vscroll->SizeMove(Pt(scroll_x, scroll_y),
                                     Pt(scroll_x + SCROLL_WIDTH, scroll_y + cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0)));
             }
-            total_y_extent += VerticalScrollPadding(cl_sz.y);
             int line_size = Value(cl_sz.y / 8);
             int page_size = Value(cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
             m_vscroll->SizeScroll(0, Value(total_y_extent - 1),
@@ -1764,7 +1752,6 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
                 cl_sz.x - SCROLL_WIDTH, Y0,
                 X(SCROLL_WIDTH), cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0),
                 m_color, CLR_SHADOW);
-        total_y_extent += VerticalScrollPadding(cl_sz.y);
         int line_size = Value(cl_sz.y / 8);
         int page_size = Value(cl_sz.y - (horizontal_needed ? SCROLL_WIDTH : 0));
         m_vscroll->SizeScroll(0, Value(total_y_extent - 1),
@@ -1784,7 +1771,6 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
                 m_hscroll->SizeMove(Pt(scroll_x, scroll_y),
                                     Pt(scroll_x + cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), scroll_y + SCROLL_WIDTH));
             }
-            total_x_extent += HorizontalScrollPadding(cl_sz.x);
             int line_size = Value(cl_sz.x / 8);
             int page_size = Value(cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
             m_hscroll->SizeScroll(0, Value(total_x_extent - 1),
@@ -1797,7 +1783,6 @@ void ListBox::AdjustScrolls(bool adjust_for_resize)
                 X0, cl_sz.y - SCROLL_WIDTH,
                 cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0), Y(SCROLL_WIDTH),
                 m_color, CLR_SHADOW);
-        total_x_extent += HorizontalScrollPadding(cl_sz.x);
         int line_size = Value(cl_sz.x / 8);
         int page_size = Value(cl_sz.x - (vertical_needed ? SCROLL_WIDTH : 0));
         m_hscroll->SizeScroll(0, Value(total_x_extent - 1),

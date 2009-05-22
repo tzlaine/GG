@@ -22,7 +22,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-#include "OISInput.h"
+#include <GG/Ogre/Plugins/OISInput.h>
 
 #include <GG/Ogre/OgreGUI.h>
 

@@ -507,7 +507,6 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = .. \
-                         ../src/Ogre/Plugins \
                          ./GGDoc.txt
 
 # This tag can be used to specify the character encoding of the source files 

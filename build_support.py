@@ -118,7 +118,8 @@ def CreateGiGiDriverPCFile(target, source, env):
         'prefix' : env['prefix'],
         'incdir' : env.subst(env['incdir']),
         'version' : gigi_version,
-        'driver_libs' : ''
+        'driver_libs' : '',
+        'driver_cflags' : ''
     }
     for flag in env['LINKFLAGS']:
         if flag not in pc_file_link_flags_used:
@@ -128,6 +129,8 @@ def CreateGiGiDriverPCFile(target, source, env):
         if lib.find('IL') == -1 and lib not in pc_file_libs_used:
             pc_file_libs_used.append(lib)
             values['driver_libs'] += ' -l' + (lib[0] != '$' and lib or env.subst(lib))
+    if 'Ogre' in target[0] and not env['dynamic']:
+        values['driver_cflags'] = '-DOGRE_STATIC_LIB'
     for tgt, src in zip(target, source):
         pc = open(str(tgt), 'w')
         pc_in = open(str(src), 'r')

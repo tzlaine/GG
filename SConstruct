@@ -783,6 +783,7 @@ if env['build_ogre_driver']:
     if env['dynamic']:
         lib_gigi_ogre = ogre_env.SharedLibrary('GiGiOgre', gigi_ogre_objects)
     else:
+        ogre_env.AppendUnique(CPPDEFINES = ['OGRE_STATIC_LIB'])
         lib_gigi_ogre = ogre_env.StaticLibrary('GiGiOgre', gigi_ogre_objects)
 
     Depends(lib_gigi_ogre, lib_gigi)
@@ -806,6 +807,7 @@ if env['build_ogre_driver']:
         if env['dynamic']:
             lib_gigi_ogre_plugins[key] = ogre_plugin_envs[key].SharedLibrary(OgrePluginName(key), value)
         else:
+            ogre_plugin_envs[key].AppendUnique(CPPDEFINES = ['OGRE_STATIC_LIB'])
             lib_gigi_ogre_plugins[key] = ogre_plugin_envs[key].StaticLibrary(OgrePluginName(key), value)
         Depends(lib_gigi_ogre_plugins[key], lib_gigi_ogre)
 

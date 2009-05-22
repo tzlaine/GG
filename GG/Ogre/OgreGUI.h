@@ -88,6 +88,22 @@ namespace GG {
     ogre_root->loadPlugin("/path/to/plugin");
     gui();
     \endverbatim
+    <p>
+    When building GG and OgreGUI statically, the input plugin needs to be
+    created and managed by the application, and installed into and uninstalled
+    from the Ogre::Root singleton explicitly.  The plugin must be constructed
+    after Ogre::Root has been constructed:
+    \verbatim
+    #include <GG/Ogre/Plugins/OISIput.h>
+    ...
+    OgreGUI gui(ogre_window, "/path/to/input_plugin.cfg");
+    OISInput* ois_input_plugin = new OISInput;
+    ogre_root->installPlugin(ois_input_plugin);
+    gui();
+    ...
+    ogre_root->uninstallPlugin(ois_input_plugin);
+    delete ois_input_plugin;
+    \endverbatim
     */
 class GG_OGRE_API OgreGUI :
     public GUI,

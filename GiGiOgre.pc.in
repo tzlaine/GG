@@ -7,4 +7,4 @@ Description: An Ogre-based input driver and application framework for use with l
 Requires: GiGi = ${version} OGRE
 Version: ${version}
 Libs: -lGiGiOgre %(driver_libs)s
-Cflags: 
+Cflags: %(driver_cflags)s

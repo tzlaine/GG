@@ -26,7 +26,7 @@
 /** \file OISInput.h \brief Contains OISInput, the OgreGUIInputPlugin subclass
     that provides OgreGUI with OIS input. */
 
-#include "OgreGUIInputPlugin.h"
+#include <GG/Ogre/Plugins/OgreGUIInputPlugin.h>
 
 #include <OIS/OISKeyboard.h>
 #include <OIS/OISMouse.h>

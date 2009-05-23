@@ -309,7 +309,6 @@ if not env.GetOption('clean'):
                 ('signals', signals_namespace)
                 ])
 
-        print 'boost_lib_suffix=',env.has_key('boost_lib_suffix') and env['boost_lib_suffix'] or None
         boost_libs = [
             ('boost_signals', 'boost/signals.hpp', 'boost::' + signals_namespace + '::connection();'),
             ('boost_system', 'boost/system/error_code.hpp', 'boost::system::get_system_category();'),
@@ -318,7 +317,6 @@ if not env.GetOption('clean'):
             ]
         if not conf.CheckBoost(boost_version_string, boost_libs, conf, not ms_linker):
             Exit(1)
-        print 'boost_lib_suffix=',env.has_key('boost_lib_suffix') and env['boost_lib_suffix'] or None
 
         # pthreads
         if str(Platform()) == 'posix':
@@ -667,7 +665,6 @@ Image Loading:
 
     if 'configure' in command_line_args:
         Exit(0)
-        
 
 ##################################################
 # define targets                                 #

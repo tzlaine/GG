@@ -503,7 +503,7 @@ void Texture::InitFromRawData(X width, Y height, const unsigned char* image, GLe
     m_default_height = height;
     m_bytes_pp = bytes_per_pixel;
     {
-        int w, h;
+        GLint w, h;
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
         m_width = X(w);

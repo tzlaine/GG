@@ -29,6 +29,21 @@
 #ifndef _GG_OgreGUI_h_ 
 #define _GG_OgreGUI_h_
 
+#ifdef __APPLE__
+/* prevents OpenTransportProviders.h (a system header in Mac SDKs)
+    from trying to enum what's already defined by related headers */
+#undef TCP_NODELAY
+#undef TCP_MAXSEG
+#undef TCP_NOTIFY_THRESHOLD
+#undef TCP_ABORT_THRESHOLD
+#undef TCP_CONN_NOTIFY_THRESHOLD
+#undef TCP_CONN_ABORT_THRESHOLD
+#undef TCP_OOBINLINE
+#undef TCP_URGENT_PTR_TYPE
+#undef TCP_KEEPALIVE
+#include <Carbon/Carbon.h>
+#endif
+
 #include <OgreDataStream.h>
 #include <OgreRenderTargetListener.h>
 #include <OgreSharedPtr.h>

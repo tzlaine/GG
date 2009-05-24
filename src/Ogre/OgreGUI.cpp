@@ -33,6 +33,10 @@
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #include <GL/gl.h>
 #include <GG/glext.h>
+#elif OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <mach-o/dyld.h>
 #else
 #include <GL/glx.h>
 #endif
@@ -61,6 +65,15 @@ namespace {
                 }
             }
     };
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    void* aglGetProcAddress (char* symbol_name)
+    {
+        return NSIsSymbolNameDefined(symbol_name) ?
+            NSAddressOfSymbol(NSLookupAndBindSymbol(symbol_name)) :
+            0;
+    }
+#endif
 }
 
 OgreGUI::OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename/* = ""*/) :
@@ -191,6 +204,8 @@ void OgreGUI::Enter2DMode()
     typedef void (*BindBufferARBFn)(GLenum, GLuint);
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
     BindBufferARBFn glBindBufferARB = (BindBufferARBFn)wglGetProcAddress("glBindBufferARB");
+#elif OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    BindBufferARBFn glBindBufferARB = (BindBufferARBFn)aglGetProcAddress("_glBindBufferARB");
 #else
     BindBufferARBFn glBindBufferARB = (BindBufferARBFn)glXGetProcAddress((const GLubyte* )"glBindBufferARB");
 #endif
@@ -204,6 +219,8 @@ void OgreGUI::Enter2DMode()
     typedef void (*UseProgramARBFn)(GLuint);
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
     UseProgramARBFn glUseProgramARB = (UseProgramARBFn)wglGetProcAddress("glUseProgramARB");
+#elif OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    UseProgramARBFn glUseProgramARB = (UseProgramARBFn)aglGetProcAddress("_glUseProgramARB");
 #else
     UseProgramARBFn glUseProgramARB = (UseProgramARBFn)glXGetProcAddress((const GLubyte* )"glUseProgramARB");
 #endif

@@ -89,3 +89,12 @@ void Control::DefineAttributes(WndEditor* editor)
     editor->Attribute<Clr>("Color", m_color, action);
     editor->Attribute("Disabled", m_disabled);
 }
+
+void Control::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(); }
+
+void Control::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(); }
+
+void Control::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(); }

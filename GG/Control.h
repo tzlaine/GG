@@ -40,11 +40,11 @@ namespace GG {
     corner of it's parent's client area.  All controls may be disabled.  By
     default, a Control forwards several types of events and requests for
     action to its parent Wnd (e.g. AcceptDrops()).  In particular, keyboard
-    input not handled by the Control should be forwarded to the Control's
-    parent.  Any class derived from Control should do this with any keyboard
-    input it does not need for its own use.  For instance, an Edit control
-    needs to know about arrow key keyboard input, but it should pass other key
-    presses like 'ESC' to its parent. */
+    input not handled by the Control is forwarded to the Control's parent.
+    Any class derived from Control should do the same with any keyboard input
+    it does not need for its own use.  For instance, an Edit control needs to
+    know about arrow key keyboard input, but it should pass other key presses
+    like 'ESC' to its parent. */
 class GG_API Control : public Wnd
 {
 public:
@@ -72,6 +72,10 @@ protected:
     Control(); ///< default ctor
     Control(X x, Y y, X w, Y h, Flags<WndFlag> flags = INTERACTIVE); ///< basic ctor
     //@}
+
+    virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
     Clr  m_color;    ///< the color of the control
     bool m_disabled; ///< whether or not this control is disabled

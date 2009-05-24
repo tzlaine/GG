@@ -651,6 +651,15 @@ void Layout::DefineAttributes(WndEditor* editor)
     // TODO: handle setting the number of rows and columns
 }
 
+void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(); }
+
+void Layout::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(); }
+
+void Layout::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
+{ ForwardEventToParent(); }
+
 double Layout::TotalStretch(const std::vector<RowColParams>& params_vec) const
 {
     double retval = 0.0;

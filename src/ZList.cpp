@@ -40,18 +40,23 @@ namespace {
 ///////////////////////////////////////
 // class GG::ZList
 ///////////////////////////////////////
-Wnd* ZList::Pick(const Pt& pt, Wnd* modal, Wnd* ignore/* = 0*/) const
+Wnd* ZList::Pick(const Pt& pt, Wnd* modal, const std::set<Wnd*>* ignore/* = 0*/) const
 {
     Wnd* retval = 0;
     if (modal) { // if a modal window is active, only look there
-        // NOTE: We have to check Visible() separately, because in the rendering code a invisble parent's children are
-        // never rendered.
-        retval = modal->Visible() && modal->InWindow(pt) ? PickWithinWindow(pt, modal, ignore) : 0;
+        // NOTE: We have to check Visible() separately, because in the
+        // rendering code an invisble parent's children are never rendered.
+        retval =
+            modal->Visible() &&
+            modal->InWindow(pt) ?
+            PickWithinWindow(pt, modal, ignore) : 0;
     } else { // otherwise, look in the z-list
         const_iterator end_it = end();
         for (const_iterator it = begin(); it != end_it; ++it) {
             Wnd* temp = 0;
-            if ((*it)->Visible() && (*it)->InWindow(pt) && (temp = PickWithinWindow(pt, *it, ignore))) {
+            if ((*it)->Visible() &&
+                (*it)->InWindow(pt) &&
+                (temp = PickWithinWindow(pt, *it, ignore))) {
                 retval = temp;
                 break;
             }
@@ -65,7 +70,8 @@ void ZList::Add(Wnd* wnd)
     if (m_contents.find(wnd) == m_contents.end()) {
         // add wnd to the end of the list...
         if (empty()) { // list empty
-            wnd->m_zorder = DESIRED_LOWEST_Z; // by default, add first element at DESIRED_LOWEST_Z
+            // by default, add first element at DESIRED_LOWEST_Z
+            wnd->m_zorder = DESIRED_LOWEST_Z;
             insert(begin(), wnd);
         } else { // list not empty
             wnd->m_zorder = back()->m_zorder - (DESIRED_GAP_SIZE + 1);
@@ -98,19 +104,28 @@ bool ZList::MoveUp(Wnd* wnd)
     iterator it = std::find(begin(), end(), wnd);
     if (it != end()) { // note that this also implies !empty()..
         int top_z = front()->m_zorder; // ..so this is okay to do without checking
-        if (!front()->OnTop() || wnd->OnTop()) { // if there are no on-top windows, or wnd is an on-top window..
-            (*it)->m_zorder = top_z + DESIRED_GAP_SIZE + 1; // ..just slap wnd on top of the topmost element
+        if (!front()->OnTop() || wnd->OnTop()) {
+            // if there are no on-top windows, or wnd is an on-top window just
+            // slap wnd on top of the topmost element
+            (*it)->m_zorder = top_z + DESIRED_GAP_SIZE + 1;
             splice(begin(), *this, it);
-        } else { // front()->OnTop() && !wnd->OnTop(), so only move wnd up to just below the bottom of the on-top range
+        } else {
+            // front()->OnTop() && !wnd->OnTop(), so only move wnd up to just
+            // below the bottom of the on-top range
             iterator first_non_ontop_it = FirstNonOnTop();
             int prev_z = (*--first_non_ontop_it)->m_zorder;
             int curr_z = (*++first_non_ontop_it)->m_zorder;
-            if (prev_z - curr_z - 1 >= 3) { // if there's at least 3 positions in between..
-                (*it)->m_zorder = (*first_non_ontop_it)->m_zorder + (prev_z - curr_z - 1) / 2; // ..just stick wnd in the middle
+            if (prev_z - curr_z - 1 >= 3) {
+                // if there's at least 3 positions in between just stick wnd
+                // in the middle
+                (*it)->m_zorder =
+                    (*first_non_ontop_it)->m_zorder + (prev_z - curr_z - 1) / 2;
                 splice(first_non_ontop_it, *this, it);
             } else { // make room by bumping up all the on-top windows
                 iterator it2 = first_non_ontop_it;
-                (*--it2)->m_zorder += 2 * (DESIRED_GAP_SIZE + 1); // double the gap before first_non_ontop_it, to leave the right gap on either side of wnd
+                // double the gap before first_non_ontop_it, to leave the
+                // right gap on either side of wnd
+                (*--it2)->m_zorder += 2 * (DESIRED_GAP_SIZE + 1);
                 while (it2 != begin()) {
                     --it2;
                     (*it2)->m_zorder += DESIRED_GAP_SIZE + 1;
@@ -131,10 +146,14 @@ bool ZList::MoveDown(Wnd* wnd)
     iterator it = std::find(begin(), end(), wnd);
     if (it != end()) {
         int bottom_z = back()->m_zorder;
-        if (back()->OnTop() || !wnd->OnTop()) { // if there are only on-top windows, or wnd is not an on-top window..
-            (*it)->m_zorder = bottom_z - (DESIRED_GAP_SIZE + 1); // ..just put wnd below the bottom element
+        if (back()->OnTop() || !wnd->OnTop()) {
+            // if there are only on-top windows, or wnd is not an on-top
+            // window just put wnd below the bottom element
+            (*it)->m_zorder = bottom_z - (DESIRED_GAP_SIZE + 1);
             splice(end(), *this, it);
-        } else { // !back()->OnTop() && wnd->OnTop(), so only move wnd up to just below the bottom of the on-top range
+        } else {
+            // !back()->OnTop() && wnd->OnTop(), so only move wnd up to just
+            // below the bottom of the on-top range
             iterator first_non_ontop_it = FirstNonOnTop();
             int prev_z = (*--first_non_ontop_it)->m_zorder;
             int curr_z = (*++first_non_ontop_it)->m_zorder;
@@ -143,7 +162,9 @@ bool ZList::MoveDown(Wnd* wnd)
                 splice(first_non_ontop_it, *this, it);
             } else { // make room by bumping up all the on-top windows
                 iterator it2 = first_non_ontop_it;
-                (*--it2)->m_zorder += 2 * (DESIRED_GAP_SIZE + 1); // double the gap before first_non_ontop_it, to leave the right gap on either side of wnd
+                // double the gap before first_non_ontop_it, to leave the
+                // right gap on either side of wnd
+                (*--it2)->m_zorder += 2 * (DESIRED_GAP_SIZE + 1);
                 while (it2 != begin()) {
                     --it2;
                     (*it2)->m_zorder += DESIRED_GAP_SIZE + 1;
@@ -158,11 +179,16 @@ bool ZList::MoveDown(Wnd* wnd)
     return retval;
 }
 
-Wnd* ZList::PickWithinWindow(const Pt& pt, Wnd* wnd, Wnd* ignore) const
+Wnd* ZList::PickWithinWindow(const Pt& pt, Wnd* wnd, const std::set<Wnd*>* ignore) const
 {
     // if wnd is visible and clickable, return it if no child windows also catch pt
-    Wnd* retval = (wnd->Visible() && wnd->Interactive() && wnd != ignore) ? wnd : 0;
-    // look through all the children of wnd, and determine whether pt lies in any of them (or their children)
+    Wnd* retval =
+        (wnd->Visible() &&
+         wnd->Interactive() &&
+         (!ignore || ignore->find(wnd) == ignore->end())) ?
+        wnd : 0;
+    // look through all the children of wnd, and determine whether pt lies in
+    // any of them (or their children)
     std::list<Wnd*>::reverse_iterator end_it = wnd->m_children.rend();
     for (std::list<Wnd*>::reverse_iterator it = wnd->m_children.rbegin(); it != end_it; ++it) {
         Wnd* temp = 0;
@@ -182,8 +208,10 @@ bool ZList::NeedsRealignment() const
         int back_z = back()->m_zorder;
         int range = front_z - back_z + 1;
         int empty_slots = range - sz;
-        double avg_gap = empty_slots / static_cast<double>(sz - 1); // empty slots over the number of spaces in between the elements
-        bool max_span_impossible = DESIRED_GAP_SIZE * static_cast<double>(sz) > MAX_SPAN; // done with doubles to avoid integer overflow
+        // empty slots over the number of spaces in between the elements
+        double avg_gap = empty_slots / static_cast<double>(sz - 1);
+        // done with doubles to avoid integer overflow
+        bool max_span_impossible = DESIRED_GAP_SIZE * static_cast<double>(sz) > MAX_SPAN;
         retval = ((range > MAX_SPAN && !max_span_impossible) ||
                   avg_gap > MAX_AVG_GAP_SIZE ||
                   avg_gap < MIN_AVG_GAP_SIZE ||

@@ -291,7 +291,10 @@ void GUIImpl::HandleDrag(unsigned int mouse_button, const Pt& pos, int curr_tick
             mouse_button == 0 ||
             !m_drag_drop_wnds.empty()) {
             bool unregistered_drag = m_drag_drop_wnds.empty();
-            m_curr_wnd_under_cursor = m_zlist.Pick(pos, GUI::s_gui->ModalWindow(), unregistered_drag ? m_drag_wnds[mouse_button] : 0);
+            std::set<Wnd*> ignores;
+            if (unregistered_drag)
+                ignores.insert(m_drag_wnds[mouse_button]);
+            m_curr_wnd_under_cursor = m_zlist.Pick(pos, GUI::s_gui->ModalWindow(), &ignores);
             std::map<Wnd*, Pt> drag_drop_wnds;
             drag_drop_wnds[m_drag_wnds[mouse_button]] = m_wnd_drag_offset;
             std::map<Wnd*, Pt>& drag_drop_wnds_to_use = unregistered_drag ? drag_drop_wnds : m_drag_drop_wnds;
@@ -381,7 +384,10 @@ void GUIImpl::HandleRelease(unsigned int mouse_button, const GG::Pt& pos, int cu
     m_prev_wnd_under_cursor_time = curr_ticks;
 
     Wnd* click_wnd = m_drag_wnds[mouse_button];
-    m_curr_wnd_under_cursor = m_zlist.Pick(pos, GUI::s_gui->ModalWindow(), m_curr_drag_wnd_dragged ? click_wnd : 0);
+    std::set<Wnd*> ignores;
+    if (m_curr_drag_wnd_dragged)
+        ignores.insert(click_wnd);
+    m_curr_wnd_under_cursor = m_zlist.Pick(pos, GUI::s_gui->ModalWindow(), &ignores);
 
     bool in_drag_drop =
         !m_drag_drop_wnds.empty() ||

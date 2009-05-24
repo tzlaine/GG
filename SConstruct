@@ -304,7 +304,7 @@ if not env.GetOption('clean'):
         signals_namespace = 'signals'
         if OptionValue('boost_signals_namespace', env):
             signals_namespace = OptionValue('boost_signals_namespace', env)
-            env.Append(CPPDEFINES = [
+            env.AppendUnique(CPPDEFINES = [
                 ('BOOST_SIGNALS_NAMESPACE', signals_namespace),
                 ('signals', signals_namespace)
                 ])
@@ -444,26 +444,26 @@ if not env.GetOption('clean'):
                 '/Zc:forScope',
                 '/GR',
                 '/Gd',
-                '/Zi',
+                '/Z7',
                 '/wd4146', '/wd4099', '/wd4251', '/wd4800', '/wd4267', '/wd4275', '/wd4244', '/wd4101', '/wd4258', '/wd4351', '/wd4996'
                 ]
-            env.Append(CCFLAGS = flags)
-            env.Append(CPPDEFINES = [
+            env.AppendUnique(CCFLAGS = flags)
+            env.AppendUnique(CPPDEFINES = [
                 (env['debug'] and '_DEBUG' or 'NDEBUG'),
                 'WIN32',
                 '_WINDOWS',
                 'ADOBE_TEST_MICROSOFT_NO_DEPRECATE=0'
                 ])
             if env['dynamic']:
-                env.Append(CPPDEFINES = [
+                env.AppendUnique(CPPDEFINES = [
                 '_USRDLL',
                 '_WINDLL'
                 ])
-            env.Append(LINKFLAGS = [
+            env.AppendUnique(LINKFLAGS = [
                 '/NODEFAULTLIB:LIBCMT',
                 '/DEBUG'
                 ])
-            env.Append(LIBS = [
+            env.AppendUnique(LIBS = [
                 'kernel32',
                 'user32',
                 'gdi32',
@@ -734,7 +734,7 @@ if env['build_sdl_driver']:
             '/nologo',
             '/c',
             '/Wp64',
-            '/Zi',
+            '/Z7',
             '/wd4099',
             '/wd4251',
             '/wd4800',

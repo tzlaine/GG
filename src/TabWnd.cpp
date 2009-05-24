@@ -105,14 +105,18 @@ std::size_t TabWnd::AddWnd(Wnd* wnd, const std::string& name)
 
 void TabWnd::InsertWnd(std::size_t index, Wnd* wnd, const std::string& name)
 {
+    std::size_t old_tab = m_tab_bar->CurrentTabIndex();
     m_wnds.insert(m_wnds.begin() + index, std::make_pair(wnd, name));
     m_tab_bar->InsertTab(index, name);
     GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize().y + 2 * 5);
+    if (m_tab_bar->CurrentTabIndex() != old_tab)
+        TabChanged(m_tab_bar->CurrentTabIndex(), false);
 }
 
 Wnd* TabWnd::RemoveWnd(const std::string& name)
 {
     Wnd* retval = 0;
+    std::size_t old_tab = m_tab_bar->CurrentTabIndex();
     std::size_t index = NO_WND;
     for (std::size_t i = 0; i < m_wnds.size(); ++i) {
         if (m_wnds[i].second == name) {
@@ -126,6 +130,8 @@ Wnd* TabWnd::RemoveWnd(const std::string& name)
         m_tab_bar->RemoveTab(name);
         GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize().y + 2 * 5);
     }
+    if (m_tab_bar->CurrentTabIndex() != old_tab)
+        TabChanged(m_tab_bar->CurrentTabIndex(), false);
     return retval;
 }
 

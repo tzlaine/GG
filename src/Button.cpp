@@ -559,6 +559,9 @@ Pt RadioButtonGroup::MinUsableSize() const
 Orientation RadioButtonGroup::GetOrientation() const
 { return m_orientation; }
 
+bool RadioButtonGroup::Empty() const
+{ return m_button_slots.empty(); }
+
 std::size_t RadioButtonGroup::NumButtons() const
 { return m_button_slots.size(); }
 

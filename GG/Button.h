@@ -249,6 +249,9 @@ public:
     /** Returns the orientation of the buttons in the group */
     Orientation      GetOrientation() const;
 
+    /** Returns true iff NumButtons() == 0 */
+    bool             Empty() const;
+
     /** Returns the number of buttons in this control */
     std::size_t      NumButtons() const;
 

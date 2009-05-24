@@ -87,6 +87,12 @@ Pt TabWnd::MinUsableSize() const
     return retval;
 }
 
+bool TabWnd::Empty() const
+{ return m_tab_bar->Empty(); }
+
+std::size_t TabWnd::NumWnds() const
+{ return m_tab_bar->NumTabs(); }
+
 Wnd* TabWnd::CurrentWnd() const
 { return m_current_wnd; }
 
@@ -235,6 +241,12 @@ Pt TabBar::MinUsableSize() const
     }
     return Pt(4 * BUTTON_WIDTH, y);
 }
+
+bool TabBar::Empty() const
+{ return m_tabs->Empty(); }
+
+std::size_t TabBar::NumTabs() const
+{ return m_tabs->NumButtons(); }
 
 std::size_t TabBar::CurrentTabIndex() const
 { return m_tabs->CheckedButton(); }

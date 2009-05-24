@@ -59,6 +59,12 @@ public:
     /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
 
+    /** Returns true iff NumWnds() == 0. */
+    bool Empty() const;
+
+    /** Returns the number of tabs currently in this TabWnd. */
+    std::size_t NumWnds() const;
+
     /** Returns the Wnd currently visible in the TabWnd, or 0 if there is none. */
     Wnd* CurrentWnd() const;
 
@@ -143,6 +149,12 @@ public:
 
     /** \name Accessors */ ///@{
     virtual Pt MinUsableSize() const;
+
+    /** Returns true iff NumWnds() == 0. */
+    bool Empty() const;
+
+    /** Returns the number of tabs currently in this TabWnd. */
+    std::size_t NumTabs() const;
 
     /** Returns the index into the sequence of tabs in this TabBar of the tab
         currently selected.  NO_TAB is returned if there is no tab currently

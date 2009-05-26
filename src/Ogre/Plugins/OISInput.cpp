@@ -417,6 +417,7 @@ void OISInput::CleanupInputManager()
     }
 }
 
+#ifndef OGRE_STATIC_LIB
 extern "C" void GG_OGRE_PLUGIN_API dllStartPlugin(void)
 {
     gOISInputPlugin = new OISInput();
@@ -428,3 +429,4 @@ extern "C" void GG_OGRE_PLUGIN_API dllStopPlugin(void)
         Ogre::Root::getSingleton().uninstallPlugin(gOISInputPlugin);
     delete gOISInputPlugin;
 }
+#endif

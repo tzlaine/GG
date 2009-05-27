@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 2.6)
+
+if (BUILD_OGRE_OIS_PLUGIN)
+    message("-- Configuring Ogre OIS Input Plugin")
+    find_package(OIS)
+    if (OIS_FOUND)
+        include_directories(${OIS_INCLUDE_DIR})
+        link_directories(${OIS_LIB_DIR})
+    else ()
+        set(BUILD_OGRE_OIS_PLUGIN OFF)
+        message("     Warning: OIS could not be found.  Disabling the OIS build.")
+    endif ()
+endif ()
+
+if (BUILD_OGRE_OIS_PLUGIN)
+    set(sources OgreGUIInputPlugin.cpp)
+
+    macro (make_gigi_ogre_ois link_type)
+        add_library(GiGiOgrePlugin_OIS ${link_type} ${sources})
+        target_link_libraries(GiGiOgrePlugin_OIS GiGiOgre ${OIS_LIBRARIES})
+    endmacro ()
+
+    if (BUILD_SHARED)
+        make_gigi_ogre_ois(SHARED)
+        set_target_properties(GiGiOgrePlugin_OIS PROPERTIES DEFINE_SYMBOL GIGI_OGRE_PLUGIN_EXPORTS)
+    endif ()
+
+    if (BUILD_STATIC)
+        make_gigi_ogre_ois(STATIC)
+        set_target_properties(GiGiOgrePlugin_OIS PROPERTIES LINK_SEARCH_END_STATIC true)
+    endif ()
+endif ()

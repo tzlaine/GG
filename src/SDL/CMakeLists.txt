@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 2.6)
+
+if (BUILD_SDL_DRIVER)
+    message("-- Configuring GiGiSDL")
+    find_package(SDL)
+    if (SDL_FOUND)
+        include_directories(${SDL_INCLUDE_DIR})
+    else ()
+        set(BUILD_SDL_DRIVER OFF)
+        message("     Warning: SDL could not be found.  Disabling the SDL build.")
+    endif ()
+endif ()
+
+if (BUILD_SDL_DRIVER)
+    set(sources SDLGUI.cpp)
+
+    macro (make_gigi_sdl link_type)
+        add_library(GiGiSDL ${link_type} ${sources})
+        target_link_libraries(GiGiSDL GiGi ${SDL_LIBRARY})
+    endmacro ()
+
+    if (BUILD_SHARED)
+        make_gigi_sdl(SHARED)
+        set_target_properties(GiGiSDL PROPERTIES DEFINE_SYMBOL GIGI_SDL_EXPORTS)
+    endif ()
+
+    if (BUILD_STATIC)
+        make_gigi_sdl(STATIC)
+        set_target_properties(GiGiSDL PROPERTIES LINK_SEARCH_END_STATIC true)
+    endif ()
+endif ()

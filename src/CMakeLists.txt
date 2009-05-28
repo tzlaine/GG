@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 message("-- Configuring GiGi")
 
-set(
-    sources
+set(THIS_LIB_SOURCES
 
     AdamGlue.cpp
     AlignmentFlags.cpp
@@ -159,33 +158,22 @@ execute_process(
 )
 set_source_files_properties(${CMAKE_HOME_DIRECTORY}/GG/ltdl.h ${CMAKE_HOME_DIRECTORY}/GG/ltdl_config.h PROPERTIES GENERATED true)
 
-macro (make_gigi link_type)
-    add_library(GiGi ${link_type} ${sources})
-    target_link_libraries(GiGi ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES})
-    if (USE_DEVIL)
-        target_link_libraries(GiGi ${IL_LIBRARY} ${ILUT_LIBRARY})
-    else ()
-        if (JPEG_FOUND)
-            target_link_libraries(GiGi ${JPEG_LIBRARIES})
-        endif ()
-        if (PNG_FOUND)
-            target_link_libraries(GiGi ${PNG_LIBRARIES})
-        endif ()
-        if (TIFF_FOUND)
-            target_link_libraries(GiGi ${TIFF_LIBRARIES})
-        endif ()
+set(THIS_LIB_LINK_LIBS ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES})
+if (USE_DEVIL)
+    list(APPEND THIS_LIB_LINK_LIBS ${IL_LIBRARY} ${ILUT_LIBRARY})
+else ()
+    if (JPEG_FOUND)
+        list(APPEND THIS_LIB_LINK_LIBS ${JPEG_LIBRARIES})
     endif ()
-endmacro ()
-
-if (BUILD_SHARED)
-    make_gigi(SHARED)
-    set_target_properties(GiGi PROPERTIES DEFINE_SYMBOL GIGI_EXPORTS)
+    if (PNG_FOUND)
+        list(APPEND THIS_LIB_LINK_LIBS ${PNG_LIBRARIES})
+    endif ()
+    if (TIFF_FOUND)
+        list(APPEND THIS_LIB_LINK_LIBS ${TIFF_LIBRARIES})
+    endif ()
 endif ()
 
-if (BUILD_STATIC)
-    make_gigi(STATIC)
-    set_target_properties(GiGi PROPERTIES LINK_SEARCH_END_STATIC true)
-endif ()
+library_all_variants(GiGi)
 
 add_subdirectory(SDL)
 add_subdirectory(Ogre)

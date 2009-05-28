@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+cmake_policy(VERSION 2.6.4)
 
 if (BUILD_SDL_DRIVER)
     message("-- Configuring GiGiSDL")
@@ -24,8 +25,8 @@ if (BUILD_SDL_DRIVER)
         set_target_properties(GiGiSDL PROPERTIES DEFINE_SYMBOL GIGI_SDL_EXPORTS)
     endif ()
 
-    if (BUILD_STATIC)
-        make_gigi_sdl(STATIC)
-        set_target_properties(GiGiSDL PROPERTIES LINK_SEARCH_END_STATIC true)
-    endif ()
+#    if (BUILD_STATIC)
+#        make_gigi_sdl(STATIC)
+#        set_target_properties(GiGiSDL PROPERTIES LINK_SEARCH_END_STATIC true)
+#    endif ()
 endif ()

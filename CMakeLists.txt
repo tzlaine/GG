@@ -1,18 +1,31 @@
 cmake_minimum_required(VERSION 2.6)
+cmake_policy(VERSION 2.6.4)
 
 set(CMAKE_VERBOSE_MAKEFILE true)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
+include(Config)
+include(Util)
 
 set(MINIMUM_BOOST_VERSION 1.36.0)
 set(MINIMUM_BOOST_COMPONENTS filesystem signals system thread)
 
 option(BUILD_STATIC "Enables building of static libraries." OFF)
 option(BUILD_SHARED "Enables building of shared libraries." ON)
-option(BUILD_DEBUG "Enables building of debugging libraries." OFF)
-option(BUILD_RELEASE "Enables building of release libraries." ON)
-option(BUILD_SINGLE_THREADED "Enables building of single-threaded libraries." OFF)
-option(BUILD_MULTI_THREADED "Enables building of multi-threaded libraries." ON)
+option(BUILD_DEBUG "Controls generation of debug code; OFF implies release code." OFF)
+option(BUILD_MULTI_THREADED "Controls generation of multi-threaded code; OFF implies single-threaded code." ON)
+
+if (BUILD_DEBUG)
+    set(BUILD_RELEASE OFF)
+else ()
+    set(BUILD_RELEASE ON)
+endif ()
+
+if (BUILD_MULTI_THREADED)
+    set(BUILD_SINGLE_THREADED OFF)
+else ()
+    set(BUILD_SINGLE_THREADED ON)
+endif ()
 
 set(BOOST_SIGNALS_NAMESPACE "signals" CACHE STRING
     "Specifies alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost).")

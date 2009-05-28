@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+cmake_policy(VERSION 2.6.4)
 
 if (BUILD_OGRE_DRIVER)
     message("-- Configuring GiGiOgre")
@@ -25,10 +26,10 @@ if (BUILD_OGRE_DRIVER)
         set_target_properties(GiGiOgre PROPERTIES DEFINE_SYMBOL GIGI_OGRE_EXPORTS)
     endif ()
 
-    if (BUILD_STATIC)
-        make_gigi_ogre(STATIC)
-        set_target_properties(GiGiOgre PROPERTIES LINK_SEARCH_END_STATIC true)
-    endif ()
+#    if (BUILD_STATIC)
+#        make_gigi_ogre(STATIC)
+#        set_target_properties(GiGiOgre PROPERTIES LINK_SEARCH_END_STATIC true)
+#    endif ()
 endif ()
 
 add_subdirectory(Plugins)

@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+cmake_policy(VERSION 2.6.4)
 
 if (BUILD_OGRE_OIS_PLUGIN)
     message("-- Configuring Ogre OIS Input Plugin")
@@ -25,8 +26,8 @@ if (BUILD_OGRE_OIS_PLUGIN)
         set_target_properties(GiGiOgrePlugin_OIS PROPERTIES DEFINE_SYMBOL GIGI_OGRE_PLUGIN_EXPORTS)
     endif ()
 
-    if (BUILD_STATIC)
-        make_gigi_ogre_ois(STATIC)
-        set_target_properties(GiGiOgrePlugin_OIS PROPERTIES LINK_SEARCH_END_STATIC true)
-    endif ()
+#    if (BUILD_STATIC)
+#        make_gigi_ogre_ois(STATIC)
+#        set_target_properties(GiGiOgrePlugin_OIS PROPERTIES LINK_SEARCH_END_STATIC true)
+#    endif ()
 endif ()

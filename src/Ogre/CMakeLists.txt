@@ -14,22 +14,9 @@ if (BUILD_OGRE_DRIVER)
 endif ()
 
 if (BUILD_OGRE_DRIVER)
-    set(sources OgreGUI.cpp)
-
-    macro (make_gigi_ogre link_type)
-        add_library(GiGiOgre ${link_type} ${sources})
-        target_link_libraries(GiGiOgre GiGi ${OGRE_LIBRARIES})
-    endmacro ()
-
-    if (BUILD_SHARED)
-        make_gigi_ogre(SHARED)
-        set_target_properties(GiGiOgre PROPERTIES DEFINE_SYMBOL GIGI_OGRE_EXPORTS)
-    endif ()
-
-#    if (BUILD_STATIC)
-#        make_gigi_ogre(STATIC)
-#        set_target_properties(GiGiOgre PROPERTIES LINK_SEARCH_END_STATIC true)
-#    endif ()
+    set(THIS_LIB_SOURCES OgreGUI.cpp)
+    set(THIS_LIB_LINK_LIBS GiGi ${OGRE_LIBRARIES})
+    library_all_variants(GiGiOgre)
 endif ()
 
 add_subdirectory(Plugins)

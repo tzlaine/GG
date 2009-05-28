@@ -13,20 +13,7 @@ if (BUILD_SDL_DRIVER)
 endif ()
 
 if (BUILD_SDL_DRIVER)
-    set(sources SDLGUI.cpp)
-
-    macro (make_gigi_sdl link_type)
-        add_library(GiGiSDL ${link_type} ${sources})
-        target_link_libraries(GiGiSDL GiGi ${SDL_LIBRARY})
-    endmacro ()
-
-    if (BUILD_SHARED)
-        make_gigi_sdl(SHARED)
-        set_target_properties(GiGiSDL PROPERTIES DEFINE_SYMBOL GIGI_SDL_EXPORTS)
-    endif ()
-
-#    if (BUILD_STATIC)
-#        make_gigi_sdl(STATIC)
-#        set_target_properties(GiGiSDL PROPERTIES LINK_SEARCH_END_STATIC true)
-#    endif ()
+    set(THIS_LIB_SOURCES SDLGUI.cpp)
+    set(THIS_LIB_LINK_LIBS GiGi ${SDL_LIBRARY})
+    library_all_variants(GiGiSDL)
 endif ()

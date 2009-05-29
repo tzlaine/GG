@@ -240,13 +240,12 @@ macro (library_variant LIBNAME)
       target_link_libraries(${VARIANT_LIBNAME} "${dependency}")
     endforeach (dependency)
 
-#    # Setup installation properties
-#    string(TOLOWER "${PROJECT_NAME}" LIB_COMPONENT)
-#    string(REPLACE "-" "_" LIB_COMPONENT ${LIB_COMPONENT})
-#
-#    # Installation of this library variant
-#    string(TOLOWER ${PROJECT_NAME} libname)
-#    install(TARGETS ${VARIANT_LIBNAME} DESTINATION lib COMPONENT ${LIB_COMPONENT})
+    # Setup installation properties
+    string(TOLOWER "${PROJECT_NAME}" LIB_COMPONENT)
+    string(REPLACE "-" "_" LIB_COMPONENT ${LIB_COMPONENT})
+
+    # Installation of this library variant
+    install(TARGETS ${VARIANT_LIBNAME} DESTINATION lib COMPONENT ${LIB_COMPONENT})
 #    set_property( 
 #          TARGET ${VARIANT_LIBNAME}
 #          PROPERTY BOOST_CPACK_COMPONENT
@@ -273,6 +272,7 @@ macro (library_variant LIBNAME)
 #      endif ()
 #    endforeach (DEP)
 #
+#    string(TOLOWER ${PROJECT_NAME} libname)
 #    if (COMMAND cpack_add_component)
 #      cpack_add_component(${LIB_COMPONENT}
 #        DISPLAY_NAME "${VARIANT_DISPLAY_NAME}"

@@ -137,6 +137,12 @@ if (NOT BOOST_SIGNALS_NAMESPACE STREQUAL "signals")
     )
 endif ()
 
+install(
+    DIRECTORY GG
+    DESTINATION include
+    PATTERN ".svn" EXCLUDE
+)
+
 add_subdirectory(src)
 
 if (BUILD_TUTORIALS)

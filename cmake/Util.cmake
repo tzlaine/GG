@@ -191,9 +191,6 @@ macro (library_variant LIBNAME)
         )
     endif (THIS_LIB_IS_STATIC)
 
-    # The basic LIBNAME target depends on each of the variants
-    # TODO: WTF? add_dependencies(${LIBNAME} ${VARIANT_LIBNAME})
-
     # Link against whatever libraries this library depends on
     target_link_libraries(${VARIANT_LIBNAME} ${THIS_VARIANT_LINK_LIBS})
     foreach (dependency ${THIS_LIB_DEPENDS})

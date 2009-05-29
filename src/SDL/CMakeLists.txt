@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(VERSION 2.6.4)
 
+project(GiGiSDL)
+
 if (BUILD_SDL_DRIVER)
     message("-- Configuring GiGiSDL")
     find_package(SDL)

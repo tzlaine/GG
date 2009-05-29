@@ -35,7 +35,7 @@
 #  include <windows.h>
 #  undef min
 #  undef max
-#  ifdef GIGI_EXPORTS
+#  ifdef GiGi_EXPORTS
 #   define GG_API __declspec(dllexport)
 #  else
 #   define GG_API __declspec(dllimport)

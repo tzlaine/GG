@@ -35,7 +35,7 @@
 
 
 #ifdef _MSC_VER
-# ifdef GIGI_SDL_EXPORTS
+# ifdef GiGiSDL_EXPORTS
 #  define GG_SDL_API __declspec(dllexport)
 # else
 #  define GG_SDL_API __declspec(dllimport)

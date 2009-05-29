@@ -674,7 +674,7 @@ Export('env')
 # define libGiGi objects
 gigi_env = env.Clone()
 if str(Platform()) == 'win32' and gigi_env['dynamic']:
-    gigi_env.AppendUnique(CPPDEFINES = ['GIGI_EXPORTS'])
+    gigi_env.AppendUnique(CPPDEFINES = ['GiGi_EXPORTS'])
 if help_only:
     lib_gigi = ['gigi']
 else:
@@ -693,7 +693,7 @@ if env['build_sdl_driver']:
     if str(Platform()) == 'win32':
         sdl_env.Append(LIBS = ['SDL', 'GiGi'])
         if sdl_env['dynamic']:
-            sdl_env.AppendUnique(CPPDEFINES = ['GIGI_SDL_EXPORTS'])
+            sdl_env.AppendUnique(CPPDEFINES = ['GiGiSDL_EXPORTS'])
     gigi_sdl_objects, gigi_sdl_sources = SConscript(os.path.normpath('src/SDL/SConscript'), exports = 'sdl_env')
 
     if env['dynamic']:
@@ -774,7 +774,7 @@ if env['build_ogre_driver']:
     if str(Platform()) == 'win32':
         ogre_env.Append(LIBS = ['GiGi'])
         if ogre_env['dynamic']:
-            ogre_env.AppendUnique(CPPDEFINES = ['GIGI_OGRE_EXPORTS'])
+            ogre_env.AppendUnique(CPPDEFINES = ['GiGiOgre_EXPORTS'])
     gigi_ogre_objects, gigi_ogre_sources = SConscript(os.path.normpath('src/Ogre/SConscript'), exports = 'ogre_env')
 
     if env['dynamic']:
@@ -794,9 +794,9 @@ if env['build_ogre_driver']:
         if str(Platform()) == 'win32':
             value.AppendUnique(LIBS = ['GiGi', 'GiGiOgre'])
             if value['dynamic']:
-                if 'GIGI_OGRE_EXPORTS' in value['CPPDEFINES']:
-                    value['CPPDEFINES'].remove('GIGI_OGRE_EXPORTS')
-                value.AppendUnique(CPPDEFINES = ['GIGI_OGRE_PLUGIN_EXPORTS'])
+                if 'GiGiOgre_EXPORTS' in value['CPPDEFINES']:
+                    value['CPPDEFINES'].remove('GiGiOgre_EXPORTS')
+                value.AppendUnique(CPPDEFINES = ['GiGiOgrePlugin_OIS_EXPORTS'])
     gigi_ogre_plugin_objects, gigi_ogre_plugin_sources = SConscript(os.path.normpath('src/Ogre/Plugins/SConscript'), exports = 'ogre_plugin_envs')
 
     lib_gigi_ogre_plugins = {}

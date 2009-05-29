@@ -38,7 +38,7 @@
 
 
 #ifdef _MSC_VER
-# ifdef GIGI_OGRE_PLUGIN_EXPORTS
+# ifdef GiGiOgrePlugin_OIS_EXPORTS
 #  define GG_OGRE_PLUGIN_API __declspec(dllexport)
 # else
 #  define GG_OGRE_PLUGIN_API __declspec(dllimport)

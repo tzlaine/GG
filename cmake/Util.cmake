@@ -44,6 +44,41 @@ macro (list_contains var value)
   endforeach (value2)
 endmacro ()
 
+# This macro is an internal utility macro that builds the name of a
+# particular variant of a library
+#
+#   library_variant_target_name(feature1 feature2 ...)
+#
+# where feature1, feature2, etc. are the names of features to be
+# included in this variant, e.g., MULTI_THREADED, DEBUG. 
+#
+# This macro sets the string VARIANT_DISPLAY_NAME.. This is the display name
+# that describes this variant, e.g., "Debug, static, multi-threaded".
+#
+macro (library_variant_display_name)
+  # Add -static for static libraries, -shared for shared libraries
+  list_contains(VARIANT_IS_STATIC STATIC ${ARGN})
+  if (VARIANT_IS_STATIC)
+    set(VARIANT_DISPLAY_NAME "Static")
+  else (VARIANT_IS_STATIC)
+    set(VARIANT_DISPLAY_NAME "Shared")
+  endif (VARIANT_IS_STATIC)
+
+  # Add "multi-threaded" to the display name for multithreaded libraries.
+  list_contains(VARIANT_IS_MT MULTI_THREADED ${ARGN})
+  if (VARIANT_IS_MT)
+    set(VARIANT_DISPLAY_NAME "${VARIANT_DISPLAY_NAME}, multi-threaded")
+  endif ()
+
+  # Add "debug" or "relase" to the display name.
+  list_contains(VARIANT_IS_DEBUG DEBUG ${ARGN})
+  if (VARIANT_IS_DEBUG)
+    set(VARIANT_DISPLAY_NAME "${VARIANT_DISPLAY_NAME}, debug")
+  else ()
+    set(VARIANT_DISPLAY_NAME "${VARIANT_DISPLAY_NAME}, release")
+  endif ()
+endmacro (library_variant_display_name)
+
 # This macro is an internal utility macro that updates compilation and
 # linking flags based on interactions among the features in a variant.
 #
@@ -130,6 +165,8 @@ macro (library_variant LIBNAME)
   feature_interactions(THIS_VARIANT ${ARGN})
 
   if (THIS_VARIANT_OKAY)
+    library_variant_display_name(${ARGN})
+
     if (IS_STATIC)
       set(VARIANT_LIBNAME ${LIBNAME}_static)
     else ()
@@ -154,6 +191,8 @@ macro (library_variant LIBNAME)
       set_target_properties(${VARIANT_LIBNAME}
         PROPERTIES
         OUTPUT_NAME "${LIBPREFIX}${LIBNAME}"
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
         CLEAN_DIRECT_OUTPUT 1
         COMPILE_FLAGS "${THIS_VARIANT_COMPILE_FLAGS}"
         LINK_FLAGS "${THIS_VARIANT_LINK_FLAGS}"
@@ -168,6 +207,8 @@ macro (library_variant LIBNAME)
       set_target_properties(${VARIANT_LIBNAME}
         PROPERTIES
         OUTPUT_NAME ${LIBNAME}
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
         CLEAN_DIRECT_OUTPUT 1
         COMPILE_FLAGS "${THIS_VARIANT_COMPILE_FLAGS}"
         LINK_FLAGS "${THIS_VARIANT_LINK_FLAGS}"
@@ -183,6 +224,8 @@ macro (library_variant LIBNAME)
       set_target_properties(${VARIANT_LIBNAME}
         PROPERTIES
         OUTPUT_NAME ${LIBNAME}
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
         CLEAN_DIRECT_OUTPUT 1
         COMPILE_FLAGS "${THIS_VARIANT_COMPILE_FLAGS}"
         LINK_FLAGS "${THIS_VARIANT_LINK_FLAGS}"

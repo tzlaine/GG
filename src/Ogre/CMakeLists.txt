@@ -19,6 +19,15 @@ if (BUILD_OGRE_DRIVER)
     set(THIS_LIB_SOURCES OgreGUI.cpp)
     set(THIS_LIB_LINK_LIBS GiGi ${OGRE_LIBRARIES})
     library_all_variants(GiGiOgre)
+
+    if (UNIX)
+        get_pkg_config_libs(pkg_config_libs ${THIS_LIB_LINK_LIBS})
+        configure_file(
+            ${CMAKE_HOME_DIRECTORY}/cmake/GiGiSDL.pc.in
+            ${CMAKE_BINARY_DIR}/GiGiSDL.pc
+            @ONLY
+        )
+    endif ()
 endif ()
 
 add_subdirectory(Plugins)

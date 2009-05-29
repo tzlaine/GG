@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: GiGiOgre
+Description: An Ogre-based input driver and application framework for use with libGiGi.
+Requires: GiGi = ${version} OGRE
+Version: ${version}
+Libs: -lGiGiOgre @pkg_config_libs@
+Cflags: 

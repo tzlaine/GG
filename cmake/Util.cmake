@@ -8,16 +8,6 @@
 # See accompanying file LICENSE_1_0.txt or copy at                       #
 #   http://www.boost.org/LICENSE_1_0.txt                                 #
 ##########################################################################
-# Macros in this module:                                                 #
-#                                                                        #
-#   list_contains: Determine whether a string value is in a list.        #
-#                                                                        #
-#   car: Return the first element in a list                              #
-#                                                                        #
-#   cdr: Return all but the first element in a list                      #
-#                                                                        #
-#   parse_arguments: Parse keyword arguments for use in other macros.    #
-##########################################################################
 
 function (pretty_print list)
     if (${list})
@@ -47,7 +37,7 @@ endmacro ()
 # This macro is an internal utility macro that builds the name of a
 # particular variant of a library
 #
-#   library_variant_target_name(feature1 feature2 ...)
+#   library_variant_display_name(feature1 feature2 ...)
 #
 # where feature1, feature2, etc. are the names of features to be
 # included in this variant, e.g., MULTI_THREADED, DEBUG. 
@@ -291,4 +281,36 @@ macro (library_all_variants LIBNAME)
     library_variant(${LIBNAME} SHARED DEBUG SINGLE_THREADED)
     library_variant(${LIBNAME} SHARED RELEASE MULTI_THREADED)
     library_variant(${LIBNAME} SHARED RELEASE SINGLE_THREADED)
+endmacro ()
+
+macro (get_pkg_config_libs name)
+    set(${name})
+    get_directory_property(dirs LINK_DIRECTORIES)
+    list(APPEND dirs /usr/local/lib /usr/lib /lib)
+    set(skip_lib false)
+    foreach (lib ${ARGN})
+        if (skip_lib)
+            set(skip_lib false)
+        elseif (lib STREQUAL "optimized" AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(skip_lib true)
+        elseif (lib STREQUAL "debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(skip_lib true)
+        else ()
+            foreach (dir ${dirs})
+                string(REPLACE ${dir}/ "" stripped_lib ${lib})
+                if (NOT stripped_lib STREQUAL lib)
+                    string(
+                        REGEX REPLACE
+                        "lib(.*)(${CMAKE_SHARED_LIBRARY_SUFFIX}|${CMAKE_STATIC_LIBRARY_SUFFIX})"
+                        "${CMAKE_LINK_LIBRARY_FLAG}\\1"
+                        stripped_lib
+                        ${stripped_lib}
+                    )
+                    list(APPEND ${name} ${stripped_lib})
+                    break()
+                endif ()
+            endforeach ()
+        endif ()
+    endforeach ()
+    string(REPLACE ";" " " ${name} "${${name}}")
 endmacro ()

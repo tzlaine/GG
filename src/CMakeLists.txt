@@ -177,5 +177,14 @@ endif ()
 
 library_all_variants(GiGi)
 
+if (UNIX)
+    get_pkg_config_libs(pkg_config_libs ${THIS_LIB_LINK_LIBS})
+    configure_file(
+        ${CMAKE_HOME_DIRECTORY}/cmake/GiGi.pc.in
+        ${CMAKE_BINARY_DIR}/GiGi.pc
+        @ONLY
+    )
+endif ()
+
 add_subdirectory(SDL)
 add_subdirectory(Ogre)

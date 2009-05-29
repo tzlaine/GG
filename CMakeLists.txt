@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(VERSION 2.6.4)
 
+set(GIGI_VERSION 0.6.0)
+
 set(CMAKE_VERBOSE_MAKEFILE true)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
@@ -141,6 +143,15 @@ install(
     DIRECTORY GG
     DESTINATION include
     PATTERN ".svn" EXCLUDE
+)
+
+install(
+    FILES
+        ${CMAKE_BINARY_DIR}/GiGi.pc
+        ${CMAKE_BINARY_DIR}/GiGiSDL.pc
+        ${CMAKE_BINARY_DIR}/GiGiOgre.pc
+    DESTINATION lib/pkgconfig
+    OPTIONAL
 )
 
 add_subdirectory(src)

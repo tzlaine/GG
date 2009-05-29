@@ -8,23 +8,7 @@
 # See accompanying file LICENSE_1_0.txt or copy at                       #
 #   http://www.boost.org/LICENSE_1_0.txt                                 #
 ##########################################################################
-# This module defines several variables that provide information about   #
-# the target compiler and platform.                                      #
-#                                                                        #
-# Variables defined:                                                     #
-#                                                                        #
-#   BOOST_TOOLSET:                                                       #
-#     The Boost toolset name, used by the library version mechanism to   #
-#     encode the compiler and version into the name of the               #
-#     library. This toolset name will correspond with Boost.Build        #
-#     version 2's toolset name, including version number.                #
-#                                                                        #
-#   MULTI_THREADED_COMPILE_FLAGS:                                        #
-#     Compilation flags when building multi-threaded programs.           #
-#                                                                        #
-#   MULTI_THREADED_LINK_FLAGS:                                           #
-#     Linker flags when building multi-threaded programs.                #
-##########################################################################
+
 include(CheckCXXSourceCompiles)
 
 # create cache entry

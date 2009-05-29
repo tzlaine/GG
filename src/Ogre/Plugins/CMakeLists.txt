@@ -16,7 +16,7 @@ if (BUILD_OGRE_OIS_PLUGIN)
 endif ()
 
 if (BUILD_OGRE_DRIVER)
-    set(THIS_LIB_SOURCES OgreGUIInputPlugin.cpp)
+    set(THIS_LIB_SOURCES OgreGUIInputPlugin.cpp OISInput.cpp)
     set(THIS_LIB_LINK_LIBS GiGiOgre ${OIS_LIBRARIES})
     library_all_variants(GiGiOgrePlugin_OIS)
 endif ()

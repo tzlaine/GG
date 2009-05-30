@@ -19,4 +19,11 @@ if (BUILD_OGRE_DRIVER)
     set(THIS_LIB_SOURCES OgreGUIInputPlugin.cpp OISInput.cpp)
     set(THIS_LIB_LINK_LIBS GiGiOgre ${OIS_LIBRARIES})
     library_all_variants(GiGiOgrePlugin_OIS)
+
+    if (TARGET GiGiOgrePlugin_OIS_static)
+        set_target_properties(GiGiOgre_static
+            PROPERTIES
+            COMPILE_DEFINITIONS OGRE_STATIC_LIB
+        )
+    endif ()
 endif ()

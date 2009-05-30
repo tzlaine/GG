@@ -45,6 +45,9 @@ option(BUILD_OGRE_DRIVER
 option(BUILD_OGRE_OIS_PLUGIN
        "Builds OIS input plugin for the GiGiOgre library."
        ON)
+option(BUILD_DOCUMENTATION
+       "Builds HTML documentation (requires Doxygen)."
+       ON)
 
 include(CMakeDependentOption)
 cmake_dependent_option(BUILD_TUTORIALS
@@ -159,4 +162,30 @@ add_subdirectory(src)
 
 if (BUILD_TUTORIALS)
     add_subdirectory(tutorial)
+endif ()
+
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/doc/GG)
+        message("-- Generating Doxygen documentation")
+        execute_process(
+            COMMAND ${DOXYGEN_EXECUTABLE}
+            WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}/doc
+        )
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_HOME_DIRECTORY}/doc/GG
+            ${CMAKE_BINARY_DIR}/doc/GG
+        )
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E remove_directory
+            ${CMAKE_HOME_DIRECTORY}/doc/GG
+        )
+    endif ()
+    install(
+        DIRECTORY ${CMAKE_BINARY_DIR}/doc/GG
+        DESTINATION doc
+    )
+elseif (BUILD_DOCUMENTATION)
+    message("   Warning: Doxygen could not be found.  Disabling the documentation build.")
 endif ()

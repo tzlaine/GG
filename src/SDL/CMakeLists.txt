@@ -5,6 +5,7 @@ project(GiGiSDL)
 
 if (BUILD_SDL_DRIVER)
     message("-- Configuring GiGiSDL")
+    set(SDL_BUILDING_LIBRARY true)
     find_package(SDL)
     if (SDL_FOUND)
         include_directories(${SDL_INCLUDE_DIR})

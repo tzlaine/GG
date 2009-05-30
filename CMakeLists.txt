@@ -143,6 +143,7 @@ install(
     DIRECTORY GG
     DESTINATION include
     PATTERN ".svn" EXCLUDE
+    PATTERN "*~" EXCLUDE
 )
 
 install(

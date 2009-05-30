@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(VERSION 2.6.4)
 
+project(GiGi)
+
 set(GIGI_VERSION 0.6.0)
 
 set(CMAKE_VERBOSE_MAKEFILE true)
@@ -190,3 +192,19 @@ if (DOXYGEN_FOUND)
 elseif (BUILD_DOCUMENTATION)
     message("   Warning: Doxygen could not be found.  Disabling the documentation build.")
 endif ()
+
+set(CPACK_PACKAGE_VERSION ${GIGI_VERSION})
+set(CPACK_PACKAGE_VENDOR "T. Zachary Laine")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A C++ GUI library for OpenGL.")
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_HOME_DIRECTORY}/lgpl.txt)
+# TODO: set this once source packaging is working
+#set(CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/;.*~")
+if (UNIX)
+    set(CPACK_GENERATOR "TGZ;TBZ2")
+    set(CPACK_SOURCE_GENERATOR "TGZ;TBZ2")
+elseif (WIN32)
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_SOURCE_GENERATOR "ZIP")
+endif ()
+
+include(CPack)

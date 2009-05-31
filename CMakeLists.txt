@@ -166,14 +166,16 @@ install(
     PATTERN "*~" EXCLUDE
 )
 
-install(
-    FILES
-        ${CMAKE_BINARY_DIR}/GiGi.pc
-        ${CMAKE_BINARY_DIR}/GiGiSDL.pc
-        ${CMAKE_BINARY_DIR}/GiGiOgre.pc
-    DESTINATION lib/pkgconfig
-    OPTIONAL
-)
+if (UNIX)
+    install(
+        FILES
+            ${CMAKE_BINARY_DIR}/GiGi.pc
+            ${CMAKE_BINARY_DIR}/GiGiSDL.pc
+            ${CMAKE_BINARY_DIR}/GiGiOgre.pc
+        DESTINATION lib/pkgconfig
+        OPTIONAL
+    )
+endif ()
 
 add_subdirectory(src)
 

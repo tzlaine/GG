@@ -51,11 +51,15 @@ option(BUILD_DOCUMENTATION
        "Builds HTML documentation (requires Doxygen)."
        ON)
 if (UNIX)
-    option(DEVEL_PACKAGE
-           "Packages just the GG headers, HTML documentation, and pkg-config .pc files (OFF implies that only the binary libs are packaged).  Note that this modifies the items that are marked for *both* installation *and* packaging."
-           ON)
+    option(RUNTIME_ONLY_PACKAGE
+           "Turns off packaging/installing the GG headers, HTML documentation, and pkg-config .pc files.  Note that this modifies the items that are marked for *both* installation *and* packaging."
+           OFF)
+    option(DEVEL_ONLY_PACKAGE
+           "Turns off packaging/installing of the runtime .so libraries.  Note that this modifies the items that are marked for *both* installation *and* packaging."
+           OFF)
 else ()
-    set(DEVEL_PACKAGE OFF)
+    set(RUNTIME_ONLY_PACKAGE OFF)
+    set(DEVEL_ONLY_PACKAGE OFF)
 endif ()
 
 include(CMakeDependentOption)
@@ -166,15 +170,17 @@ if (NOT BOOST_SIGNALS_NAMESPACE STREQUAL "signals")
     )
 endif ()
 
-install(
-    DIRECTORY GG
-    DESTINATION include
-    COMPONENT COMPONENT_GIGI_DEVEL
-    PATTERN ".svn" EXCLUDE
-    PATTERN "*~" EXCLUDE
-)
+if (NOT RUNTIME_ONLY_PACKAGE)
+    install(
+        DIRECTORY GG
+        DESTINATION include
+        COMPONENT COMPONENT_GIGI_DEVEL
+        PATTERN ".svn" EXCLUDE
+        PATTERN "*~" EXCLUDE
+    )
+endif ()
 
-if (UNIX)
+if (UNIX AND NOT RUNTIME_ONLY_PACKAGE)
     install(
         FILES
             ${CMAKE_BINARY_DIR}/GiGi.pc
@@ -210,7 +216,7 @@ if (DOXYGEN_FOUND)
             ${CMAKE_HOME_DIRECTORY}/doc/GG
         )
     endif ()
-    if (BUILD_DOCUMENTATION)
+    if (BUILD_DOCUMENTATION AND NOT RUNTIME_ONLY_PACKAGE)
         install(
             DIRECTORY ${CMAKE_BINARY_DIR}/doc/GG
             DESTINATION doc
@@ -220,6 +226,9 @@ elseif (BUILD_DOCUMENTATION)
     message("   Warning: Doxygen could not be found.  Disabling the documentation build.")
 endif ()
 
+if (RUNTIME_ONLY_PACKAGE AND DEVEL_ONLY_PACKAGE)
+    message("Warning: Both RUNTIME_ONLY_PACKAGE and DEVEL_ONLY_PACKAGE are turned on.  This means that nothing will be installed and generated packages will be empty!")
+endif ()
 
 ########################################
 # Packaging                            #
@@ -227,6 +236,12 @@ endif ()
 set(CPACK_PACKAGE_VERSION ${GIGI_VERSION})
 set(CPACK_PACKAGE_VENDOR "T. Zachary Laine")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A C++ GUI library for OpenGL.")
+if (DEVEL_ONLY_PACKAGE)
+    set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
+    set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
+    set(CPACK_PACKAGE_FILE_NAME
+        "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-devel-${CPACK_SYSTEM_NAME}")
+endif()
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_HOME_DIRECTORY}/lgpl.txt)
 # TODO: set this once source packaging is working
 #set(CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/;.*~")

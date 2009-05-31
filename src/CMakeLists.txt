@@ -173,7 +173,28 @@ else ()
     endif ()
 endif ()
 
+if (WIN32)
+    add_definitions(-DADOBE_TEST_MICROSOFT_NO_DEPRECATE=0
+                    /wd4146 /wd4099 /wd4251 /wd4800 /wd4267 /wd4275
+                    /wd4244 /wd4101 /wd4258 /wd4351 /wd4996)
+endif ()
+
 library_all_variants(GiGi)
+
+if (WIN32)
+    if (TARGET GiGi)
+        set_target_properties(GiGi
+            PROPERTIES
+            COMPILE_DEFINITIONS BOOST_ALL_DYN_LINK
+            LINK_FLAGS /NODEFAULTLIB:LIBCMT
+        )
+    elseif (TARGET GiGi_static)
+        set_target_properties(GiGi_static
+            PROPERTIES
+            LINK_FLAGS /NODEFAULTLIB:LIBCMT
+        )
+    endif ()
+endif ()
 
 if (UNIX)
     get_pkg_config_libs(pkg_config_libs ${THIS_LIB_LINK_LIBS})

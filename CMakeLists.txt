@@ -12,7 +12,7 @@ include(Config)
 include(Util)
 
 set(MINIMUM_BOOST_VERSION 1.36.0)
-set(MINIMUM_BOOST_COMPONENTS filesystem signals system thread)
+set(MINIMUM_BOOST_COMPONENTS date_time filesystem signals system thread)
 
 option(BUILD_STATIC "Enables building of static libraries." OFF)
 option(BUILD_SHARED "Enables building of shared libraries." ON)

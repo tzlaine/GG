@@ -20,6 +20,21 @@ if (BUILD_SDL_DRIVER)
     set(THIS_LIB_LINK_LIBS GiGi ${SDL_LIBRARY})
     library_all_variants(GiGiSDL)
 
+    if (WIN32)
+        if (TARGET GiGiSDL)
+            set_target_properties(GiGiSDL
+                PROPERTIES
+                COMPILE_DEFINITIONS BOOST_ALL_DYN_LINK
+                LINK_FLAGS /NODEFAULTLIB:LIBCMT
+            )
+        elseif (TARGET GiGiSDL_static)
+            set_target_properties(GiGiSDL_static
+                PROPERTIES
+                LINK_FLAGS /NODEFAULTLIB:LIBCMT
+            )
+        endif ()
+    endif ()
+
     if (UNIX)
         get_pkg_config_libs(pkg_config_libs ${THIS_LIB_LINK_LIBS})
         configure_file(

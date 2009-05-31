@@ -69,10 +69,15 @@ else ()
     message(FATAL_ERROR "Boost libraries not found.")
 endif ()
 
+set(int_have_devil 0)
+set(int_have_jpeg 0)
+set(int_have_png 0)
+set(int_have_tiff 0)
 if (USE_DEVIL)
     find_package(DevIL)
     if (IL_FOUND)
         include_directories(${IL_INCLUDE_DIR})
+        set(int_have_devil 1)
     else ()
         message(FATAL_ERROR "DevIL libraries not found.")
     endif ()
@@ -80,14 +85,17 @@ else ()
     find_package(JPEG)
     if (JPEG_FOUND)
         include_directories(${JPEG_INCLUDE_DIR})
+        set(int_have_jpeg 1)
     endif ()
     find_package(PNG)
     if (PNG_FOUND)
         include_directories(${PNG_INCLUDE_DIR})
+        set(int_have_png 1)
     endif ()
     find_package(TIFF)
     if (TIFF_FOUND)
         include_directories(${TIFF_INCLUDE_DIR})
+        set(int_have_tiff 1)
     endif ()
 endif ()
 
@@ -137,6 +145,12 @@ if (NOT EXISTS ${CMAKE_HOME_DIRECTORY}/libltdl/config.h)
         )
     endif ()
 endif ()
+
+configure_file(
+    ${CMAKE_HOME_DIRECTORY}/cmake/Config.h.in
+    ${CMAKE_HOME_DIRECTORY}/GG/Config.h
+    @ONLY
+)
 
 if (NOT BOOST_SIGNALS_NAMESPACE STREQUAL "signals")
     add_definitions(

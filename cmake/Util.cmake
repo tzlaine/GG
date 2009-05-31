@@ -231,44 +231,15 @@ macro (library_variant LIBNAME)
     endforeach (dependency)
 
     # Setup installation properties
-    string(TOLOWER "${PROJECT_NAME}" LIB_COMPONENT)
-    string(REPLACE "-" "_" LIB_COMPONENT ${LIB_COMPONENT})
+    string(TOUPPER COMPONENT_${PROJECT_NAME} LIB_COMPONENT)
 
     # Installation of this library variant
-    install(TARGETS ${VARIANT_LIBNAME} DESTINATION lib COMPONENT ${LIB_COMPONENT})
-#    set_property( 
-#          TARGET ${VARIANT_LIBNAME}
-#          PROPERTY BOOST_CPACK_COMPONENT
-#          ${LIB_COMPONENT})
-#
-#    # Make the library installation component dependent on the library
-#    # installation components of dependent libraries.
-#    set(THIS_LIB_COMPONENT_DEPENDS)
-#    foreach (DEP ${THIS_LIB_DEPENDS})
-#      # We ask the library variant that this library depends on to tell us
-#      # what it's associated installation component is. We depend on that 
-#      # installation component.
-#      get_property(DEP_COMPONENT 
-#        TARGET "${DEP}"
-#        PROPERTY BOOST_CPACK_COMPONENT)
-#
-#      if (DEP_COMPONENT)
-#        if (DEP_COMPONENT STREQUAL LIB_COMPONENT)
-#          # Do nothing: we have library dependencies within one 
-#          # Boost library
-#        else ()
-#          list(APPEND THIS_LIB_COMPONENT_DEPENDS ${DEP_COMPONENT})
-#        endif ()
-#      endif ()
-#    endforeach (DEP)
-#
-#    string(TOLOWER ${PROJECT_NAME} libname)
-#    if (COMMAND cpack_add_component)
-#      cpack_add_component(${LIB_COMPONENT}
-#        DISPLAY_NAME "${VARIANT_DISPLAY_NAME}"
-#        GROUP ${libname}
-#        DEPENDS ${THIS_LIB_COMPONENT_DEPENDS})
-#    endif ()
+    install(
+        TARGETS ${VARIANT_LIBNAME}
+        RUNTIME DESTINATION bin COMPONENT ${LIB_COMPONENT}
+        LIBRARY DESTINATION lib COMPONENT ${LIB_COMPONENT}
+        ARCHIVE DESTINATION lib COMPONENT ${LIB_COMPONENT}_DEVEL
+    )
   endif ()
 endmacro ()
 

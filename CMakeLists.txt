@@ -50,6 +50,13 @@ option(BUILD_OGRE_OIS_PLUGIN
 option(BUILD_DOCUMENTATION
        "Builds HTML documentation (requires Doxygen)."
        ON)
+if (UNIX)
+    option(DEVEL_PACKAGE
+           "Packages just the GG headers, HTML documentation, and pkg-config .pc files (OFF implies that only the binary libs are packaged).  Note that this modifies the items that are marked for *both* installation *and* packaging."
+           ON)
+else ()
+    set(DEVEL_PACKAGE OFF)
+endif ()
 
 include(CMakeDependentOption)
 cmake_dependent_option(BUILD_TUTORIALS
@@ -162,6 +169,7 @@ endif ()
 install(
     DIRECTORY GG
     DESTINATION include
+    COMPONENT COMPONENT_GIGI_DEVEL
     PATTERN ".svn" EXCLUDE
     PATTERN "*~" EXCLUDE
 )
@@ -174,6 +182,7 @@ if (UNIX)
             ${CMAKE_BINARY_DIR}/GiGiOgre.pc
         DESTINATION lib/pkgconfig
         OPTIONAL
+        COMPONENT COMPONENT_GIGI_DEVEL
     )
 endif ()
 
@@ -201,14 +210,20 @@ if (DOXYGEN_FOUND)
             ${CMAKE_HOME_DIRECTORY}/doc/GG
         )
     endif ()
-    install(
-        DIRECTORY ${CMAKE_BINARY_DIR}/doc/GG
-        DESTINATION doc
-    )
+    if (BUILD_DOCUMENTATION)
+        install(
+            DIRECTORY ${CMAKE_BINARY_DIR}/doc/GG
+            DESTINATION doc
+        )
+    endif ()
 elseif (BUILD_DOCUMENTATION)
     message("   Warning: Doxygen could not be found.  Disabling the documentation build.")
 endif ()
 
+
+########################################
+# Packaging                            #
+########################################
 set(CPACK_PACKAGE_VERSION ${GIGI_VERSION})
 set(CPACK_PACKAGE_VENDOR "T. Zachary Laine")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A C++ GUI library for OpenGL.")
@@ -224,3 +239,81 @@ elseif (WIN32)
 endif ()
 
 include(CPack)
+
+cpack_add_component(
+    COMPONENT_GIGI
+    DISPLAY_NAME GiGi
+    DESCRIPTION "The core GG library, including the GUI state machine and all the controls.  Not usable without an input driver."
+    REQUIRED
+    GROUP COMPONENT_GROUP_RUNTIME
+)
+
+cpack_add_component(
+    COMPONENT_GIGISDL
+    DISPLAY_NAME GiGiSDL
+    DESCRIPTION "An SDL input driver (http://www.libsdl.org)."
+    GROUP COMPONENT_GROUP_RUNTIME
+    DEPENDS COMPONENT_GIGI
+)
+
+cpack_add_component(
+    COMPONENT_GIGIOGRE
+    DISPLAY_NAME GiGiOgre
+    DESCRIPTION "An Ogre input driver (http://www.ogre3d.org).  Note that Ogre itself does not include proper input support.  The OIS input plugin is recommended."
+    GROUP COMPONENT_GROUP_RUNTIME
+    DEPENDS COMPONENT_GIGI
+)
+
+cpack_add_component(
+    COMPONENT_GIGIOGREPLUGIN_OIS
+    DISPLAY_NAME "GiGiOgre OIS Plugin"
+    DESCRIPTION "An Ogre plugin using OIS (http://sourceforge.net/projects/wgois)."
+    GROUP COMPONENT_GROUP_RUNTIME
+    DEPENDS COMPONENT_GIGIOGRE
+)
+
+cpack_add_component(
+    COMPONENT_GIGI_DEVEL
+    DISPLAY_NAME "GiGi"
+    DESCRIPTION "The files necessary to do development with GiGi."
+    GROUP COMPONENT_GROUP_DEVEL
+    DEPENDS COMPONENT_GIGI
+)
+
+cpack_add_component(
+    COMPONENT_GIGISDL_DEVEL
+    DISPLAY_NAME "GiGiSDL"
+    DESCRIPTION "The files necessary to do development with GiGiSDL."
+    GROUP COMPONENT_GROUP_DEVEL
+    DEPENDS COMPONENT_GIGI_DEVEL COMPONENT_GIGISDL
+)
+
+cpack_add_component(
+    COMPONENT_GIGIOGRE_DEVEL
+    DISPLAY_NAME "GiGiOgre"
+    DESCRIPTION "The files necessary to do development with GiGiOgre."
+    GROUP COMPONENT_GROUP_DEVEL
+    DEPENDS COMPONENT_GIGI_DEVEL COMPONENT_GIGIOGRE
+)
+
+cpack_add_component(
+    COMPONENT_GIGIOGREPLUGIN_OIS_DEVEL
+    DISPLAY_NAME "GiGiOgre OIS Plugin"
+    DESCRIPTION "The files necessary to do development with GiGiOgre's OIS Plugin.  Only required for users who are statically linking against Ogre, and want to link to the OIS plugin at link-time."
+    GROUP COMPONENT_GROUP_DEVEL
+    DEPENDS COMPONENT_GIGIOGRE_DEVEL COMPONENT_GIGIOGREPLUGIN_OIS
+)
+
+cpack_add_component_group(
+    COMPONENT_GROUP_RUNTIME
+    DISPLAY_NAME "Runtime"
+    DESCRIPTION "The runtime libs needed to run an application that uses GG."
+    EXPANDED
+)
+
+cpack_add_component_group(
+    COMPONENT_GROUP_DEVEL
+    DISPLAY_NAME "Development"
+    DESCRIPTION "The development libs and headers needed to build an application that uses GG."
+    EXPANDED
+)

@@ -41,4 +41,11 @@ if (BUILD_OGRE_DRIVER)
             COMPILE_DEFINITIONS OGRE_STATIC_LIB
         )
     endif ()
+
+    if (NOT RUNTIME_ONLY_PACKAGE)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES libois-devel>=1.2)
+    endif ()
+    if (NOT DEVEL_ONLY_PACKAGE)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES libois1>=1.2)
+    endif ()
 endif ()

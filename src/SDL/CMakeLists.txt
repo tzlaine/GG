@@ -43,11 +43,4 @@ if (BUILD_SDL_DRIVER)
             @ONLY
         )
     endif ()
-
-    if (NOT RUNTIME_ONLY_PACKAGE)
-        list(APPEND CPACK_RPM_PACKAGE_REQUIRES SDL-devel>=1.2)
-    endif ()
-    if (NOT DEVEL_ONLY_PACKAGE)
-        list(APPEND CPACK_RPM_PACKAGE_REQUIRES SDL>=1.2)
-    endif ()
 endif ()

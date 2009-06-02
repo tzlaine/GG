@@ -3,9 +3,12 @@ cmake_policy(VERSION 2.6.4)
 
 project(GiGi)
 
-set(GIGI_VERSION 0.6.0)
-
 set(CMAKE_VERBOSE_MAKEFILE false)
+
+########################################
+# Configuration                        #
+########################################
+set(GIGI_VERSION 0.6.0)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 include(Config)
@@ -50,17 +53,94 @@ option(BUILD_OGRE_OIS_PLUGIN
 option(BUILD_DOCUMENTATION
        "Builds HTML documentation (requires Doxygen)."
        ON)
+
+set(RUNTIME_ONLY_PACKAGE false)
+set(DEVEL_ONLY_PACKAGE false)
+set(NO_DOCS_PACKAGE false)
+set(NO_HEADERS_PACKAGE false)
+set(GG_PACKAGE_DEPENDENCY false)
+set(GG_DEVEL_PACKAGE_DEPENDENCY false)
+set(SDL_PACKAGE_DEPENDENCY false)
+set(SDL_DEVEL_PACKAGE_DEPENDENCY false)
+set(OGRE_OIS_PACKAGE_DEPENDENCY false)
+set(OGRE_OIS_DEVEL_PACKAGE_DEPENDENCY false)
 if (UNIX)
-    option(RUNTIME_ONLY_PACKAGE
-           "Turns off packaging/installing the GG headers, HTML documentation, and pkg-config .pc files.  Note that this modifies the items that are marked for *both* installation *and* packaging."
-           OFF)
-    option(DEVEL_ONLY_PACKAGE
-           "Turns off packaging/installing of the runtime .so libraries.  Note that this modifies the items that are marked for *both* installation *and* packaging."
-           OFF)
+    set(PACKAGE_CONFIGURATIONS
+        NoPackage GiGi GiGiSDL GiGiOgre Full GiGiDevel GiGiSDLDevel GiGiOgreDevel FullDevel
+        CACHE INTERNAL
+        "The types of packages available for build.  NoPackage means leave everything in.  They follow the pattern {GiGi|GiGiSDL|GiGiOgre|Full}[Devel]."
+    )
+    set(PACKAGE_TYPE
+        NoPackage
+        CACHE STRING
+        "The type of package chosen for this build.  These allow you to build Debs and RPMs that contain the sublibraries within GG, or all of GG, binary-only or \"-devel\".  NoPackage means leave everything in.  They follow the pattern {GiGi|GiGiSDL|GiGiOgre|Full}[Devel]."
+    )
+    list_contains(package_type_valid ${PACKAGE_TYPE} ${PACKAGE_CONFIGURATIONS})
+    if (NOT package_type_valid)
+        message(FATAL_ERROR "Your choice for PACKAGE_TYPE \"${PACKAGE_TYPE}\" is not a valid string.  Choose one of [${PACKAGE_CONFIGURATIONS}].")
+    endif ()
+    if (NOT ${PACKAGE_TYPE} STREQUAL NoPackage)
+        if (${PACKAGE_TYPE} MATCHES Devel)
+            set(RUNTIME_ONLY_PACKAGE false)
+            set(DEVEL_ONLY_PACKAGE true)
+        else ()
+            set(RUNTIME_ONLY_PACKAGE true)
+            set(DEVEL_ONLY_PACKAGE false)
+        endif ()
+        if (NOT ${PACKAGE_TYPE} STREQUAL FullDevel AND NOT ${PACKAGE_TYPE} STREQUAL GiGiDevel)
+            set(NO_DOCS_PACKAGE true)
+            set(NO_HEADERS_PACKAGE true)
+            if (DEVEL_ONLY_PACKAGE)
+                set(GG_DEVEL_PACKAGE_DEPENDENCY true)
+            endif ()
+        endif ()
+        if (RUNTIME_ONLY_PACKAGE AND NOT ${PACKAGE_TYPE} STREQUAL Full AND NOT ${PACKAGE_TYPE} STREQUAL GiGi)
+            set(GG_PACKAGE_DEPENDENCY true)
+        endif ()
+        if (${PACKAGE_TYPE} STREQUAL Full OR ${PACKAGE_TYPE} STREQUAL GiGiSDL)
+            set(SDL_PACKAGE_DEPENDENCY true)
+        endif ()
+        if (${PACKAGE_TYPE} STREQUAL FullDevel OR ${PACKAGE_TYPE} STREQUAL GiGiSDLDevel)
+            set(SDL_DEVEL_PACKAGE_DEPENDENCY true)
+        endif ()
+        if (${PACKAGE_TYPE} STREQUAL Full OR ${PACKAGE_TYPE} STREQUAL GiGiOgre)
+            set(OGRE_OIS_PACKAGE_DEPENDENCY true)
+        endif ()
+        if (${PACKAGE_TYPE} STREQUAL FullDevel OR ${PACKAGE_TYPE} STREQUAL GiGiOgreDevel)
+            set(OGRE_OIS_DEVEL_PACKAGE_DEPENDENCY true)
+        endif ()
+    endif ()
 else ()
-    set(RUNTIME_ONLY_PACKAGE OFF)
-    set(DEVEL_ONLY_PACKAGE OFF)
+    set(PACKAGE_CONFIGURATIONS "")
+    set(PACKAGE_TYPE "")
 endif ()
+
+# Determines whether ${component} is included in the package being built (if
+# any), and returns the result in ${var}.  Ignores the distinction between
+# Devel and non-Devel package types.
+macro (package_compatible var component)
+    if (${component} MATCHES GiGiSDL)
+        if (${PACKAGE_TYPE} STREQUAL NoPackage OR ${PACKAGE_TYPE} MATCHES Full OR ${PACKAGE_TYPE} MATCHES GiGiSDL)
+            set(${var} true)
+        else ()
+            set(${var} false)
+        endif ()
+    elseif (${component} MATCHES GiGiOgre)
+        if (${PACKAGE_TYPE} STREQUAL NoPackage OR ${PACKAGE_TYPE} MATCHES Full OR ${PACKAGE_TYPE} MATCHES GiGiOgre)
+            set(${var} true)
+        else ()
+            set(${var} false)
+        endif ()
+    elseif (${component} MATCHES GiGi)
+        if (${PACKAGE_TYPE} STREQUAL NoPackage OR ${PACKAGE_TYPE} MATCHES Full OR ${PACKAGE_TYPE} STREQUAL GiGi OR ${PACKAGE_TYPE} STREQUAL GiGiDevel)
+            set(${var} true)
+        else ()
+            set(${var} false)
+        endif ()
+    else ()
+        message(FATAL_ERROR "Invalid component \"${component}\" passed to package_compatible().")
+    endif ()
+endmacro ()
 
 include(CMakeDependentOption)
 cmake_dependent_option(BUILD_TUTORIALS
@@ -71,6 +151,10 @@ cmake_dependent_option(BUILD_TUTORIALS
 
 include_directories(${CMAKE_HOME_DIRECTORY})
 
+
+########################################
+# Dependencies                         #
+########################################
 set(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
 set(Boost_USE_MULTITHREADED ${BUILD_MULTI_THREADED})
 find_package(Boost ${MINIMUM_BOOST_VERSION} COMPONENTS ${MINIMUM_BOOST_COMPONENTS})
@@ -78,6 +162,13 @@ if (Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 else ()
     message(FATAL_ERROR "Boost libraries not found.")
+endif ()
+
+if (NOT BOOST_SIGNALS_NAMESPACE STREQUAL "signals")
+    add_definitions(
+        -DBOOST_SIGNALS_NAMESPACE=${BOOST_SIGNALS_NAMESPACE}
+        -Dsignals=${BOOST_SIGNALS_NAMESPACE}
+    )
 endif ()
 
 set(int_have_devil 0)
@@ -127,6 +218,10 @@ else ()
     message(FATAL_ERROR "Freetype library not found.")
 endif ()
 
+
+########################################
+# Header Generation                    #
+########################################
 if (NOT EXISTS ${CMAKE_HOME_DIRECTORY}/libltdl/config.h)
     if (UNIX)
         message("-- Configuring libltdl using \"libltdl/configure\" ...")
@@ -163,14 +258,11 @@ configure_file(
     @ONLY
 )
 
-if (NOT BOOST_SIGNALS_NAMESPACE STREQUAL "signals")
-    add_definitions(
-        -DBOOST_SIGNALS_NAMESPACE=${BOOST_SIGNALS_NAMESPACE}
-        -Dsignals=${BOOST_SIGNALS_NAMESPACE}
-    )
-endif ()
 
-if (NOT RUNTIME_ONLY_PACKAGE)
+########################################
+# Installed Files                      #
+########################################
+if (NOT NO_HEADERS_PACKAGE)
     install(
         DIRECTORY GG
         DESTINATION include
@@ -180,24 +272,38 @@ if (NOT RUNTIME_ONLY_PACKAGE)
     )
 endif ()
 
+macro (install_pc_file component)
+    package_compatible(ok_to_install ${component})
+    if (ok_to_install)
+        install(
+            FILES ${CMAKE_BINARY_DIR}/${component}.pc
+            DESTINATION lib/pkgconfig
+            COMPONENT COMPONENT_GIGI_DEVEL
+            OPTIONAL
+        )
+    endif ()
+endmacro ()
+
 if (UNIX AND NOT RUNTIME_ONLY_PACKAGE)
-    install(
-        FILES
-            ${CMAKE_BINARY_DIR}/GiGi.pc
-            ${CMAKE_BINARY_DIR}/GiGiSDL.pc
-            ${CMAKE_BINARY_DIR}/GiGiOgre.pc
-        DESTINATION lib/pkgconfig
-        OPTIONAL
-        COMPONENT COMPONENT_GIGI_DEVEL
-    )
+    install_pc_file(GiGi)
+    install_pc_file(GiGiSDL)
+    install_pc_file(GiGiOgre)
 endif ()
 
+
+########################################
+# Recurse Into Sources                 #
+########################################
 add_subdirectory(src)
 
 if (BUILD_TUTORIALS)
     add_subdirectory(tutorial)
 endif ()
 
+
+########################################
+# Documentation                        #
+########################################
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/doc/GG)
@@ -216,7 +322,7 @@ if (DOXYGEN_FOUND)
             ${CMAKE_HOME_DIRECTORY}/doc/GG
         )
     endif ()
-    if (BUILD_DOCUMENTATION AND NOT RUNTIME_ONLY_PACKAGE)
+    if (BUILD_DOCUMENTATION AND NOT NO_DOCS_PACKAGE)
         install(
             DIRECTORY ${CMAKE_BINARY_DIR}/doc/GG
             DESTINATION doc
@@ -226,31 +332,69 @@ elseif (BUILD_DOCUMENTATION)
     message("   Warning: Doxygen could not be found.  Disabling the documentation build.")
 endif ()
 
-if (RUNTIME_ONLY_PACKAGE AND DEVEL_ONLY_PACKAGE)
-    message("Warning: Both RUNTIME_ONLY_PACKAGE and DEVEL_ONLY_PACKAGE are turned on.  This means that nothing will be installed and generated packages will be empty!")
-endif ()
 
 ########################################
 # Packaging                            #
 ########################################
+if (RUNTIME_ONLY_PACKAGE AND DEVEL_ONLY_PACKAGE)
+    message(FATAL_ERROR "Both RUNTIME_ONLY_PACKAGE and DEVEL_ONLY_PACKAGE are turned on.  This means that nothing will be installed and generated packages will be empty!")
+endif ()
+
 set(CPACK_PACKAGE_VERSION ${GIGI_VERSION})
 set(CPACK_PACKAGE_VENDOR "T. Zachary Laine")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A C++ OpenGL GUI library.")
-if (DEVEL_ONLY_PACKAGE)
-    set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
+if (NOT ${PACKAGE_TYPE} STREQUAL NoPackage)
     set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
-    set(CPACK_PACKAGE_FILE_NAME
-        "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-devel-${CPACK_SYSTEM_NAME}")
-endif()
+    if (${PACKAGE_TYPE} STREQUAL Full)
+        set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME})
+        set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}")
+        string(TOLOWER ${CPACK_PACKAGE_FILE_NAME} CPACK_PACKAGE_FILE_NAME)
+    else ()
+        if (NOT ${PACKAGE_TYPE} STREQUAL FullDevel)
+            set(CPACK_PACKAGE_NAME ${PACKAGE_TYPE})
+            string(REPLACE Devel "" CPACK_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
+            if (${PACKAGE_TYPE} MATCHES Ogre OR ${PACKAGE_TYPE} MATCHES SDL)
+                string(REPLACE GiGi GiGi- CPACK_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
+            endif ()
+        else ()
+            set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME})
+        endif ()
+        set(version_devel_substring ${CPACK_PACKAGE_VERSION})
+        if (DEVEL_ONLY_PACKAGE)
+            set(version_devel_substring devel-${version_devel_substring})
+        endif ()
+        set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${version_devel_substring}-${CPACK_SYSTEM_NAME}")
+        string(TOLOWER ${CPACK_PACKAGE_FILE_NAME} CPACK_PACKAGE_FILE_NAME)
+    endif ()
+endif ()
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_HOME_DIRECTORY}/lgpl.txt)
 
+# RPM-specific settings
 set(CPACK_RPM_PACKAGE_LICENSE LGPL)
 set(CPACK_RPM_PACKAGE_REQUIRES)
 if (NOT RUNTIME_ONLY_PACKAGE)
     list(APPEND CPACK_RPM_PACKAGE_REQUIRES boost-devel>=1.36.0 Mesa-devel freetype2-devel)
+    if (GG_DEVEL_PACKAGE_DEPENDENCY)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES gigi-devel=${GIGI_VERSION})
+    endif ()
+    if (SDL_DEVEL_PACKAGE_DEPENDENCY)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES SDL-devel>=1.2)
+    endif ()
+    if (OGRE_OIS_DEVEL_PACKAGE_DEPENDENCY)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES ogre-devel>=1.6 libois-devel>=1.2)
+    endif ()
 endif ()
 if (NOT DEVEL_ONLY_PACKAGE)
     list(APPEND CPACK_RPM_PACKAGE_REQUIRES Mesa freetype2)
+    if (GG_PACKAGE_DEPENDENCY)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES gigi=${GIGI_VERSION})
+    endif ()
+    if (SDL_PACKAGE_DEPENDENCY)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES SDL>=1.2)
+    endif ()
+    if (OGRE_OIS_PACKAGE_DEPENDENCY)
+        list(APPEND CPACK_RPM_PACKAGE_REQUIRES ogre>=1.6 libois1>=1.2)
+    endif ()
 endif ()
 
 if (UNIX)
@@ -260,6 +404,11 @@ if (UNIX)
         list(APPEND CPACK_GENERATOR RPM)
     endif ()
     set(RPMBUILD ${RPMBUILD} CACHE INTERNAL "")
+    find_program(DPKG dpkg)
+    if (DPKG)
+        list(APPEND CPACK_GENERATOR DEB)
+    endif ()
+    set(DPKG ${DPKG} CACHE INTERNAL "")
     set(CPACK_SOURCE_GENERATOR "TGZ;TBZ2")
 elseif (WIN32)
     set(CPACK_GENERATOR "NSIS")

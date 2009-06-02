@@ -10,12 +10,16 @@
 ##########################################################################
 
 function (pretty_print list)
-    if (${list})
-        string(REPLACE ";" "\n  " pretty_list "${${list}}")
+    if (DEFINED ${list})
+        if ("${${list}}" MATCHES ";")
+            string(REPLACE ";" "\n  " pretty_list "${${list}}")
+            message("${list}=\n  ${pretty_list}")
+        else ()
+            message("${list}= ${${list}}")
+        endif ()
     else ()
-        set(pretty_list "[EMPTY]")
+        message("${list}= (undefined)")
     endif ()
-    message("${list}=\n  ${pretty_list}")
 endfunction ()
 
 # This utility macro determines whether a particular string value
@@ -236,12 +240,15 @@ macro (library_variant LIBNAME)
     # Installation of this library variant
     if (THIS_LIB_IS_STATIC AND NOT RUNTIME_ONLY_PACKAGE OR
         NOT THIS_LIB_IS_STATIC AND NOT DEVEL_ONLY_PACKAGE)
-        install(
-            TARGETS ${VARIANT_LIBNAME}
-            RUNTIME DESTINATION bin COMPONENT ${LIB_COMPONENT}
-            LIBRARY DESTINATION lib COMPONENT ${LIB_COMPONENT}
-            ARCHIVE DESTINATION lib COMPONENT ${LIB_COMPONENT}_DEVEL
-        )
+        package_compatible(ok_to_install ${LIBNAME})
+        if (ok_to_install)
+            install(
+                TARGETS ${VARIANT_LIBNAME}
+                RUNTIME DESTINATION bin COMPONENT ${LIB_COMPONENT}
+                LIBRARY DESTINATION lib COMPONENT ${LIB_COMPONENT}
+                ARCHIVE DESTINATION lib COMPONENT ${LIB_COMPONENT}_DEVEL
+            )
+        endif ()
     endif ()
   endif ()
 endmacro ()

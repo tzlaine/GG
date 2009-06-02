@@ -50,13 +50,6 @@ if (BUILD_OGRE_DRIVER)
             @ONLY
         )
     endif ()
-
-    if (NOT RUNTIME_ONLY_PACKAGE)
-        list(APPEND CPACK_RPM_PACKAGE_REQUIRES ogre-devel>=1.6)
-    endif ()
-    if (NOT DEVEL_ONLY_PACKAGE)
-        list(APPEND CPACK_RPM_PACKAGE_REQUIRES ogre>=1.6)
-    endif ()
 endif ()
 
 add_subdirectory(Plugins)

@@ -15,7 +15,7 @@ if (BUILD_OGRE_OIS_PLUGIN)
     endif ()
 endif ()
 
-if (BUILD_OGRE_DRIVER)
+if (BUILD_OGRE_OIS_PLUGIN)
     set(THIS_LIB_SOURCES OgreGUIInputPlugin.cpp OISInput.cpp)
     set(THIS_LIB_LINK_LIBS GiGiOgre ${OIS_LIBRARIES})
     library_all_variants(GiGiOgrePlugin_OIS)
@@ -40,12 +40,5 @@ if (BUILD_OGRE_DRIVER)
             PROPERTIES
             COMPILE_DEFINITIONS OGRE_STATIC_LIB
         )
-    endif ()
-
-    if (NOT RUNTIME_ONLY_PACKAGE)
-        list(APPEND CPACK_RPM_PACKAGE_REQUIRES libois-devel>=1.2)
-    endif ()
-    if (NOT DEVEL_ONLY_PACKAGE)
-        list(APPEND CPACK_RPM_PACKAGE_REQUIRES libois1>=1.2)
     endif ()
 endif ()

@@ -284,10 +284,11 @@
     GG requires GCC 3.4 or later, or MSVC++ 8.0 SP1 or later.  Note that both are available for free download.
     <p>
     GG relies on a few other open-source libraries:
-    - FreeType 2.1.2 - http://www.freetype.org
-    - Boost 1.36 - http://www.boost.org
+    - FreeType 2 - http://www.freetype.org
+    - Boost >= 1.36 - http://www.boost.org
 
     Image loading library/libraries:
+    Either:
     - DevIL 1.6.1 - http://openil.sourceforge.net
 
     Or, at least one of:
@@ -296,86 +297,94 @@
     - libtiff - http://www.libtiff.org
 
     Optional libraries for input drivers:
-    - SDL 1.2.7 - http://www.libsdl.org
-    - Ogre 1.4.7 - http://ogre3d.org
+    - SDL >= 1.2 - http://www.libsdl.org
+    - Ogre >= 1.4 - http://ogre3d.org
 
-    GG's documentation relies on Doxygen (http://www.stack.nl/~dimitri/doxygen). In the GG/doc directory, run Doxygen; the 
-    documentation will appear in the GG/doc/html directory.
+    GG's documentation relies on Doxygen
+    (http://www.stack.nl/~dimitri/doxygen). If you have Doxygen installed in a
+    standard location, the docs will be built automatically.  Otherwise, from
+    the GG/doc directory, run Doxygen; the documentation will appear in the
+    GG/doc/GG directory.
     <br>
 
     \section howto_build How To Build GG
 
     \subsection howto_build_all_platforms All Platforms
 
-    You will need to have first built the buildable portions of the Boost
+    You will need to first build the buildable portions of the Boost
     libraries.  See http://boost.org/more/getting_started/index.html for
     details on building Boost.  There are often pre-built binaries available
     for download for the latest Microsoft C++ compiler.  You will also need to
-    decide whether to use DevIL, or GG's built-in image loading code.  The
-    built-in image loader only supports PNG, JPEG, and TIFF formats, using a
-    modified version of Boost.GIL from Boost 1.37.  DevIL supports more image
-    formats, but is less portable.  If you choose not to use DevIL, you must
-    make at least one of the PNG, JPEG, and TIFF format-specific libraries
-    available instead.  To choose to use DevIL, pass "use_devil=1" to "scons
-    configure"; by default, it will not be used.  The "scons configure" step
-    will also look for SDL, Ogre, and OIS by default.  If it finds them, it
-    will build the relevant drivers for them.  To disable any of these
-    drivers, pass "build_X=0", where "X" is one of "sdl_driver",
-    "ogre_driver", or "ogre_ois_plugin".
+    decide whether to use DevIL, or GG's built-in image loading code (built-in
+    is the default).  The built-in image loader only supports PNG, JPEG, and
+    TIFF formats, using a modified version of Boost.GIL from Boost 1.37.
+    DevIL supports more image formats, but is less portable.  If you choose
+    not to use DevIL, you must make at least one of the PNG, JPEG, and TIFF
+    format-specific libraries available instead.
 
-    \subsection howto_build_linux Linux
+    GG uses CMake to generate makefiles, MSVC and XCode projects files, etc.
+    Here is the quick-and-dirty info on using CMake.  Download and install
+    CMake if necessary, of course.  You run ccmake (Linux) or cmake-gui
+    (Windows or Mac OS X) to set the build options, such as whether to use
+    DevIL, whether to build static or dynamic libs, etc.  It's really
+    straightforward, and the end result of using CMake is that you get to use
+    make, Visual Studio's IDE, XCode projects, or whatever CMake-supported
+    build tool you like.  It supports just about everything.
 
-    To build GG, you will need to have SCons installed.  The headers and built
+    \subsection howto_build_unix Unix
+
+    To build GG, you will need to have CMake installed.  The headers and built
     binaries for the libraries you intend to use should be available in your
-    include and link paths, respectively.  You can let SCons know about any
-    nonstandard paths to these headers and library binaries by providing
-    "with_X=PATHNAME", etc., to SCons on the command line.  To see all the
-    path options for the build, type
+    include and link paths, respectively.  just run cmake from the command
+    line, and the defaults will probably work for you just fine.  If you need
+    to configure the build in some way, run ccmake next.  Once you've picked
+    your options, hit 'c' for configure, then 'g' for generate.
+
+    You can let CMake know about any nonstandard paths to these headers and
+    library binaries by running ccmake, then toggling on advanced mode by
+    hitting 't', then filling in what CMake couldn't find.  For example, if
+    you want to use your own zlib, you can point CMake at it by setting
+    ZLIB_INCLUDE_DIR and ZLIB_LIBRARY from the advanced mode.  Other than
+    cases like this, you shouldn't need to use the advanced mode.
+
+    Once this is done, Unix users can simply type
     \verbatim
-      scons -h\endverbatim
+      make
+      make install [as root, if necessary]\endverbatim
 
-    Once this is done, Linux, Cygwin, and MinGW users can simply type
-    \verbatim
-      scons configure
-      scons
-      scons install [as root, if necessary]\endverbatim
+    \subsection howto_build_win32_microsoft Windows
 
-    If you encounter any problems during the "scons configure" step, look at
-    the contents of config.log.  The problem is unsually that SCons does not
-    have the right header or link path to a certain library.  Such problems
-    are usually easily diagnosed.
+    First off, try to avoid building GG altogether by downloading a Windows
+    installer containing pre-built GG binaries and headers from the
+    SourceForge download page.
 
-    \subsection howto_build_win32_gcc Windows (GCC)
+    If you want to build GG, you will need to have CMake installed, even if
+    you want to use the Visual Studio IDE.  Run cmake-gui, and select the
+    top-level GG folder for the "Where is the source code" field, and wherever
+    you want the build products to go for the "Where to build the binaries"
+    field (these can be the same place if you like).  Next, hit the Configure
+    button.  If the config step succeeds (unlikely ;) ), hit "Generate".  Be sure
+    to select the generator you want -- I think Borland CodeBuilder is the
+    default, if you can believe that.  After this, you should be able to
+    launch your favorite IDE, or build using nmake, or whatever, from the
+    "Where to build the binaries" folder.
 
-    GG works quite well with GCC on Windows, under MinGW or Cygwin, using
-    SCons.  See the SCons documentation for how to force SCons to use Cygwin
-    or MinGW on the Windows platform (this will probably only be necessary if
-    you also have the MSVC compiler), then refer to the Linux section above.
-    Also note that the DLLs for all the required libraries except the Boost
-    libraries can be found on the net pre-compiled.  You can just use the ones
-    for win32/MSVC; since they're all C code, there will be no ABI
-    compatibility issues.  You must compile the Boost libraries yourself,
-    since they are C++ code.
+    If the config step fails, which is very likely, check the "Show Advanced
+    Values" checkbox, and fill in the paths to headers and libs that CMake
+    couldn't find.  For instance, you'll probably need to fill in
+    FREETYPE_INCLUDE_DIR_freetype2, FREETYPE_INCLUDE_DIR_ft2build, and
+    FREETYPE_LIBRARY with the paths to the freetype2 folder, the path to the
+    ft2build.h header, and the path to the FreeType link library,
+    respectively.  The fields you need to fill in will contain {field
+    name}-NOTFOUND.  Note that some fields are optional, e.g. those related to
+    DevIL.
 
-    \subsection howto_build_win32_microsoft Windows (Microsoft C++)
+    \subsection howto_build_macos Mac OS X
 
-    For those of you who use the Microsoft compiler, SCons will also work from
-    the command line.  You need to install SCons and Python, and make sure
-    that python is in your path.  There is also a standalone version of SCons
-    available somewhere on the SCons site.  Then you just open up a command
-    prompt window, cd to the root of the GG directory tree, and type "scons
-    configure", then "scons".  See the info in the Linux section if you have
-    problems with "scons configure".  Note that I have only been able to get
-    the current version of GG to compile on MSVC++ 8.0 SP1 (the version that
-    comes with .NET 2005) or later.
-
-    \subsection howto_build_macos Macintosh
-
-    It would be nice to have access to a Mac OS X and/or Classic Mac box, to
-    be able to ensure that GG even compiles on such a thing.  Let me know if
-    you have or are interested in testing out a Mac build, or even taking on
-    porting duties.
-*/
+    As of this writing, GG builds fine on Mac OS X.  As for the generation of
+    XCode projects and makefiles, I'm not so certain, since I don't have
+    access to a Mac OS X box.
+ */
 
 /** \page serialization Serialization
     \section serialization_motivation Motivation
@@ -550,7 +559,7 @@
 
 /** \page tutorials Tutorials
     \section tut_using Using the Tutorials
-    The following tutorials are available in the tutorial directory.  They are built by default when you build GG with SCons.
+    The following tutorials are available in the tutorial directory.  They are built by default when you build GG.
     \section tut_1 Tutorial 1: Minimal (minimal.cpp)
     This is the minimal interesting GG application, and uses one of the default input drivers, SDL.
     \section tut_2 Tutorial 2: Controls (controls.cpp)

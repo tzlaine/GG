@@ -55,11 +55,11 @@ library.
 To build a package, configure cmake from the command line defining the package
 type you want, and then build the "make package" target, e.g.:
 
-> cmake -DPACKAGE_TYPE=GiGiSDL && make package
+> cmake [path] -DPACKAGE_TYPE=GiGiSDL && make package
 
 To build a full set of binary and -devel RPMs for GG and all its driver libs,
 you might use a bash script like this:
 
 > for p in 'GiGi GiGiSDL GiGiOgre GiGiDevel GiGiSDLDevel GiGiOgreDevel' ; \
-> do cmake -DPACKAGE_TYPE=GiGiSDL && make package ; \
+> do cmake [path] -DPACKAGE_TYPE=GiGiSDL && make package ; \
 > done

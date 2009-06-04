@@ -63,13 +63,17 @@ struct GG_API Clr
 {
     /** \name Structors */ ///@{
     /** default ctor */
-    Clr();
+    Clr() :
+        r(0), g(0), b(0), a(0)
+        {}
 
     /** ctor that constructs a Clr from four ints that represent the color channels */
     Clr(unsigned char r_,
         unsigned char g_,
         unsigned char b_,
-        unsigned char a_);
+        unsigned char a_) :
+        r(r_), g(g_), b(b_), a(a_)
+        {}
     //@}
 
     unsigned char r;   ///< the red channel
@@ -83,10 +87,23 @@ private:
     void serialize(Archive& ar, const unsigned int version);
 };
 
-GG_API Clr FloatClr(float r_, float g_, float b_, float a_); ///< named ctor that constructs a Clr from four floats that represent the color channels (each must be >= 0.0 and <= 1.0)
+/** Named ctor that constructs a Clr from four floats that represent the color
+    channels (each must be >= 0.0 and <= 1.0). */
+inline Clr FloatClr(float r, float g, float b, float a)
+{
+    return Clr(static_cast<unsigned char>(r * 255),
+               static_cast<unsigned char>(g * 255),
+               static_cast<unsigned char>(b * 255),
+               static_cast<unsigned char>(a * 255));
+}
 
-GG_API bool operator==(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are identical
-GG_API bool operator!=(const Clr& rhs, const Clr& lhs); ///< returns true iff \a rhs and \a lhs are different
+/** Returns true iff \a rhs and \a lhs are identical. */
+inline bool operator==(const Clr& rhs, const Clr& lhs)
+{ return rhs.r == lhs.r && rhs.g == lhs.g && rhs.b == lhs.b && rhs.a == lhs.a; }
+
+/** Returns true iff \a rhs and \a lhs are different. */
+inline bool operator!=(const Clr& rhs, const Clr& lhs)
+{ return !(rhs == lhs); }
 
 // some useful color constants
 extern GG_API const Clr CLR_ZERO;

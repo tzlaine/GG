@@ -37,38 +37,3 @@ const Clr GG::CLR_BLUE(0, 0, 255, 255);
 const Clr GG::CLR_CYAN(0, 255, 255, 255);
 const Clr GG::CLR_YELLOW(255, 255, 0, 255);
 const Clr GG::CLR_MAGENTA(255, 0, 255, 255);
-
-////////////////////////////////////////////////
-// GG::Clr
-////////////////////////////////////////////////
-Clr::Clr() :
-    r(0),
-    g(0),
-    b(0),
-    a(0)
-{}
-
-Clr::Clr(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_) :
-    r(r_),
-    g(g_),
-    b(b_),
-    a(a_)
-{}
-
-
-////////////////////////////////////////////////
-// free function(s)
-////////////////////////////////////////////////
-Clr GG::FloatClr(float r, float g, float b, float a)
-{
-    return Clr(static_cast<unsigned char>(r * 255),
-               static_cast<unsigned char>(g * 255),
-               static_cast<unsigned char>(b * 255),
-               static_cast<unsigned char>(a * 255));
-}
-
-bool GG::operator==(const Clr& rhs, const Clr& lhs) 
-{ return rhs.r == lhs.r && rhs.g == lhs.g && rhs.b == lhs.b && rhs.a == lhs.a; }
-
-bool GG::operator!=(const Clr& rhs, const Clr& lhs) 
-{ return !(rhs == lhs); }

@@ -111,8 +111,8 @@ if (UNIX)
         endif ()
     endif ()
 else ()
-    set(PACKAGE_CONFIGURATIONS "")
-    set(PACKAGE_TYPE "")
+    set(PACKAGE_CONFIGURATIONS NoPackage)
+    set(PACKAGE_TYPE NoPackage)
 endif ()
 
 # Determines whether ${component} is included in the package being built (if

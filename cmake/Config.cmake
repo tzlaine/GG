@@ -11,8 +11,7 @@
 
 include(CheckCXXSourceCompiles)
 
-# create cache entry
-set(BUILD_PLATFORM "unknown" CACHE STRING "Platform name")
+set(BUILD_PLATFORM "unknown")
 
 # Multi-threading support
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
@@ -59,6 +58,9 @@ elseif(WIN32)
 else()
   set(BUILD_PLATFORM "unknown")
 endif()
+
+# create cache entry
+set(BUILD_PLATFORM ${BUILD_PLATFORM} CACHE STRING "Platform name")
 
 message(STATUS "Build platform: ${BUILD_PLATFORM}")
 

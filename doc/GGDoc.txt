@@ -369,9 +369,9 @@
     launch your favorite IDE, or build using nmake, or whatever, from the
     "Where to build the binaries" folder.
 
-    If the config step fails, which is very likely, check the "Show Advanced
-    Values" checkbox, and fill in the paths to headers and libs that CMake
-    couldn't find.  For instance, you'll probably need to fill in
+    If the config step fails, which is very likely, select the "Advanced
+    View" in the view drop-list, and fill in the paths to headers and libs
+    that CMake couldn't find.  For instance, you'll probably need to fill in
     FREETYPE_INCLUDE_DIR_freetype2, FREETYPE_INCLUDE_DIR_ft2build, and
     FREETYPE_LIBRARY with the paths to the freetype2 folder, the path to the
     ft2build.h header, and the path to the FreeType link library,

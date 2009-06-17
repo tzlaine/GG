@@ -21,6 +21,7 @@
 #include <GG/adobe/implementation/parser_shared.hpp>
 
 #include <iostream>
+#include <cstdio>
 
 #include <boost/function.hpp>
 #include <boost/array.hpp>

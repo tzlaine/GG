@@ -102,7 +102,7 @@ typename detail::channel_pointer_type<HomogeneousView>::type interleaved_view_ge
     BOOST_STATIC_ASSERT((!is_planar<HomogeneousView>::value && view_is_basic<HomogeneousView>::value));
     BOOST_STATIC_ASSERT((boost::is_pointer<typename HomogeneousView::x_iterator>::value));
 
-    return &at_c<0>(view(0,0));
+    return &gil::at_c<0>(view(0,0));
 }
 
 /// \ingroup ImageViewConstructors

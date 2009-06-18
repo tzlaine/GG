@@ -63,3 +63,12 @@ you might use a bash script like this:
 > for p in 'GiGi GiGiSDL GiGiOgre GiGiDevel GiGiSDLDevel GiGiOgreDevel' ; \
 > do cmake [path] -DPACKAGE_TYPE=GiGiSDL && make package ; \
 > done
+
+A note about dependencies...  I tried to define the RPM and Deb dependencies
+that seem to be needed to build/distribute GG at the time of this writing.  I
+didn't actually try to install the resulting Debs/RPMs on a real system.  I'm
+not a packager, and don't understand all the issues involved in packaging, and
+I realize that the dependencies may differ wildly from distro to distro.  To
+change the dependencies to suit your needs, look near the end of the top-level
+CMakeLists.txt file, and change the dependencies being added to
+CPACK_RPM_PACKAGE_REQUIRES or CPACK_DEBIAN_PACKAGE_DEPENDS.

@@ -103,9 +103,12 @@ void get_control_bounds(GG::Wnd* control, GG::Rect& bounds)
 
 void set_control_bounds(GG::Wnd* control, const place_data_t& place_data)
 {
-    assert(control);
-    GG::Pt ul(GG::X(left(place_data)), GG::Y(top(place_data)));
-    control->SizeMove(ul, ul + GG::Pt(GG::X(width(place_data)), GG::Y(height(place_data))));
+    if (control) {
+        GG::Pt ul(GG::X(left(place_data)), GG::Y(top(place_data)));
+        control->SizeMove(ul,
+                          ul + GG::Pt(GG::X(width(place_data)),
+                                      GG::Y(height(place_data))));
+    }
 }
 
 /****************************************************************************************************/

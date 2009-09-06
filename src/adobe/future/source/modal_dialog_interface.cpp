@@ -8,10 +8,10 @@
 
 #define ADOBE_DLL_SAFE 0
 
+#include <GG/Wnd.h>
+
 #include <GG/adobe/config.hpp>
-
 #include <GG/adobe/future/modal_dialog_interface.hpp>
-
 #include <GG/adobe/adam_evaluate.hpp>
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/future/assemblage.hpp>
@@ -20,62 +20,6 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/keyboard.hpp>
 
-#if ADOBE_PLATFORM_WIN
-    #define WINDOWS_LEAN_AND_MEAN 1
-
-    #include <windows.h>
-#elif ADOBE_PLATFORM_MAC
-        #include <GG/adobe/macintosh_memory.hpp>
-    #include <GG/adobe/future/macintosh_events.hpp>
-#endif
-
-/****************************************************************************************************/
-
-namespace {
-
-/****************************************************************************************************/
-
-#if ADOBE_PLATFORM_MAC
-
-struct raw_key_handler_t
-{
-    raw_key_handler_t()
-    {
-        handler_m.monitor_proc_m = boost::bind(&raw_key_handler_t::handle_event,
-                                               boost::ref(*this), _1, _2);
-    }
-
-    ::OSStatus handle_event(::EventHandlerCallRef /*next*/,
-                            ::EventRef            event)
-    {
-        char key_code(0);
-
-        adobe::get_event_parameter<kEventParamKeyMacCharCodes>(event, key_code, typeChar);
-
-        bool handled =
-            adobe::keyboard_t::get().dispatch(key_code,
-                                              true,
-                                              adobe::modifiers_none_s,
-                                              adobe::any_regular_t(window_m));
-
-        // Compiler does like return handled ? noErr : eventNotHandledErr
-        // (anonymous enum types don't match)
-
-        if (handled)
-            return noErr;
-        else
-            return eventNotHandledErr;
-    }
-
-    adobe::event_handler_t handler_m;
-    ::WindowRef            window_m;
-};
-
-#endif
-
-/****************************************************************************************************/
-
-} // namespace
 
 /****************************************************************************************************/
 
@@ -129,34 +73,6 @@ std::string mdi_error_getline(std::istream& layout_definition, name_t, std::stre
 
     return result;
 }
-
-/****************************************************************************************************/
-
-} // namespace adobe
-
-/****************************************************************************************************/
-
-namespace {
-
-/****************************************************************************************************/
-#if ADOBE_PLATFORM_MAC
-pascal void purge_closed_windows(::EventLoopTimerRef /*inTimer*/,
-                                 void*               data)
-{
-    assert(data);
-
-    adobe::modal_dialog_t& mdi(*reinterpret_cast<adobe::modal_dialog_t*>(data));
-
-    mdi.end_dialog();
-}
-#endif
-/****************************************************************************************************/
-
-} // namespace
-
-/****************************************************************************************************/
-
-namespace adobe {
 
 /****************************************************************************************************/
 
@@ -275,6 +191,9 @@ dialog_result_t modal_dialog_t::go(std::istream& layout, std::istream& sheet)
         //
         view_m->eve_m.evaluate(eve_t::evaluate_nested);
         view_m->show_window_m();
+
+        platform_display_type dlg = view_m->root_display_m;
+        dlg->Run();
 
 #if ADOBE_PLATFORM_MAC
 

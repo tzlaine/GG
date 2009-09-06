@@ -39,6 +39,8 @@ class Window :
     public GG::Wnd
 {
 public:
+    static const unsigned int BEVEL = 2;
+
     Window(adobe::window_t& imp) :
         Wnd(GG::X0, GG::Y0, GG::X(100), GG::Y(100), DetermineFlags(imp)),
         m_imp(imp),
@@ -47,7 +49,7 @@ public:
         {
             if (!m_imp.name_m.empty()) {
                 m_name = GG::GUI::GetGUI()->GetStyleFactory()->NewTextControl(
-                    -ClientULOffset(true).x, -ClientULOffset(true).y,
+                    -ClientULOffset(true).x, -ClientULOffset(true).y + GG::Y(BEVEL),
                     GG::X(100), m_font->Lineskip(),
                     m_imp.name_m, m_font, GG::CLR_BLACK, GG::FORMAT_CENTER
                 );
@@ -88,7 +90,11 @@ public:
         }
 
     virtual void Render()
-        { GG::BeveledRectangle(UpperLeft(), LowerRight(), GG::CLR_GRAY, GG::CLR_GRAY, true); }
+        {
+            GG::BeveledRectangle(UpperLeft(), LowerRight(),
+                                 GG::CLR_GRAY, GG::CLR_GRAY,
+                                 true, BEVEL);
+        }
 
     virtual void KeyPress(GG::Key key, boost::uint32_t key_code_point,
                           GG::Flags<GG::ModKey> mod_keys)
@@ -118,11 +124,11 @@ private:
             GG::Flags<GG::WndFlag> retval;
 
             if (imp.style_m == adobe::window_style_moveable_modal_s) {
-                assert(imp.modality_m != adobe::window_modality_none_s);
+                // TODO assert(imp.modality_m != adobe::window_modality_none_s);
                 retval |= GG::MODAL;
                 retval |= GG::DRAGABLE;
             } else { // imp.style_m == adobe::window_style_floating_s
-                assert(imp.modality_m == adobe::window_modality_none_s);
+                // TODO assert(imp.modality_m == adobe::window_modality_none_s);
                 retval |= GG::ONTOP;
                 retval |= GG::DRAGABLE;
             }
@@ -134,10 +140,13 @@ private:
         }
 
     GG::Pt ClientULOffset(bool with_title) const
-        { return GG::Pt(GG::X(2), with_title ? m_font->Lineskip() : GG::Y(2)); }
+        {
+            return GG::Pt(GG::X(BEVEL),
+                          GG::Y(BEVEL) + with_title ? m_font->Lineskip() : GG::Y0);
+        }
 
     GG::Pt ClientLROffset() const
-        { return GG::Pt(GG::X(2), GG::Y(2)); }
+        { return GG::Pt(GG::X(BEVEL), GG::Y(BEVEL)); }
 };
 
 /****************************************************************************************************/

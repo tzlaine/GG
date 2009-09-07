@@ -24,7 +24,7 @@ class PanelWnd :
     public GG::Wnd
 {
 public:
-    PanelWnd() : Wnd(GG::X0, GG::Y0, GG::X(100), GG::Y(100), GG::CLICKABLE) {}
+    PanelWnd() : Wnd(GG::X0, GG::Y0, GG::X(100), GG::Y(100), GG::INTERACTIVE) {}
 };
 
 /****************************************************************************************************/

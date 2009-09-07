@@ -120,7 +120,7 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
         image.window_m =
             style->NewStaticGraphic(
                 GG::X0, GG::Y0, get_width(image), get_height(image),
-                view, GG::GRAPHIC_NONE, GG::CLICKABLE
+                view, GG::GRAPHIC_NONE, GG::INTERACTIVE
             );
         image.filter_m.reset(new adobe::implementation::ImageFilter(image));
         image.window_m->InstallEventFilter(image.filter_m.get());

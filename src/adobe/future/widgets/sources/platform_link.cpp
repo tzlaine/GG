@@ -145,7 +145,7 @@ platform_display_type insert<link_t>(display_t&             display,
     element.control_m =
         style->NewTextControl(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
                               "", style->DefaultFont(),
-                              GG::CLR_BLACK, GG::FORMAT_NONE, GG::CLICKABLE);
+                              GG::CLR_BLACK, GG::FORMAT_NONE, GG::INTERACTIVE);
     element.filter_m.reset(new adobe::implementation::LinkTextFilter(element));
     element.control_m->InstallEventFilter(element.filter_m.get());
 

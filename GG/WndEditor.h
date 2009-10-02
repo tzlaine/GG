@@ -529,7 +529,7 @@ void AttributeRow<T>::TextChanged(const std::string& value_text)
         m_edit->SetTextColor(CLR_BLACK);
         ValueChangedSignal(m_value);
         ChangedSignal();
-    } catch (const boost::bad_lexical_cast& e) {
+    } catch (const boost::bad_lexical_cast&) {
         m_edit->SetTextColor(CLR_RED);
     }
 }

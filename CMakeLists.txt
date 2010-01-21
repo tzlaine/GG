@@ -279,7 +279,7 @@ macro (install_pc_file component)
     if (ok_to_install)
         install(
             FILES ${CMAKE_BINARY_DIR}/${component}.pc
-            DESTINATION lib/pkgconfig
+            DESTINATION lib${LIB_SUFFIX}/pkgconfig
             COMPONENT COMPONENT_GIGI_DEVEL
             OPTIONAL
         )

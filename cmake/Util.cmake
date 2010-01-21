@@ -245,8 +245,8 @@ macro (library_variant LIBNAME)
             install(
                 TARGETS ${VARIANT_LIBNAME}
                 RUNTIME DESTINATION bin COMPONENT ${LIB_COMPONENT}
-                LIBRARY DESTINATION lib COMPONENT ${LIB_COMPONENT}
-                ARCHIVE DESTINATION lib COMPONENT ${LIB_COMPONENT}_DEVEL
+                LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT ${LIB_COMPONENT}
+                ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT ${LIB_COMPONENT}_DEVEL
             )
         endif ()
     endif ()

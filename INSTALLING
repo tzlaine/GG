@@ -16,6 +16,12 @@ run "ccmake [path/to/GG]" on unices, or cmake-gui on Windows and Mac OSX.
 Once you've configured GG, just build it and/or install it with your build
 tool.
 
+Note that you should know about a few variables that will help CMake
+find Boost when it is installed somewhere odd, or on a platform like
+Windows where there is no default install location.  Look in the CMake
+documentation for your version of CMake, for BOOST_ROOT,
+BOOST_INCLUDEDIR, and BOOST_LIBRARYDIR.
+
 To summarize...
 
 For unices:

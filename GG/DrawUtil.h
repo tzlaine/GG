@@ -70,7 +70,7 @@ namespace GG {
     GG_API Clr DisabledColor(Clr clr);
 
     /** Sets up a GL scissor box, so that everything outside of the screen
-        region defined by points \a pt1 and \a pt2 is clipped out.  These
+        region defined by points \a ul and \a lr is clipped out.  These
         coordinates should be in GG screen coordinates, with +y downward,
         instead of GL's screen coordinates.  \note Failing to call
         EndScissorClipping() after calling this function and before the next
@@ -78,10 +78,27 @@ namespace GG {
     GG_API void BeginScissorClipping(Pt ul, Pt lr);
 
     /** Ends the current GL scissor box, restoring GL scissor state to what it
-        was before the corresponding call to BeginScissorClipping().  \note If
-        there is not an outstanding call to BeginScissorClipping() when this
-        function is called, this function does nothing. */
+        was before the corresponding call to BeginScissorClipping().  \pre
+        There must be an outstanding call to BeginScissorClipping(). */
     GG_API void EndScissorClipping();
+
+    /** Sets up a GL stencil, so that anything inside of the screen region
+        defined by points \a inner_ul and \a inner_lr, or outside of the
+        screen region defined by points \a outer_ul and \a outer_lr, is
+        clipped out.  \note Failing to call EndStencilClipping() after calling
+        this function and before the next unmatched glPopAttrib() call may
+        produce unexpected results.  \note An unnested call to
+        BeginStencilClipping() will clear the stencil buffer.  \pre There are
+        no more than GL_STENCIL_BITS - 1 nested calls to
+        BeginStencilClipping() currently outstanding (each nested call uses a
+        separate bit in the stencil buffer). */
+    GG_API void BeginStencilClipping(Pt inner_ul, Pt inner_lr,
+                                     Pt outer_ul, Pt outer_lr);
+
+    /** Ends the current GL stencil, restoring GL stencil state to what it was
+        before the corresponding call to BeginScissorClipping().  \pre There
+        must be an outstanding call to BeginStencilClipping(). */
+    GG_API void EndStencilClipping();
 
     /** Renders a rectangle starting at ul and ending just before lr, and
         assumes that OpenGL in in a "2D" state.  The border is drawn in the

@@ -95,17 +95,18 @@ extern GG_API const WndFlag MODAL;
     <br>It is assumed that child windows exists within the boundaries of their
     parents, although this is not required.  By default, Wnds do not clip
     their children; child clipping can be turned on or off using
-    EnableChildClipping(), which clips all children to the client area of the
-    Wnd.  Subclasses can override BeginClipping() and EndClipping() if the
-    clipping desired is something other than the client area of the Wnd, or if
-    the Wnd is not rectangular.  Regardless of clipping, all clicks that land
-    on a child but outside of the parent will not reach the child, since
-    clicks are detected by seaching the top-level Wnds and then searching the
-    children within the ones that are hit.  Ideally, "sibling" child windows
-    should not overlap (unless they can without interfering).  If this is
-    impossible or undesirable, and control is needed over the order in which
-    children are layered, MoveChildUp() and MoveChildDown() provide such
-    control.
+    SetChildClippingMode(), which clips all children to the client and/or
+    non-client areas of the Wnd.  Subclasses can override BeginClippingImpl(),
+    EndClippingImpl(), BeginNonclientClippingImpl(), and
+    EndNonclientClippingImpl() if the clipping should be done using techniques
+    other than scissor clipping and stencil testing, or if the Wnd is
+    nonrectangular.  Regardless of clipping, all clicks that land on a child
+    but outside of the parent will not reach the child, since clicks are
+    detected by seaching the top-level Wnds and then searching the children
+    within the ones that are hit.  Ideally, "sibling" child windows should not
+    overlap (unless they can without interfering).  If this is impossible or
+    undesirable, and control is needed over the order in which children are
+    layered, MoveChildUp() and MoveChildDown() provide such control.
 
     <h3>Effects of Window-Creation Flags</h3>
 
@@ -251,6 +252,28 @@ public:
     /** The type of the iterator parameters passed to DropsAcceptable(). */
     typedef std::map<const Wnd*, bool>::iterator DropsAcceptableIter;
 
+    /** The modes of child clipping. */
+    enum ChildClippingMode {
+        /** No child clipping is performed. */
+        DontClip,
+
+        /** Children or parts of children that fall outside the client area
+            are not visible. */
+        ClipToClient,
+
+        /** Children or parts of children that fall outside the window's area
+            are not visible. */
+        ClipToWindow,
+
+        /** Acts as ClipToClient on children whose NonClientChild() member
+            returns false.  For a child C whose NonClientChild() returns true,
+            any part of C that is inside the client area or outside the
+            window's area is not visible.  This mode is useful for Wnds that
+            have client contents that should be clipped, but that also have
+            nonclient children (e.g. minimize/maximize/close buttons). */
+        ClipToClientAndWindowSeparately
+    };
+
     /** \name Structors */ ///@{
     virtual ~Wnd(); ///< Virtual dtor.
     //@}
@@ -277,8 +300,12 @@ public:
     /** Returns true iff this Wnd is a modal Wnd. */
     bool Modal() const;
 
-    /** Returns true iff child clipping is enabled. */
-    bool ClipChildren() const;
+    /** Returns the mode to use for child clipping. */
+    ChildClippingMode GetChildClippingMode() const;
+
+    /** Returns true iff this Wnd should be considered a non-client-area child
+        of its parent, for clipping purposes.  \see ChildClippingMode. */
+    bool NonClientChild() const;
 
     /** Returns true iff this Wnd will be rendered if it is registered. */
     bool Visible() const;
@@ -465,15 +492,12 @@ public:
         initialization, such as setting focus to child controls. */
     virtual void ModalInit();
 
-    /** Enables or disables clipping of child windows to the boundaries of
-        this Wnd. */
-    void EnableChildClipping(bool enable = true);
+    /** Sets the mode to use for child clipping. */
+    void SetChildClippingMode(ChildClippingMode mode);
 
-    /** Sets up child clipping for this window. */
-    virtual void BeginClipping();
-
-    /** Restores state to what it was before BeginClipping() was called. */
-    virtual void EndClipping();
+    /** Sets whether this Wnd should be considered a non-client-area child of
+        its parent, for clipping purposes.  \see ChildClippingMode. */
+    void NonClientChild(bool b);
 
     void MoveTo(const Pt& pt);     ///< Moves upper-left corner of window to \a pt.
     void OffsetMove(const Pt& pt); ///< Moves window by \a pt pixels.
@@ -829,6 +853,22 @@ protected:
         non-null.  This must only be called from within a WndEvent handler
         (e.g. LClick()). */
     void ForwardEventToParent();
+
+    /** Sets up child clipping for this window. */
+    void BeginClipping();
+
+    /** Restores state to what it was before BeginClipping() was called. */
+    void EndClipping();
+
+    /** Sets up non-client-area-only child clipping for this window.  \note
+        This function is only useful when GetChildClippingMode() is
+        ClipToClientAndWindowSeparately. */
+    void BeginNonclientClipping();
+
+    /** Restores state to what it was before BeginNonclientClipping() was
+        called.  \note This function is only useful when
+        GetChildClippingMode() is ClipToClientAndWindowSeparately. */
+    void EndNonclientClipping();
     //@}
 
     /** Modal Wnd's set this to true to stop modal loop. */
@@ -836,6 +876,11 @@ protected:
 
 private:
     void ValidateFlags();              ///< Sanity-checks the window creation flags
+    virtual void BeginClippingImpl(ChildClippingMode mode);
+    virtual void EndClippingImpl(ChildClippingMode mode);
+    virtual void BeginNonclientClippingImpl();
+    virtual void EndNonclientClippingImpl();
+
 
     Wnd*              m_parent;        ///< Ptr to this window's parent; may be 0
     std::string       m_name;          ///< A user-significant name for this Wnd
@@ -843,7 +888,8 @@ private:
     int               m_zorder;        ///< Where this window is in the z-order (root (non-child) windows only)
     bool              m_visible;
     std::string       m_drag_drop_data_type; ///< The type of drag-and-drop data this Wnd represents, if any
-    bool              m_clip_children;
+    ChildClippingMode m_child_clipping_mode;
+    bool              m_non_client_child;
     Pt                m_upperleft;     ///< Upper left point of window
     Pt                m_lowerright;    ///< Lower right point of window
     Pt                m_min_size;      ///< Minimum window size Pt(0, 0) (= none) by default
@@ -905,7 +951,8 @@ void GG::Wnd::serialize(Archive& ar, const unsigned int version)
         & BOOST_SERIALIZATION_NVP(m_zorder)
         & BOOST_SERIALIZATION_NVP(m_visible)
         & BOOST_SERIALIZATION_NVP(m_drag_drop_data_type)
-        & BOOST_SERIALIZATION_NVP(m_clip_children)
+        & BOOST_SERIALIZATION_NVP(m_child_clipping_mode)
+        & BOOST_SERIALIZATION_NVP(m_non_client_child)
         & BOOST_SERIALIZATION_NVP(m_upperleft)
         & BOOST_SERIALIZATION_NVP(m_lowerright)
         & BOOST_SERIALIZATION_NVP(m_min_size)

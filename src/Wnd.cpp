@@ -175,7 +175,8 @@ Wnd::Wnd() :
     m_parent(0),
     m_zorder(0),
     m_visible(true),
-    m_clip_children(false),
+    m_child_clipping_mode(DontClip),
+    m_non_client_child(false),
     m_max_size(X(1 << 30), Y(1 << 30)),
     m_layout(0),
     m_containing_layout(0),
@@ -191,7 +192,8 @@ Wnd::Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = INTERACTIVE | DRAGABLE*/) 
     m_parent(0),
     m_zorder(0),
     m_visible(true),
-    m_clip_children(false),
+    m_child_clipping_mode(DontClip),
+    m_non_client_child(false),
     m_upperleft(x, y),
     m_lowerright(x + w, y + h),
     m_max_size(X(1 << 30), Y(1 << 30)),
@@ -245,8 +247,11 @@ bool Wnd::OnTop() const
 bool Wnd::Modal() const
 { return !m_parent && m_flags & MODAL; }
 
-bool Wnd::ClipChildren() const
-{ return m_clip_children; }
+Wnd::ChildClippingMode Wnd::GetChildClippingMode() const
+{ return m_child_clipping_mode; }
+
+bool Wnd::NonClientChild() const
+{ return m_non_client_child; }
 
 bool Wnd::Visible() const
 { return m_visible; }
@@ -437,14 +442,11 @@ void Wnd::Show(bool children/* = true*/)
 void Wnd::ModalInit()
 {}
 
-void Wnd::EnableChildClipping(bool enable/* = true*/)
-{ m_clip_children = enable; }
+void Wnd::SetChildClippingMode(ChildClippingMode mode)
+{ m_child_clipping_mode = mode; }
 
-void Wnd::BeginClipping()
-{ BeginScissorClipping(ClientUpperLeft(), ClientLowerRight()); }
-
-void Wnd::EndClipping()
-{ EndScissorClipping(); }
+void Wnd::NonClientChild(bool b)
+{ m_non_client_child = b; }
 
 void Wnd::MoveTo(const Pt& pt)
 { SizeMove(pt, pt + Size()); }
@@ -897,7 +899,7 @@ void Wnd::DefineAttributes(WndEditor* editor)
     editor->CustomText("Client Size", WndClientSizeFunctor());
     editor->Attribute("Min Size", m_min_size);
     editor->Attribute("Max Size", m_max_size);
-    editor->Attribute("Clip Children", m_clip_children);
+    //TODO editor->Attribute("Clip Children", m_clip_children);
     editor->Attribute("Drag Drop Type", m_drag_drop_data_type);
     editor->BeginFlags(m_flags);
     editor->Flag("Interactive", INTERACTIVE);
@@ -1123,8 +1125,62 @@ void Wnd::HandleEvent(const WndEvent& event)
 void Wnd::ForwardEventToParent()
 { throw ForwardToParentException(); }
 
+void Wnd::BeginClipping()
+{
+    if (m_child_clipping_mode != DontClip)
+        BeginClippingImpl(m_child_clipping_mode);
+}
+
+void Wnd::EndClipping()
+{
+    if (m_child_clipping_mode != DontClip)
+        EndClippingImpl(m_child_clipping_mode);
+}
+
+void Wnd::BeginNonclientClipping()
+{ BeginNonclientClippingImpl(); }
+
+void Wnd::EndNonclientClipping()
+{ EndNonclientClippingImpl(); }
+
 void Wnd::ValidateFlags()
 {
     if ((m_flags & MODAL) && (m_flags & ONTOP))
         m_flags &= ~ONTOP;
 }
+
+void Wnd::BeginClippingImpl(ChildClippingMode mode)
+{
+    switch (mode) {
+    case DontClip:
+        assert(!"Wnd::BeginClippingImpl() called with mode == DontClip; this should never happen.");
+        break;
+    case ClipToClient:
+    case ClipToClientAndWindowSeparately:
+        BeginScissorClipping(ClientUpperLeft(), ClientLowerRight());
+        break;
+    case ClipToWindow:
+        BeginScissorClipping(UpperLeft(), LowerRight());
+        break;
+    }
+}
+
+void Wnd::EndClippingImpl(ChildClippingMode mode)
+{
+    switch (mode) {
+    case DontClip:
+        assert(!"Wnd::EndClippingImpl() called with mode == DontClip; this should never happen.");
+        break;
+    case ClipToClient:
+    case ClipToWindow:
+    case ClipToClientAndWindowSeparately:
+        EndScissorClipping();
+        break;
+    }
+}
+
+void Wnd::BeginNonclientClippingImpl()
+{ BeginStencilClipping(ClientUpperLeft(), ClientLowerRight(), UpperLeft(), LowerRight()); }
+
+void Wnd::EndNonclientClippingImpl()
+{ EndStencilClipping(); }

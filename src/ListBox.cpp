@@ -486,7 +486,7 @@ ListBox::ListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
 {
     Control::SetColor(color);
     ValidateStyle();
-    EnableChildClipping();
+    SetChildClippingMode(ClipToClient);
     m_auto_scroll_timer.Stop();
     m_auto_scroll_timer.Connect(this);
 

@@ -200,7 +200,7 @@ TabBar::TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Cl
 {
     SetColor(color);
 
-    EnableChildClipping(true);
+    SetChildClippingMode(ClipToClient);
 
     boost::shared_ptr<StyleFactory> style_factory = GetStyleFactory();
 

@@ -37,6 +37,12 @@ namespace { // file-scope constants and functions
     /// a stack of the currently-active clipping rects, in GG coordinates, not OpenGL scissor coordinates
     std::vector<Rect> g_scissor_clipping_rects;
 
+    GLboolean g_prev_color_writemask[4];
+    GLboolean g_prev_depth_writemask;
+
+    /// the index of the next stencil bit to use for stencil clipping
+    unsigned int g_stencil_bit = 0;
+
     /// whenever points on the unit circle are calculated with expensive sin() and cos() calls, the results are cached here
     std::map<int, std::valarray<double> > unit_circle_coords;
     /// this doesn't serve as a cache, but does allow us to prevent numerous constructions and destructions of Clr valarrays.
@@ -616,9 +622,10 @@ namespace GG {
     void BeginScissorClipping(Pt ul, Pt lr)
     {
         if (g_scissor_clipping_rects.empty()) {
-            // save old scissor state
             glPushAttrib(GL_SCISSOR_BIT);
             glEnable(GL_SCISSOR_TEST);
+            if (g_stencil_bit)
+                glDisable(GL_STENCIL_TEST);
         } else {
             const Rect& r = g_scissor_clipping_rects.back();
             ul.x = std::max(r.Left(), std::min(ul.x, r.Right()));
@@ -633,14 +640,84 @@ namespace GG {
 
     void EndScissorClipping()
     {
+        assert(!g_scissor_clipping_rects.empty());
         g_scissor_clipping_rects.pop_back();
         if (g_scissor_clipping_rects.empty()) {
-            // restore previous scissor-clipping state
             glPopAttrib();
+            if (g_stencil_bit)
+                glEnable(GL_STENCIL_TEST);
         } else {
             const Rect& r = g_scissor_clipping_rects.back();
             glScissor(Value(r.Left()), Value(GUI::GetGUI()->AppHeight() - r.Bottom()),
                       Value(r.Width()), Value(r.Height()));
+        }
+    }
+
+    void BeginStencilClipping(Pt inner_ul, Pt inner_lr,
+                              Pt outer_ul, Pt outer_lr)
+    {
+        if (!g_stencil_bit) {
+            glPushAttrib(GL_STENCIL_BUFFER_BIT);
+            glClearStencil(0);
+            glClear(GL_STENCIL_BUFFER_BIT);
+            glEnable(GL_STENCIL_TEST);
+            if (!g_scissor_clipping_rects.empty())
+                glDisable(GL_SCISSOR_TEST);
+        }
+
+        glGetBooleanv(GL_COLOR_WRITEMASK, g_prev_color_writemask);
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &g_prev_depth_writemask);
+
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glDepthMask(GL_FALSE);
+
+        GLuint mask = 1u << g_stencil_bit;
+
+        glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+        glEnableClientState(GL_VERTEX_ARRAY);
+
+        glStencilFunc(GL_ALWAYS, mask, mask);
+        glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+        GLint outer_vertices[] = {
+            Value(outer_ul.x), Value(outer_ul.y),
+            Value(outer_ul.x), Value(outer_lr.y),
+            Value(outer_lr.x), Value(outer_lr.y),
+            Value(outer_lr.x), Value(outer_ul.y)
+        };
+        glVertexPointer(2, GL_INT, 0, outer_vertices);
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+        GLint inner_vertices[] = {
+            Value(inner_ul.x), Value(inner_ul.y),
+            Value(inner_ul.x), Value(inner_lr.y),
+            Value(inner_lr.x), Value(inner_lr.y),
+            Value(inner_lr.x), Value(inner_ul.y)
+        };
+        glVertexPointer(2, GL_INT, 0, inner_vertices);
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        glColorMask(g_prev_color_writemask[0],
+                    g_prev_color_writemask[1],
+                    g_prev_color_writemask[2],
+                    g_prev_color_writemask[3]);
+        glDepthMask(g_prev_depth_writemask);
+
+        glStencilFunc(GL_EQUAL, mask, mask);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        ++g_stencil_bit;
+
+        glPopClientAttrib();
+    }
+
+    void EndStencilClipping()
+    {
+        assert(g_stencil_bit);
+        --g_stencil_bit;
+        if (!g_stencil_bit) {
+            glPopAttrib();
+            if (!g_scissor_clipping_rects.empty())
+                glEnable(GL_SCISSOR_TEST);
         }
     }
 

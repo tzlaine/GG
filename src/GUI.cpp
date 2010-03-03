@@ -976,15 +976,43 @@ void GUI::RenderWindow(Wnd* wnd)
 {
     if (wnd && wnd->Visible()) {
         wnd->Render();
-        bool clip = wnd->ClipChildren();
-        if (clip)
-            wnd->BeginClipping();
-        for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
-            if ((*it)->Visible())
-                RenderWindow(*it);
+
+        Wnd::ChildClippingMode clip_mode = wnd->GetChildClippingMode();
+
+        if (clip_mode != Wnd::ClipToClientAndWindowSeparately) {
+            bool clip = clip_mode != Wnd::DontClip;
+            if (clip)
+                wnd->BeginClipping();
+            for (std::list<Wnd*>::iterator it = wnd->m_children.begin(); it != wnd->m_children.end(); ++it) {
+                if ((*it)->Visible())
+                    RenderWindow(*it);
+            }
+            if (clip)
+                wnd->EndClipping();
+        } else {
+            std::vector<Wnd*> children_copy(wnd->m_children.begin(), wnd->m_children.end());
+            std::vector<Wnd*>::iterator client_child_begin =
+                std::partition(children_copy.begin(), children_copy.end(),
+                               boost::bind(&Wnd::NonClientChild, _1));
+
+            if (children_copy.begin() != client_child_begin) {
+                wnd->BeginNonclientClipping();
+                for (std::vector<Wnd*>::iterator it = children_copy.begin(); it != client_child_begin; ++it) {
+                    if ((*it)->Visible())
+                        RenderWindow(*it);
+                }
+                wnd->EndNonclientClipping();
+            }
+
+            if (client_child_begin != children_copy.end()) {
+                wnd->BeginClipping();
+                for (std::vector<Wnd*>::iterator it = client_child_begin; it != children_copy.end(); ++it) {
+                    if ((*it)->Visible())
+                        RenderWindow(*it);
+                }
+                wnd->EndClipping();
+            }
         }
-        if (clip)
-            wnd->EndClipping();
     }
 }
 

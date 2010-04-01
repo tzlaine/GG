@@ -1001,7 +1001,7 @@ void ListBox::SetNumCols(std::size_t n)
             alignment = ALIGN_RIGHT;
         m_col_alignments.resize(n, alignment);
     }
-    if (m_sort_col <= n)
+    if (n <= m_sort_col)
         m_sort_col = 0;
     for (iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
         NormalizeRow(*it);

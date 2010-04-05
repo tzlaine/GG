@@ -44,15 +44,16 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/spirit.hpp>
-#include <boost/spirit/dynamic.hpp>
+#include <boost/spirit/include/classic.hpp>
+#include <boost/spirit/include/classic_dynamic.hpp>
 #include <boost/system/system_error.hpp>
 
 
 using namespace GG;
 
 namespace {
-    using namespace boost::spirit;
+    using namespace boost::spirit::classic;
+
     // these functors are used by the if_p, while_p, and for_p parsers in UpdateList()
     struct LeadingWildcard
     {

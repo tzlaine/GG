@@ -142,6 +142,18 @@ namespace {
             { m_var = 0; }
         ListBox::iterator*& m_var;
     };
+
+    Alignment AlignmentFromStyle(Flags<ListBoxStyle> style)
+    {
+        Alignment retval = ALIGN_NONE;
+        if (style & LIST_LEFT)
+            retval = ALIGN_LEFT;
+        if (style & LIST_CENTER)
+            retval = ALIGN_CENTER;
+        if (style & LIST_RIGHT)
+            retval = ALIGN_RIGHT;
+        return retval;
+    }
 }
 
 ///////////////////////////////////////
@@ -266,7 +278,7 @@ void ListBox::Row::push_back(Control* c)
 {
     m_cells.push_back(c);
     m_col_widths.push_back(X(5));
-    m_col_alignments.push_back(ALIGN_CENTER);
+    m_col_alignments.push_back(ALIGN_NONE);
     if (1 < m_cells.size()) {
         m_col_widths.back() = m_col_widths[m_cells.size() - 1];
     }
@@ -305,7 +317,7 @@ void ListBox::Row::resize(std::size_t n)
     m_col_alignments.resize(n);
     for (std::size_t i = old_size; i < n; ++i) {
         m_col_widths[i] = old_size ? m_col_widths[old_size - 1] : X(5); // assign new cells reasonable default widths
-        m_col_alignments[i] = ALIGN_CENTER;
+        m_col_alignments[i] = ALIGN_NONE;
     }
     AdjustLayout();
 }
@@ -962,14 +974,7 @@ void ListBox::SetColHeaders(Row* r)
                                 (ClientSize().x - SCROLL_WIDTH) / static_cast<int>(m_header_row->size()));
             // put the remainder in the last column, so the total width == ClientSize().x - SCROLL_WIDTH
             m_col_widths.back() += (ClientSize().x - SCROLL_WIDTH) % static_cast<int>(m_header_row->size());
-            Alignment alignment = ALIGN_NONE;
-            if (m_style & LIST_LEFT)
-                alignment = ALIGN_LEFT;
-            if (m_style & LIST_CENTER)
-                alignment = ALIGN_CENTER;
-            if (m_style & LIST_RIGHT)
-                alignment = ALIGN_RIGHT;
-            m_col_alignments.resize(m_header_row->size(), alignment);
+            m_col_alignments.resize(m_header_row->size(), AlignmentFromStyle(m_style));
         }
         NormalizeRow(m_header_row);
         m_header_row->MoveTo(Pt(X0, -m_header_row->Height()));
@@ -1469,20 +1474,33 @@ ListBox::iterator ListBox::Insert(Row* row, iterator it, bool dropped)
     iterator retval = it;
 
     // The first row inserted into an empty list box defines the number of
-    // columns, and initializes the column widths.
+    // columns, and initializes the column widths and alignments.
     if (m_rows.empty() && (m_col_widths.empty() || !m_keep_col_widths)) {
-        m_col_widths.resize(row->size(), (ClientSize().x - SCROLL_WIDTH) / static_cast<int>(row->size()));
-        // Put the remainder in the last column, so the total width ==
-        // ClientSize().x - SCROLL_WIDTH.
-        m_col_widths.back() += (ClientSize().x - SCROLL_WIDTH) % static_cast<int>(row->size());
-        Alignment alignment = ALIGN_NONE;
-        if (m_style & LIST_LEFT)
-            alignment = ALIGN_LEFT;
-        if (m_style & LIST_CENTER)
-            alignment = ALIGN_CENTER;
-        if (m_style & LIST_RIGHT)
-            alignment = ALIGN_RIGHT;
-        m_col_alignments.resize(row->size(), alignment);
+        const GG::X WIDTH = ClientSize().x - SCROLL_WIDTH;
+
+        m_col_widths.resize(row->size());
+        m_col_alignments.resize(row->size());
+        GG::X total = GG::X0;
+        for (std::size_t i = 0; i < row->size(); ++i) {
+            // use the column width from the Row
+            total += row->ColWidth(i);
+
+            // use the column alignment from the Row, if it has been set;
+            // otherwise, use the one dictated by the ListBoxStyle flags
+            Alignment a = row->ColAlignment(i);
+            if (a == ALIGN_NONE)
+                a = AlignmentFromStyle(m_style);
+            m_col_alignments[i] = a;
+        }
+
+        const GG::X_d SCALE_FACTOR = 1.0 * WIDTH / total;
+
+        total = GG::X0;
+        for (std::size_t i = 0; i < row->size(); ++i) {
+            total += (m_col_widths[i] = row->ColWidth(i) * SCALE_FACTOR);
+        }
+        m_col_widths.back() += total - WIDTH;
+
         if (!m_header_row->empty())
             NormalizeRow(m_header_row);
     }

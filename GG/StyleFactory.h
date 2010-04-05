@@ -58,6 +58,7 @@ class TabWnd;
 class TextControl;
 class Texture;
 class ThreeButtonDlg;
+struct UnicodeCharset;
 
 /** \brief Creates new dialogs and Controls.
 
@@ -81,8 +82,16 @@ public:
     virtual ~StyleFactory(); ///< Virtual dtor.
     //@}
 
-    /** Returns the default font for this style, in the size \a pts. */
+    /** Returns the default font for this style, in the size \a pts,
+        supporting all printable ASCII characters. */
     virtual boost::shared_ptr<Font> DefaultFont(unsigned int pts = 12) const;
+
+    /** Returns the default font for this style, in the size \a pts,
+        supporting all the characters in the UnicodeCharsets in the range
+        [first, last). */
+    virtual boost::shared_ptr<Font> DefaultFont(unsigned int pts,
+                                                const UnicodeCharset* first,
+                                                const UnicodeCharset* last) const;
 
     /** \name Controls */ ///@{
     /** Returns a new GG Button. */

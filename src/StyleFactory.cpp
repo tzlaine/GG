@@ -56,6 +56,11 @@ StyleFactory::~StyleFactory()
 boost::shared_ptr<Font> StyleFactory::DefaultFont(unsigned int pts/* = 12*/) const
 { return GG::GUI::GetGUI()->GetFont(DefaultFontName(), pts, VeraTTFBytes()); }
 
+boost::shared_ptr<Font> StyleFactory::DefaultFont(unsigned int pts,
+                                                  const UnicodeCharset* first,
+                                                  const UnicodeCharset* last) const
+{ return GG::GUI::GetGUI()->GetFont(DefaultFontName(), pts, VeraTTFBytes(), first, last); }
+
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const
 { return new Button(x, y, w, h, str, font, color, text_color, flags); }

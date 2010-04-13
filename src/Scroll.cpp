@@ -161,7 +161,9 @@ void Scroll::SizeMove(const Pt& ul, const Pt& lr)
     int bn_width = (m_orientation == VERTICAL) ? Value(Size().x) : Value(Size().y);
     m_decr->SizeMove(Pt(), Pt(X(bn_width), Y(bn_width)));
     m_incr->SizeMove(Size() - Pt(X(bn_width), Y(bn_width)), Size());
-    m_tab->SizeMove(m_tab->RelativeUpperLeft(), (m_orientation == VERTICAL) ? Pt(X(bn_width), m_tab->RelativeLowerRight().y) :
+    m_tab->SizeMove(m_tab->RelativeUpperLeft(),
+                    (m_orientation == VERTICAL) ?
+                    Pt(X(bn_width), m_tab->RelativeLowerRight().y) :
                     Pt(m_tab->RelativeLowerRight().x, Y(bn_width)));
     SizeScroll(m_range_min, m_range_max, m_line_sz, m_page_sz); // update tab size and position
 }
@@ -201,7 +203,8 @@ void Scroll::SizeScroll(int min, int max, unsigned int line, unsigned int page)
     if (m_posn < m_range_min)
         m_posn = m_range_min;
     Pt tab_ul = m_tab->RelativeUpperLeft();
-    Pt tab_lr = m_orientation == VERTICAL ? Pt(m_tab->RelativeLowerRight().x, tab_ul.y + static_cast<int>(TabWidth())):
+    Pt tab_lr = m_orientation == VERTICAL ?
+        Pt(m_tab->RelativeLowerRight().x, tab_ul.y + static_cast<int>(TabWidth())):
         Pt(tab_ul.x + static_cast<int>(TabWidth()), m_tab->RelativeLowerRight().y);
     m_tab->SizeMove(tab_ul, tab_lr);
     MoveTabToPosn();
@@ -415,7 +418,7 @@ void Scroll::MoveTabToPosn()
     double tab_location =
         (m_posn - m_range_min) / static_cast<double>(max_posn - m_range_min) * tab_space + start_tabspace + 0.5;
     if (m_posn - m_range_min == 0)
-        tab_location = 0.0;
+        tab_location = m_orientation == VERTICAL ? Value(m_decr->Height()) : Value(m_decr->Width());
 
     m_tab->MoveTo(m_orientation == VERTICAL ?
                   Pt(m_tab->RelativeUpperLeft().x, Y(static_cast<int>(tab_location))) :

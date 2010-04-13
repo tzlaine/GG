@@ -227,7 +227,7 @@ int Slider::PtToPosn(const Pt& pt) const
     if (m_orientation == VERTICAL) {
         line_min = Value(m_tab->Height() / 2);
         line_max = Value(Height() - (m_tab->Height() - m_tab->Height() / 2));
-        pixel_nearest_to_pt_on_line = std::max(line_min, std::min(Value(pt.y - lr.y), line_max));
+        pixel_nearest_to_pt_on_line = std::max(line_min, std::min(Value(lr.y - pt.y), line_max));
     } else {
         line_min = Value(m_tab->Width() / 2);
         line_max = Value(Width() - (m_tab->Width() - m_tab->Width() / 2));
@@ -238,7 +238,7 @@ int Slider::PtToPosn(const Pt& pt) const
 }
 
 void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ SlideToImpl(m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize(), true); }
+{ SlideToImpl(PtToPosn(pt) < m_posn ? m_posn + PageSize() : m_posn - PageSize(), true); }
 
 void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {

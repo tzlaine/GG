@@ -238,7 +238,7 @@ int Slider::PtToPosn(const Pt& pt) const
 }
 
 void Slider::LClick(const Pt& pt, Flags<ModKey> mod_keys)
-{ SlideToImpl(PtToPosn(pt) < m_posn ? m_posn + PageSize() : m_posn - PageSize(), true); }
+{ SlideToImpl(m_posn < PtToPosn(pt) ? m_posn + PageSize() : m_posn - PageSize(), true); }
 
 void Slider::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {

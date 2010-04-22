@@ -46,7 +46,7 @@ namespace {
     };
 }
 
-const std::size_t Slider::INVALID_PAGE_SIZE = std::numeric_limits<std::size_t>::max();
+const unsigned int Slider::INVALID_PAGE_SIZE = std::numeric_limits<unsigned int>::max();
 
 Slider::Slider() :
     Control(),

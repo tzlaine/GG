@@ -104,7 +104,7 @@ public:
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
-    static const std::size_t INVALID_PAGE_SIZE;
+    static const unsigned int INVALID_PAGE_SIZE;
 
 protected:
     /** \name Structors */ ///@{

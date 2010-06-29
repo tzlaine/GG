@@ -9,7 +9,7 @@ set(THIS_LIB_SOURCES
     Base.cpp
     BrowseInfoWnd.cpp
     Button.cpp
-    Clr.cpp
+    ClrConstants.cpp
     Control.cpp
     Cursor.cpp
     DrawUtil.cpp

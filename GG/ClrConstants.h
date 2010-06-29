@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /* GG is a GUI for SDL and OpenGL.
    Copyright (C) 2003-2008 T. Zachary Laine
 
@@ -22,18 +23,30 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
+/** \file ClrConstants.h \brief Contains some useful constants of type Clr. */
+
+#ifndef _GG_ClrConstants_h_
+#define _GG_ClrConstants_h_
+
 #include <GG/Clr.h>
 
-using namespace GG;
 
-const Clr GG::CLR_ZERO(0, 0, 0, 0);
-const Clr GG::CLR_BLACK(0, 0, 0, 255);
-const Clr GG::CLR_WHITE(255, 255, 255, 255);
-const Clr GG::CLR_GRAY(127, 127, 127, 255);
-const Clr GG::CLR_SHADOW(127, 127, 127, 127);
-const Clr GG::CLR_RED(255, 0, 0, 255);
-const Clr GG::CLR_GREEN(0, 255, 0, 255);
-const Clr GG::CLR_BLUE(0, 0, 255, 255);
-const Clr GG::CLR_CYAN(0, 255, 255, 255);
-const Clr GG::CLR_YELLOW(255, 255, 0, 255);
-const Clr GG::CLR_MAGENTA(255, 0, 255, 255);
+namespace GG {
+
+// some useful color constants
+extern GG_API const Clr CLR_ZERO;
+extern GG_API const Clr CLR_BLACK;
+extern GG_API const Clr CLR_WHITE;
+extern GG_API const Clr CLR_GRAY;
+extern GG_API const Clr CLR_SHADOW;
+extern GG_API const Clr CLR_RED;
+extern GG_API const Clr CLR_GREEN;
+extern GG_API const Clr CLR_BLUE;
+extern GG_API const Clr CLR_CYAN;
+extern GG_API const Clr CLR_YELLOW;
+extern GG_API const Clr CLR_MAGENTA;
+
+} // namespace GG
+
+#endif // _GG_ClrConstants_h_
+

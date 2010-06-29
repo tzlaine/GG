@@ -24,6 +24,7 @@
 
 #include <GG/DrawUtil.h>
 
+#include <GG/ClrConstants.h>
 #include <GG/GUI.h>
 
 #include <valarray>

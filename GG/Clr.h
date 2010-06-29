@@ -105,19 +105,6 @@ inline bool operator==(const Clr& rhs, const Clr& lhs)
 inline bool operator!=(const Clr& rhs, const Clr& lhs)
 { return !(rhs == lhs); }
 
-// some useful color constants
-extern GG_API const Clr CLR_ZERO;
-extern GG_API const Clr CLR_BLACK;
-extern GG_API const Clr CLR_WHITE;
-extern GG_API const Clr CLR_GRAY;
-extern GG_API const Clr CLR_SHADOW;
-extern GG_API const Clr CLR_RED;
-extern GG_API const Clr CLR_GREEN;
-extern GG_API const Clr CLR_BLUE;
-extern GG_API const Clr CLR_CYAN;
-extern GG_API const Clr CLR_YELLOW;
-extern GG_API const Clr CLR_MAGENTA;
-
 } // namespace GG
 
 // template implementations

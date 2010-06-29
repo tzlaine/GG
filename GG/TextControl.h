@@ -29,6 +29,7 @@
 #ifndef _GG_TextControl_h_
 #define _GG_TextControl_h_
 
+#include <GG/ClrConstants.h>
 #include <GG/Control.h>
 #include <GG/Font.h>
 

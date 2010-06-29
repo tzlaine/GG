@@ -30,6 +30,7 @@
 #define _GG_ListBox_h_
 
 #include <GG/AlignmentFlags.h>
+#include <GG/ClrConstants.h>
 #include <GG/Control.h>
 #include <GG/Timer.h>
 

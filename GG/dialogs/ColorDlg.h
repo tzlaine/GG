@@ -30,6 +30,7 @@
 #define _GG_ColorDlg_h_
 
 #include <GG/Button.h>
+#include <GG/ClrConstants.h>
 
 
 namespace GG {

@@ -30,6 +30,7 @@
 #ifndef _GG_Menu_h_
 #define _GG_Menu_h_
 
+#include <GG/ClrConstants.h>
 #include <GG/Control.h>
 
 

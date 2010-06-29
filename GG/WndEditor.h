@@ -29,6 +29,7 @@
 #ifndef _GG_WndEditor_h_
 #define _GG_WndEditor_h_
 
+#include <GG/ClrConstants.h>
 #include <GG/DropDownList.h>
 #include <GG/Edit.h>
 #include <GG/GUI.h>

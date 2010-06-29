@@ -29,6 +29,7 @@
 #ifndef _GG_Edit_h_
 #define _GG_Edit_h_
 
+#include <GG/ClrConstants.h>
 #include <GG/TextControl.h>
 
 

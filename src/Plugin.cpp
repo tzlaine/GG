@@ -82,9 +82,6 @@ GG_SHARED_POINTER_EXPORT(GG::StateButton)
 GG_SHARED_POINTER_EXPORT(GG::RadioButtonGroup)
 // TODO : add export declarations for all user-defined Wnd subclasses
 
-using namespace GG;
-using namespace boost;
-using namespace std;
 
 // TODO: add declarations for custom classes that must be serialized in SaveWnd() and LoadWnd().
 
@@ -115,9 +112,9 @@ extern "C" {
 
     //  TODO: Override this with your own StyleFactory subclass.
     GG_PLUGIN_API
-    boost::shared_ptr<StyleFactory> GetStyleFactory()
+    boost::shared_ptr<GG::StyleFactory> GetStyleFactory()
     {
-        static boost::shared_ptr<StyleFactory> style_factory(new StyleFactory());
+        static boost::shared_ptr<GG::StyleFactory> style_factory(new GG::StyleFactory());
         return style_factory;
     }
 

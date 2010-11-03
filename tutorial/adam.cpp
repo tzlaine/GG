@@ -1,6 +1,9 @@
 #include <GG/AdamGlue.h>
 #include <GG/Layout.h>
+#include <GG/dialogs/ThreeButtonDlg.h>
 #include <GG/SDL/SDLGUI.h>
+
+#include <GG/adobe/dictionary.hpp>
 
 #include <iostream>
 
@@ -40,6 +43,8 @@ private:
 
 public:
     AdamDialog();
+
+    adobe::any_regular_t Result();
 
     virtual void Render();
 
@@ -90,7 +95,7 @@ AdamDialog::AdamDialog() :
         "sheet clipping_path"
         "{"
         "output:"
-        "    result                  <== { path: path, flatness: flatness };"
+        "    sheet_result            <== { path: path, flatness: flatness };"
         ""
         "interface:"
         "    unlink flatness : 0.0   <== (path == 0) ? 0.0 : flatness;"
@@ -116,9 +121,12 @@ AdamDialog::AdamDialog() :
 
     GG::Connect(m_ok->ClickedSignal, &AdamDialog::OkClicked, this);
 
-    m_adam_glue.AddCell<double, PathTypes>(*m_path_spin, adobe::name_t("path"));
-    m_adam_glue.AddCell<double, double>(*m_flatness_edit, adobe::name_t("flatness"));
+    m_adam_glue.BindCell<double, PathTypes>(*m_path_spin, adobe::name_t("path"));
+    m_adam_glue.BindCell<double, double>(*m_flatness_edit, adobe::name_t("flatness"));
 }
+
+adobe::any_regular_t AdamDialog::Result()
+{ return m_adam_glue.Result(); }
 
 void AdamDialog::Render()
 { FlatRectangle(UpperLeft(), LowerRight(), GG::CLR_SHADOW, GG::CLR_SHADOW, 1); }
@@ -241,6 +249,19 @@ void AdamGGApp::Initialize()
 
     AdamDialog adam_dlg;
     adam_dlg.Run();
+
+    const adobe::any_regular_t& result = adam_dlg.Result();
+    adobe::dictionary_t dictionary = result.cast<adobe::dictionary_t>();
+
+    std::ostringstream results_str;
+    results_str << "result:\n"
+                << "path = " << dictionary[adobe::name_t("path")].cast<double>() << "\n"
+                << "flatness = " << dictionary[adobe::name_t("flatness")].cast<double>();
+
+    GG::ThreeButtonDlg results_dlg(GG::X(200), GG::Y(100), results_str.str(),
+                                   GetStyleFactory()->DefaultFont(), GG::CLR_SHADOW, 
+                                   GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
+    results_dlg.Run();
 
     Exit(0);
 }

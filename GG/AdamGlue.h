@@ -224,12 +224,17 @@ struct AdamSheetGlue
     AdamSheetGlue(const std::string& str);
     AdamSheetGlue(std::istream& stream);
 
+    void SetCell(adobe::name_t cell, const adobe::any_regular_t& value);
+    void SetCells(const adobe::dictionary_t& dictionary);
+
     template <
         class AdamValueType,
         class GGValueType,
         class ControlType
     >
-    void AddCell(ControlType& control, adobe::name_t cell);
+    void BindCell(ControlType& control, adobe::name_t cell);
+
+    adobe::any_regular_t Result();
 
 private:
     void Init(std::istream& stream);
@@ -326,7 +331,7 @@ template <
     class GGValueType,
     class ControlType
 >
-void AdamSheetGlue::AddCell(ControlType& control, adobe::name_t cell)
+void AdamSheetGlue::BindCell(ControlType& control, adobe::name_t cell)
 {
     m_cells.push_back(
         boost::shared_ptr<AdamCellGlueBase>(

@@ -252,3 +252,18 @@ void AdamSheetGlue::Init(std::istream& stream)
     adobe::parse(stream, adobe::line_position_t("adam"), adobe::bind_to_sheet(m_sheet));
     m_sheet.update();
 }
+
+void AdamSheetGlue::SetCell(adobe::name_t cell, const adobe::any_regular_t& value)
+{
+    m_sheet.set(cell, value);
+    m_sheet.update();
+}
+
+void AdamSheetGlue::SetCells(const adobe::dictionary_t& dictionary)
+{
+    m_sheet.set(dictionary);
+    m_sheet.update();
+}
+
+adobe::any_regular_t AdamSheetGlue::Result()
+{ return m_sheet.get(adobe::name_t("sheet_result")); }

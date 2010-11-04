@@ -4,6 +4,7 @@ message("-- Configuring GiGi")
 
 set(THIS_LIB_SOURCES
 
+    AdamDlg.cpp
     AdamGlue.cpp
     AlignmentFlags.cpp
     Base.cpp
@@ -70,6 +71,8 @@ set(THIS_LIB_SOURCES
     adobe/token.cpp
     adobe/typeinfo.cpp
     adobe/virtual_machine.cpp
+    adobe/future/widgets/sources/virtual_machine_extension.cpp
+    adobe/future/widgets/sources/widget_tokens.cpp
 )
 
 if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
@@ -82,7 +85,6 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
         adobe/future/widgets/sources/link_factory.cpp
         adobe/future/widgets/sources/edit_text_factory.cpp
         adobe/future/widgets/sources/checkbox_factory.cpp
-        adobe/future/widgets/sources/widget_tokens.cpp
         adobe/future/widgets/sources/tab_group_factory.cpp
         adobe/future/widgets/sources/group_factory.cpp
         adobe/future/widgets/sources/image_factory.cpp
@@ -106,7 +108,6 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
         adobe/future/widgets/sources/presets_factory.cpp
         adobe/future/widgets/sources/control_button.cpp
         adobe/future/widgets/sources/control_button_factory.cpp
-        adobe/future/widgets/sources/virtual_machine_extension.cpp
         adobe/future/widgets/sources/widget_factory.cpp
         adobe/future/widgets/sources/separator_factory.cpp
         adobe/future/widgets/sources/button_helper.cpp

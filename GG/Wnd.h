@@ -595,9 +595,12 @@ public:
     virtual void Render();
 
     /** This executes a modal window and gives it its modality.  For non-modal
-        windows, this function is a no-op.  It returns 0 if the window is
-        non-modal, or non-zero after successful modal execution.*/
-    virtual int Run();
+        windows, this function is a no-op.  It returns false if the window is
+        non-modal, or true after successful modal execution.*/
+    virtual bool Run();
+
+    /** Ends the current execution of Run(), if any. */
+    void EndRun();
 
     /** Sets the time cutoff (in milliseconds) for a browse info mode.  If \a
         mode is not less than the current number of modes, extra modes will be

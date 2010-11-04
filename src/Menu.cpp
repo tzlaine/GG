@@ -627,9 +627,9 @@ void PopupMenu::RClick(const Pt& pt, Flags<ModKey> mod_keys)
 void PopupMenu::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 { LDrag(pt, Pt(), mod_keys); }
 
-int PopupMenu::Run()
+bool PopupMenu::Run()
 {
-    int retval = Wnd::Run();
+    bool retval = Wnd::Run();
     if (m_item_selected) {
         (*m_item_selected->SelectedIDSignal)(m_item_selected->item_ID);
         (*m_item_selected->SelectedSignal)();

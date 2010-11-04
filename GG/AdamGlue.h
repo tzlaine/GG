@@ -23,8 +23,9 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file AdamGlue.h \brief Contains AdamSheetGlue and related helper classes,
-    which automate the binding of GG Wnds to Adobe Adam property models. */
+/** \file AdamGlue.h \brief Contains AdamCellGlueBase and derived classes,
+    which automate the binding of GG controls to Adobe Adam property
+    models. */
 
 #ifndef _AdamGlue_h_
 #define _AdamGlue_h_
@@ -321,22 +322,6 @@ void AdamCellGlue<Spin<T>, double, T>::ControlChanged(T t)
 {
     m_sheet->set(m_cell, detail::MakeAny<double, T>(t));
     m_sheet->update();
-}
-
-
-// AdamSheetGlue
-
-template <
-    class AdamValueType,
-    class GGValueType,
-    class ControlType
->
-void AdamSheetGlue::BindCell(ControlType& control, adobe::name_t cell)
-{
-    m_cells.push_back(
-        boost::shared_ptr<AdamCellGlueBase>(
-            new AdamCellGlue<ControlType, AdamValueType, GGValueType>(
-                control, m_sheet, cell)));
 }
 
 }

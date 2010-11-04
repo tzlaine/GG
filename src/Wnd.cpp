@@ -839,20 +839,24 @@ void Wnd::SetLayoutCellMargin(unsigned int margin)
 
 void Wnd::Render() {}
 
-int Wnd::Run()
+bool Wnd::Run()
 {
-    int retval = 0;
+    bool retval = false;
     if (!m_parent && m_flags & MODAL) {
         GUI* gui = GUI::GetGUI();
         gui->RegisterModal(this);
         ModalInit();
+        m_done = false;
         boost::shared_ptr<ModalEventPump> pump = gui->CreateModalEventPump(m_done);
         (*pump)();
         gui->Remove(this);
-        retval = 1;
+        retval = true;
     }
     return retval;
 }
+
+void Wnd::EndRun()
+{ m_done = true; }
 
 void Wnd::SetBrowseModeTime(unsigned int time, std::size_t mode/* = 0*/)
 {

@@ -1,4 +1,4 @@
-#include <GG/AdamGlue.h>
+#include <GG/AdamDlg.h>
 #include <GG/Layout.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
 #include <GG/SDL/SDLGUI.h>
@@ -44,19 +44,20 @@ private:
 public:
     AdamDialog();
 
-    adobe::any_regular_t Result();
+    adobe::dictionary_t Result();
 
     virtual void Render();
+    virtual bool Run();
 
 private:
-    void OkClicked();
+    bool HandleActions (adobe::name_t name, const adobe::any_regular_t&);
 
     boost::shared_ptr<GG::Font> m_font;
     GG::Spin<PathTypes>* m_path_spin;
     GG::Edit* m_flatness_edit;
     GG::Button* m_ok;
 
-    GG::AdamSheetGlue m_adam_glue;
+    GG::AdamModalDialog m_adam_modal_dialog;
 };
 
 
@@ -91,16 +92,21 @@ AdamDialog::AdamDialog() :
                                  "0.0", m_font, GG::CLR_SHADOW, GG::CLR_WHITE)),
     m_ok(new GG::Button(GG::X0, GG::Y0, GG::X(50), GG::Y(25),
                         "Ok", m_font, GG::CLR_SHADOW, GG::CLR_WHITE)),
-    m_adam_glue(
-        "sheet clipping_path"
-        "{"
-        "output:"
-        "    sheet_result            <== { path: path, flatness: flatness };"
-        ""
-        "interface:"
-        "    unlink flatness : 0.0   <== (path == 0) ? 0.0 : flatness;"
-        "    path            : 1;"
-        "}")
+    m_adam_modal_dialog("sheet clipping_path"
+                        "{"
+                        "output:"
+                        "    result                  <== { path: path, flatness: flatness };"
+                        ""
+                        "interface:"
+                        "    unlink flatness : 0.0   <== (path == 0) ? 0.0 : flatness;"
+                        "    path            : 1;"
+                        "}",
+                        adobe::dictionary_t(),
+                        adobe::dictionary_t(),
+                        GG::ADAM_DIALOG_DISPLAY_ALWAYS,
+                        this,
+                        boost::bind(&AdamDialog::HandleActions, this, _1, _2),
+                        boost::filesystem::path())
 {
     GG::TextControl* path_label =
         new GG::TextControl(GG::X0, GG::Y0, GG::X(50), GG::Y(25),
@@ -119,20 +125,31 @@ AdamDialog::AdamDialog() :
     layout->Add(m_flatness_edit, 1, 1);
     SetLayout(layout);
 
-    GG::Connect(m_ok->ClickedSignal, &AdamDialog::OkClicked, this);
+    m_adam_modal_dialog.BindCell<double, PathTypes>(*m_path_spin, adobe::name_t("path"));
+    m_adam_modal_dialog.BindCell<double, double>(*m_flatness_edit, adobe::name_t("flatness"));
 
-    m_adam_glue.BindCell<double, PathTypes>(*m_path_spin, adobe::name_t("path"));
-    m_adam_glue.BindCell<double, double>(*m_flatness_edit, adobe::name_t("flatness"));
+    GG::Connect(m_ok->ClickedSignal,
+                boost::bind(boost::ref(m_adam_modal_dialog.DialogActionSignal),
+                            adobe::name_t("ok"),
+                            adobe::any_regular_t()));
 }
 
-adobe::any_regular_t AdamDialog::Result()
-{ return m_adam_glue.Result(); }
+adobe::dictionary_t AdamDialog::Result()
+{ return m_adam_modal_dialog.Result().m_result_values; }
 
 void AdamDialog::Render()
 { FlatRectangle(UpperLeft(), LowerRight(), GG::CLR_SHADOW, GG::CLR_SHADOW, 1); }
 
-void AdamDialog::OkClicked()
-{ m_done = true; }
+bool AdamDialog::Run()
+{
+    if (m_adam_modal_dialog.NeedUI())
+        return Wnd::Run();
+    return true;
+}
+
+bool AdamDialog::HandleActions (adobe::name_t name, const adobe::any_regular_t&)
+{ return name == adobe::static_name_t("ok"); }
+
 
 AdamGGApp::AdamGGApp() : 
     SDLGUI(1024, 768, false, "Adam App")
@@ -250,8 +267,7 @@ void AdamGGApp::Initialize()
     AdamDialog adam_dlg;
     adam_dlg.Run();
 
-    const adobe::any_regular_t& result = adam_dlg.Result();
-    adobe::dictionary_t dictionary = result.cast<adobe::dictionary_t>();
+    adobe::dictionary_t dictionary = adam_dlg.Result();
 
     std::ostringstream results_str;
     results_str << "result:\n"

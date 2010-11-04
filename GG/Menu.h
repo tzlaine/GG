@@ -279,7 +279,7 @@ public:
     virtual void   RClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
 
-    virtual int    Run();
+    virtual bool   Run();
 
     void           SetBorderColor(Clr clr);       ///< sets the color used to render the border of the control
     void           SetInteriorColor(Clr clr);     ///< sets the color used to render the interior of the control

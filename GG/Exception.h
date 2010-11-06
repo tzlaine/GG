@@ -71,7 +71,7 @@ private:
 };
 
 /** Declares a GG exception class.  This should be used to declare GG
-    exceptions at global scope. */
+    exceptions at namespace scope. */
 #define GG_EXCEPTION( name )                                            \
     class GG_API name : public ExceptionBase                            \
     {                                                                   \

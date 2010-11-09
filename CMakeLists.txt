@@ -36,6 +36,8 @@ else ()
     set(BUILD_SINGLE_THREADED ON)
 endif ()
 
+add_definitions(-DADOBE_STD_SERIALIZATION)
+
 set(BOOST_SIGNALS_NAMESPACE "signals" CACHE STRING
     "Specifies alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost).")
 

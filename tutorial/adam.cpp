@@ -57,6 +57,18 @@ std::string read_file (const std::string& filename)
     return retval;
 }
 
+// for testing only
+namespace adobe { namespace version_1 {
+
+std::ostream& operator<<(std::ostream& stream, const type_info_t& x)
+{
+    std::ostream_iterator<char> out(stream);
+    serialize(x, out);
+    return stream;
+}
+
+} }
+
 namespace GG {
 
     struct AnySlotImplBase
@@ -289,30 +301,18 @@ namespace GG {
 
     boost::phoenix::function<make_name_t_> make_name_t;
 
-    struct stack_push_
+    struct array_t_push_back_
     {
-        template <typename Arg1, typename Arg2>
+        template <typename Arg1, typename Arg2, typename Arg3 = void, typename Arg4 = void>
         struct result;
 
-        template <typename Arg2>
-        struct result<adobe::array_t, Arg2>
+        template <typename Arg2, typename Arg3, typename Arg4>
+        struct result<adobe::array_t, Arg2, Arg3, Arg4>
         { typedef void type; };
 
         template <typename Arg2>
         void operator()(adobe::array_t& array, Arg2 arg2) const
             { adobe::push_back(array, arg2); }
-    };
-
-    boost::phoenix::function<stack_push_> stack_push;
-
-    struct stack_push_2_
-    {
-        template <typename Arg1, typename Arg2, typename Arg3>
-        struct result;
-
-        template <typename Arg2, typename Arg3>
-        struct result<adobe::array_t, Arg2, Arg3>
-        { typedef void type; };
 
         template <typename Arg2, typename Arg3>
         void operator()(adobe::array_t& array, Arg2 arg2, Arg3 arg3) const
@@ -320,9 +320,15 @@ namespace GG {
                 adobe::push_back(array, arg2);
                 adobe::push_back(array, arg3);
             }
-    };
 
-    boost::phoenix::function<stack_push_2_> stack_push_2;
+        template <typename Arg2, typename Arg3, typename Arg4>
+        void operator()(adobe::array_t& array, Arg2 arg2, Arg3 arg3, Arg4 arg4) const
+            {
+                adobe::push_back(array, arg2);
+                adobe::push_back(array, arg3);
+                adobe::push_back(array, arg4);
+            }
+    };
 
     template <typename Iter>
     struct expression_parser :
@@ -332,8 +338,7 @@ namespace GG {
 
         expression_parser(adobe::array_t& stack_) :
             expression_parser::base_type(start),
-            stack(stack_),
-            current_stack(&stack)
+            stack(stack_)
         {
             namespace ascii = boost::spirit::ascii;
             namespace phoenix = boost::phoenix;
@@ -343,6 +348,7 @@ namespace GG {
             using phoenix::static_cast_;
             using qi::_1;
             using qi::_a;
+            using qi::_b;
             using qi::_r1;
             using qi::_val;
             using qi::alpha;
@@ -354,191 +360,202 @@ namespace GG {
             using qi::lexeme;
             using qi::lit;
 
-#define PUSH(x) stack_push(*phoenix::ref(current_stack), x)
-#define PUSH2(x, y) stack_push_2(*phoenix::ref(current_stack), x, y)
-#define SET_STACK(x) phoenix::ref(current_stack) = &x
-
-            start = expression(false);
+            start = expression(&stack);
 
             expression =
-                or_expression
+                or_expression(_r1)
              >> -(
-                   "?"
-                 > expression(true)[PUSH(_1)]
-                 > ":"
-                 > expression(true)[PUSH(_1)]
-             )[PUSH(adobe::name_t(adobe::ifelse_k))];
+                    "?"
+                  > expression(&_a)
+                  > ":"
+                  > expression(&_b)
+                 )[push(*_r1, _a, _b, adobe::ifelse_k)];
 
             or_expression =
-                and_expression(false)
-             >> *(
-                   lit("||")[_a = adobe::name_t(adobe::or_k)]
-                 > and_expression(true)[PUSH(_1)]
-             )[PUSH(_a)];
+                and_expression(_r1)
+             >> *( "||" > and_expression(&_a) )[push(*_r1, _a, adobe::or_k)];
 
             and_expression =
-                eps[if_(_r1)[SET_STACK(_val)]]
-             >> equality_expression(false)
-             >> *(
-                   lit("&&")[_a = adobe::name_t(adobe::and_k)]
-                 > equality_expression(true)[PUSH(_1)]
-             )[PUSH(_a)]
-             >> eps[if_(_r1)[SET_STACK(stack)]];
+                equality_expression(_r1)
+             >> *( "&&" > equality_expression(&_a) )[push(*_r1, _a, adobe::and_k)];
 
             equality_expression =
-                eps[if_(_r1)[SET_STACK(_val)]]
-             >> relational_expression >> *( eq_op[_a = _1] > relational_expression )[PUSH(_a)]
-             >> eps[if_(_r1)[SET_STACK(stack)]];
+                relational_expression(_r1)
+             >> *( eq_op[_a = _1] > relational_expression(_r1) )[push(*_r1, _a)];
 
             relational_expression =
-                additive_expression >> *( rel_op[_a = _1] > additive_expression )[PUSH(_a)];
+                additive_expression(_r1)
+             >> *( rel_op[_a = _1] > additive_expression(_r1) )[push(*_r1, _a)];
 
             additive_expression =
-                multiplicative_expression
-             >> *( add_op[_a = _1] > multiplicative_expression )[PUSH(_a)];
+                multiplicative_expression(_r1)
+             >> *( add_op[_a = _1] > multiplicative_expression(_r1) )[push(*_r1, _a)];
 
             multiplicative_expression =
-                unary_expression
-             >> *( mul_op[_a = _1] > unary_expression )[PUSH(_a)];
+                unary_expression(_r1)
+             >> *( mul_op[_a = _1] > unary_expression(_r1) )[push(*_r1, _a)];
 
-            unary_expression = postfix_expression |
-                (
-                    (
-                        "+"
-                      | lit("-")[_a = adobe::name_t(adobe::unary_negate_k)]
-                      | lit("!")[_a = adobe::name_t(adobe::not_k)]
-                    )
-                  > unary_expression
-                )[PUSH(_a)];
+            unary_expression =
+                postfix_expression(_r1)
+              | ( unary_op[_a = _1] > unary_expression(_r1) )[if_(_a)[push(*_r1, _a)]];
+
             // omitting unary_operator
 
             postfix_expression =
-                primary_expression
-             >> *( ("[" > expression(false) > "]") | ("." > identifier) )[
-                 PUSH(adobe::index_k)
+                primary_expression(_r1)
+             >> *( ("[" > expression(_r1) > "]") | ("." > identifier(_r1)) )[
+                 push(*_r1, adobe::index_k)
              ];
 
             primary_expression =
-                ( "(" >> expression(false) > ")" )
-              | variable_or_function
-              | name
-              | number
-              | boolean
-              | string
-              | empty
-              | array
-              | dictionary;
+                ( "(" >> expression(_r1) > ")" )
+              | name(_r1)
+              | number(_r1)
+              | boolean(_r1)
+              | string(_r1)
+              | empty(_r1)
+              | array(_r1)
+              | dictionary(_r1)
+              | variable_or_function(_r1);
 
-            variable_or_function = function | variable;
+            variable_or_function = function(_r1) | variable(_r1);
 
-            array = "[" >> (argument_list | eps[PUSH(adobe::array_t())]) >> "]";
-            dictionary = "{" >> (named_argument_list | eps[PUSH(adobe::dictionary_t())]) >> "}";
+            array = "[" >> (argument_list(_r1) | eps[push(*_r1, adobe::array_t())]) > "]";
 
-            argument_expression_list = argument_list | named_argument_list;
+            dictionary = "{" >> (named_argument_list(_r1) | eps[push(*_r1, adobe::dictionary_t())]) > "}";
+
+            argument_expression_list = named_argument_list(_r1) | argument_list(_r1);
 
             argument_list =
-                (expression(false)[_a = 1] >> *( "," > expression(false)[++_a] ))[
-                    PUSH2(static_cast_<double>(_a), adobe::array_k)
+                (expression(_r1)[_a = 1] >> *( "," > expression(_r1)[++_a] ))[
+                    push(*_r1, static_cast_<double>(_a), adobe::array_k)
                 ];
-            named_argument_list =
-                (named_argument[_a = 1] >> *( "," > named_argument[++_a] ))[
-                    PUSH2(static_cast_<double>(_a), adobe::dictionary_k)
-                ];
-            named_argument = identifier >> ":" > expression(false);
 
-            name = "@" >> identifier; // was: "@" >> (identifier | keyword);
-            boolean = bool_[PUSH(_1)];
+            named_argument_list =
+                (named_argument(_r1)[_a = 1] >> *( "," > named_argument(_r1)[++_a] ))[
+                    push(*_r1, static_cast_<double>(_a), adobe::dictionary_k)
+                ];
+
+            named_argument =
+                identifier_string[_a = make_name_t(_1)] >> lit(":")[push(*_r1, _a)] > expression(_r1);
+
+            name = "@" >> identifier(_r1); // was: "@" >> (identifier | keyword);
+
+            boolean = bool_[push(*_r1, _1)];
+
 
             // lexical grammar
+
             // omitting simple_token
+
             // omitting compound_token
-            string = (quoted_string[_a = _1] >> *(quoted_string[_a += _1]))[PUSH(_a)];
+
+            string = (quoted_string[_a = _1] >> *(quoted_string[_a += _1]))[push(*_r1, _a)];
+
             lead_comment %= ("/*" >> lexeme[*char_ - "*/"] >> "*/");
+
             trail_comment %= ("//" >> lexeme[*char_ >> eol]);
-            identifier = identifier_string[PUSH(make_name_t(_1))];
-            number = double_[PUSH(_1)];
+
+            identifier = identifier_string[push(*_r1, make_name_t(_1))];
+
+            number = !lit("-") >> !lit("+") >> double_[push(*_r1, _1)];
 
             quoted_string %=
                 lexeme['"' >> *(char_ - '"') >> '"']
               | lexeme['\'' >> *(char_ - '\'') >> '\''];
+
             // omitting digits
+
 
             // convenience rules
             identifier_string %= (alpha | "_") >> *(alpha | "_" | digit);
-            empty = lit("empty")[_val = adobe::any_regular_t()];
+
+            empty = lit("empty")[push(*_r1, adobe::any_regular_t())];
+
             function =
                 (identifier_string[_a = make_name_t(_1)] >>
                  (
-                     "(" >> (argument_expression_list | eps[PUSH(adobe::array_t())]) > ")"
+                     "(" >> (argument_expression_list(_r1) | eps[push(*_r1, adobe::array_t())]) > ")"
                  )
-                )[PUSH2(_a, adobe::function_k)];
-            variable = identifier[PUSH(adobe::variable_k)];
+                )[push(*_r1, _a, adobe::function_k)];
 
-#undef PUSH
-#undef PUSH2
-#undef SET_STACK
+            variable = identifier(_r1)[push(*_r1, adobe::variable_k)];
         }
 
         typedef boost::spirit::qi::rule<Iter, std::string(), space_type> string_rule;
-        typedef boost::spirit::qi::rule<Iter, adobe::any_regular_t(), space_type> any_regular_t_rule;
-        typedef boost::spirit::qi::rule<Iter, void(), space_type> void_rule;
         typedef boost::spirit::qi::rule<
             Iter,
-            void(),
+            void(adobe::array_t*),
             boost::spirit::qi::locals<adobe::name_t>,
             space_type
         > local_name_rule;
         typedef boost::spirit::qi::rule<
             Iter,
-            void(),
+            void(adobe::array_t*),
             boost::spirit::qi::locals<std::size_t>,
             space_type
-        > local_size_t_rule;
+        > local_size_rule;
         typedef boost::spirit::qi::rule<
             Iter,
-            adobe::array_t(bool),
-            boost::spirit::qi::locals<adobe::name_t>,
+            void(adobe::array_t*),
+            boost::spirit::qi::locals<adobe::array_t>,
             space_type
-        > optional_local_stack_rule;
+        > local_array_rule;
+        typedef boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> no_locals_rule;
 
-        void_rule start;
+        boost::spirit::qi::rule<Iter, void(), space_type> start;
 
-        optional_local_stack_rule expression;
-        local_name_rule or_expression;
-        optional_local_stack_rule and_expression;
-        optional_local_stack_rule equality_expression;
+        // expression grammar
+        boost::spirit::qi::rule<
+            Iter,
+            void(adobe::array_t*),
+            boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
+            space_type
+        > expression;
+
+        local_array_rule or_expression;
+        local_array_rule and_expression;
+        local_name_rule equality_expression;
         local_name_rule relational_expression;
         local_name_rule additive_expression;
         local_name_rule multiplicative_expression;
         local_name_rule unary_expression;
-        void_rule postfix_expression;
-        void_rule primary_expression;
-        void_rule variable_or_function;
-        void_rule array;
-        void_rule dictionary;
-        void_rule argument_expression_list;
-        local_size_t_rule argument_list;
-        local_size_t_rule named_argument_list;
-        void_rule named_argument;
-        void_rule name;
-        void_rule boolean;
+        no_locals_rule postfix_expression;
+        no_locals_rule primary_expression;
+        no_locals_rule variable_or_function;
+        no_locals_rule array;
+        no_locals_rule dictionary;
+        no_locals_rule argument_expression_list;
+        local_size_rule argument_list;
+        local_size_rule named_argument_list;
+        local_name_rule named_argument;
+        no_locals_rule name;
+        no_locals_rule boolean;
 
         // lexical grammar
-        boost::spirit::qi::rule<Iter, void(), boost::spirit::qi::locals<std::string>, space_type> string;
+        boost::spirit::qi::rule<
+            Iter,
+            void(adobe::array_t*),
+            boost::spirit::qi::locals<std::string>,
+            space_type
+        > string;
         string_rule lead_comment;
         string_rule trail_comment;
-        void_rule identifier;
-        void_rule number;
+        no_locals_rule identifier;
+        no_locals_rule number;
         boost::spirit::qi::rule<Iter, std::string(), space_type> quoted_string;
 
         // convenience rules
         string_rule identifier_string;
-        any_regular_t_rule empty;
+        boost::spirit::qi::rule<
+            Iter,
+            void(adobe::array_t*),
+            space_type
+        > empty;
         local_name_rule function;
-        void_rule variable;
+        no_locals_rule variable;
 
         adobe::array_t& stack;
-        adobe::array_t* current_stack;
 
         struct equality_operator_table :
             public boost::spirit::qi::symbols<char, adobe::name_t>
@@ -582,9 +599,80 @@ namespace GG {
                        ("%", adobe::modulus_k);
                 }
         } mul_op;
+
+        struct unary_operator_table :
+            public boost::spirit::qi::symbols<char, adobe::name_t>
+        {
+            unary_operator_table()
+                {
+                    add("+", adobe::name_t())
+                       ("-", adobe::unary_negate_k)
+                       ("!", adobe::not_k);
+                }
+        } unary_op;
+
+        boost::phoenix::function<array_t_push_back_> push;
     };
 
-    void TestAdamParser(const expression_parser<std::string::const_iterator>& expression_p,
+    void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
+    void verbose_dump(const adobe::dictionary_t& array, std::size_t indent = 0);
+
+    void verbose_dump(const adobe::array_t& array, std::size_t indent)
+    {
+        if (array.empty()) {
+            std::cout << std::string(4 * indent, ' ') << "[]\n";
+            return;
+        }
+
+        std::cout << std::string(4 * indent, ' ') << "[\n";
+        ++indent;
+        for (adobe::array_t::const_iterator it = array.begin(); it != array.end(); ++it)
+        {
+            const adobe::any_regular_t& any = *it;
+            if (any.type_info() == adobe::type_info<adobe::array_t>()) {
+                verbose_dump(any.cast<adobe::array_t>(), indent);
+            } else if (any.type_info() == adobe::type_info<adobe::dictionary_t>()) {
+                verbose_dump(any.cast<adobe::dictionary_t>(), indent);
+            } else {
+                std::cout << std::string(4 * indent, ' ')
+                          << "type: " << any.type_info() << " "
+                          << "value: " << any << "\n";
+            }
+        }
+        --indent;
+        std::cout << std::string(4 * indent, ' ') << "]\n";
+    }
+
+    void verbose_dump(const adobe::dictionary_t& dictionary, std::size_t indent)
+    {
+        if (dictionary.empty()) {
+            std::cout << std::string(4 * indent, ' ') << "{}\n";
+            return;
+        }
+
+        std::cout << std::string(4 * indent, ' ') << "{\n";
+        ++indent;
+        for (adobe::dictionary_t::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
+        {
+            const adobe::pair<adobe::name_t, adobe::any_regular_t>& pair = *it;
+            if (pair.second.type_info() == adobe::type_info<adobe::array_t>()) {
+                std::cout << std::string(4 * indent, ' ') << pair.first << ",\n";
+                verbose_dump(pair.second.cast<adobe::array_t>(), indent);
+            } else if (pair.second.type_info() == adobe::type_info<adobe::dictionary_t>()) {
+                std::cout << std::string(4 * indent, ' ') << pair.first << ",\n";
+                verbose_dump(pair.second.cast<adobe::dictionary_t>(), indent);
+            } else {
+                std::cout << std::string(4 * indent, ' ')
+                          << "(" << pair.first << ", "
+                          << "type: " << pair.second.type_info() << " "
+                          << "value: " << pair.second << ")\n";
+            }
+        }
+        --indent;
+        std::cout << std::string(4 * indent, ' ') << "}\n";
+    }
+
+    bool TestAdamParser(const expression_parser<std::string::const_iterator>& expression_p,
                         adobe::array_t& new_parsed_expression,
                         const std::string& expression)
     {
@@ -595,9 +683,20 @@ namespace GG {
         using boost::spirit::qi::phrase_parse;
         phrase_parse(expression.begin(), expression.end(), expression_p, space);
         std::cout << "new:      " << new_parsed_expression << "\n";
-        std::cout << (new_parsed_expression == original_parsed_expression ? "PASS" : "FAIL") << "\n";
+        bool pass = new_parsed_expression == original_parsed_expression;
+        std::cout << (pass ? "PASS" : "FAIL") << "\n";
+
+        if (!pass) {
+            std::cout << "original (verbose):\n";
+            verbose_dump(original_parsed_expression);
+            std::cout << "new (verbose):\n";
+            verbose_dump(new_parsed_expression);
+        }
+
         std::cout << "\n";
         new_parsed_expression.clear();
+
+        return pass;
     }
 
     bool TestAdamParser()
@@ -611,10 +710,18 @@ namespace GG {
         using boost::algorithm::is_any_of;
         split(expressions, expressions_file_contents, is_any_of("\n"));
 
+        std::size_t passes = 0;
+        std::size_t failures = 0;
         for (std::size_t i = 0; i < expressions.size(); ++i) {
-            if (!expressions[i].empty())
-                TestAdamParser(expression_p, stack, expressions[i]);
+            if (!expressions[i].empty()) {
+                if (TestAdamParser(expression_p, stack, expressions[i]))
+                    ++passes;
+                else
+                    ++failures;
+            }
         }
+
+        std::cout << "Summary: " << passes << " passed, " << failures << " failed\n";
 
         exit(0);
 

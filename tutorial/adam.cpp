@@ -37,8 +37,9 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/implementation/token.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/home/phoenix/object/static_cast.hpp>
+#include <boost/spirit/home/phoenix/object.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 
 #include <boost/algorithm/string/split.hpp> // for testing only
@@ -336,17 +337,21 @@ namespace GG {
     {
         typedef boost::spirit::ascii::space_type space_type;
 
-        expression_parser(const std::vector<adobe::name_t>& keywords, adobe::array_t& stack_) :
-            expression_parser::base_type(start, "expression"),
-            stack(stack_)
+        expression_parser(const std::vector<adobe::name_t>& keywords, adobe::array_t& stack) :
+            expression_parser::base_type(start, "expression")
         {
             namespace ascii = boost::spirit::ascii;
             namespace phoenix = boost::phoenix;
             namespace qi = boost::spirit::qi;
             using ascii::char_;
+            using phoenix::construct;
             using phoenix::if_;
             using phoenix::static_cast_;
+            using phoenix::val;
             using qi::_1;
+            using qi::_2;
+            using qi::_3;
+            using qi::_4;
             using qi::_a;
             using qi::_b;
             using qi::_r1;
@@ -497,6 +502,11 @@ namespace GG {
                 keyword_string.add(keywords[i].c_str(), keywords[i]);
             }
 
+            eq_op.add
+                ("==", adobe::equal_k)
+                ("!=", adobe::not_equal_k)
+                ;
+
             rel_op.add
                 ("<",  adobe::less_k)
                 ("<=", adobe::less_equal_k)
@@ -555,6 +565,14 @@ namespace GG {
             NAME(function);
             NAME(variable);
 #undef NAME
+
+            qi::on_error<qi::fail>(
+                start,
+                std::cout
+                    << val("Parse error: expecting ") << _4
+                    << val(" here: \"") << construct<std::string>(_3, _2) << val("\"")
+                    << std::endl
+            );
         }
 
         typedef boost::spirit::qi::rule<Iter, std::string(), space_type> string_rule;
@@ -638,8 +656,6 @@ namespace GG {
         boost::spirit::qi::symbols<char, adobe::name_t> unary_op;
 
         boost::phoenix::function<array_t_push_back_> push;
-
-        adobe::array_t& stack;
     };
 
     void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);

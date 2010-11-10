@@ -336,8 +336,8 @@ namespace GG {
     {
         typedef boost::spirit::ascii::space_type space_type;
 
-        expression_parser(adobe::array_t& stack_) :
-            expression_parser::base_type(start),
+        expression_parser(const std::vector<adobe::name_t>& keywords, adobe::array_t& stack_) :
+            expression_parser::base_type(start, "expression"),
             stack(stack_)
         {
             namespace ascii = boost::spirit::ascii;
@@ -439,7 +439,7 @@ namespace GG {
             named_argument =
                 identifier_string[_a = make_name_t(_1)] >> lit(":")[push(*_r1, _a)] > expression(_r1);
 
-            name = "@" >> identifier(_r1); // was: "@" >> (identifier | keyword);
+            name = "@" > ( identifier(_r1) | keyword(_r1) );
 
             boolean = bool_[push(*_r1, _1)];
 
@@ -456,9 +456,11 @@ namespace GG {
 
             trail_comment %= ("//" >> lexeme[*char_ >> eol]);
 
-            identifier = identifier_string[push(*_r1, make_name_t(_1))];
+            identifier = (!keyword_string >> identifier_string)[push(*_r1, make_name_t(_1))];
 
-            number = !lit("-") >> !lit("+") >> double_[push(*_r1, _1)];
+            keyword = keyword_string[push(*_r1, _1)];
+
+            number = !(lit("-") | "+") >> double_[push(*_r1, _1)];
 
             quoted_string %=
                 lexeme['"' >> *(char_ - '"') >> '"']
@@ -480,6 +482,79 @@ namespace GG {
                 )[push(*_r1, _a, adobe::function_k)];
 
             variable = identifier(_r1)[push(*_r1, adobe::variable_k)];
+
+
+            // symbol tables
+
+            keyword_string.add
+                ("empty", adobe::name_t("empty"))
+                ("true", adobe::name_t("true"))
+                ("false", adobe::name_t("false"))
+                ;
+
+            const std::size_t num_keywords = keywords.size();
+            for (std::size_t i = 0; i < num_keywords; ++i) {
+                keyword_string.add(keywords[i].c_str(), keywords[i]);
+            }
+
+            rel_op.add
+                ("<",  adobe::less_k)
+                ("<=", adobe::less_equal_k)
+                (">",  adobe::greater_k)
+                (">=", adobe::greater_equal_k)
+                ;
+
+            add_op.add
+                ("+", adobe::add_k)
+                ("-", adobe::subtract_k)
+                ;
+
+            mul_op.add
+                ("*", adobe::multiply_k)
+                ("/", adobe::divide_k)
+                ("%", adobe::modulus_k)
+                ;
+
+            unary_op.add
+                ("+", adobe::name_t())
+                ("-", adobe::unary_negate_k)
+                ("!", adobe::not_k)
+                ;
+
+            // define names for rules, to be used in error reporting
+#define NAME(x) x.name(#x)
+            NAME(start);
+            NAME(expression);
+            NAME(or_expression);
+            NAME(and_expression);
+            NAME(equality_expression);
+            NAME(relational_expression);
+            NAME(additive_expression);
+            NAME(multiplicative_expression);
+            NAME(unary_expression);
+            NAME(postfix_expression);
+            NAME(primary_expression);
+            NAME(variable_or_function);
+            NAME(array);
+            NAME(dictionary);
+            NAME(argument_expression_list);
+            NAME(argument_list);
+            NAME(named_argument_list);
+            NAME(named_argument);
+            NAME(name);
+            NAME(boolean);
+            NAME(string);
+            NAME(lead_comment);
+            NAME(trail_comment);
+            NAME(identifier);
+            NAME(keyword);
+            NAME(number);
+            NAME(quoted_string);
+            NAME(identifier_string);
+            NAME(empty);
+            NAME(function);
+            NAME(variable);
+#undef NAME
         }
 
         typedef boost::spirit::qi::rule<Iter, std::string(), space_type> string_rule;
@@ -542,6 +617,7 @@ namespace GG {
         string_rule lead_comment;
         string_rule trail_comment;
         no_locals_rule identifier;
+        no_locals_rule keyword;
         no_locals_rule number;
         boost::spirit::qi::rule<Iter, std::string(), space_type> quoted_string;
 
@@ -554,64 +630,16 @@ namespace GG {
         > empty;
         local_name_rule function;
         no_locals_rule variable;
-
-        adobe::array_t& stack;
-
-        struct equality_operator_table :
-            public boost::spirit::qi::symbols<char, adobe::name_t>
-        {
-            equality_operator_table()
-                {
-                    add("==", adobe::equal_k)
-                       ("!=", adobe::not_equal_k);
-                }
-        } eq_op;
-
-        struct relational_operator_table :
-            public boost::spirit::qi::symbols<char, adobe::name_t>
-        {
-            relational_operator_table()
-                {
-                    add("<",  adobe::less_k)
-                       ("<=", adobe::less_equal_k)
-                       (">",  adobe::greater_k)
-                       (">=", adobe::greater_equal_k);
-                }
-        } rel_op;
-
-        struct additive_operator_table :
-            public boost::spirit::qi::symbols<char, adobe::name_t>
-        {
-            additive_operator_table()
-                {
-                    add("+", adobe::add_k)
-                       ("-", adobe::subtract_k);
-                }
-        } add_op;
-
-        struct multiplicative_operator_table :
-            public boost::spirit::qi::symbols<char, adobe::name_t>
-        {
-            multiplicative_operator_table()
-                {
-                    add("*", adobe::multiply_k)
-                       ("/", adobe::divide_k)
-                       ("%", adobe::modulus_k);
-                }
-        } mul_op;
-
-        struct unary_operator_table :
-            public boost::spirit::qi::symbols<char, adobe::name_t>
-        {
-            unary_operator_table()
-                {
-                    add("+", adobe::name_t())
-                       ("-", adobe::unary_negate_k)
-                       ("!", adobe::not_k);
-                }
-        } unary_op;
+        boost::spirit::qi::symbols<char, adobe::name_t> keyword_string;
+        boost::spirit::qi::symbols<char, adobe::name_t> eq_op;
+        boost::spirit::qi::symbols<char, adobe::name_t> rel_op;
+        boost::spirit::qi::symbols<char, adobe::name_t> add_op;
+        boost::spirit::qi::symbols<char, adobe::name_t> mul_op;
+        boost::spirit::qi::symbols<char, adobe::name_t> unary_op;
 
         boost::phoenix::function<array_t_push_back_> push;
+
+        adobe::array_t& stack;
     };
 
     void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
@@ -672,18 +700,33 @@ namespace GG {
         std::cout << std::string(4 * indent, ' ') << "}\n";
     }
 
-    bool TestAdamParser(const expression_parser<std::string::const_iterator>& expression_p,
-                        adobe::array_t& new_parsed_expression,
-                        const std::string& expression)
+    bool TestExpressionParser(const expression_parser<std::string::const_iterator>& expression_p,
+                              adobe::array_t& new_parsed_expression,
+                              const std::string& expression)
     {
         std::cout << "expression: \"" << expression << "\"\n";
-        adobe::array_t original_parsed_expression = adobe::parse_adam_expression(expression);
-        std::cout << "original: " << original_parsed_expression << "\n";
+        adobe::array_t original_parsed_expression;
+        bool original_parse_failed = false;
+        try {
+            original_parsed_expression = adobe::parse_adam_expression(expression);
+        } catch (const adobe::stream_error_t&) {
+            original_parse_failed = true;
+        }
+        if (original_parse_failed)
+            std::cout << "original: <parse failure>\n";
+        else
+            std::cout << "original: " << original_parsed_expression << "\n";
         using boost::spirit::ascii::space;
         using boost::spirit::qi::phrase_parse;
-        phrase_parse(expression.begin(), expression.end(), expression_p, space);
-        std::cout << "new:      " << new_parsed_expression << "\n";
-        bool pass = new_parsed_expression == original_parsed_expression;
+        bool new_parse_failed =
+            !phrase_parse(expression.begin(), expression.end(), expression_p, space);
+        if (new_parse_failed)
+            std::cout << "new:      <parse failure>\n";
+        else
+            std::cout << "new:      " << new_parsed_expression << "\n";
+        bool pass =
+            original_parse_failed && new_parse_failed ||
+            new_parsed_expression == original_parsed_expression;
         std::cout << (pass ? "PASS" : "FAIL") << "\n";
 
         if (!pass) {
@@ -699,10 +742,21 @@ namespace GG {
         return pass;
     }
 
-    bool TestAdamParser()
+    bool TestExpressionParser()
     {
         adobe::array_t stack;
-        expression_parser<std::string::const_iterator> expression_p(stack);
+        std::vector<adobe::name_t> keywords;
+        keywords.push_back(adobe::name_t("input"));
+        keywords.push_back(adobe::name_t("output"));
+        keywords.push_back(adobe::name_t("interface"));
+        keywords.push_back(adobe::name_t("logic"));
+        keywords.push_back(adobe::name_t("constant"));
+        keywords.push_back(adobe::name_t("invariant"));
+        keywords.push_back(adobe::name_t("sheet"));
+        keywords.push_back(adobe::name_t("unlink"));
+        keywords.push_back(adobe::name_t("when"));
+        keywords.push_back(adobe::name_t("relate"));
+        expression_parser<std::string::const_iterator> expression_p(keywords, stack);
 
         std::string expressions_file_contents = read_file("test_expressions");
         std::vector<std::string> expressions;
@@ -714,7 +768,7 @@ namespace GG {
         std::size_t failures = 0;
         for (std::size_t i = 0; i < expressions.size(); ++i) {
             if (!expressions[i].empty()) {
-                if (TestAdamParser(expression_p, stack, expressions[i]))
+                if (TestExpressionParser(expression_p, stack, expressions[i]))
                     ++passes;
                 else
                     ++failures;
@@ -728,7 +782,7 @@ namespace GG {
         return false;
     }
 
-    bool dummy2 = TestAdamParser();
+    bool dummy2 = TestExpressionParser();
 
 }
 

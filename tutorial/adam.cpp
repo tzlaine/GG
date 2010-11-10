@@ -331,6 +331,36 @@ namespace GG {
             }
     };
 
+    struct report_error_
+    {
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+        struct result
+        { typedef void type; };
+
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+        void operator()(Arg1 _1, Arg2 _2, Arg3 _3, Arg4 _4) const
+            {
+                if (_3 == _2) {
+                    std::cout
+                        << "Parse error: expected "
+                        << _4
+                        << " before end of expression inupt."
+                        << std::endl;
+                } else {
+                    std::cout
+                        << "Parse error: expected "
+                        << _4
+                        << " here:"
+                        << "\n  "
+                        << std::string(_1, _2)
+                        << "\n  "
+                        << std::string(std::distance(_1, _3), '~')
+                        << '^'
+                        << std::endl;
+                }
+            }
+    };
+
     template <typename Iter>
     struct expression_parser :
         boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
@@ -566,13 +596,7 @@ namespace GG {
             NAME(variable);
 #undef NAME
 
-            qi::on_error<qi::fail>(
-                start,
-                std::cout
-                    << val("Parse error: expecting ") << _4
-                    << val(" here: \"") << construct<std::string>(_3, _2) << val("\"")
-                    << std::endl
-            );
+            qi::on_error<qi::fail>(start, report_error(_1, _2, _3, _4));
         }
 
         typedef boost::spirit::qi::rule<Iter, std::string(), space_type> string_rule;
@@ -656,6 +680,7 @@ namespace GG {
         boost::spirit::qi::symbols<char, adobe::name_t> unary_op;
 
         boost::phoenix::function<array_t_push_back_> push;
+        boost::phoenix::function<report_error_> report_error;
     };
 
     void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);

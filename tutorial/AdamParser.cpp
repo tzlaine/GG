@@ -23,8 +23,6 @@ namespace {
             { return adobe::name_t(arg1.c_str()); }
     };
 
-    boost::phoenix::function<make_name_t_> make_name_t;
-
     struct array_t_push_back_
     {
         template <typename Arg1, typename Arg2, typename Arg3 = void, typename Arg4 = void>
@@ -158,7 +156,7 @@ namespace {
 
             postfix_expression =
                 primary_expression(_r1)
-             >> *( ("[" > expression(_r1) > "]") | ("." > identifier(_r1)) )[
+                >> *( ("[" > expression(_r1) > "]") | ("." > identifier[push(*_r1, _1)]) )[
                  push(*_r1, adobe::index_k)
              ];
 
@@ -192,9 +190,9 @@ namespace {
                 ];
 
             named_argument =
-                identifier_string[_a = make_name_t(_1)] >> lit(":")[push(*_r1, _a)] > expression(_r1);
+                identifier[_a = _1] >> lit(":")[push(*_r1, _a)] > expression(_r1);
 
-            name = "@" > ( identifier(_r1) | keyword(_r1) );
+            name = "@" > ( identifier[push(*_r1, _1)] | keyword(_r1) );
 
             boolean = bool_[push(*_r1, _1)];
 
@@ -211,7 +209,7 @@ namespace {
 
             trail_comment %= ("//" >> lexeme[*char_ >> eol]);
 
-            identifier = (!keyword_string >> identifier_string)[push(*_r1, make_name_t(_1))];
+            identifier = !keyword_string >> identifier_string[_val = make_name_t(_1)];
 
             keyword = keyword_string[push(*_r1, _1)];
 
@@ -230,13 +228,13 @@ namespace {
             empty = lit("empty")[push(*_r1, adobe::any_regular_t())];
 
             function =
-                (identifier_string[_a = make_name_t(_1)] >>
+                (identifier[_a = _1] >>
                  (
                      "(" >> (argument_expression_list(_r1) | eps[push(*_r1, adobe::array_t())]) > ")"
                  )
                 )[push(*_r1, _a, adobe::function_k)];
 
-            variable = identifier(_r1)[push(*_r1, adobe::variable_k)];
+            variable = identifier[push(*_r1, _1, adobe::variable_k)];
 
 
             // symbol tables
@@ -319,6 +317,7 @@ namespace {
         }
 
         typedef boost::spirit::qi::rule<Iter, std::string(), space_type> string_rule;
+        typedef boost::spirit::qi::rule<Iter, adobe::name_t(), space_type> name_rule;
         typedef boost::spirit::qi::rule<
             Iter,
             void(adobe::array_t*),
@@ -375,7 +374,7 @@ namespace {
         > string;
         string_rule lead_comment;
         string_rule trail_comment;
-        no_locals_rule identifier;
+        name_rule identifier;
         no_locals_rule keyword;
         no_locals_rule number;
         boost::spirit::qi::rule<Iter, std::string(), space_type> quoted_string;
@@ -396,6 +395,7 @@ namespace {
         boost::spirit::qi::symbols<char, adobe::name_t> mul_op;
         boost::spirit::qi::symbols<char, adobe::name_t> unary_op;
 
+        boost::phoenix::function<make_name_t_> make_name_t;
         boost::phoenix::function<array_t_push_back_> push;
         boost::phoenix::function<report_error_> report_error;
     };

@@ -30,6 +30,7 @@
 
 #include <GG/Base.h>
 #include <GG/adobe/array_fwd.hpp>
+#include <GG/adobe/name_fwd.hpp>
 
 #include <boost/spirit/home/qi/char/char_class.hpp>
 #include <boost/spirit/home/qi/nonterminal/grammar.hpp>
@@ -53,7 +54,7 @@ GG_API const AdamExpressionParserRule& AdamExpressionParser();
 /** The type of Spirit 2 parser returned by AdamIdentifierParser(). */
 typedef boost::spirit::qi::rule<
     std::string::const_iterator,
-    void(adobe::array_t*),
+    adobe::name_t(),
     boost::spirit::ascii::space_type
 > AdamIdentifierParserRule;
 

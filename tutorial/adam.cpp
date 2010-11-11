@@ -508,6 +508,7 @@ namespace GG {
             using qi::lexeme;
             using qi::lit;
 
+            // note that the lead comment, sheet name, and trail comment are currently all ignored
             sheet_specifier =
                 -lead_comment >> "sheet" > identifier > "{" >> *qualified_cell_decl > "}" >> -trail_comment;
 
@@ -520,31 +521,31 @@ namespace GG {
               | invariant_set_decl;
 
             interface_set_decl =
-                "interface" > ":" > *( -lead_comment >> interface_cell_decl );
+                "interface" > ":" > *( -lead_comment[_a = _1] >> interface_cell_decl(_a) );
 
             input_set_decl =
-                "input" > ":" > *( -lead_comment >> input_cell_decl );
+                "input" > ":" > *( -lead_comment[_a = _1] >> input_cell_decl(_a) );
 
             output_set_decl =
-                "output" > ":" > *( -lead_comment >> output_cell_decl );
+                "output" > ":" > *( -lead_comment[_a = _1] >> output_cell_decl(_a) );
 
             constant_set_decl =
-                "constant" > ":" > *( -lead_comment >> constant_cell_decl );
+                "constant" > ":" > *( -lead_comment[_a = _1] >> constant_cell_decl(_a) );
 
             logic_set_decl =
-                "logic" > ":" > *( -lead_comment >> logic_cell_decl );
+                "logic" > ":" > *( -lead_comment[_a = _1] >> logic_cell_decl(_a) );
 
             invariant_set_decl =
-                "invariant" > ":" > *( -lead_comment >> invariant_cell_decl );
+                "invariant" > ":" > *( -lead_comment[_a = _1] >> invariant_cell_decl(_a) );
 
             interface_cell_decl=
-                -lit("unlink") >> identifier >> -initializer >> -define_expression > end_statement;
+                -lit("unlink") >> identifier >> -initializer(&_b) >> -define_expression > end_statement;
 
-            input_cell_decl = identifier >> -initializer > end_statement;
+            input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement; // TODO: add cell
 
             output_cell_decl = named_decl;
 
-            constant_cell_decl = identifier > initializer > end_statement;
+            constant_cell_decl = identifier[_a = _1] > initializer(&_b) > end_statement; // TODO: add cell
 
             logic_cell_decl = named_decl | relate_decl;
 
@@ -563,7 +564,7 @@ namespace GG {
 
             named_decl = identifier > define_expression > end_statement;
 
-            initializer = ":" > expression;
+            initializer = ":" > expression(_r1);
 
             define_expression = "<==" > expression;
 
@@ -575,12 +576,21 @@ namespace GG {
 #define NAME(x) x.name(#x)
 #undef NAME
 
-            qi::on_error<qi::fail>(start, report_error(_1, _2, _3, _4));
+            qi::on_error<qi::fail>(sheet_specifier, report_error(_1, _2, _3, _4));
         }
 
         typedef boost::spirit::qi::rule<Iter, void(), space_type> rule;
-
-        boost::spirit::qi::rule<Iter, void(), space_type> start;
+        typedef boost::spirit::qi::rule<
+            Iter,
+            void(const std::string&),
+            boost::spirit::qi::locals<
+                adobe::name_t,
+                adobe::array_t,
+                adobe::line_position_t, // currently unfilled
+                std::string
+            >,
+            space_type
+        > cell_decl_rule;
 
         // expression parser rules
         const AdamExpressionParserRule& expression;
@@ -597,16 +607,16 @@ namespace GG {
         rule constant_set_decl;
         rule logic_set_decl;
         rule invariant_set_decl;
-        rule interface_cell_decl;
-        rule input_cell_decl;
-        rule output_cell_decl;
-        rule constant_cell_decl;
-        rule logic_cell_decl;
-        rule invariant_cell_decl;
+        cell_decl_rule interface_cell_decl;
+        cell_decl_rule input_cell_decl;
+        cell_decl_rule output_cell_decl;
+        cell_decl_rule constant_cell_decl;
+        cell_decl_rule logic_cell_decl;
+        cell_decl_rule invariant_cell_decl;
         rule relate_decl;
         rule relate_expression;
         rule named_decl;
-        rule initializer;
+        boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> initializer;
         rule define_expression;
         rule conditional;
         rule end_statement;

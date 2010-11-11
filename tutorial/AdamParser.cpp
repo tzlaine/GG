@@ -85,15 +85,12 @@ namespace {
     };
 
     template <typename Iter>
-    struct expression_parser :
-        boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
+    struct expression_parser_rules
     {
         typedef boost::spirit::ascii::space_type space_type;
 
-        expression_parser(const adobe::name_t* first_keyword,
-                          const adobe::name_t* last_keyword,
-                          adobe::array_t& stack) :
-            expression_parser::base_type(start, "expression")
+        expression_parser_rules(const adobe::name_t* first_keyword,
+                                const adobe::name_t* last_keyword)
         {
             namespace ascii = boost::spirit::ascii;
             namespace phoenix = boost::phoenix;
@@ -119,8 +116,6 @@ namespace {
             using qi::eps;
             using qi::lexeme;
             using qi::lit;
-
-            start = expression(&stack);
 
             expression =
                 or_expression(_r1)
@@ -288,7 +283,6 @@ namespace {
 
             // define names for rules, to be used in error reporting
 #define NAME(x) x.name(#x)
-            NAME(start);
             NAME(expression);
             NAME(or_expression);
             NAME(and_expression);
@@ -321,7 +315,7 @@ namespace {
             NAME(variable);
 #undef NAME
 
-            qi::on_error<qi::fail>(start, report_error(_1, _2, _3, _4));
+            qi::on_error<qi::fail>(expression, report_error(_1, _2, _3, _4));
         }
 
         typedef boost::spirit::qi::rule<Iter, std::string(), space_type> string_rule;
@@ -344,8 +338,6 @@ namespace {
             space_type
         > local_array_rule;
         typedef boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> no_locals_rule;
-
-        boost::spirit::qi::rule<Iter, void(), space_type> start;
 
         // expression grammar
         boost::spirit::qi::rule<
@@ -418,25 +410,36 @@ namespace {
     adobe::aggregate_name_t unlink_k     = { "unlink" };
     adobe::aggregate_name_t when_k       = { "when" };
     adobe::aggregate_name_t relate_k     = { "relate" };
+
+    template <typename Iter>
+    const expression_parser_rules<Iter>& adam_expression_parser()
+    {
+        static const adobe::name_t s_keywords[] = {
+            input_k,
+            output_k,
+            interface_k,
+            logic_k,
+            constant_k,
+            invariant_k,
+            sheet_k,
+            unlink_k,
+            when_k,
+            relate_k
+        };
+        static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
+        static expression_parser_rules<Iter> s_parser(s_keywords, s_keywords + s_num_keywords);
+        return s_parser;
+    }
 }
 
-const GG::AdamExpressionParser& GG::GetAdamExpressionParser(adobe::array_t& expression)
-{
-    static const adobe::name_t s_keywords[] = {
-        input_k,
-        output_k,
-        interface_k,
-        logic_k,
-        constant_k,
-        invariant_k,
-        sheet_k,
-        unlink_k,
-        when_k,
-        relate_k
-    };
-    static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
-    typedef expression_parser<std::string::const_iterator> ParserType;
-    static std::auto_ptr<ParserType> s_parser;
-    s_parser.reset(new ParserType(s_keywords, s_keywords + s_num_keywords, expression));
-    return *s_parser;
-}
+const GG::AdamExpressionParserRule& GG::AdamExpressionParser()
+{ return adam_expression_parser<std::string::const_iterator>().expression; }
+
+const GG::AdamIdentifierParserRule& GG::AdamIdentifierParser()
+{ return adam_expression_parser<std::string::const_iterator>().identifier; }
+
+const GG::AdamStringParserRule& GG::LeadCommentParser()
+{ return adam_expression_parser<std::string::const_iterator>().lead_comment; }
+
+const GG::AdamStringParserRule& GG::TrailCommentParser()
+{ return adam_expression_parser<std::string::const_iterator>().trail_comment; }

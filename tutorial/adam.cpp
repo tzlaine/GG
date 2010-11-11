@@ -34,6 +34,16 @@ enum PathTypes {
 std::ostream& operator<<(std::ostream& os, PathTypes p);
 std::istream& operator>>(std::istream& os, PathTypes& p);
 
+#include <GG/adobe/array.hpp>
+#include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/implementation/token.hpp>
+
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/home/phoenix/object.hpp>
+#include <boost/spirit/home/phoenix/statement/if.hpp>
+
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
 #include <boost/algorithm/string/split.hpp> // for testing only
@@ -284,6 +294,21 @@ namespace GG {
 
     //bool dummy = TestNewConnections();
 
+    template <typename Iter>
+    struct expression_parser :
+        boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
+    {
+        typedef boost::spirit::ascii::space_type space_type;
+
+        expression_parser(adobe::array_t& stack, const AdamExpressionParserRule& expression) :
+            expression_parser::base_type(start)
+        {
+            start = expression(&stack);
+        }
+
+        boost::spirit::qi::rule<Iter, void(), space_type> start;
+    };
+
     void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
     void verbose_dump(const adobe::dictionary_t& array, std::size_t indent = 0);
 
@@ -342,7 +367,7 @@ namespace GG {
         std::cout << std::string(4 * indent, ' ') << "}\n";
     }
 
-    bool TestExpressionParser(const AdamExpressionParser& expression_p,
+    bool TestExpressionParser(const expression_parser<std::string::const_iterator>& expression_p,
                               adobe::array_t& new_parsed_expression,
                               const std::string& expression)
     {
@@ -387,7 +412,7 @@ namespace GG {
     bool TestExpressionParser()
     {
         adobe::array_t stack;
-        const AdamExpressionParser& expression_p = GetAdamExpressionParser(stack);
+        expression_parser<std::string::const_iterator> expression_p(stack, AdamExpressionParser());
 
         std::string expressions_file_contents = read_file("test_expressions");
         std::vector<std::string> expressions;
@@ -413,7 +438,181 @@ namespace GG {
         return false;
     }
 
-    bool dummy2 = TestExpressionParser();
+    //bool dummy2 = TestExpressionParser();
+
+    struct report_error_
+    {
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+        struct result
+        { typedef void type; };
+
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+        void operator()(Arg1 _1, Arg2 _2, Arg3 _3, Arg4 _4) const
+            {
+                if (_3 == _2) {
+                    std::cout
+                        << "Parse error: expected "
+                        << _4
+                        << " before end of expression inupt."
+                        << std::endl;
+                } else {
+                    std::cout
+                        << "Parse error: expected "
+                        << _4
+                        << " here:"
+                        << "\n  "
+                        << std::string(_1, _2)
+                        << "\n  "
+                        << std::string(std::distance(_1, _3), '~')
+                        << '^'
+                        << std::endl;
+                }
+            }
+    };
+
+    template <typename Iter>
+    struct adam_parser :
+        boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
+    {
+        typedef boost::spirit::ascii::space_type space_type;
+
+        adam_parser() :
+            adam_parser::base_type(sheet_specifier),
+            expression(AdamExpressionParser()),
+            identifier(AdamIdentifierParser()),
+            lead_comment(LeadCommentParser()),
+            trail_comment(TrailCommentParser())
+        {
+            namespace ascii = boost::spirit::ascii;
+            namespace phoenix = boost::phoenix;
+            namespace qi = boost::spirit::qi;
+            using ascii::char_;
+            using phoenix::construct;
+            using phoenix::if_;
+            using phoenix::static_cast_;
+            using phoenix::val;
+            using qi::_1;
+            using qi::_2;
+            using qi::_3;
+            using qi::_4;
+            using qi::_a;
+            using qi::_b;
+            using qi::_r1;
+            using qi::_val;
+            using qi::alpha;
+            using qi::bool_;
+            using qi::digit;
+            using qi::double_;
+            using qi::eol;
+            using qi::eps;
+            using qi::lexeme;
+            using qi::lit;
+
+            sheet_specifier =
+                -lead_comment >> "sheet" > identifier > "{" >> *qualified_cell_decl > "}" >> -trail_comment;
+
+            qualified_cell_decl =
+                interface_set_decl
+              | input_set_decl
+              | output_set_decl
+              | constant_set_decl
+              | logic_set_decl
+              | invariant_set_decl;
+
+            interface_set_decl =
+                "interface" > ":" > *( -lead_comment >> interface_cell_decl );
+
+            input_set_decl =
+                "input" > ":" > *( -lead_comment >> input_cell_decl );
+
+            output_set_decl =
+                "output" > ":" > *( -lead_comment >> output_cell_decl );
+
+            constant_set_decl =
+                "constant" > ":" > *( -lead_comment >> constant_cell_decl );
+
+            logic_set_decl =
+                "logic" > ":" > *( -lead_comment >> logic_cell_decl );
+
+            invariant_set_decl =
+                "invariant" > ":" > *( -lead_comment >> invariant_cell_decl );
+
+            interface_cell_decl=
+                -lit("unlink") >> identifier >> -initializer >> -define_expression > end_statement;
+
+            input_cell_decl = identifier >> -initializer > end_statement;
+
+            output_cell_decl = named_decl;
+
+            constant_cell_decl = identifier > initializer > end_statement;
+
+            logic_cell_decl = named_decl | relate_decl;
+
+            invariant_cell_decl = named_decl;
+
+            relate_decl =
+                ("relate" | conditional > "relate")
+              > "{"
+              > relate_expression
+              > relate_expression
+             >> *( relate_expression )
+              > "}"
+             >> -trail_comment;
+
+            relate_expression = -lead_comment >> named_decl;
+
+            named_decl = identifier > define_expression > end_statement;
+
+            initializer = ":" > expression;
+
+            define_expression = "<==" > expression;
+
+            conditional = "when" > "(" > expression > ")";
+
+            end_statement = ";" >> -trail_comment;
+
+            // define names for rules, to be used in error reporting
+#define NAME(x) x.name(#x)
+#undef NAME
+
+            qi::on_error<qi::fail>(start, report_error(_1, _2, _3, _4));
+        }
+
+        typedef boost::spirit::qi::rule<Iter, void(), space_type> rule;
+
+        boost::spirit::qi::rule<Iter, void(), space_type> start;
+
+        // expression parser rules
+        const AdamExpressionParserRule& expression;
+        const AdamIdentifierParserRule& identifier;
+        const AdamStringParserRule& lead_comment;
+        const AdamStringParserRule& trail_comment;
+
+        // Adam grammar
+        rule sheet_specifier;
+        rule qualified_cell_decl;
+        rule interface_set_decl;
+        rule input_set_decl;
+        rule output_set_decl;
+        rule constant_set_decl;
+        rule logic_set_decl;
+        rule invariant_set_decl;
+        rule interface_cell_decl;
+        rule input_cell_decl;
+        rule output_cell_decl;
+        rule constant_cell_decl;
+        rule logic_cell_decl;
+        rule invariant_cell_decl;
+        rule relate_decl;
+        rule relate_expression;
+        rule named_decl;
+        rule initializer;
+        rule define_expression;
+        rule conditional;
+        rule end_statement;
+
+        boost::phoenix::function<report_error_> report_error;
+    };
 
 }
 

@@ -44,6 +44,7 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <boost/spirit/home/phoenix/bind/bind_member_variable.hpp>
 #include <boost/spirit/home/phoenix/object.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
+#include <boost/spirit/home/phoenix/container.hpp>
 
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
@@ -441,36 +442,6 @@ namespace GG {
 
     //bool dummy2 = TestExpressionParser();
 
-    struct report_error_
-    {
-        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-        struct result
-        { typedef void type; };
-
-        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-        void operator()(Arg1 _1, Arg2 _2, Arg3 _3, Arg4 _4) const
-            {
-                if (_3 == _2) {
-                    std::cout
-                        << "Parse error: expected "
-                        << _4
-                        << " before end of expression inupt."
-                        << std::endl;
-                } else {
-                    std::cout
-                        << "Parse error: expected "
-                        << _4
-                        << " here:"
-                        << "\n  "
-                        << std::string(_1, _2)
-                        << "\n  "
-                        << std::string(std::distance(_1, _3), '~')
-                        << '^'
-                        << std::endl;
-                }
-            }
-    };
-
 #define GET_REF(type_, name)                            \
     struct get_##name##_                                \
     {                                                   \
@@ -505,26 +476,82 @@ namespace GG {
 #undef GET_REF
 #undef GET_PTR
 
+    struct add_cell_
+    {
+        template <typename Arg1,
+                  typename Arg2,
+                  typename Arg3,
+                  typename Arg4,
+                  typename Arg5,
+                  typename Arg6,
+                  typename Arg7>
+        struct result
+        { typedef void type; };
+
+        template <typename Arg1,
+                  typename Arg2,
+                  typename Arg3,
+                  typename Arg4,
+                  typename Arg5,
+                  typename Arg6,
+                  typename Arg7>
+        void operator()(Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7) const
+            { arg1.add_cell_proc_m(arg2, arg3, arg4, arg5, arg6, arg7); }
+    };
+
+    struct report_error_
+    {
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+        struct result
+        { typedef void type; };
+
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+        void operator()(Arg1 _1, Arg2 _2, Arg3 _3, Arg4 _4) const
+            {
+                if (_3 == _2) {
+                    std::cout
+                        << "Parse error: expected "
+                        << _4
+                        << " before end of expression inupt."
+                        << std::endl;
+                } else {
+                    std::cout
+                        << "Parse error: expected "
+                        << _4
+                        << " here:"
+                        << "\n  "
+                        << std::string(_1, _2)
+                        << "\n  "
+                        << std::string(std::distance(_1, _3), '~')
+                        << '^'
+                        << std::endl;
+                }
+            }
+    };
+
     template <typename Iter>
     struct adam_parser :
         boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
     {
         typedef boost::spirit::ascii::space_type space_type;
 
-        adam_parser() :
+        adam_parser(const adobe::adam_callback_suite_t& callbacks_) :
             adam_parser::base_type(sheet_specifier),
             expression(AdamExpressionParser()),
             identifier(AdamIdentifierParser()),
             lead_comment(LeadCommentParser()),
-            trail_comment(TrailCommentParser())
+            trail_comment(TrailCommentParser()),
+            callbacks(callbacks_)
         {
             namespace ascii = boost::spirit::ascii;
             namespace phoenix = boost::phoenix;
             namespace qi = boost::spirit::qi;
             using ascii::char_;
+            using phoenix::clear;
             using phoenix::construct;
             using phoenix::if_;
             using phoenix::static_cast_;
+            using phoenix::push_back;
             using phoenix::val;
             using qi::_1;
             using qi::_2;
@@ -579,16 +606,29 @@ namespace GG {
             invariant_set_decl =
                 lit("invariant") > ":" > *( -lead_comment[_a = _1] >> invariant_cell_decl(_a) );
 
-            interface_cell_decl=
-                -lit("unlink") >> identifier[_a = _1] >> -initializer(&_b) >> -define_expression(&_c) > end_statement(&_f); // TODO: add cell
+            interface_cell_decl =
+                (identifier[_a = _1] | ("unlink" > identifier[_a = _1]))
+             >> -initializer(&_b)
+             >> -define_expression(&_c)
+              > end_statement(&_f); // TODO: add cell
 
-            input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d); // TODO: add cell
+            input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d)[
+                add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
+            ];
 
-            output_cell_decl = named_decl(&_a, &_b, &_d); // TODO: add cell
+            output_cell_decl = named_decl(&_a, &_b, &_d)[
+                add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
+            ];
 
-            constant_cell_decl = identifier[_a = _1] > initializer(&_b) > end_statement(&_d); // TODO: add cell
+            constant_cell_decl = identifier[_a = _1] > initializer(&_b) > end_statement(&_d)[
+                add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
+            ];
 
-            logic_cell_decl = named_decl(&_a, &_b, &_d) | relate_decl(&_b, &_e, &_d); // TODO: add cell
+            logic_cell_decl =
+                named_decl(&_a, &_b, &_d)[
+                    add_cell(callbacks, adobe::adam_callback_suite_t::logic_k, _a, _c, _b, _d, _r1)
+                ]
+              | relate_decl(&_b, &_e, &_d); // TODO: add cell
 
             invariant_cell_decl = named_decl(&_a, &_b, &_d); // TODO: add cell
 
@@ -596,8 +636,21 @@ namespace GG {
                 ("relate" | (conditional(_r1) > "relate"))
               > "{"
               > relate_expression(&_a)
-              > relate_expression(&_b)
-             >> *( relate_expression(&_a) )
+              > relate_expression(&_b)[
+                  (
+                      push_back(*_r2, _a),
+                      push_back(*_r2, _b),
+                      clear(*get_expression(&_a))
+                  )
+              ]
+             >> *(
+                     relate_expression(&_a)[
+                         (
+                             push_back(*_r2, _a),
+                             clear(*get_expression(&_a))
+                         )
+                     ]
+                 )
               > "}"
              >> -trail_comment[*_r3 = _1]; // TODO: add cell
 
@@ -714,10 +767,14 @@ namespace GG {
         boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> conditional;
         boost::spirit::qi::rule<Iter, void(std::string*), space_type> end_statement;
 
+        boost::phoenix::function<add_cell_> add_cell;
         boost::phoenix::function<report_error_> report_error;
+
+        const adobe::adam_callback_suite_t& callbacks;
     };
 
-    adam_parser<std::string::const_iterator> ap;
+    adobe::adam_callback_suite_t callbacks;
+    adam_parser<std::string::const_iterator> ap(callbacks);
 
 }
 

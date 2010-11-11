@@ -41,6 +41,7 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/home/phoenix/bind/bind_member_variable.hpp>
 #include <boost/spirit/home/phoenix/object.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 
@@ -470,6 +471,40 @@ namespace GG {
             }
     };
 
+#define GET_REF(type_, name)                            \
+    struct get_##name##_                                \
+    {                                                   \
+        template <typename Arg1>                        \
+        struct result                                   \
+        { typedef type_ type; };                        \
+                                                        \
+        template <typename Arg1>                        \
+        type_ operator()(Arg1 arg1) const               \
+            { return arg1->name##_m; }                  \
+    };                                                  \
+    boost::phoenix::function<get_##name##_> get_##name
+
+#define GET_PTR(type_, name)                            \
+    struct get_##name##_                                \
+    {                                                   \
+        template <typename Arg1>                        \
+        struct result                                   \
+        { typedef type_ type; };                        \
+                                                        \
+        template <typename Arg1>                        \
+        type_ operator()(Arg1 arg1) const               \
+            { return &arg1->name##_m; }                 \
+    };                                                  \
+    boost::phoenix::function<get_##name##_> get_##name
+
+    GET_REF(std::string&, detailed);
+    GET_PTR(adobe::name_t*, name);
+    GET_PTR(adobe::array_t*, expression);
+    GET_PTR(std::string*, brief);
+
+#undef GET_REF
+#undef GET_PTR
+
     template <typename Iter>
     struct adam_parser :
         boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
@@ -497,7 +532,13 @@ namespace GG {
             using qi::_4;
             using qi::_a;
             using qi::_b;
+            using qi::_c;
+            using qi::_d;
+            using qi::_e;
+            using qi::_f;
             using qi::_r1;
+            using qi::_r2;
+            using qi::_r3;
             using qi::_val;
             using qi::alpha;
             using qi::bool_;
@@ -521,56 +562,58 @@ namespace GG {
               | invariant_set_decl;
 
             interface_set_decl =
-                "interface" > ":" > *( -lead_comment[_a = _1] >> interface_cell_decl(_a) );
+                lit("interface") > ":" > *( -lead_comment[_a = _1] >> interface_cell_decl(_a) );
 
             input_set_decl =
-                "input" > ":" > *( -lead_comment[_a = _1] >> input_cell_decl(_a) );
+                lit("input") > ":" > *( -lead_comment[_a = _1] >> input_cell_decl(_a) );
 
             output_set_decl =
-                "output" > ":" > *( -lead_comment[_a = _1] >> output_cell_decl(_a) );
+                lit("output") > ":" > *( -lead_comment[_a = _1] >> output_cell_decl(_a) );
 
             constant_set_decl =
-                "constant" > ":" > *( -lead_comment[_a = _1] >> constant_cell_decl(_a) );
+                lit("constant") > ":" > *( -lead_comment[_a = _1] >> constant_cell_decl(_a) );
 
             logic_set_decl =
-                "logic" > ":" > *( -lead_comment[_a = _1] >> logic_cell_decl(_a) );
+                lit("logic") > ":" > *( -lead_comment[_a = _1] >> logic_cell_decl(_a) );
 
             invariant_set_decl =
-                "invariant" > ":" > *( -lead_comment[_a = _1] >> invariant_cell_decl(_a) );
+                lit("invariant") > ":" > *( -lead_comment[_a = _1] >> invariant_cell_decl(_a) );
 
             interface_cell_decl=
-                -lit("unlink") >> identifier >> -initializer(&_b) >> -define_expression > end_statement;
+                -lit("unlink") >> identifier[_a = _1] >> -initializer(&_b) >> -define_expression(&_c) > end_statement(&_f); // TODO: add cell
 
-            input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement; // TODO: add cell
+            input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d); // TODO: add cell
 
-            output_cell_decl = named_decl;
+            output_cell_decl = named_decl(&_a, &_b, &_d); // TODO: add cell
 
-            constant_cell_decl = identifier[_a = _1] > initializer(&_b) > end_statement; // TODO: add cell
+            constant_cell_decl = identifier[_a = _1] > initializer(&_b) > end_statement(&_d); // TODO: add cell
 
-            logic_cell_decl = named_decl | relate_decl;
+            logic_cell_decl = named_decl(&_a, &_b, &_d) | relate_decl(&_b, &_e, &_d); // TODO: add cell
 
-            invariant_cell_decl = named_decl;
+            invariant_cell_decl = named_decl(&_a, &_b, &_d); // TODO: add cell
 
             relate_decl =
-                ("relate" | conditional > "relate")
+                ("relate" | (conditional(_r1) > "relate"))
               > "{"
-              > relate_expression
-              > relate_expression
-             >> *( relate_expression )
+              > relate_expression(&_a)
+              > relate_expression(&_b)
+             >> *( relate_expression(&_a) )
               > "}"
-             >> -trail_comment;
+             >> -trail_comment[*_r3 = _1]; // TODO: add cell
 
-            relate_expression = -lead_comment >> named_decl;
+            relate_expression =
+                -lead_comment[get_detailed(_r1) = _1]
+             >> named_decl(get_name(_r1), get_expression(_r1), get_brief(_r1));
 
-            named_decl = identifier > define_expression > end_statement;
+            named_decl = identifier[*_r1 = _1] > define_expression(_r2) > end_statement(_r3);
 
             initializer = ":" > expression(_r1);
 
-            define_expression = "<==" > expression;
+            define_expression = "<==" > expression(_r1);
 
-            conditional = "when" > "(" > expression > ")";
+            conditional = lit("when") > "(" > expression(_r1) > ")";
 
-            end_statement = ";" >> -trail_comment;
+            end_statement = ";" >> -trail_comment[*_r1 = _1];
 
             // define names for rules, to be used in error reporting
 #define NAME(x) x.name(#x)
@@ -579,7 +622,16 @@ namespace GG {
             qi::on_error<qi::fail>(sheet_specifier, report_error(_1, _2, _3, _4));
         }
 
-        typedef boost::spirit::qi::rule<Iter, void(), space_type> rule;
+        typedef adobe::adam_callback_suite_t::relation_t relation;
+        typedef std::vector<relation> relation_set;
+
+        typedef boost::spirit::qi::rule<Iter, void(), space_type> void_rule;
+        typedef boost::spirit::qi::rule<
+            Iter,
+            void(),
+            boost::spirit::qi::locals<std::string>,
+            space_type
+        > cell_set_rule;
         typedef boost::spirit::qi::rule<
             Iter,
             void(const std::string&),
@@ -599,30 +651,73 @@ namespace GG {
         const AdamStringParserRule& trail_comment;
 
         // Adam grammar
-        rule sheet_specifier;
-        rule qualified_cell_decl;
-        rule interface_set_decl;
-        rule input_set_decl;
-        rule output_set_decl;
-        rule constant_set_decl;
-        rule logic_set_decl;
-        rule invariant_set_decl;
-        cell_decl_rule interface_cell_decl;
+        void_rule sheet_specifier;
+        void_rule qualified_cell_decl;
+
+        cell_set_rule interface_set_decl;
+        cell_set_rule input_set_decl;
+        cell_set_rule output_set_decl;
+        cell_set_rule constant_set_decl;
+        cell_set_rule logic_set_decl;
+        cell_set_rule invariant_set_decl;
+
+        boost::spirit::qi::rule<
+            Iter,
+            void(const std::string&),
+            boost::spirit::qi::locals<
+                adobe::name_t,
+                adobe::array_t,
+                adobe::array_t,
+                adobe::line_position_t, // currently unfilled
+                adobe::line_position_t, // currently unfilled
+                std::string
+            >,
+            space_type
+        > interface_cell_decl;
+
         cell_decl_rule input_cell_decl;
         cell_decl_rule output_cell_decl;
         cell_decl_rule constant_cell_decl;
-        cell_decl_rule logic_cell_decl;
+
+        boost::spirit::qi::rule<
+            Iter,
+            void(const std::string&),
+            boost::spirit::qi::locals<
+                adobe::name_t,
+                adobe::array_t,
+                adobe::line_position_t, // currently unfilled
+                std::string,
+                relation_set
+            >,
+            space_type
+        > logic_cell_decl;
+
         cell_decl_rule invariant_cell_decl;
-        rule relate_decl;
-        rule relate_expression;
-        rule named_decl;
+
+        boost::spirit::qi::rule<
+            Iter,
+            void(adobe::array_t*, relation_set*, std::string*),
+            boost::spirit::qi::locals<relation, relation>,
+            space_type
+        > relate_decl;
+
+        boost::spirit::qi::rule<Iter, void(relation*), space_type> relate_expression;
+
+        boost::spirit::qi::rule<
+            Iter,
+            void(adobe::name_t*, adobe::array_t*, std::string*),
+            space_type
+        > named_decl;
+
         boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> initializer;
-        rule define_expression;
-        rule conditional;
-        rule end_statement;
+        boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> define_expression;
+        boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> conditional;
+        boost::spirit::qi::rule<Iter, void(std::string*), space_type> end_statement;
 
         boost::phoenix::function<report_error_> report_error;
     };
+
+    adam_parser<std::string::const_iterator> ap;
 
 }
 

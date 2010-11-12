@@ -46,6 +46,9 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 #include <boost/spirit/home/phoenix/container.hpp>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
 #include <boost/algorithm/string/split.hpp> // for testing only
@@ -478,25 +481,35 @@ namespace GG {
 
     struct add_cell_
     {
-        template <typename Arg1,
-                  typename Arg2,
-                  typename Arg3,
-                  typename Arg4,
-                  typename Arg5,
-                  typename Arg6,
-                  typename Arg7>
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
         struct result
         { typedef void type; };
 
-        template <typename Arg1,
-                  typename Arg2,
-                  typename Arg3,
-                  typename Arg4,
-                  typename Arg5,
-                  typename Arg6,
-                  typename Arg7>
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
         void operator()(Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7) const
             { arg1.add_cell_proc_m(arg2, arg3, arg4, arg5, arg6, arg7); }
+    };
+
+    struct add_relation_
+    {
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
+        struct result
+        { typedef void type; };
+
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
+        void operator()(Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6) const
+            { arg1.add_relation_proc_m(arg2, arg3, &arg4.front(), &arg4.front() + arg4.size(), arg5, arg6); }
+    };
+
+    struct add_interface_
+    {
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
+        struct result
+        { typedef void type; };
+
+        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
+        void operator()(Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9) const
+            { arg1.add_interface_proc_m(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9); }
     };
 
     struct report_error_
@@ -563,6 +576,7 @@ namespace GG {
             using qi::_d;
             using qi::_e;
             using qi::_f;
+            using qi::_g;
             using qi::_r1;
             using qi::_r2;
             using qi::_r3;
@@ -607,10 +621,15 @@ namespace GG {
                 lit("invariant") > ":" > *( -lead_comment[_a = _1] >> invariant_cell_decl(_a) );
 
             interface_cell_decl =
-                (identifier[_a = _1] | ("unlink" > identifier[_a = _1]))
-             >> -initializer(&_b)
-             >> -define_expression(&_c)
-              > end_statement(&_f); // TODO: add cell
+                (
+                    (
+                        identifier[(_a = _1, _b = val(true))]
+                      | (lit("unlink")[_b = val(false)] > identifier[_a = _1])
+                    )
+                 >> -initializer(&_c)
+                 >> -define_expression(&_d)
+                  > end_statement(&_g)
+                )[add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)];
 
             input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
@@ -628,9 +647,13 @@ namespace GG {
                 named_decl(&_a, &_b, &_d)[
                     add_cell(callbacks, adobe::adam_callback_suite_t::logic_k, _a, _c, _b, _d, _r1)
                 ]
-              | relate_decl(&_b, &_e, &_d); // TODO: add cell
+              | relate_decl(&_b, &_e, &_d)[
+                  add_relation(callbacks, _c, _b, _e, _d, _r1)
+                ];
 
-            invariant_cell_decl = named_decl(&_a, &_b, &_d); // TODO: add cell
+            invariant_cell_decl = named_decl(&_a, &_b, &_d)[
+                add_cell(callbacks, adobe::adam_callback_suite_t::invariant_k, _a, _c, _b, _d, _r1)
+            ];
 
             relate_decl =
                 ("relate" | (conditional(_r1) > "relate"))
@@ -652,7 +675,7 @@ namespace GG {
                      ]
                  )
               > "}"
-             >> -trail_comment[*_r3 = _1]; // TODO: add cell
+             >> -trail_comment[*_r3 = _1];
 
             relate_expression =
                 -lead_comment[get_detailed(_r1) = _1]
@@ -670,6 +693,27 @@ namespace GG {
 
             // define names for rules, to be used in error reporting
 #define NAME(x) x.name(#x)
+        NAME(sheet_specifier);
+        NAME(qualified_cell_decl);
+        NAME(interface_set_decl);
+        NAME(input_set_decl);
+        NAME(output_set_decl);
+        NAME(constant_set_decl);
+        NAME(logic_set_decl);
+        NAME(invariant_set_decl);
+        NAME(interface_cell_decl);
+        NAME(input_cell_decl);
+        NAME(output_cell_decl);
+        NAME(constant_cell_decl);
+        NAME(logic_cell_decl);
+        NAME(invariant_cell_decl);
+        NAME(relate_decl);
+        NAME(relate_expression);
+        NAME(named_decl);
+        NAME(initializer);
+        NAME(define_expression);
+        NAME(conditional);
+        NAME(end_statement);
 #undef NAME
 
             qi::on_error<qi::fail>(sheet_specifier, report_error(_1, _2, _3, _4));
@@ -719,6 +763,7 @@ namespace GG {
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
+                bool,
                 adobe::array_t,
                 adobe::array_t,
                 adobe::line_position_t, // currently unfilled
@@ -768,13 +813,179 @@ namespace GG {
         boost::spirit::qi::rule<Iter, void(std::string*), space_type> end_statement;
 
         boost::phoenix::function<add_cell_> add_cell;
+        boost::phoenix::function<add_relation_> add_relation;
+        boost::phoenix::function<add_interface_> add_interface;
         boost::phoenix::function<report_error_> report_error;
 
         const adobe::adam_callback_suite_t& callbacks;
     };
 
-    adobe::adam_callback_suite_t callbacks;
-    adam_parser<std::string::const_iterator> ap(callbacks);
+    bool TestAdamParser(const adam_parser<std::string::const_iterator>& adam_p,
+                        adobe::array_t& new_parse,
+                        adobe::array_t& old_parse,
+                        const adobe::adam_callback_suite_t& old_parse_callbacks,
+                        const std::string& sheet)
+    {
+        std::cout << "sheet:\"\n" << sheet << "\n\"\n";
+        bool original_parse_failed = false;
+        try {
+            std::stringstream ss(sheet);
+            adobe::parse(ss, adobe::line_position_t("adam"), old_parse_callbacks);
+        } catch (const adobe::stream_error_t&) {
+            original_parse_failed = true;
+        }
+        if (original_parse_failed)
+            std::cout << "original: <parse failure>\n";
+        else
+            std::cout << "original: " << old_parse << "\n";
+        using boost::spirit::ascii::space;
+        using boost::spirit::qi::phrase_parse;
+        bool new_parse_failed =
+            !phrase_parse(sheet.begin(), sheet.end(), adam_p, space);
+        if (new_parse_failed)
+            std::cout << "new:      <parse failure>\n";
+        else
+            std::cout << "new:      " << new_parse << "\n";
+        bool pass =
+            original_parse_failed && new_parse_failed ||
+            new_parse == old_parse;
+        std::cout << (pass ? "PASS" : "FAIL") << "\n";
+
+        if (!pass) {
+            std::cout << "original (verbose):\n";
+            verbose_dump(old_parse);
+            std::cout << "new (verbose):\n";
+            verbose_dump(new_parse);
+        }
+
+        std::cout << "\n";
+        new_parse.clear();
+        old_parse.clear();
+        return pass;
+    }
+
+    struct StoreAddCellParams
+    {
+        StoreAddCellParams(adobe::array_t& array) :
+            m_array(array)
+            {}
+
+        void operator()(adobe::adam_callback_suite_t::cell_type_t type,
+                        adobe::name_t cell_name,
+                        const adobe::line_position_t& position,
+                        const adobe::array_t& expr_or_init,
+                        const std::string& brief,
+                        const std::string& detailed)
+        {
+            push_back(m_array, type);
+            push_back(m_array, cell_name);
+//            push_back(m_array, position); // TODO: fix disagreement on positions
+            push_back(m_array, expr_or_init);
+            push_back(m_array, brief);
+            push_back(m_array, detailed);
+        }
+
+        adobe::array_t& m_array;
+    };
+
+    struct StoreAddRelationParams
+    {
+        StoreAddRelationParams(adobe::array_t& array) :
+            m_array(array)
+            {}
+
+        void operator()(const adobe::line_position_t& position,
+                        const adobe::array_t& conditional,
+                        const adobe::adam_callback_suite_t::relation_t* first,
+                        const adobe::adam_callback_suite_t::relation_t* last,
+                        const std::string& brief,
+                        const std::string& detailed)
+        {
+//            push_back(m_array, position); // TODO: fix disagreement on positions
+            push_back(m_array, conditional);
+            while (first != last) {
+                push_back(m_array, first->name_m);
+//                push_back(m_array, first->position_m); // TODO: fix disagreement on positions
+                push_back(m_array, first->expression_m);
+                push_back(m_array, first->detailed_m);
+                push_back(m_array, first->brief_m);
+                ++first;
+            }
+            push_back(m_array, brief);
+            push_back(m_array, detailed);
+        }
+
+        adobe::array_t& m_array;
+    };
+
+    struct StoreAddInterfaceParams
+    {
+        StoreAddInterfaceParams(adobe::array_t& array) :
+            m_array(array)
+            {}
+
+        void operator()(adobe::name_t cell_name,
+                        bool linked,
+                        const adobe::line_position_t& position1,
+                        const adobe::array_t& initializer,
+                        const adobe::line_position_t& position2,
+                        const adobe::array_t& expression,
+                        const std::string& brief,
+                        const std::string& detailed)
+        {
+            push_back(m_array, cell_name);
+            push_back(m_array, linked);
+//            push_back(m_array, position1); // TODO: fix disagreement on positions
+            push_back(m_array, initializer);
+//            push_back(m_array, position2); // TODO: fix disagreement on positions
+            push_back(m_array, expression);
+            push_back(m_array, brief);
+            push_back(m_array, detailed);
+        }
+
+        adobe::array_t& m_array;
+    };
+
+    bool TestAdamParser()
+    {
+        adobe::adam_callback_suite_t old_parse_callbacks;
+        adobe::array_t old_parse;
+        old_parse_callbacks.add_cell_proc_m = StoreAddCellParams(old_parse);
+        old_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(old_parse);
+        old_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(old_parse);
+
+        adobe::adam_callback_suite_t new_parse_callbacks;
+        adobe::array_t new_parse;
+        new_parse_callbacks.add_cell_proc_m = StoreAddCellParams(new_parse);
+        new_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(new_parse);
+        new_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(new_parse);
+        adam_parser<std::string::const_iterator> adam_p(new_parse_callbacks);
+
+        std::size_t passes = 0;
+        std::size_t failures = 0;
+
+        namespace fs = boost::filesystem;
+        fs::path current_path = fs::current_path();
+        fs::directory_iterator it(current_path);
+        fs::directory_iterator end_it;
+        for (; it != end_it; ++it) {
+            std::string file_contents = read_file(it->string());
+            if (!file_contents.empty()) {
+                if (TestAdamParser(adam_p, new_parse, old_parse, old_parse_callbacks, file_contents))
+                    ++passes;
+                else
+                    ++failures;
+            }
+        }
+
+        std::cout << "Summary: " << passes << " passed, " << failures << " failed\n";
+
+        exit(0);
+
+        return false;
+    }
+
+    bool dummy2 = TestAdamParser();
 
 }
 

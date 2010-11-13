@@ -205,9 +205,9 @@ namespace {
 
             string = (quoted_string[_a = _1] >> *(quoted_string[_a += _1]))[push(*_r1, _a)];
 
-            lead_comment %= ("/*" >> lexeme[*char_ - "*/"] >> "*/");
+            lead_comment = lexeme["/*" >> (*(char_ - "*/")[_val += _1]) > "*/"];
 
-            trail_comment %= ("//" >> lexeme[*char_ >> eol]);
+            trail_comment = lexeme["//" >> *(char_ - eol)[_val += _1] > eol];
 
             identifier = !keyword_string >> identifier_string[_val = make_name_t(_1)];
 

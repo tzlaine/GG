@@ -38,6 +38,7 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/implementation/token.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -45,7 +46,6 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <boost/spirit/home/phoenix/object.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 #include <boost/spirit/home/phoenix/container.hpp>
-
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -78,6 +78,15 @@ std::ostream& operator<<(std::ostream& stream, const type_info_t& x)
 }
 
 } }
+
+namespace adobe {
+
+std::ostream& operator<<(std::ostream& stream, const line_position_t& x)
+{
+    return stream; // TODO
+}
+
+}
 
 namespace GG {
 
@@ -623,7 +632,7 @@ namespace GG {
             interface_cell_decl =
                 (
                     (
-                        identifier[(_a = _1, _b = val(true))]
+                        identifier[_a = _1][_b = val(true)]
                       | (lit("unlink")[_b = val(false)] > identifier[_a = _1])
                     )
                  >> -initializer(&_c)
@@ -660,11 +669,7 @@ namespace GG {
               > "{"
               > relate_expression(&_a)
               > relate_expression(&_b)[
-                  (
-                      push_back(*_r2, _a),
-                      push_back(*_r2, _b),
-                      clear(*get_expression(&_a))
-                  )
+                  push_back(*_r2, _a) ][ push_back(*_r2, _b) ][ clear(*get_expression(&_a))
               ]
              >> *(
                      relate_expression(&_a)[
@@ -705,8 +710,10 @@ namespace GG {
         NAME(input_cell_decl);
         NAME(output_cell_decl);
         NAME(constant_cell_decl);
+//        logic_cell_decl.name("logic_cell_decl");
         NAME(logic_cell_decl);
         NAME(invariant_cell_decl);
+//        relate_decl.name("relate_decl");
         NAME(relate_decl);
         NAME(relate_expression);
         NAME(named_decl);
@@ -824,9 +831,11 @@ namespace GG {
                         adobe::array_t& new_parse,
                         adobe::array_t& old_parse,
                         const adobe::adam_callback_suite_t& old_parse_callbacks,
+                        const std::string& filename,
                         const std::string& sheet)
     {
-        std::cout << "sheet:\"\n" << sheet << "\n\"\n";
+        std::cout << "sheet:\"\n" << sheet << "\n\"\n"
+                  << "filename: " << filename << '\n';
         bool original_parse_failed = false;
         try {
             std::stringstream ss(sheet);
@@ -877,7 +886,16 @@ namespace GG {
                         const std::string& brief,
                         const std::string& detailed)
         {
-            push_back(m_array, type);
+            std::string type_str;
+            switch (type)
+            {
+            case adobe::adam_callback_suite_t::input_k: type_str = "input_k";
+            case adobe::adam_callback_suite_t::output_k: type_str = "output_k";
+            case adobe::adam_callback_suite_t::constant_k: type_str = "constant_k";
+            case adobe::adam_callback_suite_t::logic_k: type_str = "logic_k";
+            case adobe::adam_callback_suite_t::invariant_k: type_str = "invariant_k";
+            }
+            push_back(m_array, type_str);
             push_back(m_array, cell_name);
 //            push_back(m_array, position); // TODO: fix disagreement on positions
             push_back(m_array, expr_or_init);
@@ -969,12 +987,14 @@ namespace GG {
         fs::directory_iterator it(current_path);
         fs::directory_iterator end_it;
         for (; it != end_it; ++it) {
-            std::string file_contents = read_file(it->string());
-            if (!file_contents.empty()) {
-                if (TestAdamParser(adam_p, new_parse, old_parse, old_parse_callbacks, file_contents))
-                    ++passes;
-                else
-                    ++failures;
+            if (boost::algorithm::ends_with(it->string(), "adm")) {
+                std::string file_contents = read_file(it->string());
+                if (!file_contents.empty()) {
+                    if (TestAdamParser(adam_p, new_parse, old_parse, old_parse_callbacks, it->string(), file_contents))
+                        ++passes;
+                    else
+                        ++failures;
+                }
             }
         }
 

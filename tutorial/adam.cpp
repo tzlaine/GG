@@ -39,9 +39,10 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <GG/adobe/implementation/token.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/lex_lexertl.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/home/phoenix/bind/bind_member_variable.hpp>
 #include <boost/spirit/home/phoenix/object.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
@@ -308,6 +309,100 @@ namespace GG {
 
     //bool dummy = TestNewConnections();
 
+    template <typename Lexer>
+    struct lexer :
+        boost::spirit::lex::lexer<Lexer>
+    {
+        lexer() :
+            identifier("[a-zA-Z]\\w*"),
+            any("\\S+")
+            {
+                using boost::spirit::lex::token_def;
+
+                this->self =
+                    identifier
+                  | any
+                    ;
+
+                this->self("WS") = token_def<>("\\s+");
+            }
+
+        boost::spirit::lex::token_def<std::string> identifier;
+        boost::spirit::lex::token_def<std::string> any;
+    };
+
+    template <typename Iterator, typename Lexer>
+    struct lexer_test_grammar 
+        : boost::spirit::qi::grammar<Iterator, boost::spirit::qi::in_state_skipper<Lexer> >
+    {
+        template <typename TokenDef>
+        lexer_test_grammar(TokenDef const& tok) :
+            lexer_test_grammar::base_type(start)
+            {
+                using boost::spirit::qi::_1;
+                using boost::spirit::qi::lit;
+                using boost::phoenix::val;
+
+                start =
+                    +(
+                        tok.identifier[std::cout << val("identifier: ") << _1 << std::endl]
+                      | lit('\n')[std::cout << val("\n") << std::endl]
+                      | tok.any[std::cout << val("any: ") << _1 << std::endl]
+                    )
+                    ;
+            }
+
+        typedef boost::variant<std::string> expression_type;
+
+        boost::spirit::qi::rule<Iterator, boost::spirit::qi::in_state_skipper<Lexer> > start;
+    };
+
+    void TestLexer()
+    {
+        typedef boost::spirit::lex::lexertl::token<
+            std::string::iterator,
+            boost::mpl::vector<
+                std::string
+            >
+        > token_type;
+
+        typedef boost::spirit::lex::lexertl::lexer<token_type> spirit_lexer_base_type;
+
+        typedef lexer<spirit_lexer_base_type> lexer_type;
+
+        typedef lexer_type::iterator_type iterator_type;
+
+        typedef lexer_test_grammar<iterator_type, lexer_type::lexer_def> lexer_test_grammar;
+
+        lexer_type lexer;
+        lexer_test_grammar test_grammar(lexer);
+
+        std::string str =
+            "/*\n"
+            "    Copyright 2005-2007 Adobe Systems Incorporated\n"
+            "    Distributed under the MIT License (see accompanying file LICENSE_1_0_0.txt\n"
+            "    or a copy at http://stlab.adobe.com/licenses.html)\n"
+            "*/\n"
+            "\n"
+            "sheet empty_containers\n"
+            "{\n"
+            "interface:\n"
+            "    tab_group_visible: @first;\n"
+            "}\n"
+            ;
+
+        std::string::iterator it = str.begin();
+        iterator_type iter = lexer.begin(it, str.end());
+        iterator_type end = lexer.end();
+
+        boost::spirit::qi::phrase_parse(iter,
+                                        end,
+                                        test_grammar,
+                                        boost::spirit::qi::in_state("WS")[lexer.self]);
+
+        exit(0);
+    }
+
     template <typename Iter>
     struct expression_parser :
         boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
@@ -454,6 +549,7 @@ namespace GG {
 
     //bool dummy2 = TestExpressionParser();
 
+#if 0
 #define GET_REF(type_, name)                            \
     struct get_##name##_                                \
     {                                                   \
@@ -1005,7 +1101,8 @@ namespace GG {
         return false;
     }
 
-    bool dummy2 = TestAdamParser();
+    bool dummy3 = TestAdamParser();
+#endif
 
 }
 
@@ -1265,6 +1362,8 @@ void AdamGGApp::FinalCleanup()
 extern "C" // Note the use of C-linkage, as required by SDL.
 int main(int argc, char* argv[])
 {
+    GG::TestLexer();
+
     AdamGGApp app;
 
     try {

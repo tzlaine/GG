@@ -315,20 +315,28 @@ namespace GG {
     {
         lexer() :
             identifier("[a-zA-Z]\\w*"),
-            any("\\S+")
+            lead_comment("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"),
+            trail_comment("\\/\\/.*$")
             {
                 using boost::spirit::lex::token_def;
 
                 this->self =
                     identifier
-                  | any
+                  | lead_comment
+                  | trail_comment
+                  | ':'
+                  | '{'
+                  | '}'
+                  | '@'
+                  | ';'
                     ;
 
                 this->self("WS") = token_def<>("\\s+");
             }
 
         boost::spirit::lex::token_def<std::string> identifier;
-        boost::spirit::lex::token_def<std::string> any;
+        boost::spirit::lex::token_def<std::string> lead_comment;
+        boost::spirit::lex::token_def<std::string> trail_comment;
     };
 
     template <typename Iterator, typename Lexer>
@@ -343,13 +351,26 @@ namespace GG {
                 using boost::spirit::qi::lit;
                 using boost::phoenix::val;
 
+#define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << _1 << std::endl]
+#define DUMP_LIT(x) lit(x)[std::cout << val("'") << val(x) << val("'") << std::endl]
+
                 start =
                     +(
-                        tok.identifier[std::cout << val("identifier: ") << _1 << std::endl]
-                      | lit('\n')[std::cout << val("\n") << std::endl]
-                      | tok.any[std::cout << val("any: ") << _1 << std::endl]
+                        DUMP_TOK(identifier)
+                      | DUMP_TOK(lead_comment)
+                      | DUMP_TOK(trail_comment)
+                      | DUMP_LIT(':')
+                      | DUMP_LIT('{')
+                      | DUMP_LIT('}')
+                      | DUMP_LIT('@')
+                      | DUMP_LIT(';')
+                      | DUMP_LIT('\n')
+                      | DUMP_TOK(any)
                     )
                     ;
+
+#undef DUMP_TOK
+#undef DUMP_LIT
             }
 
         typedef boost::variant<std::string> expression_type;
@@ -387,7 +408,7 @@ namespace GG {
             "sheet empty_containers\n"
             "{\n"
             "interface:\n"
-            "    tab_group_visible: @first;\n"
+            "    tab_group_visible : @first; // trail comment here, nothing to see\n"
             "}\n"
             ;
 

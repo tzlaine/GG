@@ -89,6 +89,19 @@ std::ostream& operator<<(std::ostream& stream, const line_position_t& x)
 
 }
 
+namespace boost { namespace spirit { namespace traits
+{
+    // This template specialization is required by Spirit.Lex to automatically
+    // convert an iterator pair to an adobe::name_t in the lexer below.
+    template <typename Iter>
+    struct assign_to_attribute_from_iterators<adobe::name_t, Iter>
+    {
+        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
+            { attr = adobe::name_t(std::string(first, last).c_str()); }
+    };
+
+} } }
+
 namespace GG {
 
     struct AnySlotImplBase
@@ -318,7 +331,13 @@ namespace GG {
             lead_comment("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"),
             trail_comment("\\/\\/.*$")
             {
-                using boost::spirit::lex::token_def;
+                namespace lex = boost::spirit::lex;
+                namespace phoenix = boost::phoenix;
+                using lex::_end;
+                using lex::_start;
+                using lex::_val;
+                using lex::token_def;
+                using phoenix::val;
 
                 this->self =
                     identifier
@@ -334,7 +353,7 @@ namespace GG {
                 this->self("WS") = token_def<>("\\s+");
             }
 
-        boost::spirit::lex::token_def<std::string> identifier;
+        boost::spirit::lex::token_def<adobe::name_t> identifier;
         boost::spirit::lex::token_def<std::string> lead_comment;
         boost::spirit::lex::token_def<std::string> trail_comment;
     };
@@ -365,7 +384,6 @@ namespace GG {
                       | DUMP_LIT('@')
                       | DUMP_LIT(';')
                       | DUMP_LIT('\n')
-                      | DUMP_TOK(any)
                     )
                     ;
 
@@ -373,32 +391,31 @@ namespace GG {
 #undef DUMP_LIT
             }
 
-        typedef boost::variant<std::string> expression_type;
-
         boost::spirit::qi::rule<Iterator, boost::spirit::qi::in_state_skipper<Lexer> > start;
     };
 
     void TestLexer()
     {
         typedef boost::spirit::lex::lexertl::token<
-            std::string::iterator,
+            std::string::const_iterator,
             boost::mpl::vector<
+                adobe::name_t,
                 std::string
             >
         > token_type;
 
-        typedef boost::spirit::lex::lexertl::lexer<token_type> spirit_lexer_base_type;
+        typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
 
         typedef lexer<spirit_lexer_base_type> lexer_type;
 
-        typedef lexer_type::iterator_type iterator_type;
+        typedef lexer_type::iterator_type token_iterator;
 
-        typedef lexer_test_grammar<iterator_type, lexer_type::lexer_def> lexer_test_grammar;
+        typedef lexer_test_grammar<token_iterator, lexer_type::lexer_def> lexer_test_grammar;
 
         lexer_type lexer;
         lexer_test_grammar test_grammar(lexer);
 
-        std::string str =
+        const std::string str =
             "/*\n"
             "    Copyright 2005-2007 Adobe Systems Incorporated\n"
             "    Distributed under the MIT License (see accompanying file LICENSE_1_0_0.txt\n"
@@ -412,9 +429,9 @@ namespace GG {
             "}\n"
             ;
 
-        std::string::iterator it = str.begin();
-        iterator_type iter = lexer.begin(it, str.end());
-        iterator_type end = lexer.end();
+        std::string::const_iterator it = str.begin();
+        token_iterator iter = lexer.begin(it, str.end());
+        token_iterator end = lexer.end();
 
         boost::spirit::qi::phrase_parse(iter,
                                         end,

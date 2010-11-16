@@ -46,6 +46,8 @@ struct lexer :
 {
     lexer(const adobe::name_t* first_keyword,
           const adobe::name_t* last_keyword) :
+        keyword_true_false("true|false"),
+        keyword_empty("empty"),
         identifier("[a-zA-Z]\\w*"),
         lead_comment("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"),
         trail_comment("\\/\\/.*$"),
@@ -60,48 +62,55 @@ struct lexer :
         {
             namespace lex = boost::spirit::lex;
 
-            std::string keywords_regex = "empty|true|false";
-            while (first_keyword != last_keyword) {
-                keywords_regex += '|';
-                keywords_regex += first_keyword->c_str();
-                ++first_keyword;
+            std::string keywords_regex;
+            if (first_keyword != last_keyword) {
+                keywords_regex = (first_keyword++)->c_str();
+                while (first_keyword != last_keyword) {
+                    keywords_regex += '|';
+                    keywords_regex += first_keyword->c_str();
+                    ++first_keyword;
+                }
+                keyword = keywords_regex;
             }
-            keyword = keywords_regex;
 
             this->self =
                 keyword
-                | identifier
-                | lead_comment
-                | trail_comment
-                | quoted_string
-                | number
-                | eq_op
-                | rel_op
-                | mul_op
-                | define
-                | or_
-                | and_
-                | '+'
-                | '-'
-                | '!'
-                | '?'
-                | ':'
-                | '.'
-                | ','
-                | '('
-                | ')'
-                | '['
-                | ']'
-                | '{'
-                | '}'
-                | '@'
-                | ';'
+              | keyword_true_false
+              | keyword_empty
+              | identifier
+              | lead_comment
+              | trail_comment
+              | quoted_string
+              | number
+              | eq_op
+              | rel_op
+              | mul_op
+              | define
+              | or_
+              | and_
+              | '+'
+              | '-'
+              | '!'
+              | '?'
+              | ':'
+              | '.'
+              | ','
+              | '('
+              | ')'
+              | '['
+              | ']'
+              | '{'
+              | '}'
+              | '@'
+              | ';'
                 ;
 
             this->self("WS") = lex::token_def<>("\\s+");
         }
 
     boost::spirit::lex::token_def<adobe::name_t> keyword;
+    boost::spirit::lex::token_def<bool> keyword_true_false;
+    boost::spirit::lex::token_def<boost::spirit::lex::omit> keyword_empty;
     boost::spirit::lex::token_def<adobe::name_t> identifier;
     boost::spirit::lex::token_def<std::string> lead_comment;
     boost::spirit::lex::token_def<std::string> trail_comment;
@@ -131,6 +140,14 @@ namespace boost { namespace spirit { namespace traits
     {
         static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
             { attr = adobe::name_t(std::string(first, last).c_str()); }
+    };
+
+    template <>
+    struct assign_to_attribute_from_iterators<bool, std::string::const_iterator, void>
+    {
+        typedef std::string::const_iterator Iter;
+        static void call(const Iter& first, const Iter& last, bool& attr)
+            { attr = *first == 't' ? true : false; }
     };
 
     template <typename Iter>

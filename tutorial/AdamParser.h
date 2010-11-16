@@ -28,6 +28,8 @@
 #ifndef _GG_AdamParser_h_
 #define _GG_AdamParser_h_
 
+#include "AdamLexer.h"
+
 #include <GG/Base.h>
 #include <GG/adobe/array_fwd.hpp>
 #include <GG/adobe/name_fwd.hpp>
@@ -42,40 +44,14 @@ namespace GG {
 
 /** The type of Spirit 2 parser returned by AdamExpressionParser(). */
 typedef boost::spirit::qi::rule<
-    std::string::const_iterator,
+    token_iterator,
     void(adobe::array_t*),
     boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
-    boost::spirit::ascii::space_type
+    skipper_type
 > AdamExpressionParserRule;
 
 /** Returns a Spirit 2 parser that can be used to parse Adam expressions. */
 GG_API const AdamExpressionParserRule& AdamExpressionParser();
-
-/** The type of Spirit 2 parser returned by AdamIdentifierParser(). */
-typedef boost::spirit::qi::rule<
-    std::string::const_iterator,
-    adobe::name_t(),
-    boost::spirit::ascii::space_type
-> AdamIdentifierParserRule;
-
-/** Returns a Spirit 2 parser that can be used to parse Adam/Eve lead comments. */
-GG_API const AdamIdentifierParserRule& AdamIdentifierParser();
-
-/** The type of Spirit 2 parser returned by LeadCommentParser() and
-    TrailCommentParser(). */
-typedef boost::spirit::qi::rule<
-    std::string::const_iterator,
-    std::string(),
-    boost::spirit::ascii::space_type
-> AdamStringParserRule;
-
-/** Returns a Spirit 2 parser that can be used to parse Adam/Eve leading
-    comments. */
-GG_API const AdamStringParserRule& LeadCommentParser();
-
-/** Returns a Spirit 2 parser that can be used to parse Adam/Eve trailing
-    comments. */
-GG_API const AdamStringParserRule& TrailCommentParser();
 
 }
 

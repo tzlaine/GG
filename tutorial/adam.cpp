@@ -310,12 +310,10 @@ namespace GG {
 
     //bool dummy = TestNewConnections();
 
-    template <typename Iterator, typename Lexer>
     struct lexer_test_grammar 
-        : boost::spirit::qi::grammar<Iterator, boost::spirit::qi::in_state_skipper<Lexer> >
+        : boost::spirit::qi::grammar<GG::token_iterator, GG::skipper_type>
     {
-        template <typename TokenDef>
-        lexer_test_grammar(TokenDef const& tok) :
+        lexer_test_grammar(const GG::lexer& tok) :
             lexer_test_grammar::base_type(start)
             {
                 using boost::spirit::qi::_1;
@@ -337,6 +335,8 @@ namespace GG {
                       | DUMP_TOK(eq_op)
                       | DUMP_TOK(rel_op)
                       | DUMP_TOK(mul_op)
+                      | DUMP_TOK(keyword_true_false)
+                      | DUMP_UNATTRIBUTED(keyword_empty)
                       | DUMP_UNATTRIBUTED(define)
                       | DUMP_UNATTRIBUTED(or_)
                       | DUMP_UNATTRIBUTED(and_)
@@ -362,7 +362,7 @@ namespace GG {
 #undef DUMP_LIT
             }
 
-        boost::spirit::qi::rule<Iterator, boost::spirit::qi::in_state_skipper<Lexer> > start;
+        boost::spirit::qi::rule<GG::token_iterator, GG::skipper_type> start;
     };
 
     adobe::aggregate_name_t input_k      = { "input" };
@@ -378,23 +378,6 @@ namespace GG {
 
     void TestLexer()
     {
-        typedef boost::spirit::lex::lexertl::token<
-            std::string::const_iterator,
-            boost::mpl::vector<
-                adobe::name_t,
-                std::string,
-                double
-            >
-        > token_type;
-
-        typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
-
-        typedef detail::lexer<spirit_lexer_base_type> lexer_type;
-
-        typedef lexer_type::iterator_type token_iterator;
-
-        typedef lexer_test_grammar<token_iterator, lexer_type::lexer_def> lexer_test_grammar;
-
         const adobe::name_t s_keywords[] = {
             input_k,
             output_k,
@@ -409,7 +392,7 @@ namespace GG {
         };
         const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
 
-        lexer_type lexer(s_keywords, s_keywords + s_num_keywords);
+        GG::lexer lexer(s_keywords, s_keywords + s_num_keywords);
         lexer_test_grammar test_grammar(lexer);
 
         const std::string str = read_file("empty_containers.adm");
@@ -426,19 +409,16 @@ namespace GG {
         exit(0);
     }
 
-    template <typename Iter>
     struct expression_parser :
-        boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
+        boost::spirit::qi::grammar<GG::token_iterator, void(), GG::skipper_type>
     {
-        typedef boost::spirit::ascii::space_type space_type;
-
         expression_parser(adobe::array_t& stack, const AdamExpressionParserRule& expression) :
             expression_parser::base_type(start)
         {
             start = expression(&stack);
         }
 
-        boost::spirit::qi::rule<Iter, void(), space_type> start;
+        boost::spirit::qi::rule<GG::token_iterator, void(), GG::skipper_type> start;
     };
 
     void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
@@ -499,7 +479,7 @@ namespace GG {
         std::cout << std::string(4 * indent, ' ') << "}\n";
     }
 
-    bool TestExpressionParser(const expression_parser<std::string::const_iterator>& expression_p,
+    bool TestExpressionParser(const expression_parser& expression_p,
                               adobe::array_t& new_parsed_expression,
                               const std::string& expression)
     {
@@ -515,10 +495,15 @@ namespace GG {
             std::cout << "original: <parse failure>\n";
         else
             std::cout << "original: " << original_parsed_expression << "\n";
-        using boost::spirit::ascii::space;
         using boost::spirit::qi::phrase_parse;
+        std::string::const_iterator it = expression.begin();
+        token_iterator iter = AdamLexer().begin(it, expression.end());
+        token_iterator end = AdamLexer().end();
         bool new_parse_failed =
-            !phrase_parse(expression.begin(), expression.end(), expression_p, space);
+            !phrase_parse(iter,
+                          end,
+                          expression_p,
+                          boost::spirit::qi::in_state("WS")[AdamLexer().self]);
         if (new_parse_failed)
             std::cout << "new:      <parse failure>\n";
         else
@@ -544,7 +529,7 @@ namespace GG {
     bool TestExpressionParser()
     {
         adobe::array_t stack;
-        expression_parser<std::string::const_iterator> expression_p(stack, AdamExpressionParser());
+        expression_parser expression_p(stack, AdamExpressionParser());
 
         std::string expressions_file_contents = read_file("test_expressions");
         std::vector<std::string> expressions;
@@ -571,6 +556,7 @@ namespace GG {
     }
 
     //bool dummy2 = TestExpressionParser();
+
 
 #if 0
 #define GET_REF(type_, name)                            \

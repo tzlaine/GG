@@ -84,6 +84,8 @@ typedef lexer::lexer_def lexer_def;
 
 typedef boost::spirit::qi::in_state_skipper<lexer_def> skipper_type;
 
+const lexer& AdamLexer();
+
 }
 
 

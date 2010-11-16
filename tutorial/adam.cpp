@@ -89,6 +89,12 @@ std::ostream& operator<<(std::ostream& stream, const line_position_t& x)
 
 }
 
+namespace GG {
+    struct named_eq_op : adobe::name_t {};
+    struct named_rel_op : adobe::name_t {};
+    struct named_mul_op : adobe::name_t {};
+}
+
 namespace boost { namespace spirit { namespace traits
 {
     // This template specialization is required by Spirit.Lex to automatically
@@ -98,6 +104,38 @@ namespace boost { namespace spirit { namespace traits
     {
         static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
             { attr = adobe::name_t(std::string(first, last).c_str()); }
+    };
+
+    template <typename Iter>
+    struct assign_to_attribute_from_iterators<GG::named_eq_op, Iter>
+    {
+        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
+            { attr = *first == '=' ? adobe::equal_k : adobe::not_equal_k; }
+    };
+
+    template <typename Iter>
+    struct assign_to_attribute_from_iterators<GG::named_rel_op, Iter>
+    {
+        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
+            {
+                std::ptrdiff_t dist = std::distance(first, last);
+                attr =
+                    *first == '<' ?
+                    (dist == 1 ? adobe::less_k : adobe::less_equal_k) :
+                    (dist == 1 ? adobe::greater_k : adobe::greater_equal_k);
+            }
+    };
+
+    template <typename Iter>
+    struct assign_to_attribute_from_iterators<GG::named_mul_op, Iter>
+    {
+        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
+            {
+                attr =
+                    *first == '*' ?
+                    adobe::multiply_k :
+                    (*first == '/' ? adobe::divide_k : adobe::modulus_k);
+            }
     };
 
 } } }
@@ -326,10 +364,19 @@ namespace GG {
     struct lexer :
         boost::spirit::lex::lexer<Lexer>
     {
-        lexer() :
+        lexer(const adobe::name_t* first_keyword,
+              const adobe::name_t* last_keyword) :
             identifier("[a-zA-Z]\\w*"),
             lead_comment("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"),
-            trail_comment("\\/\\/.*$")
+            trail_comment("\\/\\/.*$"),
+            quoted_string("\\\"[^\\\"]*\\\"|'[^']*'"),
+            number("\\d+(\\.\\d*)?"),
+            eq_op("==|!="),
+            rel_op("<|>|<=|>="),
+            mul_op("\\*|\\/|%"),
+            define("<=="),
+            or_("\"||\""),
+            and_("&&")
             {
                 namespace lex = boost::spirit::lex;
                 namespace phoenix = boost::phoenix;
@@ -339,11 +386,38 @@ namespace GG {
                 using lex::token_def;
                 using phoenix::val;
 
+                std::string keywords_regex = "empty|true|false";
+                while (first_keyword != last_keyword) {
+                    keywords_regex += '|';
+                    keywords_regex += first_keyword->c_str();
+                    ++first_keyword;
+                }
+                keyword = keywords_regex;
+
                 this->self =
-                    identifier
+                    keyword
+                  | identifier
                   | lead_comment
                   | trail_comment
+                  | quoted_string
+                  | number
+                  | eq_op
+                  | rel_op
+                  | mul_op
+                  | define
+                  | or_
+                  | and_
+                  | '+'
+                  | '-'
+                  | '!'
+                  | '?'
                   | ':'
+                  | '.'
+                  | ','
+                  | '('
+                  | ')'
+                  | '['
+                  | ']'
                   | '{'
                   | '}'
                   | '@'
@@ -353,9 +427,18 @@ namespace GG {
                 this->self("WS") = token_def<>("\\s+");
             }
 
+        boost::spirit::lex::token_def<adobe::name_t> keyword;
         boost::spirit::lex::token_def<adobe::name_t> identifier;
         boost::spirit::lex::token_def<std::string> lead_comment;
         boost::spirit::lex::token_def<std::string> trail_comment;
+        boost::spirit::lex::token_def<std::string> quoted_string;
+        boost::spirit::lex::token_def<double> number;
+        boost::spirit::lex::token_def<named_eq_op> eq_op;
+        boost::spirit::lex::token_def<named_rel_op> rel_op;
+        boost::spirit::lex::token_def<named_mul_op> mul_op;
+        boost::spirit::lex::token_def<boost::spirit::lex::omit> define;
+        boost::spirit::lex::token_def<boost::spirit::lex::omit> or_;
+        boost::spirit::lex::token_def<boost::spirit::lex::omit> and_;
     };
 
     template <typename Iterator, typename Lexer>
@@ -372,18 +455,37 @@ namespace GG {
 
 #define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << _1 << std::endl]
 #define DUMP_LIT(x) lit(x)[std::cout << val("'") << val(x) << val("'") << std::endl]
+#define DUMP_UNATTRIBUTED(x) tok.x[std::cout << val(#x) << std::endl]
 
                 start =
                     +(
-                        DUMP_TOK(identifier)
+                        DUMP_TOK(keyword)
+                      | DUMP_TOK(identifier)
                       | DUMP_TOK(lead_comment)
                       | DUMP_TOK(trail_comment)
+                      | DUMP_TOK(quoted_string)
+                      | DUMP_TOK(number)
+                      | DUMP_TOK(eq_op)
+                      | DUMP_TOK(rel_op)
+                      | DUMP_TOK(mul_op)
+                      | DUMP_UNATTRIBUTED(define)
+                      | DUMP_UNATTRIBUTED(or_)
+                      | DUMP_UNATTRIBUTED(and_)
+                      | DUMP_LIT('-')
+                      | DUMP_LIT('+')
+                      | DUMP_LIT('!')
+                      | DUMP_LIT('?')
                       | DUMP_LIT(':')
+                      | DUMP_LIT('.')
+                      | DUMP_LIT(',')
+                      | DUMP_LIT('(')
+                      | DUMP_LIT(')')
+                      | DUMP_LIT('[')
+                      | DUMP_LIT(']')
                       | DUMP_LIT('{')
                       | DUMP_LIT('}')
                       | DUMP_LIT('@')
                       | DUMP_LIT(';')
-                      | DUMP_LIT('\n')
                     )
                     ;
 
@@ -394,13 +496,25 @@ namespace GG {
         boost::spirit::qi::rule<Iterator, boost::spirit::qi::in_state_skipper<Lexer> > start;
     };
 
+    adobe::aggregate_name_t input_k      = { "input" };
+    adobe::aggregate_name_t output_k     = { "output" };
+    adobe::aggregate_name_t interface_k  = { "interface" };
+    adobe::aggregate_name_t logic_k      = { "logic" };
+    adobe::aggregate_name_t constant_k   = { "constant" };
+    adobe::aggregate_name_t invariant_k  = { "invariant" };
+    adobe::aggregate_name_t sheet_k      = { "sheet" };
+    adobe::aggregate_name_t unlink_k     = { "unlink" };
+    adobe::aggregate_name_t when_k       = { "when" };
+    adobe::aggregate_name_t relate_k     = { "relate" };
+
     void TestLexer()
     {
         typedef boost::spirit::lex::lexertl::token<
             std::string::const_iterator,
             boost::mpl::vector<
                 adobe::name_t,
-                std::string
+                std::string,
+                double
             >
         > token_type;
 
@@ -412,22 +526,24 @@ namespace GG {
 
         typedef lexer_test_grammar<token_iterator, lexer_type::lexer_def> lexer_test_grammar;
 
-        lexer_type lexer;
+        const adobe::name_t s_keywords[] = {
+            input_k,
+            output_k,
+            interface_k,
+            logic_k,
+            constant_k,
+            invariant_k,
+            sheet_k,
+            unlink_k,
+            when_k,
+            relate_k
+        };
+        const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
+
+        lexer_type lexer(s_keywords, s_keywords + s_num_keywords);
         lexer_test_grammar test_grammar(lexer);
 
-        const std::string str =
-            "/*\n"
-            "    Copyright 2005-2007 Adobe Systems Incorporated\n"
-            "    Distributed under the MIT License (see accompanying file LICENSE_1_0_0.txt\n"
-            "    or a copy at http://stlab.adobe.com/licenses.html)\n"
-            "*/\n"
-            "\n"
-            "sheet empty_containers\n"
-            "{\n"
-            "interface:\n"
-            "    tab_group_visible : @first; // trail comment here, nothing to see\n"
-            "}\n"
-            ;
+        const std::string str = read_file("empty_containers.adm");
 
         std::string::const_iterator it = str.begin();
         token_iterator iter = lexer.begin(it, str.end());

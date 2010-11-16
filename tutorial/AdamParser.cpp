@@ -11,6 +11,8 @@
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 
 
+using namespace GG;
+
 namespace {
 
     struct make_name_t_
@@ -338,7 +340,39 @@ namespace {
         static const expression_parser_rules s_parser(GG::AdamLexer());
         return s_parser;
     }
+
+    adobe::aggregate_name_t input_k      = { "input" };
+    adobe::aggregate_name_t output_k     = { "output" };
+    adobe::aggregate_name_t interface_k  = { "interface" };
+    adobe::aggregate_name_t logic_k      = { "logic" };
+    adobe::aggregate_name_t constant_k   = { "constant" };
+    adobe::aggregate_name_t invariant_k  = { "invariant" };
+    adobe::aggregate_name_t sheet_k      = { "sheet" };
+    adobe::aggregate_name_t unlink_k     = { "unlink" };
+    adobe::aggregate_name_t when_k       = { "when" };
+    adobe::aggregate_name_t relate_k     = { "relate" };
 }
 
-const GG::AdamExpressionParserRule& GG::AdamExpressionParser()
+const lexer& GG::AdamLexer()
+{
+    static const adobe::name_t s_keywords[] = {
+        input_k,
+        output_k,
+        interface_k,
+        logic_k,
+        constant_k,
+        invariant_k,
+        sheet_k,
+        unlink_k,
+        when_k,
+        relate_k
+    };
+    static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
+
+    static const lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
+
+    return s_lexer;    
+}
+
+const AdamExpressionParserRule& GG::AdamExpressionParser()
 { return adam_expression_parser().expression; }

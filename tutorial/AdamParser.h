@@ -28,7 +28,7 @@
 #ifndef _GG_AdamParser_h_
 #define _GG_AdamParser_h_
 
-#include "AdamLexer.h"
+#include "Lexer.h"
 
 #include <GG/Base.h>
 #include <GG/adobe/array_fwd.hpp>
@@ -41,6 +41,8 @@
 
 
 namespace GG {
+
+const lexer& AdamLexer();
 
 /** The type of Spirit 2 parser returned by AdamExpressionParser(). */
 typedef boost::spirit::qi::rule<

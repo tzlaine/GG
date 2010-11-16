@@ -23,10 +23,10 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file AdamLexer.h TODO. */
+/** \file Lexer.h TODO. */
 
-#ifndef _GG_AdamLexer_h_
-#define _GG_AdamLexer_h_
+#ifndef _GG_Lexer_h_
+#define _GG_Lexer_h_
 
 #include <GG/adobe/name_fwd.hpp>
 #include <GG/adobe/implementation/token.hpp>
@@ -83,8 +83,6 @@ typedef lexer::iterator_type token_iterator;
 typedef lexer::lexer_def lexer_def;
 
 typedef boost::spirit::qi::in_state_skipper<lexer_def> skipper_type;
-
-const lexer& AdamLexer();
 
 }
 
@@ -145,4 +143,4 @@ namespace boost { namespace spirit { namespace traits
 
 } } }
 
-#endif // _GG_AdamLexer_h_
+#endif // _GG_Lexer_h_

@@ -1,4 +1,4 @@
-#include "AdamLexer.h"
+#include "Lexer.h"
 
 #include <GG/AdamDlg.h>
 #include <GG/Layout.h>

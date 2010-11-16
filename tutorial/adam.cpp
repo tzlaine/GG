@@ -1,3 +1,5 @@
+#include "AdamLexer.h"
+
 #include <GG/AdamDlg.h>
 #include <GG/Layout.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
@@ -39,7 +41,6 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <GG/adobe/implementation/token.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/spirit/include/lex_lexertl.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -88,57 +89,6 @@ std::ostream& operator<<(std::ostream& stream, const line_position_t& x)
 }
 
 }
-
-namespace GG {
-    struct named_eq_op : adobe::name_t {};
-    struct named_rel_op : adobe::name_t {};
-    struct named_mul_op : adobe::name_t {};
-}
-
-namespace boost { namespace spirit { namespace traits
-{
-    // This template specialization is required by Spirit.Lex to automatically
-    // convert an iterator pair to an adobe::name_t in the lexer below.
-    template <typename Iter>
-    struct assign_to_attribute_from_iterators<adobe::name_t, Iter>
-    {
-        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
-            { attr = adobe::name_t(std::string(first, last).c_str()); }
-    };
-
-    template <typename Iter>
-    struct assign_to_attribute_from_iterators<GG::named_eq_op, Iter>
-    {
-        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
-            { attr = *first == '=' ? adobe::equal_k : adobe::not_equal_k; }
-    };
-
-    template <typename Iter>
-    struct assign_to_attribute_from_iterators<GG::named_rel_op, Iter>
-    {
-        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
-            {
-                std::ptrdiff_t dist = std::distance(first, last);
-                attr =
-                    *first == '<' ?
-                    (dist == 1 ? adobe::less_k : adobe::less_equal_k) :
-                    (dist == 1 ? adobe::greater_k : adobe::greater_equal_k);
-            }
-    };
-
-    template <typename Iter>
-    struct assign_to_attribute_from_iterators<GG::named_mul_op, Iter>
-    {
-        static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
-            {
-                attr =
-                    *first == '*' ?
-                    adobe::multiply_k :
-                    (*first == '/' ? adobe::divide_k : adobe::modulus_k);
-            }
-    };
-
-} } }
 
 namespace GG {
 
@@ -360,87 +310,6 @@ namespace GG {
 
     //bool dummy = TestNewConnections();
 
-    template <typename Lexer>
-    struct lexer :
-        boost::spirit::lex::lexer<Lexer>
-    {
-        lexer(const adobe::name_t* first_keyword,
-              const adobe::name_t* last_keyword) :
-            identifier("[a-zA-Z]\\w*"),
-            lead_comment("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"),
-            trail_comment("\\/\\/.*$"),
-            quoted_string("\\\"[^\\\"]*\\\"|'[^']*'"),
-            number("\\d+(\\.\\d*)?"),
-            eq_op("==|!="),
-            rel_op("<|>|<=|>="),
-            mul_op("\\*|\\/|%"),
-            define("<=="),
-            or_("\"||\""),
-            and_("&&")
-            {
-                namespace lex = boost::spirit::lex;
-                namespace phoenix = boost::phoenix;
-                using lex::_end;
-                using lex::_start;
-                using lex::_val;
-                using lex::token_def;
-                using phoenix::val;
-
-                std::string keywords_regex = "empty|true|false";
-                while (first_keyword != last_keyword) {
-                    keywords_regex += '|';
-                    keywords_regex += first_keyword->c_str();
-                    ++first_keyword;
-                }
-                keyword = keywords_regex;
-
-                this->self =
-                    keyword
-                  | identifier
-                  | lead_comment
-                  | trail_comment
-                  | quoted_string
-                  | number
-                  | eq_op
-                  | rel_op
-                  | mul_op
-                  | define
-                  | or_
-                  | and_
-                  | '+'
-                  | '-'
-                  | '!'
-                  | '?'
-                  | ':'
-                  | '.'
-                  | ','
-                  | '('
-                  | ')'
-                  | '['
-                  | ']'
-                  | '{'
-                  | '}'
-                  | '@'
-                  | ';'
-                    ;
-
-                this->self("WS") = token_def<>("\\s+");
-            }
-
-        boost::spirit::lex::token_def<adobe::name_t> keyword;
-        boost::spirit::lex::token_def<adobe::name_t> identifier;
-        boost::spirit::lex::token_def<std::string> lead_comment;
-        boost::spirit::lex::token_def<std::string> trail_comment;
-        boost::spirit::lex::token_def<std::string> quoted_string;
-        boost::spirit::lex::token_def<double> number;
-        boost::spirit::lex::token_def<named_eq_op> eq_op;
-        boost::spirit::lex::token_def<named_rel_op> rel_op;
-        boost::spirit::lex::token_def<named_mul_op> mul_op;
-        boost::spirit::lex::token_def<boost::spirit::lex::omit> define;
-        boost::spirit::lex::token_def<boost::spirit::lex::omit> or_;
-        boost::spirit::lex::token_def<boost::spirit::lex::omit> and_;
-    };
-
     template <typename Iterator, typename Lexer>
     struct lexer_test_grammar 
         : boost::spirit::qi::grammar<Iterator, boost::spirit::qi::in_state_skipper<Lexer> >
@@ -520,7 +389,7 @@ namespace GG {
 
         typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
 
-        typedef lexer<spirit_lexer_base_type> lexer_type;
+        typedef detail::lexer<spirit_lexer_base_type> lexer_type;
 
         typedef lexer_type::iterator_type token_iterator;
 
@@ -1516,8 +1385,6 @@ void AdamGGApp::FinalCleanup()
 extern "C" // Note the use of C-linkage, as required by SDL.
 int main(int argc, char* argv[])
 {
-    GG::TestLexer();
-
     AdamGGApp app;
 
     try {

@@ -34,79 +34,33 @@
 #include <boost/spirit/include/lex_lexertl.hpp>
 
 
-namespace GG { namespace detail {
+namespace GG {
 
-struct named_eq_op : adobe::name_t {};
-struct named_rel_op : adobe::name_t {};
-struct named_mul_op : adobe::name_t {};
+typedef std::string::const_iterator text_iterator;
 
-template <typename Lexer>
+typedef boost::spirit::lex::lexertl::token<
+    text_iterator,
+    boost::mpl::vector<
+        adobe::name_t,
+        std::string,
+        double,
+        bool
+    >
+> token_type;
+
+typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
+
+namespace detail {
+    struct named_eq_op : adobe::name_t {};
+    struct named_rel_op : adobe::name_t {};
+    struct named_mul_op : adobe::name_t {};
+}
+
 struct lexer :
-    boost::spirit::lex::lexer<Lexer>
+    boost::spirit::lex::lexer<spirit_lexer_base_type>
 {
     lexer(const adobe::name_t* first_keyword,
-          const adobe::name_t* last_keyword) :
-        keyword_true_false("true|false"),
-        keyword_empty("empty"),
-        identifier("[a-zA-Z]\\w*"),
-        lead_comment("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"),
-        trail_comment("\\/\\/.*$"),
-        quoted_string("\\\"[^\\\"]*\\\"|'[^']*'"),
-        number("\\d+(\\.\\d*)?"),
-        eq_op("==|!="),
-        rel_op("<|>|<=|>="),
-        mul_op("\\*|\\/|%"),
-        define("<=="),
-        or_("\"||\""),
-        and_("&&")
-        {
-            namespace lex = boost::spirit::lex;
-
-            std::string keywords_regex;
-            if (first_keyword != last_keyword) {
-                keywords_regex = (first_keyword++)->c_str();
-                while (first_keyword != last_keyword) {
-                    keywords_regex += '|';
-                    keywords_regex += first_keyword->c_str();
-                    ++first_keyword;
-                }
-                keyword = keywords_regex;
-            }
-
-            this->self =
-                keyword
-              | keyword_true_false
-              | keyword_empty
-              | identifier
-              | lead_comment
-              | trail_comment
-              | quoted_string
-              | number
-              | eq_op
-              | rel_op
-              | mul_op
-              | define
-              | or_
-              | and_
-              | '+'
-              | '-'
-              | '!'
-              | '?'
-              | ':'
-              | '.'
-              | ','
-              | '('
-              | ')'
-              | '['
-              | ']'
-              | '{'
-              | '}'
-              | '@'
-              | ';'
-                ;
-
-            this->self("WS") = lex::token_def<>("\\s+");
-        }
+          const adobe::name_t* last_keyword);
 
     boost::spirit::lex::token_def<adobe::name_t> keyword;
     boost::spirit::lex::token_def<bool> keyword_true_false;
@@ -116,15 +70,21 @@ struct lexer :
     boost::spirit::lex::token_def<std::string> trail_comment;
     boost::spirit::lex::token_def<std::string> quoted_string;
     boost::spirit::lex::token_def<double> number;
-    boost::spirit::lex::token_def<named_eq_op> eq_op;
-    boost::spirit::lex::token_def<named_rel_op> rel_op;
-    boost::spirit::lex::token_def<named_mul_op> mul_op;
+    boost::spirit::lex::token_def<detail::named_eq_op> eq_op;
+    boost::spirit::lex::token_def<detail::named_rel_op> rel_op;
+    boost::spirit::lex::token_def<detail::named_mul_op> mul_op;
     boost::spirit::lex::token_def<boost::spirit::lex::omit> define;
     boost::spirit::lex::token_def<boost::spirit::lex::omit> or_;
     boost::spirit::lex::token_def<boost::spirit::lex::omit> and_;
 };
 
-} }
+typedef lexer::iterator_type token_iterator;
+
+typedef lexer::lexer_def lexer_def;
+
+typedef boost::spirit::qi::in_state_skipper<lexer_def> skipper_type;
+
+}
 
 
 // These template specializations are required by Spirit.Lex to automatically
@@ -143,10 +103,9 @@ namespace boost { namespace spirit { namespace traits
     };
 
     template <>
-    struct assign_to_attribute_from_iterators<bool, std::string::const_iterator, void>
+    struct assign_to_attribute_from_iterators<bool, GG::text_iterator, void>
     {
-        typedef std::string::const_iterator Iter;
-        static void call(const Iter& first, const Iter& last, bool& attr)
+        static void call(const GG::text_iterator& first, const GG::text_iterator& last, bool& attr)
             { attr = *first == 't' ? true : false; }
     };
 

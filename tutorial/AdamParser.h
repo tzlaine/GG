@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file AdamExpressionParser.h TODO. */
+/** \file AdamParser.h TODO. */
 
 #ifndef _GG_AdamParser_h_
 #define _GG_AdamParser_h_

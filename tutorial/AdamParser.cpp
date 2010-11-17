@@ -71,23 +71,26 @@ namespace {
         { typedef void type; };
 
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-        void operator()(Arg1 _1, Arg2 _2, Arg3 _3, Arg4 _4) const
+        void operator()(Arg1 first, Arg2 last, Arg3 it, Arg4 name) const
             {
-                if (_3 == _2) {
+                if (it == last) {
                     std::cout
                         << "Parse error: expected "
-                        << _4
+                        << name
                         << " before end of expression inupt."
                         << std::endl;
                 } else {
+                    text_iterator text_end =
+                        boost::next(first, std::distance(first, last) - 1)->matched_.second;
                     std::cout
                         << "Parse error: expected "
-                        << _4
-                        << " here:"
-                        << "\n  "
-                        << std::string(_1, _2)
-                        << "\n  "
-                        << std::string(std::distance(_1, _3), '~')
+                        << name
+                        << " here:\n"
+                        << "  "
+                        << std::string(first->matched_.first, text_end)
+                        << "\n"
+                        << "  "
+                        << std::string(std::distance(first->matched_.first, it->matched_.first), '~')
                         << '^'
                         << std::endl;
                 }
@@ -96,7 +99,14 @@ namespace {
 
     struct expression_parser_rules
     {
-        expression_parser_rules(const GG::lexer& tok)
+        typedef boost::spirit::qi::rule<
+            GG::token_iterator,
+            adobe::name_t(),
+            GG::skipper_type
+        > name_rule;
+
+        expression_parser_rules(const GG::lexer& tok, const name_rule& keyword_) :
+            keyword(keyword_)
         {
             namespace ascii = boost::spirit::ascii;
             namespace phoenix = boost::phoenix;
@@ -233,7 +243,7 @@ namespace {
             keyword =
                 tok.keyword_true_false[_val = if_else(_1, adobe::true_k, adobe::false_k)]
               | tok.keyword_empty[_val = adobe::empty_k]
-              | tok.keyword[_val = _1];
+              | keyword_[_val = _1];
 
 
             // define names for rules, to be used in error reporting
@@ -258,17 +268,11 @@ namespace {
             NAME(name);
             NAME(boolean);
             NAME(string);
-            NAME(keyword);
 #undef NAME
 
             qi::on_error<qi::fail>(expression, report_error(_1, _2, _3, _4));
         }
 
-        typedef boost::spirit::qi::rule<
-            GG::token_iterator,
-            adobe::name_t(),
-            GG::skipper_type
-        > name_rule;
         typedef boost::spirit::qi::rule<
             GG::token_iterator,
             void(adobe::array_t*),
@@ -335,12 +339,6 @@ namespace {
         boost::phoenix::function<report_error_> report_error;
     };
 
-    const expression_parser_rules& adam_expression_parser()
-    {
-        static const expression_parser_rules s_parser(GG::AdamLexer());
-        return s_parser;
-    }
-
     adobe::aggregate_name_t input_k      = { "input" };
     adobe::aggregate_name_t output_k     = { "output" };
     adobe::aggregate_name_t interface_k  = { "interface" };
@@ -369,10 +367,46 @@ const lexer& GG::AdamLexer()
     };
     static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
 
-    static const lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
+    static lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
 
     return s_lexer;    
 }
 
 const AdamExpressionParserRule& GG::AdamExpressionParser()
-{ return adam_expression_parser().expression; }
+{
+    using boost::spirit::qi::token;
+    using boost::spirit::qi::_1;
+    using boost::spirit::qi::_val;
+
+    lexer& tok = const_cast<lexer&>(AdamLexer());
+    assert(tok.keywords.size() == 10u);
+    const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
+    assert(tok.keywords.size() == 10u);
+
+    static expression_parser_rules::name_rule adam_keywords =
+        input[_val = _1]
+      | output[_val = _1]
+      | interface[_val = _1]
+      | logic[_val = _1]
+      | constant[_val = _1]
+      | invariant[_val = _1]
+      | sheet[_val = _1]
+      | unlink[_val = _1]
+      | when[_val = _1]
+      | relate[_val = _1]
+        ;
+    adam_keywords.name("keyword");
+
+    static const expression_parser_rules s_parser(GG::AdamLexer(), adam_keywords);
+
+    return s_parser.expression;
+}

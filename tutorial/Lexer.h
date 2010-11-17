@@ -31,7 +31,9 @@
 #include <GG/adobe/name_fwd.hpp>
 #include <GG/adobe/implementation/token.hpp>
 
+#define BOOST_SPIRIT_DEBUG // turn on tracking of match locations for tokens
 #include <boost/spirit/include/lex_lexertl.hpp>
+#undef BOOST_SPIRIT_DEBUG
 
 
 namespace GG {
@@ -62,7 +64,6 @@ struct lexer :
     lexer(const adobe::name_t* first_keyword,
           const adobe::name_t* last_keyword);
 
-    boost::spirit::lex::token_def<adobe::name_t> keyword;
     boost::spirit::lex::token_def<bool> keyword_true_false;
     boost::spirit::lex::token_def<boost::spirit::lex::omit> keyword_empty;
     boost::spirit::lex::token_def<adobe::name_t> identifier;
@@ -76,6 +77,7 @@ struct lexer :
     boost::spirit::lex::token_def<boost::spirit::lex::omit> define;
     boost::spirit::lex::token_def<boost::spirit::lex::omit> or_;
     boost::spirit::lex::token_def<boost::spirit::lex::omit> and_;
+    std::map<adobe::name_t, boost::spirit::lex::token_def<adobe::name_t> > keywords;
 };
 
 typedef lexer::iterator_type token_iterator;

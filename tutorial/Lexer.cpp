@@ -24,6 +24,8 @@
 
 #include "Lexer.h"
 
+#include <GG/adobe/name.hpp>
+
 
 using namespace GG;
 
@@ -45,22 +47,20 @@ lexer::lexer(const adobe::name_t* first_keyword,
 {
     namespace lex = boost::spirit::lex;
 
-    std::string keywords_regex;
-    if (first_keyword != last_keyword) {
-        keywords_regex = (first_keyword++)->c_str();
-        while (first_keyword != last_keyword) {
-            keywords_regex += '|';
-            keywords_regex += first_keyword->c_str();
-            ++first_keyword;
-        }
-        keyword = keywords_regex;
+    self =
+        keyword_true_false
+      | keyword_empty;
+
+    while (first_keyword != last_keyword) {
+        self.add(
+            keywords[*first_keyword] =
+            boost::spirit::lex::token_def<adobe::name_t>(first_keyword->c_str())
+        );
+        ++first_keyword;
     }
 
-    self =
-        keyword
-      | keyword_true_false
-      | keyword_empty
-      | identifier
+    self +=
+        identifier
       | lead_comment
       | trail_comment
       | quoted_string

@@ -323,11 +323,21 @@ namespace GG {
 #define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << _1 << std::endl]
 #define DUMP_LIT(x) lit(x)[std::cout << val("'") << val(x) << val("'") << std::endl]
 #define DUMP_UNATTRIBUTED(x) tok.x[std::cout << val(#x) << std::endl]
+#define DUMP_KEYWORD_BY_ID(x) boost::spirit::qi::token(x##_id)[std::cout << val("keyword -- ") << val(#x) << std::endl]
 
                 start =
                     +(
-                        DUMP_TOK(keyword)
-                      | DUMP_TOK(identifier)
+                        /*DUMP_KEYWORD_BY_ID(input)
+                      | DUMP_KEYWORD_BY_ID(output)
+                      | DUMP_KEYWORD_BY_ID(interface)
+                      | DUMP_KEYWORD_BY_ID(logic)
+                      | DUMP_KEYWORD_BY_ID(constant)
+                      | DUMP_KEYWORD_BY_ID(invariant)
+                      | DUMP_KEYWORD_BY_ID(sheet)
+                      | DUMP_KEYWORD_BY_ID(unlink)
+                      | DUMP_KEYWORD_BY_ID(when)
+                      | DUMP_KEYWORD_BY_ID(relate)
+                      | */DUMP_TOK(identifier)
                       | DUMP_TOK(lead_comment)
                       | DUMP_TOK(trail_comment)
                       | DUMP_TOK(quoted_string)
@@ -378,7 +388,7 @@ namespace GG {
 
     void TestLexer()
     {
-        const adobe::name_t s_keywords[] = {
+        static const adobe::name_t s_keywords[] = {
             input_k,
             output_k,
             interface_k,
@@ -395,7 +405,7 @@ namespace GG {
         GG::lexer lexer(s_keywords, s_keywords + s_num_keywords);
         lexer_test_grammar test_grammar(lexer);
 
-        const std::string str = read_file("empty_containers.adm");
+        const std::string str = read_file("test_expressions");
 
         std::string::const_iterator it = str.begin();
         token_iterator iter = lexer.begin(it, str.end());

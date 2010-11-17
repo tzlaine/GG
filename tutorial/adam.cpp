@@ -50,6 +50,7 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <boost/spirit/home/phoenix/container.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/spirit/home/phoenix.hpp>
 
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
@@ -568,7 +569,6 @@ namespace GG {
     //bool dummy2 = TestExpressionParser();
 
 
-#if 0
 #define GET_REF(type_, name)                            \
     struct get_##name##_                                \
     {                                                   \
@@ -636,6 +636,26 @@ namespace GG {
             { arg1.add_interface_proc_m(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9); }
     };
 
+    struct strip_c_comment_
+    {
+        template <typename Arg>
+        struct result
+        { typedef std::string type; };
+
+        std::string operator()(const std::string& arg1) const
+            { return arg1.substr(2, arg1.size() - 4); }
+    };
+
+    struct strip_cpp_comment_
+    {
+        template <typename Arg>
+        struct result
+        { typedef std::string type; };
+
+        std::string operator()(const std::string& arg1) const
+            { return arg1.substr(2, arg1.size() - 2); }
+    };
+
     struct report_error_
     {
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
@@ -643,41 +663,35 @@ namespace GG {
         { typedef void type; };
 
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-        void operator()(Arg1 _1, Arg2 _2, Arg3 _3, Arg4 _4) const
+        void operator()(Arg1 first, Arg2 last, Arg3 it, Arg4 name) const
             {
-                if (_3 == _2) {
+                if (it == last) {
                     std::cout
                         << "Parse error: expected "
-                        << _4
+                        << name
                         << " before end of expression inupt."
                         << std::endl;
                 } else {
+                    text_iterator text_end =
+                        boost::next(first, std::distance(first, last) - 1)->matched_.second;
                     std::cout
                         << "Parse error: expected "
-                        << _4
-                        << " here:"
-                        << "\n  "
-                        << std::string(_1, _2)
-                        << "\n  "
-                        << std::string(std::distance(_1, _3), '~')
+                        << name
+                        << " here:\n"
+                        << "  "
+                        << std::string(first->matched_.first, text_end)
+                        << "\n"
+                        << "  "
+                        << std::string(std::distance(first->matched_.first, it->matched_.first), '~')
                         << '^'
                         << std::endl;
                 }
             }
     };
 
-    template <typename Iter>
-    struct adam_parser :
-        boost::spirit::qi::grammar<Iter, void(), boost::spirit::ascii::space_type>
+    struct adam_parser_rules
     {
-        typedef boost::spirit::ascii::space_type space_type;
-
-        adam_parser(const adobe::adam_callback_suite_t& callbacks_) :
-            adam_parser::base_type(sheet_specifier),
-            expression(AdamExpressionParser()),
-            identifier(AdamIdentifierParser()),
-            lead_comment(LeadCommentParser()),
-            trail_comment(TrailCommentParser()),
+        adam_parser_rules(const adobe::adam_callback_suite_t& callbacks_) :
             callbacks(callbacks_)
         {
             namespace ascii = boost::spirit::ascii;
@@ -714,9 +728,32 @@ namespace GG {
             using qi::lexeme;
             using qi::lit;
 
+            lexer& tok = const_cast<lexer&>(AdamLexer());
+            assert(tok.keywords.size() == 10u);
+            const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
+            assert(tok.keywords.size() == 10u);
+
+            const AdamExpressionParserRule& expression = AdamExpressionParser();
+
             // note that the lead comment, sheet name, and trail comment are currently all ignored
             sheet_specifier =
-                -lead_comment >> "sheet" > identifier > "{" >> *qualified_cell_decl > "}" >> -trail_comment;
+                -lead_comment
+             >> sheet
+              > tok.identifier
+              > '{'
+             >> *qualified_cell_decl
+              > '}'
+             >> -trail_comment
+                ;
 
             qualified_cell_decl =
                 interface_set_decl
@@ -724,38 +761,39 @@ namespace GG {
               | output_set_decl
               | constant_set_decl
               | logic_set_decl
-              | invariant_set_decl;
+              | invariant_set_decl
+                ;
 
             interface_set_decl =
-                lit("interface") > ":" > *( -lead_comment[_a = _1] >> interface_cell_decl(_a) );
+                interface > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> interface_cell_decl(_a) );
 
             input_set_decl =
-                lit("input") > ":" > *( -lead_comment[_a = _1] >> input_cell_decl(_a) );
+                input > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> input_cell_decl(_a) );
 
             output_set_decl =
-                lit("output") > ":" > *( -lead_comment[_a = _1] >> output_cell_decl(_a) );
+                output > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> output_cell_decl(_a) );
 
             constant_set_decl =
-                lit("constant") > ":" > *( -lead_comment[_a = _1] >> constant_cell_decl(_a) );
+                constant > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> constant_cell_decl(_a) );
 
             logic_set_decl =
-                lit("logic") > ":" > *( -lead_comment[_a = _1] >> logic_cell_decl(_a) );
+                logic > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> logic_cell_decl(_a) );
 
             invariant_set_decl =
-                lit("invariant") > ":" > *( -lead_comment[_a = _1] >> invariant_cell_decl(_a) );
+                invariant > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> invariant_cell_decl(_a) );
 
             interface_cell_decl =
                 (
                     (
-                        identifier[_a = _1][_b = val(true)]
-                      | (lit("unlink")[_b = val(false)] > identifier[_a = _1])
+                        tok.identifier[_a = _1, _b = val(true)]
+                      | (unlink[_b = val(false)] > tok.identifier[_a = _1])
                     )
                  >> -initializer(&_c)
                  >> -define_expression(&_d)
                   > end_statement(&_g)
                 )[add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)];
 
-            input_cell_decl = identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d)[
+            input_cell_decl = tok.identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
             ];
 
@@ -763,7 +801,7 @@ namespace GG {
                 add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
             ];
 
-            constant_cell_decl = identifier[_a = _1] > initializer(&_b) > end_statement(&_d)[
+            constant_cell_decl = tok.identifier[_a = _1] > initializer(&_b) > end_statement(&_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
             ];
 
@@ -780,36 +818,40 @@ namespace GG {
             ];
 
             relate_decl =
-                ("relate" | (conditional(_r1) > "relate"))
-              > "{"
+                (relate | (conditional(_r1) > relate))
+              > '{'
               > relate_expression(&_a)
               > relate_expression(&_b)[
-                  push_back(*_r2, _a) ][ push_back(*_r2, _b) ][ clear(*get_expression(&_a))
+                  push_back(*_r2, _a),
+                  push_back(*_r2, _b),
+                  clear(*get_expression(&_a))
               ]
              >> *(
                      relate_expression(&_a)[
-                         (
-                             push_back(*_r2, _a),
-                             clear(*get_expression(&_a))
-                         )
+                         push_back(*_r2, _a),
+                         clear(*get_expression(&_a))
                      ]
                  )
-              > "}"
+              > '}'
              >> -trail_comment[*_r3 = _1];
 
             relate_expression =
                 -lead_comment[get_detailed(_r1) = _1]
              >> named_decl(get_name(_r1), get_expression(_r1), get_brief(_r1));
 
-            named_decl = identifier[*_r1 = _1] > define_expression(_r2) > end_statement(_r3);
+            named_decl = tok.identifier[*_r1 = _1] > define_expression(_r2) > end_statement(_r3);
 
-            initializer = ":" > expression(_r1);
+            initializer = ':' > expression(_r1);
 
-            define_expression = "<==" > expression(_r1);
+            define_expression = tok.define > expression(_r1);
 
-            conditional = lit("when") > "(" > expression(_r1) > ")";
+            conditional = when > '(' > expression(_r1) > ')';
 
-            end_statement = ";" >> -trail_comment[*_r1 = _1];
+            end_statement = ';' >> -trail_comment[*_r1 = _1];
+
+            // convenience rules
+            lead_comment = tok.lead_comment[_val = strip_c_comment(_1)];
+            trail_comment = tok.trail_comment[_val = strip_cpp_comment(_1)];
 
             // define names for rules, to be used in error reporting
 #define NAME(x) x.name(#x)
@@ -844,15 +886,15 @@ namespace GG {
         typedef adobe::adam_callback_suite_t::relation_t relation;
         typedef std::vector<relation> relation_set;
 
-        typedef boost::spirit::qi::rule<Iter, void(), space_type> void_rule;
+        typedef boost::spirit::qi::rule<token_iterator, void(), skipper_type> void_rule;
         typedef boost::spirit::qi::rule<
-            Iter,
+            token_iterator,
             void(),
             boost::spirit::qi::locals<std::string>,
-            space_type
+            skipper_type
         > cell_set_rule;
         typedef boost::spirit::qi::rule<
-            Iter,
+            token_iterator,
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
@@ -860,14 +902,8 @@ namespace GG {
                 adobe::line_position_t, // currently unfilled
                 std::string
             >,
-            space_type
+            skipper_type
         > cell_decl_rule;
-
-        // expression parser rules
-        const AdamExpressionParserRule& expression;
-        const AdamIdentifierParserRule& identifier;
-        const AdamStringParserRule& lead_comment;
-        const AdamStringParserRule& trail_comment;
 
         // Adam grammar
         void_rule sheet_specifier;
@@ -881,7 +917,7 @@ namespace GG {
         cell_set_rule invariant_set_decl;
 
         boost::spirit::qi::rule<
-            Iter,
+            token_iterator,
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
@@ -892,7 +928,7 @@ namespace GG {
                 adobe::line_position_t, // currently unfilled
                 std::string
             >,
-            space_type
+            skipper_type
         > interface_cell_decl;
 
         cell_decl_rule input_cell_decl;
@@ -900,7 +936,7 @@ namespace GG {
         cell_decl_rule constant_cell_decl;
 
         boost::spirit::qi::rule<
-            Iter,
+            token_iterator,
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
@@ -909,40 +945,45 @@ namespace GG {
                 std::string,
                 relation_set
             >,
-            space_type
+            skipper_type
         > logic_cell_decl;
 
         cell_decl_rule invariant_cell_decl;
 
         boost::spirit::qi::rule<
-            Iter,
+            token_iterator,
             void(adobe::array_t*, relation_set*, std::string*),
             boost::spirit::qi::locals<relation, relation>,
-            space_type
+            skipper_type
         > relate_decl;
 
-        boost::spirit::qi::rule<Iter, void(relation*), space_type> relate_expression;
+        boost::spirit::qi::rule<token_iterator, void(relation*), skipper_type> relate_expression;
 
         boost::spirit::qi::rule<
-            Iter,
+            token_iterator,
             void(adobe::name_t*, adobe::array_t*, std::string*),
-            space_type
+            skipper_type
         > named_decl;
 
-        boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> initializer;
-        boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> define_expression;
-        boost::spirit::qi::rule<Iter, void(adobe::array_t*), space_type> conditional;
-        boost::spirit::qi::rule<Iter, void(std::string*), space_type> end_statement;
+        boost::spirit::qi::rule<token_iterator, void(adobe::array_t*), skipper_type> initializer;
+        boost::spirit::qi::rule<token_iterator, void(adobe::array_t*), skipper_type> define_expression;
+        boost::spirit::qi::rule<token_iterator, void(adobe::array_t*), skipper_type> conditional;
+        boost::spirit::qi::rule<token_iterator, void(std::string*), skipper_type> end_statement;
+
+        boost::spirit::qi::rule<token_iterator, std::string(), skipper_type> lead_comment;
+        boost::spirit::qi::rule<token_iterator, std::string(), skipper_type> trail_comment;
 
         boost::phoenix::function<add_cell_> add_cell;
         boost::phoenix::function<add_relation_> add_relation;
         boost::phoenix::function<add_interface_> add_interface;
+        boost::phoenix::function<strip_c_comment_> strip_c_comment;
+        boost::phoenix::function<strip_cpp_comment_> strip_cpp_comment;
         boost::phoenix::function<report_error_> report_error;
 
         const adobe::adam_callback_suite_t& callbacks;
     };
 
-    bool TestAdamParser(const adam_parser<std::string::const_iterator>& adam_p,
+    bool TestAdamParser(const adam_parser_rules& adam_rules,
                         adobe::array_t& new_parse,
                         adobe::array_t& old_parse,
                         const adobe::adam_callback_suite_t& old_parse_callbacks,
@@ -962,10 +1003,15 @@ namespace GG {
             std::cout << "original: <parse failure>\n";
         else
             std::cout << "original: " << old_parse << "\n";
-        using boost::spirit::ascii::space;
         using boost::spirit::qi::phrase_parse;
+        std::string::const_iterator it = sheet.begin();
+        token_iterator iter = AdamLexer().begin(it, sheet.end());
+        token_iterator end = AdamLexer().end();
         bool new_parse_failed =
-            !phrase_parse(sheet.begin(), sheet.end(), adam_p, space);
+            !phrase_parse(iter,
+                          end,
+                          adam_rules.sheet_specifier,
+                          boost::spirit::qi::in_state("WS")[AdamLexer().self]);
         if (new_parse_failed)
             std::cout << "new:      <parse failure>\n";
         else
@@ -1092,7 +1138,7 @@ namespace GG {
         new_parse_callbacks.add_cell_proc_m = StoreAddCellParams(new_parse);
         new_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(new_parse);
         new_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(new_parse);
-        adam_parser<std::string::const_iterator> adam_p(new_parse_callbacks);
+        adam_parser_rules adam_rules(new_parse_callbacks);
 
         std::size_t passes = 0;
         std::size_t failures = 0;
@@ -1105,7 +1151,7 @@ namespace GG {
             if (boost::algorithm::ends_with(it->string(), "adm")) {
                 std::string file_contents = read_file(it->string());
                 if (!file_contents.empty()) {
-                    if (TestAdamParser(adam_p, new_parse, old_parse, old_parse_callbacks, it->string(), file_contents))
+                    if (TestAdamParser(adam_rules, new_parse, old_parse, old_parse_callbacks, it->string(), file_contents))
                         ++passes;
                     else
                         ++failures;
@@ -1121,7 +1167,6 @@ namespace GG {
     }
 
     bool dummy3 = TestAdamParser();
-#endif
 
 }
 

@@ -326,10 +326,21 @@ namespace GG {
 
     //bool dummy = TestNewConnections();
 
+    adobe::aggregate_name_t input_k      = { "input" };
+    adobe::aggregate_name_t output_k     = { "output" };
+    adobe::aggregate_name_t interface_k  = { "interface" };
+    adobe::aggregate_name_t logic_k      = { "logic" };
+    adobe::aggregate_name_t constant_k   = { "constant" };
+    adobe::aggregate_name_t invariant_k  = { "invariant" };
+    adobe::aggregate_name_t sheet_k      = { "sheet" };
+    adobe::aggregate_name_t unlink_k     = { "unlink" };
+    adobe::aggregate_name_t when_k       = { "when" };
+    adobe::aggregate_name_t relate_k     = { "relate" };
+
     struct lexer_test_grammar 
         : boost::spirit::qi::grammar<GG::token_iterator, GG::skipper_type>
     {
-        lexer_test_grammar(const GG::lexer& tok) :
+        lexer_test_grammar(GG::lexer& tok) :
             lexer_test_grammar::base_type(start)
             {
                 using boost::spirit::qi::_1;
@@ -339,21 +350,34 @@ namespace GG {
 #define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << _1 << std::endl]
 #define DUMP_LIT(x) lit(x)[std::cout << val("'") << val(x) << val("'") << std::endl]
 #define DUMP_UNATTRIBUTED(x) tok.x[std::cout << val(#x) << std::endl]
-#define DUMP_KEYWORD_BY_ID(x) boost::spirit::qi::token(x##_id)[std::cout << val("keyword -- ") << val(#x) << std::endl]
+#define DUMP_KEYWORD_TOK(x) x[std::cout << val("keyword -- ") << _1 << std::endl]
+
+                assert(tok.keywords.size() == 10u);
+                const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
+                assert(tok.keywords.size() == 10u);
 
                 start =
                     +(
-                        /*DUMP_KEYWORD_BY_ID(input)
-                      | DUMP_KEYWORD_BY_ID(output)
-                      | DUMP_KEYWORD_BY_ID(interface)
-                      | DUMP_KEYWORD_BY_ID(logic)
-                      | DUMP_KEYWORD_BY_ID(constant)
-                      | DUMP_KEYWORD_BY_ID(invariant)
-                      | DUMP_KEYWORD_BY_ID(sheet)
-                      | DUMP_KEYWORD_BY_ID(unlink)
-                      | DUMP_KEYWORD_BY_ID(when)
-                      | DUMP_KEYWORD_BY_ID(relate)
-                      | */DUMP_TOK(identifier)
+                        DUMP_KEYWORD_TOK(input)
+                      | DUMP_KEYWORD_TOK(output)
+                      | DUMP_KEYWORD_TOK(interface)
+                      | DUMP_KEYWORD_TOK(logic)
+                      | DUMP_KEYWORD_TOK(constant)
+                      | DUMP_KEYWORD_TOK(invariant)
+                      | DUMP_KEYWORD_TOK(sheet)
+                      | DUMP_KEYWORD_TOK(unlink)
+                      | DUMP_KEYWORD_TOK(when)
+                      | DUMP_KEYWORD_TOK(relate)
+                      | DUMP_TOK(identifier)
                       | DUMP_TOK(lead_comment)
                       | DUMP_TOK(trail_comment)
                       | DUMP_TOK(quoted_string)
@@ -391,18 +415,7 @@ namespace GG {
         boost::spirit::qi::rule<GG::token_iterator, GG::skipper_type> start;
     };
 
-    adobe::aggregate_name_t input_k      = { "input" };
-    adobe::aggregate_name_t output_k     = { "output" };
-    adobe::aggregate_name_t interface_k  = { "interface" };
-    adobe::aggregate_name_t logic_k      = { "logic" };
-    adobe::aggregate_name_t constant_k   = { "constant" };
-    adobe::aggregate_name_t invariant_k  = { "invariant" };
-    adobe::aggregate_name_t sheet_k      = { "sheet" };
-    adobe::aggregate_name_t unlink_k     = { "unlink" };
-    adobe::aggregate_name_t when_k       = { "when" };
-    adobe::aggregate_name_t relate_k     = { "relate" };
-
-    void TestLexer()
+    bool TestLexer()
     {
         static const adobe::name_t s_keywords[] = {
             input_k,
@@ -433,7 +446,11 @@ namespace GG {
                                         boost::spirit::qi::in_state("WS")[lexer.self]);
 
         exit(0);
+
+        return false;
     }
+
+    //bool dummy2 = TestLexer();
 
     struct expression_parser :
         boost::spirit::qi::grammar<GG::token_iterator, void(), GG::skipper_type>
@@ -581,7 +598,7 @@ namespace GG {
         return false;
     }
 
-    //bool dummy2 = TestExpressionParser();
+    //bool dummy3 = TestExpressionParser();
 
 
     bool TestAdamParser(adobe::array_t& new_parse,
@@ -758,7 +775,7 @@ namespace GG {
         return false;
     }
 
-    bool dummy3 = TestAdamParser();
+    //bool dummy4 = TestAdamParser();
 
 }
 

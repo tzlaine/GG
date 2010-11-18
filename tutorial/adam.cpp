@@ -441,7 +441,7 @@ namespace GG {
         expression_parser(adobe::array_t& stack, const AdamExpressionParserRule& expression) :
             expression_parser::base_type(start)
         {
-            start = expression(&stack);
+            start = expression(boost::phoenix::ref(stack));
         }
 
         boost::spirit::qi::rule<GG::token_iterator, void(), GG::skipper_type> start;

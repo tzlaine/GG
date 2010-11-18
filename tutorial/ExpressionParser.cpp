@@ -116,32 +116,32 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const name_ru
         or_expression(_r1)
      >> -(
             "?"
-          > expression(&_a)
+          > expression(_a)
           > ":"
-          > expression(&_b)
-         )[push(*_r1, _a, _b, adobe::ifelse_k)];
+          > expression(_b)
+         )[push(_r1, _a, _b, adobe::ifelse_k)];
 
     or_expression =
         and_expression(_r1)
-     >> *( tok.or_ > and_expression(&_a) )[
-         push(*_r1, _a, adobe::or_k),
+     >> *( tok.or_ > and_expression(_a) )[
+         push(_r1, _a, adobe::or_k),
          clear(_a)
      ];
 
     and_expression =
         equality_expression(_r1)
-     >> *( tok.and_ > equality_expression(&_a) )[
-         push(*_r1, _a, adobe::and_k),
+     >> *( tok.and_ > equality_expression(_a) )[
+         push(_r1, _a, adobe::and_k),
          clear(_a)
      ];
 
     equality_expression =
         relational_expression(_r1)
-     >> *( tok.eq_op[_a = _1] > relational_expression(_r1) )[push(*_r1, _a)];
+     >> *( tok.eq_op[_a = _1] > relational_expression(_r1) )[push(_r1, _a)];
 
     relational_expression =
         additive_expression(_r1)
-     >> *( tok.rel_op[_a = _1] > additive_expression(_r1) )[push(*_r1, _a)];
+     >> *( tok.rel_op[_a = _1] > additive_expression(_r1) )[push(_r1, _a)];
 
     additive_expression =
         multiplicative_expression(_r1)
@@ -151,11 +151,11 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const name_ru
               | lit('-')[_a = adobe::subtract_k]
             )
               > multiplicative_expression(_r1)
-            )[push(*_r1, _a)];
+            )[push(_r1, _a)];
 
     multiplicative_expression =
         unary_expression(_r1)
-     >> *( tok.mul_op[_a = _1] > unary_expression(_r1) )[push(*_r1, _a)];
+     >> *( tok.mul_op[_a = _1] > unary_expression(_r1) )[push(_r1, _a)];
 
     unary_expression =
         postfix_expression(_r1)
@@ -166,23 +166,23 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const name_ru
             | lit('!')[_a = adobe::not_k]
           )
         > unary_expression(_r1)
-        )[if_(_a)[push(*_r1, _a)]];
+        )[if_(_a)[push(_r1, _a)]];
 
     // omitting unary_operator
 
     postfix_expression =
         primary_expression(_r1)
-     >> *( ('[' > expression(_r1) > ']') | ('.' > tok.identifier[push(*_r1, _1)]) )[
-         push(*_r1, adobe::index_k)
+     >> *( ('[' > expression(_r1) > ']') | ('.' > tok.identifier[push(_r1, _1)]) )[
+         push(_r1, adobe::index_k)
      ];
 
     primary_expression =
         ( '(' >> expression(_r1) > ')' )
       | name(_r1)
-      | tok.number[push(*_r1, _1)]
+      | tok.number[push(_r1, _1)]
       | boolean(_r1)
       | string(_r1)
-      | tok.keyword_empty[push(*_r1, adobe::any_regular_t())]
+      | tok.keyword_empty[push(_r1, adobe::any_regular_t())]
       | array(_r1)
       | dictionary(_r1)
       | variable_or_function(_r1);
@@ -190,40 +190,40 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const name_ru
     variable_or_function =
         (tok.identifier[_a = _1] >>
          (
-             "(" >> (argument_expression_list(_r1) | eps[push(*_r1, adobe::array_t())]) > ")"
+             "(" >> (argument_expression_list(_r1) | eps[push(_r1, adobe::array_t())]) > ")"
          )
-        )[push(*_r1, _a, adobe::function_k)]
-      | tok.identifier[push(*_r1, _1, adobe::variable_k)];
+        )[push(_r1, _a, adobe::function_k)]
+      | tok.identifier[push(_r1, _1, adobe::variable_k)];
 
-    array = '[' >> (argument_list(_r1) | eps[push(*_r1, adobe::array_t())]) > ']';
+    array = '[' >> (argument_list(_r1) | eps[push(_r1, adobe::array_t())]) > ']';
 
-    dictionary = '{' >> (named_argument_list(_r1) | eps[push(*_r1, adobe::dictionary_t())]) > '}';
+    dictionary = '{' >> (named_argument_list(_r1) | eps[push(_r1, adobe::dictionary_t())]) > '}';
 
     argument_expression_list = named_argument_list(_r1) | argument_list(_r1);
 
     argument_list =
         (expression(_r1)[_a = 1] >> *( ',' > expression(_r1)[++_a] ))[
-            push(*_r1, static_cast_<double>(_a), adobe::array_k)
+            push(_r1, static_cast_<double>(_a), adobe::array_k)
         ];
 
     named_argument_list =
         (named_argument(_r1)[_a = 1] >> *( ',' > named_argument(_r1)[++_a] ))[
-            push(*_r1, static_cast_<double>(_a), adobe::dictionary_k)
+            push(_r1, static_cast_<double>(_a), adobe::dictionary_k)
         ];
 
     named_argument =
-        tok.identifier[_a = _1] >> lit(':')[push(*_r1, _a)] > expression(_r1);
+        tok.identifier[_a = _1] >> lit(':')[push(_r1, _a)] > expression(_r1);
 
-    name = '@' > ( tok.identifier[push(*_r1, _1)] | keyword[push(*_r1, _1)] );
+    name = '@' > ( tok.identifier[push(_r1, _1)] | keyword[push(_r1, _1)] );
 
-    boolean = tok.keyword_true_false[push(*_r1, _1)];
+    boolean = tok.keyword_true_false[push(_r1, _1)];
 
 
     // lexical grammar not covered by lexer
 
     string =
         (tok.quoted_string[_a = strip_quotes(_1)]
-      >> *(tok.quoted_string[_a += strip_quotes(_1)]))[push(*_r1, _a)];
+      >> *(tok.quoted_string[_a += strip_quotes(_1)]))[push(_r1, _a)];
 
     keyword =
         tok.keyword_true_false[_val = if_else(_1, adobe::true_k, adobe::false_k)]

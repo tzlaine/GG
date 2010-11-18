@@ -49,39 +49,24 @@ namespace {
     adobe::aggregate_name_t when_k       = { "when" };
     adobe::aggregate_name_t relate_k     = { "relate" };
 
-#define GET_REF(type_, name)                            \
-    struct get_##name##_                                \
-    {                                                   \
-        template <typename Arg1>                        \
-        struct result                                   \
-        { typedef type_ type; };                        \
-                                                        \
-        template <typename Arg1>                        \
-        type_ operator()(Arg1 arg1) const               \
-            { return arg1->name##_m; }                  \
-    };                                                  \
-    const boost::phoenix::function<get_##name##_> get_##name
-
-#define GET_PTR(type_, name)                            \
-    struct get_##name##_                                \
-    {                                                   \
-        template <typename Arg1>                        \
-        struct result                                   \
-        { typedef type_ type; };                        \
-                                                        \
-        template <typename Arg1>                        \
-        type_ operator()(Arg1 arg1) const               \
-            { return &arg1->name##_m; }                 \
-    };                                                  \
+#define GET_REF(type_, name)                                            \
+    struct get_##name##_                                                \
+    {                                                                   \
+        template <typename Arg1>                                        \
+        struct result                                                   \
+        { typedef type_ type; };                                        \
+                                                                        \
+        type_ operator()(adobe::adam_callback_suite_t::relation_t& relation) const \
+            { return relation.name##_m; }                               \
+    };                                                                  \
     const boost::phoenix::function<get_##name##_> get_##name
 
     GET_REF(std::string&, detailed);
-    GET_PTR(adobe::name_t*, name);
-    GET_PTR(adobe::array_t*, expression);
-    GET_PTR(std::string*, brief);
+    GET_REF(adobe::name_t&, name);
+    GET_REF(adobe::array_t&, expression);
+    GET_REF(std::string&, brief);
 
 #undef GET_REF
-#undef GET_PTR
 
     struct add_cell_
     {
@@ -144,7 +129,7 @@ namespace {
             { return arg1.substr(2, arg1.size() - 2); }
     };
 
-    boost::phoenix::function<strip_cpp_comment_> strip_cpp_comment;
+    const boost::phoenix::function<strip_cpp_comment_> strip_cpp_comment;
 
     struct adam_parser_rules
     {
@@ -245,58 +230,58 @@ namespace {
                         tok.identifier[_a = _1, _b = val(true)]
                       | (unlink[_b = val(false)] > tok.identifier[_a = _1])
                     )
-                 >> -initializer(&_c)
-                 >> -define_expression(&_d)
-                  > end_statement(&_g)
+                 >> -initializer(_c)
+                 >> -define_expression(_d)
+                  > end_statement(_g)
                 )[add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)];
 
-            input_cell_decl = tok.identifier[_a = _1] >> -initializer(&_b) > end_statement(&_d)[
+            input_cell_decl = tok.identifier[_a = _1] >> -initializer(_b) > end_statement(_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
             ];
 
-            output_cell_decl = named_decl(&_a, &_b, &_d)[
+            output_cell_decl = named_decl(_a, _b, _d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
             ];
 
-            constant_cell_decl = tok.identifier[_a = _1] > initializer(&_b) > end_statement(&_d)[
+            constant_cell_decl = tok.identifier[_a = _1] > initializer(_b) > end_statement(_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
             ];
 
             logic_cell_decl =
-                named_decl(&_a, &_b, &_d)[
+                named_decl(_a, _b, _d)[
                     add_cell(callbacks, adobe::adam_callback_suite_t::logic_k, _a, _c, _b, _d, _r1)
                 ]
-              | relate_decl(&_b, &_e, &_d)[
+              | relate_decl(_b, _e, _d)[
                   add_relation(callbacks, _c, _b, _e, _d, _r1)
                 ];
 
-            invariant_cell_decl = named_decl(&_a, &_b, &_d)[
+            invariant_cell_decl = named_decl(_a, _b, _d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::invariant_k, _a, _c, _b, _d, _r1)
             ];
 
             relate_decl =
                 (relate | (conditional(_r1) > relate))
               > '{'
-              > relate_expression(&_a)
-              > relate_expression(&_b)[
-                  push_back(*_r2, _a),
-                  push_back(*_r2, _b),
-                  clear(*get_expression(&_a))
+              > relate_expression(_a)
+              > relate_expression(_b)[
+                  push_back(_r2, _a),
+                  push_back(_r2, _b),
+                  clear(get_expression(_a))
               ]
              >> *(
-                     relate_expression(&_a)[
-                         push_back(*_r2, _a),
-                         clear(*get_expression(&_a))
+                     relate_expression(_a)[
+                         push_back(_r2, _a),
+                         clear(get_expression(_a))
                      ]
                  )
               > '}'
-             >> -trail_comment[*_r3 = _1];
+             >> -trail_comment[_r3 = _1];
 
             relate_expression =
                 -lead_comment[get_detailed(_r1) = _1]
              >> named_decl(get_name(_r1), get_expression(_r1), get_brief(_r1));
 
-            named_decl = tok.identifier[*_r1 = _1] > define_expression(_r2) > end_statement(_r3);
+            named_decl = tok.identifier[_r1 = _1] > define_expression(_r2) > end_statement(_r3);
 
             initializer = ':' > expression(_r1);
 
@@ -304,7 +289,7 @@ namespace {
 
             conditional = when > '(' > expression(_r1) > ')';
 
-            end_statement = ';' >> -trail_comment[*_r1 = _1];
+            end_statement = ';' >> -trail_comment[_r1 = _1];
 
             // convenience rules
             lead_comment = tok.lead_comment[_val = strip_c_comment(_1)];
@@ -407,23 +392,23 @@ namespace {
 
         boost::spirit::qi::rule<
             GG::token_iterator,
-            void(adobe::array_t*, relation_set*, std::string*),
+            void(adobe::array_t&, relation_set&, std::string&),
             boost::spirit::qi::locals<relation, relation>,
             GG::skipper_type
         > relate_decl;
 
-        boost::spirit::qi::rule<GG::token_iterator, void(relation*), GG::skipper_type> relate_expression;
+        boost::spirit::qi::rule<GG::token_iterator, void(relation&), GG::skipper_type> relate_expression;
 
         boost::spirit::qi::rule<
             GG::token_iterator,
-            void(adobe::name_t*, adobe::array_t*, std::string*),
+            void(adobe::name_t&, adobe::array_t&, std::string&),
             GG::skipper_type
         > named_decl;
 
-        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t*), GG::skipper_type> initializer;
-        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t*), GG::skipper_type> define_expression;
-        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t*), GG::skipper_type> conditional;
-        boost::spirit::qi::rule<GG::token_iterator, void(std::string*), GG::skipper_type> end_statement;
+        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t&), GG::skipper_type> initializer;
+        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t&), GG::skipper_type> define_expression;
+        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t&), GG::skipper_type> conditional;
+        boost::spirit::qi::rule<GG::token_iterator, void(std::string&), GG::skipper_type> end_statement;
 
         boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> lead_comment;
         boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> trail_comment;

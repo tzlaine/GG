@@ -104,6 +104,8 @@ namespace boost { namespace spirit { namespace traits
             { attr = adobe::name_t(std::string(first, last).c_str()); }
     };
 
+    // HACK! This is only necessary because of a bug in Spirit in Boost
+    // versions <= 1.45.
     template <>
     struct assign_to_attribute_from_iterators<bool, GG::text_iterator, void>
     {

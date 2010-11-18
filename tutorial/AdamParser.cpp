@@ -141,11 +141,17 @@ namespace {
 
             or_expression =
                 and_expression(_r1)
-             >> *( tok.or_ > and_expression(&_a) )[push(*_r1, _a, adobe::or_k)];
+             >> *( tok.or_ > and_expression(&_a) )[
+                 push(*_r1, _a, adobe::or_k),
+                 clear(_a)
+             ];
 
             and_expression =
                 equality_expression(_r1)
-             >> *( tok.and_ > equality_expression(&_a) )[push(*_r1, _a, adobe::and_k)];
+             >> *( tok.and_ > equality_expression(&_a) )[
+                 push(*_r1, _a, adobe::and_k),
+                 clear(_a)
+             ];
 
             equality_expression =
                 relational_expression(_r1)

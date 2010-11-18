@@ -28,6 +28,22 @@
 #ifndef _GG_Lexer_h_
 #define _GG_Lexer_h_
 
+#ifndef GG_API
+# ifdef _MSC_VER
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#  undef min
+#  undef max
+#  ifdef GiGi_EXPORTS
+#   define GG_API __declspec(dllexport)
+#  else
+#   define GG_API __declspec(dllimport)
+#  endif
+# else
+#  define GG_API
+# endif
+#endif
+
 #include <GG/adobe/name_fwd.hpp>
 #include <GG/adobe/implementation/token.hpp>
 
@@ -58,7 +74,7 @@ namespace detail {
     struct named_mul_op : adobe::name_t {};
 }
 
-struct lexer :
+struct GG_API lexer :
     boost::spirit::lex::lexer<spirit_lexer_base_type>
 {
     lexer(const adobe::name_t* first_keyword,
@@ -107,7 +123,7 @@ namespace boost { namespace spirit { namespace traits
     // HACK! This is only necessary because of a bug in Spirit in Boost
     // versions <= 1.45.
     template <>
-    struct assign_to_attribute_from_iterators<bool, GG::text_iterator, void>
+    struct GG_API assign_to_attribute_from_iterators<bool, GG::text_iterator, void>
     {
         static void call(const GG::text_iterator& first, const GG::text_iterator& last, bool& attr)
             { attr = *first == 't' ? true : false; }

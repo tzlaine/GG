@@ -30,7 +30,6 @@
 
 #include "Lexer.h"
 
-#include <GG/Base.h>
 #include <GG/adobe/array_fwd.hpp>
 #include <GG/adobe/name_fwd.hpp>
 
@@ -42,7 +41,7 @@
 
 namespace GG {
 
-const lexer& AdamLexer();
+GG_API const lexer& AdamLexer();
 
 /** The type of Spirit 2 parser returned by AdamExpressionParser(). */
 typedef boost::spirit::qi::rule<

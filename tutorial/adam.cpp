@@ -84,11 +84,26 @@ std::ostream& operator<<(std::ostream& stream, const type_info_t& x)
 
 namespace adobe {
 
-std::ostream& operator<<(std::ostream& stream, const line_position_t& x)
-{
-    return stream; // TODO
-}
+    std::ostream& operator<<(std::ostream& os, const line_position_t& x)
+    {
+        return os; // TODO
+    }
 
+    std::ostream& operator<<(std::ostream& os, const adam_callback_suite_t::relation_t& relation)
+    {
+        return os << "("
+                  << relation.name_m << " "
+                  << relation.position_m << " "
+                  << relation.expression_m << " "
+                  << relation.detailed_m << " "
+                  << relation.brief_m << " "
+                  << ")";
+    }
+
+    std::ostream& operator<<(std::ostream& os, const std::vector<adam_callback_suite_t::relation_t>& relation_set)
+    {
+        return os; // TODO
+    }
 }
 
 namespace GG {
@@ -867,10 +882,8 @@ namespace GG {
         NAME(input_cell_decl);
         NAME(output_cell_decl);
         NAME(constant_cell_decl);
-//        logic_cell_decl.name("logic_cell_decl");
         NAME(logic_cell_decl);
         NAME(invariant_cell_decl);
-//        relate_decl.name("relate_decl");
         NAME(relate_decl);
         NAME(relate_expression);
         NAME(named_decl);

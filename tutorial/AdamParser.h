@@ -39,6 +39,10 @@
 #include <string>
 
 
+namespace adobe {
+    struct adam_callback_suite_t;
+}
+
 namespace GG {
 
 GG_API const lexer& AdamLexer();
@@ -53,6 +57,8 @@ typedef boost::spirit::qi::rule<
 
 /** Returns a Spirit 2 parser that can be used to parse Adam expressions. */
 GG_API const AdamExpressionParserRule& AdamExpressionParser();
+
+GG_API bool Parse(const std::string& sheet, const adobe::adam_callback_suite_t& callbacks);
 
 }
 

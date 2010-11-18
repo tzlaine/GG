@@ -61,9 +61,10 @@ namespace {
     };                                                                  \
     const boost::phoenix::function<get_##name##_> get_##name
 
-    GET_REF(std::string&, detailed);
     GET_REF(adobe::name_t&, name);
+    GET_REF(adobe::line_position_t&, position);
     GET_REF(adobe::array_t&, expression);
+    GET_REF(std::string&, detailed);
     GET_REF(std::string&, brief);
 
 #undef GET_REF
@@ -160,6 +161,7 @@ namespace {
             using qi::_r1;
             using qi::_r2;
             using qi::_r3;
+            using qi::_r4;
             using qi::_val;
             using qi::alpha;
             using qi::bool_;
@@ -230,64 +232,64 @@ namespace {
                         tok.identifier[_a = _1, _b = val(true)]
                       | (unlink[_b = val(false)] > tok.identifier[_a = _1])
                     )
-                 >> -initializer(_c)
-                 >> -define_expression(_d)
+                 >> -initializer(_e, _c)
+                 >> -define_expression(_f, _d)
                   > end_statement(_g)
                 )[add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)];
 
-            input_cell_decl = tok.identifier[_a = _1] >> -initializer(_b) > end_statement(_d)[
+            input_cell_decl = tok.identifier[_a = _1] >> -initializer(_c, _b) > end_statement(_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
             ];
 
-            output_cell_decl = named_decl(_a, _b, _d)[
+            output_cell_decl = named_decl(_a, _c, _b, _d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
             ];
 
-            constant_cell_decl = tok.identifier[_a = _1] > initializer(_b) > end_statement(_d)[
+            constant_cell_decl = tok.identifier[_a = _1] > initializer(_c, _b) > end_statement(_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
             ];
 
             logic_cell_decl =
-                named_decl(_a, _b, _d)[
+                named_decl(_a, _c, _b, _d)[
                     add_cell(callbacks, adobe::adam_callback_suite_t::logic_k, _a, _c, _b, _d, _r1)
                 ]
-              | relate_decl(_b, _e, _d)[
+              | relate_decl(_c, _b, _e, _d)[
                   add_relation(callbacks, _c, _b, _e, _d, _r1)
                 ];
 
-            invariant_cell_decl = named_decl(_a, _b, _d)[
+            invariant_cell_decl = named_decl(_a, _c, _b, _d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::invariant_k, _a, _c, _b, _d, _r1)
             ];
 
             relate_decl =
-                (relate | (conditional(_r1) > relate))
+                (relate | (conditional(_r1, _r2) > relate))
               > '{'
               > relate_expression(_a)
               > relate_expression(_b)[
-                  push_back(_r2, _a),
-                  push_back(_r2, _b),
+                  push_back(_r3, _a),
+                  push_back(_r3, _b),
                   clear(get_expression(_a))
               ]
              >> *(
                      relate_expression(_a)[
-                         push_back(_r2, _a),
+                         push_back(_r3, _a),
                          clear(get_expression(_a))
                      ]
                  )
               > '}'
-             >> -trail_comment[_r3 = _1];
+             >> -trail_comment[_r4 = _1];
 
             relate_expression =
                 -lead_comment[get_detailed(_r1) = _1]
-             >> named_decl(get_name(_r1), get_expression(_r1), get_brief(_r1));
+             >> named_decl(get_name(_r1), get_position(_r1), get_expression(_r1), get_brief(_r1));
 
-            named_decl = tok.identifier[_r1 = _1] > define_expression(_r2) > end_statement(_r3);
+            named_decl = tok.identifier[_r1 = _1] > define_expression(_r2, _r3) > end_statement(_r4);
 
-            initializer = ':' > expression(_r1);
+            initializer = ':' > expression(_r2);
 
-            define_expression = tok.define > expression(_r1);
+            define_expression = tok.define > expression(_r2);
 
-            conditional = when > '(' > expression(_r1) > ')';
+            conditional = when > '(' > expression(_r2) > ')';
 
             end_statement = ';' >> -trail_comment[_r1 = _1];
 
@@ -392,7 +394,7 @@ namespace {
 
         boost::spirit::qi::rule<
             GG::token_iterator,
-            void(adobe::array_t&, relation_set&, std::string&),
+            void(adobe::line_position_t&, adobe::array_t&, relation_set&, std::string&),
             boost::spirit::qi::locals<relation, relation>,
             GG::skipper_type
         > relate_decl;
@@ -401,13 +403,25 @@ namespace {
 
         boost::spirit::qi::rule<
             GG::token_iterator,
-            void(adobe::name_t&, adobe::array_t&, std::string&),
+            void(adobe::name_t&, adobe::line_position_t&, adobe::array_t&, std::string&),
             GG::skipper_type
         > named_decl;
 
-        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t&), GG::skipper_type> initializer;
-        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t&), GG::skipper_type> define_expression;
-        boost::spirit::qi::rule<GG::token_iterator, void(adobe::array_t&), GG::skipper_type> conditional;
+        boost::spirit::qi::rule<
+            GG::token_iterator,
+            void(adobe::line_position_t&, adobe::array_t&),
+            GG::skipper_type
+        > initializer;
+        boost::spirit::qi::rule<
+            GG::token_iterator,
+            void(adobe::line_position_t&, adobe::array_t&),
+            GG::skipper_type
+        > define_expression;
+        boost::spirit::qi::rule<
+            GG::token_iterator,
+            void(adobe::line_position_t&, adobe::array_t&),
+            GG::skipper_type
+        > conditional;
         boost::spirit::qi::rule<GG::token_iterator, void(std::string&), GG::skipper_type> end_statement;
 
         boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> lead_comment;

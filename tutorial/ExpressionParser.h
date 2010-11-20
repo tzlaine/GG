@@ -85,38 +85,38 @@ struct GG_API expression_parser_rules
         token_iterator,
         adobe::name_t(),
         skipper_type
-    > name_rule;
+    > keyword_rule;
 
-    expression_parser_rules(const lexer& tok, const name_rule& keyword_);
+    expression_parser_rules(const lexer& tok, const keyword_rule& keyword_);
 
     typedef boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::array_t&),
+        text_iterator(adobe::array_t&),
         boost::spirit::qi::locals<adobe::name_t>,
         skipper_type
     > local_name_rule;
     typedef boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::array_t&),
+        text_iterator(adobe::array_t&),
         boost::spirit::qi::locals<std::size_t>,
         skipper_type
     > local_size_rule;
     typedef boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::array_t&),
+        text_iterator(adobe::array_t&),
         boost::spirit::qi::locals<adobe::array_t>,
         skipper_type
     > local_array_rule;
     typedef boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::array_t&),
+        text_iterator(adobe::array_t&),
         skipper_type
     > no_locals_rule;
 
     // expression grammar
     boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::array_t&),
+        text_iterator(adobe::array_t&),
         boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
         skipper_type
     > expression;
@@ -143,11 +143,11 @@ struct GG_API expression_parser_rules
     // lexical grammar
     boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::array_t&),
+        text_iterator(adobe::array_t&),
         boost::spirit::qi::locals<std::string>,
         skipper_type
     > string;
-    name_rule keyword;
+    keyword_rule keyword;
 };
 
 }

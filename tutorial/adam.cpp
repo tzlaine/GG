@@ -84,11 +84,6 @@ std::ostream& operator<<(std::ostream& stream, const type_info_t& x)
 
 namespace adobe {
 
-    std::ostream& operator<<(std::ostream& os, const line_position_t& x)
-    {
-        return os; // TODO
-    }
-
     std::ostream& operator<<(std::ostream& os, const adam_callback_suite_t::relation_t& relation)
     {
         return os << "("
@@ -345,24 +340,25 @@ namespace GG {
             {
                 using boost::spirit::qi::_1;
                 using boost::spirit::qi::lit;
+                using boost::phoenix::at_c;
                 using boost::phoenix::val;
 
-#define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << _1 << std::endl]
+#define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << detail::tok_val(_1) << std::endl]
 #define DUMP_LIT(x) lit(x)[std::cout << val("'") << val(x) << val("'") << std::endl]
 #define DUMP_UNATTRIBUTED(x) tok.x[std::cout << val(#x) << std::endl]
-#define DUMP_KEYWORD_TOK(x) x[std::cout << val("keyword -- ") << _1 << std::endl]
+#define DUMP_KEYWORD_TOK(x) x[std::cout << val("keyword -- ") << detail::tok_val(_1) << std::endl]
 
                 assert(tok.keywords.size() == 10u);
-                const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
-                const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& input = tok.keywords[input_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& output = tok.keywords[output_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& interface = tok.keywords[interface_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& logic = tok.keywords[logic_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& constant = tok.keywords[constant_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& invariant = tok.keywords[invariant_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& sheet = tok.keywords[sheet_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& unlink = tok.keywords[unlink_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& when = tok.keywords[when_k];
+                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& relate = tok.keywords[relate_k];
                 assert(tok.keywords.size() == 10u);
 
                 start =
@@ -601,27 +597,219 @@ namespace GG {
     //bool dummy3 = TestExpressionParser();
 
 
+    bool instrument_positions = false;
+
+    struct StoreAddCellParams
+    {
+        StoreAddCellParams(adobe::array_t& array, const std::string& str) :
+            m_array(array),
+            m_str(str)
+            {}
+
+        void operator()(adobe::adam_callback_suite_t::cell_type_t type,
+                        adobe::name_t cell_name,
+                        const adobe::line_position_t& position,
+                        const adobe::array_t& expr_or_init,
+                        const std::string& brief,
+                        const std::string& detailed)
+        {
+            std::string type_str;
+            switch (type)
+            {
+            case adobe::adam_callback_suite_t::input_k: type_str = "input_k";
+            case adobe::adam_callback_suite_t::output_k: type_str = "output_k";
+            case adobe::adam_callback_suite_t::constant_k: type_str = "constant_k";
+            case adobe::adam_callback_suite_t::logic_k: type_str = "logic_k";
+            case adobe::adam_callback_suite_t::invariant_k: type_str = "invariant_k";
+            }
+            push_back(m_array, type_str);
+            push_back(m_array, cell_name);
+            if (instrument_positions) {
+                std::cerr << position.stream_name() << ":"
+                          << position.line_number_m << ":"
+                          << position.line_start_m << ":"
+                          << position.position_m << ":";
+                if (position.line_start_m) {
+                    std::cerr << " \"" << std::string(m_str.begin() + position.line_start_m,
+                                                      m_str.begin() + position.position_m)
+                              << "\"";
+                }
+                std::cerr << "\n";
+            } else {
+                push_back(m_array, position.stream_name());
+                push_back(m_array, position.line_number_m);
+                push_back(m_array, std::size_t(position.line_start_m));
+                push_back(m_array, std::size_t(position.position_m));
+            }
+            push_back(m_array, expr_or_init);
+            push_back(m_array, brief);
+            push_back(m_array, detailed);
+        }
+
+        adobe::array_t& m_array;
+        const std::string& m_str;
+    };
+
+    struct StoreAddRelationParams
+    {
+        StoreAddRelationParams(adobe::array_t& array, const std::string& str) :
+            m_array(array),
+            m_str(str)
+            {}
+
+        void operator()(const adobe::line_position_t& position,
+                        const adobe::array_t& conditional,
+                        const adobe::adam_callback_suite_t::relation_t* first,
+                        const adobe::adam_callback_suite_t::relation_t* last,
+                        const std::string& brief,
+                        const std::string& detailed)
+        {
+            if (instrument_positions) {
+                std::cerr << position.stream_name() << ":"
+                          << position.line_number_m << ":"
+                          << position.line_start_m << ":"
+                          << position.position_m << ":";
+                if (position.line_start_m) {
+                    std::cerr << " \"" << std::string(m_str.begin() + position.line_start_m,
+                                                      m_str.begin() + position.position_m)
+                              << "\"";
+                }
+                std::cerr << "\n";
+            } else {
+                push_back(m_array, position.stream_name());
+                push_back(m_array, position.line_number_m);
+                push_back(m_array, std::size_t(position.line_start_m));
+                push_back(m_array, std::size_t(position.position_m));
+            }
+            push_back(m_array, conditional);
+            while (first != last) {
+                push_back(m_array, first->name_m);
+                if (instrument_positions) {
+                    std::cerr << first->position_m.stream_name() << ":"
+                              << first->position_m.line_number_m << ":"
+                              << first->position_m.line_start_m << ":"
+                              << first->position_m.position_m << ":";
+                    if (position.line_start_m) {
+                        std::cerr << " \"" << std::string(m_str.begin() + first->position_m.line_start_m,
+                                                          m_str.begin() + first->position_m.position_m)
+                                  << "\"";
+                    }
+                    std::cerr << "\n";
+                } else {
+                    push_back(m_array, first->position_m.stream_name());
+                    push_back(m_array, first->position_m.line_number_m);
+                    push_back(m_array, std::size_t(first->position_m.line_start_m));
+                    push_back(m_array, std::size_t(first->position_m.position_m));
+                }
+                push_back(m_array, first->expression_m);
+                push_back(m_array, first->detailed_m);
+                push_back(m_array, first->brief_m);
+                ++first;
+            }
+            push_back(m_array, brief);
+            push_back(m_array, detailed);
+        }
+
+        adobe::array_t& m_array;
+        const std::string& m_str;
+    };
+
+    struct StoreAddInterfaceParams
+    {
+        StoreAddInterfaceParams(adobe::array_t& array, const std::string& str) :
+            m_array(array),
+            m_str(str)
+            {}
+
+        void operator()(adobe::name_t cell_name,
+                        bool linked,
+                        const adobe::line_position_t& position1,
+                        const adobe::array_t& initializer,
+                        const adobe::line_position_t& position2,
+                        const adobe::array_t& expression,
+                        const std::string& brief,
+                        const std::string& detailed)
+        {
+            push_back(m_array, cell_name);
+            push_back(m_array, linked);
+            if (instrument_positions) {
+                std::cerr << position1.stream_name() << ":"
+                          << position1.line_number_m << ":"
+                          << position1.line_start_m << ":"
+                          << position1.position_m << ":";
+                if (position1.line_start_m) {
+                    std::cerr << " \"" << std::string(m_str.begin() + position1.line_start_m,
+                                                      m_str.begin() + position1.position_m)
+                          << "\"";
+                }
+                std::cerr << "\n";
+            } else {
+                push_back(m_array, position1.stream_name());
+                push_back(m_array, position1.line_number_m);
+                push_back(m_array, std::size_t(position1.line_start_m));
+                push_back(m_array, std::size_t(position1.position_m));
+            }
+            push_back(m_array, initializer);
+            if (instrument_positions) {
+                std::cerr << position2.stream_name() << ":"
+                          << position2.line_number_m << ":"
+                          << position2.line_start_m << ":"
+                          << position2.position_m << ":";
+                if (position2.line_start_m) {
+                    std::cerr << " \"" << std::string(m_str.begin() + position2.line_start_m,
+                                                      m_str.begin() + position2.position_m)
+                              << "\"";
+                }
+                std::cerr << "\n";
+            } else {
+                push_back(m_array, position2.stream_name());
+                push_back(m_array, position2.line_number_m);
+                push_back(m_array, std::size_t(position2.line_start_m));
+                push_back(m_array, std::size_t(position2.position_m));
+            }
+            push_back(m_array, expression);
+            push_back(m_array, brief);
+            push_back(m_array, detailed);
+        }
+
+        adobe::array_t& m_array;
+        const std::string& m_str;
+    };
+
     bool TestAdamParser(adobe::array_t& new_parse,
-                        const adobe::adam_callback_suite_t& new_parse_callbacks,
                         adobe::array_t& old_parse,
-                        const adobe::adam_callback_suite_t& old_parse_callbacks,
                         const std::string& filename,
                         const std::string& sheet)
     {
+        adobe::adam_callback_suite_t old_parse_callbacks;
+        old_parse_callbacks.add_cell_proc_m = StoreAddCellParams(old_parse, sheet);
+        old_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(old_parse, sheet);
+        old_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(old_parse, sheet);
+
+        adobe::adam_callback_suite_t new_parse_callbacks;
+        new_parse_callbacks.add_cell_proc_m = StoreAddCellParams(new_parse, sheet);
+        new_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(new_parse, sheet);
+        new_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(new_parse, sheet);
+
         std::cout << "sheet:\"\n" << sheet << "\n\"\n"
                   << "filename: " << filename << '\n';
         bool original_parse_failed = false;
         try {
             std::stringstream ss(sheet);
-            adobe::parse(ss, adobe::line_position_t("adam"), old_parse_callbacks);
-        } catch (const adobe::stream_error_t&) {
+            adobe::parse(ss, adobe::line_position_t(filename.c_str()), old_parse_callbacks);
+        } catch (const adobe::stream_error_t& e) {
+#if 0
+            for (std::size_t i = 0; i < e.line_position_set().size(); ++i) {
+                std::cout << "Line position: \"" << e.line_position_set()[i] << "\"\n";
+            }
+#endif
             original_parse_failed = true;
         }
         if (original_parse_failed)
             std::cout << "original: <parse failure>\n";
         else
             std::cout << "original: " << old_parse << "\n";
-        bool new_parse_failed = !Parse(sheet, new_parse_callbacks);
+        bool new_parse_failed = !Parse(sheet, filename, new_parse_callbacks);
         if (new_parse_failed)
             std::cout << "new:      <parse failure>\n";
         else
@@ -644,110 +832,10 @@ namespace GG {
         return pass;
     }
 
-    struct StoreAddCellParams
-    {
-        StoreAddCellParams(adobe::array_t& array) :
-            m_array(array)
-            {}
-
-        void operator()(adobe::adam_callback_suite_t::cell_type_t type,
-                        adobe::name_t cell_name,
-                        const adobe::line_position_t& position,
-                        const adobe::array_t& expr_or_init,
-                        const std::string& brief,
-                        const std::string& detailed)
-        {
-            std::string type_str;
-            switch (type)
-            {
-            case adobe::adam_callback_suite_t::input_k: type_str = "input_k";
-            case adobe::adam_callback_suite_t::output_k: type_str = "output_k";
-            case adobe::adam_callback_suite_t::constant_k: type_str = "constant_k";
-            case adobe::adam_callback_suite_t::logic_k: type_str = "logic_k";
-            case adobe::adam_callback_suite_t::invariant_k: type_str = "invariant_k";
-            }
-            push_back(m_array, type_str);
-            push_back(m_array, cell_name);
-//            push_back(m_array, position); // TODO: fix disagreement on positions
-            push_back(m_array, expr_or_init);
-            push_back(m_array, brief);
-            push_back(m_array, detailed);
-        }
-
-        adobe::array_t& m_array;
-    };
-
-    struct StoreAddRelationParams
-    {
-        StoreAddRelationParams(adobe::array_t& array) :
-            m_array(array)
-            {}
-
-        void operator()(const adobe::line_position_t& position,
-                        const adobe::array_t& conditional,
-                        const adobe::adam_callback_suite_t::relation_t* first,
-                        const adobe::adam_callback_suite_t::relation_t* last,
-                        const std::string& brief,
-                        const std::string& detailed)
-        {
-//            push_back(m_array, position); // TODO: fix disagreement on positions
-            push_back(m_array, conditional);
-            while (first != last) {
-                push_back(m_array, first->name_m);
-//                push_back(m_array, first->position_m); // TODO: fix disagreement on positions
-                push_back(m_array, first->expression_m);
-                push_back(m_array, first->detailed_m);
-                push_back(m_array, first->brief_m);
-                ++first;
-            }
-            push_back(m_array, brief);
-            push_back(m_array, detailed);
-        }
-
-        adobe::array_t& m_array;
-    };
-
-    struct StoreAddInterfaceParams
-    {
-        StoreAddInterfaceParams(adobe::array_t& array) :
-            m_array(array)
-            {}
-
-        void operator()(adobe::name_t cell_name,
-                        bool linked,
-                        const adobe::line_position_t& position1,
-                        const adobe::array_t& initializer,
-                        const adobe::line_position_t& position2,
-                        const adobe::array_t& expression,
-                        const std::string& brief,
-                        const std::string& detailed)
-        {
-            push_back(m_array, cell_name);
-            push_back(m_array, linked);
-//            push_back(m_array, position1); // TODO: fix disagreement on positions
-            push_back(m_array, initializer);
-//            push_back(m_array, position2); // TODO: fix disagreement on positions
-            push_back(m_array, expression);
-            push_back(m_array, brief);
-            push_back(m_array, detailed);
-        }
-
-        adobe::array_t& m_array;
-    };
-
     bool TestAdamParser()
     {
-        adobe::adam_callback_suite_t old_parse_callbacks;
         adobe::array_t old_parse;
-        old_parse_callbacks.add_cell_proc_m = StoreAddCellParams(old_parse);
-        old_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(old_parse);
-        old_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(old_parse);
-
-        adobe::adam_callback_suite_t new_parse_callbacks;
         adobe::array_t new_parse;
-        new_parse_callbacks.add_cell_proc_m = StoreAddCellParams(new_parse);
-        new_parse_callbacks.add_relation_proc_m = StoreAddRelationParams(new_parse);
-        new_parse_callbacks.add_interface_proc_m = StoreAddInterfaceParams(new_parse);
 
         std::size_t passes = 0;
         std::size_t failures = 0;
@@ -760,7 +848,7 @@ namespace GG {
             if (boost::algorithm::ends_with(it->string(), "adm")) {
                 std::string file_contents = read_file(it->string());
                 if (!file_contents.empty()) {
-                    if (TestAdamParser(new_parse, new_parse_callbacks, old_parse, old_parse_callbacks, it->string(), file_contents))
+                    if (TestAdamParser(new_parse, old_parse, it->string(), file_contents))
                         ++passes;
                     else
                         ++failures;
@@ -774,8 +862,6 @@ namespace GG {
 
         return false;
     }
-
-    //bool dummy4 = TestAdamParser();
 
 }
 
@@ -1035,6 +1121,11 @@ void AdamGGApp::FinalCleanup()
 extern "C" // Note the use of C-linkage, as required by SDL.
 int main(int argc, char* argv[])
 {
+    if (1 < argc)
+        GG::instrument_positions = true;
+
+    GG::TestAdamParser();
+
     AdamGGApp app;
 
     try {

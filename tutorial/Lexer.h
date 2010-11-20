@@ -56,23 +56,27 @@ namespace GG {
 
 typedef std::string::const_iterator text_iterator;
 
-typedef boost::spirit::lex::lexertl::token<
-    text_iterator,
-    boost::mpl::vector<
-        adobe::name_t,
-        std::string,
-        double,
-        bool
-    >
-> token_type;
-
-typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
-
 namespace detail {
     struct named_eq_op : adobe::name_t {};
     struct named_rel_op : adobe::name_t {};
     struct named_mul_op : adobe::name_t {};
 }
+
+typedef boost::spirit::lex::lexertl::token<
+    text_iterator,
+    boost::mpl::vector<
+        std::pair<adobe::name_t, text_iterator>,
+        std::pair<detail::named_eq_op, text_iterator>,
+        std::pair<detail::named_rel_op, text_iterator>,
+        std::pair<detail::named_mul_op, text_iterator>,
+        std::pair<std::string, text_iterator>,
+        std::pair<double, text_iterator>,
+        std::pair<bool, text_iterator>,
+        text_iterator
+    >
+> token_type;
+
+typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
 
 struct GG_API lexer :
     boost::spirit::lex::lexer<spirit_lexer_base_type>
@@ -80,20 +84,42 @@ struct GG_API lexer :
     lexer(const adobe::name_t* first_keyword,
           const adobe::name_t* last_keyword);
 
-    boost::spirit::lex::token_def<bool> keyword_true_false;
-    boost::spirit::lex::token_def<boost::spirit::lex::omit> keyword_empty;
-    boost::spirit::lex::token_def<adobe::name_t> identifier;
-    boost::spirit::lex::token_def<std::string> lead_comment;
-    boost::spirit::lex::token_def<std::string> trail_comment;
-    boost::spirit::lex::token_def<std::string> quoted_string;
-    boost::spirit::lex::token_def<double> number;
-    boost::spirit::lex::token_def<detail::named_eq_op> eq_op;
-    boost::spirit::lex::token_def<detail::named_rel_op> rel_op;
-    boost::spirit::lex::token_def<detail::named_mul_op> mul_op;
-    boost::spirit::lex::token_def<boost::spirit::lex::omit> define;
-    boost::spirit::lex::token_def<boost::spirit::lex::omit> or_;
-    boost::spirit::lex::token_def<boost::spirit::lex::omit> and_;
-    std::map<adobe::name_t, boost::spirit::lex::token_def<adobe::name_t> > keywords;
+    boost::spirit::lex::token_def<std::pair<bool, text_iterator> > keyword_true_false;
+    boost::spirit::lex::token_def<text_iterator> keyword_empty;
+    boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> > identifier;
+    boost::spirit::lex::token_def<std::pair<std::string, text_iterator> > lead_comment;
+    boost::spirit::lex::token_def<std::pair<std::string, text_iterator> > trail_comment;
+    boost::spirit::lex::token_def<std::pair<std::string, text_iterator> > quoted_string;
+    boost::spirit::lex::token_def<std::pair<double, text_iterator> > number;
+    boost::spirit::lex::token_def<std::pair<detail::named_eq_op, text_iterator> > eq_op;
+    boost::spirit::lex::token_def<std::pair<detail::named_rel_op, text_iterator> > rel_op;
+    boost::spirit::lex::token_def<std::pair<detail::named_mul_op, text_iterator> > mul_op;
+    boost::spirit::lex::token_def<text_iterator> define;
+    boost::spirit::lex::token_def<text_iterator> or_;
+    boost::spirit::lex::token_def<text_iterator> and_;
+    boost::spirit::lex::token_def<text_iterator> not_;
+    boost::spirit::lex::token_def<text_iterator> plus;
+    boost::spirit::lex::token_def<text_iterator> minus;
+    boost::spirit::lex::token_def<text_iterator> at;
+    boost::spirit::lex::token_def<text_iterator> question;
+    boost::spirit::lex::token_def<text_iterator> colon;
+    boost::spirit::lex::token_def<text_iterator> dot;
+    boost::spirit::lex::token_def<text_iterator> comma;
+    boost::spirit::lex::token_def<text_iterator> lparen;
+    boost::spirit::lex::token_def<text_iterator> rparen;
+    boost::spirit::lex::token_def<text_iterator> lbracket;
+    boost::spirit::lex::token_def<text_iterator> rbracket;
+    boost::spirit::lex::token_def<text_iterator> lbrace;
+    boost::spirit::lex::token_def<text_iterator> rbrace;
+    boost::spirit::lex::token_def<text_iterator> semicolon;
+
+    std::map<
+        adobe::name_t,
+        boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >
+    > keywords;
+
+    std::size_t line_number; // 0-based line number of the current token
+    text_iterator line_start; // the first character of the line currently being processed
 };
 
 typedef lexer::iterator_type token_iterator;
@@ -101,6 +127,41 @@ typedef lexer::iterator_type token_iterator;
 typedef lexer::lexer_def lexer_def;
 
 typedef boost::spirit::qi::in_state_skipper<lexer_def> skipper_type;
+
+
+namespace detail {
+
+    struct tok_val_
+    {
+        template <typename Arg>
+        struct result;
+
+        template <typename T>
+        struct result<std::pair<T, text_iterator> >
+        { typedef T type; };
+
+        template <typename T>
+        typename result<std::pair<T, text_iterator> >::type
+        operator()(const std::pair<T, text_iterator>& t) const
+            { return t.first; }
+    };
+
+    extern GG_API const boost::phoenix::function<tok_val_> tok_val;
+
+    struct tok_pos_
+    {
+        template <typename Arg>
+        struct result
+        { typedef text_iterator type; };
+
+        template <typename T>
+        text_iterator operator()(const std::pair<T, text_iterator>& t) const
+            { return t.second; }
+    };
+
+    extern GG_API const boost::phoenix::function<tok_pos_> tok_pos;
+
+}
 
 }
 
@@ -137,6 +198,13 @@ namespace boost { namespace spirit { namespace traits
     };
 
     template <typename Iter>
+    struct assign_to_attribute_from_iterators<Iter, Iter>
+    {
+        static void call(const Iter& first, const Iter& last, Iter& attr)
+            { attr = first; }
+    };
+
+    template <typename Iter>
     struct assign_to_attribute_from_iterators<GG::detail::named_rel_op, Iter>
     {
         static void call(const Iter& first, const Iter& last, adobe::name_t& attr)
@@ -158,6 +226,17 @@ namespace boost { namespace spirit { namespace traits
                     *first == '*' ?
                     adobe::multiply_k :
                     (*first == '/' ? adobe::divide_k : adobe::modulus_k);
+            }
+    };
+
+    template <typename Iter, typename T>
+    struct assign_to_attribute_from_iterators<std::pair<T, Iter>, Iter>
+    {
+        static void call(const Iter& first, const Iter& last, std::pair<T, Iter>& attr)
+            {
+                using boost::fusion::at_c;
+                assign_to_attribute_from_iterators<T, Iter, void>::call(first, last, attr.first);
+                attr.second = first;
             }
     };
 

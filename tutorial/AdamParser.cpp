@@ -218,81 +218,114 @@ namespace {
             using GG::detail::next_pos;
 
             // note that the lead comment, sheet name, and trail comment are currently all ignored
-            sheet_specifier =
-                -lead_comment
-             >> sheet
-              > tok.identifier
-              > '{'
-             >> *qualified_cell_decl
-              > '}'
-             >> -trail_comment
+            sheet_specifier
+                =    - lead_comment
+                >>     sheet
+                >      tok.identifier
+                >      '{'
+                >>   * qualified_cell_decl
+                >      '}'
+                >>   - trail_comment
                 ;
 
-            qualified_cell_decl =
-                interface_set_decl
-              | input_set_decl
-              | output_set_decl
-              | constant_set_decl
-              | logic_set_decl
-              | invariant_set_decl
+            qualified_cell_decl
+                =      interface_set_decl
+                |      input_set_decl
+                |      output_set_decl
+                |      constant_set_decl
+                |      logic_set_decl
+                |      invariant_set_decl
                 ;
 
             interface_set_decl =
-                interface > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> interface_cell_decl(_a) );
+                interface > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> interface_cell_decl(_a) ) ;
 
             input_set_decl =
-                input > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> input_cell_decl(_a) );
+                input > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> input_cell_decl(_a) ) ;
 
             output_set_decl =
-                output > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> output_cell_decl(_a) );
+                output > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> output_cell_decl(_a) ) ;
 
             constant_set_decl =
-                constant > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> constant_cell_decl(_a) );
+                constant > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> constant_cell_decl(_a) ) ;
 
             logic_set_decl =
-                logic > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> logic_cell_decl(_a) );
+                logic > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> logic_cell_decl(_a) ) ;
 
             invariant_set_decl =
-                invariant > ':' > *( (lead_comment[_a = _1] | eps[clear(_a)]) >> invariant_cell_decl(_a) );
+                invariant > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> invariant_cell_decl(_a) ) ;
 
-            interface_cell_decl =
+            interface_cell_decl
+                =
                 (
                     (
-                        tok.identifier[_a = _1, _b = val(true)]
-                      | (unlink[_b = val(false)] > tok.identifier[_a = _1])
+                          tok.identifier
+                          [
+                              _a = _1,
+                              _b = val(true)
+                          ]
+                     |    (
+                               unlink [_b = val(false)]
+                           >   tok.identifier [_a = _1]
+                          )
                     )
-                 >> -initializer(_e, _c)
-                 >> -define_expression(_f, _d)
-                  > end_statement(_g)
-                )[add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)];
-
-            input_cell_decl = tok.identifier[_a = _1] >> -initializer(_c, _b) > end_statement(_d)[
-                add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
-            ];
-
-            output_cell_decl = named_decl(_a, _c, _b, _d)[
-                add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
-            ];
-
-            constant_cell_decl = tok.identifier[_a = _1] > initializer(_c, _b) > end_statement(_d)[
-                add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
-            ];
-
-            logic_cell_decl =
-                named_decl(_a, _c, _b, _d)[
-                    add_cell(callbacks, adobe::adam_callback_suite_t::logic_k, _a, _c, _b, _d, _r1)
+                    >>  - initializer(_e, _c)
+                    >>  - define_expression(_f, _d)
+                    >     end_statement(_g)
+                )
+                [
+                    add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)
                 ]
-              | relate_decl(_c, _b, _e, _d)[
-                  add_relation(callbacks, _c, _b, _e, _d, _r1)
-                ];
+                ;
 
-            invariant_cell_decl = named_decl(_a, _c, _b, _d)[
-                add_cell(callbacks, adobe::adam_callback_suite_t::invariant_k, _a, _c, _b, _d, _r1)
-            ];
+            input_cell_decl
+                =     tok.identifier [_a = _1]
+                >>  - initializer(_c, _b)
+                >     end_statement(_d)
+                      [
+                          add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
+                      ]
+                ;
+
+            output_cell_decl
+                =    named_decl(_a, _c, _b, _d)
+                     [
+                         add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
+                     ]
+                ;
+
+            constant_cell_decl
+                =     tok.identifier [_a = _1]
+                >     initializer(_c, _b)
+                >     end_statement(_d)
+                      [
+                          add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
+                      ]
+                ;
+
+            logic_cell_decl
+                =     named_decl(_a, _c, _b, _d)
+                      [
+                          add_cell(callbacks, adobe::adam_callback_suite_t::logic_k, _a, _c, _b, _d, _r1)
+                      ]
+                |     relate_decl(_c, _b, _e, _d)
+                      [
+                          add_relation(callbacks, _c, _b, _e, _d, _r1)
+                      ]
+                ;
+
+            invariant_cell_decl
+                =     named_decl(_a, _c, _b, _d)
+                      [
+                          add_cell(callbacks, adobe::adam_callback_suite_t::invariant_k, _a, _c, _b, _d, _r1)
+                      ]
+                ;
 
             relate_decl
-                =    (relate | (conditional(_r1, _r2) > relate))
-                >>   next_pos[_r1 = _1]
+                =    (
+                           (relate >> next_pos [_r1 = _1])
+                      |    (conditional(_r1, _r2) > relate)
+                     )
                 >    '{'
                 >    relate_expression(_a)
                 >    relate_expression(_b)
@@ -301,31 +334,51 @@ namespace {
                          push_back(_r3, _b),
                          clear(get_expression(_a))
                      ]
-                >>  *relate_expression(_a)
+                >> * relate_expression(_a)
                      [
                          push_back(_r3, _a),
                          clear(get_expression(_a))
                      ]
                 >    '}'
-                >>  -trail_comment[_r4 = _1];
+                >> - trail_comment [_r4 = _1]
+                ;
 
-            relate_expression =
-                -lead_comment[get_detailed(_r1) = _1]
-             >> named_decl(get_name(_r1), get_position(_r1), get_expression(_r1), get_brief(_r1));
+            relate_expression
+                =    - lead_comment [get_detailed(_r1) = _1]
+                >>     named_decl(get_name(_r1), get_position(_r1), get_expression(_r1), get_brief(_r1))
+                ;
 
-            named_decl = tok.identifier[_r1 = _1] > define_expression(_r2, _r3) > end_statement(_r4);
+            named_decl
+                =     tok.identifier [_r1 = _1]
+                >     define_expression(_r2, _r3)
+                >     end_statement(_r4)
+                ;
 
-            initializer = ':' >> next_pos[_r1 = _1] > expression(_r2);
+            initializer
+                =    ':'
+                >>   next_pos [_r1 = _1]
+                >    expression(_r2)
+                ;
 
-            define_expression = tok.define >> next_pos[_r1 = _1] > expression(_r2);
+            define_expression
+                =     tok.define
+                >>    next_pos [_r1 = _1]
+                >     expression(_r2)
+                ;
 
-            conditional = when > '(' >> next_pos[_r1 = _1] > expression(_r2) > ')';
+            conditional
+                =     when
+                >     '('
+                >>    next_pos [_r1 = _1]
+                >     expression(_r2)
+                >     ')'
+                ;
 
-            end_statement = ';' >> -trail_comment[_r1 = _1];
+            end_statement = ';' >> - trail_comment [_r1 = _1] ;
 
             // convenience rules
-            lead_comment = tok.lead_comment[_val = strip_c_comment(_1)];
-            trail_comment = tok.trail_comment[_val = strip_cpp_comment(_1)];
+            lead_comment = tok.lead_comment [_val = strip_c_comment(_1)] ;
+            trail_comment = tok.trail_comment [_val = strip_cpp_comment(_1)] ;
 
             // define names for rules, to be used in error reporting
 #define NAME(x) x.name(#x)

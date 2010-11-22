@@ -49,30 +49,22 @@ namespace detail {
         { typedef void type; };
 
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-        void operator()(Arg1 first, Arg2 last, Arg3 it, Arg4 name) const
+        void operator()(Arg1 first, Arg2 last, Arg3 it, Arg4 rule_name) const
             {
-                if (it == last) {
-                    std::cout
-                        << "Parse error: expected "
-                        << name
-                        << " before end of expression inupt."
-                        << std::endl;
-                } else {
-                    text_iterator text_end =
-                        boost::next(first, std::distance(first, last) - 1)->matched_.second;
-                    std::cout
-                        << "Parse error: expected "
-                        << name
-                        << " here:\n"
-                        << "  "
-                        << std::string(first->matched_.first, text_end)
-                        << "\n"
-                        << "  "
-                        << std::string(std::distance(first->matched_.first, it->matched_.first), '~')
-                        << '^'
-                        << std::endl;
-                }
+                std::string error_string;
+                generate_error_string(*first, *it, rule_name, first == last, error_string);
+                send_error_string(error_string);
             }
+
+        static boost::function<void (const std::string&)> send_error_string;
+        static void default_send_error_string(const std::string& str);
+
+    private:
+        void generate_error_string(const token_type& first,
+                                   const token_type& it,
+                                   const boost::spirit::info& rule_name,
+                                   bool at_end,
+                                   std::string& str) const;
     };
 
     extern GG_API const boost::phoenix::function<report_error_> report_error;
@@ -91,32 +83,32 @@ struct GG_API expression_parser_rules
 
     typedef boost::spirit::qi::rule<
         token_iterator,
-        text_iterator(adobe::array_t&),
+        void(adobe::array_t&),
         boost::spirit::qi::locals<adobe::name_t>,
         skipper_type
     > local_name_rule;
     typedef boost::spirit::qi::rule<
         token_iterator,
-        text_iterator(adobe::array_t&),
+        void(adobe::array_t&),
         boost::spirit::qi::locals<std::size_t>,
         skipper_type
     > local_size_rule;
     typedef boost::spirit::qi::rule<
         token_iterator,
-        text_iterator(adobe::array_t&),
+        void(adobe::array_t&),
         boost::spirit::qi::locals<adobe::array_t>,
         skipper_type
     > local_array_rule;
     typedef boost::spirit::qi::rule<
         token_iterator,
-        text_iterator(adobe::array_t&),
+        void(adobe::array_t&),
         skipper_type
     > no_locals_rule;
 
     // expression grammar
     boost::spirit::qi::rule<
         token_iterator,
-        text_iterator(adobe::array_t&),
+        void(adobe::array_t&),
         boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
         skipper_type
     > expression;
@@ -143,7 +135,7 @@ struct GG_API expression_parser_rules
     // lexical grammar
     boost::spirit::qi::rule<
         token_iterator,
-        text_iterator(adobe::array_t&),
+        void(adobe::array_t&),
         boost::spirit::qi::locals<std::string>,
         skipper_type
     > string;

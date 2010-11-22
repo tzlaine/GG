@@ -82,25 +82,6 @@ std::ostream& operator<<(std::ostream& stream, const type_info_t& x)
 
 } }
 
-namespace adobe {
-
-    std::ostream& operator<<(std::ostream& os, const adam_callback_suite_t::relation_t& relation)
-    {
-        return os << "("
-                  << relation.name_m << " "
-                  << relation.position_m << " "
-                  << relation.expression_m << " "
-                  << relation.detailed_m << " "
-                  << relation.brief_m << " "
-                  << ")";
-    }
-
-    std::ostream& operator<<(std::ostream& os, const std::vector<adam_callback_suite_t::relation_t>& relation_set)
-    {
-        return os; // TODO
-    }
-}
-
 namespace GG {
 
     struct AnySlotImplBase
@@ -343,22 +324,22 @@ namespace GG {
                 using boost::phoenix::at_c;
                 using boost::phoenix::val;
 
-#define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << detail::tok_val(_1) << std::endl]
+#define DUMP_TOK(x) tok.x[std::cout << val(#x" -- ") << _1 << std::endl]
 #define DUMP_LIT(x) lit(x)[std::cout << val("'") << val(x) << val("'") << std::endl]
 #define DUMP_UNATTRIBUTED(x) tok.x[std::cout << val(#x) << std::endl]
-#define DUMP_KEYWORD_TOK(x) x[std::cout << val("keyword -- ") << detail::tok_val(_1) << std::endl]
+#define DUMP_KEYWORD_TOK(x) x[std::cout << val("keyword -- ") << _1 << std::endl]
 
                 assert(tok.keywords.size() == 10u);
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& input = tok.keywords[input_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& output = tok.keywords[output_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& interface = tok.keywords[interface_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& logic = tok.keywords[logic_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& constant = tok.keywords[constant_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& invariant = tok.keywords[invariant_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& sheet = tok.keywords[sheet_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& unlink = tok.keywords[unlink_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& when = tok.keywords[when_k];
-                const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& relate = tok.keywords[relate_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+                const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
                 assert(tok.keywords.size() == 10u);
 
                 start =

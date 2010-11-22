@@ -50,7 +50,7 @@ GG_API const lexer& AdamLexer();
 /** The type of Spirit 2 parser returned by AdamExpressionParser(). */
 typedef boost::spirit::qi::rule<
     token_iterator,
-    text_iterator(adobe::array_t&),
+    void(adobe::array_t&),
     boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
     skipper_type
 > AdamExpressionParserRule;

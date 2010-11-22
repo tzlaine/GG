@@ -36,6 +36,32 @@
 
 using namespace GG;
 
+// requirements of spirit::qi::debug()
+namespace adobe {
+
+    std::ostream& operator<<(std::ostream& os, const line_position_t& x)
+    {
+        return os; // TODO
+    }
+
+    std::ostream& operator<<(std::ostream& os, const adam_callback_suite_t::relation_t& relation)
+    {
+        return os << "("
+                  << relation.name_m << " "
+                  << relation.position_m << " "
+                  << relation.expression_m << " "
+                  << relation.detailed_m << " "
+                  << relation.brief_m << " "
+                  << ")";
+    }
+
+    std::ostream& operator<<(std::ostream& os, const std::vector<adam_callback_suite_t::relation_t>& relation_set)
+    {
+        return os; // TODO
+    }
+
+}
+
 namespace {
 
     adobe::aggregate_name_t input_k      = { "input" };
@@ -132,46 +158,21 @@ namespace {
 
     const boost::phoenix::function<strip_cpp_comment_> strip_cpp_comment;
 
-    struct line_pos_
-    {
-        template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-        struct result
-        { typedef adobe::line_position_t type; };
-
-        adobe::line_position_t operator()(const std::string& filename,
-                                          GG::text_iterator first,
-                                          GG::text_iterator token_start,
-                                          const GG::lexer& lexer) const
-            {
-                // TODO: remove these +1's; leave them for now, for exact agreement with the (incorrect) Adobe parser
-                adobe::line_position_t retval(filename.c_str(), lexer.line_number);
-                retval.line_start_m = std::distance(first, lexer.line_start) + 1;
-                retval.position_m = std::distance(first, token_start) + 1;
-                return retval;
-            }
-    };
-
-    const boost::phoenix::function<line_pos_> line_pos;
-
     struct adam_parser_rules
     {
-        adam_parser_rules(const GG::text_iterator first,
-                          const std::string& filename_,
-                          const adobe::adam_callback_suite_t& callbacks_) :
-            filename(filename_),
+        adam_parser_rules(const adobe::adam_callback_suite_t& callbacks_) :
             callbacks(callbacks_)
         {
             namespace ascii = boost::spirit::ascii;
             namespace phoenix = boost::phoenix;
             namespace qi = boost::spirit::qi;
             using ascii::char_;
-            using phoenix::at_c;
             using phoenix::clear;
             using phoenix::construct;
-            using phoenix::if_;
-            using phoenix::push_back;
             using phoenix::cref;
+            using phoenix::if_;
             using phoenix::static_cast_;
+            using phoenix::push_back;
             using phoenix::val;
             using qi::_1;
             using qi::_2;
@@ -197,23 +198,24 @@ namespace {
             using qi::eps;
             using qi::lexeme;
             using qi::lit;
-            using detail::tok_val;
 
             lexer& tok = const_cast<lexer&>(AdamLexer());
             assert(tok.keywords.size() == 10u);
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& input = tok.keywords[input_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& output = tok.keywords[output_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& interface = tok.keywords[interface_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& logic = tok.keywords[logic_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& constant = tok.keywords[constant_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& invariant = tok.keywords[invariant_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& sheet = tok.keywords[sheet_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& unlink = tok.keywords[unlink_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& when = tok.keywords[when_k];
-            const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& relate = tok.keywords[relate_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+            const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
             assert(tok.keywords.size() == 10u);
 
             const AdamExpressionParserRule& expression = AdamExpressionParser();
+
+            using GG::detail::next_pos;
 
             // note that the lead comment, sheet name, and trail comment are currently all ignored
             sheet_specifier =
@@ -256,15 +258,15 @@ namespace {
             interface_cell_decl =
                 (
                     (
-                        tok.identifier[_a = tok_val(_1), _b = val(true)]
-                      | (unlink[_b = val(false)] > tok.identifier[_a = tok_val(_1)])
+                        tok.identifier[_a = _1, _b = val(true)]
+                      | (unlink[_b = val(false)] > tok.identifier[_a = _1])
                     )
                  >> -initializer(_e, _c)
                  >> -define_expression(_f, _d)
                   > end_statement(_g)
                 )[add_interface(callbacks, _a, _b, _e, _c, _f, _d, _g, _r1)];
 
-            input_cell_decl = tok.identifier[_a = tok_val(_1)] >> -initializer(_c, _b) > end_statement(_d)[
+            input_cell_decl = tok.identifier[_a = _1] >> -initializer(_c, _b) > end_statement(_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::input_k, _a, _c, _b, _d, _r1)
             ];
 
@@ -272,7 +274,7 @@ namespace {
                 add_cell(callbacks, adobe::adam_callback_suite_t::output_k, _a, _c, _b, _d, _r1)
             ];
 
-            constant_cell_decl = tok.identifier[_a = tok_val(_1)] > initializer(_c, _b) > end_statement(_d)[
+            constant_cell_decl = tok.identifier[_a = _1] > initializer(_c, _b) > end_statement(_d)[
                 add_cell(callbacks, adobe::adam_callback_suite_t::constant_k, _a, _c, _b, _d, _r1)
             ];
 
@@ -288,44 +290,42 @@ namespace {
                 add_cell(callbacks, adobe::adam_callback_suite_t::invariant_k, _a, _c, _b, _d, _r1)
             ];
 
-            relate_decl =
-                (
-                    relate
-                  | (conditional(_r1, _r2) > relate)
-                )
-              > lit('{')[_r1 = line_pos(cref(filename), first, first/*TODO*/, phoenix::cref(tok))]
-              > relate_expression(_a)
-              > relate_expression(_b)[
-                  push_back(_r3, _a),
-                  push_back(_r3, _b),
-                  clear(get_expression(_a))
-              ]
-             >> *(
-                     relate_expression(_a)[
+            relate_decl
+                =    (relate | (conditional(_r1, _r2) > relate))
+                >>   next_pos[_r1 = _1]
+                >    '{'
+                >    relate_expression(_a)
+                >    relate_expression(_b)
+                     [
+                         push_back(_r3, _a),
+                         push_back(_r3, _b),
+                         clear(get_expression(_a))
+                     ]
+                >>  *relate_expression(_a)
+                     [
                          push_back(_r3, _a),
                          clear(get_expression(_a))
                      ]
-                 )
-              > '}'
-             >> -trail_comment[_r4 = _1];
+                >    '}'
+                >>  -trail_comment[_r4 = _1];
 
             relate_expression =
                 -lead_comment[get_detailed(_r1) = _1]
              >> named_decl(get_name(_r1), get_position(_r1), get_expression(_r1), get_brief(_r1));
 
-            named_decl = tok.identifier[_r1 = tok_val(_1)] > define_expression(_r2, _r3) > end_statement(_r4);
+            named_decl = tok.identifier[_r1 = _1] > define_expression(_r2, _r3) > end_statement(_r4);
 
-            initializer = ':' > expression(_r2)[_r1 = line_pos(cref(filename), first, _1, phoenix::cref(tok))];
+            initializer = ':' >> next_pos[_r1 = _1] > expression(_r2);
 
-            define_expression = tok.define > expression(_r2)[_r1 = line_pos(cref(filename), first, _1, phoenix::cref(tok))];
+            define_expression = tok.define >> next_pos[_r1 = _1] > expression(_r2);
 
-            conditional = when > '(' > expression(_r2)[_r1 = line_pos(cref(filename), first, _1, phoenix::cref(tok))] > ')';
+            conditional = when > '(' >> next_pos[_r1 = _1] > expression(_r2) > ')';
 
             end_statement = ';' >> -trail_comment[_r1 = _1];
 
             // convenience rules
-            lead_comment = tok.lead_comment[_val = strip_c_comment(tok_val(_1))];
-            trail_comment = tok.trail_comment[_val = strip_cpp_comment(tok_val(_1))];
+            lead_comment = tok.lead_comment[_val = strip_c_comment(_1)];
+            trail_comment = tok.trail_comment[_val = strip_cpp_comment(_1)];
 
             // define names for rules, to be used in error reporting
 #define NAME(x) x.name(#x)
@@ -457,7 +457,6 @@ namespace {
         boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> lead_comment;
         boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> trail_comment;
 
-        const std::string& filename;
         const adobe::adam_callback_suite_t& callbacks;
     };
 
@@ -489,33 +488,32 @@ const AdamExpressionParserRule& GG::AdamExpressionParser()
     using boost::spirit::qi::token;
     using boost::spirit::qi::_1;
     using boost::spirit::qi::_val;
-    using detail::tok_val;
 
     lexer& tok = const_cast<lexer&>(AdamLexer());
     assert(tok.keywords.size() == 10u);
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& input = tok.keywords[input_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& output = tok.keywords[output_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& interface = tok.keywords[interface_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& logic = tok.keywords[logic_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& constant = tok.keywords[constant_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& invariant = tok.keywords[invariant_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& sheet = tok.keywords[sheet_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& unlink = tok.keywords[unlink_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& when = tok.keywords[when_k];
-    const boost::spirit::lex::token_def<std::pair<adobe::name_t, text_iterator> >& relate = tok.keywords[relate_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
     assert(tok.keywords.size() == 10u);
 
     static expression_parser_rules::keyword_rule adam_keywords =
-        input[_val = tok_val(_1)]
-      | output[_val = tok_val(_1)]
-      | interface[_val = tok_val(_1)]
-      | logic[_val = tok_val(_1)]
-      | constant[_val = tok_val(_1)]
-      | invariant[_val = tok_val(_1)]
-      | sheet[_val = tok_val(_1)]
-      | unlink[_val = tok_val(_1)]
-      | when[_val = tok_val(_1)]
-      | relate[_val = tok_val(_1)]
+        input[_val = _1]
+      | output[_val = _1]
+      | interface[_val = _1]
+      | logic[_val = _1]
+      | constant[_val = _1]
+      | invariant[_val = _1]
+      | sheet[_val = _1]
+      | unlink[_val = _1]
+      | when[_val = _1]
+      | relate[_val = _1]
         ;
     adam_keywords.name("keyword");
 
@@ -530,9 +528,11 @@ bool GG::Parse(const std::string& sheet,
 {
     using boost::spirit::qi::phrase_parse;
     std::string::const_iterator it = sheet.begin();
+    token_type::s_begin = it;
+    token_type::s_filename = filename.c_str();
     token_iterator iter = AdamLexer().begin(it, sheet.end());
     token_iterator end = AdamLexer().end();
-    adam_parser_rules adam_rules(it, filename, callbacks);
+    adam_parser_rules adam_rules(callbacks);
     return phrase_parse(iter,
                         end,
                         adam_rules.sheet_specifier,

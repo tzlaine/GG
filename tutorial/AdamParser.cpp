@@ -237,23 +237,26 @@ namespace {
                 |      invariant_set_decl
                 ;
 
-            interface_set_decl =
-                interface > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> interface_cell_decl(_a) ) ;
+#define SET_DECL(name)                                          \
+            name##_set_decl                                     \
+                =     name                                      \
+                >     ':'                                       \
+                >   * (                                         \
+                           (                                    \
+                               lead_comment [_a = _1]           \
+                             | eps [clear(_a)]                  \
+                           )                                    \
+                        >> name##_cell_decl(_a)                 \
+                      )
 
-            input_set_decl =
-                input > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> input_cell_decl(_a) ) ;
+            SET_DECL(interface);
+            SET_DECL(input);
+            SET_DECL(output);
+            SET_DECL(constant);
+            SET_DECL(logic);
+            SET_DECL(invariant);
 
-            output_set_decl =
-                output > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> output_cell_decl(_a) ) ;
-
-            constant_set_decl =
-                constant > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> constant_cell_decl(_a) ) ;
-
-            logic_set_decl =
-                logic > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> logic_cell_decl(_a) ) ;
-
-            invariant_set_decl =
-                invariant > ':' > * ( (lead_comment [_a = _1] | eps [clear(_a)]) >> invariant_cell_decl(_a) ) ;
+#undef SET_DECL
 
             interface_cell_decl
                 =

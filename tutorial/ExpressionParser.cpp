@@ -271,7 +271,7 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
                    )
                 |  (
                         '.'
-                    >   tok.identifier [push(_r1, _1)]
+                     >  tok.identifier [push(_r1, _1)]
                    )
               )
               [
@@ -393,9 +393,7 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
     string
         =     (
                      tok.quoted_string [_a = strip_quotes(_1)]
-                >> * (
-                          tok.quoted_string [_a += strip_quotes(_1)]
-                     )
+                >> * tok.quoted_string [_a += strip_quotes(_1)]
               )
               [
                   push(_r1, _a)

@@ -47,9 +47,9 @@ lexer::lexer(const adobe::name_t* first_keyword,
 {
     namespace lex = boost::spirit::lex;
 
-    self =
-        keyword_true_false
-      | keyword_empty;
+    self
+        =     keyword_true_false
+        |     keyword_empty;
 
     while (first_keyword != last_keyword) {
         self.add(
@@ -59,33 +59,33 @@ lexer::lexer(const adobe::name_t* first_keyword,
         ++first_keyword;
     }
 
-    self +=
-        identifier
-      | lead_comment
-      | trail_comment
-      | quoted_string
-      | number
-      | eq_op
-      | rel_op
-      | mul_op
-      | define
-      | or_
-      | and_
-      | '+'
-      | '-'
-      | '!'
-      | '?'
-      | ':'
-      | '.'
-      | ','
-      | '('
-      | ')'
-      | '['
-      | ']'
-      | '{'
-      | '}'
-      | '@'
-      | ';'
+    self
+        +=    identifier
+        |     lead_comment
+        |     trail_comment
+        |     quoted_string
+        |     number
+        |     eq_op
+        |     rel_op
+        |     mul_op
+        |     define
+        |     or_
+        |     and_
+        |     '+'
+        |     '-'
+        |     '!'
+        |     '?'
+        |     ':'
+        |     '.'
+        |     ','
+        |     '('
+        |     ')'
+        |     '['
+        |     ']'
+        |     '{'
+        |     '}'
+        |     '@'
+        |     ';'
         ;
 
     self("WS") = lex::token_def<>("\\s+");

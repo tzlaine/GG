@@ -466,6 +466,8 @@ class sheet_t : boost::noncopyable
 */
     dictionary_t contributing_to_cell(name_t) const;
 
+    void print(std::ostream& os) const;
+
     /*
         REVISIT (fbrereto) : From a note from sparent 2007/04/13:
 

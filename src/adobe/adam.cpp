@@ -13,6 +13,7 @@
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/function.hpp>
+#include <boost/variant.hpp>
 
 #include <GG/adobe/algorithm/find.hpp>
 #include <GG/adobe/algorithm/for_each.hpp>
@@ -29,6 +30,8 @@
 #include <GG/adobe/string.hpp>
 #include <GG/adobe/table_index.hpp>
 #include <GG/adobe/virtual_machine.hpp>
+
+#include "../../tutorial/ExpressionWriter.cpp"
 
 #ifndef NDEBUG
 
@@ -206,6 +209,8 @@ public:
     dictionary_t contributing(const dictionary_t&) const; 
 // all contributing values that have changed since mark
     dictionary_t contributing_to_cell(name_t) const;
+
+    void print(std::ostream& os) const;
     
 private:
     struct relation_cell_t;
@@ -358,7 +363,202 @@ private:
                                 boost::hash<name_t>,
                                 equal_to,
                                 mem_data_t<cell_t, const name_t> >  index_t;
-    
+
+    struct input_parameters_t
+    {
+        input_parameters_t (name_t name,
+                            const line_position_t& position,
+                            const array_t& initializer) :
+            name_m(name),
+            position_m(position),
+            initializer_m(initializer)
+            {}
+        name_t name_m;
+        line_position_t position_m;
+        array_t initializer_m;
+    };
+
+    struct output_parameters_t
+    {
+        output_parameters_t (name_t output,
+                             const line_position_t& position,
+                             const array_t& expression) :
+            output_m(output),
+            position_m(position),
+            expression_m(expression)
+            {}
+        name_t output_m;
+        line_position_t position_m;
+        array_t expression_m;
+    };
+
+    struct interface_parameters_t
+    {
+        interface_parameters_t (name_t name,
+                                bool linked,
+                                const line_position_t& position1,
+                                const array_t& initializer_expression,
+                                const line_position_t& position2, 
+                                const array_t& expression) :
+            name_m(name),
+            linked_m(linked),
+            position1_m(position1),
+            initializer_expression_m(initializer_expression),
+            position2_m(position2),
+            expression_m(expression)
+            {}
+        name_t name_m;
+        bool linked_m;
+        line_position_t position1_m;
+        array_t initializer_expression_m;
+        line_position_t position2_m;
+        array_t expression_m;
+    };
+
+    struct constant_parameters_t
+    {
+        constant_parameters_t (name_t name,
+                               const line_position_t& position,
+                               const array_t& initializer) :
+            name_m(name),
+            position_m(position),
+            initializer_m(initializer)
+            {}
+        name_t name_m;
+        line_position_t position_m;
+        array_t initializer_m;
+    };
+
+    struct logic_parameters_t
+    {
+        logic_parameters_t (name_t logic,
+                            const line_position_t& position,
+                            const array_t& expression) :
+            logic_m(logic),
+            position_m(position),
+            expression_m(expression)
+            {}
+        name_t logic_m;
+        line_position_t position_m;
+        array_t expression_m;
+    };
+
+    struct invariant_parameters_t
+    {
+        invariant_parameters_t (name_t invariant,
+                                const line_position_t& position,
+                                const array_t& expression) :
+            invariant_m(invariant),
+            position_m(position),
+            expression_m(expression)
+            {}
+        name_t invariant_m;
+        line_position_t position_m;
+        array_t expression_m;
+    };
+
+    struct relation_parameters_t
+    {
+        relation_parameters_t (const line_position_t& position,
+                               const array_t& conditional,
+                               const relation_t* first,
+                               const relation_t* last) :
+            position_m(position),
+            conditional_m(conditional),
+            relations_m(first, last)
+            {}
+        line_position_t position_m;
+        array_t conditional_m;
+        std::vector<relation_t> relations_m;
+    };
+
+    typedef boost::variant<
+        input_parameters_t,
+        output_parameters_t,
+        constant_parameters_t,
+        logic_parameters_t,
+        invariant_parameters_t,
+        interface_parameters_t,
+        relation_parameters_t
+    > add_parameters_t;
+
+    struct print_visitor :
+        public boost::static_visitor<>
+    {
+        print_visitor(std::ostream& os) :
+            os_m(os)
+            {}
+
+        void operator()(const input_parameters_t& params) const
+            {
+                os_m << "    " << params.name_m << " : "
+                     << GG::WriteExpression(params.initializer_m) << ";\n";
+            }
+
+        void operator()(const output_parameters_t& params) const
+            {
+                os_m << "    " << params.output_m << " <== "
+                     << GG::WriteExpression(params.expression_m) << ";\n";
+            }
+
+        void operator()(const constant_parameters_t& params) const
+            {
+                os_m << "    " << params.name_m << " : "
+                     << GG::WriteExpression(params.initializer_m) << ";\n";
+            }
+
+        void operator()(const logic_parameters_t& params) const
+            {
+                os_m << "    " << params.logic_m << " <== "
+                     << GG::WriteExpression(params.expression_m) << ";\n";
+            }
+
+        void operator()(const invariant_parameters_t& params) const
+            {
+                os_m << "    " << params.invariant_m << " <== "
+                     << GG::WriteExpression(params.expression_m) << ";\n";
+            }
+
+        void operator()(const interface_parameters_t& params) const
+            {
+                os_m << "    ";
+                if (!params.linked_m)
+                    os_m << "unlink ";
+                os_m << params.name_m << " : "
+                     << GG::WriteExpression(params.initializer_expression_m);
+                if (!params.expression_m.empty())
+                    os_m << "<== " << GG::WriteExpression(params.expression_m);
+                os_m << ";\n";
+            }
+
+        void operator()(const relation_parameters_t& params) const
+            {
+                os_m << "    ";
+                if (!params.conditional_m.empty())
+                    os_m << "when (" << GG::WriteExpression(params.conditional_m) << ") ";
+                os_m << "relate {\n";
+                for (std::size_t i = 0; i < params.relations_m.size(); ++i) {
+                    const relation_t& relation = params.relations_m[i];
+                    os_m << "        " << relation.name_m << " <== "
+                         << GG::WriteExpression(relation.expression_m) << ";\n";
+                }
+                os_m << "    }\n";
+            }
+
+        std::ostream& os_m;
+    };
+
+    struct added_cell_set_t
+    {
+        added_cell_set_t(access_specifier_t access) :
+            access_m(access)
+            {}
+        access_specifier_t access_m;
+        std::vector<add_parameters_t> added_cells_m;
+    };
+
+    typedef std::vector<added_cell_set_t> added_cells_t;
+
     index_t             name_index_m;
     index_t             setable_index_m; // input of interface or input;
     index_t             input_index_m;
@@ -388,6 +588,8 @@ private:
 
     bool                   has_output_m; // true if there are any output cells.
     bool                   initialize_mode_m; // true during reinitialize call.
+
+    added_cells_t          added_cells_m;
     
     // Actual cell storage - every thing else is index or state.
     
@@ -620,6 +822,9 @@ dictionary_t sheet_t::contributing() const
 dictionary_t sheet_t::contributing_to_cell(name_t x) const
 { return object_m->contributing_to_cell(x); }
 
+void sheet_t::print(std::ostream& os) const
+{ object_m->print(os); }
+
 /**************************************************************************************************/
 
 sheet_t::implementation_t::implementation_t(virtual_machine_t& machine) :
@@ -713,6 +918,10 @@ void sheet_t::implementation_t::touch(const name_t* first, const name_t* last)
 void sheet_t::implementation_t::add_input(name_t name, const line_position_t& position,
                                           const array_t& initializer)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_input)
+        added_cells_m.push_back(added_cell_set_t(access_input));
+    added_cells_m.back().added_cells_m.push_back(input_parameters_t(name, position, initializer));
+
     scope_value_t<bool> scope(initialize_mode_m, true);
     
     any_regular_t initial_value;
@@ -724,11 +933,15 @@ void sheet_t::implementation_t::add_input(name_t name, const line_position_t& po
     input_index_m.insert(cell_set_m.back());
 }
     
-
 /**************************************************************************************************/
+
 void sheet_t::implementation_t::add_output(name_t output, const line_position_t& position,
         const array_t& expression)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_output)
+        added_cells_m.push_back(added_cell_set_t(access_output));
+    added_cells_m.back().added_cells_m.push_back(output_parameters_t(output, position, expression));
+
     // REVISIT (sparent) : Non-transactional on failure.
     cell_set_m.push_back(cell_t(access_output, output, 
                                 boost::bind(&implementation_t::calculate_expression,
@@ -754,6 +967,15 @@ void sheet_t::implementation_t::add_interface(name_t name, bool linked,
                                               const line_position_t& position2, 
                                               const array_t& expression)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_interface_input)
+        added_cells_m.push_back(added_cell_set_t(access_interface_input));
+    added_cells_m.back().added_cells_m.push_back(interface_parameters_t(name,
+                                                                        linked,
+                                                                        position1,
+                                                                        initializer_expression,
+                                                                        position2, 
+                                                                        expression));
+
     scope_value_t<bool> scope(initialize_mode_m, true);
 
     if (initializer_expression.size()) {
@@ -795,6 +1017,10 @@ void sheet_t::implementation_t::add_interface(name_t name, bool linked,
 void sheet_t::implementation_t::add_constant(name_t name, const line_position_t& position,
         const array_t& initializer)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_constant)
+        added_cells_m.push_back(added_cell_set_t(access_constant));
+    added_cells_m.back().added_cells_m.push_back(constant_parameters_t(name, position, initializer));
+
     scope_value_t<bool> scope(initialize_mode_m, true);
 
     cell_set_m.push_back(cell_t(access_constant, name, 
@@ -812,6 +1038,10 @@ void sheet_t::implementation_t::add_constant(name_t name, const line_position_t&
 void sheet_t::implementation_t::add_logic(name_t logic, const line_position_t& position,
         const array_t& expression)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_logic)
+        added_cells_m.push_back(added_cell_set_t(access_logic));
+    added_cells_m.back().added_cells_m.push_back(logic_parameters_t(logic, position, expression));
+
     cell_set_m.push_back(cell_t(access_logic, logic, 
                                 boost::bind(&implementation_t::calculate_expression,
                                             boost::ref(*this), position, expression),
@@ -827,6 +1057,10 @@ void sheet_t::implementation_t::add_logic(name_t logic, const line_position_t& p
 void sheet_t::implementation_t::add_invariant(name_t invariant, const line_position_t& position,
         const array_t& expression)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_invariant)
+        added_cells_m.push_back(added_cell_set_t(access_invariant));
+    added_cells_m.back().added_cells_m.push_back(invariant_parameters_t(invariant, position, expression));
+
     // REVISIT (sparent) : Should invariants also go in name_index_m?
     cell_set_m.push_back(cell_t(access_invariant, invariant, 
                                 boost::bind(&implementation_t::calculate_expression,
@@ -840,6 +1074,10 @@ void sheet_t::implementation_t::add_invariant(name_t invariant, const line_posit
 void sheet_t::implementation_t::add_relation(const line_position_t& position,
         const array_t& conditional, const relation_t* first, const relation_t* last)
 {
+    if (added_cells_m.empty() || added_cells_m.back().access_m != access_logic)
+        added_cells_m.push_back(added_cell_set_t(access_logic));
+    added_cells_m.back().added_cells_m.push_back(relation_parameters_t(position, conditional, first, last));
+
     relation_cell_set_m.push_back(relation_cell_t(position, conditional, first, last));
     
     for (; first != last; ++first) {
@@ -1334,6 +1572,32 @@ dictionary_t sheet_t::implementation_t::contributing_to_cell(name_t x) const
         throw std::logic_error(make_string("No monitorable cell: ", x.c_str()));
         
     return contributing_set(dictionary_t(), iter->contributing_m);
+}
+
+/**************************************************************************************************/
+
+void sheet_t::implementation_t::print(std::ostream& os) const
+{
+    const char* tab = "    ";
+    os << "sheet name_ignored\n"
+       << "{\n";
+    for (std::size_t i = 0; i < added_cells_m.size(); ++i) {
+        const added_cell_set_t& cell_set = added_cells_m[i];
+        if (i)
+            os << '\n';
+        switch (cell_set.access_m) {
+        case access_input: os << "input:\n"; break;
+        case access_interface_input: os << "interface:\n"; break;
+        case access_output: os << "output:\n"; break;
+        case access_logic: os << "logic:\n"; break;
+        case access_constant: os << "constant:\n"; break;
+        case access_invariant: os << "invariant:\n"; break;
+        }
+        for (std::size_t j = 0; j < cell_set.added_cells_m.size(); ++j) {
+            boost::apply_visitor(print_visitor(os), cell_set.added_cells_m[j]);
+        }
+    }
+    os << "}\n";
 }
 
 /**************************************************************************************************/

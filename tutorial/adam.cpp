@@ -52,6 +52,8 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <boost/filesystem/path.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 
+#include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp> // for testing only
+#include <GG/adobe/adam_evaluate.hpp> // for testing only
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
 #include "ExpressionWriter.h" // for testing only
@@ -763,7 +765,8 @@ namespace GG {
     bool TestAdamParser(adobe::array_t& new_parse,
                         adobe::array_t& old_parse,
                         const std::string& filename,
-                        const std::string& sheet)
+                        const std::string& sheet,
+                        bool& round_trip_parse_pass)
     {
         adobe::adam_callback_suite_t old_parse_callbacks;
         old_parse_callbacks.add_cell_proc_m = StoreAddCellParams(old_parse, sheet);
@@ -782,11 +785,6 @@ namespace GG {
             std::stringstream ss(sheet);
             adobe::parse(ss, adobe::line_position_t(filename.c_str()), old_parse_callbacks);
         } catch (const adobe::stream_error_t& e) {
-#if 0
-            for (std::size_t i = 0; i < e.line_position_set().size(); ++i) {
-                std::cout << "Line position: \"" << e.line_position_set()[i] << "\"\n";
-            }
-#endif
             original_parse_failed = true;
         }
         if (original_parse_failed)
@@ -803,7 +801,32 @@ namespace GG {
             new_parse == old_parse;
         std::cout << (pass ? "PASS" : "FAIL") << "\n";
 
-        if (!pass) {
+        if (pass) {
+            round_trip_parse_pass = true;
+            try {
+                adobe::vm_lookup_t vm_lookup;
+                adobe::sheet_t adobe_sheet;
+                vm_lookup.attach_to(adobe_sheet);
+                vm_lookup.attach_to(adobe_sheet.machine_m);
+                Parse(sheet, filename, adobe::bind_to_sheet(adobe_sheet));
+                std::stringstream os;
+                adobe_sheet.print(os);
+                adobe::array_t round_trip_parse;
+                adobe::adam_callback_suite_t round_trip_parse_callbacks;
+                round_trip_parse_callbacks.add_cell_proc_m =
+                    StoreAddCellParams(round_trip_parse, sheet);
+                round_trip_parse_callbacks.add_relation_proc_m =
+                    StoreAddRelationParams(round_trip_parse, sheet);
+                round_trip_parse_callbacks.add_interface_proc_m =
+                    StoreAddInterfaceParams(round_trip_parse, sheet);
+                round_trip_parse_pass =
+                    Parse(sheet, filename, round_trip_parse_callbacks);
+                round_trip_parse_pass =
+                    round_trip_parse_pass && new_parse_failed ||
+                    round_trip_parse == new_parse;
+            } catch (const adobe::stream_error_t&) {}
+            std::cout << "Round-trip parse: " << (round_trip_parse_pass ? "PASS" : "FAIL") << '\n';
+        } else {
             std::cout << "original (verbose):\n";
             verbose_dump(old_parse);
             std::cout << "new (verbose):\n";
@@ -824,6 +847,9 @@ namespace GG {
         std::size_t passes = 0;
         std::size_t failures = 0;
 
+        std::size_t round_trip_passes = 0;
+        std::size_t round_trip_failures = 0;
+
         namespace fs = boost::filesystem;
         fs::path current_path = fs::current_path();
         fs::directory_iterator it(current_path);
@@ -832,15 +858,21 @@ namespace GG {
             if (boost::algorithm::ends_with(it->string(), "adm")) {
                 std::string file_contents = read_file(it->string());
                 if (!file_contents.empty()) {
-                    if (TestAdamParser(new_parse, old_parse, it->string(), file_contents))
+                    bool round_trip_pass;
+                    if (TestAdamParser(new_parse, old_parse, it->string(), file_contents, round_trip_pass))
                         ++passes;
                     else
                         ++failures;
+                    if (round_trip_pass)
+                        ++round_trip_passes;
+                    else
+                        ++round_trip_failures;
                 }
             }
         }
 
-        std::cout << "Summary: " << passes << " passed, " << failures << " failed\n";
+        std::cout << "Summary:    " << passes << " passed, " << failures << " failed\n";
+        std::cout << "Round-trip: " << round_trip_passes << " passed, " << round_trip_failures << " failed\n";
 
         exit(0);
 

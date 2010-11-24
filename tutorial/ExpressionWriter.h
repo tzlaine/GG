@@ -51,7 +51,7 @@
 
 namespace GG {
 
-std::string GG_API WriteExpression(const adobe::array_t& expression);
+GG_API std::string WriteExpression(const adobe::array_t& expression);
 
 }
 

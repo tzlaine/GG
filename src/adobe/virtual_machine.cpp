@@ -96,7 +96,7 @@ typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)>    di
 typedef adobe::vector<adobe::any_regular_t>                    stack_type; // REVISIT (sparent) : GCC 3.1 the symbol stack_t conflicts with a symbol in signal.h
 
 #if !defined(ADOBE_NO_DOCUMENTATION)
-typedef adobe::static_table<adobe::name_t, operator_t, 21>              operator_table_t;
+typedef adobe::static_table<adobe::name_t, operator_t, 22>              operator_table_t;
 typedef adobe::static_table<adobe::name_t, array_function_t, 7>         array_function_table_t;
 typedef adobe::static_table<adobe::name_t, dictionary_function_t, 1>    dictionary_function_table_t;
 typedef adobe::static_table<adobe::type_info_t, adobe::name_t, 7>       type_table_t;
@@ -367,7 +367,8 @@ void virtual_machine_init_once()
         op_entry_type(adobe::equal_k,           &implementation_t::binary_operator<std::equal_to, adobe::any_regular_t>),
         op_entry_type(adobe::not_equal_k,       &implementation_t::binary_operator<std::not_equal_to, adobe::any_regular_t>),
         op_entry_type(adobe::ifelse_k,          &implementation_t::ifelse_operator),
-        op_entry_type(adobe::index_k,           &implementation_t::index_operator),
+        op_entry_type(adobe::dot_index_k,       &implementation_t::index_operator),
+        op_entry_type(adobe::bracket_index_k,   &implementation_t::index_operator),
         op_entry_type(adobe::function_k,        &implementation_t::function_operator),
         op_entry_type(adobe::array_k,           &implementation_t::array_operator),
         op_entry_type(adobe::dictionary_k,      &implementation_t::dictionary_operator),
@@ -435,9 +436,17 @@ void virtual_machine_t::implementation_t::evaluate(const array_t& expression)
     for(expression_t::const_iterator iter(expression.begin()); iter != expression.end(); ++iter)
     {
         if (iter->type_info() == type_info<adobe::name_t>() && iter->cast<adobe::name_t>().c_str()[0] == '.')
-            ((*this).*(find_operator(iter->cast<adobe::name_t>())))();
+        {
+            if (iter->cast<adobe::name_t>() != parenthesized_expression_k &&
+                iter->cast<adobe::name_t>() != name_k)
+            {
+                ((*this).*(find_operator(iter->cast<adobe::name_t>())))();
+            }
+        }
         else
+        {
             value_stack_m.push_back(*iter);
+        }
     }
 }
     

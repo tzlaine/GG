@@ -75,9 +75,13 @@ extern aggregate_name_t false_k;
 
 extern aggregate_name_t function_k;
 extern aggregate_name_t variable_k;
-extern aggregate_name_t index_k;
+extern aggregate_name_t bracket_index_k;
+extern aggregate_name_t dot_index_k;
 extern aggregate_name_t array_k;
 extern aggregate_name_t dictionary_k;
+
+extern aggregate_name_t parenthesized_expression_k;
+extern aggregate_name_t name_k;
 
 /*************************************************************************************************/
 

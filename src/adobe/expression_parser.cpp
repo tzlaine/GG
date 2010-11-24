@@ -287,17 +287,18 @@ bool expression_parser::is_postfix_expression(array_t& expression_stack)
             {
             require_expression(expression_stack);
             require_token(close_bracket_k);
+            expression_stack.push_back(any_regular_t(bracket_index_k));
             }
+
         else if (is_token(dot_k))
             {
             any_regular_t result;
             require_token(identifier_k, result);
             expression_stack.push_back(result);
+            expression_stack.push_back(any_regular_t(dot_index_k));
             }
-        else break;
-        
-        expression_stack.push_back(any_regular_t(index_k));
 
+        else break;
         }
     
     return true;
@@ -387,11 +388,16 @@ bool expression_parser::is_primary_expression(array_t& expression_stack)
     {
     any_regular_t result; // empty result used if is_keyword(empty_k)
     
-    if (is_name(result)
-            || is_token(number_k, result)
-            || is_boolean(result)
-            || is_token(string_k, result)
-            || is_keyword(empty_k))
+    if (is_name(result))
+        {
+        expression_stack.push_back(move(result));
+        expression_stack.push_back(any_regular_t(name_k));
+        return true;
+        }
+    else if (is_token(number_k, result)
+             || is_boolean(result)
+             || is_token(string_k, result)
+             || is_keyword(empty_k))
         {
         expression_stack.push_back(move(result));
         return true;
@@ -403,6 +409,7 @@ bool expression_parser::is_primary_expression(array_t& expression_stack)
         {
         require_expression(expression_stack);
         require_token(close_parenthesis_k);
+        expression_stack.push_back(any_regular_t(parenthesized_expression_k));
         return true;
         }
     
@@ -473,6 +480,7 @@ bool expression_parser::is_name(any_regular_t& result)
     if (!is_token(keyword_k, result) && !is_token(identifier_k, result)) {
         throw_exception("identifier or keyword required.");
     }
+
     return true;
 }
 

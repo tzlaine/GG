@@ -65,9 +65,13 @@ aggregate_name_t false_k                = { "false" };
 
 aggregate_name_t function_k             = { ".function" };
 aggregate_name_t variable_k             = { ".variable" };
-aggregate_name_t index_k                = { ".index" };
+aggregate_name_t bracket_index_k        = { ".bracket_index" };
+aggregate_name_t dot_index_k            = { ".dot_index" };
 aggregate_name_t array_k                = { ".array" };
 aggregate_name_t dictionary_k           = { ".dictionary" };
+
+aggregate_name_t parenthesized_expression_k = { ".parenthesized_expression_k" };
+aggregate_name_t name_k                 = { ".name_k" };
 
 /*************************************************************************************************/
 

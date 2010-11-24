@@ -269,14 +269,17 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
                      >  expression(_r1)
                      >  ']'
                    )
+                   [
+                       push(_r1, adobe::bracket_index_k)
+                   ]
                 |  (
                         '.'
                      >  tok.identifier [push(_r1, _1)]
                    )
+                   [
+                       push(_r1, adobe::dot_index_k)
+                   ]
               )
-              [
-                  push(_r1, adobe::index_k)
-              ]
         ;
 
     primary_expression
@@ -285,6 +288,9 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
                 >> expression(_r1)
                 >  ')'
               )
+              [
+                  push(_r1, adobe::parenthesized_expression_k)
+              ]
         |     name(_r1)
         |     tok.number
               [
@@ -383,6 +389,9 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
                    tok.identifier [push(_r1, _1)]
                 |  keyword [push(_r1, _1)]
               )
+              [
+                  push(_r1, adobe::name_k)
+              ]
         ;
 
     boolean = tok.keyword_true_false [push(_r1, _1)] ;

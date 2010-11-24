@@ -54,6 +54,7 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
+#include "ExpressionWriter.h" // for testing only
 #include <boost/algorithm/string/split.hpp> // for testing only
 #include <boost/algorithm/string/classification.hpp> // for testing only
 #include <fstream> // for testing only
@@ -533,7 +534,9 @@ namespace GG {
             new_parsed_expression == original_parsed_expression;
         std::cout << (pass ? "PASS" : "FAIL") << "\n";
 
-        if (!pass) {
+        if (pass) {
+            std::cout << GG::WriteExpression(new_parsed_expression) << '\n';
+        } else {
             std::cout << "original (verbose):\n";
             verbose_dump(original_parsed_expression);
             std::cout << "new (verbose):\n";

@@ -8,13 +8,17 @@
 #include <iostream>
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE Lexer
 
 #include <boost/test/unit_test.hpp>
 
 #define GENERATE_TEST_RESULTS 0
 
-// for testing only
+enum TestType
+{
+    AdamTest,
+    EveTest
+} g_test_type;
+
 std::string read_file (const std::string& filename)
 {
     std::string retval;
@@ -210,6 +214,9 @@ namespace GG {
 
 BOOST_AUTO_TEST_CASE( adam_lexer )
 {
+    if (g_test_type != AdamTest)
+        return;
+
     static const adobe::name_t s_keywords[] = {
         input_k,
         output_k,
@@ -250,6 +257,9 @@ BOOST_AUTO_TEST_CASE( adam_lexer )
 
 BOOST_AUTO_TEST_CASE( eve_lexer )
 {
+    if (g_test_type != EveTest)
+        return;
+
     static const adobe::name_t s_keywords[] = {
         interface_k,
         constant_k,
@@ -280,4 +290,35 @@ BOOST_AUTO_TEST_CASE( eve_lexer )
     std::string expected_results = read_file("eve_test_expressions_tokens");
     BOOST_CHECK_EQUAL(stream.str(), expected_results);
 #endif
+}
+
+// Most of this is boilerplate cut-and-pasted from Boost.Test.  We need to
+// select which test(s) to do, so we can't use it here unmodified.
+
+#ifdef BOOST_TEST_ALTERNATIVE_INIT_API
+bool init_unit_test()                   {
+#else
+::boost::unit_test::test_suite*
+init_unit_test_suite( int, char* [] )   {
+#endif
+
+#ifdef BOOST_TEST_MODULE
+    using namespace ::boost::unit_test;
+    assign_op( framework::master_test_suite().p_name.value, BOOST_TEST_STRINGIZE( BOOST_TEST_MODULE ).trim( "\"" ), 0 );
+    
+#endif
+
+#ifdef BOOST_TEST_ALTERNATIVE_INIT_API
+    return true;
+}
+#else
+    return 0;
+}
+#endif
+
+int BOOST_TEST_CALL_DECL
+main( int argc, char* argv[] )
+{
+    g_test_type = (argv[2][0] == 'a') ? AdamTest : EveTest;
+    return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

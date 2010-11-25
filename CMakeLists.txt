@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(VERSION 2.6.4)
 
+enable_testing()
+
 project(GiGi)
 
 set(CMAKE_VERBOSE_MAKEFILE false)
@@ -35,8 +37,6 @@ if (BUILD_MULTI_THREADED)
 else ()
     set(BUILD_SINGLE_THREADED ON)
 endif ()
-
-add_definitions(-DADOBE_STD_SERIALIZATION)
 
 set(BOOST_SIGNALS_NAMESPACE "signals" CACHE STRING
     "Specifies alternate namespace used for boost::signals (only needed if you changed it using the BOOST_SIGNALS_NAMESPACE define when you built boost).")
@@ -152,6 +152,8 @@ cmake_dependent_option(BUILD_TUTORIALS
                        ON
                        BUILD_SDL_DRIVER
                        OFF)
+
+add_definitions(-DADOBE_STD_SERIALIZATION)
 
 include_directories(${CMAKE_HOME_DIRECTORY})
 
@@ -299,6 +301,8 @@ endif ()
 # Recurse Into Sources                 #
 ########################################
 add_subdirectory(src)
+
+add_subdirectory(test)
 
 if (BUILD_TUTORIALS)
     add_subdirectory(tutorial)

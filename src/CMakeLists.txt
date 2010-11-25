@@ -21,6 +21,7 @@ set(THIS_LIB_SOURCES
     Font.cpp
     GUI.cpp
     Layout.cpp
+    Lexer.cpp
     ListBox.cpp
     Menu.cpp
     MultiEdit.cpp

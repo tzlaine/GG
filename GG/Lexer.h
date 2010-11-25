@@ -44,8 +44,7 @@
 # endif
 #endif
 
-#include "Token.h"
-
+#include <GG/Token.h>
 #include <GG/adobe/name.hpp>
 #include <GG/adobe/istream.hpp>
 #include <GG/adobe/implementation/token.hpp>

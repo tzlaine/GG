@@ -28,8 +28,7 @@
 #ifndef _GG_EveParser_h_
 #define _GG_EveParser_h_
 
-#include "Lexer.h"
-
+#include <GG/Lexer.h>
 #include <GG/adobe/array_fwd.hpp>
 #include <GG/adobe/name_fwd.hpp>
 

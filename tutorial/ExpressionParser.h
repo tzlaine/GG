@@ -28,8 +28,7 @@
 #ifndef _GG_ExpressionParser_h_
 #define _GG_ExpressionParser_h_
 
-#include "Lexer.h"
-
+#include <GG/Lexer.h>
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/implementation/token.hpp>

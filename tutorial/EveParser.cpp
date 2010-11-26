@@ -24,7 +24,7 @@
 
 #include "EveParser.h"
 
-#include "ExpressionParser.h"
+#include <GG/ExpressionParser.h>
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/eve_parser.hpp>

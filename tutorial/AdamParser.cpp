@@ -24,7 +24,7 @@
 
 #include "AdamParser.h"
 
-#include "ExpressionParser.h"
+#include <GG/ExpressionParser.h>
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/adam_parser.hpp>

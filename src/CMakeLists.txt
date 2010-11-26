@@ -18,6 +18,7 @@ set(THIS_LIB_SOURCES
     DynamicGraphic.cpp
     Edit.cpp
     EventPump.cpp
+    ExpressionParser.cpp
     Font.cpp
     GUI.cpp
     Layout.cpp

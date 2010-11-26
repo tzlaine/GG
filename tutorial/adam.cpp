@@ -303,18 +303,6 @@ namespace GG {
 
     //bool dummy = TestNewConnections();
 
-    struct expression_parser :
-        boost::spirit::qi::grammar<GG::token_iterator, void(), GG::skipper_type>
-    {
-        expression_parser(adobe::array_t& stack, const AdamExpressionParserRule& expression) :
-            expression_parser::base_type(start)
-        {
-            start = expression(boost::phoenix::ref(stack));
-        }
-
-        boost::spirit::qi::rule<GG::token_iterator, void(), GG::skipper_type> start;
-    };
-
     void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
     void verbose_dump(const adobe::dictionary_t& array, std::size_t indent = 0);
 
@@ -372,87 +360,6 @@ namespace GG {
         --indent;
         std::cout << std::string(4 * indent, ' ') << "}\n";
     }
-
-    bool TestExpressionParser(const expression_parser& expression_p,
-                              adobe::array_t& new_parsed_expression,
-                              const std::string& expression)
-    {
-        std::cout << "expression: \"" << expression << "\"\n";
-        adobe::array_t original_parsed_expression;
-        bool original_parse_failed = false;
-        try {
-            original_parsed_expression = adobe::parse_adam_expression(expression);
-        } catch (const adobe::stream_error_t&) {
-            original_parse_failed = true;
-        }
-        if (original_parse_failed)
-            std::cout << "original: <parse failure>\n";
-        else
-            std::cout << "original: " << original_parsed_expression << "\n";
-        using boost::spirit::qi::phrase_parse;
-        std::string::const_iterator it = expression.begin();
-        token_iterator iter = AdamLexer().begin(it, expression.end());
-        token_iterator end = AdamLexer().end();
-        bool new_parse_failed =
-            !phrase_parse(iter,
-                          end,
-                          expression_p,
-                          boost::spirit::qi::in_state("WS")[AdamLexer().self]);
-        if (new_parse_failed)
-            std::cout << "new:      <parse failure>\n";
-        else
-            std::cout << "new:      " << new_parsed_expression << "\n";
-        bool pass =
-            original_parse_failed && new_parse_failed ||
-            new_parsed_expression == original_parsed_expression;
-        std::cout << (pass ? "PASS" : "FAIL") << "\n";
-
-        if (pass) {
-            std::cout << GG::WriteExpression(new_parsed_expression) << '\n';
-        } else {
-            std::cout << "original (verbose):\n";
-            verbose_dump(original_parsed_expression);
-            std::cout << "new (verbose):\n";
-            verbose_dump(new_parsed_expression);
-        }
-
-        std::cout << "\n";
-        new_parsed_expression.clear();
-
-        return pass;
-    }
-
-    bool TestExpressionParser()
-    {
-        adobe::array_t stack;
-        expression_parser expression_p(stack, AdamExpressionParser());
-
-        std::string expressions_file_contents = read_file("test_expressions");
-        std::vector<std::string> expressions;
-        using boost::algorithm::split;
-        using boost::algorithm::is_any_of;
-        split(expressions, expressions_file_contents, is_any_of("\n"));
-
-        std::size_t passes = 0;
-        std::size_t failures = 0;
-        for (std::size_t i = 0; i < expressions.size(); ++i) {
-            if (!expressions[i].empty()) {
-                if (TestExpressionParser(expression_p, stack, expressions[i]))
-                    ++passes;
-                else
-                    ++failures;
-            }
-        }
-
-        std::cout << "Summary: " << passes << " passed, " << failures << " failed\n";
-
-        exit(0);
-
-        return false;
-    }
-
-    //bool dummy3 = TestExpressionParser();
-
 
     bool instrument_positions = false;
 

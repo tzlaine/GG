@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-#include "ExpressionParser.h"
+#include <GG/ExpressionParser.h>
 
 #include <GG/adobe/implementation/token.hpp>
 

@@ -11,8 +11,11 @@
 
 #include <boost/test/unit_test.hpp>
 
+
 #define GENERATE_TEST_RESULTS 0
 
+const char* g_input_file = 0;
+const char* g_expected_output_file = 0;
 enum TestType
 {
     AdamTest,
@@ -235,7 +238,7 @@ BOOST_AUTO_TEST_CASE( adam_lexer )
     std::stringstream stream;
     GG::adam_lexer_test_grammar test_grammar(lexer, stream);
 
-    const std::string str = read_file("test_expressions");
+    const std::string str = read_file(g_input_file);
 
     std::string::const_iterator it = str.begin();
     GG::token_iterator iter = lexer.begin(it, str.end());
@@ -246,11 +249,13 @@ BOOST_AUTO_TEST_CASE( adam_lexer )
                                     test_grammar,
                                     boost::spirit::qi::in_state("WS")[lexer.self]);
 
+    std::cout << stream.str();
+
 #if GENERATE_TEST_RESULTS
-    std::ofstream ofs("adam_test_expressions_tokens");
+    std::ofstream ofs(g_expected_output_file);
     ofs << stream.str();
 #else
-    std::string expected_results = read_file("adam_test_expressions_tokens");
+    std::string expected_results = read_file(g_expected_output_file);
     BOOST_CHECK_EQUAL(stream.str(), expected_results);
 #endif
 }
@@ -272,7 +277,7 @@ BOOST_AUTO_TEST_CASE( eve_lexer )
     std::stringstream stream;
     GG::eve_lexer_test_grammar test_grammar(lexer, stream);
 
-    const std::string str = read_file("test_expressions");
+    const std::string str = read_file(g_input_file);
 
     std::string::const_iterator it = str.begin();
     GG::token_iterator iter = lexer.begin(it, str.end());
@@ -283,11 +288,13 @@ BOOST_AUTO_TEST_CASE( eve_lexer )
                                     test_grammar,
                                     boost::spirit::qi::in_state("WS")[lexer.self]);
 
+    std::cout << stream.str();
+
 #if GENERATE_TEST_RESULTS
-    std::ofstream ofs("eve_test_expressions_tokens");
+    std::ofstream ofs(g_expected_output_file);
     ofs << stream.str();
 #else
-    std::string expected_results = read_file("eve_test_expressions_tokens");
+    std::string expected_results = read_file(g_expected_output_file);
     BOOST_CHECK_EQUAL(stream.str(), expected_results);
 #endif
 }
@@ -319,6 +326,8 @@ init_unit_test_suite( int, char* [] )   {
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
-    g_test_type = (argv[2][0] == 'a') ? AdamTest : EveTest;
+    g_input_file = argv[1];
+    g_expected_output_file = argv[2];
+    g_test_type = (g_expected_output_file[0] == 'a') ? AdamTest : EveTest;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

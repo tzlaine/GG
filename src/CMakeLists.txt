@@ -19,6 +19,7 @@ set(THIS_LIB_SOURCES
     Edit.cpp
     EventPump.cpp
     ExpressionParser.cpp
+    ExpressionWriter.cpp
     Font.cpp
     GUI.cpp
     Layout.cpp

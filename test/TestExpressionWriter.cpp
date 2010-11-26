@@ -1,5 +1,6 @@
 #include <GG/ExpressionParser.h>
 
+#include <GG/ExpressionWriter.h>
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/algorithm/lower_bound.hpp>
 #include <GG/adobe/algorithm/sort.hpp>
@@ -172,10 +173,7 @@ namespace GG {
         } catch (const adobe::stream_error_t&) {
             original_parse_failed = true;
         }
-        if (original_parse_failed)
-            std::cout << "original: <parse failure>\n";
-        else
-            std::cout << "original: " << original_parsed_expression << "\n";
+        std::cout << "original: <parse " << (original_parse_failed ? "failure" : "success") << ">\n";
         using boost::spirit::qi::phrase_parse;
         std::string::const_iterator it = expression.begin();
         token_iterator iter = lexer_.begin(it, expression.end());
@@ -185,21 +183,23 @@ namespace GG {
                           end,
                           parser_rules.expression(boost::phoenix::ref(new_parsed_expression)),
                           boost::spirit::qi::in_state("WS")[lexer_.self]);
-        if (new_parse_failed)
-            std::cout << "new:      <parse failure>\n";
-        else
-            std::cout << "new:      " << new_parsed_expression << "\n";
+        std::cout << "new:      <parse " << (new_parse_failed ? "failure" : "success") << ">\n";
         bool pass =
             original_parse_failed && new_parse_failed ||
             new_parsed_expression == original_parsed_expression;
-        std::cout << (pass ? "PASS" : "FAIL") << "\n";
 
-        if (!pass) {
-            std::cout << "original (verbose):\n";
-            verbose_dump(original_parsed_expression);
-            std::cout << "new (verbose):\n";
-            verbose_dump(new_parsed_expression);
+        if (pass) {
+            std::string rewritten_expression = GG::WriteExpression(new_parsed_expression);
+            std::cout << "Rewrite:    " << rewritten_expression << '\n';
+            try {
+                adobe::array_t round_trip_parsed_expression = adobe_parse(rewritten_expression);
+                pass &= round_trip_parsed_expression == new_parsed_expression;
+            } catch (const adobe::stream_error_t&) {
+                pass = new_parsed_expression.empty();
+            }
         }
+
+        std::cout << "Round-trip parse: " << (pass ? "PASS" : "FAIL") << '\n';
 
         std::cout << "\n";
         new_parsed_expression.clear();

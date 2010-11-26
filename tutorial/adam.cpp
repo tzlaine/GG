@@ -54,7 +54,7 @@ std::istream& operator>>(std::istream& os, PathTypes& p);
 #include <GG/adobe/adam_evaluate.hpp> // for testing only
 #include <GG/adobe/adam_parser.hpp> // for testing only
 #include "AdamParser.h" // for testing only
-#include "ExpressionWriter.h" // for testing only
+#include <GG/ExpressionWriter.h> // for testing only
 #include <boost/algorithm/string/split.hpp> // for testing only
 #include <boost/algorithm/string/classification.hpp> // for testing only
 #include <fstream> // for testing only

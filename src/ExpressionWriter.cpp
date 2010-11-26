@@ -23,7 +23,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-#include "ExpressionWriter.h"
+#include <GG/ExpressionWriter.h>
 
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>

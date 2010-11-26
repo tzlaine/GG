@@ -31,7 +31,7 @@
 #include <GG/adobe/table_index.hpp>
 #include <GG/adobe/virtual_machine.hpp>
 
-#include "../../tutorial/ExpressionWriter.cpp"
+#include <GG/ExpressionWriter.h>
 
 #ifndef NDEBUG
 

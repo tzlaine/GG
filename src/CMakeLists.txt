@@ -6,6 +6,7 @@ set(THIS_LIB_SOURCES
 
     AdamDlg.cpp
     AdamGlue.cpp
+    AdamParser.cpp
     AlignmentFlags.cpp
     Base.cpp
     BrowseInfoWnd.cpp

@@ -22,7 +22,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-#include "AdamParser.h"
+#include <GG/AdamParser.h>
 
 #include <GG/ExpressionParser.h>
 #include <GG/adobe/array.hpp>
@@ -38,11 +38,6 @@ using namespace GG;
 
 // requirements of spirit::qi::debug()
 namespace adobe {
-
-    std::ostream& operator<<(std::ostream& os, const line_position_t& x)
-    {
-        return os; // TODO
-    }
 
     std::ostream& operator<<(std::ostream& os, const adam_callback_suite_t::relation_t& relation)
     {

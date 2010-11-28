@@ -19,6 +19,7 @@ set(THIS_LIB_SOURCES
     DynamicGraphic.cpp
     Edit.cpp
     EventPump.cpp
+    EveParser.cpp
     ExpressionParser.cpp
     ExpressionWriter.cpp
     Font.cpp

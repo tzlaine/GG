@@ -22,7 +22,7 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-#include "EveParser.h"
+#include <GG/EveParser.h>
 
 #include <GG/ExpressionParser.h>
 #include <GG/adobe/array.hpp>

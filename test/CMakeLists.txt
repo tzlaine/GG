@@ -39,6 +39,7 @@ make_test_exec(ExpressionParser)
 make_test_exec(ExpressionWriter)
 make_test_exec(AdamParser)
 make_test_exec(AdamWriter)
+make_test_exec(EveParser)
 
 add_test_and_data_files(StrongTypedef)
 add_test_and_data_files(Lexer test_expressions adam_test_expressions_tokens)
@@ -56,4 +57,10 @@ endforeach ()
 
 foreach (test_file ${adam_test_files})
     add_test_and_data_files(AdamWriter ${test_file})
+endforeach ()
+
+file(GLOB eve_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} asl_1.0.43_eve_files/*.eve)
+
+foreach (test_file ${eve_test_files})
+    add_test_and_data_files(EveParser ${test_file})
 endforeach ()

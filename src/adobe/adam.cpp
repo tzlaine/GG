@@ -524,8 +524,9 @@ private:
                 os_m << "    ";
                 if (!params.linked_m)
                     os_m << "unlink ";
-                os_m << params.name_m << " : "
-                     << GG::WriteExpression(params.initializer_expression_m);
+                os_m << params.name_m;
+                if (!params.initializer_expression_m.empty())
+                    os_m << " : " << GG::WriteExpression(params.initializer_expression_m);
                 if (!params.expression_m.empty())
                     os_m << "<== " << GG::WriteExpression(params.expression_m);
                 os_m << ";\n";

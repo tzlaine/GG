@@ -70,6 +70,66 @@ namespace {
     adobe::aggregate_name_t when_k       = { "when" };
     adobe::aggregate_name_t relate_k     = { "relate" };
 
+    const lexer& AdamLexer()
+    {
+        static const adobe::name_t s_keywords[] = {
+            input_k,
+            output_k,
+            interface_k,
+            logic_k,
+            constant_k,
+            invariant_k,
+            sheet_k,
+            unlink_k,
+            when_k,
+            relate_k
+        };
+        static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
+
+        static lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
+
+        return s_lexer;    
+    }
+
+    const expression_parser_rules::expression_rule& AdamExpressionParser()
+    {
+        using boost::spirit::qi::token;
+        using boost::spirit::qi::_1;
+        using boost::spirit::qi::_val;
+
+        lexer& tok = const_cast<lexer&>(AdamLexer());
+        assert(tok.keywords.size() == 10u);
+        const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
+        assert(tok.keywords.size() == 10u);
+
+        static expression_parser_rules::keyword_rule adam_keywords =
+              input[_val = _1]
+            | output[_val = _1]
+            | interface[_val = _1]
+            | logic[_val = _1]
+            | constant[_val = _1]
+            | invariant[_val = _1]
+            | sheet[_val = _1]
+            | unlink[_val = _1]
+            | when[_val = _1]
+            | relate[_val = _1]
+            ;
+        adam_keywords.name("keyword");
+
+        static const expression_parser_rules s_parser(AdamLexer(), adam_keywords);
+
+        return s_parser.expression;
+    }
+
 #define GET_REF(type_, name)                                            \
     struct get_##name##_                                                \
     {                                                                   \
@@ -208,7 +268,7 @@ namespace {
             const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
             assert(tok.keywords.size() == 10u);
 
-            const AdamExpressionParserRule& expression = AdamExpressionParser();
+            const expression_parser_rules::expression_rule& expression = AdamExpressionParser();
 
             using GG::detail::next_pos;
 
@@ -409,15 +469,15 @@ namespace {
         typedef adobe::adam_callback_suite_t::relation_t relation;
         typedef std::vector<relation> relation_set;
 
-        typedef boost::spirit::qi::rule<GG::token_iterator, void(), GG::skipper_type> void_rule;
+        typedef boost::spirit::qi::rule<token_iterator, void(), skipper_type> void_rule;
         typedef boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(),
             boost::spirit::qi::locals<std::string>,
-            GG::skipper_type
+            skipper_type
         > cell_set_rule;
         typedef boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
@@ -425,7 +485,7 @@ namespace {
                 adobe::line_position_t,
                 std::string
             >,
-            GG::skipper_type
+            skipper_type
         > cell_decl_rule;
 
         // Adam grammar
@@ -440,7 +500,7 @@ namespace {
         cell_set_rule invariant_set_decl;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
@@ -451,7 +511,7 @@ namespace {
                 adobe::line_position_t,
                 std::string
             >,
-            GG::skipper_type
+            skipper_type
         > interface_cell_decl;
 
         cell_decl_rule input_cell_decl;
@@ -459,7 +519,7 @@ namespace {
         cell_decl_rule constant_cell_decl;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(const std::string&),
             boost::spirit::qi::locals<
                 adobe::name_t,
@@ -468,109 +528,49 @@ namespace {
                 std::string,
                 relation_set
             >,
-            GG::skipper_type
+            skipper_type
         > logic_cell_decl;
 
         cell_decl_rule invariant_cell_decl;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::line_position_t&, adobe::array_t&, relation_set&, std::string&),
             boost::spirit::qi::locals<relation, relation>,
-            GG::skipper_type
+            skipper_type
         > relate_decl;
 
-        boost::spirit::qi::rule<GG::token_iterator, void(relation&), GG::skipper_type> relate_expression;
+        boost::spirit::qi::rule<token_iterator, void(relation&), skipper_type> relate_expression;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::name_t&, adobe::line_position_t&, adobe::array_t&, std::string&),
-            GG::skipper_type
+            skipper_type
         > named_decl;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::line_position_t&, adobe::array_t&),
-            GG::skipper_type
+            skipper_type
         > initializer;
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::line_position_t&, adobe::array_t&),
-            GG::skipper_type
+            skipper_type
         > define_expression;
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::line_position_t&, adobe::array_t&),
-            GG::skipper_type
+            skipper_type
         > conditional;
-        boost::spirit::qi::rule<GG::token_iterator, void(std::string&), GG::skipper_type> end_statement;
+        boost::spirit::qi::rule<token_iterator, void(std::string&), skipper_type> end_statement;
 
-        boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> lead_comment;
-        boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> trail_comment;
+        boost::spirit::qi::rule<token_iterator, std::string(), skipper_type> lead_comment;
+        boost::spirit::qi::rule<token_iterator, std::string(), skipper_type> trail_comment;
 
         const adobe::adam_callback_suite_t& callbacks;
     };
 
-}
-
-const lexer& GG::AdamLexer()
-{
-    static const adobe::name_t s_keywords[] = {
-        input_k,
-        output_k,
-        interface_k,
-        logic_k,
-        constant_k,
-        invariant_k,
-        sheet_k,
-        unlink_k,
-        when_k,
-        relate_k
-    };
-    static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
-
-    static lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
-
-    return s_lexer;    
-}
-
-const AdamExpressionParserRule& GG::AdamExpressionParser()
-{
-    using boost::spirit::qi::token;
-    using boost::spirit::qi::_1;
-    using boost::spirit::qi::_val;
-
-    lexer& tok = const_cast<lexer&>(AdamLexer());
-    assert(tok.keywords.size() == 10u);
-    const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& logic = tok.keywords[logic_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& invariant = tok.keywords[invariant_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& sheet = tok.keywords[sheet_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
-    assert(tok.keywords.size() == 10u);
-
-    static expression_parser_rules::keyword_rule adam_keywords =
-        input[_val = _1]
-      | output[_val = _1]
-      | interface[_val = _1]
-      | logic[_val = _1]
-      | constant[_val = _1]
-      | invariant[_val = _1]
-      | sheet[_val = _1]
-      | unlink[_val = _1]
-      | when[_val = _1]
-      | relate[_val = _1]
-        ;
-    adam_keywords.name("keyword");
-
-    static const expression_parser_rules s_parser(GG::AdamLexer(), adam_keywords);
-
-    return s_parser.expression;
 }
 
 bool GG::Parse(const std::string& sheet,

@@ -43,6 +43,48 @@ namespace {
     adobe::aggregate_name_t layout_k     = { "layout" };
     adobe::aggregate_name_t view_k       = { "view" };
 
+    const lexer& EveLexer()
+    {
+        static const adobe::name_t s_keywords[] = {
+            interface_k,
+            constant_k,
+            layout_k,
+            view_k
+        };
+        static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
+
+        static lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
+
+        return s_lexer;    
+    }
+
+    const expression_parser_rules::expression_rule& EveExpressionParser()
+    {
+        using boost::spirit::qi::token;
+        using boost::spirit::qi::_1;
+        using boost::spirit::qi::_val;
+
+        lexer& tok = const_cast<lexer&>(EveLexer());
+        assert(tok.keywords.size() == 4u);
+        const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& layout = tok.keywords[layout_k];
+        const boost::spirit::lex::token_def<adobe::name_t>& view = tok.keywords[view_k];
+        assert(tok.keywords.size() == 4u);
+
+        static expression_parser_rules::keyword_rule eve_keywords =
+              interface[_val = _1]
+            | constant[_val = _1]
+            | layout[_val = _1]
+            | view[_val = _1]
+            ;
+        eve_keywords.name("keyword");
+
+        static const expression_parser_rules s_parser(EveLexer(), eve_keywords);
+
+        return s_parser.expression;
+    }
+
     struct add_cell_
     {
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
@@ -124,7 +166,7 @@ namespace {
             const boost::spirit::lex::token_def<adobe::name_t>& view = tok.keywords[view_k];
             assert(tok.keywords.size() == 4u);
 
-            const EveExpressionParserRule& expression = EveExpressionParser();
+            const expression_parser_rules::expression_rule& expression = EveExpressionParser();
             expression_parser_rules::local_size_rule named_argument_list; // TODO
 
             using GG::detail::next_pos;
@@ -240,12 +282,12 @@ namespace {
 
         typedef adobe::eve_callback_suite_t::cell_type_t cell_type_t;
 
-        typedef boost::spirit::qi::rule<GG::token_iterator, void(), GG::skipper_type> void_rule;
+        typedef boost::spirit::qi::rule<token_iterator, void(), skipper_type> void_rule;
 
         typedef boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(const boost::any&),
-            GG::skipper_type
+            skipper_type
         > position_rule;
 
         position_rule layout_specifier;
@@ -255,7 +297,7 @@ namespace {
         void_rule constant_set_decl;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(cell_type_t),
             boost::spirit::qi::locals<
                 std::string,
@@ -264,17 +306,17 @@ namespace {
                 adobe::line_position_t,
                 adobe::array_t
             >,
-            GG::skipper_type
+            skipper_type
         > cell_decl;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::line_position_t&, adobe::array_t&),
-            GG::skipper_type
+            skipper_type
         > initializer;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(const boost::any&),
             boost::spirit::qi::locals<
                 std::string,
@@ -284,74 +326,32 @@ namespace {
                 adobe::line_position_t,
                 boost::any
             >,
-            GG::skipper_type
+            skipper_type
         > view_definition;
 
         position_rule view_statment_sequence;
 
         boost::spirit::qi::rule<
-            GG::token_iterator,
+            token_iterator,
             void(adobe::name_t&, adobe::array_t&),
-            GG::skipper_type
+            skipper_type
         > view_class_decl;
 
         position_rule view_statment_list;
 
-        boost::spirit::qi::rule<GG::token_iterator, void(std::string&), GG::skipper_type> end_statement;
+        boost::spirit::qi::rule<token_iterator, void(std::string&), skipper_type> end_statement;
 
-        boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> lead_comment;
-        boost::spirit::qi::rule<GG::token_iterator, std::string(), GG::skipper_type> trail_comment;
+        boost::spirit::qi::rule<token_iterator, std::string(), skipper_type> lead_comment;
+        boost::spirit::qi::rule<token_iterator, std::string(), skipper_type> trail_comment;
 
         const adobe::eve_callback_suite_t& callbacks;
     };
 
 }
 
-const lexer& GG::EveLexer()
-{
-    static const adobe::name_t s_keywords[] = {
-        interface_k,
-        constant_k,
-        layout_k,
-        view_k
-    };
-    static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
-
-    static lexer s_lexer(s_keywords, s_keywords + s_num_keywords);
-
-    return s_lexer;    
-}
-
-const EveExpressionParserRule& GG::EveExpressionParser()
-{
-    using boost::spirit::qi::token;
-    using boost::spirit::qi::_1;
-    using boost::spirit::qi::_val;
-
-    lexer& tok = const_cast<lexer&>(EveLexer());
-    assert(tok.keywords.size() == 4u);
-    const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& constant = tok.keywords[constant_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& layout = tok.keywords[layout_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& view = tok.keywords[view_k];
-    assert(tok.keywords.size() == 4u);
-
-    static expression_parser_rules::keyword_rule eve_keywords =
-        interface[_val = _1]
-      | constant[_val = _1]
-      | layout[_val = _1]
-      | view[_val = _1]
-        ;
-    eve_keywords.name("keyword");
-
-    static const expression_parser_rules s_parser(GG::EveLexer(), eve_keywords);
-
-    return s_parser.expression;
-}
-
 bool GG::Parse(const std::string& layout,
                const std::string& filename,
-               const boost::any& position,
+               const boost::any& parent,
                const adobe::eve_callback_suite_t& callbacks)
 {
     using boost::spirit::qi::phrase_parse;
@@ -363,6 +363,6 @@ bool GG::Parse(const std::string& layout,
     eve_parser_rules eve_rules(callbacks);
     return phrase_parse(iter,
                         end,
-                        eve_rules.layout_specifier(boost::phoenix::cref(position)),
+                        eve_rules.layout_specifier(boost::phoenix::cref(parent)),
                         boost::spirit::qi::in_state("WS")[EveLexer().self]);
 }

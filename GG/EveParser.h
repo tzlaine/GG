@@ -28,12 +28,21 @@
 #ifndef _GG_EveParser_h_
 #define _GG_EveParser_h_
 
-#include <GG/Lexer.h>
-#include <GG/adobe/array_fwd.hpp>
-#include <GG/adobe/name_fwd.hpp>
-
-#include <boost/spirit/home/qi/char/char_class.hpp>
-#include <boost/spirit/home/qi/nonterminal/grammar.hpp>
+#ifndef GG_API
+# ifdef _MSC_VER
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#  undef min
+#  undef max
+#  ifdef GiGi_EXPORTS
+#   define GG_API __declspec(dllexport)
+#  else
+#   define GG_API __declspec(dllimport)
+#  endif
+# else
+#  define GG_API
+# endif
+#endif
 
 #include <string>
 
@@ -42,24 +51,15 @@ namespace adobe {
     struct eve_callback_suite_t;
 }
 
+namespace boost {
+    class any;
+}
+
 namespace GG {
-
-GG_API const lexer& EveLexer();
-
-/** The type of Spirit 2 parser returned by EveExpressionParser(). */
-typedef boost::spirit::qi::rule<
-    token_iterator,
-    void(adobe::array_t&),
-    boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
-    skipper_type
-> EveExpressionParserRule;
-
-/** Returns a Spirit 2 parser that can be used to parse Eve expressions. */
-GG_API const EveExpressionParserRule& EveExpressionParser();
 
 GG_API bool Parse(const std::string& sheet,
                   const std::string& filename,
-                  const boost::any& position,
+                  const boost::any& parent,
                   const adobe::eve_callback_suite_t& callbacks);
 
 }

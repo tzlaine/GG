@@ -83,6 +83,12 @@ struct GG_API expression_parser_rules
     typedef boost::spirit::qi::rule<
         token_iterator,
         void(adobe::array_t&),
+        boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
+        skipper_type
+    > expression_rule;
+    typedef boost::spirit::qi::rule<
+        token_iterator,
+        void(adobe::array_t&),
         boost::spirit::qi::locals<adobe::name_t>,
         skipper_type
     > local_name_rule;
@@ -105,12 +111,7 @@ struct GG_API expression_parser_rules
     > no_locals_rule;
 
     // expression grammar
-    boost::spirit::qi::rule<
-        token_iterator,
-        void(adobe::array_t&),
-        boost::spirit::qi::locals<adobe::array_t, adobe::array_t>,
-        skipper_type
-    > expression;
+    expression_rule expression;
 
     local_array_rule or_expression;
     local_array_rule and_expression;

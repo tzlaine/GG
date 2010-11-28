@@ -11,6 +11,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestingUtils.h"
+
 
 #define GENERATE_TEST_RESULTS 0
 
@@ -21,17 +23,6 @@ enum TestType
     AdamTest,
     EveTest
 } g_test_type;
-
-std::string read_file (const std::string& filename)
-{
-    std::string retval;
-    std::ifstream ifs(filename.c_str());
-    int c;
-    while ((c = ifs.get()) != std::ifstream::traits_type::eof()) {
-        retval += c;
-    }
-    return retval;
-}
 
 adobe::aggregate_name_t input_k      = { "input" };
 adobe::aggregate_name_t output_k     = { "output" };

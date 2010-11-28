@@ -23,26 +23,26 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file AdamParser.h TODO. */
+/** \file Export.h Contains the GG_API macro, which is used to specify which
+    class and function symbols will be exported in SO's/DLL's. */
 
-#ifndef _GG_AdamParser_h_
-#define _GG_AdamParser_h_
+#ifndef _GG_Export_h_
+#define _GG_Export_h_
 
-#include <GG/Export.h>
+#ifndef GG_API
+# ifdef _MSC_VER
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#  undef min
+#  undef max
+#  ifdef GiGi_EXPORTS
+#   define GG_API __declspec(dllexport)
+#  else
+#   define GG_API __declspec(dllimport)
+#  endif
+# else
+#  define GG_API
+# endif
+#endif
 
-#include <string>
-
-
-namespace adobe {
-    struct adam_callback_suite_t;
-}
-
-namespace GG {
-
-GG_API bool Parse(const std::string& sheet,
-                  const std::string& filename,
-                  const adobe::adam_callback_suite_t& callbacks);
-
-}
-
-#endif // _GG_AdamParser_h_
+#endif // _GG_Export_h_

@@ -28,21 +28,7 @@
 #ifndef _GG_EveParser_h_
 #define _GG_EveParser_h_
 
-#ifndef GG_API
-# ifdef _MSC_VER
-#  define WIN32_LEAN_AND_MEAN
-#  include <windows.h>
-#  undef min
-#  undef max
-#  ifdef GiGi_EXPORTS
-#   define GG_API __declspec(dllexport)
-#  else
-#   define GG_API __declspec(dllimport)
-#  endif
-# else
-#  define GG_API
-# endif
-#endif
+#include <GG/Export.h>
 
 #include <string>
 

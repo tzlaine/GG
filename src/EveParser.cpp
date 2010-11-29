@@ -225,6 +225,9 @@ namespace {
                 >>   view_class_decl(_c, _d)
                 >    (
                           end_statement(_b)
+                          [
+                              _f = add_view(callbacks, _r1, _e, _c, _d, _b, _a)
+                          ]
                        |  (
                               - trail_comment [_b = _1]
                             >>  eps

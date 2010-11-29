@@ -102,7 +102,17 @@ void detail::report_error_::generate_error_string(const token_type& first,
         is << " before end of input.\n";
     } else {
         std::string match(it.matched_range().first, it.matched_range().second);
-        std::string line_start_though_it_start(it.line_start(), it.matched_range().first);
+        text_iterator it_start = it.matched_range().first;
+
+        // Use the end of the token's matched range, if its entire match was
+        // whitespace.
+        if (match.find_first_not_of(" \t\n\r\f\v") == std::string::npos)
+            it_start = it.matched_range().second;
+
+        if (it_start < it.line_start())
+            it_start = it.line_start();
+
+        std::string line_start_though_it_start(it.line_start(), it_start);
 
         // expand tabs (ugh!)
         {

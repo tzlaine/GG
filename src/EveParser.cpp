@@ -58,7 +58,7 @@ namespace {
         return s_lexer;    
     }
 
-    const expression_parser_rules::expression_rule& EveExpressionParser()
+    const expression_parser_rules& EveExpressionParserRules()
     {
         using boost::spirit::qi::token;
         using boost::spirit::qi::_1;
@@ -82,7 +82,7 @@ namespace {
 
         static const expression_parser_rules s_parser(EveLexer(), eve_keywords);
 
-        return s_parser.expression;
+        return s_parser;
     }
 
     struct add_cell_
@@ -106,7 +106,7 @@ namespace {
 
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
         boost::any operator()(Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7) const
-            { arg1.add_view_proc_m(arg2, arg3, arg4, arg5, arg6, arg7); }
+            { return arg1.add_view_proc_m(arg2, arg3, arg4, arg5, arg6, arg7); }
     };
 
     const boost::phoenix::function<add_view_> add_view;
@@ -166,8 +166,8 @@ namespace {
             const boost::spirit::lex::token_def<adobe::name_t>& view = tok.keywords[view_k];
             assert(tok.keywords.size() == 4u);
 
-            const expression_parser_rules::expression_rule& expression = EveExpressionParser();
-            expression_parser_rules::local_size_rule named_argument_list; // TODO
+            const expression_parser_rules::expression_rule& expression = EveExpressionParserRules().expression;
+            const expression_parser_rules::local_size_rule& named_argument_list = EveExpressionParserRules().named_argument_list;
 
             using GG::detail::next_pos;
 
@@ -192,13 +192,13 @@ namespace {
             interface_set_decl
                 =    interface
                 >    ':'
-                >  + cell_decl(adobe::eve_callback_suite_t::interface_k)
+                >  * cell_decl(adobe::eve_callback_suite_t::interface_k)
                 ;
 
             constant_set_decl
                 =    constant
                 >    ':'
-                >  + cell_decl(adobe::eve_callback_suite_t::constant_k)
+                >  * cell_decl(adobe::eve_callback_suite_t::constant_k)
                 ;
 
             cell_decl

@@ -115,7 +115,7 @@ namespace GG {
 
 }
 
-BOOST_AUTO_TEST_CASE( adam_parser )
+BOOST_AUTO_TEST_CASE( eve_parser )
 {
     std::string file_contents = read_file(g_input_file);
 

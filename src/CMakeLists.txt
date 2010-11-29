@@ -20,6 +20,7 @@ set(THIS_LIB_SOURCES
     Edit.cpp
     EventPump.cpp
     EveParser.cpp
+    EveLayout.cpp
     ExpressionParser.cpp
     ExpressionWriter.cpp
     Font.cpp

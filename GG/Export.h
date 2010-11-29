@@ -23,8 +23,8 @@
    Zach Laine
    whatwasthataddress@gmail.com */
    
-/** \file Export.h Contains the GG_API macro, which is used to specify which
-    class and function symbols will be exported in SO's/DLL's. */
+/** \file Export.h \brief Contains the GG_API macro, which is used to specify
+    which class and function symbols will be exported in SO's/DLL's. */
 
 #ifndef _GG_Export_h_
 #define _GG_Export_h_

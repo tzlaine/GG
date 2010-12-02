@@ -36,6 +36,8 @@
 #include <GG/adobe/adam.hpp>
 #include <GG/adobe/basic_sheet.hpp>
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/algorithm/sort.hpp>
+#include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 
 #include <boost/cast.hpp>
@@ -699,6 +701,40 @@ namespace {
             wnd_type == name_column;
     }
 
+    adobe::any_regular_t VariableLookup(const adobe::basic_sheet_t& layout_sheet, adobe::name_t name)
+    {
+        static bool s_once = true;
+        static adobe::name_t s_reflected_names[] =
+            {
+                key_align_left,
+                key_align_right,
+                key_align_top,
+                key_align_bottom,
+                key_align_center,
+                key_align_proportional,
+                key_align_fill,
+                key_place_row,
+                key_place_column,
+                key_place_overlay
+            };
+        static std::pair<adobe::name_t*, adobe::name_t*> s_reflected_names_range;
+
+        if (s_once) {
+            adobe::sort(s_reflected_names);
+            s_reflected_names_range.first = boost::begin(s_reflected_names);
+            s_reflected_names_range.second = boost::end(s_reflected_names);
+            s_once = false;
+        }
+
+        adobe::name_t* it =
+            std::lower_bound(s_reflected_names_range.first, s_reflected_names_range.second, name);
+
+        if (it != s_reflected_names_range.second && *it == name)
+            return adobe::any_regular_t(name);
+
+        return layout_sheet[name];
+    }
+
 }
 
 struct EveLayout::Impl
@@ -707,7 +743,7 @@ struct EveLayout::Impl
         m_sheet(sheet),
         m_current_nested_view(0),
         m_wnd(0)
-        {}
+        { m_lookup.attach_to(m_evaluator); }
 
     ~Impl()
         { delete m_wnd; }
@@ -750,11 +786,20 @@ struct EveLayout::Impl
             if (m_added_cells.empty() || m_added_cells.back().m_access != type)
                 m_added_cells.push_back(AddedCellSet(type));
 
-            // TODO
-
             m_added_cells.back().m_cells.push_back(
                 CellParameters(type, name, position, initializer, brief, detailed)
             );
+
+            m_evaluator.evaluate(initializer);
+            adobe::any_regular_t value(m_evaluator.back());
+            m_evaluator.pop_back();
+
+            if (type == adobe::eve_callback_suite_t::constant_k)
+                m_layout_sheet.add_constant(name, value);
+            else if (type == adobe::eve_callback_suite_t::interface_k)
+                m_layout_sheet.add_interface(name, value);
+            else
+                assert(0 && "Cell type not supported");
         }
 
     boost::any AddView(const boost::any& parent_,
@@ -1059,6 +1104,7 @@ struct EveLayout::Impl
 
     adobe::basic_sheet_t m_layout_sheet;
     adobe::virtual_machine_t m_evaluator;
+    adobe::vm_lookup_t m_lookup;
 
     AddedCells m_added_cells;
     NestedViews m_nested_views;

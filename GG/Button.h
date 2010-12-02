@@ -137,18 +137,14 @@ GG_ENUM_STREAM_OUT(Button::ButtonState)
 /** \brief This is a basic state button control.
 
     This class is for checkboxes and radio buttons, etc.  The button/checkbox
-    area can be provided via the bn_* contructor parameters, or it can be
-    determined from the text height and format; the button height and width
-    will be the text height, and the the button will be positioned to the left
-    of the text and vertically the same as the text, unless the text is
-    centered, in which case the button and text will be centered, and the
+    area is determined from the text height and format; the button height and
+    width will be the text height, and the the button will be positioned to
+    the left of the text and vertically the same as the text, unless the text
+    is centered, in which case the button and text will be centered, and the
     button will appear above or below the text.  Whenever there is not room to
     place the button and the text in the proper orientation because the entire
     control's size is too small, the button and text are positioned in their
-    default spots (button on left, text on right, centered vertically).  If no
-    text format flags are provided, the default text orientation is
-    FORMAT_VCENTER | FORMAT_LEFT.  Note that the bn_x and bn_y paramters are
-    taken to be relative to the control's x and y position.*/
+    default spots (button on left, text on right, centered vertically). */
 class GG_API StateButton : public TextControl
 {
 public:

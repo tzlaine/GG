@@ -44,6 +44,8 @@ namespace boost {
 
 namespace GG {
 
+class Wnd;
+
 class EveLayout
 {
 public:
@@ -65,6 +67,8 @@ public:
                        const adobe::array_t& parameters,
                        const std::string& brief,
                        const std::string& detailed);
+
+    Wnd& Finish();
 
 private:
     class Impl;

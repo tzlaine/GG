@@ -47,7 +47,8 @@ BrowseInfoWnd::BrowseInfoWnd(X x, Y y, X w, Y h) :
 void BrowseInfoWnd::Update(std::size_t mode, const Wnd* target)
 {
     UpdateImpl(mode, target);
-    MoveTo(m_cursor_pos - Pt(Width() / 2, Height()));
+    const Y MARGIN(2);
+    MoveTo(m_cursor_pos - Pt(Width() / 2, Height() + MARGIN));
     Pt ul = UpperLeft(), lr = LowerRight();
     if (GUI::GetGUI()->AppWidth() <= lr.x)
         ul.x += GUI::GetGUI()->AppWidth() - lr.x;

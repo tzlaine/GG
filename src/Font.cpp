@@ -750,9 +750,9 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
         const sregex TEXT =
             ('<' >> *~set[_s | '<']) | (+~set[_s | '<']);
         const sregex EVERYTHING =
-            ('<' >> (tag_name_tag = OPEN_TAG_NAME) >> repeat<0, 9>(+blank >> TAG_PARAM) >> (open_bracket_tag = '>'))
-            [Push(ref(text), ref(tag_stack), ref(ignore_tags), tag_name_tag)] |
-            ("</" >> (tag_name_tag = CLOSE_TAG_NAME) >> (close_bracket_tag = '>')) |
+            ('<' >> (tag_name_tag = OPEN_TAG_NAME) >> repeat<0, 9>(+blank >> TAG_PARAM) >> (open_bracket_tag.proto_base() = '>'))
+            [Push(boost::xpressive::ref(text), boost::xpressive::ref(tag_stack), ref(ignore_tags), tag_name_tag)] |
+            ("</" >> (tag_name_tag = CLOSE_TAG_NAME) >> (close_bracket_tag.proto_base() = '>')) |
             (whitespace_tag = WHITESPACE) |
             (text_tag = TEXT);
 

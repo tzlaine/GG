@@ -90,6 +90,15 @@ namespace {
     adobe::aggregate_name_t name_int_spin           = { "int_spin" };
     adobe::aggregate_name_t name_double_spin        = { "double_spin" };
 
+    StyleFactory& Factory()
+    { return *GUI::GetGUI()->GetStyleFactory(); }
+
+    boost::shared_ptr<Font> DefaultFont()
+    { return Factory().DefaultFont(); }
+
+    Y CharHeight()
+    { return DefaultFont()->Lineskip(); }
+
     struct Panel :
         public Wnd
     {
@@ -141,20 +150,32 @@ namespace {
         public Wnd
     {
         Dialog(adobe::name_t name, Flags<WndFlag> flags) :
-            Wnd(X0, Y0, X1, Y1, flags)
-            {}
+            Wnd(X0, Y0, X1, Y1, flags),
+            m_title(Factory().NewTextControl(X0, Y0, X1, Y1, name.c_str(), DefaultFont()))
+            { AttachChild(m_title); }
 
-        // TODO
+        virtual Pt ClientUpperLeft() const
+            { UpperLeft() + s_bevel_offset + Pt(X0, m_title->Height()); }
+
+        virtual Pt ClientLowerRight() const
+            { LowerRight() - s_bevel_offset; }
+
+        virtual void SizeMove(const Pt& ul, const Pt& lr)
+            {
+                m_title->SizeMove(ul + s_bevel_offset,
+                                  Pt((lr.x - ul.x) - s_bevel_offset.x * 2, m_title->Height()));
+                Wnd::SizeMove(ul, lr);
+            }
+
+        virtual void Render()
+            { BeveledRectangle(UpperLeft(), LowerRight(), CLR_GRAY, CLR_GRAY, true); }
+
+        TextControl* m_title;
+
+        static Pt s_bevel_offset;
     };
 
-    StyleFactory& Factory()
-    { return *GUI::GetGUI()->GetStyleFactory(); }
-
-    boost::shared_ptr<Font> DefaultFont()
-    { return Factory().DefaultFont(); }
-
-    Y CharHeight()
-    { return DefaultFont()->Lineskip(); }
+    Pt Dialog::s_bevel_offset(X(2), Y(2));
 
     struct MakeWndResult
     {

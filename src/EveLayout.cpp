@@ -149,9 +149,9 @@ namespace {
     struct Dialog :
         public Wnd
     {
-        Dialog(adobe::name_t name, Flags<WndFlag> flags) :
-            Wnd(X0, Y0, X1, Y1, flags),
-            m_title(Factory().NewTextControl(X0, Y0, X1, Y1, name.c_str(), DefaultFont()))
+        Dialog(const std::string& name, Flags<WndFlag> flags) :
+            Wnd(X0, Y0, X1, Y1, flags | MODAL),
+            m_title(Factory().NewTextControl(X0, Y0, X1, Y1, name, DefaultFont()))
             { AttachChild(m_title); }
 
         virtual Pt ClientUpperLeft() const
@@ -190,7 +190,7 @@ namespace {
 
     MakeWndResult Make_dialog(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         bool grow = false;
 
         get_value(params, adobe::key_name, name);
@@ -204,7 +204,7 @@ namespace {
 
     MakeWndResult Make_button(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         bool default_ = false;
         bool cancel = false;
         adobe::name_t bind;
@@ -229,14 +229,14 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewButton(X0, Y0, X1, Y1, name.c_str(), DefaultFont(), CLR_GRAY));
+        retval.m_wnds.push_back(Factory().NewButton(X0, Y0, X1, Y1, name, DefaultFont(), CLR_GRAY));
 
         return retval;
     }
 
     MakeWndResult Make_checkbox(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         adobe::any_regular_t value_on;
@@ -254,7 +254,7 @@ namespace {
         MakeWndResult retval;
 
         retval.m_wnds.push_back(
-            Factory().NewStateButton(X0, Y0, X1, Y1, name.c_str(), DefaultFont(), FORMAT_NONE, CLR_GRAY)
+            Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
         );
 
         return retval;
@@ -263,7 +263,7 @@ namespace {
     MakeWndResult Make_display_number(const adobe::dictionary_t& params,
                                       const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         std::size_t characters;
@@ -282,7 +282,7 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name.c_str(), DefaultFont()));
+        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, X1, Y1, "", DefaultFont()));
 
         return retval;
@@ -290,7 +290,7 @@ namespace {
 
     MakeWndResult Make_edit_number(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         std::size_t digits;
@@ -316,7 +316,7 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name.c_str(), DefaultFont()));
+        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         retval.m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
 
         return retval;
@@ -324,7 +324,7 @@ namespace {
 
     MakeWndResult Make_edit_text(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         std::size_t characters;
@@ -346,7 +346,7 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name.c_str(), DefaultFont()));
+        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         retval.m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
 
         return retval;
@@ -354,7 +354,7 @@ namespace {
 
     MakeWndResult Make_image(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t image;
+        std::string image;
         adobe::name_t bind;
 
         get_value(params, adobe::key_name, image);
@@ -365,7 +365,7 @@ namespace {
 
         MakeWndResult retval;
 
-        boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image.c_str());
+        boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
         retval.m_wnds.push_back(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
 
         return retval;
@@ -373,7 +373,7 @@ namespace {
 
     MakeWndResult Make_popup(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         adobe::array_t items;
@@ -391,6 +391,8 @@ namespace {
 
         MakeWndResult retval;
 
+        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
         retval.m_wnds.push_back(Factory().NewDropDownList(X0, Y0, X1, Y1, drop_height, CLR_GRAY));
@@ -400,7 +402,7 @@ namespace {
 
     MakeWndResult Make_radio_button(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         adobe::any_regular_t value;
@@ -417,7 +419,7 @@ namespace {
         MakeWndResult retval;
 
         retval.m_wnds.push_back(
-            Factory().NewStateButton(X0, Y0, X1, Y1, name.c_str(), DefaultFont(), FORMAT_NONE,
+            Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE,
                                      CLR_GRAY, CLR_BLACK, CLR_ZERO, SBSTYLE_3D_RADIO)
         );
 
@@ -477,7 +479,7 @@ namespace {
 
     MakeWndResult Make_tab_group(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name; // TODO: is this useful?
         adobe::name_t bind;
         adobe::any_regular_t value;
 
@@ -497,7 +499,7 @@ namespace {
 
     MakeWndResult Make_static_text(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         std::string alt;
         std::size_t characters = 25;
         bool wrap = false;
@@ -512,7 +514,7 @@ namespace {
         X char_width = DefaultFont()->TextExtent("W").x;
         X w = static_cast<int>(characters) * char_width;
         retval.m_wnds.push_back(
-            Factory().NewTextControl(X0, Y0, w, CharHeight(), name.c_str(), DefaultFont(),
+            Factory().NewTextControl(X0, Y0, w, CharHeight(), name, DefaultFont(),
                                      CLR_BLACK, wrap ? FORMAT_WORDBREAK : FORMAT_NONE)
         );
 
@@ -530,7 +532,7 @@ namespace {
 
     MakeWndResult Make_int_spin(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         adobe::dictionary_t format;
@@ -550,7 +552,7 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name.c_str(), DefaultFont()));
+        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
         int step = 1;
         int min = 1;
@@ -569,7 +571,7 @@ namespace {
 
     MakeWndResult Make_double_spin(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t bind;
         std::string alt;
         adobe::dictionary_t format;
@@ -589,7 +591,7 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name.c_str(), DefaultFont()));
+        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
         double step = 1.0;
         double min = 1.0;
@@ -626,7 +628,7 @@ namespace {
 
     MakeWndResult Make_panel(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t name;
+        std::string name;
         adobe::name_t value;
         adobe::name_t bind;
         adobe::name_t placement = key_place_column;
@@ -636,7 +638,7 @@ namespace {
         get_value(params, adobe::key_bind, bind);
         get_value(params, key_placement, placement);
 
-        if (!name)
+        if (name.empty())
             throw adobe::stream_error_t("panel requires a name parameter", position);
 
         if (placement == key_place_overlay)
@@ -646,7 +648,7 @@ namespace {
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(new Panel(orientation, name.c_str()));
+        retval.m_wnds.push_back(new Panel(orientation, name));
 
         return retval;
     }
@@ -799,6 +801,19 @@ struct EveLayout::Impl
             os << "}\n";
         }
 
+    adobe::eve_callback_suite_t BindCallbacks()
+        {
+            adobe::eve_callback_suite_t retval;
+            m_evaluator.set_variable_lookup(
+                boost::bind(VariableLookup, boost::cref(m_layout_sheet), _1)
+            );
+            retval.add_view_proc_m =
+                boost::bind(&EveLayout::Impl::AddView, this, _1, _2, _3, _4, _5, _6);
+            retval.add_cell_proc_m =
+                boost::bind(&EveLayout::Impl::AddCell, this, _1, _2, _3, _4, _5, _6);
+            return retval;
+        }
+
     void AddCell(adobe::eve_callback_suite_t::cell_type_t type,
                  adobe::name_t name,
                  const adobe::line_position_t& position,
@@ -832,8 +847,6 @@ struct EveLayout::Impl
                        const std::string& brief,
                        const std::string& detailed)
         {
-            boost::any retval;
-
             ViewParameters params(parent_, position, name, parameters, brief, detailed);
 
             // TODO: Don't do this -- instead, just generate a unique integer
@@ -845,18 +858,21 @@ struct EveLayout::Impl
                 m_nested_views = NestedViews(params, 0);
                 m_current_nested_view = &m_nested_views;
             } else {
-                while (boost::any_cast<Wnd*>(m_current_nested_view->m_view_parameters.m_parent) != parent &&
+                while (boost::any_cast<Wnd*>(m_current_nested_view->m_view_parameters.m_parent) !=
+                       parent &&
                        m_current_nested_view->m_nested_view_parent) {
                     m_current_nested_view = m_current_nested_view->m_nested_view_parent;
                 }
                 assert(m_current_nested_view);
+                bool is_container = IsContainer(name);
+                if (is_container)
+                    params.m_parent = ++parent;
                 m_current_nested_view->m_children.push_back(NestedViews(params, m_current_nested_view));
-                m_current_nested_view = &m_current_nested_view->m_children.back();
+                if (is_container)
+                    m_current_nested_view = &m_current_nested_view->m_children.back();
             }
 
-            retval = ++parent; // TODO (right now, just generate some parent addresses to test the machinery)
-
-            return retval;
+            return parent;
         }
 
     struct CellParameters
@@ -1145,6 +1161,9 @@ adobe::dictionary_t EveLayout::Contributing() const
 
 void EveLayout::Print(std::ostream& os) const
 { m_impl->Print(os); }
+
+adobe::eve_callback_suite_t EveLayout::BindCallbacks()
+{ return m_impl->BindCallbacks(); }
 
 void EveLayout::AddCell(adobe::eve_callback_suite_t::cell_type_t type,
                         adobe::name_t name,

@@ -52,7 +52,10 @@ public:
     EveLayout(adobe::sheet_t& sheet);
 
     adobe::dictionary_t Contributing() const;
+
     void Print(std::ostream& os) const;
+
+    adobe::eve_callback_suite_t BindCallbacks();
 
     void AddCell(adobe::eve_callback_suite_t::cell_type_t type,
                  adobe::name_t name,

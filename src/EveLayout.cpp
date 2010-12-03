@@ -130,12 +130,6 @@ namespace {
             Wnd(X0, Y0, X1, Y1, Flags<WndFlag>())
             {}
 
-        void SetTabBar(TabBar* tab_bar)
-            {
-                AttachChild(tab_bar);
-                // TODO
-            }
-
         void AddPanel(Panel* panel)
             { AttachChild(panel); }
 
@@ -194,20 +188,21 @@ namespace {
         bool cancel = false;
         adobe::name_t bind;
         std::string alt;
-        adobe::any_regular_t value;
         adobe::name_t action;
+        adobe::any_regular_t value;
+        adobe::name_t bind_output;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_default, default_);
         get_value(params, adobe::key_cancel, cancel);
         get_value(params, adobe::key_bind, bind);
         get_value(params, adobe::key_alt_text, alt);
-        get_value(params, adobe::key_value, value);
         get_value(params, adobe::key_action, action);
+        get_value(params, adobe::key_value, value);
+        get_value(params, adobe::key_bind_output, bind_output);
 
         // TODO bind_view ?
         // TODO bind_controller ?
-        // skipping bind_output
         // skipping items
         // skipping modifiers
 
@@ -446,8 +441,8 @@ namespace {
 
         MakeWndResult retval;
 
-        double min = 1;   // TODO
-        double max = 100; // TODO
+        double min = 1;
+        double max = 100;
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         Orientation orientation_ = orientation == adobe::key_vertical ? VERTICAL : HORIZONTAL;
@@ -483,15 +478,22 @@ namespace {
     {
         adobe::name_t name;
         std::string alt;
-        std::size_t characters;
+        std::size_t characters = 25;
+        bool wrap = false;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_alt_text, alt);
         get_value(params, adobe::key_characters, characters);
+        get_value(params, adobe::key_wrap, wrap);
 
         MakeWndResult retval;
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name.c_str(), DefaultFont()));
+        X char_width = DefaultFont()->TextExtent("W").x;
+        X w = static_cast<int>(characters) * char_width;
+        retval.m_wnds.push_back(
+            Factory().NewTextControl(X0, Y0, w, CharHeight(), name.c_str(), DefaultFont(),
+                                     CLR_BLACK, wrap ? FORMAT_WORDBREAK : FORMAT_NONE)
+        );
 
         return retval;
     }

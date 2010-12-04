@@ -46,6 +46,66 @@
 
 using namespace GG;
 
+#define INSTRUMENT_WINDOW_CREATION 0
+
+#if INSTRUMENT_WINDOW_CREATION
+void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
+void verbose_dump(const adobe::dictionary_t& array, std::size_t indent = 0);
+
+void verbose_dump(const adobe::array_t& array, std::size_t indent)
+{
+    if (array.empty()) {
+        std::cout << std::string(4 * indent, ' ') << "[]\n";
+        return;
+    }
+
+    std::cout << std::string(4 * indent, ' ') << "[\n";
+    ++indent;
+    for (adobe::array_t::const_iterator it = array.begin(); it != array.end(); ++it) {
+        const adobe::any_regular_t& any = *it;
+        if (any.type_info() == adobe::type_info<adobe::array_t>()) {
+            verbose_dump(any.cast<adobe::array_t>(), indent);
+        } else if (any.type_info() == adobe::type_info<adobe::dictionary_t>()) {
+            verbose_dump(any.cast<adobe::dictionary_t>(), indent);
+        } else {
+            std::cout << std::string(4 * indent, ' ')
+                      << "type: " << any.type_info() << " "
+                      << "value: " << any << "\n";
+        }
+    }
+    --indent;
+    std::cout << std::string(4 * indent, ' ') << "]\n";
+}
+
+void verbose_dump(const adobe::dictionary_t& dictionary, std::size_t indent)
+{
+    if (dictionary.empty()) {
+        std::cout << std::string(4 * indent, ' ') << "{}\n";
+        return;
+    }
+
+    std::cout << std::string(4 * indent, ' ') << "{\n";
+    ++indent;
+    for (adobe::dictionary_t::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it) {
+        const adobe::pair<adobe::name_t, adobe::any_regular_t>& pair = *it;
+        if (pair.second.type_info() == adobe::type_info<adobe::array_t>()) {
+            std::cout << std::string(4 * indent, ' ') << pair.first << ",\n";
+            verbose_dump(pair.second.cast<adobe::array_t>(), indent);
+        } else if (pair.second.type_info() == adobe::type_info<adobe::dictionary_t>()) {
+            std::cout << std::string(4 * indent, ' ') << pair.first << ",\n";
+            verbose_dump(pair.second.cast<adobe::dictionary_t>(), indent);
+        } else {
+            std::cout << std::string(4 * indent, ' ')
+                      << "(" << pair.first << ", "
+                      << "type: " << pair.second.type_info() << " "
+                      << "value: " << pair.second << ")\n";
+        }
+    }
+    --indent;
+    std::cout << std::string(4 * indent, ' ') << "}\n";
+}
+#endif
+
 namespace {
 
     adobe::aggregate_name_t key_spacing             = { "spacing" };
@@ -150,7 +210,7 @@ namespace {
         public Wnd
     {
         Dialog(const std::string& name, Flags<WndFlag> flags) :
-            Wnd(X0, Y0, X1, Y1, flags | MODAL),
+            Wnd(X(100), Y(100), X(100), Y(100), flags | MODAL),
             m_title(Factory().NewTextControl(X0, Y0, X1, Y1, name, DefaultFont()))
             { AttachChild(m_title); }
 
@@ -188,27 +248,28 @@ namespace {
             { return lhs.m_wnds.size() < rhs.m_wnds.size(); }
     };
 
-    MakeWndResult Make_dialog(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_dialog(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         bool grow = false;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
 
-        MakeWndResult retval;
-        retval.m_wnds.push_back(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        return retval;
+        retval->m_wnds.push_back(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
+
+        return retval.release();
     }
 
-    MakeWndResult Make_button(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_button(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         bool default_ = false;
         bool cancel = false;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::name_t action;
         adobe::any_regular_t value;
         adobe::name_t bind_output;
@@ -227,18 +288,18 @@ namespace {
         // skipping items
         // skipping modifiers
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewButton(X0, Y0, X1, Y1, name, DefaultFont(), CLR_GRAY));
+        retval->m_wnds.push_back(Factory().NewButton(X0, Y0, X1, Y1, name, DefaultFont(), CLR_GRAY));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_checkbox(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_checkbox(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::any_regular_t value_on;
         adobe::any_regular_t value_off;
 
@@ -251,24 +312,24 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(
+        retval->m_wnds.push_back(
             Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
         );
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_display_number(const adobe::dictionary_t& params,
+    MakeWndResult* Make_display_number(const adobe::dictionary_t& params,
                                       const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         std::size_t characters;
         adobe::array_t units;
-        std::string format;
+        adobe::string_t format;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_bind, bind);
@@ -280,21 +341,22 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, X1, Y1, "", DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, X1, Y1, "", DefaultFont()));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_edit_number(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_edit_number(const adobe::dictionary_t& params,
+                                    const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         std::size_t digits;
-        std::string format;
+        adobe::string_t format;
         double min_value;
         double max_value;
 
@@ -314,19 +376,20 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        retval.m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_edit_text(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_edit_text(const adobe::dictionary_t& params,
+                                  const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         std::size_t characters;
         std::size_t lines;
         bool scrollable;
@@ -344,38 +407,38 @@ namespace {
         // skipping max_characters
         // skipping monospaced
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        retval.m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_image(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_image(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string image;
+        adobe::string_t image;
         adobe::name_t bind;
 
-        get_value(params, adobe::key_name, image);
+        get_value(params, adobe::key_image, image);
         get_value(params, adobe::key_bind, bind);
 
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
-        retval.m_wnds.push_back(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
+        retval->m_wnds.push_back(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_popup(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_popup(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::array_t items;
 
         get_value(params, adobe::key_name, name);
@@ -389,22 +452,23 @@ namespace {
         // skipping popup_bind
         // skipping popup_placement
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
-        retval.m_wnds.push_back(Factory().NewDropDownList(X0, Y0, X1, Y1, drop_height, CLR_GRAY));
+        retval->m_wnds.push_back(Factory().NewDropDownList(X0, Y0, X1, Y1, drop_height, CLR_GRAY));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_radio_button(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_radio_button(const adobe::dictionary_t& params,
+                                     const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::any_regular_t value;
 
         get_value(params, adobe::key_name, name);
@@ -416,17 +480,17 @@ namespace {
         // TODO bind_controller ?
         // TODO touch ?
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(
+        retval->m_wnds.push_back(
             Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE,
                                      CLR_GRAY, CLR_BLACK, CLR_ZERO, SBSTYLE_3D_RADIO)
         );
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_radio_button_group(const adobe::dictionary_t& params,
+    MakeWndResult* Make_radio_button_group(const adobe::dictionary_t& params,
                                           const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_column;
@@ -434,22 +498,24 @@ namespace {
         get_value(params, key_placement, placement);
 
         if (placement == key_place_overlay) {
-            throw adobe::stream_error_t("place_overlay placement is not compatible with radio_button_group",
-                                        position);
+            throw adobe::stream_error_t(
+                "place_overlay placement is not compatible with radio_button_group",
+                position
+            );
         }
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
-        retval.m_wnds.push_back(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
+        retval->m_wnds.push_back(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_slider(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_slider(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::dictionary_t format;
         adobe::name_t orientation = adobe::key_vertical;
         double slider_ticks;
@@ -462,7 +528,7 @@ namespace {
 
         // skipping slider_point
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
         double min = 1;
         double max = 100;
@@ -470,16 +536,17 @@ namespace {
         get_value(format, adobe::key_last, max);
         Orientation orientation_ = orientation == adobe::key_vertical ? VERTICAL : HORIZONTAL;
         const int TAB_WIDTH = 5;
-        retval.m_wnds.push_back(
+        retval->m_wnds.push_back(
             Factory().NewSlider(X0, Y0, X1, Y1, min, max, orientation_, GROOVED, CLR_GRAY, TAB_WIDTH)
         );
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_tab_group(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_tab_group(const adobe::dictionary_t& params,
+                                  const adobe::line_position_t& position)
     {
-        std::string name; // TODO: is this useful?
+        adobe::string_t name; // TODO: is this useful?
         adobe::name_t bind;
         adobe::any_regular_t value;
 
@@ -490,17 +557,18 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
+        retval->m_wnds.push_back(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_static_text(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_static_text(const adobe::dictionary_t& params,
+                                    const adobe::line_position_t& position)
     {
-        std::string name;
-        std::string alt;
+        adobe::string_t name;
+        adobe::string_t alt;
         std::size_t characters = 25;
         bool wrap = false;
 
@@ -509,32 +577,32 @@ namespace {
         get_value(params, adobe::key_characters, characters);
         get_value(params, adobe::key_wrap, wrap);
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
         X char_width = DefaultFont()->TextExtent("W").x;
         X w = static_cast<int>(characters) * char_width;
-        retval.m_wnds.push_back(
+        retval->m_wnds.push_back(
             Factory().NewTextControl(X0, Y0, w, CharHeight(), name, DefaultFont(),
                                      CLR_BLACK, wrap ? FORMAT_WORDBREAK : FORMAT_NONE)
         );
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_menu_bar(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_menu_bar(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         // TODO
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_int_spin(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_int_spin(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::dictionary_t format;
 
         get_value(params, adobe::key_name, name);
@@ -550,9 +618,9 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
         int step = 1;
         int min = 1;
@@ -562,18 +630,19 @@ namespace {
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
-        retval.m_wnds.push_back(
+        retval->m_wnds.push_back(
             Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
         );
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_double_spin(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_double_spin(const adobe::dictionary_t& params,
+                                    const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t bind;
-        std::string alt;
+        adobe::string_t alt;
         adobe::dictionary_t format;
 
         get_value(params, adobe::key_name, name);
@@ -589,9 +658,9 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
         double step = 1.0;
         double min = 1.0;
@@ -601,14 +670,14 @@ namespace {
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
-        retval.m_wnds.push_back(
+        retval->m_wnds.push_back(
             Factory().NewDoubleSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
         );
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_overlay(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_overlay(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_overlay;
 
@@ -616,19 +685,20 @@ namespace {
 
         if (placement == key_place_row || placement == key_place_column) {
             std::string placement_ = key_place_overlay.name_m;
-            throw adobe::stream_error_t(placement_ + " placement is not compatible with overlay", position);
+            throw adobe::stream_error_t(placement_ + " placement is not compatible with overlay",
+                                        position);
         }
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(new Overlay);
+        retval->m_wnds.push_back(new Overlay);
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_panel(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    MakeWndResult* Make_panel(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        std::string name;
+        adobe::string_t name;
         adobe::name_t value;
         adobe::name_t bind;
         adobe::name_t placement = key_place_column;
@@ -644,45 +714,65 @@ namespace {
         if (placement == key_place_overlay)
             throw adobe::stream_error_t("place_overlay placement is not compatible with panel", position);
 
-       Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
+        Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(new Panel(orientation, name));
+        retval->m_wnds.push_back(new Panel(orientation, name));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult Make_layout(adobe::name_t wnd_type,
+    MakeWndResult* Make_layout(adobe::name_t wnd_type,
                               const adobe::dictionary_t& params,
                               const adobe::line_position_t& position)
     {
 
-        adobe::name_t placement = key_place_column;
+        adobe::name_t placement = key_place_overlay;
 
-        get_value(params, key_placement, placement);
-
-        if (!(placement == key_place_row && wnd_type == name_row ||
-              placement == key_place_column && wnd_type == name_column)) {
-            std::string placement_ = key_place_overlay.name_m;
-            throw adobe::stream_error_t(placement_ + " placement is not compatible with " + wnd_type.c_str(),
-                                        position);
+        if (get_value(params, key_placement, placement)) {
+            if (!(placement == key_place_row && wnd_type == name_row ||
+                  placement == key_place_column && wnd_type == name_column)) {
+                std::string placement_ = key_place_overlay.name_m;
+                throw adobe::stream_error_t(
+                    placement_ + " placement is not compatible with " + wnd_type.c_str(),
+                    position
+                );
+            }
         }
 
-        MakeWndResult retval;
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval.m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1));
+        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1));
 
-        return retval;
+        return retval.release();
     }
 
-    MakeWndResult MakeWnd(adobe::name_t wnd_type,
-                          const adobe::dictionary_t& params,
-                          const adobe::line_position_t& position)
+#if INSTRUMENT_WINDOW_CREATION
+    int indent = 0;
+#endif
+
+    MakeWndResult* MakeWnd(adobe::name_t wnd_type,
+                           const adobe::dictionary_t& params,
+                           const adobe::line_position_t& position)
     {
         using namespace adobe;
 
+#if INSTRUMENT_WINDOW_CREATION
+#define IF_CASE(x) if (wnd_type == name_##x)                            \
+        {                                                               \
+            std::cout << std::string(indent * 4, ' ') << "    Make_"#x"(" << wnd_type << ")\n"; \
+            MakeWndResult* retval = Make_##x(params, position);         \
+            std::cout << std::string(indent * 4, ' ') << "    [ ";      \
+            for (std::size_t i = 0; i < retval->m_wnds.size(); ++i) {   \
+                std::cout << &retval->m_wnds[i] << " ";                 \
+            }                                                           \
+            std::cout << "]\n";                                         \
+            return retval;                                              \
+        }
+#else
 #define IF_CASE(x) if (wnd_type == name_##x) { return Make_##x(params, position); }
+#endif
 
         IF_CASE(dialog)
         else IF_CASE(button)
@@ -703,7 +793,18 @@ namespace {
         else IF_CASE(overlay)
         else IF_CASE(panel)
         else if (wnd_type == name_row || wnd_type == name_column) {
+#if INSTRUMENT_WINDOW_CREATION
+            std::cout << std::string(indent * 4, ' ') << "    Make_layout(" << wnd_type << ", " << params << ", ...)\n";
+            MakeWndResult* retval = Make_layout(wnd_type, params, position);
+            std::cout << std::string(indent * 4, ' ') << "    [ ";
+            for (std::size_t i = 0; i < retval->m_wnds.size(); ++i) {
+                std::cout << &retval->m_wnds[i] << " ";
+            }
+            std::cout << "]\n";
+            return retval;
+#else
             return Make_layout(wnd_type, params, position);
+#endif
         } else {
             std::string wnd_type_ = wnd_type.c_str();
             throw adobe::stream_error_t(wnd_type_ + " is not a supported view type", position);
@@ -948,11 +1049,23 @@ struct EveLayout::Impl
     };
 
     void AddChildren(Wnd* wnd,
-                     std::vector<MakeWndResult>& children,
+                     boost::ptr_vector<MakeWndResult>& children,
                      adobe::name_t placement,
                      const ViewParameters& wnd_view_params)
     {
         using namespace adobe;
+
+#if INSTRUMENT_WINDOW_CREATION
+        std::cout << std::string(indent * 4, ' ') << "    AddChildren(children = [ ";
+        for (std::size_t i = 0; i < children.size(); ++i) {
+            std::cout << "[ ";
+            for (std::size_t j = 0; j < children[i].m_wnds.size(); ++j) {
+                std::cout << &children[i].m_wnds[j] << " ";
+            }
+            std::cout << "] ";
+        }
+        std::cout << "])\n";
+#endif
 
         if (wnd_view_params.m_name == name_dialog) {
             if (placement == key_place_overlay) {
@@ -968,20 +1081,22 @@ struct EveLayout::Impl
                                   orientation == VERTICAL ? children.size() : 1,
                                   orientation == VERTICAL ? MAX_SIZE : children.size() * 2));
             for (std::size_t i = 0; i < children.size(); ++i) {
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                if (children[i].m_wnds.size() == 1u) {
+                if (children[i].m_wnds.size()) {
+                    boost::ptr_vector<Wnd>::auto_type child_0 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
                     if (orientation == VERTICAL)
                         layout->Add(child_0.release(), i, 0, 1, MAX_SIZE);
                     else
                         layout->Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
                 } else {
+                    boost::ptr_vector<Wnd>::auto_type child_1 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
+                    boost::ptr_vector<Wnd>::auto_type child_0 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
                     if (orientation == VERTICAL)
                         layout->Add(child_0.release(), i, 0);
                     else
                         layout->Add(child_0.release(), 0, i * 2 + 0);
-                    boost::ptr_vector<Wnd>::auto_type child_1 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
                     if (orientation == VERTICAL)
                         layout->Add(child_1.release(), i, 1);
                     else
@@ -1040,14 +1155,16 @@ struct EveLayout::Impl
             assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
             layout->ResizeLayout(1, children.size() * 2);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                if (children[i].m_wnds.size() == 1u) {
+                if (children[i].m_wnds.size()) {
+                    boost::ptr_vector<Wnd>::auto_type child_0 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
                     layout->Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
                 } else {
-                    layout->Add(child_0.release(), 0, i * 2 + 0);
                     boost::ptr_vector<Wnd>::auto_type child_1 =
                         children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
+                    boost::ptr_vector<Wnd>::auto_type child_0 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                    layout->Add(child_0.release(), 0, i * 2 + 0);
                     layout->Add(child_1.release(), 0, i * 2 + 1);
                 }
             }
@@ -1058,14 +1175,16 @@ struct EveLayout::Impl
             assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
             layout->ResizeLayout(MAX_SIZE, children.size() * 2);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                if (children[i].m_wnds.size() == 1u) {
+                if (children[i].m_wnds.size()) {
+                    boost::ptr_vector<Wnd>::auto_type child_0 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
                     layout->Add(child_0.release(), i, 0, 1, MAX_SIZE);
                 } else {
-                    layout->Add(child_0.release(), i, 0);
                     boost::ptr_vector<Wnd>::auto_type child_1 =
                         children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
+                    boost::ptr_vector<Wnd>::auto_type child_0 =
+                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                    layout->Add(child_0.release(), i, 0);
                     layout->Add(child_1.release(), i, 1);
                 }
             }
@@ -1077,25 +1196,40 @@ struct EveLayout::Impl
 
     Wnd& Finish()
         {
-            MakeWndResult dialog = CreateChild(m_nested_views);
-            m_wnd = dialog.m_wnds.release(dialog.m_wnds.begin() + 0).release();
+            std::auto_ptr<MakeWndResult> dialog(CreateChild(m_nested_views));
+            m_wnd = dialog->m_wnds.release(dialog->m_wnds.begin() + 0).release();
             return *m_wnd;
         }
 
-    MakeWndResult CreateChild(const NestedViews& nested_view)
+    MakeWndResult* CreateChild(const NestedViews& nested_view)
         {
             const ViewParameters& view_params = nested_view.m_view_parameters;
+
+#if INSTRUMENT_WINDOW_CREATION
+            std::cout << std::string(indent * 4, ' ') << "CreateChild(" << view_params.m_name << ")\n";
+#endif
 
             m_evaluator.evaluate(view_params.m_parameters);
             adobe::dictionary_t parameters(move(m_evaluator.back().cast<adobe::dictionary_t>()));
             m_evaluator.pop_back();
 
-            MakeWndResult retval = MakeWnd(view_params.m_name, parameters, view_params.m_position);
+#if INSTRUMENT_WINDOW_CREATION
+            std::cout << std::string(indent * 4, ' ') << "    MakeWnd(" << view_params.m_name << ")\n";
+#endif
+            std::auto_ptr<MakeWndResult> retval(
+                MakeWnd(view_params.m_name, parameters, view_params.m_position)
+            );
 
-            std::vector<MakeWndResult> children;
+#if INSTRUMENT_WINDOW_CREATION
+            ++indent;
+#endif
+            boost::ptr_vector<MakeWndResult> children;
             for (std::size_t i = 0; i < nested_view.m_children.size(); ++i) {
                 children.push_back(CreateChild(nested_view.m_children[i]));
             }
+#if INSTRUMENT_WINDOW_CREATION
+            --indent;
+#endif
 
             assert(children.empty() || IsContainer(view_params.m_name));
 
@@ -1103,11 +1237,11 @@ struct EveLayout::Impl
             get_value(parameters, key_placement, placement);
 
             if (!children.empty()) {
-                assert(retval.m_wnds.size() == 1u);
-                AddChildren(&retval.m_wnds[0], children, placement, view_params);
+                assert(retval->m_wnds.size() == 1u);
+                AddChildren(&retval->m_wnds[0], children, placement, view_params);
             }
 
-            return retval;
+            return retval.release();
         }
 
     static void PrintNestedView(std::ostream& os, const NestedViews& nested_view, unsigned int indent)

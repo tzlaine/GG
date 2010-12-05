@@ -31,7 +31,6 @@
 #define _GG_StrongTypedef_h_
 
 #include <boost/static_assert.hpp>
-#include <boost/operators.hpp>
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/serialization/nvp.hpp>
 
@@ -43,14 +42,7 @@
     class name ## _d;                                                   \
     double Value(name ## _d x);                                         \
                                                                         \
-    class name ## _d :                                                  \
-        boost::equality_comparable1<name ## _d                          \
-      , boost::equality_comparable2<name ## _d, double                  \
-      , boost::unit_steppable<name ## _d                                \
-      , boost::integer_arithmetic1<name ## _d                           \
-      , boost::integer_arithmetic2<name ## _d, double                   \
-      , boost::subtractable2_left<name ## _d, double                    \
-    > > > > > >                                                         \
+    class name ## _d                                                    \
     {                                                                   \
     private:                                                            \
         struct ConvertibleToBoolDummy {int _;};                         \
@@ -79,6 +71,11 @@
         { ++m_value; return *this; }                                    \
         name ## _d& operator--()                                        \
         { --m_value; return *this; }                                    \
+                                                                        \
+        name ## _d operator++(int)                                      \
+        { name ## _d retval(m_value); ++m_value; return retval; }       \
+        name ## _d operator--(int)                                      \
+        { name ## _d retval(m_value); --m_value; return retval; }       \
                                                                         \
         name ## _d& operator+=(name ## _d rhs)                          \
         { m_value += rhs.m_value; return *this; }                       \
@@ -126,6 +123,8 @@
     inline bool operator>=(name ## _d x, name ## _d y)                  \
     { return y < x || x == y; }                                         \
                                                                         \
+    inline bool operator!=(name ## _d x, double y)                      \
+    { return !(x == y); }                                               \
     inline bool operator>(name ## _d x, double y)                       \
     { return !(x < y || x == y); }                                      \
     inline bool operator<=(name ## _d x, double y)                      \
@@ -134,12 +133,41 @@
     { return !(x < y); }                                                \
     inline bool operator>(double x, name ## _d y)                       \
     { return y < x; }                                                   \
+    inline bool operator==(double x, name ## _d y)                      \
+    { return y == x; }                                                  \
+    inline bool operator!=(double x, name ## _d y)                      \
+    { return y != x; }                                                  \
     inline bool operator<(double x, name ## _d y)                       \
     { return !(y < x || y == x); }                                      \
     inline bool operator<=(double x, name ## _d y)                      \
     { return !(y < x); }                                                \
     inline bool operator>=(double x, name ## _d y)                      \
-    { return y < x || x == y; }                                         \
+    { return y < x || y == x; }                                         \
+                                                                        \
+    inline name ## _d operator+(name ## _d lhs, name ## _d rhs)         \
+    { return lhs += rhs; }                                              \
+    inline name ## _d operator-(name ## _d lhs, name ## _d rhs)         \
+    { return lhs -= rhs; }                                              \
+    inline name ## _d operator*(name ## _d lhs, name ## _d rhs)         \
+    { return lhs *= rhs; }                                              \
+    inline name ## _d operator/(name ## _d lhs, name ## _d rhs)         \
+    { return lhs /= rhs; }                                              \
+                                                                        \
+    inline name ## _d operator+(name ## _d lhs, double rhs)             \
+    { return lhs += rhs; }                                              \
+    inline name ## _d operator-(name ## _d lhs, double rhs)             \
+    { return lhs -= rhs; }                                              \
+    inline name ## _d operator*(name ## _d lhs, double rhs)             \
+    { return lhs *= rhs; }                                              \
+    inline name ## _d operator/(name ## _d lhs, double rhs)             \
+    { return lhs /= rhs; }                                              \
+                                                                        \
+    inline name ## _d operator+(double lhs, name ## _d rhs)             \
+    { return rhs += lhs; }                                              \
+    inline name ## _d operator-(double lhs, name ## _d rhs)             \
+    { return -(rhs -= lhs); }                                           \
+    inline name ## _d operator*(double lhs, name ## _d rhs)             \
+    { return rhs *= lhs; }                                              \
                                                                         \
     inline double Value(name ## _d x)                                   \
     { return x.m_value; }                                               \
@@ -170,16 +198,7 @@
                                                                         \
     type Value(name x);                                                 \
                                                                         \
-    class name :                                                        \
-        boost::equality_comparable1<name                                \
-      , boost::equality_comparable2<name, type                          \
-      , boost::equality_comparable2<name, name ## _d                    \
-      , boost::equality_comparable2<name, double                        \
-      , boost::unit_steppable<name                                      \
-      , boost::integer_arithmetic1<name                                 \
-      , boost::integer_arithmetic2<name, type                           \
-      , boost::subtractable2_left<name, type                            \
-    > > > > > > > >                                                     \
+    class name                                                          \
     {                                                                   \
     private:                                                            \
         struct ConvertibleToBoolDummy {int _;};                         \
@@ -205,16 +224,22 @@
         { return m_value < rhs; }                                       \
         bool operator==(type rhs) const                                 \
         { return m_value == rhs; }                                      \
+        bool operator!=(type rhs) const                                 \
+        { return m_value != rhs; }                                      \
                                                                         \
         bool operator<(name ## _d rhs) const                            \
         { return m_value < Value(rhs); }                                \
         bool operator==(name ## _d rhs) const                           \
         { return m_value == Value(rhs); }                               \
+        bool operator!=(name ## _d rhs) const                           \
+        { return m_value != Value(rhs); }                               \
                                                                         \
         bool operator<(double rhs) const                                \
         { return m_value < rhs; }                                       \
         bool operator==(double rhs) const                               \
         { return m_value == rhs; }                                      \
+        bool operator!=(double rhs) const                               \
+        { return m_value != rhs; }                                      \
                                                                         \
         operator int ConvertibleToBoolDummy::* () const                 \
         { return m_value ? &ConvertibleToBoolDummy::_ : 0; }            \
@@ -226,6 +251,11 @@
         { ++m_value; return *this; }                                    \
         name& operator--()                                              \
         { --m_value; return *this; }                                    \
+                                                                        \
+        name operator++(int)                                            \
+        { name retval(m_value); ++m_value; return retval; }             \
+        name operator--(int)                                            \
+        { name retval(m_value); --m_value; return retval; }             \
                                                                         \
         name& operator+=(name rhs)                                      \
         { m_value += rhs.m_value; return *this; }                       \
@@ -279,6 +309,35 @@
         friend type Value(name x);                                      \
     };                                                                  \
                                                                         \
+    inline name operator+(name lhs, name rhs)                           \
+    { return lhs += rhs; }                                              \
+    inline name operator-(name lhs, name rhs)                           \
+    { return lhs -= rhs; }                                              \
+    inline name operator*(name lhs, name rhs)                           \
+    { return lhs *= rhs; }                                              \
+    inline name operator/(name lhs, name rhs)                           \
+    { return lhs /= rhs; }                                              \
+    inline name operator%(name lhs, name rhs)                           \
+    { return lhs %= rhs; }                                              \
+                                                                        \
+    inline name operator+(name lhs, type rhs)                           \
+    { return lhs += rhs; }                                              \
+    inline name operator-(name lhs, type rhs)                           \
+    { return lhs -= rhs; }                                              \
+    inline name operator*(name lhs, type rhs)                           \
+    { return lhs *= rhs; }                                              \
+    inline name operator/(name lhs, type rhs)                           \
+    { return lhs /= rhs; }                                              \
+    inline name operator%(name lhs, type rhs)                           \
+    { return lhs %= rhs; }                                              \
+                                                                        \
+    inline name operator+(type lhs, name rhs)                           \
+    { return rhs += lhs; }                                              \
+    inline name operator-(type lhs, name rhs)                           \
+    { return -(rhs -= lhs); }                                           \
+    inline name operator*(type lhs, name rhs)                           \
+    { return rhs *= lhs; }                                              \
+                                                                        \
     inline name ## _d operator+(name x, double y)                       \
     { return name ## _d(Value(x)) + y; }                                \
     inline name ## _d operator+(double x, name y)                       \
@@ -310,6 +369,10 @@
     { return x < y || x == y; }                                         \
     inline bool operator>=(name x, type y)                              \
     { return !(x < y); }                                                \
+    inline bool operator==(type x, name y)                              \
+    { return y == x; }                                                  \
+    inline bool operator!=(type x, name y)                              \
+    { return y != x; }                                                  \
     inline bool operator>(type x, name y)                               \
     { return y < x; }                                                   \
     inline bool operator<(type x, name y)                               \
@@ -317,7 +380,7 @@
     inline bool operator<=(type x, name y)                              \
     { return !(y < x); }                                                \
     inline bool operator>=(type x, name y)                              \
-    { return y < x || x == y; }                                         \
+    { return y < x || y == x; }                                         \
                                                                         \
     inline bool operator>(name x, name ## _d y)                         \
     { return !(x < y || x == y); }                                      \
@@ -325,6 +388,10 @@
     { return x < y || x == y; }                                         \
     inline bool operator>=(name x, name ## _d y)                        \
     { return !(x < y); }                                                \
+    inline bool operator!=(name ## _d x, name y)                        \
+    { return Value(y) != Value(x); }                                    \
+    inline bool operator==(name ## _d x, name y)                        \
+    { return Value(y) == Value(x); }                                    \
     inline bool operator>(name ## _d x, name y)                         \
     { return y < x; }                                                   \
     inline bool operator<(name ## _d x, name y)                         \
@@ -401,14 +468,7 @@
     class name;                                                         \
     std::size_t Value(name x);                                          \
                                                                         \
-    class name :                                                        \
-        boost::equality_comparable1<name                                \
-      , boost::equality_comparable2<name, std::size_t                   \
-      , boost::unit_steppable<name                                      \
-      , boost::integer_arithmetic1<name                                 \
-      , boost::integer_arithmetic2<name, std::size_t                    \
-      , boost::subtractable2_left<name, std::size_t                     \
-    > > > > > >                                                         \
+    class name                                                          \
     {                                                                   \
     private:                                                            \
         struct ConvertibleToBoolDummy {int _;};                         \
@@ -437,6 +497,11 @@
         { ++m_value; return *this; }                                    \
         name& operator--()                                              \
         { --m_value; return *this; }                                    \
+                                                                        \
+        name operator++(int)                                            \
+        { name retval(m_value); ++m_value; return retval; }             \
+        name operator--(int)                                            \
+        { name retval(m_value); --m_value; return retval; }             \
                                                                         \
         name& operator+=(name rhs)                                      \
         { m_value += rhs.m_value; return *this; }                       \
@@ -479,12 +544,18 @@
     inline bool operator>=(name x, name y)                              \
     { return y < x || x == y; }                                         \
                                                                         \
+    inline bool operator!=(name x, std::size_t y)                       \
+    { return !(x == y); }                                               \
     inline bool operator>(name x, std::size_t y)                        \
     { return !(x < y || x == y); }                                      \
     inline bool operator<=(name x, std::size_t y)                       \
     { return x < y || x == y; }                                         \
     inline bool operator>=(name x, std::size_t y)                       \
     { return !(x < y); }                                                \
+    inline bool operator==(std::size_t x, name y)                       \
+    { return y == x; }                                                  \
+    inline bool operator!=(std::size_t x, name y)                       \
+    { return y != x; }                                                  \
     inline bool operator>(std::size_t x, name y)                        \
     { return y < x; }                                                   \
     inline bool operator<(std::size_t x, name y)                        \
@@ -492,7 +563,36 @@
     inline bool operator<=(std::size_t x, name y)                       \
     { return !(y < x); }                                                \
     inline bool operator>=(std::size_t x, name y)                       \
-    { return y < x || x == y; }                                         \
+    { return y < x || y == x; }                                         \
+                                                                        \
+    inline name operator+(name lhs, name rhs)                           \
+    { return lhs += rhs; }                                              \
+    inline name operator-(name lhs, name rhs)                           \
+    { return lhs -= rhs; }                                              \
+    inline name operator*(name lhs, name rhs)                           \
+    { return lhs *= rhs; }                                              \
+    inline name operator/(name lhs, name rhs)                           \
+    { return lhs /= rhs; }                                              \
+    inline name operator%(name lhs, name rhs)                           \
+    { return lhs %= rhs; }                                              \
+                                                                        \
+    inline name operator+(name lhs, std::size_t rhs)                    \
+    { return lhs += rhs; }                                              \
+    inline name operator-(name lhs, std::size_t rhs)                    \
+    { return lhs -= rhs; }                                              \
+    inline name operator*(name lhs, std::size_t rhs)                    \
+    { return lhs *= rhs; }                                              \
+    inline name operator/(name lhs, std::size_t rhs)                    \
+    { return lhs /= rhs; }                                              \
+    inline name operator%(name lhs, std::size_t rhs)                    \
+    { return lhs %= rhs; }                                              \
+                                                                        \
+    inline name operator+(std::size_t lhs, name rhs)                    \
+    { return rhs += lhs; }                                              \
+    inline name operator-(std::size_t lhs, name rhs)                    \
+    { return -(rhs -= lhs); }                                           \
+    inline name operator*(std::size_t lhs, name rhs)                    \
+    { return rhs *= lhs; }                                              \
                                                                         \
     inline std::size_t Value(name x)                                    \
     { return x.m_value; }                                               \

@@ -1,14 +1,14 @@
 #include <GG/PtRect.h>
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE StrongTypedef
+#define BOOST_TEST_MODULE StrongIntegralTypedef
 
 #include <boost/test/unit_test.hpp>
 
 int i = 7;
-double d = 3.0;
+double d = 3.1;
 GG::X x(2);
-GG::X_d xd(5.0);
+GG::X_d xd(5.1);
 
 int temp_int;
 double temp_double;
@@ -30,9 +30,9 @@ double temp_double;
 
 #define RESET()                                 \
     i = 7;                                      \
-    d = 3.0;                                    \
+    d = 3.1;                                    \
     x = GG::X(2);                               \
-    xd = GG::X_d(5.0)
+    xd = GG::X_d(5.1)
 
 #define ASSIGN_ARITHMETIC_ITERATION(op)                                 \
     BOOST_CHECK_EQUAL(Value(x op i), (temp_int = Value(x)) op i); RESET(); \

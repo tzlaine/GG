@@ -31,10 +31,13 @@
 
 #include <GG/Exception.h>
 
+#include <boost/utility/enable_if.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/mpl/assert.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
+#include <cassert>
 #include <iosfwd>
 #include <map>
 #include <set>

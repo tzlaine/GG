@@ -28,6 +28,7 @@
 #include <GG/Edit.h>
 #include <GG/GUI.h>
 #include <GG/Layout.h>
+#include <GG/Menu.h>
 #include <GG/Slider.h>
 #include <GG/Spin.h>
 #include <GG/StyleFactory.h>
@@ -47,6 +48,7 @@
 using namespace GG;
 
 #define INSTRUMENT_WINDOW_CREATION 0
+#define INSTRUMENT_CREATED_LAYOUT 0
 
 #if INSTRUMENT_WINDOW_CREATION
 void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
@@ -210,20 +212,51 @@ namespace {
         public Wnd
     {
         Dialog(const std::string& name, Flags<WndFlag> flags) :
-            Wnd(X(100), Y(100), X(100), Y(100), flags | MODAL),
-            m_title(Factory().NewTextControl(X0, Y0, X1, Y1, name, DefaultFont()))
+            Wnd(X(10), Y(10), X(200), Y(200), flags | MODAL | DRAGABLE | INTERACTIVE),
+            m_title(Factory().NewTextControl(BEVEL_OFFSET.x, BEVEL_OFFSET.y - CharHeight(),
+                                             X(200) - BEVEL_OFFSET.x * 2, CharHeight(),
+                                             name, DefaultFont()))
             { AttachChild(m_title); }
 
         virtual Pt ClientUpperLeft() const
-            { UpperLeft() + s_bevel_offset + Pt(X0, m_title->Height()); }
+            { return UpperLeft() + BEVEL_OFFSET + Pt(X0, m_title->Height()); }
 
         virtual Pt ClientLowerRight() const
-            { LowerRight() - s_bevel_offset; }
+            { return LowerRight() - BEVEL_OFFSET; }
+
+        virtual WndRegion WindowRegion(const Pt& pt) const
+            {
+                enum {LEFT = 0, MIDDLE = 1, RIGHT = 2};
+                enum {TOP = 0, BOTTOM = 2};
+
+                // window regions look like this:
+                // 0111112
+                // 3444445   // 4 is client area, 0,2,6,8 are corners
+                // 3444445
+                // 6777778
+
+                int x_pos = MIDDLE;   // default & typical case is that the mouse is over the (non-border) client area
+                int y_pos = MIDDLE;
+
+                Pt ul = UpperLeft() + BEVEL_OFFSET, lr = LowerRight() - BEVEL_OFFSET;
+
+                if (pt.x < ul.x)
+                    x_pos = LEFT;
+                else if (pt.x > lr.x)
+                    x_pos = RIGHT;
+
+                if (pt.y < ul.y)
+                    y_pos = TOP;
+                else if (pt.y > lr.y)
+                    y_pos = BOTTOM;
+
+                return (Resizable() ? WndRegion(x_pos + 3 * y_pos) : WR_NONE);
+            }
 
         virtual void SizeMove(const Pt& ul, const Pt& lr)
             {
-                m_title->SizeMove(ul + s_bevel_offset,
-                                  Pt((lr.x - ul.x) - s_bevel_offset.x * 2, m_title->Height()));
+                Pt new_title_size = Pt((lr - ul).x - BEVEL_OFFSET.x * 2, m_title->Height());
+                m_title->Resize(new_title_size);
                 Wnd::SizeMove(ul, lr);
             }
 
@@ -232,10 +265,12 @@ namespace {
 
         TextControl* m_title;
 
-        static Pt s_bevel_offset;
+        static const int FRAME_WIDTH;
+        static const Pt BEVEL_OFFSET;
     };
 
-    Pt Dialog::s_bevel_offset(X(2), Y(2));
+    const int Dialog::FRAME_WIDTH = 2;
+    const Pt Dialog::BEVEL_OFFSET(X(Dialog::FRAME_WIDTH), Y(Dialog::FRAME_WIDTH));
 
     struct MakeWndResult
     {
@@ -247,6 +282,44 @@ namespace {
         std::size_t operator()(const MakeWndResult& lhs, const MakeWndResult& rhs)
             { return lhs.m_wnds.size() < rhs.m_wnds.size(); }
     };
+
+#if INSTRUMENT_CREATED_LAYOUT
+    const char* WndTypeStr(Wnd* w)
+    {
+#define CASE(x) if (dynamic_cast<x*>(w)) return #x;
+
+        CASE(Dialog)
+        else CASE(Layout)
+        else CASE(Panel)
+        else CASE(Overlay)
+        else CASE(Button)
+        else CASE(StateButton)
+        else CASE(TextControl)
+        else CASE(Edit)
+        else CASE(StaticGraphic)
+        else CASE(DropDownList)
+        else CASE(RadioButtonGroup)
+        else CASE(Slider)
+        else CASE(TabBar)
+        else CASE(MenuBar)
+        else CASE(Spin<int>)
+        else CASE(Spin<double>)
+        else return "Unknown";
+
+#undef CASE
+    }
+
+    void DumpLayout(Wnd* w, int indent = 0)
+    {
+        std::cout << std::string(indent * 4, ' ') << WndTypeStr(w) << " "
+                  << w->RelativeUpperLeft() << " - "
+                  << w->RelativeLowerRight()
+                  << "\n";
+        for (std::list<Wnd*>::const_iterator it = w->Children().begin(); it != w->Children().end(); ++it) {
+            DumpLayout(*it, indent + 1);
+        }
+    }
+#endif
 
     MakeWndResult* Make_dialog(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
@@ -1198,6 +1271,9 @@ struct EveLayout::Impl
         {
             std::auto_ptr<MakeWndResult> dialog(CreateChild(m_nested_views));
             m_wnd = dialog->m_wnds.release(dialog->m_wnds.begin() + 0).release();
+#if INSTRUMENT_CREATED_LAYOUT
+            DumpLayout(m_wnd);
+#endif
             return *m_wnd;
         }
 

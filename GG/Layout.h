@@ -138,7 +138,7 @@ public:
         debugging purposes. */
     Clr    OutlineColor() const;
     //@}
-   
+
     /** \name Mutators */ ///@{
     virtual void StartingChildDragDrop(const Wnd* wnd, const Pt& offset);
     virtual void CancellingChildDragDrop(const std::vector<const Wnd*>& wnds);

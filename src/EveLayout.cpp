@@ -284,12 +284,13 @@ namespace {
     };
 
 #if INSTRUMENT_CREATED_LAYOUT
-    const char* WndTypeStr(Wnd* w)
+    std::string WndTypeStr(Wnd* w)
     {
 #define CASE(x) if (dynamic_cast<x*>(w)) return #x;
 
+        using boost::lexical_cast;
+
         CASE(Dialog)
-        else CASE(Layout)
         else CASE(Panel)
         else CASE(Overlay)
         else CASE(Button)
@@ -304,7 +305,14 @@ namespace {
         else CASE(MenuBar)
         else CASE(Spin<int>)
         else CASE(Spin<double>)
-        else return "Unknown";
+        else if (Layout* l = dynamic_cast<Layout*>(w)) {
+            return
+                lexical_cast<std::string>(l->Rows()) + "x" +
+                lexical_cast<std::string>(l->Columns()) +
+                " Layout";
+        } else {
+            return "Unknown";
+        }
 
 #undef CASE
     }
@@ -395,7 +403,7 @@ namespace {
     }
 
     MakeWndResult* Make_display_number(const adobe::dictionary_t& params,
-                                      const adobe::line_position_t& position)
+                                       const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -564,7 +572,7 @@ namespace {
     }
 
     MakeWndResult* Make_radio_button_group(const adobe::dictionary_t& params,
-                                          const adobe::line_position_t& position)
+                                           const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_column;
 
@@ -643,7 +651,7 @@ namespace {
         adobe::string_t name;
         adobe::string_t alt;
         std::size_t characters = 25;
-        bool wrap = false;
+        bool wrap = true;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_alt_text, alt);
@@ -654,9 +662,10 @@ namespace {
 
         X char_width = DefaultFont()->TextExtent("W").x;
         X w = static_cast<int>(characters) * char_width;
+        Flags<TextFormat> format = wrap ? FORMAT_WORDBREAK : FORMAT_NONE;
+        Pt extent = DefaultFont()->TextExtent(name, format, w);
         retval->m_wnds.push_back(
-            Factory().NewTextControl(X0, Y0, w, CharHeight(), name, DefaultFont(),
-                                     CLR_BLACK, wrap ? FORMAT_WORDBREAK : FORMAT_NONE)
+            Factory().NewTextControl(X0, Y0, extent.x, extent.y, name, DefaultFont(), CLR_BLACK, format)
         );
 
         return retval.release();
@@ -797,8 +806,8 @@ namespace {
     }
 
     MakeWndResult* Make_layout(adobe::name_t wnd_type,
-                              const adobe::dictionary_t& params,
-                              const adobe::line_position_t& position)
+                               const adobe::dictionary_t& params,
+                               const adobe::line_position_t& position)
     {
 
         adobe::name_t placement = key_place_overlay;
@@ -1152,7 +1161,7 @@ struct EveLayout::Impl
             std::auto_ptr<Layout>
                 layout(new Layout(X0, Y0, X1, Y1,
                                   orientation == VERTICAL ? children.size() : 1,
-                                  orientation == VERTICAL ? MAX_SIZE : children.size() * 2));
+                                  orientation == VERTICAL ? MAX_SIZE : children.size() * MAX_SIZE));
             for (std::size_t i = 0; i < children.size(); ++i) {
                 if (children[i].m_wnds.size()) {
                     boost::ptr_vector<Wnd>::auto_type child_0 =
@@ -1226,7 +1235,7 @@ struct EveLayout::Impl
             const std::size_t MAX_SIZE =
                 std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
             assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
-            layout->ResizeLayout(1, children.size() * 2);
+            layout->ResizeLayout(1, children.size() * MAX_SIZE);
             for (std::size_t i = 0; i < children.size(); ++i) {
                 if (children[i].m_wnds.size()) {
                     boost::ptr_vector<Wnd>::auto_type child_0 =
@@ -1246,7 +1255,7 @@ struct EveLayout::Impl
             const std::size_t MAX_SIZE =
                 std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
             assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
-            layout->ResizeLayout(MAX_SIZE, children.size() * 2);
+            layout->ResizeLayout(children.size(), MAX_SIZE);
             for (std::size_t i = 0; i < children.size(); ++i) {
                 if (children[i].m_wnds.size()) {
                     boost::ptr_vector<Wnd>::auto_type child_0 =

@@ -811,6 +811,7 @@ namespace {
     {
 
         adobe::name_t placement = key_place_overlay;
+        int margin = 3;
 
         if (get_value(params, key_placement, placement)) {
             if (!(placement == key_place_row && wnd_type == name_row ||
@@ -822,10 +823,11 @@ namespace {
                 );
             }
         }
+        get_value(params, key_margin, margin);
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
-        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1));
+        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1, 1, margin));
 
         return retval.release();
     }

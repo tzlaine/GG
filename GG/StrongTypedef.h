@@ -356,6 +356,8 @@
     inline name ## _d operator/(name x, double y)                       \
     { return name ## _d(Value(x)) / y; }                                \
                                                                         \
+    inline bool operator!=(name x, name y)                              \
+    { return !(x == y); }                                               \
     inline bool operator>(name x, name y)                               \
     { return y < x; }                                                   \
     inline bool operator<=(name x, name y)                              \

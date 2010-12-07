@@ -50,6 +50,7 @@ class EveLayout
 {
 public:
     EveLayout(adobe::sheet_t& sheet);
+    ~EveLayout();
 
     adobe::dictionary_t Contributing() const;
 

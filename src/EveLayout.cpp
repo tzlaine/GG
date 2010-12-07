@@ -809,7 +809,6 @@ namespace {
                                const adobe::dictionary_t& params,
                                const adobe::line_position_t& position)
     {
-
         adobe::name_t placement = key_place_overlay;
         int margin = 3;
 
@@ -1376,6 +1375,9 @@ struct EveLayout::Impl
 EveLayout::EveLayout(adobe::sheet_t& sheet) :
     m_impl(new Impl(sheet))
 {}
+
+EveLayout::~EveLayout()
+{ delete m_impl; }
 
 adobe::dictionary_t EveLayout::Contributing() const
 { return m_impl->Contributing(); }

@@ -900,7 +900,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1, 1, retval->m_margin));
+        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
 
         return retval.release();
     }
@@ -1301,12 +1301,14 @@ struct EveLayout::Impl
         }
     }
 
-    void AddChildren(Wnd* wnd,
+    void AddChildren(MakeWndResult& wnd_,
                      boost::ptr_vector<MakeWndResult>& children,
                      adobe::name_t placement,
                      const ViewParameters& wnd_view_params)
     {
         using namespace adobe;
+
+        Wnd* wnd = &wnd_.m_wnds[0];
 
 #if INSTRUMENT_WINDOW_CREATION
         std::cout << std::string(indent * 4, ' ') << "    AddChildren(children = [ ";
@@ -1332,7 +1334,9 @@ struct EveLayout::Impl
             std::auto_ptr<Layout>
                 layout(new Layout(X0, Y0, X1, Y1,
                                   orientation == VERTICAL ? children.size() : 1,
-                                  orientation == VERTICAL ? MAX_SIZE : children.size() * MAX_SIZE));
+                                  orientation == VERTICAL ? MAX_SIZE : children.size() * MAX_SIZE,
+                                  wnd_.m_margin,
+                                  wnd_.m_margin));
             if (orientation == VERTICAL)
                 AddChildrenToVerticalLayout(*layout, children, MAX_SIZE);
             else
@@ -1449,7 +1453,7 @@ struct EveLayout::Impl
 
             if (!children.empty()) {
                 assert(retval->m_wnds.size() == 1u);
-                AddChildren(&retval->m_wnds[0], children, placement, view_params);
+                AddChildren(*retval, children, placement, view_params);
             }
 
             return retval.release();

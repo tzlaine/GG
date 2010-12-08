@@ -1131,6 +1131,46 @@ struct EveLayout::Impl
         std::vector<NestedViews> m_children;
     };
 
+    void AddChildrenToHorizontalLayout(Layout& layout,
+                                       boost::ptr_vector<MakeWndResult>& children,
+                                       const std::size_t MAX_SIZE)
+    {
+        for (std::size_t i = 0; i < children.size(); ++i) {
+            if (children[i].m_wnds.size()) {
+                boost::ptr_vector<Wnd>::auto_type child_0 =
+                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                layout.Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
+            } else {
+                boost::ptr_vector<Wnd>::auto_type child_1 =
+                    children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
+                boost::ptr_vector<Wnd>::auto_type child_0 =
+                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                layout.Add(child_0.release(), 0, i * 2 + 0);
+                layout.Add(child_1.release(), 0, i * 2 + 1);
+            }
+        }
+    }
+
+    void AddChildrenToVerticalLayout(Layout& layout,
+                                     boost::ptr_vector<MakeWndResult>& children,
+                                     const std::size_t MAX_SIZE)
+    {
+        for (std::size_t i = 0; i < children.size(); ++i) {
+            if (children[i].m_wnds.size()) {
+                boost::ptr_vector<Wnd>::auto_type child_0 =
+                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                layout.Add(child_0.release(), i, 0, 1, MAX_SIZE);
+            } else {
+                boost::ptr_vector<Wnd>::auto_type child_1 =
+                    children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
+                boost::ptr_vector<Wnd>::auto_type child_0 =
+                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                layout.Add(child_0.release(), i, 0);
+                layout.Add(child_1.release(), i, 1);
+            }
+        }
+    }
+
     void AddChildren(Wnd* wnd,
                      boost::ptr_vector<MakeWndResult>& children,
                      adobe::name_t placement,
@@ -1163,29 +1203,10 @@ struct EveLayout::Impl
                 layout(new Layout(X0, Y0, X1, Y1,
                                   orientation == VERTICAL ? children.size() : 1,
                                   orientation == VERTICAL ? MAX_SIZE : children.size() * MAX_SIZE));
-            for (std::size_t i = 0; i < children.size(); ++i) {
-                if (children[i].m_wnds.size()) {
-                    boost::ptr_vector<Wnd>::auto_type child_0 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                    if (orientation == VERTICAL)
-                        layout->Add(child_0.release(), i, 0, 1, MAX_SIZE);
-                    else
-                        layout->Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
-                } else {
-                    boost::ptr_vector<Wnd>::auto_type child_1 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
-                    boost::ptr_vector<Wnd>::auto_type child_0 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                    if (orientation == VERTICAL)
-                        layout->Add(child_0.release(), i, 0);
-                    else
-                        layout->Add(child_0.release(), 0, i * 2 + 0);
-                    if (orientation == VERTICAL)
-                        layout->Add(child_1.release(), i, 1);
-                    else
-                        layout->Add(child_1.release(), 0, i * 2 + 1);
-                }
-            }
+            if (orientation == VERTICAL)
+                AddChildrenToVerticalLayout(*layout, children, MAX_SIZE);
+            else
+                AddChildrenToHorizontalLayout(*layout, children, MAX_SIZE);
             wnd->SetLayout(layout.release());
         } else if (wnd_view_params.m_name == name_radio_button_group) {
             RadioButtonGroup* radio_button_group = boost::polymorphic_downcast<RadioButtonGroup*>(wnd);
@@ -1237,40 +1258,14 @@ struct EveLayout::Impl
                 std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
             assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
             layout->ResizeLayout(1, children.size() * MAX_SIZE);
-            for (std::size_t i = 0; i < children.size(); ++i) {
-                if (children[i].m_wnds.size()) {
-                    boost::ptr_vector<Wnd>::auto_type child_0 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                    layout->Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
-                } else {
-                    boost::ptr_vector<Wnd>::auto_type child_1 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
-                    boost::ptr_vector<Wnd>::auto_type child_0 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                    layout->Add(child_0.release(), 0, i * 2 + 0);
-                    layout->Add(child_1.release(), 0, i * 2 + 1);
-                }
-            }
+            AddChildrenToHorizontalLayout(*layout, children, MAX_SIZE);
         } else if (wnd_view_params.m_name == name_column) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             const std::size_t MAX_SIZE =
                 std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
             assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
             layout->ResizeLayout(children.size(), MAX_SIZE);
-            for (std::size_t i = 0; i < children.size(); ++i) {
-                if (children[i].m_wnds.size()) {
-                    boost::ptr_vector<Wnd>::auto_type child_0 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                    layout->Add(child_0.release(), i, 0, 1, MAX_SIZE);
-                } else {
-                    boost::ptr_vector<Wnd>::auto_type child_1 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
-                    boost::ptr_vector<Wnd>::auto_type child_0 =
-                        children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                    layout->Add(child_0.release(), i, 0);
-                    layout->Add(child_1.release(), i, 1);
-                }
-            }
+            AddChildrenToVerticalLayout(*layout, children, MAX_SIZE);
         } else {
             throw stream_error_t("attempted to attach children to a non-container",
                                  wnd_view_params.m_position);
@@ -1372,6 +1367,10 @@ struct EveLayout::Impl
     Wnd* m_wnd;
 };
 
+
+////////////////////////////////////////////////////////////
+// EveLayout                                              //
+////////////////////////////////////////////////////////////
 EveLayout::EveLayout(adobe::sheet_t& sheet) :
     m_impl(new Impl(sheet))
 {}

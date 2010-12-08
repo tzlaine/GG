@@ -456,6 +456,7 @@ namespace {
             Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
         );
         button->SetMaxSize(Pt(button->MaxSize().x, button->Height()));
+        button->SetMinSize(Pt(button->MinSize().x, button->Height()));
         retval->m_wnds.push_back(button);
 
         return retval.release();
@@ -484,6 +485,7 @@ namespace {
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
         );
         checkbox->SetMaxSize(Pt(checkbox->MaxSize().x, checkbox->Height()));
+        checkbox->SetMinSize(Pt(checkbox->MinSize().x, checkbox->Height()));
         retval->m_wnds.push_back(checkbox);
 
         return retval.release();
@@ -516,6 +518,7 @@ namespace {
             Factory().NewTextControl(X0, Y0, X1, StandardHeight(), "", DefaultFont())
         );
         text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
+        text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
         retval->m_wnds.push_back(text_control);
 
         return retval.release();
@@ -634,6 +637,7 @@ namespace {
             Factory().NewDropDownList(X0, Y0, X1, StandardHeight(), drop_height, CLR_GRAY)
         );
         drop_down_list->SetMaxSize(Pt(drop_down_list->MaxSize().x, drop_down_list->Height()));
+        drop_down_list->SetMinSize(Pt(drop_down_list->MinSize().x, drop_down_list->Height()));
         retval->m_wnds.push_back(drop_down_list);
 
         return retval.release();
@@ -663,6 +667,7 @@ namespace {
                                      CLR_GRAY, CLR_BLACK, CLR_ZERO, SBSTYLE_3D_RADIO)
         );
         radio_button->SetMaxSize(Pt(radio_button->MaxSize().x, radio_button->Height()));
+        radio_button->SetMinSize(Pt(radio_button->MinSize().x, radio_button->Height()));
         retval->m_wnds.push_back(radio_button);
 
         return retval.release();
@@ -723,6 +728,10 @@ namespace {
         slider->SetMaxSize(
             Pt(orientation_ == VERTICAL ? slider->MaxSize().x : slider->Width(),
                orientation_ == VERTICAL ? slider->Height() : slider->MaxSize().y)
+        );
+        slider->SetMinSize(
+            Pt(orientation_ == VERTICAL ? slider->MinSize().x : slider->Width(),
+               orientation_ == VERTICAL ? slider->Height() : slider->MinSize().y)
         );
         retval->m_wnds.push_back(slider);
 

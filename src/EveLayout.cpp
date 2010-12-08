@@ -44,6 +44,8 @@
 #include <boost/cast.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
+#include <numeric>
+
 
 using namespace GG;
 
@@ -333,9 +335,11 @@ namespace {
     {
         adobe::string_t name;
         bool grow = false;
+        int margin = 5;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
+        get_value(params, key_margin, margin);
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
 
@@ -810,7 +814,7 @@ namespace {
                                const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_overlay;
-        int margin = 3;
+        int margin = 5;
 
         if (get_value(params, key_placement, placement)) {
             if (!(placement == key_place_row && wnd_type == name_row ||
@@ -1135,19 +1139,47 @@ struct EveLayout::Impl
                                        boost::ptr_vector<MakeWndResult>& children,
                                        const std::size_t MAX_SIZE)
     {
+        std::vector<Y> max_single_row_heights(MAX_SIZE, Y0);
+        Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             if (children[i].m_wnds.size()) {
                 boost::ptr_vector<Wnd>::auto_type child_0 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                Pt min_usable_size = child_0->MinUsableSize();
+                max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
+                layout.SetMinimumColumnWidth(i, min_usable_size.x);
                 layout.Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
             } else {
                 boost::ptr_vector<Wnd>::auto_type child_1 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
                 boost::ptr_vector<Wnd>::auto_type child_0 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                Pt min_usable_size = child_0->MinUsableSize();
+                max_single_row_heights[0] =
+                    std::max(max_single_row_heights[0], min_usable_size.y);
+                layout.SetMinimumColumnWidth(i, min_usable_size.x);
+                min_usable_size = child_1->MinUsableSize();
+                max_single_row_heights[1] =
+                    std::max(max_single_row_heights[1], min_usable_size.y);
+                layout.SetMinimumColumnWidth(i, min_usable_size.x);
                 layout.Add(child_0.release(), 0, i * 2 + 0);
                 layout.Add(child_1.release(), 0, i * 2 + 1);
             }
+        }
+        Y_d summed_single_row_heights =
+            1.0 * std::accumulate(max_single_row_heights.begin(), max_single_row_heights.end(), Y0);
+        bool all_rows_height_larger = max_all_rows_height > summed_single_row_heights;
+        Y_d difference = max_all_rows_height - summed_single_row_heights;
+        for (std::size_t i = 0; i < max_single_row_heights.size(); ++i) {
+            Y_d stretch =
+                summed_single_row_heights ?
+                max_single_row_heights[i] / summed_single_row_heights :
+                Y_d(0.0);
+            Y_d min_height = 1.0 * max_single_row_heights[i];
+            if (all_rows_height_larger)
+                min_height += difference * stretch;
+            layout.SetRowStretch(i, Value(stretch));
+            layout.SetMinimumRowHeight(i, Y(std::ceil(Value(min_height))));
         }
     }
 
@@ -1155,19 +1187,47 @@ struct EveLayout::Impl
                                      boost::ptr_vector<MakeWndResult>& children,
                                      const std::size_t MAX_SIZE)
     {
+        std::vector<X> max_single_column_widths(MAX_SIZE, X0);
+        X max_all_columns_width = X0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             if (children[i].m_wnds.size()) {
                 boost::ptr_vector<Wnd>::auto_type child_0 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                Pt min_usable_size = child_0->MinUsableSize();
+                max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
+                layout.SetMinimumRowHeight(i, min_usable_size.y);
                 layout.Add(child_0.release(), i, 0, 1, MAX_SIZE);
             } else {
                 boost::ptr_vector<Wnd>::auto_type child_1 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
                 boost::ptr_vector<Wnd>::auto_type child_0 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
+                Pt min_usable_size = child_0->MinUsableSize();
+                max_single_column_widths[0] =
+                    std::max(max_single_column_widths[0], min_usable_size.x);
+                layout.SetMinimumRowHeight(i, min_usable_size.y);
+                min_usable_size = child_1->MinUsableSize();
+                max_single_column_widths[1] =
+                    std::max(max_single_column_widths[1], min_usable_size.x);
+                layout.SetMinimumRowHeight(i, min_usable_size.y);
                 layout.Add(child_0.release(), i, 0);
                 layout.Add(child_1.release(), i, 1);
             }
+        }
+        X_d summed_single_column_widths =
+            1.0 * std::accumulate(max_single_column_widths.begin(), max_single_column_widths.end(), X0);
+        bool all_columns_width_larger = max_all_columns_width > summed_single_column_widths;
+        X_d difference = max_all_columns_width - summed_single_column_widths;
+        for (std::size_t i = 0; i < max_single_column_widths.size(); ++i) {
+            X_d stretch =
+                summed_single_column_widths ?
+                max_single_column_widths[i] / summed_single_column_widths :
+                X_d(0.0);
+            X_d min_width = 1.0 * max_single_column_widths[i];
+            if (all_columns_width_larger)
+                min_width += difference * stretch;
+            layout.SetColumnStretch(i, Value(stretch));
+            layout.SetMinimumColumnWidth(i, X(std::ceil(Value(min_width))));
         }
     }
 

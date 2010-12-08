@@ -163,6 +163,9 @@ namespace {
     Y CharHeight()
     { return DefaultFont()->Lineskip(); }
 
+    Y StandardHeight()
+    { return CharHeight() * 3 / 2; }
+
     struct Panel :
         public Wnd
     {
@@ -409,7 +412,11 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
-        retval->m_wnds.push_back(Factory().NewButton(X0, Y0, X1, Y1, name, DefaultFont(), CLR_GRAY));
+        std::auto_ptr<Button> button(
+            Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
+        );
+        button->SetMaxSize(Pt(button->MaxSize().x, button->Height()));
+        retval->m_wnds.push_back(button);
 
         return retval.release();
     }
@@ -433,9 +440,11 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
-        retval->m_wnds.push_back(
-            Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
+        std::auto_ptr<StateButton> checkbox(
+            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
         );
+        checkbox->SetMaxSize(Pt(checkbox->MaxSize().x, checkbox->Height()));
+        retval->m_wnds.push_back(checkbox);
 
         return retval.release();
     }
@@ -463,7 +472,11 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, X1, Y1, "", DefaultFont()));
+        std::auto_ptr<TextControl> text_control(
+            Factory().NewTextControl(X0, Y0, X1, StandardHeight(), "", DefaultFont())
+        );
+        text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
+        retval->m_wnds.push_back(text_control);
 
         return retval.release();
     }
@@ -577,7 +590,11 @@ namespace {
 
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
-        retval->m_wnds.push_back(Factory().NewDropDownList(X0, Y0, X1, Y1, drop_height, CLR_GRAY));
+        std::auto_ptr<DropDownList> drop_down_list(
+            Factory().NewDropDownList(X0, Y0, X1, StandardHeight(), drop_height, CLR_GRAY)
+        );
+        drop_down_list->SetMaxSize(Pt(drop_down_list->MaxSize().x, drop_down_list->Height()));
+        retval->m_wnds.push_back(drop_down_list);
 
         return retval.release();
     }
@@ -601,10 +618,12 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
-        retval->m_wnds.push_back(
-            Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE,
+        std::auto_ptr<StateButton> radio_button(
+            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE,
                                      CLR_GRAY, CLR_BLACK, CLR_ZERO, SBSTYLE_3D_RADIO)
         );
+        radio_button->SetMaxSize(Pt(radio_button->MaxSize().x, radio_button->Height()));
+        retval->m_wnds.push_back(radio_button);
 
         return retval.release();
     }
@@ -655,9 +674,17 @@ namespace {
         get_value(format, adobe::key_last, max);
         Orientation orientation_ = orientation == adobe::key_vertical ? VERTICAL : HORIZONTAL;
         const int TAB_WIDTH = 5;
-        retval->m_wnds.push_back(
-            Factory().NewSlider(X0, Y0, X1, Y1, min, max, orientation_, GROOVED, CLR_GRAY, TAB_WIDTH)
+        std::auto_ptr<Slider> slider(
+            Factory().NewSlider(X0, Y0,
+                                orientation_ == VERTICAL ? X(Value(StandardHeight())) : X1,
+                                orientation_ == VERTICAL ? Y1 : StandardHeight(),
+                                min, max, orientation_, GROOVED, CLR_GRAY, TAB_WIDTH)
         );
+        slider->SetMaxSize(
+            Pt(orientation_ == VERTICAL ? slider->MaxSize().x : slider->Width(),
+               orientation_ == VERTICAL ? slider->Height() : slider->MaxSize().y)
+        );
+        retval->m_wnds.push_back(slider);
 
         return retval.release();
     }

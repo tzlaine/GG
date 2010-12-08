@@ -70,6 +70,8 @@ public:
         UpperLeft()-relative coordinates.  This may not be the entire area of
         the StaticGraphic, based on the style being used. */
     Rect RenderedArea() const;
+
+    virtual Pt MinUsableSize() const;
     //@}
 
     /** \name Mutators */ ///@{

@@ -276,6 +276,42 @@ namespace {
 
     struct MakeWndResult
     {
+        enum Alignment
+        {
+            ALIGN_FILL,
+            ALIGN_TOP,
+            ALIGN_BOTTOM,
+            ALIGN_LEFT,
+            ALIGN_RIGHT,
+            ALIGN_CENTER,
+            ALIGN_PROPORTIONAL
+        };
+
+        MakeWndResult(const adobe::dictionary_t& params) :
+            m_horizontal(ALIGN_PROPORTIONAL),
+            m_vertical(ALIGN_PROPORTIONAL),
+            m_child_horizontal(ALIGN_PROPORTIONAL),
+            m_child_vertical(ALIGN_PROPORTIONAL),
+            m_spacing(0),
+            m_indent(0),
+            m_margin(5)
+            {
+                get_value(params, key_horizontal, m_horizontal);
+                get_value(params, key_vertical, m_vertical);
+                get_value(params, key_child_horizontal, m_child_horizontal);
+                get_value(params, key_child_vertical, m_child_vertical);
+                get_value(params, key_spacing, m_spacing);
+                get_value(params, key_indent, m_indent);
+                get_value(params, key_margin, m_margin);
+            }
+
+        Alignment m_horizontal;
+        Alignment m_vertical;
+        Alignment m_child_horizontal;
+        Alignment m_child_vertical;
+        int m_spacing;
+        int m_indent;
+        int m_margin;
         boost::ptr_vector<Wnd> m_wnds;
     };
 
@@ -335,13 +371,11 @@ namespace {
     {
         adobe::string_t name;
         bool grow = false;
-        int margin = 5;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
-        get_value(params, key_margin, margin);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
 
@@ -373,7 +407,7 @@ namespace {
         // skipping items
         // skipping modifiers
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewButton(X0, Y0, X1, Y1, name, DefaultFont(), CLR_GRAY));
 
@@ -397,7 +431,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(
             Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
@@ -426,7 +460,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, X1, Y1, "", DefaultFont()));
@@ -461,7 +495,7 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         retval->m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
@@ -492,7 +526,7 @@ namespace {
         // skipping max_characters
         // skipping monospaced
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         retval->m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
@@ -511,7 +545,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
         retval->m_wnds.push_back(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
@@ -537,7 +571,7 @@ namespace {
         // skipping popup_bind
         // skipping popup_placement
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
@@ -565,7 +599,7 @@ namespace {
         // TODO bind_controller ?
         // TODO touch ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(
             Factory().NewStateButton(X0, Y0, X1, Y1, name, DefaultFont(), FORMAT_NONE,
@@ -589,7 +623,7 @@ namespace {
             );
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
         retval->m_wnds.push_back(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
@@ -613,7 +647,7 @@ namespace {
 
         // skipping slider_point
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         double min = 1;
         double max = 100;
@@ -642,7 +676,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
@@ -662,7 +696,7 @@ namespace {
         get_value(params, adobe::key_characters, characters);
         get_value(params, adobe::key_wrap, wrap);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         X char_width = DefaultFont()->TextExtent("W").x;
         X w = static_cast<int>(characters) * char_width;
@@ -679,7 +713,7 @@ namespace {
     {
         // TODO
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         return retval.release();
     }
@@ -704,7 +738,7 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
@@ -744,7 +778,7 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
 
@@ -775,7 +809,7 @@ namespace {
                                         position);
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(new Overlay);
 
@@ -802,7 +836,7 @@ namespace {
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
         retval->m_wnds.push_back(new Panel(orientation, name));
 
@@ -814,7 +848,6 @@ namespace {
                                const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_overlay;
-        int margin = 5;
 
         if (get_value(params, key_placement, placement)) {
             if (!(placement == key_place_row && wnd_type == name_row ||
@@ -826,11 +859,10 @@ namespace {
                 );
             }
         }
-        get_value(params, key_margin, margin);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params));
 
-        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1, 1, margin));
+        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1, 1, retval->m_margin));
 
         return retval.release();
     }

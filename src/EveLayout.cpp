@@ -329,6 +329,35 @@ namespace {
         boost::ptr_vector<Wnd> m_wnds;
     };
 
+    Flags<Alignment> AlignmentsImpl(adobe::name_t horizontal, adobe::name_t vertical)
+    {
+        Flags<Alignment> retval;
+
+        if (vertical == key_align_top)
+            retval |= ALIGN_TOP;
+        else if (vertical == key_align_center)
+            retval |= ALIGN_VCENTER;
+        else if (vertical == key_align_bottom)
+            retval |= ALIGN_BOTTOM;
+        // TODO: else fill and else proportional
+
+        if (horizontal == key_align_left)
+            retval |= ALIGN_LEFT;
+        else if (horizontal == key_align_center)
+            retval |= ALIGN_CENTER;
+        else if (horizontal == key_align_right)
+            retval |= ALIGN_RIGHT;
+        // TODO: else fill and else proportional
+
+        return retval;
+    }
+
+    Flags<Alignment> Alignments(const MakeWndResult& mwr)
+    { return AlignmentsImpl(mwr.m_horizontal, mwr.m_vertical); }
+
+    Flags<Alignment> ChildAlignments(const MakeWndResult& mwr)
+    { return AlignmentsImpl(mwr.m_child_horizontal, mwr.m_child_vertical); }
+
     struct MakeWndResultLess
     {
         std::size_t operator()(const MakeWndResult& lhs, const MakeWndResult& rhs)
@@ -1218,7 +1247,7 @@ struct EveLayout::Impl
                 Pt min_usable_size = child_0->MinUsableSize();
                 max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
                 layout.SetMinimumColumnWidth(i, min_usable_size.x);
-                layout.Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE);
+                layout.Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE, Alignments(children[i]));
             } else {
                 boost::ptr_vector<Wnd>::auto_type child_1 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
@@ -1232,8 +1261,8 @@ struct EveLayout::Impl
                 max_single_row_heights[1] =
                     std::max(max_single_row_heights[1], min_usable_size.y);
                 layout.SetMinimumColumnWidth(i, min_usable_size.x);
-                layout.Add(child_0.release(), 0, i * 2 + 0);
-                layout.Add(child_1.release(), 0, i * 2 + 1);
+                layout.Add(child_0.release(), 0, i * 2 + 0, 1, 1, Alignments(children[i]));
+                layout.Add(child_1.release(), 0, i * 2 + 1, 1, 1, Alignments(children[i]));
             }
         }
         Y_d summed_single_row_heights =
@@ -1266,7 +1295,7 @@ struct EveLayout::Impl
                 Pt min_usable_size = child_0->MinUsableSize();
                 max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
                 layout.SetMinimumRowHeight(i, min_usable_size.y);
-                layout.Add(child_0.release(), i, 0, 1, MAX_SIZE);
+                layout.Add(child_0.release(), i, 0, 1, MAX_SIZE, Alignments(children[i]));
             } else {
                 boost::ptr_vector<Wnd>::auto_type child_1 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
@@ -1280,8 +1309,8 @@ struct EveLayout::Impl
                 max_single_column_widths[1] =
                     std::max(max_single_column_widths[1], min_usable_size.x);
                 layout.SetMinimumRowHeight(i, min_usable_size.y);
-                layout.Add(child_0.release(), i, 0);
-                layout.Add(child_1.release(), i, 1);
+                layout.Add(child_0.release(), i, 0, 1, 1, Alignments(children[i]));
+                layout.Add(child_1.release(), i, 1, 1, 1, Alignments(children[i]));
             }
         }
         X_d summed_single_column_widths =

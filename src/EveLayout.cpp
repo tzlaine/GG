@@ -257,9 +257,9 @@ namespace {
 
         virtual void SizeMove(const Pt& ul, const Pt& lr)
             {
-                Pt new_title_size = Pt((lr - ul).x - BEVEL_OFFSET.x * 2, m_title->Height());
-                m_title->Resize(new_title_size);
                 Wnd::SizeMove(ul, lr);
+                Pt new_title_size = Pt((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
+                m_title->Resize(new_title_size);
             }
 
         virtual void Render()

@@ -37,7 +37,7 @@
 
     GG uses OpenGL to render its graphics.  It is assumed that the entire GUI
     is being redrawn multiple times each second, as part of a high-framerate
-    application.  Each GG UI element is draw using calls to OpenGL.
+    application.  Each GG UI element is drawn using calls to OpenGL.
     Therefore, each element can be rendered as a pre-rendered pixmap, flat 2D
     texture or sprite, or even a fully 3D rendering; the complexity of the
     graphics used to represent the UI elements is only limited by the target
@@ -45,7 +45,7 @@
 
     \section arch_main_loop_integration Integration With Application Render Loop
 
-    GG supplies arender loop in the form of GUI::Run().  For many
+    GG supplies a render loop in the form of GUI::Run().  For many
     applications, this default render loop is sufficient.  However, for users
     who are integrating GG with an existing application that already has its
     own render loop, there is another way.  See the GG::EventPump

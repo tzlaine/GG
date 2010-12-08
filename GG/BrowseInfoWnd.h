@@ -38,6 +38,7 @@
 
 namespace GG {
 
+class Cursor;
 class Font;
 class TextControl;
 
@@ -73,6 +74,15 @@ public:
     /** Sets the current cursor position to the one given. */
     void SetCursorPosition(const Pt& cursor_pos);
     //@}
+
+    /** If set by the user, this function is used to determine the position of
+        this BrowseInfoWnd.  It takes the current cursor position, the
+        currently-set cursor, this BrowseInfoWnd, and the Wnd that is
+        displaying this BrowseInfoWnd as parameters, and returns the desired
+        upper-left corner of this BrowseInfoWnd. */
+    mutable boost::function<
+        Pt (const Pt&, const boost::shared_ptr<Cursor>&, const BrowseInfoWnd&, const Wnd&)
+    > PositionWnd;
 
 protected:
     /** \name Structors */ ///@{
@@ -123,7 +133,7 @@ public:
     //@}
 
     /** \name Mutators */ ///@{
-    void         SetText (const std::string& str);
+    void         SetText(const std::string& str);
     virtual void Render();
 
     void SetTextFromTarget(bool b);                    ///< sets the text display mode to static (\a b == true) or dynamic (read from the target Wnd, \a b == false)

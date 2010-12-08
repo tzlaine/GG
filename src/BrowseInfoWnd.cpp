@@ -31,6 +31,9 @@
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
 
+#include <boost/tuple/tuple.hpp>
+
+
 using namespace GG;
 
 ////////////////////////////////////////////////
@@ -47,8 +50,14 @@ BrowseInfoWnd::BrowseInfoWnd(X x, Y y, X w, Y h) :
 void BrowseInfoWnd::Update(std::size_t mode, const Wnd* target)
 {
     UpdateImpl(mode, target);
-    const Y MARGIN(2);
-    MoveTo(m_cursor_pos - Pt(Width() / 2, Height() + MARGIN));
+    Pt new_pos;
+    if (PositionWnd) {
+        new_pos = PositionWnd(m_cursor_pos, GUI::GetGUI()->GetCursor(), *this, *target);
+    } else {
+        const Y MARGIN(2);
+        new_pos = m_cursor_pos - Pt(Width() / 2, Height() + MARGIN);
+    }
+    MoveTo(new_pos);
     Pt ul = UpperLeft(), lr = LowerRight();
     if (GUI::GetGUI()->AppWidth() <= lr.x)
         ul.x += GUI::GetGUI()->AppWidth() - lr.x;

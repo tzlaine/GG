@@ -79,6 +79,14 @@ public:
     TextureCursor(const boost::shared_ptr<Texture>& texture, const Pt& hotspot = Pt());
     //@}
 
+    /** \name Accessors */ ///@{
+    /** Returns the texture used to render this TextureCursor. */
+    const boost::shared_ptr<Texture>& GetTexture() const;
+
+    /** Returns the position within Texture() of the cursor hotspot. */
+    const Pt& Hotspot() const;
+    //@}
+
     /** \name Mutators */ ///@{
     virtual void Render(const Pt& pt);
     //@}

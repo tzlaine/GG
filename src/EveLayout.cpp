@@ -160,6 +160,9 @@ namespace {
     boost::shared_ptr<Font> DefaultFont()
     { return Factory().DefaultFont(); }
 
+    X CharWidth()
+    { return DefaultFont()->TextExtent("W").x; }
+
     Y CharHeight()
     { return DefaultFont()->Lineskip(); }
 
@@ -456,7 +459,7 @@ namespace {
             Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
         );
         button->SetMaxSize(Pt(button->MaxSize().x, button->Height()));
-        button->SetMinSize(Pt(button->MinSize().x, button->Height()));
+        button->SetMinSize(Pt(DefaultFont()->TextExtent(name).x + 4 * CharWidth(), button->Height()));
         retval->m_wnds.push_back(button);
 
         return retval.release();
@@ -774,8 +777,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        X char_width = DefaultFont()->TextExtent("W").x;
-        X w = static_cast<int>(characters) * char_width;
+        X w = static_cast<int>(characters) * CharWidth();
         Flags<TextFormat> format = wrap ? FORMAT_WORDBREAK : FORMAT_NONE;
         Pt extent = DefaultFont()->TextExtent(name, format, w);
         retval->m_wnds.push_back(

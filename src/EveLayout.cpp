@@ -285,6 +285,10 @@ namespace {
     {
         MakeWndResult(const adobe::dictionary_t& params,
                       const adobe::line_position_t& position) :
+            m_horizontal(key_align_center),
+            m_vertical(key_align_center),
+            m_child_horizontal(key_align_center),
+            m_child_vertical(key_align_center),
             m_spacing(0),
             m_indent(0),
             m_margin(5)
@@ -1417,6 +1421,7 @@ struct EveLayout::Impl
         {
             std::auto_ptr<MakeWndResult> dialog(CreateChild(m_nested_views));
             m_wnd = dialog->m_wnd.release();
+            m_wnd->Resize(Pt(X1, Y1));
 #if INSTRUMENT_CREATED_LAYOUT
             DumpLayout(m_wnd);
 #endif

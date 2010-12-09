@@ -1249,7 +1249,6 @@ struct EveLayout::Impl
                                        boost::ptr_vector<MakeWndResult>& children,
                                        const std::size_t MAX_SIZE)
     {
-        std::vector<Y> max_single_row_heights(MAX_SIZE, Y0);
         Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             if (children[i].m_wnds.size()) {
@@ -1265,32 +1264,16 @@ struct EveLayout::Impl
                 boost::ptr_vector<Wnd>::auto_type child_0 =
                     children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
                 Pt min_usable_size = child_0->MinUsableSize();
-                max_single_row_heights[0] =
-                    std::max(max_single_row_heights[0], min_usable_size.y);
+                max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
                 layout.SetMinimumColumnWidth(i, min_usable_size.x);
                 min_usable_size = child_1->MinUsableSize();
-                max_single_row_heights[1] =
-                    std::max(max_single_row_heights[1], min_usable_size.y);
+                max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
                 layout.SetMinimumColumnWidth(i, min_usable_size.x);
                 layout.Add(child_0.release(), 0, i * 2 + 0, 1, 1, Alignments(children[i]));
                 layout.Add(child_1.release(), 0, i * 2 + 1, 1, 1, Alignments(children[i]));
             }
         }
-        Y_d summed_single_row_heights =
-            1.0 * std::accumulate(max_single_row_heights.begin(), max_single_row_heights.end(), Y0);
-        bool all_rows_height_larger = max_all_rows_height > summed_single_row_heights;
-        Y_d difference = max_all_rows_height - summed_single_row_heights;
-        for (std::size_t i = 0; i < max_single_row_heights.size(); ++i) {
-            Y_d stretch =
-                summed_single_row_heights ?
-                max_single_row_heights[i] / summed_single_row_heights :
-                Y_d(0.0);
-            Y_d min_height = 1.0 * max_single_row_heights[i];
-            if (all_rows_height_larger)
-                min_height += difference * stretch;
-            layout.SetRowStretch(i, Value(stretch));
-            layout.SetMinimumRowHeight(i, Y(std::ceil(Value(min_height))));
-        }
+        layout.SetMinimumRowHeight(0, max_all_rows_height);
     }
 
     void AddChildrenToVerticalLayout(Layout& layout,

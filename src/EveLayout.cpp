@@ -292,6 +292,25 @@ namespace {
             m_spacing(0),
             m_indent(0),
             m_margin(5)
+            { Init(params, position); }
+
+        MakeWndResult(const adobe::dictionary_t& params,
+                      const adobe::line_position_t& position,
+                      adobe::name_t horizontal,
+                      adobe::name_t vertical,
+                      adobe::name_t child_horizontal,
+                      adobe::name_t child_vertical) :
+            m_horizontal(horizontal),
+            m_vertical(vertical),
+            m_child_horizontal(child_horizontal),
+            m_child_vertical(child_vertical),
+            m_spacing(0),
+            m_indent(0),
+            m_margin(5)
+            { Init(params, position); }
+
+        void Init(const adobe::dictionary_t& params,
+                  const adobe::line_position_t& position)
             {
                 get_value(params, key_horizontal, m_horizontal);
                 CheckAlignment(key_horizontal, m_horizontal, position);
@@ -481,7 +500,12 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              key_align_left,
+                                                              key_align_center,
+                                                              key_align_center,
+                                                              key_align_center));
 
         std::auto_ptr<StateButton> checkbox(
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
@@ -716,7 +740,12 @@ namespace {
         // TODO bind_controller ?
         // TODO touch ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              key_align_left,
+                                                              key_align_center,
+                                                              key_align_center,
+                                                              key_align_center));
 
         std::auto_ptr<StateButton> radio_button(
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE,

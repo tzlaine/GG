@@ -42,6 +42,7 @@
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 
 #include <boost/cast.hpp>
+#include <boost/ptr_container/ptr_deque.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <numeric>
@@ -512,7 +513,9 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+        layout->Add(label.release(), 0, 0);
 
         std::auto_ptr<TextControl> text_control(
             Factory().NewTextControl(X0, Y0, X1, StandardHeight(), "", DefaultFont())
@@ -557,7 +560,10 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+        layout->Add(label.release(), 0, 0);
+
         layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
 
         retval->m_wnd = layout;
@@ -592,7 +598,10 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+        layout->Add(label.release(), 0, 0);
+
         layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
 
         retval->m_wnd = layout;
@@ -641,15 +650,44 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+        layout->Add(label.release(), 0, 0);
 
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
         std::auto_ptr<DropDownList> drop_down_list(
             Factory().NewDropDownList(X0, Y0, X1, StandardHeight(), drop_height, CLR_GRAY)
         );
+
+        X max_item_width = X0;
+        boost::ptr_deque<ListBox::Row> rows;
+        for (adobe::array_t::const_iterator it = items.begin(); it != items.end(); ++it) {
+            try {
+                const adobe::dictionary_t& name_value_pair = it->cast<adobe::dictionary_t>();
+                adobe::string_t name;
+                adobe::any_regular_t value;
+                if (!get_value(name_value_pair, adobe::key_name, name))
+                    throw adobe::stream_error_t("popup items must each contain a string name", position);
+                if (!get_value(name_value_pair, adobe::key_value, value))
+                    throw adobe::stream_error_t("popup items must each contain a value", position);
+                std::auto_ptr<ListBox::Row> row(new ListBox::Row);
+                row->push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+                max_item_width = std::max(max_item_width, DefaultFont()->TextExtent(name).x);
+                rows.push_back(row);
+            } catch (const adobe::bad_cast&) {
+                throw adobe::stream_error_t("popup items must each be a dictionary", position);
+            }
+        }
+
+        max_item_width += CharWidth() * 2;
         drop_down_list->SetMaxSize(Pt(drop_down_list->MaxSize().x, drop_down_list->Height()));
-        drop_down_list->SetMinSize(Pt(drop_down_list->MinSize().x, drop_down_list->Height()));
+        drop_down_list->SetMinSize(Pt(max_item_width, drop_down_list->Height()));
+
+        while (!rows.empty()) {
+            drop_down_list->Insert(rows.release(rows.begin()).release());
+        }
+
         layout->Add(drop_down_list.release(), 0, 1);
 
         retval->m_wnd = layout;
@@ -794,6 +832,7 @@ namespace {
         retval->m_wnd.reset(
             Factory().NewTextControl(X0, Y0, extent.x, extent.y, name, DefaultFont(), CLR_BLACK, format)
         );
+        retval->m_wnd->SetMinSize(Pt(retval->m_wnd->Width(), retval->m_wnd->MinSize().y));
 
         return retval.release();
     }
@@ -831,7 +870,9 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+        layout->Add(label.release(), 0, 0);
 
         int step = 1;
         int min = 1;
@@ -874,7 +915,9 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+        layout->Add(label.release(), 0, 0);
 
         double step = 1.0;
         double min = 1.0;

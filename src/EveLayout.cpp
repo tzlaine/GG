@@ -329,7 +329,7 @@ namespace {
         int m_spacing;
         int m_indent;
         int m_margin;
-        boost::ptr_vector<Wnd> m_wnds;
+        std::auto_ptr<Wnd> m_wnd;
     };
 
     Flags<Alignment> AlignmentsImpl(adobe::name_t horizontal, adobe::name_t vertical)
@@ -360,12 +360,6 @@ namespace {
 
     Flags<Alignment> ChildAlignments(const MakeWndResult& mwr)
     { return AlignmentsImpl(mwr.m_child_horizontal, mwr.m_child_vertical); }
-
-    struct MakeWndResultLess
-    {
-        std::size_t operator()(const MakeWndResult& lhs, const MakeWndResult& rhs)
-            { return lhs.m_wnds.size() < rhs.m_wnds.size(); }
-    };
 
 #if INSTRUMENT_CREATED_LAYOUT
     std::string WndTypeStr(Wnd* w)
@@ -423,7 +417,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
+        retval->m_wnd.reset(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
 
         return retval.release();
     }
@@ -460,7 +454,7 @@ namespace {
         );
         button->SetMaxSize(Pt(button->MaxSize().x, button->Height()));
         button->SetMinSize(Pt(DefaultFont()->TextExtent(name).x + 4 * CharWidth(), button->Height()));
-        retval->m_wnds.push_back(button);
+        retval->m_wnd = button;
 
         return retval.release();
     }
@@ -489,7 +483,7 @@ namespace {
         );
         checkbox->SetMaxSize(Pt(checkbox->MaxSize().x, checkbox->Height()));
         checkbox->SetMinSize(Pt(checkbox->MinSize().x, checkbox->Height()));
-        retval->m_wnds.push_back(checkbox);
+        retval->m_wnd = checkbox;
 
         return retval.release();
     }
@@ -516,13 +510,18 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+
         std::auto_ptr<TextControl> text_control(
             Factory().NewTextControl(X0, Y0, X1, StandardHeight(), "", DefaultFont())
         );
         text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
         text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
-        retval->m_wnds.push_back(text_control);
+        layout->Add(text_control.release(), 0, 1);
+
+        retval->m_wnd = layout;
 
         return retval.release();
     }
@@ -556,8 +555,12 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        retval->m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
+
+        retval->m_wnd = layout;
 
         return retval.release();
     }
@@ -587,8 +590,12 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        retval->m_wnds.push_back(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
+        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
+
+        retval->m_wnd = layout;
 
         return retval.release();
     }
@@ -607,7 +614,7 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
-        retval->m_wnds.push_back(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
+        retval->m_wnd.reset(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
 
         return retval.release();
     }
@@ -632,7 +639,9 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
 
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
@@ -641,7 +650,9 @@ namespace {
         );
         drop_down_list->SetMaxSize(Pt(drop_down_list->MaxSize().x, drop_down_list->Height()));
         drop_down_list->SetMinSize(Pt(drop_down_list->MinSize().x, drop_down_list->Height()));
-        retval->m_wnds.push_back(drop_down_list);
+        layout->Add(drop_down_list.release(), 0, 1);
+
+        retval->m_wnd = layout;
 
         return retval.release();
     }
@@ -671,7 +682,7 @@ namespace {
         );
         radio_button->SetMaxSize(Pt(radio_button->MaxSize().x, radio_button->Height()));
         radio_button->SetMinSize(Pt(radio_button->MinSize().x, radio_button->Height()));
-        retval->m_wnds.push_back(radio_button);
+        retval->m_wnd = radio_button;
 
         return retval.release();
     }
@@ -693,7 +704,7 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
-        retval->m_wnds.push_back(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
+        retval->m_wnd.reset(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
 
         return retval.release();
     }
@@ -736,7 +747,7 @@ namespace {
             Pt(orientation_ == VERTICAL ? slider->MinSize().x : slider->Width(),
                orientation_ == VERTICAL ? slider->Height() : slider->MinSize().y)
         );
-        retval->m_wnds.push_back(slider);
+        retval->m_wnd = slider;
 
         return retval.release();
     }
@@ -757,7 +768,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
+        retval->m_wnd.reset(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
         return retval.release();
     }
@@ -780,7 +791,7 @@ namespace {
         X w = static_cast<int>(characters) * CharWidth();
         Flags<TextFormat> format = wrap ? FORMAT_WORDBREAK : FORMAT_NONE;
         Pt extent = DefaultFont()->TextExtent(name, format, w);
-        retval->m_wnds.push_back(
+        retval->m_wnd.reset(
             Factory().NewTextControl(X0, Y0, extent.x, extent.y, name, DefaultFont(), CLR_BLACK, format)
         );
 
@@ -818,7 +829,9 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
 
         int step = 1;
         int min = 1;
@@ -828,9 +841,10 @@ namespace {
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
-        retval->m_wnds.push_back(
-            Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
-        );
+        layout->Add(Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
+                    0, 1);
+
+        retval->m_wnd = layout;
 
         return retval.release();
     }
@@ -858,7 +872,9 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+        layout->Add(Factory().NewTextControl(X0, Y0, name, DefaultFont()), 0, 0);
 
         double step = 1.0;
         double min = 1.0;
@@ -868,9 +884,12 @@ namespace {
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
-        retval->m_wnds.push_back(
-            Factory().NewDoubleSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
+        layout->Add(
+            Factory().NewDoubleSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
+            0, 1
         );
+
+        retval->m_wnd = layout;
 
         return retval.release();
     }
@@ -889,7 +908,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(new Overlay);
+        retval->m_wnd.reset(new Overlay);
 
         return retval.release();
     }
@@ -916,7 +935,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(new Panel(orientation, name));
+        retval->m_wnd.reset(new Panel(orientation, name));
 
         return retval.release();
     }
@@ -940,7 +959,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
 
-        retval->m_wnds.push_back(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
+        retval->m_wnd.reset(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
 
         return retval.release();
     }
@@ -960,11 +979,7 @@ namespace {
         {                                                               \
             std::cout << std::string(indent * 4, ' ') << "    Make_"#x"(" << wnd_type << ")\n"; \
             MakeWndResult* retval = Make_##x(params, position);         \
-            std::cout << std::string(indent * 4, ' ') << "    [ ";      \
-            for (std::size_t i = 0; i < retval->m_wnds.size(); ++i) {   \
-                std::cout << &retval->m_wnds[i] << " ";                 \
-            }                                                           \
-            std::cout << "]\n";                                         \
+            std::cout << std::string(indent * 4, ' ') << "    " << retval->m_wnd.get() << " " << "\n"; \
             return retval;                                              \
         }
 #else
@@ -993,11 +1008,7 @@ namespace {
 #if INSTRUMENT_WINDOW_CREATION
             std::cout << std::string(indent * 4, ' ') << "    Make_layout(" << wnd_type << ", " << params << ", ...)\n";
             MakeWndResult* retval = Make_layout(wnd_type, params, position);
-            std::cout << std::string(indent * 4, ' ') << "    [ ";
-            for (std::size_t i = 0; i < retval->m_wnds.size(); ++i) {
-                std::cout << &retval->m_wnds[i] << " ";
-            }
-            std::cout << "]\n";
+            std::cout << std::string(indent * 4, ' ') << "    " << retval->m_wnd.get() << " " << "\n";
             return retval;
 #else
             return Make_layout(wnd_type, params, position);
@@ -1245,83 +1256,28 @@ struct EveLayout::Impl
         std::vector<NestedViews> m_children;
     };
 
-    void AddChildrenToHorizontalLayout(Layout& layout,
-                                       boost::ptr_vector<MakeWndResult>& children,
-                                       const std::size_t MAX_SIZE)
+    void AddChildrenToHorizontalLayout(Layout& layout, boost::ptr_vector<MakeWndResult>& children)
     {
         Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
-            if (children[i].m_wnds.size()) {
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                Pt min_usable_size = child_0->MinUsableSize();
-                max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
-                layout.SetMinimumColumnWidth(i, min_usable_size.x);
-                layout.Add(child_0.release(), 0, i * MAX_SIZE, 1, MAX_SIZE, Alignments(children[i]));
-            } else {
-                boost::ptr_vector<Wnd>::auto_type child_1 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                Pt min_usable_size = child_0->MinUsableSize();
-                max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
-                layout.SetMinimumColumnWidth(i, min_usable_size.x);
-                min_usable_size = child_1->MinUsableSize();
-                max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
-                layout.SetMinimumColumnWidth(i, min_usable_size.x);
-                layout.Add(child_0.release(), 0, i * 2 + 0, 1, 1, Alignments(children[i]));
-                layout.Add(child_1.release(), 0, i * 2 + 1, 1, 1, Alignments(children[i]));
-            }
+            Pt min_usable_size = children[i].m_wnd->MinUsableSize();
+            max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
+            layout.SetMinimumColumnWidth(i, min_usable_size.x);
+            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, Alignments(children[i]));
         }
         layout.SetMinimumRowHeight(0, max_all_rows_height);
     }
 
-    void AddChildrenToVerticalLayout(Layout& layout,
-                                     boost::ptr_vector<MakeWndResult>& children,
-                                     const std::size_t MAX_SIZE)
+    void AddChildrenToVerticalLayout(Layout& layout, boost::ptr_vector<MakeWndResult>& children)
     {
-        std::vector<X> max_single_column_widths(MAX_SIZE, X0);
         X max_all_columns_width = X0;
         for (std::size_t i = 0; i < children.size(); ++i) {
-            if (children[i].m_wnds.size()) {
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                Pt min_usable_size = child_0->MinUsableSize();
-                max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
-                layout.SetMinimumRowHeight(i, min_usable_size.y);
-                layout.Add(child_0.release(), i, 0, 1, MAX_SIZE, Alignments(children[i]));
-            } else {
-                boost::ptr_vector<Wnd>::auto_type child_1 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 1);
-                boost::ptr_vector<Wnd>::auto_type child_0 =
-                    children[i].m_wnds.release(children[i].m_wnds.begin() + 0);
-                Pt min_usable_size = child_0->MinUsableSize();
-                max_single_column_widths[0] =
-                    std::max(max_single_column_widths[0], min_usable_size.x);
-                layout.SetMinimumRowHeight(i, min_usable_size.y);
-                min_usable_size = child_1->MinUsableSize();
-                max_single_column_widths[1] =
-                    std::max(max_single_column_widths[1], min_usable_size.x);
-                layout.SetMinimumRowHeight(i, min_usable_size.y);
-                layout.Add(child_0.release(), i, 0, 1, 1, Alignments(children[i]));
-                layout.Add(child_1.release(), i, 1, 1, 1, Alignments(children[i]));
-            }
+            Pt min_usable_size = children[i].m_wnd->MinUsableSize();
+            max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
+            layout.SetMinimumRowHeight(i, min_usable_size.y);
+            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(children[i]));
         }
-        X_d summed_single_column_widths =
-            1.0 * std::accumulate(max_single_column_widths.begin(), max_single_column_widths.end(), X0);
-        bool all_columns_width_larger = max_all_columns_width > summed_single_column_widths;
-        X_d difference = max_all_columns_width - summed_single_column_widths;
-        for (std::size_t i = 0; i < max_single_column_widths.size(); ++i) {
-            X_d stretch =
-                summed_single_column_widths ?
-                max_single_column_widths[i] / summed_single_column_widths :
-                X_d(0.0);
-            X_d min_width = 1.0 * max_single_column_widths[i];
-            if (all_columns_width_larger)
-                min_width += difference * stretch;
-            layout.SetColumnStretch(i, Value(stretch));
-            layout.SetMinimumColumnWidth(i, X(std::ceil(Value(min_width))));
-        }
+        layout.SetMinimumColumnWidth(0, max_all_columns_width);
     }
 
     void AddChildren(MakeWndResult& wnd_,
@@ -1331,7 +1287,7 @@ struct EveLayout::Impl
     {
         using namespace adobe;
 
-        Wnd* wnd = &wnd_.m_wnds[0];
+        Wnd* wnd = wnd_.m_wnd.get();
 
 #if INSTRUMENT_WINDOW_CREATION
         std::cout << std::string(indent * 4, ' ') << "    AddChildren(children = [ ";
@@ -1351,78 +1307,63 @@ struct EveLayout::Impl
                                      wnd_view_params.m_position);
             }
             Orientation orientation = (placement == key_place_row) ? HORIZONTAL : VERTICAL;
-            const std::size_t MAX_SIZE =
-                std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
-            assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
             std::auto_ptr<Layout>
                 layout(new Layout(X0, Y0, X1, Y1,
                                   orientation == VERTICAL ? children.size() : 1,
-                                  orientation == VERTICAL ? MAX_SIZE : children.size() * MAX_SIZE,
+                                  orientation == VERTICAL ? 1 : children.size(),
                                   wnd_.m_margin,
                                   wnd_.m_margin));
             if (orientation == VERTICAL)
-                AddChildrenToVerticalLayout(*layout, children, MAX_SIZE);
+                AddChildrenToVerticalLayout(*layout, children);
             else
-                AddChildrenToHorizontalLayout(*layout, children, MAX_SIZE);
+                AddChildrenToHorizontalLayout(*layout, children);
             wnd->SetLayout(layout.release());
         } else if (wnd_view_params.m_name == name_radio_button_group) {
             RadioButtonGroup* radio_button_group = boost::polymorphic_downcast<RadioButtonGroup*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                assert(children[i].m_wnds.size() == 1u);
-                StateButton* state_button = dynamic_cast<StateButton*>(&children[i].m_wnds[0]);
+                StateButton* state_button = dynamic_cast<StateButton*>(children[i].m_wnd.get());
                 if (!state_button) {
                     throw stream_error_t("non-radio_buttons are not compatible with radio_button_group",
                                          wnd_view_params.m_position);
                 }
-                children[i].m_wnds.release(children[i].m_wnds.begin() + 0).release();
+                children[i].m_wnd.release();
                 radio_button_group->AddButton(state_button);
             }
         } else if (wnd_view_params.m_name == name_tab_group) {
             TabWnd* tab_wnd = boost::polymorphic_downcast<TabWnd*>(wnd);
-            assert(children[0].m_wnds.size() == 1u);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                assert(children[i].m_wnds.size() == 1u);
-                Panel* panel = dynamic_cast<Panel*>(&children[i].m_wnds[0]);
+                Panel* panel = dynamic_cast<Panel*>(children[i].m_wnd.get());
                 if (!panel) {
                     throw stream_error_t("non-panels are not compatible with tab_group",
                                          wnd_view_params.m_position);
                 }
-                children[i].m_wnds.release(children[i].m_wnds.begin() + 0).release();
+                children[i].m_wnd.release();
                 tab_wnd->AddWnd(panel, panel->Name());
             }
         } else if (wnd_view_params.m_name == name_overlay) {
             Overlay* overlay = boost::polymorphic_downcast<Overlay*>(wnd);
-            assert(children[0].m_wnds.size() == 1u);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                assert(children[i].m_wnds.size() == 1u);
-                Panel* panel = dynamic_cast<Panel*>(&children[i].m_wnds[0]);
+                Panel* panel = dynamic_cast<Panel*>(children[i].m_wnd.get());
                 if (!panel) {
                     throw stream_error_t("non-panels are not compatible with overlay",
                                          wnd_view_params.m_position);
                 }
-                children[i].m_wnds.release(children[i].m_wnds.begin() + 0).release();
+                children[i].m_wnd.release();
                 overlay->AddPanel(panel);
             }
         } else if (wnd_view_params.m_name == name_panel) {
             Panel* panel = boost::polymorphic_downcast<Panel*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                assert(children[i].m_wnds.size() == 1u);
-                panel->Add(children[i].m_wnds.release(children[i].m_wnds.begin() + 0).release());
+                panel->Add(children[i].m_wnd.release());
             }
         } else if (wnd_view_params.m_name == name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
-            const std::size_t MAX_SIZE =
-                std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
-            assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
-            layout->ResizeLayout(1, children.size() * MAX_SIZE);
-            AddChildrenToHorizontalLayout(*layout, children, MAX_SIZE);
+            layout->ResizeLayout(1, children.size());
+            AddChildrenToHorizontalLayout(*layout, children);
         } else if (wnd_view_params.m_name == name_column) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
-            const std::size_t MAX_SIZE =
-                std::max_element(children.begin(), children.end(), MakeWndResultLess())->m_wnds.size();
-            assert(MAX_SIZE == 1u || MAX_SIZE == 2u);
-            layout->ResizeLayout(children.size(), MAX_SIZE);
-            AddChildrenToVerticalLayout(*layout, children, MAX_SIZE);
+            layout->ResizeLayout(children.size(), 1);
+            AddChildrenToVerticalLayout(*layout, children);
         } else {
             throw stream_error_t("attempted to attach children to a non-container",
                                  wnd_view_params.m_position);
@@ -1432,7 +1373,7 @@ struct EveLayout::Impl
     Wnd& Finish()
         {
             std::auto_ptr<MakeWndResult> dialog(CreateChild(m_nested_views));
-            m_wnd = dialog->m_wnds.release(dialog->m_wnds.begin() + 0).release();
+            m_wnd = dialog->m_wnd.release();
 #if INSTRUMENT_CREATED_LAYOUT
             DumpLayout(m_wnd);
 #endif
@@ -1474,10 +1415,8 @@ struct EveLayout::Impl
             adobe::name_t placement;
             get_value(parameters, key_placement, placement);
 
-            if (!children.empty()) {
-                assert(retval->m_wnds.size() == 1u);
+            if (!children.empty())
                 AddChildren(*retval, children, placement, view_params);
-            }
 
             return retval.release();
         }

@@ -52,6 +52,7 @@ using namespace GG;
 
 #define INSTRUMENT_WINDOW_CREATION 0
 #define INSTRUMENT_CREATED_LAYOUT 0
+#define SHOW_LAYOUTS 0
 
 #if INSTRUMENT_WINDOW_CREATION
 void verbose_dump(const adobe::array_t& array, std::size_t indent = 0);
@@ -286,10 +287,10 @@ namespace {
         MakeWndResult(const adobe::dictionary_t& params,
                       const adobe::line_position_t& position,
                       bool wnd_is_labeled_control) :
-            m_horizontal(key_align_center),
+            m_horizontal(),
             m_vertical(key_align_center),
-            m_child_horizontal(key_align_center),
-            m_child_vertical(key_align_center),
+            m_child_horizontal(),
+            m_child_vertical(),
             m_spacing(0),
             m_indent(0),
             m_margin(5),
@@ -476,7 +477,13 @@ namespace {
         // skipping items
         // skipping modifiers
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              key_align_center,
+                                                              key_align_center,
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              false));
 
         std::auto_ptr<Button> button(
             Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
@@ -508,9 +515,9 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
                                                               key_align_left,
-                                                              key_align_center,
-                                                              key_align_center,
-                                                              key_align_center,
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
                                                               false));
 
         std::auto_ptr<StateButton> checkbox(
@@ -547,6 +554,10 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
+
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
@@ -569,7 +580,7 @@ namespace {
         adobe::string_t name;
         adobe::name_t bind;
         adobe::string_t alt;
-        std::size_t digits;
+        std::size_t digits = 5;
         adobe::string_t format;
         double min_value;
         double max_value;
@@ -594,11 +605,17 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
+
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
-        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
+        std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
+        edit->SetMinSize(Pt(X(30), edit->MinSize().y));
+        layout->Add(edit.release(), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -632,6 +649,10 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
+
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
@@ -654,7 +675,13 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              false));
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
         retval->m_wnd.reset(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
@@ -683,6 +710,10 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
@@ -749,9 +780,9 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
                                                               key_align_left,
-                                                              key_align_center,
-                                                              key_align_center,
-                                                              key_align_center,
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
                                                               false));
 
         std::auto_ptr<StateButton> radio_button(
@@ -803,13 +834,22 @@ namespace {
 
         // skipping slider_point
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        Orientation orientation_ = orientation == adobe::key_vertical ? VERTICAL : HORIZONTAL;
+
+        std::auto_ptr<MakeWndResult> retval(
+            new MakeWndResult(params,
+                              position,
+                              orientation_ == VERTICAL ? key_align_center : adobe::name_t(),
+                              orientation_ == VERTICAL ? adobe::name_t() : key_align_center,
+                              adobe::name_t(),
+                              adobe::name_t(),
+                              false)
+        );
 
         double min = 1;
         double max = 100;
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
-        Orientation orientation_ = orientation == adobe::key_vertical ? VERTICAL : HORIZONTAL;
         const int TAB_WIDTH = 5;
         std::auto_ptr<Slider> slider(
             Factory().NewSlider(X0, Y0,
@@ -910,6 +950,10 @@ namespace {
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
+
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
@@ -954,6 +998,10 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
@@ -1042,7 +1090,12 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
-        retval->m_wnd.reset(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+        layout->RenderOutline(true);
+#endif
+        retval->m_wnd.reset(layout.release());
 
         return retval.release();
     }
@@ -1409,9 +1462,7 @@ struct EveLayout::Impl
 
         for (std::size_t i = 0; i < children_as_labeled_control_layouts.size(); ++i) {
             if (Layout* l = children_as_labeled_control_layouts[i]) {
-                l->SetColumnStretch(0, Value(stretch_0));
                 l->SetMinimumColumnWidth(0, X(std::ceil(Value(min_width_0))));
-                l->SetColumnStretch(1, Value(stretch_1));
                 l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
             }
         }
@@ -1452,6 +1503,11 @@ struct EveLayout::Impl
                                   orientation == VERTICAL ? 1 : children.size(),
                                   wnd_.m_margin,
                                   wnd_.m_margin));
+
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
             if (orientation == VERTICAL)
                 AddChildrenToVerticalLayout(*layout, children);
             else

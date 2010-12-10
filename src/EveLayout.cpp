@@ -556,7 +556,7 @@ namespace {
         );
         text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
         text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
-        layout->Add(text_control.release(), 0, 1, 1, 1, ALIGN_LEFT);
+        layout->Add(text_control.release(), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -598,7 +598,7 @@ namespace {
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
-        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1, 1, 1, ALIGN_LEFT);
+        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -636,7 +636,7 @@ namespace {
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
-        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1, 1, 1, ALIGN_LEFT);
+        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -722,7 +722,7 @@ namespace {
             drop_down_list->Insert(rows.release(rows.begin()).release());
         }
 
-        layout->Add(drop_down_list.release(), 0, 1, 1, 1, ALIGN_LEFT);
+        layout->Add(drop_down_list.release(), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -923,7 +923,7 @@ namespace {
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
         layout->Add(Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
-                    0, 1, 1, 1, ALIGN_LEFT);
+                    0, 1);
 
         retval->m_wnd = layout;
 
@@ -969,7 +969,7 @@ namespace {
         get_value(format, key_allow_edits, allow_edits);
         layout->Add(
             Factory().NewDoubleSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
-            0, 1, 1, 1, ALIGN_LEFT
+            0, 1
         );
 
         retval->m_wnd = layout;

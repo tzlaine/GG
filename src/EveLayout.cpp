@@ -1080,7 +1080,7 @@ namespace {
         if (get_value(params, key_placement, placement)) {
             if (!(placement == key_place_row && wnd_type == name_row ||
                   placement == key_place_column && wnd_type == name_column)) {
-                std::string placement_ = key_place_overlay.name_m;
+                std::string placement_ = placement.c_str();
                 throw adobe::stream_error_t(
                     placement_ + " placement is not compatible with " + wnd_type.c_str(),
                     position

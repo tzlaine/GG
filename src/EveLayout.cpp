@@ -1421,9 +1421,8 @@ struct EveLayout::Impl
                     std::max(max_single_column_widths[0], l->Cells()[0][0]->MinUsableSize().x);
                 max_single_column_widths[1] =
                     std::max(max_single_column_widths[1], l->Cells()[0][1]->MinUsableSize().x);
-            } else {
-                max_all_columns_width = std::max(max_all_columns_width, children[i].m_wnd->MinUsableSize().x);
             }
+            max_all_columns_width = std::max(max_all_columns_width, children[i].m_wnd->MinUsableSize().x);
             children_as_labeled_control_layouts[i] = l;
         }
         max_single_column_widths.resize(max_columns);

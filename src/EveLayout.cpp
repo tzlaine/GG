@@ -549,14 +549,14 @@ namespace {
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0);
+        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
         std::auto_ptr<TextControl> text_control(
             Factory().NewTextControl(X0, Y0, X1, StandardHeight(), "", DefaultFont())
         );
         text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
         text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
-        layout->Add(text_control.release(), 0, 1);
+        layout->Add(text_control.release(), 0, 1, 1, 1, ALIGN_LEFT);
 
         retval->m_wnd = layout;
 
@@ -596,9 +596,9 @@ namespace {
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0);
+        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
-        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
+        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1, 1, 1, ALIGN_LEFT);
 
         retval->m_wnd = layout;
 
@@ -634,9 +634,9 @@ namespace {
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0);
+        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
-        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
+        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1, 1, 1, ALIGN_LEFT);
 
         retval->m_wnd = layout;
 
@@ -686,7 +686,7 @@ namespace {
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0);
+        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
@@ -722,7 +722,7 @@ namespace {
             drop_down_list->Insert(rows.release(rows.begin()).release());
         }
 
-        layout->Add(drop_down_list.release(), 0, 1);
+        layout->Add(drop_down_list.release(), 0, 1, 1, 1, ALIGN_LEFT);
 
         retval->m_wnd = layout;
 
@@ -912,7 +912,7 @@ namespace {
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0);
+        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
         int step = 1;
         int min = 1;
@@ -923,7 +923,7 @@ namespace {
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
         layout->Add(Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
-                    0, 1);
+                    0, 1, 1, 1, ALIGN_LEFT);
 
         retval->m_wnd = layout;
 
@@ -957,7 +957,7 @@ namespace {
 
         std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0);
+        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
         double step = 1.0;
         double min = 1.0;
@@ -969,7 +969,7 @@ namespace {
         get_value(format, key_allow_edits, allow_edits);
         layout->Add(
             Factory().NewDoubleSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
-            0, 1
+            0, 1, 1, 1, ALIGN_LEFT
         );
 
         retval->m_wnd = layout;

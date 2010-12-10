@@ -1454,7 +1454,7 @@ struct EveLayout::Impl
                 summed_single_column_widths ?
                 max_single_column_widths[1] / summed_single_column_widths :
                 X_d(0.0);
-            X_d min_width_1 = 1.0 * max_single_column_widths[1];
+            min_width_1 = 1.0 * max_single_column_widths[1];
             if (all_columns_width_larger)
                 min_width_1 += difference * stretch_1;
         }

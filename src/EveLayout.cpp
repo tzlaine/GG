@@ -284,14 +284,16 @@ namespace {
     struct MakeWndResult
     {
         MakeWndResult(const adobe::dictionary_t& params,
-                      const adobe::line_position_t& position) :
+                      const adobe::line_position_t& position,
+                      bool wnd_is_labeled_control) :
             m_horizontal(key_align_center),
             m_vertical(key_align_center),
             m_child_horizontal(key_align_center),
             m_child_vertical(key_align_center),
             m_spacing(0),
             m_indent(0),
-            m_margin(5)
+            m_margin(5),
+            m_wnd_is_labeled_control(wnd_is_labeled_control)
             { Init(params, position); }
 
         MakeWndResult(const adobe::dictionary_t& params,
@@ -299,14 +301,16 @@ namespace {
                       adobe::name_t horizontal,
                       adobe::name_t vertical,
                       adobe::name_t child_horizontal,
-                      adobe::name_t child_vertical) :
+                      adobe::name_t child_vertical,
+                      bool wnd_is_labeled_control) :
             m_horizontal(horizontal),
             m_vertical(vertical),
             m_child_horizontal(child_horizontal),
             m_child_vertical(child_vertical),
             m_spacing(0),
             m_indent(0),
-            m_margin(5)
+            m_margin(5),
+            m_wnd_is_labeled_control(wnd_is_labeled_control)
             { Init(params, position); }
 
         void Init(const adobe::dictionary_t& params,
@@ -354,6 +358,7 @@ namespace {
         int m_indent;
         int m_margin;
         std::auto_ptr<Wnd> m_wnd;
+        bool m_wnd_is_labeled_control;
     };
 
     Flags<Alignment> AlignmentsImpl(adobe::name_t horizontal, adobe::name_t vertical)
@@ -439,7 +444,7 @@ namespace {
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         retval->m_wnd.reset(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
 
@@ -471,7 +476,7 @@ namespace {
         // skipping items
         // skipping modifiers
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         std::auto_ptr<Button> button(
             Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
@@ -505,7 +510,8 @@ namespace {
                                                               key_align_left,
                                                               key_align_center,
                                                               key_align_center,
-                                                              key_align_center));
+                                                              key_align_center,
+                                                              false));
 
         std::auto_ptr<StateButton> checkbox(
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
@@ -537,7 +543,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
@@ -584,7 +590,7 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
@@ -622,7 +628,7 @@ namespace {
         // skipping max_characters
         // skipping monospaced
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
@@ -648,7 +654,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
         retval->m_wnd.reset(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
@@ -674,7 +680,7 @@ namespace {
         // skipping popup_bind
         // skipping popup_placement
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
@@ -745,7 +751,8 @@ namespace {
                                                               key_align_left,
                                                               key_align_center,
                                                               key_align_center,
-                                                              key_align_center));
+                                                              key_align_center,
+                                                              false));
 
         std::auto_ptr<StateButton> radio_button(
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE,
@@ -772,7 +779,7 @@ namespace {
             );
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
         retval->m_wnd.reset(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
@@ -796,7 +803,7 @@ namespace {
 
         // skipping slider_point
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         double min = 1;
         double max = 100;
@@ -837,7 +844,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         retval->m_wnd.reset(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
@@ -857,7 +864,7 @@ namespace {
         get_value(params, adobe::key_characters, characters);
         get_value(params, adobe::key_wrap, wrap);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         X w = static_cast<int>(characters) * CharWidth();
         Flags<TextFormat> format = wrap ? FORMAT_WORDBREAK : FORMAT_NONE;
@@ -874,7 +881,7 @@ namespace {
     {
         // TODO
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         return retval.release();
     }
@@ -899,7 +906,7 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
@@ -944,7 +951,7 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
@@ -982,7 +989,7 @@ namespace {
                                         position);
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         retval->m_wnd.reset(new Overlay);
 
@@ -1009,7 +1016,7 @@ namespace {
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         retval->m_wnd.reset(new Panel(orientation, name));
 
@@ -1033,7 +1040,7 @@ namespace {
             }
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         retval->m_wnd.reset(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
 
@@ -1346,13 +1353,69 @@ struct EveLayout::Impl
 
     void AddChildrenToVerticalLayout(Layout& layout, boost::ptr_vector<MakeWndResult>& children)
     {
+        std::size_t max_columns = 0;
+        std::vector<X> max_single_column_widths(2, X0);
         X max_all_columns_width = X0;
+        std::vector<Layout*> children_as_labeled_control_layouts(children.size());
+        for (std::size_t i = 0; i < children.size(); ++i) {
+            Layout* l = 0;
+            if (children[i].m_wnd_is_labeled_control &&
+                (l = boost::polymorphic_downcast<Layout*>(children[i].m_wnd.get()))) {
+                assert(l->Rows() == 1u);
+                assert(l->Columns() == 2u);
+                max_columns = 2;
+                max_single_column_widths[0] =
+                    std::max(max_single_column_widths[0], l->Cells()[0][0]->MinUsableSize().x);
+                max_single_column_widths[1] =
+                    std::max(max_single_column_widths[1], l->Cells()[0][1]->MinUsableSize().x);
+            } else {
+                max_all_columns_width = std::max(max_all_columns_width, children[i].m_wnd->MinUsableSize().x);
+            }
+            children_as_labeled_control_layouts[i] = l;
+        }
+        max_single_column_widths.resize(max_columns);
+
         for (std::size_t i = 0; i < children.size(); ++i) {
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
             layout.SetMinimumRowHeight(i, min_usable_size.y);
             layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(children[i]));
         }
+
+        X_d summed_single_column_widths =
+            1.0 * std::accumulate(max_single_column_widths.begin(), max_single_column_widths.end(), X0);
+        bool all_columns_width_larger = max_all_columns_width > summed_single_column_widths;
+        X_d difference = max_all_columns_width - summed_single_column_widths;
+
+        X_d stretch_0 =
+            summed_single_column_widths ?
+            max_single_column_widths[0] / summed_single_column_widths :
+            X_d(0.0);
+        X_d min_width_0 = 1.0 * max_single_column_widths[0];
+        if (all_columns_width_larger)
+            min_width_0 += difference * stretch_0;
+
+        X_d stretch_1;
+        X_d min_width_1;
+        if (1u < max_columns) {
+            stretch_1 =
+                summed_single_column_widths ?
+                max_single_column_widths[1] / summed_single_column_widths :
+                X_d(0.0);
+            X_d min_width_1 = 1.0 * max_single_column_widths[1];
+            if (all_columns_width_larger)
+                min_width_1 += difference * stretch_1;
+        }
+
+        for (std::size_t i = 0; i < children_as_labeled_control_layouts.size(); ++i) {
+            if (Layout* l = children_as_labeled_control_layouts[i]) {
+                l->SetColumnStretch(0, Value(stretch_0));
+                l->SetMinimumColumnWidth(0, X(std::ceil(Value(min_width_0))));
+                l->SetColumnStretch(1, Value(stretch_1));
+                l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
+            }
+        }
+
         layout.SetMinimumColumnWidth(0, max_all_columns_width);
     }
 

@@ -185,16 +185,15 @@ namespace {
 
         void Add(Wnd* wnd)
             {
+                // TODO: Propagate alignments and spacing here
                 if (Layout* layout = GetLayout()) {
                     layout->Add(wnd,
                                 m_orientation == VERTICAL ? layout->Rows() : 0,
                                 m_orientation == VERTICAL ? 0 : layout->Columns());
                 } else {
-                    AttachChild(wnd);
-                    if (m_orientation == VERTICAL)
-                        VerticalLayout();
-                    else
-                        HorizontalLayout();
+                    Layout* layout = new Layout(X0, Y0, X1, Y1, 1, 1);
+                    layout->Add(wnd, 0, 0);
+                    SetLayout(layout);
                 }
             }
 

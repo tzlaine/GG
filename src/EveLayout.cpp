@@ -185,19 +185,6 @@ namespace {
         std::string m_name;
     };
 
-    struct Overlay :
-        public Wnd
-    {
-        Overlay() :
-            Wnd(X0, Y0, X1, Y1, Flags<WndFlag>())
-            {}
-
-        void AddPanel(Panel* panel)
-            { AttachChild(panel); }
-
-        // TODO
-    };
-
     // TODO: Put this into StyleFactory.
     struct Dialog :
         public Wnd
@@ -1036,7 +1023,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
-        retval->m_wnd.reset(new Overlay);
+        retval->m_wnd.reset(new OverlayWnd(X0, Y0, X1, Y1));
 
         return retval.release();
     }
@@ -1526,15 +1513,13 @@ struct EveLayout::Impl
                 tab_wnd->AddWnd(panel, panel->Name());
             }
         } else if (wnd_view_params.m_name == name_overlay) {
-            Overlay* overlay = boost::polymorphic_downcast<Overlay*>(wnd);
+            OverlayWnd* overlay = boost::polymorphic_downcast<OverlayWnd*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
-                Panel* panel = dynamic_cast<Panel*>(children[i].m_wnd.get());
-                if (!panel) {
+                if (!dynamic_cast<Panel*>(children[i].m_wnd.get())) {
                     throw stream_error_t("non-panels are not compatible with overlay",
                                          wnd_view_params.m_position);
                 }
-                children[i].m_wnd.release();
-                overlay->AddPanel(panel);
+                overlay->AddWnd(children[i].m_wnd.release());
             }
         } else if (wnd_view_params.m_name == name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);

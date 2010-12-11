@@ -174,32 +174,14 @@ namespace {
     struct Panel :
         public Wnd
     {
-        Panel(Orientation orientation, const std::string& name) :
+        Panel(const std::string& name) :
             Wnd(X0, Y0, X1, Y1, Flags<WndFlag>()),
-            m_orientation(orientation),
             m_name(name)
             {}
 
         const std::string& Name() const
             { return m_name; }
 
-        void Add(Wnd* wnd)
-            {
-                // TODO: Propagate alignments and spacing here
-                if (Layout* layout = GetLayout()) {
-                    layout->Add(wnd,
-                                m_orientation == VERTICAL ? layout->Rows() : 0,
-                                m_orientation == VERTICAL ? 0 : layout->Columns());
-                } else {
-                    Layout* layout = new Layout(X0, Y0, X1, Y1, 1, 1);
-                    layout->Add(wnd, 0, 0);
-                    SetLayout(layout);
-                }
-            }
-
-        // TODO
-
-        Orientation m_orientation;
         std::string m_name;
     };
 
@@ -1064,24 +1046,17 @@ namespace {
         adobe::string_t name;
         adobe::name_t value;
         adobe::name_t bind;
-        adobe::name_t placement = key_place_column;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_value, value);
         get_value(params, adobe::key_bind, bind);
-        get_value(params, key_placement, placement);
 
         if (name.empty())
             throw adobe::stream_error_t("panel requires a name parameter", position);
 
-        if (placement == key_place_overlay)
-            throw adobe::stream_error_t("place_overlay placement is not compatible with panel", position);
-
-        Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
-
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
-        retval->m_wnd.reset(new Panel(orientation, name));
+        retval->m_wnd.reset(new Panel(name));
 
         return retval.release();
     }
@@ -1505,9 +1480,10 @@ struct EveLayout::Impl
         std::cout << "])\n";
 #endif
 
-        if (wnd_view_params.m_name == name_dialog) {
+        if (wnd_view_params.m_name == name_dialog || wnd_view_params.m_name == name_panel) {
             if (placement == key_place_overlay) {
-                throw stream_error_t("place_overlay placement is not compatible with dialog",
+                std::string name = wnd_view_params.m_name.c_str();
+                throw stream_error_t("place_overlay placement is not compatible with " + name,
                                      wnd_view_params.m_position);
             }
             Orientation orientation = (placement == key_place_row) ? HORIZONTAL : VERTICAL;
@@ -1559,11 +1535,6 @@ struct EveLayout::Impl
                 }
                 children[i].m_wnd.release();
                 overlay->AddPanel(panel);
-            }
-        } else if (wnd_view_params.m_name == name_panel) {
-            Panel* panel = boost::polymorphic_downcast<Panel*>(wnd);
-            for (std::size_t i = 0; i < children.size(); ++i) {
-                panel->Add(children[i].m_wnd.release());
             }
         } else if (wnd_view_params.m_name == name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);

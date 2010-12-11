@@ -613,7 +613,8 @@ namespace {
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
         std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
-        edit->SetMinSize(Pt(X(30), edit->MinSize().y));
+        edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
+        edit->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), edit->Height()));
         layout->Add(edit.release(), 0, 1);
 
         retval->m_wnd = layout;
@@ -627,7 +628,7 @@ namespace {
         adobe::string_t name;
         adobe::name_t bind;
         adobe::string_t alt;
-        std::size_t characters;
+        std::size_t characters = 8;
         std::size_t lines;
         bool scrollable;
 
@@ -656,7 +657,10 @@ namespace {
         label->SetMinSize(Pt(label->Width(), label->MinSize().y));
         layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
 
-        layout->Add(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY), 0, 1);
+        std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
+        edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
+        edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(), edit->Height()));
+        layout->Add(edit.release(), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -673,6 +677,7 @@ namespace {
 
         // TODO bind_view ?
         // TODO bind_controller ?
+        // TODO: grow
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
@@ -930,11 +935,13 @@ namespace {
         adobe::string_t name;
         adobe::name_t bind;
         adobe::string_t alt;
+        std::size_t digits = 5;
         adobe::dictionary_t format;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_bind, bind);
         get_value(params, adobe::key_alt_text, alt);
+        get_value(params, adobe::key_digits, digits);
         get_value(params, adobe::key_format, format);
 
         // TODO bind_view ?
@@ -965,8 +972,13 @@ namespace {
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
-        layout->Add(Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
-                    0, 1);
+
+        std::auto_ptr<Spin<int> > spin(
+            Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
+        );
+        spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
+        spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
+        layout->Add(spin.release(), 0, 1);
 
         retval->m_wnd = layout;
 
@@ -979,11 +991,13 @@ namespace {
         adobe::string_t name;
         adobe::name_t bind;
         adobe::string_t alt;
+        std::size_t digits = 5;
         adobe::dictionary_t format;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_bind, bind);
         get_value(params, adobe::key_alt_text, alt);
+        get_value(params, adobe::key_digits, digits);
         get_value(params, adobe::key_format, format);
 
         // TODO bind_view ?
@@ -1014,10 +1028,12 @@ namespace {
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
         get_value(format, key_allow_edits, allow_edits);
-        layout->Add(
-            Factory().NewDoubleSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY),
-            0, 1
+        std::auto_ptr<Spin<int> > spin(
+            Factory().NewIntSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
         );
+        spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
+        spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
+        layout->Add(spin.release(), 0, 1);
 
         retval->m_wnd = layout;
 

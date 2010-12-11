@@ -37,6 +37,89 @@ namespace GG {
 class TabBar;
 class WndEvent;
 
+/** \brief Contains several Wnds, and only displays the Wnd currently
+    specified. */
+class GG_API OverlayWnd : public Wnd
+{
+public:
+    /** \name Signal Types */ ///@{
+    /** Emitted when the currently-selected Wnd has changed; the new selected
+        Wnd's index in the group is provided (this may be NO_WND if no Wnd is
+        currently selected). */
+    typedef boost::signal<void (std::size_t)> WndChangedSignalType;
+    //@}
+
+    /** \name Structors */ ///@{
+    /** Basic ctor. */
+    OverlayWnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = Flags<WndFlag>());
+    ~OverlayWnd();
+    //@}
+
+    /** \name Accessors */ ///@{
+    virtual Pt MinUsableSize() const;
+
+    /** Returns true iff NumWnds() == 0. */
+    bool Empty() const;
+
+    /** Returns the number of Wnds currently in this OverlayWnd. */
+    std::size_t NumWnds() const;
+
+    /** Returns the Wnd currently visible in the OverlayWnd, or 0 if there is none. */
+    Wnd* CurrentWnd() const;
+
+    /** Returns the index into the sequence of Wnds in this OverlayWnd of the Wnd
+        currently shown.  NO_WND is returned if there is no Wnd currently
+        visible. */
+    std::size_t  CurrentWndIndex() const;
+
+    /** Returns the set of Wnds currently controlled by this OverlayWnd. */
+    const std::vector<Wnd*>& Wnds() const;
+    //@}
+
+    /** \name Mutators */ ///@{
+    /** Adds \a wnd to the sequence of Wnds in this OverlayWnd, with name \a name.
+        \a name can be used later to remove the Wnd (\a name is not checked
+        for uniqueness).  Returns the index at which \a wnd is placed. */
+    std::size_t AddWnd(Wnd* wnd);
+
+    /** Adds \a wnd to the sequence of Wnds in this OverlayWnd, inserting it at
+        the \a index location within the sequence.  \a name can be used later
+        to remove the Wnd (\a name is not checked for uniqueness).  Not range
+        checked. */
+    void InsertWnd(std::size_t index, Wnd* wnd);
+
+    /** Removes and returns the Wnd at index \a index from the sequence of
+        Wnds in this OverlayWnd, or 0 if there is no Wnd at that index. */
+    Wnd* RemoveWnd(std::size_t index);
+
+    /** Removes and returns \a wnd from the sequence of Wnds in this
+        OverlayWnd, or 0 if there is no such Wnd in this OverlayWnd. */
+    Wnd* RemoveWnd(Wnd* wnd);
+
+    /** Sets the currently visible Wnd in the sequence to the Wnd in the \a
+        index position within the sequence.  Not range checked. */
+    void SetCurrentWnd(std::size_t index);
+    //@}
+
+    /** The invalid Wnd position index that there is no currently-selected
+        Wnd. */
+    static const std::size_t NO_WND;
+
+protected:
+    /** \name Structors */ ///@{
+    OverlayWnd(); ///< default ctor
+    //@}
+
+private:
+    std::vector<Wnd*> m_wnds;
+    std::size_t       m_current_wnd_index;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version);
+};
+
+
 /** \brief Contains several Wnds and a TabBar, and only displays the Wnd
     currently selected in the TabBar. */
 class GG_API TabWnd : public Wnd
@@ -53,7 +136,6 @@ public:
     /** Basic ctor. */
     TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
            TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = INTERACTIVE);
-    ~TabWnd();
     //@}
 
     /** \name Accessors */ ///@{
@@ -75,8 +157,6 @@ public:
     //@}
 
     /** \name Mutators */ ///@{
-    virtual void Render();
-
     /** Adds \a wnd to the sequence of Wnds in this TabWnd, with name \a name.
         \a name can be used later to remove the Wnd (\a name is not checked
         for uniqueness).  Returns the index at which \a wnd is placed. */
@@ -89,7 +169,8 @@ public:
     void InsertWnd(std::size_t index, Wnd* wnd, const std::string& name);
 
     /** Removes and returns the first Wnd previously added witht he name \a
-        name from the sequence of Wnds in this TabWnd. */
+        name from the sequence of Wnds in this TabWnd, or 0 if no such Wnd is
+        found. */
     Wnd* RemoveWnd(const std::string& name);
 
     /** Sets the currently visible Wnd in the sequence to the Wnd in the \a
@@ -97,7 +178,7 @@ public:
     void SetCurrentWnd(std::size_t index);
     //@}
 
-    mutable WndChangedSignalType WndChangedSignal; ///< The Wnd change signal object for this Button
+    mutable WndChangedSignalType WndChangedSignal; ///< The Wnd change signal object for this TabWnd
 
     /** The invalid Wnd position index that there is no currently-selected
         Wnd. */
@@ -109,16 +190,23 @@ protected:
     //@}
 
     /** \name Accessors */ ///@{
-    const TabBar*                                     GetTabBar() const;
-    const std::vector<std::pair<Wnd*, std::string> >& Wnds() const;
+    /** Returns the TabBar at the top of this TabWnd. */
+    const TabBar* GetTabBar() const;
+
+    /** Returns the OverlayWnd in this TabWnd. */
+    const OverlayWnd* GetOverlayWnd() const;
+
+    /** Returns the set of Wnds currently controlled by this TabWnd, indexed
+        by name. */
+    const std::map<std::string, Wnd*>& WndNames() const;
     //@}
 
 private:
     void TabChanged(std::size_t tab_index, bool signal);
 
-    TabBar*                                    m_tab_bar;
-    std::vector<std::pair<Wnd*, std::string> > m_wnds;
-    Wnd*                                       m_current_wnd;
+    TabBar*                     m_tab_bar;
+    OverlayWnd*                 m_overlay;
+    std::map<std::string, Wnd*> m_named_wnds;
 
     friend class boost::serialization::access;
     template <class Archive>
@@ -189,7 +277,7 @@ public:
     void SetCurrentTab(std::size_t index);
     //@}
 
-    mutable TabChangedSignalType TabChangedSignal; ///< The tab change signal object for this Button
+    mutable TabChangedSignalType TabChangedSignal; ///< The tab change signal object for this TabBar
 
     /** The invalid tab position index that there is no currently-selected
         tab. */
@@ -244,12 +332,20 @@ private:
 
 // template implementations
 template <class Archive>
+void GG::OverlayWnd::serialize(Archive& ar, const unsigned int version)
+{
+    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
+        & BOOST_SERIALIZATION_NVP(m_wnds)
+        & BOOST_SERIALIZATION_NVP(m_current_wnd_index);
+}
+
+template <class Archive>
 void GG::TabWnd::serialize(Archive& ar, const unsigned int version)
 {
     ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
         & BOOST_SERIALIZATION_NVP(m_tab_bar)
-        & BOOST_SERIALIZATION_NVP(m_wnds)
-        & BOOST_SERIALIZATION_NVP(m_current_wnd);
+        & BOOST_SERIALIZATION_NVP(m_overlay)
+        & BOOST_SERIALIZATION_NVP(m_named_wnds);
 }
 
 template <class Archive>

@@ -46,33 +46,129 @@ namespace {
 }
 
 ////////////////////////////////////////////////
-// GG::TabWnd
+// GG::OverlayWnd
 ////////////////////////////////////////////////
 // static(s)
-const std::size_t TabWnd::NO_WND = RadioButtonGroup::NO_BUTTON;
+const std::size_t OverlayWnd::NO_WND = std::numeric_limits<std::size_t>::max();
 
-TabWnd::TabWnd() :
-    m_tab_bar(0),
-    m_current_wnd(0)
+OverlayWnd::OverlayWnd() :
+    m_current_wnd_index(NO_WND)
 {}
 
-TabWnd::~TabWnd()
+OverlayWnd::OverlayWnd(X x, Y y, X w, Y h, Flags<WndFlag> flags) :
+    Wnd(x, y, w, h, flags),
+    m_current_wnd_index(NO_WND)
+{ SetLayout(new Layout(X0, Y0, w, h, 1, 1)); }
+
+OverlayWnd::~OverlayWnd()
 {
     for (std::size_t i = 0; i < m_wnds.size(); ++i) {
-        delete m_wnds[i].first;
+        delete m_wnds[i];
     }
 }
 
+Pt OverlayWnd::MinUsableSize() const
+{
+    Pt retval;
+    for (std::size_t i = 0; i < m_wnds.size(); ++i) {
+        Pt min_usable_size = m_wnds[i]->MinUsableSize();
+        retval.x = std::max(retval.x, min_usable_size.x);
+        retval.y = std::max(retval.y, min_usable_size.y);
+    }
+    return retval;
+}
+
+bool OverlayWnd::Empty() const
+{ return m_wnds.empty(); }
+
+std::size_t OverlayWnd::NumWnds() const
+{ return m_wnds.size(); }
+
+Wnd* OverlayWnd::CurrentWnd() const
+{ return m_current_wnd_index == NO_WND ? 0 : m_wnds[m_current_wnd_index]; }
+
+std::size_t OverlayWnd::CurrentWndIndex() const
+{ return m_current_wnd_index; }
+
+const std::vector<Wnd*>& OverlayWnd::Wnds() const
+{ return m_wnds; }
+
+std::size_t OverlayWnd::AddWnd(Wnd* wnd)
+{
+    std::size_t retval = m_wnds.size();
+    InsertWnd(m_wnds.size(), wnd);
+    return retval;
+}
+
+void OverlayWnd::InsertWnd(std::size_t index, Wnd* wnd)
+{
+    m_wnds.insert(m_wnds.begin() + index, wnd);
+    if (m_current_wnd_index == NO_WND)
+        SetCurrentWnd(0);
+}
+
+Wnd* OverlayWnd::RemoveWnd(std::size_t index)
+{
+    Wnd* retval = 0;
+    if (index < m_wnds.size()) {
+        std::vector<Wnd*>::iterator it = m_wnds.begin() + index;
+        retval = *it;
+        m_wnds.erase(it);
+        if (index == m_current_wnd_index)
+            m_current_wnd_index = NO_WND;
+    }
+    return retval;
+}
+
+Wnd* OverlayWnd::RemoveWnd(Wnd* wnd)
+{
+    Wnd* retval = 0;
+    std::vector<Wnd*>::iterator it = std::find(m_wnds.begin(), m_wnds.end(), wnd);
+    if (it != m_wnds.end()) {
+        if (it - m_wnds.begin() == m_current_wnd_index)
+            m_current_wnd_index = NO_WND;
+        retval = *it;
+        m_wnds.erase(it);
+    }
+    return retval;
+}
+
+void OverlayWnd::SetCurrentWnd(std::size_t index)
+{
+    assert(index < m_wnds.size());
+    Wnd* old_current_wnd = CurrentWnd();
+    m_current_wnd_index = index;
+    Wnd* current_wnd = CurrentWnd();
+    if (current_wnd != old_current_wnd) {
+        Layout* layout = GetLayout();
+        layout->Remove(old_current_wnd);
+        layout->Add(current_wnd, 0, 0);
+    }
+}
+
+
+////////////////////////////////////////////////
+// GG::TabWnd
+////////////////////////////////////////////////
+// static(s)
+const std::size_t TabWnd::NO_WND = std::numeric_limits<std::size_t>::max();
+
+TabWnd::TabWnd() :
+    m_tab_bar(0),
+    m_overlay(0)
+{}
+
 TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr color,
                Clr text_color/* = CLR_BLACK*/, TabBarStyle style/* = TAB_BAR_ATTACHED*/,
-               Flags<WndFlag> flags/* = INTERACTIVE | DRAGABLE*/) :
+               Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Wnd(x, y, w, h, flags),
     m_tab_bar(GetStyleFactory()->NewTabBar(X0, Y0, w, font, color, text_color, style, INTERACTIVE)),
-    m_current_wnd(0)
+    m_overlay(new OverlayWnd(X0, Y0, X1, Y1))
 {
     Layout* layout = new Layout(X0, Y0, w, h, 2, 1);
     layout->SetRowStretch(1, 1.0);
     layout->Add(m_tab_bar, 0, 0);
+    layout->Add(m_overlay, 1, 0);
     SetLayout(layout);
     Connect(m_tab_bar->TabChangedSignal, boost::bind(&TabWnd::TabChanged, this, _1, true));
 
@@ -83,7 +179,9 @@ TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr colo
 Pt TabWnd::MinUsableSize() const
 {
     Pt retval = m_tab_bar->MinUsableSize();
-    retval.y *= 2;
+    Pt min_usable_size = m_overlay->MinUsableSize();
+    retval.x = std::max(retval.x, min_usable_size.x);
+    retval.y += min_usable_size.y;
     return retval;
 }
 
@@ -94,25 +192,23 @@ std::size_t TabWnd::NumWnds() const
 { return m_tab_bar->NumTabs(); }
 
 Wnd* TabWnd::CurrentWnd() const
-{ return m_current_wnd; }
+{ return m_overlay->CurrentWnd(); }
 
 std::size_t TabWnd::CurrentWndIndex() const
 { return m_tab_bar->CurrentTabIndex(); }
 
-void TabWnd::Render()
-{}
-
 std::size_t TabWnd::AddWnd(Wnd* wnd, const std::string& name)
 {
-    std::size_t retval = m_wnds.size();
-    InsertWnd(m_wnds.size(), wnd, name);
+    std::size_t retval = m_named_wnds.size();
+    InsertWnd(m_named_wnds.size(), wnd, name);
     return retval;
 }
 
 void TabWnd::InsertWnd(std::size_t index, Wnd* wnd, const std::string& name)
 {
     std::size_t old_tab = m_tab_bar->CurrentTabIndex();
-    m_wnds.insert(m_wnds.begin() + index, std::make_pair(wnd, name));
+    m_named_wnds[name] = wnd;
+    m_overlay->InsertWnd(index, wnd);
     m_tab_bar->InsertTab(index, name);
     GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize().y + 2 * 5);
     if (m_tab_bar->CurrentTabIndex() != old_tab)
@@ -121,28 +217,21 @@ void TabWnd::InsertWnd(std::size_t index, Wnd* wnd, const std::string& name)
 
 Wnd* TabWnd::RemoveWnd(const std::string& name)
 {
-    Wnd* retval = 0;
-    std::size_t old_tab = m_tab_bar->CurrentTabIndex();
-    std::size_t index = NO_WND;
-    for (std::size_t i = 0; i < m_wnds.size(); ++i) {
-        if (m_wnds[i].second == name) {
-            index = i;
-            break;
-        }
-    }
-    if (index != NO_WND) {
-        retval = m_wnds[index].first;
-        m_wnds.erase(m_wnds.begin() + index);
+    std::size_t old_tab_index = m_tab_bar->CurrentTabIndex();
+    Wnd* retval = m_overlay->RemoveWnd(m_named_wnds[name]);
+    if (retval) {
+        m_named_wnds.erase(name);
         m_tab_bar->RemoveTab(name);
         GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize().y + 2 * 5);
     }
-    if (m_tab_bar->CurrentTabIndex() != old_tab)
+    if (m_tab_bar->CurrentTabIndex() != old_tab_index)
         TabChanged(m_tab_bar->CurrentTabIndex(), false);
     return retval;
 }
 
 void TabWnd::SetCurrentWnd(std::size_t index)
 {
+    m_overlay->SetCurrentWnd(index);
     m_tab_bar->SetCurrentTab(index);
     TabChanged(index, false);
 }
@@ -150,19 +239,17 @@ void TabWnd::SetCurrentWnd(std::size_t index)
 const TabBar* TabWnd::GetTabBar() const
 { return m_tab_bar; }
 
-const std::vector<std::pair<Wnd*, std::string> >& TabWnd::Wnds() const
-{ return m_wnds; }
+const OverlayWnd* TabWnd::GetOverlayWnd() const
+{ return m_overlay; }
+
+const std::map<std::string, Wnd*>& TabWnd::WndNames() const
+{ return m_named_wnds; }
 
 void TabWnd::TabChanged(std::size_t index, bool signal)
 {
-    assert(index < m_wnds.size());
-    Wnd* old_current_wnd = m_current_wnd;
-    m_current_wnd = m_wnds[index].first;
-    if (m_current_wnd != old_current_wnd) {
-        Layout* layout = GetLayout();
-        layout->Remove(old_current_wnd);
-        layout->Add(m_current_wnd, 1, 0);
-    }
+    assert(index < m_named_wnds.size());
+    Wnd* old_current_wnd = m_overlay->CurrentWnd();
+    m_overlay->SetCurrentWnd(index);
     if (signal)
         WndChangedSignal(index);
 }

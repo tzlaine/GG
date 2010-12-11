@@ -1038,9 +1038,6 @@ namespace {
         get_value(params, adobe::key_value, value);
         get_value(params, adobe::key_bind, bind);
 
-        if (name.empty())
-            throw adobe::stream_error_t("panel requires a name parameter", position);
-
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
 
         retval->m_wnd.reset(new Panel(name));
@@ -1507,6 +1504,10 @@ struct EveLayout::Impl
                 Panel* panel = dynamic_cast<Panel*>(children[i].m_wnd.get());
                 if (!panel) {
                     throw stream_error_t("non-panels are not compatible with tab_group",
+                                         wnd_view_params.m_position);
+                }
+                if (panel->Name().empty()) {
+                    throw stream_error_t("a panel used in tab_group requires a name parameter",
                                          wnd_view_params.m_position);
                 }
                 children[i].m_wnd.release();

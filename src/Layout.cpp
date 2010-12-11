@@ -106,7 +106,10 @@ Layout::Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns,
     m_ignore_parent_resize(false),
     m_render_outline(false),
     m_outline_color(CLR_MAGENTA)
-{}
+{
+    assert(rows);
+    assert(columns);
+}
 
 Pt Layout::MinUsableSize() const
 { return m_min_usable_size; }

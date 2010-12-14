@@ -657,7 +657,9 @@ namespace {
                                                               false));
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
-        retval->m_wnd.reset(Factory().NewStaticGraphic(X0, Y0, X1, Y1, texture));
+        retval->m_wnd.reset(Factory().NewStaticGraphic(X0, Y0,
+                                                       texture->DefaultWidth(), texture->DefaultHeight(),
+                                                       texture));
 
         return retval.release();
     }

@@ -154,9 +154,6 @@ Rect StaticGraphic::RenderedArea() const
     return Rect(pt1, pt2);
 }
 
-Pt StaticGraphic::MinUsableSize() const
-{ return Pt(m_graphic.Width(), m_graphic.Height()); }
-
 void StaticGraphic::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();

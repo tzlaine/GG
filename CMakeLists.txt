@@ -10,7 +10,7 @@ set(CMAKE_VERBOSE_MAKEFILE false)
 ########################################
 # Configuration                        #
 ########################################
-set(GIGI_VERSION 0.6.0)
+set(GIGI_VERSION 0.8.0)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 include(Config)

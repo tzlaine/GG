@@ -562,7 +562,7 @@ namespace {
         text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
         text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
 
-        if (name.c_str()) {
+        if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
@@ -615,7 +615,7 @@ namespace {
         edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
         edit->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), edit->Height()));
 
-        if (name.c_str()) {
+        if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
@@ -664,7 +664,7 @@ namespace {
         edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
         edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(), edit->Height()));
 
-        if (name.c_str()) {
+        if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
@@ -767,7 +767,7 @@ namespace {
             drop_down_list->Insert(rows.release(rows.begin()).release());
         }
 
-        if (name.c_str()) {
+        if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
@@ -1003,7 +1003,7 @@ namespace {
         spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
 
-        if (name.c_str()) {
+        if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
@@ -1062,7 +1062,7 @@ namespace {
         spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
 
-        if (name.c_str()) {
+        if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
@@ -1473,7 +1473,7 @@ struct EveLayout::Impl
         for (std::size_t i = 0; i < children.size(); ++i) {
             Layout* l = 0;
             if (children[i].m_labeled_status == LABELED_CONTROL &&
-                (l = boost::polymorphic_downcast<Layout*>(children[i].m_wnd.get()))) {
+                (l = dynamic_cast<Layout*>(children[i].m_wnd.get()))) {
                 assert(l->Rows() == 1u);
                 assert(l->Columns() == 2u);
                 max_columns = 2;

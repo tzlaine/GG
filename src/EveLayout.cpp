@@ -564,17 +564,13 @@ namespace {
 
         if (name.c_str()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
-
             std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
             label->SetMinSize(Pt(label->Width(), label->MinSize().y));
             layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
-
             layout->Add(text_control.release(), 0, 1);
-
             retval->m_wnd = layout;
         } else {
             retval->m_wnd = text_control;
@@ -621,17 +617,13 @@ namespace {
 
         if (name.c_str()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
-
             std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
             label->SetMinSize(Pt(label->Width(), label->MinSize().y));
             layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
-
             layout->Add(edit.release(), 0, 1);
-
             retval->m_wnd = layout;
         } else {
             retval->m_wnd = edit;
@@ -674,17 +666,13 @@ namespace {
 
         if (name.c_str()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
-
             std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
             label->SetMinSize(Pt(label->Width(), label->MinSize().y));
             layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
-
             layout->Add(edit.release(), 0, 1);
-
             retval->m_wnd = layout;
         } else {
             retval->m_wnd = edit;
@@ -781,17 +769,13 @@ namespace {
 
         if (name.c_str()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
-
             std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
             label->SetMinSize(Pt(label->Width(), label->MinSize().y));
             layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
-
             layout->Add(drop_down_list.release(), 0, 1);
-
             retval->m_wnd = layout;
         } else {
             retval->m_wnd = drop_down_list;
@@ -1021,17 +1005,13 @@ namespace {
 
         if (name.c_str()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
-
             std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
             label->SetMinSize(Pt(label->Width(), label->MinSize().y));
             layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
-
             layout->Add(spin.release(), 0, 1);
-
             retval->m_wnd = layout;
         } else {
             retval->m_wnd = spin;
@@ -1084,17 +1064,13 @@ namespace {
 
         if (name.c_str()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
-
             std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
             label->SetMinSize(Pt(label->Width(), label->MinSize().y));
             layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
-
             layout->Add(spin.release(), 0, 1);
-
             retval->m_wnd = layout;
         } else {
             retval->m_wnd = spin;

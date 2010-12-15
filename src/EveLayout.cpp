@@ -1581,7 +1581,7 @@ struct EveLayout::Impl
 
             assert(children.empty() || IsContainer(view_params.m_name));
 
-            adobe::name_t placement;
+            adobe::name_t placement = key_place_row;
             get_value(parameters, key_placement, placement);
 
             if (!children.empty())

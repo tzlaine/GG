@@ -1132,7 +1132,26 @@ namespace {
             }
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
+        std::auto_ptr<MakeWndResult> retval;
+        if (placement == key_place_column) {
+            retval.reset(new MakeWndResult(params,
+                                           position,
+                                           adobe::name_t(),
+                                           adobe::name_t(),
+                                           adobe::name_t(),
+                                           key_align_top,
+                                           UNLABELED_CONTROL,
+                                           CONTAINER));
+        } else {
+            retval.reset(new MakeWndResult(params,
+                                           position,
+                                           adobe::name_t(),
+                                           adobe::name_t(),
+                                           key_align_left,
+                                           adobe::name_t(),
+                                           UNLABELED_CONTROL,
+                                           CONTAINER));
+        }
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
 
@@ -1579,11 +1598,15 @@ struct EveLayout::Impl
 #endif
 
             if (orientation == VERTICAL) {
+                if (wnd_view_params.m_name == name_dialog && !wnd_.m_child_horizontal)
+                    wnd_.m_child_horizontal = key_align_left;
                 AddChildrenToVerticalLayout(*layout,
                                             children,
                                             wnd_.m_child_horizontal,
                                             wnd_.m_child_vertical);
             } else {
+                if (wnd_view_params.m_name == name_dialog && !wnd_.m_child_vertical)
+                    wnd_.m_child_vertical = key_align_top;
                 AddChildrenToHorizontalLayout(*layout,
                                               children,
                                               wnd_.m_child_horizontal,

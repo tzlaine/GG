@@ -361,7 +361,7 @@ namespace {
         ContainerStatus m_container_status;
     };
 
-    Flags<Alignment> AlignmentsImpl(adobe::name_t horizontal, adobe::name_t vertical)
+    Flags<Alignment> Alignments(adobe::name_t horizontal, adobe::name_t vertical)
     {
         Flags<Alignment> retval;
 
@@ -385,10 +385,10 @@ namespace {
     }
 
     Flags<Alignment> Alignments(const MakeWndResult& mwr)
-    { return AlignmentsImpl(mwr.m_horizontal, mwr.m_vertical); }
+    { return Alignments(mwr.m_horizontal, mwr.m_vertical); }
 
     Flags<Alignment> ChildAlignments(const MakeWndResult& mwr)
-    { return AlignmentsImpl(mwr.m_child_horizontal, mwr.m_child_vertical); }
+    { return Alignments(mwr.m_child_horizontal, mwr.m_child_vertical); }
 
 #if INSTRUMENT_CREATED_LAYOUT
     std::string WndTypeStr(Wnd* w)
@@ -1436,19 +1436,35 @@ struct EveLayout::Impl
         std::vector<NestedViews> m_children;
     };
 
-    void AddChildrenToHorizontalLayout(Layout& layout, boost::ptr_vector<MakeWndResult>& children)
+    void AddChildrenToHorizontalLayout(Layout& layout,
+                                       boost::ptr_vector<MakeWndResult>& children,
+                                       adobe::name_t child_horizontal,
+                                       adobe::name_t child_vertical)
     {
         Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
-            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, Alignments(children[i]));
+
+            Flags<Alignment> alignment = Alignments(children[i]);
+            if (child_horizontal) {
+                alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
+                alignment |= Alignments(child_horizontal, adobe::name_t());
+            }
+            if (child_vertical) {
+                alignment &= ~(ALIGN_TOP | ALIGN_VCENTER | ALIGN_BOTTOM);
+                alignment |= Alignments(adobe::name_t(), child_vertical);
+            }
+            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, alignment);
         }
         layout.SetMinimumRowHeight(0, max_all_rows_height);
     }
 
-    void AddChildrenToVerticalLayout(Layout& layout, boost::ptr_vector<MakeWndResult>& children)
+    void AddChildrenToVerticalLayout(Layout& layout,
+                                     boost::ptr_vector<MakeWndResult>& children,
+                                     adobe::name_t child_horizontal,
+                                     adobe::name_t child_vertical)
     {
         std::size_t max_columns = 0;
         std::vector<X> max_single_column_widths(2, X0);
@@ -1475,7 +1491,17 @@ struct EveLayout::Impl
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
             layout.SetMinimumRowHeight(i, min_usable_size.y);
-            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(children[i]));
+
+            Flags<Alignment> alignment = Alignments(children[i]);
+            if (child_horizontal) {
+                alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
+                alignment |= Alignments(child_horizontal, adobe::name_t());
+            }
+            if (child_vertical) {
+                alignment &= ~(ALIGN_TOP | ALIGN_VCENTER | ALIGN_BOTTOM);
+                alignment |= Alignments(adobe::name_t(), child_vertical);
+            }
+            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, alignment);
         }
 
         X_d summed_single_column_widths =
@@ -1552,10 +1578,17 @@ struct EveLayout::Impl
             layout->RenderOutline(true);
 #endif
 
-            if (orientation == VERTICAL)
-                AddChildrenToVerticalLayout(*layout, children);
-            else
-                AddChildrenToHorizontalLayout(*layout, children);
+            if (orientation == VERTICAL) {
+                AddChildrenToVerticalLayout(*layout,
+                                            children,
+                                            wnd_.m_child_horizontal,
+                                            wnd_.m_child_vertical);
+            } else {
+                AddChildrenToHorizontalLayout(*layout,
+                                              children,
+                                              wnd_.m_child_horizontal,
+                                              wnd_.m_child_vertical);
+            }
             wnd->SetLayout(layout.release());
         } else if (wnd_view_params.m_name == name_radio_button_group) {
             RadioButtonGroup* radio_button_group = boost::polymorphic_downcast<RadioButtonGroup*>(wnd);
@@ -1595,11 +1628,11 @@ struct EveLayout::Impl
         } else if (wnd_view_params.m_name == name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(1, children.size());
-            AddChildrenToHorizontalLayout(*layout, children);
+            AddChildrenToHorizontalLayout(*layout, children, wnd_.m_child_horizontal, wnd_.m_child_vertical);
         } else if (wnd_view_params.m_name == name_column) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(children.size(), 1);
-            AddChildrenToVerticalLayout(*layout, children);
+            AddChildrenToVerticalLayout(*layout, children, wnd_.m_child_horizontal, wnd_.m_child_vertical);
         } else {
             throw stream_error_t("attempted to attach children to a non-container",
                                  wnd_view_params.m_position);

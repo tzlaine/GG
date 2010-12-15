@@ -250,11 +250,22 @@ namespace {
     const int Dialog::FRAME_WIDTH = 2;
     const Pt Dialog::BEVEL_OFFSET(X(Dialog::FRAME_WIDTH), Y(Dialog::FRAME_WIDTH));
 
+    enum LabeledStatus {
+        LABELED_CONTROL,
+        UNLABELED_CONTROL
+    };
+
+    enum ContainerStatus {
+        CONTAINER,
+        NONCONTAINER
+    };
+
     struct MakeWndResult
     {
         MakeWndResult(const adobe::dictionary_t& params,
                       const adobe::line_position_t& position,
-                      bool wnd_is_labeled_control) :
+                      LabeledStatus labeled_status,
+                      ContainerStatus container_status) :
             m_horizontal(),
             m_vertical(key_align_center),
             m_child_horizontal(),
@@ -262,7 +273,8 @@ namespace {
             m_spacing(0),
             m_indent(0),
             m_margin(5),
-            m_wnd_is_labeled_control(wnd_is_labeled_control)
+            m_labeled_status(labeled_status),
+            m_container_status(container_status)
             { Init(params, position); }
 
         MakeWndResult(const adobe::dictionary_t& params,
@@ -271,7 +283,8 @@ namespace {
                       adobe::name_t vertical,
                       adobe::name_t child_horizontal,
                       adobe::name_t child_vertical,
-                      bool wnd_is_labeled_control) :
+                      LabeledStatus labeled_status,
+                      ContainerStatus container_status) :
             m_horizontal(horizontal),
             m_vertical(vertical),
             m_child_horizontal(child_horizontal),
@@ -279,7 +292,8 @@ namespace {
             m_spacing(0),
             m_indent(0),
             m_margin(5),
-            m_wnd_is_labeled_control(wnd_is_labeled_control)
+            m_labeled_status(labeled_status),
+            m_container_status(container_status)
             { Init(params, position); }
 
         void Init(const adobe::dictionary_t& params,
@@ -289,13 +303,29 @@ namespace {
                 CheckAlignment(key_horizontal, m_horizontal, position);
                 get_value(params, key_vertical, m_vertical);
                 CheckAlignment(key_vertical, m_vertical, position);
-                get_value(params, key_child_horizontal, m_child_horizontal);
+                bool has_child_horz = get_value(params, key_child_horizontal, m_child_horizontal);
                 CheckAlignment(key_child_horizontal, m_child_horizontal, position);
-                get_value(params, key_child_vertical, m_child_vertical);
+                bool has_child_vert = get_value(params, key_child_vertical, m_child_vertical);
                 CheckAlignment(key_child_vertical, m_child_vertical, position);
                 get_value(params, key_spacing, m_spacing);
                 get_value(params, key_indent, m_indent);
                 get_value(params, key_margin, m_margin);
+
+                if (m_container_status == NONCONTAINER && has_child_horz) {
+                    throw adobe::stream_error_t(
+                        key_child_horizontal.name_m +
+                        std::string(" is not compatible with non-containers"),
+                        position
+                    );
+                }
+
+                if (m_container_status == NONCONTAINER && has_child_vert) {
+                    throw adobe::stream_error_t(
+                        key_child_vertical.name_m +
+                        std::string(" is not compatible with non-containers"),
+                        position
+                    );
+                }
             }
 
         void CheckAlignment(adobe::name_t key_name,
@@ -327,7 +357,8 @@ namespace {
         int m_indent;
         int m_margin;
         std::auto_ptr<Wnd> m_wnd;
-        bool m_wnd_is_labeled_control;
+        LabeledStatus m_labeled_status;
+        ContainerStatus m_container_status;
     };
 
     Flags<Alignment> AlignmentsImpl(adobe::name_t horizontal, adobe::name_t vertical)
@@ -413,7 +444,7 @@ namespace {
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
 
@@ -451,7 +482,8 @@ namespace {
                                                               key_align_center,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
-                                                              false));
+                                                              UNLABELED_CONTROL,
+                                                              NONCONTAINER));
 
         std::auto_ptr<Button> button(
             Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
@@ -486,7 +518,8 @@ namespace {
                                                               adobe::name_t(),
                                                               adobe::name_t(),
                                                               adobe::name_t(),
-                                                              false));
+                                                              UNLABELED_CONTROL,
+                                                              NONCONTAINER));
 
         std::auto_ptr<StateButton> checkbox(
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
@@ -518,26 +551,34 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
-
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
-#if SHOW_LAYOUTS
-        layout->RenderOutline(true);
-#endif
-
-        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              LABELED_CONTROL,
+                                                              NONCONTAINER));
 
         std::auto_ptr<TextControl> text_control(
             Factory().NewTextControl(X0, Y0, X1, StandardHeight(), "", DefaultFont())
         );
         text_control->SetMaxSize(Pt(text_control->MaxSize().x, text_control->Height()));
         text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
-        layout->Add(text_control.release(), 0, 1);
 
-        retval->m_wnd = layout;
+        if (name.c_str()) {
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
+            std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+            label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+            layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+
+            layout->Add(text_control.release(), 0, 1);
+
+            retval->m_wnd = layout;
+        } else {
+            retval->m_wnd = text_control;
+        }
 
         return retval.release();
     }
@@ -569,24 +610,32 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
-
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
-#if SHOW_LAYOUTS
-        layout->RenderOutline(true);
-#endif
-
-        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              LABELED_CONTROL,
+                                                              NONCONTAINER));
 
         std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
         edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
         edit->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), edit->Height()));
-        layout->Add(edit.release(), 0, 1);
 
-        retval->m_wnd = layout;
+        if (name.c_str()) {
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
+            std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+            label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+            layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+
+            layout->Add(edit.release(), 0, 1);
+
+            retval->m_wnd = layout;
+        } else {
+            retval->m_wnd = edit;
+        }
 
         return retval.release();
     }
@@ -614,24 +663,32 @@ namespace {
         // skipping max_characters
         // skipping monospaced
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
-
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
-#if SHOW_LAYOUTS
-        layout->RenderOutline(true);
-#endif
-
-        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              LABELED_CONTROL,
+                                                              NONCONTAINER));
 
         std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
         edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
         edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(), edit->Height()));
-        layout->Add(edit.release(), 0, 1);
 
-        retval->m_wnd = layout;
+        if (name.c_str()) {
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
+            std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+            label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+            layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+
+            layout->Add(edit.release(), 0, 1);
+
+            retval->m_wnd = layout;
+        } else {
+            retval->m_wnd = edit;
+        }
 
         return retval.release();
     }
@@ -654,7 +711,8 @@ namespace {
                                                               adobe::name_t(),
                                                               adobe::name_t(),
                                                               adobe::name_t(),
-                                                              false));
+                                                              UNLABELED_CONTROL,
+                                                              NONCONTAINER));
 
         boost::shared_ptr<Texture> texture = GG::GUI::GetGUI()->GetTexture(image);
         retval->m_wnd.reset(Factory().NewStaticGraphic(X0, Y0,
@@ -682,17 +740,10 @@ namespace {
         // skipping popup_bind
         // skipping popup_placement
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
-
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
-#if SHOW_LAYOUTS
-        layout->RenderOutline(true);
-#endif
-
-        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              LABELED_CONTROL,
+                                                              NONCONTAINER));
 
         const std::size_t MAX_LINES = 10;
         Y drop_height = CharHeight() * static_cast<int>(std::min(items.size(), MAX_LINES));
@@ -728,9 +779,23 @@ namespace {
             drop_down_list->Insert(rows.release(rows.begin()).release());
         }
 
-        layout->Add(drop_down_list.release(), 0, 1);
+        if (name.c_str()) {
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
 
-        retval->m_wnd = layout;
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
+            std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+            label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+            layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+
+            layout->Add(drop_down_list.release(), 0, 1);
+
+            retval->m_wnd = layout;
+        } else {
+            retval->m_wnd = drop_down_list;
+        }
 
         return retval.release();
     }
@@ -758,7 +823,8 @@ namespace {
                                                               adobe::name_t(),
                                                               adobe::name_t(),
                                                               adobe::name_t(),
-                                                              false));
+                                                              UNLABELED_CONTROL,
+                                                              CONTAINER));
 
         std::auto_ptr<StateButton> radio_button(
             Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE,
@@ -785,7 +851,10 @@ namespace {
             );
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              UNLABELED_CONTROL,
+                                                              NONCONTAINER));
 
         Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
         retval->m_wnd.reset(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
@@ -818,7 +887,8 @@ namespace {
                               orientation_ == VERTICAL ? adobe::name_t() : key_align_center,
                               adobe::name_t(),
                               adobe::name_t(),
-                              false)
+                              UNLABELED_CONTROL,
+                              NONCONTAINER)
         );
 
         double min = 1;
@@ -859,7 +929,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
@@ -879,7 +949,10 @@ namespace {
         get_value(params, adobe::key_characters, characters);
         get_value(params, adobe::key_wrap, wrap);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              UNLABELED_CONTROL,
+                                                              NONCONTAINER));
 
         X w = static_cast<int>(characters) * CharWidth();
         Flags<TextFormat> format = wrap ? FORMAT_WORDBREAK : FORMAT_NONE;
@@ -896,7 +969,10 @@ namespace {
     {
         // TODO
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              UNLABELED_CONTROL,
+                                                              NONCONTAINER));
 
         return retval.release();
     }
@@ -923,17 +999,10 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
-
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
-#if SHOW_LAYOUTS
-        layout->RenderOutline(true);
-#endif
-
-        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              LABELED_CONTROL,
+                                                              NONCONTAINER));
 
         int step = 1;
         int min = 1;
@@ -949,9 +1018,24 @@ namespace {
         );
         spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
-        layout->Add(spin.release(), 0, 1);
 
-        retval->m_wnd = layout;
+        if (name.c_str()) {
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
+            std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+            label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+            layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+
+            layout->Add(spin.release(), 0, 1);
+
+            retval->m_wnd = layout;
+        } else {
+            retval->m_wnd = spin;
+        }
 
         return retval.release();
     }
@@ -979,17 +1063,10 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, true));
-
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
-
-#if SHOW_LAYOUTS
-        layout->RenderOutline(true);
-#endif
-
-        std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
-        label->SetMinSize(Pt(label->Width(), label->MinSize().y));
-        layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              LABELED_CONTROL,
+                                                              NONCONTAINER));
 
         double step = 1.0;
         double min = 1.0;
@@ -1004,9 +1081,24 @@ namespace {
         );
         spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
-        layout->Add(spin.release(), 0, 1);
 
-        retval->m_wnd = layout;
+        if (name.c_str()) {
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+
+#if SHOW_LAYOUTS
+            layout->RenderOutline(true);
+#endif
+
+            std::auto_ptr<TextControl> label(Factory().NewTextControl(X0, Y0, name, DefaultFont()));
+            label->SetMinSize(Pt(label->Width(), label->MinSize().y));
+            layout->Add(label.release(), 0, 0, 1, 1, ALIGN_RIGHT);
+
+            layout->Add(spin.release(), 0, 1);
+
+            retval->m_wnd = layout;
+        } else {
+            retval->m_wnd = spin;
+        }
 
         return retval.release();
     }
@@ -1023,7 +1115,7 @@ namespace {
                                         position);
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new OverlayWnd(X0, Y0, X1, Y1));
 
@@ -1040,7 +1132,7 @@ namespace {
         get_value(params, adobe::key_value, value);
         get_value(params, adobe::key_bind, bind);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new Panel(name));
 
@@ -1064,7 +1156,7 @@ namespace {
             }
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, false));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
 
@@ -1388,7 +1480,7 @@ struct EveLayout::Impl
         std::vector<Layout*> children_as_labeled_control_layouts(children.size());
         for (std::size_t i = 0; i < children.size(); ++i) {
             Layout* l = 0;
-            if (children[i].m_wnd_is_labeled_control &&
+            if (children[i].m_labeled_status == LABELED_CONTROL &&
                 (l = boost::polymorphic_downcast<Layout*>(children[i].m_wnd.get()))) {
                 assert(l->Rows() == 1u);
                 assert(l->Columns() == 2u);

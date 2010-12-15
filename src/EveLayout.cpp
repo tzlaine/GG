@@ -1472,7 +1472,8 @@ struct EveLayout::Impl
         std::vector<Layout*> children_as_labeled_control_layouts(children.size());
         for (std::size_t i = 0; i < children.size(); ++i) {
             Layout* l = 0;
-            if (l = dynamic_cast<Layout*>(children[i].m_wnd.get())) {
+            if (children[i].m_labeled_status == LABELED_CONTROL &&
+                (l = dynamic_cast<Layout*>(children[i].m_wnd.get()))) {
                 assert(l->Rows() == 1u);
                 assert(l->Columns() == 2u);
                 max_columns = 2;

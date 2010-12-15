@@ -149,6 +149,7 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
     namespace phoenix = boost::phoenix;
     namespace qi = boost::spirit::qi;
     using ascii::char_;
+    using phoenix::clear;
     using phoenix::construct;
     using phoenix::if_;
     using phoenix::static_cast_;

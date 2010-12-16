@@ -115,7 +115,7 @@ public:
 
     std::size_t      Rows() const;                             ///< returns the number of rows in the layout
     std::size_t      Columns() const;                          ///< returns the number of columns in the layout
-    Flags<Alignment> ChildAlignment(Wnd* wnd) const;           ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
+    Flags<Alignment> ChildAlignment(const Wnd* wnd) const;     ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
     unsigned int     BorderMargin() const;                     ///< returns the number of pixels that the layout will leave between its edges and the windows it contains
     unsigned int     CellMargin() const;                       ///< returns the number of pixels the layout leaves between the edges of windows in adjacent cells
     double           RowStretch(std::size_t row) const;            ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.

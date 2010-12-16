@@ -120,9 +120,9 @@ std::size_t Layout::Rows() const
 std::size_t Layout::Columns() const
 { return m_cells.empty() ? 0 : m_cells[0].size(); }
 
-Flags<Alignment> Layout::ChildAlignment(Wnd* wnd) const
+Flags<Alignment> Layout::ChildAlignment(const Wnd* wnd) const
 {
-    std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(wnd);
+    std::map<Wnd*, WndPosition>::const_iterator it = m_wnd_positions.find(const_cast<Wnd*>(wnd));
     if (it == m_wnd_positions.end())
         throw NoSuchChild("Layout::ChildAlignment() : Alignment of a nonexistent child was requested");
     return it->second.alignment;

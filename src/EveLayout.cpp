@@ -1169,7 +1169,7 @@ namespace {
         }
 
         std::auto_ptr<MakeWndResult> retval;
-        if (placement == key_place_column) {
+        if (wnd_type == name_column) {
             retval.reset(new MakeWndResult(params,
                                            position,
                                            adobe::name_t(),

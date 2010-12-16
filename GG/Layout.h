@@ -118,9 +118,9 @@ public:
     Flags<Alignment> ChildAlignment(const Wnd* wnd) const;     ///< returns the aligment of child \a wnd.  \throw GG::Layout::NoSuchChild Throws if no such child exists.
     unsigned int     BorderMargin() const;                     ///< returns the number of pixels that the layout will leave between its edges and the windows it contains
     unsigned int     CellMargin() const;                       ///< returns the number of pixels the layout leaves between the edges of windows in adjacent cells
-    double           RowStretch(std::size_t row) const;            ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.
-    double           ColumnStretch(std::size_t column) const;      ///< returns the stretch factor for column \a column.  Note that \a column is not range-checked.
-    Y                MinimumRowHeight(std::size_t row) const;      ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
+    double           RowStretch(std::size_t row) const;        ///< returns the stretch factor for row \a row.  Note that \a row is not range-checked.
+    double           ColumnStretch(std::size_t column) const;  ///< returns the stretch factor for column \a column.  Note that \a column is not range-checked.
+    Y                MinimumRowHeight(std::size_t row) const;  ///< returns the minimum height allowed for row \a row.  Note that \a row is not range-checked.
     X                MinimumColumnWidth(std::size_t column) const; ///< returns the minimum height allowed for column \a column.  Note that \a column is not range-checked.
     std::vector<std::vector<const Wnd*> >
                      Cells() const;                            ///< returns a matrix of the Wnds that can be found in each cell
@@ -256,11 +256,11 @@ private:
     {
         RowColParams();
 
-        double stretch;
-        unsigned int    min;
-        unsigned int    effective_min;   ///< current effective minimum size of this row or column, based on min, layout margins, and layout cell contents
-        int             current_origin;  ///< current position of top or left side
-        unsigned int    current_width;   ///< current extent in downward or rightward direction
+        double       stretch;
+        unsigned int min;
+        unsigned int effective_min;   ///< current effective minimum size of this row or column, based on min, layout margins, and layout cell contents
+        int          current_origin;  ///< current position of top or left side
+        unsigned int current_width;   ///< current extent in downward or rightward direction
 
     private:
         friend class boost::serialization::access;

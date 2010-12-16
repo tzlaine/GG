@@ -177,7 +177,7 @@ public:
 
     /** Sets the aligment of child \a wnd to \a alignment.  If no such child
         exists, no action is taken. */
-    void SetChildAlignment(Wnd* wnd, Flags<Alignment> alignment);
+    void SetChildAlignment(const Wnd* wnd, Flags<Alignment> alignment);
 
     /** Sets the number of pixels that the layout will leave between its edges
         and the windows it contains */

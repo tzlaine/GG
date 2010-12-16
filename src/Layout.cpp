@@ -586,9 +586,9 @@ void Layout::ResizeLayout(std::size_t rows, std::size_t columns)
     RedoLayout();
 }
 
-void Layout::SetChildAlignment(Wnd* wnd, Flags<Alignment> alignment)
+void Layout::SetChildAlignment(const Wnd* wnd, Flags<Alignment> alignment)
 {
-    std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.find(wnd);
+    std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.find(const_cast<Wnd*>(wnd));
     if (it != m_wnd_positions.end()) {
         ValidateAlignment(alignment);
         it->second.alignment = alignment;

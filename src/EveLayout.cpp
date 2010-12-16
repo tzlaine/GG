@@ -1304,6 +1304,18 @@ namespace {
         return layout_sheet[name];
     }
 
+    Alignment HorizontalAlignment(Flags<Alignment> flags)
+    {
+        const Flags<Alignment> HORIZONTAL_FLAGS(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
+        if ((flags | HORIZONTAL_FLAGS) == ALIGN_LEFT)
+            return ALIGN_LEFT;
+        else if ((flags | HORIZONTAL_FLAGS) == ALIGN_CENTER)
+            return ALIGN_CENTER;
+        else if ((flags | HORIZONTAL_FLAGS) == ALIGN_RIGHT)
+            return ALIGN_RIGHT;
+        return ALIGN_NONE;
+    }
+
 }
 
 struct EveLayout::Impl
@@ -1498,7 +1510,8 @@ struct EveLayout::Impl
         Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
-            max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
+            max_all_rows_height =
+                std::max(max_all_rows_height, std::max(children[i].m_wnd->MinSize().y, min_usable_size.y));
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
             layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, Alignments(wnd, children[i]));
         }
@@ -1509,63 +1522,97 @@ struct EveLayout::Impl
                                      MakeWndResult& wnd,
                                      boost::ptr_vector<MakeWndResult>& children)
     {
-        std::size_t max_columns = 0;
-        std::vector<X> max_single_column_widths(2, X0);
+        std::size_t max_columns = 1;
         X max_all_columns_width = X0;
-        std::vector<Layout*> children_as_labeled_control_layouts(children.size());
+        std::map<Alignment, std::vector<X> > max_single_column_widths;
+        std::map<Alignment, std::vector<Layout*> > children_as_1x2_layouts;
         for (std::size_t i = 0; i < children.size(); ++i) {
             Layout* l = 0;
-            if (children[i].m_labeled_status == LABELED_CONTROL &&
-                (l = dynamic_cast<Layout*>(children[i].m_wnd.get()))) {
-                assert(l->Rows() == 1u);
-                assert(l->Columns() == 2u);
+            Alignment align = HorizontalAlignment(Alignments(wnd, children[i]));
+            if ((l = dynamic_cast<Layout*>(children[i].m_wnd.get())) &&
+                l->Rows() == 1u &&
+                l->Columns() == 2u &&
+                dynamic_cast<const TextControl*>(l->Cells()[0][0])) {
                 max_columns = 2;
-                max_single_column_widths[0] =
-                    std::max(max_single_column_widths[0], l->Cells()[0][0]->MinUsableSize().x);
-                max_single_column_widths[1] =
-                    std::max(max_single_column_widths[1], l->Cells()[0][1]->MinUsableSize().x);
+                max_single_column_widths[align].resize(2, X0);
+                max_single_column_widths[align][0] =
+                    std::max(max_single_column_widths[align][0],
+                             std::max(l->Cells()[0][0]->MinSize().x, l->Cells()[0][0]->MinUsableSize().x));
+                max_single_column_widths[align][1] =
+                    std::max(max_single_column_widths[align][1],
+                             std::max(l->Cells()[0][1]->MinSize().x, l->Cells()[0][1]->MinUsableSize().x));
+            } else {
+                l = 0;
             }
-            max_all_columns_width = std::max(max_all_columns_width, children[i].m_wnd->MinUsableSize().x);
-            children_as_labeled_control_layouts[i] = l;
+            max_all_columns_width =
+                std::max(max_all_columns_width,
+                         std::max(children[i].m_wnd->MinSize().x, children[i].m_wnd->MinUsableSize().x));
+            children_as_1x2_layouts[align].resize(children.size());
+            children_as_1x2_layouts[align][i] = l;
         }
-        max_single_column_widths.resize(max_columns);
+
+        max_single_column_widths[ALIGN_NONE].resize(max_columns);
+        max_single_column_widths[ALIGN_LEFT].resize(max_columns);
+        max_single_column_widths[ALIGN_CENTER].resize(max_columns);
+        max_single_column_widths[ALIGN_RIGHT].resize(max_columns);
 
         for (std::size_t i = 0; i < children.size(); ++i) {
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
-            max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
+            max_all_columns_width =
+                std::max(max_all_columns_width,
+                         std::max(children[i].m_wnd->MinSize().x, min_usable_size.x));
             layout.SetMinimumRowHeight(i, min_usable_size.y);
             layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(wnd, children[i]));
         }
 
-        X_d summed_single_column_widths =
-            1.0 * std::accumulate(max_single_column_widths.begin(), max_single_column_widths.end(), X0);
-        bool all_columns_width_larger = max_all_columns_width > summed_single_column_widths;
-        X_d difference = max_all_columns_width - summed_single_column_widths;
+        const Alignment ALIGNMENTS[] = { ALIGN_NONE, ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT };
+        const std::size_t NUM_ALIGNMENTS = sizeof(ALIGNMENTS) / sizeof(ALIGNMENTS[0]);
 
-        X_d stretch_0 =
-            summed_single_column_widths ?
-            max_single_column_widths[0] / summed_single_column_widths :
-            X_d(0.0);
-        X_d min_width_0 = 1.0 * max_single_column_widths[0];
-        if (all_columns_width_larger)
-            min_width_0 += difference * stretch_0;
+        for (std::size_t i = 0; i < NUM_ALIGNMENTS; ++i) {
+            Alignment align = ALIGNMENTS[i];
 
-        X_d stretch_1;
-        X_d min_width_1;
-        if (1u < max_columns) {
-            stretch_1 =
+            std::size_t num_in_this_layout = 0;
+            for (std::size_t i = 0; i < children_as_1x2_layouts[align].size(); ++i) {
+                if (children_as_1x2_layouts[align][i])
+                    ++num_in_this_layout;
+            }
+            if (num_in_this_layout < 2)
+                continue;
+
+            X_d summed_single_column_widths =
+                1.0 * std::accumulate(max_single_column_widths[align].begin(),
+                                      max_single_column_widths[align].end(),
+                                      X0);
+            bool all_columns_width_larger = max_all_columns_width > summed_single_column_widths;
+            X_d difference = max_all_columns_width - summed_single_column_widths;
+
+            X_d stretch_0 =
                 summed_single_column_widths ?
-                max_single_column_widths[1] / summed_single_column_widths :
+                max_single_column_widths[align][0] / summed_single_column_widths :
                 X_d(0.0);
-            min_width_1 = 1.0 * max_single_column_widths[1];
+            X_d min_width_0 = 1.0 * max_single_column_widths[align][0];
             if (all_columns_width_larger)
-                min_width_1 += difference * stretch_1;
-        }
+                min_width_0 += difference * stretch_0;
 
-        for (std::size_t i = 0; i < children_as_labeled_control_layouts.size(); ++i) {
-            if (Layout* l = children_as_labeled_control_layouts[i]) {
-                l->SetMinimumColumnWidth(0, X(std::ceil(Value(min_width_0))));
-                l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
+            X_d stretch_1;
+            X_d min_width_1;
+            if (1u < max_columns) {
+                stretch_1 =
+                    summed_single_column_widths ?
+                    max_single_column_widths[align][1] / summed_single_column_widths :
+                    X_d(0.0);
+                min_width_1 = 1.0 * max_single_column_widths[align][1];
+                if (all_columns_width_larger)
+                    min_width_1 += difference * stretch_1;
+            }
+
+            for (std::size_t i = 0; i < children_as_1x2_layouts[align].size(); ++i) {
+                if (Layout* l = children_as_1x2_layouts[align][i]) {
+                    l->SetMinimumColumnWidth(0, X(std::ceil(Value(min_width_0))));
+                    l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
+                    l->SetChildAlignment(l->Cells()[0][0], ALIGN_RIGHT);
+                    l->SetChildAlignment(l->Cells()[0][1], ALIGN_NONE);
+                }
             }
         }
 

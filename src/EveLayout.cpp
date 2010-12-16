@@ -264,52 +264,49 @@ namespace {
     {
         MakeWndResult(const adobe::dictionary_t& params,
                       const adobe::line_position_t& position,
-                      adobe::name_t parent_child_horizontal,
-                      adobe::name_t parent_child_vertical,
                       LabeledStatus labeled_status,
                       ContainerStatus container_status) :
-            m_horizontal(parent_child_horizontal),
-            m_vertical(parent_child_vertical),
+            m_horizontal(),
+            m_vertical(),
             m_child_horizontal(),
             m_child_vertical(),
+            m_default_horizontal(),
+            m_default_vertical(key_align_center),
+            m_default_child_horizontal(),
+            m_default_child_vertical(),
             m_spacing(0),
             m_indent(0),
             m_margin(5),
             m_labeled_status(labeled_status),
             m_container_status(container_status)
-            { Init(params, position, adobe::name_t(), key_align_center); }
+            { Init(params, position); }
 
         MakeWndResult(const adobe::dictionary_t& params,
                       const adobe::line_position_t& position,
-                      adobe::name_t parent_child_horizontal,
-                      adobe::name_t parent_child_vertical,
                       adobe::name_t default_horizontal,
                       adobe::name_t default_vertical,
                       adobe::name_t default_child_horizontal,
                       adobe::name_t default_child_vertical,
                       LabeledStatus labeled_status,
                       ContainerStatus container_status) :
-            m_horizontal(parent_child_horizontal),
-            m_vertical(parent_child_vertical),
-            m_child_horizontal(default_child_horizontal),
-            m_child_vertical(default_child_vertical),
+            m_horizontal(),
+            m_vertical(),
+            m_child_horizontal(),
+            m_child_vertical(),
+            m_default_horizontal(default_horizontal),
+            m_default_vertical(default_vertical),
+            m_default_child_horizontal(default_child_horizontal),
+            m_default_child_vertical(default_child_vertical),
             m_spacing(0),
             m_indent(0),
             m_margin(5),
             m_labeled_status(labeled_status),
             m_container_status(container_status)
-            { Init(params, position, default_horizontal, default_vertical); }
+            { Init(params, position); }
 
         void Init(const adobe::dictionary_t& params,
-                  const adobe::line_position_t& position,
-                  adobe::name_t default_horizontal,
-                  adobe::name_t default_vertical)
+                  const adobe::line_position_t& position)
             {
-                if (!m_horizontal)
-                    m_horizontal = default_horizontal;
-                if (!m_vertical)
-                    m_vertical = default_vertical;
-
                 get_value(params, key_horizontal, m_horizontal);
                 CheckAlignment(key_horizontal, m_horizontal, position);
                 get_value(params, key_vertical, m_vertical);
@@ -364,6 +361,10 @@ namespace {
         adobe::name_t m_vertical;
         adobe::name_t m_child_horizontal;
         adobe::name_t m_child_vertical;
+        adobe::name_t m_default_horizontal;
+        adobe::name_t m_default_vertical;
+        adobe::name_t m_default_child_horizontal;
+        adobe::name_t m_default_child_vertical;
         int m_spacing;
         int m_indent;
         int m_margin;
@@ -395,11 +396,35 @@ namespace {
         return retval;
     }
 
-    Flags<Alignment> Alignments(const MakeWndResult& mwr)
-    { return Alignments(mwr.m_horizontal, mwr.m_vertical); }
+    void ConditionallyApplyAlignments(adobe::name_t& existing_horizontal,
+                                      adobe::name_t& existing_vertical,
+                                      adobe::name_t horizontal,
+                                      adobe::name_t vertical)
+    {
+        if (!existing_horizontal)
+            existing_horizontal = horizontal;
+        if (!existing_vertical)
+            existing_vertical = vertical;
+    }
 
-    Flags<Alignment> ChildAlignments(const MakeWndResult& mwr)
-    { return Alignments(mwr.m_child_horizontal, mwr.m_child_vertical); }
+    Flags<Alignment> Alignments(const MakeWndResult& parent, const MakeWndResult& child)
+    {
+        adobe::name_t horizontal = child.m_horizontal;
+        adobe::name_t vertical = child.m_vertical;
+        ConditionallyApplyAlignments(horizontal,
+                                     vertical,
+                                     parent.m_child_horizontal,
+                                     parent.m_child_vertical);
+        ConditionallyApplyAlignments(horizontal,
+                                     vertical,
+                                     child.m_default_horizontal,
+                                     child.m_default_vertical);
+        ConditionallyApplyAlignments(horizontal,
+                                     vertical,
+                                     parent.m_default_child_horizontal,
+                                     parent.m_default_child_vertical);
+        return Alignments(horizontal, vertical);
+    }
 
 #if INSTRUMENT_CREATED_LAYOUT
     std::string WndTypeStr(Wnd* w)
@@ -410,7 +435,7 @@ namespace {
 
         CASE(Dialog)
         else CASE(Panel)
-        else CASE(Overlay)
+        else CASE(OverlayWnd)
         else CASE(Button)
         else CASE(StateButton)
         else CASE(TextControl)
@@ -447,10 +472,7 @@ namespace {
     }
 #endif
 
-    MakeWndResult* Make_dialog(const adobe::dictionary_t& params,
-                               const adobe::line_position_t& position,
-                               adobe::name_t parent_child_horizontal,
-                               adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_dialog(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
         bool grow = false;
@@ -458,22 +480,14 @@ namespace {
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
-                                                              position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
-                                                              UNLABELED_CONTROL,
-                                                              CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
 
         return retval.release();
     }
 
-    MakeWndResult* Make_button(const adobe::dictionary_t& params,
-                               const adobe::line_position_t& position,
-                               adobe::name_t parent_child_horizontal,
-                               adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_button(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
         bool default_ = false;
@@ -500,8 +514,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               key_align_center,
                                                               key_align_center,
                                                               adobe::name_t(),
@@ -519,10 +531,7 @@ namespace {
         return retval.release();
     }
 
-    MakeWndResult* Make_checkbox(const adobe::dictionary_t& params,
-                                 const adobe::line_position_t& position,
-                                 adobe::name_t parent_child_horizontal,
-                                 adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_checkbox(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -541,8 +550,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               key_align_left,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
@@ -561,9 +568,7 @@ namespace {
     }
 
     MakeWndResult* Make_display_number(const adobe::dictionary_t& params,
-                                       const adobe::line_position_t& position,
-                                       adobe::name_t parent_child_horizontal,
-                                       adobe::name_t parent_child_vertical)
+                                       const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -584,8 +589,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -613,9 +616,7 @@ namespace {
     }
 
     MakeWndResult* Make_edit_number(const adobe::dictionary_t& params,
-                                    const adobe::line_position_t& position,
-                                    adobe::name_t parent_child_horizontal,
-                                    adobe::name_t parent_child_vertical)
+                                    const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -643,8 +644,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -670,9 +669,7 @@ namespace {
     }
 
     MakeWndResult* Make_edit_text(const adobe::dictionary_t& params,
-                                  const adobe::line_position_t& position,
-                                  adobe::name_t parent_child_horizontal,
-                                  adobe::name_t parent_child_vertical)
+                                  const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -696,8 +693,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -722,10 +717,7 @@ namespace {
         return retval.release();
     }
 
-    MakeWndResult* Make_image(const adobe::dictionary_t& params,
-                              const adobe::line_position_t& position,
-                              adobe::name_t parent_child_horizontal,
-                              adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_image(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t image;
         adobe::name_t bind;
@@ -739,10 +731,8 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
+                                                              key_align_center,
+                                                              key_align_center,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
                                                               UNLABELED_CONTROL,
@@ -756,10 +746,7 @@ namespace {
         return retval.release();
     }
 
-    MakeWndResult* Make_popup(const adobe::dictionary_t& params,
-                              const adobe::line_position_t& position,
-                              adobe::name_t parent_child_horizontal,
-                              adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_popup(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -779,8 +766,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -836,9 +821,7 @@ namespace {
     }
 
     MakeWndResult* Make_radio_button(const adobe::dictionary_t& params,
-                                     const adobe::line_position_t& position,
-                                     adobe::name_t parent_child_horizontal,
-                                     adobe::name_t parent_child_vertical)
+                                     const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -856,8 +839,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               key_align_left,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
@@ -877,9 +858,7 @@ namespace {
     }
 
     MakeWndResult* Make_radio_button_group(const adobe::dictionary_t& params,
-                                           const adobe::line_position_t& position,
-                                           adobe::name_t parent_child_horizontal,
-                                           adobe::name_t parent_child_vertical)
+                                           const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_column;
 
@@ -894,8 +873,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -905,10 +882,7 @@ namespace {
         return retval.release();
     }
 
-    MakeWndResult* Make_slider(const adobe::dictionary_t& params,
-                               const adobe::line_position_t& position,
-                               adobe::name_t parent_child_horizontal,
-                               adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_slider(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::name_t bind;
         adobe::string_t alt;
@@ -929,8 +903,6 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(
             new MakeWndResult(params,
                               position,
-                              parent_child_horizontal,
-                              parent_child_vertical,
                               orientation_ == VERTICAL ? key_align_center : adobe::name_t(),
                               orientation_ == VERTICAL ? adobe::name_t() : key_align_center,
                               adobe::name_t(),
@@ -964,9 +936,7 @@ namespace {
     }
 
     MakeWndResult* Make_tab_group(const adobe::dictionary_t& params,
-                                  const adobe::line_position_t& position,
-                                  adobe::name_t parent_child_horizontal,
-                                  adobe::name_t parent_child_vertical)
+                                  const adobe::line_position_t& position)
     {
         adobe::string_t name; // TODO: is this useful?
         adobe::name_t bind;
@@ -979,12 +949,7 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
-                                                              position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
-                                                              UNLABELED_CONTROL,
-                                                              CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
@@ -992,9 +957,7 @@ namespace {
     }
 
     MakeWndResult* Make_static_text(const adobe::dictionary_t& params,
-                                    const adobe::line_position_t& position,
-                                    adobe::name_t parent_child_horizontal,
-                                    adobe::name_t parent_child_vertical)
+                                    const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::string_t alt;
@@ -1008,8 +971,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -1024,27 +985,19 @@ namespace {
         return retval.release();
     }
 
-    MakeWndResult* Make_menu_bar(const adobe::dictionary_t& params,
-                                 const adobe::line_position_t& position,
-                                 adobe::name_t parent_child_horizontal,
-                                 adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_menu_bar(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         // TODO
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
 
         return retval.release();
     }
 
-    MakeWndResult* Make_int_spin(const adobe::dictionary_t& params,
-                                 const adobe::line_position_t& position,
-                                 adobe::name_t parent_child_horizontal,
-                                 adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_int_spin(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -1068,8 +1021,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -1106,9 +1057,7 @@ namespace {
     }
 
     MakeWndResult* Make_double_spin(const adobe::dictionary_t& params,
-                                    const adobe::line_position_t& position,
-                                    adobe::name_t parent_child_horizontal,
-                                    adobe::name_t parent_child_vertical)
+                                    const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t bind;
@@ -1132,8 +1081,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
@@ -1168,10 +1115,7 @@ namespace {
         return retval.release();
     }
 
-    MakeWndResult* Make_overlay(const adobe::dictionary_t& params,
-                                const adobe::line_position_t& position,
-                                adobe::name_t parent_child_horizontal,
-                                adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_overlay(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_overlay;
 
@@ -1183,22 +1127,14 @@ namespace {
                                         position);
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
-                                                              position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
-                                                              UNLABELED_CONTROL,
-                                                              CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new OverlayWnd(X0, Y0, X1, Y1));
 
         return retval.release();
     }
 
-    MakeWndResult* Make_panel(const adobe::dictionary_t& params,
-                              const adobe::line_position_t& position,
-                              adobe::name_t parent_child_horizontal,
-                              adobe::name_t parent_child_vertical)
+    MakeWndResult* Make_panel(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
         adobe::name_t value;
@@ -1208,12 +1144,7 @@ namespace {
         get_value(params, adobe::key_value, value);
         get_value(params, adobe::key_bind, bind);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
-                                                              position,
-                                                              parent_child_horizontal,
-                                                              parent_child_vertical,
-                                                              UNLABELED_CONTROL,
-                                                              CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new Panel(name));
 
@@ -1222,9 +1153,7 @@ namespace {
 
     MakeWndResult* Make_layout(adobe::name_t wnd_type,
                                const adobe::dictionary_t& params,
-                               const adobe::line_position_t& position,
-                               adobe::name_t parent_child_horizontal,
-                               adobe::name_t parent_child_vertical)
+                               const adobe::line_position_t& position)
     {
         adobe::name_t placement = key_place_overlay;
 
@@ -1243,8 +1172,6 @@ namespace {
         if (placement == key_place_column) {
             retval.reset(new MakeWndResult(params,
                                            position,
-                                           parent_child_horizontal,
-                                           parent_child_vertical,
                                            adobe::name_t(),
                                            adobe::name_t(),
                                            adobe::name_t(),
@@ -1254,8 +1181,6 @@ namespace {
         } else {
             retval.reset(new MakeWndResult(params,
                                            position,
-                                           parent_child_horizontal,
-                                           parent_child_vertical,
                                            adobe::name_t(),
                                            adobe::name_t(),
                                            key_align_left,
@@ -1280,9 +1205,7 @@ namespace {
 
     MakeWndResult* MakeWnd(adobe::name_t wnd_type,
                            const adobe::dictionary_t& params,
-                           const adobe::line_position_t& position,
-                           adobe::name_t parent_child_horizontal,
-                           adobe::name_t parent_child_vertical)
+                           const adobe::line_position_t& position)
     {
         using namespace adobe;
 
@@ -1290,12 +1213,12 @@ namespace {
 #define IF_CASE(x) if (wnd_type == name_##x)                            \
         {                                                               \
             std::cout << std::string(indent * 4, ' ') << "    Make_"#x"(" << wnd_type << ")\n"; \
-            MakeWndResult* retval = Make_##x(params, position, parent_child_horizontal, parent_child_vertical); \
+            MakeWndResult* retval = Make_##x(params, position);         \
             std::cout << std::string(indent * 4, ' ') << "    " << retval->m_wnd.get() << " " << "\n"; \
             return retval;                                              \
         }
 #else
-#define IF_CASE(x) if (wnd_type == name_##x) { return Make_##x(params, position, parent_child_horizontal, parent_child_vertical); }
+#define IF_CASE(x) if (wnd_type == name_##x) { return Make_##x(params, position); }
 #endif
 
         IF_CASE(dialog)
@@ -1319,11 +1242,11 @@ namespace {
         else if (wnd_type == name_row || wnd_type == name_column) {
 #if INSTRUMENT_WINDOW_CREATION
             std::cout << std::string(indent * 4, ' ') << "    Make_layout(" << wnd_type << ", " << params << ", ...)\n";
-            MakeWndResult* retval = Make_layout(wnd_type, params, position, parent_child_horizontal, parent_child_vertical);
+            MakeWndResult* retval = Make_layout(wnd_type, params, position);
             std::cout << std::string(indent * 4, ' ') << "    " << retval->m_wnd.get() << " " << "\n";
             return retval;
 #else
-            return Make_layout(wnd_type, params, position, parent_child_horizontal, parent_child_vertical);
+            return Make_layout(wnd_type, params, position);
 #endif
         } else {
             std::string wnd_type_ = wnd_type.c_str();
@@ -1569,34 +1492,22 @@ struct EveLayout::Impl
     };
 
     void AddChildrenToHorizontalLayout(Layout& layout,
-                                       boost::ptr_vector<MakeWndResult>& children,
-                                       adobe::name_t child_horizontal,
-                                       adobe::name_t child_vertical)
+                                       MakeWndResult& wnd,
+                                       boost::ptr_vector<MakeWndResult>& children)
     {
         Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_rows_height = std::max(max_all_rows_height, min_usable_size.y);
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
-
-            Flags<Alignment> alignment = Alignments(child_horizontal, child_vertical);
-            if (children[i].m_horizontal) {
-                alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
-                alignment |= Alignments(children[i].m_horizontal, adobe::name_t());
-            }
-            if (children[i].m_vertical) {
-                alignment &= ~(ALIGN_TOP | ALIGN_VCENTER | ALIGN_BOTTOM);
-                alignment |= Alignments(adobe::name_t(), children[i].m_vertical);
-            }
-            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, alignment);
+            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, Alignments(wnd, children[i]));
         }
         layout.SetMinimumRowHeight(0, max_all_rows_height);
     }
 
     void AddChildrenToVerticalLayout(Layout& layout,
-                                     boost::ptr_vector<MakeWndResult>& children,
-                                     adobe::name_t child_horizontal,
-                                     adobe::name_t child_vertical)
+                                     MakeWndResult& wnd,
+                                     boost::ptr_vector<MakeWndResult>& children)
     {
         std::size_t max_columns = 0;
         std::vector<X> max_single_column_widths(2, X0);
@@ -1623,17 +1534,7 @@ struct EveLayout::Impl
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_columns_width = std::max(max_all_columns_width, min_usable_size.x);
             layout.SetMinimumRowHeight(i, min_usable_size.y);
-
-            Flags<Alignment> alignment = Alignments(child_horizontal, child_vertical);
-            if (children[i].m_horizontal) {
-                alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
-                alignment |= Alignments(children[i].m_horizontal, adobe::name_t());
-            }
-            if (children[i].m_vertical) {
-                alignment &= ~(ALIGN_TOP | ALIGN_VCENTER | ALIGN_BOTTOM);
-                alignment |= Alignments(adobe::name_t(), children[i].m_vertical);
-            }
-            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, alignment);
+            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(wnd, children[i]));
         }
 
         X_d summed_single_column_widths =
@@ -1683,11 +1584,7 @@ struct EveLayout::Impl
 #if INSTRUMENT_WINDOW_CREATION
         std::cout << std::string(indent * 4, ' ') << "    AddChildren(children = [ ";
         for (std::size_t i = 0; i < children.size(); ++i) {
-            std::cout << "[ ";
-            for (std::size_t j = 0; j < children[i].m_wnds.size(); ++j) {
-                std::cout << &children[i].m_wnds[j] << " ";
-            }
-            std::cout << "] ";
+            std::cout << children[i].m_wnd.get() << " ";
         }
         std::cout << "])\n";
 #endif
@@ -1712,18 +1609,12 @@ struct EveLayout::Impl
 
             if (orientation == VERTICAL) {
                 if (wnd_view_params.m_name == name_dialog && !wnd_.m_child_horizontal)
-                    wnd_.m_child_horizontal = key_align_left;
-                AddChildrenToVerticalLayout(*layout,
-                                            children,
-                                            wnd_.m_child_horizontal,
-                                            wnd_.m_child_vertical);
+                    wnd_.m_default_child_horizontal = key_align_left;
+                AddChildrenToVerticalLayout(*layout, wnd_, children);
             } else {
                 if (wnd_view_params.m_name == name_dialog && !wnd_.m_child_vertical)
-                    wnd_.m_child_vertical = key_align_top;
-                AddChildrenToHorizontalLayout(*layout,
-                                              children,
-                                              wnd_.m_child_horizontal,
-                                              wnd_.m_child_vertical);
+                    wnd_.m_default_child_vertical = key_align_top;
+                AddChildrenToHorizontalLayout(*layout, wnd_, children);
             }
             wnd->SetLayout(layout.release());
         } else if (wnd_view_params.m_name == name_radio_button_group) {
@@ -1764,11 +1655,11 @@ struct EveLayout::Impl
         } else if (wnd_view_params.m_name == name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(1, children.size());
-            AddChildrenToHorizontalLayout(*layout, children, wnd_.m_child_horizontal, wnd_.m_child_vertical);
+            AddChildrenToHorizontalLayout(*layout, wnd_, children);
         } else if (wnd_view_params.m_name == name_column) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(children.size(), 1);
-            AddChildrenToVerticalLayout(*layout, children, wnd_.m_child_horizontal, wnd_.m_child_vertical);
+            AddChildrenToVerticalLayout(*layout, wnd_, children);
         } else {
             throw stream_error_t("attempted to attach children to a non-container",
                                  wnd_view_params.m_position);
@@ -1777,9 +1668,7 @@ struct EveLayout::Impl
 
     Wnd& Finish()
         {
-            std::auto_ptr<MakeWndResult> dialog(CreateChild(m_nested_views,
-                                                            adobe::name_t(),
-                                                            adobe::name_t()));
+            std::auto_ptr<MakeWndResult> dialog(CreateChild(m_nested_views));
             m_wnd = dialog->m_wnd.release();
             m_wnd->Resize(Pt(X1, Y1));
 #if INSTRUMENT_CREATED_LAYOUT
@@ -1788,9 +1677,7 @@ struct EveLayout::Impl
             return *m_wnd;
         }
 
-    MakeWndResult* CreateChild(const NestedViews& nested_view,
-                               adobe::name_t parent_child_horizontal,
-                               adobe::name_t parent_child_vertical)
+    MakeWndResult* CreateChild(const NestedViews& nested_view)
         {
             const ViewParameters& view_params = nested_view.m_view_parameters;
 
@@ -1806,11 +1693,7 @@ struct EveLayout::Impl
             std::cout << std::string(indent * 4, ' ') << "    MakeWnd(" << view_params.m_name << ")\n";
 #endif
             std::auto_ptr<MakeWndResult> retval(
-                MakeWnd(view_params.m_name,
-                        parameters,
-                        view_params.m_position,
-                        parent_child_horizontal,
-                        parent_child_vertical)
+                MakeWnd(view_params.m_name, parameters, view_params.m_position)
             );
 
 #if INSTRUMENT_WINDOW_CREATION
@@ -1818,9 +1701,7 @@ struct EveLayout::Impl
 #endif
             boost::ptr_vector<MakeWndResult> children;
             for (std::size_t i = 0; i < nested_view.m_children.size(); ++i) {
-                children.push_back(CreateChild(nested_view.m_children[i],
-                                               retval->m_child_horizontal,
-                                               retval->m_child_vertical));
+                children.push_back(CreateChild(nested_view.m_children[i]));
             }
 #if INSTRUMENT_WINDOW_CREATION
             --indent;

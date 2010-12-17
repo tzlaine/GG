@@ -25,6 +25,7 @@
 #include <GG/GUI.h>
 
 #include <GG/BrowseInfoWnd.h>
+#include <GG/Config.h>
 #include <GG/Control.h>
 #include <GG/Cursor.h>
 #include <GG/EventPump.h>
@@ -34,6 +35,10 @@
 #include <GG/Timer.h>
 #include <GG/ZList.h>
 #include <GG/utf8/checked.h>
+
+#if GG_HAVE_LIBPNG
+#include "GIL/extension/io/png_io.hpp"
+#endif
 
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
@@ -93,6 +98,45 @@ namespace {
     const wchar_t WIDE_DASH = '-';
     const word_regex DEFAULT_WORD_REGEX =
         +boost::xpressive::set[boost::xpressive::_w | WIDE_DASH];
+
+    void WriteWndToPNG(const Wnd* wnd, const std::string& filename)
+    {
+#if GG_HAVE_LIBPNG
+        Pt ul = wnd->UpperLeft();
+        Pt size = wnd->Size();
+
+        std::vector<GLubyte> bytes(Value(size.x) * Value(size.y) * 4);
+
+        glFinish();
+
+        glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+
+        glPixelStorei(GL_PACK_SWAP_BYTES, false);
+        glPixelStorei(GL_PACK_LSB_FIRST, false);
+        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+        glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+        glReadPixels(Value(ul.x),
+                     Value(GUI::GetGUI()->AppHeight() - wnd->LowerRight().y),
+                     Value(size.x),
+                     Value(size.y),
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     &bytes[0]);
+
+        glPopClientAttrib();
+
+        using namespace boost::gil;
+        png_write_view(filename,
+                       flipped_up_down_view(
+                           interleaved_view(Value(size.x),
+                                            Value(size.y),
+                                            static_cast<rgba8_pixel_t*>(static_cast<void*>(&bytes[0])),
+                                            Value(size.x) * sizeof(rgba8_pixel_t))));
+#endif
+    }
 }
 
 // implementation data types
@@ -132,7 +176,8 @@ struct GG::GUIImpl
         m_render_cursor(false),
         m_cursor(),
         m_save_wnd_fn(0),
-        m_load_wnd_fn(0)
+        m_load_wnd_fn(0),
+        m_save_as_png_wnd(0)
     {
         m_button_state[0] = m_button_state[1] = m_button_state[2] = false;
         m_drag_wnds[0] = m_drag_wnds[1] = m_drag_wnds[2] = 0;
@@ -212,6 +257,9 @@ struct GG::GUIImpl
 
     GUI::SaveWndFn    m_save_wnd_fn;
     GUI::LoadWndFn    m_load_wnd_fn;
+
+    const Wnd* m_save_as_png_wnd;
+    std::string m_save_as_png_filename;
 };
 
 void GUIImpl::HandlePress(unsigned int mouse_button, const Pt& pos, int curr_ticks)
@@ -602,6 +650,12 @@ GUI::AcceleratorSignalType& GUI::AcceleratorSignal(Key key, Flags<ModKey> mod_ke
     if (INSTRUMENT_ALL_SIGNALS)
         Connect(*sig_ptr, AcceleratorEcho(key, mod_keys));
     return *sig_ptr;
+}
+
+void GUI::SaveWndAsPNG(const Wnd* wnd, const std::string& filename) const
+{
+    s_impl->m_save_as_png_wnd = wnd;
+    s_impl->m_save_as_png_filename = filename;
 }
 
 void GUI::operator()()
@@ -1013,6 +1067,12 @@ void GUI::RenderWindow(Wnd* wnd)
                 wnd->EndClipping();
             }
         }
+    }
+
+    if (wnd == s_impl->m_save_as_png_wnd) {
+        WriteWndToPNG(s_impl->m_save_as_png_wnd, s_impl->m_save_as_png_filename);
+        s_impl->m_save_as_png_wnd = 0;
+        s_impl->m_save_as_png_filename.clear();
     }
 }
 

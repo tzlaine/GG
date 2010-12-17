@@ -209,8 +209,13 @@ public:
     /** Returns an iterator to one past the last defined keyboard accelerator. */
     const_accel_iterator accel_end() const;
 
-    /** returns the signal that is emitted when the requested keyboard accelerator is invoked. */
+    /** Returns the signal that is emitted when the requested keyboard accelerator is invoked. */
     AcceleratorSignalType& AcceleratorSignal(Key key, Flags<ModKey> mod_keys = MOD_KEY_NONE) const;
+
+    /** Saves \a wnd to file \a filename during the next render cycle.  If \a
+        wnd is not rendered during the render cycle, or PNG support is not
+        enabled, this is a no-op. */
+    void SaveWndAsPNG(const Wnd* wnd, const std::string& filename) const;
     //@}
 
     /** \name Mutators */ ///@{

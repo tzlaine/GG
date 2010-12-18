@@ -14,17 +14,11 @@ layout empty_containers
 
             column(name: "Empty With Name");
 
-            tab_group(bind: @tab_group_visible);
+            tab_group(bind: @tab_group_visible)
             {
-                panel(name: "Empty", value: @first)
-                {
-                }
-                panel(name: "With", value: @second)
-                {
-                }
-                panel(name: "Tabs", value: @third)
-                {
-                }
+                panel(name: "Empty", value: @first);
+                panel(name: "With", value: @second);
+                panel(name: "Tabs", value: @third);
             }
         }
 

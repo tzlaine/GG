@@ -126,19 +126,7 @@ void MinimalGGApp::FinalCleanup()
 BOOST_AUTO_TEST_CASE( eve_layout )
 {
     MinimalGGApp app;
-
-    // The try-catch block is not strictly necessary, but it sure helps to see
-    // what exception crashed your app in the log file.
-    try {
-        // This, however, is necessary.  This executes the GG event loop until the app is terminated.
-        app();
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "main() caught exception(std::invalid_arg): " << e.what();
-    } catch (const std::runtime_error& e) {
-        std::cerr << "main() caught exception(std::runtime_error): " << e.what();
-    } catch (const std::exception& e) {
-        std::cerr << "main() caught exception(std::exception): " << e.what();
-    }
+    app();
 }
 
 // Most of this is boilerplate cut-and-pasted from Boost.Test.  We need to

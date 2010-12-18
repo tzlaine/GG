@@ -77,7 +77,8 @@ foreach (test_file ${eve_test_files})
 endforeach ()
 
 if (TARGET GiGiSDL)
-    file(COPY EveLayout_vs_Adobe_Begin.html begin_images DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(GLOB pngs *.png)
+    file(COPY EveLayout_vs_Adobe_Begin.html begin_images ${pngs} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
     foreach (test_file ${eve_test_files})
         add_test_and_data_files(EveLayout ${test_file} ${CMAKE_CURRENT_BINARY_DIR})

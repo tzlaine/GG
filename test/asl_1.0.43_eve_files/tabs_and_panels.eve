@@ -29,7 +29,7 @@ layout tabs_and_panels
                 static_text(name: "I am the last panel. Save the best for last!", horizontal: align_center);
                 radio_button(name: "Don't click me!", bind: @tab_group_visible, value: @na);
             }
-            panel(name: "", value: @na, bind: @tab_group_visible)
+            panel(name: "Other", value: @na, bind: @tab_group_visible)
             {
                 radio_button(name: "Told you not to click that...", bind: @tab_group_visible, value: @second);
             }

@@ -42,7 +42,7 @@ layout find_and_replace
                             { name: '(recent search strings)', value: empty },
                             { name: '-', value: @pattern_separator }
                         ]);
-                static_text(name: localize("<xstr id='section_symbol'>&#xa7;</xstr>"));
+                static_text(name: localize("Section"));
                 checkbox(name: 'Use Grep');
             }
             popup(  name: 'Patterns:', popup_bind: @patterns, popup_placement: @down,
@@ -83,7 +83,7 @@ layout find_and_replace
                             { name: '(recent replace strings)', value: empty },
                             { name: '-', value: @pattern_separator }
                         ]);
-                static_text(name: localize("<xstr id='section_symbol'>&#xa7;</xstr>"));
+                static_text(name: localize("Section"));
             }
             edit_text(size: @size_small, characters: 60, lines: 3, scrollable: false, monospaced: true, vertical: align_fill);
             separator();

@@ -128,7 +128,7 @@ layout big_popup
                 { name: "Item #asf1", value: @aam },
                 { name: "Item #541", value: @aan }
             ] );
-            button(name: localize("<xstr id='ok'>OK</xstr>"), action: @ok, bind: @selection);
+            button(name: localize("OK"), action: @ok, bind: @selection);
         }
     }
 }

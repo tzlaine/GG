@@ -12,14 +12,14 @@ layout checkbox_radio_button_suite
         {
             column()
             {
-                group(placement: place_row, name: "Horizontal Checkboxes", child_horizontal: align_fill)
+                row(name: "Horizontal Checkboxes", child_horizontal: align_fill)
                 {
                     checkbox(name: "Checkbox A", bind: @checkbox_1);
                     checkbox(name: "Checkbox B", bind: @checkbox_2);
                     checkbox(name: "Checkbox C", bind: @checkbox_3);
                     checkbox(bind: @checkbox_empty);
                 }
-                group(placement: place_row, name: "Vertical Checkboxes & Radio Buttons", horizontal: align_fill, child_horizontal: align_fill)
+                row(name: "Vertical Checkboxes & Radio Buttons", horizontal: align_fill, child_horizontal: align_fill)
                 {
                     column(vertical: align_top, guide_mask: [])
                     {
@@ -36,7 +36,7 @@ layout checkbox_radio_button_suite
                         radio_button(bind: @radio_button_1, value: @none);
                     }
                 }
-                group(placement: place_row, name: "Horizontal Radio Buttons", child_horizontal: align_fill)
+                row(name: "Horizontal Radio Buttons", child_horizontal: align_fill)
                 {
                         radio_button(name: "Radio Button A", bind: @radio_button_1, value: @a);
                         radio_button(name: "Radio Button B", bind: @radio_button_1, value: @b);

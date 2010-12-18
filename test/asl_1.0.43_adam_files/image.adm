@@ -7,8 +7,8 @@
 sheet image
 {
 constant:
-    image1 : image(name: "stop.tga");
-    image2 : image(name: "small_warning_icon.tga");
+    image1 : image(name: "stop.png");
+    image2 : image(name: "small_warning_icon.png");
 
 interface:
     other_image    : false;

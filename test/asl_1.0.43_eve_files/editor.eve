@@ -13,24 +13,13 @@ layout editor
     view dialog(name: "Editor", size: @size_small, placement: place_column,
                 grow: true, horizontal: align_fill, vertical: align_fill)
     {
-        tab_group(bind: @editor_tab_group, vertical: align_fill, horizontal: align_fill,
-                  items: [
-                      { name: "Sources", value: @sources },
-                      { name: "Property Model", value: @model_inspector },
-                      { name: "Layout Sheet", value: @layout_inspector },
-                      { name: "Results", value: @results },
-                      { name: "Errors", value: @errors }
-                  ])
+        tab_group(bind: @editor_tab_group, vertical: align_fill, horizontal: align_fill)
         {
-            panel(bind: @editor_tab_group, value: @sources)
+            panel(name: "Sources", bind: @editor_tab_group, value: @sources)
             {
-                tab_group(bind: @source_tab_group, vertical: align_fill, horizontal: align_fill,
-                          items: [
-                              { name: "Adam", value: @adam },
-                              { name: "Eve", value: @eve }
-                          ])
+                tab_group(bind: @source_tab_group, vertical: align_fill, horizontal: align_fill)
                 {
-                    panel(bind: @source_tab_group, value: @adam)
+                    panel(name: "Adam", bind: @source_tab_group, value: @adam)
                     {
                         edit_text(bind: @adam_source, characters: 50, lines: 10, scrollable: true,
                                   monospaced: true, horizontal: align_fill, vertical: align_fill);
@@ -42,7 +31,7 @@ layout editor
                         }
                     }
         
-                    panel(bind: @source_tab_group, value: @eve)
+                    panel(name: "Eve", bind: @source_tab_group, value: @eve)
                     {
                         edit_text(bind: @eve_source, characters: 50, lines: 10, scrollable: true,
                                   monospaced: true, horizontal: align_fill, vertical: align_fill);
@@ -56,7 +45,7 @@ layout editor
                 }
             }
 
-            panel(bind: @editor_tab_group, value: @model_inspector, child_horizontal: align_fill)
+            panel(name: "Property Model", bind: @editor_tab_group, value: @model_inspector, child_horizontal: align_fill)
             {
                 row(vertical: align_top, child_horizontal: align_fill)
                 {
@@ -85,7 +74,7 @@ layout editor
                 }
             }
 
-            panel(bind: @editor_tab_group, value: @layout_inspector, child_horizontal: align_fill)
+            panel(name: "Layout Sheet", bind: @editor_tab_group, value: @layout_inspector, child_horizontal: align_fill)
             {
                 static_text(name: "Note: You can only tweak the topmost dialog", characters: 1);
 
@@ -112,13 +101,13 @@ layout editor
                 }
             }
 
-            panel(bind: @editor_tab_group, value: @results, child_horizontal: align_fill)
+            panel(name: "Results", bind: @editor_tab_group, value: @results, child_horizontal: align_fill)
             {
                 edit_text(bind: @results, characters: 50, lines: 10, scrollable: true,
                           monospaced: true, vertical: align_fill);
             }
 
-            panel(bind: @editor_tab_group, value: @errors)
+            panel(name: "Errors", bind: @editor_tab_group, value: @errors)
             {
                 edit_text(bind: @errors, characters: 50, lines: 10, scrollable: true,
                           monospaced: true, horizontal: align_fill, vertical: align_fill);

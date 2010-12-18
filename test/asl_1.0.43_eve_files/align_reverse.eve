@@ -10,7 +10,7 @@ layout aling_reverse
     {
 		row(child_horizontal: align_fill, child_vertical: align_fill)
 		{
-            group()
+            column()
             {
                 static_text(wrap: true, characters: 10, horizontal: align_fill, name:
                     "Test of cross stream guide suppression.");
@@ -19,7 +19,7 @@ layout aling_reverse
                 edit_number(digits: 4, name: "Not Aligned and very long:", guide_mask: [@guide_label]);
                 edit_number(digits: 2, name: "Not Aligned:", guide_mask: [@guide_label]);
             }
-            group(child_horizontal: align_right)
+            column(child_horizontal: align_right)
             {
                 static_text(wrap: true, characters: 10, horizontal: align_fill, name:
                     "Test of cross stream guide suppression with right align.");
@@ -31,7 +31,7 @@ layout aling_reverse
 		}
 		row(vertical: align_top)
 		{
-            group()
+            column()
             {
                 static_text(wrap: true, characters: 10, horizontal: align_fill, name:
                 		"This group is aligned left. The guides from this group will align to the guides in the group above"
@@ -39,7 +39,7 @@ layout aling_reverse
                 edit_number(digits: 8, name: "Also aligned to 'Short':");
                 edit_number(digits: 6, name: "As is this.:");
             }
-            group(horizontal: align_center)
+            column(horizontal: align_center)
             {
                 static_text(wrap: true, characters: 10, horizontal: align_fill, name:
                     "This group is centered, the guides out of this group are suppressed but will align internally.");
@@ -48,7 +48,7 @@ layout aling_reverse
                 edit_number(digits: 4, name: "Not Aligned and very long:", guide_mask: [@guide_label]);
                 edit_number(digits: 2, name: "Not Aligned:", guide_mask: [@guide_label]);
             }
-            group(horizontal: align_right)
+            column(horizontal: align_right)
             {
                 static_text(wrap: true, characters: 10, horizontal: align_fill, name:
                 		"This group is aligned right. The right aligned guides from this group will align to the guides in the group above"

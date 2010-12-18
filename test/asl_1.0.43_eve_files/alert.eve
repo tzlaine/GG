@@ -8,7 +8,7 @@ layout alert_dialog
 {
     view dialog(name: "Alert", placement: place_row)
     {
-        image(image: "stop.tga");     
+        image(image: "stop.png");     
 
         column(vertical: align_fill)
         {

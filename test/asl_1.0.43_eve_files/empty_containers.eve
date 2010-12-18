@@ -8,40 +8,52 @@ layout empty_containers
 {
     view dialog(name: "Empty Containers")
     {
-        group(name: "Empty")
+        column(name: "Empty")
         {
-            group();
+            column();
 
-            group(name: "Empty With Name");
+            column(name: "Empty With Name");
 
-            tab_group(  bind: @tab_group_visible,
-                        items: [
-                            {name: "Empty", value: @first},
-                            {name: "With", value: @second},
-                            {name: "Tabs", value: @third}
-                        ]);
+            tab_group(bind: @tab_group_visible);
+            {
+                panel(name: "Empty", value: @first)
+                {
+                }
+                panel(name: "With", value: @second)
+                {
+                }
+                panel(name: "Tabs", value: @third)
+                {
+                }
+            }
         }
 
-        group(name: "Minimal Stuff")
+        column(name: "Minimal Stuff")
         {
-            group()
+            column()
             {
                 static_text(name:"X");
             }
 
-            group(name: "Empty With Name")
+            column(name: "Empty With Name")
             {
                 static_text(name:"X");
             }
 
-            tab_group(  bind: @tab_group_visible,
-                        items: [
-                            {name: "Empty", value: @first},
-                            {name: "With", value: @second},
-                            {name: "Tabs", value: @third}
-                        ])
+            tab_group(bind: @tab_group_visible)
             {
-                static_text(name:"X");
+                panel(name: "Empty", value: @first)
+                {
+                    static_text(name:"X");
+                }
+                panel(name: "With", value: @second)
+                {
+                    static_text(name:"X");
+                }
+                panel(name: "Tabs", value: @third)
+                {
+                    static_text(name:"X");
+                }
             }
         }
     }

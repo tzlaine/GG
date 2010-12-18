@@ -10,7 +10,7 @@ layout edit_text_suite
     {
         row(child_horizontal: align_fill)
         {
-            group(placement: place_column, name: localize("<xstr id='edit_text_suite_dialog_title'>Edit Text Suite</xstr>"), child_horizontal: align_fill)
+            column(name: localize("<xstr id='edit_text_suite_dialog_title'>Edit Text Suite</xstr>"), child_horizontal: align_fill)
             {
                 edit_text(bind: @edit_text_value, characters: 10, name: localize("<xstr id='et_suite_label'>Label Name:</xstr>"));
                 edit_text(bind: @edit_text_value, scrollable: true, characters: 10, lines: 10, name: localize("<xstr id='et_suite_label'>Label Name:</xstr>"));

@@ -15,7 +15,7 @@ layout image_size_auto
                                     { name: localize("<xstr id='image_size_auto_lines_per_cm'>lines/cm</xstr>"), bind: @screen_lpi, scale: [2.54, 0.0], format: "#.00" }
                                      ]);
     
-            group(name: localize("<xstr id='image_size_auto_quality'>Quality</xstr>"), horizontal: align_fill, placement: place_row, child_horizontal: align_proportional)
+            row(name: localize("<xstr id='image_size_auto_quality'>Quality</xstr>"), horizontal: align_fill, placement: place_row, child_horizontal: align_proportional)
             { 
                 radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("<xstr id='image_size_auto_draft'>Draft</xstr>"), value: @draft);
                 radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("<xstr id='image_size_auto_good'>Good</xstr>"), value: @good);

@@ -20,7 +20,7 @@ layout widget_palette
                       { name: "Overlay", value: @overlay }
                   ]);
 
-        group (name: "General Widget Properties:")
+        column (name: "General Widget Properties:")
         {
             popup(name: "Horizontal Alignment:", bind: @horizontal,
                   items: [
@@ -44,7 +44,7 @@ layout widget_palette
 
         optional(bind: @widget_type, value: @button, horizontal: align_fill, child_horizontal: align_fill)
         {
-            group (name: "Button Properties:", child_horizontal: align_fill)
+            column (name: "Button Properties:", child_horizontal: align_fill)
             {
                 edit_text(name: "Name:", bind: @name);
             }
@@ -52,7 +52,7 @@ layout widget_palette
 
         optional(bind: @widget_type, value: @edit_text, horizontal: align_fill, child_horizontal: align_fill)
         {
-            group (name: "Edit Text Properties:", child_horizontal: align_fill)
+            column (name: "Edit Text Properties:", child_horizontal: align_fill)
             {
                 edit_text(name: "Label:", bind: @name);
                 edit_number(name: "Characters:", bind: @characters, min_value: 1, max_value: 100);
@@ -61,7 +61,7 @@ layout widget_palette
 
         optional(bind: @widget_type, value: @edit_number, horizontal: align_fill, child_horizontal: align_fill)
         {
-            group (name: "Edit Number Properties:", child_horizontal: align_fill, guide_mask: [ @mask_label ])
+            column (name: "Edit Number Properties:", child_horizontal: align_fill, guide_mask: [ @mask_label ])
             {
                 edit_text(name: "Label:", bind: @name);
                 edit_number(name: "Digits:", bind: @characters, min_value: 1, max_value: 100);
@@ -72,7 +72,7 @@ layout widget_palette
 
         optional(bind: @is_container)
         {
-            group(name: "General Container Properties:")
+            column(name: "General Container Properties:")
             {
                 popup(name: "Child Placement:", bind: @placement,
                       items: [

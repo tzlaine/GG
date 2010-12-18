@@ -13,14 +13,14 @@ layout slider_suite
             column()
             { 
                 edit_number(name: "Value:", bind: @slider_value_1, digits: 3, format: "#");
-                group(placement: place_row, name: "Vertical Sliders", child_horizontal: align_fill)
+                row(name: "Vertical Sliders", child_horizontal: align_fill)
                 {
                     slider(bind: @slider_value_1, slider_point: @left, orientation: @vertical, format: {first: 0, last: 100, interval: 1});
                     slider(bind: @slider_value_2, slider_point: @right, orientation: @vertical, format: {first: 0, last: 100, interval: 1});
                     slider(bind: @slider_value_1, orientation: @vertical, format: {first: 0, last: 100, interval: 1});
                     slider(bind: @slider_value_2, slider_point: @right, slider_ticks: 11, orientation: @vertical, format: {first: 0, last: 100, interval: 1});
                 }
-                group(placement: place_column, name: "Horizontal Sliders", horizontal: align_fill, child_horizontal: align_fill)
+                column(name: "Horizontal Sliders", horizontal: align_fill, child_horizontal: align_fill)
                 {
                     slider(bind: @slider_value_2, slider_point: @up, format: {first: 0, last: 100, interval: 1});
                     slider(bind: @slider_value_1, slider_point: @down, format: {first: 0, last: 100, interval: 1});

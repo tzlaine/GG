@@ -44,7 +44,7 @@ layout checkbox_radio_button_suite
                         radio_button(bind: @radio_button_1, value: @none);
                 }
             }
-            column(child_horizontal: align_fill)
+            column(child_horizontal: align_fill, vertical: align_top)
             {
                 button(name: "OK", default: true);
                 button( items: [ 

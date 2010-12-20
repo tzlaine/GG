@@ -16,7 +16,7 @@ layout edit_text_suite
                 edit_text(bind: @edit_text_value, scrollable: true, characters: 10, lines: 10, name: localize("Label Name:"));
                 checkbox(bind: @disabled, name: localize("Disabled"));
             }
-            column(child_horizontal: align_fill)
+            column(child_horizontal: align_fill, vertical: align_top)
             {
                 button(name: localize("OK"), default: true);
                 button( items: [ 

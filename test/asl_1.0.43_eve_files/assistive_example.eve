@@ -17,7 +17,7 @@ layout assistive_example
 		   
 		   edit_number(name: "File Size:", bind: @file_size, format: "#");
 		}
-        column()
+        column(child_horizontal: align_fill)
         {
             button(name: "OK", bind: @result, action: @ok, default: true);
             button( items:  [ 

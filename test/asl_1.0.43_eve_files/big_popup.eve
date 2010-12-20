@@ -10,7 +10,7 @@ layout big_popup
 {
     view dialog(name: "Big popup")
     {
-        row()
+        row(child_vertical: align_center)
         {
             popup( name: "Choose:", bind: @selection, items: [
                 { name: "Item #1", value: @a },

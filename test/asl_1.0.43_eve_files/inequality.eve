@@ -17,7 +17,7 @@ layout inequality
                 slider(bind: @max_value, slider_point: @up, format: {first: 0, last: 100, interval: 1});
             }
     
-            column(child_horizontal: align_fill, horizontal: align_right)
+            column(child_horizontal: align_fill, horizontal: align_right, vertical: align_top)
             {
                 button(name: "OK", default: true, bind: @value);
                 button( items: [

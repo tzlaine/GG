@@ -39,7 +39,7 @@ layout alignment_test
         }
         column()
         {
-            column(name: "No lables")
+            column(name: "No lables", horizontal: align_left)
             {
                 edit_text(bind: @alignment, characters: 10);
                 popup(items: [{name: "Item One", value: @one}, {name: "Item Two", value: @two}]);

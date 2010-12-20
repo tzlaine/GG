@@ -887,7 +887,7 @@ namespace {
         adobe::name_t bind;
         adobe::string_t alt;
         adobe::dictionary_t format;
-        adobe::name_t orientation = adobe::key_vertical;
+        adobe::name_t orientation = adobe::key_horizontal;
         double slider_ticks;
 
         get_value(params, adobe::key_bind, bind);
@@ -918,17 +918,17 @@ namespace {
         const int TAB_WIDTH = 5;
         std::auto_ptr<Slider> slider(
             Factory().NewSlider(X0, Y0,
-                                orientation_ == VERTICAL ? X(Value(StandardHeight())) : X1,
-                                orientation_ == VERTICAL ? Y1 : StandardHeight(),
+                                orientation_ == VERTICAL ? X(Value(StandardHeight())) : X(200),
+                                orientation_ == VERTICAL ? Y(200) : StandardHeight(),
                                 min, max, orientation_, GROOVED, CLR_GRAY, TAB_WIDTH)
         );
         slider->SetMaxSize(
-            Pt(orientation_ == VERTICAL ? slider->MaxSize().x : slider->Width(),
-               orientation_ == VERTICAL ? slider->Height() : slider->MaxSize().y)
+            Pt(orientation_ == VERTICAL ? slider->Width() : slider->MaxSize().x,
+               orientation_ == VERTICAL ? slider->MaxSize().y : slider->Height())
         );
         slider->SetMinSize(
-            Pt(orientation_ == VERTICAL ? slider->MinSize().x : slider->Width(),
-               orientation_ == VERTICAL ? slider->Height() : slider->MinSize().y)
+            Pt(orientation_ == VERTICAL ? slider->Width() : slider->MinSize().x,
+               orientation_ == VERTICAL ? slider->MinSize().y : slider->Height())
         );
         retval->m_wnd = slider;
 

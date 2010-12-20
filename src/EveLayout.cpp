@@ -1611,7 +1611,7 @@ struct EveLayout::Impl
                     l->SetMinimumColumnWidth(0, X(std::ceil(Value(min_width_0))));
                     l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
                     l->SetChildAlignment(l->Cells()[0][0], ALIGN_RIGHT);
-                    l->SetChildAlignment(l->Cells()[0][1], ALIGN_NONE);
+                    l->SetChildAlignment(l->Cells()[0][1], ALIGN_LEFT);
                 }
             }
         }

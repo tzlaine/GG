@@ -550,15 +550,11 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              key_align_left,
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
 
         std::auto_ptr<StateButton> checkbox(
-            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE, CLR_GRAY)
+            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_LEFT, CLR_GRAY)
         );
         checkbox->SetMaxSize(Pt(checkbox->MaxSize().x, checkbox->Height()));
         checkbox->SetMinSize(Pt(checkbox->MinSize().x, checkbox->Height()));
@@ -839,15 +835,11 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              key_align_left,
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
                                                               UNLABELED_CONTROL,
                                                               CONTAINER));
 
         std::auto_ptr<StateButton> radio_button(
-            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_NONE,
+            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_LEFT,
                                      CLR_GRAY, CLR_BLACK, CLR_ZERO, SBSTYLE_3D_RADIO)
         );
         radio_button->SetMaxSize(Pt(radio_button->MaxSize().x, radio_button->Height()));

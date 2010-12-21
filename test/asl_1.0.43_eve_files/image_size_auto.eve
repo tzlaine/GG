@@ -26,10 +26,7 @@ layout image_size_auto
         column(child_horizontal: align_fill, vertical: align_top)
         {
             button(name: localize("OK"), bind: @result, action: @ok, default: true);
-            button( items: [
-                        { name: localize("Cancel"), action: @cancel },
-                        { name: localize("Reset"), action: @reset, modifiers: @opt }
-                     ]);
+            button(name: localize("Cancel"), action: @cancel);
         }
     }
 }

@@ -51,11 +51,8 @@ layout editor
                 {
                     edit_text(name: "Expression:", bind: @pm_expression, characters: 10);
 
-                    button(horizontal: align_right, vertical: align_bottom, items: [
-                               { name: "Evaluate", bind: @result, action: @pm_evaluate },
-                               { name: "Dump", bind: @result, action: @pm_dump, modifiers: @opt },
-                               { name: "Version", bind: @result, action: @version_info, modifiers: @cmd }
-                           ]);
+                    button(horizontal: align_right, vertical: align_bottom,
+                           name: "Evaluate", bind: @result, action: @pm_evaluate);
                 }
 
                 row(vertical: align_top, child_horizontal: align_fill)

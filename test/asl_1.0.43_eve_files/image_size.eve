@@ -95,10 +95,7 @@ layout image_size
         column(child_horizontal: align_fill)
         {
             button(name: localize("OK"), action: @ok, bind: @result, default: true, alt: "Resize the image with the current settings");
-            button( items: [ 
-                        { name: localize("Cancel"), action: @cancel, alt: "Do not resize the image and close the dialog" },
-                        { name: localize("Reset"), action: @reset, modifiers: @opt, alt: "Reset the dialog settings" }
-                     ]);
+            button(name: localize("Cancel"), action: @cancel, alt: "Do not resize the image and close the dialog");
 
             button(name: localize("Auto..."), action: @dialog, value: "image_size_auto.eve", alt: "Auto-calculate image resolution");
         }

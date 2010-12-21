@@ -36,10 +36,7 @@ layout progress_bar_suite
             column(child_horizontal: align_fill)
             {
                 button(name: "OK", default: true);
-                button( items: [
-                            {name: "Cancel", action: @cancel},
-                            {name: "Reset", action: @reset, modifiers: @opt}
-                        ]);
+                button(name: "Cancel", action: @cancel);
             }
         }
     }

@@ -34,10 +34,7 @@ layout mini_image_size
 			column()
 			{
 				button(name: "OK", action: @ok, default: true);
-				button(	items:	[ 
-									{ name: "Cancel", action: @cancel },
-									{ name: "Reset", action: @reset, modifiers: @opt }
-								]);
+				button(name: "Cancel", action: @cancel);
 			}
 		}
 		reveal(name: "Percent", bind: @percent);

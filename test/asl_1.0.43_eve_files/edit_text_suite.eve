@@ -19,10 +19,7 @@ layout edit_text_suite
             column(child_horizontal: align_fill, vertical: align_top)
             {
                 button(name: localize("OK"), default: true);
-                button( items: [ 
-                            { name: localize("Cancel"), action: @cancel },
-                            { name: localize("Reset"), action: @reset, modifiers: @opt }
-                         ]);
+                button(name: localize("Cancel"), action: @cancel);
             }
         }
     }

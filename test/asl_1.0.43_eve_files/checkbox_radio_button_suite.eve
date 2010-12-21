@@ -47,10 +47,7 @@ layout checkbox_radio_button_suite
             column(child_horizontal: align_fill, vertical: align_top)
             {
                 button(name: "OK", default: true);
-                button( items: [ 
-                            { name: "Cancel", action: @cancel },
-                            { name: "Reset", action: @reset, modifiers: @opt }
-                         ]);
+                button(name: "Cancel", action: @cancel);
             }
         }
     }

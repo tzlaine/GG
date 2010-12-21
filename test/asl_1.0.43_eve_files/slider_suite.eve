@@ -31,10 +31,7 @@ layout slider_suite
             column(child_horizontal: align_fill, horizontal: align_right, vertical: align_top)
             {
                 button(name: "OK", default: true, bind: @slider_value_1);
-                button( items: [
-                            {name: "Cancel", action: @cancel},
-                            {name: "Reset", action: @reset, modifiers: @opt}
-                        ]);
+                button(name: "Cancel", action: @cancel);
             }
         }
     }

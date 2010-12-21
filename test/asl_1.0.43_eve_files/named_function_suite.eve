@@ -28,10 +28,7 @@ layout named_function_suite
             column(child_horizontal: align_fill)
             {
                 button(name: "OK", default: true, bind: @result);
-                button( items: [
-                            {name: "Cancel", action: @cancel},
-                            {name: "Reset", action: @reset, modifiers: @opt}
-                        ]);
+                button(name: "Cancel", action: @cancel);
             }
         }
     }

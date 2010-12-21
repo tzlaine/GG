@@ -233,6 +233,8 @@ public:
         TextElement();
 
     private:
+        mutable X cached_width;
+
         friend class boost::serialization::access;
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version);
@@ -442,6 +444,22 @@ public:
     Pt   DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width,
                         std::vector<LineData>& line_data) const;
 
+    /** Returns the maximum dimensions of the string in x and y, and populates
+        \a line_data and \a text_elements.  Note that \a text_elements must be
+        empty. */
+    Pt   DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width,
+                        std::vector<LineData>& line_data,
+                        std::vector<boost::shared_ptr<TextElement> >& text_elements) const;
+
+    /** Returns the maximum dimensions of the string in x and y, and populates
+        \a line_data.  The contents of \a text_elements will be used, and the
+        equivalent work done by DetermineLines() will be skipped.  Supplying a
+        \a text and a \a text_elements that are incompatible will result in
+        undefined behavior. */
+    Pt   DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width,
+                        const std::vector<boost::shared_ptr<TextElement> >& text_elements,
+                        std::vector<LineData>& line_data) const;
+
     /** Returns the maximum dimensions of the string in x and y.  Provided as
         a convenience; it just calls DetermineLines with the given
         parameters. */
@@ -519,6 +537,12 @@ private:
     };
 
     typedef boost::unordered_map<boost::uint32_t, Glyph> GlyphMap;
+
+    Pt DetermineLinesImpl(const std::string& text,
+                          Flags<TextFormat>& format,
+                          X box_width,
+                          std::vector<LineData>& line_data,
+                          std::vector<boost::shared_ptr<TextElement> >* text_elements_ptr) const;
 
     FT_Error          GetFace(FT_Face& face);
     FT_Error          GetFace(const std::vector<unsigned char>& file_contents, FT_Face& face);

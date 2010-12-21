@@ -411,12 +411,14 @@ std::pair<std::size_t, CPSize> GG::LinePositionOf(CPSize index, const std::vecto
 ///////////////////////////////////////
 Font::TextElement::TextElement() :
     whitespace(false),
-    newline(false)
+    newline(false),
+    cached_width(-X1)
 {}
 
 Font::TextElement::TextElement(bool ws, bool nl) :
     whitespace(ws),
-    newline(nl)
+    newline(nl),
+    cached_width(-X1)
 {}
 
 Font::TextElement::~TextElement()
@@ -426,7 +428,11 @@ Font::TextElement::TextElementType Font::TextElement::Type() const
 { return newline ? NEWLINE : (whitespace ? WHITESPACE : TEXT); }
 
 X Font::TextElement::Width() const
-{ return std::accumulate(widths.begin(), widths.end(), X0); }
+{
+    if (cached_width == -X1)
+        cached_width = std::accumulate(widths.begin(), widths.end(), X0);
+    return cached_width;
+}
 
 StrSize Font::TextElement::StringSize() const
 { return StrSize(text.size()); }
@@ -714,7 +720,80 @@ void Font::ProcessTagsBefore(const std::vector<LineData>& line_data, RenderState
     }
 }
 
-Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width, std::vector<LineData>& line_data) const
+Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width,
+                        std::vector<LineData>& line_data) const
+{ return DetermineLinesImpl(text, format, box_width, line_data, 0); }
+
+Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width,
+                        std::vector<LineData>& line_data,
+                        std::vector<boost::shared_ptr<TextElement> >& text_elements) const
+{
+    assert(text_elements.empty());
+    return DetermineLinesImpl(text, format, box_width, line_data, &text_elements);
+}
+
+Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X box_width,
+                        const std::vector<boost::shared_ptr<TextElement> >& text_elements,
+                        std::vector<LineData>& line_data) const
+{
+    assert(!text_elements.empty());
+    return DetermineLinesImpl(text,
+                              format,
+                              box_width,
+                              line_data,
+                              const_cast<std::vector<boost::shared_ptr<TextElement> >*>(&text_elements));
+}
+
+Pt Font::TextExtent(const std::string& text, Flags<TextFormat> format/* = FORMAT_NONE*/, X box_width/* = X0*/) const
+{
+    std::vector<LineData> lines;
+    return DetermineLines(text, format, box_width ? box_width : X(1 << 15), lines);
+}
+
+Pt Font::TextExtent(const std::string& text, const std::vector<LineData>& line_data) const
+{
+    Pt retval;
+    for (std::size_t i = 0; i < line_data.size(); ++i) {
+        if (retval.x < line_data[i].Width())
+            retval.x = line_data[i].Width();
+    }
+    retval.y = text.empty() ? Y0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
+    return retval;
+}
+
+void Font::RegisterKnownTag(const std::string& tag)
+{ s_known_tags.insert(tag); }
+
+void Font::RemoveKnownTag(const std::string& tag)
+{
+    if (s_action_tags.find(tag) == s_action_tags.end())
+        s_known_tags.erase(tag);
+}
+
+void Font::ClearKnownTags()
+{
+    s_action_tags.clear();
+    s_action_tags.insert("i");
+    s_action_tags.insert("u");
+    s_action_tags.insert("rgba");
+    s_action_tags.insert(ALIGN_LEFT_TAG);
+    s_action_tags.insert(ALIGN_CENTER_TAG);
+    s_action_tags.insert(ALIGN_RIGHT_TAG);
+    s_action_tags.insert(PRE_TAG);
+    s_known_tags = s_action_tags;
+}
+
+void Font::ThrowBadGlyph(const std::string& format_str, boost::uint32_t c)
+{
+    boost::format format(isprint(c) ? "%c" : "U+%x");
+    throw BadGlyph(boost::io::str(boost::format(format_str) % boost::io::str(format % c)));
+}
+
+Pt Font::DetermineLinesImpl(const std::string& text,
+                            Flags<TextFormat>& format,
+                            X box_width,
+                            std::vector<LineData>& line_data,
+                            std::vector<boost::shared_ptr<TextElement> >* text_elements_ptr) const
 {
     ValidateFormat(format);
 
@@ -724,8 +803,12 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
               << format << " box_width=" << box_width << ")" << std::endl;
 #endif
 
-    std::vector<boost::shared_ptr<TextElement> > text_elements;
-    {
+    std::vector<boost::shared_ptr<TextElement> > local_text_elements;
+
+    std::vector<boost::shared_ptr<TextElement> >& text_elements =
+        text_elements_ptr ? *text_elements_ptr : local_text_elements;
+
+    if (text_elements.empty()) {
         using namespace boost::xpressive;
 
         std::stack<Substring> tag_stack;
@@ -815,55 +898,55 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
             if (need_increment)
                 ++it;
         }
-    }
 
-    // fill in the widths of code points in each TextElement
-    const GlyphMap::const_iterator WIDE_SPACE_IT = m_glyphs.find(WIDE_SPACE);
-    for (std::size_t i = 0; i < text_elements.size(); ++i) {
-        std::string::const_iterator it = text_elements[i]->text.begin();
-        std::string::const_iterator end_it = text_elements[i]->text.end();
-        while (it != end_it) {
-            text_elements[i]->widths.push_back(X0);
-            boost::uint32_t c = utf8::next(it, end_it);
-            if (c != WIDE_NEWLINE) {
-                GlyphMap::const_iterator it = m_glyphs.find(c);
-                // use a space when an unrendered glyph is requested (the
-                // space chararacter is always renderable)
-                if (it == m_glyphs.end())
-                    it = WIDE_SPACE_IT;
-                text_elements[i]->widths.back() = it->second.advance;
+        // fill in the widths of code points in each TextElement
+        const GlyphMap::const_iterator WIDE_SPACE_IT = m_glyphs.find(WIDE_SPACE);
+        for (std::size_t i = 0; i < text_elements.size(); ++i) {
+            std::string::const_iterator it = text_elements[i]->text.begin();
+            std::string::const_iterator end_it = text_elements[i]->text.end();
+            while (it != end_it) {
+                text_elements[i]->widths.push_back(X0);
+                boost::uint32_t c = utf8::next(it, end_it);
+                if (c != WIDE_NEWLINE) {
+                    GlyphMap::const_iterator it = m_glyphs.find(c);
+                    // use a space when an unrendered glyph is requested (the
+                    // space chararacter is always renderable)
+                    if (it == m_glyphs.end())
+                        it = WIDE_SPACE_IT;
+                    text_elements[i]->widths.back() = it->second.advance;
+                }
             }
         }
-    }
 
 #if DEBUG_DETERMINELINES
-    std::cout << "results of parse:\n";
-    for (std::size_t i = 0; i < text_elements.size(); ++i) {
-        if (boost::shared_ptr<FormattingTag> tag_elem = boost::dynamic_pointer_cast<FormattingTag>(text_elements[i])) {
-            std::cout << "FormattingTag\n    text=\"" << tag_elem->text << "\" (@ "
-                      << static_cast<const void*>(&*tag_elem->text.begin()) << ")\n    widths=";
-            for (std::size_t j = 0; j < tag_elem->widths.size(); ++j) {
-                std::cout << tag_elem->widths[j] << " ";
+        std::cout << "results of parse:\n";
+        for (std::size_t i = 0; i < text_elements.size(); ++i) {
+            if (boost::shared_ptr<FormattingTag> tag_elem = boost::dynamic_pointer_cast<FormattingTag>(text_elements[i])) {
+                std::cout << "FormattingTag\n    text=\"" << tag_elem->text << "\" (@ "
+                          << static_cast<const void*>(&*tag_elem->text.begin()) << ")\n    widths=";
+                for (std::size_t j = 0; j < tag_elem->widths.size(); ++j) {
+                    std::cout << tag_elem->widths[j] << " ";
+                }
+                std::cout << "\n    whitespace=" << tag_elem->whitespace << "\n    newline=" << tag_elem->newline << "\n    params=\n";
+                for (std::size_t j = 0; j < tag_elem->params.size(); ++j) {
+                    std::cout << "        \"" << tag_elem->params[j] << "\"\n";
+                }
+                std::cout << "    tag_name=\"" << tag_elem->tag_name << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
+            } else {
+                boost::shared_ptr<TextElement> elem = text_elements[i];
+                std::cout << "TextElement\n    text=\"" << elem->text << "\" (@ "
+                          << static_cast<const void*>(&*elem->text.begin()) << ")\n    widths=";
+                for (std::size_t j = 0; j < elem->widths.size(); ++j) {
+                    std::cout << elem->widths[j] << " ";
+                }
+                std::cout << "\n    whitespace=" << elem->whitespace << "\n    newline=" << elem->newline << "\n";
             }
-            std::cout << "\n    whitespace=" << tag_elem->whitespace << "\n    newline=" << tag_elem->newline << "\n    params=\n";
-            for (std::size_t j = 0; j < tag_elem->params.size(); ++j) {
-                std::cout << "        \"" << tag_elem->params[j] << "\"\n";
-            }
-            std::cout << "    tag_name=\"" << tag_elem->tag_name << "\"\n    close_tag=" << tag_elem->close_tag << "\n";
-        } else {
-            boost::shared_ptr<TextElement> elem = text_elements[i];
-            std::cout << "TextElement\n    text=\"" << elem->text << "\" (@ "
-                      << static_cast<const void*>(&*elem->text.begin()) << ")\n    widths=";
-            for (std::size_t j = 0; j < elem->widths.size(); ++j) {
-                std::cout << elem->widths[j] << " ";
-            }
-            std::cout << "\n    whitespace=" << elem->whitespace << "\n    newline=" << elem->newline << "\n";
+            std::cout << "    string_size=" << text_elements[i]->StringSize() << "\n";
+            std::cout << "\n";
         }
-        std::cout << "    string_size=" << text_elements[i]->StringSize() << "\n";
-        std::cout << "\n";
-    }
-    std::cout << std::endl;
+        std::cout << std::endl;
 #endif
+    }
 
     RenderState render_state;
     int tab_width = 8; // default tab width
@@ -1097,51 +1180,6 @@ Pt Font::DetermineLines(const std::string& text, Flags<TextFormat>& format, X bo
 #endif
 
     return TextExtent(text, line_data);
-}
-
-Pt Font::TextExtent(const std::string& text, Flags<TextFormat> format/* = FORMAT_NONE*/, X box_width/* = X0*/) const
-{
-    std::vector<LineData> lines;
-    return DetermineLines(text, format, box_width ? box_width : X(1 << 15), lines);
-}
-
-Pt Font::TextExtent(const std::string& text, const std::vector<LineData>& line_data) const
-{
-    Pt retval;
-    for (std::size_t i = 0; i < line_data.size(); ++i) {
-        if (retval.x < line_data[i].Width())
-            retval.x = line_data[i].Width();
-    }
-    retval.y = text.empty() ? Y0 : (static_cast<int>(line_data.size()) - 1) * m_lineskip + m_height;
-    return retval;
-}
-
-void Font::RegisterKnownTag(const std::string& tag)
-{ s_known_tags.insert(tag); }
-
-void Font::RemoveKnownTag(const std::string& tag)
-{
-    if (s_action_tags.find(tag) == s_action_tags.end())
-        s_known_tags.erase(tag);
-}
-
-void Font::ClearKnownTags()
-{
-    s_action_tags.clear();
-    s_action_tags.insert("i");
-    s_action_tags.insert("u");
-    s_action_tags.insert("rgba");
-    s_action_tags.insert(ALIGN_LEFT_TAG);
-    s_action_tags.insert(ALIGN_CENTER_TAG);
-    s_action_tags.insert(ALIGN_RIGHT_TAG);
-    s_action_tags.insert(PRE_TAG);
-    s_known_tags = s_action_tags;
-}
-
-void Font::ThrowBadGlyph(const std::string& format_str, boost::uint32_t c)
-{
-    boost::format format(isprint(c) ? "%c" : "U+%x");
-    throw BadGlyph(boost::io::str(boost::format(format_str) % boost::io::str(format % c)));
 }
 
 FT_Error Font::GetFace(FT_Face& face)

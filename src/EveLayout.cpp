@@ -271,7 +271,7 @@ namespace {
             m_child_horizontal(),
             m_child_vertical(),
             m_default_horizontal(),
-            m_default_vertical(key_align_center),
+            m_default_vertical(),
             m_default_child_horizontal(),
             m_default_child_vertical(),
             m_spacing(0),

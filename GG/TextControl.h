@@ -83,7 +83,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt        MinUsableSize() const;
+    virtual Pt        MinUsableSize(X available_width) const;
 
     /** Returns the text displayed in this control. */
     const std::string& Text() const;
@@ -257,6 +257,8 @@ private:
     Clr                         m_text_color;  ///< the color of the text itself (may differ from GG::Control::m_color)
     bool                        m_clip_text;
     bool                        m_set_min_size;
+    std::vector<boost::shared_ptr<Font::TextElement> >
+                                m_text_elements;
     std::vector<Font::LineData> m_line_data;
     CPSize                      m_code_points;
     boost::shared_ptr<Font>     m_font;
@@ -267,6 +269,7 @@ private:
     // variables for caching the results of MinUsableSize()
     mutable Pt                  m_min_usable_size;
     mutable X                   m_previous_client_width;
+    mutable X                   m_previous_available_width;
     mutable Flags<TextFormat>   m_previous_format;
 
     friend class boost::serialization::access;

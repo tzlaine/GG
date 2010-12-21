@@ -111,7 +111,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize() const;
+    virtual Pt MinUsableSize(X available_width) const;
 
     std::size_t      Rows() const;                             ///< returns the number of rows in the layout
     std::size_t      Columns() const;                          ///< returns the number of columns in the layout

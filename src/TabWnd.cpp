@@ -67,11 +67,11 @@ OverlayWnd::~OverlayWnd()
     }
 }
 
-Pt OverlayWnd::MinUsableSize() const
+Pt OverlayWnd::MinUsableSize(X available_width) const
 {
     Pt retval;
     for (std::size_t i = 0; i < m_wnds.size(); ++i) {
-        Pt min_usable_size = m_wnds[i]->MinUsableSize();
+        Pt min_usable_size = m_wnds[i]->MinUsableSize(available_width);
         retval.x = std::max(retval.x, min_usable_size.x);
         retval.y = std::max(retval.y, min_usable_size.y);
     }
@@ -176,10 +176,10 @@ TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr colo
         Connect(WndChangedSignal, TabChangedEcho("TabWnd::WndChangedSignal"));
 }
 
-Pt TabWnd::MinUsableSize() const
+Pt TabWnd::MinUsableSize(X available_width) const
 {
-    Pt retval = m_tab_bar->MinUsableSize();
-    Pt min_usable_size = m_overlay->MinUsableSize();
+    Pt retval = m_tab_bar->MinUsableSize(available_width);
+    Pt min_usable_size = m_overlay->MinUsableSize(available_width);
     retval.x = std::max(retval.x, min_usable_size.x);
     retval.y += min_usable_size.y;
     return retval;
@@ -210,7 +210,7 @@ void TabWnd::InsertWnd(std::size_t index, Wnd* wnd, const std::string& name)
     m_named_wnds[name] = wnd;
     m_overlay->InsertWnd(index, wnd);
     m_tab_bar->InsertTab(index, name);
-    GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize().y + 2 * 5);
+    GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize(X1).y + 2 * 5);
     if (m_tab_bar->CurrentTabIndex() != old_tab)
         TabChanged(m_tab_bar->CurrentTabIndex(), false);
 }
@@ -222,7 +222,7 @@ Wnd* TabWnd::RemoveWnd(const std::string& name)
     if (retval) {
         m_named_wnds.erase(name);
         m_tab_bar->RemoveTab(name);
-        GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize().y + 2 * 5);
+        GetLayout()->SetMinimumRowHeight(0, m_tab_bar->MinUsableSize(X1).y + 2 * 5);
     }
     if (m_tab_bar->CurrentTabIndex() != old_tab_index)
         TabChanged(m_tab_bar->CurrentTabIndex(), false);
@@ -318,11 +318,11 @@ TabBar::TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Cl
         Connect(TabChangedSignal, TabChangedEcho("TabBar::TabChangedSignal"));
 }
 
-Pt TabBar::MinUsableSize() const
+Pt TabBar::MinUsableSize(X available_width) const
 {
     Y y(0);
     for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
-        Y button_min_y = m_tab_buttons[i]->MinUsableSize().y;
+        Y button_min_y = m_tab_buttons[i]->MinUsableSize(available_width).y;
         if (y < button_min_y)
             y = button_min_y;
     }

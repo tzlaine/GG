@@ -125,7 +125,7 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
     SetText(str);
 }
 
-Pt TextControl::MinUsableSize() const
+Pt TextControl::MinUsableSize(X available_width) const
 {
     if (m_min_usable_size == INVALID_USABLE_SIZE ||
         m_previous_client_width != ClientSize().x ||

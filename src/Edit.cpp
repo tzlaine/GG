@@ -88,7 +88,7 @@ Edit::Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>&
     }
 }
 
-Pt Edit::MinUsableSize() const
+Pt Edit::MinUsableSize(X available_width) const
 { return Pt(X(4 * PIXEL_MARGIN), HeightFromFont(GetFont(), PIXEL_MARGIN)); }
 
 Pt Edit::ClientUpperLeft() const

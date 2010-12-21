@@ -218,7 +218,7 @@ StateButton* StyleFactory::NewTabBarTab(X x, Y y, X w, Y h, const std::string& s
                                         StateButtonStyle style/* = SBSTYLE_3D_TOP_ATTACHED_TAB*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const
 {
     StateButton* retval = NewStateButton(x, y, w, h, str, font, format, color, text_color, interior, style, flags);
-    retval->Resize(retval->MinUsableSize() + Pt(X(12), Y0));
+    retval->Resize(retval->MinUsableSize(X1) + Pt(X(12), Y0));
     return retval;
 }
 

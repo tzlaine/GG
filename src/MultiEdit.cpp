@@ -152,7 +152,7 @@ MultiEdit::~MultiEdit()
     delete m_hscroll;
 }
 
-Pt MultiEdit::MinUsableSize() const
+Pt MultiEdit::MinUsableSize(X available_width) const
 {
     return Pt(X(4 * SCROLL_WIDTH + 2 * BORDER_THICK),
               Y(4 * SCROLL_WIDTH + 2 * BORDER_THICK));

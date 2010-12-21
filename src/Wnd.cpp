@@ -311,7 +311,7 @@ Pt Wnd::MinSize() const
 Pt Wnd::MaxSize() const
 { return m_max_size; }
 
-Pt Wnd::MinUsableSize() const
+Pt Wnd::MinUsableSize(X available_width) const
 { return Size(); }
 
 Pt Wnd::ClientUpperLeft() const

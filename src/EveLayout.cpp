@@ -525,7 +525,7 @@ namespace {
             Factory().NewButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
         );
         button->SetMaxSize(Pt(button->MaxSize().x, button->Height()));
-        button->SetMinSize(Pt(DefaultFont()->TextExtent(name).x + 4 * CharWidth(), button->Height()));
+        button->SetMinSize(Pt(DefaultFont()->TextExtent(name).x + 2 * CharWidth(), button->Height()));
         retval->m_wnd = button;
 
         return retval.release();

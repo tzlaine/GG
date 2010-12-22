@@ -180,21 +180,13 @@ std::vector<std::vector<Rect> > Layout::RelativeCellRects() const
             Pt lr = ul + Pt(X(m_column_params[j].current_width),
                             Y(m_row_params[i].current_width));
             Rect rect(ul, lr);
-            if (!j)
-                rect.ul.x += static_cast<int>(m_border_margin);
-            else
+            if (j)
                 rect.ul.x += static_cast<int>(m_cell_margin / 2);
-            if (j == m_cells[i].size() - 1)
-                rect.lr.x -= static_cast<int>(m_border_margin);
-            else
+            if (j != m_cells[i].size() - 1)
                 rect.lr.x -= static_cast<int>(m_cell_margin - m_cell_margin / 2);
-            if (!i)
-                rect.ul.y += static_cast<int>(m_border_margin);
-            else
+            if (i)
                 rect.ul.y += static_cast<int>(m_cell_margin / 2);
-            if (i == m_cells.size() - 1)
-                rect.lr.y -= static_cast<int>(m_border_margin);
-            else
+            if (i != m_cells.size() - 1)
                 rect.lr.y -= static_cast<int>(m_cell_margin - m_cell_margin / 2);
             retval[i][j] = rect;
         }

@@ -673,7 +673,7 @@ namespace {
         adobe::string_t alt;
         std::size_t characters = 8;
         std::size_t lines = 1u;
-        bool scrollable;
+        bool scrollable = true;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_bind, bind);
@@ -694,22 +694,24 @@ namespace {
                                                               NONCONTAINER));
 
         std::auto_ptr<Wnd> edit;
+        X width = static_cast<int>(characters) * CharWidth();
         if (lines <= 1u) {
             std::auto_ptr<Edit> one_line_edit(
-                Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY)
+                Factory().NewEdit(X0, Y0, width, "", DefaultFont(), CLR_GRAY)
             );
             one_line_edit->SetMaxSize(Pt(one_line_edit->MaxSize().x, one_line_edit->Height()));
-            one_line_edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(),
-                                         one_line_edit->Height()));
+            one_line_edit->SetMinSize(Pt(width, one_line_edit->Height()));
             edit = one_line_edit;
         } else {
             Y height = CharHeight() * static_cast<int>(lines);
+            Flags<MultiEditStyle> style = MULTI_LINEWRAP;
+            if (!scrollable)
+                style |= MULTI_NO_SCROLL;
             std::auto_ptr<MultiEdit> multiline_edit(
-                Factory().NewMultiEdit(X0, Y0, X1, height, "", DefaultFont(), CLR_GRAY)
+                Factory().NewMultiEdit(X0, Y0, width, height, "", DefaultFont(), CLR_GRAY, style)
             );
             multiline_edit->SetMaxSize(Pt(multiline_edit->MaxSize().x, multiline_edit->Height()));
-            multiline_edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(),
-                                          multiline_edit->Height()));
+            multiline_edit->SetMinSize(Pt(width, multiline_edit->Height()));
             edit = multiline_edit;
         }
 

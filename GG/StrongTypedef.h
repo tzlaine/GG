@@ -389,53 +389,20 @@ inline std::size_t Value(std::size_t s)
         name() {}                                                       \
         explicit name(std::size_t t) : m_value(t) {}                    \
                                                                         \
-        bool operator<(name rhs) const                                  \
-        { return m_value < rhs.m_value; }                               \
-        bool operator==(name rhs) const                                 \
-        { return m_value == rhs.m_value; }                              \
+        GG_MEMBER_SELF_COMPARATORS(name);                               \
                                                                         \
-        bool operator<(std::size_t rhs) const                           \
-        { return m_value < rhs; }                                       \
-        bool operator==(std::size_t rhs) const                          \
-        { return m_value == rhs; }                                      \
+        GG_MEMBER_OTHER_COMPARATORS(std::size_t);                       \
                                                                         \
         operator int ConvertibleToBoolDummy::* () const                 \
         { return m_value ? &ConvertibleToBoolDummy::_ : 0; }            \
                                                                         \
-        name operator-() const                                          \
-        { return name(-m_value); }                                      \
+        GG_MEMBER_NEG_INCR_DECR(name);                                  \
                                                                         \
-        name& operator++()                                              \
-        { ++m_value; return *this; }                                    \
-        name& operator--()                                              \
-        { --m_value; return *this; }                                    \
+        GG_MEMBER_ARITH_ASSIGN_OPS_SELF_TYPE(name);                     \
+        GG_MEMBER_ASSIGN_OP_SELF_TYPE(%=, name);                        \
                                                                         \
-        name operator++(int)                                            \
-        { name retval(m_value); ++m_value; return retval; }             \
-        name operator--(int)                                            \
-        { name retval(m_value); --m_value; return retval; }             \
-                                                                        \
-        name& operator+=(name rhs)                                      \
-        { m_value += rhs.m_value; return *this; }                       \
-        name& operator-=(name rhs)                                      \
-        { m_value -= rhs.m_value; return *this; }                       \
-        name& operator*=(name rhs)                                      \
-        { m_value *= rhs.m_value; return *this; }                       \
-        name& operator/=(name rhs)                                      \
-        { m_value /= rhs.m_value; return *this; }                       \
-        name& operator%=(name rhs)                                      \
-        { m_value %= rhs.m_value; return *this; }                       \
-                                                                        \
-        name& operator+=(std::size_t rhs)                               \
-        { m_value += rhs; return *this; }                               \
-        name& operator-=(std::size_t rhs)                               \
-        { m_value -= rhs; return *this; }                               \
-        name& operator*=(std::size_t rhs)                               \
-        { m_value *= rhs; return *this; }                               \
-        name& operator/=(std::size_t rhs)                               \
-        { m_value /= rhs; return *this; }                               \
-        name& operator%=(std::size_t rhs)                               \
-        { m_value %= rhs; return *this; }                               \
+        GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, std::size_t);       \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE(%=, name, std::size_t);          \
                                                                         \
     private:                                                            \
         std::size_t m_value;                                            \
@@ -449,62 +416,15 @@ inline std::size_t Value(std::size_t s)
         friend std::size_t Value(name x);                               \
     };                                                                  \
                                                                         \
-    inline bool operator>(name x, name y)                               \
-    { return y < x; }                                                   \
-    inline bool operator<=(name x, name y)                              \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name x, name y)                              \
-    { return y < x || x == y; }                                         \
+    GG_NONMEMBER_ARITH_OPS_SELF_TYPE(name);                             \
+    GG_NONMEMBER_OP_SELF_TYPE(%, name);                                 \
                                                                         \
-    inline bool operator!=(name x, std::size_t y)                       \
-    { return !(x == y); }                                               \
-    inline bool operator>(name x, std::size_t y)                        \
-    { return !(x < y || x == y); }                                      \
-    inline bool operator<=(name x, std::size_t y)                       \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name x, std::size_t y)                       \
-    { return !(x < y); }                                                \
-    inline bool operator==(std::size_t x, name y)                       \
-    { return y == x; }                                                  \
-    inline bool operator!=(std::size_t x, name y)                       \
-    { return y != x; }                                                  \
-    inline bool operator>(std::size_t x, name y)                        \
-    { return y < x; }                                                   \
-    inline bool operator<(std::size_t x, name y)                        \
-    { return !(y < x || y == x); }                                      \
-    inline bool operator<=(std::size_t x, name y)                       \
-    { return !(y < x); }                                                \
-    inline bool operator>=(std::size_t x, name y)                       \
-    { return y < x || y == x; }                                         \
+    GG_NONMEMBER_ARITH_OPS_OTHER_TYPE(name, std::size_t);               \
+    GG_NONMEMBER_OP_OTHER_TYPE(%, name, std::size_t);                   \
                                                                         \
-    inline name operator+(name lhs, name rhs)                           \
-    { return lhs += rhs; }                                              \
-    inline name operator-(name lhs, name rhs)                           \
-    { return lhs -= rhs; }                                              \
-    inline name operator*(name lhs, name rhs)                           \
-    { return lhs *= rhs; }                                              \
-    inline name operator/(name lhs, name rhs)                           \
-    { return lhs /= rhs; }                                              \
-    inline name operator%(name lhs, name rhs)                           \
-    { return lhs %= rhs; }                                              \
+    GG_NONMEMBER_REVERSED_BOOL_OP_SET(std::size_t, name);               \
                                                                         \
-    inline name operator+(name lhs, std::size_t rhs)                    \
-    { return lhs += rhs; }                                              \
-    inline name operator-(name lhs, std::size_t rhs)                    \
-    { return lhs -= rhs; }                                              \
-    inline name operator*(name lhs, std::size_t rhs)                    \
-    { return lhs *= rhs; }                                              \
-    inline name operator/(name lhs, std::size_t rhs)                    \
-    { return lhs /= rhs; }                                              \
-    inline name operator%(name lhs, std::size_t rhs)                    \
-    { return lhs %= rhs; }                                              \
-                                                                        \
-    inline name operator+(std::size_t lhs, name rhs)                    \
-    { return rhs += lhs; }                                              \
-    inline name operator-(std::size_t lhs, name rhs)                    \
-    { return -(rhs -= lhs); }                                           \
-    inline name operator*(std::size_t lhs, name rhs)                    \
-    { return rhs *= lhs; }                                              \
+    GG_NONMEMBER_REVERSED_ARITH_OP_SET(std::size_t, name);              \
                                                                         \
     inline std::size_t Value(name x)                                    \
     { return x.m_value; }                                               \

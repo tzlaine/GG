@@ -1793,7 +1793,8 @@ struct EveLayout::Impl
 
             assert(children.empty() || IsContainer(view_params.m_name));
 
-            adobe::name_t placement = key_place_row;
+            adobe::name_t placement =
+                view_params.m_name == adobe::name_dialog ? key_place_row : key_place_column;
             get_value(parameters, key_placement, placement);
 
             if (!children.empty())

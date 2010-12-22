@@ -159,7 +159,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt       MinUsableSize(X available_width) const;
+    virtual Pt       MinUsableSize() const;
 
     bool             Checked() const;       ///< Returns true if button is checked
     Clr              InteriorColor() const; ///< Returns the interior color of the box, circle, or other enclosing shape
@@ -241,7 +241,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt       MinUsableSize(X available_width) const;
+    virtual Pt       MinUsableSize() const;
 
     /** Returns the orientation of the buttons in the group */
     Orientation      GetOrientation() const;

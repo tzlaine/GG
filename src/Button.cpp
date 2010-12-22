@@ -252,9 +252,9 @@ StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost
         Connect(CheckedSignal, &CheckedEcho);
 }
 
-Pt StateButton::MinUsableSize(X available_width) const
+Pt StateButton::MinUsableSize() const
 {
-    Pt text_lr = m_text_ul + TextControl::MinUsableSize(available_width);
+    Pt text_lr = m_text_ul + TextControl::MinUsableSize();
     return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, m_text_ul.x),
               std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, m_text_ul.y));
 }
@@ -540,11 +540,11 @@ RadioButtonGroup::RadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation) 
         Connect(ButtonChangedSignal, &ButtonChangedEcho);
 }
 
-Pt RadioButtonGroup::MinUsableSize(X available_width) const
+Pt RadioButtonGroup::MinUsableSize() const
 {
     Pt retval;
     for (std::size_t i = 0; i < m_button_slots.size(); ++i) {
-        Pt min_usable_size = m_button_slots[i].button->MinUsableSize(available_width);
+        Pt min_usable_size = m_button_slots[i].button->MinUsableSize();
         if (m_orientation == VERTICAL) {
             retval.x = std::max(retval.x, min_usable_size.x);
             retval.y += min_usable_size.y;
@@ -621,7 +621,7 @@ void RadioButtonGroup::InsertButton(std::size_t index, StateButton* bn)
 {
     assert(index <= m_button_slots.size());
     if (!m_expand_buttons) {
-        Pt min_usable_size = bn->MinUsableSize(X1);
+        Pt min_usable_size = bn->MinUsableSize();
         bn->Resize(Pt(std::max(bn->Width(), min_usable_size.x), std::max(bn->Height(), min_usable_size.y)));
     }
     Pt bn_sz = bn->Size();
@@ -678,7 +678,7 @@ void RadioButtonGroup::InsertButton(std::size_t index, const std::string& text, 
 {
     assert(index <= m_button_slots.size());
     StateButton* button = GetStyleFactory()->NewStateButton(X0, Y0, X1, Y1, text, font, format, color, text_color, interior, style);
-    button->Resize(button->MinUsableSize(X1));
+    button->Resize(button->MinUsableSize());
     InsertButton(index, button);
 }
 

@@ -127,7 +127,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X available_width) const;
+    virtual Pt MinUsableSize() const;
 
     T      Value() const;              ///< returns the current value of the control's text
     T      StepSize() const;           ///< returns the step size of the control
@@ -267,11 +267,11 @@ Spin<T>::~Spin()
 {}
 
 template<class T>
-Pt Spin<T>::MinUsableSize(X available_width) const
+Pt Spin<T>::MinUsableSize() const
 {
-    Pt edit_min = m_edit->MinUsableSize(available_width);
-    Pt up_min = m_up_button->MinUsableSize(available_width);
-    Pt down_min = m_down_button->MinUsableSize(available_width);
+    Pt edit_min = m_edit->MinUsableSize();
+    Pt up_min = m_up_button->MinUsableSize();
+    Pt down_min = m_down_button->MinUsableSize();
     return Pt(edit_min.x + std::max(up_min.x, down_min.x) + 2 * BORDER_THICK,
               std::max(up_min.y + down_min.y, edit_min.y) + 2 * BORDER_THICK);
 }

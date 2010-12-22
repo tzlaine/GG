@@ -111,7 +111,7 @@ Layout::Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns,
     assert(columns);
 }
 
-Pt Layout::MinUsableSize(X available_width) const
+Pt Layout::MinUsableSize() const
 { return m_min_usable_size; }
 
 std::size_t Layout::Rows() const
@@ -261,7 +261,7 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
             margin.x = X(static_cast<int>(std::ceil(m_cell_margin / 2.0)));
 
         Pt min_space_needed = it->first->MinSize() + margin;
-        Pt min_usable_size = it->first->MinUsableSize(it->first->Width()) + margin;
+        Pt min_usable_size = it->first->MinUsableSize() + margin;
 
         // adjust row minimums
         double total_stretch = 0.0;
@@ -449,7 +449,7 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
             it->first->SizeMove(ul, lr);
         } else { // align as appropriate
             Pt available_space = lr - ul;
-            Pt min_usable_size = it->first->MinUsableSize(available_space.x);
+            Pt min_usable_size = it->first->MinUsableSize();
             Pt window_size(std::min(available_space.x, std::max(it->second.original_size.x, min_usable_size.x)),
                            std::min(available_space.y, std::max(it->second.original_size.y, min_usable_size.y)));
             Pt resize_ul, resize_lr;

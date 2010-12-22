@@ -148,8 +148,7 @@ void TextBoxBrowseInfoWnd::SetText(const std::string& str)
     else
         Show();
     Resize(Pt(X1, Y1));
-    Pt layout_min_usable_size = GetLayout()->MinUsableSize(m_preferred_width);
-    Resize(Pt(std::min(m_preferred_width, layout_min_usable_size.x), layout_min_usable_size.y));
+    Resize(Pt(std::min(m_preferred_width, GetLayout()->MinUsableSize().x), GetLayout()->MinUsableSize().y));
 }
 
 void TextBoxBrowseInfoWnd::Render()

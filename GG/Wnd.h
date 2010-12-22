@@ -362,10 +362,8 @@ public:
         with those elements (if applicable).  For example, a TextControl's
         MinUsableSize() is just the area of its text, and a Scroll's
         MinUsableSize() is the combined sizes of its up-button, down-button,
-        and tab (plus a bit of room in which to drag the tab).  The \a
-        available_width parameter is used by Wnds that need to define their
-        height based on their width (e.g. TextControl). */
-    virtual Pt MinUsableSize(X available_width) const;
+        and tab (plus a bit of room in which to drag the tab). */
+    virtual Pt MinUsableSize() const;
 
     /** Returns upper-left corner of window's client area in screen
         coordinates (or of the entire area, if no client area is specified).

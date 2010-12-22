@@ -1520,7 +1520,7 @@ struct EveLayout::Impl
     {
         Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
-            Pt min_usable_size = children[i].m_wnd->MinUsableSize(X1);
+            Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_rows_height =
                 std::max(max_all_rows_height, std::max(children[i].m_wnd->MinSize().y, min_usable_size.y));
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
@@ -1548,16 +1548,16 @@ struct EveLayout::Impl
                 max_single_column_widths[align].resize(2, X0);
                 max_single_column_widths[align][0] =
                     std::max(max_single_column_widths[align][0],
-                             std::max(l->Cells()[0][0]->MinSize().x, l->Cells()[0][0]->MinUsableSize(X1).x));
+                             std::max(l->Cells()[0][0]->MinSize().x, l->Cells()[0][0]->MinUsableSize().x));
                 max_single_column_widths[align][1] =
                     std::max(max_single_column_widths[align][1],
-                             std::max(l->Cells()[0][1]->MinSize().x, l->Cells()[0][1]->MinUsableSize(X1).x));
+                             std::max(l->Cells()[0][1]->MinSize().x, l->Cells()[0][1]->MinUsableSize().x));
             } else {
                 l = 0;
             }
             max_all_columns_width =
                 std::max(max_all_columns_width,
-                         std::max(children[i].m_wnd->MinSize().x, children[i].m_wnd->MinUsableSize(X1).x));
+                         std::max(children[i].m_wnd->MinSize().x, children[i].m_wnd->MinUsableSize().x));
             children_as_1x2_layouts[align].resize(children.size());
             children_as_1x2_layouts[align][i] = l;
         }
@@ -1568,7 +1568,7 @@ struct EveLayout::Impl
         max_single_column_widths[ALIGN_RIGHT].resize(max_columns);
 
         for (std::size_t i = 0; i < children.size(); ++i) {
-            Pt min_usable_size = children[i].m_wnd->MinUsableSize(X1);
+            Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             max_all_columns_width =
                 std::max(max_all_columns_width,
                          std::max(children[i].m_wnd->MinSize().x, min_usable_size.x));

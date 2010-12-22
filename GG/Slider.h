@@ -63,7 +63,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt           MinUsableSize(X available_width) const;
+    virtual Pt           MinUsableSize() const;
 
     int                  Posn() const;           ///< returns the current tab position
     std::pair<int, int>  SliderRange() const;    ///< returns the defined possible range of control

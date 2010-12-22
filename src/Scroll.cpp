@@ -112,18 +112,18 @@ Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr inter
     }
 }
 
-Pt Scroll::MinUsableSize(X available_width) const
+Pt Scroll::MinUsableSize() const
 {
     Pt retval;
     const int MIN_DRAGABLE_SIZE = 2;
     if (m_orientation == VERTICAL) {
         retval.x = X(MIN_DRAGABLE_SIZE);
-        Y decr_y = m_decr->MinUsableSize(available_width).y;
-        Y incr_y = m_incr->MinUsableSize(available_width).y;
+        Y decr_y = m_decr->MinUsableSize().y;
+        Y incr_y = m_incr->MinUsableSize().y;
         retval.y = decr_y + incr_y + 3 * std::min(decr_y, incr_y);
     } else {
-        X decr_x = m_decr->MinUsableSize(available_width).x;
-        X incr_x = m_incr->MinUsableSize(available_width).x;
+        X decr_x = m_decr->MinUsableSize().x;
+        X incr_x = m_incr->MinUsableSize().x;
         retval.x = decr_x + incr_x + 3 * std::min(decr_x, incr_x);
         retval.y = Y(MIN_DRAGABLE_SIZE);
     }

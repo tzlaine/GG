@@ -92,9 +92,9 @@ Slider::Slider(X x, Y y, X w, Y h, int min, int max, Orientation orientation, Sl
     }
 }
 
-Pt Slider::MinUsableSize(X available_width) const
+Pt Slider::MinUsableSize() const
 {
-    Pt tab_min = m_tab->MinUsableSize(available_width);
+    Pt tab_min = m_tab->MinUsableSize();
     return Pt(m_orientation == VERTICAL ? tab_min.x : Size().x,
               m_orientation == VERTICAL ? Size().y : tab_min.y);
 }

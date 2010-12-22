@@ -75,7 +75,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X available_width) const;
+    virtual Pt MinUsableSize() const;
     virtual Pt ClientUpperLeft() const;
     virtual Pt ClientLowerRight() const;
 

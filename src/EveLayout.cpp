@@ -29,6 +29,7 @@
 #include <GG/GUI.h>
 #include <GG/Layout.h>
 #include <GG/Menu.h>
+#include <GG/MultiEdit.h>
 #include <GG/Slider.h>
 #include <GG/Spin.h>
 #include <GG/StyleFactory.h>
@@ -671,7 +672,7 @@ namespace {
         adobe::name_t bind;
         adobe::string_t alt;
         std::size_t characters = 8;
-        std::size_t lines;
+        std::size_t lines = 1u;
         bool scrollable;
 
         get_value(params, adobe::key_name, name);
@@ -692,9 +693,25 @@ namespace {
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
-        std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
-        edit->SetMaxSize(Pt(edit->MaxSize().x, edit->Height()));
-        edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(), edit->Height()));
+        std::auto_ptr<Wnd> edit;
+        if (lines <= 1u) {
+            std::auto_ptr<Edit> one_line_edit(
+                Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY)
+            );
+            one_line_edit->SetMaxSize(Pt(one_line_edit->MaxSize().x, one_line_edit->Height()));
+            one_line_edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(),
+                                         one_line_edit->Height()));
+            edit = one_line_edit;
+        } else {
+            Y height = CharHeight() * static_cast<int>(lines);
+            std::auto_ptr<MultiEdit> multiline_edit(
+                Factory().NewMultiEdit(X0, Y0, X1, height, "", DefaultFont(), CLR_GRAY)
+            );
+            multiline_edit->SetMaxSize(Pt(multiline_edit->MaxSize().x, multiline_edit->Height()));
+            multiline_edit->SetMinSize(Pt(static_cast<int>(characters) * CharWidth(),
+                                          multiline_edit->Height()));
+            edit = multiline_edit;
+        }
 
         if (!name.empty()) {
             std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));

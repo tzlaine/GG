@@ -87,7 +87,6 @@ TextControl::TextControl() :
     m_set_min_size(false),
     m_code_points(0),
     m_fit_to_text(false),
-    m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
 {}
 
@@ -101,7 +100,6 @@ TextControl::TextControl(X x, Y y, X w, Y h, const std::string& str, const boost
     m_code_points(0),
     m_font(font),
     m_fit_to_text(false),
-    m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
 {
     ValidateFormat();
@@ -118,7 +116,6 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
     m_code_points(0),
     m_font(font),
     m_fit_to_text(true),
-    m_min_usable_size(INVALID_USABLE_SIZE),
     m_dirty_load(false)
 {
     ValidateFormat();
@@ -126,18 +123,7 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
 }
 
 Pt TextControl::MinUsableSize(X available_width) const
-{
-    if (m_min_usable_size == INVALID_USABLE_SIZE ||
-        m_previous_client_width != ClientSize().x ||
-        m_previous_format != m_format) {
-        m_min_usable_size = m_font ?
-            m_font->TextExtent(m_text, m_line_data) :
-            Pt();
-        m_previous_client_width = ClientSize().x;
-        m_previous_format = m_format;
-    }
-    return m_min_usable_size;
-}
+{ return m_text_lr - m_text_ul; }
 
 const std::string& TextControl::Text() const
 { return m_text; }
@@ -188,8 +174,10 @@ void TextControl::SetText(const std::string& str)
 {
     m_text = str;
     if (m_font) {
-        Pt text_sz = m_font->DetermineLines(m_text, m_format, ClientSize().x, m_line_data);
         m_code_points = CPSize(utf8::distance(str.begin(), str.end()));
+        m_text_elements.clear();
+        Pt text_sz =
+            m_font->DetermineLines(m_text, m_format, ClientSize().x, m_line_data, m_text_elements);
         m_text_ul = Pt();
         m_text_lr = text_sz;
         AdjustMinimumSize();
@@ -200,12 +188,32 @@ void TextControl::SetText(const std::string& str)
         }
     }
     m_dirty_load = false;
-    m_min_usable_size = INVALID_USABLE_SIZE;
 }
 
 void TextControl::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
+    bool redo_determine_lines = false;
+    X client_width = ClientSize().x;
+    if (!m_fit_to_text && (m_format | FORMAT_WORDBREAK || m_format | FORMAT_LINEWRAP)) {
+        X text_width = m_text_lr.x - m_text_ul.x;
+        redo_determine_lines =
+            client_width < text_width ||
+            text_width < client_width && 1u < m_line_data.size();
+    }
+    if (redo_determine_lines) {
+        Pt text_sz;
+        if (m_text_elements.empty()) {
+            text_sz =
+                m_font->DetermineLines(m_text, m_format, client_width, m_line_data, m_text_elements);
+        } else {
+            text_sz =
+                m_font->DetermineLines(m_text, m_format, client_width, m_text_elements, m_line_data);
+        }
+        m_text_ul = Pt();
+        m_text_lr = text_sz;
+        AdjustMinimumSize();
+    }
     RecomputeTextBounds();
 }
 

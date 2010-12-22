@@ -266,12 +266,6 @@ private:
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
     Pt                          m_text_lr;     ///< stored relative to the control's UpperLeft()
 
-    // variables for caching the results of MinUsableSize()
-    mutable Pt                  m_min_usable_size;
-    mutable X                   m_previous_client_width;
-    mutable X                   m_previous_available_width;
-    mutable Flags<TextFormat>   m_previous_format;
-
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version);

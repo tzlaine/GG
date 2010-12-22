@@ -37,9 +37,155 @@
 #include <iostream>
 
 
-#define GG_STRONG_DOUBLE_TYPEDEF(name)                                  \
+namespace GG {
+
+/** Overload of Value() for int. */
+inline int Value(int i)
+{ return i; }
+
+/** Overload of Value() for double. */
+inline double Value(double d)
+{ return d; }
+
+/** Overload of Value() for std::size_t. */
+inline std::size_t Value(std::size_t s)
+{ return s; }
+
+}
+
+#define GG_MEMBER_BOOL_OP_SELF_TYPE(op, rhs_type) \
+    inline bool operator op (rhs_type rhs) const  \
+    { return m_value op rhs.m_value; }
+
+#define GG_MEMBER_BOOL_OP_OTHER_TYPE(op, rhs_type) \
+    inline bool operator op (rhs_type rhs) const   \
+    { return m_value op Value(rhs); }
+
+#define GG_MEMBER_NEG_INCR_DECR(this_type)      \
+    inline this_type operator-() const          \
+    { return this_type(-m_value); }             \
+    inline this_type& operator++()              \
+    {                                           \
+        ++m_value;                              \
+        return *this;                           \
+    }                                           \
+    inline this_type& operator--()              \
+    {                                           \
+        --m_value;                              \
+        return *this;                           \
+    }                                           \
+    inline this_type operator++(int)            \
+    {                                           \
+        this_type retval(m_value);              \
+        ++m_value;                              \
+        return retval;                          \
+    }                                           \
+    inline this_type operator--(int)            \
+    {                                           \
+        this_type retval(m_value);              \
+        --m_value;                              \
+        return retval;                          \
+    }
+
+#define GG_MEMBER_ASSIGN_OP_SELF_TYPE(op, rhs_type)     \
+    inline rhs_type& operator op (rhs_type rhs)         \
+    {                                                   \
+        m_value op rhs.m_value;                         \
+        return *this;                                   \
+    }
+
+#define GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(op, self_type, rhs_type) \
+    inline self_type& operator op (rhs_type rhs)
+
+#define GG_MEMBER_ASSIGN_OP_OTHER_TYPE(op, self_type, rhs_type)  \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(op, self_type, rhs_type) \
+    {                                                            \
+        m_value op Value(rhs);                                   \
+        return *this;                                            \
+    }
+
+#define GG_MEMBER_OP_OTHER_TYPE_DECL(op, self_type, rhs_type) \
+    inline self_type& operator op (rhs_type rhs) const
+
+#define GG_MEMBER_OP_OTHER_TYPE(op, self_type, rhs_type)  \
+    GG_MEMBER_OP_OTHER_TYPE_DECL(op, self_type, rhs_type) \
+    { return self_type(m_value op Value(rhs)); }
+
+#define GG_NONMEMBER_OP_SELF_TYPE(op, self_type)                \
+    inline self_type operator op (self_type lhs, self_type rhs) \
+    { return lhs op ## = rhs; }
+
+#define GG_NONMEMBER_OP_OTHER_TYPE(op, self_type, rhs_type)     \
+    inline self_type operator op (self_type lhs, rhs_type rhs)  \
+    { return lhs op ## = Value(rhs); }
+
+#define GG_MEMBER_SELF_COMPARATORS(self_type)    \
+    GG_MEMBER_BOOL_OP_SELF_TYPE(==, self_type); \
+    GG_MEMBER_BOOL_OP_SELF_TYPE(!=, self_type); \
+    GG_MEMBER_BOOL_OP_SELF_TYPE(<, self_type);  \
+    GG_MEMBER_BOOL_OP_SELF_TYPE(>, self_type);  \
+    GG_MEMBER_BOOL_OP_SELF_TYPE(<=, self_type); \
+    GG_MEMBER_BOOL_OP_SELF_TYPE(>=, self_type);
+
+#define GG_MEMBER_OTHER_COMPARATORS(rhs_type)   \
+    GG_MEMBER_BOOL_OP_OTHER_TYPE(==, rhs_type); \
+    GG_MEMBER_BOOL_OP_OTHER_TYPE(!=, rhs_type); \
+    GG_MEMBER_BOOL_OP_OTHER_TYPE(<, rhs_type);  \
+    GG_MEMBER_BOOL_OP_OTHER_TYPE(>, rhs_type);  \
+    GG_MEMBER_BOOL_OP_OTHER_TYPE(<=, rhs_type); \
+    GG_MEMBER_BOOL_OP_OTHER_TYPE(>=, rhs_type);
+
+#define GG_MEMBER_ARITH_ASSIGN_OPS_SELF_TYPE(rhs_type) \
+    GG_MEMBER_ASSIGN_OP_SELF_TYPE(+=, rhs_type);       \
+    GG_MEMBER_ASSIGN_OP_SELF_TYPE(-=, rhs_type);       \
+    GG_MEMBER_ASSIGN_OP_SELF_TYPE(*=, rhs_type);       \
+    GG_MEMBER_ASSIGN_OP_SELF_TYPE(/=, rhs_type);
+
+#define GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(self_type, rhs_type) \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(+=, self_type, rhs_type);       \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(-=, self_type, rhs_type);       \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(*=, self_type, rhs_type);       \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(/=, self_type, rhs_type);
+
+#define GG_NONMEMBER_ARITH_OPS_SELF_TYPE(self_type) \
+    GG_NONMEMBER_OP_SELF_TYPE(+, self_type);        \
+    GG_NONMEMBER_OP_SELF_TYPE(-, self_type);        \
+    GG_NONMEMBER_OP_SELF_TYPE(*, self_type);        \
+    GG_NONMEMBER_OP_SELF_TYPE(/, self_type);
+
+#define GG_NONMEMBER_ARITH_OPS_OTHER_TYPE(self_type, rhs_type) \
+    GG_NONMEMBER_OP_OTHER_TYPE(+, self_type, rhs_type);        \
+    GG_NONMEMBER_OP_OTHER_TYPE(-, self_type, rhs_type);        \
+    GG_NONMEMBER_OP_OTHER_TYPE(*, self_type, rhs_type);        \
+    GG_NONMEMBER_OP_OTHER_TYPE(/, self_type, rhs_type);
+
+#define GG_NONMEMBER_REVERSED_BOOL_OP_SET(lhs_type, self_type)  \
+    inline bool operator==(lhs_type x, self_type y)             \
+    { return y == x; }                                          \
+    inline bool operator!=(lhs_type x, self_type y)             \
+    { return y != x; }                                          \
+    inline bool operator<(lhs_type x, self_type y)              \
+    { return !(y < x || y == x); }                              \
+    inline bool operator>(lhs_type x, self_type y)              \
+    { return !(y > x || y == x); }                              \
+    inline bool operator<=(lhs_type x, self_type y)             \
+    { return !(y < x); }                                        \
+    inline bool operator>=(lhs_type x, self_type y)             \
+    { return !(y > x); }
+
+#define GG_NONMEMBER_REVERSED_ARITH_OP_SET(lhs_type, self_type) \
+    inline self_type operator+(lhs_type x, self_type y)         \
+    { return y += x; }                                          \
+    inline self_type operator-(lhs_type x, self_type y)         \
+    { return -(y -= x); }                                       \
+    inline self_type operator*(lhs_type x, self_type y)         \
+    { return y *= x; }
+
+
+#define GG_STRONG_DOUBLE_TYPEDEF(name, type)                            \
     class name;                                                         \
     class name ## _d;                                                   \
+    type Value(name x);                                                 \
     double Value(name ## _d x);                                         \
                                                                         \
     class name ## _d                                                    \
@@ -51,59 +197,23 @@
         name ## _d() {}                                                 \
         explicit name ## _d(double t) : m_value(t) {}                   \
                                                                         \
-        bool operator<(name ## _d rhs) const                            \
-        { return m_value < rhs.m_value; }                               \
-        bool operator==(name ## _d rhs) const                           \
-        { return m_value == rhs.m_value; }                              \
+        GG_MEMBER_SELF_COMPARATORS(name ## _d);                         \
                                                                         \
-        bool operator<(double rhs) const                                \
-        { return m_value < rhs; }                                       \
-        bool operator==(double rhs) const                               \
-        { return m_value == rhs; }                                      \
+        GG_MEMBER_OTHER_COMPARATORS(double);                            \
                                                                         \
         operator int ConvertibleToBoolDummy::* () const                 \
         { return m_value ? &ConvertibleToBoolDummy::_ : 0; }            \
                                                                         \
-        name ## _d operator-() const                                    \
-        { return name ## _d(-m_value); }                                \
+        GG_MEMBER_NEG_INCR_DECR(name ## _d);                            \
                                                                         \
-        name ## _d& operator++()                                        \
-        { ++m_value; return *this; }                                    \
-        name ## _d& operator--()                                        \
-        { --m_value; return *this; }                                    \
+        GG_MEMBER_ARITH_ASSIGN_OPS_SELF_TYPE(name ## _d);               \
                                                                         \
-        name ## _d operator++(int)                                      \
-        { name ## _d retval(m_value); ++m_value; return retval; }       \
-        name ## _d operator--(int)                                      \
-        { name ## _d retval(m_value); --m_value; return retval; }       \
+        GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name ## _d, double);      \
                                                                         \
-        name ## _d& operator+=(name ## _d rhs)                          \
-        { m_value += rhs.m_value; return *this; }                       \
-        name ## _d& operator-=(name ## _d rhs)                          \
-        { m_value -= rhs.m_value; return *this; }                       \
-        name ## _d& operator*=(name ## _d rhs)                          \
-        { m_value *= rhs.m_value; return *this; }                       \
-        name ## _d& operator/=(name ## _d rhs)                          \
-        { m_value /= rhs.m_value; return *this; }                       \
-                                                                        \
-        name ## _d& operator+=(double rhs)                              \
-        { m_value += rhs; return *this; }                               \
-        name ## _d& operator-=(double rhs)                              \
-        { m_value -= rhs; return *this; }                               \
-        name ## _d& operator*=(double rhs)                              \
-        { m_value *= rhs; return *this; }                               \
-        name ## _d& operator/=(double rhs)                              \
-        { m_value /= rhs; return *this; }                               \
-                                                                        \
-        name ## _d& operator+=(name rhs);                               \
-        name ## _d& operator-=(name rhs);                               \
-        name ## _d& operator*=(name rhs);                               \
-        name ## _d& operator/=(name rhs);                               \
-                                                                        \
-        name ## _d operator+(name rhs);                                 \
-        name ## _d operator-(name rhs);                                 \
-        name ## _d operator*(name rhs);                                 \
-        name ## _d operator/(name rhs);                                 \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(+=, name ## _d, name);      \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(-=, name ## _d, name);      \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(*=, name ## _d, name);      \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(/=, name ## _d, name);      \
                                                                         \
     private:                                                            \
         double m_value;                                                 \
@@ -116,58 +226,13 @@
         friend double Value(name ## _d x);                              \
     };                                                                  \
                                                                         \
-    inline bool operator>(name ## _d x, name ## _d y)                   \
-    { return y < x; }                                                   \
-    inline bool operator<=(name ## _d x, name ## _d y)                  \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name ## _d x, name ## _d y)                  \
-    { return y < x || x == y; }                                         \
+    GG_NONMEMBER_ARITH_OPS_SELF_TYPE(name ## _d);                       \
                                                                         \
-    inline bool operator!=(name ## _d x, double y)                      \
-    { return !(x == y); }                                               \
-    inline bool operator>(name ## _d x, double y)                       \
-    { return !(x < y || x == y); }                                      \
-    inline bool operator<=(name ## _d x, double y)                      \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name ## _d x, double y)                      \
-    { return !(x < y); }                                                \
-    inline bool operator>(double x, name ## _d y)                       \
-    { return y < x; }                                                   \
-    inline bool operator==(double x, name ## _d y)                      \
-    { return y == x; }                                                  \
-    inline bool operator!=(double x, name ## _d y)                      \
-    { return y != x; }                                                  \
-    inline bool operator<(double x, name ## _d y)                       \
-    { return !(y < x || y == x); }                                      \
-    inline bool operator<=(double x, name ## _d y)                      \
-    { return !(y < x); }                                                \
-    inline bool operator>=(double x, name ## _d y)                      \
-    { return y < x || y == x; }                                         \
+    GG_NONMEMBER_ARITH_OPS_OTHER_TYPE(name ## _d, double);              \
                                                                         \
-    inline name ## _d operator+(name ## _d lhs, name ## _d rhs)         \
-    { return lhs += rhs; }                                              \
-    inline name ## _d operator-(name ## _d lhs, name ## _d rhs)         \
-    { return lhs -= rhs; }                                              \
-    inline name ## _d operator*(name ## _d lhs, name ## _d rhs)         \
-    { return lhs *= rhs; }                                              \
-    inline name ## _d operator/(name ## _d lhs, name ## _d rhs)         \
-    { return lhs /= rhs; }                                              \
+    GG_NONMEMBER_REVERSED_BOOL_OP_SET(double, name ## _d);              \
                                                                         \
-    inline name ## _d operator+(name ## _d lhs, double rhs)             \
-    { return lhs += rhs; }                                              \
-    inline name ## _d operator-(name ## _d lhs, double rhs)             \
-    { return lhs -= rhs; }                                              \
-    inline name ## _d operator*(name ## _d lhs, double rhs)             \
-    { return lhs *= rhs; }                                              \
-    inline name ## _d operator/(name ## _d lhs, double rhs)             \
-    { return lhs /= rhs; }                                              \
-                                                                        \
-    inline name ## _d operator+(double lhs, name ## _d rhs)             \
-    { return rhs += lhs; }                                              \
-    inline name ## _d operator-(double lhs, name ## _d rhs)             \
-    { return -(rhs -= lhs); }                                           \
-    inline name ## _d operator*(double lhs, name ## _d rhs)             \
-    { return rhs *= lhs; }                                              \
+    GG_NONMEMBER_REVERSED_ARITH_OP_SET(double, name ## _d);             \
                                                                         \
     inline double Value(name ## _d x)                                   \
     { return x.m_value; }                                               \
@@ -194,7 +259,7 @@
     functions accepting doubles return GG_STRONG_DOUBLE_TYPEDEF's called \a
     name_d.  This allows \a name objects to be used in floating point math. */
 #define GG_STRONG_INTEGRAL_TYPEDEF(name, type)                          \
-    GG_STRONG_DOUBLE_TYPEDEF(name);                                     \
+    GG_STRONG_DOUBLE_TYPEDEF(name, type);                               \
                                                                         \
     type Value(name x);                                                 \
                                                                         \
@@ -215,87 +280,25 @@
         name& operator=(name ## _d t)                                   \
         { m_value = static_cast<type>(Value(t)); return *this; }        \
                                                                         \
-        bool operator<(name rhs) const                                  \
-        { return m_value < rhs.m_value; }                               \
-        bool operator==(name rhs) const                                 \
-        { return m_value == rhs.m_value; }                              \
+        GG_MEMBER_SELF_COMPARATORS(name);                               \
                                                                         \
-        bool operator<(type rhs) const                                  \
-        { return m_value < rhs; }                                       \
-        bool operator==(type rhs) const                                 \
-        { return m_value == rhs; }                                      \
-        bool operator!=(type rhs) const                                 \
-        { return m_value != rhs; }                                      \
-                                                                        \
-        bool operator<(name ## _d rhs) const                            \
-        { return m_value < Value(rhs); }                                \
-        bool operator==(name ## _d rhs) const                           \
-        { return m_value == Value(rhs); }                               \
-        bool operator!=(name ## _d rhs) const                           \
-        { return m_value != Value(rhs); }                               \
-                                                                        \
-        bool operator<(double rhs) const                                \
-        { return m_value < rhs; }                                       \
-        bool operator==(double rhs) const                               \
-        { return m_value == rhs; }                                      \
-        bool operator!=(double rhs) const                               \
-        { return m_value != rhs; }                                      \
+        GG_MEMBER_OTHER_COMPARATORS(type);                              \
+        GG_MEMBER_OTHER_COMPARATORS(name ## _d);                        \
+        GG_MEMBER_OTHER_COMPARATORS(double);                            \
                                                                         \
         operator int ConvertibleToBoolDummy::* () const                 \
         { return m_value ? &ConvertibleToBoolDummy::_ : 0; }            \
                                                                         \
-        name operator-() const                                          \
-        { return name(-m_value); }                                      \
+        GG_MEMBER_NEG_INCR_DECR(name);                                  \
                                                                         \
-        name& operator++()                                              \
-        { ++m_value; return *this; }                                    \
-        name& operator--()                                              \
-        { --m_value; return *this; }                                    \
+        GG_MEMBER_ARITH_ASSIGN_OPS_SELF_TYPE(name);                     \
+        GG_MEMBER_ASSIGN_OP_SELF_TYPE(%=, name);                        \
                                                                         \
-        name operator++(int)                                            \
-        { name retval(m_value); ++m_value; return retval; }             \
-        name operator--(int)                                            \
-        { name retval(m_value); --m_value; return retval; }             \
+        GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, type);              \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE(%=, name, type);                 \
                                                                         \
-        name& operator+=(name rhs)                                      \
-        { m_value += rhs.m_value; return *this; }                       \
-        name& operator-=(name rhs)                                      \
-        { m_value -= rhs.m_value; return *this; }                       \
-        name& operator*=(name rhs)                                      \
-        { m_value *= rhs.m_value; return *this; }                       \
-        name& operator/=(name rhs)                                      \
-        { m_value /= rhs.m_value; return *this; }                       \
-        name& operator%=(name rhs)                                      \
-        { m_value %= rhs.m_value; return *this; }                       \
-                                                                        \
-        name& operator+=(type rhs)                                      \
-        { m_value += rhs; return *this; }                               \
-        name& operator-=(type rhs)                                      \
-        { m_value -= rhs; return *this; }                               \
-        name& operator*=(type rhs)                                      \
-        { m_value *= rhs; return *this; }                               \
-        name& operator/=(type rhs)                                      \
-        { m_value /= rhs; return *this; }                               \
-        name& operator%=(type rhs)                                      \
-        { m_value %= rhs; return *this; }                               \
-                                                                        \
-        name& operator+=(name ## _d rhs)                                \
-        { return operator+=(Value(rhs)); }                              \
-        name& operator-=(name ## _d rhs)                                \
-        { return operator-=(Value(rhs)); }                              \
-        name& operator*=(name ## _d rhs)                                \
-        { return operator*=(Value(rhs)); }                              \
-        name& operator/=(name ## _d rhs)                                \
-        { return operator/=(Value(rhs)); }                              \
-                                                                        \
-        name& operator+=(double rhs)                                    \
-        { m_value = static_cast<type>(m_value + rhs); return *this; }   \
-        name& operator-=(double rhs)                                    \
-        { m_value = static_cast<type>(m_value - rhs); return *this; }   \
-        name& operator*=(double rhs)                                    \
-        { m_value = static_cast<type>(m_value * rhs); return *this; }   \
-        name& operator/=(double rhs)                                    \
-        { m_value = static_cast<type>(m_value / rhs); return *this; }   \
+        GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, name ## _d);        \
+        GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, double);            \
                                                                         \
     private:                                                            \
         type m_value;                                                   \
@@ -309,114 +312,33 @@
         friend type Value(name x);                                      \
     };                                                                  \
                                                                         \
-    inline name operator+(name lhs, name rhs)                           \
-    { return lhs += rhs; }                                              \
-    inline name operator-(name lhs, name rhs)                           \
-    { return lhs -= rhs; }                                              \
-    inline name operator*(name lhs, name rhs)                           \
-    { return lhs *= rhs; }                                              \
-    inline name operator/(name lhs, name rhs)                           \
-    { return lhs /= rhs; }                                              \
-    inline name operator%(name lhs, name rhs)                           \
-    { return lhs %= rhs; }                                              \
+    GG_NONMEMBER_ARITH_OPS_SELF_TYPE(name);                             \
+    GG_NONMEMBER_OP_SELF_TYPE(%, name);                                 \
                                                                         \
-    inline name operator+(name lhs, type rhs)                           \
-    { return lhs += rhs; }                                              \
-    inline name operator-(name lhs, type rhs)                           \
-    { return lhs -= rhs; }                                              \
-    inline name operator*(name lhs, type rhs)                           \
-    { return lhs *= rhs; }                                              \
-    inline name operator/(name lhs, type rhs)                           \
-    { return lhs /= rhs; }                                              \
-    inline name operator%(name lhs, type rhs)                           \
-    { return lhs %= rhs; }                                              \
+    GG_NONMEMBER_ARITH_OPS_OTHER_TYPE(name, type);                      \
+    GG_NONMEMBER_OP_OTHER_TYPE(%, name, type);                          \
                                                                         \
-    inline name operator+(type lhs, name rhs)                           \
-    { return rhs += lhs; }                                              \
-    inline name operator-(type lhs, name rhs)                           \
-    { return -(rhs -= lhs); }                                           \
-    inline name operator*(type lhs, name rhs)                           \
-    { return rhs *= lhs; }                                              \
+    GG_NONMEMBER_REVERSED_BOOL_OP_SET(type, name);                      \
+    GG_NONMEMBER_REVERSED_BOOL_OP_SET(name ## _d, name);                \
+    GG_NONMEMBER_REVERSED_BOOL_OP_SET(double, name);                    \
+                                                                        \
+    GG_NONMEMBER_REVERSED_ARITH_OP_SET(type, name);                     \
                                                                         \
     inline name ## _d operator+(name x, double y)                       \
     { return name ## _d(Value(x)) + y; }                                \
-    inline name ## _d operator+(double x, name y)                       \
-    { return x + name ## _d(Value(y)); }                                \
-                                                                        \
     inline name ## _d operator-(name x, double y)                       \
     { return name ## _d(Value(x)) - y; }                                \
-    inline name ## _d operator-(double x, name y)                       \
-    { return x - name ## _d(Value(y)); }                                \
-                                                                        \
     inline name ## _d operator*(name x, double y)                       \
     { return name ## _d(Value(x)) * y; }                                \
-    inline name ## _d operator*(double x, name y)                       \
-    { return x * name ## _d(Value(y)); }                                \
-                                                                        \
     inline name ## _d operator/(name x, double y)                       \
     { return name ## _d(Value(x)) / y; }                                \
                                                                         \
-    inline bool operator!=(name x, name y)                              \
-    { return !(x == y); }                                               \
-    inline bool operator>(name x, name y)                               \
-    { return y < x; }                                                   \
-    inline bool operator<=(name x, name y)                              \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name x, name y)                              \
-    { return y < x || x == y; }                                         \
-                                                                        \
-    inline bool operator>(name x, type y)                               \
-    { return !(x < y || x == y); }                                      \
-    inline bool operator<=(name x, type y)                              \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name x, type y)                              \
-    { return !(x < y); }                                                \
-    inline bool operator==(type x, name y)                              \
-    { return y == x; }                                                  \
-    inline bool operator!=(type x, name y)                              \
-    { return y != x; }                                                  \
-    inline bool operator>(type x, name y)                               \
-    { return y < x; }                                                   \
-    inline bool operator<(type x, name y)                               \
-    { return !(y < x || y == x); }                                      \
-    inline bool operator<=(type x, name y)                              \
-    { return !(y < x); }                                                \
-    inline bool operator>=(type x, name y)                              \
-    { return y < x || y == x; }                                         \
-                                                                        \
-    inline bool operator>(name x, name ## _d y)                         \
-    { return !(x < y || x == y); }                                      \
-    inline bool operator<=(name x, name ## _d y)                        \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name x, name ## _d y)                        \
-    { return !(x < y); }                                                \
-    inline bool operator!=(name ## _d x, name y)                        \
-    { return Value(y) != Value(x); }                                    \
-    inline bool operator==(name ## _d x, name y)                        \
-    { return Value(y) == Value(x); }                                    \
-    inline bool operator>(name ## _d x, name y)                         \
-    { return y < x; }                                                   \
-    inline bool operator<(name ## _d x, name y)                         \
-    { return !(y < x || y == x); }                                      \
-    inline bool operator<=(name ## _d x, name y)                        \
-    { return !(y < x); }                                                \
-    inline bool operator>=(name ## _d x, name y)                        \
-    { return y < x || x == y; }                                         \
-                                                                        \
-    inline bool operator>(name x, double y)                             \
-    { return !(x < y || x == y); }                                      \
-    inline bool operator<=(name x, double y)                            \
-    { return x < y || x == y; }                                         \
-    inline bool operator>=(name x, double y)                            \
-    { return !(x < y); }                                                \
-    inline bool operator>(double x, name y)                             \
-    { return y < x; }                                                   \
-    inline bool operator<(double x, name y)                             \
-    { return !(y < x || y == x); }                                      \
-    inline bool operator<=(double x, name y)                            \
-    { return !(y < x); }                                                \
-    inline bool operator>=(double x, name y)                            \
-    { return y < x || x == y; }                                         \
+    inline name ## _d operator+(double x, name y)                       \
+    { return x + name ## _d(Value(y)); }                                \
+    inline name ## _d operator-(double x, name y)                       \
+    { return x - name ## _d(Value(y)); }                                \
+    inline name ## _d operator*(double x, name y)                       \
+    { return x * name ## _d(Value(y)); }                                \
                                                                         \
     inline type Value(name x)                                           \
     { return x.m_value; }                                               \
@@ -433,31 +355,19 @@
     }                                                                   \
                                                                         \
     inline name ## _d& name ## _d::operator+=(name rhs)                 \
-    { m_value += rhs.m_value; return *this; }                           \
+    { m_value += Value(rhs); return *this; }                            \
     inline name ## _d& name ## _d::operator-=(name rhs)                 \
-    { m_value -= rhs.m_value; return *this; }                           \
+    { m_value -= Value(rhs); return *this; }                            \
     inline name ## _d& name ## _d::operator*=(name rhs)                 \
-    { m_value *= rhs.m_value; return *this; }                           \
+    { m_value *= Value(rhs); return *this; }                            \
     inline name ## _d& name ## _d::operator/=(name rhs)                 \
-    { m_value /= rhs.m_value; return *this; }                           \
+    { m_value /= Value(rhs); return *this; }                            \
                                                                         \
-    inline name ## _d operator+(name lhs, name ## _d rhs)               \
-    { return rhs += lhs; }                                              \
-    inline name ## _d operator-(name lhs, name ## _d rhs)               \
-    { return lhs - Value(rhs); }                                        \
-    inline name ## _d operator*(name lhs, name ## _d rhs)               \
-    { return rhs *= lhs; }                                              \
-    inline name ## _d operator/(name lhs, name ## _d rhs)               \
-    { return lhs / Value(rhs); }                                        \
+    GG_NONMEMBER_ARITH_OPS_OTHER_TYPE(name ## _d, name);                \
                                                                         \
-    inline name ## _d name ## _d::operator+(name rhs)                   \
-    { return name ## _d(m_value + rhs.m_value); }                       \
-    inline name ## _d name ## _d::operator-(name rhs)                   \
-    { return name ## _d(m_value - rhs.m_value); }                       \
-    inline name ## _d name ## _d::operator*(name rhs)                   \
-    { return name ## _d(m_value * rhs.m_value); }                       \
-    inline name ## _d name ## _d::operator/(name rhs)                   \
-    { return name ## _d(m_value / rhs.m_value); }                       \
+    GG_NONMEMBER_REVERSED_ARITH_OP_SET(name, name ## _d);               \
+    inline name ## _d operator/(name x, name ## _d y)                   \
+    { return name ## _d(Value(x) / Value(y)); }                         \
                                                                         \
     void dummy_function_to_force_semicolon()
 

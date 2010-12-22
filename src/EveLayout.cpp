@@ -127,6 +127,9 @@ namespace {
     adobe::aggregate_name_t key_child_horizontal    = { "child_horizontal" };
     adobe::aggregate_name_t key_child_vertical      = { "child_vertical" };
 
+    adobe::aggregate_name_t key_text_horizontal     = { "text_horizontal" };
+    adobe::aggregate_name_t key_text_vertical       = { "text_vertical" };
+
     adobe::aggregate_name_t key_align_left          = { "align_left" };
     adobe::aggregate_name_t key_align_right         = { "align_right" };
     adobe::aggregate_name_t key_align_top           = { "align_top" };
@@ -974,11 +977,15 @@ namespace {
         adobe::string_t alt;
         std::size_t characters = 25;
         bool wrap = true;
+        adobe::name_t text_horizontal = key_align_left;
+        adobe::name_t text_vertical;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_alt_text, alt);
         get_value(params, adobe::key_characters, characters);
         get_value(params, adobe::key_wrap, wrap);
+        get_value(params, key_text_horizontal, text_horizontal);
+        get_value(params, key_text_vertical, text_vertical);
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
@@ -986,7 +993,26 @@ namespace {
                                                               NONCONTAINER));
 
         X w = static_cast<int>(characters) * CharWidth();
-        Flags<TextFormat> format = wrap ? FORMAT_WORDBREAK : FORMAT_NONE;
+
+        Flags<TextFormat> format;
+
+        if (wrap)
+            format |= FORMAT_WORDBREAK;
+
+        if (text_horizontal == key_align_left)
+            format |= FORMAT_LEFT;
+        else if (text_horizontal == key_align_center)
+            format |= FORMAT_CENTER;
+        else if (text_horizontal == key_align_right)
+            format |= FORMAT_RIGHT;
+
+        if (text_vertical == key_align_top)
+            format |= FORMAT_TOP;
+        else if (text_vertical == key_align_center)
+            format |= FORMAT_VCENTER;
+        else if (text_vertical == key_align_bottom)
+            format |= FORMAT_BOTTOM;
+
         Pt extent = DefaultFont()->TextExtent(name, format, w);
         retval->m_wnd.reset(
             Factory().NewTextControl(X0, Y0, extent.x, extent.y, name, DefaultFont(), CLR_BLACK, format)

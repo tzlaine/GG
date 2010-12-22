@@ -20,6 +20,7 @@
 
 const char* g_input_file = 0;
 const char* g_output_dir = 0;
+bool g_dont_exit = false;
 
 struct StopDialog
 {
@@ -114,7 +115,8 @@ void MinimalGGApp::Initialize()
         output /= input.stem() + ".png";
         GG::GUI::GetGUI()->SaveWndAsPNG(&eve_dialog, output.string());
         GG::Timer timer(100);
-        GG::Connect(timer.FiredSignal, StopDialog(&eve_dialog));
+        if (!g_dont_exit)
+            GG::Connect(timer.FiredSignal, StopDialog(&eve_dialog));
         eve_dialog.Run();
     }
     Exit(0);
@@ -158,5 +160,7 @@ main( int argc, char* argv[] )
 {
     g_input_file = argv[1];
     g_output_dir = argv[2];
+    if (argc == 4)
+        g_dont_exit = true;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

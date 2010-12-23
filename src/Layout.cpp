@@ -255,6 +255,13 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
         Pt min_space_needed = it->first->MinSize() + margin;
         Pt min_usable_size = it->first->MinUsableSize() + margin;
 
+        // HACK! This is put here so that TextControl, which is currently GG's
+        // only height-for-width Wnd type, doesn't get vertically squashed
+        // down to 0-height cells.  Note that they can still get horizontally
+        // squashed.
+        if (dynamic_cast<TextControl*>(it->first))
+            min_space_needed.y = std::max(min_space_needed.y, min_usable_size.y);
+
         // adjust row minimums
         double total_stretch = 0.0;
         for (std::size_t i = it->second.first_row; i < it->second.last_row; ++i) {

@@ -1552,7 +1552,6 @@ struct EveLayout::Impl
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
             layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, Alignments(wnd, children[i]));
         }
-        layout.SetMinimumRowHeight(0, max_all_rows_height);
     }
 
     void AddChildrenToVerticalLayout(Layout& layout,
@@ -1598,7 +1597,6 @@ struct EveLayout::Impl
             max_all_columns_width =
                 std::max(max_all_columns_width,
                          std::max(children[i].m_wnd->MinSize().x, min_usable_size.x));
-            layout.SetMinimumRowHeight(i, min_usable_size.y);
             layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(wnd, children[i]));
         }
 

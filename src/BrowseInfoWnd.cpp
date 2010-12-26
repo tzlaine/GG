@@ -141,14 +141,15 @@ unsigned int TextBoxBrowseInfoWnd::TextMargin() const
 
 void TextBoxBrowseInfoWnd::SetText(const std::string& str)
 {
-    Resize(Pt(m_preferred_width, Y1));
     m_text_control->SetText(str);
+    unsigned int margins = 2 * TextMargin();
+    Pt extent = m_font->TextExtent(str, GetTextFormat(), m_preferred_width - X(margins));
+    SetMinSize(extent + Pt(X(margins), Y0));
+    Resize(extent + Pt(X(margins), Y0));
     if (str.empty())
         Hide();
     else
         Show();
-    Resize(Pt(m_text_control->TextLowerRight().x - m_text_control->TextUpperLeft().x, Y1));
-    Resize(Pt(std::min(m_preferred_width, GetLayout()->MinUsableSize().x), GetLayout()->MinUsableSize().y));
 }
 
 void TextBoxBrowseInfoWnd::Render()

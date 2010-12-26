@@ -147,7 +147,7 @@ void TextBoxBrowseInfoWnd::SetText(const std::string& str)
         Hide();
     else
         Show();
-    Resize(Pt(X1, Y1));
+    Resize(Pt(m_text_control->TextLowerRight().x - m_text_control->TextUpperLeft().x, Y1));
     Resize(Pt(std::min(m_preferred_width, GetLayout()->MinUsableSize().x), GetLayout()->MinUsableSize().y));
 }
 

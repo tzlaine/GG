@@ -52,6 +52,7 @@
 using namespace GG;
 
 #define INSTRUMENT_WINDOW_CREATION 0
+#define INSTRUMENT_ADD_TO_VERTICAL 0
 #define INSTRUMENT_CREATED_LAYOUT 0
 #define SHOW_LAYOUTS 0
 
@@ -379,7 +380,7 @@ namespace {
         ContainerStatus m_container_status;
     };
 
-    Flags<Alignment> Alignments(adobe::name_t horizontal, adobe::name_t vertical)
+    Flags<Alignment> AlignmentFlags(adobe::name_t horizontal, adobe::name_t vertical)
     {
         Flags<Alignment> retval;
 
@@ -413,23 +414,28 @@ namespace {
             existing_vertical = vertical;
     }
 
-    Flags<Alignment> Alignments(const MakeWndResult& parent, const MakeWndResult& child)
+    std::pair<adobe::name_t, adobe::name_t> Alignments(const MakeWndResult& parent, const MakeWndResult& child)
     {
-        adobe::name_t horizontal = child.m_horizontal;
-        adobe::name_t vertical = child.m_vertical;
-        ConditionallyApplyAlignments(horizontal,
-                                     vertical,
+        std::pair<adobe::name_t, adobe::name_t> retval(child.m_horizontal, child.m_vertical);
+        ConditionallyApplyAlignments(retval.first,
+                                     retval.second,
                                      parent.m_child_horizontal,
                                      parent.m_child_vertical);
-        ConditionallyApplyAlignments(horizontal,
-                                     vertical,
+        ConditionallyApplyAlignments(retval.first,
+                                     retval.second,
                                      child.m_default_horizontal,
                                      child.m_default_vertical);
-        ConditionallyApplyAlignments(horizontal,
-                                     vertical,
+        ConditionallyApplyAlignments(retval.first,
+                                     retval.second,
                                      parent.m_default_child_horizontal,
                                      parent.m_default_child_vertical);
-        return Alignments(horizontal, vertical);
+        return retval;
+    }
+
+    Flags<Alignment> AlignmentFlags(const MakeWndResult& parent, const MakeWndResult& child)
+    {
+        std::pair<adobe::name_t, adobe::name_t> alignments = Alignments(parent, child);
+        return AlignmentFlags(alignments.first, alignments.second);
     }
 
 #if INSTRUMENT_CREATED_LAYOUT
@@ -1346,11 +1352,11 @@ namespace {
     Alignment HorizontalAlignment(Flags<Alignment> flags)
     {
         const Flags<Alignment> HORIZONTAL_FLAGS(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
-        if ((flags | HORIZONTAL_FLAGS) == ALIGN_LEFT)
+        if ((flags & HORIZONTAL_FLAGS) == ALIGN_LEFT)
             return ALIGN_LEFT;
-        else if ((flags | HORIZONTAL_FLAGS) == ALIGN_CENTER)
+        else if ((flags & HORIZONTAL_FLAGS) == ALIGN_CENTER)
             return ALIGN_CENTER;
-        else if ((flags | HORIZONTAL_FLAGS) == ALIGN_RIGHT)
+        else if ((flags & HORIZONTAL_FLAGS) == ALIGN_RIGHT)
             return ALIGN_RIGHT;
         return ALIGN_NONE;
     }
@@ -1546,13 +1552,10 @@ struct EveLayout::Impl
                                        MakeWndResult& wnd,
                                        boost::ptr_vector<MakeWndResult>& children)
     {
-        Y max_all_rows_height = Y0;
         for (std::size_t i = 0; i < children.size(); ++i) {
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
-            max_all_rows_height =
-                std::max(max_all_rows_height, std::max(children[i].m_wnd->MinSize().y, min_usable_size.y));
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
-            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, Alignments(wnd, children[i]));
+            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(wnd, children[i]));
         }
     }
 
@@ -1560,34 +1563,79 @@ struct EveLayout::Impl
                                      MakeWndResult& wnd,
                                      boost::ptr_vector<MakeWndResult>& children)
     {
+#if INSTRUMENT_ADD_TO_VERTICAL
+        std::cout << "AddChildrenToVerticalLayout()\n";
+#endif
         std::size_t max_columns = 1;
-        X max_all_columns_width = X0;
+        std::map<Alignment, X> max_all_columns_widths;
         std::map<Alignment, std::vector<X> > max_single_column_widths;
         std::map<Alignment, std::vector<Layout*> > children_as_1x2_layouts;
+        std::vector<Flags<Alignment> > child_alignments(children.size());
         for (std::size_t i = 0; i < children.size(); ++i) {
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    child " << i << ":\n";
+#endif
             Layout* l = 0;
-            Alignment align = HorizontalAlignment(Alignments(wnd, children[i]));
+            Alignment align;
+            std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
+#endif
             if ((l = dynamic_cast<Layout*>(children[i].m_wnd.get())) &&
                 l->Rows() == 1u &&
                 l->Columns() == 2u &&
                 dynamic_cast<const TextControl*>(l->Cells()[0][0])) {
+#if INSTRUMENT_ADD_TO_VERTICAL
+                std::cout << "        two-column layout\n";
+#endif
+                if (!raw_alignments.first || raw_alignments.first == key_align_fill)
+                    raw_alignments.first = key_align_left;
+                child_alignments[i] = AlignmentFlags(raw_alignments.first, raw_alignments.second);
+                align = HorizontalAlignment(child_alignments[i]);
+#if INSTRUMENT_ADD_TO_VERTICAL
+                std::cout << "        align=" << align << "\n";
+#endif
                 max_columns = 2;
-                max_single_column_widths[align].resize(2, X0);
+                max_single_column_widths[align].resize(2);
                 max_single_column_widths[align][0] =
                     std::max(max_single_column_widths[align][0],
                              std::max(l->Cells()[0][0]->MinSize().x, l->Cells()[0][0]->MinUsableSize().x));
                 max_single_column_widths[align][1] =
                     std::max(max_single_column_widths[align][1],
                              std::max(l->Cells()[0][1]->MinSize().x, l->Cells()[0][1]->MinUsableSize().x));
+#if INSTRUMENT_ADD_TO_VERTICAL
+                std::cout << "        cell-size 0=" << std::max(l->Cells()[0][0]->MinSize().x, l->Cells()[0][0]->MinUsableSize().x) << "\n";
+                std::cout << "        max_single_column_widths[" << align << "][0]=" << max_single_column_widths[align][0] << "\n";
+                std::cout << "        cell-size 1=" << std::max(l->Cells()[0][1]->MinSize().x, l->Cells()[0][1]->MinUsableSize().x) << "\n";
+                std::cout << "        max_single_column_widths[" << align << "][1]=" << max_single_column_widths[align][1] << "\n";
+#endif
             } else {
+#if INSTRUMENT_ADD_TO_VERTICAL
+                std::cout << "        no layout\n";
+#endif
                 l = 0;
+                child_alignments[i] = AlignmentFlags(raw_alignments.first, raw_alignments.second);
+                align = HorizontalAlignment(child_alignments[i]);
+#if INSTRUMENT_ADD_TO_VERTICAL
+                std::cout << "        align=" << align << "\n";
+#endif
             }
-            max_all_columns_width =
-                std::max(max_all_columns_width,
+            max_all_columns_widths[align] =
+                std::max(max_all_columns_widths[align],
                          std::max(children[i].m_wnd->MinSize().x, children[i].m_wnd->MinUsableSize().x));
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    max_all_columns_widths[" << align << "]=" << max_all_columns_widths[align] << "\n";
+#endif
             children_as_1x2_layouts[align].resize(children.size());
             children_as_1x2_layouts[align][i] = l;
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    children_as_1x2_layouts[align][i]=" << children_as_1x2_layouts[align][i] << "\n";
+#endif
         }
+
+#if INSTRUMENT_ADD_TO_VERTICAL
+        std::cout << "\n    max_columns=" << max_columns << "\n";
+#endif
 
         max_single_column_widths[ALIGN_NONE].resize(max_columns);
         max_single_column_widths[ALIGN_LEFT].resize(max_columns);
@@ -1595,11 +1643,14 @@ struct EveLayout::Impl
         max_single_column_widths[ALIGN_RIGHT].resize(max_columns);
 
         for (std::size_t i = 0; i < children.size(); ++i) {
-            Pt min_usable_size = children[i].m_wnd->MinUsableSize();
-            max_all_columns_width =
-                std::max(max_all_columns_width,
-                         std::max(children[i].m_wnd->MinSize().x, min_usable_size.x));
-            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, Alignments(wnd, children[i]));
+            std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
+            Alignment align = HorizontalAlignment(AlignmentFlags(raw_alignments.first, raw_alignments.second));
+            if (!raw_alignments.first || raw_alignments.first == key_align_fill)
+                raw_alignments.first = key_align_left;
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    layout.Add(child " << i << ", ..., " << child_alignments[i] << ")\n";
+#endif
+            layout.Add(children[i].m_wnd.release(), i, 0, 1, 1, child_alignments[i]);
         }
 
         const Alignment ALIGNMENTS[] = { ALIGN_NONE, ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT };
@@ -1607,12 +1658,22 @@ struct EveLayout::Impl
 
         for (std::size_t i = 0; i < NUM_ALIGNMENTS; ++i) {
             Alignment align = ALIGNMENTS[i];
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    align " << align << ":\n";
+#endif
 
             std::size_t num_in_this_layout = 0;
             for (std::size_t i = 0; i < children_as_1x2_layouts[align].size(); ++i) {
                 if (children_as_1x2_layouts[align][i])
                     ++num_in_this_layout;
             }
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    num_in_this_layout=" << num_in_this_layout;
+            if (num_in_this_layout < 2)
+                std::cout << " ... continue\n";
+            else
+                std::cout << "\n";
+#endif
             if (num_in_this_layout < 2)
                 continue;
 
@@ -1620,16 +1681,30 @@ struct EveLayout::Impl
                 1.0 * std::accumulate(max_single_column_widths[align].begin(),
                                       max_single_column_widths[align].end(),
                                       X0);
-            bool all_columns_width_larger = max_all_columns_width > summed_single_column_widths;
-            X_d difference = max_all_columns_width - summed_single_column_widths;
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    summed_single_column_widths=" << summed_single_column_widths << "\n";
+#endif
+            bool all_columns_width_larger = max_all_columns_widths[align] > summed_single_column_widths;
+            X_d difference = max_all_columns_widths[align] - summed_single_column_widths;
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    difference=" << difference << "\n";
+#endif
 
             X_d stretch_0 =
                 summed_single_column_widths ?
                 max_single_column_widths[align][0] / summed_single_column_widths :
                 X_d(0.0);
             X_d min_width_0 = 1.0 * max_single_column_widths[align][0];
+#if INSTRUMENT_ADD_TO_VERTICAL
+            std::cout << "    stretch_0=" << stretch_0 << " min_width_0=" << min_width_0 << "\n";
+#endif
             if (all_columns_width_larger)
                 min_width_0 += difference * stretch_0;
+
+#if INSTRUMENT_ADD_TO_VERTICAL
+            if (all_columns_width_larger)
+                std::cout << "    stretch_0=" << stretch_0 << " min_width_0=" << min_width_0 << "\n";
+#endif
 
             X_d stretch_1;
             X_d min_width_1;
@@ -1639,8 +1714,15 @@ struct EveLayout::Impl
                     max_single_column_widths[align][1] / summed_single_column_widths :
                     X_d(0.0);
                 min_width_1 = 1.0 * max_single_column_widths[align][1];
+#if INSTRUMENT_ADD_TO_VERTICAL
+                std::cout << "    stretch_1=" << stretch_1 << " min_width_1=" << min_width_1 << "\n";
+#endif
                 if (all_columns_width_larger)
                     min_width_1 += difference * stretch_1;
+#if INSTRUMENT_ADD_TO_VERTICAL
+                if (all_columns_width_larger)
+                    std::cout << "    stretch_1=" << stretch_1 << " min_width_1=" << min_width_1 << "\n";
+#endif
             }
 
             for (std::size_t i = 0; i < children_as_1x2_layouts[align].size(); ++i) {
@@ -1649,11 +1731,13 @@ struct EveLayout::Impl
                     l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
                     l->SetChildAlignment(l->Cells()[0][0], ALIGN_RIGHT);
                     l->SetChildAlignment(l->Cells()[0][1], ALIGN_LEFT);
+#if INSTRUMENT_ADD_TO_VERTICAL
+                    std::cout << "    l->SetMinimumColumnWidth(0, =" << X(std::ceil(Value(min_width_0))) << ")\n";
+                    std::cout << "    l->SetMinimumColumnWidth(1, =" << X(std::ceil(Value(min_width_1))) << ")\n";
+#endif
                 }
             }
         }
-
-        layout.SetMinimumColumnWidth(0, max_all_columns_width);
     }
 
     void AddChildren(MakeWndResult& wnd_,

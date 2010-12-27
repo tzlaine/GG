@@ -197,8 +197,9 @@ namespace {
             Wnd(X(10), Y(10), X(200), Y(200), flags | MODAL | DRAGABLE | INTERACTIVE),
             m_title(Factory().NewTextControl(BEVEL_OFFSET.x, BEVEL_OFFSET.y - CharHeight(), name, DefaultFont()))
             {
-                m_title->SetMinSize(m_title->Size() + Pt(2 * CharWidth(), Y0));
                 AttachChild(m_title);
+                const Pt MIN_SIZE(6 * CharWidth(), 2 * StandardHeight());
+                SetMinSize(Pt(std::max(MIN_SIZE.x, m_title->Width() + 2 * CharWidth()), MIN_SIZE.y));
             }
 
         virtual Pt ClientUpperLeft() const
@@ -241,8 +242,6 @@ namespace {
                 Wnd::SizeMove(ul, lr);
                 Pt new_title_size = Pt((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
                 m_title->Resize(new_title_size);
-                if (Width() < m_title->Width())
-                    Resize(Pt(m_title->Width(), Height()));
             }
 
         virtual void Render()

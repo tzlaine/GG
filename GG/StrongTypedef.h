@@ -194,7 +194,7 @@ inline std::size_t Value(std::size_t s)
         struct ConvertibleToBoolDummy {int _;};                         \
                                                                         \
     public:                                                             \
-        name ## _d() {}                                                 \
+        name ## _d() : m_value(0.0) {}                                  \
         explicit name ## _d(double t) : m_value(t) {}                   \
                                                                         \
         GG_MEMBER_SELF_COMPARATORS(name ## _d);                         \
@@ -271,7 +271,7 @@ inline std::size_t Value(std::size_t s)
     public:                                                             \
         BOOST_STATIC_ASSERT((boost::is_integral<type>::value));         \
                                                                         \
-        name() {}                                                       \
+        name() : m_value(0) {}                                          \
         explicit name(type t) : m_value(t) {}                           \
         explicit name(name ## _d t) :                                   \
             m_value(static_cast<type>(Value(t)))                        \
@@ -386,7 +386,7 @@ inline std::size_t Value(std::size_t s)
         struct ConvertibleToBoolDummy {int _;};                         \
                                                                         \
     public:                                                             \
-        name() {}                                                       \
+        name() : m_value(0) {}                                          \
         explicit name(std::size_t t) : m_value(t) {}                    \
                                                                         \
         GG_MEMBER_SELF_COMPARATORS(name);                               \

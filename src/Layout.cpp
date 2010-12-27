@@ -449,8 +449,9 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
         } else { // align as appropriate
             Pt available_space = lr - ul;
             Pt min_usable_size = it->first->MinUsableSize();
-            Pt window_size(std::min(available_space.x, std::max(it->second.original_size.x, min_usable_size.x)),
-                           std::min(available_space.y, std::max(it->second.original_size.y, min_usable_size.y)));
+            Pt min_size = it->first->MinSize();
+            Pt window_size(std::min(available_space.x, std::max(it->second.original_size.x, std::max(min_size.x, min_usable_size.x))),
+                           std::min(available_space.y, std::max(it->second.original_size.y, std::max(min_size.y, min_usable_size.y))));
             Pt resize_ul, resize_lr;
             if (it->second.alignment & ALIGN_LEFT) {
                 resize_ul.x = ul.x;

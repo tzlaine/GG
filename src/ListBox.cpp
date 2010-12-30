@@ -502,6 +502,8 @@ ListBox::ListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
     m_auto_scroll_timer.Stop();
     m_auto_scroll_timer.Connect(this);
 
+    InstallEventFilter(this);
+
     if (INSTRUMENT_ALL_SIGNALS) {
         Connect(ClearedSignal, ListSignalEcho(*this, "ListBox::ClearedSignal"));
         Connect(InsertedSignal, ListSignalEcho(*this, "ListBox::InsertedSignal"));
@@ -1348,7 +1350,7 @@ void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
 
 bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
 {
-    assert(dynamic_cast<Row*>(w));
+    assert(w == this || dynamic_cast<Row*>(w));
 
     if (!Disabled()) {
         Pt pt = event.Point();
@@ -1438,6 +1440,8 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
         }
 
         case WndEvent::GainingFocus: {
+            if (w == this)
+                return false;
             GUI::GetGUI()->SetFocusWnd(this);
             break;
         }
@@ -1448,6 +1452,8 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
         case WndEvent::DragDropEnter:
         case WndEvent::DragDropHere:
         case WndEvent::DragDropLeave:
+            if (w == this)
+                return false;
             HandleEvent(event);
             break;
 

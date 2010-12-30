@@ -54,7 +54,10 @@ void measure(label_t& value, extents_t& result)
     assert(value.window_m);
     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     GG::Pt size =
-        style->DefaultFont()->TextExtent(value.name_m, value.window_m->GetTextFormat());
+        style->DefaultFont()->TextExtent(value.characters_m ?
+                                         std::string(value.characters_m, '0') :
+                                         value.name_m,
+                                         value.window_m->GetTextFormat());
     result.horizontal().length_m = Value(size.x);
     assert(result.horizontal().length_m);
 }
@@ -108,7 +111,8 @@ platform_display_type insert<label_t>(display_t& display,
 {
     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     element.window_m = style->NewTextControl(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
-                                             element.name_m, style->DefaultFont());
+                                             element.name_m, style->DefaultFont(),
+                                             GG::CLR_BLACK, GG::FORMAT_WORDBREAK);
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);

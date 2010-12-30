@@ -42,11 +42,9 @@ std::string get_locale_ident()
 { return get_locale_tidbit(LOCALE_SENGLANGUAGE) << "_" << get_locale_tidbit(LOCALE_SENGCOUNTRY); }
 
 #elif defined(__unix) || defined(_XOPEN_SOURCE) || defined(_POSIX_SOURCE)
-# include <clocale>
-# include <langinfo.h>
 
 std::string get_locale_ident()
-{ return std::string(std::setlocale(LC_ALL, 0)) + "_" + nl_langinfo(CODESET); }
+{ return "C"; }
 
 #else
 # error "Unsupported platform -- unable to get locale information"

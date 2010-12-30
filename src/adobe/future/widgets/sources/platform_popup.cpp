@@ -262,17 +262,8 @@ void popup_t::place(const place_data_t& place_data)
         local_place_data.horizontal().position_m += width;
         adobe::width(local_place_data) -= width;
     }
-    //
-    // On Win32, you give a combo box the height it should have
-    // when it's fully extended (which seems a bit like a hackish
-    // implementation detail poking through). Here we ensure that
-    // the combo box is maximally the size of 10 elements (so that
-    // we don't go over the edges of the screen if we have a huge
-    // number of elements).
-    //
-    // REVISIT (ralpht) : fixed value.
-    //
-    height(local_place_data) = height(place_data) + std::min<long>(static_cast<long>((menu_items_m.size() + 1)), 10) * height(place_data);
+
+    height(local_place_data) = height(place_data);
 
     implementation::set_control_bounds(control_m, local_place_data);
 }

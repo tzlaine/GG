@@ -10,11 +10,13 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_popup.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 
 #include <GG/DropDownList.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
 
 /****************************************************************************************************/
@@ -22,16 +24,6 @@
 namespace {
 
 /****************************************************************************************************/
-
-struct TextDropDownListRow :
-    public GG::ListBox::Row
-{
-    TextDropDownListRow(const std::string& str)
-        {
-            boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-            push_back(str, style->DefaultFont());
-        }
-};
 
 enum metrics {
     gap = 4 // Measured as space from popup to label.
@@ -94,7 +86,11 @@ void message_menu_item_set(adobe::popup_t& popup)
              first = popup.menu_items_m.begin(), last = popup.menu_items_m.end();
          first != last;
          ++first) {
-        popup.control_m->Insert(new TextDropDownListRow(first->first));
+        GG::ListBox::Row* row = new GG::ListBox::Row;
+        row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
+                                                                       adobe::implementation::DefaultFont(),
+                                                                       GG::CLR_BLACK, GG::FORMAT_LEFT));
+        popup.control_m->Insert(row);
     }
 
     popup.enable(!popup.menu_items_m.empty());
@@ -147,8 +143,7 @@ void popup_t::measure(extents_t& result)
     // the widest extents (when drawn). Then we can make sure that we get
     // enough space to draw our largest text item.
     //
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    boost::shared_ptr<GG::Font> font = style->DefaultFont();
+    const boost::shared_ptr<GG::Font>& font = implementation::DefaultFont();
 
     menu_item_set_t::iterator first(menu_items_m.begin());
     menu_item_set_t::iterator last(menu_items_m.end());
@@ -162,10 +157,8 @@ void popup_t::measure(extents_t& result)
         have_extents = true;
     }
 
-    result.width() =
-        Value(largest_extent.x + control_m->Width() - control_m->ClientWidth());
-    result.height() =
-        Value(largest_extent.y + control_m->Height() - control_m->ClientHeight());
+    result.width() = Value(largest_extent.x + 2 * implementation::CharWidth());
+    result.height() = Value(control_m->Height());
     GG::Y baseline = control_m->ClientUpperLeft().y + font->Ascent();
     result.vertical().guide_set_m.push_back(Value(baseline));
 
@@ -239,7 +232,7 @@ void popup_t::place(const place_data_t& place_data)
         //
         place_data_t label_place_data;
         label_place_data.horizontal().position_m = left(place_data);
-        label_place_data.vertical().position_m = top(place_data) + (baseline - static_baseline_m);
+        label_place_data.vertical().position_m = top(place_data);
 
         //
         // The width of the label is the first horizontal
@@ -247,7 +240,7 @@ void popup_t::place(const place_data_t& place_data)
         //
         assert(place_data.horizontal().guide_set_m.empty() == false);
         width(label_place_data) = place_data.horizontal().guide_set_m[0];
-        height(label_place_data) = static_height_m;
+        height(label_place_data) = height(place_data);
 
         //
         // Set the label dimensions.
@@ -320,7 +313,11 @@ void popup_t::display_custom()
         return;
 
     custom_m = true;
-    control_m->Insert(new TextDropDownListRow(custom_item_name_m), control_m->begin());
+    GG::ListBox::Row* row = new GG::ListBox::Row;
+    row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, custom_item_name_m,
+                                                                   adobe::implementation::DefaultFont(),
+                                                                   GG::CLR_BLACK, GG::FORMAT_LEFT));
+    control_m->Insert(row, control_m->begin());
     control_m->Select(0);
 }
 
@@ -379,11 +376,10 @@ template <> platform_display_type insert<popup_t>(display_t&             display
 
     assert(!element.control_m);
 
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     int lines = std::min(element.menu_items_m.size(), 20u);
-    element.control_m = style->NewDropDownList(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
-                                               style->DefaultFont()->Lineskip() * lines,
-                                               GG::CLR_GRAY);
+    element.control_m =
+        implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
+                                                  implementation::DefaultFont()->Lineskip() * lines, GG::CLR_GRAY);
 
     GG::Connect(element.control_m->SelChangedSignal,
                 boost::bind(&sel_changed_slot, boost::ref(element), _1));

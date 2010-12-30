@@ -27,7 +27,9 @@
 namespace GG {
     class Control;
     class Edit;
+    class Font;
     class MultiEdit;
+    class StyleFactory;
     class TextControl;
 }
 
@@ -61,6 +63,16 @@ template <>
 const std::string& get_field_text<GG::TextControl*>(GG::TextControl*& x);
 
 bool is_focused(GG::Wnd* w);
+
+GG::StyleFactory& Factory();
+
+boost::shared_ptr<GG::Font> DefaultFont();
+
+GG::X CharWidth();
+
+GG::Y CharHeight();
+
+GG::Y StandardHeight();
 
 /****************************************************************************************************/
 

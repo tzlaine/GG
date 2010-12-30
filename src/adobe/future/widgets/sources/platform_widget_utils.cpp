@@ -43,6 +43,24 @@ namespace adobe {
 
 namespace implementation {
 
+GG::StyleFactory& Factory()
+{ return *GG::GUI::GetGUI()->GetStyleFactory(); }
+
+boost::shared_ptr<GG::Font> DefaultFont()
+{ return Factory().DefaultFont(); }
+
+GG::X CharWidth()
+{
+    static GG::X retval = DefaultFont()->TextExtent("00").x;
+    return retval;
+}
+
+GG::Y CharHeight()
+{ return DefaultFont()->Lineskip(); }
+
+GG::Y StandardHeight()
+{ return CharHeight() * 3 / 2; }
+
 /****************************************************************************************************/
 
 bool pick_file(boost::filesystem::path& path)

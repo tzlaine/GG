@@ -6,13 +6,12 @@
 
 /****************************************************************************************************/
 
-#include <GG/adobe/future/widgets/headers/platform_button.hpp>
-
-#include <GG/adobe/future/widgets/headers/platform_label.hpp>
-
 #include <GG/adobe/future/widgets/headers/button_helper.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
+#include <GG/adobe/future/widgets/headers/platform_button.hpp>
+#include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <GG/Button.h>
 #include <GG/GUI.h>
@@ -77,8 +76,7 @@ void button_t::measure(extents_t& result)
                                                              modifier_mask_m,
                                                              modifiers_m));
 
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    boost::shared_ptr<GG::Font> font = style->DefaultFont();
+    boost::shared_ptr<GG::Font> font = implementation::DefaultFont();
 
     if (state == state_set_m.end())
         state = button_default_state(state_set_m);
@@ -86,21 +84,18 @@ void button_t::measure(extents_t& result)
     extents_t cur_text_extents(metrics::measure_text(state->name_m, font));
 
     result.width() -= cur_text_extents.width();
-    result.height() -= cur_text_extents.height();
+    result.height() = Value(control_m->Height());
 
     long width_additional(0);
-    long height_additional(0);
     
     for (button_state_set_t::iterator iter(state_set_m.begin()), last(state_set_m.end()); iter != last; ++iter)
     {
         extents_t tmp(metrics::measure_text(iter->name_m, font));
-
         width_additional = (std::max)(width_additional, tmp.width());
-        height_additional = (std::max)(height_additional, tmp.height());
     }
 
     result.width() += width_additional;
-    result.height() += height_additional;
+    result.width() += Value(2 * implementation::CharWidth());
 
     result.width() = (std::max)(result.width(), 70L);
 }
@@ -201,9 +196,9 @@ platform_display_type insert<button_t>(display_t&             display,
 
     button_state_set_t::iterator state(button_default_state(element.state_set_m));
 
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    element.control_m = style->NewButton(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
-                                         state->name_m, style->DefaultFont(), GG::CLR_GRAY);
+    element.control_m =
+        implementation::Factory().NewButton(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
+                                            state->name_m, implementation::DefaultFont(), GG::CLR_GRAY);
 
     GG::Connect(element.control_m->ClickedSignal, Clicked(element));
 

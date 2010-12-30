@@ -23,75 +23,6 @@
 
 /****************************************************************************************************/
 
-namespace adobe {
-
-/****************************************************************************************************/
-
-namespace implementation {
-
-/*************************************************************************************************/
-
-class ImageFilter :
-    public GG::Wnd
-{
-public:
-    ImageFilter(image_t& image) : m_image(image) {}
-
-    virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
-        {
-            bool retval = false;
-            if (event.Type() == GG::WndEvent::LDrag) {
-                GG::Pt cur_point(event.Point());
-
-                if (m_image.last_point_m != cur_point) {
-                    double x(0);
-                    double y(0);
-                    double delta_x(Value(m_image.last_point_m.x - cur_point.x));
-                    double delta_y(Value(m_image.last_point_m.y - cur_point.y));
-
-                    get_value(m_image.metadata_m, static_name_t("x"), x);
-                    get_value(m_image.metadata_m, static_name_t("y"), y);
-
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_x"),
-                                                                       any_regular_t(delta_x)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_y"),
-                                                                       any_regular_t(delta_y)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("dragging"),
-                                                                       any_regular_t(true)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("x"),
-                                                                       any_regular_t(x + delta_x)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("y"),
-                                                                       any_regular_t(y + delta_y)));
-
-                    m_image.callback_m(m_image.metadata_m);
-                }
-
-                m_image.last_point_m = cur_point;
-
-                retval = true;
-            } else if (event.Type() == GG::WndEvent::LButtonUp ||
-                       event.Type() == GG::WndEvent::LClick) {
-                m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_x"),
-                                                                   any_regular_t(0)));
-                m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_y"),
-                                                                   any_regular_t(0)));
-                m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("dragging"),
-                                                                   any_regular_t(false)));
-                m_image.callback_m(m_image.metadata_m);
-                retval = true;
-            }
-            return retval;
-        }
-
-    image_t& m_image;
-};
-
-} // implementation
-
-} // adobe
-
-/****************************************************************************************************/
-
 namespace {
 
 /****************************************************************************************************/
@@ -122,8 +53,6 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
                 GG::X0, GG::Y0, get_width(image), get_height(image),
                 view, GG::GRAPHIC_NONE, GG::INTERACTIVE
             );
-        image.filter_m.reset(new adobe::implementation::ImageFilter(image));
-        image.window_m->InstallEventFilter(image.filter_m.get());
     }
 }
 

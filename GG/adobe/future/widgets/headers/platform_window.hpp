@@ -11,6 +11,8 @@
 
 /****************************************************************************************************/
 
+#include <GG/Wnd.h>
+
 #include <GG/adobe/config.hpp>
 
 #include <GG/adobe/any_regular.hpp>
@@ -38,11 +40,9 @@ namespace adobe {
 
 struct window_t
 {
-    window_t(const std::string&  name,
-             window_style_t      style,
-             window_attributes_t attributes,
-             window_modality_t   modality,
-             theme_t             theme);
+    window_t(const std::string&     name,
+             GG::Flags<GG::WndFlag> flags,
+             theme_t                theme);
 
     ~window_t();
 
@@ -54,25 +54,23 @@ struct window_t
 
     void set_size(const point_2d_t& size);
 
-    void reposition(window_reposition_t position);
+    void reposition();
  
     void monitor_resize(const window_resize_proc_t& proc);
 
     any_regular_t underlying_handler();
 
-    bool handle_key(key_type /*key*/, bool /*pressed*/, modifiers_t /*modifiers*/);
+    bool handle_key(key_type key, bool pressed, modifiers_t modifiers);
 
-    GG::Wnd*             window_m;
-    std::string          name_m;
-    window_style_t       style_m;
-    window_attributes_t  attributes_m;
-    window_modality_t    modality_m;
-    theme_t              theme_m;
-    place_data_t         place_data_m;
-    window_resize_proc_t resize_proc_m;
-    bool                 debounce_m;
-    point_2d_t           min_size_m;
-    bool                 placed_once_m;
+    GG::Wnd*               window_m;
+    GG::Flags<GG::WndFlag> flags_m;
+    std::string            name_m;
+    theme_t                theme_m;
+    place_data_t           place_data_m;
+    window_resize_proc_t   resize_proc_m;
+    bool                   debounce_m;
+    point_2d_t             min_size_m;
+    bool                   placed_once_m;
 };
 
 /****************************************************************************************************/

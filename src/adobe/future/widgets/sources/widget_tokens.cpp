@@ -84,6 +84,9 @@ aggregate_name_t  key_wrap                = { "wrap" };
 aggregate_name_t  key_text_horizontal     = { "text_horizontal" };
 aggregate_name_t  key_text_vertical       = { "text_vertical" };
 
+aggregate_name_t key_move                 = { "move" };
+aggregate_name_t key_on_top               = { "on_top" };
+aggregate_name_t key_modal                = { "modal" };
 aggregate_name_t key_step                 = { "step" };
 aggregate_name_t key_allow_edits          = { "allow_edits" };
 

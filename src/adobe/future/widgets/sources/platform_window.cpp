@@ -12,6 +12,7 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/keyboard.hpp>
 
 #include <GG/DrawUtil.h>
@@ -27,14 +28,7 @@ namespace {
 
 /****************************************************************************************************/
 
-GG::Pt get_window_client_offsets(GG::Wnd* w)
-{
-    assert(w);
-    return w->ClientUpperLeft() - w->UpperLeft();
-}
-
-/****************************************************************************************************/
-
+// TODO: Put this into StyleFactory.
 class Window :
     public GG::Wnd
 {
@@ -42,59 +36,80 @@ public:
     static const unsigned int BEVEL = 2;
 
     Window(adobe::window_t& imp) :
-        Wnd(GG::X0, GG::Y0, GG::X(100), GG::Y(100), DetermineFlags(imp)),
+        Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1, imp.flags_m),
         m_imp(imp),
-        m_font(GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont()),
-        m_name()
+        m_title(0)
         {
             if (!m_imp.name_m.empty()) {
-                m_name = GG::GUI::GetGUI()->GetStyleFactory()->NewTextControl(
-                    -ClientULOffset(true).x, -ClientULOffset(true).y + GG::Y(BEVEL),
-                    GG::X(100), m_font->Lineskip(),
-                    m_imp.name_m, m_font, GG::CLR_BLACK, GG::FORMAT_CENTER
+                m_title = adobe::implementation::Factory().NewTextControl(
+                    BEVEL_OFFSET.x, BEVEL_OFFSET.y - adobe::implementation::CharHeight(),
+                    m_imp.name_m, adobe::implementation::DefaultFont()
                 );
-                AttachChild(m_name);
+                AttachChild(m_title);
             }
-            GG::Pt min_client_size(GG::X(m_imp.min_size_m.x_m), GG::Y(m_imp.min_size_m.y_m));
-            SetMinSize(min_client_size + ClientULOffset(m_name) + ClientLROffset());
         }
 
     virtual GG::Pt ClientUpperLeft() const
-        { return UpperLeft() + ClientULOffset(m_name); }
+        { return UpperLeft() + BEVEL_OFFSET + GG::Pt(GG::X0, m_title ? m_title->Height() : GG::Y0); }
 
     virtual GG::Pt ClientLowerRight() const
-        { return LowerRight() - ClientLROffset(); }
+        { return LowerRight() - BEVEL_OFFSET; }
+
+    virtual GG::WndRegion WindowRegion(const GG::Pt& pt) const
+        {
+            enum {LEFT = 0, MIDDLE = 1, RIGHT = 2};
+            enum {TOP = 0, BOTTOM = 2};
+
+            // window regions look like this:
+            // 0111112
+            // 3444445   // 4 is client area, 0,2,6,8 are corners
+            // 3444445
+            // 6777778
+
+            int x_pos = MIDDLE;   // default & typical case is that the mouse is over the (non-border) client area
+            int y_pos = MIDDLE;
+
+            GG::Pt ul = UpperLeft() + BEVEL_OFFSET, lr = LowerRight() - BEVEL_OFFSET;
+
+            if (pt.x < ul.x)
+                x_pos = LEFT;
+            else if (pt.x > lr.x)
+                x_pos = RIGHT;
+
+            if (pt.y < ul.y)
+                y_pos = TOP;
+            else if (pt.y > lr.y)
+                y_pos = BOTTOM;
+
+            return (Resizable() ? GG::WndRegion(x_pos + 3 * y_pos) : GG::WR_NONE);
+        }
 
     virtual void SizeMove(const GG::Pt& ul, const GG::Pt& lr)
         {
-            GG::Wnd::SizeMove(ul, lr);
-
-            GG::Pt size(lr - ul);
-            size -= ClientULOffset(m_name) + ClientLROffset();
+            GG::Pt client_size = ClientSize();
 
             if (!m_imp.debounce_m && !m_imp.resize_proc_m.empty()) {
                 m_imp.debounce_m = true;
 
-                if (adobe::width(m_imp.place_data_m) != Value(size.x) ||
-                    adobe::height(m_imp.place_data_m) != Value(size.y)) {
-                    m_imp.resize_proc_m(Value(size.x), Value(size.y));
+                if (adobe::width(m_imp.place_data_m) != Value(client_size.x) ||
+                    adobe::height(m_imp.place_data_m) != Value(client_size.y)) {
+                    m_imp.resize_proc_m(Value(client_size.x), Value(client_size.y));
 
-                    adobe::width(m_imp.place_data_m) = Value(size.x);
-                    adobe::height(m_imp.place_data_m) = Value(size.y);
+                    adobe::width(m_imp.place_data_m) = Value(client_size.x);
+                    adobe::height(m_imp.place_data_m) = Value(client_size.y);
                 }
 
                 m_imp.debounce_m = false;
             }
 
-            m_name->Resize(GG::Pt(Width(), m_name->Height()));
+            GG::Wnd::SizeMove(ul, lr);
+
+            GG::Pt new_title_size((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
+            m_title->Resize(new_title_size);
         }
 
     virtual void Render()
-        {
-            GG::BeveledRectangle(UpperLeft(), LowerRight(),
-                                 GG::CLR_GRAY, GG::CLR_GRAY,
-                                 true, BEVEL);
-        }
+        { GG::BeveledRectangle(UpperLeft(), LowerRight(), GG::CLR_GRAY, GG::CLR_GRAY, true, BEVEL); }
 
     virtual void KeyPress(GG::Key key, boost::uint32_t key_code_point,
                           GG::Flags<GG::ModKey> mod_keys)
@@ -116,38 +131,14 @@ public:
 
 private:
     adobe::window_t& m_imp;
-    boost::shared_ptr<GG::Font> m_font;
-    GG::TextControl* m_name;
+    GG::TextControl* m_title;
 
-    GG::Flags<GG::WndFlag> DetermineFlags(const adobe::window_t& imp) const
-        {
-            GG::Flags<GG::WndFlag> retval;
-
-            if (imp.style_m == adobe::window_style_moveable_modal_s) {
-                // TODO assert(imp.modality_m != adobe::window_modality_none_s);
-                retval |= GG::MODAL;
-                retval |= GG::DRAGABLE;
-            } else { // imp.style_m == adobe::window_style_floating_s
-                // TODO assert(imp.modality_m == adobe::window_modality_none_s);
-                retval |= GG::ONTOP;
-                retval |= GG::DRAGABLE;
-            }
-
-            if (imp.attributes_m == adobe::window_attributes_resizeable_s)
-                retval |= GG::RESIZABLE;
-
-            return retval;
-        }
-
-    GG::Pt ClientULOffset(bool with_title) const
-        {
-            return GG::Pt(GG::X(BEVEL),
-                          GG::Y(BEVEL) + with_title ? m_font->Lineskip() : GG::Y0);
-        }
-
-    GG::Pt ClientLROffset() const
-        { return GG::Pt(GG::X(BEVEL), GG::Y(BEVEL)); }
+    static const int FRAME_WIDTH;
+    static const GG::Pt BEVEL_OFFSET;
 };
+
+const int Window::FRAME_WIDTH = 2;
+const GG::Pt Window::BEVEL_OFFSET(GG::X(Window::FRAME_WIDTH), GG::Y(Window::FRAME_WIDTH));
 
 /****************************************************************************************************/
 
@@ -159,16 +150,12 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-window_t::window_t(const std::string&  name,
-                   window_style_t      style,
-                   window_attributes_t attributes,
-                   window_modality_t   modality,
-                   theme_t             theme) :
+window_t::window_t(const std::string&     name,
+                   GG::Flags<GG::WndFlag> flags,
+                   theme_t                theme) :
     window_m(0),
+    flags_m(flags),
     name_m(name),
-    style_m(style),
-    attributes_m(attributes),
-    modality_m(modality),
     theme_m(theme),
     debounce_m(false),
     placed_once_m(false)
@@ -217,18 +204,18 @@ void window_t::place(const place_data_t& place_data)
 
         place_data_m = place_data;
 
-        GG::Pt window_ul(window_m->UpperLeft());
-        GG::Pt extra(get_window_client_offsets(window_m));
-
         min_size_m.x_m = width(place_data);
         min_size_m.y_m = height(place_data);
 
-        GG::Pt new_ul(static_cast<int>(left(place_data)) + window_ul.x,
-                      static_cast<int>(top(place_data)) + window_ul.y);
-        GG::Pt new_size(static_cast<int>(width(place_data)) + extra.x,
-                        static_cast<int>(height(place_data)) + extra.y);
+        GG::Pt ul(GG::X(left(place_data)), GG::Y(top(place_data)));
+        GG::Pt size(
+            GG::Pt(GG::X(width(place_data)), GG::Y(height(place_data))) +
+            implementation::NonClientSize(*window_m)
+        );
 
-        window_m->SizeMove(new_ul, new_ul + new_size);
+        window_m->SetMinSize(size);
+
+        window_m->SizeMove(ul, ul + size);
     }
 }
 
@@ -246,17 +233,17 @@ void window_t::set_size(const point_2d_t& size)
     width(place_data_m) = size.x_m;
     height(place_data_m) = size.y_m;
 
-    GG::Pt extra(get_window_client_offsets(window_m));
-
-    window_m->Resize(GG::Pt(static_cast<int>(width(place_data_m)) + extra.x,
-                            static_cast<int>(height(place_data_m)) + extra.y));
+    window_m->Resize(
+        GG::Pt(GG::X(width(place_data_m)), GG::Y(height(place_data_m))) +
+        implementation::NonClientSize(*window_m)
+    );
 
     debounce_m = false;
 }
 
 /****************************************************************************************************/
 
-void window_t::reposition(window_reposition_t position)
+void window_t::reposition()
 {
     assert(window_m);
 
@@ -267,12 +254,7 @@ void window_t::reposition(window_reposition_t position)
     GG::Y app_height(GG::GUI::GetGUI()->AppHeight());
     
     GG::X left(std::max(GG::X(10), (app_width - width) / 2));
-    GG::Y top;
-
-    if (position == window_reposition_center_s)
-        top = std::max(GG::Y(10), (app_height - height) / 2);
-    else //if (position == window_reposition_alert_s)
-        top = std::max(GG::Y(10), static_cast<GG::Y>((app_height * 0.6 - height) / 2));
+    GG::Y top(std::max(GG::Y(10), (app_height - height) / 2));
 
     window_m->MoveTo(GG::Pt(left, top));
 }
@@ -284,7 +266,7 @@ void window_t::set_visible(bool make_visible)
     assert(window_m);
 
     if (!window_m->Visible())
-        reposition(window_reposition_center_s);
+        reposition();
 
     set_control_visible(window_m, make_visible);
 }
@@ -301,7 +283,7 @@ any_regular_t window_t::underlying_handler()
 
 /****************************************************************************************************/
 
-bool window_t::handle_key(key_type /*key*/, bool /*pressed*/, modifiers_t /*modifiers*/)
+bool window_t::handle_key(key_type key, bool pressed, modifiers_t modifiers)
 { return false; }
 
 /****************************************************************************************************/

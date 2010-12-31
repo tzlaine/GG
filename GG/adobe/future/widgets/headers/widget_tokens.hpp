@@ -88,6 +88,9 @@ extern aggregate_name_t key_wrap;
 extern aggregate_name_t key_text_horizontal;
 extern aggregate_name_t key_text_vertical;
 
+extern aggregate_name_t key_move;
+extern aggregate_name_t key_on_top;
+extern aggregate_name_t key_modal;
 extern aggregate_name_t key_step;
 extern aggregate_name_t key_allow_edits;
 

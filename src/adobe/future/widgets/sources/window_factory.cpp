@@ -26,28 +26,33 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         size,
                    window_t*&          window)
 {
-    std:: string name;
-    bool         grow(false);
-    bool         metal(false);
+    std::string name;
+    bool        grow(false);
+    bool        move(false);
+    bool        on_top(false);
+    bool        modal(true);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_grow, grow);
-    get_value(parameters, key_metal, metal);
+    get_value(parameters, key_move, move);
+    get_value(parameters, key_on_top, on_top);
+    get_value(parameters, key_modal, modal);
 
-    window_attributes_t attributes(window_attributes_standard_handler_s);
+    GG::Flags<GG::WndFlag> flags = GG::INTERACTIVE;
 
     if (grow)
-        attributes |= window_attributes_resizeable_s |
-                      window_attributes_live_resizeable_s;
+        flags |= GG::RESIZABLE;
 
-    if (metal)
-        attributes |= window_attributes_metal_s;
+    if (move)
+        flags |= GG::DRAGABLE;
 
-    window = new window_t(name,
-                        window_style_moveable_modal_s,
-                        attributes,
-                        window_modality_none_s,
-                        implementation::size_to_theme(size));
+    if (on_top)
+        flags |= GG::ONTOP;
+
+    if (modal)
+        flags |= GG::MODAL;
+
+    window = new window_t(name, flags, implementation::size_to_theme(size));
 }
 
 /****************************************************************************************************/

@@ -101,7 +101,13 @@ public:
     virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
+    /** A sentinel value that indicates that there is no limit on the number
+        of lines of history are to be stored.  \see MaxLinesOfHistory() \see
+        SetMaxLinesOfHistory() */
     static const std::size_t ALL_LINES;
+
+    /** The thickness with which to render the border of the control. */
+    static const unsigned int BORDER_THICK;
 
 protected:
     /** \name Structors */ ///@{
@@ -206,9 +212,6 @@ protected:
     /** The width used to create the control's vertical and horizontal
         Scrolls. */
     static const unsigned int SCROLL_WIDTH;
-
-    /** The thickness with which to render the border of the control. */
-    static const unsigned int BORDER_THICK;
 
 private:
     void    Init();

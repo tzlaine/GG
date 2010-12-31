@@ -129,8 +129,8 @@ edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
 { /* TODO: Address password_m == true. */ }
 
 /****************************************************************************************************/
-extents_t calculate_edit_bounds(GG::Edit* edit, int cols, int rows);
 
+extents_t calculate_edit_bounds(GG::Edit* edit, int cols, int rows);
 
 void edit_text_t::measure(extents_t& result)
 {
@@ -153,7 +153,12 @@ void edit_text_t::measure(extents_t& result)
     //
     if (!using_label_m) return;
     extents_t label_bounds;
-    ::adobe::measure(get_label(), label_bounds);
+    {
+        ::adobe::measure(get_label(), label_bounds);
+        place_data_t p;
+        p.horizontal().length_m = label_bounds.width();
+        measure_vertical(get_label(), label_bounds, p);
+    }
     //
     // Make sure that the height can accomodate both the label
     // and the edit widget.

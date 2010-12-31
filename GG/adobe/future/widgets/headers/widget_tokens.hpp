@@ -44,7 +44,6 @@ extern aggregate_name_t key_format;
 extern aggregate_name_t key_decimal_places;
 extern aggregate_name_t key_trailing_zeroes;
 extern aggregate_name_t key_grow;
-extern aggregate_name_t key_horizontal;
 extern aggregate_name_t key_identifier;
 extern aggregate_name_t key_image;
 extern aggregate_name_t key_image_on;
@@ -85,8 +84,12 @@ extern aggregate_name_t key_units;
 extern aggregate_name_t key_value;
 extern aggregate_name_t key_value_off;
 extern aggregate_name_t key_value_on;
-extern aggregate_name_t key_vertical;
 extern aggregate_name_t key_wrap;
+extern aggregate_name_t key_text_horizontal;
+extern aggregate_name_t key_text_vertical;
+
+extern aggregate_name_t key_step;
+extern aggregate_name_t key_allow_edits;
 
 extern aggregate_name_t  key_modifier_set;
 extern aggregate_name_t  key_modifier_option;
@@ -105,6 +108,15 @@ extern aggregate_name_t key_modifiers_optcmd;
 extern aggregate_name_t key_modifiers_optctl;
 extern aggregate_name_t key_modifiers_optctlcmd;
 // end deprecated
+
+extern aggregate_name_t name_row;
+extern aggregate_name_t name_column;
+extern aggregate_name_t name_overlay;
+extern aggregate_name_t name_reveal;
+extern aggregate_name_t name_preset;
+extern aggregate_name_t name_preview;
+extern aggregate_name_t name_static_text;
+extern aggregate_name_t name_control_button;
 
 extern aggregate_name_t name_button;
 extern aggregate_name_t name_checkbox;
@@ -130,6 +142,11 @@ extern aggregate_name_t name_size_group;
 extern aggregate_name_t name_slider;
 extern aggregate_name_t name_tab_group;
 extern aggregate_name_t name_toggle;
+
+extern aggregate_name_t name_radio_button_group;
+extern aggregate_name_t name_menu_bar;
+extern aggregate_name_t name_int_spin;
+extern aggregate_name_t name_double_spin;
 
 /****************************************************************************************************/
 

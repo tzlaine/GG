@@ -131,7 +131,7 @@ popup_t::popup_t(const std::string& name,
                  theme_t            theme) :
     control_m(0),
     theme_m(theme),
-    name_m(name, alt_text, 0, theme),
+    name_m(name, alt_text, 0, GG::FORMAT_NONE, theme),
     alt_text_m(alt_text),
     using_label_m(!name.empty()),
     custom_m(false),

@@ -38,6 +38,7 @@
 #include <GG/adobe/adam.hpp>
 #include <GG/adobe/basic_sheet.hpp>
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/eve_evaluate.hpp>
 #include <GG/adobe/algorithm/sort.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
@@ -115,51 +116,6 @@ void verbose_dump(const adobe::dictionary_t& dictionary, std::size_t indent)
 #endif
 
 namespace {
-
-    adobe::aggregate_name_t key_spacing             = { "spacing" };
-    adobe::aggregate_name_t key_indent              = { "indent" };
-    adobe::aggregate_name_t key_margin              = { "margin" };
-
-    adobe::aggregate_name_t key_placement           = { "placement" };
-
-    adobe::aggregate_name_t key_horizontal          = { "horizontal" };
-    adobe::aggregate_name_t key_vertical            = { "vertical" };
-
-    adobe::aggregate_name_t key_child_horizontal    = { "child_horizontal" };
-    adobe::aggregate_name_t key_child_vertical      = { "child_vertical" };
-
-    adobe::aggregate_name_t key_text_horizontal     = { "text_horizontal" };
-    adobe::aggregate_name_t key_text_vertical       = { "text_vertical" };
-
-    adobe::aggregate_name_t key_align_left          = { "align_left" };
-    adobe::aggregate_name_t key_align_right         = { "align_right" };
-    adobe::aggregate_name_t key_align_top           = { "align_top" };
-    adobe::aggregate_name_t key_align_bottom        = { "align_bottom" };
-    adobe::aggregate_name_t key_align_center        = { "align_center" };
-    adobe::aggregate_name_t key_align_proportional  = { "align_proportional" };
-    adobe::aggregate_name_t key_align_fill          = { "align_fill" };
-
-    adobe::aggregate_name_t key_place_row           = { "place_row" };
-    adobe::aggregate_name_t key_place_column        = { "place_column" };
-    adobe::aggregate_name_t key_place_overlay       = { "place_overlay" };
-
-    adobe::aggregate_name_t key_guide_mask          = { "guide_mask" };
-    adobe::aggregate_name_t key_guide_balance       = { "guide_balance" };
-    
-    adobe::aggregate_name_t key_guide_baseline      = { "guide_baseline" };
-    adobe::aggregate_name_t key_guide_label         = { "guide_label" };
-
-    adobe::aggregate_name_t key_step                = { "step" };
-    adobe::aggregate_name_t key_allow_edits         = { "allow_edits" };
-
-    adobe::aggregate_name_t name_row                = { "row" };
-    adobe::aggregate_name_t name_column             = { "column" };
-    adobe::aggregate_name_t name_overlay            = { "overlay" };
-    adobe::aggregate_name_t name_static_text        = { "static_text" };
-    adobe::aggregate_name_t name_radio_button_group = { "radio_button_group" };
-    adobe::aggregate_name_t name_menu_bar           = { "menu_bar" };
-    adobe::aggregate_name_t name_int_spin           = { "int_spin" };
-    adobe::aggregate_name_t name_double_spin        = { "double_spin" };
 
     StyleFactory& Factory()
     { return *GUI::GetGUI()->GetStyleFactory(); }
@@ -314,21 +270,21 @@ namespace {
         void Init(const adobe::dictionary_t& params,
                   const adobe::line_position_t& position)
             {
-                get_value(params, key_horizontal, m_horizontal);
-                CheckAlignment(key_horizontal, m_horizontal, position);
-                get_value(params, key_vertical, m_vertical);
-                CheckAlignment(key_vertical, m_vertical, position);
-                bool has_child_horz = get_value(params, key_child_horizontal, m_child_horizontal);
-                CheckAlignment(key_child_horizontal, m_child_horizontal, position);
-                bool has_child_vert = get_value(params, key_child_vertical, m_child_vertical);
-                CheckAlignment(key_child_vertical, m_child_vertical, position);
-                get_value(params, key_spacing, m_spacing);
-                get_value(params, key_indent, m_indent);
-                get_value(params, key_margin, m_margin);
+                get_value(params, adobe::key_horizontal, m_horizontal);
+                CheckAlignment(adobe::key_horizontal, m_horizontal, position);
+                get_value(params, adobe::key_vertical, m_vertical);
+                CheckAlignment(adobe::key_vertical, m_vertical, position);
+                bool has_child_horz = get_value(params, adobe::key_child_horizontal, m_child_horizontal);
+                CheckAlignment(adobe::key_child_horizontal, m_child_horizontal, position);
+                bool has_child_vert = get_value(params, adobe::key_child_vertical, m_child_vertical);
+                CheckAlignment(adobe::key_child_vertical, m_child_vertical, position);
+                get_value(params, adobe::key_spacing, m_spacing);
+                get_value(params, adobe::key_indent, m_indent);
+                get_value(params, adobe::key_margin, m_margin);
 
                 if (m_container_status == NONCONTAINER && has_child_horz) {
                     throw adobe::stream_error_t(
-                        key_child_horizontal.name_m +
+                        adobe::key_child_horizontal.name_m +
                         std::string(" is not compatible with non-containers"),
                         position
                     );
@@ -336,7 +292,7 @@ namespace {
 
                 if (m_container_status == NONCONTAINER && has_child_vert) {
                     throw adobe::stream_error_t(
-                        key_child_vertical.name_m +
+                        adobe::key_child_vertical.name_m +
                         std::string(" is not compatible with non-containers"),
                         position
                     );
@@ -348,13 +304,13 @@ namespace {
                             const adobe::line_position_t& position)
             {
                 if (alignment_name &&
-                    alignment_name != key_align_fill &&
-                    alignment_name != key_align_top &&
-                    alignment_name != key_align_bottom &&
-                    alignment_name != key_align_left &&
-                    alignment_name != key_align_right &&
-                    alignment_name != key_align_center &&
-                    alignment_name != key_align_proportional) {
+                    alignment_name != adobe::key_align_fill &&
+                    alignment_name != adobe::key_align_top &&
+                    alignment_name != adobe::key_align_bottom &&
+                    alignment_name != adobe::key_align_left &&
+                    alignment_name != adobe::key_align_right &&
+                    alignment_name != adobe::key_align_center &&
+                    alignment_name != adobe::key_align_proportional) {
                     throw adobe::stream_error_t(
                         alignment_name.c_str() +
                         std::string(" is not an allowed alignment for alignment type ") +
@@ -384,19 +340,19 @@ namespace {
     {
         Flags<Alignment> retval;
 
-        if (vertical == key_align_top)
+        if (vertical == adobe::key_align_top)
             retval |= ALIGN_TOP;
-        else if (vertical == key_align_center)
+        else if (vertical == adobe::key_align_center)
             retval |= ALIGN_VCENTER;
-        else if (vertical == key_align_bottom)
+        else if (vertical == adobe::key_align_bottom)
             retval |= ALIGN_BOTTOM;
         // TODO: else fill and else proportional
 
-        if (horizontal == key_align_left)
+        if (horizontal == adobe::key_align_left)
             retval |= ALIGN_LEFT;
-        else if (horizontal == key_align_center)
+        else if (horizontal == adobe::key_align_center)
             retval |= ALIGN_CENTER;
-        else if (horizontal == key_align_right)
+        else if (horizontal == adobe::key_align_right)
             retval |= ALIGN_RIGHT;
         // TODO: else fill and else proportional
 
@@ -526,7 +482,7 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              key_align_center,
+                                                              adobe::key_align_center,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
                                                               adobe::name_t(),
@@ -757,8 +713,8 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              key_align_center,
-                                                              key_align_center,
+                                                              adobe::key_align_center,
+                                                              adobe::key_align_center,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
                                                               UNLABELED_CONTROL,
@@ -882,11 +838,11 @@ namespace {
     MakeWndResult* Make_radio_button_group(const adobe::dictionary_t& params,
                                            const adobe::line_position_t& position)
     {
-        adobe::name_t placement = key_place_column;
+        adobe::name_t placement = adobe::key_place_column;
 
-        get_value(params, key_placement, placement);
+        get_value(params, adobe::key_placement, placement);
 
-        if (placement == key_place_overlay) {
+        if (placement == adobe::key_place_overlay) {
             throw adobe::stream_error_t(
                 "place_overlay placement is not compatible with radio_button_group",
                 position
@@ -898,7 +854,7 @@ namespace {
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
 
-        Orientation orientation = placement == key_place_column ? VERTICAL : HORIZONTAL;
+        Orientation orientation = placement == adobe::key_place_column ? VERTICAL : HORIZONTAL;
         retval->m_wnd.reset(Factory().NewRadioButtonGroup(X0, Y0, X1, Y1, orientation));
 
         return retval.release();
@@ -925,8 +881,8 @@ namespace {
         std::auto_ptr<MakeWndResult> retval(
             new MakeWndResult(params,
                               position,
-                              orientation_ == VERTICAL ? key_align_center : adobe::name_t(),
-                              orientation_ == VERTICAL ? adobe::name_t() : key_align_center,
+                              orientation_ == VERTICAL ? adobe::key_align_center : adobe::name_t(),
+                              orientation_ == VERTICAL ? adobe::name_t() : adobe::key_align_center,
                               adobe::name_t(),
                               adobe::name_t(),
                               UNLABELED_CONTROL,
@@ -985,15 +941,15 @@ namespace {
         adobe::string_t alt;
         std::size_t characters = 25;
         bool wrap = true;
-        adobe::name_t text_horizontal = key_align_left;
+        adobe::name_t text_horizontal = adobe::key_align_left;
         adobe::name_t text_vertical;
 
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_alt_text, alt);
         get_value(params, adobe::key_characters, characters);
         get_value(params, adobe::key_wrap, wrap);
-        get_value(params, key_text_horizontal, text_horizontal);
-        get_value(params, key_text_vertical, text_vertical);
+        get_value(params, adobe::key_text_horizontal, text_horizontal);
+        get_value(params, adobe::key_text_vertical, text_vertical);
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
@@ -1007,18 +963,18 @@ namespace {
         if (wrap)
             format |= FORMAT_WORDBREAK;
 
-        if (text_horizontal == key_align_left)
+        if (text_horizontal == adobe::key_align_left)
             format |= FORMAT_LEFT;
-        else if (text_horizontal == key_align_center)
+        else if (text_horizontal == adobe::key_align_center)
             format |= FORMAT_CENTER;
-        else if (text_horizontal == key_align_right)
+        else if (text_horizontal == adobe::key_align_right)
             format |= FORMAT_RIGHT;
 
-        if (text_vertical == key_align_top)
+        if (text_vertical == adobe::key_align_top)
             format |= FORMAT_TOP;
-        else if (text_vertical == key_align_center)
+        else if (text_vertical == adobe::key_align_center)
             format |= FORMAT_VCENTER;
-        else if (text_vertical == key_align_bottom)
+        else if (text_vertical == adobe::key_align_bottom)
             format |= FORMAT_BOTTOM;
 
         Pt extent = DefaultFont()->TextExtent(name, format, w);
@@ -1073,10 +1029,10 @@ namespace {
         int min = 1;
         int max = 100;
         bool allow_edits = false;
-        get_value(format, key_step, step);
+        get_value(format, adobe::key_step, step);
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
-        get_value(format, key_allow_edits, allow_edits);
+        get_value(format, adobe::key_allow_edits, allow_edits);
 
         std::auto_ptr<Spin<int> > spin(
             Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
@@ -1133,10 +1089,10 @@ namespace {
         double min = 1.0;
         double max = 100.0;
         bool allow_edits = false;
-        get_value(format, key_step, step);
+        get_value(format, adobe::key_step, step);
         get_value(format, adobe::key_first, min);
         get_value(format, adobe::key_last, max);
-        get_value(format, key_allow_edits, allow_edits);
+        get_value(format, adobe::key_allow_edits, allow_edits);
         std::auto_ptr<Spin<int> > spin(
             Factory().NewIntSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
         );
@@ -1162,12 +1118,12 @@ namespace {
 
     MakeWndResult* Make_overlay(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
-        adobe::name_t placement = key_place_overlay;
+        adobe::name_t placement = adobe::key_place_overlay;
 
-        get_value(params, key_placement, placement);
+        get_value(params, adobe::key_placement, placement);
 
-        if (placement == key_place_row || placement == key_place_column) {
-            std::string placement_ = key_place_overlay.name_m;
+        if (placement == adobe::key_place_row || placement == adobe::key_place_column) {
+            std::string placement_ = adobe::key_place_overlay.name_m;
             throw adobe::stream_error_t(placement_ + " placement is not compatible with overlay",
                                         position);
         }
@@ -1200,11 +1156,11 @@ namespace {
                                const adobe::dictionary_t& params,
                                const adobe::line_position_t& position)
     {
-        adobe::name_t placement = key_place_overlay;
+        adobe::name_t placement = adobe::key_place_overlay;
 
-        if (get_value(params, key_placement, placement)) {
-            if (!(placement == key_place_row && wnd_type == name_row ||
-                  placement == key_place_column && wnd_type == name_column)) {
+        if (get_value(params, adobe::key_placement, placement)) {
+            if (!(placement == adobe::key_place_row && wnd_type == adobe::name_row ||
+                  placement == adobe::key_place_column && wnd_type == adobe::name_column)) {
                 std::string placement_ = placement.c_str();
                 throw adobe::stream_error_t(
                     placement_ + " placement is not compatible with " + wnd_type.c_str(),
@@ -1214,13 +1170,13 @@ namespace {
         }
 
         std::auto_ptr<MakeWndResult> retval;
-        if (wnd_type == name_column) {
+        if (wnd_type == adobe::name_column) {
             retval.reset(new MakeWndResult(params,
                                            position,
                                            adobe::name_t(),
                                            adobe::name_t(),
                                            adobe::name_t(),
-                                           key_align_top,
+                                           adobe::key_align_top,
                                            UNLABELED_CONTROL,
                                            CONTAINER));
         } else {
@@ -1228,7 +1184,7 @@ namespace {
                                            position,
                                            adobe::name_t(),
                                            adobe::name_t(),
-                                           key_align_left,
+                                           adobe::key_align_left,
                                            adobe::name_t(),
                                            UNLABELED_CONTROL,
                                            CONTAINER));
@@ -1284,7 +1240,7 @@ namespace {
         else IF_CASE(double_spin)
         else IF_CASE(overlay)
         else IF_CASE(panel)
-        else if (wnd_type == name_row || wnd_type == name_column) {
+        else if (wnd_type == adobe::name_row || wnd_type == adobe::name_column) {
 #if INSTRUMENT_WINDOW_CREATION
             std::cout << std::string(indent * 4, ' ') << "    Make_layout(" << wnd_type << ", " << params << ", ...)\n";
             MakeWndResult* retval = Make_layout(wnd_type, params, position);
@@ -1306,13 +1262,13 @@ namespace {
         using namespace adobe;
 
         return
-            wnd_type == name_dialog ||
-            wnd_type == name_radio_button_group ||
-            wnd_type == name_tab_group ||
-            wnd_type == name_overlay ||
-            wnd_type == name_panel ||
-            wnd_type == name_row ||
-            wnd_type == name_column;
+            wnd_type == adobe::name_dialog ||
+            wnd_type == adobe::name_radio_button_group ||
+            wnd_type == adobe::name_tab_group ||
+            wnd_type == adobe::name_overlay ||
+            wnd_type == adobe::name_panel ||
+            wnd_type == adobe::name_row ||
+            wnd_type == adobe::name_column;
     }
 
     adobe::any_regular_t VariableLookup(const adobe::basic_sheet_t& layout_sheet, adobe::name_t name)
@@ -1320,16 +1276,16 @@ namespace {
         static bool s_once = true;
         static adobe::name_t s_reflected_names[] =
             {
-                key_align_left,
-                key_align_right,
-                key_align_top,
-                key_align_bottom,
-                key_align_center,
-                key_align_proportional,
-                key_align_fill,
-                key_place_row,
-                key_place_column,
-                key_place_overlay
+                adobe::key_align_left,
+                adobe::key_align_right,
+                adobe::key_align_top,
+                adobe::key_align_bottom,
+                adobe::key_align_center,
+                adobe::key_align_proportional,
+                adobe::key_align_fill,
+                adobe::key_place_row,
+                adobe::key_place_column,
+                adobe::key_place_overlay
             };
         static std::pair<adobe::name_t*, adobe::name_t*> s_reflected_names_range;
 
@@ -1588,8 +1544,8 @@ struct EveLayout::Impl
 #if INSTRUMENT_ADD_TO_VERTICAL
                 std::cout << "        two-column layout\n";
 #endif
-                if (!raw_alignments.first || raw_alignments.first == key_align_fill)
-                    raw_alignments.first = key_align_left;
+                if (!raw_alignments.first || raw_alignments.first == adobe::key_align_fill)
+                    raw_alignments.first = adobe::key_align_left;
                 child_alignments[i] = AlignmentFlags(raw_alignments.first, raw_alignments.second);
                 align = HorizontalAlignment(child_alignments[i]);
 #if INSTRUMENT_ADD_TO_VERTICAL
@@ -1645,8 +1601,8 @@ struct EveLayout::Impl
         for (std::size_t i = 0; i < children.size(); ++i) {
             std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
             Alignment align = HorizontalAlignment(AlignmentFlags(raw_alignments.first, raw_alignments.second));
-            if (!raw_alignments.first || raw_alignments.first == key_align_fill)
-                raw_alignments.first = key_align_left;
+            if (!raw_alignments.first || raw_alignments.first == adobe::key_align_fill)
+                raw_alignments.first = adobe::key_align_left;
 #if INSTRUMENT_ADD_TO_VERTICAL
             std::cout << "    layout.Add(child " << i << ", ..., " << child_alignments[i] << ")\n";
 #endif
@@ -1757,13 +1713,13 @@ struct EveLayout::Impl
         std::cout << "])\n";
 #endif
 
-        if (wnd_view_params.m_name == name_dialog || wnd_view_params.m_name == name_panel) {
-            if (placement == key_place_overlay) {
+        if (wnd_view_params.m_name == adobe::name_dialog || wnd_view_params.m_name == adobe::name_panel) {
+            if (placement == adobe::key_place_overlay) {
                 std::string name = wnd_view_params.m_name.c_str();
                 throw stream_error_t("place_overlay placement is not compatible with " + name,
                                      wnd_view_params.m_position);
             }
-            Orientation orientation = (placement == key_place_row) ? HORIZONTAL : VERTICAL;
+            Orientation orientation = (placement == adobe::key_place_row) ? HORIZONTAL : VERTICAL;
             std::auto_ptr<Layout>
                 layout(new Layout(X0, Y0, X1, Y1,
                                   orientation == VERTICAL ? children.size() : 1,
@@ -1776,16 +1732,16 @@ struct EveLayout::Impl
 #endif
 
             if (orientation == VERTICAL) {
-                if (wnd_view_params.m_name == name_dialog && !wnd_.m_child_horizontal)
-                    wnd_.m_default_child_horizontal = key_align_left;
+                if (wnd_view_params.m_name == adobe::name_dialog && !wnd_.m_child_horizontal)
+                    wnd_.m_default_child_horizontal = adobe::key_align_left;
                 AddChildrenToVerticalLayout(*layout, wnd_, children);
             } else {
-                if (wnd_view_params.m_name == name_dialog && !wnd_.m_child_vertical)
-                    wnd_.m_default_child_vertical = key_align_top;
+                if (wnd_view_params.m_name == adobe::name_dialog && !wnd_.m_child_vertical)
+                    wnd_.m_default_child_vertical = adobe::key_align_top;
                 AddChildrenToHorizontalLayout(*layout, wnd_, children);
             }
             wnd->SetLayout(layout.release());
-        } else if (wnd_view_params.m_name == name_radio_button_group) {
+        } else if (wnd_view_params.m_name == adobe::name_radio_button_group) {
             RadioButtonGroup* radio_button_group = boost::polymorphic_downcast<RadioButtonGroup*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
                 StateButton* state_button = dynamic_cast<StateButton*>(children[i].m_wnd.get());
@@ -1796,7 +1752,7 @@ struct EveLayout::Impl
                 children[i].m_wnd.release();
                 radio_button_group->AddButton(state_button);
             }
-        } else if (wnd_view_params.m_name == name_tab_group) {
+        } else if (wnd_view_params.m_name == adobe::name_tab_group) {
             TabWnd* tab_wnd = boost::polymorphic_downcast<TabWnd*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
                 Panel* panel = dynamic_cast<Panel*>(children[i].m_wnd.get());
@@ -1811,7 +1767,7 @@ struct EveLayout::Impl
                 children[i].m_wnd.release();
                 tab_wnd->AddWnd(panel, panel->Name());
             }
-        } else if (wnd_view_params.m_name == name_overlay) {
+        } else if (wnd_view_params.m_name == adobe::name_overlay) {
             OverlayWnd* overlay = boost::polymorphic_downcast<OverlayWnd*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
                 if (!dynamic_cast<Panel*>(children[i].m_wnd.get())) {
@@ -1820,11 +1776,11 @@ struct EveLayout::Impl
                 }
                 overlay->AddWnd(children[i].m_wnd.release());
             }
-        } else if (wnd_view_params.m_name == name_row) {
+        } else if (wnd_view_params.m_name == adobe::name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(1, children.size());
             AddChildrenToHorizontalLayout(*layout, wnd_, children);
-        } else if (wnd_view_params.m_name == name_column) {
+        } else if (wnd_view_params.m_name == adobe::name_column) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(children.size(), 1);
             AddChildrenToVerticalLayout(*layout, wnd_, children);
@@ -1878,8 +1834,8 @@ struct EveLayout::Impl
             assert(children.empty() || IsContainer(view_params.m_name));
 
             adobe::name_t placement =
-                view_params.m_name == adobe::name_dialog ? key_place_row : key_place_column;
-            get_value(parameters, key_placement, placement);
+                view_params.m_name == adobe::name_dialog ? adobe::key_place_row : adobe::key_place_column;
+            get_value(parameters, adobe::key_placement, placement);
 
             if (!children.empty())
                 AddChildren(*retval, children, placement, view_params);

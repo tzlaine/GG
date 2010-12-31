@@ -114,7 +114,7 @@ void edit_text_t::display(const model_type& value) // values that come in from A
 /****************************************************************************************************/
 
 edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) : 
-    name_m(block.name_m, block.alt_text_m, 0, block.theme_m),
+    name_m(block.name_m, block.alt_text_m, 0, GG::FORMAT_NONE, block.theme_m),
     alt_text_m(block.alt_text_m),
     field_text_m(),
     using_label_m(!block.name_m.empty()),

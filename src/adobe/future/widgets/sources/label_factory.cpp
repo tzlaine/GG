@@ -27,15 +27,40 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         size,
                    label_t*&           widget)
 {
-    std::string name;
-    std::string alt_text;
-    long        characters(0);
+    std::string   name;
+    std::string   alt_text;
+    long          characters(0);
+    bool          wrap(true);
+    adobe::name_t text_horizontal = key_align_left;
+    adobe::name_t text_vertical;
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_characters, characters);
+    get_value(parameters, key_wrap, wrap);
+    get_value(parameters, key_text_horizontal, text_horizontal);
+    get_value(parameters, key_text_vertical, text_vertical);
 
-    widget = new label_t(name, alt_text, characters, 
+    GG::Flags<GG::TextFormat> format;
+
+    if (wrap)
+        format |= GG::FORMAT_WORDBREAK;
+
+    if (text_horizontal == key_align_left)
+        format |= GG::FORMAT_LEFT;
+    else if (text_horizontal == key_align_center)
+        format |= GG::FORMAT_CENTER;
+    else if (text_horizontal == key_align_right)
+        format |= GG::FORMAT_RIGHT;
+
+    if (text_vertical == key_align_top)
+        format |= GG::FORMAT_TOP;
+    else if (text_vertical == key_align_center)
+        format |= GG::FORMAT_VCENTER;
+    else if (text_vertical == key_align_bottom)
+        format |= GG::FORMAT_BOTTOM;
+
+    widget = new label_t(name, alt_text, characters, format, 
                          implementation::size_to_theme(size));
 }
 

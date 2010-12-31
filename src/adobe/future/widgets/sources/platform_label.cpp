@@ -27,11 +27,13 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-label_t::label_t(const std::string& name,
-                 const std::string& alt_text,
-                 std::size_t        characters,
-                 theme_t            theme) :
+label_t::label_t(const std::string&        name,
+                 const std::string&        alt_text,
+                 std::size_t               characters,
+                 GG::Flags<GG::TextFormat> format,
+                 theme_t                   theme) :
     window_m(0),
+    format_m(format),
     theme_m(theme),
     name_m(name),
     alt_text_m(alt_text),
@@ -52,13 +54,9 @@ void place(label_t& value, const place_data_t& place_data)
 void measure(label_t& value, extents_t& result)
 {
     assert(value.window_m);
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    GG::Pt size =
-        style->DefaultFont()->TextExtent(value.characters_m ?
-                                         std::string(value.characters_m, '0') :
-                                         value.name_m,
-                                         value.window_m->GetTextFormat());
-    result.horizontal().length_m = Value(size.x);
+    GG::X w = static_cast<int>(value.characters_m) * implementation::CharWidth();
+    GG::Pt extent = implementation::DefaultFont()->TextExtent(value.name_m, value.format_m, w);
+    result.horizontal().length_m = Value(extent.x);
     assert(result.horizontal().length_m);
 }
 
@@ -68,27 +66,24 @@ void measure_vertical(label_t& value, extents_t& calculated_horizontal,
                       const place_data_t& placed_horizontal)
 {
     assert(value.window_m);
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    GG::Pt size =
-        style->DefaultFont()->TextExtent(value.name_m, value.window_m->GetTextFormat(),
-                                         GG::X(width(placed_horizontal)));
-    calculated_horizontal.vertical().length_m = Value(size.y);
+    GG::Pt extent = implementation::DefaultFont()->TextExtent(value.name_m, value.format_m,
+                                                              GG::X(width(placed_horizontal)));
+    calculated_horizontal.vertical().length_m = Value(extent.y);
     calculated_horizontal.vertical().guide_set_m.push_back(
-        Value(style->DefaultFont()->Ascent()));
+        Value(implementation::DefaultFont()->Ascent()));
 }
 
 /****************************************************************************************************/
 
 void enable(label_t& value, bool make_enabled)
-{ value.window_m->Disable(make_enabled); }
+{ value.window_m->Disable(!make_enabled); }
 
 /****************************************************************************************************/
 
 extents_t measure_text(const std::string& text, const boost::shared_ptr<GG::Font>& font)
 {
     extents_t result;
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    GG::Pt size = font->TextExtent(text);
+    GG::Pt size = implementation::DefaultFont()->TextExtent(text);
     result.horizontal().length_m = Value(size.x);
     result.vertical().length_m = Value(size.y);
     return result;
@@ -109,10 +104,12 @@ platform_display_type insert<label_t>(display_t& display,
                                       platform_display_type& parent,
                                       label_t& element)
 {
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    element.window_m = style->NewTextControl(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
-                                             element.name_m, style->DefaultFont(),
-                                             GG::CLR_BLACK, GG::FORMAT_WORDBREAK);
+    GG::X w = static_cast<int>(element.characters_m) * implementation::CharWidth();
+    GG::Pt extent = implementation::DefaultFont()->TextExtent(element.name_m, element.format_m, w);
+    element.window_m =
+        implementation::Factory().NewTextControl(GG::X0, GG::Y0, extent.x, extent.y,
+                                                 element.name_m, implementation::DefaultFont(),
+                                                 GG::CLR_BLACK, element.format_m);
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);

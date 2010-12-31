@@ -25,6 +25,37 @@
 
 namespace adobe {
 
+extern aggregate_name_t key_spacing;
+extern aggregate_name_t key_indent;
+extern aggregate_name_t key_margin;
+
+extern aggregate_name_t key_placement;
+
+extern aggregate_name_t key_horizontal;
+extern aggregate_name_t key_vertical;
+
+extern aggregate_name_t key_child_horizontal;
+extern aggregate_name_t key_child_vertical;
+
+extern aggregate_name_t key_align_left;
+extern aggregate_name_t key_align_right;
+extern aggregate_name_t key_align_top;
+extern aggregate_name_t key_align_bottom;
+extern aggregate_name_t key_align_center;
+extern aggregate_name_t key_align_proportional;
+extern aggregate_name_t key_align_fill;
+
+extern aggregate_name_t key_place_row;
+extern aggregate_name_t key_place_column;
+extern aggregate_name_t key_place_overlay;
+
+
+extern aggregate_name_t key_guide_mask;
+extern aggregate_name_t key_guide_balance;
+    
+extern aggregate_name_t key_guide_baseline;
+extern aggregate_name_t key_guide_label;
+
 /*************************************************************************************************/
 
 typedef boost::function<

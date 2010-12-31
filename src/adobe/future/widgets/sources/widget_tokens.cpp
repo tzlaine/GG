@@ -39,7 +39,6 @@ aggregate_name_t  key_first               = { "first" };
 aggregate_name_t  key_focus               = { "focus" };
 aggregate_name_t  key_format              = { "format" };
 aggregate_name_t  key_grow                = { "grow" };
-aggregate_name_t  key_horizontal          = { "horizontal" };
 aggregate_name_t  key_identifier          = { "identifier" };
 aggregate_name_t  key_image               = { "image" };
 aggregate_name_t  key_image_on            = { "image_on" };
@@ -81,8 +80,12 @@ aggregate_name_t  key_units               = { "units" };
 aggregate_name_t  key_value               = { "value" };
 aggregate_name_t  key_value_off           = { "value_off" };
 aggregate_name_t  key_value_on            = { "value_on" };
-aggregate_name_t  key_vertical            = { "vertical" };
 aggregate_name_t  key_wrap                = { "wrap" };
+aggregate_name_t  key_text_horizontal     = { "text_horizontal" };
+aggregate_name_t  key_text_vertical       = { "text_vertical" };
+
+aggregate_name_t key_step                 = { "step" };
+aggregate_name_t key_allow_edits          = { "allow_edits" };
 
 // New modifer names:
 aggregate_name_t  key_modifier_set        = { "modifier_set" };
@@ -102,6 +105,15 @@ aggregate_name_t  key_modifiers_optcmd    = { "optcmd" };
 aggregate_name_t  key_modifiers_optctl    = { "optctl" };
 aggregate_name_t  key_modifiers_optctlcmd = { "optctlcmd" };
 // end deprecated modifer names
+
+aggregate_name_t name_row                 = { "row" };
+aggregate_name_t name_column              = { "column" };
+aggregate_name_t name_overlay             = { "overlay" };
+aggregate_name_t name_reveal              = { "reveal" };
+aggregate_name_t name_preset              = { "preset" };
+aggregate_name_t name_preview             = { "preview" };
+aggregate_name_t name_static_text         = { "static_text" };
+aggregate_name_t name_control_button      = { "control_button" };
 
 aggregate_name_t  name_button             = { "button" };
 aggregate_name_t  name_checkbox           = { "checkbox" };
@@ -127,6 +139,11 @@ aggregate_name_t  name_size_group         = { "size_group" };
 aggregate_name_t  name_slider             = { "slider" };
 aggregate_name_t  name_tab_group          = { "tab_group" };
 aggregate_name_t  name_toggle             = { "toggle" };
+
+aggregate_name_t  name_radio_button_group = { "radio_button_group" };
+aggregate_name_t  name_menu_bar           = { "menu_bar" };
+aggregate_name_t  name_int_spin           = { "int_spin" };
+aggregate_name_t  name_double_spin        = { "double_spin" };
 
 /****************************************************************************************************/
 

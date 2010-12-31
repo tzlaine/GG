@@ -217,15 +217,6 @@ const widget_factory_t& default_asl_widget_factory()
 
     if (!inited)
     {
-        name_t name_row(static_name_t("row"));
-        name_t name_column(static_name_t("column"));
-        name_t name_overlay(static_name_t("overlay"));
-        name_t name_reveal(static_name_t("reveal"));
-        name_t name_preset(static_name_t("preset"));
-        name_t name_preview(static_name_t("preview"));
-        name_t name_static_text(static_name_t("static_text"));
-        name_t name_control_button(static_name_t("control_button"));
-
         default_factory_s.reg(name_column, &column_factory, true, column_layout_attributes());
         default_factory_s.reg(name_overlay, &overlay_factory, true, overlay_layout_attributes());
         default_factory_s.reg(name_row, &row_factory, true, row_layout_attributes());

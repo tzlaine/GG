@@ -12,13 +12,14 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <GG/FontFwd.h>
+
 #include <GG/adobe/memory.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
 
 
 namespace GG {
-    class Font;
     class TextControl;
     class Wnd;
 }
@@ -26,17 +27,19 @@ namespace GG {
 namespace adobe {
     struct label_t  : boost::noncopyable
     {
-        label_t(const std::string& name, 
-                const std::string& alt_text, 
-                std::size_t        characters,
-                theme_t            theme
+        label_t(const std::string&        name, 
+                const std::string&        alt_text, 
+                std::size_t               characters,
+                GG::Flags<GG::TextFormat> format,
+                theme_t                   theme
                 );
 
-        GG::TextControl* window_m;
-        theme_t          theme_m;
-        std::string      name_m;
-        std::string      alt_text_m;
-        std::size_t      characters_m;
+        GG::TextControl*          window_m;
+        GG::Flags<GG::TextFormat> format_m;
+        theme_t                   theme_m;
+        std::string               name_m;
+        std::string               alt_text_m;
+        std::size_t               characters_m;
     };
 
     void measure(label_t& value, extents_t& result);

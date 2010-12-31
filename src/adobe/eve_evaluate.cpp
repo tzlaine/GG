@@ -23,6 +23,45 @@ ADOBE_ONCE_DECLARATION(adobe_eve_evaluate)
 
 /*************************************************************************************************/
 
+namespace adobe {
+
+/*************************************************************************************************/
+
+aggregate_name_t key_spacing             = { "spacing" };
+aggregate_name_t key_indent              = { "indent" };
+aggregate_name_t key_margin              = { "margin" };
+
+aggregate_name_t key_placement           = { "placement" };
+
+aggregate_name_t key_horizontal          = { "horizontal" };
+aggregate_name_t key_vertical            = { "vertical" };
+
+aggregate_name_t key_child_horizontal    = { "child_horizontal" };
+aggregate_name_t key_child_vertical      = { "child_vertical" };
+
+aggregate_name_t key_align_left          = { "align_left" };
+aggregate_name_t key_align_right         = { "align_right" };
+aggregate_name_t key_align_top           = { "align_top" };
+aggregate_name_t key_align_bottom        = { "align_bottom" };
+aggregate_name_t key_align_center        = { "align_center" };
+aggregate_name_t key_align_proportional  = { "align_proportional" };
+aggregate_name_t key_align_fill          = { "align_fill" };
+
+aggregate_name_t key_place_row           = { "place_row" };
+aggregate_name_t key_place_column        = { "place_column" };
+aggregate_name_t key_place_overlay       = { "place_overlay" };
+
+
+aggregate_name_t key_guide_mask          = { "guide_mask" };
+aggregate_name_t key_guide_balance       = { "guide_balance" };
+    
+aggregate_name_t key_guide_baseline      = { "guide_baseline" };
+aggregate_name_t key_guide_label         = { "guide_label" };
+
+} // namespace adobe
+
+/*************************************************************************************************/
+
 namespace {
 
 /*************************************************************************************************/
@@ -32,38 +71,6 @@ typedef adobe::static_table<adobe::name_t, adobe::layout_attributes_t::alignment
 typedef adobe::static_table<adobe::name_t, adobe::layout_attributes_placement_t::placement_t, 3>    placement_table_t;
 
 /*************************************************************************************************/
-
-
-adobe::aggregate_name_t key_spacing             = { "spacing" };
-adobe::aggregate_name_t key_indent              = { "indent" };
-adobe::aggregate_name_t key_margin              = { "margin" };
-
-adobe::aggregate_name_t key_placement           = { "placement" };
-
-adobe::aggregate_name_t key_horizontal          = { "horizontal" };
-adobe::aggregate_name_t key_vertical            = { "vertical" };
-
-adobe::aggregate_name_t key_child_horizontal    = { "child_horizontal" };
-adobe::aggregate_name_t key_child_vertical      = { "child_vertical" };
-
-adobe::aggregate_name_t key_align_left          = { "align_left" };
-adobe::aggregate_name_t key_align_right         = { "align_right" };
-adobe::aggregate_name_t key_align_top           = { "align_top" };
-adobe::aggregate_name_t key_align_bottom        = { "align_bottom" };
-adobe::aggregate_name_t key_align_center        = { "align_center" };
-adobe::aggregate_name_t key_align_proportional  = { "align_proportional" };
-adobe::aggregate_name_t key_align_fill          = { "align_fill" };
-
-adobe::aggregate_name_t key_place_row           = { "place_row" };
-adobe::aggregate_name_t key_place_column        = { "place_column" };
-adobe::aggregate_name_t key_place_overlay       = { "place_overlay" };
-
-
-adobe::aggregate_name_t key_guide_mask          = { "guide_mask" };
-adobe::aggregate_name_t key_guide_balance       = { "guide_balance" };
-    
-adobe::aggregate_name_t key_guide_baseline      = { "guide_baseline" };
-adobe::aggregate_name_t key_guide_label         = { "guide_label" };
 
 // blank(guide_attach: {left: @guide_baseline});
 
@@ -77,20 +84,20 @@ void init_once()
 {
     static alignment_table_t alignment_table_s =
     {{
-        alignment_table_t::entry_type(key_align_left,           adobe::layout_attributes_t::align_left),
-        alignment_table_t::entry_type(key_align_right,          adobe::layout_attributes_t::align_right),
-        alignment_table_t::entry_type(key_align_top,            adobe::layout_attributes_t::align_top),
-        alignment_table_t::entry_type(key_align_bottom,         adobe::layout_attributes_t::align_bottom),
-        alignment_table_t::entry_type(key_align_center,         adobe::layout_attributes_t::align_center),
-        alignment_table_t::entry_type(key_align_proportional,   adobe::layout_attributes_t::align_proportional),
-        alignment_table_t::entry_type(key_align_fill,           adobe::layout_attributes_t::align_fill)
+        alignment_table_t::entry_type(adobe::key_align_left,           adobe::layout_attributes_t::align_left),
+        alignment_table_t::entry_type(adobe::key_align_right,          adobe::layout_attributes_t::align_right),
+        alignment_table_t::entry_type(adobe::key_align_top,            adobe::layout_attributes_t::align_top),
+        alignment_table_t::entry_type(adobe::key_align_bottom,         adobe::layout_attributes_t::align_bottom),
+        alignment_table_t::entry_type(adobe::key_align_center,         adobe::layout_attributes_t::align_center),
+        alignment_table_t::entry_type(adobe::key_align_proportional,   adobe::layout_attributes_t::align_proportional),
+        alignment_table_t::entry_type(adobe::key_align_fill,           adobe::layout_attributes_t::align_fill)
     }};
 
     static placement_table_t placement_table_s =
     {{
-        placement_table_t::entry_type(key_place_row,            adobe::layout_attributes_placement_t::place_row),
-        placement_table_t::entry_type(key_place_column,         adobe::layout_attributes_placement_t::place_column),
-        placement_table_t::entry_type(key_place_overlay,         adobe::layout_attributes_placement_t::place_overlay)
+        placement_table_t::entry_type(adobe::key_place_row,            adobe::layout_attributes_placement_t::place_row),
+        placement_table_t::entry_type(adobe::key_place_column,         adobe::layout_attributes_placement_t::place_column),
+        placement_table_t::entry_type(adobe::key_place_overlay,         adobe::layout_attributes_placement_t::place_overlay)
     }};
 
     alignment_table_s.sort();
@@ -101,17 +108,17 @@ void init_once()
     
     static adobe::name_t    reflected[] =
     {
-        key_align_left,
-        key_align_right,
-        key_align_top,
-        key_align_bottom,
-        key_align_center,
-        key_align_proportional,
-        key_align_fill,
+        adobe::key_align_left,
+        adobe::key_align_right,
+        adobe::key_align_top,
+        adobe::key_align_bottom,
+        adobe::key_align_center,
+        adobe::key_align_proportional,
+        adobe::key_align_fill,
         
-        key_place_row,
-        key_place_column,
-        key_place_overlay
+        adobe::key_place_row,
+        adobe::key_place_column,
+        adobe::key_place_overlay
     };
     static reflected_table_range_t reflected_table_range_s;
 

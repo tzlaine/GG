@@ -74,7 +74,7 @@ reveal_t::reveal_t(const std::string&   name,
                    const std::string&   alt_text) :
     control_m(0),
     theme_m(theme),
-    name_m(name, std::string(), 0, theme),
+    name_m(name, std::string(), 0, GG::FORMAT_NONE, theme),
     using_label_m(!name.empty()),
     show_value_m(show_value),
     alt_text_m(alt_text)

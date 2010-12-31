@@ -33,26 +33,16 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-/*
-    \omit from the doxygen documentation (for now)
-
-    \ingroup asl_widgets_win32
-
-    \brief UI core checkbox widget
-
-    Further documentation can be found in the \ref asl_widgets_carbon.
-*/
-
 struct checkbox_t
 {
-    typedef any_regular_t                      model_type;
+    typedef any_regular_t                             model_type;
     typedef boost::function<void (const model_type&)> setter_type;
 
-    checkbox_t(const std::string&          name,
+    checkbox_t(const std::string&   name,
                const any_regular_t& true_value,
                const any_regular_t& false_value,
                theme_t              theme,
-               const std::string&          alt_text);
+               const std::string&   alt_text);
 
     void measure(extents_t& result);
 
@@ -64,7 +54,7 @@ struct checkbox_t
 
     void monitor(const setter_type& proc);
 
-    friend bool operator == (const checkbox_t& x, const checkbox_t& y);
+    friend bool operator==(const checkbox_t& x, const checkbox_t& y);
 
     GG::StateButton*     control_m;
     theme_t              theme_m;

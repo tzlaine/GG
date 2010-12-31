@@ -63,10 +63,15 @@ checkbox_t::checkbox_t( const std::string&                      name,
 
 void checkbox_t::measure(extents_t& result)
 {
-    result = metrics::measure(control_m);
-    // add margin equal to default checkbox size (== font size)
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    result.width() += style->DefaultFont()->PointSize();
+    GG::Pt min_usable_size = control_m->MinUsableSize();
+
+    result.width() = Value(min_usable_size.x);
+    result.height() = Value(min_usable_size.y);
+
+    result.vertical().guide_set_m.push_back(
+        Value((min_usable_size.y - implementation::DefaultFont()->Lineskip()) / 2 +
+              implementation::DefaultFont()->Ascent())
+    );
 }
 
 /****************************************************************************************************/
@@ -121,11 +126,10 @@ platform_display_type insert<checkbox_t>(display_t&             display,
 {
     assert(element.control_m == 0);
 
-    // TODO: We need to handle the text formatting flags here based on the Eve spec.
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    element.control_m = style->NewStateButton(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
-                                              element.name_m, style->DefaultFont(),
-                                              GG::FORMAT_LEFT, GG::CLR_GRAY);
+    element.control_m =
+        implementation::Factory().NewStateButton(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
+                                                 element.name_m, implementation::DefaultFont(),
+                                                 GG::FORMAT_LEFT, GG::CLR_GRAY);
 
     GG::Connect(element.control_m->CheckedSignal, Checked(element));
 

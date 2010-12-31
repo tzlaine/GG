@@ -51,7 +51,7 @@ boost::shared_ptr<GG::Font> DefaultFont()
 
 GG::X CharWidth()
 {
-    static GG::X retval = DefaultFont()->TextExtent("00").x;
+    static GG::X retval = DefaultFont()->TextExtent("0").x;
     return retval;
 }
 
@@ -60,6 +60,9 @@ GG::Y CharHeight()
 
 GG::Y StandardHeight()
 { return CharHeight() * 3 / 2; }
+
+GG::Pt NonClientSize(GG::Wnd& w)
+{ return w.Size() - w.ClientSize(); }
 
 /****************************************************************************************************/
 

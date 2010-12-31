@@ -278,7 +278,9 @@ extents_t calculate_edit_bounds(GG::Edit* edit, int cols, int original_height)
     assert(0 < cols);
     assert(0 < original_height);
 
-    result.width() = Value(cols * implementation::CharWidth());
+    GG::Pt non_client_size = implementation::NonClientSize(*edit);
+
+    result.width() = Value(cols * implementation::CharWidth() + non_client_size.x);
     result.height() = original_height;
     GG::Y baseline =
         (static_cast<int>(result.height()) - implementation::CharHeight()) / 2 +

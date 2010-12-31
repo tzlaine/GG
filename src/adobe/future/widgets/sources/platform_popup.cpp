@@ -165,7 +165,9 @@ void popup_t::measure(extents_t& result)
         have_extents = true;
     }
 
-    result.width() = Value(largest_extent.x + 2 * implementation::CharWidth());
+    GG::Pt non_client_size = implementation::NonClientSize(*control_m);
+
+    result.width() = Value(largest_extent.x + non_client_size.x);
     result.height() = original_height_m;
     GG::Y baseline =
         (static_cast<int>(result.height()) - implementation::CharHeight()) / 2 +

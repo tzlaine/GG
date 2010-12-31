@@ -74,6 +74,8 @@ GG::Y CharHeight();
 
 GG::Y StandardHeight();
 
+GG::Pt NonClientSize(GG::Wnd& w);
+
 /****************************************************************************************************/
 
 } // namespace implementation

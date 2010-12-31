@@ -35,7 +35,7 @@ public:
                           std::size_t              millisecond_delay = 200) :
         is_blocked_m(false),
         proc_m(proc),
-        data_m(periodical_platform_data_t::fire_proc_t(), millisecond_delay)
+        data_m(proc, millisecond_delay)
     {
         // NOTE (fbrereto) : MSVC 8 doesn't allow "this" to be used
         //                   in a constructor initializer, so we

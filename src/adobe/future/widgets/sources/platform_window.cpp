@@ -86,6 +86,8 @@ public:
 
     virtual void SizeMove(const GG::Pt& ul, const GG::Pt& lr)
         {
+            GG::Wnd::SizeMove(ul, lr);
+
             GG::Pt client_size = ClientSize();
 
             if (!m_imp.debounce_m && !m_imp.resize_proc_m.empty()) {
@@ -101,8 +103,6 @@ public:
 
                 m_imp.debounce_m = false;
             }
-
-            GG::Wnd::SizeMove(ul, lr);
 
             GG::Pt new_title_size((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
             m_title->Resize(new_title_size);

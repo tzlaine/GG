@@ -34,7 +34,7 @@ namespace adobe {
 
 struct display_number_t  : boost::noncopyable 
 {
-    typedef double  model_type;
+    typedef double model_type;
 
     typedef std::vector<unit_t> unit_set_t;
 
@@ -47,7 +47,6 @@ struct display_number_t  : boost::noncopyable
                      int characters);
 
     GG::TextControl*         window_m;
-    GG::Rect                 bounds_m;   
     std::string              name_m;
     std::string              alt_text_m;
     unit_set_t               unit_set_m;
@@ -66,17 +65,17 @@ struct display_number_t  : boost::noncopyable
 
 template <typename ForwardIterator>
 display_number_t::display_number_t(
-             const std::string& name,
-             const std::string& alt_text,
-             ForwardIterator first,
-             ForwardIterator last, 
-             theme_t theme,
-             int characters) 
-                : name_m(name),
-                  alt_text_m(alt_text),
-                  unit_set_m(first, last),
-                  theme_m(theme),
-                  characters_m(characters)
+    const std::string& name,
+    const std::string& alt_text,
+    ForwardIterator first,
+    ForwardIterator last, 
+    theme_t theme,
+    int characters) :
+    name_m(name),
+    alt_text_m(alt_text),
+    unit_set_m(first, last),
+    theme_m(theme),
+    characters_m(characters)
 { }
 
 /****************************************************************************************************/

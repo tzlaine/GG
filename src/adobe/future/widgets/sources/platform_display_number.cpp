@@ -97,13 +97,11 @@ void display_number_t::measure(extents_t& result)
 {
     assert(window_m);
 
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    boost::shared_ptr<GG::Font> font = style->DefaultFont();
+    boost::shared_ptr<GG::Font> font = implementation::DefaultFont();
 
     extents_t space_extents(metrics::measure_text(std::string(" "), font));
     extents_t label_extents(metrics::measure_text(name_m, font));
-    extents_t characters_extents(
-        metrics::measure_text(std::string(characters_m, '0'), font));
+    extents_t characters_extents(metrics::measure_text(std::string(characters_m, '0'), font));
 
     extents_t unit_max_extents;
     for (display_number_t::unit_set_t::iterator it(unit_set_m.begin()), end(unit_set_m.end());
@@ -148,8 +146,8 @@ void display_number_t::measure_vertical(extents_t& calculated_horizontal, const 
     assert(window_m);
 
     extents_t::slice_t& vert = calculated_horizontal.vertical();
-    vert.length_m = Value(window_m->Height());
-    vert.guide_set_m.push_back(metrics::measure_baseline(window_m));
+    vert.length_m = Value(implementation::DefaultFont()->Lineskip());
+    vert.guide_set_m.push_back(Value(implementation::DefaultFont()->Ascent()));
 }
 
 /****************************************************************************************************/
@@ -161,14 +159,9 @@ platform_display_type insert<display_number_t>(display_t& display,
                                                platform_display_type& parent,
                                                display_number_t& element)
 {
-    GG::Rect bounds(GG::X0, GG::Y0, GG::X(100), GG::Y(100));
-
-    element.bounds_m = bounds;
-
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    element.window_m = style->NewTextControl(bounds.Left(), bounds.Top(),
-                                             bounds.Width(), bounds.Height(),
-                                             element.name_m, style->DefaultFont());
+    element.window_m =
+        implementation::Factory().NewTextControl(GG::X0, GG::Y0, GG::X1, GG::Y1,
+                                                 element.name_m, implementation::DefaultFont());
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);

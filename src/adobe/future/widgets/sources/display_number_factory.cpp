@@ -51,8 +51,8 @@ void create_widget(const dictionary_t&       parameters,
             unit_set.push_back(to_unit(iter->cast<dictionary_t>(), default_unit));
     }
 
-    display_number = new display_number_t(name, alt_text, unit_set.begin(),
-                                          unit_set.end(), theme, characters);
+    display_number = new display_number_t(name, alt_text, unit_set.begin(), unit_set.end(),
+                                          theme, characters);
 }
 
 /*************************************************************************************************/

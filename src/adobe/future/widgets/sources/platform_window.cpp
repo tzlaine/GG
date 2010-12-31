@@ -204,9 +204,6 @@ void window_t::place(const place_data_t& place_data)
 
         place_data_m = place_data;
 
-        min_size_m.x_m = width(place_data);
-        min_size_m.y_m = height(place_data);
-
         GG::Pt ul(GG::X(left(place_data)), GG::Y(top(place_data)));
         GG::Pt size(
             GG::Pt(GG::X(width(place_data)), GG::Y(height(place_data))) +

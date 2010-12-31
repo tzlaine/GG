@@ -69,7 +69,6 @@ struct window_t
     place_data_t           place_data_m;
     window_resize_proc_t   resize_proc_m;
     bool                   debounce_m;
-    point_2d_t             min_size_m;
     bool                   placed_once_m;
 };
 

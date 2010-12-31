@@ -23,8 +23,8 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         size,
                    checkbox_t* &       checkbox)
 {
-    std::string    name;
-    std::string    alt_text;
+    std::string   name;
+    std::string   alt_text;
     any_regular_t true_value(true);
     any_regular_t false_value(false);
     theme_t theme(implementation::size_to_theme(size));

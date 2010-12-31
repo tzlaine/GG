@@ -11,6 +11,7 @@
 #include <GG/adobe/future/widgets/headers/display.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <GG/Button.h>
 #include <GG/GUI.h>
@@ -54,9 +55,15 @@ radio_button_t::radio_button_t(const std::string&   name,
 
 void radio_button_t::measure(extents_t& result)
 {
-    GG::Pt min_size = control_m->MinUsableSize();
-    result.width() = Value(min_size.x);
-    result.height() = Value(min_size.y);
+    GG::Pt min_usable_size = control_m->MinUsableSize();
+
+    result.width() = Value(min_usable_size.x);
+    result.height() = Value(min_usable_size.y);
+
+    result.vertical().guide_set_m.push_back(
+        Value((min_usable_size.y - implementation::DefaultFont()->Lineskip()) / 2 +
+              implementation::DefaultFont()->Ascent())
+    );
 }
 
 /****************************************************************************************************/
@@ -102,11 +109,12 @@ platform_display_type insert<radio_button_t>(display_t&             display,
                                              platform_display_type& parent,
                                              radio_button_t&        element)
 {
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     element.control_m =
-        style->NewStateButton(GG::X0, GG::Y0, GG::X(100), style->DefaultFont()->Lineskip(),
-                              element.name_m, style->DefaultFont(),
-                              GG::FORMAT_LEFT, GG::CLR_GRAY);
+        implementation::Factory().NewStateButton(GG::X0, GG::Y0, GG::X1,
+                                                 implementation::StandardHeight(), element.name_m,
+                                                 implementation::DefaultFont(), GG::FORMAT_LEFT,
+                                                 GG::CLR_GRAY, GG::CLR_BLACK, GG::CLR_ZERO,
+                                                 GG::SBSTYLE_3D_RADIO);
 
     GG::Connect(element.control_m->CheckedSignal,
                 boost::bind(&radio_button_clicked, boost::ref(element), _1));

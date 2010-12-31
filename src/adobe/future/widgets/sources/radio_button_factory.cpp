@@ -23,8 +23,8 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         size,
                    radio_button_t*&     widget)
 {
-    std::string          name;
-    std::string          alt_text;
+    std::string   name;
+    std::string   alt_text;
     any_regular_t set_value;
 
     get_value(parameters, key_name, name);

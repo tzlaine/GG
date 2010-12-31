@@ -25,6 +25,18 @@ namespace {
 
 /****************************************************************************************************/
 
+GG::Y RowHeight()
+{
+    static GG::Y retval = GG::Y0;
+    if (!retval) {
+        const GG::Y DEFAULT_MARGIN(8); // DEFAULT_ROW_HEIGHT from ListBox.cpp, minus the default font's lineskip of 14
+        retval = adobe::implementation::DefaultFont()->Lineskip() + DEFAULT_MARGIN;
+    }
+    return retval;
+}
+
+/****************************************************************************************************/
+
 enum metrics {
     gap = 4 // Measured as space from popup to label.
 };
@@ -86,7 +98,7 @@ void message_menu_item_set(adobe::popup_t& popup)
              first = popup.menu_items_m.begin(), last = popup.menu_items_m.end();
          first != last;
          ++first) {
-        GG::ListBox::Row* row = new GG::ListBox::Row;
+        GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
         row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
                                                                        adobe::implementation::DefaultFont(),
                                                                        GG::CLR_BLACK, GG::FORMAT_LEFT));
@@ -313,7 +325,7 @@ void popup_t::display_custom()
         return;
 
     custom_m = true;
-    GG::ListBox::Row* row = new GG::ListBox::Row;
+    GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
     row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, custom_item_name_m,
                                                                    adobe::implementation::DefaultFont(),
                                                                    GG::CLR_BLACK, GG::FORMAT_LEFT));
@@ -379,7 +391,8 @@ template <> platform_display_type insert<popup_t>(display_t&             display
     int lines = std::min(element.menu_items_m.size(), 20u);
     element.control_m =
         implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
-                                                  implementation::DefaultFont()->Lineskip() * lines, GG::CLR_GRAY);
+                                                  RowHeight() * lines + static_cast<int>(2 * GG::ListBox::BORDER_THICK),
+                                                  GG::CLR_GRAY);
 
     GG::Connect(element.control_m->SelChangedSignal,
                 boost::bind(&sel_changed_slot, boost::ref(element), _1));

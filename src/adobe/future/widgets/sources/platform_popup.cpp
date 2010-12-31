@@ -133,10 +133,6 @@ popup_t::popup_t(const std::string& name,
     theme_m(theme),
     name_m(name, alt_text, 0, theme),
     alt_text_m(alt_text),
-    static_baseline_m(0),
-    static_height_m(0),
-    popup_baseline_m(0),
-    popup_height_m(0),
     using_label_m(!name.empty()),
     custom_m(false),
     custom_item_name_m(custom_item_name)
@@ -170,8 +166,10 @@ void popup_t::measure(extents_t& result)
     }
 
     result.width() = Value(largest_extent.x + 2 * implementation::CharWidth());
-    result.height() = Value(control_m->Height());
-    GG::Y baseline = control_m->ClientUpperLeft().y + font->Ascent();
+    result.height() = original_height_m;
+    GG::Y baseline =
+        (static_cast<int>(result.height()) - implementation::CharHeight()) / 2 +
+        implementation::DefaultFont()->Ascent();
     result.vertical().guide_set_m.push_back(Value(baseline));
 
     //
@@ -190,8 +188,6 @@ void popup_t::measure(extents_t& result)
     //
     extents_t label_bounds(measure_text(name_m.name_m, font));
     label_bounds.vertical().guide_set_m.push_back(Value(font->Ascent()));
-    static_height_m = label_bounds.height();
-    static_baseline_m = label_bounds.vertical().guide_set_m[0];
     //
     // Now we can align the label within the vertical
     // slice of the result. This doesn't do anything if
@@ -226,10 +222,6 @@ void popup_t::place(const place_data_t& place_data)
 
     place_data_t local_place_data(place_data);
 
-    //
-    // If we have a label then we need to allocate space for it
-    // out of the space we have been given.
-    //
     if (using_label_m)
     {
         //
@@ -239,9 +231,6 @@ void popup_t::place(const place_data_t& place_data)
         assert(place_data.vertical().guide_set_m.empty() == false);
         long baseline = place_data.vertical().guide_set_m[0];
 
-        //
-        // Apply the vertical offset.
-        //
         place_data_t label_place_data;
         label_place_data.horizontal().position_m = left(place_data);
         label_place_data.vertical().position_m = top(place_data);
@@ -267,8 +256,6 @@ void popup_t::place(const place_data_t& place_data)
         local_place_data.horizontal().position_m += width;
         adobe::width(local_place_data) -= width;
     }
-
-    height(local_place_data) = height(place_data);
 
     implementation::set_control_bounds(control_m, local_place_data);
 }
@@ -393,6 +380,8 @@ template <> platform_display_type insert<popup_t>(display_t&             display
         implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
                                                   RowHeight() * lines + static_cast<int>(2 * GG::ListBox::BORDER_THICK),
                                                   GG::CLR_GRAY);
+
+    element.original_height_m = Value(element.control_m->Height());
 
     GG::Connect(element.control_m->SelChangedSignal,
                 boost::bind(&sel_changed_slot, boost::ref(element), _1));

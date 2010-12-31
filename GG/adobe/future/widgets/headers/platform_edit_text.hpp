@@ -71,6 +71,7 @@ struct edit_text_t : boost::noncopyable
     void              signal_pre_edit(edit_text_pre_edit_proc_t proc);
 
     GG::Edit*                  control_m;
+    unsigned int               original_height_m;
     theme_t                    theme_m;
     label_t                    name_m;
     std::string                alt_text_m;
@@ -82,10 +83,6 @@ struct edit_text_t : boost::noncopyable
     long                       max_cols_m;
     bool                       scrollable_m;
     bool                       password_m;
-    long                       edit_baseline_m;
-    long                       edit_height_m;
-    long                       static_baseline_m;
-    long                       static_height_m;
     edit_text_pre_edit_proc_t  pre_edit_proc_m;
     setter_type                post_edit_proc_m;
     std::string                value_m; // Used to debounce

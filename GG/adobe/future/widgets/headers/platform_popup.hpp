@@ -71,13 +71,10 @@ struct popup_t : boost::noncopyable
     void                enable(bool make_enabled);
 
     GG::DropDownList*    control_m;
+    unsigned int         original_height_m;
     theme_t              theme_m;
     label_t              name_m;
     std::string          alt_text_m;
-    long                 static_baseline_m;
-    long                 static_height_m;
-    long                 popup_baseline_m;
-    long                 popup_height_m;
     bool                 using_label_m;
     setter_type          value_proc_m;
     extended_setter_type extended_value_proc_m;

@@ -56,13 +56,11 @@ struct image_t : boost::noncopyable
 
     void display(const view_model_type& value);
     void monitor(const setter_proc_type& proc);
-    void enable(bool make_enabled);
 
     GG::StaticGraphic*                 window_m;
     view_model_type                    image_m;
     setter_proc_type                   callback_m;
     dictionary_t                       metadata_m;
-    bool                               enabled_m;
     GG::Pt                             last_point_m;
 
     boost::shared_ptr<implementation::ImageFilter>

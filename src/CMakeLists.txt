@@ -24,6 +24,7 @@ set(THIS_LIB_SOURCES
     ExpressionParser.cpp
     ExpressionWriter.cpp
     Font.cpp
+    GroupBox.cpp
     GUI.cpp
     Layout.cpp
     Lexer.cpp

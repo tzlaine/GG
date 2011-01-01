@@ -49,7 +49,7 @@ platform_display_type display_t::insert(platform_display_type parent,
 
     if (parent != null_parent_s)// TODO && parent != get_main_display().root())
         parent->AttachChild(element);
-    else
+    else if (!element->Modal())
         GG::GUI::GetGUI()->Register(element);
 
     return element;

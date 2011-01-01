@@ -88,7 +88,6 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
         adobe/future/widgets/sources/edit_number.cpp
         adobe/future/widgets/sources/panel_factory.cpp
         adobe/future/widgets/sources/number_unit.cpp
-        adobe/future/widgets/sources/link_factory.cpp
         adobe/future/widgets/sources/edit_text_factory.cpp
         adobe/future/widgets/sources/checkbox_factory.cpp
         adobe/future/widgets/sources/tab_group_factory.cpp
@@ -145,7 +144,6 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
         adobe/future/widgets/sources/platform_group.cpp
         adobe/future/widgets/sources/platform_image.cpp
         adobe/future/widgets/sources/platform_label.cpp
-        adobe/future/widgets/sources/platform_link.cpp
         adobe/future/widgets/sources/platform_metrics.cpp
         adobe/future/widgets/sources/platform_optional_panel.cpp
         adobe/future/widgets/sources/platform_panel.cpp

@@ -27,7 +27,6 @@
 #include <GG/adobe/future/widgets/headers/group_factory.hpp>
 #include <GG/adobe/future/widgets/headers/image_factory.hpp>
 #include <GG/adobe/future/widgets/headers/label_factory.hpp>
-#include <GG/adobe/future/widgets/headers/link_factory.hpp>
 #include <GG/adobe/future/widgets/headers/optional_panel_factory.hpp>
 #include <GG/adobe/future/widgets/headers/panel_factory.hpp>
 #include <GG/adobe/future/widgets/headers/popup_factory.hpp>
@@ -232,7 +231,6 @@ const widget_factory_t& default_asl_widget_factory()
         default_factory_s.reg(name_image, &implementation::make_image_hack);
         default_factory_s.reg(name_toggle, &make_toggle);
         default_factory_s.reg(name_label, &implementation::make_label_hack);
-        default_factory_s.reg(name_link, &make_link, false, link_layout_attributes());
         default_factory_s.reg(name_optional, &make_optional_panel, true, optional_panel_layout_attributes());
         default_factory_s.reg(name_panel, &make_panel, true, panel_layout_attributes());
         default_factory_s.reg(name_popup, &make_popup);

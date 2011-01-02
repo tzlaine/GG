@@ -34,7 +34,7 @@ using namespace GG;
 
 namespace {
     Y TopOfFrame(bool label, const boost::shared_ptr<Font>& font)
-    { return label ? font->Lineskip() : font->Lineskip() / 2 - 1; }
+    { return label ? font->Lineskip() / 2 - 1 : Y0; }
 }
 
 ////////////////////////////////////////////////

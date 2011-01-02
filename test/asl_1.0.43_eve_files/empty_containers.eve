@@ -8,46 +8,40 @@ layout empty_containers
 {
     view dialog(name: "Empty Containers")
     {
-        column(name: "Empty")
+        group(name: "Empty")
         {
-            column();
+            group();
 
-            column(name: "Empty With Name");
+            group(name: "Empty With Name");
 
-            tab_group(bind: @tab_group_visible)
-            {
-                panel(name: "Empty", value: @first);
-                panel(name: "With", value: @second);
-                panel(name: "Tabs", value: @third);
-            }
+            tab_group(  bind: @tab_group_visible,
+                        items: [
+                            {name: "Empty", value: @first},
+                            {name: "With", value: @second},
+                            {name: "Tabs", value: @third}
+                        ]);
         }
 
-        column(name: "Minimal Stuff")
+        group(name: "Minimal Stuff")
         {
-            column()
+            group()
             {
                 static_text(name:"X");
             }
 
-            column(name: "Empty With Name")
+            group(name: "Empty With Name")
             {
                 static_text(name:"X");
             }
 
-            tab_group(bind: @tab_group_visible)
+            tab_group(  bind: @tab_group_visible,
+                        items: [
+                            {name: "Empty", value: @first},
+                            {name: "With", value: @second},
+                            {name: "Tabs", value: @third}
+                        ])
             {
-                panel(name: "Empty", value: @first)
-                {
-                    static_text(name:"X");
-                }
-                panel(name: "With", value: @second)
-                {
-                    static_text(name:"X");
-                }
-                panel(name: "Tabs", value: @third)
-                {
-                    static_text(name:"X");
-                }
+                static_text(name:"X");
             }
         }
     }

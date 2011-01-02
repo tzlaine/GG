@@ -8,7 +8,7 @@ layout alignment_test
 {
     view dialog(name: "Alignment Test", spacing: 6)
     {
-        column(name: "Colon Alignment 1")
+        group(placement: place_column, name: "Colon Alignment 1")
         {
             edit_text(bind: @alignment, characters: 10, name: "Apple:");
             edit_text(bind: @alignment, characters: 10, name: "Orange:");
@@ -18,7 +18,7 @@ layout alignment_test
         }
         column()
         {
-            column(name: "Colon Alignment 2")
+            group(placement: place_column, name: "Colon Alignment 2")
             {
                 edit_text(bind: @alignment, characters: 10, name: "Alignment:");
     
@@ -39,12 +39,12 @@ layout alignment_test
         }
         column()
         {
-            column(name: "No lables", horizontal: align_left)
+            group(placement: place_column, name: "No lables")
             {
                 edit_text(bind: @alignment, characters: 10);
                 popup(items: [{name: "Item One", value: @one}, {name: "Item Two", value: @two}]);
             }
-            column(name: "Other Texts")
+            group(placement: place_column, name: "Other Texts")
             {
                 row()
                 {

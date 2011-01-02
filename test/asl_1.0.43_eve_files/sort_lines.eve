@@ -19,21 +19,21 @@ layout sort_lines
     {
         row(horizontal: align_fill)
         {
-            column(name: 'Sorting Options', horizontal: align_fill)
+            group(name: 'Sorting Options', horizontal: align_fill)
             {
                 checkbox(name: 'Numbers Match by Value', bind: @numbers_match_by_value, value: true);
                 checkbox(name: 'Ignore Leading White Space', bind: @ignore_leading_white_space, value: true);
                 checkbox(name: 'Reverse Sort', bind: @reverse_sort, value: true);
                 checkbox(name: 'Use Pattern', bind: @sort_using_pattern, value: true);
             }
-            column(name: 'Result Destinations', vertical: align_fill, horizontal: align_fill)
+            group(name: 'Result Destinations', vertical: align_fill, horizontal: align_fill)
             {
                 checkbox(name: 'Clipboard', bind: @lines_to_clipboard, value: true);
                 checkbox(name: 'New Document', bind: @lines_to_new_doc, value: true);
                 checkbox(name: 'Replace Selection', bind: @lines_replace_selection, value: true);
             }
         }
-        column(name: 'Pattern Options', horizontal: align_fill)
+        group(name: 'Pattern Options', placement: place_column, horizontal: align_fill)
         {
             row(horizontal: align_fill)
             {

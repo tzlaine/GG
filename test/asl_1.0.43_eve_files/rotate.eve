@@ -1,5 +1,5 @@
 layout my_dialog {
-  view dialog(name: localize("My Dialog")) {
+  view dialog(name: localize("<xstr id='my_dialog_name'>My Dialog</xstr>")) {
     row() {
       column() {
         edit_number(name: 'x:', bind: @x, format: '#.##');
@@ -11,8 +11,8 @@ layout my_dialog {
       }
     }
     button (items: [
-                       { name: localize("OK"), action: @ok, bind: @result, alt: 'Perform the command with the current settings' },
-                       { name: localize("Reset"), action: @reset, modifiers: @opt, alt: 'Reset the dialog settings' }
+                       { name: localize("<xstr id='ok'>OK</xstr>"), action: @ok, bind: @result, alt: 'Perform the command with the current settings' },
+                       { name: localize("<xstr id='reset'>Reset</xstr>"), action: @reset, modifiers: @opt, alt: 'Reset the dialog settings' }
                    ]);
   }
 }

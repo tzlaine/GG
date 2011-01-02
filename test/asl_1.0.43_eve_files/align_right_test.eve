@@ -10,7 +10,7 @@ layout alignment_test
     {
 		row(horizontal: align_fill, vertical: align_fill)
 		{
-		column(horizontal: align_fill, vertical: align_fill)
+		group(horizontal: align_fill, vertical: align_fill)
 			{
         			edit_number(name: "Right Align Test:", horizontal: align_right, digits: 16);
         			edit_number(name: "This is left:", digits: 4);
@@ -18,7 +18,7 @@ layout alignment_test
         			edit_number(name: "Also right:", horizontal: align_right, digits: 8);
         			edit_number(name: "This is left fill:", digits: 4, horizontal: align_fill);
 			}
-			row(vertical: align_fill)
+			group(placement: place_row, vertical: align_fill)
 			{
 				button(name: "top");
 				checkbox(name: "top");

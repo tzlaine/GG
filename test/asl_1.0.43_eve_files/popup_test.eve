@@ -33,7 +33,7 @@ layout preset_test
     {
         column(horizontal: align_fill, child_horizontal: align_fill)
         {
-            column(horizontal: align_fill, child_horizontal: align_fill)
+            group(horizontal: align_fill, child_horizontal: align_fill)
             {
                 popup(name: "Static Popup:", bind: @value_one,
                       items: [
@@ -46,7 +46,7 @@ layout preset_test
                 edit_text(name: "Popup Value:", bind: @value_one);
             }
 
-            column(horizontal: align_fill, child_horizontal: align_fill)
+            group(horizontal: align_fill, child_horizontal: align_fill)
             {
                 popup(name: "Number Set:", bind: @popup_item_set, items: @menu_item_set_set);
 

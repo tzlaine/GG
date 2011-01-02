@@ -7,13 +7,13 @@ layout nested_group
 {
     view dialog(name: "nested group test", placement: place_column)
     {
-        column(name: "group a")
+        group(name: "group a")
         {
             button(name: "button one");
-            column(name: "group b")
+            group(name: "group b")
             {
                 button(name: "button two");
-                column(name: "group c")
+                group(name: "group c")
                 {
                     button(name: "button three");
                     edit_text(name: "text", characters: 10);

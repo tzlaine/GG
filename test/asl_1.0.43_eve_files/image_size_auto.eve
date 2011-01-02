@@ -6,26 +6,26 @@
 
 layout image_size_auto
 {
-    view dialog(name: localize("Auto Resolution"))
+    view dialog(name: localize("<xstr id='image_size_auto_dialog_title'>Auto Resolution</xstr>"))
     {
         column()
         {
-            edit_number(name: localize("Screen:"), digits: 9, touch: [ @dim_width_pixels, @dim_height_pixels ], 
-                        units: [    { name: localize("lines/inch"), bind: @screen_lpi, format: "#.000" },
-                                    { name: localize("lines/cm"), bind: @screen_lpi, scale: [2.54, 0.0], format: "#.00" }
+            edit_number(name: localize("<xstr id='image_size_auto_screen'>Screen:</xstr>"), digits: 9, touch: [ @dim_width_pixels, @dim_height_pixels ], 
+                        units: [    { name: localize("<xstr id='image_size_auto_lines_per_inch'>lines/inch</xstr>"), bind: @screen_lpi, format: "#.000" },
+                                    { name: localize("<xstr id='image_size_auto_lines_per_cm'>lines/cm</xstr>"), bind: @screen_lpi, scale: [2.54, 0.0], format: "#.00" }
                                      ]);
     
-            row(name: localize("Quality"), horizontal: align_fill, placement: place_row, child_horizontal: align_proportional)
+            group(name: localize("<xstr id='image_size_auto_quality'>Quality</xstr>"), horizontal: align_fill, placement: place_row, child_horizontal: align_proportional)
             { 
-                radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("Draft"), value: @draft);
-                radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("Good"), value: @good);
-                radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("Best"), value: @best);
+                radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("<xstr id='image_size_auto_draft'>Draft</xstr>"), value: @draft);
+                radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("<xstr id='image_size_auto_good'>Good</xstr>"), value: @good);
+                radio_button(touch: [ @screen_lpi, @dim_width_pixels, @dim_height_pixels ], bind: @auto_quality, name: localize("<xstr id='image_size_auto_best'>Best</xstr>"), value: @best);
             }
         }
     
-        column(child_horizontal: align_fill, vertical: align_top)
+        column(child_horizontal: align_fill)
         {
-            button(name: localize("OK"), bind: @result, action: @ok, default: true);
+            button(name: localize("<xstr id='ok'>OK</xstr>"), bind: @result, action: @ok, default: true);
             button(name: localize("Cancel"), action: @cancel);
         }
     }

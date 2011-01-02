@@ -8,12 +8,12 @@ layout image
 {
     view dialog(name: "Image Widget Test Dialog")
     {
-        column(name: "Static Image")
+        group(name: "Static Image")
         {
             image(image: "stop.png");
         }
 
-        column(name: "View/Controller-Bound Image")
+        group(name: "View/Controller-Bound Image")
         {
             edit_number(name: "Delta X", bind: @delta_x);
             edit_number(name: "Delta Y", bind: @delta_y);
@@ -21,7 +21,7 @@ layout image
             image(bind_view: @my_image, bind_controller: @image_metadata);
         }
 
-        column(name: "View-Bound Image")
+        group(name: "View-Bound Image")
         {
             checkbox(name: "Other Image", bind: @other_image);
             image(bind_view: @my_image);

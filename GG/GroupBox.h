@@ -65,6 +65,13 @@ public:
     /** Sets the interior color of the box. */
     void SetInteriorColor(Clr c);
 
+    /** Setting this to true causes ClientUpperLeft() and ClientLowerRight()
+        to return UpperLeft() and LowerRight(), respectively.  This is a
+        horrible hack that is designed to allow the Eve layout engine to set
+        this box's children at their desired locations without knowing
+        anything about how GG Wnd client areas work. */
+    void SetClientCornersEqualToBoxCorners(bool b);
+
     virtual void SetText(const std::string& str);
     //@}
 
@@ -86,6 +93,7 @@ private:
     Clr                     m_int_color;  ///< Color of background inside box
     boost::shared_ptr<Font> m_font;
     TextControl*            m_label;
+    bool                    m_set_client_corners_equal_to_box_corners;
 
     friend class boost::serialization::access;
     template <class Archive>

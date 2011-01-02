@@ -45,7 +45,8 @@ const int GroupBox::FRAME_THICK = 2;
 const int GroupBox::PIXEL_MARGIN = 4;
 
 GroupBox::GroupBox() :
-    m_label(0)
+    m_label(0),
+    m_set_client_corners_equal_to_box_corners(false)
 {}
 
 GroupBox::GroupBox(X x, Y y, X w, Y h, const std::string& label, const boost::shared_ptr<Font>& font,
@@ -55,16 +56,25 @@ GroupBox::GroupBox(X x, Y y, X w, Y h, const std::string& label, const boost::sh
     m_text_color(text_color),
     m_int_color(interior),
     m_font(font),
-    m_label(label.empty() ? 0 : GUI::GetGUI()->GetStyleFactory()->NewTextControl(X0, -m_font->Lineskip(),
-                                                                                 X1, m_font->Lineskip(),
-                                                                                 label, m_font, m_text_color, FORMAT_LEFT | FORMAT_TOP))
+    m_label(label.empty() ? 0 : GUI::GetGUI()->GetStyleFactory()->NewTextControl(X0, -m_font->Lineskip(), X1, m_font->Lineskip(),
+                                                                                 label, m_font, m_text_color, FORMAT_LEFT | FORMAT_TOP)),
+    m_set_client_corners_equal_to_box_corners(false)
 { AttachChild(m_label); }
 
 Pt GroupBox::ClientUpperLeft() const
-{ return UpperLeft() + Pt(X(FRAME_THICK + PIXEL_MARGIN), Y(FRAME_THICK + PIXEL_MARGIN) + TopOfFrame(m_label, m_font)); }
+{
+    Pt retval = UpperLeft();
+    if (!m_set_client_corners_equal_to_box_corners)
+        retval += Pt(X(FRAME_THICK + PIXEL_MARGIN), Y(FRAME_THICK + PIXEL_MARGIN) + TopOfFrame(m_label, m_font));
+    return retval;
+}
 
 Pt GroupBox::ClientLowerRight() const
-{ return LowerRight() - Pt(X(FRAME_THICK + PIXEL_MARGIN), Y(FRAME_THICK + PIXEL_MARGIN)); }
+{
+    Pt retval = LowerRight();
+    if (!m_set_client_corners_equal_to_box_corners)
+        retval -= Pt(X(FRAME_THICK + PIXEL_MARGIN), Y(FRAME_THICK + PIXEL_MARGIN));
+}
 
 void GroupBox::Render()
 {
@@ -129,6 +139,19 @@ void GroupBox::SetTextColor(Clr c)
 void GroupBox::SetInteriorColor(Clr c)
 { m_int_color = c; }
 
+void GroupBox::SetClientCornersEqualToBoxCorners(bool b)
+{
+    if (b != m_set_client_corners_equal_to_box_corners) {
+        m_set_client_corners_equal_to_box_corners = b;
+        if (m_label) {
+            if (m_set_client_corners_equal_to_box_corners)
+                m_label->MoveTo(Pt(X(FRAME_THICK + PIXEL_MARGIN), Y0));
+            else
+                m_label->MoveTo(Pt(X0, -m_font->Lineskip()));
+        }
+    }
+}
+
 void GroupBox::SetText(const std::string& str)
 {
     delete m_label;
@@ -138,4 +161,7 @@ void GroupBox::SetText(const std::string& str)
                                                                    X1, m_font->Lineskip(),
                                                                    str, m_font, m_text_color);
     }
+
+    if (m_set_client_corners_equal_to_box_corners && m_label)
+        m_label->MoveTo(Pt(X(FRAME_THICK + PIXEL_MARGIN), Y0));
 }

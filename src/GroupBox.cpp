@@ -74,6 +74,7 @@ Pt GroupBox::ClientLowerRight() const
     Pt retval = LowerRight();
     if (!m_set_client_corners_equal_to_box_corners)
         retval -= Pt(X(FRAME_THICK + PIXEL_MARGIN), Y(FRAME_THICK + PIXEL_MARGIN));
+    return retval;
 }
 
 void GroupBox::Render()

@@ -44,6 +44,7 @@ class DynamicGraphic;
 class FileDlg;
 class Edit;
 class Font;
+class GroupBox;
 class ListBox;
 class MenuBar;
 class MultiEdit;
@@ -176,6 +177,11 @@ public:
     virtual TextControl*       NewTextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font,
                                               Clr color = CLR_BLACK, Flags<TextFormat> format = FORMAT_NONE,
                                               Flags<WndFlag> flags = Flags<WndFlag>()) const;
+
+    /** Returns a new GG GroupBox. */
+    virtual GroupBox*          NewGroupBox(X x, Y y, X w, Y h, const std::string& label, const boost::shared_ptr<Font>& font,
+                                           Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
+                                           Flags<WndFlag> flags = Flags<WndFlag>()) const;
     //@}
 
     /** \name Subcontrols */ ///@{

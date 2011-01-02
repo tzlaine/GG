@@ -28,6 +28,7 @@
 #include <GG/DropDownList.h>
 #include <GG/DynamicGraphic.h>
 #include <GG/Edit.h>
+#include <GG/GroupBox.h>
 #include <GG/ListBox.h>
 #include <GG/Menu.h>
 #include <GG/MultiEdit.h>
@@ -132,6 +133,11 @@ TextControl* StyleFactory::NewTextControl(X x, Y y, X w, Y h, const std::string&
 TextControl* StyleFactory::NewTextControl(X x, Y y, const std::string& str, const boost::shared_ptr<Font>& font,
                                           Clr color/* = CLR_BLACK*/, Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 { return new TextControl(x, y, str, font, color, format, flags); }
+
+GroupBox* StyleFactory::NewGroupBox(X x, Y y, X w, Y h, const std::string& label, const boost::shared_ptr<Font>& font,
+                                    Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
+                                    Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+{ return new GroupBox(x, y, w, h, label, font, color, text_color, interior, flags); }
 
 TabBar* StyleFactory::NewTabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                 TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const

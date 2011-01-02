@@ -42,7 +42,7 @@ namespace {
 ////////////////////////////////////////////////
 // static(s)
 const int GroupBox::FRAME_THICK = 2;
-const int GroupBox::PIXEL_MARGIN = 5;
+const int GroupBox::PIXEL_MARGIN = 4;
 
 GroupBox::GroupBox() :
     m_label(0)

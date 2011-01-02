@@ -22,7 +22,7 @@
 
 
 namespace GG {
-    class Control;
+    class GroupBox;
 }
 
 /****************************************************************************************************/
@@ -41,7 +41,7 @@ struct group_t
 
     void place(const place_data_t& place_data);
 
-    GG::Control*         control_m; // TODO
+    GG::GroupBox*        control_m;
     std::string          name_m;
     std::string          alt_text_m;
     theme_t              theme_m;

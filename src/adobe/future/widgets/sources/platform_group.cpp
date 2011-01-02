@@ -11,8 +11,10 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 
+#include <GG/GroupBox.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 
@@ -48,8 +50,7 @@ void group_t::measure(extents_t& result)
 
     // REVISIT (fbrereto) : A lot of static metrics values added here
 
-    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-    result = metrics::measure_text(name_m, style->DefaultFont());
+    result = metrics::measure_text(name_m, implementation::DefaultFont());
 
     result.width() += 15;
 
@@ -73,20 +74,10 @@ platform_display_type insert<group_t>(display_t&             display,
                                       platform_display_type& parent,
                                       group_t&               element)
 {
-    assert(!"GG has no group control yet");
-#if 0
-    HWND parent_hwnd(parent);
-
-    element.control_m = ::CreateWindowExW(WS_EX_CONTROLPARENT | WS_EX_COMPOSITED | WS_EX_TRANSPARENT,
-                                          L"BUTTON",
-                                          hackery::convert_utf(element.name_m).c_str(),
-                                          WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                                          0, 0, 10, 10,
-                                          parent_hwnd,
-                                          0,
-                                          ::GetModuleHandle(NULL),
-                                          NULL);
-#endif
+    element.control_m =
+        implementation::Factory().NewGroupBox(GG::X0, GG::Y0, GG::X1, GG::Y1, element.name_m,
+                                              implementation::DefaultFont(), GG::CLR_GRAY);
+    element.control_m->SetClientCornersEqualToBoxCorners(true);
 
     return display.insert(parent, element.control_m);
 }

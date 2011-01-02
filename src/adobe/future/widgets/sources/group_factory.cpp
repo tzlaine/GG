@@ -18,9 +18,9 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-void create_widget(const dictionary_t&   parameters,
-                   size_enum_t               size,
-                   group_t*&                 group)
+void create_widget(const dictionary_t& parameters,
+                   size_enum_t         size,
+                   group_t*&           group)
 {
     std::string    name;
     std::string    alt_text;
@@ -51,7 +51,13 @@ widget_node_t make_group(const dictionary_t&     parameters,
                          const widget_node_t&    parent, 
                          const factory_token_t&  token,
                          const widget_factory_t& factory)
-    { return create_and_hookup_widget<group_t, poly_placeable_t>(parameters, parent, token, factory.is_container(static_name_t("group")), factory.layout_attributes(static_name_t("group"))); }
+    {
+        return create_and_hookup_widget<group_t, poly_placeable_t>(
+            parameters, parent, token,
+            factory.is_container(static_name_t("group")),
+            factory.layout_attributes(static_name_t("group"))
+        );
+    }
 
 /****************************************************************************************************/
 

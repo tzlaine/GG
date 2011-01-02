@@ -98,7 +98,6 @@ namespace { // file-scope constants and functions
 
         // draw interior of rectangle
         if (color != CLR_ZERO) {
-            glVertexPointer(2, GL_INT, 2 * 2 * sizeof(GL_INT), vertices);
             glColor(color);
             glBegin(GL_QUADS);
             glVertex(inner_x2, inner_y1);

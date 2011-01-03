@@ -231,7 +231,10 @@ public:
         be added as permanent. */
     void insert(FlagType flag, const std::string& name, bool permanent = false)
         {
-            bool insert_successful = m_flags.insert(flag).second;
+#ifndef NDEBUG
+            bool insert_successful =
+#endif
+                m_flags.insert(flag).second;
             assert(insert_successful);
             if (permanent)
                 m_permanent.insert(flag);

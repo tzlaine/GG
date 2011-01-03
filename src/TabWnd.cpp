@@ -125,7 +125,7 @@ Wnd* OverlayWnd::RemoveWnd(Wnd* wnd)
     Wnd* retval = 0;
     std::vector<Wnd*>::iterator it = std::find(m_wnds.begin(), m_wnds.end(), wnd);
     if (it != m_wnds.end()) {
-        if (it - m_wnds.begin() == m_current_wnd_index)
+        if (it - m_wnds.begin() == static_cast<std::ptrdiff_t>(m_current_wnd_index))
             m_current_wnd_index = NO_WND;
         retval = *it;
         m_wnds.erase(it);
@@ -248,7 +248,6 @@ const std::map<std::string, Wnd*>& TabWnd::WndNames() const
 void TabWnd::TabChanged(std::size_t index, bool signal)
 {
     assert(index < m_named_wnds.size());
-    Wnd* old_current_wnd = m_overlay->CurrentWnd();
     m_overlay->SetCurrentWnd(index);
     if (signal)
         WndChangedSignal(index);

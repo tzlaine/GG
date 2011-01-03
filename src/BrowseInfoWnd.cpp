@@ -107,7 +107,6 @@ TextBoxBrowseInfoWnd::TextBoxBrowseInfoWnd(X w, const boost::shared_ptr<Font>& f
 
 bool TextBoxBrowseInfoWnd::WndHasBrowseInfo(const Wnd* wnd, std::size_t mode) const
 {
-    const std::vector<Wnd::BrowseInfoMode>& browse_modes = wnd->BrowseModes();
     assert(mode <= browse_modes.size());
     return !wnd->BrowseInfoText(mode).empty();
 }

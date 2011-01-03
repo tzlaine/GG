@@ -1579,7 +1579,6 @@ dictionary_t sheet_t::implementation_t::contributing_to_cell(name_t x) const
 
 void sheet_t::implementation_t::print(std::ostream& os) const
 {
-    const char* tab = "    ";
     os << "sheet name_ignored\n"
        << "{\n";
     for (std::size_t i = 0; i < added_cells_m.size(); ++i) {
@@ -1593,6 +1592,7 @@ void sheet_t::implementation_t::print(std::ostream& os) const
         case access_logic: os << "logic:\n"; break;
         case access_constant: os << "constant:\n"; break;
         case access_invariant: os << "invariant:\n"; break;
+        case access_interface_output: break;
         }
         for (std::size_t j = 0; j < cell_set.added_cells_m.size(); ++j) {
             boost::apply_visitor(print_visitor(os), cell_set.added_cells_m[j]);

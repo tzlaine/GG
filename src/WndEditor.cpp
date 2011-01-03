@@ -23,7 +23,7 @@ namespace {
                 m_value = T(value);
                 m_edit->SetTextColor(CLR_BLACK);
                 m_signal();
-            } catch (const boost::bad_lexical_cast& e) {
+            } catch (const boost::bad_lexical_cast&) {
                 m_edit->SetTextColor(CLR_RED);
             }
         }
@@ -50,7 +50,7 @@ namespace {
                 m_value = value;
                 m_edit->SetTextColor(CLR_BLACK);
                 m_signal();
-            } catch (const boost::bad_lexical_cast& e) {
+            } catch (const boost::bad_lexical_cast&) {
                 m_edit->SetTextColor(CLR_RED);
             }
         }
@@ -303,7 +303,7 @@ void AttributeRow<boost::shared_ptr<Font> >::FilenameChanged(const std::string& 
         m_filename_edit->SetTextColor(CLR_BLACK);
         ValueChangedSignal(m_value);
         ChangedSignal();
-    } catch (const Font::Exception& e) {
+    } catch (const Font::Exception&) {
         m_filename_edit->SetTextColor(CLR_RED);
     }
 }
@@ -319,9 +319,9 @@ void AttributeRow<boost::shared_ptr<Font> >::PointsChanged(const std::string& po
         m_points_edit->SetTextColor(CLR_BLACK);
         ValueChangedSignal(m_value);
         ChangedSignal();
-    } catch (const boost::bad_lexical_cast& e) {
+    } catch (const boost::bad_lexical_cast&) {
         m_points_edit->SetTextColor(CLR_RED);
-    } catch (const Font::Exception& e) {
+    } catch (const Font::Exception&) {
         m_points_edit->SetTextColor(CLR_RED);
     }
 }

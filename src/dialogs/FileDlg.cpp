@@ -233,7 +233,7 @@ void FileDlg::Render()
     FlatRectangle(UpperLeft(), LowerRight(), m_color, m_border_color, 1);
     try {
         fs::directory_iterator test(s_working_dir);
-    } catch (const fs::filesystem_error& e) {
+    } catch (const fs::filesystem_error&) {
         // This ctor has been found to throw on Win32 when we attempt to iterate over a path into a drive that has just
         // been disconnected (e.g. a USB thumb drive).  In this case, we will just cancel the dialog.
         CancelClicked();
@@ -642,7 +642,7 @@ void FileDlg::UpdateList()
         }
         try {
             fs::directory_iterator test(s_working_dir);
-        } catch (const fs::filesystem_error& e) {
+        } catch (const fs::filesystem_error&) {
             // This ctor has been found to throw on Win32 when we attempt to iterate over a path into a drive that has
             // just been disconnected (e.g. a USB thumb drive).  In this case, we will just cancel the dialog.
             CancelClicked();
@@ -657,7 +657,7 @@ void FileDlg::UpdateList()
                     row->push_back(row_text, m_font, m_text_color);
                     sorted_rows.insert(std::make_pair(row_text, row));
                 }
-            } catch (const fs::filesystem_error& e) {
+            } catch (const fs::filesystem_error&) {
             }
         }
         for (std::multimap<std::string, ListBox::Row*>::const_iterator it = sorted_rows.begin(); it != sorted_rows.end(); ++it) {
@@ -679,7 +679,7 @@ void FileDlg::UpdateList()
                             sorted_rows.insert(std::make_pair(it->filename(), row));
                         }
                     }
-                } catch (const fs::filesystem_error& e) {
+                } catch (const fs::filesystem_error&) {
                 }
             }
             for (std::multimap<std::string, ListBox::Row*>::const_iterator it = sorted_rows.begin(); it != sorted_rows.end(); ++it) {
@@ -695,7 +695,7 @@ void FileDlg::UpdateList()
                     row->push_back("[" + path.root_name() + "]", m_font, m_text_color);
                     m_files_list->Insert(row);
                 }
-            } catch (const fs::filesystem_error& e) {
+            } catch (const fs::filesystem_error&) {
             }
         }
     }

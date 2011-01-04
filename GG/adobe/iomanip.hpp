@@ -181,7 +181,7 @@ protected:
     { ++depth_m; }
 
     void down()
-    { depth_m = (std::max)(std::size_t(0), --depth_m); }
+    { depth_m = (std::max)(std::size_t(0), depth_m - 1); }
 
 private:
     virtual void stack_event(stream_type& os, bool is_push) = 0;

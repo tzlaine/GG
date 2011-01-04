@@ -231,7 +231,6 @@ void popup_t::place(const place_data_t& place_data)
         // baseline - the label's baseline.
         //
         assert(place_data.vertical().guide_set_m.empty() == false);
-        long baseline = place_data.vertical().guide_set_m[0];
 
         place_data_t label_place_data;
         label_place_data.horizontal().position_m = left(place_data);

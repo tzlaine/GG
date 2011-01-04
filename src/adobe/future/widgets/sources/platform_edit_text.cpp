@@ -178,7 +178,6 @@ void edit_text_t::place(const place_data_t& place_data)
         // baseline - the label's baseline.
         //
         assert(place_data.vertical().guide_set_m.empty() == false);
-        long baseline = local_place_data.vertical().guide_set_m[0];
 
         place_data_t label_place_data;
         label_place_data.horizontal().position_m = left(local_place_data);
@@ -301,7 +300,7 @@ platform_display_type insert<edit_text_t>(display_t&             display,
         insert(display, parent, element.get_label());
 
     assert(0 < element.rows_m);
-    if (element.rows_m <= 1u) {
+    if (element.rows_m <= 1) {
         element.control_m =
             implementation::Factory().NewEdit(GG::X0, GG::Y0, GG::X1, "",
                                               implementation::DefaultFont(), GG::CLR_GRAY);

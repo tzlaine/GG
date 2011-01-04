@@ -502,11 +502,11 @@ class any_regular_t : boost::equality_comparable<any_regular_t, any_regular_t>
         \ref concept_movable
     */
     /*!@{*/
-    any_regular_t() { ::new (storage()) traits<empty_t>::model_type(); }
+    any_regular_t() : data_ptr_m(&data_m[0]) { ::new (storage()) traits<empty_t>::model_type(); }
 
-    any_regular_t(const any_regular_t& x) { x.object().clone(storage()); }
+    any_regular_t(const any_regular_t& x) : data_ptr_m(&data_m[0]) { x.object().clone(storage()); }
     
-    any_regular_t(move_from<any_regular_t> x) { x.source.object().move_clone(storage()); }
+    any_regular_t(move_from<any_regular_t> x) : data_ptr_m(&data_m[0]) { x.source.object().move_clone(storage()); }
     
     any_regular_t& operator=(any_regular_t x)
     {
@@ -547,11 +547,11 @@ class any_regular_t : boost::equality_comparable<any_regular_t, any_regular_t>
     */
 
     template <typename T>
-    explicit any_regular_t(const T& x, typename copy_sink<T>::type = 0)
+    explicit any_regular_t(const T& x, typename copy_sink<T>::type = 0) : data_ptr_m(&data_m[0])
     { ::new (storage()) typename traits<T>::model_type(x); }
     
     template <typename T>
-    explicit any_regular_t(T x, typename move_sink<T>::type = 0)
+    explicit any_regular_t(T x, typename move_sink<T>::type = 0) : data_ptr_m(&data_m[0])
     { ::new (storage()) typename traits<T>::model_type(move(x)); }
     
     /*!@}*/
@@ -659,15 +659,16 @@ class any_regular_t : boost::equality_comparable<any_regular_t, any_regular_t>
 #endif
 
  private:    
-    any_regular_t(move_from<interface_type> x) { x.source.move_clone(storage()); }
+    any_regular_t(move_from<interface_type> x) : data_ptr_m(&data_m[0]) { x.source.move_clone(storage()); }
  
     interface_type& object() { return *static_cast<interface_type*>(storage()); }
     const interface_type& object() const { return *static_cast<const interface_type*>(storage()); }
     
-    void* storage() { return &data_m; }
-    const void* storage() const { return &data_m; }
+    void* storage() { return static_cast<void*>(data_ptr_m); }
+    const void* storage() const { return static_cast<const void*>(data_ptr_m); }
     
     storage_t data_m;
+    void* data_ptr_m;
 
 #ifndef ADOBE_NO_DOCUMENTATION
 
@@ -685,7 +686,7 @@ public:
 };
 
 #ifndef ADOBE_NO_DOCUMENTATION
-BOOST_STATIC_ASSERT((sizeof(any_regular_t) == 16));
+    BOOST_STATIC_ASSERT((sizeof(any_regular_t) == 16 + sizeof(void*)));
 #endif
 
 /**************************************************************************************************/
@@ -708,8 +709,10 @@ struct any_regular_t::helper
     
         if (r.type_info() != adobe::type_info<promote_type>())
             throw bad_cast(r.type_info(), adobe::type_info<promote_type>());
-        return static_cast<typename traits<T>::const_result_type>(
-                reinterpret_cast<const typename traits<T>::model_type&>(r.object()).get());
+
+        const void* void_ptr = static_cast<const void*>(&r.object());
+        const typename traits<T>::model_type* model_ptr = static_cast<const typename traits<T>::model_type*>(void_ptr);
+        return static_cast<typename traits<T>::const_result_type>(model_ptr->get());
     }
     
     static inline typename traits<T>::result_type cast(any_regular_t& r)
@@ -718,8 +721,10 @@ struct any_regular_t::helper
         
         if (r.type_info() != adobe::type_info<promote_type>())
             throw bad_cast(r.type_info(), adobe::type_info<promote_type>());
-        return static_cast<typename traits<T>::result_type>(
-                reinterpret_cast<typename traits<T>::model_type&>(r.object()).get());
+
+        void* void_ptr = static_cast<void*>(&r.object());
+        typename traits<T>::model_type* model_ptr = static_cast<typename traits<T>::model_type*>(void_ptr);
+        return static_cast<typename traits<T>::result_type>(model_ptr->get());
     }
     
     static inline any_regular_t& assign(any_regular_t& r, const T& x)

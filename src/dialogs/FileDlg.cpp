@@ -116,7 +116,11 @@ namespace {
     { return root_name.size() == 2 && std::isalpha(root_name[0]) && root_name[1] == ':'; }
 
     bool Win32Paths()
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    { return WindowsRoot(boost::filesystem::initial_path().root_name().native()); }
+#else
     { return WindowsRoot(boost::filesystem::initial_path().root_name()); }
+#endif
 
     const X H_SPACING(10);
     const Y V_SPACING(10);
@@ -339,9 +343,17 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
 
     boost::shared_ptr<StyleFactory> style = GetStyleFactory();
 
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    fs::path filename_path = fs::system_complete(fs::path(filename));
+#else
     fs::path filename_path = fs::complete(fs::path(filename));
+#endif
     m_files_edit = style->NewEdit(X0, Y0, X1, "", m_font, m_border_color, m_text_color);
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    m_files_edit->SetText(filename_path.leaf().native());
+#else
     m_files_edit->SetText(filename_path.leaf());
+#endif
     m_filter_list = style->NewDropDownList(X0, Y0, X(100), m_font->Lineskip(), m_font->Lineskip() * 3, m_border_color);
     m_filter_list->SetStyle(LIST_NOSORT);
 
@@ -402,9 +414,17 @@ void FileDlg::Init(const std::string& directory)
     AttachChild(m_file_types_label);
 
     if (directory != "") {
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+        fs::path dir_path = fs::system_complete(fs::path(directory));
+#else
         fs::path dir_path = fs::complete(fs::path(directory));
+#endif
         if (!fs::exists(dir_path))
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+            throw BadInitialDirectory("FileDlg::Init() : Initial directory \"" + dir_path.string() + "\" does not exist.");
+#else
             throw BadInitialDirectory("FileDlg::Init() : Initial directory \"" + dir_path.native_directory_string() + "\" does not exist.");
+#endif
         SetWorkingDirectory(dir_path);
     }
 
@@ -461,7 +481,11 @@ void FileDlg::OkHandler(bool double_click)
                 return;
             }
             fs::path p = s_working_dir / fs::path(save_file);
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+            m_result.insert(p.string());
+#else
             m_result.insert(m_select_directories ? p.native_directory_string() : p.native_file_string());
+#endif
             // check to see if file already exists; if so, ask if it's ok to overwrite
             if (fs::exists(p)) {
                 std::string msg_str = boost::str(boost::format(m_overwrite_prompt_str) % save_file);
@@ -498,7 +522,11 @@ void FileDlg::OkHandler(bool double_click)
                         results_valid = false;
                         break;
                     }
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                    m_result.insert(p.string());
+#else
                     m_result.insert(p_is_directory ? p.native_directory_string() : p.native_file_string());
+#endif
                     results_valid = true; // indicate validity only if at least one good file was found
                 } else {
                     std::string msg_str = boost::str(boost::format(m_file_does_not_exist_str) % (*it));
@@ -651,9 +679,17 @@ void FileDlg::UpdateList()
         std::multimap<std::string, ListBox::Row*> sorted_rows;
         for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
             try {
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                if (fs::exists(*it) && fs::is_directory(*it) && it->path().filename().native()[0] != '.') {
+#else
                 if (fs::exists(*it) && fs::is_directory(*it) && it->filename()[0] != '.') {
+#endif
                     ListBox::Row* row = new ListBox::Row();
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                    std::string row_text = "[" + it->path().filename().native() + "]";
+#else
                     std::string row_text = "[" + it->filename() + "]";
+#endif
                     row->push_back(row_text, m_font, m_text_color);
                     sorted_rows.insert(std::make_pair(row_text, row));
                 }
@@ -667,16 +703,29 @@ void FileDlg::UpdateList()
             sorted_rows.clear();
             for (fs::directory_iterator it(s_working_dir); it != end_it; ++it) {
                 try {
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                    if (fs::exists(*it) && !fs::is_directory(*it) && it->path().filename().native()[0] != '.') {
+#else
                     if (fs::exists(*it) && !fs::is_directory(*it) && it->filename()[0] != '.') {
+#endif
                         bool meets_filters = file_filters.empty();
                         for (std::size_t i = 0; i < file_filters.size() && !meets_filters; ++i) {
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                            if (parse(it->path().filename().c_str(), file_filters[i]).full)
+#else
                             if (parse(it->filename().c_str(), file_filters[i]).full)
+#endif
                                 meets_filters = true;
                         }
                         if (meets_filters) {
                             ListBox::Row* row = new ListBox::Row();
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                            row->push_back(it->path().filename().native(), m_font, m_text_color);
+                            sorted_rows.insert(std::make_pair(it->path().filename().native(), row));
+#else
                             row->push_back(it->filename(), m_font, m_text_color);
                             sorted_rows.insert(std::make_pair(it->filename(), row));
+#endif
                         }
                     }
                 } catch (const fs::filesystem_error&) {
@@ -692,7 +741,11 @@ void FileDlg::UpdateList()
                 fs::path path(c + std::string(":"));
                 if (fs::exists(path)) {
                     ListBox::Row* row = new ListBox::Row();
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+                    row->push_back("[" + path.root_name().native() + "]", m_font, m_text_color);
+#else
                     row->push_back("[" + path.root_name() + "]", m_font, m_text_color);
+#endif
                     m_files_list->Insert(row);
                 }
             } catch (const fs::filesystem_error&) {
@@ -703,7 +756,11 @@ void FileDlg::UpdateList()
 
 void FileDlg::UpdateDirectoryText()
 {
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+    std::string str = s_working_dir.string();
+#else
     std::string str = s_working_dir.native_directory_string();
+#endif
     const X H_SPACING(10);
     while (m_font->TextExtent(str).x > Width() - 2 * H_SPACING) {
         std::string::size_type slash_idx = str.find('/', 1);

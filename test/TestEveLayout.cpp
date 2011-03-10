@@ -112,7 +112,11 @@ void MinimalGGApp::Initialize()
         GG::Wnd& eve_dialog = layout.Finish();
         boost::filesystem::path input(g_input_file);
         boost::filesystem::path output(g_output_dir);
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
+        output /= input.stem().native() + ".png";
+#else
         output /= input.stem() + ".png";
+#endif
         GG::GUI::GetGUI()->SaveWndAsPNG(&eve_dialog, output.string());
         GG::Timer timer(100);
         if (!g_dont_exit)

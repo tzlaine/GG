@@ -62,7 +62,7 @@ template <typename T, typename Any = void>
 struct make_serializable { static const serializable<T> value; };
 
 template <typename T, typename Any>
-const serializable<T> make_serializable<T, Any>::value;
+const serializable<T> make_serializable<T, Any>::value = serializable<T>();
 
 /**************************************************************************************************/
 

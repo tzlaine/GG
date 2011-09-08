@@ -51,7 +51,7 @@ typedef int FT_Error;
 namespace GG {
 
 /** Returns a string of the form "<rgba r g b a>" from a Clr object with color
-    channels r, b, g, a.*/
+    channels r, b, g, a. */
 GG_API std::string RgbaTag(const Clr& c);
 
 
@@ -333,7 +333,7 @@ public:
 
         By keeping track of this state across multiple calls to RenderText(),
         the user can preserve the functionality of the text formatting tags,
-        if present.*/
+        if present. */
     struct GG_API RenderState
     {
         RenderState(); ///< Default ctor.
@@ -523,7 +523,7 @@ protected:
 
 private:
     /** \brief This just holds the essential data necessary to render a glyph
-        from the OpenGL texture(s) created at GG::Font creation time.*/
+        from the OpenGL texture(s) created at GG::Font creation time. */
     struct Glyph
     {
         Glyph(); ///< Default ctor
@@ -638,6 +638,18 @@ private:
     };
 
 public:
+    /** \name Accessors */ ///@{
+    /** Returns true iff this manager contains a font with the given filename
+        and point size, regardless of charsets. */
+    bool HasFont(const std::string& font_filename, unsigned int pts) const;
+
+    /** Returns true iff this manager contains a font with the given filename
+        and point size, containing the given charsets. */
+    template <class CharSetIter>
+    bool HasFont(const std::string& font_filename, unsigned int pts,
+                 CharSetIter first, CharSetIter last) const;
+    //@}
+
     /** \name Mutators */ ///@{
     /** Returns a shared_ptr to the requested font, supporting all printable
         ASCII characters.  \note May load font if unavailable at time of
@@ -844,6 +856,22 @@ void GG::Font::serialize(Archive& ar, const unsigned int version)
             }
         }
     }
+}
+
+template <class CharSetIter>
+bool GG::FontManager::HasFont(const std::string& font_filename, unsigned int pts,
+                              CharSetIter first, CharSetIter last) const
+{
+    bool retval = false;
+    FontKey key(font_filename, pts);
+    std::map<FontKey, boost::shared_ptr<Font> >::const_iterator it = m_rendered_fonts.find(key);
+    if (it != m_rendered_fonts.end()) {
+        std::set<UnicodeCharset> requested_charsets(first, last);
+        std::set<UnicodeCharset> found_charsets(it->second->UnicodeCharsets().begin(),
+                                                it->second->UnicodeCharsets().end());
+        retval = requested_charsets == found_charsets;
+    }
+    return retval;
 }
 
 template <class CharSetIter>

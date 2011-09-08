@@ -55,12 +55,28 @@ StyleFactory::~StyleFactory()
 {}
 
 boost::shared_ptr<Font> StyleFactory::DefaultFont(unsigned int pts/* = 12*/) const
-{ return GG::GUI::GetGUI()->GetFont(DefaultFontName(), pts, VeraTTFBytes()); }
+{
+    if (GetFontManager().HasFont(DefaultFontName(), pts)) {
+        return GUI::GetGUI()->GetFont(DefaultFontName(), pts, std::vector<unsigned char>());
+    } else {
+        std::vector<unsigned char> bytes;
+        VeraTTFBytes(bytes);
+        return GUI::GetGUI()->GetFont(DefaultFontName(), pts, bytes);
+    }
+}
 
 boost::shared_ptr<Font> StyleFactory::DefaultFont(unsigned int pts,
                                                   const UnicodeCharset* first,
                                                   const UnicodeCharset* last) const
-{ return GG::GUI::GetGUI()->GetFont(DefaultFontName(), pts, VeraTTFBytes(), first, last); }
+{
+    if (GetFontManager().HasFont(DefaultFontName(), pts, first, last)) {
+        return GUI::GetGUI()->GetFont(DefaultFontName(), pts, std::vector<unsigned char>(), first, last);
+    } else {
+        std::vector<unsigned char> bytes;
+        VeraTTFBytes(bytes);
+        return GUI::GetGUI()->GetFont(DefaultFontName(), pts, bytes, first, last);
+    }
+}
 
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const

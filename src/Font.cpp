@@ -1545,6 +1545,9 @@ const boost::shared_ptr<Font> FontManager::EMPTY_FONT(new Font("", 0));
 FontManager::FontManager()
 {}
 
+bool FontManager::HasFont(const std::string& font_filename, unsigned int pts) const
+{ return m_rendered_fonts.find(FontKey(font_filename, pts)) != m_rendered_fonts.end(); }
+
 boost::shared_ptr<Font> FontManager::GetFont(const std::string& font_filename, unsigned int pts)
 {
     std::vector<UnicodeCharset> v;

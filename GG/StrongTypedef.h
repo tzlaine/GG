@@ -95,12 +95,14 @@ inline std::size_t Value(std::size_t s)
     }
 
 #define GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(op, self_type, rhs_type) \
-    inline self_type& operator op (rhs_type rhs)
+    inline self_type& operator op ## = (rhs_type rhs)
 
 #define GG_MEMBER_ASSIGN_OP_OTHER_TYPE(op, self_type, rhs_type)  \
     GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(op, self_type, rhs_type) \
     {                                                            \
-        m_value op Value(rhs);                                   \
+        m_value = static_cast<self_type::value_type>(            \
+            m_value op Value(rhs)                                \
+        );                                                       \
         return *this;                                            \
     }
 
@@ -142,10 +144,10 @@ inline std::size_t Value(std::size_t s)
     GG_MEMBER_ASSIGN_OP_SELF_TYPE(/=, rhs_type);
 
 #define GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(self_type, rhs_type) \
-    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(+=, self_type, rhs_type);       \
-    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(-=, self_type, rhs_type);       \
-    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(*=, self_type, rhs_type);       \
-    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(/=, self_type, rhs_type);
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(+, self_type, rhs_type);        \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(-, self_type, rhs_type);        \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(*, self_type, rhs_type);        \
+    GG_MEMBER_ASSIGN_OP_OTHER_TYPE(/, self_type, rhs_type);
 
 #define GG_NONMEMBER_ARITH_OPS_SELF_TYPE(self_type) \
     GG_NONMEMBER_OP_SELF_TYPE(+, self_type);        \
@@ -194,6 +196,8 @@ inline std::size_t Value(std::size_t s)
         struct ConvertibleToBoolDummy {int _;};                         \
                                                                         \
     public:                                                             \
+        typedef double value_type;                                      \
+                                                                        \
         name ## _d() : m_value(0.0) {}                                  \
         explicit name ## _d(double t) : m_value(t) {}                   \
                                                                         \
@@ -210,10 +214,10 @@ inline std::size_t Value(std::size_t s)
                                                                         \
         GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name ## _d, double);      \
                                                                         \
-        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(+=, name ## _d, name);      \
-        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(-=, name ## _d, name);      \
-        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(*=, name ## _d, name);      \
-        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(/=, name ## _d, name);      \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(+, name ## _d, name);       \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(-, name ## _d, name);       \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(*, name ## _d, name);       \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE_DECL(/, name ## _d, name);       \
                                                                         \
     private:                                                            \
         double m_value;                                                 \
@@ -271,6 +275,8 @@ inline std::size_t Value(std::size_t s)
     public:                                                             \
         BOOST_STATIC_ASSERT((boost::is_integral<type>::value));         \
                                                                         \
+        typedef type value_type;                                        \
+                                                                        \
         name() : m_value(0) {}                                          \
         explicit name(type t) : m_value(t) {}                           \
         explicit name(name ## _d t) :                                   \
@@ -295,7 +301,7 @@ inline std::size_t Value(std::size_t s)
         GG_MEMBER_ASSIGN_OP_SELF_TYPE(%=, name);                        \
                                                                         \
         GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, type);              \
-        GG_MEMBER_ASSIGN_OP_OTHER_TYPE(%=, name, type);                 \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE(%, name, type);                  \
                                                                         \
         GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, name ## _d);        \
         GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, double);            \
@@ -386,6 +392,8 @@ inline std::size_t Value(std::size_t s)
         struct ConvertibleToBoolDummy {int _;};                         \
                                                                         \
     public:                                                             \
+        typedef std::size_t value_type;                                 \
+                                                                        \
         name() : m_value(0) {}                                          \
         explicit name(std::size_t t) : m_value(t) {}                    \
                                                                         \
@@ -402,7 +410,7 @@ inline std::size_t Value(std::size_t s)
         GG_MEMBER_ASSIGN_OP_SELF_TYPE(%=, name);                        \
                                                                         \
         GG_MEMBER_ARITH_ASSIGN_OPS_OTHER_TYPE(name, std::size_t);       \
-        GG_MEMBER_ASSIGN_OP_OTHER_TYPE(%=, name, std::size_t);          \
+        GG_MEMBER_ASSIGN_OP_OTHER_TYPE(%, name, std::size_t);           \
                                                                         \
     private:                                                            \
         std::size_t m_value;                                            \

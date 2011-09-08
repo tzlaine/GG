@@ -889,10 +889,12 @@ namespace {
                               NONCONTAINER)
         );
 
-        double min = 1;
-        double max = 100;
-        get_value(format, adobe::key_first, min);
-        get_value(format, adobe::key_last, max);
+        double min_ = 1;
+        double max_ = 100;
+        get_value(format, adobe::key_first, min_);
+        get_value(format, adobe::key_last, max_);
+        int min = static_cast<int>(min_);
+        int max = static_cast<int>(max_);
         const int TAB_WIDTH = 5;
         std::auto_ptr<Slider> slider(
             Factory().NewSlider(X0, Y0,
@@ -1085,16 +1087,19 @@ namespace {
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
 
-        double step = 1.0;
-        double min = 1.0;
-        double max = 100.0;
+        double step_ = 1.0;
+        double min_ = 1.0;
+        double max_ = 100.0;
         bool allow_edits = false;
-        get_value(format, adobe::key_step, step);
-        get_value(format, adobe::key_first, min);
-        get_value(format, adobe::key_last, max);
+        get_value(format, adobe::key_step, step_);
+        get_value(format, adobe::key_first, min_);
+        get_value(format, adobe::key_last, max_);
         get_value(format, adobe::key_allow_edits, allow_edits);
+        int step = static_cast<int>(step_);
+        int min = static_cast<int>(min_);
+        int max = static_cast<int>(max_);
         std::auto_ptr<Spin<int> > spin(
-            Factory().NewIntSpin(X0, Y0, X1, 0.0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
+            Factory().NewIntSpin(X0, Y0, X1, 0, step, min, max, allow_edits, DefaultFont(), CLR_GRAY)
         );
         spin->SetMaxSize(Pt(spin->MaxSize().x, spin->Height()));
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
@@ -1683,8 +1688,8 @@ struct EveLayout::Impl
 
             for (std::size_t i = 0; i < children_as_1x2_layouts[align].size(); ++i) {
                 if (Layout* l = children_as_1x2_layouts[align][i]) {
-                    l->SetMinimumColumnWidth(0, X(std::ceil(Value(min_width_0))));
-                    l->SetMinimumColumnWidth(1, X(std::ceil(Value(min_width_1))));
+                    l->SetMinimumColumnWidth(0, X(static_cast<int>(std::ceil(Value(min_width_0)))));
+                    l->SetMinimumColumnWidth(1, X(static_cast<int>(std::ceil(Value(min_width_1)))));
                     l->SetChildAlignment(l->Cells()[0][0], ALIGN_RIGHT);
                     l->SetChildAlignment(l->Cells()[0][1], ALIGN_LEFT);
 #if INSTRUMENT_ADD_TO_VERTICAL

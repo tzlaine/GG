@@ -61,10 +61,10 @@ private:
 };
 
 /** Returns true iff all of \a lhs's and \a rhs's members compare equal. */
-GG_API bool operator==(const GG::UnicodeCharset& lhs, const GG::UnicodeCharset& rhs);
+GG_API bool operator==(const UnicodeCharset& lhs, const UnicodeCharset& rhs);
 
 /** Returns true iff \a lhs.m_first_char < \a rhs.m_first_char. */
-GG_API bool operator<(const GG::UnicodeCharset& lhs, const GG::UnicodeCharset& rhs);
+GG_API bool operator<(const UnicodeCharset& lhs, const UnicodeCharset& rhs);
 
 
 /** Returns a vector containing all defined UnicodeCharset's. */

@@ -97,8 +97,8 @@ namespace GG {
         }
         std::cout << "original: <parse " << (original_parse_failed ? "failure" : "success") << ">\n";
         using boost::spirit::qi::phrase_parse;
-        std::string::const_iterator it = expression.begin();
-        token_iterator iter = lexer_.begin(it, expression.end());
+        text_iterator it(expression.begin());
+        token_iterator iter = lexer_.begin(it, text_iterator(expression.end()));
         token_iterator end = lexer_.end();
         bool new_parse_failed =
             !phrase_parse(iter,

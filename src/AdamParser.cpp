@@ -463,7 +463,7 @@ namespace {
             NAME(end_statement);
 #undef NAME
 
-            qi::on_error<qi::fail>(sheet_specifier, GG::detail::report_error(_1, _2, _3, _4));
+            qi::on_error<qi::fail>(sheet_specifier, GG::report_error(_1, _2, _3, _4));
         }
 
         typedef adobe::adam_callback_suite_t::relation_t relation;
@@ -578,10 +578,10 @@ bool GG::Parse(const std::string& sheet,
                const adobe::adam_callback_suite_t& callbacks)
 {
     using boost::spirit::qi::phrase_parse;
-    std::string::const_iterator it = sheet.begin();
-    token_type::s_begin = it;
-    token_type::s_filename = filename.c_str();
-    token_iterator iter = AdamLexer().begin(it, sheet.end());
+    text_iterator it(sheet.begin());
+    report_error_::s_begin = it;
+    report_error_::s_filename = filename.c_str();
+    token_iterator iter = AdamLexer().begin(it, text_iterator(sheet.end()));
     token_iterator end = AdamLexer().end();
     adam_parser_rules adam_rules(callbacks);
     return phrase_parse(iter,

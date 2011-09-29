@@ -29,29 +29,14 @@
 #define _GG_Lexer_h_
 
 #include <GG/Export.h>
-#include <GG/Token.h>
-#include <GG/adobe/name.hpp>
+#include <GG/LexerFwd.h>
+#include <GG/ReportParseError.h>
+
 #include <GG/adobe/istream.hpp>
 #include <GG/adobe/implementation/token.hpp>
 
-#include <boost/spirit/include/lex_lexertl.hpp>
-
 
 namespace GG {
-
-typedef std::string::const_iterator text_iterator;
-
-typedef position_tracking_token<
-    text_iterator,
-    boost::mpl::vector<
-        adobe::name_t,
-        std::string,
-        double,
-        bool
-    >
-> token_type;
-
-typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_type;
 
 namespace detail {
     struct named_eq_op : adobe::name_t {};
@@ -116,12 +101,15 @@ namespace GG { namespace detail {
         bool parse(Iter& first, Iter const& last, Context&, Skipper const& skipper, Attribute& attr) const
         {
             boost::spirit::qi::skip_over(first, last, skipper);
-            attr = adobe::line_position_t(first->filename(), first->line_number());
+            attr = adobe::line_position_t(report_error_::s_filename, boost::spirit::get_line(first->matched_.first));
             // Note that the +1's below are there to provide the user with
             // 1-based column numbers.  This is Adobe's convention.  The Adobe
             // convention is also that line numbers are 0-based.  Go figure.
-            attr.line_start_m = std::distance(token_type::s_begin, first->line_start()) + 1;
-            attr.position_m = std::distance(token_type::s_begin, first->matched_range().first) + 1;
+            attr.line_start_m =
+                std::distance(report_error_::s_begin,
+                              boost::spirit::get_line_start(report_error_::s_begin, first->matched_.first)) + 1;
+            attr.position_m =
+                std::distance(report_error_::s_begin, first->matched_.first) + 1;
             return true;
         }
 

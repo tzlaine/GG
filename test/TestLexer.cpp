@@ -231,8 +231,8 @@ BOOST_AUTO_TEST_CASE( adam_lexer )
 
     const std::string str = read_file(g_input_file);
 
-    std::string::const_iterator it = str.begin();
-    GG::token_iterator iter = lexer.begin(it, str.end());
+    GG::text_iterator it(str.begin());
+    GG::token_iterator iter = lexer.begin(it, GG::text_iterator(str.end()));
     GG::token_iterator end = lexer.end();
 
     boost::spirit::qi::phrase_parse(iter,
@@ -270,8 +270,8 @@ BOOST_AUTO_TEST_CASE( eve_lexer )
 
     const std::string str = read_file(g_input_file);
 
-    std::string::const_iterator it = str.begin();
-    GG::token_iterator iter = lexer.begin(it, str.end());
+    GG::text_iterator it(str.begin());
+    GG::token_iterator iter = lexer.begin(it, GG::text_iterator(str.end()));
     GG::token_iterator end = lexer.end();
 
     boost::spirit::qi::phrase_parse(iter,

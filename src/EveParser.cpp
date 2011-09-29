@@ -280,7 +280,7 @@ namespace {
             NAME(end_statement);
 #undef NAME
 
-            qi::on_error<qi::fail>(layout_specifier, GG::detail::report_error(_1, _2, _3, _4));
+            qi::on_error<qi::fail>(layout_specifier, GG::report_error(_1, _2, _3, _4));
         }
 
         typedef adobe::eve_callback_suite_t::cell_type_t cell_type_t;
@@ -358,10 +358,10 @@ bool GG::Parse(const std::string& layout,
                const adobe::eve_callback_suite_t& callbacks)
 {
     using boost::spirit::qi::phrase_parse;
-    std::string::const_iterator it = layout.begin();
-    token_type::s_begin = it;
-    token_type::s_filename = filename.c_str();
-    token_iterator iter = EveLexer().begin(it, layout.end());
+    text_iterator it(layout.begin());
+    report_error_::s_begin = it;
+    report_error_::s_filename = filename.c_str();
+    token_iterator iter = EveLexer().begin(it, text_iterator(layout.end()));
     token_iterator end = EveLexer().end();
     eve_parser_rules eve_rules(callbacks);
     return phrase_parse(iter,

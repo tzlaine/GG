@@ -33,6 +33,7 @@ set(THIS_LIB_SOURCES
     MultiEdit.cpp
     PluginInterface.cpp
     PtRect.cpp
+    ReportParseError.cpp
     Scroll.cpp
     Slider.cpp
     StaticGraphic.cpp

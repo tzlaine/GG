@@ -200,8 +200,15 @@ void MinimalGGApp::Initialize()
     // add whatever OpenGL calls you like to a GG::Wnd's Render() method,
     // sandwiched between Exit2DMode() and Enter2DMode().
 
+    const std::string message = "Are we Готово yet?"; // That Russian word means "Done", ha.
+    const std::set<GG::UnicodeCharset> charsets_ = GG::UnicodeCharsetsToRender(message);
+    const std::vector<GG::UnicodeCharset> charsets(charsets_.begin(), charsets_.end());
+
+    const boost::shared_ptr<GG::Font> font =
+        GetStyleFactory()->DefaultFont(12, &charsets[0], &charsets[0] + charsets.size());
+
     GG::Wnd* quit_dlg =
-        new GG::ThreeButtonDlg(GG::X(200), GG::Y(100), "Are we done yet?", GetStyleFactory()->DefaultFont(), GG::CLR_SHADOW, 
+        new GG::ThreeButtonDlg(GG::X(200), GG::Y(100), message, font, GG::CLR_SHADOW, 
                                GG::CLR_SHADOW, GG::CLR_SHADOW, GG::CLR_WHITE, 1);
     quit_dlg->Run();
 

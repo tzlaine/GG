@@ -46,10 +46,17 @@ void report_error_::generate_error_string(const token_type& first,
 {
     std::stringstream is;
 
-    is << s_filename << ":" << (boost::spirit::get_line(it.matched_.first.position()) + 1) << ": "
+    bool empty_match = it.matched_.first == it.matched_.second;
+    std::size_t line_number;
+    if (empty_match)
+        line_number = std::count(s_begin, s_end, '\n') + 1;
+    else
+        line_number = boost::spirit::get_line(it.matched_.first);
+
+    is << s_filename << ":" << line_number << ": "
        << "Parse error: expected " << rule_name;
 
-    if (at_end) {
+    if (at_end || empty_match) {
         is << " before end of input.\n";
     } else {
         std::string match(it.matched_.first, it.matched_.second);
@@ -84,3 +91,5 @@ boost::function<void (const std::string&)> report_error_::send_error_string =
 const char* report_error_::s_filename = 0;
 
 text_iterator report_error_::s_begin;
+
+text_iterator report_error_::s_end;

@@ -580,8 +580,9 @@ bool GG::Parse(const std::string& sheet,
     using boost::spirit::qi::phrase_parse;
     text_iterator it(sheet.begin());
     report_error_::s_begin = it;
+    report_error_::s_end = text_iterator(sheet.end());
     report_error_::s_filename = filename.c_str();
-    token_iterator iter = AdamLexer().begin(it, text_iterator(sheet.end()));
+    token_iterator iter = AdamLexer().begin(it, report_error_::s_end);
     token_iterator end = AdamLexer().end();
     adam_parser_rules adam_rules(callbacks);
     return phrase_parse(iter,

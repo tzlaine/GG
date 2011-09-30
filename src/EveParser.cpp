@@ -360,8 +360,9 @@ bool GG::Parse(const std::string& layout,
     using boost::spirit::qi::phrase_parse;
     text_iterator it(layout.begin());
     report_error_::s_begin = it;
+    report_error_::s_end = text_iterator(layout.end());
     report_error_::s_filename = filename.c_str();
-    token_iterator iter = EveLexer().begin(it, text_iterator(layout.end()));
+    token_iterator iter = EveLexer().begin(it, report_error_::s_end);
     token_iterator end = EveLexer().end();
     eve_parser_rules eve_rules(callbacks);
     return phrase_parse(iter,

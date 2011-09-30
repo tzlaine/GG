@@ -52,6 +52,7 @@ namespace GG {
         static void default_send_error_string(const std::string& str);
         static const char* s_filename;
         static text_iterator s_begin;
+        static text_iterator s_end;
 
     private:
         void generate_error_string(const token_type& first,

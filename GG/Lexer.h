@@ -101,13 +101,13 @@ namespace GG { namespace detail {
         bool parse(Iter& first, Iter const& last, Context&, Skipper const& skipper, Attribute& attr) const
         {
             boost::spirit::qi::skip_over(first, last, skipper);
-            attr = adobe::line_position_t(report_error_::s_filename, boost::spirit::get_line(first->matched_.first));
+            attr = adobe::line_position_t(report_error_::s_filename, boost::spirit::get_line(first->matched_.first) - 1);
             // Note that the +1's below are there to provide the user with
             // 1-based column numbers.  This is Adobe's convention.  The Adobe
             // convention is also that line numbers are 0-based.  Go figure.
             attr.line_start_m =
                 std::distance(report_error_::s_begin,
-                              boost::spirit::get_line_start(report_error_::s_begin, first->matched_.first)) + 1;
+                              boost::spirit::get_line_start(report_error_::s_begin, first->matched_.first)) + 2;
             attr.position_m =
                 std::distance(report_error_::s_begin, first->matched_.first) + 1;
             return true;

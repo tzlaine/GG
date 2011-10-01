@@ -28,8 +28,6 @@
 #ifndef _GG_Lexer_h_
 #define _GG_Lexer_h_
 
-#include <GG/Export.h>
-#include <GG/LexerFwd.h>
 #include <GG/ReportParseError.h>
 
 #include <GG/adobe/istream.hpp>

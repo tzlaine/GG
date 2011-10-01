@@ -28,6 +28,7 @@
 #ifndef _GG_ReportParseError_h_
 #define _GG_ReportParseError_h_
 
+#include <GG/Export.h>
 #include <GG/LexerFwd.h>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -40,9 +41,9 @@ namespace GG {
         inline void default_send_error_string(const std::string& str)
         { std::cerr << str; }
 
-        extern const char* s_filename;
-        extern text_iterator s_begin;
-        extern text_iterator s_end;
+        extern const char* GG_API s_filename;
+        extern text_iterator GG_API s_begin;
+        extern text_iterator GG_API s_end;
 
     }
 
@@ -111,7 +112,7 @@ namespace GG {
 
                     is << " here:\n"
                        << "  " << line_start_through_it_begin << match << it_end_through_line_end << "\n"
-                       << "  " << std::string(line_start_through_it_begin.size() + whitespace, '~') << '^' << std::string(match.size() - 1, '~')
+                       << "  " << std::string(line_start_through_it_begin.size() + whitespace, ' ') << std::string(match.size(), '^')
                        << std::endl;
                 }
 

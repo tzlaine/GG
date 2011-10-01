@@ -27,6 +27,12 @@
 #include <GG/adobe/name.hpp>
 
 
+namespace GG {
+
+    const boost::phoenix::function<report_error_<token_type> > report_error;
+
+}
+
 using namespace GG;
 
 lexer::lexer(const adobe::name_t* first_keyword,

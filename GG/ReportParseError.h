@@ -28,13 +28,26 @@
 #ifndef _GG_ReportParseError_h_
 #define _GG_ReportParseError_h_
 
-#include <GG/Export.h>
 #include <GG/LexerFwd.h>
+
+#include <boost/algorithm/string/replace.hpp>
 
 
 namespace GG {
 
-    struct GG_API report_error_
+    namespace detail {
+
+        inline void default_send_error_string(const std::string& str)
+        { std::cerr << str; }
+
+        extern const char* s_filename;
+        extern text_iterator s_begin;
+        extern text_iterator s_end;
+
+    }
+
+    template <typename TokenType>
+    struct report_error_
     {
         template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
         struct result
@@ -49,20 +62,66 @@ namespace GG {
             }
 
         static boost::function<void (const std::string&)> send_error_string;
-        static void default_send_error_string(const std::string& str);
-        static const char* s_filename;
-        static text_iterator s_begin;
-        static text_iterator s_end;
 
     private:
-        void generate_error_string(const token_type& first,
-                                   const token_type& it,
+        void generate_error_string(const TokenType& first,
+                                   const TokenType& it,
                                    const boost::spirit::info& rule_name,
                                    bool at_end,
-                                   std::string& str) const;
+                                   std::string& str) const
+            {
+                std::stringstream is;
+
+                bool empty_match = it.matched_.first == it.matched_.second;
+                std::size_t line_number;
+                if (empty_match)
+                    line_number = std::count(detail::s_begin, detail::s_end, '\n') + 1;
+                else
+                    line_number = boost::spirit::get_line(it.matched_.first);
+
+                is << detail::s_filename << ":" << line_number << ": "
+                   << "Parse error: expected " << rule_name;
+
+                if (at_end || empty_match) {
+                    is << " before end of input.\n";
+                } else {
+                    std::string match(it.matched_.first, it.matched_.second);
+                    text_iterator it_begin = it.matched_.first;
+
+                    // Use the end of the token's matched range, if its entire match was
+                    // whitespace.
+                    std::size_t whitespace = 0;
+                    if (match.find_first_not_of(" \t\n\r\f\v") == std::string::npos)
+                        whitespace = match.size();
+
+                    text_iterator line_start = boost::spirit::get_line_start(detail::s_begin, it.matched_.first);
+                    if (it_begin.base() < line_start.base())
+                        it_begin = line_start;
+
+                    std::string line_start_through_it_begin(line_start, it_begin);
+                    boost::algorithm::replace_all(line_start_through_it_begin, "\t", "    ");
+
+                    const text_iterator it_end = it.matched_.second;
+                    text_iterator line_end = it_end;
+                    while (line_end != detail::s_end && *line_end != '\n' && *line_end != '\r') {
+                        ++line_end;
+                    }
+                    std::string it_end_through_line_end(it_end, line_end);
+                    boost::algorithm::replace_all(it_end_through_line_end, "\t", "    ");
+
+                    is << " here:\n"
+                       << "  " << line_start_through_it_begin << match << it_end_through_line_end << "\n"
+                       << "  " << std::string(line_start_through_it_begin.size() + whitespace, '~') << '^' << std::string(match.size() - 1, '~')
+                       << std::endl;
+                }
+
+                str = is.str();
+            }
     };
 
-    extern GG_API const boost::phoenix::function<report_error_> report_error;
+    template <typename TokenType>
+    boost::function<void (const std::string&)> report_error_<TokenType>::send_error_string =
+        &detail::default_send_error_string;
 
 }
 

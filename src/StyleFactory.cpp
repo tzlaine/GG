@@ -122,10 +122,15 @@ Scroll* StyleFactory::NewScroll(X x, Y y, X w, Y h, Orientation orientation, Clr
                                 Flags<WndFlag> flags/* = INTERACTIVE | REPEAT_BUTTON_DOWN*/) const
 { return new Scroll(x, y, w, h, orientation, color, interior, flags); }
 
-Slider* StyleFactory::NewSlider(X x, Y y, X w, Y h, int min, int max, Orientation orientation,
-                                SliderLineStyle style, Clr color, int tab_width, int line_width/* = 5*/,
-                                Flags<WndFlag> flags/* = INTERACTIVE*/) const
-{ return new Slider(x, y, w, h, min, max, orientation, style, color, tab_width, line_width, flags); }
+Slider<int>* StyleFactory::NewIntSlider(X x, Y y, X w, Y h, int min, int max, Orientation orientation,
+                                        SliderLineStyle style, Clr color, int tab_width, int line_width/* = 5*/,
+                                        Flags<WndFlag> flags/* = INTERACTIVE*/) const
+{ return new Slider<int>(x, y, w, h, min, max, orientation, style, color, tab_width, line_width, flags); }
+
+Slider<double>* StyleFactory::NewDoubleSlider(X x, Y y, X w, Y h, double min, double max, Orientation orientation,
+                                             SliderLineStyle style, Clr color, int tab_width, int line_width/* = 5*/,
+                                            Flags<WndFlag> flags/* = INTERACTIVE*/) const
+{ return new Slider<double>(x, y, w, h, min, max, orientation, style, color, tab_width, line_width, flags); }
 
 Spin<int>* StyleFactory::NewIntSpin(X x, Y y, X w, int value, int step, int min, int max, bool edits,
                                     const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,

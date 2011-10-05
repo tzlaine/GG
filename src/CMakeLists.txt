@@ -35,7 +35,6 @@ set(THIS_LIB_SOURCES
     PtRect.cpp
     ReportParseError.cpp
     Scroll.cpp
-    Slider.cpp
     StaticGraphic.cpp
     StyleFactory.cpp
     TabWnd.cpp

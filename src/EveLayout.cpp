@@ -889,18 +889,16 @@ namespace {
                               NONCONTAINER)
         );
 
-        double min_ = 1;
-        double max_ = 100;
-        get_value(format, adobe::key_first, min_);
-        get_value(format, adobe::key_last, max_);
-        int min = static_cast<int>(min_);
-        int max = static_cast<int>(max_);
+        double min = 1;
+        double max = 100;
+        get_value(format, adobe::key_first, min);
+        get_value(format, adobe::key_last, max);
         const int TAB_WIDTH = 5;
-        std::auto_ptr<Slider> slider(
-            Factory().NewSlider(X0, Y0,
-                                orientation_ == VERTICAL ? X(Value(StandardHeight())) : X(200),
-                                orientation_ == VERTICAL ? Y(200) : StandardHeight(),
-                                min, max, orientation_, GROOVED, CLR_GRAY, TAB_WIDTH)
+        std::auto_ptr<Slider<double> > slider(
+            Factory().NewDoubleSlider(X0, Y0,
+                                      orientation_ == VERTICAL ? X(Value(StandardHeight())) : X(200),
+                                      orientation_ == VERTICAL ? Y(200) : StandardHeight(),
+                                      min, max, orientation_, GROOVED, CLR_GRAY, TAB_WIDTH)
         );
         slider->SetMaxSize(
             Pt(orientation_ == VERTICAL ? slider->Width() : slider->MaxSize().x,

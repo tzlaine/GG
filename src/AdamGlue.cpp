@@ -204,8 +204,8 @@ void AdamCellGlue<DropDownList, double, std::size_t>::ControlChanged(DropDownLis
 ////////////////////////////////////////
 // AdamCellGlue<Slider>
 ////////////////////////////////////////
-AdamCellGlue<Slider, double, int>::AdamCellGlue(
-    Slider& slider,
+AdamCellGlue<Slider<int>, double, int>::AdamCellGlue(
+    Slider<int>& slider,
     adobe::sheet_t& sheet,
     adobe::name_t cell) :
     m_slider(&slider),
@@ -217,13 +217,13 @@ AdamCellGlue<Slider, double, int>::AdamCellGlue(
     Connect(m_slider->SlidSignal, &ThisType::ControlChanged, this);
 }
 
-void AdamCellGlue<Slider, double, int>::SheetChanged(const adobe::any_regular_t &any)
+void AdamCellGlue<Slider<int>, double, int>::SheetChanged(const adobe::any_regular_t &any)
 { m_slider->SlideTo(detail::AnyCast<double, int>(any)); }
 
-void AdamCellGlue<Slider, double, int>::Enable(bool b)
+void AdamCellGlue<Slider<int>, double, int>::Enable(bool b)
 { m_slider->Disable(!b); }
 
-void AdamCellGlue<Slider, double, int>::ControlChanged(int tab_posn, int min, int max)
+void AdamCellGlue<Slider<int>, double, int>::ControlChanged(int tab_posn, int min, int max)
 {
     m_sheet->set(m_cell, detail::MakeAny<double, int>(tab_posn));
     m_sheet->update();

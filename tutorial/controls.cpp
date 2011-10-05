@@ -329,8 +329,8 @@ void ControlsTestApp::Initialize()
     layout->Add(multi_edit, 3, 1);
 
     // A numerical value slider control.
-    GG::Slider* slider =
-        new GG::Slider(GG::X0, GG::Y0, GG::X(300), GG::Y(14), 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
+    GG::Slider<int>* slider =
+        new GG::Slider<int>(GG::X0, GG::Y0, GG::X(300), GG::Y(14), 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
     layout->Add(slider, 4, 0);
 
     // An integer spin box.

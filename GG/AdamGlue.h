@@ -44,6 +44,7 @@ class StateButton;
 class RadioButtonGroup;
 class Edit;
 class DropDownList;
+template <class T>
 class Slider;
 
 namespace detail {
@@ -203,19 +204,19 @@ private:
 };
 
 template <>
-struct AdamCellGlue<Slider, double, int> :
+struct AdamCellGlue<Slider<int>, double, int> :
     public AdamCellGlueBase
 {
-    AdamCellGlue(Slider& slider, adobe::sheet_t& sheet, adobe::name_t cell);
+    AdamCellGlue(Slider<int>& slider, adobe::sheet_t& sheet, adobe::name_t cell);
 
 private:
-    typedef AdamCellGlue<Slider, double, int> ThisType;
+    typedef AdamCellGlue<Slider<int>, double, int> ThisType;
 
     void SheetChanged(const adobe::any_regular_t &any);
     void Enable(bool b);
     void ControlChanged(int tab_posn, int min, int max);
 
-    Slider* m_slider;
+    Slider<int>* m_slider;
     adobe::sheet_t* m_sheet;
     adobe::name_t m_cell;
 };

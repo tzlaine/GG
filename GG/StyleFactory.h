@@ -50,6 +50,7 @@ class MenuBar;
 class MultiEdit;
 class RadioButtonGroup;
 class Scroll;
+template <class T>
 class Slider;
 template <class T>
 class Spin;
@@ -144,10 +145,15 @@ public:
     virtual Scroll*            NewScroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr interior,
                                          Flags<WndFlag> flags = INTERACTIVE | REPEAT_BUTTON_DOWN) const;
 
-    /** Returns a new GG Slider. */
-    virtual Slider*            NewSlider(X x, Y y, X w, Y h, int min, int max, Orientation orientation,
-                                         SliderLineStyle style, Clr color, int tab_width, int line_width = 5,
-                                         Flags<WndFlag> flags = INTERACTIVE) const;
+    /** Returns a new GG Slider<int>. */
+    virtual Slider<int>*       NewIntSlider(X x, Y y, X w, Y h, int min, int max, Orientation orientation,
+                                            SliderLineStyle style, Clr color, int tab_width, int line_width = 5,
+                                            Flags<WndFlag> flags = INTERACTIVE) const;
+
+    /** Returns a new GG Slider<double>. */
+    virtual Slider<double>*    NewDoubleSlider(X x, Y y, X w, Y h, double min, double max, Orientation orientation,
+                                            SliderLineStyle style, Clr color, int tab_width, int line_width = 5,
+                                            Flags<WndFlag> flags = INTERACTIVE) const;
 
     /** Returns a new GG Spin<int>. */
     virtual Spin<int>*         NewIntSpin(X x, Y y, X w, int value, int step, int min, int max, bool edits,

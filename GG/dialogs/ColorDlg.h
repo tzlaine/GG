@@ -36,8 +36,9 @@
 namespace GG {
 
 class Font;
+template <class T>
 class Slider;
-    
+
 /** \brief Contains the necessary data to represent a color in HSV space, with
     an alpha value thrown in to make conversions to and from GG::Clr
     possible. */
@@ -334,7 +335,7 @@ private:
     std::size_t               m_current_color_button;
     std::vector<TextControl*> m_slider_labels;
     std::vector<TextControl*> m_slider_values;
-    std::vector<Slider*>      m_sliders;
+    std::vector<Slider<int>*> m_sliders;
     Button*                   m_ok;
     Button*                   m_cancel;
     Layout*                   m_sliders_ok_cancel_layout;

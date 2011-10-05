@@ -294,8 +294,8 @@ void ControlsTestApp::Initialize()
         new GG::MultiEdit(GG::X0, GG::Y0, GG::X(300), GG::Y(200), "Edit me\ntoo.", font, GG::CLR_GRAY, GG::MULTI_LINEWRAP, GG::CLR_WHITE, GG::CLR_SHADOW);
     layout->Add(multi_edit, 3, 1);
 
-    GG::Slider* slider =
-        new GG::Slider(GG::X0, GG::Y0, GG::X(300), GG::Y(14), 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
+    GG::Slider<int>* slider =
+        new GG::Slider<int>(GG::X0, GG::Y0, GG::X(300), GG::Y(14), 1, 100, GG::HORIZONTAL, GG::RAISED, GG::CLR_GRAY, 10);
     layout->Add(slider, 4, 0);
 
     GG::Spin<int>* spin_int =

@@ -41,9 +41,9 @@ namespace GG {
         inline void default_send_error_string(const std::string& str)
         { std::cerr << str; }
 
-        extern const char* GG_API s_filename;
-        extern text_iterator GG_API s_begin;
-        extern text_iterator GG_API s_end;
+        extern GG_API const char* s_filename;
+        extern GG_API text_iterator s_begin;
+        extern GG_API text_iterator s_end;
 
     }
 

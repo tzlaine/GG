@@ -33,6 +33,7 @@
 #include <GG/Control.h>
 #include <GG/WndEditor.h>
 #include <GG/DrawUtil.h>
+#include <GG/StyleFactory.h>
 
 #include <boost/serialization/version.hpp>
 

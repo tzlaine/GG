@@ -142,7 +142,7 @@ protected:
         the code point at \a <i>char_idx</i> in row \a row, using \a line_data
         instead of the current line data, if it is supplied.  If \a row, \a
         char_idx refers to a character preceeded by formatting tags, the index
-        of the first chracter of the first formatting tag is returned instead.
+        of the first character of the first formatting tag is returned instead.
         Not range-checked. */
     CPSize CharIndexOf(std::size_t row, CPSize char_idx,
                        const std::vector<Font::LineData>* line_data = 0) const;

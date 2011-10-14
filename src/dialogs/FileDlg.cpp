@@ -117,7 +117,7 @@ namespace {
 
     bool Win32Paths()
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-    { return WindowsRoot(boost::filesystem::initial_path().root_name().native()); }
+    { return WindowsRoot(boost::filesystem::initial_path().root_name().string()); }
 #else
     { return WindowsRoot(boost::filesystem::initial_path().root_name()); }
 #endif
@@ -350,7 +350,7 @@ void FileDlg::CreateChildren(const std::string& filename, bool multi)
 #endif
     m_files_edit = style->NewEdit(X0, Y0, X1, "", m_font, m_border_color, m_text_color);
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-    m_files_edit->SetText(filename_path.leaf().native());
+    m_files_edit->SetText(filename_path.leaf().string());
 #else
     m_files_edit->SetText(filename_path.leaf());
 #endif
@@ -686,7 +686,7 @@ void FileDlg::UpdateList()
 #endif
                     ListBox::Row* row = new ListBox::Row();
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-                    std::string row_text = "[" + it->path().filename().native() + "]";
+                    std::string row_text = "[" + it->path().filename().string() + "]";
 #else
                     std::string row_text = "[" + it->filename() + "]";
 #endif
@@ -711,7 +711,7 @@ void FileDlg::UpdateList()
                         bool meets_filters = file_filters.empty();
                         for (std::size_t i = 0; i < file_filters.size() && !meets_filters; ++i) {
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-                            if (parse(it->path().filename().c_str(), file_filters[i]).full)
+                            if (parse(it->path().filename().string().c_str(), file_filters[i]).full)
 #else
                             if (parse(it->filename().c_str(), file_filters[i]).full)
 #endif
@@ -720,8 +720,8 @@ void FileDlg::UpdateList()
                         if (meets_filters) {
                             ListBox::Row* row = new ListBox::Row();
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-                            row->push_back(it->path().filename().native(), m_font, m_text_color);
-                            sorted_rows.insert(std::make_pair(it->path().filename().native(), row));
+                            row->push_back(it->path().filename().string(), m_font, m_text_color);
+                            sorted_rows.insert(std::make_pair(it->path().filename().string(), row));
 #else
                             row->push_back(it->filename(), m_font, m_text_color);
                             sorted_rows.insert(std::make_pair(it->filename(), row));
@@ -742,7 +742,7 @@ void FileDlg::UpdateList()
                 if (fs::exists(path)) {
                     ListBox::Row* row = new ListBox::Row();
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-                    row->push_back("[" + path.root_name().native() + "]", m_font, m_text_color);
+                    row->push_back("[" + path.root_name().string() + "]", m_font, m_text_color);
 #else
                     row->push_back("[" + path.root_name() + "]", m_font, m_text_color);
 #endif

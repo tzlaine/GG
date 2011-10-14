@@ -128,7 +128,8 @@ void Edit::Render()
     X first_char_offset = FirstCharOffset();
     Y text_y_pos(ul.y + ((lr.y - ul.y) - GetFont()->Height()) / 2.0 + 0.5);
     CPSize last_visible_char = LastVisibleChar();
-    const CPSize INDEX_END = last_visible_char;
+    const StrSize INDEX_0 = StringIndexOf(0, m_first_char_shown, GetLineData());
+    const StrSize INDEX_END = StringIndexOf(0, last_visible_char, GetLineData());
     if (MultiSelected())   { // if one or more chars are selected, hilite, then draw the range in the selected-text color
         CPSize low_cursor_pos  = std::min(m_cursor_pos.first, m_cursor_pos.second);
         CPSize high_cursor_pos = std::max(m_cursor_pos.first, m_cursor_pos.second);
@@ -141,9 +142,8 @@ void Edit::Render()
         // INDEX_0 to INDEX_1 is unhilited, INDEX_1 to
         // INDEX_2 is hilited, and INDEX_2 to INDEX_3 is
         // unhilited; each range may be empty
-        const CPSize INDEX_0 = m_first_char_shown;
-        const CPSize INDEX_1 = std::max(low_cursor_pos, m_first_char_shown);
-        const CPSize INDEX_2 = std::min(high_cursor_pos, last_visible_char);
+        const StrSize INDEX_1 = StringIndexOf(0, std::max(low_cursor_pos, m_first_char_shown), GetLineData());
+        const StrSize INDEX_2 = StringIndexOf(0, std::min(high_cursor_pos, last_visible_char), GetLineData());
 
         // draw text
         X text_x_pos = ul.x + PIXEL_MARGIN;
@@ -164,7 +164,6 @@ void Edit::Render()
                                   Text().substr(Value(INDEX_2), Value(INDEX_END - INDEX_2)));
     } else { // no selected text
         glColor(text_color_to_use);
-        const CPSize INDEX_0 = m_first_char_shown;
         GetFont()->RenderText(Pt(client_ul.x, text_y_pos), Text().substr(Value(INDEX_0), Value(INDEX_END - INDEX_0)));
         if (GUI::GetGUI()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
             X caret_x = ScreenPosOfChar(m_cursor_pos.second);

@@ -306,7 +306,9 @@ void MultiEdit::SetText(const std::string& str)
                     CPSize cursor_end_string_index = CharIndexOf(m_cursor_end.first, m_cursor_end.second, &lines);
                     cursor_end_idx = first_line_first_char_idx < cursor_end_string_index ? CP0 : cursor_end_string_index - first_line_first_char_idx;
                 }
-                TextControl::SetText(str.substr(Value(first_line_first_char_idx), Value(last_line_last_char_idx - first_line_first_char_idx)));
+                StrSize first_line_first_string_idx = StringIndexOf(first_line, CP0, lines);
+                StrSize last_line_last_string_idx = last_line < lines.size() - 1 ? StringIndexOf(last_line + 1, CP0, lines) : StringIndexOf(lines.size(), CP0, lines);
+                TextControl::SetText(str.substr(Value(first_line_first_string_idx), Value(last_line_last_string_idx - first_line_first_string_idx)));
                 if (cursor_begin_idx != INVALID_CP_SIZE && cursor_end_idx != INVALID_CP_SIZE) {
                     bool found_cursor_begin = false;
                     bool found_cursor_end = false;

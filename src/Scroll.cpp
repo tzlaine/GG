@@ -241,7 +241,7 @@ void Scroll::ScrollLineDecr()
 
 void Scroll::ScrollPageIncr()
 {
-    if (m_posn + m_page_sz <= m_range_max - m_page_sz)
+    if (static_cast<int>(m_posn + m_page_sz) <= static_cast<int>(m_range_max - m_page_sz))
         m_posn += m_page_sz;
     else
         m_posn = m_range_max - (m_page_sz - 1);
@@ -428,7 +428,7 @@ void Scroll::MoveTabToPosn()
 void Scroll::ScrollLineIncrImpl(bool signal)
 {
     int old_posn = m_posn;
-    if (m_posn + m_line_sz <= m_range_max - m_page_sz)
+    if (static_cast<int>(m_posn + m_line_sz) <= static_cast<int>(m_range_max - m_page_sz))
         m_posn += m_line_sz;
     else
         m_posn = m_range_max - (m_page_sz - 1);

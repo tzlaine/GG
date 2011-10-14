@@ -1361,7 +1361,7 @@ bool ListBox::EventFilter(Wnd* w, const WndEvent& event)
             m_old_sel_row = RowUnderPt(pt);
             if (!InClient(pt)) {
                 m_old_sel_row = m_rows.end();
-            } else {
+            } else if (m_old_sel_row != m_rows.end()) {
                 m_old_sel_row_selected = m_selections.find(m_old_sel_row) != m_selections.end();
                 if (!(m_style & LIST_NOSEL) && !m_old_sel_row_selected)
                     ClickAtRow(m_old_sel_row, mod_keys);

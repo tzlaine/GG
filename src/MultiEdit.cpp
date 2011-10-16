@@ -294,11 +294,11 @@ void MultiEdit::SetText(const std::string& str)
                 CPSize cursor_begin_idx = INVALID_CP_SIZE; // used to correct the cursor range when lines get chopped
                 CPSize cursor_end_idx = INVALID_CP_SIZE;
                 if (m_style & MULTI_TERMINAL_STYLE) {
-                    first_line = lines.size() - m_max_lines_history;
+                    first_line = lines.size() - 1 - m_max_lines_history;
                     last_line = lines.size() - 1;
                 }
                 CPSize first_line_first_char_idx = CharIndexOf(first_line, CP0, &lines);
-                CPSize last_line_last_char_idx = last_line < lines.size() - 1 ? CharIndexOf(last_line + 1, CP0, &lines) : CharIndexOf(lines.size(), CP0, &lines);
+                CPSize last_line_last_char_idx = last_line < lines.size() - 1 ? CharIndexOf(last_line + 1, CP0, &lines) : CharIndexOf(lines.size() - 1, CP0, &lines);
                 if (m_style & MULTI_TERMINAL_STYLE) {
                     // chopping these lines off the front will invalidate the cursor range unless we do this
                     CPSize cursor_begin_string_index = CharIndexOf(m_cursor_begin.first, m_cursor_begin.second, &lines);
@@ -307,18 +307,18 @@ void MultiEdit::SetText(const std::string& str)
                     cursor_end_idx = first_line_first_char_idx < cursor_end_string_index ? CP0 : cursor_end_string_index - first_line_first_char_idx;
                 }
                 StrSize first_line_first_string_idx = StringIndexOf(first_line, CP0, lines);
-                StrSize last_line_last_string_idx = last_line < lines.size() - 1 ? StringIndexOf(last_line + 1, CP0, lines) : StringIndexOf(lines.size(), CP0, lines);
+                StrSize last_line_last_string_idx = last_line < lines.size() - 1 ? StringIndexOf(last_line + 1, CP0, lines) : StringIndexOf(lines.size() - 1, CP0, lines);
                 TextControl::SetText(str.substr(Value(first_line_first_string_idx), Value(last_line_last_string_idx - first_line_first_string_idx)));
                 if (cursor_begin_idx != INVALID_CP_SIZE && cursor_end_idx != INVALID_CP_SIZE) {
                     bool found_cursor_begin = false;
                     bool found_cursor_end = false;
                     for (std::size_t i = 0; i < GetLineData().size(); ++i) {
-                        if (!found_cursor_begin && cursor_begin_idx <= GetLineData()[i].char_data.back().code_point_index) {
+                        if (!found_cursor_begin && !GetLineData()[i].Empty() && cursor_begin_idx <= GetLineData()[i].char_data.back().code_point_index) {
                             m_cursor_begin.first = i;
                             m_cursor_begin.second = cursor_begin_idx - CharIndexOf(i, CP0);
                             found_cursor_begin = true;
                         }
-                        if (!found_cursor_end && cursor_end_idx <= GetLineData()[i].char_data.back().code_point_index) {
+                        if (!found_cursor_end && !GetLineData()[i].Empty() && cursor_end_idx <= GetLineData()[i].char_data.back().code_point_index) {
                             m_cursor_end.first = i;
                             m_cursor_end.second = cursor_end_idx - CharIndexOf(i, CP0);
                             found_cursor_end = true;

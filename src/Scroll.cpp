@@ -194,7 +194,7 @@ void Scroll::SizeScroll(int min, int max, unsigned int line, unsigned int page)
     m_range_max = std::max(min, max);
     m_page_sz = page;
 
-    assert(m_page_sz <= static_cast<unsigned int>(m_range_max - m_range_min + 1));
+    assert(static_cast<int>(m_page_sz) <= m_range_max - m_range_min + 1);
 
     if (m_page_sz > static_cast<unsigned int>(m_range_max - m_range_min + 1))
         m_page_sz = (m_range_max - m_range_min + 1);

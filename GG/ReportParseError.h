@@ -86,33 +86,36 @@ namespace GG {
                 if (at_end || empty_match) {
                     is << " before end of input.\n";
                 } else {
-                    std::string match(it.matched_.first, it.matched_.second);
-                    text_iterator it_begin = it.matched_.first;
-
                     // Use the end of the token's matched range, if its entire match was
                     // whitespace.
                     std::size_t whitespace = 0;
+                    const std::string match(it.matched_.first, it.matched_.second);
                     if (match.find_first_not_of(" \t\n\r\f\v") == std::string::npos)
                         whitespace = match.size();
 
-                    text_iterator line_start = boost::spirit::get_line_start(detail::s_begin, it.matched_.first);
-                    if (it_begin.base() < line_start.base())
-                        it_begin = line_start;
-
-                    std::string line_start_through_it_begin(line_start, it_begin);
-                    boost::algorithm::replace_all(line_start_through_it_begin, "\t", "    ");
-
-                    const text_iterator it_end = it.matched_.second;
-                    text_iterator line_end = it_end;
+                    text_iterator line_start = boost::spirit::get_line_start(detail::s_begin, it.matched_.second);
+                    ++line_start;
+                    text_iterator line_end = it.matched_.second;
                     while (line_end != detail::s_end && *line_end != '\n' && *line_end != '\r') {
                         ++line_end;
                     }
-                    std::string it_end_through_line_end(it_end, line_end);
-                    boost::algorithm::replace_all(it_end_through_line_end, "\t", "    ");
+                    std::string line(line_start, line_end);
+                    boost::algorithm::replace_all(line, "\t", "    ");
+
+                    std::size_t column = boost::spirit::get_column(detail::s_begin, it.matched_.first);
+
+                    std::string spacing;
+                    // Spirit reports columns as 1-based, and we only want to print n-1 spaces before the position indicator.
+                    if (2u < column)
+                        column -= 2;
+                    else
+                        column = 0;
+                    if (column + whitespace)
+                        spacing = std::string(column + whitespace, ' ');
 
                     is << " here:\n"
-                       << "  " << line_start_through_it_begin << match << it_end_through_line_end << "\n"
-                       << "  " << std::string(line_start_through_it_begin.size() + whitespace, ' ') << std::string(match.size(), '^')
+                       << "  " << line << "\n"
+                       << "  " << spacing << std::string(match.size(), '^')
                        << std::endl;
                 }
 

@@ -94,7 +94,8 @@ namespace GG {
                         whitespace = match.size();
 
                     text_iterator line_start = boost::spirit::get_line_start(detail::s_begin, it.matched_.second);
-                    ++line_start;
+                    if (line_start != detail::s_begin)
+                        ++line_start;
                     text_iterator line_end = it.matched_.second;
                     while (line_end != detail::s_end && *line_end != '\n' && *line_end != '\r') {
                         ++line_end;

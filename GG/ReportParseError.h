@@ -73,12 +73,12 @@ namespace GG {
             {
                 std::stringstream is;
 
-                bool empty_match = it.matched_.first == it.matched_.second;
+                bool empty_match = it.matched().begin() == it.matched().end();
                 std::size_t line_number;
                 if (empty_match)
                     line_number = std::count(detail::s_begin, detail::s_end, '\n') + 1;
                 else
-                    line_number = boost::spirit::get_line(it.matched_.first);
+                    line_number = boost::spirit::get_line(it.matched().begin());
 
                 is << detail::s_filename << ":" << line_number << ": "
                    << "Parse error: expected " << rule_name;
@@ -89,21 +89,20 @@ namespace GG {
                     // Use the end of the token's matched range, if its entire match was
                     // whitespace.
                     std::size_t whitespace = 0;
-                    const std::string match(it.matched_.first, it.matched_.second);
-                    if (match.find_first_not_of(" \t\n\r\f\v") == std::string::npos)
-                        whitespace = match.size();
+                    std::string match(it.matched().begin(), it.matched().end());
+                    text_iterator it_begin = it.matched().begin();
 
-                    text_iterator line_start = boost::spirit::get_line_start(detail::s_begin, it.matched_.second);
+                    text_iterator line_start = boost::spirit::get_line_start(detail::s_begin, it.matched().begin());
                     if (line_start != detail::s_begin)
                         ++line_start;
-                    text_iterator line_end = it.matched_.second;
+                    text_iterator line_end = it.matched().end();
                     while (line_end != detail::s_end && *line_end != '\n' && *line_end != '\r') {
                         ++line_end;
                     }
                     std::string line(line_start, line_end);
                     boost::algorithm::replace_all(line, "\t", "    ");
 
-                    std::size_t column = boost::spirit::get_column(detail::s_begin, it.matched_.first);
+                    std::size_t column = boost::spirit::get_column(detail::s_begin, it.matched().begin());
 
                     std::string spacing;
                     // Spirit reports columns as 1-based, and we only want to print n-1 spaces before the position indicator.

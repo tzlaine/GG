@@ -31,8 +31,8 @@
 #include <GG/adobe/name.hpp>
 
 #include <boost/spirit/home/support/iterators/line_pos_iterator.hpp>
-#define BOOST_SPIRIT_DEBUG
 #include <boost/spirit/include/lex_lexertl.hpp>
+#include <boost/spirit/home/lex/lexer/lexertl/position_token.hpp>
 
 #include <string>
 
@@ -41,7 +41,7 @@ namespace GG {
 
 typedef boost::spirit::line_pos_iterator<std::string::const_iterator> text_iterator;
 
-typedef boost::spirit::lex::lexertl::token<
+typedef boost::spirit::lex::lexertl::position_token<
     text_iterator,
     boost::mpl::vector<
         adobe::name_t,

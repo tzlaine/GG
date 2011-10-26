@@ -30,6 +30,7 @@ namespace GG {
     namespace detail {
 
         const char* s_filename = 0;
+        text_iterator* s_text_it;
         text_iterator s_begin;
         text_iterator s_end;
 

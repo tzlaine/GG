@@ -359,6 +359,7 @@ bool GG::Parse(const std::string& layout,
 {
     using boost::spirit::qi::phrase_parse;
     text_iterator it(layout.begin());
+    detail::s_text_it = &it;
     detail::s_begin = it;
     detail::s_end = text_iterator(layout.end());
     detail::s_filename = filename.c_str();

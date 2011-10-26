@@ -98,6 +98,7 @@ namespace GG {
         std::cout << "original: <parse " << (original_parse_failed ? "failure" : "success") << ">\n";
         using boost::spirit::qi::phrase_parse;
         text_iterator it(expression.begin());
+        detail::s_text_it = &it;
         detail::s_begin = it;
         detail::s_end = text_iterator(expression.end());
         detail::s_filename = "test_expression";

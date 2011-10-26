@@ -579,6 +579,7 @@ bool GG::Parse(const std::string& sheet,
 {
     using boost::spirit::qi::phrase_parse;
     text_iterator it(sheet.begin());
+    detail::s_text_it = &it;
     detail::s_begin = it;
     detail::s_end = text_iterator(sheet.end());
     detail::s_filename = filename.c_str();

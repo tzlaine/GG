@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 include(Config)
 include(Util)
 
-set(MINIMUM_BOOST_VERSION 1.44.0)
+set(MINIMUM_BOOST_VERSION 1.47.0)
 set(MINIMUM_BOOST_COMPONENTS date_time filesystem signals system thread)
 
 option(BUILD_STATIC "Enables building of static libraries." OFF)

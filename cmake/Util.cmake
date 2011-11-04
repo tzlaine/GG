@@ -238,8 +238,9 @@ macro (library_variant LIBNAME)
     string(TOUPPER COMPONENT_${PROJECT_NAME} LIB_COMPONENT)
 
     # Installation of this library variant
-    if (THIS_LIB_IS_STATIC AND NOT RUNTIME_ONLY_PACKAGE OR
-        NOT THIS_LIB_IS_STATIC AND NOT DEVEL_ONLY_PACKAGE)
+    if ((THIS_LIB_IS_STATIC AND NOT RUNTIME_ONLY_PACKAGE OR
+         NOT THIS_LIB_IS_STATIC AND NOT DEVEL_ONLY_PACKAGE) AND
+        COMMAND package_compatible)
         package_compatible(ok_to_install ${LIBNAME})
         if (ok_to_install)
             install(

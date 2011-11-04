@@ -25,6 +25,7 @@
 
 
 namespace GG {
+    template <typename T>
     class Slider;
 }
 
@@ -56,7 +57,7 @@ struct slider_t : boost::noncopyable
 
     void monitor(const setter_type& proc);
 
-    GG::Slider*          control_m;
+    GG::Slider<double>*  control_m;
     std::string          alt_text_m;
     bool                 is_vertical_m;
     slider_style_t       style_m;

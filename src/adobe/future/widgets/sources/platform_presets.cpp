@@ -262,7 +262,7 @@ namespace implementation {
 
 boost::filesystem::path preset_directory(const presets_t& control)
 {
-    boost::filesystem::path result(control.path_m, boost::filesystem::native);
+    boost::filesystem::path result(control.path_m);
     boost::filesystem::create_directory(result);
     return result;
 }

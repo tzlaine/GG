@@ -109,9 +109,9 @@ platform_display_type insert<slider_t>(display_t&             display,
     double min = element.format_m.at(0).cast<slider_t::model_type>();
     double max = element.format_m.at(element.format_m.size() - 1).cast<slider_t::model_type>();
     element.control_m =
-        style->NewSlider(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
-                         min, max, element.is_vertical_m ? GG::VERTICAL : GG::HORIZONTAL,
-                         GG::GROOVED, GG::CLR_GRAY, 6);
+        style->NewDoubleSlider(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
+                               min, max, element.is_vertical_m ? GG::VERTICAL : GG::HORIZONTAL,
+                               GG::GROOVED, GG::CLR_GRAY, 6);
 
     GG::Connect(element.control_m->SlidSignal,
                 boost::bind(&slider_slid, boost::ref(element), _1, _2, _3));

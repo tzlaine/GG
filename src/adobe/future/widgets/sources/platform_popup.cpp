@@ -376,7 +376,7 @@ template <> platform_display_type insert<popup_t>(display_t&             display
 
     assert(!element.control_m);
 
-    int lines = std::min(element.menu_items_m.size(), 20u);
+    int lines = std::min(element.menu_items_m.size(), std::size_t(20u));
     element.control_m =
         implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
                                                   RowHeight() * lines + static_cast<int>(2 * GG::ListBox::BORDER_THICK),

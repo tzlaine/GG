@@ -29,7 +29,7 @@ namespace {
 /****************************************************************************************************/
 
 boost::filesystem::path to_path(const std::string& path_string)
-{ return boost::filesystem::path(path_string, boost::filesystem::native); }
+{ return boost::filesystem::path(path_string); }
 
 /****************************************************************************************************/
 

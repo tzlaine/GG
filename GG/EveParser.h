@@ -50,4 +50,4 @@ GG_API bool Parse(const std::string& sheet,
 
 }
 
-#endif // _GG_EveParser_h_
+#endif

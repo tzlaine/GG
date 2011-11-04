@@ -186,26 +186,8 @@ private:
 
     iterator       m_current_item;  ///< the currently-selected list item (end() if none is selected)
     ListBox*       m_LB;            ///< the ListBox used to render the selected row and the popup list
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::DropDownList::serialize(Archive& ar, const unsigned int version)
-{
-    std::size_t current_item;
-    if (Archive::is_saving::value)
-        current_item = std::distance(m_LB->begin(), m_current_item);
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(current_item)
-        & BOOST_SERIALIZATION_NVP(m_LB);
-    if (Archive::is_loading::value)
-        m_current_item = boost::next(m_LB->begin(), current_item);
-}
-
-#endif // _GG_DropDownList_h_
+#endif

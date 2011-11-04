@@ -56,11 +56,6 @@ public:
         care to ensure that the cursor's "hotspot" is rendered at \a pt. */
     virtual void Render(const Pt& pt) = 0;
     //@}
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** \brief TextureCursor is a very simple subclass of Cursor.
@@ -94,25 +89,8 @@ public:
 private:
     boost::shared_ptr<Texture> m_texture;
     Pt                         m_hotspot;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Cursor::serialize(Archive& ar, const unsigned int version)
-{}
-
-template <class Archive>
-void GG::TextureCursor::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Cursor)
-        & m_texture
-        & m_hotspot;
-}
-
-#endif // _GG_Cursor_h_
+#endif

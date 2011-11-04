@@ -45,4 +45,4 @@ GG_API bool Parse(const std::string& sheet,
 
 }
 
-#endif // _GG_AdamParser_h_
+#endif

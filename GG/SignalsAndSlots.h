@@ -67,6 +67,6 @@ Connect(SigT& sig, const typename SigT::slot_type& _slot, int grp, boost::signal
 } // namespace GG
 
 
-#endif // _GG_SignalsAndSlots_h_
+#endif
 
 

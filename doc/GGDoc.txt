@@ -100,10 +100,9 @@
     layers of the GUI, removing windows from the GUI, getting mouse state
     (position and button depression), setting mouse delay repeat (see GG::GUI
     for a description of this), entering and exiting from an orthographic
-    projection (2D) rendering mode, and saving/loading polymorphic GUI
-    elements to/from their serialized form.  Most of these services must be
-    provided by the user when subclassing from GG::GUI; if either of SDLGUI or
-    OgreGUI is used, these services are already implemented.
+    projection (2D) rendering mode.  Most of these services must be provided
+    by the user when subclassing from GG::GUI; if either of SDLGUI or OgreGUI
+    is used, these services are already implemented.
 
     <p>
 
@@ -386,44 +385,6 @@
     access to a Mac OS X box.
  */
 
-/** \page serialization Serialization
-    \section serialization_motivation Motivation
-
-    One of the main design goals for GG is the editability of UI elements
-    without recompilation.  Another main goal is the capability of saving and
-    restoring the state of the GUI.  A secondary design goal is the capability
-    of serializing UI elements for network transmission and receipt.  To
-    satisfy all these requirements, GG uses the Boost.Serialization library to
-    serialize GG::Wnd-derived objects.
-
-    \section serialization_approach Details
-
-    GG does not contain any actual code that will serialize a GG::Wnd.
-    Instead, each GG::Wnd subclass contains a serialize() template method
-    which may be invoked by user code to perform serialization.  The user must
-    then create a Boost.Serialization archive, and save/load the desired
-    windows to/from the archive.  To be serializable, user-created subclasses
-    need to define a serialize method that first serializes its base class,
-    then serializes any subclass-specific data; see any GG::Wnd subclass for
-    example code.  For full details on how the serialization works, see the
-    serialization tutorial and the Boost.Serialization documentation.
-
-    \section caveats Caveats
-
-    Signals are not currently serializable.  This means that when a class is
-    created from an input serialization archive, all its signals must be
-    reconnected to their slots (and any signals connected to it should be
-    reconnected as well).  Many of the built-in GG controls must reconnect
-    signals when loaded; such classes have a private ConnectSignals() method
-    that is called at load time.  See GG::RadioButtonGroup::serialize() in
-    Button.h for an example.
-
-    <p>
-
-    GG::Font and GG::Texture objects that were part of the GUI's
-    GG::FontManager and GG::TextureManager when saved will not be added back
-    to these two structures when they are loaded.  */
-
 /** \page brief_tour A Brief Tour
 
     In a library as diverse in functionality as GG, it can be difficult even
@@ -476,8 +437,8 @@
 
     Plugins (dynamically loaded shared libraries/DLLs not linked into the
     application when it is built) can be created and used with GG.  Plugins
-    provide a GG::StyleFactory, a default font name and size, and functions to
-    serialize and deserialize GG::Wnd's.  \see GG::PluginInterface.
+    provide a GG::StyleFactory, and a default font name and size.  \see
+    GG::PluginInterface.
 
     \section tour_standard_dialogs Standard Dialogs
 
@@ -564,8 +525,6 @@
     This is the minimal interesting GG application, and uses one of the default input drivers, SDL.
     \section tut_2 Tutorial 2: Controls (controls.cpp)
     This builds upon Tutorial 1 by adding one of every type of Control, and connecting some signals and slots.
-    \section tut_3 Tutorial 3: Serialization (serialization.cpp)
-    This builds upon Tutorial 2 by adding serialization code, and saving and loading all the controls at the start of the app's run.
 */
 
 /** \mainpage GG Documentation Overviews
@@ -575,7 +534,6 @@
     -# \ref sigs_n_slots
     -# \ref text_handling
     -# \ref drag_n_drop
-    -# \ref serialization
     -# \ref brief_tour
     -# \ref building
     -# \ref tutorials

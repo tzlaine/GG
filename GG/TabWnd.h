@@ -113,10 +113,6 @@ protected:
 private:
     std::vector<Wnd*> m_wnds;
     std::size_t       m_current_wnd_index;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -207,10 +203,6 @@ private:
     TabBar*                     m_tab_bar;
     OverlayWnd*                 m_overlay;
     std::map<std::string, Wnd*> m_named_wnds;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -322,46 +314,8 @@ private:
     Clr                       m_text_color;
     TabBarStyle               m_style;
     std::size_t               m_first_tab_shown;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
-
-// template implementations
-template <class Archive>
-void GG::OverlayWnd::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_wnds)
-        & BOOST_SERIALIZATION_NVP(m_current_wnd_index);
-}
-
-template <class Archive>
-void GG::TabWnd::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_tab_bar)
-        & BOOST_SERIALIZATION_NVP(m_overlay)
-        & BOOST_SERIALIZATION_NVP(m_named_wnds);
-}
-
-template <class Archive>
-void GG::TabBar::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_tabs)
-        & BOOST_SERIALIZATION_NVP(m_tab_buttons)
-        & BOOST_SERIALIZATION_NVP(m_font)
-        & BOOST_SERIALIZATION_NVP(m_left_button)
-        & BOOST_SERIALIZATION_NVP(m_right_button)
-        & BOOST_SERIALIZATION_NVP(m_left_right_button_layout)
-        & BOOST_SERIALIZATION_NVP(m_format)
-        & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_style)
-        & BOOST_SERIALIZATION_NVP(m_first_tab_shown);
-}
 
 #endif

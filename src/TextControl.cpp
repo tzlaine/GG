@@ -45,8 +45,7 @@ TextControl::TextControl() :
     m_clip_text(false),
     m_set_min_size(false),
     m_code_points(0),
-    m_fit_to_text(false),
-    m_dirty_load(false)
+    m_fit_to_text(false)
 {}
 
 TextControl::TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
@@ -58,8 +57,7 @@ TextControl::TextControl(X x, Y y, X w, Y h, const std::string& str, const boost
     m_set_min_size(false),
     m_code_points(0),
     m_font(font),
-    m_fit_to_text(false),
-    m_dirty_load(false)
+    m_fit_to_text(false)
 {
     ValidateFormat();
     SetText(str);
@@ -74,8 +72,7 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
     m_set_min_size(false),
     m_code_points(0),
     m_font(font),
-    m_fit_to_text(true),
-    m_dirty_load(false)
+    m_fit_to_text(true)
 {
     ValidateFormat();
     SetText(str);
@@ -116,8 +113,6 @@ Pt TextControl::TextLowerRight() const
 
 void TextControl::Render()
 {
-    if (m_dirty_load)
-        SetText(m_text);
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor(clr_to_use);
     if (m_font) {
@@ -146,7 +141,6 @@ void TextControl::SetText(const std::string& str)
             RecomputeTextBounds();
         }
     }
-    m_dirty_load = false;
 }
 
 void TextControl::SizeMove(const Pt& ul, const Pt& lr)
@@ -266,9 +260,6 @@ const boost::shared_ptr<Font>& TextControl::GetFont() const
 
 bool TextControl::FitToText() const
 { return m_fit_to_text; }
-
-bool TextControl::DirtyLoad() const
-{ return m_dirty_load; }
 
 void TextControl::ValidateFormat()
 {

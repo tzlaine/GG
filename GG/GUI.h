@@ -154,12 +154,6 @@ public:
         accel_end(). */
     typedef std::set<std::pair<Key, Flags<ModKey> > >::const_iterator const_accel_iterator;
 
-    /** The type of function used to serialize Wnds. */
-    typedef void (*SaveWndFn)(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
-
-    /** The type of function used to deserialize Wnds. */
-    typedef void (*LoadWndFn)(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
-
     /** \name Structors */ ///@{
     virtual ~GUI(); ///< virtual dtor
     //@}
@@ -321,31 +315,6 @@ public:
 
     void RenderCursor(bool render); ///< set this to true iff the GUI should render the cursor
     void SetCursor(const boost::shared_ptr<Cursor>& cursor); ///< sets the currently-installed cursor
-
-    /** Saves \a wnd to the archive \a ar, with the xml tag \a name.  \throw
-        GG::GUI::BadFunctionPointer Throws GG::GUI::BadFunctionPointer if no
-        Wnd-serializing function has ben defined by the user using
-        SetSaveWndFunction(). */
-    void SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar);
-
-    /** Loads \a wnd, with the xml tag \a name, from the archive \a ar.
-        \throw GG::GUI::BadFunctionPointer Throws GG::GUI::BadFunctionPointer
-        if no Wnd-serializing function has ben defined by the user using
-        SetLoadWndFunction(). */
-    void LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
-
-    /** Since LoadWnd() will only accept a referemce to a GG::Wnd*, this
-        method is provided to more conveniently accept pointers to Wnd
-        subclasses. */
-    template <class T>
-    void LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
-
-    void SetSaveWndFunction(SaveWndFn fn); ///< sets \a fn to be the function invoked when SaveWnd() is called.
-    void SetLoadWndFunction(LoadWndFn fn); ///< sets \a fn to be the function invoked when LoadWnd() is called.
-
-    /** Sets all the SaveWnd() and LoadWnd() function pointers to be the
-        functions provided by \a interface. */
-    void SetSaveLoadFunctions(const PluginInterface& interface);
     //@}
 
     static GUI*  GetGUI();                ///< allows any GG code access to GUI framework by calling GUI::GetGUI()
@@ -419,15 +388,6 @@ boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned 
                                      CharSetIter first, CharSetIter last)
 { return GetFontManager().GetFont(font_filename, pts, file_contents, first, last); }
 
-template <class T>
-void GUI::LoadWnd(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
-{
-    Wnd* wnd_as_base = wnd;
-    LoadWnd(wnd_as_base, name, ar);
-    wnd = dynamic_cast<T*>(wnd_as_base);
-    assert(wnd || !wnd_as_base);
-}
-
 } // namespace GG
 
-#endif // _GG_GUI_h_
+#endif

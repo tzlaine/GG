@@ -32,7 +32,6 @@
 
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_integral.hpp>
-#include <boost/serialization/nvp.hpp>
 
 #include <iostream>
 
@@ -222,11 +221,6 @@ inline std::size_t Value(std::size_t s)
     private:                                                            \
         double m_value;                                                 \
                                                                         \
-        friend class boost::serialization::access;                      \
-        template <class Archive>                                        \
-        void serialize(Archive& ar, const unsigned int version)         \
-        { ar & BOOST_SERIALIZATION_NVP(m_value); }                      \
-                                                                        \
         friend double Value(name ## _d x);                              \
     };                                                                  \
                                                                         \
@@ -308,11 +302,6 @@ inline std::size_t Value(std::size_t s)
                                                                         \
     private:                                                            \
         type m_value;                                                   \
-                                                                        \
-        friend class boost::serialization::access;                      \
-        template <class Archive>                                        \
-        void serialize(Archive& ar, const unsigned int version)         \
-        { ar & BOOST_SERIALIZATION_NVP(m_value); }                      \
                                                                         \
         friend class name ## _d;                                        \
         friend type Value(name x);                                      \
@@ -415,11 +404,6 @@ inline std::size_t Value(std::size_t s)
     private:                                                            \
         std::size_t m_value;                                            \
                                                                         \
-        friend class boost::serialization::access;                      \
-        template <class Archive>                                        \
-        void serialize(Archive& ar, const unsigned int version)         \
-        { ar & BOOST_SERIALIZATION_NVP(m_value); }                      \
-                                                                        \
         friend class name ## _d;                                        \
         friend std::size_t Value(name x);                               \
     };                                                                  \
@@ -450,4 +434,4 @@ inline std::size_t Value(std::size_t s)
                                                                         \
     void dummy_function_to_force_semicolon()
 
-#endif // _GG_StrongTypedef_h_
+#endif

@@ -46,8 +46,7 @@ class TextControl;
     is emmitted with its menu_ID member whenever it is selected. Such signals
     may be emitted even when the menu_ID is 0.  These signals allow each
     MenuItem to be attached directly to code that should be executed when that
-    item is selected.  Note that the signal is not serialized.  The user must
-    restore it after the MenuItem is reloaded. */
+    item is selected. */
 struct GG_API MenuItem
 {
     /** \name Signal Types */ ///@{
@@ -95,11 +94,6 @@ struct GG_API MenuItem
     bool                  disabled;   ///< set to true when this menu item is disabled
     bool                  checked;    ///< set to true when this menu item can be toggled, and is currently on
     std::vector<MenuItem> next_level; ///< submenu off of this menu item; may be emtpy
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -215,10 +209,6 @@ private:
 
     friend struct SetFontAction;
     friend struct SetTextColorAction;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -232,16 +222,12 @@ private:
     not recommended.  The intent of this class is to act as a tool to get
     immediate input from the user, inline.  However, attaching MenuItem
     signals directly to slots will work, and it will certainly be useful in
-    some cases to do this.  Note also that there is no way to serialize a
-    PopupMenu.  This is also because of the intent to use PopupMenus in an
-    immediate, short-lived manner.  If you wish to save an often-used popup
-    menu, simply create the MenuItem that the popup is based on, and save and
-    load that.  Also, if some action is to be taken as the user browses the
-    menu items, such as displaying some visual cue to indicate the result of
-    chosing a particular menu entry, you can attach a slot function to the
-    BrowsedSignalType object returned by BrowsedSignal.  Whenever the mouse
-    moves to a new menu item, this signal is emitted with the ID number of the
-    item under the cursor. */
+    some cases to do this.  Also, if some action is to be taken as the user
+    browses the menu items, such as displaying some visual cue to indicate the
+    result of chosing a particular menu entry, you can attach a slot function
+    to the BrowsedSignalType object returned by BrowsedSignal.  Whenever the
+    mouse moves to a new menu item, this signal is emitted with the ID number
+    of the item under the cursor. */
 class GG_API PopupMenu : public Wnd
 {
 public:
@@ -339,29 +325,4 @@ GG::MenuItem::MenuItem(const std::string& str, int id, bool disable, bool check,
     checked(check)
 { SelectedSignal->connect(boost::bind(slot, obj)); }
 
-template <class Archive>
-void GG::MenuItem::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(label)
-        & BOOST_SERIALIZATION_NVP(item_ID)
-        & BOOST_SERIALIZATION_NVP(disabled)
-        & BOOST_SERIALIZATION_NVP(checked)
-        & BOOST_SERIALIZATION_NVP(next_level);
-}
-
-template <class Archive>
-void GG::MenuBar::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_font)
-        & BOOST_SERIALIZATION_NVP(m_border_color)
-        & BOOST_SERIALIZATION_NVP(m_int_color)
-        & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_hilite_color)
-        & BOOST_SERIALIZATION_NVP(m_sel_text_color)
-        & BOOST_SERIALIZATION_NVP(m_menu_data)
-        & BOOST_SERIALIZATION_NVP(m_menu_labels)
-        & BOOST_SERIALIZATION_NVP(m_caret);
-}
-
-#endif // _GG_Menu_h_
+#endif

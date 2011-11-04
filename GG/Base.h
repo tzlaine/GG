@@ -747,5 +747,5 @@ GG_ENUM_STREAM_OUT(Key)
 
 } // namespace GG
 
-#endif // _GG_Base_h_
+#endif
 

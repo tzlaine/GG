@@ -34,8 +34,6 @@
 #include <GG/ClrConstants.h>
 #include <GG/TextControl.h>
 
-#include <boost/serialization/version.hpp>
-
 
 namespace GG {
 
@@ -115,10 +113,6 @@ private:
     SubTexture     m_unpressed_graphic; ///< Graphic used to display button when it's unpressed
     SubTexture     m_pressed_graphic;   ///< Graphic used to display button when it's depressed
     SubTexture     m_rollover_graphic;  ///< Graphic used to display button when it's under the mouse and not pressed
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 // define EnumMap and stream operators for Button::ButtonState
@@ -208,10 +202,6 @@ private:
     Pt                m_button_ul;
     Pt                m_button_lr;
     Pt                m_text_ul;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -222,9 +212,7 @@ private:
     changes.  The signal indicates which button has been pressed, by passing
     the index of the button; the currently-checked button index is NO_BUTTON
     when no button is checked.  Any StateButton-derived controls can be used
-    in a RadioButtonGroup.  However, if you want to automatically serialize a
-    RadioButtonGroup that has custom buttons, you must register the new types.
-    See the boost serialization documentation for details. */
+    in a RadioButtonGroup. */
 class GG_API RadioButtonGroup : public Control
 {
 public:
@@ -347,9 +335,6 @@ protected:
         ButtonSlot(StateButton* button_);
         StateButton*               button;
         boost::signals::connection connection;
-
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \name Structors */ ///@{
@@ -384,57 +369,8 @@ private:
     bool                    m_render_outline;
 
     friend class ButtonClickedFunctor;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-
-// template implementations
-template <class Archive>
-void GG::Button::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextControl)
-        & BOOST_SERIALIZATION_NVP(m_state)
-        & BOOST_SERIALIZATION_NVP(m_unpressed_graphic)
-        & BOOST_SERIALIZATION_NVP(m_pressed_graphic)
-        & BOOST_SERIALIZATION_NVP(m_rollover_graphic);
-}
-
-template <class Archive>
-void GG::StateButton::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextControl)
-        & BOOST_SERIALIZATION_NVP(m_checked)
-        & BOOST_SERIALIZATION_NVP(m_int_color)
-        & BOOST_SERIALIZATION_NVP(m_style)
-        & BOOST_SERIALIZATION_NVP(m_button_ul)
-        & BOOST_SERIALIZATION_NVP(m_button_lr)
-        & BOOST_SERIALIZATION_NVP(m_text_ul);
-}
-
-template <class Archive>
-void GG::RadioButtonGroup::ButtonSlot::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(button);
-}
-
-template <class Archive>
-void GG::RadioButtonGroup::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation))
-        & BOOST_SERIALIZATION_NVP(m_button_slots)
-        & BOOST_SERIALIZATION_NVP(m_expand_buttons)
-        & BOOST_SERIALIZATION_NVP(m_expand_buttons_proportionally)
-        & BOOST_SERIALIZATION_NVP(m_checked_button)
-        & BOOST_SERIALIZATION_NVP(m_render_outline);
-
-    if (Archive::is_loading::value)
-        ConnectSignals();
-}
-
-#endif // _GG_Button_h_
+#endif

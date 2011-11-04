@@ -219,10 +219,6 @@ private:
     X                                m_width;
     Y                                m_height;
     GLfloat                          m_tex_coords[4];  ///< position of element within containing texture 
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** \brief A singleton that loads and stores textures for use by GG.
@@ -276,75 +272,4 @@ TextureManager& GetTextureManager();
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Texture::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(m_filename)
-        & BOOST_SERIALIZATION_NVP(m_bytes_pp)
-        & BOOST_SERIALIZATION_NVP(m_width)
-        & BOOST_SERIALIZATION_NVP(m_height)
-        & BOOST_SERIALIZATION_NVP(m_wrap_s)
-        & BOOST_SERIALIZATION_NVP(m_wrap_t)
-        & BOOST_SERIALIZATION_NVP(m_min_filter)
-        & BOOST_SERIALIZATION_NVP(m_mag_filter)
-        & BOOST_SERIALIZATION_NVP(m_mipmaps)
-        & BOOST_SERIALIZATION_NVP(m_format)
-        & BOOST_SERIALIZATION_NVP(m_type)
-        & BOOST_SERIALIZATION_NVP(m_tex_coords)
-        & BOOST_SERIALIZATION_NVP(m_default_width)
-        & BOOST_SERIALIZATION_NVP(m_default_height);
-
-    unsigned char* raw_data_bytes = 0;
-    std::size_t raw_data_size = 0;
-    if (Archive::is_saving::value) {
-        if (m_filename == "" && m_opengl_id)
-            raw_data_bytes = GetRawBytes();
-        if (raw_data_bytes)
-            raw_data_size = static_cast<std::size_t>(Value(m_width) * Value(m_height) * m_bytes_pp);
-    }
-    ar & BOOST_SERIALIZATION_NVP(raw_data_size);
-    if (raw_data_size) {
-        if (Archive::is_loading::value) {
-            typedef unsigned char uchar;
-            raw_data_bytes = new uchar[raw_data_size];
-        }
-        boost::serialization::binary_object raw_data(raw_data_bytes, raw_data_size);
-        ar & BOOST_SERIALIZATION_NVP(raw_data);
-    }
-
-    if (Archive::is_loading::value) {
-        if (raw_data_size) {
-            Init(X0, Y0, m_default_width, m_default_height, m_width, raw_data_bytes, m_format, m_type, m_bytes_pp, m_mipmaps);
-        } else {
-            try {
-                Load(m_filename);
-            } catch (const BadFile& e) {
-                // take no action; the Texture must have been uninitialized when saved
-            }
-        }
-        SetWrap(m_wrap_s, m_wrap_t);
-        SetFilters(m_min_filter, m_mag_filter);
-    }
-
-    if (raw_data_size)
-        delete [] raw_data_bytes;
-}
-
-template <class Archive>
-void GG::SubTexture::serialize(Archive& ar, const unsigned int version)
-{
-    boost::shared_ptr<Texture> non_const_texture;
-    if (Archive::is_saving::value)
-        non_const_texture = boost::const_pointer_cast<Texture>(m_texture);
-
-    ar  & boost::serialization::make_nvp("m_texture", non_const_texture)
-        & BOOST_SERIALIZATION_NVP(m_width)
-        & BOOST_SERIALIZATION_NVP(m_height)
-        & BOOST_SERIALIZATION_NVP(m_tex_coords);
-
-    if (Archive::is_loading::value)
-        m_texture = boost::const_pointer_cast<const Texture>(non_const_texture);
-}
-
-#endif // _GG_Texture_h_
+#endif

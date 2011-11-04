@@ -95,4 +95,4 @@ private:
 
 } // namespace GG
 
-#endif // _GG_Enum_h_
+#endif

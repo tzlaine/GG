@@ -161,4 +161,4 @@ namespace GG {
 
 }
 
-#endif // _GG_DrawUtil_h_
+#endif

@@ -56,4 +56,4 @@ extern GG_API const Flags<MultiEditStyle> MULTI_NO_SCROLL; ///< Scrolls are not 
 
 }
 
-#endif // _GG_MultiEdit_h_
+#endif

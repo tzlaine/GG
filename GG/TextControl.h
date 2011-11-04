@@ -236,13 +236,6 @@ protected:
     /** Returns true iff this TextControl was constructed using the ctor
         without width and height parameters.  \see TextControl::SetText() */
     bool FitToText() const;
-
-    /** Returns true iff the object has just been loaded from a serialized
-        form, meaning changes may have been made that leave the control in an
-        inconsistent state; this must be remedied by calling
-        <code>SetText(Text());</code> the next time Render() is
-        called. */
-    bool DirtyLoad() const;
     //@}
 
 private:
@@ -263,12 +256,6 @@ private:
     bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
     Pt                          m_text_lr;     ///< stored relative to the control's UpperLeft()
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
-
-    bool m_dirty_load;
 };
 
 } // namespace GG
@@ -292,26 +279,4 @@ template <class T>
 void GG::TextControl::operator<<(T t)
 { SetText(boost::lexical_cast<std::string>(t)); }
 
-template <class Archive>
-void GG::TextControl::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_text)
-        & BOOST_SERIALIZATION_NVP(m_format)
-        & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_clip_text)
-        & BOOST_SERIALIZATION_NVP(m_set_min_size)
-        & BOOST_SERIALIZATION_NVP(m_line_data)
-        & BOOST_SERIALIZATION_NVP(m_code_points)
-        & BOOST_SERIALIZATION_NVP(m_font)
-        & BOOST_SERIALIZATION_NVP(m_fit_to_text)
-        & BOOST_SERIALIZATION_NVP(m_text_ul)
-        & BOOST_SERIALIZATION_NVP(m_text_lr);
-
-    if (Archive::is_loading::value) {
-        ValidateFormat();
-        m_dirty_load = true;
-    }
-}
-
-#endif // _GG_TextControl_h_
+#endif

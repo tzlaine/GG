@@ -31,9 +31,6 @@
 
 #include <GG/Export.h>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/nvp.hpp>
-
 
 namespace GG {
 
@@ -66,11 +63,6 @@ struct GG_API Clr
     unsigned char g;   ///< the green channel
     unsigned char b;   ///< the blue channel
     unsigned char a;   ///< the alpha channel
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** Named ctor that constructs a Clr from four floats that represent the color
@@ -93,15 +85,5 @@ inline bool operator!=(const Clr& rhs, const Clr& lhs)
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Clr::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(r)
-        & BOOST_SERIALIZATION_NVP(g)
-        & BOOST_SERIALIZATION_NVP(b)
-        & BOOST_SERIALIZATION_NVP(a);
-}
-
-#endif // _GG_Clr_h_
+#endif
 

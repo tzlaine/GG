@@ -36,8 +36,6 @@
 
 #include <set>
 
-#include <boost/serialization/version.hpp>
-
 
 namespace GG {
 
@@ -218,10 +216,6 @@ public:
         bool                   m_ignore_adjust_layout;
 
         friend class DeferAdjustLayout;
-
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     typedef std::list<Row*>::iterator iterator;
@@ -563,10 +557,6 @@ private:
     iterator*       m_iterator_being_erased;
 
     friend class DropDownList; ///< allow complete access to DropDownList, which relies on ListBox to do its rendering
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
@@ -602,90 +592,10 @@ bool GG::ListBox::RowPtrIteratorLess<Cont>::LessThan(Iter lhs, Iter rhs, Iter en
          true : (*lhs)->UpperLeft().y < (*rhs)->UpperLeft().y);
 }
 
-template <class Archive>
-void GG::ListBox::Row::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_cells)
-        & BOOST_SERIALIZATION_NVP(m_row_alignment)
-        & BOOST_SERIALIZATION_NVP(m_col_alignments)
-        & BOOST_SERIALIZATION_NVP(m_col_widths)
-        & BOOST_SERIALIZATION_NVP(m_margin);
-}
-
 template <class RowType>
 bool GG::ListBox::DefaultRowCmp<RowType>::operator()(const GG::ListBox::Row& lhs, const GG::ListBox::Row& rhs, std::size_t column) const
 {
     return static_cast<const RowType&>(lhs).SortKey(column) < static_cast<const RowType&>(rhs).SortKey(column);
 }
 
-template <class Archive>
-void GG::ListBox::serialize(Archive& ar, const unsigned int version)
-{
-    std::size_t caret_index = std::distance(m_rows.begin(), m_caret);
-    std::size_t old_sel_row_index = std::distance(m_rows.begin(), m_old_sel_row);
-    std::size_t old_rdown_row_index = std::distance(m_rows.begin(), m_old_rdown_row);
-    std::size_t lclick_row_index = std::distance(m_rows.begin(), m_lclick_row);
-    std::size_t rclick_row_index = std::distance(m_rows.begin(), m_rclick_row);
-    std::size_t last_row_browsed_index = std::distance(m_rows.begin(), m_last_row_browsed);
-    std::size_t first_row_shown_index = std::distance(m_rows.begin(), m_first_row_shown);
-    std::set<std::size_t> selection_indices;
-
-    if (Archive::is_saving::value) {
-        for (SelectionSet::iterator it = m_selections.begin(); it != m_selections.end(); ++it) {
-            selection_indices.insert(std::distance(m_rows.begin(), *it));
-        }
-    }
-
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_rows)
-        & BOOST_SERIALIZATION_NVP(m_vscroll)
-        & BOOST_SERIALIZATION_NVP(m_hscroll)
-        & BOOST_SERIALIZATION_NVP(caret_index)
-        & BOOST_SERIALIZATION_NVP(selection_indices)
-        & BOOST_SERIALIZATION_NVP(old_sel_row_index)
-        & BOOST_SERIALIZATION_NVP(m_old_sel_row_selected)
-        & BOOST_SERIALIZATION_NVP(old_rdown_row_index)
-        & BOOST_SERIALIZATION_NVP(lclick_row_index)
-        & BOOST_SERIALIZATION_NVP(rclick_row_index)
-        & BOOST_SERIALIZATION_NVP(last_row_browsed_index)
-        & BOOST_SERIALIZATION_NVP(first_row_shown_index)
-        & BOOST_SERIALIZATION_NVP(m_first_col_shown)
-        & BOOST_SERIALIZATION_NVP(m_col_widths)
-        & BOOST_SERIALIZATION_NVP(m_col_alignments)
-        & BOOST_SERIALIZATION_NVP(m_cell_margin)
-        & BOOST_SERIALIZATION_NVP(m_int_color)
-        & BOOST_SERIALIZATION_NVP(m_hilite_color)
-        & BOOST_SERIALIZATION_NVP(m_style)
-        & BOOST_SERIALIZATION_NVP(m_header_row)
-        & BOOST_SERIALIZATION_NVP(m_keep_col_widths)
-        & BOOST_SERIALIZATION_NVP(m_clip_cells)
-        & BOOST_SERIALIZATION_NVP(m_sort_col)
-        & BOOST_SERIALIZATION_NVP(m_allowed_drop_types)
-        & BOOST_SERIALIZATION_NVP(m_auto_scroll_during_drag_drops)
-        & BOOST_SERIALIZATION_NVP(m_auto_scroll_margin)
-        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_up)
-        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_down)
-        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_left)
-        & BOOST_SERIALIZATION_NVP(m_auto_scrolling_right)
-        & BOOST_SERIALIZATION_NVP(m_auto_scroll_timer);
-
-    if (Archive::is_loading::value) {
-        m_caret = boost::next(m_rows.begin(), caret_index);
-        m_old_sel_row = boost::next(m_rows.begin(), old_sel_row_index);
-        m_old_rdown_row = boost::next(m_rows.begin(), old_rdown_row_index);
-        m_lclick_row = boost::next(m_rows.begin(), lclick_row_index);
-        m_rclick_row = boost::next(m_rows.begin(), rclick_row_index);
-        m_last_row_browsed = boost::next(m_rows.begin(), last_row_browsed_index);
-        m_first_row_shown = boost::next(m_rows.begin(), first_row_shown_index);
-
-        for (std::set<std::size_t>::iterator it = selection_indices.begin(); it != selection_indices.end(); ++it) {
-            m_selections.insert(boost::next(m_rows.begin(), *it));
-        }
-
-        ValidateStyle();
-        ConnectSignals();
-    }
-}
-
-#endif // _GG_ListBox_h_
+#endif

@@ -31,8 +31,6 @@
 #include <GG/Base.h>
 #include <GG/StrongTypedef.h>
 
-#include <boost/serialization/access.hpp>
-
 
 namespace GG {
 
@@ -81,11 +79,6 @@ struct GG_API Pt
 
     X x; ///< The x component.
     Y y; ///< The y component.
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** \brief A GG rectangle class.
@@ -119,11 +112,6 @@ struct GG_API Rect
 
     Pt ul; ///< the upper-left corner of the Rect
     Pt lr; ///< the lower-right corner of the Rect
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 GG_API inline bool operator==(const Pt& lhs, const Pt& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; } ///< returns true if \a lhs is identical to \a rhs
@@ -152,19 +140,4 @@ GG_API std::ostream& operator<<(std::ostream& os, const Rect& rect); ///< Rect s
 
 } // namepace GG
 
-// template implementations
-template <class Archive>
-void GG::Pt::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(x)
-        & BOOST_SERIALIZATION_NVP(y);
-}
-
-template <class Archive>
-void GG::Rect::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(ul)
-        & BOOST_SERIALIZATION_NVP(lr);
-}
-
-#endif // _GG_PtRect_h_
+#endif

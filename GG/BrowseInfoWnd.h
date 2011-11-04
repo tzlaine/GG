@@ -33,8 +33,6 @@
 #include <GG/Wnd.h>
 #include <GG/Font.h>
 
-#include <boost/serialization/version.hpp>
-
 
 namespace GG {
 
@@ -94,10 +92,6 @@ private:
     Pt m_cursor_pos;
 
     virtual void UpdateImpl(std::size_t mode, const Wnd* target);
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -161,34 +155,8 @@ private:
     unsigned int            m_border_width;
     X                       m_preferred_width;
     TextControl*            m_text_control;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-
-// template implementations
-template <class Archive>
-void GG::BrowseInfoWnd::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_cursor_pos);
-}
-
-template <class Archive>
-void GG::TextBoxBrowseInfoWnd::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BrowseInfoWnd)
-        & BOOST_SERIALIZATION_NVP(m_text_from_target)
-        & BOOST_SERIALIZATION_NVP(m_font)
-        & BOOST_SERIALIZATION_NVP(m_color)
-        & BOOST_SERIALIZATION_NVP(m_border_color)
-        & BOOST_SERIALIZATION_NVP(m_border_width)
-        & BOOST_SERIALIZATION_NVP(m_text_control)
-        & BOOST_SERIALIZATION_NVP(m_preferred_width);
-}
-
-#endif // _GG_BrowseInfoWnd_h_
+#endif

@@ -208,11 +208,6 @@ protected:
     {
         boost::shared_ptr<const Texture> texture; ///< the texture with the frames in it
         std::size_t                      frames;  ///< the number of frames in this texture
-
-    private:
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \name Structors */ ///@{
@@ -251,52 +246,8 @@ private:
     std::size_t  m_last_frame_idx;    ///< the index of the last frame shown during playback. usually m_frames - 1
 
     Flags<GraphicStyle> m_style;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::DynamicGraphic::FrameSet::serialize(Archive& ar, const unsigned int version)
-{
-    boost::shared_ptr<Texture> non_const_texture;
-    if (Archive::is_saving::value)
-        non_const_texture = boost::const_pointer_cast<Texture>(texture);
-
-    ar  & boost::serialization::make_nvp("texture", non_const_texture)
-        & BOOST_SERIALIZATION_NVP(frames);
-
-    if (Archive::is_loading::value)
-        texture = boost::const_pointer_cast<const Texture>(non_const_texture);
-}
-
-template <class Archive>
-void GG::DynamicGraphic::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & boost::serialization::make_nvp("m_margin", const_cast<unsigned int&>(m_margin))
-        & boost::serialization::make_nvp("m_frame_width", const_cast<X&>(m_frame_width))
-        & boost::serialization::make_nvp("m_frame_height", const_cast<Y&>(m_frame_height))
-        & BOOST_SERIALIZATION_NVP(m_textures)
-        & BOOST_SERIALIZATION_NVP(m_FPS)
-        & BOOST_SERIALIZATION_NVP(m_playing)
-        & BOOST_SERIALIZATION_NVP(m_looping)
-        & BOOST_SERIALIZATION_NVP(m_curr_texture)
-        & BOOST_SERIALIZATION_NVP(m_curr_subtexture)
-        & BOOST_SERIALIZATION_NVP(m_frames)
-        & BOOST_SERIALIZATION_NVP(m_curr_frame)
-        & BOOST_SERIALIZATION_NVP(m_first_frame_time)
-        & BOOST_SERIALIZATION_NVP(m_last_frame_time)
-        & BOOST_SERIALIZATION_NVP(m_first_frame_idx)
-        & BOOST_SERIALIZATION_NVP(m_last_frame_idx)
-        & BOOST_SERIALIZATION_NVP(m_style);
-
-    if (Archive::is_loading::value)
-        ValidateStyle();
-}
-
-#endif // _GG_DynamicGraphic_h_
+#endif

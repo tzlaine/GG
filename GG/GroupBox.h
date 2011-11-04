@@ -94,23 +94,8 @@ private:
     boost::shared_ptr<Font> m_font;
     TextControl*            m_label;
     bool                    m_set_client_corners_equal_to_box_corners;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::GroupBox::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_color)
-        & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_int_color)
-        & BOOST_SERIALIZATION_NVP(m_label);
-}
-
-#endif // _GG_GroupBox_h_
+#endif

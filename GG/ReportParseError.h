@@ -139,4 +139,4 @@ namespace GG {
 
 }
 
-#endif // _GG_ReportParseError_h_
+#endif

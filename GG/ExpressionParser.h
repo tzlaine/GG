@@ -113,4 +113,4 @@ struct GG_API expression_parser_rules
 
 }
 
-#endif // _GG_ExpressionParser_h_
+#endif

@@ -53,11 +53,6 @@ struct GG_API UnicodeCharset
     std::string m_script_name;
     boost::uint32_t m_first_char;
     boost::uint32_t m_last_char;
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** Returns true iff all of \a lhs's and \a rhs's members compare equal. */
@@ -83,13 +78,4 @@ GG_API const UnicodeCharset* CharsetWithName(const std::string& name);
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::UnicodeCharset::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(m_script_name)
-        & BOOST_SERIALIZATION_NVP(m_first_char)
-        & BOOST_SERIALIZATION_NVP(m_last_char);
-}
-
-#endif // _UnicodeCharsets_h_
+#endif

@@ -41,7 +41,6 @@
 #include <stack>
 
 #include <boost/unordered_map.hpp>
-#include <boost/serialization/access.hpp>
 
 
 struct FT_FaceRec_;
@@ -124,10 +123,7 @@ class GG_API Font
 {
 public:
     /** \brief A range of iterators into a std::string that defines a
-        substring found in a string being rendered by Font.
-
-        Due to the requirements of serializing Substring, it must contain a
-        reference to the string of which it is a substring. */
+        substring found in a string being rendered by Font. */
     class GG_API Substring
     {
     public:
@@ -177,10 +173,6 @@ public:
         std::ptrdiff_t second;
 
         static const std::string EMPTY_STRING;
-
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \brief Used to encapsulate a token-like piece of text to be rendered
@@ -234,10 +226,6 @@ public:
 
     private:
         mutable X cached_width;
-
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \brief The type of TextElement that represents a text formatting
@@ -262,9 +250,6 @@ public:
 
     private:
         FormattingTag();
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \brief Holds the essential data on each line that a string occupies when
@@ -306,11 +291,6 @@ public:
             /** The text formatting tags that should be applied before
                 rendering this glyph. */
             std::vector<boost::shared_ptr<FormattingTag> > tags;
-
-        private:
-            friend class boost::serialization::access;
-            template <class Archive>
-            void serialize(Archive& ar, const unsigned int version);
         };
 
         X    Width() const; ///< Returns the width of the line.
@@ -322,11 +302,6 @@ public:
         /** FORMAT_LEFT, FORMAT_CENTER, or FORMAT_RIGHT; derived from text
             format flags and/or formatting tags in the text. */
         Alignment justification;
-
-    private:
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \brief Holds the state of tags during rendering of text.
@@ -576,10 +551,6 @@ private:
 
     static std::set<std::string>   s_action_tags; ///< Embedded tags that Font must act upon when rendering are stored here
     static std::set<std::string>   s_known_tags;  ///< Embedded tags that Font knows about but should not act upon are stored here
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** Stream output operator for Font::Substring. */
@@ -721,13 +692,6 @@ namespace detail {
             { return c <= 0x7f; }
     };
 
-    struct SerializableString : public std::string
-    {
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version)
-            { ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(std::string); }
-    };
-
     struct GG_API FTFaceWrapper
     {
         FTFaceWrapper();
@@ -740,53 +704,6 @@ namespace detail {
 
 
 // template implementations
-template <class Archive>
-void GG::Font::Substring::serialize(Archive& ar, const unsigned int version)
-{
-    detail::SerializableString* mutable_str =
-        static_cast<detail::SerializableString*>(const_cast<std::string*>(str));
-    ar  & BOOST_SERIALIZATION_NVP(mutable_str)
-        & BOOST_SERIALIZATION_NVP(first)
-        & BOOST_SERIALIZATION_NVP(second);
-    if (Archive::is_loading::value)
-        str = mutable_str;
-}
-
-template <class Archive>
-void GG::Font::TextElement::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(text)
-        & BOOST_SERIALIZATION_NVP(widths)
-        & boost::serialization::make_nvp("whitespace", const_cast<bool&>(whitespace))
-        & boost::serialization::make_nvp("newline", const_cast<bool&>(newline));
-}
-
-template <class Archive>
-void GG::Font::FormattingTag::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextElement)
-        & BOOST_SERIALIZATION_NVP(params)
-        & BOOST_SERIALIZATION_NVP(tag_name)
-        & boost::serialization::make_nvp("close_tag", const_cast<bool&>(close_tag));
-}
-
-template <class Archive>
-void GG::Font::LineData::CharData::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(extent)
-        & BOOST_SERIALIZATION_NVP(string_index)
-        & BOOST_SERIALIZATION_NVP(string_size)
-        & BOOST_SERIALIZATION_NVP(code_point_index)
-        & BOOST_SERIALIZATION_NVP(tags);
-}
-
-template <class Archive>
-void GG::Font::LineData::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(char_data)
-        & BOOST_SERIALIZATION_NVP(justification);
-}
-
 template <class CharSetIter>
 GG::Font::Font(const std::string& font_filename, unsigned int pts,
                CharSetIter first, CharSetIter last) :
@@ -831,31 +748,6 @@ GG::Font::Font(const std::string& font_filename, unsigned int pts,
     FT_Error error = GetFace(file_contents, wrapper.m_face);
     CheckFace(wrapper.m_face, error);
     Init(wrapper.m_face);
-}
-
-template <class Archive>
-void GG::Font::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(m_font_filename)
-        & BOOST_SERIALIZATION_NVP(m_pt_sz)
-        & BOOST_SERIALIZATION_NVP(m_charsets);
-
-    if (Archive::is_loading::value) {
-        if (!m_font_filename.empty() && 0 < m_pt_sz) {
-            try {
-                if (IsDefaultFont()) {
-                    *this = *GetDefaultFont(m_pt_sz);
-                } else if (m_font_filename != "") {
-                    detail::FTFaceWrapper wrapper;
-                    FT_Error error = GetFace(wrapper.m_face);
-                    CheckFace(wrapper.m_face, error);
-                    Init(wrapper.m_face);
-                }
-            } catch (const Exception& e) {
-                // take no action; the Font must have been uninitialized when saved
-            }
-        }
-    }
 }
 
 template <class CharSetIter>
@@ -937,4 +829,4 @@ GG::FontManager::GetFontImpl(const std::string& font_filename, unsigned int pts,
     }
 }
 
-#endif // _GG_Font_h_
+#endif

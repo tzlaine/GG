@@ -160,8 +160,6 @@ std::size_t MultiEdit::MaxLinesOfHistory() const
 
 void MultiEdit::Render()
 {
-    if (DirtyLoad())
-        SetText(Text());
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
     Clr int_color_to_use = Disabled() ? DisabledColor(InteriorColor()) : InteriorColor();
     Clr sel_text_color_to_use = Disabled() ? DisabledColor(SelectedTextColor()) : SelectedTextColor();

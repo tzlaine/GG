@@ -50,9 +50,6 @@ struct GG_API HSVClr
     double  s;   ///< saturation
     double  v;   ///< value
     GLubyte a;   ///< alpha
-
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** \brief A control specifically designed for ColorDlg that allows the user
@@ -91,10 +88,6 @@ private:
     double m_saturation;
     std::vector<std::vector<std::pair<double, double> > >  m_vertices;
     std::vector<std::vector<Clr> > m_colors;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -137,10 +130,6 @@ private:
     double  m_value;
 
     Clr m_arrow_color;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -185,10 +174,6 @@ public:
 
     private:
         Clr m_represented_color;
-
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \brief A simple control that only displays a rectangle filled with the
@@ -212,11 +197,6 @@ public:
         /** \name Structors */ ///@{
         ColorDisplay(); ///< default ctor
         //@}
-
-    private:
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** \name Structors */ ///@{
@@ -347,99 +327,8 @@ private:
     static std::vector<Clr>   s_custom_colors;
 
     friend struct ColorButtonClickFunctor;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::HSVClr::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(h)
-        & BOOST_SERIALIZATION_NVP(s)
-        & BOOST_SERIALIZATION_NVP(v)
-        & BOOST_SERIALIZATION_NVP(a);
-}
-
-template <class Archive>
-void GG::HueSaturationPicker::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_hue)
-        & BOOST_SERIALIZATION_NVP(m_saturation)
-        & BOOST_SERIALIZATION_NVP(m_vertices)
-        & BOOST_SERIALIZATION_NVP(m_colors);
-}
-
-template <class Archive>
-void GG::ValuePicker::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_hue)
-        & BOOST_SERIALIZATION_NVP(m_saturation)
-        & BOOST_SERIALIZATION_NVP(m_value)
-        & BOOST_SERIALIZATION_NVP(m_arrow_color);
-}
-
-template <class Archive>
-void GG::ColorDlg::ColorButton::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Button)
-        & BOOST_SERIALIZATION_NVP(m_represented_color);
-}
-
-template <class Archive>
-void GG::ColorDlg::ColorDisplay::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control);
-}
-
-template <class Archive>
-void GG::ColorDlg::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_current_color)
-        & BOOST_SERIALIZATION_NVP(m_original_color)
-        & BOOST_SERIALIZATION_NVP(m_original_color_specified)
-        & BOOST_SERIALIZATION_NVP(m_color_was_picked)
-        & BOOST_SERIALIZATION_NVP(m_new_str)
-        & BOOST_SERIALIZATION_NVP(m_old_str)
-        & BOOST_SERIALIZATION_NVP(m_red_str)
-        & BOOST_SERIALIZATION_NVP(m_green_str)
-        & BOOST_SERIALIZATION_NVP(m_blue_str)
-        & BOOST_SERIALIZATION_NVP(m_hue_str)
-        & BOOST_SERIALIZATION_NVP(m_saturation_str)
-        & BOOST_SERIALIZATION_NVP(m_value_str)
-        & BOOST_SERIALIZATION_NVP(m_alpha_str)
-        & BOOST_SERIALIZATION_NVP(m_ok_str)
-        & BOOST_SERIALIZATION_NVP(m_cancel_str)
-        & BOOST_SERIALIZATION_NVP(m_hue_saturation_picker)
-        & BOOST_SERIALIZATION_NVP(m_value_picker)
-        & BOOST_SERIALIZATION_NVP(m_pickers_layout)
-        & BOOST_SERIALIZATION_NVP(m_new_color_square)
-        & BOOST_SERIALIZATION_NVP(m_old_color_square)
-        & BOOST_SERIALIZATION_NVP(m_new_color_square_text)
-        & BOOST_SERIALIZATION_NVP(m_old_color_square_text)
-        & BOOST_SERIALIZATION_NVP(m_color_squares_layout)
-        & BOOST_SERIALIZATION_NVP(m_color_buttons)
-        & BOOST_SERIALIZATION_NVP(m_color_buttons_layout)
-        & BOOST_SERIALIZATION_NVP(m_current_color_button)
-        & BOOST_SERIALIZATION_NVP(m_slider_labels)
-        & BOOST_SERIALIZATION_NVP(m_slider_values)
-        & BOOST_SERIALIZATION_NVP(m_sliders)
-        & BOOST_SERIALIZATION_NVP(m_ok)
-        & BOOST_SERIALIZATION_NVP(m_cancel)
-        & BOOST_SERIALIZATION_NVP(m_sliders_ok_cancel_layout)
-        & BOOST_SERIALIZATION_NVP(m_color)
-        & BOOST_SERIALIZATION_NVP(m_border_color)
-        & BOOST_SERIALIZATION_NVP(m_text_color);
-
-    if (Archive::is_loading::value)
-        ConnectSignals();
-}
-
-#endif // _GG_ColorDlg_h_
+#endif

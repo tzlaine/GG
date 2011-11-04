@@ -45,4 +45,4 @@
 # endif
 #endif
 
-#endif // _GG_Export_h_
+#endif

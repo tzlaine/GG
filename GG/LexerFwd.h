@@ -55,4 +55,4 @@ typedef boost::spirit::lex::lexertl::actor_lexer<token_type> spirit_lexer_base_t
 
 }
 
-#endif // _GG_LexerFwd_h_
+#endif

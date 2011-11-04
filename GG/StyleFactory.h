@@ -324,11 +324,8 @@ public:
 
     /** The "filename" of the default font. */
     static const std::string&  DefaultFontName();
-
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version) {}
 };
 
 } // namespace GG
 
-#endif // _GG_StyleFactory_h_
+#endif

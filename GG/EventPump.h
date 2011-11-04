@@ -147,4 +147,4 @@ private:
 
 } // namespace GG
 
-#endif // _GG_EventPump_h_
+#endif

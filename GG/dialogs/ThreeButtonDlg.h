@@ -111,32 +111,8 @@ private:
     Button*     m_button_0;
     Button*     m_button_1;
     Button*     m_button_2;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::ThreeButtonDlg::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_color)
-        & BOOST_SERIALIZATION_NVP(m_border_color)
-        & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_button_color)
-        & BOOST_SERIALIZATION_NVP(m_default)
-        & BOOST_SERIALIZATION_NVP(m_escape)
-        & BOOST_SERIALIZATION_NVP(m_result)
-        & BOOST_SERIALIZATION_NVP(m_button_0)
-        & BOOST_SERIALIZATION_NVP(m_button_1)
-        & BOOST_SERIALIZATION_NVP(m_button_2);
-
-    if (Archive::is_loading::value)
-        ConnectSignals();
-}
-
-#endif // _GG_ThreeButtonDlg_h_
+#endif

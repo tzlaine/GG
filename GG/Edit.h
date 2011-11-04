@@ -226,10 +226,6 @@ private:
     unsigned int m_last_button_down_time;
     bool         m_in_double_click_mode;
     std::pair<CPSize, CPSize> m_double_click_cursor_pos;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 void GG_API GetTranslatedCodePoint(Key key,
@@ -239,16 +235,4 @@ void GG_API GetTranslatedCodePoint(Key key,
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Edit::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextControl)
-        & BOOST_SERIALIZATION_NVP(m_cursor_pos)
-        & BOOST_SERIALIZATION_NVP(m_first_char_shown)
-        & BOOST_SERIALIZATION_NVP(m_int_color)
-        & BOOST_SERIALIZATION_NVP(m_hilite_color)
-        & BOOST_SERIALIZATION_NVP(m_sel_text_color);
-}
-
-#endif // _GG_Edit_h_
+#endif

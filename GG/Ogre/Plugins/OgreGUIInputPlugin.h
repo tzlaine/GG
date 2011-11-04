@@ -92,4 +92,4 @@ private:
 
 } // namespace GG
 
-#endif // _GG_OgreGUIInputPlugin_h_
+#endif

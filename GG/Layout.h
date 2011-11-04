@@ -32,8 +32,6 @@
 #include <GG/AlignmentFlags.h>
 #include <GG/Wnd.h>
 
-#include <boost/serialization/version.hpp>
-
 
 namespace GG {
 
@@ -259,11 +257,6 @@ private:
         unsigned int effective_min;   ///< current effective minimum size of this row or column, based on min, layout margins, and layout cell contents
         int          current_origin;  ///< current position of top or left side
         unsigned int current_width;   ///< current extent in downward or rightward direction
-
-    private:
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     struct GG_API WndPosition
@@ -280,11 +273,6 @@ private:
         Flags<Alignment> alignment;
         Pt               original_ul;
         Pt               original_size;
-
-    private:
-        friend class boost::serialization::access;
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     double TotalStretch(const std::vector<RowColParams>& params_vec) const;
@@ -308,52 +296,8 @@ private:
 
     friend class Wnd;
     friend struct SetMarginAction;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-
-// template implementations
-template <class Archive>
-void GG::Layout::RowColParams::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(stretch)
-        & BOOST_SERIALIZATION_NVP(min)
-        & BOOST_SERIALIZATION_NVP(effective_min)
-        & BOOST_SERIALIZATION_NVP(current_origin)
-        & BOOST_SERIALIZATION_NVP(current_width);
-}
-
-template <class Archive>
-void GG::Layout::WndPosition::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(first_row)
-        & BOOST_SERIALIZATION_NVP(first_column)
-        & BOOST_SERIALIZATION_NVP(last_row)
-        & BOOST_SERIALIZATION_NVP(last_column)
-        & BOOST_SERIALIZATION_NVP(alignment)
-        & BOOST_SERIALIZATION_NVP(original_ul)
-        & BOOST_SERIALIZATION_NVP(original_size);
-}
-
-template <class Archive>
-void GG::Layout::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_cells)
-        & BOOST_SERIALIZATION_NVP(m_border_margin)
-        & BOOST_SERIALIZATION_NVP(m_cell_margin)
-        & BOOST_SERIALIZATION_NVP(m_row_params)
-        & BOOST_SERIALIZATION_NVP(m_column_params)
-        & BOOST_SERIALIZATION_NVP(m_wnd_positions)
-        & BOOST_SERIALIZATION_NVP(m_ignore_child_resize)
-        & BOOST_SERIALIZATION_NVP(m_render_outline)
-        & BOOST_SERIALIZATION_NVP(m_outline_color)
-        & BOOST_SERIALIZATION_NVP(m_min_usable_size);
-}
-
-#endif // _GG_Layout_h_
+#endif

@@ -41,11 +41,6 @@
 #include <string>
 
 
-namespace boost { namespace archive {
-    class xml_oarchive;
-    class xml_iarchive;
-} }
-
 namespace GG {
 
 /** \brief The interface to custom-control plugins.
@@ -59,11 +54,7 @@ namespace GG {
     the interface is in an unloaded state, the functions in the interface are
     all null, and calling any of them will crash your app.  Once a plugin has
     been loaded, all the functions in the interface should be valid (if the
-    plugin author did everything correctly).  The plugin interface also
-    provides SaveWnd() and LoadWnd() methods to serialize all types in the
-    GG::Wnd hierarchy.  Note that includes all the original GG types, not just
-    the ones added by the plugin; if Wnd is not serializable, none of its
-    descendents are either. */
+    plugin author did everything correctly). */
 class GG_API PluginInterface
 {
 private:
@@ -79,11 +70,6 @@ public:
     typedef unsigned int                    (*DefaultFontSizeFn)();
     /** The type of function that supplies the plugin's StyleFactory. */
     typedef boost::shared_ptr<StyleFactory> (*GetStyleFactoryFn)();
-
-    /** The type of function used to serialize Wnds. */
-    typedef GUI::SaveWndFn                  SaveWndFn;
-    /** The type of function used to deserialize Wnds. */
-    typedef GUI::LoadWndFn                  LoadWndFn;
 
     /** \name Structors */ ///@{
     PluginInterface(); ///< default ctor.
@@ -114,15 +100,6 @@ public:
     DefaultFontNameFn           DefaultFontName;        ///< returns the default font name that should be used to create controls using this plugin.
     DefaultFontSizeFn           DefaultFontSize;        ///< returns the default font point size that should be used to create controls using this plugin.
     GetStyleFactoryFn           GetStyleFactory;        ///< returns a shared_ptr to the plugin's style factory, which creates controls and dialogs
-    SaveWndFn                   SaveWnd;                ///< serializes a Wnd to the given XML archive.
-    LoadWndFn                   LoadWnd;                ///< creates a new Wnd from the next one found in the given XML archive.
-
-    /** Since LoadWnd() will only accept a referemce to a Wnd*, this method is
-        provided to more conveniently accept Wnd subclass pointers.  It
-        unfortunately cannot overload the name of LoadWnd, which is a data
-        member. */
-    template <class T>
-    void LoadWndT(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar);
     //@}
 
 private:
@@ -178,16 +155,6 @@ private:
 /** Returns the singleton PluginManager instance. */
 GG_API PluginManager& GetPluginManager();
 
-// template implementations
-template <class T>
-void PluginInterface::LoadWndT(T*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
-{
-    Wnd* wnd_as_base = wnd;
-    LoadWnd(wnd_as_base, name, ar);
-    wnd = dynamic_cast<T*>(wnd_as_base);
-    assert(wnd);
-}
-
 } // namespace GG
 
-#endif // _GG_PluginInterface_h_
+#endif

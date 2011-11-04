@@ -91,24 +91,8 @@ private:
 
     SubTexture          m_graphic;
     Flags<GraphicStyle> m_style;        ///< position of texture wrt the window area
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::StaticGraphic::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_graphic)
-        & BOOST_SERIALIZATION_NVP(m_style);
-
-    if (Archive::is_loading::value)
-        ValidateStyle();
-}
-
-#endif // _GG_StaticGraphic_h_
+#endif

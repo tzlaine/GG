@@ -77,22 +77,8 @@ protected:
 
     Clr  m_color;    ///< the color of the control
     bool m_disabled; ///< whether or not this control is disabled
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Control::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_color)
-        & BOOST_SERIALIZATION_NVP(m_disabled);
-}
-
-#endif // _GG_Control_h_
+#endif

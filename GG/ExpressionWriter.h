@@ -40,4 +40,4 @@ GG_API std::string WriteExpression(const adobe::array_t& expression);
 
 }
 
-#endif // _GG_ExpressionWriter_h_
+#endif

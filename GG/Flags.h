@@ -34,8 +34,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/mpl/assert.hpp>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/nvp.hpp>
 
 #include <cassert>
 #include <iosfwd>
@@ -99,11 +97,6 @@ struct is_flag_type : boost::mpl::false_ {};
     private:                                                            \
         unsigned int m_value;                                           \
         friend class Flags<name>;                                       \
-                                                                        \
-        friend class boost::serialization::access;                      \
-        template <class Archive>                                        \
-        void serialize(Archive& ar, const unsigned int version)         \
-            { ar & BOOST_SERIALIZATION_NVP(m_value); }                  \
     };                                                                  \
                                                                         \
     template <>                                                         \
@@ -360,10 +353,6 @@ private:
     unsigned int m_flags;
 
     friend std::ostream& operator<<<>(std::ostream& os, Flags<FlagType> flags);
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** Writes \a flags to \a os in the format "flag1 | flag2 | ... flagn". */
@@ -506,9 +495,4 @@ operator~(FlagType flag)
 
 } // namespace GG
 
-template <class FlagType>
-template <class Archive>
-void GG::Flags<FlagType>::serialize(Archive& ar, const unsigned int version)
-{ ar & BOOST_SERIALIZATION_NVP(m_flags); }
-
-#endif // _GG_Flags_h_
+#endif

@@ -75,4 +75,4 @@ extern GG_API const CPSize INVALID_CP_SIZE;
 
 }
 
-#endif // _GG_Font_h_
+#endif

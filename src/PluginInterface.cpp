@@ -45,8 +45,6 @@ PluginInterface::PluginInterface() :
     DefaultFontName(0),
     DefaultFontSize(0),
     GetStyleFactory(0),
-    SaveWnd(0),
-    LoadWnd(0),
     m_handle(0),
     m_out_archive(0),
     m_in_archive(0)
@@ -57,8 +55,6 @@ PluginInterface::PluginInterface(const std::string& lib_name) :
     DefaultFontName(0),
     DefaultFontSize(0),
     GetStyleFactory(0),
-    SaveWnd(0),
-    LoadWnd(0),
     m_handle(0),
     m_out_archive(0),
     m_in_archive(0)
@@ -71,8 +67,6 @@ PluginInterface::~PluginInterface()
         DefaultFontName = 0;
         DefaultFontSize = 0;
         GetStyleFactory = 0;
-        SaveWnd = 0;
-        LoadWnd = 0;
         lt_dlclose(m_handle);
         m_handle = 0;
     }
@@ -103,8 +97,6 @@ bool PluginInterface::Load(const std::string& lib_name)
             DefaultFontName = (DefaultFontNameFn)(lt_dlsym(m_handle, "DefaultFontName"));
             DefaultFontSize = (DefaultFontSizeFn)(lt_dlsym(m_handle, "DefaultFontSize"));
             GetStyleFactory = (GetStyleFactoryFn)(lt_dlsym(m_handle, "GetStyleFactory"));
-            SaveWnd = (SaveWndFn)(lt_dlsym(m_handle, "SaveWnd"));
-            LoadWnd = (LoadWndFn)(lt_dlsym(m_handle, "LoadWnd"));
         } else {
             retval = false;
             std::cerr << "PluginInterface::Load : Failed to load dynamic library \"" << lib_name << "\" (error was: " << lt_dlerror() << ").";

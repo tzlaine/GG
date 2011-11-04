@@ -182,4 +182,4 @@ private:
 
 } // namespace GG
 
-#endif // _GG_OgreGUI_h_
+#endif

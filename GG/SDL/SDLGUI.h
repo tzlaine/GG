@@ -131,5 +131,5 @@ private:
 
 } // namespace GG
 
-#endif // _GG_SDLGUI_h_
+#endif
 

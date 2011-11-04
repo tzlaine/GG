@@ -216,13 +216,7 @@ extern GG_API const WndFlag MODAL;
     sliding tab).  There is an GUI-wide StyleFactory available, but for
     complete customization, each Wnd may have one installed as well.  The
     GetStyleFactory() method returns the one installed in the Wnd, if one
-    exists, or the GUI-wide one otherwise.
-
-    <p>Note that while a Wnd can contain arbitrary Wnd-derived children, in
-    order for such children to be automatically serialized, any user-defined
-    Wnd subclasses must be registered.  See the boost serialization
-    documentation for details, and/or the serialization tutorial for
-    examples. */
+    exists, or the GUI-wide one otherwise. */
 class GG_API Wnd : public boost::signals::trackable
 {
 public:
@@ -243,9 +237,6 @@ public:
 
         /** The text to display in the BrowseInfoWnd shown for this mode. */
         std::string                      text;
-
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int version);
     };
 
     /** The type of the iterator parameters passed to DropsAcceptable(). */
@@ -922,49 +913,8 @@ private:
     friend class GUIImpl;
     friend class Timer; ///< Timer needs to be able to call HandleEvent
     friend class ZList; ///< ZList needs access to \a m_zorder in order to order windows
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Wnd::BrowseInfoMode::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(time)
-        & BOOST_SERIALIZATION_NVP(wnd)
-        & BOOST_SERIALIZATION_NVP(text);
-}
-
-template <class Archive>
-void GG::Wnd::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_NVP(m_done)
-        & BOOST_SERIALIZATION_NVP(m_parent)
-        & BOOST_SERIALIZATION_NVP(m_name)
-        & BOOST_SERIALIZATION_NVP(m_children)
-        & BOOST_SERIALIZATION_NVP(m_zorder)
-        & BOOST_SERIALIZATION_NVP(m_visible)
-        & BOOST_SERIALIZATION_NVP(m_drag_drop_data_type)
-        & BOOST_SERIALIZATION_NVP(m_child_clipping_mode)
-        & BOOST_SERIALIZATION_NVP(m_non_client_child)
-        & BOOST_SERIALIZATION_NVP(m_upperleft)
-        & BOOST_SERIALIZATION_NVP(m_lowerright)
-        & BOOST_SERIALIZATION_NVP(m_min_size)
-        & BOOST_SERIALIZATION_NVP(m_max_size)
-        & BOOST_SERIALIZATION_NVP(m_filters)
-        & BOOST_SERIALIZATION_NVP(m_filtering)
-        & BOOST_SERIALIZATION_NVP(m_layout)
-        & BOOST_SERIALIZATION_NVP(m_containing_layout)
-        & BOOST_SERIALIZATION_NVP(m_browse_modes)
-        & BOOST_SERIALIZATION_NVP(m_style_factory)
-        & BOOST_SERIALIZATION_NVP(m_flags);
-
-    if (Archive::is_loading::value)
-        ValidateFlags();
-}
-
-#endif // _GG_Wnd_h_
+#endif

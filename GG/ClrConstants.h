@@ -48,5 +48,5 @@ extern GG_API const Clr CLR_MAGENTA;
 
 } // namespace GG
 
-#endif // _GG_ClrConstants_h_
+#endif
 

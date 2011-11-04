@@ -238,31 +238,8 @@ private:
 
     bool        m_preserve_text_position_on_next_set_text;
     bool        m_ignore_adjust_scrolls;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::MultiEdit::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Edit)
-        & BOOST_SERIALIZATION_NVP(m_style)
-        & BOOST_SERIALIZATION_NVP(m_cursor_begin)
-        & BOOST_SERIALIZATION_NVP(m_cursor_end)
-        & BOOST_SERIALIZATION_NVP(m_contents_sz)
-        & BOOST_SERIALIZATION_NVP(m_first_col_shown)
-        & BOOST_SERIALIZATION_NVP(m_first_row_shown)
-        & BOOST_SERIALIZATION_NVP(m_max_lines_history)
-        & BOOST_SERIALIZATION_NVP(m_vscroll)
-        & BOOST_SERIALIZATION_NVP(m_hscroll);
-
-    if (Archive::is_loading::value)
-        ValidateStyle();
-}
-
-#endif // _GG_MultiEdit_h_
+#endif

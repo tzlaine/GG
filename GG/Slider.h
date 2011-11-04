@@ -35,8 +35,6 @@
 #include <GG/StyleFactory.h>
 #include <GG/WndEvent.h>
 
-#include <boost/serialization/version.hpp>
-
 
 namespace GG {
 
@@ -54,10 +52,7 @@ class WndEvent;
     Unlike vertical Scrolls, whose values increase downward, vertical Sliders
     increase upward by default.  Note that it is acceptible to define a range
     that increases from min to max, or one that decreases from min to max;
-    both are legal.  Note that if you want Slider controls to be automatically
-    serialized in your application, you need to export each instantiation of
-    Slider<> yourself (e.g. Slider<int> or Slider<double>).  See the boost
-    serialization documentation for details. */
+    both are legal. */
 template <class T>
 class Slider : public Control
 {
@@ -156,10 +151,6 @@ private:
     int                       m_tab_drag_offset;
     Button*                   m_tab;
     bool                      m_dragging_tab;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 // template implementations
@@ -495,23 +486,6 @@ void Slider<T>::SlideToImpl(T p, bool signal)
 }
 
 template <class T>
-template <class Archive>
-void Slider<T>::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_posn)
-        & BOOST_SERIALIZATION_NVP(m_range_min)
-        & BOOST_SERIALIZATION_NVP(m_range_max)
-        & BOOST_SERIALIZATION_NVP(m_orientation)
-        & BOOST_SERIALIZATION_NVP(m_line_width)
-        & BOOST_SERIALIZATION_NVP(m_tab_width)
-        & BOOST_SERIALIZATION_NVP(m_line_style)
-        & BOOST_SERIALIZATION_NVP(m_tab_drag_offset)
-        & BOOST_SERIALIZATION_NVP(m_tab)
-        & BOOST_SERIALIZATION_NVP(m_page_sz);
-}
-
-template <class T>
 Slider<T>::SlidEcho::SlidEcho(const std::string& name) :
     m_name(name)
 {}
@@ -525,4 +499,4 @@ void Slider<T>::SlidEcho::operator()(T pos, T min, T max)
 
 } // namespace GG
 
-#endif // _GG_Slider_h_
+#endif

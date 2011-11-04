@@ -85,4 +85,4 @@ private:
 
 } // namespace GG
 
-#endif // _GG_ZList_h_
+#endif

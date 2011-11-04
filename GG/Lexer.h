@@ -189,4 +189,4 @@ namespace boost { namespace spirit { namespace traits
 
 } } }
 
-#endif // _GG_Lexer_h_
+#endif

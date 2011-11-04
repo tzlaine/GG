@@ -68,10 +68,7 @@ namespace spin_details {
     to use; if you choose to add custom buttons, make sure they look alright
     at arbitrary sizes, and note that Spin buttons are always H wide by H/2
     tall, where H is the height of the Spin, less the thickness of the Spin's
-    border.  Note that if you want Spin controls to be automatically
-    serialized in your application, you need to export each instantiation of
-    Spin<> yourself (e.g. Spin<int> or Spin<double>).  See the boost
-    serialization documentation for details. */
+    border. */
 template <class T>
 class Spin : public Control
 {
@@ -181,10 +178,6 @@ private:
     X          m_button_width;
 
     static void ValueChangedEcho(const T& value);
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 
@@ -526,24 +519,6 @@ void Spin<T>::ValueChangedEcho(const T& value)
 { std::cerr << "GG SIGNAL : Spin<>::ValueChangedSignal(value=" << value << ")\n"; }
 
 
-template <class T>
-template <class Archive>
-void Spin<T>::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_value)
-        & BOOST_SERIALIZATION_NVP(m_step_size)
-        & BOOST_SERIALIZATION_NVP(m_min_value)
-        & BOOST_SERIALIZATION_NVP(m_max_value)
-        & BOOST_SERIALIZATION_NVP(m_editable)
-        & BOOST_SERIALIZATION_NVP(m_edit)
-        & BOOST_SERIALIZATION_NVP(m_up_button)
-        & BOOST_SERIALIZATION_NVP(m_down_button);
-
-    if (Archive::is_loading::value)
-        ConnectSignals();
-}
-
 namespace spin_details {
     // provides a typesafe mod function
     template <class T> inline 
@@ -572,5 +547,5 @@ namespace spin_details {
 
 } // namespace GG
 
-#endif // _GG_Spin_h_
+#endif
 

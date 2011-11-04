@@ -43,9 +43,7 @@ class Wnd;
 
     The rate at which the Timer fires is not realtime.  That is, there are no
     guarantees on the interval between firings other than that a minimum of
-    Interval() ms will have elapsed.  Note that Timers do not rely on Boost
-    signals to propagate firing messages, so a Timers's Wnd connections will
-    survive a serialization-deserialization cycle. */
+    Interval() ms will have elapsed. */
 class GG_API Timer
 {
 public:
@@ -88,36 +86,8 @@ private:
     unsigned int   m_interval;
     bool           m_running;
     unsigned int   m_last_fire;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
-
-// template implementations
-template <class Archive>
-void GG::Timer::serialize(Archive& ar, const unsigned int version)
-{
-    std::set<Wnd*> wnds;
-    for (ConnectionMap::iterator it = m_wnd_connections.begin();
-         it != m_wnd_connections.end();
-         ++it)
-    {
-        wnds.insert(it->first);
-    }
-
-    ar  & BOOST_SERIALIZATION_NVP(wnds)
-        & BOOST_SERIALIZATION_NVP(m_interval)
-        & BOOST_SERIALIZATION_NVP(m_last_fire)
-        & BOOST_SERIALIZATION_NVP(m_running);
-
-    if (Archive::is_loading::value) {
-        for (std::set<Wnd*>::iterator it = wnds.begin(); it != wnds.end(); ++it) {
-            Connect(*it);
-        }
-    }
-}
 
 #endif

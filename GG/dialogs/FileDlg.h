@@ -223,51 +223,8 @@ private:
     TextControl*     m_file_types_label;
 
     static boost::filesystem::path s_working_dir; ///< declared static so each instance of FileDlg opens up the same directory
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 } // namespace GG
 
-
-// template implementations
-template <class Archive>
-void GG::FileDlg::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Wnd)
-        & BOOST_SERIALIZATION_NVP(m_color)
-        & BOOST_SERIALIZATION_NVP(m_border_color)
-        & BOOST_SERIALIZATION_NVP(m_text_color)
-        & BOOST_SERIALIZATION_NVP(m_font)
-        & BOOST_SERIALIZATION_NVP(m_save)
-        & BOOST_SERIALIZATION_NVP(m_file_filters)
-        & BOOST_SERIALIZATION_NVP(m_result)
-        & BOOST_SERIALIZATION_NVP(m_save_str)
-        & BOOST_SERIALIZATION_NVP(m_open_str)
-        & BOOST_SERIALIZATION_NVP(m_cancel_str)
-        & BOOST_SERIALIZATION_NVP(m_malformed_filename_str)
-        & BOOST_SERIALIZATION_NVP(m_overwrite_prompt_str)
-        & BOOST_SERIALIZATION_NVP(m_invalid_filename_str)
-        & BOOST_SERIALIZATION_NVP(m_filename_is_a_directory_str)
-        & BOOST_SERIALIZATION_NVP(m_file_does_not_exist_str)
-        & BOOST_SERIALIZATION_NVP(m_device_is_not_ready_str)
-        & BOOST_SERIALIZATION_NVP(m_three_button_dlg_ok_str)
-        & BOOST_SERIALIZATION_NVP(m_three_button_dlg_cancel_str)
-        & BOOST_SERIALIZATION_NVP(m_curr_dir_text)
-        & BOOST_SERIALIZATION_NVP(m_files_list)
-        & BOOST_SERIALIZATION_NVP(m_files_edit)
-        & BOOST_SERIALIZATION_NVP(m_filter_list)
-        & BOOST_SERIALIZATION_NVP(m_ok_button)
-        & BOOST_SERIALIZATION_NVP(m_cancel_button)
-        & BOOST_SERIALIZATION_NVP(m_files_label)
-        & BOOST_SERIALIZATION_NVP(m_file_types_label)
-        & BOOST_SERIALIZATION_NVP(m_select_directories)
-        & BOOST_SERIALIZATION_NVP(m_append_missing_save_extension);
-
-    if (Archive::is_loading::value)
-        ConnectSignals();
-}
-
-#endif // _GG_FileDlg_h_
+#endif

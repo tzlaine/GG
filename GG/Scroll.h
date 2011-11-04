@@ -50,9 +50,7 @@ class Button;
     increase in a vertical scroll is down, and a decrease is up; since GG
     assumes the y-coordinates are downwardly increasing.  The rather plain
     default buttons and tab can be replaced by any Button-derived controls
-    desired.  However, if you want to serialize a Scroll that has custom
-    buttons and/or tab, you must make sure they are properly registered.  See
-    the boost serialization documentation for details.*/
+    desired. */
 class GG_API Scroll : public Control
 {
 public:
@@ -155,10 +153,6 @@ private:
     ScrollRegion      m_depressed_region;         ///< the part of the scrollbar currently being "depressed" by held-down mouse button
     bool              m_dragging_tab;
     bool              m_tab_dragged;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 // define EnumMap and stream operators for Scroll::ScrollRegion
@@ -178,21 +172,4 @@ GG_API void SignalScroll(const Scroll& scroll, bool stopped);
 
 } // namespace GG
 
-// template implementations
-template <class Archive>
-void GG::Scroll::serialize(Archive& ar, const unsigned int version)
-{
-    ar  & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Control)
-        & BOOST_SERIALIZATION_NVP(m_int_color)
-        & boost::serialization::make_nvp("m_orientation", const_cast<Orientation&>(m_orientation))
-        & BOOST_SERIALIZATION_NVP(m_posn)
-        & BOOST_SERIALIZATION_NVP(m_range_min)
-        & BOOST_SERIALIZATION_NVP(m_range_max)
-        & BOOST_SERIALIZATION_NVP(m_line_sz)
-        & BOOST_SERIALIZATION_NVP(m_page_sz)
-        & BOOST_SERIALIZATION_NVP(m_tab)
-        & BOOST_SERIALIZATION_NVP(m_incr)
-        & BOOST_SERIALIZATION_NVP(m_decr);
-}
-
-#endif // _GG_Scroll_h_
+#endif

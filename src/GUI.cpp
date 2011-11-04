@@ -175,8 +175,6 @@ struct GG::GUIImpl
         m_style_factory(new StyleFactory()),
         m_render_cursor(false),
         m_cursor(),
-        m_save_wnd_fn(0),
-        m_load_wnd_fn(0),
         m_save_as_png_wnd(0)
     {
         m_button_state[0] = m_button_state[1] = m_button_state[2] = false;
@@ -254,9 +252,6 @@ struct GG::GUIImpl
     boost::shared_ptr<Cursor>       m_cursor;
 
     std::set<Timer*>  m_timers;
-
-    GUI::SaveWndFn    m_save_wnd_fn;
-    GUI::LoadWndFn    m_load_wnd_fn;
 
     const Wnd* m_save_as_png_wnd;
     std::string m_save_as_png_filename;
@@ -996,32 +991,6 @@ void GUI::RenderCursor(bool render)
 
 void GUI::SetCursor(const boost::shared_ptr<Cursor>& cursor)
 { s_impl->m_cursor = cursor; }
-
-void GUI::SaveWnd(const Wnd* wnd, const std::string& name, boost::archive::xml_oarchive& ar)
-{
-    if (!s_impl->m_save_wnd_fn)
-        throw BadFunctionPointer("GUI::SaveWnd() : Attempted call on null function pointer.");
-    s_impl->m_save_wnd_fn(wnd, name, ar);
-}
-
-void GUI::LoadWnd(Wnd*& wnd, const std::string& name, boost::archive::xml_iarchive& ar)
-{
-    if (!s_impl->m_load_wnd_fn)
-        throw BadFunctionPointer("GUI::LoadWnd() : Attempted call on null function pointer.");
-    s_impl->m_load_wnd_fn(wnd, name, ar);
-}
-
-void GUI::SetSaveWndFunction(SaveWndFn fn)
-{ s_impl->m_save_wnd_fn = fn; }
-
-void GUI::SetLoadWndFunction(LoadWndFn fn)
-{ s_impl->m_load_wnd_fn = fn; }
-
-void GUI::SetSaveLoadFunctions(const PluginInterface& interface)
-{
-    s_impl->m_save_wnd_fn = interface.SaveWnd;
-    s_impl->m_load_wnd_fn = interface.LoadWnd;
-}
 
 GUI* GUI::GetGUI()
 { return s_gui; }

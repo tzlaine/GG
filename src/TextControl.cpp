@@ -25,7 +25,6 @@
 #include <GG/TextControl.h>
 
 #include <GG/DrawUtil.h>
-#include <GG/WndEditor.h>
 #include <GG/utf8/checked.h>
 
 #include <boost/assign/list_of.hpp>
@@ -35,46 +34,6 @@ using namespace GG;
 
 namespace {
     const Pt INVALID_USABLE_SIZE(-X1, -Y1);
-
-    struct SetTextAction : AttributeChangedAction<std::string>
-    {
-        SetTextAction(TextControl* text_control) : m_text_control(text_control) {}
-        virtual void operator()(const std::string& value) { m_text_control->SetText(value); }
-    private:
-        TextControl* m_text_control;
-    };
-
-    struct SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
-    {
-        SetFontAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const boost::shared_ptr<Font>&) { m_text_control->SetText(m_text_control->Text()); }
-    private:
-        TextControl* m_text_control;
-    };
-
-    struct SetFormatAction : AttributeChangedAction<Flags<TextFormat> >
-    {
-        SetFormatAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const Flags<TextFormat>& format) { m_text_control->SetTextFormat(format); }
-    private:
-        TextControl* m_text_control;
-    };
-
-    struct FitToTextAction : AttributeChangedAction<bool>
-    {
-        FitToTextAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const bool&) { m_text_control->SetText(m_text_control->Text()); }
-    private:
-        TextControl* m_text_control;
-    };
-
-    struct SetMinSizeAction : AttributeChangedAction<bool>
-    {
-        SetMinSizeAction(TextControl* text_control) : m_text_control(text_control) {}
-        void operator()(const bool& set_min_size) { m_text_control->SetMinSize(set_min_size); }
-    private:
-        TextControl* m_text_control;
-    };
 }
 
 ////////////////////////////////////////////////
@@ -297,36 +256,6 @@ void TextControl::Erase(std::size_t line, CPSize pos, CPSize num/* = CP1*/)
     std::string::iterator end_it = m_text.begin() + Value(StringIndexOf(line, pos + num, m_line_data));
     m_text.erase(it, end_it);
     SetText(m_text);
-}
-
-void TextControl::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("TextControl");
-    boost::shared_ptr<SetTextAction> action(new SetTextAction(this));
-    editor->Attribute<std::string>("Text", m_text, action);
-    boost::shared_ptr<SetFontAction> set_font_action(new SetFontAction(this));
-    editor->Attribute<boost::shared_ptr<Font> >("Font", m_font, set_font_action);
-    boost::shared_ptr<SetFormatAction> set_format_action(new SetFormatAction(this));
-    editor->BeginFlags<TextFormat>(m_format, set_format_action);
-    typedef std::vector<TextFormat> FlagVec;
-    using boost::assign::list_of;
-    editor->FlagGroup("V. Alignment", FlagVec() = list_of(FORMAT_TOP)(FORMAT_VCENTER)(FORMAT_BOTTOM));
-    editor->FlagGroup("H. Alignment", FlagVec() = list_of(FORMAT_LEFT)(FORMAT_CENTER)(FORMAT_RIGHT));
-    editor->Flag("Word-break", FORMAT_WORDBREAK);
-    editor->Flag("Line-wrap", FORMAT_LINEWRAP);
-    editor->Flag("Ignore Tags", FORMAT_IGNORETAGS);
-    editor->EndFlags();
-    editor->Attribute("Text Color", m_text_color);
-    editor->Attribute("Clip Text", m_clip_text);
-    boost::shared_ptr<FitToTextAction> fit_to_text_action(new FitToTextAction(this));
-    editor->Attribute<bool>("Fit Size to Text", m_fit_to_text, fit_to_text_action);
-    boost::shared_ptr<SetMinSizeAction> min_size_action(new SetMinSizeAction(this));
-    editor->Attribute<bool>("Set Min Size", m_set_min_size, min_size_action);
-    editor->ConstAttribute("Text Upper Left", m_text_ul);
-    editor->ConstAttribute("Text Lower Right", m_text_lr);
 }
 
 const std::vector<Font::LineData>& TextControl::GetLineData() const

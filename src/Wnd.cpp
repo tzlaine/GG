@@ -29,7 +29,6 @@
 #include <GG/DrawUtil.h>
 #include <GG/EventPump.h>
 #include <GG/Layout.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 #include <boost/multi_index_container.hpp>
@@ -891,29 +890,6 @@ void Wnd::SetBrowseModes(const std::vector<BrowseInfoMode>& modes)
 
 void Wnd::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
 { m_style_factory = factory; }
-
-void Wnd::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    editor->Label("Wnd");
-    editor->ConstAttribute("Upper Left", m_upperleft);
-    editor->ConstAttribute("Lower Right", m_lowerright);
-    editor->CustomText("Size", WndSizeFunctor());
-    editor->CustomText("Client Size", WndClientSizeFunctor());
-    editor->Attribute("Min Size", m_min_size);
-    editor->Attribute("Max Size", m_max_size);
-    //TODO editor->Attribute("Clip Children", m_clip_children);
-    editor->Attribute("Drag Drop Type", m_drag_drop_data_type);
-    editor->BeginFlags(m_flags);
-    editor->Flag("Interactive", INTERACTIVE);
-    editor->Flag("Dragable", DRAGABLE);
-    editor->Flag("Resizable", RESIZABLE);
-    editor->Flag("Ontop", ONTOP);
-    editor->Flag("Modal", MODAL);
-    editor->EndFlags();
-    // TODO: handle creation and modification of browse info modes
-}
 
 unsigned int Wnd::DefaultBrowseTime()
 { return s_default_browse_time; }

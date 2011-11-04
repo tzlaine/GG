@@ -127,8 +127,6 @@ public:
     virtual void SelectAll();
 
     virtual void SetText(const std::string& str);
-
-    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

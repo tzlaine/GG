@@ -219,8 +219,6 @@ public:
     /** Erases \a num code points from the text starting at position \a
         pos within line \a line. */
     void  Erase(std::size_t line, CPSize pos, CPSize num = CP1);
-
-    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

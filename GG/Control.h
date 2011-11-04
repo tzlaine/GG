@@ -63,8 +63,6 @@ public:
 
     virtual void   SetColor(Clr c);        ///< sets the color of the control
     virtual void   Disable(bool b = true); ///< disables/enables the control; disabled controls appear greyed
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

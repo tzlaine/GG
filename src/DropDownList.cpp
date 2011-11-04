@@ -28,7 +28,6 @@
 #include <GG/DrawUtil.h>
 #include <GG/Scroll.h>
 #include <GG/StyleFactory.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 
@@ -321,16 +320,6 @@ void DropDownList::SetColAlignment(std::size_t n, Alignment align)
 
 void DropDownList::SetRowAlignment(iterator it, Alignment align) 
 { m_LB->SetRowAlignment(it, align); }
-
-void DropDownList::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("DropDownList");
-    // TODO: Handle the representation of the current item.
-    //editor->Attribute("Current Item", m_current_item);
-}
 
 void DropDownList::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 {

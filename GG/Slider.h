@@ -30,10 +30,10 @@
 #ifndef _GG_Slider_h_
 #define _GG_Slider_h_
 
-#include <GG/Control.h>
-#include <GG/WndEditor.h>
+#include <GG/Button.h>
 #include <GG/DrawUtil.h>
 #include <GG/StyleFactory.h>
+#include <GG/WndEvent.h>
 
 #include <boost/serialization/version.hpp>
 
@@ -111,8 +111,6 @@ public:
     void           SetPageSize(T size);
 
     void           SetLineStyle(SliderLineStyle style); ///< returns the style of line used to render the control
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
     static const T INVALID_PAGE_SIZE;
@@ -340,21 +338,6 @@ void Slider<T>::SetPageSize(T size)
 template <class T>
 void Slider<T>::SetLineStyle(SliderLineStyle style)
 { m_line_style = style; }
-
-template <class T>
-void Slider<T>::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("Slider");
-    editor->Attribute("Range Min", m_range_min);
-    editor->Attribute("Range Max", m_range_max);
-    editor->Attribute("Line Width", m_line_width);
-    editor->Attribute("Tab Width", m_tab_width);
-    editor->Attribute("Line Style", m_line_style,
-                      FLAT, GROOVED);
-}
 
 template <class T>
 Button* Slider<T>::Tab() const

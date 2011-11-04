@@ -26,10 +26,10 @@
 
 #include <GG/DynamicGraphic.h>
 
+#include <GG/ClrConstants.h>
 #include <GG/GUI.h>
 #include <GG/DrawUtil.h>
 #include <GG/Texture.h>
-#include <GG/WndEditor.h>
 
 #include <boost/assign/list_of.hpp>
 
@@ -435,30 +435,6 @@ void DynamicGraphic::SetStyle(Flags<GraphicStyle> style)
 {
     m_style = style;
     ValidateStyle();
-}
-
-void DynamicGraphic::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("DynamicGraphic");
-    editor->Attribute("Frame Margin", const_cast<unsigned int&>(m_margin));
-    editor->Attribute("Frame Width", const_cast<X&>(m_frame_width));
-    editor->Attribute("Frame Height", const_cast<Y&>(m_frame_height));
-    // TODO: handle setting frame(s)
-    editor->Attribute("Frames Per Second", m_FPS);
-    editor->Attribute("Playing", m_playing);
-    editor->Attribute("Looping", m_looping);
-    editor->BeginFlags(m_style);
-    typedef std::vector<GraphicStyle> FlagVec;
-    using boost::assign::list_of;
-    editor->FlagGroup("V. Alignment", FlagVec() = list_of(GRAPHIC_TOP)(GRAPHIC_VCENTER)(GRAPHIC_BOTTOM));
-    editor->FlagGroup("H. Alignment", FlagVec() = list_of(GRAPHIC_LEFT)(GRAPHIC_CENTER)(GRAPHIC_RIGHT));
-    editor->Flag("Fit Graphic to Size", GRAPHIC_FITGRAPHIC);
-    editor->Flag("Shrink-to-Fit", GRAPHIC_SHRINKFIT);
-    editor->Flag("Proportional Scaling", GRAPHIC_PROPSCALE);
-    editor->EndFlags();
 }
 
 std::size_t DynamicGraphic::FramesInTexture(const Texture* t) const

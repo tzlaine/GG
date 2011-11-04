@@ -97,8 +97,6 @@ public:
     /** Sets the maximum number of rows of text that the control will keep.
         ALL_LINES indicates no limit. */
     void           SetMaxLinesOfHistory(std::size_t max);
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
     /** A sentinel value that indicates that there is no limit on the number

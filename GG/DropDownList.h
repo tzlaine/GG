@@ -167,8 +167,6 @@ public:
 
     void           SetColAlignment(std::size_t n, Alignment align); ///< sets the alignment of column \a n to \a align; not range-checked
     void           SetRowAlignment(iterator it, Alignment align);   ///< sets the alignment of the Row at row index \a n to \a align; not range-checked
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

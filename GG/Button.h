@@ -87,8 +87,6 @@ public:
     void           SetUnpressedGraphic(const SubTexture& st); ///< Sets the SubTexture to be used as the image of the button when unpressed
     void           SetPressedGraphic(const SubTexture& st);   ///< Sets the SubTexture to be used as the image of the button when pressed
     void           SetRolloverGraphic(const SubTexture& st);  ///< Sets the SubTexture to be used as the image of the button when it contains the cursor, but is not pressed
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -183,8 +181,6 @@ public:
 
     /** Sets the visual style of the button \see StateButtonStyle */
     void             SetStyle(StateButtonStyle bs);
-
-    virtual void     DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -336,8 +332,6 @@ public:
     /** Raises the currently-selected button to the top of the child z-order.
         If there is no currently-selected button, no action is taken. */
     void RaiseCheckedButton();
-
-    virtual void DefineAttributes(WndEditor* editor);
 
     /** The invalid button position index that there is no currently-checked
         button. */

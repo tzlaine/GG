@@ -43,7 +43,6 @@ class BrowseInfoWnd;
 class Layout;
 class StyleFactory;
 class Timer;
-class WndEditor;
 class WndEvent;
 
 
@@ -637,10 +636,6 @@ public:
 
     /** Sets the currently-installed style factory. */
     void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory);
-
-    /** Provides the attributes of this object that are appropriate for a user
-        to edit in a WndEditor; see WndEditor for details. */
-    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 

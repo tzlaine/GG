@@ -215,8 +215,6 @@ public:
         if RenderOutline() returns true).  This is sometimes useful for
         debugging purposes. */
     void SetOutlineColor(Clr color);
-
-    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
     /** \name Exceptions */ ///@{

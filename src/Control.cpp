@@ -24,21 +24,10 @@
 
 #include <GG/Control.h>
 
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 
 using namespace GG;
-
-namespace {
-    struct SetColorAction : AttributeChangedAction<Clr>
-    {
-        SetColorAction(Control* control) : m_control(control) {}
-        virtual void operator()(const Clr& value) {m_control->SetColor(value);}
-    private:
-        Control* m_control;
-    };
-}
 
 ////////////////////////////////////////////////
 // GG::Control
@@ -78,17 +67,6 @@ void Control::SetColor(Clr c)
 
 void Control::Disable(bool b/* = true*/)
 { m_disabled = b; }
-
-void Control::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Wnd::DefineAttributes(editor);
-    editor->Label("Control");
-    boost::shared_ptr<SetColorAction> action(new SetColorAction(this));
-    editor->Attribute<Clr>("Color", m_color, action);
-    editor->Attribute("Disabled", m_disabled);
-}
 
 void Control::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 { ForwardEventToParent(); }

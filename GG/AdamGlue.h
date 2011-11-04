@@ -30,6 +30,7 @@
 #ifndef _AdamGlue_h_
 #define _AdamGlue_h_
 
+#include <GG/DropDownList.h>
 #include <GG/Spin.h>
 #include <GG/adobe/adam.hpp>
 
@@ -43,7 +44,6 @@ class Button;
 class StateButton;
 class RadioButtonGroup;
 class Edit;
-class DropDownList;
 template <class T>
 class Slider;
 

@@ -27,7 +27,6 @@
 #include <GG/DrawUtil.h>
 #include <GG/Layout.h>
 #include <GG/StyleFactory.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 #include <boost/lexical_cast.hpp>
@@ -47,18 +46,6 @@ namespace {
         std::cerr << "GG SIGNAL : RadioButtonGroup::ButtonChangedSignal(index="
                   << index << ")\n";
     }
-
-    struct SetCheckedButtonAction : AttributeChangedAction<std::size_t>
-    {
-        SetCheckedButtonAction(RadioButtonGroup* radio_button_group) :
-            m_radio_button_group(radio_button_group) {}
-        void operator()(const std::size_t& button)
-        {
-            m_radio_button_group->SetCheck(RadioButtonGroup::NO_BUTTON);
-            m_radio_button_group->SetCheck(button);
-        }
-        RadioButtonGroup* const m_radio_button_group;
-    };
 }
 
 ////////////////////////////////////////////////
@@ -115,14 +102,6 @@ void Button::SetPressedGraphic(const SubTexture& st)
 
 void Button::SetRolloverGraphic(const SubTexture& st)
 { m_rollover_graphic = st; }
-
-void Button::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    TextControl::DefineAttributes(editor);
-    // TODO: handle setting graphics
-}
 
 void Button::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
@@ -461,21 +440,6 @@ void StateButton::SetInteriorColor(Clr c)
 void StateButton::SetStyle(StateButtonStyle bs)
 { m_style = bs; }
 
-void StateButton::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    TextControl::DefineAttributes(editor);
-    editor->Label("StateButton");
-    editor->Attribute("Checked", m_checked);
-    editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Button Style", m_style,
-                      SBSTYLE_3D_XBOX, SBSTYLE_3D_ROUND_BUTTON);
-    editor->Attribute("Button Upper Left", m_button_ul);
-    editor->Attribute("Button Lower Right", m_button_lr);
-    editor->Attribute("Text Upper Left", m_text_ul);
-}
-
 Pt StateButton::ButtonUpperLeft() const
 { return m_button_ul; }
 
@@ -764,16 +728,6 @@ void RadioButtonGroup::ExpandButtonsProportionally(bool proportional)
 
 void RadioButtonGroup::RenderOutline(bool render_outline)
 { m_render_outline = render_outline; }
-
-void RadioButtonGroup::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("RadioButtonGroup");
-    boost::shared_ptr<SetCheckedButtonAction> set_checked_button_action(new SetCheckedButtonAction(this));
-    editor->Attribute<std::size_t>("Checked Button", m_checked_button, set_checked_button_action);
-}
 
 const std::vector<RadioButtonGroup::ButtonSlot>& RadioButtonGroup::ButtonSlots() const
 { return m_button_slots; }

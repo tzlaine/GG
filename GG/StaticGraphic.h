@@ -78,8 +78,6 @@ public:
     /** Sets the style flags, and perfroms sanity checking \see
         GraphicStyle */
     void SetStyle(Flags<GraphicStyle> style);
-
-    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:

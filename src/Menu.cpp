@@ -28,7 +28,6 @@
 #include <GG/DrawUtil.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 
@@ -48,22 +47,6 @@ namespace {
     const int BORDER_THICKNESS = 1; // thickness with which to draw menu borders
     const int MENU_SEPARATION = 10; // distance between menu texts in a MenuBar, in pixels
 }
-
-struct GG::SetFontAction : AttributeChangedAction<boost::shared_ptr<Font> >
-{
-    SetFontAction(MenuBar* menu_bar) : m_menu_bar(menu_bar) {}
-    void operator()(const boost::shared_ptr<Font>&) {m_menu_bar->AdjustLayout(true);}
-private:
-    MenuBar* m_menu_bar;
-};
-
-struct GG::SetTextColorAction : AttributeChangedAction<Clr>
-{
-    SetTextColorAction(MenuBar* menu_bar) : m_menu_bar(menu_bar) {}
-    void operator()(const Clr&) {m_menu_bar->AdjustLayout(true);}
-private:
-    MenuBar* m_menu_bar;
-};
 
 
 ////////////////////////////////////////////////
@@ -331,23 +314,6 @@ void MenuBar::SetHiliteColor(Clr clr)
 
 void MenuBar::SetSelectedTextColor(Clr clr)
 { m_sel_text_color = clr; }
-
-void MenuBar::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("MenuBar");
-    boost::shared_ptr<SetFontAction> set_font_action(new SetFontAction(this));
-    editor->Attribute<boost::shared_ptr<Font> >("Font", m_font, set_font_action);
-    editor->Attribute("Border Color", m_border_color);
-    editor->Attribute("Interior Color", m_int_color);
-    boost::shared_ptr<SetTextColorAction> set_text_color_action(new SetTextColorAction(this));
-    editor->Attribute<Clr>("Text Color", m_text_color, set_text_color_action);
-    editor->Attribute("Highlighting Color", m_hilite_color);
-    editor->Attribute("Selected Text Color", m_sel_text_color);
-    // TODO: handle assigning menu items
-}
 
 const boost::shared_ptr<Font>& MenuBar::GetFont() const
 { return m_font; }

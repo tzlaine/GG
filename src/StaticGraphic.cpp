@@ -24,23 +24,13 @@
 
 #include <GG/StaticGraphic.h>
 
+#include <GG/ClrConstants.h>
 #include <GG/DrawUtil.h>
-#include <GG/WndEditor.h>
 
 #include <boost/assign/list_of.hpp>
 
 
 using namespace GG;
-
-namespace {
-    struct SetStyleAction : AttributeChangedAction<Flags<GraphicStyle> >
-    {
-        SetStyleAction(StaticGraphic* static_graphic) : m_static_graphic(static_graphic) {}
-        void operator()(const Flags<GraphicStyle>& style) {m_static_graphic->SetStyle(style);}
-    private:
-        StaticGraphic* m_static_graphic;
-    };
-}
 
 ///////////////////////////////////////
 // GraphicStyle
@@ -166,25 +156,6 @@ void StaticGraphic::SetStyle(Flags<GraphicStyle> style)
 {
     m_style = style;
     ValidateStyle();
-}
-
-void StaticGraphic::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("StaticGraphic");
-    // TODO: handle setting image
-    boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
-    editor->BeginFlags<GraphicStyle>(m_style, set_style_action);
-    typedef std::vector<GraphicStyle> FlagVec;
-    using boost::assign::list_of;
-    editor->FlagGroup("V. Alignment", FlagVec() = list_of(GRAPHIC_TOP)(GRAPHIC_VCENTER)(GRAPHIC_BOTTOM));
-    editor->FlagGroup("H. Alignment", FlagVec() = list_of(GRAPHIC_LEFT)(GRAPHIC_CENTER)(GRAPHIC_RIGHT));
-    editor->Flag("Fit Graphic to Size", GRAPHIC_FITGRAPHIC);
-    editor->Flag("Shrink-to-Fit", GRAPHIC_SHRINKFIT);
-    editor->Flag("Proportional Scaling", GRAPHIC_PROPSCALE);
-    editor->EndFlags();
 }
 
 void StaticGraphic::Init(const SubTexture& subtexture)

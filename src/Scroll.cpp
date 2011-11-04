@@ -27,7 +27,6 @@
 #include <GG/Button.h>
 #include <GG/DrawUtil.h>
 #include <GG/StyleFactory.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 
@@ -255,19 +254,6 @@ void Scroll::ScrollPageDecr()
     else
         m_posn = m_range_min;
     MoveTabToPosn();
-}
-
-void Scroll::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("Scroll");
-    editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Range Min", m_range_min);
-    editor->Attribute("Range Max", m_range_max);
-    editor->Attribute("Line Size", m_line_sz);
-    editor->Attribute("Page Size", m_page_sz);
 }
 
 unsigned int Scroll::TabSpace() const

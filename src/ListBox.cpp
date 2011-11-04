@@ -32,7 +32,6 @@
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
 #include <GG/WndEvent.h>
-#include <GG/WndEditor.h>
 
 #include <boost/cast.hpp>
 #include <boost/assign/list_of.hpp>
@@ -97,22 +96,6 @@ namespace {
         boost::function<bool (const ListBox::Row&, const ListBox::Row&, std::size_t)> m_cmp;
         std::size_t m_sort_col;
         bool m_invert;
-    };
-
-    struct SetStyleAction : AttributeChangedAction<Flags<ListBoxStyle> >
-    {
-        SetStyleAction(ListBox* list_box) : m_list_box(list_box) {}
-        void operator()(const Flags<ListBoxStyle>& style) {m_list_box->SetStyle(style);}
-    private:
-        ListBox* m_list_box;
-    };
-
-    struct SetSortColAction : AttributeChangedAction<std::size_t>
-    {
-        SetSortColAction(ListBox* list_box) : m_list_box(list_box) {}
-        void operator()(const std::size_t& sort_col) {m_list_box->SetSortCol(sort_col);}
-    private:
-        ListBox* m_list_box;
     };
 
     bool LessThan(ListBox::iterator lhs, ListBox::iterator rhs, ListBox::iterator end)
@@ -1071,40 +1054,6 @@ void ListBox::SetAutoScrollMargin(unsigned int margin)
 
 void ListBox::SetAutoScrollInterval(unsigned int interval)
 { m_auto_scroll_timer.SetInterval(interval); }
-
-void ListBox::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    editor->Label("ListBox");
-    // TODO: handle specifying column widths and alignments
-    editor->Attribute("Cell Margin", m_cell_margin);
-    editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Highlighting Color", m_hilite_color);
-    boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
-    editor->BeginFlags<ListBoxStyle>(m_style, set_style_action);
-    typedef std::vector<ListBoxStyle> FlagVec;
-    using boost::assign::list_of;
-    editor->FlagGroup("V. Alignment", FlagVec() = list_of(LIST_TOP)(LIST_VCENTER)(LIST_BOTTOM));
-    editor->FlagGroup("H. Alignment", FlagVec() = list_of(LIST_LEFT)(LIST_CENTER)(LIST_RIGHT));
-    editor->Flag("Do not Sort", LIST_NOSORT);
-    editor->Flag("Sort Descending", LIST_SORTDESCENDING);
-    editor->Flag("No Selections", LIST_NOSEL);
-    editor->Flag("Single-Selection", LIST_SINGLESEL);
-    editor->Flag("Quick-Selection", LIST_QUICKSEL);
-    editor->Flag("User Deletions", LIST_USERDELETE);
-    editor->Flag("Browse Updates", LIST_BROWSEUPDATES);
-    editor->EndFlags();
-    // TODO: handle setting header row
-    editor->Attribute("Keep Column Widths", m_keep_col_widths);
-    editor->Attribute("Clip Cells", m_clip_cells);
-    boost::shared_ptr<SetSortColAction> set_sort_col_action(new SetSortColAction(this));
-    editor->Attribute<std::size_t>("Sort Column", m_sort_col,
-                                   0, m_col_widths.size(),
-                                   set_sort_col_action);
-    // TODO: handle specifying allowed drop types
-}
 
 X ListBox::RightMargin() const
 { return X(m_vscroll ? SCROLL_WIDTH : 0); }

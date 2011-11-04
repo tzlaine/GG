@@ -43,7 +43,6 @@ set(THIS_LIB_SOURCES
     Timer.cpp
     UnicodeCharsets.cpp
     Wnd.cpp
-    WndEditor.cpp
     WndEvent.cpp
     ZList.cpp
 

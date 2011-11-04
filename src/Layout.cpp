@@ -24,8 +24,9 @@
 
 #include <GG/Layout.h>
 
+#include <GG/ClrConstants.h>
 #include <GG/DrawUtil.h>
-#include <GG/WndEditor.h>
+#include <GG/TextControl.h>
 #include <GG/WndEvent.h>
 
 #include <cassert>
@@ -42,14 +43,6 @@ namespace {
             cell_margin;
     }
 }
-
-struct GG::SetMarginAction : AttributeChangedAction<unsigned int>
-{
-    SetMarginAction(Layout* layout) : m_layout(layout) {}
-    void operator()(const unsigned int&) { m_layout->RedoLayout(); }
-private:
-    Layout* m_layout;
-};
 
 // RowColParams
 Layout::RowColParams::RowColParams() :
@@ -641,18 +634,6 @@ void Layout::RenderOutline(bool render_outline)
 
 void Layout::SetOutlineColor(Clr color)
 { m_outline_color = color; }
-
-void Layout::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Wnd::DefineAttributes(editor);
-    editor->Label("Layout");
-    boost::shared_ptr<SetMarginAction> set_margin_action(new SetMarginAction(this));
-    editor->Attribute<unsigned int>("Border Margin", m_border_margin, set_margin_action);
-    editor->Attribute<unsigned int>("Cell Margin", m_cell_margin, set_margin_action);
-    // TODO: handle setting the number of rows and columns
-}
 
 void Layout::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 { ForwardEventToParent(); }

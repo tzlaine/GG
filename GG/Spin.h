@@ -35,7 +35,6 @@
 #include <GG/Edit.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 
 #include <cmath>
@@ -48,42 +47,6 @@ namespace GG {
 namespace spin_details {
     template <class T> T mod(T, T);
     template <class T> T div(T, T);
-
-    template <class T>
-    struct SetValueAction : AttributeChangedAction<T>
-    {
-        SetValueAction(Spin<T>* spin) : m_spin(spin) {}
-        void operator()(const T& value) {m_spin->SetValue(m_spin->Value());}
-    private:
-        Spin<T>* m_spin;
-    };
-
-    template <class T>
-    struct SetMinValueAction : AttributeChangedAction<T>
-    {
-        SetMinValueAction(Spin<T>* spin) : m_spin(spin) {}
-        void operator()(const T& value) {m_spin->SetValue(value);}
-    private:
-        Spin<T>* m_spin;
-    };
-
-    template <class T>
-    struct SetMaxValueAction : AttributeChangedAction<T>
-    {
-        SetMaxValueAction(Spin<T>* spin) : m_spin(spin) {}
-        void operator()(const T& value) {m_spin->SetValue(value);}
-    private:
-        Spin<T>* m_spin;
-    };
-
-    template <class T>
-    struct SetButtonWidthAction : AttributeChangedAction<X>
-    {
-        SetButtonWidthAction(Spin<T>* spin) : m_spin(spin) {}
-        void operator()(const X& width) {m_spin->SetButtonWidth(width);}
-    private:
-        Spin<T>* m_spin;
-    };
 }
 
 
@@ -172,8 +135,6 @@ public:
     void SetInteriorColor(Clr c);      ///< sets the interior color of the control
     void SetHiliteColor(Clr c);        ///< sets the color used to render hiliting around selected text
     void SetSelectedTextColor(Clr c);  ///< sets the color used to render selected text   
-
-    virtual void DefineAttributes(WndEditor* editor);
     //@}
 
 protected:
@@ -416,30 +377,6 @@ void Spin<T>::SetHiliteColor(Clr c)
 template<class T>
 void Spin<T>::SetSelectedTextColor(Clr c)
 { m_edit->SetSelectedTextColor(c); }
-
-template<class T>
-void Spin<T>::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Control::DefineAttributes(editor);
-    if (boost::is_same<T, int>::value)
-        editor->Label("Spin<int>");
-    else if (boost::is_same<T, double>::value)
-        editor->Label("Spin<double>");
-    else
-        editor->Label("Spin<T>");
-    boost::shared_ptr<spin_details::SetValueAction<T> > set_value_action(new spin_details::SetValueAction<T>(this));
-    editor->Attribute<T>("Value", m_value, set_value_action);
-    editor->Attribute<T>("Step Size", m_step_size, set_value_action);
-    boost::shared_ptr<spin_details::SetMinValueAction<T> > set_min_value_action(new spin_details::SetMinValueAction<T>(this));
-    editor->Attribute<T>("Min Value", m_min_value, set_min_value_action);
-    boost::shared_ptr<spin_details::SetMaxValueAction<T> > set_max_value_action(new spin_details::SetMaxValueAction<T>(this));
-    editor->Attribute<T>("Max Value", m_max_value, set_max_value_action);
-    editor->Attribute("Editable", m_editable);
-    boost::shared_ptr<spin_details::SetButtonWidthAction<T> > set_button_width_action(new spin_details::SetButtonWidthAction<T>(this));
-    editor->Attribute<X>("Button Width", m_button_width, set_button_width_action);
-}
 
 template<class T>
 Button* Spin<T>::UpButton() const

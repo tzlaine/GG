@@ -25,9 +25,9 @@
 #include <GG/MultiEdit.h>
 
 #include <GG/DrawUtil.h>
+#include <GG/GUI.h>
 #include <GG/Scroll.h>
 #include <GG/StyleFactory.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 #include <GG/utf8/checked.h>
 
@@ -46,15 +46,6 @@ namespace {
         else
             return original_string[Value(lines[line].char_data.back().string_index)] == '\n';
     }
-
-    struct SetStyleAction : AttributeChangedAction<Flags<MultiEditStyle> >
-    {
-        SetStyleAction(MultiEdit* multi_edit) : m_multi_edit(multi_edit) {}
-        void operator()(const Flags<MultiEditStyle>& style)
-            { m_multi_edit->SetText(m_multi_edit->Text()); }
-    private:
-        MultiEdit* m_multi_edit;
-    };
 }
 
 ///////////////////////////////////////
@@ -380,29 +371,6 @@ void MultiEdit::SetMaxLinesOfHistory(std::size_t max)
 {
     m_max_lines_history = max;
     SetText(Text());
-}
-
-void MultiEdit::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    Edit::DefineAttributes(editor);
-    editor->Label("MultiEdit");
-    boost::shared_ptr<SetStyleAction> set_style_action(new SetStyleAction(this));
-    editor->BeginFlags<MultiEditStyle>(m_style, set_style_action);
-    typedef std::vector<MultiEditStyle> FlagVec;
-    using boost::assign::list_of;
-    editor->FlagGroup("V. Alignment", FlagVec() = list_of(MULTI_TOP)(MULTI_VCENTER)(MULTI_BOTTOM));
-    editor->FlagGroup("H. Alignment", FlagVec() = list_of(MULTI_LEFT)(MULTI_CENTER)(MULTI_RIGHT));
-    editor->Flag("Word-break", MULTI_WORDBREAK);
-    editor->Flag("Line-wrap", MULTI_LINEWRAP);
-    editor->Flag("Read Only", MULTI_READ_ONLY);
-    editor->Flag("Terminal Style", MULTI_TERMINAL_STYLE);
-    editor->Flag("Integral Height", MULTI_INTEGRAL_HEIGHT);
-    editor->Flag("No V. Scrolling", MULTI_NO_VSCROLL);
-    editor->Flag("No H. Scrolling", MULTI_NO_HSCROLL);
-    editor->EndFlags();
-    editor->Attribute("Lines of History", m_max_lines_history);
 }
 
 bool MultiEdit::MultiSelected() const

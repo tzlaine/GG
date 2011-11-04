@@ -182,8 +182,6 @@ public:
     void           SetTextColor(Clr clr);         ///< sets the color used to render menu item text
     void           SetHiliteColor(Clr clr);       ///< sets the color used to indicate a hilited menu item
     void           SetSelectedTextColor(Clr clr); ///< sets the color used to render a hilited menu item's text
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
     static const std::size_t INVALID_CARET;

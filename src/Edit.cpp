@@ -26,7 +26,6 @@
 
 #include <GG/GUI.h>
 #include <GG/DrawUtil.h>
-#include <GG/WndEditor.h>
 #include <GG/WndEvent.h>
 #include <GG/utf8/checked.h>
 
@@ -222,17 +221,6 @@ void Edit::SetText(const std::string& str)
     }
 
     m_recently_edited = true;
-}
-
-void Edit::DefineAttributes(WndEditor* editor)
-{
-    if (!editor)
-        return;
-    TextControl::DefineAttributes(editor);
-    editor->Label("Edit");
-    editor->Attribute("Interior Color", m_int_color);
-    editor->Attribute("Highlighting Color", m_hilite_color);
-    editor->Attribute("Selected Text Color", m_sel_text_color);
 }
 
 bool Edit::MultiSelected() const

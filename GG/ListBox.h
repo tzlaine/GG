@@ -440,8 +440,6 @@ public:
     /** Sets the number of milliseconds that elapse between row/column scrolls
         when auto-scrolling. */
     void           SetAutoScrollInterval(unsigned int interval);
-
-    virtual void   DefineAttributes(WndEditor* editor);
     //@}
 
     /** \brief Sorts two Rows of a ListBox using operator<() on the

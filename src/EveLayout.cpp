@@ -26,6 +26,7 @@
 
 #include <GG/DropDownList.h>
 #include <GG/Edit.h>
+#include <GG/GroupBox.h>
 #include <GG/GUI.h>
 #include <GG/Layout.h>
 #include <GG/Menu.h>
@@ -1138,6 +1139,36 @@ namespace {
         return retval.release();
     }
 
+    MakeWndResult* Make_group(const adobe::dictionary_t& params, const adobe::line_position_t& position)
+    {
+        adobe::string_t name;
+        adobe::string_t alt;
+        adobe::name_t placement = adobe::key_place_column;
+
+        get_value(params, adobe::key_name, name);
+        get_value(params, adobe::key_alt_text, alt);
+        get_value(params, adobe::key_placement, placement);
+
+        if (placement != adobe::key_place_row && placement != adobe::key_place_column) {
+            std::string placement_ = adobe::key_placement.name_m;
+            throw adobe::stream_error_t(placement_ + " placement is not compatible with group",
+                                        position);
+        }
+
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+                                                              position,
+                                                              adobe::name_t(),
+                                                              adobe::name_t(),
+                                                              placement == adobe::name_row ? adobe::key_align_left : adobe::name_t(),
+                                                              placement == adobe::name_column ? adobe::key_align_top : adobe::name_t(),
+                                                              UNLABELED_CONTROL,
+                                                              CONTAINER));
+
+        retval->m_wnd.reset(new GroupBox(X0, Y0, X1, Y1, name, DefaultFont(), CLR_GRAY));
+
+        return retval.release();
+    }
+
     MakeWndResult* Make_panel(const adobe::dictionary_t& params, const adobe::line_position_t& position)
     {
         adobe::string_t name;
@@ -1231,6 +1262,7 @@ namespace {
         else IF_CASE(display_number)
         else IF_CASE(edit_number)
         else IF_CASE(edit_text)
+        else IF_CASE(group)
         else IF_CASE(image)
         else IF_CASE(popup)
         else IF_CASE(radio_button)
@@ -1266,6 +1298,7 @@ namespace {
 
         return
             wnd_type == adobe::name_dialog ||
+            wnd_type == adobe::name_group ||
             wnd_type == adobe::name_radio_button_group ||
             wnd_type == adobe::name_tab_group ||
             wnd_type == adobe::name_overlay ||
@@ -1716,7 +1749,9 @@ struct EveLayout::Impl
         std::cout << "])\n";
 #endif
 
-        if (wnd_view_params.m_name == adobe::name_dialog || wnd_view_params.m_name == adobe::name_panel) {
+        if (wnd_view_params.m_name == adobe::name_dialog ||
+            wnd_view_params.m_name == adobe::name_panel ||
+            wnd_view_params.m_name == adobe::name_group) {
             if (placement == adobe::key_place_overlay) {
                 std::string name = wnd_view_params.m_name.c_str();
                 throw stream_error_t("place_overlay placement is not compatible with " + name,

@@ -15,6 +15,12 @@ macro (make_test_exec name)
     if (TARGET GiGiSDL)
         target_link_libraries(${name}-test GiGiSDL ${Boost_LIBRARIES})
     endif ()
+    if (0)
+        set_target_properties(${name}-test
+            PROPERTIES
+            COMPILE_FLAGS "${DEBUG_COMPILE_FLAGS}"
+        )
+    endif ()
 endmacro ()
 
 macro (add_test_and_data_files name)

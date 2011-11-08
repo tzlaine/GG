@@ -24,12 +24,17 @@ bool g_dont_exit = false;
 
 struct StopDialog
 {
-    StopDialog(GG::Wnd* dialog) :
-        m_dialog(dialog)
+    StopDialog(GG::Wnd* dialog, const std::string& output) :
+        m_dialog(dialog),
+        m_output(output)
         {}
     void operator()(unsigned int, GG::Timer*)
-        { m_dialog->EndRun(); }
+        {
+            GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, m_output);
+            m_dialog->EndRun();
+        }
     GG::Wnd* m_dialog;
+    std::string m_output;
 };
 
 class MinimalGGApp : public GG::SDLGUI
@@ -117,10 +122,9 @@ void MinimalGGApp::Initialize()
 #else
         output /= input.stem() + ".png";
 #endif
-        GG::GUI::GetGUI()->SaveWndAsPNG(&eve_dialog, output.string());
         GG::Timer timer(100);
         if (!g_dont_exit)
-            GG::Connect(timer.FiredSignal, StopDialog(&eve_dialog));
+            GG::Connect(timer.FiredSignal, StopDialog(&eve_dialog, output.string()));
         eve_dialog.Run();
     }
     Exit(0);

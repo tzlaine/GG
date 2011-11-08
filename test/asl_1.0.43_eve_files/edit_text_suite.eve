@@ -6,19 +6,19 @@
 
 layout edit_text_suite
 {
-    view dialog(name: localize("<xstr id='edit_text_suite_dialog_title'>Edit Text Suite</xstr>"))
+    view dialog(name: localize("Edit Text Suite"))
     {
         row(child_horizontal: align_fill)
         {
-            group(placement: place_column, name: localize("<xstr id='edit_text_suite_dialog_title'>Edit Text Suite</xstr>"), child_horizontal: align_fill)
+            group(placement: place_column, name: localize("Edit Text Suite"), child_horizontal: align_fill)
             {
-                edit_text(bind: @edit_text_value, characters: 10, name: localize("<xstr id='et_suite_label'>Label Name:</xstr>"));
-                edit_text(bind: @edit_text_value, scrollable: true, characters: 10, lines: 10, name: localize("<xstr id='et_suite_label'>Label Name:</xstr>"));
-                checkbox(bind: @disabled, name: localize("<xstr id='et_suite_disabled'>Disabled</xstr>"));
+                edit_text(bind: @edit_text_value, characters: 10, name: localize("Label Name:"));
+                edit_text(bind: @edit_text_value, scrollable: true, characters: 10, lines: 10, name: localize("Label Name:"));
+                checkbox(bind: @disabled, name: localize("Disabled"));
             }
             column(child_horizontal: align_fill)
             {
-                button(name: localize("<xstr id='ok'>OK</xstr>"), default: true);
+                button(name: localize("OK"), default: true);
                 button(name: localize("Cancel"), action: @cancel);
             }
         }

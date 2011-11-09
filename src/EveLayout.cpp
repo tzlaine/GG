@@ -1554,16 +1554,20 @@ struct EveLayout::Impl
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
 #endif
-            bool fill = children[i].m_horizontal == adobe::key_align_fill;
+            bool horizontal_fill = raw_alignments.first == adobe::key_align_fill;
+            bool vertical_fill = raw_alignments.second == adobe::key_align_fill;
 #if INSTRUMENT_ADD_TO_HORIZONTAL
-            std::cout << "        fill=" << fill << "\n";
+            std::cout << "        horizontal_fill=" << horizontal_fill << "\n";
+            std::cout << "        vertical_fill=" << vertical_fill << "\n";
 #endif
             layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(raw_alignments.first, raw_alignments.second));
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments.first, raw_alignments.second) << ")\n";
 #endif
-            if (fill)
+            if (horizontal_fill)
                 layout.SetColumnStretch(i, 1.0);
+            if (vertical_fill)
+                layout.SetRowStretch(0, 1.0);
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        layout.layout.ColumnStretch(i)=" << layout.ColumnStretch(i) << "\n";
 #endif

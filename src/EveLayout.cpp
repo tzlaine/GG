@@ -54,6 +54,7 @@
 using namespace GG;
 
 #define INSTRUMENT_WINDOW_CREATION 0
+#define INSTRUMENT_ADD_TO_HORIZONTAL 0
 #define INSTRUMENT_ADD_TO_VERTICAL 0
 #define INSTRUMENT_CREATED_LAYOUT 0
 #define SHOW_LAYOUTS 0
@@ -1540,10 +1541,32 @@ struct EveLayout::Impl
                                        MakeWndResult& wnd,
                                        boost::ptr_vector<MakeWndResult>& children)
     {
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+        std::cout << "AddChildrenToHorizontalLayout()\n";
+#endif
         for (std::size_t i = 0; i < children.size(); ++i) {
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+            std::cout << "    child " << i << ":\n";
+#endif
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
             layout.SetMinimumColumnWidth(i, min_usable_size.x);
-            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(wnd, children[i]));
+            std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+            std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
+#endif
+            bool fill = children[i].m_horizontal == adobe::key_align_fill;
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+            std::cout << "        fill=" << fill << "\n";
+#endif
+            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(raw_alignments.first, raw_alignments.second));
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+            std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments.first, raw_alignments.second) << ")\n";
+#endif
+            if (fill)
+                layout.SetColumnStretch(i, 1.0);
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+            std::cout << "        layout.layout.ColumnStretch(i)=" << layout.ColumnStretch(i) << "\n";
+#endif
         }
     }
 
@@ -1572,7 +1595,10 @@ struct EveLayout::Impl
             if ((l = dynamic_cast<Layout*>(children[i].m_wnd.get())) &&
                 l->Rows() == 1u &&
                 l->Columns() == 2u &&
-                dynamic_cast<const TextControl*>(l->Cells()[0][0])) {
+                dynamic_cast<const TextControl*>(l->Cells()[0][0]) && // TODO: HACK! This is horrible!
+                !dynamic_cast<const Button*>(l->Cells()[0][0]) &&
+                !dynamic_cast<const StateButton*>(l->Cells()[0][0]) &&
+                !dynamic_cast<const Edit*>(l->Cells()[0][0])) {
 #if INSTRUMENT_ADD_TO_VERTICAL
                 std::cout << "        two-column layout\n";
 #endif

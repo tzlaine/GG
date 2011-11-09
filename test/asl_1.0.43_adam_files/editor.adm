@@ -35,12 +35,12 @@ output:
     };
     
     enable <== 
-	{
-		adam_source : adam_source,
-		eve_source  : eve_source,
-		results     : results,
-		errors      : errors
-	};
+    {
+        adam_source : adam_source,
+        eve_source  : eve_source,
+        results     : results,
+        errors      : errors
+    };
 
 invariant:
     adam_source_filled   <== adam_source != "";

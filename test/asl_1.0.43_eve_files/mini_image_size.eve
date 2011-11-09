@@ -6,19 +6,19 @@
 
 layout mini_image_size
 {
- interface:
+interface:
     percent: false;
         
     view dialog (name: "Mini Image Size")
     {
         column()
         {
-		   display_number(name: "Document Height:", bind: @original_height, format: "#",
-		   		units: [{ name: "pixels", format: "#", scale: [ 1, 0 ] }]);
-		   display_number(name: "Document Width:", bind: @original_width, format: "#",
-		   		units: [{ name: "pixels", format: "#", scale: [ 1, 0 ] }]);
-		   		
-		   	row() { }
+           display_number(name: "Document Height:", bind: @original_height, format: "#",
+                          units: [{ name: "pixels", format: "#", scale: [ 1, 0 ] }]);
+           display_number(name: "Document Width:", bind: @original_width, format: "#",
+                          units: [{ name: "pixels", format: "#", scale: [ 1, 0 ] }]);
+                
+            row() { }
         
             overlay()
             {

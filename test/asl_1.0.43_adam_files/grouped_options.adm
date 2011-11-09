@@ -6,29 +6,29 @@
 
 sheet grouped_options
 {
-  interface:
-	a : true;
-	b : true;
-	c : true;
-	/* group g = [@a, @b, @c ] */
-	g : { a: a, b: b, c: c };
-	all : true;
-	
-  constant:
-  	g_true : { a: true, b: true, c: true };
-  	g_false : { a: false, b: false, c: false };
+interface:
+    a : true;
+    b : true;
+    c : true;
+    /* group g = [@a, @b, @c ] */
+    g : { a: a, b: b, c: c };
+    all : true;
+    
+constant:
+    g_true : { a: true, b: true, c: true };
+    g_false : { a: false, b: false, c: false };
 
-  logic:
-  	/* relate clauses that simulate a group */
-	relate { a <== g.a; g <== { a: a, b: g.b, c: g.c }; }
-	relate { b <== g.b; g <== { a: g.a, b: b, c: g.c }; }
-	relate { c <== g.c; g <== { a: g.a, b: g.b, c: c }; }
+logic:
+    /* relate clauses that simulate a group */
+    relate { a <== g.a; g <== { a: a, b: g.b, c: g.c }; }
+    relate { b <== g.b; g <== { a: g.a, b: b, c: g.c }; }
+    relate { c <== g.c; g <== { a: g.a, b: g.b, c: c }; }
 
-	relate {
-		all <== g == g_true ? true : g == g_false ? false : empty;
-		g <== { a: all, b: all, c: all };
-	}
+    relate {
+        all <== g == g_true ? true : g == g_false ? false : empty;
+        g <== { a: all, b: all, c: all };
+    }
 
- output:
+output:
     result <== { all: all, a: a, b: b, c: c };
 }

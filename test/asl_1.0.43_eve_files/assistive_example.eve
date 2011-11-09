@@ -10,13 +10,13 @@ layout assistive_example
     {
         column(spacing: [10, 20])
         {
-		   edit_number(name: "Pixels:", bind: @pixels, format: "#");
-		   edit_number(name: "Resolution:", bind: @resolution, format: "#.00");
-		   
-		   edit_number(name: "Inches:", bind: @inches, format: "#.00");
-		   
-		   edit_number(name: "File Size:", bind: @file_size, format: "#");
-		}
+            edit_number(name: "Pixels:", bind: @pixels, format: "#");
+            edit_number(name: "Resolution:", bind: @resolution, format: "#.00");
+           
+            edit_number(name: "Inches:", bind: @inches, format: "#.00");
+           
+            edit_number(name: "File Size:", bind: @file_size, format: "#");
+        }
         column()
         {
             button(name: "OK", bind: @result, action: @ok, default: true);

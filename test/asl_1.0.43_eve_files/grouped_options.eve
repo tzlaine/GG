@@ -8,13 +8,13 @@ layout grouped_options
 {
     view dialog(name: "Grouped Options")
     {
-		column()
-		{
-			checkbox(name: "all", bind: @all);
-			checkbox(name: "a", bind: @a, indent: 10);
-			checkbox(name: "b", bind: @b, indent: 10);
-			checkbox(name: "c", bind: @c, indent: 10);
-		}
-		button(name: "OK", bind: @result, action: @ok, default: true);
+        column()
+        {
+            checkbox(name: "all", bind: @all);
+            checkbox(name: "a", bind: @a, indent: 10);
+            checkbox(name: "b", bind: @b, indent: 10);
+            checkbox(name: "c", bind: @c, indent: 10);
+        }
+        button(name: "OK", bind: @result, action: @ok, default: true);
     }
 }

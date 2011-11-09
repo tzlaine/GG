@@ -483,10 +483,6 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
                                                               position,
-                                                              adobe::key_align_center,
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
-                                                              adobe::name_t(),
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
 

@@ -528,7 +528,7 @@ struct sheet_t::relation_t
     relation_t(name_t n, line_position_t p, array_t e) :
         name_m(n),
         position_m(p),
-        expression_m(move(e))
+        expression_m(::adobe::move(e))
     { }
     
     friend void swap(relation_t& x, relation_t& y)
@@ -541,7 +541,7 @@ struct sheet_t::relation_t
     relation_t(move_from<relation_t> x) :
         name_m(x.source.name_m),
         position_m(x.source.position_m),
-        expression_m(move(x.source.expression_m))
+        expression_m(::adobe::move(x.source.expression_m))
     { }
     
     relation_t& operator=(relation_t x) 

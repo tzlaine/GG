@@ -1848,7 +1848,7 @@ struct EveLayout::Impl
 #endif
 
             m_evaluator.evaluate(view_params.m_parameters);
-            adobe::dictionary_t parameters(move(m_evaluator.back().cast<adobe::dictionary_t>()));
+            adobe::dictionary_t parameters(::adobe::move(m_evaluator.back().cast<adobe::dictionary_t>()));
             m_evaluator.pop_back();
 
 #if INSTRUMENT_WINDOW_CREATION

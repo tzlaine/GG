@@ -390,7 +390,7 @@ bool expression_parser::is_primary_expression(array_t& expression_stack)
     
     if (is_name(result))
         {
-        expression_stack.push_back(move(result));
+        expression_stack.push_back(::adobe::move(result));
         expression_stack.push_back(any_regular_t(name_k));
         return true;
         }
@@ -399,7 +399,7 @@ bool expression_parser::is_primary_expression(array_t& expression_stack)
              || is_token(string_k, result)
              || is_keyword(empty_k))
         {
-        expression_stack.push_back(move(result));
+        expression_stack.push_back(::adobe::move(result));
         return true;
         }
     else if (is_array(expression_stack)) return true;

@@ -649,7 +649,7 @@ void sheet_t::implementation_t::cell_t::calculate()
     any_regular_t result = term_m.empty() ? calculator_m() : term_m();
     
     dirty_m = (result != state_m);
-    state_m = move(result);
+    state_m = ::adobe::move(result);
     evaluated_m = true;
 }
 
@@ -666,7 +666,7 @@ sheet_t::implementation_t::cell_t::cell_t(name_t name, any_regular_t x,
     relation_count_m(0),
     initial_relation_count_m(0),
     dirty_m(false),
-    state_m(move(x)),
+    state_m(::adobe::move(x)),
     cell_set_pos_m(cell_set_pos),
     interface_input_m(0)
 {
@@ -725,7 +725,7 @@ sheet_t::implementation_t::cell_t::cell_t(access_specifier_t specifier, name_t n
     evaluated_m(true),
     relation_count_m(0),
     initial_relation_count_m(0),
-    state_m(move(x)),
+    state_m(::adobe::move(x)),
     cell_set_pos_m(cell_set_pos),
     interface_input_m(0)
 { }
@@ -851,7 +851,7 @@ any_regular_t sheet_t::implementation_t::inspect(const array_t& expression)
 {
     machine_m.evaluate(expression);
     
-    any_regular_t result = move(machine_m.back());
+    any_regular_t result = ::adobe::move(machine_m.back());
     machine_m.pop_back();
     
     return result;
@@ -929,7 +929,7 @@ void sheet_t::implementation_t::add_input(name_t name, const line_position_t& po
 
     if (initializer.size()) initial_value = calculate_expression(position, initializer);
 
-    cell_set_m.push_back(cell_t(name, move(initial_value), cell_set_m.size()));
+    cell_set_m.push_back(cell_t(name, ::adobe::move(initial_value), cell_set_m.size()));
     // REVISIT (sparent) : Non-transactional on failure.
     input_index_m.insert(cell_set_m.back());
 }
@@ -1100,7 +1100,7 @@ any_regular_t sheet_t::implementation_t::calculate_expression(
 {
     evaluate(machine_m, position, expression);
     
-    any_regular_t result = move(machine_m.back());
+    any_regular_t result = ::adobe::move(machine_m.back());
     machine_m.pop_back();
         
     return result;

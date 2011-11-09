@@ -220,7 +220,7 @@ struct any_regular_model_local : any_regular_interface_t, boost::noncopyable
     
     template <typename U>
     explicit any_regular_model_local(U x, typename move_sink<U, T>::type = 0)
-        : interface_type(vtable_s), object_m(move(x)) { }
+        : interface_type(vtable_s), object_m(::adobe::move(x)) { }
         
     static const any_regular_model_local& self(const interface_type& x)
     { return static_cast<const any_regular_model_local&>(x); }
@@ -238,7 +238,7 @@ struct any_regular_model_local : any_regular_interface_t, boost::noncopyable
     { return ::new(storage) any_regular_model_local(self(x).object_m); }
     
     static interface_type* move_clone(interface_type& x, void* storage)
-    { return ::new(storage) any_regular_model_local(move(self(x).object_m)); }
+    { return ::new(storage) any_regular_model_local(::adobe::move(self(x).object_m)); }
     
     static void assign(interface_type& x, const interface_type& y)
     { self(x).object_m = self(y).object_m; }
@@ -552,7 +552,7 @@ class any_regular_t : boost::equality_comparable<any_regular_t, any_regular_t>
     
     template <typename T>
     explicit any_regular_t(T x, typename move_sink<T>::type = 0) : data_ptr_m(&data_m[0])
-    { ::new (storage()) typename traits<T>::model_type(move(x)); }
+    { ::new (storage()) typename traits<T>::model_type(::adobe::move(x)); }
     
     /*!@}*/
     
@@ -613,7 +613,7 @@ class any_regular_t : boost::equality_comparable<any_regular_t, any_regular_t>
     any_regular_t& assign(T x, typename move_sink<T>::type = 0)
     { 
         object().destruct();
-        ::new (storage()) typename traits<T>::model_type(move(x));
+        ::new (storage()) typename traits<T>::model_type(::adobe::move(x));
         return *this;
     }
     

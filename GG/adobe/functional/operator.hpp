@@ -104,7 +104,7 @@ struct assign
     void operator()(const T& x, T& r, typename copy_sink<T>::type = 0) { r = x; }
     
     template <typename T> // T models Movable
-    void operator()(T x, T& r, typename move_sink<T>::type = 0) { r = move(x); }
+    void operator()(T x, T& r, typename move_sink<T>::type = 0) { r = ::adobe::move(x); }
 };
 
 /*************************************************************************************************/

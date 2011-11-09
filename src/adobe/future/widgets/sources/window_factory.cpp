@@ -28,13 +28,13 @@ void create_widget(const dictionary_t& parameters,
 {
     std::string name;
     bool        grow(false);
-    bool        move(false);
+    bool        move_(false);
     bool        on_top(false);
     bool        modal(true);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_grow, grow);
-    get_value(parameters, key_move, move);
+    get_value(parameters, key_move, move_);
     get_value(parameters, key_on_top, on_top);
     get_value(parameters, key_modal, modal);
 
@@ -43,7 +43,7 @@ void create_widget(const dictionary_t& parameters,
     if (grow)
         flags |= GG::RESIZABLE;
 
-    if (move)
+    if (move_)
         flags |= GG::DRAGABLE;
 
     if (on_top)

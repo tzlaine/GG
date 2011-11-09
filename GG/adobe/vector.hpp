@@ -324,7 +324,7 @@ void vector<T, A>::append(I f, I l, std::input_iterator_tag) { while (f != l) { 
 template <typename T, typename A>
 template <typename I> // I models InputIterator
 void vector<T, A>::move_append(I f, I l, std::input_iterator_tag)
-{ while (f != l) { push_back(move(*f)); ++f; } }
+{ while (f != l) { push_back(::adobe::move(*f)); ++f; } }
     
 template <typename T, typename A>
 template <typename I> // I models ForwardIterator
@@ -412,13 +412,13 @@ typename vector<T, A>::iterator vector<T, A>::move_insert(iterator p, I f, I l)
         if (n < after) {
             move_append(last - n, last);
             move_backward(p, last - n, last);
-            move(f, l, p);
+            ::adobe::move(f, l, p);
         } else {
             I m = f;
             std::advance(m, after);
             move_append(m, l);
             move_append(p, last);
-            move(f, m, p);
+            ::adobe::move(f, m, p);
         }
     }
     return begin() + before + n;
@@ -469,7 +469,7 @@ typename vector<T, A>::iterator vector<T, A>::insert(iterator p, size_type n, co
 template <typename T, typename A>
 typename vector<T, A>::iterator vector<T, A>::erase(iterator f, iterator l)
 {
-    iterator i = move(l, end(), f);
+    iterator i = ::adobe::move(l, end(), f);
     for (iterator b(i), e(end()); b != e; ++b) {
         b->~value_type();
     }

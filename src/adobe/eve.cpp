@@ -474,8 +474,8 @@ std::pair<long, long> eve_t::implementation_t::adjust(evaluate_options_t options
     
     adobe::for_each(preorder_range(), &proxy_tree_t::value_type::place);
 
-    return std::make_pair<long>(proxies_m.front().place_m.horizontal().length_m,
-                                proxies_m.front().place_m.vertical().length_m);
+    return std::pair<long, long>(proxies_m.front().place_m.horizontal().length_m,
+                                 proxies_m.front().place_m.vertical().length_m);
 }
 
 /*************************************************************************************************/

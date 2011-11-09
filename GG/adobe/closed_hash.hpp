@@ -448,7 +448,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
     
     template <typename I> // I models ForwardIterator
     void move_insert(I first, I last)
-    { while (first != last) { insert(move(*first)); ++first; } }
+    { while (first != last) { insert(::adobe::move(*first)); ++first; } }
     
     /*
         NOTE (sparent): If there is not enough space for one element we will reserve the space
@@ -480,12 +480,12 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
             {
             iterator found = find(node, key_function()(x));
             if (found != end()) {
-                *found = move(x);
+                *found = ::adobe::move(x);
                 return std::make_pair(found, false);
             }
             
             iterator free(begin_free());
-            insert_raw(free, move(x), state_misplaced);
+            insert_raw(free, ::adobe::move(x), state_misplaced);
             unsafe::splice_node_range(node, free, free);
             node = free;
             }
@@ -493,7 +493,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
         case state_misplaced:
             {
             iterator free(begin_free());
-            insert_raw(free, move(*node), state_misplaced);
+            insert_raw(free, ::adobe::move(*node), state_misplaced);
             
             unsafe::set_next(boost::prior(node), free);
             unsafe::set_next(free, boost::next(node));
@@ -503,7 +503,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
             // fall through
         default: // state_free
             {
-            insert_raw(node, move(x), state_home);
+            insert_raw(node, ::adobe::move(x), state_home);
             unsafe::splice_node_range(end(), node, node);
             }
         }
@@ -520,7 +520,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
     template <typename U>
     iterator insert(iterator, U x, typename move_sink<U, value_type>::type = 0)
     {
-        return insert(move(x)).first;
+        return insert(::adobe::move(x)).first;
     }
     
     ~closed_hash_set()

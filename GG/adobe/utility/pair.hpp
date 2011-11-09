@@ -79,11 +79,11 @@ struct pair : boost::totally_ordered<pair<T1, T2>, pair<T1, T2>, empty_base<pair
     
     pair() : first(), second() { }
     
-    pair(move_from<pair> x) : first(move(x.source.first)), second(move(x.source.second)) { }
+    pair(move_from<pair> x) : first(::adobe::move(x.source.first)), second(::adobe::move(x.source.second)) { }
     
-    pair& operator=(pair x) { first = move(x.first); second = move(x.second); return *this; }
+    pair& operator=(pair x) { first = ::adobe::move(x.first); second = ::adobe::move(x.second); return *this; }
     
-    pair(T1 x, T2 y) : first(move(x)), second(move(y)) { }
+    pair(T1 x, T2 y) : first(::adobe::move(x)), second(::adobe::move(y)) { }
     
     template <typename U1, typename U2>
     pair(const pair<U1, U2>& p) : first(p.first), second(p.second) { }
@@ -107,7 +107,7 @@ struct pair : boost::totally_ordered<pair<T1, T2>, pair<T1, T2>, empty_base<pair
 //! \ingroup asl_pair
 template <typename T1, typename T2>
 inline pair<T1, T2> make_pair(T1 x, T2 y)
-{ return pair<T1, T2>(move(x), move(y)); }
+{ return pair<T1, T2>(::adobe::move(x), ::adobe::move(y)); }
 
 /*************************************************************************************************/
 

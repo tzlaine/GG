@@ -392,7 +392,7 @@ template <typename T>
 template <typename U>
 void circular_queue<T>::push_back(U x, typename move_sink<U, T>::type)
 {
-    *end_m = move(x);
+    *end_m = ::adobe::move(x);
     
     bool was_full (full());
     

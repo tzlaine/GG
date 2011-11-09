@@ -396,7 +396,7 @@ template <typename I, // I models InputIterator
 O move(I f, I l, O result)
 {
     while (f != l) {
-        *result = move(*f);
+        *result = ::adobe::move(*f);
         ++f; ++result;
     }
     return result;
@@ -411,7 +411,7 @@ for movable types, otherwise with copy semantics.
 */
 template <typename I, // I models InputRange
           typename O> // O models OutputIterator
-inline O move(I& in, O out) { return move(boost::begin(in), boost::end(in), out); }
+inline O move(I& in, O out) { return ::adobe::move(boost::begin(in), boost::end(in), out); }
 
 /*************************************************************************************************/
  
@@ -426,7 +426,7 @@ O move_backward(I f, I l, O result)
 {
     while (f != l) {
         --l; --result;
-        *result = move(*l);
+        *result = ::adobe::move(*l);
     }
     return result;
 }
@@ -462,7 +462,7 @@ class back_move_iterator : public std::iterator<std::output_iterator_tag, void, 
     explicit back_move_iterator(C& x) : container_m(&x) { }
     
     back_move_iterator& operator=(typename C::value_type x)
-    { container_m->push_back(move(x)); return *this; }
+    { container_m->push_back(::adobe::move(x)); return *this; }
     
     back_move_iterator& operator*() { return *this; }
     back_move_iterator& operator++() { return *this; }
@@ -490,7 +490,7 @@ inline back_move_iterator<C> back_mover(C& x) { return back_move_iterator<C>(x);
 template <typename T, typename U> // T models Regular
 inline void move_construct(T* p, U& x, typename move_sink<U, T>::type = 0)
 {
-    ::new(static_cast<void*>(p)) T(move(x));
+    ::new(static_cast<void*>(p)) T(::adobe::move(x));
 }
 
 /*************************************************************************************************/

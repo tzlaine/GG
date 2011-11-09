@@ -107,7 +107,7 @@ struct poly_state_remote : Interface
     
     template <typename U>
     explicit poly_state_remote(U x, typename move_sink<U, value_type>::type = 0)
-        : value_ptr_m(::new value_type(move(x))) { }
+        : value_ptr_m(::new value_type(::adobe::move(x))) { }
     
     ~poly_state_remote()
     { delete value_ptr_m; }
@@ -144,7 +144,7 @@ struct poly_state_local : Interface
     value_type& get() { return value_m; }
 
     poly_state_local(move_from<poly_state_local> x)
-        : value_m(move(x.source.value_m)){ }
+        : value_m(::adobe::move(x.source.value_m)){ }
 
     template <typename U>
     explicit poly_state_local(const U& x, typename copy_sink<U, value_type>::type = 0)
@@ -152,7 +152,7 @@ struct poly_state_local : Interface
     
     template <typename U>
     explicit poly_state_local(U x, typename move_sink<U, value_type>::type = 0)
-        : value_m(move(x)) { }
+        : value_m(::adobe::move(x)) { }
     
     // Precondition : this->type_info() == x.type_info()
     void assign(const poly_copyable_interface& x)
@@ -278,7 +278,7 @@ struct poly_base {
     explicit poly_base(T x, 
         typename move_sink<T>::type = 0,
         typename boost::disable_if<boost::is_base_of<poly_base, T> >::type* = 0)
-    { ::new (storage()) implementation::poly_instance<Instance<T> >(move(x)); }
+    { ::new (storage()) implementation::poly_instance<Instance<T> >(::adobe::move(x)); }
 
 
 
@@ -305,7 +305,7 @@ struct poly_base {
         if (a.type_info() == b.type_info()) { a.exchange(b); return; }
 
         // x->tmp
-        poly_base tmp(move(x));
+        poly_base tmp(::adobe::move(x));
         a.~interface_type();
         
         // y->x
@@ -435,7 +435,7 @@ T must be a regular type modeling the concept represented by F
 
     poly(move_from<poly> x) : F(move_from<F>(x.source)) {}
     
-    poly& operator=(poly x) { static_cast<F&>(*this) = move(static_cast<F&>(x)); return *this; }
+    poly& operator=(poly x) { static_cast<F&>(*this) = ::adobe::move(static_cast<F&>(x)); return *this; }
 
     poly() : F() {}
 };

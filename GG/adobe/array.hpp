@@ -30,10 +30,10 @@ inline void push_back(array_t& v, const T& x, typename copy_sink<T>::type = 0)
 
 template <typename T> // T models Regular
 inline void push_back(array_t& v, T x, typename move_sink<T>::type = 0)
-{ v.push_back(any_regular_t(move(x))); }
+{ v.push_back(any_regular_t(::adobe::move(x))); }
 
 inline void push_back(array_t& v, any_regular_t x)
-{ v.push_back(move(x)); }
+{ v.push_back(::adobe::move(x)); }
 
 /**************************************************************************************************/
 

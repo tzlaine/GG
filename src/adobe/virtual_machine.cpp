@@ -648,11 +648,11 @@ void virtual_machine_t::implementation_t::array_operator()
     for (stack_type::iterator first(value_stack_m.end() - count), last(value_stack_m.end());
         first != last; ++first)
     {
-        result.push_back(move(*first));
+        result.push_back(::adobe::move(*first));
     }
             
     value_stack_m.resize(value_stack_m.size() - count);
-    value_stack_m.push_back(any_regular_t(move(result)));
+    value_stack_m.push_back(any_regular_t(::adobe::move(result)));
 }
 
 /*************************************************************************************************/
@@ -670,12 +670,12 @@ void virtual_machine_t::implementation_t::dictionary_operator()
     {
         name_t name = first->cast<adobe::name_t>();
         ++first;
-        result.insert(make_pair(name, move(*first)));
+        result.insert(make_pair(name, ::adobe::move(*first)));
         ++first;
     }
         
     value_stack_m.resize(value_stack_m.size() - count);
-    value_stack_m.push_back(any_regular_t(move(result)));
+    value_stack_m.push_back(any_regular_t(::adobe::move(result)));
 }
 
 /*************************************************************************************************/

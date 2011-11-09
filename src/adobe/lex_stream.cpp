@@ -497,7 +497,7 @@ void lex_stream_t::implementation_t::parse_token(char c)
         ||  is_simple(c, result)))
         { throw_parser_exception("Syntax Error"); }
 
-    put_token(move(result));
+    put_token(::adobe::move(result));
 }
 
 /*************************************************************************************************/

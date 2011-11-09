@@ -148,7 +148,7 @@ adobe::dictionary_t evaluate_named_arguments(adobe::virtual_machine_t& evaluator
 {
     evaluator.evaluate(arguments);
     
-    adobe::dictionary_t result(move(evaluator.back().cast<adobe::dictionary_t>()));
+    adobe::dictionary_t result(::adobe::move(evaluator.back().cast<adobe::dictionary_t>()));
     
     evaluator.pop_back();
     return result;

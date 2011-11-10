@@ -79,7 +79,25 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
 }
 
 Pt TextControl::MinUsableSize() const
-{ return m_text_lr - m_text_ul; }
+{
+    Pt min_size = MinSize();
+    if (m_text.empty()) {
+        m_min_usable_size = Pt();
+    } else if (m_fit_to_text) {
+        m_min_usable_size = m_text_lr - m_text_ul;
+    } else if (0 < min_size.x) {
+        if (min_size.x != m_last_min_width) {
+            m_min_usable_size = m_font->TextExtent(m_text, m_format, min_size.x);
+            m_last_min_width = min_size.x;
+        }
+    } else {
+        std::size_t min_chars = 8;
+        if (!m_line_data.empty())
+            min_chars = std::min(min_chars, m_line_data[0].char_data.size());
+        m_min_usable_size = Pt(static_cast<int>(min_chars) * m_font->SpaceWidth(), m_font->Height());
+    }
+    return m_min_usable_size;
+}
 
 const std::string& TextControl::Text() const
 { return m_text; }

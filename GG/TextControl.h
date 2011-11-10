@@ -256,6 +256,8 @@ private:
     bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
     Pt                          m_text_lr;     ///< stored relative to the control's UpperLeft()
+    mutable X                   m_last_min_width;
+    mutable Pt                  m_min_usable_size;
 };
 
 } // namespace GG

@@ -1544,12 +1544,17 @@ struct EveLayout::Impl
 #if INSTRUMENT_ADD_TO_HORIZONTAL
         std::cout << "AddChildrenToHorizontalLayout()\n";
 #endif
+        const bool proportional = wnd.m_child_horizontal == adobe::key_align_proportional;
+        if (proportional)
+            layout.ResizeLayout(1, children.size() * 2 - 1);
+
+        std::size_t column = 0;
         for (std::size_t i = 0; i < children.size(); ++i) {
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "    child " << i << ":\n";
 #endif
             Pt min_usable_size = children[i].m_wnd->MinUsableSize();
-            layout.SetMinimumColumnWidth(i, min_usable_size.x);
+            layout.SetMinimumColumnWidth(column, min_usable_size.x);
             std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
@@ -1560,17 +1565,27 @@ struct EveLayout::Impl
             std::cout << "        horizontal_fill=" << horizontal_fill << "\n";
             std::cout << "        vertical_fill=" << vertical_fill << "\n";
 #endif
-            layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(raw_alignments.first, raw_alignments.second));
+            if (i && proportional) {
+                layout.SetColumnStretch(column, 1.0);
+#if INSTRUMENT_ADD_TO_HORIZONTAL
+                std::cout << "        layout.Add(proportional space " << column << ")\n";
+                std::cout << "        layout.ColumnStretch(" << column << ")=" << layout.ColumnStretch(column) << "\n";
+#endif
+                ++column;
+            }
+            layout.Add(children[i].m_wnd.release(), 0, column, 1, 1, AlignmentFlags(raw_alignments.first, raw_alignments.second));
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments.first, raw_alignments.second) << ")\n";
 #endif
             if (horizontal_fill)
-                layout.SetColumnStretch(i, 1.0);
+                layout.SetColumnStretch(column, 1.0);
             if (vertical_fill)
                 layout.SetRowStretch(0, 1.0);
 #if INSTRUMENT_ADD_TO_HORIZONTAL
-            std::cout << "        layout.layout.ColumnStretch(i)=" << layout.ColumnStretch(i) << "\n";
+            std::cout << "        layout.ColumnStretch(" << column << ")=" << layout.ColumnStretch(column) << "\n";
+            std::cout << "        layout.RowStretch(0)=" << layout.RowStretch(0) << "\n";
 #endif
+            ++column;
         }
     }
 

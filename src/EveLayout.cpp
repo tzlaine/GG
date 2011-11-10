@@ -1554,8 +1554,8 @@ struct EveLayout::Impl
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
 #endif
-            bool horizontal_fill = raw_alignments.first == adobe::key_align_fill;
-            bool vertical_fill = raw_alignments.second == adobe::key_align_fill;
+            bool horizontal_fill = children[i].m_horizontal == adobe::key_align_fill;
+            bool vertical_fill = children[i].m_vertical == adobe::key_align_fill;
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "        horizontal_fill=" << horizontal_fill << "\n";
             std::cout << "        vertical_fill=" << vertical_fill << "\n";

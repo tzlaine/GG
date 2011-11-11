@@ -137,7 +137,7 @@ GG_ENUM_STREAM_OUT(Button::ButtonState)
     place the button and the text in the proper orientation because the entire
     control's size is too small, the button and text are positioned in their
     default spots (button on left, text on right, centered vertically). */
-class GG_API StateButton : public TextControl
+class GG_API StateButton : public Control
 {
 public:
     /** \name Signal Types */ ///@{
@@ -151,30 +151,32 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt       MinUsableSize() const;
+    virtual Pt         MinUsableSize() const;
 
-    bool             Checked() const;       ///< Returns true if button is checked
-    Clr              InteriorColor() const; ///< Returns the interior color of the box, circle, or other enclosing shape
+    bool               Checked() const;       ///< Returns true if button is checked
+    Clr                InteriorColor() const; ///< Returns the interior color of the box, circle, or other enclosing shape
+
+    const std::string& Text() const;          ///< Returns the text of this button.
 
     /** Returns the visual style of the button \see StateButtonStyle */
-    StateButtonStyle Style() const;
+    StateButtonStyle   Style() const;
 
     mutable CheckedSignalType CheckedSignal; ///< The checked signal object for this StaticButton
     //@}
 
     /** \name Mutators */ ///@{
-    virtual void     Render();
-    virtual void     SizeMove(const Pt& ul, const Pt& lr);
+    virtual void       Render();
+    virtual void       SizeMove(const Pt& ul, const Pt& lr);
 
-    void             Reset();                 ///< Unchecks button
-    void             SetCheck(bool b = true); ///< (Un)checks button
-    void             SetButtonPosition(const Pt& ul, const Pt& lr); ///< places the button within the control
-    void             SetDefaultButtonPosition(); ///< Places the button to its default positionwithin the control
-    virtual void     SetColor(Clr c);         ///< Sets the color of the button; does not affect text color
-    void             SetInteriorColor(Clr c); ///< Sets the interior color of the box, circle, or other enclosing shape
+    void               Reset();                 ///< Unchecks button
+    void               SetCheck(bool b = true); ///< (Un)checks button
+    void               SetButtonPosition(const Pt& ul, const Pt& lr); ///< places the button within the control
+    void               SetDefaultButtonPosition(); ///< Places the button to its default positionwithin the control
+    virtual void       SetColor(Clr c);         ///< Sets the color of the button; does not affect text color
+    void               SetInteriorColor(Clr c); ///< Sets the interior color of the box, circle, or other enclosing shape
 
     /** Sets the visual style of the button \see StateButtonStyle */
-    void             SetStyle(StateButtonStyle bs);
+    void               SetStyle(StateButtonStyle bs);
     //@}
 
 protected:
@@ -195,13 +197,14 @@ protected:
     //@}
 
 private:
+    TextControl*      m_text;
+
     bool              m_checked;     ///< true when this button in a checked, active state
     Clr               m_int_color;   ///< color inside border
     StateButtonStyle  m_style;       ///< style of appearance to use when rendering button
 
     Pt                m_button_ul;
     Pt                m_button_lr;
-    Pt                m_text_ul;
 };
 
 

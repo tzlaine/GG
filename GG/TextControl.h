@@ -152,6 +152,16 @@ public:
     /** Returns the lower-right corner of the text as it is would be rendered
         if it were not bound to the dimensions of this control. */
     Pt TextLowerRight() const;
+
+    /** Returns the line data for the text in this TextControl. */
+    const std::vector<Font::LineData>& GetLineData() const;
+
+    /** Returns the Font used by this TextControl to render its text. */
+    const boost::shared_ptr<Font>& GetFont() const;
+
+    /** Returns true iff this TextControl was constructed using the ctor
+        without width and height parameters.  \see TextControl::SetText() */
+    bool FitToText() const;
     //@}
 
     /** \name Mutators */ ///@{
@@ -224,18 +234,6 @@ public:
 protected:
     /** \name Structors */ ///@{
     TextControl(); ///< Default ctor.
-    //@}
-
-    /** \name Accessors */ ///@{
-    /** Returns the line data for the text in this TextControl. */
-    const std::vector<Font::LineData>& GetLineData() const;
-
-    /** Returns the Font used by this TextControl to render its text. */
-    const boost::shared_ptr<Font>& GetFont() const;
-
-    /** Returns true iff this TextControl was constructed using the ctor
-        without width and height parameters.  \see TextControl::SetText() */
-    bool FitToText() const;
     //@}
 
 private:

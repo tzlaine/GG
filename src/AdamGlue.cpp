@@ -92,11 +92,13 @@ AdamCellGlue<StateButton, bool, bool>::AdamCellGlue(
 
 void AdamCellGlue<StateButton, bool, bool>::SheetChanged(const adobe::any_regular_t &any)
 {
+#if 0
     bool new_value;
     if (any.cast<bool>(new_value))
         m_state_button->SetCheck(new_value);
     else
         m_state_button->SetText(detail::AnyCast<adobe::string_t, std::string>(any));
+#endif
 }
 
 void AdamCellGlue<StateButton, bool, bool>::Enable(bool b)

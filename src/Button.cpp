@@ -35,6 +35,8 @@
 using namespace GG;
 
 namespace {
+    const int BEVEL = 2;
+
     void ClickedEcho()
     { std::cerr << "GG SIGNAL : Button::ClickedSignal()\n"; }
 
@@ -211,7 +213,7 @@ void Button::RenderDefault()
 // GG::StateButton
 ////////////////////////////////////////////////
 StateButton::StateButton() :
-    TextControl(),
+    Control(),
     m_checked(false),
     m_style(SBSTYLE_3D_XBOX)
 {}
@@ -219,11 +221,14 @@ StateButton::StateButton() :
 StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
                          Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          Flags<WndFlag> flags/* = INTERACTIVE*/) :
-    TextControl(x, y, w, h, str, font, text_color, format, flags),
+    Control(x, y, w, h, flags),
+    m_text(new TextControl(X0, Y0, str, font, text_color, format)),
     m_checked(false),
     m_int_color(interior),
     m_style(style)
 {
+    AttachChild(m_text);
+
     m_color = color;
     SetDefaultButtonPosition();
 
@@ -233,9 +238,9 @@ StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost
 
 Pt StateButton::MinUsableSize() const
 {
-    Pt text_lr = m_text_ul + TextControl::MinUsableSize();
-    return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, m_text_ul.x),
-              std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, m_text_ul.y));
+    Pt text_ul = m_text->RelativeUpperLeft(), text_lr = m_text->RelativeLowerRight();
+    return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, text_ul.x),
+              std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, text_ul.y));
 }
 
 bool StateButton::Checked() const
@@ -244,20 +249,19 @@ bool StateButton::Checked() const
 Clr StateButton::InteriorColor() const
 { return m_int_color; }
 
+const std::string& StateButton::Text() const
+{ return m_text->Text(); }
+
 StateButtonStyle StateButton::Style() const
 { return m_style; }
 
 void StateButton::Render()
 {
-    const int BEVEL = 2;
-
     // draw button
     Pt cl_ul = ClientUpperLeft();
     Pt cl_lr = ClientLowerRight();
     Pt bn_ul = cl_ul + m_button_ul;
     Pt bn_lr = cl_ul + m_button_lr;
-
-    Pt additional_text_offset;
 
     const Pt DOUBLE_BEVEL(X(2 * BEVEL), Y(2 * BEVEL));
 
@@ -304,10 +308,8 @@ void StateButton::Render()
     case SBSTYLE_3D_TOP_ATTACHED_TAB: {
         Clr color_to_use = m_checked ? m_color : DarkColor(m_color);
         color_to_use = Disabled() ? DisabledColor(color_to_use) : color_to_use;
-        if (!m_checked) {
+        if (!m_checked)
             cl_ul.y += BEVEL;
-            additional_text_offset.y = Y(BEVEL / 2);
-        }
         BeveledRectangle(cl_ul, cl_lr,
                          color_to_use, color_to_use,
                          true, BEVEL,
@@ -317,20 +319,14 @@ void StateButton::Render()
     case SBSTYLE_3D_TOP_DETACHED_TAB: {
         Clr color_to_use = m_checked ? m_color : DarkColor(m_color);
         color_to_use = Disabled() ? DisabledColor(color_to_use) : color_to_use;
-        if (!m_checked) {
+        if (!m_checked)
             cl_ul.y += BEVEL;
-            additional_text_offset.y = Y(BEVEL / 2);
-        }
         BeveledRectangle(cl_ul, cl_lr,
                          color_to_use, color_to_use,
                          true, BEVEL);
         break;
     }
     }
-
-    OffsetMove(m_text_ul + additional_text_offset);
-    TextControl::Render();
-    OffsetMove(-(m_text_ul + additional_text_offset));
 }
 
 void StateButton::LClick(const Pt& pt, Flags<ModKey> mod_keys)
@@ -344,7 +340,7 @@ void StateButton::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 void StateButton::SizeMove(const Pt& ul, const Pt& lr)
 {
     RepositionButton();
-    TextControl::SizeMove(ul, lr);
+    Control::SizeMove(ul, lr);
 }
 
 void StateButton::Reset()
@@ -355,11 +351,11 @@ void StateButton::SetCheck(bool b/* = true*/)
 
 void StateButton::RepositionButton()
 {
-    if (m_style == SBSTYLE_3D_TOP_ATTACHED_TAB ||
-        m_style == SBSTYLE_3D_TOP_DETACHED_TAB) {
+    Pt text_ul;
+    if (m_style == SBSTYLE_3D_TOP_ATTACHED_TAB || m_style == SBSTYLE_3D_TOP_DETACHED_TAB) {
         m_button_ul = Pt();
         m_button_lr = Pt();
-        m_text_ul = Pt();
+        text_ul = Pt(X0, Y(BEVEL / 2));
     } else {
         X w = Width();
         Y h = Height();
@@ -367,18 +363,18 @@ void StateButton::RepositionButton()
         const Y BN_H = m_button_lr.y - m_button_ul.y;
         X bn_x = m_button_ul.x;
         Y bn_y = m_button_ul.y;
-        Flags<TextFormat> format = GetTextFormat();
+        Flags<TextFormat> format = m_text->GetTextFormat();
         Flags<TextFormat> original_format = format;
         const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
         if (format & FORMAT_VCENTER)       // center button vertically
             bn_y = (h - BN_H) / 2.0 + 0.5;
         if (format & FORMAT_TOP) {         // put button at top, text just below
             bn_y = Y0;
-            m_text_ul.y = BN_H;
+            text_ul.y = BN_H;
         }
         if (format & FORMAT_BOTTOM) {      // put button at bottom, text just above
             bn_y = (h - BN_H);
-            m_text_ul.y = h - (BN_H * (1 + SPACING)) - (static_cast<int>(GetLineData().size() - 1) * GetFont()->Lineskip() + GetFont()->Height()) + 0.5;
+            text_ul.y = h - (BN_H * (1 + SPACING)) - (static_cast<int>(m_text->GetLineData().size() - 1) * m_text->GetFont()->Lineskip() + m_text->GetFont()->Height()) + 0.5;
         }
 
         if (format & FORMAT_CENTER) {      // center button horizontally
@@ -392,18 +388,19 @@ void StateButton::RepositionButton()
         if (format & FORMAT_LEFT) {        // put button at left, text just to the right
             bn_x = X0;
             if (format & FORMAT_VCENTER)
-                m_text_ul.x = BN_W * (1 + SPACING) + 0.5;
+                text_ul.x = BN_W * (1 + SPACING) + 0.5;
         }
         if (format & FORMAT_RIGHT) {       // put button at right, text just to the left
             bn_x = (w - BN_W);
             if (format & FORMAT_VCENTER)
-                m_text_ul.x = -BN_W * (1 + SPACING) + 0.5;
+                text_ul.x = -BN_W * (1 + SPACING) + 0.5;
         }
         if (format != original_format)
-            SetTextFormat(format);
+            m_text->SetTextFormat(format);
         m_button_ul = Pt(bn_x, bn_y);
         m_button_lr = m_button_ul + Pt(BN_W, BN_H);
     }
+    m_text->MoveTo(text_ul);
 }
 
 void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
@@ -414,8 +411,8 @@ void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
     Y bn_h = lr.y - ul.y;
 
     if (bn_w <= 0 || bn_h <= 0) {              // if one of these is invalid,
-        bn_w = X(GetFont()->PointSize()); // set button width and height to text height
-        bn_h = Y(GetFont()->PointSize());
+        bn_w = X(m_text->GetFont()->PointSize()); // set button width and height to text height
+        bn_h = Y(m_text->GetFont()->PointSize());
     }
 
     if (bn_x == -1 || bn_y == -1) {
@@ -447,7 +444,7 @@ Pt StateButton::ButtonLowerRight() const
 { return m_button_lr; }
 
 Pt StateButton::TextUpperLeft() const
-{ return m_text_ul; }
+{ return m_text->RelativeUpperLeft(); }
 
 
 ////////////////////////////////////////////////

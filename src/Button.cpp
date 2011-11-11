@@ -339,8 +339,8 @@ void StateButton::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 
 void StateButton::SizeMove(const Pt& ul, const Pt& lr)
 {
-    RepositionButton();
     Control::SizeMove(ul, lr);
+    RepositionButton();
 }
 
 void StateButton::Reset()
@@ -366,8 +366,10 @@ void StateButton::RepositionButton()
         Flags<TextFormat> format = m_text->GetTextFormat();
         Flags<TextFormat> original_format = format;
         const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
-        if (format & FORMAT_VCENTER)       // center button vertically
+        if (format & FORMAT_VCENTER) {      // center button vertically
             bn_y = (h - BN_H) / 2.0 + 0.5;
+            text_ul.y = (h - m_text->Height()) / 2.0 + 0.5;
+        }
         if (format & FORMAT_TOP) {         // put button at top, text just below
             bn_y = Y0;
             text_ul.y = BN_H;
@@ -379,10 +381,11 @@ void StateButton::RepositionButton()
 
         if (format & FORMAT_CENTER) {      // center button horizontally
             if (format & FORMAT_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                format |= FORMAT_LEFT;     // so go to the default (FORMAT_CENTER|FORMAT_LEFT)
+                format |= FORMAT_LEFT;     // so go to the default (FORMAT_LEFT|FORMAT_VCENTER)
                 format &= ~FORMAT_CENTER;
             } else {
-                bn_x = (w - bn_x) / 2.0 - BN_W / 2.0 + 0.5;
+                bn_x = (w - BN_W) / 2.0 + 0.5;
+                text_ul.x = (w - m_text->Width()) / 2.0 + 0.5;
             }
         }
         if (format & FORMAT_LEFT) {        // put button at left, text just to the right

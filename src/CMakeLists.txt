@@ -4,8 +4,6 @@ message("-- Configuring GiGi")
 
 set(THIS_LIB_SOURCES
 
-    AdamDlg.cpp
-    AdamGlue.cpp
     AdamParser.cpp
     AlignmentFlags.cpp
     Base.cpp
@@ -83,8 +81,6 @@ set(THIS_LIB_SOURCES
 
 if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
     set(THIS_LIB_SOURCES ${THIS_LIB_SOURCES}
-        EveGlue.cpp
-
         adobe/future/widgets/sources/edit_number.cpp
         adobe/future/widgets/sources/panel_factory.cpp
         adobe/future/widgets/sources/number_unit.cpp

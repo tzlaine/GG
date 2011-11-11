@@ -74,6 +74,9 @@ public:
 
     Wnd& Finish();
 
+    static char LabelTerminatingCharacter();
+    static void LabelTerminatingCharacter(char c);
+
 private:
     class Impl;
     Impl* m_impl;

@@ -119,6 +119,8 @@ void verbose_dump(const adobe::dictionary_t& dictionary, std::size_t indent)
 
 namespace {
 
+    char g_label_terminator = ':';
+
     StyleFactory& Factory()
     { return *GUI::GetGUI()->GetStyleFactory(); }
 
@@ -970,11 +972,15 @@ namespace {
         get_value(params, adobe::key_text_horizontal, text_horizontal);
         get_value(params, adobe::key_text_vertical, text_vertical);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(!name.empty() && *(name.end() - 1) == ':' ? adobe::name_label : adobe::name_static_text, // TODO: Generalize ':'.
-                                                              params,
-                                                              position,
-                                                              UNLABELED_CONTROL,
-                                                              NONCONTAINER));
+        std::auto_ptr<MakeWndResult> retval(
+            new MakeWndResult(!name.empty() && *(name.end() - 1) == g_label_terminator ?
+                              adobe::name_label :
+                              adobe::name_static_text,
+                              params,
+                              position,
+                              UNLABELED_CONTROL,
+                              NONCONTAINER)
+        );
 
         X w = static_cast<int>(characters) * CharWidth();
 
@@ -2001,10 +2007,17 @@ struct EveLayout::Impl
     Wnd* m_wnd;
 };
 
-
 ////////////////////////////////////////////////////////////
 // EveLayout                                              //
 ////////////////////////////////////////////////////////////
+
+// statics
+char EveLayout::LabelTerminatingCharacter()
+{ return g_label_terminator; }
+
+void EveLayout::LabelTerminatingCharacter(char c)
+{ g_label_terminator = c; }
+
 EveLayout::EveLayout(adobe::sheet_t& sheet) :
     m_impl(new Impl(sheet))
 {}

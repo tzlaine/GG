@@ -34,9 +34,6 @@
 #include <GG/Base.h>
 #include <GG/Exception.h>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/binary_object.hpp>
-
 
 namespace GG {
 
@@ -55,13 +52,7 @@ namespace GG {
     the OpenGL texture currently in use by the texture (if any) and create a
     new one.  When the load filename is "" or the image parameter is 0, all
     initialization functions fail silently, performing no initialization and
-    allocating no memory or OpenGL texture.  Serialized Textures save the
-    filename associated with the texture when available, so the originally
-    loaded file can be reloaded again later.  If no such file exists, such as
-    when a Texture is created from in-memory image data, the contents of the
-    Texture are read from video memory and saved as binary data.  A
-    default-constructed Texture will have niether a filename nor raw image
-    data. */
+    allocating no memory or OpenGL texture. */
 class GG_API Texture
 {
 public:
@@ -160,10 +151,6 @@ private:
     GLfloat      m_tex_coords[4];  ///< the texture coords used to blit from this texture by default (reflecting original image width and height)
     X            m_default_width;  ///< the original width and height of this texture to be used in blitting 
     Y            m_default_height;
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version);
 };
 
 /** \brief This class is a convenient way to store the info needed to use a

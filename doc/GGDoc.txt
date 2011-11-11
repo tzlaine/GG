@@ -25,7 +25,6 @@
     - Communication of UI controls via signals and slots
     - Support for 2D-, 3D-, and mixed-mode rendering
     - Managment of textures and fonts
-    - Serialization of UI elements
 
     \section nonfeatures Non-Features
     - GG is not fully threadsafe, due to its use of signals and slots

@@ -131,12 +131,7 @@ GG_ENUM_STREAM_OUT(Button::ButtonState)
     This class is for checkboxes and radio buttons, etc.  The button/checkbox
     area is determined from the text height and format; the button height and
     width will be the text height, and the the button will be positioned to
-    the left of the text and vertically the same as the text, unless the text
-    is centered, in which case the button and text will be centered, and the
-    button will appear above or below the text.  Whenever there is not room to
-    place the button and the text in the proper orientation because the entire
-    control's size is too small, the button and text are positioned in their
-    default spots (button on left, text on right, centered vertically). */
+    the left of the text and vertically the same as the text. */
 class GG_API StateButton : public Control
 {
 public:
@@ -170,8 +165,6 @@ public:
 
     void               Reset();                 ///< Unchecks button
     void               SetCheck(bool b = true); ///< (Un)checks button
-    void               SetButtonPosition(const Pt& ul, const Pt& lr); ///< places the button within the control
-    void               SetDefaultButtonPosition(); ///< Places the button to its default positionwithin the control
     virtual void       SetColor(Clr c);         ///< Sets the color of the button; does not affect text color
     void               SetInteriorColor(Clr c); ///< Sets the interior color of the box, circle, or other enclosing shape
 

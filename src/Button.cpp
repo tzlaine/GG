@@ -225,12 +225,14 @@ StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost
     m_text(new TextControl(X0, Y0, str, font, text_color, format)),
     m_checked(false),
     m_int_color(interior),
-    m_style(style)
+    m_style(style),
+    m_button_ul(),
+    m_button_lr(X(m_text->GetFont()->PointSize()), Y(m_text->GetFont()->PointSize()))
 {
     AttachChild(m_text);
 
     m_color = color;
-    SetDefaultButtonPosition();
+    RepositionButton();
 
     if (INSTRUMENT_ALL_SIGNALS)
         Connect(CheckedSignal, &CheckedEcho);
@@ -357,79 +359,17 @@ void StateButton::RepositionButton()
         m_button_lr = Pt();
         text_ul = Pt(X0, Y(BEVEL / 2));
     } else {
-        X w = Width();
-        Y h = Height();
+        const X W = Width();
+        const Y H = Height();
         const X BN_W = m_button_lr.x - m_button_ul.x;
         const Y BN_H = m_button_lr.y - m_button_ul.y;
-        X bn_x = m_button_ul.x;
-        Y bn_y = m_button_ul.y;
-        Flags<TextFormat> format = m_text->GetTextFormat();
-        Flags<TextFormat> original_format = format;
         const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
-        if (format & FORMAT_VCENTER) {      // center button vertically
-            bn_y = (h - BN_H) / 2.0 + 0.5;
-            text_ul.y = (h - m_text->Height()) / 2.0 + 0.5;
-        }
-        if (format & FORMAT_TOP) {         // put button at top, text just below
-            bn_y = Y0;
-            text_ul.y = BN_H;
-        }
-        if (format & FORMAT_BOTTOM) {      // put button at bottom, text just above
-            bn_y = (h - BN_H);
-            text_ul.y = h - (BN_H * (1 + SPACING)) - (static_cast<int>(m_text->GetLineData().size() - 1) * m_text->GetFont()->Lineskip() + m_text->GetFont()->Height()) + 0.5;
-        }
-
-        if (format & FORMAT_CENTER) {      // center button horizontally
-            if (format & FORMAT_VCENTER) { // if both the button and the text are to be centered, bad things happen
-                format |= FORMAT_LEFT;     // so go to the default (FORMAT_LEFT|FORMAT_VCENTER)
-                format &= ~FORMAT_CENTER;
-            } else {
-                bn_x = (w - BN_W) / 2.0 + 0.5;
-                text_ul.x = (w - m_text->Width()) / 2.0 + 0.5;
-            }
-        }
-        if (format & FORMAT_LEFT) {        // put button at left, text just to the right
-            bn_x = X0;
-            if (format & FORMAT_VCENTER)
-                text_ul.x = BN_W * (1 + SPACING) + 0.5;
-        }
-        if (format & FORMAT_RIGHT) {       // put button at right, text just to the left
-            bn_x = (w - BN_W);
-            if (format & FORMAT_VCENTER)
-                text_ul.x = -BN_W * (1 + SPACING) + 0.5;
-        }
-        if (format != original_format)
-            m_text->SetTextFormat(format);
-        m_button_ul = Pt(bn_x, bn_y);
+        m_button_ul = Pt(X0, (H - BN_H) / 2.0 + 0.5);
         m_button_lr = m_button_ul + Pt(BN_W, BN_H);
+        text_ul = Pt(BN_W * (1 + SPACING) + 0.5, (H - m_text->Height()) / 2.0 + 0.5);
     }
     m_text->MoveTo(text_ul);
 }
-
-void StateButton::SetButtonPosition(const Pt& ul, const Pt& lr)
-{
-    X bn_x = ul.x;
-    Y bn_y = ul.y;
-    X bn_w = lr.x - ul.x;
-    Y bn_h = lr.y - ul.y;
-
-    if (bn_w <= 0 || bn_h <= 0) {              // if one of these is invalid,
-        bn_w = X(m_text->GetFont()->PointSize()); // set button width and height to text height
-        bn_h = Y(m_text->GetFont()->PointSize());
-    }
-
-    if (bn_x == -1 || bn_y == -1) {
-        m_button_ul = Pt(X0, Y0);
-        m_button_lr = Pt(bn_w, bn_h);
-        RepositionButton();
-    } else {
-        m_button_ul = Pt(bn_x, bn_y);
-        m_button_lr = m_button_ul + Pt(bn_w, bn_h);
-    }
-}
-
-void StateButton::SetDefaultButtonPosition()
-{ SetButtonPosition(Pt(-X1, -Y1), Pt(-X1, -Y1)); }
 
 void StateButton::SetColor(Clr c)
 { Control::SetColor(c); }

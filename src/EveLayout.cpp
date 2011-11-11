@@ -225,12 +225,16 @@ namespace {
         NONCONTAINER
     };
 
+    adobe::aggregate_name_t name_layout = { "layout" };
+
     struct MakeWndResult
     {
-        MakeWndResult(const adobe::dictionary_t& params,
+        MakeWndResult(adobe::name_t type,
+                      const adobe::dictionary_t& params,
                       const adobe::line_position_t& position,
                       LabeledStatus labeled_status,
                       ContainerStatus container_status) :
+            m_type(type),
             m_horizontal(),
             m_vertical(),
             m_child_horizontal(),
@@ -246,7 +250,8 @@ namespace {
             m_container_status(container_status)
             { Init(params, position); }
 
-        MakeWndResult(const adobe::dictionary_t& params,
+        MakeWndResult(adobe::name_t type,
+                      const adobe::dictionary_t& params,
                       const adobe::line_position_t& position,
                       adobe::name_t default_horizontal,
                       adobe::name_t default_vertical,
@@ -254,6 +259,7 @@ namespace {
                       adobe::name_t default_child_vertical,
                       LabeledStatus labeled_status,
                       ContainerStatus container_status) :
+            m_type(type),
             m_horizontal(),
             m_vertical(),
             m_child_horizontal(),
@@ -322,6 +328,7 @@ namespace {
                 }
             }
 
+        adobe::name_t m_type;
         adobe::name_t m_horizontal;
         adobe::name_t m_vertical;
         adobe::name_t m_child_horizontal;
@@ -450,7 +457,7 @@ namespace {
         get_value(params, adobe::key_name, name);
         get_value(params, adobe::key_grow, grow);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_dialog, params, position, UNLABELED_CONTROL, CONTAINER));
 
         retval->m_wnd.reset(new Dialog(name, grow ? RESIZABLE : Flags<WndFlag>()));
 
@@ -482,7 +489,8 @@ namespace {
         // skipping items
         // skipping modifiers
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_button,
+                                                              params,
                                                               position,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
@@ -514,7 +522,8 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_checkbox,
+                                                              params,
                                                               position,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
@@ -549,7 +558,8 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_display_number,
+                                                              params,
                                                               position,
                                                               LABELED_CONTROL,
                                                               NONCONTAINER));
@@ -604,9 +614,10 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_edit_number,
+                                                              params,
                                                               position,
-                                                              LABELED_CONTROL,
+                                                              name.empty() ? UNLABELED_CONTROL : LABELED_CONTROL,
                                                               NONCONTAINER));
 
         std::auto_ptr<Edit> edit(Factory().NewEdit(X0, Y0, X1, "", DefaultFont(), CLR_GRAY));
@@ -653,9 +664,10 @@ namespace {
         // skipping max_characters
         // skipping monospaced
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_edit_text,
+                                                              params,
                                                               position,
-                                                              LABELED_CONTROL,
+                                                              name.empty() ? UNLABELED_CONTROL : LABELED_CONTROL,
                                                               NONCONTAINER));
 
         std::auto_ptr<Wnd> edit;
@@ -709,7 +721,8 @@ namespace {
         // TODO bind_controller ?
         // TODO: grow
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_image,
+                                                              params,
                                                               position,
                                                               adobe::key_align_center,
                                                               adobe::key_align_center,
@@ -744,9 +757,10 @@ namespace {
         // skipping popup_bind
         // skipping popup_placement
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_popup,
+                                                              params,
                                                               position,
-                                                              LABELED_CONTROL,
+                                                              name.empty() ? UNLABELED_CONTROL : LABELED_CONTROL,
                                                               NONCONTAINER));
 
         const std::size_t MAX_LINES = 10;
@@ -817,7 +831,8 @@ namespace {
         // TODO bind_controller ?
         // TODO touch ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_radio_button,
+                                                              params,
                                                               position,
                                                               UNLABELED_CONTROL,
                                                               CONTAINER));
@@ -847,7 +862,8 @@ namespace {
             );
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_radio_button_group,
+                                                              params,
                                                               position,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
@@ -877,7 +893,8 @@ namespace {
         Orientation orientation_ = orientation == adobe::key_vertical ? VERTICAL : HORIZONTAL;
 
         std::auto_ptr<MakeWndResult> retval(
-            new MakeWndResult(params,
+            new MakeWndResult(adobe::name_slider,
+                              params,
                               position,
                               orientation_ == VERTICAL ? adobe::key_align_center : adobe::name_t(),
                               orientation_ == VERTICAL ? adobe::name_t() : adobe::key_align_center,
@@ -925,7 +942,11 @@ namespace {
         // TODO bind_view ?
         // TODO bind_controller ?
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_tab_group,
+                                                              params,
+                                                              position,
+                                                              UNLABELED_CONTROL,
+                                                              CONTAINER));
 
         retval->m_wnd.reset(Factory().NewTabWnd(X0, Y0, X1, Y1, DefaultFont(), CLR_GRAY));
 
@@ -949,7 +970,8 @@ namespace {
         get_value(params, adobe::key_text_horizontal, text_horizontal);
         get_value(params, adobe::key_text_vertical, text_vertical);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(!name.empty() && *(name.end() - 1) == ':' ? adobe::name_label : adobe::name_static_text, // TODO: Generalize ':'.
+                                                              params,
                                                               position,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
@@ -988,7 +1010,8 @@ namespace {
     {
         // TODO
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_menu_bar,
+                                                              params,
                                                               position,
                                                               UNLABELED_CONTROL,
                                                               NONCONTAINER));
@@ -1018,9 +1041,10 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_int_spin,
+                                                              params,
                                                               position,
-                                                              LABELED_CONTROL,
+                                                              name.empty() ? UNLABELED_CONTROL : LABELED_CONTROL,
                                                               NONCONTAINER));
 
         int step = 1;
@@ -1078,9 +1102,10 @@ namespace {
         // TODO touch ?
         // skipping max_digits
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_double_spin,
+                                                              params,
                                                               position,
-                                                              LABELED_CONTROL,
+                                                              name.empty() ? UNLABELED_CONTROL : LABELED_CONTROL,
                                                               NONCONTAINER));
 
         double step_ = 1.0;
@@ -1129,7 +1154,11 @@ namespace {
                                         position);
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_overlay,
+                                                              params,
+                                                              position,
+                                                              UNLABELED_CONTROL,
+                                                              CONTAINER));
 
         retval->m_wnd.reset(new OverlayWnd(X0, Y0, X1, Y1));
 
@@ -1152,7 +1181,8 @@ namespace {
                                         position);
         }
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params,
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_group,
+                                                              params,
                                                               position,
                                                               adobe::name_t(),
                                                               adobe::name_t(),
@@ -1176,7 +1206,11 @@ namespace {
         get_value(params, adobe::key_value, value);
         get_value(params, adobe::key_bind, bind);
 
-        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(params, position, UNLABELED_CONTROL, CONTAINER));
+        std::auto_ptr<MakeWndResult> retval(new MakeWndResult(adobe::name_panel,
+                                                              params,
+                                                              position,
+                                                              UNLABELED_CONTROL,
+                                                              CONTAINER));
 
         retval->m_wnd.reset(new Panel(name));
 
@@ -1202,7 +1236,8 @@ namespace {
 
         std::auto_ptr<MakeWndResult> retval;
         if (wnd_type == adobe::name_column) {
-            retval.reset(new MakeWndResult(params,
+            retval.reset(new MakeWndResult(name_layout,
+                                           params,
                                            position,
                                            adobe::name_t(),
                                            adobe::name_t(),
@@ -1211,7 +1246,8 @@ namespace {
                                            UNLABELED_CONTROL,
                                            CONTAINER));
         } else {
-            retval.reset(new MakeWndResult(params,
+            retval.reset(new MakeWndResult(name_layout,
+                                           params,
                                            position,
                                            adobe::name_t(),
                                            adobe::name_t(),
@@ -1587,6 +1623,11 @@ struct EveLayout::Impl
 #endif
             ++column;
         }
+
+        // Detect the special case of a text label paired with a labeled control.
+        if (layout.Columns() == 2u && children[0].m_type == adobe::name_label && children[1].m_labeled_status != LABELED_CONTROL) {
+            wnd.m_labeled_status = LABELED_CONTROL;
+        }
     }
 
     void AddChildrenToVerticalLayout(Layout& layout,
@@ -1610,14 +1651,10 @@ struct EveLayout::Impl
             std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
 #if INSTRUMENT_ADD_TO_VERTICAL
             std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
+            std::cout << "        labeled_status=" << (children[i].m_labeled_status == LABELED_CONTROL ? "LABELED_CONTROL" : "UNLABELED_CONTROL") << "\n";
 #endif
-            if ((l = dynamic_cast<Layout*>(children[i].m_wnd.get())) &&
-                l->Rows() == 1u &&
-                l->Columns() == 2u &&
-                dynamic_cast<const TextControl*>(l->Cells()[0][0]) && // TODO: HACK! This is horrible!
-                !dynamic_cast<const Button*>(l->Cells()[0][0]) &&
-                !dynamic_cast<const StateButton*>(l->Cells()[0][0]) &&
-                !dynamic_cast<const Edit*>(l->Cells()[0][0])) {
+            if (children[i].m_labeled_status == LABELED_CONTROL) {
+                l = boost::polymorphic_downcast<Layout*>(children[i].m_wnd.get());
 #if INSTRUMENT_ADD_TO_VERTICAL
                 std::cout << "        two-column layout\n";
 #endif

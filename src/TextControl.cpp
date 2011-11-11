@@ -78,6 +78,8 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
     SetText(str);
 }
 
+// TODO: This must be done in terms of available horizontal space!  Add an X
+// width parameter, and change Layout to go across first, then down.
 Pt TextControl::MinUsableSize() const
 {
     Pt min_size = MinSize();

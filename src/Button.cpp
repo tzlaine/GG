@@ -230,6 +230,7 @@ void Button::RenderDefault()
 ////////////////////////////////////////////////
 StateButton::StateButton() :
     Control(),
+    m_text(0),
     m_checked(false),
     m_style(SBSTYLE_3D_XBOX)
 {}

@@ -569,7 +569,7 @@ void FileDlg::FileSetChanged(const ListBox::SelectionSet& files)
             dir_selected = true;
         }
     }
-    *m_files_edit << all_files;
+    m_files_edit->SetText(all_files);
     if (m_save && !dir_selected && m_ok_button->Text() != m_save_str)
         m_ok_button->SetText(m_save_str);
     else if (m_save && dir_selected && m_ok_button->Text() == m_save_str)
@@ -775,7 +775,7 @@ void FileDlg::UpdateDirectoryText()
             break;
         }
     }
-    *m_curr_dir_text << str;
+    m_curr_dir_text->SetText(str);
     PlaceLabelsAndEdits(Width() / 4 - H_SPACING, m_files_edit->Height());
 }
 

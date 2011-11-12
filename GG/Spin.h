@@ -509,7 +509,7 @@ void Spin<T>::SetValueImpl(T value, bool signal)
             m_value = value;
         }
     }
-    *m_edit << m_value;
+    m_edit->SetValue(m_value);
     if (signal && m_value != old_value)
         ValueChangedSignal(m_value);
 }

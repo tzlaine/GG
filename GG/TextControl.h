@@ -42,14 +42,7 @@ namespace GG {
 
     TextControl's know how to center, left- or right-justify, etc. themselves
     within their window areas.  The format flags used with TextControl are
-    defined in the TextFormat flag type. TextControl has std::string-like
-    operators and functions that allow the m_text member string to be
-    manipulated directly.  In addition, the << and >> operators allow
-    virtually any type (int, float, char, etc.) to be read from a TextControl
-    object as if it were an input or output stream, thanks to
-    boost::lexical_cast.  Note that the TextControl stream operators only read
-    the first instance of the specified type from m_text, and overwrite the
-    entire m_text string when writing to it; both operators may throw.
+    defined in the TextFormat flag type.
 
     <br>TextControl is based on pre-rendered font glyphs.  The text is
     rendered character by character from a prerendered font. The font used is
@@ -109,21 +102,6 @@ public:
         size. */
     bool              SetMinSize() const;
 
-    /** Sets the value of \a t to the interpreted value of the control's text.
-        If the control's text can be interpreted as an object of type T by
-        boost::lexical_cast (and thus by a stringstream), then the >> operator
-        will do so.  Note that the return type is void, so multiple >>
-        operations cannot be strung together.  Also, because lexical_cast
-        attempts to convert the entire contents of the string to a single
-        value, a TextControl containing the string "4.15 3.8" will fill a
-        float with 0.0 (the default construction of float), even though there
-        is a perfectly valid 4.15 value that occurs first in the string.
-        \note boost::lexical_cast usually throws boost::bad_lexical_cast when
-        it cannot perform a requested cast, though >> will return a
-        default-constructed T if one cannot be deduced from the control's
-        text. */
-    template <class T> void operator>>(T& t) const;
-
     /** Returns the value of the control's text, interpreted as an object of
         type T.  If the control's text can be interpreted as an object of type
         T by boost::lexical_cast (and thus by a stringstream), then GetValue()
@@ -132,15 +110,8 @@ public:
         string "4.15 3.8" will throw, even though there is a perfectly valid
         4.15 value that occurs first in the string.  \throw
         boost::bad_lexical_cast boost::lexical_cast throws
-        boost::bad_lexical_cast when it cannot perform a requested cast. This
-        is handy for validating data in a dialog box; Otherwise, using
-        operator>>(), you may get the default value, even though the text in
-        the control may not be the default value at all, but garbage. */
+        boost::bad_lexical_cast when it cannot perform a requested cast. */
     template <class T> T GetValue() const;
-
-    /** Returns the control's text; allows TextControl's to be used as
-        std::string's. */
-    operator const std::string&() const;
 
     bool   Empty() const;   ///< Returns true iff text string equals "".
     CPSize Length() const;  ///< Returns the number of code points in the text.
@@ -192,43 +163,39 @@ public:
         size. */
     void         SetMinSize(bool b);
 
-    /** Sets the value of the control's text to the stringified version of t.
-        If t can be converted to a string representation by a
-        boost::lexical_cast (and thus by a stringstream), then the << operator
-        will do so, e.g. double(4.15) to string("4.15").  Note that the return
-        type is void, so multiple << operations cannot be strung together.
-        \throw boost::bad_lexical_cast boost::lexical_cast throws
-        boost::bad_lexical_cast when it is confused.*/
-    template <class T>
-    void operator<<(T t);
+    /** Sets the value of the control's text, interpreted as an object of type
+        T.  If the control's text can be interpreted as an object of type T by
+        boost::lexical_cast (and thus by a stringstream), then SetValue() will
+        do so.  \throw boost::bad_lexical_cast boost::lexical_cast throws
+        boost::bad_lexical_cast when it cannot perform a requested cast. */
+    template <class T> void SetValue(const T& t);
 
-    void  operator+=(const std::string& s); ///< Appends \a s to text.
-    void  operator+=(char c);               ///< Appends \a c to text.
-    void  Clear();                          ///< Sets text to the empty string.
+    /** Sets text to the empty string. */
+    void         Clear();
 
     /** Inserts \a c at position \a pos within the text.  \note Just as with
         most string parameters throughout GG, \a c must be a valid UTF-8
         sequence. */
-    void  Insert(CPSize pos, char c);
+    void         Insert(CPSize pos, char c);
 
     /** Inserts \a s at position \a pos within the text. */
-    void  Insert(CPSize pos, const std::string& s);
+    void         Insert(CPSize pos, const std::string& s);
     
     /** Erases \a num code points from the text starting at position \a
         pos. */
-    void  Erase(CPSize pos, CPSize num = CP1);
+    void         Erase(CPSize pos, CPSize num = CP1);
 
     /** Inserts \a c at text position \a pos within line \a line.  \note Just
         as with most string parameters throughout GG, \a c must be a valid
         UTF-8 sequence. */
-    void  Insert(std::size_t line, CPSize pos, char c);
+    void         Insert(std::size_t line, CPSize pos, char c);
 
     /** Inserts \a s at text position \a pos within line \a line. */
-    void  Insert(std::size_t line, CPSize pos, const std::string& s);
+    void         Insert(std::size_t line, CPSize pos, const std::string& s);
 
     /** Erases \a num code points from the text starting at position \a
         pos within line \a line. */
-    void  Erase(std::size_t line, CPSize pos, CPSize num = CP1);
+    void         Erase(std::size_t line, CPSize pos, CPSize num = CP1);
     //@}
 
 protected:
@@ -262,21 +229,11 @@ private:
 
 // template implementations
 template <class T>
-void GG::TextControl::operator>>(T& t) const
-{
-    try {
-        t = boost::lexical_cast<T>(m_text);
-    } catch (boost::bad_lexical_cast) {
-        t = T();
-    }
-}
-
-template <class T>
 T GG::TextControl::GetValue() const
 { return boost::lexical_cast<T, std::string>(m_text); }
 
 template <class T>
-void GG::TextControl::operator<<(T t)
+void GG::TextControl::SetValue(const T& t)
 { SetText(boost::lexical_cast<std::string>(t)); }
 
 #endif

@@ -116,9 +116,6 @@ bool TextControl::ClipText() const
 bool TextControl::SetMinSize() const
 { return m_set_min_size; }
 
-TextControl::operator const std::string&() const
-{ return m_text; }
-
 bool TextControl::Empty() const
 { return m_text.empty(); }
 
@@ -214,16 +211,6 @@ void TextControl::SetMinSize(bool b)
 {
     m_set_min_size = b;
     AdjustMinimumSize();
-}
-
-void TextControl::operator+=(const std::string& s)
-{ SetText(m_text + s); }
-
-void TextControl::operator+=(char c)
-{
-    if (!detail::ValidUTFChar<char>()(c))
-        throw utf8::invalid_utf8(c);
-    SetText(m_text + c);
 }
 
 void TextControl::Clear()

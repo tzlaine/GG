@@ -89,7 +89,7 @@ public:
                 if (squelch) {
                     retval = true;
                 } else {
-                    *m_edit_text.control_m += translated_code_point;
+                    m_edit_text.control_m->SetText(m_edit_text.control_m->Text() + translated_code_point);
                     m_edit_text.value_m = new_value;
                     m_edit_text.post_edit_proc_m(new_value);
                     retval = true;

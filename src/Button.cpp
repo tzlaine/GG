@@ -89,12 +89,6 @@ const SubTexture& Button::PressedGraphic() const
 const SubTexture& Button::RolloverGraphic() const
 { return m_rollover_graphic; }
 
-void Button::SizeMove(const Pt& ul, const Pt& lr)
-{
-    Control::SizeMove(ul, lr);
-    m_text->Resize(Size());
-}
-
 void Button::Render()
 {
     switch (m_state) {
@@ -102,6 +96,12 @@ void Button::Render()
     case BN_UNPRESSED: RenderUnpressed(); break;
     case BN_ROLLOVER:  RenderRollover(); break;
     }
+}
+
+void Button::SizeMove(const Pt& ul, const Pt& lr)
+{
+    Control::SizeMove(ul, lr);
+    m_text->Resize(Size());
 }
 
 void Button::SetText(const std::string& text)

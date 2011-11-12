@@ -27,6 +27,7 @@
 #include <GG/DrawUtil.h>
 #include <GG/Layout.h>
 #include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 #include <GG/WndEvent.h>
 
 #include <boost/lexical_cast.hpp>
@@ -54,20 +55,27 @@ namespace {
 // GG::Button
 ////////////////////////////////////////////////
 Button::Button() :
-    TextControl(),
+    Control(),
+    m_text(0),
     m_state(BN_UNPRESSED)
 {}
 
 Button::Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
                Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = INTERACTIVE*/) :
-    TextControl(x, y, w, h, str, font, text_color, FORMAT_NONE, flags),
+    Control(x, y, w, h, flags),
+    m_text(new TextControl(X0, Y0, w, h, str, font, text_color, FORMAT_NONE)),
     m_state(BN_UNPRESSED)
 {
+    AttachChild(m_text);
+
     m_color = color;
 
     if (INSTRUMENT_ALL_SIGNALS)
         Connect(ClickedSignal, &ClickedEcho);
 }
+
+const std::string& Button::Text() const
+{ return m_text->Text(); }
 
 Button::ButtonState Button::State() const
 { return m_state; }
@@ -81,6 +89,12 @@ const SubTexture& Button::PressedGraphic() const
 const SubTexture& Button::RolloverGraphic() const
 { return m_rollover_graphic; }
 
+void Button::SizeMove(const Pt& ul, const Pt& lr)
+{
+    Control::SizeMove(ul, lr);
+    m_text->Resize(Size());
+}
+
 void Button::Render()
 {
     switch (m_state) {
@@ -89,6 +103,9 @@ void Button::Render()
     case BN_ROLLOVER:  RenderRollover(); break;
     }
 }
+
+void Button::SetText(const std::string& text)
+{ m_text->SetText(text); }
 
 void Button::SetColor(Clr c)
 { Control::SetColor(c); }
@@ -119,7 +136,7 @@ void Button::LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys)
 {
     if (!Disabled())
         m_state = BN_PRESSED;
-    Wnd::LDrag(pt, move, mod_keys);
+    Control::LDrag(pt, move, mod_keys);
 }
 
 void Button::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
@@ -150,6 +167,8 @@ void Button::MouseLeave()
 
 void Button::RenderUnpressed()
 {
+    m_text->MoveTo(Pt());
+
     if (!m_unpressed_graphic.Empty()) {
         glColor(Disabled() ? DisabledColor(m_color) : m_color);
         m_unpressed_graphic.OrthoBlit(UpperLeft(), LowerRight());
@@ -157,31 +176,30 @@ void Button::RenderUnpressed()
         RenderDefault();
     }
     // draw text shadow
-    Clr temp = TextColor();  // save original color
-    SetTextColor(CLR_SHADOW); // shadow color
-    OffsetMove(Pt(X(2), Y(2)));
-    TextControl::Render();
-    OffsetMove(Pt(X(-2), Y(-2)));
-    SetTextColor(temp);    // restore original color
-    // draw text
-    TextControl::Render();
+    Clr temp = m_text->TextColor();  // save original color
+    m_text->SetTextColor(CLR_SHADOW); // shadow color
+    m_text->OffsetMove(Pt(X(2), Y(2)));
+    m_text->Render();
+    m_text->OffsetMove(Pt(X(-2), Y(-2)));
+    m_text->SetTextColor(temp);    // restore original color
 }
 
 void Button::RenderPressed()
 {
+    m_text->MoveTo(Pt(X1, Y1));
+
     if (!m_pressed_graphic.Empty()) {
         glColor(Disabled() ? DisabledColor(m_color) : m_color);
         m_pressed_graphic.OrthoBlit(UpperLeft(), LowerRight());
     } else {
         RenderDefault();
     }
-    OffsetMove(Pt(X1, Y1));
-    TextControl::Render();
-    OffsetMove(Pt(-X1, -Y1));
 }
 
 void Button::RenderRollover()
 {
+    m_text->MoveTo(Pt());
+
     if (!m_rollover_graphic.Empty()) {
         glColor(Disabled() ? DisabledColor(m_color) : m_color);
         m_rollover_graphic.OrthoBlit(UpperLeft(), LowerRight());
@@ -189,14 +207,12 @@ void Button::RenderRollover()
         RenderDefault();
     }
     // draw text shadow
-    Clr temp = TextColor();  // save original color
-    SetTextColor(CLR_SHADOW); // shadow color
-    OffsetMove(Pt(X(2), Y(2)));
-    TextControl::Render();
-    OffsetMove(Pt(X(-2), Y(-2)));
-    SetTextColor(temp);    // restore original color
-    // draw text
-    TextControl::Render();
+    Clr temp = m_text->TextColor();  // save original color
+    m_text->SetTextColor(CLR_SHADOW); // shadow color
+    m_text->OffsetMove(Pt(X(2), Y(2)));
+    m_text->Render();
+    m_text->OffsetMove(Pt(X(-2), Y(-2)));
+    m_text->SetTextColor(temp);    // restore original color
 }
 
 void Button::RenderDefault()

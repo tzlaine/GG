@@ -17,6 +17,7 @@
 #include <GG/Button.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 
 
 /****************************************************************************************************/

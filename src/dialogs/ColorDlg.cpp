@@ -30,6 +30,7 @@
 #include <GG/Layout.h>
 #include <GG/Slider.h>
 #include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 #include <GG/WndEvent.h>
 
 

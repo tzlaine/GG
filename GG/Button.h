@@ -32,10 +32,14 @@
 #define _GG_Button_h_
 
 #include <GG/ClrConstants.h>
-#include <GG/TextControl.h>
+#include <GG/Control.h>
+#include <GG/FontFwd.h>
+#include <GG/Texture.h>
 
 
 namespace GG {
+
+class TextControl;
 
 /** \brief This is a basic button control.
 
@@ -44,7 +48,7 @@ namespace GG {
     allowing rollover effects on the button.  To create a bitmap button,
     simply set the unpressed, pressed, and/or rollover graphics to the desired
     SubTextures. \see GG::SubTexture */
-class GG_API Button : public TextControl
+class GG_API Button : public Control
 {
 public:
     /// the states of being for a GG::Button
@@ -64,6 +68,9 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
+    /** Returns the text of this button. */
+    const std::string& Text() const;
+
     /** Returns button state \see ButtonState */
     ButtonState       State() const;
 
@@ -75,9 +82,13 @@ public:
     //@}
 
     /** \name Mutators */ ///@{
+    virtual void   SizeMove(const Pt& ul, const Pt& lr);
     virtual void   Render();
 
     virtual void   SetColor(Clr c); ///< Sets the control's color; does not affect the text color
+
+    /** Sets the text of this button. */
+    void SetText(const std::string& text);
 
     /** Sets button state programmatically \see ButtonState */
     void           SetState(ButtonState state);
@@ -107,6 +118,8 @@ protected:
 
 private:
     void           RenderDefault();     ///< This just draws the default unadorned square-and-rectangle button
+
+    TextControl*   m_text;
 
     ButtonState    m_state;             ///< Button is always in exactly one of the ButtonState states above
 

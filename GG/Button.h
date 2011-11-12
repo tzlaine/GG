@@ -68,6 +68,8 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
+    virtual Pt MinUsableSize() const;
+
     /** Returns the text of this button. */
     const std::string& Text() const;
 

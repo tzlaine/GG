@@ -74,6 +74,24 @@ Button::Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_p
         Connect(ClickedSignal, &ClickedEcho);
 }
 
+Pt Button::MinUsableSize() const
+{
+    Pt retval = Size();
+    if (m_text->GetFont() && (m_unpressed_graphic.Empty() || m_pressed_graphic.Empty() || m_rollover_graphic.Empty())) {
+        if (!m_text->Text().empty()) {
+            const std::vector<Font::LineData>& line_data = m_text->GetLineData();
+            retval = Pt();
+            for (std::size_t i = 0; i < line_data.size(); ++i) {
+                retval.x = std::max(retval.x, line_data[i].Width());
+                retval.y += i ? m_text->GetFont()->Lineskip() : m_text->GetFont()->Height();
+            }
+        } else {
+            retval = Pt(X(Value(m_text->GetFont()->Height())), m_text->GetFont()->Height());
+        }
+    }
+    return retval;
+}
+
 const std::string& Button::Text() const
 { return m_text->Text(); }
 

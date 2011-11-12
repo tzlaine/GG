@@ -24,8 +24,10 @@
 
 #include <GG/Edit.h>
 
+#include <GG/Font.h>
 #include <GG/GUI.h>
 #include <GG/DrawUtil.h>
+#include <GG/TextControl.h>
 #include <GG/WndEvent.h>
 #include <GG/utf8/checked.h>
 
@@ -60,7 +62,8 @@ namespace {
 const int Edit::PIXEL_MARGIN = 5;
 
 Edit::Edit() :
-    TextControl(),
+    Control(),
+    m_text(0),
     m_first_char_shown(0),
     m_recently_edited(false),
     m_last_button_down_time(0),
@@ -69,7 +72,8 @@ Edit::Edit() :
 
 Edit::Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
            Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, Flags<WndFlag> flags/* = INTERACTIVE*/) :
-    TextControl(x, y, w, HeightFromFont(font, PIXEL_MARGIN), str, font, text_color, FORMAT_LEFT | FORMAT_IGNORETAGS, flags),
+    Control(x, y, w, HeightFromFont(font, PIXEL_MARGIN), flags),
+    m_text(new TextControl(X0, Y0, w, Height(), str, font, text_color, FORMAT_LEFT | FORMAT_IGNORETAGS)),
     m_cursor_pos(CP0, CP0),
     m_first_char_shown(CP0),
     m_int_color(interior),
@@ -87,8 +91,11 @@ Edit::Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>&
     }
 }
 
+Edit::~Edit()
+{ delete m_text; }
+
 Pt Edit::MinUsableSize() const
-{ return Pt(X(4 * PIXEL_MARGIN), HeightFromFont(GetFont(), PIXEL_MARGIN)); }
+{ return Pt(X(4 * PIXEL_MARGIN), HeightFromFont(m_text->GetFont(), PIXEL_MARGIN)); }
 
 Pt Edit::ClientUpperLeft() const
 { return UpperLeft() + Pt(X(PIXEL_MARGIN), Y(PIXEL_MARGIN)); }
@@ -96,8 +103,14 @@ Pt Edit::ClientUpperLeft() const
 Pt Edit::ClientLowerRight() const
 { return LowerRight() - Pt(X(PIXEL_MARGIN), Y(PIXEL_MARGIN)); }
 
+const std::string& Edit::Text() const
+{ return m_text->Text(); }
+
 const std::pair<CPSize, CPSize>& Edit::CursorPosn() const
 { return m_cursor_pos; }
+
+Clr Edit::TextColor() const
+{ return m_text->TextColor(); }
 
 Clr Edit::InteriorColor() const
 { return m_int_color; }
@@ -114,7 +127,7 @@ void Edit::Render()
     Clr int_color_to_use = Disabled() ? DisabledColor(m_int_color) : m_int_color;
     Clr sel_text_color_to_use = Disabled() ? DisabledColor(m_sel_text_color) : m_sel_text_color;
     Clr hilite_color_to_use = Disabled() ? DisabledColor(m_hilite_color) : m_hilite_color;
-    Clr text_color_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
+    Clr text_color_to_use = Disabled() ? DisabledColor(m_text->TextColor()) : m_text->TextColor();
 
     Pt ul = UpperLeft(), lr = LowerRight();
     Pt client_ul = ClientUpperLeft(), client_lr = ClientLowerRight();
@@ -123,12 +136,12 @@ void Edit::Render()
 
     BeginScissorClipping(Pt(client_ul.x - 1, client_ul.y), client_lr);
 
-    const std::vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
+    const std::vector<Font::LineData::CharData>& char_data = m_text->GetLineData()[0].char_data;
     X first_char_offset = FirstCharOffset();
-    Y text_y_pos(ul.y + ((lr.y - ul.y) - GetFont()->Height()) / 2.0 + 0.5);
+    Y text_y_pos(ul.y + ((lr.y - ul.y) - m_text->GetFont()->Height()) / 2.0 + 0.5);
     CPSize last_visible_char = LastVisibleChar();
-    const StrSize INDEX_0 = StringIndexOf(0, m_first_char_shown, GetLineData());
-    const StrSize INDEX_END = StringIndexOf(0, last_visible_char, GetLineData());
+    const StrSize INDEX_0 = StringIndexOf(0, m_first_char_shown, m_text->GetLineData());
+    const StrSize INDEX_END = StringIndexOf(0, last_visible_char, m_text->GetLineData());
     if (MultiSelected())   { // if one or more chars are selected, hilite, then draw the range in the selected-text color
         CPSize low_cursor_pos  = std::min(m_cursor_pos.first, m_cursor_pos.second);
         CPSize high_cursor_pos = std::max(m_cursor_pos.first, m_cursor_pos.second);
@@ -141,8 +154,8 @@ void Edit::Render()
         // INDEX_0 to INDEX_1 is unhilited, INDEX_1 to
         // INDEX_2 is hilited, and INDEX_2 to INDEX_3 is
         // unhilited; each range may be empty
-        const StrSize INDEX_1 = StringIndexOf(0, std::max(low_cursor_pos, m_first_char_shown), GetLineData());
-        const StrSize INDEX_2 = StringIndexOf(0, std::min(high_cursor_pos, last_visible_char), GetLineData());
+        const StrSize INDEX_1 = StringIndexOf(0, std::max(low_cursor_pos, m_first_char_shown), m_text->GetLineData());
+        const StrSize INDEX_2 = StringIndexOf(0, std::min(high_cursor_pos, last_visible_char), m_text->GetLineData());
 
         // draw text
         X text_x_pos = ul.x + PIXEL_MARGIN;
@@ -151,19 +164,19 @@ void Edit::Render()
         // TODO: Use subrange RenderTex()
 
         text_x_pos +=
-            GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
-                                  Text().substr(Value(INDEX_0), Value(INDEX_1 - INDEX_0)));
+            m_text->GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
+                                          Text().substr(Value(INDEX_0), Value(INDEX_1 - INDEX_0)));
         glColor(sel_text_color_to_use);
         text_x_pos +=
-            GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
-                                  Text().substr(Value(INDEX_1), Value(INDEX_2 - INDEX_1)));
+            m_text->GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
+                                          Text().substr(Value(INDEX_1), Value(INDEX_2 - INDEX_1)));
         glColor(text_color_to_use);
         text_x_pos +=
-            GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
-                                  Text().substr(Value(INDEX_2), Value(INDEX_END - INDEX_2)));
+            m_text->GetFont()->RenderText(Pt(text_x_pos, text_y_pos),
+                                          Text().substr(Value(INDEX_2), Value(INDEX_END - INDEX_2)));
     } else { // no selected text
         glColor(text_color_to_use);
-        GetFont()->RenderText(Pt(client_ul.x, text_y_pos), Text().substr(Value(INDEX_0), Value(INDEX_END - INDEX_0)));
+        m_text->GetFont()->RenderText(Pt(client_ul.x, text_y_pos), Text().substr(Value(INDEX_0), Value(INDEX_END - INDEX_0)));
         if (GUI::GetGUI()->FocusWnd() == this) { // if we have focus, draw the caret as a simple vertical line
             X caret_x = ScreenPosOfChar(m_cursor_pos.second);
             glDisable(GL_TEXTURE_2D);
@@ -178,11 +191,37 @@ void Edit::Render()
     EndScissorClipping();
 }
 
+void Edit::SizeMove(const Pt& ul, const Pt& lr)
+{
+    Control::SizeMove(ul, lr);
+    m_text->Resize(Size());
+}
+
 void Edit::SetColor(Clr c)
 { Control::SetColor(c); }
 
+void Edit::SetText(const std::string& str)
+{
+    m_text->SetText(str);
+    m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
+
+    // make sure the change in text did not make the cursor or view position invalid
+    if (str.empty() || m_text->GetLineData().empty() || m_text->GetLineData()[0].char_data.size() < m_cursor_pos.first) {
+        m_first_char_shown = CP0;
+        m_cursor_pos = std::make_pair(CP0, CP0);
+    }
+
+    m_recently_edited = true;
+}
+
+void Edit::Clear()
+{ m_text->Clear(); }
+
 void Edit::SetInteriorColor(Clr c)
 { m_int_color = c; }
+
+void Edit::SetTextColor(Clr c)
+{ m_text->SetTextColor(c); }
 
 void Edit::SetHiliteColor(Clr c)
 { m_hilite_color = c; }
@@ -192,7 +231,7 @@ void Edit::SetSelectedTextColor(Clr c)
 
 void Edit::SelectAll()
 {
-    m_cursor_pos.first = Length();
+    m_cursor_pos.first = m_text->Length();
     m_cursor_pos.second = CP0;
     AdjustView();
 }
@@ -201,27 +240,16 @@ void Edit::SelectRange(CPSize from, CPSize to)
 {
     if (from < to) {
         m_cursor_pos.first = std::max(CP0, from);
-        m_cursor_pos.second = std::min(to, Length());
+        m_cursor_pos.second = std::min(to, m_text->Length());
     } else {
-        m_cursor_pos.first = std::min(from, Length());
+        m_cursor_pos.first = std::min(from, m_text->Length());
         m_cursor_pos.second = std::max(CP0, to);
     }
     AdjustView();
 }
 
-void Edit::SetText(const std::string& str)
-{
-    TextControl::SetText(str);
-    m_cursor_pos.second = m_cursor_pos.first; // eliminate any hiliting
-
-    // make sure the change in text did not make the cursor or view position invalid
-    if (str.empty() || GetLineData().empty() || GetLineData()[0].char_data.size() < m_cursor_pos.first) {
-        m_first_char_shown = CP0;
-        m_cursor_pos = std::make_pair(CP0, CP0);
-    }
-
-    m_recently_edited = true;
-}
+TextControl* Edit::Text_() const
+{ return m_text; }
 
 bool Edit::MultiSelected() const
 { return m_cursor_pos.first != m_cursor_pos.second; }
@@ -236,10 +264,10 @@ CPSize Edit::CharIndexOf(X x) const
 {
     CPSize retval;
     X first_char_offset = FirstCharOffset();
-    for (retval = CP0; retval < Length(); ++retval) {
+    for (retval = CP0; retval < m_text->Length(); ++retval) {
         X curr_extent;
-        if (x + first_char_offset <= (curr_extent = GetLineData()[0].char_data[Value(retval)].extent)) { // the point falls within the character at index retval
-            X prev_extent = retval ? GetLineData()[0].char_data[Value(retval - 1)].extent : X0;
+        if (x + first_char_offset <= (curr_extent = m_text->GetLineData()[0].char_data[Value(retval)].extent)) { // the point falls within the character at index retval
+            X prev_extent = retval ? m_text->GetLineData()[0].char_data[Value(retval - 1)].extent : X0;
             X half_way = (prev_extent + curr_extent) / 2;
             if (half_way <= x + first_char_offset) // if the point is more than halfway across the character, put the cursor *after* the character
                 ++retval;
@@ -250,20 +278,20 @@ CPSize Edit::CharIndexOf(X x) const
 }
 
 X Edit::FirstCharOffset() const
-{ return (m_first_char_shown ? GetLineData()[0].char_data[Value(m_first_char_shown - 1)].extent : X0); }
+{ return (m_first_char_shown ? m_text->GetLineData()[0].char_data[Value(m_first_char_shown - 1)].extent : X0); }
 
 X Edit::ScreenPosOfChar(CPSize idx) const
 {
     X first_char_offset = FirstCharOffset();
-    return UpperLeft().x + PIXEL_MARGIN + ((idx ? GetLineData()[0].char_data[Value(idx - 1)].extent : X0) - first_char_offset);
+    return UpperLeft().x + PIXEL_MARGIN + ((idx ? m_text->GetLineData()[0].char_data[Value(idx - 1)].extent : X0) - first_char_offset);
 }
 
 CPSize Edit::LastVisibleChar() const
 {
     X first_char_offset = FirstCharOffset();
     CPSize retval = m_first_char_shown;
-    for ( ; retval < Length(); ++retval) {
-        if (Size().x - 2 * PIXEL_MARGIN <= (retval ? GetLineData()[0].char_data[Value(retval - 1)].extent : X0) - first_char_offset)
+    for ( ; retval < m_text->Length(); ++retval) {
+        if (Size().x - 2 * PIXEL_MARGIN <= (retval ? m_text->GetLineData()[0].char_data[Value(retval - 1)].extent : X0) - first_char_offset)
             break;
     }
     return retval;
@@ -351,8 +379,8 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
                 m_cursor_pos.second = m_cursor_pos.first = std::min(m_cursor_pos.first, m_cursor_pos.second);
             } else if (0 < m_cursor_pos.second) {
                 --m_cursor_pos.second;
-                X extent = GetLineData()[0].char_data[Value(m_cursor_pos.second)].extent;
-                while (0 < m_cursor_pos.second && extent == GetLineData()[0].char_data[Value(m_cursor_pos.second - 1)].extent)
+                X extent = m_text->GetLineData()[0].char_data[Value(m_cursor_pos.second)].extent;
+                while (0 < m_cursor_pos.second && extent == m_text->GetLineData()[0].char_data[Value(m_cursor_pos.second - 1)].extent)
                     --m_cursor_pos.second;
                 if (!shift_down)
                     m_cursor_pos.first = m_cursor_pos.second;
@@ -362,9 +390,9 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
         case GGK_RIGHT:
             if (MultiSelected() && !shift_down) {
                 m_cursor_pos.second = m_cursor_pos.first = std::max(m_cursor_pos.first, m_cursor_pos.second);
-            } else if (m_cursor_pos.second < Length()) {
-                X extent = GetLineData()[0].char_data[Value(m_cursor_pos.second)].extent;
-                while (m_cursor_pos.second < Length() && extent == GetLineData()[0].char_data[Value(m_cursor_pos.second)].extent)
+            } else if (m_cursor_pos.second < m_text->Length()) {
+                X extent = m_text->GetLineData()[0].char_data[Value(m_cursor_pos.second)].extent;
+                while (m_cursor_pos.second < m_text->Length() && extent == m_text->GetLineData()[0].char_data[Value(m_cursor_pos.second)].extent)
                     ++m_cursor_pos.second;
                 if (!shift_down)
                     m_cursor_pos.first = m_cursor_pos.second;
@@ -373,9 +401,9 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
             break;
         case GGK_END:
             if (shift_down)
-                m_cursor_pos.second = Length();
+                m_cursor_pos.second = m_text->Length();
             else
-                m_cursor_pos.second = m_cursor_pos.first = Length();
+                m_cursor_pos.second = m_cursor_pos.first = m_text->Length();
             AdjustView();
             break;
         case GGK_BACKSPACE:
@@ -384,7 +412,7 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
                 emit_signal = true;
             } else if (0 < m_cursor_pos.first) {
                 m_cursor_pos.second = --m_cursor_pos.first;
-                Erase(0, m_cursor_pos.first);
+                m_text->Erase(0, m_cursor_pos.first);
                 emit_signal = true;
             }
             AdjustView();
@@ -393,8 +421,8 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
             if (MultiSelected()) {
                 ClearSelected();
                 emit_signal = true;
-            } else if (m_cursor_pos.first < Length()) {
-                Erase(m_cursor_pos.first);
+            } else if (m_cursor_pos.first < m_text->Length()) {
+                m_text->Erase(m_cursor_pos.first);
                 emit_signal = true;
             }
             AdjustView();
@@ -402,7 +430,7 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
         case GGK_RETURN:
         case GGK_KP_ENTER:
             FocusUpdateSignal(Text());
-            TextControl::KeyPress(key, key_code_point, mod_keys);
+            m_text->KeyPress(key, key_code_point, mod_keys);
             m_recently_edited = false;
             break;
         default:
@@ -412,20 +440,20 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
                 !(mod_keys & (MOD_KEY_CTRL | MOD_KEY_ALT | MOD_KEY_META))) {
                 if (MultiSelected())
                     ClearSelected();
-                Insert(0, m_cursor_pos.first, translated_code_point);
+                m_text->Insert(0, m_cursor_pos.first, translated_code_point);
                 m_cursor_pos.second = ++m_cursor_pos.first;
                 emit_signal = true;
                 if (LastVisibleChar() <= m_cursor_pos.first)
                     AdjustView();
             } else {
-                TextControl::KeyPress(key, key_code_point, mod_keys);
+                m_text->KeyPress(key, key_code_point, mod_keys);
             }
             break;
         }
         if (emit_signal)
             EditedSignal(Text());
     } else {
-        TextControl::KeyPress(key, key_code_point, mod_keys);
+        m_text->KeyPress(key, key_code_point, mod_keys);
     }
 }
 
@@ -479,13 +507,13 @@ void Edit::ClearSelected()
         m_cursor_pos.second = m_cursor_pos.first;
     else
         m_cursor_pos.first = m_cursor_pos.second;
-    Erase(0, low, high - low);
+    m_text->Erase(0, low, high - low);
 
     // make sure deletion has not left m_first_char_shown in an out-of-bounds position
-    if (GetLineData()[0].char_data.empty())
+    if (m_text->GetLineData()[0].char_data.empty())
         m_first_char_shown = CP0;
-    else if (GetLineData()[0].char_data.size() <= m_first_char_shown)
-        m_first_char_shown = CodePointIndexOf(0, INVALID_CP_SIZE, GetLineData());
+    else if (m_text->GetLineData()[0].char_data.size() <= m_first_char_shown)
+        m_first_char_shown = CodePointIndexOf(0, INVALID_CP_SIZE, m_text->GetLineData());
 }
 
 void Edit::AdjustView()
@@ -497,14 +525,14 @@ void Edit::AdjustView()
             m_first_char_shown = (0 <= m_first_char_shown - 5) ? m_first_char_shown - 5 : CP0; // try to move the caret by five characters
         else // if the caret is more than five characters before m_first_char_shown, just move straight to that spot
             m_first_char_shown = m_cursor_pos.second;
-    } else if (Length() && text_space <= (m_cursor_pos.second ? GetLineData()[0].char_data[Value(m_cursor_pos.second - 1)].extent : X0) - first_char_offset) { // if the caret is moving to a place right of the current visible area
+    } else if (m_text->Length() && text_space <= (m_cursor_pos.second ? m_text->GetLineData()[0].char_data[Value(m_cursor_pos.second - 1)].extent : X0) - first_char_offset) { // if the caret is moving to a place right of the current visible area
         // try to move the text by five characters, or to the end if caret is at a location before the end - 5th character
-        CPSize last_idx_to_use = (m_cursor_pos.second + 5 <= Length() - 1) ? m_cursor_pos.second + 5 : Length() - 1;
-        const std::vector<Font::LineData::CharData>& char_data = GetLineData()[0].char_data;
+        CPSize last_idx_to_use = (m_cursor_pos.second + 5 <= m_text->Length() - 1) ? m_cursor_pos.second + 5 : m_text->Length() - 1;
+        const std::vector<Font::LineData::CharData>& char_data = m_text->GetLineData()[0].char_data;
         // number of pixels that the caret position overruns the right side of text area
         X pixels_to_move = (char_data[Value(last_idx_to_use)].extent - first_char_offset) - text_space;
-        if (last_idx_to_use == Length() - 1) // if the caret is at the very end of the string, add the length of some spaces
-            pixels_to_move += static_cast<int>(Value(m_cursor_pos.second + 5 - Length() - 1)) * GetFont()->SpaceWidth();
+        if (last_idx_to_use == m_text->Length() - 1) // if the caret is at the very end of the string, add the length of some spaces
+            pixels_to_move += static_cast<int>(Value(m_cursor_pos.second + 5 - m_text->Length() - 1)) * m_text->GetFont()->SpaceWidth();
         CPSize move_to = m_first_char_shown;
         while (move_to < char_data.size() &&
                char_data[Value(move_to)].extent - first_char_offset < pixels_to_move) {

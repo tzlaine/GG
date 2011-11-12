@@ -30,6 +30,7 @@
 #define _GG_MultiEdit_h_
 
 #include <GG/Edit.h>
+#include <GG/Font.h>
 #include <GG/MultiEditFwd.h>
 
 

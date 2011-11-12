@@ -19,6 +19,7 @@
 #include <GG/Menu.h>
 #include <GG/MultiEdit.h>
 #include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 #include <GG/dialogs/FileDlg.h>
 
 

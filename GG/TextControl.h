@@ -85,8 +85,7 @@ public:
         word breaks and line wrapping, etc.) */
     Flags<TextFormat> GetTextFormat() const;
 
-    /** Returns the text color (this may differ from the Control::Color() in
-        some subclasses) */
+    /** Returns the text color (this may differ from the Control::Color()). */
     Clr               TextColor() const;
 
     /** Returns true iff the text control clips its text to its client area;
@@ -196,6 +195,8 @@ public:
     /** Erases \a num code points from the text starting at position \a
         pos within line \a line. */
     void         Erase(std::size_t line, CPSize pos, CPSize num = CP1);
+
+    using Control::KeyPress;
     //@}
 
 protected:

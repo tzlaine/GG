@@ -30,10 +30,13 @@
 #define _GG_Edit_h_
 
 #include <GG/ClrConstants.h>
-#include <GG/TextControl.h>
+#include <GG/Control.h>
+#include <GG/FontFwd.h>
 
 
 namespace GG {
+
+    class TextControl;
 
 /** \brief This is a single-line edit box control.
 
@@ -54,7 +57,7 @@ namespace GG {
     receive it only when it is certain that the user is finished editing the
     text (when the focus changes).  Note that both signals may be used at the
     same time, if desired. */
-class GG_API Edit : public TextControl
+class GG_API Edit : public Control
 {
 public:
     /** \name Signal Types */ ///@{
@@ -72,6 +75,9 @@ public:
     /** Ctor. Height is determined from the font and point size used. */
     Edit(X x, Y y, X w, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
          Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, Flags<WndFlag> flags = INTERACTIVE);
+
+    /** Dtor. */
+    ~Edit();
     //@}
 
     /** \name Accessors */ ///@{
@@ -79,12 +85,29 @@ public:
     virtual Pt ClientUpperLeft() const;
     virtual Pt ClientLowerRight() const;
 
+    /** Returns the text of this button. */
+    const std::string& Text() const;
+
+    /** Returns the value of the control's text, interpreted as an object of
+        type T.  If the control's text can be interpreted as an object of type
+        T by boost::lexical_cast (and thus by a stringstream), then GetValue()
+        will do so.  Because lexical_cast attempts to convert the entire
+        contents of the string to a single value, a TextControl containing the
+        string "4.15 3.8" will throw, even though there is a perfectly valid
+        4.15 value that occurs first in the string.  \throw
+        boost::bad_lexical_cast boost::lexical_cast throws
+        boost::bad_lexical_cast when it cannot perform a requested cast. */
+    template <class T> T GetValue() const;
+
     /** Returns the current position of the cursor (first selected character
         to one past the last selected one). */
     const std::pair<CPSize, CPSize>& CursorPosn() const;
 
     /** Returns the color used to render the iterior of the control. */
     Clr InteriorColor() const;
+
+    /** Returns the text color (this may differ from the Control::Color()). */
+    Clr TextColor() const;
 
     /** Returns the color used to render hiliting around selected text. */
     Clr HiliteColor() const;
@@ -101,11 +124,28 @@ public:
 
     /** \name Mutators */ ///@{
     virtual void Render();
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
 
     virtual void SetColor(Clr c);
 
+    /** Sets the text of this button. */
+    void SetText(const std::string& text);
+
+    /** Sets text to the empty string. */
+    void Clear();
+
+    /** Sets the value of the control's text, interpreted as an object of type
+        T.  If the control's text can be interpreted as an object of type T by
+        boost::lexical_cast (and thus by a stringstream), then SetValue() will
+        do so.  \throw boost::bad_lexical_cast boost::lexical_cast throws
+        boost::bad_lexical_cast when it cannot perform a requested cast. */
+    template <class T> void SetValue(const T& t);
+
     /** Sets the interior color of the control. */
     void SetInteriorColor(Clr c);
+
+    /** Sets the text color. */
+    void SetTextColor(Clr color);
 
     /** Sets the color used to render hiliting around selected text. */
     void SetHiliteColor(Clr c);
@@ -125,8 +165,6 @@ public:
     /** Selects all text in the entire control.  This function leaves the
         beginning of the text in view; see SelectRange(). */
     virtual void SelectAll();
-
-    virtual void SetText(const std::string& str);
     //@}
 
 protected:
@@ -135,6 +173,8 @@ protected:
     //@}
 
     /** \name Accessors */ ///@{
+    TextControl* Text_() const;
+
     /** Returns true if >= 1 characters selected. */
     virtual bool MultiSelected() const;
 
@@ -211,6 +251,8 @@ private:
     void ClearSelected(); ///< Clears (deletes) selected characters, as when a del, backspace, or character is entered
     void AdjustView();    ///< Makes sure the caret ends up in view after an arbitrary move
 
+    TextControl* m_text;
+
     /** If .first == .second, the caret is drawn before character at
         m_cursor_pos.first; otherwise, the range is selected (when range is
         selected, caret is considered at .second) */
@@ -234,5 +276,14 @@ void GG_API GetTranslatedCodePoint(Key key,
                                    std::string& translated_code_point);
 
 } // namespace GG
+
+// template implementations
+template <class T>
+T GG::Edit::GetValue() const
+{ return boost::lexical_cast<T, std::string>(Text()); }
+
+template <class T>
+void GG::Edit::SetValue(const T& t)
+{ SetText(boost::lexical_cast<std::string>(t)); }
 
 #endif

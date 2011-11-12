@@ -35,6 +35,7 @@
 #include <GG/Spin.h>
 #include <GG/StyleFactory.h>
 #include <GG/TabWnd.h>
+#include <GG/TextControl.h>
 #include <GG/ExpressionWriter.h>
 #include <GG/adobe/adam.hpp>
 #include <GG/adobe/basic_sheet.hpp>

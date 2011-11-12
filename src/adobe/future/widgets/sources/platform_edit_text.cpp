@@ -72,7 +72,7 @@ public:
                     m_edit_text.rows_m == 1 &&
                     0 < m_edit_text.max_cols_m &&
                     static_cast<std::size_t>(m_edit_text.max_cols_m) <
-                    m_edit_text.control_m->Length() + 1;
+                    m_edit_text.control_m->Text().size() + 1;
 
                 if (squelch)
                     return true;

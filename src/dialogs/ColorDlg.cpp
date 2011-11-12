@@ -836,10 +836,10 @@ void ColorDlg::ValuePickerChanged(double value)
 void ColorDlg::UpdateRGBSliders()
 {
     Clr color = Convert(m_current_color);
-    *m_slider_values[R] << static_cast<int>(color.r);
-    *m_slider_values[G] << static_cast<int>(color.g);
-    *m_slider_values[B] << static_cast<int>(color.b);
-    *m_slider_values[A] << static_cast<int>(color.a);
+    m_slider_values[R]->SetValue(static_cast<int>(color.r));
+    m_slider_values[G]->SetValue(static_cast<int>(color.g));
+    m_slider_values[B]->SetValue(static_cast<int>(color.b));
+    m_slider_values[A]->SetValue(static_cast<int>(color.a));
     m_sliders[R]->SlideTo(color.r);
     m_sliders[G]->SlideTo(color.g);
     m_sliders[B]->SlideTo(color.b);
@@ -848,9 +848,9 @@ void ColorDlg::UpdateRGBSliders()
 
 void ColorDlg::UpdateHSVSliders()
 {
-    *m_slider_values[H] << static_cast<int>(m_current_color.h * 359);
-    *m_slider_values[S] << static_cast<int>(m_current_color.s * 255);
-    *m_slider_values[V] << static_cast<int>(m_current_color.v * 255);
+    m_slider_values[H]->SetValue(static_cast<int>(m_current_color.h * 359));
+    m_slider_values[S]->SetValue(static_cast<int>(m_current_color.s * 255));
+    m_slider_values[V]->SetValue(static_cast<int>(m_current_color.v * 255));
     m_sliders[H]->SlideTo(static_cast<int>(m_current_color.h * 359));
     m_sliders[S]->SlideTo(static_cast<int>(m_current_color.s * 255));
     m_sliders[V]->SlideTo(static_cast<int>(m_current_color.v * 255));
@@ -883,7 +883,7 @@ void ColorDlg::RedSliderChanged(int value, int low, int high)
     color.r = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
-    *m_slider_values[R] << value;
+    m_slider_values[R]->SetValue(value);
 }
 
 void ColorDlg::GreenSliderChanged(int value, int low, int high)
@@ -892,7 +892,7 @@ void ColorDlg::GreenSliderChanged(int value, int low, int high)
     color.g = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
-    *m_slider_values[G] << value;
+    m_slider_values[G]->SetValue(value);
 }
 
 void ColorDlg::BlueSliderChanged(int value, int low, int high)
@@ -901,7 +901,7 @@ void ColorDlg::BlueSliderChanged(int value, int low, int high)
     color.b = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
-    *m_slider_values[B] << value;
+    m_slider_values[B]->SetValue(value);
 }
 
 void ColorDlg::AlphaSliderChanged(int value, int low, int high)
@@ -910,7 +910,7 @@ void ColorDlg::AlphaSliderChanged(int value, int low, int high)
     color.a = value;
     m_current_color = Convert(color);
     ColorChangeFromRGBSlider();
-    *m_slider_values[A] << value;
+    m_slider_values[A]->SetValue(value);
 }
 
 void ColorDlg::HueSliderChanged(int value, int low, int high)

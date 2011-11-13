@@ -104,7 +104,7 @@ Layout::Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns,
     assert(columns);
 }
 
-Pt Layout::MinUsableSize() const
+Pt Layout::MinUsableSize(X/* = X0*/) const
 { return m_min_usable_size; }
 
 std::size_t Layout::Rows() const
@@ -248,6 +248,11 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
         Pt min_space_needed = it->first->MinSize() + margin;
         Pt min_usable_size = it->first->MinUsableSize() + margin;
 
+        if (TextControl* text_control = dynamic_cast<TextControl*>(it->first)) {
+            if (text_control->GetFont() && !text_control->Text().empty())
+                min_usable_size.y = text_control->GetFont()->Height();
+        }
+
         // adjust row minimums
         double total_stretch = 0.0;
         for (std::size_t i = it->second.first_row; i < it->second.last_row; ++i) {
@@ -348,66 +353,68 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
     }
 
     // determine row and column positions
-    double total_stretch = TotalStretch(m_row_params);
-    int total_stretch_space = Value(Size().y - MinSize().y);
-    double space_per_unit_stretch = total_stretch ? total_stretch_space / total_stretch : 0.0;
-    bool larger_than_min = 0 < total_stretch_space;
-    double remainder = 0.0;
-    int current_origin = m_border_margin;
+    const double row_total_stretch = TotalStretch(m_row_params);
+    const int row_total_stretch_space = Value(Size().y - MinSize().y);
+    const double row_space_per_unit_stretch = row_total_stretch ? row_total_stretch_space / row_total_stretch : 0.0;
+    const bool row_larger_than_min = 0 < row_total_stretch_space;
+    double row_remainder = 0.0;
+    int row_current_origin = m_border_margin;
+
     for (std::size_t i = 0; i < m_row_params.size(); ++i) {
-        if (larger_than_min) {
+        if (row_larger_than_min) {
             if (i < m_row_params.size() - 1) {
-                double raw_width =
+                double row_raw_width =
                     m_row_params[i].effective_min +
-                    (total_stretch ?
-                     space_per_unit_stretch * m_row_params[i].stretch :
-                     total_stretch_space / static_cast<double>(m_row_params.size()));
-                int int_raw_width = static_cast<int>(raw_width);
-                m_row_params[i].current_width = int_raw_width;
-                remainder += raw_width - int_raw_width;
-                if (1.0 < remainder) {
-                    --remainder;
+                    (row_total_stretch ?
+                     row_space_per_unit_stretch * m_row_params[i].stretch :
+                     row_total_stretch_space / static_cast<double>(m_row_params.size()));
+                int row_int_raw_width = static_cast<int>(row_raw_width);
+                m_row_params[i].current_width = row_int_raw_width;
+                row_remainder += row_raw_width - row_int_raw_width;
+                if (1.0 < row_remainder) {
+                    --row_remainder;
                     ++m_row_params[i].current_width;
                 }
             } else {
-                m_row_params[i].current_width = Value(Height()) - m_border_margin - current_origin;
+                m_row_params[i].current_width = Value(Height()) - m_border_margin - row_current_origin;
             }
         } else {
             m_row_params[i].current_width = m_row_params[i].effective_min;
         }
-        m_row_params[i].current_origin = current_origin;
-        current_origin += m_row_params[i].current_width;
+        m_row_params[i].current_origin = row_current_origin;
+        row_current_origin += m_row_params[i].current_width;
     }
 
-    total_stretch = TotalStretch(m_column_params);
-    total_stretch_space = Value(Size().x - MinSize().x);
-    space_per_unit_stretch = total_stretch ? total_stretch_space / total_stretch : 0.0;
-    larger_than_min = 0 < total_stretch_space;
-    remainder = 0.0;
-    current_origin = m_border_margin;
+    const double column_total_stretch = TotalStretch(m_column_params);
+    const int column_total_stretch_space = Value(Size().x - MinSize().x);
+    const double column_space_per_unit_stretch = column_total_stretch ? column_total_stretch_space / column_total_stretch : 0.0;
+    const bool column_larger_than_min = 0 < column_total_stretch_space;
+    double column_remainder = 0.0;
+    int column_current_origin = m_border_margin;
+
     for (std::size_t i = 0; i < m_column_params.size(); ++i) {
-        if (larger_than_min) {
+        if (column_larger_than_min) {
             if (i < m_column_params.size() - 1) {
-                double raw_width =
+                double column_raw_width =
                     m_column_params[i].effective_min +
-                    (total_stretch ?
-                     space_per_unit_stretch * m_column_params[i].stretch :
-                     total_stretch_space / static_cast<double>(m_column_params.size()));
-                int int_raw_width = static_cast<int>(raw_width);
-                m_column_params[i].current_width = int_raw_width;
-                remainder += raw_width - int_raw_width;
-                if (1.0 < remainder) {
-                    --remainder;
+                    (column_total_stretch ?
+                     column_space_per_unit_stretch * m_column_params[i].stretch :
+                     column_total_stretch_space / static_cast<double>(m_column_params.size()));
+                int column_int_raw_width = static_cast<int>(column_raw_width);
+                m_column_params[i].current_width = column_int_raw_width;
+                column_remainder += column_raw_width - column_int_raw_width;
+                if (1.0 < column_remainder) {
+                    --column_remainder;
                     ++m_column_params[i].current_width;
                 }
             } else {
-                m_column_params[i].current_width = Value(Width()) - m_border_margin - current_origin;
+                m_column_params[i].current_width = Value(Width()) - m_border_margin - column_current_origin;
             }
         } else {
             m_column_params[i].current_width = m_column_params[i].effective_min;
         }
-        m_column_params[i].current_origin = current_origin;
-        current_origin += m_column_params[i].current_width;
+        m_column_params[i].current_origin = column_current_origin;
+        column_current_origin += m_column_params[i].current_width;
     }
 
     if (m_row_params.back().current_origin + m_row_params.back().current_width != Value(Height()) - m_border_margin)

@@ -254,7 +254,7 @@ public:
                                     DropsAcceptableIter last,
                                     const Pt& pt) const;
 
-    virtual Pt      MinUsableSize() const;
+    virtual Pt      MinUsableSize(X width = X0) const;
     virtual Pt      ClientUpperLeft() const;
     virtual Pt      ClientLowerRight() const;
 

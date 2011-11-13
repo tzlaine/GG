@@ -310,8 +310,11 @@ Pt Wnd::MinSize() const
 Pt Wnd::MaxSize() const
 { return m_max_size; }
 
-Pt Wnd::MinUsableSize() const
+Pt Wnd::MinUsableSize(X width/* = X0*/) const
 { return Size(); }
+
+Y Wnd::MinUsableHeight(X width) const
+{ return MinUsableSize(width).y; }
 
 Pt Wnd::ClientUpperLeft() const
 { return UpperLeft(); }

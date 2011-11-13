@@ -73,7 +73,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt           MinUsableSize() const;
+    virtual Pt           MinUsableSize(X width = X0) const;
 
     std::pair<int, int>  PosnRange() const;         ///< range currently being viewed
     std::pair<int, int>  ScrollRange() const;       ///< defined possible range of control

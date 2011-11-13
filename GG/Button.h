@@ -68,7 +68,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize() const;
+    virtual Pt MinUsableSize(X width = X0) const;
 
     /** Returns the text of this button. */
     const std::string& Text() const;
@@ -161,7 +161,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt         MinUsableSize() const;
+    virtual Pt         MinUsableSize(X width = X0) const;
 
     bool               Checked() const;       ///< Returns true if button is checked
     Clr                InteriorColor() const; ///< Returns the interior color of the box, circle, or other enclosing shape
@@ -236,7 +236,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt       MinUsableSize() const;
+    virtual Pt       MinUsableSize(X width = X0) const;
 
     /** Returns the orientation of the buttons in the group */
     Orientation      GetOrientation() const;

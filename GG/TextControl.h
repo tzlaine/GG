@@ -76,7 +76,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt        MinUsableSize() const;
+    virtual Pt        MinUsableSize(X width = X0) const;
 
     /** Returns the text displayed in this control. */
     const std::string& Text() const;
@@ -223,6 +223,9 @@ private:
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
     Pt                          m_text_lr;     ///< stored relative to the control's UpperLeft()
     mutable X                   m_last_min_width;
+    mutable X                   m_last_min_usable_width;
+    mutable Pt                  m_min_usable_size_for_min_width;
+    mutable Pt                  m_min_usable_size_for_min_usable_width;
     mutable Pt                  m_min_usable_size;
 };
 

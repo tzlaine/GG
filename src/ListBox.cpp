@@ -521,7 +521,7 @@ void ListBox::DropsAcceptable(DropsAcceptableIter first, DropsAcceptableIter las
     }
 }
 
-Pt ListBox::MinUsableSize() const
+Pt ListBox::MinUsableSize(X/* = X0*/) const
 {
     return Pt(X(5 * SCROLL_WIDTH + 2 * BORDER_THICK),
               Y(5 * SCROLL_WIDTH + 2 * BORDER_THICK));

@@ -107,6 +107,12 @@ const SubTexture& Button::PressedGraphic() const
 const SubTexture& Button::RolloverGraphic() const
 { return m_rollover_graphic; }
 
+Clr Button::TextColor() const
+{ return m_text->TextColor(); }
+
+const boost::shared_ptr<Font>& Button::GetFont() const
+{ return m_text->GetFont(); }
+
 void Button::Render()
 {
     switch (m_state) {
@@ -139,6 +145,9 @@ void Button::SetPressedGraphic(const SubTexture& st)
 
 void Button::SetRolloverGraphic(const SubTexture& st)
 { m_rollover_graphic = st; }
+
+void Button::SetTextColor(Clr text_color)
+{ m_text->SetTextColor(text_color); }
 
 void Button::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
@@ -283,6 +292,9 @@ Pt StateButton::MinUsableSize(X/* = X0*/) const
 bool StateButton::Checked() const
 { return m_checked; }
 
+Clr StateButton::TextColor() const
+{ return m_text->TextColor(); }
+
 Clr StateButton::InteriorColor() const
 { return m_int_color; }
 
@@ -291,6 +303,12 @@ const std::string& StateButton::Text() const
 
 StateButtonStyle StateButton::Style() const
 { return m_style; }
+
+Flags<TextFormat> StateButton::GetTextFormat() const
+{ return m_text->GetTextFormat(); }
+
+const boost::shared_ptr<Font>& StateButton::GetFont() const
+{ return m_text->GetFont(); }
 
 void StateButton::Render()
 {
@@ -408,6 +426,9 @@ void StateButton::RepositionButton()
 
 void StateButton::SetColor(Clr c)
 { Control::SetColor(c); }
+
+void StateButton::SetTextColor(Clr text_color)
+{ m_text->SetTextColor(text_color); }
 
 void StateButton::SetInteriorColor(Clr c)
 { m_int_color = c; }

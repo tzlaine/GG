@@ -44,14 +44,10 @@ namespace {
 const int GroupBox::FRAME_THICK = 2;
 const int GroupBox::PIXEL_MARGIN = 4;
 
-GroupBox::GroupBox() :
-    m_label(0),
-    m_set_client_corners_equal_to_box_corners(false)
-{}
-
 GroupBox::GroupBox(X x, Y y, X w, Y h, const std::string& label, const boost::shared_ptr<Font>& font,
                    Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                    Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
+    Wnd(x, y, w, h, flags),
     m_color(color),
     m_text_color(text_color),
     m_int_color(interior),

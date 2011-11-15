@@ -171,10 +171,6 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ ///@{
-    Edit(); ///< Default ctor.
-    //@}
-
     /** \name Accessors */ ///@{
     TextControl* GetTextControl() const;
 

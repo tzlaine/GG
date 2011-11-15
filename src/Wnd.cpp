@@ -169,23 +169,6 @@ namespace {
 unsigned int Wnd::s_default_browse_time = 1500;
 boost::shared_ptr<BrowseInfoWnd> Wnd::s_default_browse_info_wnd;
 
-Wnd::Wnd() :
-    m_done(false),
-    m_parent(0),
-    m_zorder(0),
-    m_visible(true),
-    m_child_clipping_mode(DontClip),
-    m_non_client_child(false),
-    m_max_size(X(1 << 30), Y(1 << 30)),
-    m_layout(0),
-    m_containing_layout(0),
-    m_flags()
-{
-    m_browse_modes.resize(1);
-    m_browse_modes[0].time = s_default_browse_time;
-    m_browse_modes[0].wnd = s_default_browse_info_wnd;
-}
-
 Wnd::Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = INTERACTIVE | DRAGABLE*/) :
     m_done(false),
     m_parent(0),

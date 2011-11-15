@@ -54,12 +54,6 @@ namespace {
 ////////////////////////////////////////////////
 // GG::Button
 ////////////////////////////////////////////////
-Button::Button() :
-    Control(),
-    m_text(0),
-    m_state(BN_UNPRESSED)
-{}
-
 Button::Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color, 
                Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Control(x, y, w, h, flags),
@@ -258,13 +252,6 @@ void Button::RenderDefault()
 ////////////////////////////////////////////////
 // GG::StateButton
 ////////////////////////////////////////////////
-StateButton::StateButton() :
-    Control(),
-    m_text(0),
-    m_checked(false),
-    m_style(SBSTYLE_3D_XBOX)
-{}
-
 StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
                          Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          Flags<WndFlag> flags/* = INTERACTIVE*/) :
@@ -487,15 +474,6 @@ RadioButtonGroup::ButtonSlot::ButtonSlot(StateButton* button_) :
 // RadioButtonGroup
 // static(s)
 const std::size_t RadioButtonGroup::NO_BUTTON = std::numeric_limits<std::size_t>::max();
-
-RadioButtonGroup::RadioButtonGroup() :
-    Control(),
-    m_orientation(VERTICAL),
-    m_checked_button(NO_BUTTON),
-    m_expand_buttons(false),
-    m_expand_buttons_proportionally(false),
-    m_render_outline(false)
-{ SetColor(CLR_YELLOW); }
 
 RadioButtonGroup::RadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation) :
     Control(x, y, w, h),

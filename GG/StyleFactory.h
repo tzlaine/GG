@@ -81,7 +81,6 @@ class GG_API StyleFactory
 {
 public:
     /** \name Structors */ ///@{
-    StyleFactory(); ///< Default ctor.
     virtual ~StyleFactory(); ///< Virtual dtor.
     //@}
 

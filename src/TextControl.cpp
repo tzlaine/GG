@@ -39,15 +39,6 @@ namespace {
 ////////////////////////////////////////////////
 // GG::TextControl
 ////////////////////////////////////////////////
-TextControl::TextControl() :
-    Control(),
-    m_format(FORMAT_NONE),
-    m_clip_text(false),
-    m_set_min_size(false),
-    m_code_points(0),
-    m_fit_to_text(false)
-{}
-
 TextControl::TextControl(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                          Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) :
     Control(x, y, w, h, flags),

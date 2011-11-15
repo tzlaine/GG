@@ -42,7 +42,10 @@ class EditTextFilter :
     public GG::Wnd
 {
 public:
-    EditTextFilter(edit_text_t& edit_text) : m_edit_text(edit_text) {}
+    EditTextFilter(edit_text_t& edit_text) :
+        Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
+        m_edit_text(edit_text)
+        {}
 
     virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
         {

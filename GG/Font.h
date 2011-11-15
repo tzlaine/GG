@@ -491,11 +491,6 @@ public:
         "%1%" where the code point should appear. */
     static void ThrowBadGlyph(const std::string& format_str, boost::uint32_t c);
 
-protected:
-    /** \name Structors */ ///@{
-    Font(); ///< Default ctor.
-    //@}
-
 private:
     /** \brief This just holds the essential data necessary to render a glyph
         from the OpenGL texture(s) created at GG::Font creation time. */

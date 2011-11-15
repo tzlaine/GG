@@ -525,18 +525,6 @@ Font::Glyph::Glyph(const boost::shared_ptr<Texture>& texture, const Pt& ul, cons
 std::set<std::string> Font::s_action_tags;
 std::set<std::string> Font::s_known_tags;
 
-Font::Font() :
-    m_pt_sz(0),
-    m_ascent(0),
-    m_descent(0),
-    m_height(0),
-    m_lineskip(0),
-    m_underline_offset(0.0),
-    m_underline_height(0.0),
-    m_italics_offset(0.0),
-    m_space_width(0)
-{}
-
 Font::Font(const std::string& font_filename, unsigned int pts) :
     m_font_filename(font_filename),
     m_pt_sz(pts),

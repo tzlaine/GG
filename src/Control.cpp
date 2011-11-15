@@ -32,11 +32,6 @@ using namespace GG;
 ////////////////////////////////////////////////
 // GG::Control
 ////////////////////////////////////////////////
-Control::Control() :
-    Wnd (),
-    m_disabled(false)
-{}
-
 Control::Control(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Wnd(x, y, w, h, flags),
     m_disabled(false)

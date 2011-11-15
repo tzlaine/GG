@@ -107,12 +107,6 @@ namespace {
 ////////////////////////////////////////////////
 // GG::DropDownList
 ////////////////////////////////////////////////
-DropDownList::DropDownList() :
-    Control(),
-    m_current_item(),
-    m_LB(0)
-{}
-
 DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color,
                            Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Control(x, y, w, h, flags),

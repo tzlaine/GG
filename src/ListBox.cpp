@@ -410,41 +410,6 @@ void ListBox::Row::AdjustLayout(bool adjust_for_push_back/* = false*/)
 // static(s)
 const unsigned int ListBox::BORDER_THICK = 2;
 
-ListBox::ListBox() :
-    Control(),
-    m_rows(),
-    m_vscroll(0),
-    m_hscroll(0),
-    m_caret(m_rows.end()),
-    m_selections(RowPtrIteratorLess<std::list<Row*> >(&m_rows)),
-    m_old_sel_row(m_rows.end()),
-    m_old_sel_row_selected(false),
-    m_old_rdown_row(m_rows.end()),
-    m_lclick_row(m_rows.end()),
-    m_rclick_row(m_rows.end()),
-    m_last_row_browsed(m_rows.end()),
-    m_first_row_shown(m_rows.end()),
-    m_first_col_shown(0),
-    m_cell_margin(2),
-    m_style(LIST_NONE),
-    m_header_row(0),
-    m_keep_col_widths(false),
-    m_clip_cells(false),
-    m_sort_col(0),
-    m_sort_cmp(DefaultRowCmp<Row>()),
-    m_auto_scroll_during_drag_drops(true),
-    m_auto_scroll_margin(8),
-    m_auto_scrolling_up(false),
-    m_auto_scrolling_down(false),
-    m_auto_scrolling_left(false),
-    m_auto_scrolling_right(false),
-    m_auto_scroll_timer(250),
-    m_iterator_being_erased(0)
-{
-    m_auto_scroll_timer.Stop();
-    m_auto_scroll_timer.Connect(this);
-}
-
 ListBox::ListBox(X x, Y y, X w, Y h, Clr color, Clr interior/* = CLR_ZERO*/,
                  Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Control(x, y, w, h, flags),

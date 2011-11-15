@@ -199,11 +199,6 @@ public:
     using Control::KeyPress;
     //@}
 
-protected:
-    /** \name Structors */ ///@{
-    TextControl(); ///< Default ctor.
-    //@}
-
 private:
     void ValidateFormat();      ///< ensures that the format flags are consistent
     void AdjustMinimumSize();

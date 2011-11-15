@@ -48,9 +48,6 @@
 
 using namespace GG;
 
-StyleFactory::StyleFactory()
-{}
-
 StyleFactory::~StyleFactory()
 {}
 

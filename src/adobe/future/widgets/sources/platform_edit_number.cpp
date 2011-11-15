@@ -27,7 +27,10 @@ class EditNumberLabelFilter :
     public GG::Wnd
 {
 public:
-    EditNumberLabelFilter(edit_number_platform_data_t& data) : m_data(data) {}
+    EditNumberLabelFilter(edit_number_platform_data_t& data) :
+        Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
+        m_data(data)
+        {}
 
     virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
         {

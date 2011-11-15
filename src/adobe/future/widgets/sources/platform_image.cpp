@@ -36,7 +36,10 @@ class ImageFilter :
     public GG::Wnd
 {
 public:
-    ImageFilter(image_t& image) : m_image(image) {}
+    ImageFilter(image_t& image) :
+        Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
+        m_image(image)
+        {}
 
     virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
         {

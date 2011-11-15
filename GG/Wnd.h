@@ -689,8 +689,6 @@ protected:
     };
 
     /** \name Structors */ ///@{
-    Wnd(); ///< Default ctor.
-
     /** Ctor that allows a size and position to be specified, as well as
         creation flags. */
     Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags = INTERACTIVE | DRAGABLE);

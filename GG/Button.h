@@ -135,11 +135,6 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ ///@{
-    /** Default ctor. */
-    Button();
-    //@}
-
     /** \name Accessors */ ///@{
     /** Returns the TextControl used to render this Button's text. */
     TextControl* GetTextControl() const;
@@ -261,11 +256,6 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ ///@{
-    /** Default ctor. */
-    StateButton();
-    //@}
-
     /** \name Accessors */ ///@{
     /** Returns the upper-left of the button part of the control. */
     Pt  ButtonUpperLeft() const;
@@ -435,11 +425,6 @@ protected:
         StateButton*               button;
         boost::signals::connection connection;
     };
-
-    /** \name Structors */ ///@{
-    /** Default ctor. */
-    RadioButtonGroup();
-    //@}
 
     /** \name Accessors */ ///@{
     /** Returns the state buttons in the group. */

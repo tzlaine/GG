@@ -77,10 +77,6 @@ public:
     //@}
 
 protected:
-    /** \name Structors */ ///@{
-    GroupBox(); ///< Default ctor.
-    //@}
-
     /** The thickness with which to render the frame. */
     static const int FRAME_THICK;
 

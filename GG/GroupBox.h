@@ -72,7 +72,8 @@ public:
         anything about how GG Wnd client areas work. */
     void SetClientCornersEqualToBoxCorners(bool b);
 
-    virtual void SetText(const std::string& str);
+    /** Sets the title text on this GroupBox. */
+    void SetText(const std::string& str);
     //@}
 
 protected:

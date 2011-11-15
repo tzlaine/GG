@@ -141,7 +141,7 @@ public:
         window.  If FitToText() returns true (i.e. if the second ctor was
         used), calls to this function cause the window to be resized to
         whatever space the newly rendered text occupies. */
-    virtual void SetText(const std::string& str);
+    void SetText(const std::string& str);
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
 

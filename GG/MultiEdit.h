@@ -90,7 +90,9 @@ public:
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
 
     virtual void   SelectAll();
-    virtual void   SetText(const std::string& str);
+
+    /** Sets the text in this MultiEdit. */
+    void           SetText(const std::string& str);
 
     /** Sets the style flags for this MultiEdit to \a style. */
     void           SetStyle(Flags<MultiEditStyle> style);
@@ -116,6 +118,9 @@ protected:
     /** \name Accessors */ ///@{
     /** Returns true if >= 1 characters are selected. */
     virtual bool MultiSelected() const;
+
+    /** Returns the line data for the text in this MultiEdit. */
+    const std::vector<Font::LineData>& GetLineData() const;
 
     /** Returns the width of the scrollbar on the right side of the control (0
         if none). */

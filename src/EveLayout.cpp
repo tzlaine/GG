@@ -532,7 +532,7 @@ namespace {
                                                               NONCONTAINER));
 
         std::auto_ptr<StateButton> checkbox(
-            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_LEFT, CLR_GRAY)
+            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), CLR_GRAY)
         );
         checkbox->SetMaxSize(Pt(checkbox->MaxSize().x, checkbox->Height()));
         checkbox->SetMinSize(Pt(checkbox->MinSize().x, checkbox->Height()));
@@ -841,7 +841,7 @@ namespace {
                                                               CONTAINER));
 
         std::auto_ptr<StateButton> radio_button(
-            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(), FORMAT_LEFT,
+            Factory().NewStateButton(X0, Y0, X1, StandardHeight(), name, DefaultFont(),
                                      CLR_GRAY, CLR_BLACK, CLR_ZERO, SBSTYLE_3D_RADIO)
         );
         radio_button->SetMaxSize(Pt(radio_button->MaxSize().x, radio_button->Height()));

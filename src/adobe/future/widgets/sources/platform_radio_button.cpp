@@ -112,7 +112,7 @@ platform_display_type insert<radio_button_t>(display_t&             display,
     element.control_m =
         implementation::Factory().NewStateButton(GG::X0, GG::Y0, GG::X1,
                                                  implementation::StandardHeight(), element.name_m,
-                                                 implementation::DefaultFont(), GG::FORMAT_LEFT,
+                                                 implementation::DefaultFont(),
                                                  GG::CLR_GRAY, GG::CLR_BLACK, GG::CLR_ZERO,
                                                  GG::SBSTYLE_3D_RADIO);
 

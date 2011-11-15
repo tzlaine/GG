@@ -149,6 +149,9 @@ void Button::SetRolloverGraphic(const SubTexture& st)
 void Button::SetTextColor(Clr text_color)
 { m_text->SetTextColor(text_color); }
 
+TextControl* Button::GetTextControl() const
+{ return m_text; }
+
 void Button::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
 {
     if (!Disabled()) {
@@ -262,11 +265,11 @@ StateButton::StateButton() :
     m_style(SBSTYLE_3D_XBOX)
 {}
 
-StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
-                         Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
+StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Clr color,
+                         Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/, StateButtonStyle style/* = SBSTYLE_3D_XBOX*/,
                          Flags<WndFlag> flags/* = INTERACTIVE*/) :
     Control(x, y, w, h, flags),
-    m_text(new TextControl(X0, Y0, str, font, text_color, format)),
+    m_text(new TextControl(X0, Y0, str, font, text_color)),
     m_checked(false),
     m_int_color(interior),
     m_style(style),
@@ -284,9 +287,13 @@ StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost
 
 Pt StateButton::MinUsableSize(X/* = X0*/) const
 {
-    Pt text_ul = m_text->RelativeUpperLeft(), text_lr = m_text->RelativeLowerRight();
-    return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, text_ul.x),
-              std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, text_ul.y));
+    if (m_style == SBSTYLE_3D_TOP_ATTACHED_TAB || m_style == SBSTYLE_3D_TOP_DETACHED_TAB) {
+        return m_text->MinUsableSize();
+    } else {
+        Pt text_ul = m_text->RelativeUpperLeft(), text_lr = m_text->RelativeLowerRight();
+        return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, text_ul.x),
+                  std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, text_ul.y));
+    }
 }
 
 bool StateButton::Checked() const
@@ -406,17 +413,18 @@ void StateButton::SetCheck(bool b/* = true*/)
 
 void StateButton::RepositionButton()
 {
+    const X W = Width();
+    const Y H = Height();
+    const X BN_W = m_button_lr.x - m_button_ul.x;
+    const Y BN_H = m_button_lr.y - m_button_ul.y;
+    const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
+
     Pt text_ul;
     if (m_style == SBSTYLE_3D_TOP_ATTACHED_TAB || m_style == SBSTYLE_3D_TOP_DETACHED_TAB) {
         m_button_ul = Pt();
         m_button_lr = Pt();
-        text_ul = Pt(X0, Y(BEVEL / 2));
+        text_ul = Pt(X(Value(m_text->Height())) * SPACING + 0.5, (H - m_text->Height()) / 2.0 + 0.5);
     } else {
-        const X W = Width();
-        const Y H = Height();
-        const X BN_W = m_button_lr.x - m_button_ul.x;
-        const Y BN_H = m_button_lr.y - m_button_ul.y;
-        const double SPACING = 0.5; // the space to leave between the button and text, as a factor of the button's size (width or height)
         m_button_ul = Pt(X0, (H - BN_H) / 2.0 + 0.5);
         m_button_lr = m_button_ul + Pt(BN_W, BN_H);
         text_ul = Pt(BN_W * (1 + SPACING) + 0.5, (H - m_text->Height()) / 2.0 + 0.5);
@@ -444,6 +452,9 @@ Pt StateButton::ButtonLowerRight() const
 
 Pt StateButton::TextUpperLeft() const
 { return m_text->RelativeUpperLeft(); }
+
+TextControl* StateButton::GetTextControl() const
+{ return m_text; }
 
 
 ////////////////////////////////////////////////
@@ -637,7 +648,7 @@ void RadioButtonGroup::InsertButton(std::size_t index, const std::string& text, 
                                     StateButtonStyle style/* = SBSTYLE_3D_RADIO*/)
 {
     assert(index <= m_button_slots.size());
-    StateButton* button = GetStyleFactory()->NewStateButton(X0, Y0, X1, Y1, text, font, format, color, text_color, interior, style);
+    StateButton* button = GetStyleFactory()->NewStateButton(X0, Y0, X1, Y1, text, font, color, text_color, interior, style);
     button->Resize(button->MinUsableSize());
     InsertButton(index, button);
 }

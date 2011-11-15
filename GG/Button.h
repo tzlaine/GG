@@ -140,6 +140,11 @@ protected:
     Button();
     //@}
 
+    /** \name Accessors */ ///@{
+    /** Returns the TextControl used to render this Button's text. */
+    TextControl* GetTextControl() const;
+    //@}
+
     /** \name Mutators */ ///@{
     virtual void   LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void   LDrag(const Pt& pt, const Pt& move, Flags<ModKey> mod_keys);
@@ -198,7 +203,7 @@ public:
 
     /** \name Structors */ ///@{
     /** Ctor. */
-    StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, Flags<TextFormat> format, 
+    StateButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font, 
                 Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO, StateButtonStyle style = SBSTYLE_3D_XBOX,
                 Flags<WndFlag> flags = INTERACTIVE);
     //@}
@@ -270,6 +275,9 @@ protected:
 
     /** Returns the upper-left of the text part of the control. */
     Pt  TextUpperLeft() const;
+
+    /** Returns the TextControl used to render this StateButton's text. */
+    TextControl* GetTextControl() const;
     //@}
 
     /** \name Mutators */ ///@{

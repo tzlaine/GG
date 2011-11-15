@@ -106,7 +106,7 @@ public:
     /** Returns the color used to render the iterior of the control. */
     Clr InteriorColor() const;
 
-    /** Returns the text color (this may differ from the Control::Color()). */
+    /** Returns the text color. */
     Clr TextColor() const;
 
     /** Returns the color used to render hiliting around selected text. */
@@ -114,6 +114,9 @@ public:
 
     /** Returns the color used to render selected text. */
     Clr SelectedTextColor() const;
+
+    /** Returns the Font used by this StateButton to render its text. */
+    const boost::shared_ptr<Font>& GetFont() const;
 
     /** The edited signal object for this Edit. */
     mutable EditedSignalType EditedSignal;
@@ -128,7 +131,7 @@ public:
 
     virtual void SetColor(Clr c);
 
-    /** Sets the text of this button. */
+    /** Sets the text in this Edit. */
     void SetText(const std::string& text);
 
     /** Sets text to the empty string. */
@@ -173,7 +176,7 @@ protected:
     //@}
 
     /** \name Accessors */ ///@{
-    TextControl* Text_() const;
+    TextControl* GetTextControl() const;
 
     /** Returns true if >= 1 characters selected. */
     virtual bool MultiSelected() const;

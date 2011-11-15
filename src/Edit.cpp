@@ -121,6 +121,9 @@ Clr Edit::HiliteColor() const
 Clr Edit::SelectedTextColor() const
 { return m_sel_text_color; }
 
+const boost::shared_ptr<Font>& Edit::GetFont() const
+{ return m_text->GetFont(); }
+
 void Edit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -248,7 +251,7 @@ void Edit::SelectRange(CPSize from, CPSize to)
     AdjustView();
 }
 
-TextControl* Edit::Text_() const
+TextControl* Edit::GetTextControl() const
 { return m_text; }
 
 bool Edit::MultiSelected() const

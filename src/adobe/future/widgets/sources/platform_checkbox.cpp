@@ -129,7 +129,7 @@ platform_display_type insert<checkbox_t>(display_t&             display,
     element.control_m =
         implementation::Factory().NewStateButton(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
                                                  element.name_m, implementation::DefaultFont(),
-                                                 GG::FORMAT_LEFT, GG::CLR_GRAY);
+                                                 GG::CLR_GRAY);
 
     GG::Connect(element.control_m->CheckedSignal, Checked(element));
 

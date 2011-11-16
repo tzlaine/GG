@@ -1665,6 +1665,17 @@ struct EveLayout::Impl
 #if INSTRUMENT_ADD_TO_VERTICAL
                 std::cout << "        two-column layout\n";
 #endif
+
+                // Special case for the placement of labels on large items:
+                // align to top instead of align to center.
+                const TextControl* label = boost::polymorphic_downcast<const TextControl*>(l->Cells()[0][0]);
+                if (label->GetFont()->Height() * 2 < l->Cells()[0][1]->Height()) {
+                    Flags<Alignment> label_alignment = l->ChildAlignment(label);
+                    label_alignment &= ~ALIGN_VCENTER;
+                    label_alignment |= ALIGN_TOP;
+                    l->SetChildAlignment(label, label_alignment);
+                }
+
                 if (!raw_alignments.first || raw_alignments.first == adobe::key_align_fill)
                     raw_alignments.first = adobe::key_align_left;
                 child_alignments[i] = AlignmentFlags(raw_alignments.first, raw_alignments.second);
@@ -1806,8 +1817,13 @@ struct EveLayout::Impl
                 if (Layout* l = children_as_1x2_layouts[align][i]) {
                     l->SetMinimumColumnWidth(0, X(static_cast<int>(std::ceil(Value(min_width_0)))));
                     l->SetMinimumColumnWidth(1, X(static_cast<int>(std::ceil(Value(min_width_1)))));
-                    l->SetChildAlignment(l->Cells()[0][0], ALIGN_RIGHT);
+
+                    Flags<Alignment> label_alignment = l->ChildAlignment(l->Cells()[0][0]);
+                    label_alignment &= ~(ALIGN_CENTER | ALIGN_LEFT);
+                    label_alignment |= ALIGN_RIGHT;
+                    l->SetChildAlignment(l->Cells()[0][0], label_alignment);
                     l->SetChildAlignment(l->Cells()[0][1], ALIGN_LEFT);
+
 #if INSTRUMENT_ADD_TO_VERTICAL
                     std::cout << "    l->SetMinimumColumnWidth(0, =" << X(std::ceil(Value(min_width_0))) << ")\n";
                     std::cout << "    l->SetMinimumColumnWidth(1, =" << X(std::ceil(Value(min_width_1))) << ")\n";

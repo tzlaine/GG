@@ -500,7 +500,7 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
         if (it->second.last_column < m_column_params.size())
             lr.x -= static_cast<int>(m_cell_margin / 2.0 + 0.5);
 
-        if (it->second.alignment == ALIGN_NONE) {// || height_for_width_wnds.find(it->first) != height_for_width_wnds.end()) { // expand to fill available space
+        if (it->second.alignment == ALIGN_NONE) { // expand to fill available space
             it->first->SizeMove(ul, lr);
         } else { // align as appropriate
             Pt available_space = lr - ul;

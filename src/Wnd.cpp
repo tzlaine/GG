@@ -296,6 +296,9 @@ Pt Wnd::MaxSize() const
 Pt Wnd::MinUsableSize(X width/* = X0*/) const
 { return Size(); }
 
+bool Wnd::HeightForWidth() const
+{ return false; }
+
 Y Wnd::MinUsableHeight(X width) const
 { return MinUsableSize(width).y; }
 

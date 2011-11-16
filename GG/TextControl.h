@@ -77,6 +77,7 @@ public:
 
     /** \name Accessors */ ///@{
     virtual Pt        MinUsableSize(X width = X0) const;
+    virtual bool      HeightForWidth() const;
 
     /** Returns the text displayed in this control. */
     const std::string& Text() const;

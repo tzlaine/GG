@@ -357,6 +357,12 @@ public:
         its width can ignore \a width regardless of its value. */
     virtual Pt MinUsableSize(X width = X0) const;
 
+    /** Returns true iff this Wnd's minimum usable height can only be
+        determined by knowing its width.  For example, the height of a
+        TextControl in line-wrapped mode can only be determined if the maximum
+        line width is known.  */
+    virtual bool HeightForWidth() const;
+
     /** Returns the size of the height that can enclose the Wnd and still show
         all of its elements, plus enough room for interaction with those
         elements (if applicable), given that the Wnd is exactly \a width

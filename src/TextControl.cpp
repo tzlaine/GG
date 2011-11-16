@@ -87,6 +87,7 @@ Pt TextControl::MinUsableSize(X width/* = X0*/) const
         } else if (0 < min_size.x) {
             if (width != m_last_min_width) {
                 m_min_usable_size_for_min_width = m_font->TextExtent(m_text, m_format, min_size.x);
+                m_min_usable_size_for_min_width.y = m_font->Height();
                 m_last_min_width = width;
             }
             m_min_usable_size = m_min_usable_size_for_min_width;
@@ -101,6 +102,9 @@ Pt TextControl::MinUsableSize(X width/* = X0*/) const
     }
     return m_min_usable_size;
 }
+
+bool TextControl::HeightForWidth() const
+{ return true; }
 
 const std::string& TextControl::Text() const
 { return m_text; }

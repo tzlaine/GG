@@ -186,9 +186,8 @@ Slider<T>::Slider(X x, Y y, X w, Y h, T min, T max, Orientation orientation, Sli
 template <class T>
 Pt Slider<T>::MinUsableSize(X width/* = X0*/) const
 {
-    Pt tab_min = m_tab->MinUsableSize();
-    return Pt(m_orientation == VERTICAL ? tab_min.x : Size().x,
-              m_orientation == VERTICAL ? Size().y : tab_min.y);
+    return Pt(m_orientation == VERTICAL ? X(m_tab_width) : Size().x,
+              m_orientation == VERTICAL ? Size().y : Y(m_tab_width));
 }
 
 template <class T>
@@ -256,9 +255,9 @@ void Slider<T>::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
     if (m_orientation == VERTICAL)
-        m_tab->SizeMove(Pt(), Pt(lr.x - ul.x, Y(m_tab_width)));
+        m_tab->SizeMove(Pt(), Pt(Width(), Y(m_tab_width)));
     else
-        m_tab->SizeMove(Pt(), Pt(X(m_tab_width), lr.y - ul.y));
+        m_tab->SizeMove(Pt(), Pt(X(m_tab_width), Height()));
     MoveTabToPosn();
 }
 

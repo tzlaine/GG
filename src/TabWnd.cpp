@@ -323,9 +323,9 @@ Clr TabBar::TextColor() const
 
 void TabBar::SizeMove(const Pt& ul, const Pt& lr)
 {
-    m_tabs->Resize(Pt(m_tabs->Size().x, lr.y -  ul.y));
-    m_left_right_button_layout->SizeMove(Pt(), lr - ul);
     Control::SizeMove(ul, lr);
+    m_tabs->Resize(Pt(m_tabs->Width(), Height()));
+    m_left_right_button_layout->Resize(Size());
 }
 
 void TabBar::Render()

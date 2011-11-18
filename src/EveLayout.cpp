@@ -358,7 +358,6 @@ namespace {
             retval |= ALIGN_VCENTER;
         else if (vertical == adobe::key_align_bottom)
             retval |= ALIGN_BOTTOM;
-        // TODO: else fill and else proportional
 
         if (horizontal == adobe::key_align_left)
             retval |= ALIGN_LEFT;
@@ -366,7 +365,6 @@ namespace {
             retval |= ALIGN_CENTER;
         else if (horizontal == adobe::key_align_right)
             retval |= ALIGN_RIGHT;
-        // TODO: else fill and else proportional
 
         return retval;
     }
@@ -1282,10 +1280,8 @@ namespace {
                            const adobe::dictionary_t& params,
                            const adobe::line_position_t& position)
     {
-        using namespace adobe;
-
 #if INSTRUMENT_WINDOW_CREATION
-#define IF_CASE(x) if (wnd_type == name_##x)                            \
+#define IF_CASE(x) if (wnd_type == adobe::name_##x)                     \
         {                                                               \
             std::cout << std::string(indent * 4, ' ') << "    Make_"#x"(" << wnd_type << ")\n"; \
             MakeWndResult* retval = Make_##x(params, position);         \
@@ -1293,7 +1289,7 @@ namespace {
             return retval;                                              \
         }
 #else
-#define IF_CASE(x) if (wnd_type == name_##x) { return Make_##x(params, position); }
+#define IF_CASE(x) if (wnd_type == adobe::name_##x) { return Make_##x(params, position); }
 #endif
 
         IF_CASE(dialog)
@@ -1334,8 +1330,6 @@ namespace {
 
     bool IsContainer(adobe::name_t wnd_type)
     {
-        using namespace adobe;
-
         return
             wnd_type == adobe::name_dialog ||
             wnd_type == adobe::name_group ||
@@ -1582,53 +1576,67 @@ struct EveLayout::Impl
 
     void AddChildrenToHorizontalLayout(Layout& layout,
                                        MakeWndResult& wnd,
-                                       boost::ptr_vector<MakeWndResult>& children)
+                                       boost::ptr_vector<MakeWndResult>& children,
+                                       const ViewParameters& wnd_view_params)
     {
 #if INSTRUMENT_ADD_TO_HORIZONTAL
         std::cout << "AddChildrenToHorizontalLayout()\n";
 #endif
-        const bool proportional = wnd.m_child_horizontal == adobe::key_align_proportional;
-        if (proportional)
-            layout.ResizeLayout(1, children.size() * 2 - 1);
 
-        std::size_t column = 0;
+        std::vector<std::pair<adobe::name_t, adobe::name_t> > raw_alignments(children.size());
+        std::size_t first_right_aligned_index = children.size();
+        for (std::size_t i = 0; i < children.size(); ++i) {
+            raw_alignments[i] = Alignments(wnd, children[i]);
+            if (raw_alignments[i].first == adobe::key_align_right) {
+                if (first_right_aligned_index == children.size())
+                    first_right_aligned_index = i;
+            } else if (first_right_aligned_index < children.size()) {
+                throw adobe::stream_error_t("a non-right-aligned element is not supported after a right-aligned element",
+                                            wnd_view_params.m_position);
+            }
+        }
+
+        if (first_right_aligned_index < children.size())
+            layout.SetColumnStretch(first_right_aligned_index, 1.0);
+
         for (std::size_t i = 0; i < children.size(); ++i) {
 #if INSTRUMENT_ADD_TO_HORIZONTAL
             std::cout << "    child " << i << ":\n";
+            std::cout << "        raw_align=" << raw_alignments[i].first << "," << raw_alignments[i].second << "\n";
 #endif
-            Pt min_usable_size = children[i].m_wnd->MinUsableSize();
-            layout.SetMinimumColumnWidth(column, min_usable_size.x);
-            std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
+            if (raw_alignments[i].first == adobe::key_align_proportional) {
+                std::size_t first_j = i;
+                std::size_t last_j = i;
+                do {
+                    ++last_j;
+                } while (last_j < children.size() && raw_alignments[last_j].first == adobe::key_align_proportional);
+                std::auto_ptr<Layout> sublayout(new Layout(X0, Y0, X1, Y1, 1, (last_j - first_j) * 2 - 1, 0, 0));
+                for (std::size_t j = first_j; j < last_j; ++j) {
+                    if (j != first_j)
+                        layout.SetColumnStretch(j * 2 - 1, 1.0);
+                    Pt min_usable_size = children[j].m_wnd->MinUsableSize();
+                    sublayout->SetMinimumColumnWidth(j * 2, min_usable_size.x);
+                    sublayout->Add(children[j].m_wnd.release(), 0, j * 2, 1, 1, AlignmentFlags(raw_alignments[j].first, raw_alignments[j].second));
+                }
+                layout.SetColumnStretch(i, last_j - first_j);
+                layout.Add(sublayout.release(), 0, i, 1, 1, ALIGN_NONE);
+                i = last_j - 1;
+            } else {
+                Pt min_usable_size = children[i].m_wnd->MinUsableSize();
+                layout.SetMinimumColumnWidth(i, min_usable_size.x);
+                layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second));
 #if INSTRUMENT_ADD_TO_HORIZONTAL
-            std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
+                std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second) << ")\n";
 #endif
-            bool horizontal_fill = children[i].m_horizontal == adobe::key_align_fill;
-            bool vertical_fill = children[i].m_vertical == adobe::key_align_fill;
+
+                if (children[i].m_horizontal == adobe::key_align_fill || raw_alignments[i].first == adobe::key_align_center)
+                    layout.SetColumnStretch(i, 1.0);
+
 #if INSTRUMENT_ADD_TO_HORIZONTAL
-            std::cout << "        horizontal_fill=" << horizontal_fill << "\n";
-            std::cout << "        vertical_fill=" << vertical_fill << "\n";
+                std::cout << "        fill=" << (children[i].m_horizontal == adobe::key_align_fill) << "\n";
+                std::cout << "        layout.ColumnStretch(" << i << ")=" << layout.ColumnStretch(i) << "\n";
 #endif
-            if (i && proportional) {
-                layout.SetColumnStretch(column, 1.0);
-#if INSTRUMENT_ADD_TO_HORIZONTAL
-                std::cout << "        layout.Add(proportional space " << column << ")\n";
-                std::cout << "        layout.ColumnStretch(" << column << ")=" << layout.ColumnStretch(column) << "\n";
-#endif
-                ++column;
             }
-            layout.Add(children[i].m_wnd.release(), 0, column, 1, 1, AlignmentFlags(raw_alignments.first, raw_alignments.second));
-#if INSTRUMENT_ADD_TO_HORIZONTAL
-            std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments.first, raw_alignments.second) << ")\n";
-#endif
-            if (horizontal_fill)
-                layout.SetColumnStretch(column, 1.0);
-            if (vertical_fill)
-                layout.SetRowStretch(0, 1.0);
-#if INSTRUMENT_ADD_TO_HORIZONTAL
-            std::cout << "        layout.ColumnStretch(" << column << ")=" << layout.ColumnStretch(column) << "\n";
-            std::cout << "        layout.RowStretch(0)=" << layout.RowStretch(0) << "\n";
-#endif
-            ++column;
         }
 
         // Detect the special case of a text label paired with a labeled control.
@@ -1838,8 +1846,6 @@ struct EveLayout::Impl
                      adobe::name_t placement,
                      const ViewParameters& wnd_view_params)
     {
-        using namespace adobe;
-
         Wnd* wnd = wnd_.m_wnd.get();
 
 #if INSTRUMENT_WINDOW_CREATION
@@ -1855,8 +1861,8 @@ struct EveLayout::Impl
             wnd_view_params.m_name == adobe::name_group) {
             if (placement == adobe::key_place_overlay) {
                 std::string name = wnd_view_params.m_name.c_str();
-                throw stream_error_t("place_overlay placement is not compatible with " + name,
-                                     wnd_view_params.m_position);
+                throw adobe::stream_error_t("place_overlay placement is not compatible with " + name,
+                                            wnd_view_params.m_position);
             }
             Orientation orientation = (placement == adobe::key_place_row) ? HORIZONTAL : VERTICAL;
             std::auto_ptr<Layout>
@@ -1877,7 +1883,7 @@ struct EveLayout::Impl
             } else {
                 if (wnd_view_params.m_name == adobe::name_dialog && !wnd_.m_child_vertical)
                     wnd_.m_default_child_vertical = adobe::key_align_top;
-                AddChildrenToHorizontalLayout(*layout, wnd_, children);
+                AddChildrenToHorizontalLayout(*layout, wnd_, children, wnd_view_params);
             }
             wnd->SetLayout(layout.release());
         } else if (wnd_view_params.m_name == adobe::name_radio_button_group) {
@@ -1885,8 +1891,8 @@ struct EveLayout::Impl
             for (std::size_t i = 0; i < children.size(); ++i) {
                 StateButton* state_button = dynamic_cast<StateButton*>(children[i].m_wnd.get());
                 if (!state_button) {
-                    throw stream_error_t("non-radio_buttons are not compatible with radio_button_group",
-                                         wnd_view_params.m_position);
+                    throw adobe::stream_error_t("non-radio_buttons are not compatible with radio_button_group",
+                                                wnd_view_params.m_position);
                 }
                 children[i].m_wnd.release();
                 radio_button_group->AddButton(state_button);
@@ -1896,12 +1902,12 @@ struct EveLayout::Impl
             for (std::size_t i = 0; i < children.size(); ++i) {
                 Panel* panel = dynamic_cast<Panel*>(children[i].m_wnd.get());
                 if (!panel) {
-                    throw stream_error_t("non-panels are not compatible with tab_group",
-                                         wnd_view_params.m_position);
+                    throw adobe::stream_error_t("non-panels are not compatible with tab_group",
+                                                wnd_view_params.m_position);
                 }
                 if (panel->Name().empty()) {
-                    throw stream_error_t("a panel used in tab_group requires a name parameter",
-                                         wnd_view_params.m_position);
+                    throw adobe::stream_error_t("a panel used in tab_group requires a name parameter",
+                                                wnd_view_params.m_position);
                 }
                 children[i].m_wnd.release();
                 tab_wnd->AddWnd(panel, panel->Name());
@@ -1910,22 +1916,22 @@ struct EveLayout::Impl
             OverlayWnd* overlay = boost::polymorphic_downcast<OverlayWnd*>(wnd);
             for (std::size_t i = 0; i < children.size(); ++i) {
                 if (!dynamic_cast<Panel*>(children[i].m_wnd.get())) {
-                    throw stream_error_t("non-panels are not compatible with overlay",
-                                         wnd_view_params.m_position);
+                    throw adobe::stream_error_t("non-panels are not compatible with overlay",
+                                                wnd_view_params.m_position);
                 }
                 overlay->AddWnd(children[i].m_wnd.release());
             }
         } else if (wnd_view_params.m_name == adobe::name_row) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(1, children.size());
-            AddChildrenToHorizontalLayout(*layout, wnd_, children);
+            AddChildrenToHorizontalLayout(*layout, wnd_, children, wnd_view_params);
         } else if (wnd_view_params.m_name == adobe::name_column) {
             Layout* layout = boost::polymorphic_downcast<Layout*>(wnd);
             layout->ResizeLayout(children.size(), 1);
             AddChildrenToVerticalLayout(*layout, wnd_, children);
         } else {
-            throw stream_error_t("attempted to attach children to a non-container",
-                                 wnd_view_params.m_position);
+            throw adobe::stream_error_t("attempted to attach children to a non-container",
+                                        wnd_view_params.m_position);
         }
     }
 

@@ -1657,15 +1657,16 @@ struct EveLayout::Impl
         std::map<Alignment, std::vector<X> > max_single_column_widths;
         std::map<Alignment, std::vector<Layout*> > children_as_1x2_layouts;
         std::vector<Flags<Alignment> > child_alignments(children.size());
+        std::vector<std::pair<adobe::name_t, adobe::name_t> > raw_alignments(children.size());
         for (std::size_t i = 0; i < children.size(); ++i) {
 #if INSTRUMENT_ADD_TO_VERTICAL
             std::cout << "    child " << i << ":\n";
 #endif
             Layout* l = 0;
             Alignment align;
-            std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
+            raw_alignments[i] = Alignments(wnd, children[i]);
 #if INSTRUMENT_ADD_TO_VERTICAL
-            std::cout << "        raw_align=" << raw_alignments.first << "," << raw_alignments.second << "\n";
+            std::cout << "        raw_align=" << raw_alignments[i].first << "," << raw_alignments[i].second << "\n";
             std::cout << "        labeled_status=" << (children[i].m_labeled_status == LABELED_CONTROL ? "LABELED_CONTROL" : "UNLABELED_CONTROL") << "\n";
 #endif
             if (children[i].m_labeled_status == LABELED_CONTROL) {
@@ -1684,9 +1685,9 @@ struct EveLayout::Impl
                     l->SetChildAlignment(label, label_alignment);
                 }
 
-                if (!raw_alignments.first || raw_alignments.first == adobe::key_align_fill)
-                    raw_alignments.first = adobe::key_align_left;
-                child_alignments[i] = AlignmentFlags(raw_alignments.first, raw_alignments.second);
+                if (!raw_alignments[i].first || raw_alignments[i].first == adobe::key_align_fill)
+                    raw_alignments[i].first = adobe::key_align_left;
+                child_alignments[i] = AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second);
                 align = HorizontalAlignment(child_alignments[i]);
 #if INSTRUMENT_ADD_TO_VERTICAL
                 std::cout << "        align=" << align << "\n";
@@ -1710,7 +1711,7 @@ struct EveLayout::Impl
                 std::cout << "        no layout\n";
 #endif
                 l = 0;
-                child_alignments[i] = AlignmentFlags(raw_alignments.first, raw_alignments.second);
+                child_alignments[i] = AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second);
                 align = HorizontalAlignment(child_alignments[i]);
 #if INSTRUMENT_ADD_TO_VERTICAL
                 std::cout << "        align=" << align << "\n";
@@ -1739,10 +1740,6 @@ struct EveLayout::Impl
         max_single_column_widths[ALIGN_RIGHT].resize(max_columns);
 
         for (std::size_t i = 0; i < children.size(); ++i) {
-            std::pair<adobe::name_t, adobe::name_t> raw_alignments = Alignments(wnd, children[i]);
-            Alignment align = HorizontalAlignment(AlignmentFlags(raw_alignments.first, raw_alignments.second));
-            if (!raw_alignments.first || raw_alignments.first == adobe::key_align_fill)
-                raw_alignments.first = adobe::key_align_left;
 #if INSTRUMENT_ADD_TO_VERTICAL
             std::cout << "    layout.Add(child " << i << ", ..., " << child_alignments[i] << ")\n";
 #endif
@@ -1830,7 +1827,10 @@ struct EveLayout::Impl
                     label_alignment &= ~(ALIGN_CENTER | ALIGN_LEFT);
                     label_alignment |= ALIGN_RIGHT;
                     l->SetChildAlignment(l->Cells()[0][0], label_alignment);
-                    l->SetChildAlignment(l->Cells()[0][1], ALIGN_LEFT);
+                    Flags<Alignment> control_alignment = l->ChildAlignment(l->Cells()[0][1]);
+                    control_alignment &= ~(ALIGN_CENTER | ALIGN_RIGHT);
+                    control_alignment |= ALIGN_LEFT;
+                    l->SetChildAlignment(l->Cells()[0][1], control_alignment);
 
 #if INSTRUMENT_ADD_TO_VERTICAL
                     std::cout << "    l->SetMinimumColumnWidth(0, =" << X(std::ceil(Value(min_width_0))) << ")\n";

@@ -1262,7 +1262,7 @@ namespace {
                                            CONTAINER));
         }
 
-        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 1, retval->m_margin, retval->m_margin));
+        std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 1, 0, retval->m_margin));
 
 #if SHOW_LAYOUTS
         layout->RenderOutline(true);

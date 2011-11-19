@@ -572,7 +572,7 @@ namespace {
         text_control->SetMinSize(Pt(text_control->MinSize().x, text_control->Height()));
 
         if (!name.empty()) {
-            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, 0, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
@@ -626,7 +626,7 @@ namespace {
         edit->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), edit->Height()));
 
         if (!name.empty()) {
-            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, 0, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
@@ -694,7 +694,7 @@ namespace {
         }
 
         if (!name.empty()) {
-            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, 0, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
@@ -799,7 +799,7 @@ namespace {
         }
 
         if (!name.empty()) {
-            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, 0, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
@@ -1068,7 +1068,7 @@ namespace {
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
 
         if (!name.empty()) {
-            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, 0, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
@@ -1131,7 +1131,7 @@ namespace {
         spin->SetMinSize(Pt(static_cast<int>(digits) * CharWidth(), spin->Height()));
 
         if (!name.empty()) {
-            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, retval->m_margin, retval->m_margin));
+            std::auto_ptr<Layout> layout(new Layout(X0, Y0, X1, Y1, 1, 2, 0, retval->m_margin));
 #if SHOW_LAYOUTS
             layout->RenderOutline(true);
 #endif
@@ -1656,8 +1656,8 @@ struct EveLayout::Impl
         std::map<Alignment, X> max_all_columns_widths;
         std::map<Alignment, std::vector<X> > max_single_column_widths;
         std::map<Alignment, std::vector<Layout*> > children_as_1x2_layouts;
-        std::vector<Flags<Alignment> > child_alignments(children.size());
         std::vector<std::pair<adobe::name_t, adobe::name_t> > raw_alignments(children.size());
+        std::vector<Flags<Alignment> > child_alignments(children.size());
         for (std::size_t i = 0; i < children.size(); ++i) {
 #if INSTRUMENT_ADD_TO_VERTICAL
             std::cout << "    child " << i << ":\n";
@@ -1828,8 +1828,9 @@ struct EveLayout::Impl
                     label_alignment |= ALIGN_RIGHT;
                     l->SetChildAlignment(l->Cells()[0][0], label_alignment);
                     Flags<Alignment> control_alignment = l->ChildAlignment(l->Cells()[0][1]);
-                    control_alignment &= ~(ALIGN_CENTER | ALIGN_RIGHT);
-                    control_alignment |= ALIGN_LEFT;
+                    control_alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
+                    if (raw_alignments[i].first != adobe::key_align_fill)
+                        control_alignment |= ALIGN_LEFT;
                     l->SetChildAlignment(l->Cells()[0][1], control_alignment);
 
 #if INSTRUMENT_ADD_TO_VERTICAL

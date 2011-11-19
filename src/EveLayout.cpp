@@ -1624,7 +1624,7 @@ struct EveLayout::Impl
                     sublayout->Add(children[j].m_wnd.release(), 0, sublayout_index * 2, 1, 1, AlignmentFlags(raw_alignments[j].first, raw_alignments[j].second));
                 }
                 layout.SetColumnStretch(i, last_j - first_j);
-                layout.Add(sublayout.release(), 0, i, 1, 1, ALIGN_NONE);
+                layout.Add(sublayout.release(), 0, i, 1, last_j - first_j, ALIGN_NONE);
                 i = last_j - 1;
             } else {
                 Pt min_usable_size = children[i].m_wnd->MinUsableSize();

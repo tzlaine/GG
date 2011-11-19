@@ -1630,14 +1630,10 @@ struct EveLayout::Impl
                 Pt min_usable_size = children[i].m_wnd->MinUsableSize();
                 layout.SetMinimumColumnWidth(i, min_usable_size.x);
                 layout.Add(children[i].m_wnd.release(), 0, i, 1, 1, AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second));
-#if INSTRUMENT_ADD_TO_HORIZONTAL
-                std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second) << ")\n";
-#endif
-
                 if (children[i].m_horizontal == adobe::key_align_fill || raw_alignments[i].first == adobe::key_align_center)
                     layout.SetColumnStretch(i, 1.0);
-
 #if INSTRUMENT_ADD_TO_HORIZONTAL
+                std::cout << "        layout.Add(child " << i << ", ..., " << AlignmentFlags(raw_alignments[i].first, raw_alignments[i].second) << ")\n";
                 std::cout << "        fill=" << (children[i].m_horizontal == adobe::key_align_fill) << "\n";
                 std::cout << "        layout.ColumnStretch(" << i << ")=" << layout.ColumnStretch(i) << "\n";
 #endif

@@ -1824,12 +1824,13 @@ struct EveLayout::Impl
                     l->SetMinimumColumnWidth(1, X(static_cast<int>(std::ceil(Value(min_width_1)))));
 
                     Flags<Alignment> label_alignment = l->ChildAlignment(l->Cells()[0][0]);
-                    label_alignment &= ~(ALIGN_CENTER | ALIGN_LEFT);
+                    label_alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
                     label_alignment |= ALIGN_RIGHT;
                     l->SetChildAlignment(l->Cells()[0][0], label_alignment);
                     Flags<Alignment> control_alignment = l->ChildAlignment(l->Cells()[0][1]);
                     control_alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
-                    if (raw_alignments[i].first != adobe::key_align_fill)
+                    bool align_fill = align == ALIGN_LEFT && children[i].m_horizontal == adobe::key_align_fill;
+                    if (!align_fill)
                         control_alignment |= ALIGN_LEFT;
                     l->SetChildAlignment(l->Cells()[0][1], control_alignment);
 
@@ -1837,6 +1838,16 @@ struct EveLayout::Impl
                     std::cout << "    l->SetMinimumColumnWidth(0, =" << X(std::ceil(Value(min_width_0))) << ")\n";
                     std::cout << "    l->SetMinimumColumnWidth(1, =" << X(std::ceil(Value(min_width_1))) << ")\n";
 #endif
+
+                    // Special "align fill" case.  The label-control pair is
+                    // left-aligned, but the control expands to fill all
+                    // available space.
+                    if (align_fill) {
+                        l->SetColumnStretch(1, 1.0);
+                        Flags<Alignment> layout_alignment = layout.ChildAlignment(l);
+                        layout_alignment &= ~(ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT);
+                        layout.SetChildAlignment(l, layout_alignment);
+                    }
                 }
             }
         }

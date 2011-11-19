@@ -1596,8 +1596,10 @@ struct EveLayout::Impl
             }
         }
 
-        if (first_right_aligned_index < children.size())
+        if (first_right_aligned_index < children.size() &&
+            (!first_right_aligned_index || children[first_right_aligned_index - 1].m_horizontal == adobe::key_align_left)) {
             layout.SetColumnStretch(first_right_aligned_index, 1.0);
+        }
 
         for (std::size_t i = 0; i < children.size(); ++i) {
 #if INSTRUMENT_ADD_TO_HORIZONTAL
@@ -1610,13 +1612,14 @@ struct EveLayout::Impl
                 do {
                     ++last_j;
                 } while (last_j < children.size() && raw_alignments[last_j].first == adobe::key_align_proportional);
-                std::auto_ptr<Layout> sublayout(new Layout(X0, Y0, X1, Y1, 1, (last_j - first_j) * 2 - 1, 0, 0));
+                std::auto_ptr<Layout> sublayout(new Layout(X0, Y0, X1, Y1, 1, (last_j - first_j) * 2 - 1, 0, wnd.m_margin));
                 for (std::size_t j = first_j; j < last_j; ++j) {
-                    if (j != first_j)
-                        layout.SetColumnStretch(j * 2 - 1, 1.0);
+                    std::size_t sublayout_index = j - first_j;
+                    if (sublayout_index)
+                        sublayout->SetColumnStretch(sublayout_index * 2 - 1, 1.0);
                     Pt min_usable_size = children[j].m_wnd->MinUsableSize();
-                    sublayout->SetMinimumColumnWidth(j * 2, min_usable_size.x);
-                    sublayout->Add(children[j].m_wnd.release(), 0, j * 2, 1, 1, AlignmentFlags(raw_alignments[j].first, raw_alignments[j].second));
+                    sublayout->SetMinimumColumnWidth(sublayout_index * 2, min_usable_size.x);
+                    sublayout->Add(children[j].m_wnd.release(), 0, sublayout_index * 2, 1, 1, AlignmentFlags(raw_alignments[j].first, raw_alignments[j].second));
                 }
                 layout.SetColumnStretch(i, last_j - first_j);
                 layout.Add(sublayout.release(), 0, i, 1, 1, ALIGN_NONE);

@@ -278,6 +278,8 @@ Pt StateButton::MinUsableSize(X/* = X0*/) const
         return m_text->MinUsableSize();
     } else {
         Pt text_ul = m_text->RelativeUpperLeft(), text_lr = m_text->RelativeLowerRight();
+        if (m_text->GetFont())
+            text_lr.x += m_text->GetFont()->SpaceWidth() * 2;
         return Pt(std::max(m_button_lr.x, text_lr.x) - std::min(m_button_ul.x, text_ul.x),
                   std::max(m_button_lr.y, text_lr.y) - std::min(m_button_ul.y, text_ul.y));
     }

@@ -1597,7 +1597,9 @@ struct EveLayout::Impl
         }
 
         if (first_right_aligned_index < children.size() &&
-            (!first_right_aligned_index || children[first_right_aligned_index - 1].m_horizontal == adobe::key_align_left)) {
+            (!first_right_aligned_index ||
+             !children[first_right_aligned_index - 1].m_horizontal ||
+             children[first_right_aligned_index - 1].m_horizontal == adobe::key_align_left)) {
             layout.SetColumnStretch(first_right_aligned_index, 1.0);
         }
 

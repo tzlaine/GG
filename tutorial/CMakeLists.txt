@@ -15,3 +15,6 @@ endmacro ()
 
 make_gigi_tutorial(minimal minimal.cpp)
 make_gigi_tutorial(controls controls.cpp)
+if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
+    make_gigi_tutorial(eve eve.cpp)
+endif ()

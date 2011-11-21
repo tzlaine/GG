@@ -1,5 +1,6 @@
 #include <GG/EveLayout.h>
 
+#include <GG/EveGlue.h>
 #include <GG/EveParser.h>
 #include <GG/GUI.h>
 #include <GG/Timer.h>
@@ -106,27 +107,31 @@ void MinimalGGApp::GLInit()
     glMatrixMode(GL_MODELVIEW);
 }
 
+bool OkHandler(adobe::name_t name, const adobe::any_regular_t&)
+{ return name == adobe::static_name_t("ok"); }
+
 void MinimalGGApp::Initialize()
 {
-    adobe::sheet_t sheet;
-    GG::EveLayout layout(sheet);
-    adobe::eve_callback_suite_t callbacks = layout.BindCallbacks();
-    std::string file_contents = read_file(g_input_file);
-    GG::Wnd* w = 0;
-    if (GG::Parse(file_contents, g_input_file, w, callbacks)) {
-        GG::Wnd& eve_dialog = layout.Finish();
-        boost::filesystem::path input(g_input_file);
-        boost::filesystem::path output(g_output_dir);
+    std::ifstream eve(g_input_file);
+    std::istringstream adam("sheet foo\n"
+                            "{\n"
+                            "output:\n"
+                            "    result <== { foo: 42 };\n"
+                            "}");
+    GG::Wnd* eve_dialog = GG::MakeDialog(eve, adam, &OkHandler);
+
+    boost::filesystem::path input(g_input_file);
+    boost::filesystem::path output(g_output_dir);
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-        output /= input.stem().native() + ".png";
+    output /= input.stem().native() + ".png";
 #else
-        output /= input.stem() + ".png";
+    output /= input.stem() + ".png";
 #endif
-        GG::Timer timer(100);
-        if (!g_dont_exit)
-            GG::Connect(timer.FiredSignal, StopDialog(&eve_dialog, output.string()));
-        eve_dialog.Run();
-    }
+    GG::Timer timer(100);
+    if (!g_dont_exit)
+        GG::Connect(timer.FiredSignal, StopDialog(eve_dialog, output.string()));
+    eve_dialog->Run();
+
     Exit(0);
 }
 

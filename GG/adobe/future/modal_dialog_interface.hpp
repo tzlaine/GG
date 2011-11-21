@@ -6,6 +6,8 @@
 
 /****************************************************************************************************/
 
+#include <GG/Wnd.h>
+
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/array.hpp>
 
@@ -18,7 +20,52 @@
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 
+namespace adobe {
+
+struct modal_dialog_t;
+struct window_t;
+
+}
+
 /****************************************************************************************************/
+
+namespace GG {
+
+/****************************************************************************************************/
+
+// TODO: Put this into StyleFactory.
+class Window :
+    public Wnd
+{
+public:
+    static const unsigned int BEVEL = 2;
+
+    Window(adobe::window_t& imp);
+
+    virtual Pt ClientUpperLeft() const;
+    virtual Pt ClientLowerRight() const;
+    virtual WndRegion WindowRegion(const Pt& pt) const;
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
+
+    virtual void Render();
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+
+    void SetEveModalDialog(adobe::modal_dialog_t* modal_dialog);
+
+private:
+    adobe::window_t& m_imp;
+    TextControl* m_title;
+
+    std::auto_ptr<adobe::modal_dialog_t> m_eve_modal_dialog;
+
+    static const int FRAME_WIDTH;
+    static const Pt BEVEL_OFFSET;
+};
+
+/****************************************************************************************************/
+
+} // namespace GG
 
 namespace adobe {
 
@@ -162,7 +209,8 @@ public:
 
     modal_dialog_t();
 
-    dialog_result_t go(std::istream& layout, std::istream& sheet);
+    platform_display_type init(std::istream& layout, std::istream& sheet);
+    dialog_result_t go();
 
     dictionary_t            input_m;
     dictionary_t            record_m;
@@ -188,6 +236,7 @@ private:
     bool              need_ui_m;
     dialog_result_t   result_m;
     dictionary_t      contributing_m;
+    assemblage_t      assemblage_m;
 };
 
 /****************************************************************************************************/
@@ -269,7 +318,9 @@ inline dialog_result_t handle_dialog(const dictionary_t&            input,
     dialog.working_directory_m = working_directory;
     dialog.parent_m = parent;
 
-    return dialog.go(layout_definition, sheet_definition);
+    dialog.init(layout_definition, sheet_definition);
+
+    return dialog.go();
 }
 
 /****************************************************************************************************/

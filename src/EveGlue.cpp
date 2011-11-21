@@ -25,6 +25,8 @@
 #include <GG/EveGlue.h>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
 
+#include <boost/cast.hpp>
+
 
 using namespace GG;
 
@@ -34,15 +36,18 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
 {
     ModalDialogResult retval;
 
-    adobe::dialog_result_t adobe_result =
-        adobe::handle_dialog(adobe::dictionary_t(),
-                             adobe::dictionary_t(),
-                             adobe::dictionary_t(),
-                             adobe::dialog_display_s,
-                             eve_definition,
-                             adam_definition,
-                             handler,
-                             boost::filesystem::path());
+    std::auto_ptr<adobe::modal_dialog_t> dialog(new adobe::modal_dialog_t);
+
+    dialog->input_m = adobe::dictionary_t();
+    dialog->record_m = adobe::dictionary_t();
+    dialog->display_state_m = adobe::dictionary_t();
+    dialog->display_options_m = adobe::dialog_display_s;
+    dialog->callback_m = handler;
+    dialog->working_directory_m = boost::filesystem::path();
+    dialog->parent_m = 0;
+
+    dialog->init(eve_definition, adam_definition);
+    adobe::dialog_result_t adobe_result = dialog->go();
 
     swap(adobe_result.command_m, retval.m_result);
     retval.m_terminating_action = adobe_result.terminating_action_m;
@@ -54,6 +59,22 @@ Wnd* GG::MakeDialog(std::istream& eve_definition,
                     std::istream& adam_definition,
                     ButtonHandler handler)
 {
-    Wnd* retval = 0;
+    Window* retval = 0;
+
+    std::auto_ptr<adobe::modal_dialog_t> dialog(new adobe::modal_dialog_t);
+
+    dialog->input_m = adobe::dictionary_t();
+    dialog->record_m = adobe::dictionary_t();
+    dialog->display_state_m = adobe::dictionary_t();
+    dialog->display_options_m = adobe::dialog_display_s;
+    dialog->callback_m = handler;
+    dialog->working_directory_m = boost::filesystem::path();
+    dialog->parent_m = 0;
+
+    Wnd* w = dialog->init(eve_definition, adam_definition);
+    retval = boost::polymorphic_downcast<Window*>(w);
+
+    retval->SetEveModalDialog(dialog.release());
+
     return retval;
 }

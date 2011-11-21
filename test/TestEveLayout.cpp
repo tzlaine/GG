@@ -19,7 +19,8 @@
 #include "TestingUtils.h"
 
 
-const char* g_input_file = 0;
+const char* g_eve_file = 0;
+const char* g_adam_file = 0;
 const char* g_output_dir = 0;
 bool g_dont_exit = false;
 
@@ -112,15 +113,11 @@ bool OkHandler(adobe::name_t name, const adobe::any_regular_t&)
 
 void MinimalGGApp::Initialize()
 {
-    std::ifstream eve(g_input_file);
-    std::istringstream adam("sheet foo\n"
-                            "{\n"
-                            "output:\n"
-                            "    result <== { foo: 42 };\n"
-                            "}");
+    std::ifstream eve(g_eve_file);
+    std::ifstream adam(g_adam_file);
     GG::Wnd* eve_dialog = GG::MakeDialog(eve, adam, &OkHandler);
 
-    boost::filesystem::path input(g_input_file);
+    boost::filesystem::path input(g_eve_file);
     boost::filesystem::path output(g_output_dir);
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
     output /= input.stem().native() + ".png";
@@ -171,9 +168,10 @@ init_unit_test_suite( int, char* [] )   {
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
-    g_input_file = argv[1];
-    g_output_dir = argv[2];
-    if (argc == 4)
+    g_eve_file = argv[1];
+    g_adam_file = argv[2];
+    g_output_dir = argv[3];
+    if (argc == 5)
         g_dont_exit = true;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

@@ -136,7 +136,7 @@ void EveGGApp::GLInit()
 }
 
 bool OkHandler(adobe::name_t name, const adobe::any_regular_t&)
-{ return name == adobe::name_t("ok"); }
+{ return name == adobe::static_name_t("ok"); }
 
 void EveGGApp::Initialize()
 {

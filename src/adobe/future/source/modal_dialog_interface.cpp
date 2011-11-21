@@ -79,8 +79,7 @@ std::string mdi_error_getline(std::istream& layout_definition, name_t, std::stre
 modal_dialog_t::modal_dialog_t() :
     display_options_m(dialog_display_s),
     parent_m(platform_display_type()),
-    root_behavior_m(false),
-    defer_view_close_m(false)
+    root_behavior_m(false)
 { }
 
 /****************************************************************************************************/
@@ -281,29 +280,6 @@ dialog_result_t modal_dialog_t::go(std::istream& layout, std::istream& sheet)
 
 /****************************************************************************************************/
 
-bool modal_dialog_t::end_dialog()
-{
-    if (defer_view_close_m == false)
-        return false;
-
-#if ADOBE_PLATFORM_MAC
-
-    HIViewRef cntl(view_m->root_display_m);
-    WindowRef owner(::GetControlOwner(cntl));
-
-    ::QuitAppModalLoopForWindow(owner);
-
-#elif ADOBE_PLATFORM_WIN
-
-    ::PostQuitMessage(0);
-
-#endif
-
-    return true;
-}
-
-/****************************************************************************************************/
-
 void modal_dialog_t::latch_callback(name_t action, const any_regular_t& value)
 try
 {
@@ -318,8 +294,7 @@ try
     else if (callback_m(action, value))
     {
         result_m.terminating_action_m = action;
-
-        defer_view_close_m = true;
+        view_m->root_display_m->EndRun();
     }
 }
 catch(const std::exception& error)

@@ -174,7 +174,6 @@ public:
     vm_lookup_t             vm_lookup_m;
 
     /* Clients: no need to call these. */
-    bool end_dialog();
     void display(const model_type& value);
 
 private:
@@ -186,7 +185,6 @@ private:
     sheet_t           sheet_m;
     behavior_t        root_behavior_m;
     auto_view_t       view_m;
-    bool              defer_view_close_m;
     bool              need_ui_m;
     dialog_result_t   result_m;
     dictionary_t      contributing_m;

@@ -75,7 +75,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X width = X0) const;
+    virtual Pt MinUsableSize() const;
 
     /** Returns the text of this button. */
     const std::string& Text() const;
@@ -204,7 +204,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt         MinUsableSize(X width = X0) const;
+    virtual Pt         MinUsableSize() const;
 
     /** Returns true if button is checked. */
     bool               Checked() const;
@@ -313,7 +313,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt       MinUsableSize(X width = X0) const;
+    virtual Pt       MinUsableSize() const;
 
     /** Returns the orientation of the buttons in the group */
     Orientation      GetOrientation() const;

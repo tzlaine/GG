@@ -94,7 +94,7 @@ Layout::Layout(X x, Y y, X w, Y h, std::size_t rows, std::size_t columns,
     assert(columns);
 }
 
-Pt Layout::MinUsableSize(X/* = X0*/) const
+Pt Layout::MinUsableSize() const
 { return m_min_usable_size; }
 
 std::size_t Layout::Rows() const
@@ -223,8 +223,6 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
         column_effective_min_usable_sizes[i] = min_due_to_margin;
     }
 
-    std::map<Wnd*, WndPosition> height_for_width_wnds;
-
     // adjust effective minimums based on cell contents
     for (std::map<Wnd*, WndPosition>::iterator it = m_wnd_positions.begin(); it != m_wnd_positions.end(); ++it) {
         Pt margin;
@@ -239,9 +237,6 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
 
         Pt min_space_needed = it->first->MinSize() + margin;
         Pt min_usable_size = it->first->MinUsableSize() + margin;
-
-        if (it->first->HeightForWidth())
-            height_for_width_wnds.insert(*it);
 
         // adjust row minimums
         double total_stretch = 0.0;
@@ -294,7 +289,6 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
     for (std::size_t i = 0; i < m_row_params.size(); ++i) {
         m_row_params[i].effective_min = std::max(m_row_params[i].effective_min, static_cast<unsigned int>(m_row_params[i].stretch * greatest_min_over_stretch_ratio));
         row_effective_min_usable_sizes[i] = std::max(row_effective_min_usable_sizes[i], static_cast<unsigned int>(m_row_params[i].stretch * greatest_usable_min_over_stretch_ratio));
-        m_row_params[i].effective_min = std::max(m_row_params[i].effective_min, row_effective_min_usable_sizes[i]);
     }
     greatest_min_over_stretch_ratio = 0.0;
     greatest_usable_min_over_stretch_ratio = 0.0;
@@ -307,7 +301,6 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
     for (std::size_t i = 0; i < m_column_params.size(); ++i) {
         m_column_params[i].effective_min = std::max(m_column_params[i].effective_min, static_cast<unsigned int>(m_column_params[i].stretch * greatest_min_over_stretch_ratio));
         column_effective_min_usable_sizes[i] = std::max(column_effective_min_usable_sizes[i], static_cast<unsigned int>(m_column_params[i].stretch * greatest_usable_min_over_stretch_ratio));
-        m_column_params[i].effective_min = std::max(m_column_params[i].effective_min, column_effective_min_usable_sizes[i]);
     }
 
     m_min_usable_size.x = X(2 * m_border_margin);
@@ -320,12 +313,12 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
     }
 
     bool size_or_min_size_changed = false;
-    Pt original_size = Size();
-    Pt new_min_size(std::max(TotalMinWidth(), m_min_usable_size.x), std::max(TotalMinHeight(), m_min_usable_size.y));
+    Pt new_min_size(TotalMinWidth(), TotalMinHeight());
     if (new_min_size != MinSize()) {
         SetMinSize(new_min_size);
         size_or_min_size_changed = true;
     }
+    Pt original_size = Size();
     Wnd::SizeMove(ul, lr);
     if (Size() != original_size)
         size_or_min_size_changed = true;
@@ -343,139 +336,66 @@ void Layout::SizeMove(const Pt& ul, const Pt& lr)
     }
 
     // determine row and column positions
-    const double column_total_stretch = TotalStretch(m_column_params);
-    const int column_total_stretch_space = Value(Size().x - MinSize().x);
-    const double column_space_per_unit_stretch = column_total_stretch ? column_total_stretch_space / column_total_stretch : 0.0;
-    const bool column_larger_than_min = 0 < column_total_stretch_space;
-    double column_remainder = 0.0;
-    int column_current_origin = m_border_margin;
-
-    for (std::size_t i = 0; i < m_column_params.size(); ++i) {
-        if (column_larger_than_min) {
-            if (i < m_column_params.size() - 1) {
-                double column_raw_width =
-                    m_column_params[i].effective_min +
-                    (column_total_stretch ?
-                     column_space_per_unit_stretch * m_column_params[i].stretch :
-                     column_total_stretch_space / static_cast<double>(m_column_params.size()));
-                int column_int_raw_width = static_cast<int>(column_raw_width);
-                m_column_params[i].current_width = column_int_raw_width;
-                column_remainder += column_raw_width - column_int_raw_width;
-                if (1.0 < column_remainder) {
-                    --column_remainder;
-                    ++m_column_params[i].current_width;
-                }
-            } else {
-                m_column_params[i].current_width = Value(Width()) - m_border_margin - column_current_origin;
-            }
-        } else {
-            m_column_params[i].current_width = m_column_params[i].effective_min;
-        }
-        m_column_params[i].current_origin = column_current_origin;
-        column_current_origin += m_column_params[i].current_width;
-    }
-
-    // find min usable heights for HeightForWidth() wnds
-    for (std::map<Wnd*, WndPosition>::iterator it = height_for_width_wnds.begin(); it != height_for_width_wnds.end(); ++it) {
-        X width((m_column_params[it->second.last_column - 1].current_origin +
-                 m_column_params[it->second.last_column - 1].current_width) -
-                m_column_params[it->second.first_column].current_origin);
-
-        if (0 < it->second.first_column)
-            width -= static_cast<int>(m_cell_margin / 2);
-        if (it->second.last_column < m_column_params.size())
-            width -= static_cast<int>(m_cell_margin / 2.0 + 0.5);
-
-        Y min_usable_height = it->first->MinUsableHeight(width);
-
-        if (0 < it->second.first_row && it->second.last_row < m_row_params.size())
-            min_usable_height += Y(m_cell_margin);
-        else if (0 < it->second.first_row || it->second.last_row < m_row_params.size())
-            min_usable_height += Y(static_cast<int>(std::ceil(m_cell_margin / 2.0)));
-
-        // adjust row minimums (again, but now with height for width values)
-        double total_stretch = 0.0;
-        for (std::size_t i = it->second.first_row; i < it->second.last_row; ++i) {
-            total_stretch += m_row_params[i].stretch;
-        }
-        if (total_stretch) {
-            for (std::size_t i = it->second.first_row; i < it->second.last_row; ++i) {
-                row_effective_min_usable_sizes[i] = std::max(row_effective_min_usable_sizes[i], static_cast<unsigned int>(Value(min_usable_height / total_stretch * m_row_params[i].stretch)));
-            }
-        } else { // if all rows have 0.0 stretch, distribute height evenly
-            double per_row_usable_min = Value(min_usable_height / static_cast<double>(it->second.last_row - it->second.first_row));
-            for (std::size_t i = it->second.first_row; i < it->second.last_row; ++i) {
-                row_effective_min_usable_sizes[i] = std::max(row_effective_min_usable_sizes[i], static_cast<unsigned int>(per_row_usable_min + 0.5));
-            }
-        }
-    }
-
-    // determine final effective minimums, preserving stretch ratios (again, but now with height for width values)
-    greatest_usable_min_over_stretch_ratio = 0.0;
+    double total_stretch = TotalStretch(m_row_params);
+    int total_stretch_space = Value(Size().y - MinSize().y);
+    double space_per_unit_stretch = total_stretch ? total_stretch_space / total_stretch : 0.0;
+    bool larger_than_min = 0 < total_stretch_space;
+    double remainder = 0.0;
+    int current_origin = m_border_margin;
     for (std::size_t i = 0; i < m_row_params.size(); ++i) {
-        if (m_row_params[i].stretch)
-            greatest_usable_min_over_stretch_ratio = std::max(greatest_usable_min_over_stretch_ratio, row_effective_min_usable_sizes[i] / m_row_params[i].stretch);
-    }
-    for (std::size_t i = 0; i < m_row_params.size(); ++i) {
-        row_effective_min_usable_sizes[i] = std::max(row_effective_min_usable_sizes[i], static_cast<unsigned int>(m_row_params[i].stretch * greatest_usable_min_over_stretch_ratio));
-        m_row_params[i].effective_min = std::max(m_row_params[i].effective_min, row_effective_min_usable_sizes[i]);
-    }
-
-    m_min_usable_size.y = Y(2 * m_border_margin);
-    for (std::size_t i = 0; i < row_effective_min_usable_sizes.size(); ++i) {
-        m_min_usable_size.y += static_cast<int>(row_effective_min_usable_sizes[i]);
-    }
-
-    size_or_min_size_changed = false;
-    new_min_size = Pt(std::max(TotalMinWidth(), m_min_usable_size.x), std::max(TotalMinHeight(), m_min_usable_size.y));
-    if (Width() < m_min_usable_size.x || Height() < m_min_usable_size.y) {
-        Pt size(std::max(Width(), m_min_usable_size.x), std::max(Height(), m_min_usable_size.y));
-        Wnd::Resize(size);
-        size_or_min_size_changed = true;
-    }
-
-    // if this is the layout object for some Wnd, propogate the size up to the owning Wnd
-    if (Wnd* parent = Parent()) {
-        if (const_cast<const Wnd*>(parent)->GetLayout() == this) {
-            Pt new_parent_size = new_min_size + parent->Size() - parent->ClientSize();
-            Pt parent_size = parent->Size();
-            new_parent_size.x = std::max(parent_size.x, new_parent_size.x);
-            new_parent_size.y = std::max(parent_size.y, new_parent_size.y);
-            ScopedAssign<bool> assignment(m_ignore_parent_resize, true);
-            parent->Resize(new_parent_size);
-        }
-    }
-
-    const double row_total_stretch = TotalStretch(m_row_params);
-    const int row_total_stretch_space = Value(Size().y - MinSize().y);
-    const double row_space_per_unit_stretch = row_total_stretch ? row_total_stretch_space / row_total_stretch : 0.0;
-    const bool row_larger_than_min = 0 < row_total_stretch_space;
-    double row_remainder = 0.0;
-    int row_current_origin = m_border_margin;
-
-    for (std::size_t i = 0; i < m_row_params.size(); ++i) {
-        if (row_larger_than_min) {
+        if (larger_than_min) {
             if (i < m_row_params.size() - 1) {
-                double row_raw_width =
+                double raw_width =
                     m_row_params[i].effective_min +
-                    (row_total_stretch ?
-                     row_space_per_unit_stretch * m_row_params[i].stretch :
-                     row_total_stretch_space / static_cast<double>(m_row_params.size()));
-                int row_int_raw_width = static_cast<int>(row_raw_width);
-                m_row_params[i].current_width = row_int_raw_width;
-                row_remainder += row_raw_width - row_int_raw_width;
-                if (1.0 < row_remainder) {
-                    --row_remainder;
+                    (total_stretch ?
+                     space_per_unit_stretch * m_row_params[i].stretch :
+                     total_stretch_space / static_cast<double>(m_row_params.size()));
+                int int_raw_width = static_cast<int>(raw_width);
+                m_row_params[i].current_width = int_raw_width;
+                remainder += raw_width - int_raw_width;
+                if (1.0 < remainder) {
+                    --remainder;
                     ++m_row_params[i].current_width;
                 }
             } else {
-                m_row_params[i].current_width = Value(Height()) - m_border_margin - row_current_origin;
+                m_row_params[i].current_width = Value(Height()) - m_border_margin - current_origin;
             }
         } else {
             m_row_params[i].current_width = m_row_params[i].effective_min;
         }
-        m_row_params[i].current_origin = row_current_origin;
-        row_current_origin += m_row_params[i].current_width;
+        m_row_params[i].current_origin = current_origin;
+        current_origin += m_row_params[i].current_width;
+    }
+
+    total_stretch = TotalStretch(m_column_params);
+    total_stretch_space = Value(Size().x - MinSize().x);
+    space_per_unit_stretch = total_stretch ? total_stretch_space / total_stretch : 0.0;
+    larger_than_min = 0 < total_stretch_space;
+    remainder = 0.0;
+    current_origin = m_border_margin;
+    for (std::size_t i = 0; i < m_column_params.size(); ++i) {
+        if (larger_than_min) {
+            if (i < m_column_params.size() - 1) {
+                double raw_width =
+                    m_column_params[i].effective_min +
+                    (total_stretch ?
+                     space_per_unit_stretch * m_column_params[i].stretch :
+                     total_stretch_space / static_cast<double>(m_column_params.size()));
+                int int_raw_width = static_cast<int>(raw_width);
+                m_column_params[i].current_width = int_raw_width;
+                remainder += raw_width - int_raw_width;
+                if (1.0 < remainder) {
+                    --remainder;
+                    ++m_column_params[i].current_width;
+                }
+            } else {
+                m_column_params[i].current_width = Value(Width()) - m_border_margin - current_origin;
+            }
+        } else {
+            m_column_params[i].current_width = m_column_params[i].effective_min;
+        }
+        m_column_params[i].current_origin = current_origin;
+        current_origin += m_column_params[i].current_width;
     }
 
     if (m_row_params.back().current_origin + m_row_params.back().current_width != Value(Height()) - m_border_margin)

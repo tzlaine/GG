@@ -56,7 +56,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X width = X0) const;
+    virtual Pt MinUsableSize() const;
 
     /** Returns true iff NumWnds() == 0. */
     bool Empty() const;
@@ -130,7 +130,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X width = X0) const;
+    virtual Pt MinUsableSize() const;
 
     /** Returns true iff NumWnds() == 0. */
     bool Empty() const;
@@ -219,7 +219,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X width = X0) const;
+    virtual Pt MinUsableSize() const;
 
     /** Returns true iff NumWnds() == 0. */
     bool Empty() const;

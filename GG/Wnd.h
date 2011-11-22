@@ -349,27 +349,11 @@ public:
 
     /** Returns the size of the minimum bounding box that can enclose the Wnd
         and still show all of its elements, plus enough room for interaction
-        with those elements (if applicable).  For example, a Scroll's
+        with those elements (if applicable).  For example, a TextControl's
+        MinUsableSize() is just the area of its text, and a Scroll's
         MinUsableSize() is the combined sizes of its up-button, down-button,
-        and tab (plus a bit of room in which to drag the tab).  If \a width is
-        nonzero, a Wnd whose height depends on its width must honor the given
-        width as the minimum usable.  A Wnd whose height does not depend on
-        its width can ignore \a width regardless of its value. */
-    virtual Pt MinUsableSize(X width = X0) const;
-
-    /** Returns true iff this Wnd's minimum usable height can only be
-        determined by knowing its width.  For example, the height of a
-        TextControl in line-wrapped mode can only be determined if the maximum
-        line width is known.  */
-    virtual bool HeightForWidth() const;
-
-    /** Returns the size of the height that can enclose the Wnd and still show
-        all of its elements, plus enough room for interaction with those
-        elements (if applicable), given that the Wnd is exactly \a width
-        pixels wide.  For example, a TextControl's MinUsableHeight( \a w )
-        with line wrapping enabled is the height required to show its text in
-        lines at most \a w pixels wide. */
-    Y MinUsableHeight(X width) const;
+        and tab (plus a bit of room in which to drag the tab). */
+    virtual Pt MinUsableSize() const;
 
     /** Returns upper-left corner of window's client area in screen
         coordinates (or of the entire area, if no client area is specified).

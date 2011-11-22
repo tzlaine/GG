@@ -94,7 +94,7 @@ Scroll::Scroll(X x, Y y, X w, Y h, Orientation orientation, Clr color, Clr inter
     }
 }
 
-Pt Scroll::MinUsableSize(X/* = X0*/) const
+Pt Scroll::MinUsableSize() const
 {
     Pt retval;
     const int MIN_DRAGABLE_SIZE = 2;

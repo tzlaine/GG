@@ -69,42 +69,28 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
     SetText(str);
 }
 
-Pt TextControl::MinUsableSize(X width/* = X0*/) const
+// TODO: This must be done in terms of available horizontal space!  Add an X
+// width parameter, and change Layout to go across first, then down.
+Pt TextControl::MinUsableSize() const
 {
+    Pt min_size = MinSize();
     if (m_text.empty()) {
         m_min_usable_size = Pt();
     } else if (m_fit_to_text) {
         m_min_usable_size = m_text_lr - m_text_ul;
-    } else if (m_font) {
-        Pt min_size = MinSize();
-        if (0 < width) {
-            assert(min_size.x <= width);
-            if (width != m_last_min_usable_width) {
-                m_min_usable_size_for_min_usable_width = m_font->TextExtent(m_text, m_format, width);
-                m_last_min_usable_width = width;
-            }
-            m_min_usable_size = m_min_usable_size_for_min_usable_width;
-        } else if (0 < min_size.x) {
-            if (width != m_last_min_width) {
-                m_min_usable_size_for_min_width = m_font->TextExtent(m_text, m_format, min_size.x);
-                m_min_usable_size_for_min_width.y = m_font->Height();
-                m_last_min_width = width;
-            }
-            m_min_usable_size = m_min_usable_size_for_min_width;
-        } else {
-            std::size_t min_chars = 8;
-            if (!m_line_data.empty())
-                min_chars = std::min(min_chars, m_line_data[0].char_data.size());
-            m_min_usable_size = Pt(static_cast<int>(min_chars) * m_font->SpaceWidth(), m_font->Height());
+    } else if (0 < min_size.x) {
+        if (min_size.x != m_last_min_width) {
+            m_min_usable_size = m_font->TextExtent(m_text, m_format, min_size.x);
+            m_last_min_width = min_size.x;
         }
     } else {
-        m_min_usable_size = Size();
+        std::size_t min_chars = 8;
+        if (!m_line_data.empty())
+            min_chars = std::min(min_chars, m_line_data[0].char_data.size());
+        m_min_usable_size = Pt(static_cast<int>(min_chars) * m_font->SpaceWidth(), m_font->Height());
     }
     return m_min_usable_size;
 }
-
-bool TextControl::HeightForWidth() const
-{ return true; }
 
 const std::string& TextControl::Text() const
 { return m_text; }
@@ -176,7 +162,7 @@ void TextControl::SizeMove(const Pt& ul, const Pt& lr)
             client_width < text_width ||
             text_width < client_width && 1u < m_line_data.size();
     }
-    if (redo_determine_lines && m_font) {
+    if (redo_determine_lines) {
         Pt text_sz;
         if (m_text_elements.empty()) {
             text_sz =

@@ -72,7 +72,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt MinUsableSize(X width = X0) const;
+    virtual Pt MinUsableSize() const;
     virtual Pt ClientLowerRight() const;
 
     /** Returns the style flags for this MultiEdit. */

@@ -154,7 +154,7 @@ MenuBar::MenuBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, const MenuI
         Connect(BrowsedSignal, MenuSignalEcho("MenuBar::BrowsedSignal"));
 }
 
-Pt MenuBar::MinUsableSize(X/* = X0*/) const
+Pt MenuBar::MinUsableSize() const
 {
     Pt retval;
     for (std::size_t i = 0; i < m_menu_labels.size(); ++i) {

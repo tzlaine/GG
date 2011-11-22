@@ -69,7 +69,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    virtual Pt           MinUsableSize(X width = X0) const;
+    virtual Pt           MinUsableSize() const;
 
     T                    Posn() const;           ///< returns the current tab position
     std::pair<T, T>      SliderRange() const;    ///< returns the defined possible range of control
@@ -184,7 +184,7 @@ Slider<T>::Slider(X x, Y y, X w, Y h, T min, T max, Orientation orientation, Sli
 }
 
 template <class T>
-Pt Slider<T>::MinUsableSize(X width/* = X0*/) const
+Pt Slider<T>::MinUsableSize() const
 {
     return Pt(m_orientation == VERTICAL ? X(m_tab_width) : Size().x,
               m_orientation == VERTICAL ? Size().y : Y(m_tab_width));

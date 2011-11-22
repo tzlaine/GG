@@ -64,7 +64,7 @@ OverlayWnd::~OverlayWnd()
     }
 }
 
-Pt OverlayWnd::MinUsableSize(X/* = X0*/) const
+Pt OverlayWnd::MinUsableSize() const
 {
     Pt retval;
     for (std::size_t i = 0; i < m_wnds.size(); ++i) {
@@ -168,7 +168,7 @@ TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr colo
         Connect(WndChangedSignal, TabChangedEcho("TabWnd::WndChangedSignal"));
 }
 
-Pt TabWnd::MinUsableSize(X/* = X0*/) const
+Pt TabWnd::MinUsableSize() const
 {
     Pt retval = m_tab_bar->MinUsableSize();
     Pt min_usable_size = m_overlay->MinUsableSize();
@@ -298,7 +298,7 @@ TabBar::TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Cl
         Connect(TabChangedSignal, TabChangedEcho("TabBar::TabChangedSignal"));
 }
 
-Pt TabBar::MinUsableSize(X/* = X0*/) const
+Pt TabBar::MinUsableSize() const
 {
     Y y(0);
     for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {

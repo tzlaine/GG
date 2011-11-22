@@ -68,7 +68,7 @@ Button::Button(X x, Y y, X w, Y h, const std::string& str, const boost::shared_p
         Connect(ClickedSignal, &ClickedEcho);
 }
 
-Pt Button::MinUsableSize(X/* = X0*/) const
+Pt Button::MinUsableSize() const
 {
     Pt retval = Size();
     if (m_text->GetFont() && (m_unpressed_graphic.Empty() || m_pressed_graphic.Empty() || m_rollover_graphic.Empty())) {
@@ -272,7 +272,7 @@ StateButton::StateButton(X x, Y y, X w, Y h, const std::string& str, const boost
         Connect(CheckedSignal, &CheckedEcho);
 }
 
-Pt StateButton::MinUsableSize(X/* = X0*/) const
+Pt StateButton::MinUsableSize() const
 {
     if (m_style == SBSTYLE_3D_TOP_ATTACHED_TAB || m_style == SBSTYLE_3D_TOP_DETACHED_TAB) {
         return m_text->MinUsableSize();
@@ -491,7 +491,7 @@ RadioButtonGroup::RadioButtonGroup(X x, Y y, X w, Y h, Orientation orientation) 
         Connect(ButtonChangedSignal, &ButtonChangedEcho);
 }
 
-Pt RadioButtonGroup::MinUsableSize(X/* = X0*/) const
+Pt RadioButtonGroup::MinUsableSize() const
 {
     Pt retval;
     for (std::size_t i = 0; i < m_button_slots.size(); ++i) {

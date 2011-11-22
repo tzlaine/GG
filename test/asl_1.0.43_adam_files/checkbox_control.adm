@@ -7,10 +7,10 @@
 sheet control_example
 {
 interface:
-    control         : true;
-    enable_me           : false <== control == true ? true : enable_me;
-    enable_me_too       : false <== control == true ? enable_me_too : false;
-    unlink remember_me  : false <== control == true ? true : remember_me;
+    control         : @mixed;
+    enable_me           : false <== control == @mixed ? true : enable_me;
+    enable_me_too       : false <== control == @mixed ? enable_me_too : false;
+    unlink remember_me  : false <== control == @mixed ? true : remember_me;
 output:
     result <==  {
                     control: control,

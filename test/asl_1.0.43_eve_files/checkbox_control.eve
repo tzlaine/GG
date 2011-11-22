@@ -10,7 +10,7 @@ layout checkbox_control
     {
         column(spacing: 10)
         {
-            checkbox(name: "Control", bind: @control);
+            checkbox(name: "Control", bind: @control, value_on: @mixed);
             checkbox(name: "Make Mixed Control", bind: @control, value_on: @mixed, value_off: false);
             checkbox(name: "Enable me", bind: @enable_me);
             checkbox(name: "Enable me too", bind: @enable_me_too);

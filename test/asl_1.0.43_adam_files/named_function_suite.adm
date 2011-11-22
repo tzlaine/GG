@@ -32,7 +32,7 @@ output:
                     min_element_test_result: min_element_test,
                     max_element_test_result: max_element_test,
                     round_test_result: round_test,
-                    contributing_test_result: contributing(contributing_test),
+                    contributing_test_result: contributing(@contributing_test),
                     sample_array_result: sample_array,
                     sample_dictionary_result: sample_dictionary
                 };

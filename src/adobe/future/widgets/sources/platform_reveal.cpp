@@ -194,7 +194,7 @@ platform_display_type insert<reveal_t>(display_t&             display,
     platform_display_type result(display.insert(parent, element.control_m));
 
     if (element.using_label_m)
-        display.insert(parent, get_display(element.name_m));
+        insert(display, parent, element.name_m);
 
     return result;
 }

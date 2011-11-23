@@ -322,6 +322,8 @@ struct is_movable : boost::mpl::and_<
 
 /*************************************************************************************************/
 
+#if 0 // TODO: Implement actual c++11 move support.  The sinks below break clang 3.0.
+
 /*!
 \ingroup move_related
 \brief copy_sink and move_sink are used to select between overloaded operations according to
@@ -361,6 +363,20 @@ struct move_sink : boost::enable_if<
                         R
                     >
 { };
+
+#else
+
+template <typename T,
+          typename U = T,
+          typename R = void*>
+struct copy_sink : boost::enable_if<boost::mpl::true_, R> {};
+
+template <typename T,
+          typename U = T,
+          typename R = void*>
+struct move_sink : boost::enable_if<boost::mpl::false_, R> {};
+
+#endif
 
 /*************************************************************************************************/
 

@@ -216,7 +216,7 @@ namespace {
     };
 
     const int Dialog::FRAME_WIDTH = 2;
-    const Pt Dialog::BEVEL_OFFSET(X(Dialog::FRAME_WIDTH), Y(Dialog::FRAME_WIDTH));
+    const Pt Dialog::BEVEL_OFFSET(X(2), Y(2));
 
     enum LabeledStatus {
         LABELED_CONTROL,

@@ -457,7 +457,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
     */
     
     template <typename U>
-    std::pair<iterator, bool> insert(const U& x, typename copy_sink<U, value_type>::type = 0)
+    std::pair<iterator, bool> insert(const U& x)//, typename copy_sink<U, value_type>::type = 0)
     {
         if (capacity() == size()) {
             value_type tmp(x); // Make a copy incase resize moves the element.
@@ -466,7 +466,7 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
         }
         return unsafe_copy_insert(x);
     }
-    
+#if 0
     template <typename U>
     std::pair<iterator, bool> insert(U x, typename move_sink<U, value_type>::type = 0)
     {
@@ -510,18 +510,19 @@ class closed_hash_set : boost::equality_comparable<closed_hash_set<T, KeyTransfo
         header()->size() += 1;
         return std::make_pair(node, true);
     }
-    
+
     template <typename U>
     iterator insert(iterator, const U& x, typename copy_sink<U, value_type>::type = 0)
     {
         return insert(x).first;
     }
-    
+
     template <typename U>
     iterator insert(iterator, U x, typename move_sink<U, value_type>::type = 0)
     {
         return insert(::adobe::move(x)).first;
     }
+#endif
     
     ~closed_hash_set()
     {

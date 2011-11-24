@@ -381,6 +381,7 @@ template <> platform_display_type insert<popup_t>(display_t&             display
         implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
                                                   RowHeight() * lines + static_cast<int>(2 * GG::ListBox::BORDER_THICK),
                                                   GG::CLR_GRAY);
+    element.control_m->SetStyle(GG::LIST_NOSORT);
 
     element.original_height_m = Value(element.control_m->Height());
 

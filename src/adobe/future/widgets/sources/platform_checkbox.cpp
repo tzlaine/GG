@@ -103,7 +103,7 @@ void checkbox_t::display(const any_regular_t& new_value)
     if (current_value_m == true_value_m)
         control_m->SetCheck(true);
     else if (current_value_m == false_value_m)
-        control_m->SetCheck(true);
+        control_m->SetCheck(false);
     else
         assert(!"checkbox_t::display() : non-true and non-false value set");
 }

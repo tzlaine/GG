@@ -130,6 +130,7 @@ public:
     virtual void SizeMove(const Pt& ul, const Pt& lr);
 
     virtual void SetColor(Clr c);
+    virtual void Disable(bool b = true);
 
     /** Sets the text in this Edit. */
     void SetText(const std::string& text);

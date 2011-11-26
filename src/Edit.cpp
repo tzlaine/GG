@@ -194,6 +194,12 @@ void Edit::SizeMove(const Pt& ul, const Pt& lr)
 void Edit::SetColor(Clr c)
 { Control::SetColor(c); }
 
+void Edit::Disable(bool b/* = true*/)
+{
+    m_text->Disable(b);
+    Control::Disable(b);
+}
+
 void Edit::SetText(const std::string& str)
 {
     m_text->SetText(str);

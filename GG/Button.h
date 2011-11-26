@@ -108,9 +108,8 @@ public:
     /** \name Mutators */ ///@{
     virtual void   SizeMove(const Pt& ul, const Pt& lr);
     virtual void   Render();
-
-    /** Sets the control's color; does not affect the text color. */
     virtual void   SetColor(Clr c);
+    virtual void   Disable(bool b = true);
 
     /** Sets the text of this button. */
     void           SetText(const std::string& text);
@@ -223,7 +222,7 @@ public:
 
     /** Returns the text format (vertical and horizontal justification, use of
         word breaks and line wrapping, etc.) */
-    Flags<TextFormat> GetTextFormat() const;
+    Flags<TextFormat>  GetTextFormat() const;
 
     /** Returns the Font used by this StateButton to render its text. */
     const boost::shared_ptr<Font>& GetFont() const;
@@ -235,15 +234,14 @@ public:
     /** \name Mutators */ ///@{
     virtual void       Render();
     virtual void       SizeMove(const Pt& ul, const Pt& lr);
+    virtual void       SetColor(Clr c);
+    virtual void       Disable(bool b = true);
 
     /** Unchecks button. */
     void               Reset();
 
     /** (Un)checks button. */
     void               SetCheck(bool b = true);
-
-    /** Sets the color of the button; does not affect text color. */
-    virtual void       SetColor(Clr c);
 
     /** Sets the button text color. */
     void               SetTextColor(Clr text_color);

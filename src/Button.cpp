@@ -128,6 +128,12 @@ void Button::SetText(const std::string& text)
 void Button::SetColor(Clr c)
 { Control::SetColor(c); }
 
+void Button::Disable(bool b/* = true*/)
+{
+    m_text->Disable(b);
+    Control::Disable(b);
+}
+
 void Button::SetState(ButtonState state)
 { m_state = state; }
 
@@ -394,6 +400,15 @@ void StateButton::SizeMove(const Pt& ul, const Pt& lr)
     RepositionButton();
 }
 
+void StateButton::SetColor(Clr c)
+{ Control::SetColor(c); }
+
+void StateButton::Disable(bool b/* = true*/)
+{
+    m_text->Disable(b);
+    Control::Disable(b);
+}
+
 void StateButton::Reset()
 { SetCheck(false); }
 
@@ -420,9 +435,6 @@ void StateButton::RepositionButton()
     }
     m_text->MoveTo(text_ul);
 }
-
-void StateButton::SetColor(Clr c)
-{ Control::SetColor(c); }
 
 void StateButton::SetTextColor(Clr text_color)
 { m_text->SetTextColor(text_color); }

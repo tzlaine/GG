@@ -52,7 +52,7 @@ boost::shared_ptr<GG::Font> DefaultFont()
 
 GG::X CharWidth()
 {
-    static GG::X retval = DefaultFont()->TextExtent("0").x;
+    static GG::X retval = DefaultFont()->TextExtent("W").x;
     return retval;
 }
 

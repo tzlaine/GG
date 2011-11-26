@@ -25,7 +25,7 @@ logic:
     relate { c <== g.c; g <== { a: g.a, b: g.b, c: c }; }
 
     relate {
-        all <== g == g_true ? true : g == g_false ? false : empty;
+        all <== g == g_true ? true : false;
         g <== { a: all, b: all, c: all };
     }
 

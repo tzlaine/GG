@@ -37,6 +37,11 @@ GG::Y RowHeight()
 
 /****************************************************************************************************/
 
+GG::Y DropHeight(unsigned int lines)
+{ return RowHeight() * static_cast<int>(lines) + static_cast<int>(2 * GG::ListBox::BORDER_THICK); }
+
+/****************************************************************************************************/
+
 enum metrics {
     gap = 4 // Measured as space from popup to label.
 };
@@ -77,7 +82,8 @@ void set_menu_item_set(adobe::popup_t& p, const adobe::popup_t::menu_item_t* fir
 {
     p.custom_m = false;
 
-    for (; first != last; ++first)
+    unsigned int lines = 0;
+    for (; first != last; ++first, ++lines)
     {
         // MM: Revisit. Is there a way to have disabled separators in combo boxes?
         // Since I don't know a way I intercept -'s here. (Dashes inidcate separators
@@ -86,6 +92,9 @@ void set_menu_item_set(adobe::popup_t& p, const adobe::popup_t::menu_item_t* fir
         if (first->first != "-" && first->first != "__separator") 
             p.menu_items_m.push_back(*first);
     }
+
+    if (p.control_m)
+        p.control_m->SetDropHeight(DropHeight(lines));
 }
 
 /****************************************************************************************************/
@@ -379,8 +388,7 @@ template <> platform_display_type insert<popup_t>(display_t&             display
     int lines = std::min(element.menu_items_m.size(), std::size_t(20u));
     element.control_m =
         implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
-                                                  RowHeight() * lines + static_cast<int>(2 * GG::ListBox::BORDER_THICK),
-                                                  GG::CLR_GRAY);
+                                                  DropHeight(lines), GG::CLR_GRAY);
     element.control_m->SetStyle(GG::LIST_NOSORT);
 
     element.original_height_m = Value(element.control_m->Height());

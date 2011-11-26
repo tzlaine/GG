@@ -108,10 +108,15 @@ platform_display_type insert<slider_t>(display_t&             display,
     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     double min = element.format_m.at(0).cast<slider_t::model_type>();
     double max = element.format_m.at(element.format_m.size() - 1).cast<slider_t::model_type>();
+    const int unsigned tab_width = 6;
     element.control_m =
         style->NewDoubleSlider(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
                                min, max, element.is_vertical_m ? GG::VERTICAL : GG::HORIZONTAL,
-                               GG::GROOVED, GG::CLR_GRAY, 6);
+                               GG::GROOVED, GG::CLR_GRAY, tab_width);
+
+    const int unsigned tab_length = tab_width * 3;
+    element.control_m->SetMinSize(GG::Pt(element.is_vertical_m ? GG::X(tab_length) : GG::X0,
+                                         element.is_vertical_m ? GG::Y0 : GG::Y(tab_length)));
 
     GG::Connect(element.control_m->SlidSignal,
                 boost::bind(&slider_slid, boost::ref(element), _1, _2, _3));

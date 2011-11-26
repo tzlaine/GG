@@ -186,8 +186,9 @@ Slider<T>::Slider(X x, Y y, X w, Y h, T min, T max, Orientation orientation, Sli
 template <class T>
 Pt Slider<T>::MinUsableSize() const
 {
-    return Pt(m_orientation == VERTICAL ? X(m_tab_width) : Size().x,
-              m_orientation == VERTICAL ? Size().y : Y(m_tab_width));
+    const Pt MIN_SIZE = MinSize();
+    return Pt(m_orientation == VERTICAL ? std::max(MIN_SIZE.x, X(m_tab_width)) : Size().x,
+              m_orientation == VERTICAL ? Size().y : std::max(MIN_SIZE.y, Y(m_tab_width)));
 }
 
 template <class T>

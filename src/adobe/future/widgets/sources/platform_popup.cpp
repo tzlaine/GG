@@ -168,7 +168,7 @@ void popup_t::measure(extents_t& result)
     bool have_extents = false;
     for (; first != last; ++first)
     {
-        GG::Pt extent = font->TextExtent(first->first) + GG::Pt(2 * implementation::CharWidth(), GG::Y0);
+        GG::Pt extent = font->TextExtent(first->first) + GG::Pt(implementation::CharWidth(), GG::Y0);
         if (largest_extent.x < extent.x)
             largest_extent = extent;
         have_extents = true;

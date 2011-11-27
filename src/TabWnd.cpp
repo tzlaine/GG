@@ -326,6 +326,7 @@ void TabBar::SizeMove(const Pt& ul, const Pt& lr)
     Control::SizeMove(ul, lr);
     m_tabs->Resize(Pt(m_tabs->Width(), Height()));
     m_left_right_button_layout->Resize(Size());
+    UpdateLeftRightButtons();
 }
 
 void TabBar::Render()
@@ -351,14 +352,7 @@ void TabBar::InsertTab(std::size_t index, const std::string& name)
     button->InstallEventFilter(this);
     m_tab_buttons.insert(m_tab_buttons.begin() + index, button);
     m_tabs->InsertButton(index, m_tab_buttons[index]);
-    if (Width() < m_tabs->Width()) {
-        m_left_right_button_layout->Show();
-        m_left_button->Disable(m_first_tab_shown == 0);
-        X right_side = m_left_right_button_layout->Visible() ?
-            m_left_button->UpperLeft().x :
-            LowerRight().x;
-        m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
-    }
+    UpdateLeftRightButtons();
     if (m_tabs->CheckedButton() == RadioButtonGroup::NO_BUTTON)
         SetCurrentTab(0);
 }
@@ -378,8 +372,7 @@ void TabBar::RemoveTab(const std::string& name)
     m_tabs->RemoveButton(m_tab_buttons[index]);
     delete m_tab_buttons[index];
     m_tab_buttons.erase(m_tab_buttons.begin() + index);
-    if (m_tabs->Width() <= Width())
-        m_left_right_button_layout->Hide();
+    UpdateLeftRightButtons();
     if (m_tabs->CheckedButton() == RadioButtonGroup::NO_BUTTON && !m_tab_buttons.empty())
         m_tabs->SetCheck(0);
 }
@@ -414,8 +407,7 @@ void TabBar::LeftClicked()
     assert(0 < m_first_tab_shown);
     m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown - 1]->UpperLeft().x, Y0));
     --m_first_tab_shown;
-    m_left_button->Disable(m_first_tab_shown == 0);
-    m_right_button->Disable(false);
+    UpdateLeftRightButtons();
 }
 
 void TabBar::RightClicked()
@@ -423,11 +415,7 @@ void TabBar::RightClicked()
     assert(m_first_tab_shown < m_tab_buttons.size() - 1);
     m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[m_first_tab_shown + 1]->UpperLeft().x, Y0));
     ++m_first_tab_shown;
-    X right_side = m_left_right_button_layout->Visible() ?
-        m_left_button->UpperLeft().x :
-        LowerRight().x;
-    m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
-    m_left_button->Disable(false);
+    UpdateLeftRightButtons();
 }
 
 void TabBar::BringTabIntoView(std::size_t index)
@@ -444,8 +432,23 @@ void TabBar::BringTabIntoView(std::size_t index)
         }
     } else {
         m_tabs->OffsetMove(Pt(m_tab_buttons[m_first_tab_shown]->UpperLeft().x - m_tab_buttons[index]->UpperLeft().x, Y0));
+    }
+    UpdateLeftRightButtons();
+}
+
+void TabBar::UpdateLeftRightButtons()
+{
+    if (Width() < m_tabs->Width())
+        m_left_right_button_layout->Show();
+    else if (m_first_tab_shown == 0)
+        m_left_right_button_layout->Hide();
+
+    m_left_button->Disable(m_first_tab_shown == 0);
+    if (!m_tab_buttons.empty()) {
+        X right_side = m_left_right_button_layout->Visible() ?
+            m_left_button->UpperLeft().x :
+            LowerRight().x;
         m_right_button->Disable(m_tab_buttons.back()->LowerRight().x <= right_side);
-        m_left_button->Disable(false);
     }
 }
 

@@ -290,6 +290,7 @@ private:
     void LeftClicked();
     void RightClicked();
     void BringTabIntoView(std::size_t index);
+    void UpdateLeftRightButtons();
 
     RadioButtonGroup*         m_tabs;
     std::vector<StateButton*> m_tab_buttons;

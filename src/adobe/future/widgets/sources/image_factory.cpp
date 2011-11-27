@@ -36,9 +36,10 @@ void create_widget(const dictionary_t& parameters,
 
     get_value(parameters, key_image, image_filename);
 
-    try
-    { actual_image = GG::GUI::GetGUI()->GetTexture(image_filename); }
-    catch (...) {}
+    try {
+        actual_image = GG::GUI::GetGUI()->GetTexture(image_filename);
+        actual_image->SetFilters(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+    } catch (...) {}
 
     widget = new image_t(actual_image);
 }

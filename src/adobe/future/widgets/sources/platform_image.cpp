@@ -126,16 +126,27 @@ GG::Y get_height(adobe::image_t& image)
 
 void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& view)
 {
-    delete image.window_m;
-    image.window_m = 0;
+    assert(image.window_m);
 
     if (view) {
+        GG::Wnd* parent = image.window_m->Parent();
+        GG::Pt ul = image.window_m->RelativeUpperLeft();
+        GG::Pt size = image.window_m->Size();
+
+        assert(parent);
+
+        delete image.window_m;
+        image.window_m = 0;
+
         image.window_m =
             adobe::implementation::Factory().NewStaticGraphic(
-                GG::X0, GG::Y0, view->DefaultWidth(), view->DefaultHeight(), view,
-                GG::GRAPHIC_NONE, GG::INTERACTIVE
+                ul.x, ul.y, size.x, size.y, view,
+                GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE, GG::INTERACTIVE
             );
+        parent->AttachChild(image.window_m);
         image.window_m->InstallEventFilter(&image.filter_m);
+    } else {
+        image.window_m->Hide();
     }
 }
 
@@ -241,7 +252,22 @@ platform_display_type insert<image_t>(display_t&             display,
                                       image_t&               element)
 {
     assert(!element.window_m);
-    reset_image(element, element.image_m);
+    if (element.image_m) {
+        element.window_m =
+            adobe::implementation::Factory().NewStaticGraphic(
+                GG::X0, GG::Y0, element.image_m->DefaultWidth(), element.image_m->DefaultHeight(),
+                element.image_m, GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
+                GG::INTERACTIVE
+            );
+    } else {
+        element.window_m =
+            adobe::implementation::Factory().NewStaticGraphic(
+                GG::X0, GG::Y0, fixed_width, fixed_height,
+                boost::shared_ptr<GG::Texture>(), GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
+                GG::INTERACTIVE
+            );
+    }
+    element.window_m->InstallEventFilter(&element.filter_m);
     return display.insert(parent, get_display(element));
 }
 

@@ -26,6 +26,23 @@ namespace {
 
 /*************************************************************************************************/
 
+struct EditHandler
+{
+    EditHandler(adobe::edit_text_t& edit_text) :
+        m_edit_text(&edit_text)
+        {}
+
+    void operator()(const std::string& text)
+        {
+            m_edit_text->value_m = text;
+            m_edit_text->post_edit_proc_m(text);
+        }
+
+    adobe::edit_text_t* m_edit_text;
+};
+
+/*************************************************************************************************/
+
 const int gap = 4;
 
 } // namespace
@@ -63,6 +80,8 @@ public:
                     event.GetKey() == GG::GGK_LEFT ||
                     event.GetKey() == GG::GGK_RIGHT ||
                     event.GetKey() == GG::GGK_END ||
+                    event.GetKey() == GG::GGK_PAGEUP ||
+                    event.GetKey() == GG::GGK_PAGEDOWN ||
                     event.GetKey() == GG::GGK_BACKSPACE ||
                     event.GetKey() == GG::GGK_DELETE ||
                     event.GetKey() == GG::GGK_RETURN ||
@@ -89,14 +108,8 @@ public:
                 if (m_edit_text.pre_edit_proc_m)
                     m_edit_text.pre_edit_proc_m(new_value, squelch);
 
-                if (squelch) {
+                if (squelch)
                     retval = true;
-                } else {
-                    m_edit_text.control_m->SetText(m_edit_text.control_m->Text() + translated_code_point);
-                    m_edit_text.value_m = new_value;
-                    m_edit_text.post_edit_proc_m(new_value);
-                    retval = true;
-                }
             }
             return retval;
         }
@@ -307,6 +320,7 @@ platform_display_type insert<edit_text_t>(display_t&             display,
         element.control_m =
             implementation::Factory().NewEdit(GG::X0, GG::Y0, GG::X1, "",
                                               implementation::DefaultFont(), GG::CLR_GRAY);
+        GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     } else {
         GG::Y height =
             implementation::CharHeight() * static_cast<int>(element.rows_m) +
@@ -317,6 +331,7 @@ platform_display_type insert<edit_text_t>(display_t&             display,
         element.control_m =
             implementation::Factory().NewMultiEdit(GG::X0, GG::Y0, GG::X1, height, "",
                                                    implementation::DefaultFont(), GG::CLR_GRAY, style);
+        GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     }
 
     element.original_height_m = Value(element.control_m->Height());

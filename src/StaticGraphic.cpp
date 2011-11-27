@@ -75,7 +75,10 @@ StaticGraphic::StaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture
                              Flags<WndFlag> flags/* = 0*/) :
     Control(x, y, w, h, flags),
     m_style(style)
-{ Init(SubTexture(texture, X0, Y0, texture->DefaultWidth(), texture->DefaultHeight())); }
+{
+    if (texture)
+        Init(SubTexture(texture, X0, Y0, texture->DefaultWidth(), texture->DefaultHeight()));
+}
 
 StaticGraphic::StaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,
                              Flags<WndFlag> flags/* = 0*/) :
@@ -141,10 +144,12 @@ Rect StaticGraphic::RenderedArea() const
 
 void StaticGraphic::Render()
 {
-    Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
-    glColor(color_to_use);
-    Rect rendered_area = RenderedArea();
-    m_graphic.OrthoBlit(rendered_area.ul, rendered_area.lr);
+    if (!m_graphic.Empty()) {
+        Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
+        glColor(color_to_use);
+        Rect rendered_area = RenderedArea();
+        m_graphic.OrthoBlit(rendered_area.ul, rendered_area.lr);
+    }
 }
 
 void StaticGraphic::SetStyle(Flags<GraphicStyle> style)

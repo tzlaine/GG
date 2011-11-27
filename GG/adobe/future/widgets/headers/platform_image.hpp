@@ -11,6 +11,8 @@
 
 /****************************************************************************************************/
 
+#include <GG/PtRect.h>
+#include <GG/Wnd.h>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/memory.hpp>
 #include <GG/adobe/layout_attributes.hpp>
@@ -19,8 +21,6 @@
 #include <boost/noncopyable.hpp>
 
 #include <string>
-
-#include <GG/PtRect.h>
 
 
 namespace GG {
@@ -33,13 +33,20 @@ namespace GG {
 
 namespace adobe {
 
+struct image_t;
+
 /****************************************************************************************************/
 
 namespace implementation {
 
 /****************************************************************************************************/
 
-class ImageFilter;
+struct ImageFilter : GG::Wnd
+{
+    ImageFilter(image_t& image);
+    virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event);
+    image_t& m_image;
+};
 
 }
 
@@ -62,9 +69,7 @@ struct image_t : boost::noncopyable
     setter_proc_type                   callback_m;
     dictionary_t                       metadata_m;
     GG::Pt                             last_point_m;
-
-    boost::shared_ptr<implementation::ImageFilter>
-                                       filter_m;
+    implementation::ImageFilter        filter_m;
 };
 
 /****************************************************************************************************/

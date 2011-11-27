@@ -24,6 +24,24 @@
 
 /****************************************************************************************************/
 
+namespace {
+
+/****************************************************************************************************/
+
+adobe::aggregate_name_t key_delta_x = { "delta_x" };
+adobe::aggregate_name_t key_delta_y = { "delta_y" };
+adobe::aggregate_name_t key_dragging = { "dragging" };
+adobe::aggregate_name_t key_x = { "x" };
+adobe::aggregate_name_t key_y = { "y" };
+adobe::aggregate_name_t key_width = { "width" };
+adobe::aggregate_name_t key_height = { "height" };
+
+/****************************************************************************************************/
+
+} // namespace
+
+/****************************************************************************************************/
+
 namespace adobe {
 
 /****************************************************************************************************/
@@ -32,65 +50,54 @@ namespace implementation {
 
 /*************************************************************************************************/
 
-class ImageFilter :
-    public GG::Wnd
+ImageFilter::ImageFilter(image_t& image) :
+    Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
+    m_image(image)
+{}
+
+bool ImageFilter::EventFilter(GG::Wnd*, const GG::WndEvent& event)
 {
-public:
-    ImageFilter(image_t& image) :
-        Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
-        m_image(image)
-        {}
+    bool retval = false;
 
-    virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
-        {
-            bool retval = false;
-            if (event.Type() == GG::WndEvent::LButtonDown) {
-                m_image.last_point_m = event.Point();
-                retval = true;
-            } else if (event.Type() == GG::WndEvent::LDrag) {
-                GG::Pt cur_point(event.Point());
-                double x(Value(cur_point.x));
-                double y(Value(cur_point.y));
+    typedef dictionary_t::value_type value_type;
 
-                if (m_image.last_point_m != cur_point && m_image.callback_m) {
-                    double delta_x(Value(m_image.last_point_m.x - cur_point.x));
-                    double delta_y(Value(m_image.last_point_m.y - cur_point.y));
+    if (event.Type() == GG::WndEvent::LButtonDown) {
+        m_image.last_point_m = event.Point();
+        retval = true;
+    } else if (event.Type() == GG::WndEvent::LDrag) {
+        GG::Pt cur_point(event.Point());
+        double x(Value(cur_point.x));
+        double y(Value(cur_point.y));
 
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_x"),
-                                                                       any_regular_t(delta_x)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_y"),
-                                                                       any_regular_t(delta_y)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("dragging"),
-                                                                       any_regular_t(true)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("x"),
-                                                                       any_regular_t(x)));
-                    m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("y"),
-                                                                       any_regular_t(y)));
+        if (m_image.last_point_m != cur_point && m_image.callback_m) {
+            double delta_x(Value(m_image.last_point_m.x - cur_point.x));
+            double delta_y(Value(m_image.last_point_m.y - cur_point.y));
 
-                    m_image.callback_m(m_image.metadata_m);
-                }
+            m_image.metadata_m.insert(value_type(key_delta_x, any_regular_t(delta_x)));
+            m_image.metadata_m.insert(value_type(key_delta_y, any_regular_t(delta_y)));
+            m_image.metadata_m.insert(value_type(key_dragging, any_regular_t(true)));
+            m_image.metadata_m.insert(value_type(key_x, any_regular_t(x)));
+            m_image.metadata_m.insert(value_type(key_y, any_regular_t(y)));
 
-                m_image.last_point_m = cur_point;
-
-                retval = true;
-            } else if (event.Type() == GG::WndEvent::LButtonUp ||
-                       event.Type() == GG::WndEvent::LClick) {
-                m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_x"),
-                                                                   any_regular_t(0)));
-                m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("delta_y"),
-                                                                   any_regular_t(0)));
-                m_image.metadata_m.insert(dictionary_t::value_type(static_name_t("dragging"),
-                                                                   any_regular_t(false)));
-                if (m_image.callback_m)
-                    m_image.callback_m(m_image.metadata_m);
-
-                retval = true;
-            }
-            return retval;
+            m_image.callback_m(m_image.metadata_m);
         }
 
-    image_t& m_image;
-};
+        m_image.last_point_m = cur_point;
+
+        retval = true;
+    } else if (event.Type() == GG::WndEvent::LButtonUp ||
+               event.Type() == GG::WndEvent::LClick) {
+        m_image.metadata_m.insert(value_type(key_delta_x, any_regular_t(0)));
+        m_image.metadata_m.insert(value_type(key_delta_y, any_regular_t(0)));
+        m_image.metadata_m.insert(value_type(key_dragging, any_regular_t(false)));
+
+        if (m_image.callback_m)
+            m_image.callback_m(m_image.metadata_m);
+
+        retval = true;
+    }
+    return retval;
+}
 
 } // implementation
 
@@ -120,6 +127,7 @@ GG::Y get_height(adobe::image_t& image)
 void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& view)
 {
     delete image.window_m;
+    image.window_m = 0;
 
     if (view) {
         image.window_m =
@@ -127,8 +135,7 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
                 GG::X0, GG::Y0, view->DefaultWidth(), view->DefaultHeight(), view,
                 GG::GRAPHIC_NONE, GG::INTERACTIVE
             );
-        image.filter_m.reset(new adobe::implementation::ImageFilter(image));
-        image.window_m->InstallEventFilter(image.filter_m.get());
+        image.window_m->InstallEventFilter(&image.filter_m);
     }
 }
 
@@ -143,13 +150,15 @@ namespace adobe {
 
 image_t::image_t(const view_model_type& image) :
     window_m(0),
-    image_m(image)
+    image_m(image),
+    filter_m(*this)
 {
-    metadata_m.insert(dictionary_t::value_type(static_name_t("delta_x"), any_regular_t(0)));
-    metadata_m.insert(dictionary_t::value_type(static_name_t("delta_y"), any_regular_t(0)));
-    metadata_m.insert(dictionary_t::value_type(static_name_t("dragging"), any_regular_t(false)));
-    metadata_m.insert(dictionary_t::value_type(static_name_t("x"), any_regular_t(0)));
-    metadata_m.insert(dictionary_t::value_type(static_name_t("y"), any_regular_t(0)));
+    typedef dictionary_t::value_type value_type;
+    metadata_m.insert(value_type(key_delta_x, any_regular_t(0)));
+    metadata_m.insert(value_type(key_delta_y, any_regular_t(0)));
+    metadata_m.insert(value_type(key_dragging, any_regular_t(false)));
+    metadata_m.insert(value_type(key_x, any_regular_t(0)));
+    metadata_m.insert(value_type(key_y, any_regular_t(0)));
 }
 
 /****************************************************************************************************/
@@ -178,8 +187,9 @@ void place(image_t& value, const place_data_t& place_data)
         double width(Value(std::min(fixed_width, get_width(value))));
         double height(Value(std::min(fixed_height, get_height(value))));
 
-        value.metadata_m.insert(dictionary_t::value_type(static_name_t("width"), any_regular_t(width)));
-        value.metadata_m.insert(dictionary_t::value_type(static_name_t("height"), any_regular_t(height)));
+        typedef dictionary_t::value_type value_type;
+        value.metadata_m.insert(value_type(key_width, any_regular_t(width)));
+        value.metadata_m.insert(value_type(key_height, any_regular_t(height)));
 
         if (old_metadata != value.metadata_m)
             value.callback_m(value.metadata_m);

@@ -24,6 +24,7 @@
 
 
 namespace GG {
+    class TabWnd;
     class TabBar;
 }
 
@@ -59,7 +60,8 @@ struct tab_group_t : boost::noncopyable
     void        enable(bool make_enabled);
 
 
-    GG::TabBar*             control_m;
+    GG::TabWnd*             control_m;
+    GG::TabBar*             tab_bar_m;
     theme_t                 theme_m;
     tab_group_value_proc_t  value_proc_m;
     tab_set_t               items_m;

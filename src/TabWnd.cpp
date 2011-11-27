@@ -169,13 +169,7 @@ TabWnd::TabWnd(X x, Y y, X w, Y h, const boost::shared_ptr<Font>& font, Clr colo
 }
 
 Pt TabWnd::MinUsableSize() const
-{
-    Pt retval = m_tab_bar->MinUsableSize();
-    Pt min_usable_size = m_overlay->MinUsableSize();
-    retval.x = std::max(retval.x, min_usable_size.x);
-    retval.y += min_usable_size.y;
-    return retval;
-}
+{ return GetLayout()->MinUsableSize(); }
 
 bool TabWnd::Empty() const
 { return m_tab_bar->Empty(); }

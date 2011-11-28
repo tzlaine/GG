@@ -22,21 +22,46 @@
 const char* g_eve_file = 0;
 const char* g_adam_file = 0;
 const char* g_output_dir = 0;
+std::vector<GG::Pt> g_click_locations;
+bool g_generate_variants = false;
 bool g_dont_exit = false;
 
-struct StopDialog
+struct GenerateEvents
 {
-    StopDialog(GG::Wnd* dialog, const std::string& output) :
+    GenerateEvents(GG::Timer& timer, GG::Wnd* dialog, const std::string& input_stem) :
+        m_iteration(0),
         m_dialog(dialog),
-        m_output(output)
+        m_input_stem(input_stem)
         {}
-    void operator()(unsigned int, GG::Timer*)
+    void operator()(unsigned int, GG::Timer* timer)
         {
-            GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, m_output);
-            m_dialog->EndRun();
+            if (m_iteration <= g_click_locations.size()) {
+                GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, OutputFilename());
+                if (m_iteration) {
+                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1], GG::Pt());
+                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1], GG::Pt());
+                }
+                timer->Reset();
+            } else {
+                m_dialog->EndRun();
+            }
+            ++m_iteration;
         }
+    std::string OutputFilename()
+        {
+            boost::filesystem::path out(g_output_dir);
+            std::string filename = m_input_stem;
+            if (g_generate_variants) {
+                filename += '_';
+                filename += static_cast<char>('a' + m_iteration);
+            }
+            filename += ".png";
+            out /= filename;
+            return out.string();
+        }
+    std::size_t m_iteration;
     GG::Wnd* m_dialog;
-    std::string m_output;
+    std::string m_input_stem;
 };
 
 class MinimalGGApp : public GG::SDLGUI
@@ -118,15 +143,16 @@ void MinimalGGApp::Initialize()
     GG::Wnd* eve_dialog = GG::MakeDialog(eve, adam, &OkHandler);
 
     boost::filesystem::path input(g_eve_file);
-    boost::filesystem::path output(g_output_dir);
+    std::string input_stem =
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-    output /= input.stem().native() + ".png";
+        input.stem().native()
 #else
-    output /= input.stem() + ".png";
+        input.stem()
 #endif
+        ;
     GG::Timer timer(100);
     if (!g_dont_exit)
-        GG::Connect(timer.FiredSignal, StopDialog(eve_dialog, output.string()));
+        GG::Connect(timer.FiredSignal, GenerateEvents(timer, eve_dialog, input_stem));
     eve_dialog->Run();
 
     Exit(0);
@@ -171,7 +197,16 @@ main( int argc, char* argv[] )
     g_eve_file = argv[1];
     g_adam_file = argv[2];
     g_output_dir = argv[3];
-    if (argc == 5)
+    int i = 4;
+    std::string token;
+    std::size_t comma;
+    while (i < argc && (token = argv[i], comma = token.find(',')) != std::string::npos) {
+        g_generate_variants = true;
+        g_click_locations.push_back(GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(0, comma))),
+                                           GG::Y(boost::lexical_cast<int>(token.substr(comma + 1, -1)))));
+        ++i;
+    }
+    if (i < argc)
         g_dont_exit = true;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

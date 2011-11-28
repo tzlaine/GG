@@ -46,7 +46,10 @@ bool Timer::Running() const
 { return m_running; }
 
 void Timer::Reset(unsigned int start_time/* = 0*/)
-{ m_last_fire = start_time ? start_time : GUI::GetGUI()->Ticks(); }
+{
+    m_last_fire = start_time ? start_time : GUI::GetGUI()->Ticks();
+    m_running = true;
+}
 
 void Timer::SetInterval(unsigned int interval)
 { m_interval = interval; }
@@ -74,6 +77,8 @@ void Timer::Stop()
 
 void Timer::Update(unsigned int ticks)
 {
-    if (m_running && m_interval < ticks - m_last_fire)
+    if (m_running && m_interval < ticks - m_last_fire) {
+        m_running = false;
         FiredSignal(ticks, this);
+    }
 }

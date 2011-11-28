@@ -1259,6 +1259,7 @@ void ListBox::TimerFiring(unsigned int ticks, Timer* timer)
                 }
             }
         }
+        timer->Reset(ticks);
     }
 }
 

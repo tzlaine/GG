@@ -52,8 +52,6 @@ public:
     EveLayout(adobe::sheet_t& sheet);
     ~EveLayout();
 
-    adobe::dictionary_t Contributing() const;
-
     void Print(std::ostream& os) const;
 
     adobe::eve_callback_suite_t BindCallbacks();
@@ -71,11 +69,6 @@ public:
                        const adobe::array_t& parameters,
                        const std::string& brief,
                        const std::string& detailed);
-
-    Wnd& Finish();
-
-    static char LabelTerminatingCharacter();
-    static void LabelTerminatingCharacter(char c);
 
 private:
     class Impl;

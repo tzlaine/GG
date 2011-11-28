@@ -26,8 +26,22 @@
 
 #include <GG/WndEvent.h>
 
+#include <boost/tuple/tuple.hpp>
+
 
 using namespace GG;
+
+namespace {
+
+    typedef boost::tuple<GUI::EventType, Key, boost::uint32_t, Flags<ModKey>, Pt, Pt> QueuedEventTuple;
+    typedef std::deque<QueuedEventTuple> EventQueue;
+    EventQueue& GGEventQueue()
+    {
+        static EventQueue retval;
+        return retval;
+    }
+
+}
 
 EventPumpState::EventPumpState() :
     last_FPS_time(0),
@@ -41,6 +55,12 @@ void EventPumpBase::LoopBody(GUI* gui, EventPumpState& state, bool do_non_render
 {
     if (do_non_rendering) {
         int time = gui->Ticks();
+
+        while (!GGEventQueue().empty()) {
+            const QueuedEventTuple& event = GGEventQueue().front();
+            gui->HandleGGEvent(event.get<0>(), event.get<1>(), event.get<2>(), event.get<3>(), event.get<4>(), event.get<5>());
+            GGEventQueue().pop_front();
+        }
 
         // send an idle message, so that the gui has timely updates for triggering browse info windows, etc.
         gui->HandleGGEvent(GUI::IDLE, GGK_UNKNOWN, 0, gui->ModKeys(), gui->MousePosition(), Pt());
@@ -91,6 +111,9 @@ void EventPump::operator()()
         LoopBody(gui, state, true, true);
     }
 }
+
+void EventPump::QueueGGEvent(GUI::EventType event, Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel)
+{ GGEventQueue().push_back(QueuedEventTuple(event, key, key_code_point, mod_keys, pos, rel)); }
 
 
 ModalEventPump::ModalEventPump(const bool& done) :

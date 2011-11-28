@@ -763,6 +763,9 @@ void GUI::HandleGGEvent(EventType event, Key key, boost::uint32_t key_code_point
     }
 }
 
+void GUI::QueueGGEvent(EventType event, Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel)
+{ EventPump::QueueGGEvent(event, key, key_code_point, mod_keys, pos, rel); }
+
 void GUI::SetFocusWnd(Wnd* wnd)
 {
     // inform old focus wnd that it is losing focus

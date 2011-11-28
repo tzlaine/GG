@@ -125,6 +125,10 @@ public:
     /** Cycles through event-handling and rendering, calling
         GUI::HandleSystemEvents() and then EventPumpBase::LoopBody(). */
     virtual void operator()();
+
+    /** Queues up a GG event to be handled during the next execution of
+        LoopBody(). */
+    static void QueueGGEvent(GUI::EventType event, Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys, const Pt& pos, const Pt& rel);
 };
 
 /** \brief An EventPump that terminates when the bool reference \a done

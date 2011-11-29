@@ -65,11 +65,9 @@ namespace {
             m_connection_2 =
                 Connect(m_lb_wnd->LeftClickedSignal, &ModalListPicker::LBLeftClickSlot, this);
             m_lb_ul = m_old_lb_ul + m_drop_wnd->UpperLeft();
+            m_lb_wnd->MoveTo(m_lb_ul);
             AttachChild(m_lb_wnd);
         }
-
-        virtual void Render()
-        { m_lb_wnd->MoveTo(m_lb_ul); }
 
         ~ModalListPicker()
         {

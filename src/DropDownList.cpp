@@ -66,6 +66,7 @@ namespace {
                 Connect(m_lb_wnd->LeftClickedSignal, &ModalListPicker::LBLeftClickSlot, this);
             m_lb_ul = m_old_lb_ul + m_drop_wnd->UpperLeft();
             m_lb_wnd->MoveTo(m_lb_ul);
+            m_lb_wnd->Show();
             AttachChild(m_lb_wnd);
         }
 
@@ -77,7 +78,7 @@ namespace {
 
     protected:
         virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys)
-        { m_done = true; }
+        { Done(); }
 
     private:
         void LBSelChangedSlot(const ListBox::SelectionSet& rows)
@@ -85,12 +86,18 @@ namespace {
             if (!rows.empty()) {
                 m_drop_wnd->Select(*rows.begin());
                 m_drop_wnd->SelChangedSignal(m_drop_wnd->CurrentItem());
-                m_done = true;
+                Done();
             }
         }
 
         void LBLeftClickSlot(ListBox::iterator it, const Pt&)
-        { m_done = true; }
+        { Done(); }
+
+        void Done()
+        {
+            m_done = true;
+            m_lb_wnd->Hide();
+        }
 
         DropDownList*  m_drop_wnd;
         ListBox*       m_lb_wnd;

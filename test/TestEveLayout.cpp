@@ -22,7 +22,7 @@
 const char* g_eve_file = 0;
 const char* g_adam_file = 0;
 const char* g_output_dir = 0;
-std::vector<GG::Pt> g_click_locations;
+std::vector<std::pair<GG::Pt, GG::Pt> > g_click_locations;
 bool g_generate_variants = false;
 bool g_dont_exit = false;
 
@@ -38,8 +38,12 @@ struct GenerateEvents
             if (m_iteration <= g_click_locations.size()) {
                 GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, OutputFilename());
                 if (m_iteration) {
-                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1], GG::Pt());
-                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1], GG::Pt());
+                    if (g_click_locations[m_iteration - 1].first != g_click_locations[m_iteration - 1].second) {
+                        GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].second, GG::Pt());
+                        GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].second, GG::Pt());
+                    }
+                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].first, GG::Pt());
+                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].first, GG::Pt());
                 }
                 timer->Reset();
             } else {
@@ -199,11 +203,19 @@ main( int argc, char* argv[] )
     g_output_dir = argv[3];
     int i = 4;
     std::string token;
-    std::size_t comma;
-    while (i < argc && (token = argv[i], comma = token.find(',')) != std::string::npos) {
+    std::size_t comma_1;
+    while (i < argc && (token = argv[i], comma_1 = token.find(',')) != std::string::npos) {
         g_generate_variants = true;
-        g_click_locations.push_back(GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(0, comma))),
-                                           GG::Y(boost::lexical_cast<int>(token.substr(comma + 1, -1)))));
+        std::size_t comma_2 = token.find(',', comma_1 + 1);
+        GG::Pt point_1(GG::X(boost::lexical_cast<int>(token.substr(0, comma_1))),
+                       GG::Y(boost::lexical_cast<int>(token.substr(comma_1 + 1, comma_2 - comma_1 - 1))));
+        GG::Pt point_2 = point_1;
+        if (comma_2 != std::string::npos) {
+            std::size_t comma_3 = token.find(',', comma_2 + 1);
+            point_2 = GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(comma_2 + 1, comma_3 - comma_2 - 1))),
+                             GG::Y(boost::lexical_cast<int>(token.substr(comma_3 + 1, -1))));
+        }
+        g_click_locations.push_back(std::make_pair(point_1, point_2));
         ++i;
     }
     if (i < argc)

@@ -16,16 +16,6 @@ Describe relationship among bind_view, bind_controller, and bind (incl. how bind
 Document which widgets are containers, and which ones are labeled ... TODO
 */
 
-/** \page eve_misc_reference Miscellaneous Reference
-
-    \section eve_modifiers Modifiers
-
-    These are the available modifiers supported by Eve widgets.
-    \li \c shift Either shift key.
-    \li \c control Either control key.
-    \li \c option Either option (or alt) key.
-*/
-
 /** \page eve_button button()
 
     button() creates a basic push-button (e.g. "OK" or "Cancel"), with some additional features.  Clicking a button may have a local effect, such as assigning a value to a cell in an Adam property sheet, or may indicate that some other action should be taken.  In the latter case, such clicks are given to the button handler.
@@ -75,12 +65,39 @@ else:
     \param modifier_set An array of modifier keys.
 */
 
+/** \page eve_misc_reference Miscellaneous Reference
+
+    \section eve_array Array
+
+    An array in the Adam and Eve scripting languages is a bracketed, comma-delimited list of values:
+
+    \code [ "a string", @a_name, 3.14, empty ] \endcode
+
+    Each element of an array can be any type.
+
+    \section eve_modifiers Modifiers
+
+    These are the available modifiers supported by Eve widgets.
+    \li \c shift Either shift key.
+    \li \c control Either control key.
+    \li \c option Either option (or alt) key.
+*/
+
 /** \page eve_overview The Eve Layout Engine
 
     Eve is a scripting language for specifying UIs, and a runtime library that
     acts as a layout solver.  It interoperates with the Adam property model
     engine.
 
+    \section eve_expressions Built-in Types And Expressions
+
+    Adam and Eve share a common expression grammar.  Take a look at it <a
+    href="http://stlab.adobe.com/group__expression__reference.html">here</a>
+    to learn about the types and expressions available.
+
+    \section eve_non_containers Non-Containers
+
     -# \ref eve_button
-    -# \ref eve_misc_reference
+
+    \ref eve_misc_reference
 */

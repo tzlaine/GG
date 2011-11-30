@@ -54,20 +54,22 @@ struct ModalDialogResult
     adobe::name_t m_terminating_action;
 };
 
-/** The type of button click handle function expected by ExecuteModalDialog().
-    Handlers accept the name of the button clicked, the value emitted by the
-    click as specified in the Adam and Eve scripts, and return true if the
-    click should result in the closure of the dialog. */
+/** The type of button click handle function expected by the UI creation
+    functions.  Handlers accept the name of the \a action associated with the
+    button click and the \a value emitted by the click as specified in the
+    Adam and Eve scripts, and return true if the click should result in the
+    closure of the dialog.  \see \ref eve_button_handler.  \see \ref
+    eve_button_click_semantics. */
 typedef boost::function <bool (adobe::name_t, const adobe::any_regular_t&)> ButtonHandler;
 
-/** Parses \a eve_definition and adam_definition, then instantiates and
-    executes a modal dialog.  Any buttons ... TODO handler documentation */
+/** Returns the result of executing the modal dialog described by \a
+    eve_definition and \a adam_definition.  \see ButtonHandler. */
 ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      std::istream& adam_definition,
                                      ButtonHandler handler);
 
-/** Parses \a eve_definition and adam_definition, then instantiates and
-    executes a modal dialog.  Any buttons ... TODO handler documentation */
+/** Parses \a eve_definition and \a adam_definition, then instantiates and
+    returns a dialog.  \see ButtonHandler. */
 Wnd* MakeDialog(std::istream& eve_definition,
                 std::istream& adam_definition,
                 ButtonHandler handler);

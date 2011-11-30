@@ -3,8 +3,6 @@
 */
 
 /*
-The button handler is ... TODO
-
 Describe disabling semantics ... TODO
 
 Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
@@ -14,7 +12,13 @@ Define contributing ... TODO
 
 /** \page eve_button button()
 
-    button() creates a basic push-button (e.g. "OK" or "Cancel"), with some additional features.  Clicking a button may have a local effect, such as assigning a value to a cell in an Adam property sheet, or may indicate that some other action should be taken.  In the latter case, such clicks are given to the button handler.
+    button() creates a basic push-button (e.g. "OK" or "Cancel"), with some
+    additional features.  Clicking a button may have a local effect, such as
+    assigning a value to a cell in an Adam property sheet, or may indicate
+    that some other action should be taken.  In the latter case, such clicks
+    are given to the button handler.
+
+    \section eve_button_click_semantics Button Click Semantics
 
     The semantics of a button press are represented in this pseudocode:
 
@@ -27,7 +31,12 @@ else:
     else:
         button_handler(action, value)\endverbatim
 
-    Briefly, if \a bind_output is defined, \a value is assigned to the Adam property sheet cell with the name \a bind_output.  Otherwise, the button handler is called with \a action as its first argument.  If \a bind is defined, the second argument is a dictionary containing ( \a value, \a contributing ) as its only elemement; if \a bind is not defined, the second argument to the button handler is just \a value.
+    Briefly, if \a bind_output is defined, \a value is assigned to the Adam
+    property sheet cell with the name \a bind_output.  Otherwise, the button
+    handler is called with \a action as its first argument.  If \a bind is
+    defined, the second argument is a dictionary containing ( \a value, \a
+    contributing ) as its only elemement; if \a bind is not defined, the
+    second argument to the button handler is just \a value.
 
     \section eve_button_usage button() Usage
 
@@ -44,7 +53,7 @@ else:
     \param cancel  If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
     \param items  An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
 
-    \section items_usage items Usage
+    \section eve_button_items_usage items Usage
 
     \code items: [ { param: value, param: value, ... }, { param: value, param: value, ... }, ... ] \endcode
 
@@ -55,10 +64,29 @@ else:
     \param action See above.
     \param value See above.
 
-    Additionally, each item may contain one or more modifier keys that must be depressed for a click or keypress to register:
+    Additionally, each item may contain one or more modifier keys that must be
+    depressed for a click or keypress to register:
 
     \param modifiers A single modifier key.
     \param modifier_set An array of modifier keys.
+
+    \section eve_button_handler The Button Handler
+
+    GG's UI creation functions all accept a user-defined GG::ButtonHandler.
+    This handler accepts an adobe::name_t action name and an
+    adobe::any_regular_t value.  It is called by Eve buttons under the
+    circumstances outlined in \ref eve_button_click_semantics.  This mechanism
+    allows the user to hook custom functionality into any Eve interface.  Note
+    that, as described in \ref eve_button_click_semantics, the value parameter
+    passed to the handler may include contributing cells.
+
+    \section eve_button_predefined_actions Predefined Actions
+
+    Some values of \a action have predefined meanings, and are handled by the
+    Eve engine before they ever reach the button handler.  Currently, there is
+    only one such action, "reset".  Clicking a button whose action is "reset"
+    will cause the entire containing UI to have its original values reset to
+    what they were when the UI was launched.
 */
 
 /** \page eve_misc_reference Miscellaneous Reference

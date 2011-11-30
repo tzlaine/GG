@@ -507,6 +507,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = .. \
+                         ./Eve.txt \
                          ./GGDoc.txt
 
 # This tag can be used to specify the character encoding of the source files 

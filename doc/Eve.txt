@@ -1,5 +1,8 @@
-Work-in-progress on documenting the semantics of the Adobe Eve widgets implemented herein.
+/*
+   This file contains documentation for the Eve layout engine.
+*/
 
+/*
 An array is an adobe::array_t ... TODO
 
 A dictionary is an adobe::dictionary_t ... TODO
@@ -11,51 +14,73 @@ Describe disabling semantics ... TODO
 Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
 
 Document which widgets are containers, and which ones are labeled ... TODO
+*/
 
+/** \page eve_misc_reference Miscellaneous Reference
 
-modifiers
-=========
-These are the available modifiers supported by Eve widgets.
-shift: Either shift key.
-control: Either control key.
-option: Either option (or alt) key.
+    \section eve_modifiers Modifiers
 
+    These are the available modifiers supported by Eve widgets.
+    \li \c shift Either shift key.
+    \li \c control Either control key.
+    \li \c option Either option (or alt) key.
+*/
 
-button
-======
-button is a basic push-button (e.g. "OK" or "Cancel"), with some additional features.  Clicking a button may have a local effect, such as assigning a value to a cell in an Adam property sheet, or may indicate that some other action should be taken.  In the latter case, such clicks are given to the button handler.
+/** \page eve_button button()
 
-The semantics of a button press are represented in this pseudocode:
+    button() creates a basic push-button (e.g. "OK" or "Cancel"), with some additional features.  Clicking a button may have a local effect, such as assigning a value to a cell in an Adam property sheet, or may indicate that some other action should be taken.  In the latter case, such clicks are given to the button handler.
 
+    The semantics of a button press are represented in this pseudocode:
+
+    \verbatim
 if bind_output is defined:
     adam_cell(bind_output) = value
 else:
     if bind is defined:
         button_handler(action, {value: contributing})
     else:
-        button_handler(action, value)
+        button_handler(action, value)\endverbatim
 
-Briefly, if bind_output is defined, the value parameter is assigned to the Adam property sheet cell with the same name.  Otherwise, the button handler is called with the action parameter as its first argument.  If bind is defined, the second argument is a dictionary containing (value, contributing) as its only elemement; if bind is not defined, the second argument to the button handler is just value.
+    Briefly, if bind_output is defined, the value parameter is assigned to the Adam property sheet cell with the same name.  Otherwise, the button handler is called with the action parameter as its first argument.  If bind is defined, the second argument is a dictionary containing (value, contributing) as its only elemement; if bind is not defined, the second argument to the button handler is just value.
 
-Parameters:
------------
-name: The text that appears on the button.
-alt: The tooltip text that appears when the cursor hovers over the button.
-bind: The cell in the Adam property sheet to which this button is bound.  The current value of the bound cell is used to determine which of the states in the items parameter this button is in.  The button will be disabled if its bound cell is no longer contributing.
-bind_output: The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned the value of the value parameter.  When bind_output is specified, the button handler is not notified of this button's presses, making the action parameter moot.
-action: The action associated with this button.  The button handler (if available) will be called with the action parameter as its first argument.
-value: The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler (see button's main description).
-is_default: If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
-is_cancel: If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
-items: An array of dictionariess, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary may contain the following, each of which has the same meaning for this button state as it would for the overall button if it were given outside of the items array:
-    name
-    alt
-    bind
-    bind_output
-    action
-    value
-Additionally, each item may contain one or more modifier keys that must be depressed for a click or keypress to register:
-    modifiers: A single modifier key.
-    modifier_set: An array of modifier keys.
+    \section Usage
 
+    \code button(param: value, param: value, ...) \endcode
 
+    \param name The text that appears on the button.
+
+    \param alt  The tooltip text that appears when the cursor hovers over the button.
+    \param bind  The cell in the Adam property sheet to which this button is bound.  The current value of the bound cell is used to determine which of the states in the items parameter this button is in.  The button will be disabled if its bound cell is no longer contributing.
+    \param bind_output  The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned the value of the value parameter.  When bind_output is specified, the button handler is not notified of this button's presses, making the action parameter moot.
+    \param action  The action associated with this button.  The button handler (if available) will be called with the action parameter as its first argument.
+    \param value  The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler (see button's main description).
+    \param is_default  If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
+    \param is_cancel  If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
+    \param items  An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary may contain the following, each of which has the same meaning for this button state as it would for the overall button if it were given outside of the items array.
+
+    \section items_usage items Usage
+
+    \code items: [ { param: value, param: value, ... }, { param: value, param: value, ... }, ... ] \endcode
+
+    \param name See above.
+    \param alt See above.
+    \param bind See above.
+    \param bind_output See above.
+    \param action See above.
+    \param value See above.
+
+    Additionally, each item may contain one or more modifier keys that must be depressed for a click or keypress to register:
+
+    \param modifiers A single modifier key.
+    \param modifier_set An array of modifier keys.
+*/
+
+/** \page eve_overview The Eve Layout Engine
+
+    Eve is a scripting language for specifying UIs, and a runtime library that
+    acts as a layout solver.  It interoperates with the Adam property model
+    engine.
+
+    -# \ref eve_button
+    -# \ref eve_misc_reference
+*/

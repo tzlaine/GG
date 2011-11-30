@@ -382,7 +382,19 @@
     As of this writing, GG builds fine on Mac OS X.  As for the generation of
     XCode projects and makefiles, I'm not so certain, since I don't have
     access to a Mac OS X box.
- */
+*/
+
+/** \page adam_and_eve Adam and Eve
+
+    Adam and Eve are two libraries that are included with GG, originally from
+    the Adobe ASL libraries.  They are used to specify and operate UIs in a
+    very flexible way that makes UI design and use a lot less painful.  A good
+    overview of both libraries can be found on the <a href="http://stlab.adobe.com/group__asl__overview.html">Adobe website</a>.
+    The code in GG is a modified version of the Adam and Eve libraries from
+    version 1.0.41 of Adobe ASL.
+
+    \ref eve_overview
+*/
 
 /** \page brief_tour A Brief Tour
 
@@ -533,6 +545,7 @@
     -# \ref sigs_n_slots
     -# \ref text_handling
     -# \ref drag_n_drop
+    -# \ref adam_and_eve
     -# \ref brief_tour
     -# \ref building
     -# \ref tutorials

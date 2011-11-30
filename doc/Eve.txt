@@ -8,8 +8,6 @@ The button handler is ... TODO
 Describe disabling semantics ... TODO
 
 Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
-
-Document which widgets are containers, and which ones are labeled ... TODO
 */
 
 /** \page eve_button button()

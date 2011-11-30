@@ -44,13 +44,13 @@ Define contributing ... TODO
 
 /** \page eve_button button()
 
-    button() creates a basic push-button (e.g. "OK" or "Cancel"), with some
+    button() creates a push-button (e.g. "OK" or "Cancel"), with some
     additional features.  Clicking a button may have a local effect, such as
     assigning a value to a cell in an Adam property sheet, or may indicate
     that some other action should be taken.  In the latter case, such clicks
     are given to the button handler.
 
-    \section eve_button_click_semantics Button Click Semantics
+    \section eve_button_interaction_semantics Interaction Semantics
 
     The semantics of a button press are represented in this pseudocode:
 
@@ -75,15 +75,14 @@ else:
     \code button(param: value, param: value, ...) \endcode
 
     \param name The text that appears on the button.
-
-    \param alt  The tooltip text that appears when the cursor hovers over the button.
-    \param bind  The cell in the Adam property sheet to which this button is bound.  A valid cell must be chosen, but otherwise there is no interaction with the bound cell.  The value of \a bind is only important in determining what happens when the button is clicked (see above).
+    \param alt The tooltip text that appears when the cursor hovers over the button.
+    \param bind The cell in the Adam property sheet to which this button is bound.  A valid cell must be chosen, but otherwise there is no interaction with the bound cell.  The value of \a bind is only important in determining what happens when the button is clicked (see above).
     \param bind_output  The cell in the Adam property sheet to which the output of this button is bound.  The \a bind_output cell will be assigned \a value.  When \a bind_output is specified, the button handler is not notified of this button's presses, making \a action moot.
-    \param action  The action associated with this button.  The button handler (if available) will be called with \a action as its first argument.
-    \param value  The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see \a bind_output), or passed as the second argument in a call to the button handler (see button()'s main description).
-    \param default  If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
-    \param cancel  If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
-    \param items  An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
+    \param action The action associated with this button.  The button handler (if available) will be called with \a action as its first argument.
+    \param value The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see \a bind_output), or passed as the second argument in a call to the button handler (see button()'s main description).
+    \param default If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
+    \param cancel If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
+    \param items An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
 
     \section eve_button_items_usage items Usage
 
@@ -107,10 +106,11 @@ else:
     GG's UI creation functions all accept a user-defined GG::ButtonHandler.
     This handler accepts an adobe::name_t action name and an
     adobe::any_regular_t value.  It is called by Eve buttons under the
-    circumstances outlined in \ref eve_button_click_semantics.  This mechanism
-    allows the user to hook custom functionality into any Eve interface.  Note
-    that, as described in \ref eve_button_click_semantics, the value parameter
-    passed to the handler may include contributing cells.
+    circumstances outlined in \ref eve_button_interaction_semantics.  This
+    mechanism allows the user to hook custom functionality into any Eve
+    interface.  Note that, as described in \ref
+    eve_button_interaction_semantics, the value parameter passed to the
+    handler may include contributing cells.
 
     \section eve_button_predefined_actions Predefined Actions
 
@@ -122,7 +122,23 @@ else:
 */
 
 /** \page eve_checkbox checkbox()
-    TODO
+    checkbox() creates a checkbox.
+
+    \section eve_checkbox_interaction_semantics Interaction Semantics
+
+    Clicking on a checkbox causes a value to be assigned to the bound cell, if
+    any.  The value assigned is \a value_on when the click checks the box, and
+    \a value_off when the click unchecks it.
+
+    \section eve_checkbox_usage checkbox() Usage
+
+    \code checkbox(param: value, param: value, ...) \endcode
+
+    \param name The text that appears to the right of the checkbox.
+    \param alt The tooltip text that appears when the cursor hovers over the checkbox.
+    \param bind The cell in the Adam property sheet to which this checkbox is bound.
+    \param value_on The value emitted when checking the checkbox.
+    \param value_off The value emitted when unchecking the checkbox.
 */
 
 /** \page eve_control_button control_button()

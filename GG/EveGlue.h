@@ -58,8 +58,7 @@ struct ModalDialogResult
     functions.  Handlers accept the name of the \a action associated with the
     button click and the \a value emitted by the click as specified in the
     Adam and Eve scripts, and return true if the click should result in the
-    closure of the dialog.  \see \ref eve_button_handler.  \see \ref
-    eve_button_click_semantics. */
+    closure of the dialog.  \see \ref eve_button_handler. */
 typedef boost::function <bool (adobe::name_t, const adobe::any_regular_t&)> ButtonHandler;
 
 /** Returns the result of executing the modal dialog described by \a

@@ -205,7 +205,7 @@ else:
 */
 
 /** \page eve_static_text static_text()
-    TODO
+    Synomyn for \ref eve_label.
 */
 
 /** \page eve_edit_number edit_number()

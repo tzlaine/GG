@@ -8,6 +8,11 @@ The button handler is ... TODO
 
 Describe disabling semantics ... TODO
 
+Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
+
+Document which widgets are containers, and which ones are labeled ... TODO
+
+
 modifiers
 =========
 These are the available modifiers supported by Eve widgets.
@@ -18,7 +23,7 @@ option: Either option (or alt) key.
 
 button
 ======
-button is a basic push-button (e.g. "OK" or "Cancel"), with some additional features.  Pressing a button 
+button is a basic push-button (e.g. "OK" or "Cancel"), with some additional features.  Clicking a button may have a local effect, such as assigning a value to a cell in an Adam property sheet, or may indicate that some other action should be taken.  In the latter case, such clicks are given to the button handler.
 
 The semantics of a button press are represented in this pseudocode:
 

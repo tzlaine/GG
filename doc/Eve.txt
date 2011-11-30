@@ -10,6 +10,38 @@ Describe relationship among bind_view, bind_controller, and bind (incl. how bind
 Define contributing ... TODO
 */
 
+/** \page eve_column column()
+    TODO
+*/
+
+/** \page eve_overlay overlay()
+    TODO
+*/
+
+/** \page eve_row row()
+    TODO
+*/
+
+/** \page eve_dialog dialog()
+    TODO
+*/
+
+/** \page eve_group group()
+    TODO
+*/
+
+/** \page eve_optional optional()
+    TODO
+*/
+
+/** \page eve_panel panel()
+    TODO
+*/
+
+/** \page eve_tab_group tab_group()
+    TODO
+*/
+
 /** \page eve_button button()
 
     button() creates a basic push-button (e.g. "OK" or "Cancel"), with some
@@ -89,6 +121,74 @@ else:
     what they were when the UI was launched.
 */
 
+/** \page eve_checkbox checkbox()
+    TODO
+*/
+
+/** \page eve_control_button control_button()
+    TODO
+*/
+
+/** \page eve_display_number display_number()
+    TODO
+*/
+
+/** \page eve_image image()
+    TODO
+*/
+
+/** \page eve_toggle toggle()
+    TODO
+*/
+
+/** \page eve_label label()
+    TODO
+*/
+
+/** \page eve_preset preset()
+    TODO
+*/
+
+/** \page eve_preview preview()
+    TODO
+*/
+
+/** \page eve_progress_bar progress_bar()
+    TODO
+*/
+
+/** \page eve_radio_button radio_button()
+    TODO
+*/
+
+/** \page eve_reveal reveal()
+    TODO
+*/
+
+/** \page eve_separator separator()
+    TODO
+*/
+
+/** \page eve_slider slider()
+    TODO
+*/
+
+/** \page eve_static_text static_text()
+    TODO
+*/
+
+/** \page eve_edit_number edit_number()
+    TODO
+*/
+
+/** \page eve_edit_text edit_text()
+    TODO
+*/
+
+/** \page eve_popup popup()
+    TODO
+*/
+
 /** \page eve_misc_reference Miscellaneous Reference
 
     \section eve_modifiers Modifiers
@@ -112,12 +212,38 @@ else:
     to learn about the types and expressions available.
 
     \section eve_containers Containers
+    - \ref eve_column
+    - \ref eve_overlay
+    - \ref eve_row
+    - \ref eve_dialog
+    - \ref eve_group
+    - \ref eve_optional
+    - \ref eve_panel
+    - \ref eve_tab_group
 
     \section eve_unlabeled Unlabeled Controls
 
     - \ref eve_button
+    - \ref eve_checkbox
+    - \ref eve_control_button
+    - \ref eve_display_number
+    - \ref eve_image
+    - \ref eve_toggle
+    - \ref eve_label
+    - \ref eve_preset
+    - \ref eve_preview
+    - \ref eve_progress_bar
+    - \ref eve_radio_button
+    - \ref eve_reveal
+    - \ref eve_separator
+    - \ref eve_slider
+    - \ref eve_static_text
 
     \section eve_labeled Labeled Controls
+
+    - \ref eve_edit_number
+    - \ref eve_edit_text
+    - \ref eve_popup
 
     \ref eve_misc_reference
 */

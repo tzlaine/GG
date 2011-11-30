@@ -158,7 +158,22 @@ else:
 */
 
 /** \page eve_label label()
-    TODO
+    label() creates a text label.
+
+    \section eve_label_interaction_semantics Interaction Semantics
+
+    Eve labels are non-interactive.
+
+    \section eve_label_usage label() Usage
+
+    \code label(param: value, param: value, ...) \endcode
+
+    \param name The text of the label.
+    \param alt The tooltip text that appears when the cursor hovers over the label.
+    \param characters The minimum width of the label, in number of characters.
+    \param wrap If true, the label's text is word-wrapped.
+    \param text_horizontal The horizontal alignment of the text ( \a align_left, \a align_center, or \a align_right ).
+    \param text_vertical The horizontal alignment of the text ( \a align_top, \a align_center, or \a align_bottom ).
 */
 
 /** \page eve_preset preset()

@@ -109,7 +109,7 @@ platform_display_type insert<label_t>(display_t& display,
     element.window_m =
         implementation::Factory().NewTextControl(GG::X0, GG::Y0, extent.x, extent.y,
                                                  element.name_m, implementation::DefaultFont(),
-                                                 GG::CLR_BLACK, element.format_m);
+                                                 GG::CLR_BLACK, element.format_m, GG::INTERACTIVE);
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);

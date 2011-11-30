@@ -67,14 +67,6 @@ else:
 
 /** \page eve_misc_reference Miscellaneous Reference
 
-    \section eve_array Array
-
-    An array in the Adam and Eve scripting languages is a bracketed, comma-delimited list of values:
-
-    \code [ "a string", @a_name, 3.14, empty ] \endcode
-
-    Each element of an array can be any type.
-
     \section eve_modifiers Modifiers
 
     These are the available modifiers supported by Eve widgets.

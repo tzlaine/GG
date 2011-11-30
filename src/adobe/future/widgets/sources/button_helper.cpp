@@ -28,27 +28,9 @@ modifiers_t name_to_modifer(name_t name)
         to a semantic notion for modifiers.
     */
     if (name == key_modifier_option) return modifiers_any_option_s;
-    if (name == key_modifier_command) return modifiers_any_command_s;
     if (name == key_modifier_control) return modifiers_any_control_s;
     if (name == key_modifier_shift) return modifiers_any_shift_s;
-    
-    // REVISIT (sparent) : put an assert here later to clean out these older names.
-    
-    if (name == key_modifiers_cmd)
-        return modifiers_any_command_s;
-    if (name == key_modifiers_ctl)
-        return modifiers_any_control_s;
-    if (name == key_modifiers_ctlcmd)
-        return modifiers_any_control_s | modifiers_any_command_s;
-    if (name == key_modifiers_opt)
-        return modifiers_any_option_s;
-    if (name == key_modifiers_optcmd)
-        return modifiers_any_option_s | modifiers_any_command_s;
-    if (name == key_modifiers_optctl)
-        return modifiers_any_option_s | modifiers_any_control_s;
-    if (name == key_modifiers_optctlcmd)
-        return modifiers_any_option_s | modifiers_any_control_s | modifiers_any_command_s;
-    
+
     std::string error("unknown modifier: ");
     error << name.c_str();
     throw std::invalid_argument(error);

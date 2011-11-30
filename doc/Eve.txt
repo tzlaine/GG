@@ -3,10 +3,6 @@
 */
 
 /*
-An array is an adobe::array_t ... TODO
-
-A dictionary is an adobe::dictionary_t ... TODO
-
 The button handler is ... TODO
 
 Describe disabling semantics ... TODO
@@ -70,9 +66,9 @@ else:
     \section eve_modifiers Modifiers
 
     These are the available modifiers supported by Eve widgets.
-    \li \c shift Either shift key.
-    \li \c control Either control key.
-    \li \c option Either option (or alt) key.
+    - \c shift Either shift key.
+    - \c control Either control key.
+    - \c option Either option (or alt) key.
 */
 
 /** \page eve_overview The Eve Layout Engine
@@ -87,9 +83,13 @@ else:
     href="http://stlab.adobe.com/group__expression__reference.html">here</a>
     to learn about the types and expressions available.
 
-    \section eve_non_containers Non-Containers
+    \section eve_containers Containers
 
-    -# \ref eve_button
+    \section eve_unlabeled Unlabeled Controls
+
+    - \ref eve_button
+
+    \section eve_labeled Labeled Controls
 
     \ref eve_misc_reference
 */

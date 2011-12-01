@@ -207,13 +207,14 @@ else:
 
     \section eve_button_handler The Button Handler
 
-    GG's UI creation functions all accept a user-defined ButtonHandler.  This
-    handler accepts an adobe::name_t action name and an adobe::any_regular_t
-    value.  It is called by Eve buttons under the circumstances outlined in
-    \ref eve_button_interaction_semantics.  This mechanism allows the user to
-    hook custom functionality into any Eve interface.  Note that, as described
-    in \ref eve_button_interaction_semantics, the value parameter passed to
-    the handler may include contributing cells.
+    GG's UI creation functions all accept a user-defined GG::ButtonHandler.
+    This handler accepts an adobe::name_t action name and an
+    adobe::any_regular_t value.  It is called by Eve buttons under the
+    circumstances outlined in \ref eve_button_interaction_semantics.  This
+    mechanism allows the user to hook custom functionality into any Eve
+    interface.  Note that, as described in \ref
+    eve_button_interaction_semantics, the value parameter passed to the
+    handler may include contributing cells.
 
     \section eve_button_predefined_actions Predefined Actions
 
@@ -250,7 +251,28 @@ else:
 */
 
 /** \page eve_control_button control_button()
-    TODO
+    control_button() creates a push-button that gets its value by evaluating
+    an Adam and Eve expression when clicked.
+
+    \section eve_control_button_interaction_semantics User Interaction Semantics
+
+    Clicking on a control_button causes a value to be assigned to the bound
+    cell, if any.  The value assigned is the result of evaluating \a
+    expression.
+
+    \section eve_control_button_adam_interaction Adam Interaction Notes
+
+    The control_button will assign \a expression to its bound cell.  Changes
+    to the bound cell are not reflected in the control_button.
+
+    \section eve_control_button_usage control_button() Usage
+
+    \code control_button(param: value, param: value, ...); \endcode
+
+    \param name The text that appears on the control_button.
+    \param alt The tooltip text that appears when the cursor hovers over the control_button.
+    \param bind The cell in the Adam property sheet to which this control_button is bound.
+    \param expression The expression to be evaluated when the control_button is clicked, in a string.
 */
 
 /** \page eve_display_number display_number()
@@ -332,7 +354,31 @@ else:
 */
 
 /** \page eve_radio_button radio_button()
-    TODO
+    radio_button() creates a radio button.
+
+    \section eve_radio_button_interaction_semantics User Interaction Semantics
+
+    Clicking on a radio_button causes \a value to be assigned to the bound cell, if
+    any.
+
+    \section eve_radio_button_adam_interaction Adam Interaction Notes
+
+    The radio_button will be set to a pressed state if the controller-bound
+    Adam cell is set to \a value, and will be in an unpressed state otherwise.
+
+    \section eve_radio_button_usage radio_button() Usage
+
+    \code radio_button(param: value, param: value, ...); \endcode
+
+    \param name The text that appears to the right of the radio_button.
+    \param alt The tooltip text that appears when the cursor hovers over the radio_button.
+    \param bind The cell in the Adam property sheet to which this radio_button is bound.
+    \param value The value emitted when checking the radio_button.
+
+    \note The idiomatic way to associate a set of radio_buttons with each
+    other (making them mutually exclusive) is to bind them all to the same
+    cell, and give them each different \a values.  The use of a combining
+    entity like GG::RadioButtonGroup is not necessary.
 */
 
 /** \page eve_reveal reveal()
@@ -360,7 +406,7 @@ else:
 */
 
 /** \page eve_popup popup()
-    popup() creates a "popup" list, a la DropDownList.
+    popup() creates a "popup" list, a la GG::DropDownList.
 
     When the value of the bound cell is not one of the values specified in \a
     items, the popup displays a "custom" item.  This item indicates to the

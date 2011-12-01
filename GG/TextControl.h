@@ -81,6 +81,10 @@ public:
     /** Returns the text displayed in this control. */
     const std::string& Text() const;
 
+    /** Returns the underlying text in this control (which differs from what
+        is displayed when in password mode). */
+    const std::string& RawText() const;
+
     /** Returns the text format (vertical and horizontal justification, use of
         word breaks and line wrapping, etc.) */
     Flags<TextFormat> GetTextFormat() const;
@@ -100,6 +104,14 @@ public:
         of fit-to-text behavior, which sets the window size, not its minimum
         size. */
     bool              SetMinSize() const;
+
+    /** Returns true iff this edit is in password mode (showing the special
+        password character for each character typed). */
+    bool              PasswordMode() const;
+
+    /** Returns the code point used to display the special password
+        character. */
+    boost::uint32_t   PasswordCharacter() const;
 
     /** Returns the value of the control's text, interpreted as an object of
         type T.  If the control's text can be interpreted as an object of type
@@ -162,6 +174,13 @@ public:
         size. */
     void         SetMinSize(bool b);
 
+    /** Sets or unsets password mode on this edit (showing the special
+        password character for each character typed). */
+    void         PasswordMode(bool b);
+
+    /** Sets the code point used to display the special password character. */
+    void         PasswordCharacter(boost::uint32_t code_point);
+
     /** Sets the value of the control's text, interpreted as an object of type
         T.  If the control's text can be interpreted as an object of type T by
         boost::lexical_cast (and thus by a stringstream), then SetValue() will
@@ -217,6 +236,9 @@ private:
     bool                        m_fit_to_text; ///< when true, this window will maintain a minimum width and height that encloses the text
     Pt                          m_text_ul;     ///< stored relative to the control's UpperLeft()
     Pt                          m_text_lr;     ///< stored relative to the control's UpperLeft()
+    std::string                 m_password_text;
+    bool                        m_password_mode;
+    std::string                 m_password_character;
     mutable X                   m_last_min_width;
     mutable Pt                  m_min_usable_size;
 };

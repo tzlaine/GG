@@ -48,7 +48,9 @@ TextControl::TextControl(X x, Y y, X w, Y h, const std::string& str, const boost
     m_set_min_size(false),
     m_code_points(0),
     m_font(font),
-    m_fit_to_text(false)
+    m_fit_to_text(false),
+    m_password_mode(false),
+    m_password_character("*")
 {
     ValidateFormat();
     SetText(str);
@@ -63,24 +65,24 @@ TextControl::TextControl(X x, Y y, const std::string& str, const boost::shared_p
     m_set_min_size(false),
     m_code_points(0),
     m_font(font),
-    m_fit_to_text(true)
+    m_fit_to_text(true),
+    m_password_mode(false),
+    m_password_character("*")
 {
     ValidateFormat();
     SetText(str);
 }
 
-// TODO: This must be done in terms of available horizontal space!  Add an X
-// width parameter, and change Layout to go across first, then down.
 Pt TextControl::MinUsableSize() const
 {
     Pt min_size = MinSize();
-    if (m_text.empty()) {
+    if (Text().empty()) {
         m_min_usable_size = Pt();
     } else if (m_fit_to_text) {
         m_min_usable_size = m_text_lr - m_text_ul;
     } else if (0 < min_size.x) {
         if (min_size.x != m_last_min_width) {
-            m_min_usable_size = m_font->TextExtent(m_text, m_format, min_size.x);
+            m_min_usable_size = m_font->TextExtent(Text(), m_format, min_size.x);
             m_last_min_width = min_size.x;
         }
     } else {
@@ -93,6 +95,9 @@ Pt TextControl::MinUsableSize() const
 }
 
 const std::string& TextControl::Text() const
+{ return m_password_mode ? m_password_text : m_text; }
+
+const std::string& TextControl::RawText() const
 { return m_text; }
 
 Flags<TextFormat> TextControl::GetTextFormat() const
@@ -106,6 +111,16 @@ bool TextControl::ClipText() const
 
 bool TextControl::SetMinSize() const
 { return m_set_min_size; }
+
+bool TextControl::PasswordMode() const
+{ return m_password_mode; }
+
+boost::uint32_t TextControl::PasswordCharacter() const
+{
+    boost::uint32_t retval;
+    utf8::utf8to32(m_password_character.begin(), m_password_character.end(), &retval);
+    return retval;
+}
 
 bool TextControl::Empty() const
 { return m_text.empty(); }
@@ -126,7 +141,7 @@ void TextControl::Render()
     if (m_font) {
         if (m_clip_text)
             BeginClipping();
-        m_font->RenderText(UpperLeft(), LowerRight(), m_text, m_format, &m_line_data);
+        m_font->RenderText(UpperLeft(), LowerRight(), Text(), m_format, &m_line_data);
         if (m_clip_text)
             EndClipping();
     }
@@ -135,11 +150,25 @@ void TextControl::Render()
 void TextControl::SetText(const std::string& str)
 {
     m_text = str;
+
+    CPSize str_code_points = CPSize(utf8::distance(str.begin(), str.end()));
+    if (m_password_mode) {
+        assert(m_password_text.size() % m_password_character.size() == 0);
+        CPSize password_code_points(m_password_text.size() / m_password_character.size());
+        if (str_code_points < password_code_points) {
+            m_text.resize(Value(str_code_points) * m_password_character.size());
+        } else {
+            for (CPSize i = CP0; i < str_code_points - password_code_points; ++i) {
+                m_password_text += m_password_character;
+            }
+        }
+    }
+
     if (m_font) {
-        m_code_points = CPSize(utf8::distance(str.begin(), str.end()));
+        m_code_points = str_code_points;
         m_text_elements.clear();
         Pt text_sz =
-            m_font->DetermineLines(m_text, m_format, ClientSize().x, m_line_data, m_text_elements);
+            m_font->DetermineLines(Text(), m_format, ClientSize().x, m_line_data, m_text_elements);
         m_text_ul = Pt();
         m_text_lr = text_sz;
         AdjustMinimumSize();
@@ -166,10 +195,10 @@ void TextControl::SizeMove(const Pt& ul, const Pt& lr)
         Pt text_sz;
         if (m_text_elements.empty()) {
             text_sz =
-                m_font->DetermineLines(m_text, m_format, client_width, m_line_data, m_text_elements);
+                m_font->DetermineLines(Text(), m_format, client_width, m_line_data, m_text_elements);
         } else {
             text_sz =
-                m_font->DetermineLines(m_text, m_format, client_width, m_text_elements, m_line_data);
+                m_font->DetermineLines(Text(), m_format, client_width, m_text_elements, m_line_data);
         }
         m_text_ul = Pt();
         m_text_lr = text_sz;
@@ -202,6 +231,29 @@ void TextControl::SetMinSize(bool b)
 {
     m_set_min_size = b;
     AdjustMinimumSize();
+}
+
+void TextControl::PasswordMode(bool b)
+{
+    bool need_set_text = !m_password_mode && m_password_mode != b;
+    m_password_mode = b;
+    if (need_set_text)
+        SetText(m_text);
+}
+
+void TextControl::PasswordCharacter(boost::uint32_t code_point)
+{
+    CPSize password_code_points;
+    if (m_password_mode) {
+        assert(m_password_text.size() % m_password_character.size() == 0);
+        password_code_points = CPSize(m_password_text.size() / m_password_character.size());
+    }
+    boost::uint32_t chars[] = { code_point };
+    utf8::utf32to8(chars, chars + 1, std::back_inserter(m_password_character));
+    m_password_text.clear();
+    for (CPSize i = CP0; i < password_code_points; ++i) {
+        m_password_text += m_password_character;
+    }
 }
 
 void TextControl::Clear()

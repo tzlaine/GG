@@ -115,6 +115,12 @@ Clr Edit::SelectedTextColor() const
 const boost::shared_ptr<Font>& Edit::GetFont() const
 { return m_text->GetFont(); }
 
+bool Edit::PasswordMode() const
+{ return m_text->PasswordMode(); }
+
+boost::uint32_t Edit::PasswordCharacter() const
+{ return m_text->PasswordCharacter(); }
+
 void Edit::Render()
 {
     Clr color_to_use = Disabled() ? DisabledColor(Color()) : Color();
@@ -228,6 +234,12 @@ void Edit::SetHiliteColor(Clr c)
 
 void Edit::SetSelectedTextColor(Clr c)
 { m_sel_text_color = c; }
+
+void Edit::PasswordMode(bool b)
+{ m_text->PasswordMode(b); }
+
+void Edit::PasswordCharacter(boost::uint32_t code_point)
+{ m_text->PasswordCharacter(code_point); }
 
 void Edit::SelectAll()
 {

@@ -85,7 +85,7 @@ public:
     virtual Pt ClientUpperLeft() const;
     virtual Pt ClientLowerRight() const;
 
-    /** Returns the text of this button. */
+    /** Returns the text of this edit. */
     const std::string& Text() const;
 
     /** Returns the value of the control's text, interpreted as an object of
@@ -115,8 +115,16 @@ public:
     /** Returns the color used to render selected text. */
     Clr SelectedTextColor() const;
 
-    /** Returns the Font used by this StateButton to render its text. */
+    /** Returns the Font used by this Edit to render its text. */
     const boost::shared_ptr<Font>& GetFont() const;
+
+    /** Returns true iff this edit is in password mode (showing the special
+        password character for each character typed). */
+    bool PasswordMode() const;
+
+    /** Returns the code point used to display the special password
+        character. */
+    boost::uint32_t PasswordCharacter() const;
 
     /** The edited signal object for this Edit. */
     mutable EditedSignalType EditedSignal;
@@ -156,6 +164,13 @@ public:
 
     /** Sets the color used to render selected text. */
     void SetSelectedTextColor(Clr c);
+
+    /** Sets or unsets password mode on this edit (showing the special
+        password character for each character typed). */
+    void PasswordMode(bool b);
+
+    /** Sets the code point used to display the special password character. */
+    void PasswordCharacter(boost::uint32_t code_point);
 
     /** Selects all text in the given range.  When \a from == \a to, this
         function just places the caret at \a from.  Note that it is legal to

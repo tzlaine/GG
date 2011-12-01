@@ -68,7 +68,18 @@
 */
 
 /** \page eve_expression_localize_fn localize()
-    TODO
+    \section eve_localize_fn_usage localize() Usage
+
+    \code localize(expr) \endcode
+
+    \param expr An Adam and Eve expression of type string.  UTF-8 encoding is assumed.
+
+    Returns the localized (i.e. translated) and UTF-8 encoded version of \a
+    expr if a localization function has been registered, and \a expr
+    otherwise.  A localization function can be registered with
+    adobe::localization_register().
+
+    \remark Note that the parameter to \a localize() is not named.
 */
 
 /** \page eve_expression_scale_fn scale()
@@ -160,9 +171,8 @@ else:
 
     \section eve_button_adam_interaction Adam Interaction Notes
 
-    If \a bind is defined, a valid cell must be chosen, but otherwise there is
-    no interaction with the bound cell.  The value of \a bind is only
-    important in determining what happens when the button is clicked.
+    If \a bind is defined, the value emitted by the button will be the value
+    of the bound cell (otherwise, it is \a value).
 
     \section eve_button_usage button() Usage
 
@@ -170,7 +180,7 @@ else:
 
     \param name The text that appears on the button.
     \param alt The tooltip text that appears when the cursor hovers over the button.
-    \param bind The cell in the Adam property sheet to which this button is bound.
+    \param bind The cell in the Adam property sheet to which this button is bound.  If defined, \a bind makes \a value moot.
     \param bind_output The cell in the Adam property sheet to which the output of this button is bound.  The \a bind_output cell will be assigned \a value.  When \a bind_output is specified, the button handler is not notified of this button's presses, making \a action moot.
     \param action The action associated with this button.  The button handler (if available) will be called with \a action as its first argument.
     \param value The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see \a bind_output), or passed as the second argument in a call to the button handler (see button()'s main description).
@@ -351,7 +361,37 @@ else:
 */
 
 /** \page eve_popup popup()
-    TODO
+    popup() creates a "popup" list, a la GG::DropDownList.
+
+    When the value of the bound cell is not one of the values specified in \a
+    items, the popup displays a "custom" item.  This item indicates to the
+    user that a selection should be made.  Once the user has selected an item
+    from \a items, the custom item will no longer be available.
+
+    \section eve_popup_interaction_semantics User Interaction Semantics
+
+    Selecting a new value from a popup causes a value to be assigned to the
+    bound cell, if any.  The value assigned when selecting the item "Foo" from
+    the popup is \a items[Foo].
+
+    \section eve_popup_adam_interaction Adam Interaction Notes
+
+    The popup expects the controller-bound Adam cell to set its value to one
+    of the values specified in \a items.  If any other value is set, the
+    custom popup item will be available, and will be selected.
+
+    As indicated below, binding \a items to an Adam cell will populate the
+    popup dynamically, instead of relying on a static list of items.
+
+    \section eve_popup_usage popup() Usage
+
+    \code popup(param: value, param: value, ...); \endcode
+
+    \param name The text label that appears to the left of the popup.
+    \param alt The tooltip text that appears when the cursor hovers over the popup.
+    \param bind The cell in the Adam property sheet to which this popup is bound.
+    \param items A dictionary whose key-value pairs define the names and values of the items in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.
+    \param custom_item_name The name of the custom item in the popup.
 */
 
 /** \page eve_misc_reference Miscellaneous Reference
@@ -378,7 +418,8 @@ else:
 
     \section eve_expression_builtin_functions Built-in Functions
 
-    Adam and Eve expressions support several built-in functions.
+    Adam and Eve expressions support several built-in functions.  It is
+    possible for users to add their own functions as well.
 
     - \ref eve_expression_typeof_fn
     - \ref eve_expression_min_fn
@@ -387,6 +428,23 @@ else:
     - \ref eve_expression_localize_fn
     - \ref eve_expression_scale_fn
     - \ref eve_expression_image_fn
+
+    TODO User-added functions
+
+    \section eve_views Views
+
+    The term that Eve uses to describe Eve widgets and layout elements is
+    "view".  Below are the views built in to the Eve engine.  It is possible
+    for users to add their own views as well.
+
+    \note Eve layouts can contain property cells, like those in an Adam
+    property sheet.  In the documentation pages below, reference is often
+    generically made to a view's "bound cell".  Other times, cells are
+    explicitly referred to as being in the Adam property sheet (and this is
+    generally the case).  However, cells in a view's own Eve sheet are
+    considered first, before Adam sheet cells.  If a view binds to @foo, and
+    both its Adam and Eve sheets have cells called "foo", the Eve cell will be
+    bound.
 
     \section eve_containers Containers
 
@@ -424,4 +482,6 @@ else:
     - \ref eve_popup
 
     \ref eve_misc_reference
+
+    TODO User-added views
 */

@@ -10,6 +10,10 @@ Describe relationship among bind_view, bind_controller, and bind (incl. how bind
 Define contributing ... TODO
 */
 
+/** \page eve_expression_image_fn image()
+    TODO
+*/
+
 /** \page eve_column column()
     TODO
 */
@@ -50,7 +54,7 @@ Define contributing ... TODO
     that some other action should be taken.  In the latter case, such clicks
     are given to the button handler.
 
-    \section eve_button_interaction_semantics Interaction Semantics
+    \section eve_button_interaction_semantics User Interaction Semantics
 
     The semantics of a button press are represented in this pseudocode:
 
@@ -70,14 +74,20 @@ else:
     contributing ) as its only elemement; if \a bind is not defined, the
     second argument to the button handler is just \a value.
 
+    \section eve_button_adam_interaction Adam Interaction Notes
+
+    If \a bind is defined, a valid cell must be chosen, but otherwise there is
+    no interaction with the bound cell.  The value of \a bind is only
+    important in determining what happens when the button is clicked.
+
     \section eve_button_usage button() Usage
 
     \code button(param: value, param: value, ...); \endcode
 
     \param name The text that appears on the button.
     \param alt The tooltip text that appears when the cursor hovers over the button.
-    \param bind The cell in the Adam property sheet to which this button is bound.  A valid cell must be chosen, but otherwise there is no interaction with the bound cell.  The value of \a bind is only important in determining what happens when the button is clicked (see above).
-    \param bind_output  The cell in the Adam property sheet to which the output of this button is bound.  The \a bind_output cell will be assigned \a value.  When \a bind_output is specified, the button handler is not notified of this button's presses, making \a action moot.
+    \param bind The cell in the Adam property sheet to which this button is bound.
+    \param bind_output The cell in the Adam property sheet to which the output of this button is bound.  The \a bind_output cell will be assigned \a value.  When \a bind_output is specified, the button handler is not notified of this button's presses, making \a action moot.
     \param action The action associated with this button.  The button handler (if available) will be called with \a action as its first argument.
     \param value The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see \a bind_output), or passed as the second argument in a call to the button handler (see button()'s main description).
     \param default If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
@@ -124,11 +134,16 @@ else:
 /** \page eve_checkbox checkbox()
     checkbox() creates a checkbox.
 
-    \section eve_checkbox_interaction_semantics Interaction Semantics
+    \section eve_checkbox_interaction_semantics User Interaction Semantics
 
     Clicking on a checkbox causes a value to be assigned to the bound cell, if
     any.  The value assigned is \a value_on when the click checks the box, and
     \a value_off when the click unchecks it.
+
+    \section eve_checkbox_adam_interaction Adam Interaction Notes
+
+    The checkbox expects the controller-bound Adam cell only to set its value
+    to \a value_on or \a value_off.
 
     \section eve_checkbox_usage checkbox() Usage
 
@@ -152,7 +167,7 @@ else:
 /** \page eve_image image()
     image() creates an image.
 
-    \section eve_image_interaction_semantics Interaction Semantics
+    \section eve_image_interaction_semantics User Interaction Semantics
 
     Eve images emit metadata when a cursor drag occurs in the image.  The
     metadata is a dictionary with the following contents:
@@ -167,6 +182,14 @@ else:
     At the end of the drag, the above metadata are emitted one final time,
     with \a dragging set to \c false, and \a delta_x and \a delta_x both set
     to \c 0.
+
+    \section eve_image_adam_interaction Adam Interaction Notes
+
+    The image expects a the view-bound Adam cell to set a texture.  The
+    built-in function \ref eve_expression_image_fn can be used to specify a
+    texture.  The image emits metadata, as described above.  This makes using
+    \a bind problematic.  \a bind_controller and \a bind_view should be used
+    instead.
 
     \section eve_image_usage image() Usage
 
@@ -183,9 +206,13 @@ else:
 /** \page eve_label label()
     label() creates a text label.
 
-    \section eve_label_interaction_semantics Interaction Semantics
+    \section eve_label_interaction_semantics User Interaction Semantics
 
     Eve labels are non-interactive.
+
+    \section eve_image_adam_interaction Adam Interaction Notes
+
+    Eve labels do not interact with Adam property sheets.
 
     \section eve_label_usage label() Usage
 
@@ -264,6 +291,12 @@ else:
     Adam and Eve share a common expression grammar.  Take a look at it <a
     href="http://stlab.adobe.com/group__expression__reference.html">here</a>
     to learn about the types and expressions available.
+
+    \section eve_expression_builtin_functions Built-in Functions
+
+    Adam and Eve expressions can include several built-in functions.
+
+    - \ref eve_expression_image_fn
 
     \section eve_containers Containers
     - \ref eve_column

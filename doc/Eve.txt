@@ -390,7 +390,31 @@ else:
 */
 
 /** \page eve_slider slider()
-    TODO
+    slider() creates a slider.
+
+    \section eve_slider_interaction_semantics User Interaction Semantics
+
+    Moving the slider's tab causes a value to be assigned to the bound cell,
+    if any.
+
+    \section eve_slider_adam_interaction Adam Interaction Notes
+
+    The slider will be set to the value of the controller-bound Adam cell.
+
+    \section eve_slider_usage slider() Usage
+
+    \code slider(param: value, param: value, ...); \endcode
+
+    \param alt The tooltip text that appears when the cursor hovers over the slider.
+    \param bind The cell in the Adam property sheet to which this slider is bound.
+    \param orientation The orientation of the slider (horizontal or vertical).
+    \param format A dictionary specifying the range of values the slider can take.
+    \param slider_point TODO
+
+    \section eve_slider_format_usage format Usage
+
+    \param first The value associated with the left end (if horizontal) or bottom end (if vertical) of the slider.
+    \param last The value associated with the right end (if horizontal) or top end (if vertical) of the slider.
 */
 
 /** \page eve_static_text static_text()

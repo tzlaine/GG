@@ -207,14 +207,13 @@ else:
 
     \section eve_button_handler The Button Handler
 
-    GG's UI creation functions all accept a user-defined GG::ButtonHandler.
-    This handler accepts an adobe::name_t action name and an
-    adobe::any_regular_t value.  It is called by Eve buttons under the
-    circumstances outlined in \ref eve_button_interaction_semantics.  This
-    mechanism allows the user to hook custom functionality into any Eve
-    interface.  Note that, as described in \ref
-    eve_button_interaction_semantics, the value parameter passed to the
-    handler may include contributing cells.
+    GG's UI creation functions all accept a user-defined ButtonHandler.  This
+    handler accepts an adobe::name_t action name and an adobe::any_regular_t
+    value.  It is called by Eve buttons under the circumstances outlined in
+    \ref eve_button_interaction_semantics.  This mechanism allows the user to
+    hook custom functionality into any Eve interface.  Note that, as described
+    in \ref eve_button_interaction_semantics, the value parameter passed to
+    the handler may include contributing cells.
 
     \section eve_button_predefined_actions Predefined Actions
 
@@ -361,7 +360,7 @@ else:
 */
 
 /** \page eve_popup popup()
-    popup() creates a "popup" list, a la GG::DropDownList.
+    popup() creates a "popup" list, a la DropDownList.
 
     When the value of the bound cell is not one of the values specified in \a
     items, the popup displays a "custom" item.  This item indicates to the
@@ -404,6 +403,28 @@ else:
     - \c option Either option (or alt) key.
 */
 
+/** \page eve_adding_user_functions Adding User-Defined Adam and Eve Expression Functions
+
+    Users can define their own functions and add them to the Adam and Eve
+    expression evaluator, to be used in Adam and Eve scripts just like the
+    \ref eve_expression_builtin_functions.
+
+    Just as with the \ref eve_expression_builtin_functions, there are two
+    kinds of functions supported, named-parameter functions (like \ref
+    eve_expression_scale_fn) and positional-parameter functions (like \ref
+    eve_expression_min_fn).  The former are registered with
+    RegisterDictionaryFunction(), and the latter with RegisterArrayFunction().
+    Note that both forms can be defined for a function, like \ref
+    eve_expression_image_fn.
+
+    For consistency with the \ref eve_expression_builtin_functions,
+    user-defined functions should throw when they are called with unusable
+    arguments, and they cannot return a reasonable default.  Named-parameter
+    functions should throw std::runtime_error when they fail to receive all
+    the named parameters they require.  Positional-parameter functions should
+    throw std::runtime_error when called with the wrong number of parameters.
+*/
+
 /** \page eve_overview The Eve Layout Engine
 
     Eve is a scripting language for specifying UIs, and a runtime library that
@@ -429,7 +450,7 @@ else:
     - \ref eve_expression_scale_fn
     - \ref eve_expression_image_fn
 
-    TODO User-added functions
+    \link eve_adding_user_functions Adding User-Defined Functions \endlink
 
     \section eve_views Views
 
@@ -442,9 +463,9 @@ else:
     generically made to a view's "bound cell".  Other times, cells are
     explicitly referred to as being in the Adam property sheet (and this is
     generally the case).  However, cells in a view's own Eve sheet are
-    considered first, before Adam sheet cells.  If a view binds to @foo, and
-    both its Adam and Eve sheets have cells called "foo", the Eve cell will be
-    bound.
+    considered first, before Adam sheet cells.  If a view binds to a cell foo,
+    and both its Adam and Eve sheets have cells called foo, the Eve cell will
+    be bound.
 
     \section eve_containers Containers
 

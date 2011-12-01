@@ -481,7 +481,7 @@ public:
     GG_CONCRETE_EXCEPTION(BadPointSize, GG::Font, Exception);
 
     /** Thrown when FreeType is unable to fulfill a request to load or render
-        a glpyh. */
+        a glyph. */
     GG_CONCRETE_EXCEPTION(BadGlyph, GG::Font, Exception);
     //@}
 

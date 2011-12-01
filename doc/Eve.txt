@@ -72,7 +72,7 @@ else:
 
     \section eve_button_usage button() Usage
 
-    \code button(param: value, param: value, ...) \endcode
+    \code button(param: value, param: value, ...); \endcode
 
     \param name The text that appears on the button.
     \param alt The tooltip text that appears when the cursor hovers over the button.
@@ -132,7 +132,7 @@ else:
 
     \section eve_checkbox_usage checkbox() Usage
 
-    \code checkbox(param: value, param: value, ...) \endcode
+    \code checkbox(param: value, param: value, ...); \endcode
 
     \param name The text that appears to the right of the checkbox.
     \param alt The tooltip text that appears when the cursor hovers over the checkbox.
@@ -150,7 +150,30 @@ else:
 */
 
 /** \page eve_image image()
-    TODO
+    image() creates an image.
+
+    \section eve_image_interaction_semantics Interaction Semantics
+
+    Eve images emit metadata when a cursor drag occurs in the image.  The
+    metadata is a dictionary with the following contents:
+
+    \param delta_x The cursor's x coordinate, relative to the start position of the drag.
+    \param delta_y The cursor's y coordinate, relative to the start position of the drag.
+    \param dragging Whether the cursor is being dragged.
+    \param x The cursor's current x coordinate.
+    \param y The cursor's current y coordinate.
+
+    During the drag, the above metadata values are assigned to the bound cell.
+    At the end of the drag, the above metadata are emitted one final time,
+    with \a dragging set to \c false, and \a delta_x and \a delta_x both set
+    to \c 0.
+
+    \section eve_image_usage image() Usage
+
+    \code image(param: value, param: value, ...); \endcode
+
+    \param image The filename of the image.
+    \param bind The cell in the Adam property sheet to which this image is bound.
 */
 
 /** \page eve_toggle toggle()
@@ -166,7 +189,7 @@ else:
 
     \section eve_label_usage label() Usage
 
-    \code label(param: value, param: value, ...) \endcode
+    \code label(param: value, param: value, ...); \endcode
 
     \param name The text of the label.
     \param alt The tooltip text that appears when the cursor hovers over the label.

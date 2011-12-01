@@ -1,18 +1,102 @@
 /*
-   This file contains documentation for the Eve layout engine.
+    This file contains documentation for the Eve layout engine.
 */
 
 /*
-Describe disabling semantics ... TODO
+    Describe disabling semantics ... TODO
 
-Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
+    Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
 
-Define contributing ... TODO
+    Define contributing ... TODO
+*/
+
+
+/** \page eve_expression_typeof_fn typeof()
+    \section eve_typeof_fn_usage typeof() Usage
+
+    \code typeof(expr) \endcode
+
+    \param expr An Adam and Eve expression.
+
+    Returns the name of the type of \a expr.  The possible types are:
+
+    - empty
+    - number
+    - boolean
+    - name
+    - string
+    - array
+    - dictionary
+
+    \remark Note that the parameters to \a typeof() are not named.
+*/
+
+/** \page eve_expression_min_fn min()
+    \section eve_min_fn_usage min() Usage
+
+    \code min(expr, expr, ...) \endcode
+
+    \param expr An Adam and Eve expression of type number.
+
+    Returns the minimum value of the numbers given.
+
+    \remark Note that the parameters to \a min() are not named.
+*/
+
+/** \page eve_expression_max_fn max()
+    \section eve_max_fn_usage max() Usage
+
+    \code max(expr, expr, ...) \endcode
+
+    \param expr An Adam and Eve expression of type number.
+
+    Returns the maximum value of the numbers given.
+
+    \remark Note that the parameters to \a max() are not named.
+*/
+
+/** \page eve_expression_round_fn round()
+    \section eve_round_fn_usage round() Usage
+
+    \code round(expr) \endcode
+
+    \param expr An Adam and Eve expression of type number.
+
+    Returns \a expr rounded to the nearest integer value.
+
+    \remark Note that the parameter to \a round() is not named.
+*/
+
+/** \page eve_expression_localize_fn localize()
+    TODO
+*/
+
+/** \page eve_expression_scale_fn scale()
+    \section eve_scale_fn_usage scale() Usage
+
+    \code scale(m: expr, x: expr, b: expr) \endcode
+
+    \param m An Adam and Eve expression of type number.
+    \param x An Adam and Eve expression of type number.
+    \param b An Adam and Eve expression of type number.
+
+    Returns \code m * x + b \endcode .
 */
 
 /** \page eve_expression_image_fn image()
-    TODO
+    \section eve_image_fn_usage image() Usage
+
+    \code image(filename) \endcode
+    \code image(name: filename) \endcode
+
+    \param name The name of the texture image file.
+
+    Returns a texture loaded from \a filename, or \a empty if the \a filename
+    does not exist or is not a valid texture.
+
+    \remark Note that the parameter to \a image() may be named or not.
 */
+
 
 /** \page eve_column column()
     TODO
@@ -294,11 +378,18 @@ else:
 
     \section eve_expression_builtin_functions Built-in Functions
 
-    Adam and Eve expressions can include several built-in functions.
+    Adam and Eve expressions support several built-in functions.
 
+    - \ref eve_expression_typeof_fn
+    - \ref eve_expression_min_fn
+    - \ref eve_expression_max_fn
+    - \ref eve_expression_round_fn
+    - \ref eve_expression_localize_fn
+    - \ref eve_expression_scale_fn
     - \ref eve_expression_image_fn
 
     \section eve_containers Containers
+
     - \ref eve_column
     - \ref eve_overlay
     - \ref eve_row

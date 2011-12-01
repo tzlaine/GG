@@ -31,6 +31,7 @@
 #ifndef _EveGlue_h_
 #define _EveGlue_h_
 
+#include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
 
 #include <boost/function.hpp>
@@ -72,6 +73,24 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
 Wnd* MakeDialog(std::istream& eve_definition,
                 std::istream& adam_definition,
                 ButtonHandler handler);
+
+/** The type of function used to evaluate named-parameter functions in Adam
+    and Eve expressions.  \see \ref eve_adding_user_functions. */
+typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)> DictionaryFunction;
+
+/** The type of function used to evaluate positional-parameter functions in
+    Adam and Eve expressions.  \see \ref eve_adding_user_functions. */
+typedef boost::function<adobe::any_regular_t (const adobe::array_t&)> ArrayFunction;
+
+/** Registers user-defined function \a function, callable as a named-parameter
+    function in Adam and Eve expressions.  \see \ref
+    eve_adding_user_functions. */
+void RegisterDictionaryFunction(adobe::name_t function_name, const DictionaryFunction& function);
+
+/** Registers user-defined function \a function, callable as a
+    positional-parameter function in Adam and Eve expressions.  \see \ref
+    eve_adding_user_functions. */
+void RegisterArrayFunction(adobe::name_t function_name, const ArrayFunction& function);
 
 }
 

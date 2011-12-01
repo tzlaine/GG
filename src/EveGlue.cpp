@@ -30,6 +30,24 @@
 
 using namespace GG;
 
+namespace {
+
+    typedef std::list<std::pair<adobe::name_t, DictionaryFunction> > DictionaryFunctionList;
+    DictionaryFunctionList& DictionaryFunctions()
+    {
+        static DictionaryFunctionList retval;
+        return retval;
+    }
+
+    typedef std::list<std::pair<adobe::name_t, ArrayFunction> > ArrayFunctionList;
+    ArrayFunctionList& ArrayFunctions()
+    {
+        static ArrayFunctionList retval;
+        return retval;
+    }
+
+}
+
 ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                                          std::istream& adam_definition,
                                          ButtonHandler handler)
@@ -45,6 +63,20 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     dialog->callback_m = handler;
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
+
+    for (DictionaryFunctionList::const_iterator
+             it = DictionaryFunctions().begin(), end_it = DictionaryFunctions().end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
+    }
+
+    for (ArrayFunctionList::const_iterator
+             it = ArrayFunctions().begin(), end_it = ArrayFunctions().end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
+    }
 
     dialog->init(eve_definition, adam_definition);
     adobe::dialog_result_t adobe_result = dialog->go();
@@ -71,6 +103,20 @@ Wnd* GG::MakeDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
+    for (DictionaryFunctionList::const_iterator
+             it = DictionaryFunctions().begin(), end_it = DictionaryFunctions().end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
+    }
+
+    for (ArrayFunctionList::const_iterator
+             it = ArrayFunctions().begin(), end_it = ArrayFunctions().end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
+    }
+
     Wnd* w = dialog->init(eve_definition, adam_definition);
     retval = boost::polymorphic_downcast<Window*>(w);
 
@@ -78,3 +124,9 @@ Wnd* GG::MakeDialog(std::istream& eve_definition,
 
     return retval;
 }
+
+void GG::RegisterDictionaryFunction(adobe::name_t function_name, const DictionaryFunction& function)
+{ DictionaryFunctions().push_back(std::make_pair(function_name, function)); }
+
+void GG::RegisterArrayFunction(adobe::name_t function_name, const ArrayFunction& function)
+{ ArrayFunctions().push_back(std::make_pair(function_name, function)); }

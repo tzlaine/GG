@@ -112,21 +112,23 @@
 /** \page eve_container_layout_params Container Layout Parameters
     \section Usage
 
-    \param indent TODO
-    \param horizontal 
-    \param vertical 
-    \param placement 
-    \param child_horizontal 
-    \param child_vertical 
-    \param spacing 
-    \param margin 
-    \param guide_mask 
-    \param guide_balance 
+    \param indent The indentation of this container within its available space. TODO Does this apply to vertical too?  To non-left alignments?
+    \param horizontal The horizontal alignment of this container in its available space.
+    \param vertical The vertical alignment of this container in its available space.
+    \param placement The placement of contained elements within this container.
+    \param child_horizontal The horizontal alignment of contained elements within this container.
+    \param child_vertical The vertical alignment of contained elements within this container.
+    \param spacing An array of numbers to be used for inter-element spacing of contained elements, or a single number to use for all spacing.  If the array has more elements than the number of contained elements, only the applicable ones are used.  If the array has too few elements (or a single number is used), the last value is used for all the subsequent element spacing. TODO
+    \param margin An array of four numbers specifying the margin of space that should be placed around this container (left, top, right, bottom), or a single number for all four values.
+    \param guide_mask TODO
+    \param guide_balance TODO
+
+    TODO How do child_horizontal and its children's horizontal params interoperate?
 
     \section eve_container_layout_guide_mask_guide_balance_usage guide_mask/guide_balance Usage
 
-    \param guide_baseline 
-    \param guide_label 
+    \param guide_baseline TODO
+    \param guide_label TODO
 
     \section Placements
 

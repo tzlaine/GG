@@ -113,14 +113,6 @@
     TODO
 */
 
-/** \page eve_overlay overlay()
-    TODO
-*/
-
-/** \page eve_row row()
-    TODO
-*/
-
 /** \page eve_dialog dialog()
     TODO
 */
@@ -133,7 +125,15 @@
     TODO
 */
 
+/** \page eve_overlay overlay()
+    TODO
+*/
+
 /** \page eve_panel panel()
+    TODO
+*/
+
+/** \page eve_row row()
     TODO
 */
 
@@ -142,7 +142,6 @@
 */
 
 /** \page eve_button button()
-
     button() creates a push-button (e.g. "OK" or "Cancel"), with some
     additional features.  Clicking a button may have a local effect, such as
     assigning a value to a cell in an Adam property sheet, or may indicate
@@ -655,7 +654,6 @@ else:
 */
 
 /** \page eve_adding_user_functions Adding User-Defined Adam and Eve Expression Functions
-
     Users can define their own functions and add them to the Adam and Eve
     expression evaluator, to be used in Adam and Eve scripts just like the
     \ref eve_expression_builtin_functions.
@@ -677,7 +675,6 @@ else:
 */
 
 /** \page eve_overview The Eve Layout Engine
-
     Eve is a scripting language for specifying UIs, and a runtime library that
     acts as a layout solver.  It interoperates with the Adam property model
     engine.
@@ -721,12 +718,12 @@ else:
     \section eve_containers Containers
 
     - \ref eve_column
-    - \ref eve_overlay
-    - \ref eve_row
     - \ref eve_dialog
     - \ref eve_group
     - \ref eve_optional
+    - \ref eve_overlay
     - \ref eve_panel
+    - \ref eve_row
     - \ref eve_tab_group
 
     \section eve_unlabeled Unlabeled Controls

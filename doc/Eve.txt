@@ -109,8 +109,44 @@
 */
 
 
+/** \page eve_container_layout_params Container Layout Parameters
+    \section Usage
+
+    \param indent TODO
+    \param horizontal 
+    \param vertical 
+    \param placement 
+    \param child_horizontal 
+    \param child_vertical 
+    \param spacing 
+    \param margin 
+    \param guide_mask 
+    \param guide_balance 
+
+    \section eve_container_layout_guide_mask_guide_balance_usage guide_mask/guide_balance Usage
+
+    \param guide_baseline 
+    \param guide_label 
+
+    \section Placements
+
+    - \c place_row Places contained elements as if they were in a \link eve_row row \endlink.
+    - \c place_column Places contained elements as if they were in a \link eve_column column \endlink.
+    - \c place_overlay Places contained elements as if they were in an \link eve_overlay overlay \endlink.
+
+    \section Alignments
+
+    - \c align_left Align the element to the left of available space.
+    - \c align_right Align the element to the right of available space.
+    - \c align_top Align the element to the top of available space.
+    - \c align_bottom Align the element to the top of available space.
+    - \c align_center Align the element to the center of available (vertical or horizontal) space.
+    - \c align_proportional Place the \c i-th element of \c N elements \c i/N of the way through the available (vertical or horizontal) space.
+    - \c align_fill Expand the element to fill the available (vertical or horizontal) space.
+*/
+
 /** \page eve_column column()
-    TODO
+    TODO Places contained elements vertically, in rows, top-to-bottom, in the order listed.
 */
 
 /** \page eve_dialog dialog()
@@ -134,7 +170,7 @@
 */
 
 /** \page eve_row row()
-    TODO
+    TODO Places contained elements horizontally, in rows, left-to-right, in the order listed.
 */
 
 /** \page eve_tab_group tab_group()
@@ -717,6 +753,10 @@ else:
 
     \section eve_containers Containers
 
+    All the containers below have parameters that control the placement and
+    layout of ther contained views, and the propagation of the alignment
+    guides.  These are documented in \ref eve_container_layout_params.
+
     - \ref eve_column
     - \ref eve_dialog
     - \ref eve_group
@@ -745,7 +785,7 @@ else:
 
     \section eve_labeled Labeled Controls
 
-    TODO Document how labels are optional, and how they alignment is done on ":".
+    TODO Document how labels are optional, and how the alignment is done on ":".
 
     - \ref eve_display_number
     - \ref eve_edit_number

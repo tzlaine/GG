@@ -504,7 +504,18 @@ else:
 */
 
 /** \page eve_number_format Number Format
-    TODO
+    Eve number format strings control how numbers are displayed in Eve.  The
+    format string is searched for a decimal point, and the number of
+    characters after the decimal point (if one is found) is used to set the
+    number of decimal places after the decimal point.
+
+    For example, these both display \c 3.14159 as \c "3.14":
+    \code "#.##" \endcode
+    \code "#.00" \endcode
+
+    and this displays a number with the default C++ iostreams formatting,
+    since it contains no decimal point: TODO
+    \code "#" \endcode
 */
 
 /** \page eve_number_unit Number Unit

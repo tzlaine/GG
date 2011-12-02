@@ -275,10 +275,6 @@ else:
     \param expression The expression to be evaluated when the control_button is clicked, in a string.
 */
 
-/** \page eve_display_number display_number()
-    TODO
-*/
-
 /** \page eve_image image()
     image() creates an image.
 
@@ -441,6 +437,30 @@ else:
 
 /** \page eve_static_text static_text()
     Synomyn for \ref eve_label.
+*/
+
+/** \page eve_display_number display_number()
+    display_number() creates a user-noninteractive number.
+
+    \section eve_display_number_interaction_semantics User Interaction Semantics
+
+    Eve display_numbers are non-interactive.
+
+    \section eve_image_adam_interaction Adam Interaction Notes
+
+    Eve display_numbers do not interact with Adam property sheets.
+
+    \section eve_display_number_usage display_number() Usage
+
+    \code display_number(param: value, param: value, ...); \endcode
+
+    All the named parameters in a \link eve_number_unit unit \endlink are
+    accepted as parameters in display_number, including \a bind.
+
+    \param name The text label that appears to the left of the display_number.
+    \param alt The tooltip text that appears when the cursor hovers over the display_number.
+    \param characters The minimum width of the display_number, in number of characters.
+    \param units An array of \link eve_number_unit units \endlink.
 */
 
 /** \page eve_edit_number edit_number()
@@ -663,7 +683,6 @@ else:
     - \ref eve_button
     - \ref eve_checkbox
     - \ref eve_control_button
-    - \ref eve_display_number
     - \ref eve_image
     - \ref eve_toggle
     - \ref eve_label
@@ -678,6 +697,9 @@ else:
 
     \section eve_labeled Labeled Controls
 
+    TODO Document how labels are optional, and how they alignment is done on ":".
+
+    - \ref eve_display_number
     - \ref eve_edit_number
     - \ref eve_edit_text
     - \ref eve_popup

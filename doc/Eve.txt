@@ -543,9 +543,7 @@ else:
     \param short_name The short name of the unit (e.g. cm for centimeters).
     \param bind The cell in the Adam property sheet to which the displayed number is bound, when in this unit.  Note that this can vary from unit to unit.  For instance, if one unit is "meters" and another is "seconds", it makes no sense to bind these units to the same cell.
     \param min_max_filter TODO
-    \param decimal_places The number of decimal places to show.
-    \param trailing_zeroes Whether trailing zeroes should be shown.
-    \param format A string specifying how the number should be displayed.  This is only used if neither of \a decimal_places and \a trailing_zeroes is defined.
+    \param format A string specifying how the number should be displayed (see \ref eve_number_format).
     \param min_value The minimum value of the displayed number allowed in this unit. TODO
     \param max_value The maximum value of the displayed number allowed in this unit. TODO
     \param scale An array of one or two numbers.  The first number is a scale factor; the second is an offset.

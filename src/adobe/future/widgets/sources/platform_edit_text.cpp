@@ -18,6 +18,7 @@
 #include <GG/GUI.h>
 #include <GG/MultiEdit.h>
 #include <GG/StyleFactory.h>
+#include <GG/utf8/checked.h>
 
 
 /*************************************************************************************************/
@@ -90,11 +91,13 @@ public:
                 if (nontext)
                     return false;
 
+                const std::string& text = m_edit_text.control_m->Text();
+
                 bool squelch =
                     m_edit_text.rows_m == 1 &&
                     0 < m_edit_text.max_cols_m &&
                     static_cast<std::size_t>(m_edit_text.max_cols_m) <
-                    m_edit_text.control_m->Text().size() + 1;
+                    utf8::distance(text.begin(), text.end()) + 1;
 
                 if (squelch)
                     return true;

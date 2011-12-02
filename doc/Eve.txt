@@ -409,7 +409,6 @@ else:
     \param bind The cell in the Adam property sheet to which this slider is bound.
     \param orientation The orientation of the slider (horizontal or vertical).
     \param format A dictionary specifying the range of values the slider can take.
-    \param slider_point TODO
 
     \section eve_slider_format_usage format Usage
 

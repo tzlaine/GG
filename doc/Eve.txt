@@ -3,11 +3,11 @@
 */
 
 /*
-    Describe disabling semantics ... TODO
-
     Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
 
     Define contributing ... TODO
+
+    Describe disabling semantics ... TODO
 */
 
 
@@ -296,11 +296,10 @@ else:
 
     \section eve_image_adam_interaction Adam Interaction Notes
 
-    The image expects a the view-bound Adam cell to set a texture.  The
-    built-in function \ref eve_expression_image_fn can be used to specify a
-    texture.  The image emits metadata, as described above.  This makes using
-    \a bind problematic.  \a bind_controller and \a bind_view should be used
-    instead.
+    The image expects the view-bound Adam cell to set a texture.  The built-in
+    function \ref eve_expression_image_fn can be used to specify a texture.
+    The image emits metadata, as described above.  This makes using \a bind
+    problematic.  \a bind_controller and \a bind_view should be used instead.
 
     \section eve_image_usage image() Usage
 
@@ -464,7 +463,55 @@ else:
 */
 
 /** \page eve_edit_number edit_number()
-    TODO
+    edit_number() creates a text entry box, for numbers only.  When multiple
+    units are defined, a popup will be placed to the right of the text box
+    that the user can use to select the unit.
+
+    \section eve_edit_number_interaction_semantics User Interaction Semantics
+
+    Typing into the edit_number's text box causes its contents to be assigned
+    to the bound cell.  Typing is filtered, so that invalid keystrokes are not
+    applied.  Examples of invalid keystrokes are nonnumeric keystrokes, or
+    keystrokes that would put the value outside of the \a min_value or \a
+    max_value for the current unit.
+
+    Selecting a new value from the unit popup causes the value to be updated
+    to the rescaled value, and assigned to the bound cell, if any.
+
+    The up and down error keys can be used to increment and decrement the
+    value, when the text entry box has focus.
+
+    Clicking and dragging the label up/down will increment/decrement the value
+    once per pixel dragged; if the shift key is depressed, the rate of
+    increment/decrement will be increased by a factor of 10.
+
+    In the increment operations described above, the value of the
+    increment/decrement will be the value of the \link eve_number_unit unit
+    \endlink parameter \a increment for the current unit (or \a 1 if one is
+    not defined).
+
+    \section eve_image_adam_interaction Adam Interaction Notes
+
+    The edit_number expects the bound Adam cell to set a number.  The popup
+    portion of the edit_number (if present) expects the bound Adam cell to set
+    its value to one of the names specified in \a units.  If any other value
+    is set, TODO
+
+    \section eve_edit_number_usage edit_number() Usage
+
+    \code edit_number(param: value, param: value, ...); \endcode
+
+    All the named parameters in a \link eve_number_unit unit \endlink are
+    accepted as parameters in edit_number, including \a bind.
+
+    \param name The text label that appears to the left of the edit_number.
+    \param alt The tooltip text that appears when the cursor hovers over the edit_number.
+    \param bind The cell in the Adam property sheet to which this edit_number's value is bound.
+    \param bind_units The cell in the Adam property sheet to which this edit_number's unit type is bound.
+    \param bind_group TODO (shift click thingy)
+    \param digits The minimum width of the edit_number, in number of characters.
+    \param max_digits The maximum number of characters the user is allowed to type into the edit_number.
+    \param units An array of \link eve_number_unit units \endlink.
 */
 
 /** \page eve_edit_text edit_text()
@@ -474,6 +521,10 @@ else:
 
     Typing into the edit_text causes its contents to be assigned to the bound
     cell.
+
+    \section eve_image_adam_interaction Adam Interaction Notes
+
+    The edit_text expects the bound Adam cell to set a string.
 
     \section eve_edit_text_usage edit_text() Usage
 

@@ -172,7 +172,34 @@
 */
 
 /** \page eve_optional optional()
-    TODO
+    optional() creates an optionally-visible layout.  The optional's layout
+    defaults to \a place_column and \a align_fill in both horizontal and
+    vertical directions.  An Eve optional notifies its containing layout when
+    it is shown or hidden.  This is the only thing that differentiates
+    optional from \link eve_panel panel \endlink.  If you don't need this
+    behavior (such as when you have several panels overlayed on each other as
+    in an \link eve_overlay overlay \endlink), use \link eve_panel panel
+    \endlink instead.
+
+    \section eve_optional_interaction_semantics User Interaction Semantics
+
+    Eve optionals are non-interactive.
+
+    \section eve_optional_adam_interaction Adam Interaction Notes
+
+    When the bound cell's value is \a value, the optional is visible.  Otherwise,
+    it is hidden.
+
+    \section eve_optional_usage optional() Usage
+
+    \code optional(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
+
+    \param bind The cell in the Adam property sheet to which this button is bound.
+    \param value The value of the bound cell that causes the optional to be shown.
 */
 
 /** \page eve_overlay overlay()
@@ -203,7 +230,11 @@
 /** \page eve_panel panel()
     panel() creates an optionally-visible layout.  The panel's layout defaults
     to \a place_column and \a align_fill in both horizontal and vertical
-    directions.
+    directions.  An Eve panel does not notify its containing layout when it is
+    shown or hidden.  This is the only thing that differentiates panel from
+    \link eve_overlay overlay \endlink.  If you need this behavior (such as
+    when you have a panel connected to a \link eve_reveal reveal \endlink),
+    use \link eve_overlay overlay \endlink instead.
 
     \section eve_panel_interaction_semantics User Interaction Semantics
 

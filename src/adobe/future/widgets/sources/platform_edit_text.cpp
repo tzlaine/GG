@@ -139,7 +139,7 @@ edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
     max_cols_m(block.max_characters_m),
     scrollable_m(block.scrollable_m),
     password_m(block.password_m)
-{ /* TODO: Address password_m == true. */ }
+{}
 
 /****************************************************************************************************/
 
@@ -333,6 +333,9 @@ platform_display_type insert<edit_text_t>(display_t&             display,
                                                    implementation::DefaultFont(), GG::CLR_GRAY, style);
         GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     }
+
+    if (element.password_m)
+        element.control_m->PasswordMode(true);
 
     element.original_height_m = Value(element.control_m->Height());
 

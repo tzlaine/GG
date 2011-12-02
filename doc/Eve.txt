@@ -143,7 +143,16 @@
 */
 
 /** \page eve_column column()
-    TODO Places contained elements vertically, in rows, top-to-bottom, in the order listed.
+    column() creates a layout that places contained elements vertically, in
+    rows, top-to-bottom, in the order listed.
+
+    \section eve_column_usage column() Usage
+
+    \code column(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
 */
 
 /** \page eve_dialog dialog()
@@ -159,7 +168,20 @@
 */
 
 /** \page eve_overlay overlay()
-    TODO
+    overlay() creates a layout that places all the contained elements so that
+    they fill the entire overlay.
+
+    \section eve_overlay_usage overlay() Usage
+
+    \code overlay(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
+
+    \note The idiomatic way to use overlay is to populate it entirely with
+    \link eve_panel panels \endlink that are all bound to the same cell, so
+    that only one at a time is visible.
 */
 
 /** \page eve_panel panel()
@@ -167,7 +189,16 @@
 */
 
 /** \page eve_row row()
-    TODO Places contained elements horizontally, in rows, left-to-right, in the order listed.
+    row() creates a layout that places contained elements horizontally, in
+    rows, left-to-right, in the order listed.
+
+    \section eve_row_usage row() Usage
+
+    \code row(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
 */
 
 /** \page eve_tab_group tab_group()

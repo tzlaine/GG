@@ -45,8 +45,7 @@ public:
                 GG::Pt point = event.Point();
                 GG::Y delta(m_data.last_point_m.y - point.y);
 
-                if (m_data.last_point_m.y != 0 && delta != 0)
-                {
+                if (m_data.last_point_m.y != 0 && delta != 0) {
                     modifiers_t modifiers(modifier_state());
 
                     if (modifiers & modifiers_any_shift_s)

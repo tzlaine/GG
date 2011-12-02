@@ -70,10 +70,7 @@ public:
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseWheel) {
                 bool squelch;
-                if (event.WheelMove() < 0)
-                    m_edit_text.pre_edit_proc_m(std::string(30, 1), squelch);
-                else if (0 < event.WheelMove())
-                    m_edit_text.pre_edit_proc_m(std::string(31, 1), squelch);
+                m_edit_text.pre_edit_proc_m(std::string(1, 0 < event.WheelMove() ? 30 : 31), squelch);
                 retval = true;
             } else if (event.Type() == GG::WndEvent::KeyPress) {
                 bool nontext =
@@ -90,6 +87,12 @@ public:
 
                 if (nontext)
                     return false;
+
+                if (event.GetKey() == GG::GGK_UP || event.GetKey() == GG::GGK_DOWN) {
+                    bool squelch;
+                    m_edit_text.pre_edit_proc_m(std::string(1, event.GetKey() == GG::GGK_UP ? 30 : 31), squelch);
+                    return true;
+                }
 
                 const std::string& text = m_edit_text.control_m->Text();
 

@@ -382,8 +382,31 @@ else:
 */
 
 /** \page eve_reveal reveal()
-    TODO
-*/
+    reveal() creates a button suitable for revealing/hiding a portion of an
+    interface.  Note that a reveal is semantically very similar to a checkbox.
+
+    \section eve_reveal_interaction_semantics User Interaction Semantics
+
+    Clicking the reveal assigns a value to the bound cell, if any.  The value
+    assigned is \a empty if the reveal is currently in its "show" state, and
+    \a value_on otherwise.
+
+    \section eve_reveal_adam_interaction Adam Interaction Notes
+
+    The reveal will be set to the value of the controller-bound Adam cell.
+
+    \section eve_reveal_usage reveal() Usage
+
+    \code reveal(param: value, param: value, ...); \endcode
+
+    \param name The text that appears to the right of the reveal.
+    \param alt The tooltip text that appears when the cursor hovers over the reveal.
+    \param bind The cell in the Adam property sheet to which this reveal is bound.
+    \param value_on The value associated with the "show" state of the reveal.
+
+    \note The idiomatic way to create a showable/hidable portion of an
+    interface is to bind a reveal and an \link eve_optional optional \endlink
+    to the same cell.  */
 
 /** \page eve_separator separator()
     TODO

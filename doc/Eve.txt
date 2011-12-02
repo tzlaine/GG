@@ -146,6 +146,14 @@
     column() creates a layout that places contained elements vertically, in
     rows, top-to-bottom, in the order listed.
 
+    \section eve_column_interaction_semantics User Interaction Semantics
+
+    Eve columns are non-interactive.
+
+    \section eve_column_adam_interaction Adam Interaction Notes
+
+    Eve columns do not interact with Adam property sheets.
+
     \section eve_column_usage column() Usage
 
     \code column(param: value, param: value, ...); \endcode
@@ -171,6 +179,14 @@
     overlay() creates a layout that places all the contained elements so that
     they fill the entire overlay.
 
+    \section eve_overlay_interaction_semantics User Interaction Semantics
+
+    Eve overlays are non-interactive.
+
+    \section eve_overlay_adam_interaction Adam Interaction Notes
+
+    Eve overlays do not interact with Adam property sheets.
+
     \section eve_overlay_usage overlay() Usage
 
     \code overlay(param: value, param: value, ...); \endcode
@@ -185,12 +201,42 @@
 */
 
 /** \page eve_panel panel()
-    TODO
+    panel() creates an optionally-visible layout.  The panel's layout defaults
+    to \a place_column and \a align_fill in both horizontal and vertical
+    directions.
+
+    \section eve_panel_interaction_semantics User Interaction Semantics
+
+    Eve panels are non-interactive.
+
+    \section eve_panel_adam_interaction Adam Interaction Notes
+
+    When the bound cell's value is \a value, the panel is visible.  Otherwise,
+    it is hidden.
+
+    \section eve_panel_usage panel() Usage
+
+    \code panel(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
+
+    \param bind The cell in the Adam property sheet to which this button is bound.
+    \param value The value of the bound cell that causes the panel to be shown.
 */
 
 /** \page eve_row row()
     row() creates a layout that places contained elements horizontally, in
     rows, left-to-right, in the order listed.
+
+    \section eve_row_interaction_semantics User Interaction Semantics
+
+    Eve rows are non-interactive.
+
+    \section eve_row_adam_interaction Adam Interaction Notes
+
+    Eve rows do not interact with Adam property sheets.
 
     \section eve_row_usage row() Usage
 

@@ -426,7 +426,25 @@ else:
 */
 
 /** \page eve_edit_text edit_text()
-    TODO
+    edit_text() creates a text entry box.
+
+    \section eve_edit_text_interaction_semantics User Interaction Semantics
+
+    Typing into the edit_text causes its contents to be assigned to the bound
+    cell.
+
+    \section eve_edit_text_usage edit_text() Usage
+
+    \code edit_text(param: value, param: value, ...); \endcode
+
+    \param name The text label that appears to the left of the edit_text.
+    \param alt The tooltip text that appears when the cursor hovers over the edit_text.
+    \param bind The cell in the Adam property sheet to which this edit_text is bound.
+    \param characters The minimum width of the edit_text, based on space needed to see \a characters characters.
+    \param max_characters The maximum number of characters the user is allowed to type into the edit_text.  This only applies when \a lines is \c 1.
+    \param lines The number of lines high the edit_text should be.
+    \param scrollable Whether the edit_text has scrollbars.  This only applies when \a lines is greater than \c 1.
+    \param password Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.
 */
 
 /** \page eve_popup popup()

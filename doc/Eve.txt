@@ -164,7 +164,31 @@
 */
 
 /** \page eve_dialog dialog()
-    TODO
+    dialog() creates a dialog box.  There should only be one dialog in an Eve
+    sheet, at the top level.  The dialog's layout defaults to \a place_row.
+
+    \section eve_dialog_interaction_semantics User Interaction Semantics
+
+    Eve dialogs are interactive to the extent that its interaction parameters
+    are defined (\a grow, \a move, etc.).
+
+    \section eve_dialog_adam_interaction Adam Interaction Notes
+
+    Eve dialogs do not interact with Adam property sheets.
+
+    \section eve_dialog_usage dialog() Usage
+
+    \code dialog(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
+
+    \param name The text that appears on the dialog box.
+    \param grow Whether the dialog box should be resizable (see GG::RESIZABLE).
+    \param move Whether the dialog box should be movable (see GG::DRAGABLE).
+    \param on_top Whether the dialog box should be always-on-top (see GG::ONTOP).
+    \param modal Whether the dialog box should be modal (see GG::MODAL).
 */
 
 /** \page eve_group group()

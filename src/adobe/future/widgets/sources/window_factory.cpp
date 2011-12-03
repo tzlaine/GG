@@ -107,9 +107,6 @@ widget_node_t make_window(const dictionary_t&     parameters,
     keyboard_t::iterator keyboard_token(
         token.client_holder_m.keyboard_m.insert(keyboard_t::iterator(), poly_key_handler_t(boost::ref(*widget))));
 
-    token.client_holder_m.assemblage_m.cleanup(
-        boost::bind(&keyboard_t::erase, boost::ref(token.client_holder_m.keyboard_m), keyboard_token));
-
     widget->window_m->SetKeyboard(token.client_holder_m.keyboard_m);
 
     //

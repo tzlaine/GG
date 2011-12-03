@@ -168,7 +168,27 @@
 */
 
 /** \page eve_group group()
-    TODO
+    group() creates a non-interactive group box.  The group's layout defaults
+    to \a place_column.
+
+    \section eve_group_interaction_semantics User Interaction Semantics
+
+    Eve groups are non-interactive.
+
+    \section eve_group_adam_interaction Adam Interaction Notes
+
+    Eve groups do not interact with Adam property sheets.
+
+    \section eve_group_usage group() Usage
+
+    \code group(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
+
+    \param name The text that appears on the group box.
+    \param alt The tooltip text that appears when the cursor hovers over the group box.
 */
 
 /** \page eve_optional optional()

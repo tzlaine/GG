@@ -199,7 +199,7 @@ modal_dialog_t::modal_dialog_t() :
 
 platform_display_type modal_dialog_t::init(std::istream& layout, std::istream& sheet)
 {
-// TODO: ???    resource_context_t res_context(working_directory_m);
+    resource_context_t res_context(working_directory_m);
 
     vm_lookup_m.attach_to(sheet_m);
     vm_lookup_m.attach_to(sheet_m.machine_m);

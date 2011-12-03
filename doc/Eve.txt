@@ -3,8 +3,6 @@
 */
 
 /*
-    Describe relationship among bind_view, bind_controller, and bind (incl. how bind overrides the other two, and which widgets (maybe all?) support bind_*) ... TODO
-
     Define contributing ... TODO
 
     Describe disabling semantics ... TODO
@@ -109,41 +107,50 @@
 */
 
 
-/** \page eve_common_layout_params Common Layout Parameters
+/** \page eve_common_view_params Common View Parameters
     \section Usage
 
-    \param indent The indentation of this view within its available space. TODO Does this apply to vertical too?  To non-left alignments?
-    \param horizontal The horizontal alignment of this view in its available space.
-    \param vertical The vertical alignment of this view in its available space.
+    \param bind The cell in the Adam property sheet to which this view is bound.  If this is defined, \a bind_controller and \a bind_view are ignored.
+    \param bind_controller The "controller" half of the binding to the cell in the Adam property sheet.  This is half of the cell binding that covers assignment to the bound cell.  See \a bind_controller in \ref eve_image for an example.
+    \param bind_view The "view" half of the binding to the cell in the Adam property sheet.  This is half of the cell binding that covers assignment to the Eve view from the bound cell.  See \a bind_view in \ref eve_image for an example.
+    \param horizontal The horizontal alignment of this view in its available space (see \ref eve_alignments).
+    \param vertical The vertical alignment of this view in its available space (see \ref eve_alignments).
+    \param indent The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.
     \param margin An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.
+
+    \note Some Eve views are completely non-interactive, and in fact have no
+    interaction with Adam cells at all.  For such views, \a bind, \a
+    bind_controller, and \a bind_view are ignored.
 */
 
 /** \page eve_container_layout_params Container Layout Parameters
     \section Usage
 
-    \param placement The placement of elements within this container.
-    \param child_horizontal The horizontal alignment of elements within this container.
-    \param child_vertical The vertical alignment of elements within this container.
-    \param spacing An array of numbers to be used for inter-element spacing of contained elements, or a single number to use for all spacing.  If the array has more elements than the number of contained elements, only the applicable ones are used.  If the array has too few elements (or a single number is used), the last value is used for all the subsequent element spacing. TODO
+    \param placement The placement of views within this container (see \ref eve_placements).
+    \param child_horizontal The horizontal alignment of views within this container (see \ref eve_alignments).
+    \param child_vertical The vertical alignment of views within this container (see \ref eve_alignments).
+    \param spacing An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.
     \param guide_mask TODO
     \param guide_balance TODO
 
-    TODO How do child_horizontal and its children's horizontal params interoperate?
+    \note An view's \a horizontal and \a vertical parameters (if defined)
+    override the alignments specified in its containing view's \a
+    child_horizontal and \a child_vertical (see \a eve_common_view_params).
 
     \section eve_container_layout_guide_mask_guide_balance_usage guide_mask/guide_balance Usage
 
     \param guide_baseline TODO
     \param guide_label TODO
 
-    \section Placements
+    \section eve_placements Placements
 
-    - \c place_row Places contained elements as if they were in a \link eve_row row \endlink.
-    - \c place_column Places contained elements as if they were in a \link eve_column column \endlink.
-    - \c place_overlay Places contained elements as if they were in an \link eve_overlay overlay \endlink.
+    - \c place_row Places contained views as if they were in a \link eve_row row \endlink.
+    - \c place_column Places contained views as if they were in a \link eve_column column \endlink.
+    - \c place_overlay Places contained views as if they were in an \link eve_overlay overlay \endlink.
 */
 
 /** \page eve_column column()
-    column() creates a layout that places contained elements vertically, in
+    column() creates a layout that places contained views vertically, in
     rows, top-to-bottom, in the order listed.
 
     \section eve_column_interaction_semantics User Interaction Semantics
@@ -158,7 +165,7 @@
 
     \code column(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 */
@@ -180,7 +187,7 @@
 
     \code dialog(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 
@@ -207,7 +214,7 @@
 
     \code group(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 
@@ -238,7 +245,7 @@
 
     \code optional(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 
@@ -247,7 +254,7 @@
 */
 
 /** \page eve_overlay overlay()
-    overlay() creates a layout that places all the contained elements so that
+    overlay() creates a layout that places all the contained views so that
     they fill the entire overlay.
 
     \section eve_overlay_interaction_semantics User Interaction Semantics
@@ -262,7 +269,7 @@
 
     \code overlay(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 
@@ -293,7 +300,7 @@
 
     \code panel(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 
@@ -302,7 +309,7 @@
 */
 
 /** \page eve_row row()
-    row() creates a layout that places contained elements horizontally, in
+    row() creates a layout that places contained views horizontally, in
     rows, left-to-right, in the order listed.
 
     \section eve_row_interaction_semantics User Interaction Semantics
@@ -317,7 +324,7 @@
 
     \code row(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 */
@@ -335,13 +342,14 @@
     \section eve_tab_group_adam_interaction Adam Interaction Notes
 
     The popup expects the controller-bound Adam cell to set its value to one
-    of the values specified in \a items.  If any other value is set, TODO
+    of the values specified in \a items.  If any other value is set, there is
+    no effect.
 
     \section eve_tab_group_usage tab_group() Usage
 
     \code tab_group(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
     \n
     \ref eve_container_layout_params
 
@@ -389,12 +397,12 @@ else:
 
     \code button(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text that appears on the button.
     \param alt The tooltip text that appears when the cursor hovers over the button.
-    \param bind The cell in the Adam property sheet to which this button is bound.  If defined, \a bind makes \a value moot.
-    \param bind_output The cell in the Adam property sheet to which the output of this button is bound.  The \a bind_output cell will be assigned \a value.  When \a bind_output is specified, the button handler is not notified of this button's presses, making \a action moot.
+    \param bind The cell in the Adam property sheet to which this button is bound.  If defined, \a value is ignored.
+    \param bind_output The cell in the Adam property sheet to which the output of this button is bound.  The \a bind_output cell will be assigned \a value.  When \a bind_output is specified, the button handler is not notified of this button's presses, and so \a action is ignored.
     \param action The action associated with this button.  The button handler (if available) will be called with \a action as its first argument.
     \param value The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see \a bind_output), or passed as the second argument in a call to the button handler (see button()'s main description).
     \param default If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
@@ -456,7 +464,7 @@ else:
 
     \code checkbox(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text that appears to the right of the checkbox.
     \param alt The tooltip text that appears when the cursor hovers over the checkbox.
@@ -484,7 +492,7 @@ else:
 
     \code control_button(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text that appears on the control_button.
     \param alt The tooltip text that appears when the cursor hovers over the control_button.
@@ -522,7 +530,7 @@ else:
 
     \code image(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param image The filename of the image.
     \param bind The cell in the Adam property sheet to which this image is bound.
@@ -547,7 +555,7 @@ else:
 
     \code label(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text of the label.
     \param alt The tooltip text that appears when the cursor hovers over the label.
@@ -586,7 +594,7 @@ else:
 
     \code radio_button(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text that appears to the right of the radio_button.
     \param alt The tooltip text that appears when the cursor hovers over the radio_button.
@@ -617,7 +625,7 @@ else:
 
     \code reveal(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text that appears to the right of the reveal.
     \param alt The tooltip text that appears when the cursor hovers over the reveal.
@@ -648,7 +656,7 @@ else:
 
     \code slider(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param alt The tooltip text that appears when the cursor hovers over the slider.
     \param bind The cell in the Adam property sheet to which this slider is bound.
@@ -680,7 +688,7 @@ else:
 
     \code display_number(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     All the named parameters in a \link eve_number_unit unit \endlink are
     accepted as parameters in display_number, including \a bind.
@@ -708,7 +716,8 @@ else:
     to the rescaled value, and assigned to the bound cell, if any.
 
     The up and down error keys can be used to increment and decrement the
-    value, when the text entry box has focus.
+    value, when the text entry box has focus.  Scrolling the mouse wheel up
+    and down over the text entry box has the same effect.
 
     Clicking and dragging the label up/down will increment/decrement the value
     once per pixel dragged; if the shift key is depressed, the rate of
@@ -722,15 +731,15 @@ else:
     \section eve_image_adam_interaction Adam Interaction Notes
 
     The edit_number expects the bound Adam cell to set a number.  The popup
-    portion of the edit_number (if present) expects the bound Adam cell to set
-    its value to one of the names specified in \a units.  If any other value
-    is set, TODO
+    portion of the edit_number (if present) will only set the bound Adam cell
+    (to the string name of its current unit), but will not change if the bound
+    value changes.
 
     \section eve_edit_number_usage edit_number() Usage
 
     \code edit_number(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     All the named parameters in a \link eve_number_unit unit \endlink are
     accepted as parameters in edit_number, including \a bind.
@@ -739,7 +748,6 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the edit_number.
     \param bind The cell in the Adam property sheet to which this edit_number's value is bound.
     \param bind_units The cell in the Adam property sheet to which this edit_number's unit type is bound.
-    \param bind_group TODO (shift click thingy)
     \param digits The minimum width of the edit_number, in number of characters.
     \param max_digits The maximum number of characters the user is allowed to type into the edit_number.
     \param units An array of \link eve_number_unit units \endlink.
@@ -761,7 +769,7 @@ else:
 
     \code edit_text(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text label that appears to the left of the edit_text.
     \param alt The tooltip text that appears when the cursor hovers over the edit_text.
@@ -800,7 +808,7 @@ else:
 
     \code popup(param: value, param: value, ...); \endcode
 
-    \ref eve_common_layout_params
+    \ref eve_common_view_params
 
     \param name The text label that appears to the left of the popup.
     \param alt The tooltip text that appears when the cursor hovers over the popup.
@@ -820,7 +828,7 @@ else:
     \code "#.00" \endcode
 
     and this displays a number with the default C++ iostreams formatting,
-    since it contains no decimal point: TODO
+    since it contains no decimal point:
     \code "#" \endcode
 */
 
@@ -859,10 +867,9 @@ else:
     \param name The name of the unit (e.g. centimeters).
     \param short_name The short name of the unit (e.g. cm for centimeters).
     \param bind The cell in the Adam property sheet to which the displayed number is bound, when in this unit.  Note that this can vary from unit to unit.  For instance, if one unit is "meters" and another is "seconds", it makes no sense to bind these units to the same cell.
-    \param min_max_filter TODO
     \param format A string specifying how the number should be displayed (see \ref eve_number_format).
-    \param min_value The minimum value of the displayed number allowed in this unit. TODO
-    \param max_value The maximum value of the displayed number allowed in this unit. TODO
+    \param min_value The minimum allowed value of the displayed number in this unit.
+    \param max_value The maximum allowed value of the displayed number in this unit.
     \param scale An array of one or two numbers.  The first number is a scale factor; the second is an offset.
     \param increment In some instances the user is able to increment the value. This specifies the amount (in this unit) by which to increment the number.
 
@@ -885,13 +892,13 @@ else:
 /** \page eve_alignments Alignments
     These are the available alignments supported by Eve widgets.
 
-    - \c align_left Align the element to the left of available space.
-    - \c align_right Align the element to the right of available space.
-    - \c align_top Align the element to the top of available space.
-    - \c align_bottom Align the element to the top of available space.
-    - \c align_center Align the element to the center of available (vertical or horizontal) space.
-    - \c align_proportional Place the \c i-th element of \c N elements \c i/N of the way through the available (vertical or horizontal) space.
-    - \c align_fill Expand the element to fill the available (vertical or horizontal) space.
+    - \c align_left Align the view to the left of available space.
+    - \c align_right Align the view to the right of available space.
+    - \c align_top Align the view to the top of available space.
+    - \c align_bottom Align the view to the top of available space.
+    - \c align_center Align the view to the center of available (vertical or horizontal) space.
+    - \c align_proportional Place the \c i-th view of \c N views \c i/N of the way through the available (vertical or horizontal) space.
+    - \c align_fill Expand the view to fill the available (vertical or horizontal) space.
 */
 
 /** \page eve_modifier_keys Modifier Keys
@@ -932,7 +939,7 @@ else:
 
     Adam and Eve share a common expression grammar.  Take a look at it <a
     href="http://stlab.adobe.com/group__expression__reference.html">here</a>
-    to learn about the types and expressions available.
+    to learn about the data types and expressions available.
 
     \section eve_expression_builtin_functions Built-in Functions
 
@@ -956,7 +963,12 @@ else:
     for users to add their own views as well.
 
     All the views below have parameters that control their placement.  These
-    are documented in \ref eve_common_layout_params.
+    are documented in \ref eve_common_view_params.
+
+    Note that all views are constructed with a function-like syntax, with a
+    named-parameter interface.  Adding extra named parameters that don't apply
+    to a certain view have no effect.  For instance, it is always fine to add
+    \code foo: "bar" \endcode to any view in an Eve sheet.
 
     \note Eve layouts can contain property cells, like those in an Adam
     property sheet.  In the documentation pages below, reference is often
@@ -982,7 +994,7 @@ else:
     - \ref eve_row
     - \ref eve_tab_group
 
-    \section eve_unlabeled Unlabeled Controls
+    \section eve_unlabeled Unlabeled Views
 
     - \ref eve_button
     - \ref eve_checkbox
@@ -999,9 +1011,11 @@ else:
     - \ref eve_slider
     - \ref eve_static_text
 
-    \section eve_labeled Labeled Controls
+    \section eve_labeled Labeled Views
 
-    TODO Document how labels are optional, and how the alignment is done on ":".
+    Labeled views have an optional static text label to the left of the
+    interactive portion of the view.  Column layouts usually align labeled
+    views so that the right edge of each label is aligned.
 
     - \ref eve_display_number
     - \ref eve_edit_number

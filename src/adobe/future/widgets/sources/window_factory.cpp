@@ -8,6 +8,7 @@
 
 #define ADOBE_DLL_SAFE 0
 
+#include <GG/adobe/future/modal_dialog_interface.hpp>
 #include <GG/adobe/future/platform_primitives.hpp>
 
 // window.hpp needs to come before widget_factory to hook the overrides
@@ -16,6 +17,7 @@
 #include <GG/adobe/future/widgets/headers/window_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
+
 /****************************************************************************************************/
 
 namespace adobe {
@@ -102,10 +104,13 @@ widget_node_t make_window(const dictionary_t&     parameters,
     // set up key handler code. We do this all the time because we want the button to be updated
     // when modifier keys are pressed during execution of the dialog.
 
-    keyboard_t::iterator keyboard_token(keyboard_t::get().insert(keyboard_t::iterator(), poly_key_handler_t(boost::ref(*widget))));
+    keyboard_t::iterator keyboard_token(
+        token.client_holder_m.keyboard_m.insert(keyboard_t::iterator(), poly_key_handler_t(boost::ref(*widget))));
 
     token.client_holder_m.assemblage_m.cleanup(
-        boost::bind(&keyboard_t::erase, boost::ref(keyboard_t::get()), keyboard_token));
+        boost::bind(&keyboard_t::erase, boost::ref(token.client_holder_m.keyboard_m), keyboard_token));
+
+    widget->window_m->SetKeyboard(token.client_holder_m.keyboard_m);
 
     //
     // Return the widget_node_t that comprises the tokens created for this widget by the various components

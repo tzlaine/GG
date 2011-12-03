@@ -147,6 +147,11 @@ struct eve_client_holder : public boost::noncopyable
     behavior_t*                              my_behavior_m;
 
     //
+    /// Keyboard handler for this interface
+    //
+    keyboard_t                               keyboard_m;
+
+    //
     /// Display token for the root item in the view
     //
     platform_display_type                    root_display_m;

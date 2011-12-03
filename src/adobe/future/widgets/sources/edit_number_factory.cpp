@@ -213,7 +213,8 @@ widget_node_t make_edit_number(const dictionary_t&     parameters,
 
     attach_edit_num_view_and_controller(*widget, parameters, token);
 
-    keyboard_t::iterator keyboard_token = keyboard_t::get().insert(parent.keyboard_token_m, poly_key_handler_t(boost::ref(*widget)));
+    keyboard_t::iterator keyboard_token =
+        token.client_holder_m.keyboard_m.insert(parent.keyboard_token_m, poly_key_handler_t(boost::ref(*widget)));
 
     //
     // Return the widget_node_t that comprises the tokens created for this widget by the various components

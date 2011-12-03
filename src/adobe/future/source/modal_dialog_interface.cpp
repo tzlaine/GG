@@ -40,7 +40,8 @@ namespace GG {
     Window::Window(adobe::window_t& imp) :
         Wnd(X0, Y0, X1, Y1, imp.flags_m),
         m_imp(imp),
-        m_title(0)
+        m_title(0),
+        m_keyboard(0)
     {
         if (!m_imp.name_m.empty()) {
             m_title = adobe::implementation::Factory().NewTextControl(
@@ -115,19 +116,22 @@ namespace GG {
 
     void Window::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
     {
-        adobe::keyboard_t::get().dispatch(adobe::key_type(key, key_code_point),
-                                          true,
-                                          adobe::modifier_state(),
-                                          adobe::any_regular_t(this));
+        assert(m_keyboard);
+        m_keyboard->dispatch(adobe::key_type(key, key_code_point),
+                             true,
+                             adobe::modifier_state());
     }
 
     void Window::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
     {
-        adobe::keyboard_t::get().dispatch(adobe::key_type(key, key_code_point),
-                                          false,
-                                          adobe::modifier_state(),
-                                          adobe::any_regular_t(this));
+        assert(m_keyboard);
+        m_keyboard->dispatch(adobe::key_type(key, key_code_point),
+                             false,
+                             adobe::modifier_state());
     }
+
+    void Window::SetKeyboard(adobe::keyboard_t& keyboard)
+    { m_keyboard = &keyboard; }
 
     void Window::SetEveModalDialog(adobe::modal_dialog_t* modal_dialog)
     { m_eve_modal_dialog.reset(modal_dialog); }

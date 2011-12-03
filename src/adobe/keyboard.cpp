@@ -14,15 +14,6 @@ namespace adobe {
 
 /*************************************************************************************************/
 
-keyboard_t& keyboard_t::get()
-{
-    static keyboard_t keyboard_s;
-
-    return keyboard_s;
-}
-
-/*************************************************************************************************/
-
 keyboard_t::iterator keyboard_t::insert(iterator parent,
                                         const adobe::poly_key_handler_t& element)
 {
@@ -46,13 +37,9 @@ void keyboard_t::erase(iterator position)
 
 bool keyboard_t::dispatch(key_type                    virtual_key,
                           bool                        pressed,
-                          adobe::modifiers_t          modifiers,
-                          const adobe::any_regular_t& base_handler)
+                          adobe::modifiers_t          modifiers)
 {
-    iterator parent(handler_to_iterator(base_handler));
-
-    if (parent == forest_m.end())
-        return false;
+    iterator parent(forest_m.begin());
 
     typedef keyboard_forest_t::postorder_iterator postorder_iterator;
 
@@ -64,19 +51,6 @@ bool keyboard_t::dispatch(key_type                    virtual_key,
     }
 
     return false;
-}
-
-/*************************************************************************************************/
-
-keyboard_t::iterator keyboard_t::handler_to_iterator(const adobe::any_regular_t& handler)
-{
-    typedef keyboard_forest_t::child_iterator child_iterator;
-
-    for (child_iterator iter(forest_m.begin()), last(forest_m.end()); iter != last; ++iter)
-        if (iter->underlying_handler() == handler)
-            return iter.base();
-
-    return forest_m.end();
 }
 
 /*************************************************************************************************/

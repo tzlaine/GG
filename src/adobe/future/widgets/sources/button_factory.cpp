@@ -267,8 +267,8 @@ widget_node_t make_button(const dictionary_t&     parameters,
     // set up key handler code. We do this all the time because we want the button to be updated
     // when modifier keys are pressed during execution of the dialog.
 
-    keyboard_t::iterator keyboard_token(keyboard_t::get().insert(parent.keyboard_token_m, poly_key_handler_t(boost::ref(*widget))));
-    
+    keyboard_t::iterator keyboard_token(
+        token.client_holder_m.keyboard_m.insert(parent.keyboard_token_m, poly_key_handler_t(boost::ref(*widget))));
     
     //
     // As per SF.net bug 1428833, we want to attach the poly_placeable_t

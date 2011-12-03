@@ -17,8 +17,6 @@
 #include <boost/mpl/bool_fwd.hpp>
 #include <boost/signals/connection.hpp>
 
-#include <GG/Wnd.h>
-
 #include <GG/adobe/adam.hpp>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/basic_sheet.hpp>
@@ -359,12 +357,6 @@ inline widget_node_t create_and_hookup_widget(const dictionary_t& parameters,
     // Call display_insertion to embed the new widget within the view heirarchy
     //
     platform_display_type display_token(insert(get_main_display(), parent.display_token_m, *widget));
-
-    // This hack is necessary so that children of panel_t's, which are added
-    // after the panel_t's are already placed (and thusalready have their
-    // visibilities set) don't show up if the panel_t is hidden.
-    if (!parent.display_token_m->Visible())
-        display_token->Hide();
 
     //
     // As per SF.net bug 1428833, we want to attach the poly_placeable_t

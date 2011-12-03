@@ -141,12 +141,7 @@ void window_t::set_visible(bool make_visible)
     if (!window_m->Visible())
         reposition();
 
-    // It's necessary not to recursively show or hide children here, as it
-    // messes up the operation of panel_t.
-    if (make_visible)
-        window_m->Show(false);
-    else
-        window_m->Hide(false);
+    set_control_visible(window_m, make_visible);
 }
 
 /****************************************************************************************************/

@@ -38,10 +38,16 @@ namespace adobe {
 /****************************************************************************************************/
 
 panel_t::panel_t(const any_regular_t& show_value, theme_t theme) :
+    parent_m(0),
     control_m(0),
     theme_m(theme),
     show_value_m(show_value)
 { }
+
+/****************************************************************************************************/
+
+panel_t::~panel_t()
+{ delete control_m; }
 
 /****************************************************************************************************/
 
@@ -64,7 +70,13 @@ void panel_t::place(const place_data_t& place_data)
 /*************************************************************************************************/
 
 void panel_t::set_visible(bool make_visible)
-{ set_control_visible(control_m, make_visible); }
+{
+    assert(parent_m);
+    if (make_visible)
+        parent_m->AttachChild(control_m);
+    else
+        parent_m->DetachChild(control_m);
+}
 
 /****************************************************************************************************/
 
@@ -73,6 +85,7 @@ platform_display_type insert<panel_t>(display_t&             display,
                                       platform_display_type& parent,
                                       panel_t&               element)
 {
+    element.parent_m = parent;
     element.control_m = new PanelWnd;
     return display.insert(parent, element.control_m);
 }

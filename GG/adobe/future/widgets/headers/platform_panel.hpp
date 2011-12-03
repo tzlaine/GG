@@ -9,6 +9,7 @@
 #ifndef ADOBE_PANEL_HPP
 #define ADOBE_PANEL_HPP
 
+#include <GG/Wnd.h>
 #include <GG/adobe/config.hpp>
 
 #include <boost/utility.hpp>
@@ -19,10 +20,6 @@
 #include <GG/adobe/widget_attributes.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
-
-namespace GG {
-    class Wnd;
-}
 
 /****************************************************************************************************/
 
@@ -36,6 +33,8 @@ struct panel_t : extents_slices_t, boost::noncopyable
 
     panel_t(const any_regular_t& show_value, theme_t theme);
 
+    ~panel_t();
+
     void        measure(extents_t& result);
 
     void        place(const place_data_t& place_data);
@@ -44,6 +43,7 @@ struct panel_t : extents_slices_t, boost::noncopyable
 
     void        set_visible(bool make_visible); 
 
+    GG::Wnd*         parent_m;
     GG::Wnd*         control_m;
     theme_t          theme_m;
     any_regular_t    show_value_m;

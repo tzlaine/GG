@@ -216,6 +216,9 @@ public:
     /** Basic ctor. */
     TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color = CLR_BLACK,
            TabBarStyle style = TAB_BAR_ATTACHED, Flags<WndFlag> flags = INTERACTIVE);
+
+    /** Dtor. */
+    ~TabBar();
     //@}
 
     /** \name Accessors */ ///@{

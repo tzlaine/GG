@@ -292,6 +292,9 @@ TabBar::TabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Cl
         Connect(TabChangedSignal, TabChangedEcho("TabBar::TabChangedSignal"));
 }
 
+TabBar::~TabBar()
+{ delete m_left_right_button_layout; }
+
 Pt TabBar::MinUsableSize() const
 {
     Y y(0);
@@ -433,9 +436,9 @@ void TabBar::BringTabIntoView(std::size_t index)
 void TabBar::UpdateLeftRightButtons()
 {
     if (Width() < m_tabs->Width())
-        m_left_right_button_layout->Show();
+        AttachChild(m_left_right_button_layout);
     else if (m_first_tab_shown == 0)
-        m_left_right_button_layout->Hide();
+        DetachChild(m_left_right_button_layout);
 
     m_left_button->Disable(m_first_tab_shown == 0);
     if (!m_tab_buttons.empty()) {

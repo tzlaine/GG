@@ -191,7 +191,7 @@
     \n
     \ref eve_container_layout_params
 
-    \param name The text that appears on the dialog box.
+    \param name The title text that appears on the dialog box.
     \param grow Whether the dialog box should be resizable (see GG::RESIZABLE).
     \param move Whether the dialog box should be movable (see GG::DRAGABLE).
     \param on_top Whether the dialog box should be always-on-top (see GG::ONTOP).

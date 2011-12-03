@@ -138,7 +138,7 @@ void MinimalGGApp::GLInit()
 }
 
 bool OkHandler(adobe::name_t name, const adobe::any_regular_t&)
-{ return name == adobe::static_name_t("ok"); }
+{ return name == adobe::static_name_t("ok") || name == adobe::static_name_t("cancel"); }
 
 void MinimalGGApp::Initialize()
 {

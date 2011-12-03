@@ -323,7 +323,34 @@
 */
 
 /** \page eve_tab_group tab_group()
-    TODO
+    tab_group() creates an tab group.  The tab_group layout defaults to \a
+    place_overlay.
+
+    \section eve_tab_group_interaction_semantics User Interaction Semantics
+
+    Clicking a new tab causes a value to be assigned to the bound cell, if
+    any.  The value assigned when clicking the tab "Foo" from the popup is \a
+    items[Foo].
+
+    \section eve_tab_group_adam_interaction Adam Interaction Notes
+
+    The popup expects the controller-bound Adam cell to set its value to one
+    of the values specified in \a items.  If any other value is set, TODO
+
+    \section eve_tab_group_usage tab_group() Usage
+
+    \code tab_group(param: value, param: value, ...); \endcode
+
+    \ref eve_common_layout_params
+    \n
+    \ref eve_container_layout_params
+
+    \param bind The cell in the Adam property sheet to which this button is bound.
+    \param items A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.
+
+    \note The idiomatic way to use tab_group is to populate it entirely with
+    \link eve_panel panels \endlink that are all bound to the same cell, so
+    that only one at a time is visible.
 */
 
 /** \page eve_button button()

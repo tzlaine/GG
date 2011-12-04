@@ -673,6 +673,10 @@ else:
     Synomyn for \ref eve_label.
 */
 
+/** \page eve_display_text display_text()
+    TODO
+*/
+
 /** \page eve_display_number display_number()
     display_number() creates a user-noninteractive number.
 
@@ -1023,6 +1027,7 @@ else:
     interactive portion of the view.  Column layouts usually align labeled
     views so that the right edge of each label is aligned.
 
+    - \ref eve_display_text
     - \ref eve_display_number
     - \ref eve_edit_number
     - \ref eve_edit_text

@@ -29,9 +29,11 @@ struct Checked
         {}
     void operator()(bool checked)
         {
-            m_checkbox.hit_proc_m(checked ?
-                                  adobe::any_regular_t(m_checkbox.true_value_m) :
-                                  adobe::any_regular_t(m_checkbox.false_value_m));
+            if (m_checkbox.hit_proc_m) {
+                m_checkbox.hit_proc_m(checked ?
+                                      adobe::any_regular_t(m_checkbox.true_value_m) :
+                                      adobe::any_regular_t(m_checkbox.false_value_m));
+            }
         }
     adobe::checkbox_t& m_checkbox;
 };

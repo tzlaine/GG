@@ -8,6 +8,8 @@
 
 #define ADOBE_DLL_SAFE 0
 
+#include <GG/EveGlue.h>
+
 #include <GG/adobe/future/modal_dialog_interface.hpp>
 #include <GG/adobe/future/platform_primitives.hpp>
 
@@ -106,8 +108,6 @@ widget_node_t make_window(const dictionary_t&     parameters,
 
     keyboard_t::iterator keyboard_token(
         token.client_holder_m.keyboard_m.insert(keyboard_t::iterator(), poly_key_handler_t(boost::ref(*widget))));
-
-    widget->window_m->SetKeyboard(token.client_holder_m.keyboard_m);
 
     //
     // Return the widget_node_t that comprises the tokens created for this widget by the various components

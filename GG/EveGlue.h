@@ -31,15 +31,29 @@
 #ifndef _EveGlue_h_
 #define _EveGlue_h_
 
+#include <GG/Wnd.h>
+
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/future/widgets/headers/display.hpp>
 
 #include <boost/function.hpp>
 
 
+namespace adobe {
+    struct keyboard_t;
+    struct modal_dialog_t;
+    struct window_t;
+    template <>
+    platform_display_type insert<window_t>(display_t&             display,
+                                           platform_display_type& parent,
+                                           window_t&              element);
+}
+
 namespace GG {
 
-class Wnd;
+class EveDialog;
+class TextControl;
 
 /** Contains the result of a modal dialog created by ExecuteModalDialog(). */
 struct ModalDialogResult
@@ -69,10 +83,63 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      ButtonHandler handler);
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
-    returns a dialog.  \see ButtonHandler. */
-Wnd* MakeDialog(std::istream& eve_definition,
-                std::istream& adam_definition,
-                ButtonHandler handler);
+    returns an EveDialog.  \see ButtonHandler. */
+EveDialog* MakeEveDialog(std::istream& eve_definition,
+                         std::istream& adam_definition,
+                         ButtonHandler handler);
+
+/** A GG Eve dialog that handles all the interaction with the Eve engine
+    (e.g. relayout on resize).  Must be created via MakeEveDialog(). */
+class EveDialog :
+    public Wnd
+{
+public:
+    virtual Pt ClientUpperLeft() const;
+    virtual Pt ClientLowerRight() const;
+    virtual WndRegion WindowRegion(const Pt& pt) const;
+
+    /** Returns the action that terminated the execution of the dialog, or an
+        empty adobe::name_t if the dialog has not yet been terminated. */
+    adobe::name_t TerminatingAction() const;
+
+    /** Returns the action that terminated the execution of the dialog.
+        Results are undefined if TerminatingAction().empty() is true. */
+    const adobe::dictionary_t& Result() const;
+
+    virtual void SizeMove(const Pt& ul, const Pt& lr);
+    virtual void Render();
+    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
+
+private:
+    EveDialog(adobe::window_t& imp);
+
+    void SetKeyboard(adobe::keyboard_t& keyboard);
+    void SetEveModalDialog(adobe::modal_dialog_t* modal_dialog);
+
+    adobe::window_t& m_imp;
+    TextControl* m_title;
+    adobe::keyboard_t* m_keyboard;
+    std::auto_ptr<adobe::modal_dialog_t> m_eve_modal_dialog;
+
+    static const unsigned int BEVEL;
+    static const int FRAME_WIDTH;
+    static const Pt BEVEL_OFFSET;
+
+    friend adobe::platform_display_type
+    adobe::insert<adobe::window_t>(adobe::display_t&,
+                                   adobe::platform_display_type&,
+                                   adobe::window_t&);
+
+
+    friend ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
+                                     std::istream& adam_definition,
+                                     ButtonHandler handler);
+
+    friend EveDialog* MakeEveDialog(std::istream& eve_definition,
+                                    std::istream& adam_definition,
+                                    ButtonHandler handler);
+};
 
 /** The type of function used to evaluate named-parameter functions in Adam
     and Eve expressions.  \see \ref eve_adding_user_functions. */

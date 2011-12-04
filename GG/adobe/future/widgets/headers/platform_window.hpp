@@ -29,7 +29,7 @@
 
 
 namespace GG {
-    class Window;
+    class EveDialog;
 }
 
 /****************************************************************************************************/
@@ -62,7 +62,7 @@ struct window_t
 
     bool handle_key(key_type key, bool pressed, modifiers_t modifiers);
 
-    GG::Window*            window_m;
+    GG::EveDialog*         window_m;
     GG::Flags<GG::WndFlag> flags_m;
     std::string            name_m;
     theme_t                theme_m;

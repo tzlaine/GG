@@ -29,45 +29,6 @@ struct window_t;
 
 /****************************************************************************************************/
 
-namespace GG {
-
-/****************************************************************************************************/
-
-// TODO: Put this into StyleFactory.
-class Window :
-    public Wnd
-{
-public:
-    static const unsigned int BEVEL = 2;
-
-    Window(adobe::window_t& imp);
-
-    virtual Pt ClientUpperLeft() const;
-    virtual Pt ClientLowerRight() const;
-    virtual WndRegion WindowRegion(const Pt& pt) const;
-    virtual void SizeMove(const Pt& ul, const Pt& lr);
-
-    virtual void Render();
-    virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-    virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
-
-    void SetKeyboard(adobe::keyboard_t& keyboard);
-    void SetEveModalDialog(adobe::modal_dialog_t* modal_dialog);
-
-private:
-    adobe::window_t& m_imp;
-    TextControl* m_title;
-    adobe::keyboard_t* m_keyboard;
-    std::auto_ptr<adobe::modal_dialog_t> m_eve_modal_dialog;
-
-    static const int FRAME_WIDTH;
-    static const Pt BEVEL_OFFSET;
-};
-
-/****************************************************************************************************/
-
-} // namespace GG
-
 namespace adobe {
 
 /****************************************************************************************************/
@@ -224,6 +185,8 @@ public:
 
     /* Clients: no need to call these. */
     void display(const model_type& value);
+    keyboard_t& keyboard();
+    const dialog_result_t& result();
 
 private:
     void              latch_callback(name_t action, const any_regular_t&);

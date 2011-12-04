@@ -16,6 +16,7 @@
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/keyboard.hpp>
 
+#include <GG/EveGlue.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 
@@ -169,7 +170,7 @@ platform_display_type insert<window_t>(display_t&             display,
     assert(!element.window_m);
     assert(!parent);
 
-    element.window_m = new GG::Window(element);
+    element.window_m = new GG::EveDialog(element);
 
     return display.insert(parent, element.window_m);
 }

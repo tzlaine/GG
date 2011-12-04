@@ -21,122 +21,6 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/keyboard.hpp>
 
-#include <GG/DrawUtil.h>
-#include <GG/GUI.h>
-#include <GG/StyleFactory.h>
-#include <GG/TextControl.h>
-#include <GG/Wnd.h>
-
-
-/****************************************************************************************************/
-
-namespace GG {
-
-/****************************************************************************************************/
-
-    const int Window::FRAME_WIDTH = 2;
-    const Pt Window::BEVEL_OFFSET(X(Window::FRAME_WIDTH), Y(Window::FRAME_WIDTH));
-
-    Window::Window(adobe::window_t& imp) :
-        Wnd(X0, Y0, X1, Y1, imp.flags_m),
-        m_imp(imp),
-        m_title(0),
-        m_keyboard(0)
-    {
-        if (!m_imp.name_m.empty()) {
-            m_title = adobe::implementation::Factory().NewTextControl(
-                BEVEL_OFFSET.x, BEVEL_OFFSET.y - adobe::implementation::CharHeight(),
-                m_imp.name_m, adobe::implementation::DefaultFont()
-            );
-            AttachChild(m_title);
-        }
-    }
-
-    Pt Window::ClientUpperLeft() const
-    { return UpperLeft() + BEVEL_OFFSET + Pt(X0, m_title ? m_title->Height() : Y0); }
-
-    Pt Window::ClientLowerRight() const
-    { return LowerRight() - BEVEL_OFFSET; }
-
-    WndRegion Window::WindowRegion(const Pt& pt) const
-    {
-        enum {LEFT = 0, MIDDLE = 1, RIGHT = 2};
-        enum {TOP = 0, BOTTOM = 2};
-
-        // window regions look like this:
-        // 0111112
-        // 3444445   // 4 is client area, 0,2,6,8 are corners
-        // 3444445
-        // 6777778
-
-        int x_pos = MIDDLE;   // default & typical case is that the mouse is over the (non-border) client area
-        int y_pos = MIDDLE;
-
-        Pt ul = UpperLeft() + BEVEL_OFFSET, lr = LowerRight() - BEVEL_OFFSET;
-
-        if (pt.x < ul.x)
-            x_pos = LEFT;
-        else if (pt.x > lr.x)
-            x_pos = RIGHT;
-
-        if (pt.y < ul.y)
-            y_pos = TOP;
-        else if (pt.y > lr.y)
-            y_pos = BOTTOM;
-
-        return (Resizable() ? WndRegion(x_pos + 3 * y_pos) : WR_NONE);
-    }
-
-    void Window::SizeMove(const Pt& ul, const Pt& lr)
-    {
-        Wnd::SizeMove(ul, lr);
-
-        Pt client_size = ClientSize();
-
-        if (!m_imp.debounce_m && !m_imp.resize_proc_m.empty()) {
-            m_imp.debounce_m = true;
-
-            if (adobe::width(m_imp.place_data_m) != Value(client_size.x) ||
-                adobe::height(m_imp.place_data_m) != Value(client_size.y)) {
-                m_imp.resize_proc_m(Value(client_size.x), Value(client_size.y));
-
-                adobe::width(m_imp.place_data_m) = Value(client_size.x);
-                adobe::height(m_imp.place_data_m) = Value(client_size.y);
-            }
-
-            m_imp.debounce_m = false;
-        }
-
-        Pt new_title_size((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
-        m_title->Resize(new_title_size);
-    }
-
-    void Window::Render()
-    { BeveledRectangle(UpperLeft(), LowerRight(), CLR_GRAY, CLR_GRAY, true, BEVEL); }
-
-    void Window::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-    {
-        assert(m_keyboard);
-        m_keyboard->dispatch(adobe::key_type(key, key_code_point),
-                             true,
-                             adobe::modifier_state());
-    }
-
-    void Window::KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
-    {
-        assert(m_keyboard);
-        m_keyboard->dispatch(adobe::key_type(key, key_code_point),
-                             false,
-                             adobe::modifier_state());
-    }
-
-    void Window::SetKeyboard(adobe::keyboard_t& keyboard)
-    { m_keyboard = &keyboard; }
-
-    void Window::SetEveModalDialog(adobe::modal_dialog_t* modal_dialog)
-    { m_eve_modal_dialog.reset(modal_dialog); }
-
-} // namespace GG
 
 /****************************************************************************************************/
 
@@ -359,6 +243,20 @@ catch(...)
 void modal_dialog_t::display(const model_type& value)
 {
     result_m.command_m = value.cast<dictionary_t>();
+}
+
+/****************************************************************************************************/
+
+keyboard_t& modal_dialog_t::keyboard()
+{
+    return view_m->keyboard_m;
+}
+
+/****************************************************************************************************/
+
+const dialog_result_t& modal_dialog_t::result()
+{
+    return result_m;
 }
 
 /****************************************************************************************************/

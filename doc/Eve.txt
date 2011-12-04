@@ -960,7 +960,134 @@ else:
 */
 
 /** \page eve_adding_user_views Adding User-Defined Eve Views
-    TODO
+
+    Users can define their own Eve views (widgets, layouts, etc.) and add them
+    to the Eve engine, to be used in Adam and Eve scripts just like the
+    built-in Eve views.
+
+    \section Overview
+
+    Most GG/Eve views consists of several parts:
+
+    \li \a G, a GG::Wnd-derived class implementing the visual and user-interface elements of the view. Some Eve views are implemented in terms of other views, and so do not directly use an underlying \a G.
+    \li \a W, a widget type that Eve uses to represent the view.  The widget uses \a G in its implementation.
+    \li \a F, a factory function, and associated Eve factory code specializations for \a W.  \a F is registered and associated with a name, allowing the view to be used by name in Eve scripts.
+
+    The \ref eve_display_text view is not part of the Adobe set of Eve views;
+    it is a GG extension.  We will use it as an example here to demonstrate
+    how to hook a new view into the Eve engine.
+
+    First, a widget type must be defined.
+
+    \section platform_display_text_hpp platform_display_text.hpp:
+
+    In this example, the widget type is in namespace \a adobe, but this is not
+    necessary; the widget type may be declared in whatever namespace you find
+    convenient, and can have any name you like.
+
+    \dontinclude platform_display_text.hpp
+    \skip #ifndef
+    \until boost::noncopyable
+    \until {
+
+    \a model_type is the type of the value that this view is a view of.  In
+    this case, we use adobe::any_regular_t instead of std::string, because \a
+    display_text can accept other Adam and Eve expression types besides just
+    string (e.g. name).
+
+    \until int characters_m;
+
+    All Eve widgets require \a measure(), \a place(), and \a display().  This
+    one also requires \a measure_vertical(), since this widget models
+    PlaceableTwoPassConcept (see factory code below).
+
+    \until };
+
+    This function is used by the Eve code as a generic way to get a pointer to
+    the underlying GG::Wnd-derived object from any widget type.
+
+    \until #endif
+
+    \section platform_display_text_cpp platform_display_text.cpp:
+
+    Here is the actual implementation of the \a display_text_t widget.  Full
+    documentation of what all this code means is beyond the scope of this
+    document.  However, most of the code below is straightforward.  Moreover,
+    by following the pattern of the existing widget implementations, it should
+    be relatively straightforward to write an implementation like that below.
+
+    \dontinclude platform_display_text.cpp
+    \skip #include
+    \until return display.insert(parent, get_display(element));
+    \until }
+    \until }
+
+    Next, a factory function must be defined.
+
+    \section display_text_factory_hpp display_text_factory.hpp:
+    \dontinclude display_text_factory.hpp
+    \skip #ifndef
+    \until #endif
+
+    In this example, the factory function is in namespace \a
+    adobe::implementation, but this is not necessary; the factory function may
+    be declared in whatever namespace you find convenient, and can have any
+    name you like.  However, it must have the signature shown above.
+
+    \section display_text_factory_cpp display_text_factory.cpp:
+
+    The implementation of the factory function will reuse much of the Adobe
+    code.  In fact, the body of the actual factory function is often trivial,
+    as it is below.  However, there are other functions that must be defined
+    that the Adobe code requires.  The most typical kind of view only requires
+    you to define the factory function itself and \a create_widget() (see
+    below).  If your view is atypical in some way, as \a display_text_t is,
+    you should find a view with similar semantics, and pattern your factory
+    code after its factory implementation.
+
+    \dontinclude display_text_factory.cpp
+    \skip namespace adobe
+    \line namespace adobe
+
+    \a create_widget() is the other function that the Adobe code requires.  It
+    takes a dictionary of parameters, a size that is ignored in the current GG
+    implementation, and a reference to a pointer to the widget begin created.
+    \a create_widget() is called within \a create_and_hookup_widget<>() (see
+    below), and is responsible for grabbing the parameters relevant to the
+    view, and using them to construct the widget object.
+
+    \until new display_text_t
+    \until }
+
+    This function is not always required, but it is specialized here for \a
+    display_text_t so that the generic version called within \a
+    create_and_hookup_widget<>() is not called.  The generic version ties the
+    value of the view to its bound cell, so that when the view's value
+    changes, the bound cell is assigned the new value.  However, \a
+    display_text_t is not supposed to assign to its controller-bound cell, so
+    this specialization is purposely a no-op.
+
+    \until const widget_factory_t& factory)
+    \until {
+
+    Here is the body of the factory function, and it is indeed trivial.  The
+    only thing to note here is the use of \a poly_placeable_twopass_t as the
+    second template parameter to \a create_and_hookup_widget<>().  \a
+    poly_placeable_t may be used as well.  \a poly_placeable_twopass_t applies
+    to a view whose height depends on its width.  \a poly_placeable_t is for a
+    view whose height and width are independent.  See the <a
+    href="http://stlab.adobe.com/group__placeable__concept.html">Adobe
+    documentation</a> for details.
+
+    \until factory.layout_attributes
+    \until }
+    \until }
+    \until }
+
+    Finally, somewhere, the factory function needs to be registered so that it
+    is actually available when an Eve script is parsed:
+
+    \code GG::RegisterView(adobe::static_name_t("display_text"), &adobe::implementation::make_display_text); \endcode
 */
 
 /** \page eve_overview The Eve Layout Engine

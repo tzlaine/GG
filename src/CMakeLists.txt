@@ -157,6 +157,11 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
         adobe/future/widgets/sources/platform_toggle.cpp
         adobe/future/widgets/sources/platform_widget_utils.cpp
         adobe/future/widgets/sources/platform_window.cpp
+
+        # GG extensions to the Adobe Eve widget set
+        adobe/future/widgets/sources/GG/display_text_factory.cpp
+
+        adobe/future/widgets/sources/GG/platform_display_text.cpp
     )
 endif ()
 

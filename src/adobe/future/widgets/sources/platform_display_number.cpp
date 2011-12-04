@@ -26,7 +26,7 @@ namespace {
 
 /****************************************************************************************************/
 
-std::string set_field_text(std::string                       label,
+std::string set_field_text(const std::string&                label,
                            double                            value,
                            const std::vector<adobe::unit_t>& unit_set)
 {
@@ -161,7 +161,8 @@ platform_display_type insert<display_number_t>(display_t& display,
 {
     element.window_m =
         implementation::Factory().NewTextControl(GG::X0, GG::Y0, GG::X1, GG::Y1,
-                                                 element.name_m, implementation::DefaultFont());
+                                                 element.name_m, implementation::DefaultFont(),
+                                                 GG::CLR_BLACK, GG::FORMAT_NONE, GG::INTERACTIVE);
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);

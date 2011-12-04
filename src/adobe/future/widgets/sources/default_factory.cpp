@@ -209,7 +209,7 @@ widget_node_t overlay_factory(const dictionary_t&     parameters,
 
 /*************************************************************************************************/
 
-const widget_factory_t& default_asl_widget_factory()
+widget_factory_t& default_asl_widget_factory()
 {
     static bool             inited(false);
     static widget_factory_t default_factory_s;

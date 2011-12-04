@@ -249,3 +249,9 @@ void GG::RegisterDictionaryFunction(adobe::name_t function_name, const Dictionar
 
 void GG::RegisterArrayFunction(adobe::name_t function_name, const ArrayFunction& function)
 { ArrayFunctions().push_back(std::make_pair(function_name, function)); }
+
+void GG::RegisterView(adobe::name_t name,
+                      const MakeViewFunction& method,
+                      bool container/* = false*/,
+                      const adobe::layout_attributes_t& layout_attributes/* = adobe::layout_attributes_t()*/)
+{ adobe::default_asl_widget_factory().reg(name, method, container, layout_attributes); }

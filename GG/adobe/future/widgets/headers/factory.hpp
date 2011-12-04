@@ -322,7 +322,7 @@ widget_node_t overlay_factory(const dictionary_t& parameters, const widget_node_
 /// Note, however, that some ASL widget implementations expect other ASL implementations to exist
 /// (e.g., edit_number has dependencies on edit_text, label, etc.)
 //
-const widget_factory_t& default_asl_widget_factory();
+widget_factory_t& default_asl_widget_factory();
 
 /*************************************************************************************************/
 

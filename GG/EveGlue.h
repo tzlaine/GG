@@ -35,19 +35,23 @@
 
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 
 #include <boost/function.hpp>
 
 
 namespace adobe {
+    struct factory_token_t;
     struct keyboard_t;
     struct modal_dialog_t;
+    struct widget_factory_t;
+    struct widget_node_t;
     struct window_t;
     template <>
-    platform_display_type insert<window_t>(display_t&             display,
+    platform_display_type insert<window_t>(display_t& display,
                                            platform_display_type& parent,
-                                           window_t&              element);
+                                           window_t& element);
 }
 
 namespace GG {
@@ -158,6 +162,20 @@ void RegisterDictionaryFunction(adobe::name_t function_name, const DictionaryFun
     positional-parameter function in Adam and Eve expressions.  \see \ref
     eve_adding_user_functions. */
 void RegisterArrayFunction(adobe::name_t function_name, const ArrayFunction& function);
+
+/** The type of function used to instantiate a user-defined Eve view.  \see
+    \ref eve_adding_user_views. */
+typedef boost::function<adobe::widget_node_t (const adobe::dictionary_t&,
+                                              const adobe::widget_node_t&,
+                                              const adobe::factory_token_t&,
+                                              const adobe::widget_factory_t&)> MakeViewFunction;
+
+/** Registers user-defined Eve view \a name, for use in Eve sheets.  \see \ref
+    eve_adding_user_views. */
+void RegisterView(adobe::name_t name,
+                  const MakeViewFunction& method,
+                  bool container = false,
+                  const adobe::layout_attributes_t& layout_attributes = adobe::layout_attributes_t());
 
 }
 

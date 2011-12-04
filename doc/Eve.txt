@@ -930,6 +930,10 @@ else:
     throw std::runtime_error when called with the wrong number of parameters.
 */
 
+/** \page eve_adding_user_views Adding User-Defined Eve Views
+    TODO
+*/
+
 /** \page eve_overview The Eve Layout Engine
     Eve is a scripting language for specifying UIs, and a runtime library that
     acts as a layout solver.  It interoperates with the Adam property model
@@ -946,6 +950,8 @@ else:
     Adam and Eve expressions support several built-in functions.  It is
     possible for users to add their own functions as well.
 
+    \link eve_adding_user_functions Adding User-Defined Functions \endlink
+
     - \ref eve_expression_typeof_fn
     - \ref eve_expression_min_fn
     - \ref eve_expression_max_fn
@@ -953,8 +959,6 @@ else:
     - \ref eve_expression_localize_fn
     - \ref eve_expression_scale_fn
     - \ref eve_expression_image_fn
-
-    \link eve_adding_user_functions Adding User-Defined Functions \endlink
 
     \section eve_views Views
 
@@ -978,6 +982,8 @@ else:
     considered first, before Adam sheet cells.  If a view binds to a cell foo,
     and both its Adam and Eve sheets have cells called foo, the Eve cell will
     be bound.
+
+    \link eve_adding_user_views Adding User-Defined Views \endlink
 
     \section eve_containers Containers
 
@@ -1028,6 +1034,4 @@ else:
     - \ref eve_number_unit
     - \ref eve_alignments
     - \ref eve_modifier_keys
-
-    TODO User-added views
 */

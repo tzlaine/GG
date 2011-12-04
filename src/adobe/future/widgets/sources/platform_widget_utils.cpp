@@ -69,12 +69,12 @@ GG::Pt NonClientSize(GG::Wnd& w)
 
 bool pick_file(boost::filesystem::path& path)
 {
-    boost::shared_ptr<GG::StyleFactory> style(GG::GUI::GetGUI()->GetStyleFactory());
-    assert(style->DefaultFont());
+    GG::StyleFactory& style(Factory());
+    assert(style.DefaultFont());
 
     std::auto_ptr<GG::FileDlg> dlg(
-        style->NewFileDlg("", "", false, false,
-                          style->DefaultFont(), GG::CLR_GRAY, GG::CLR_GRAY));
+        style.NewFileDlg("", "", false, false, style.DefaultFont(), GG::CLR_GRAY, GG::CLR_GRAY)
+    );
     dlg->Run();
     assert(dlg->Result().size() <= 1u);
 
@@ -90,12 +90,12 @@ bool pick_file(boost::filesystem::path& path)
 
 bool pick_save_path(boost::filesystem::path& path)
 {
-    boost::shared_ptr<GG::StyleFactory> style(GG::GUI::GetGUI()->GetStyleFactory());
-    assert(style->DefaultFont());
+    GG::StyleFactory& style(Factory());
+    assert(style.DefaultFont());
 
     std::auto_ptr<GG::FileDlg> dlg(
-        style->NewFileDlg("", "", true, false,
-                          style->DefaultFont(), GG::CLR_GRAY, GG::CLR_GRAY));
+        style.NewFileDlg("", "", true, false, style.DefaultFont(), GG::CLR_GRAY, GG::CLR_GRAY)
+    );
     dlg->SelectDirectories(true);
     dlg->Run();
     assert(dlg->Result().size() <= 1u);
@@ -111,7 +111,14 @@ bool pick_save_path(boost::filesystem::path& path)
 /****************************************************************************************************/
 
 void set_control_alt_text(GG::Wnd* control, const std::string& alt_text)
-{ control->SetBrowseText(alt_text); }
+{
+    if (control->BrowseModes().empty())
+        control->SetBrowseModeTime(100);
+    if (!control->BrowseModes().front().wnd)
+        control->SetBrowseInfoWnd(Factory().DefaultBrowseInfoWnd());
+    control->SetBrowseText(alt_text);
+    
+}
 
 /****************************************************************************************************/
 
@@ -177,17 +184,18 @@ bool context_menu(const GG::Pt& pt,
                   const name_t* last,
                   name_t& result)
 {
-    boost::shared_ptr<GG::StyleFactory> style(GG::GUI::GetGUI()->GetStyleFactory());
-    assert(style->DefaultFont());
+    GG::StyleFactory& style(implementation::Factory());
+    assert(style.DefaultFont());
 
     int id = 1;
     GG::MenuItem items;
     for (const name_t* it = first; it != last; ++it, ++id) {
         items.next_level.push_back(
-            GG::MenuItem(static_cast<std::string>(it->c_str()), id, false, false));
+            GG::MenuItem(static_cast<std::string>(it->c_str()), id, false, false)
+        );
     }
 
-    GG::PopupMenu popup(pt.x, pt.y, style->DefaultFont(), items);
+    GG::PopupMenu popup(pt.x, pt.y, style.DefaultFont(), items);
     int result_id = popup.Run();
 
     if (result_id)

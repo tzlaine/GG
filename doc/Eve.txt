@@ -6,6 +6,8 @@
     Define contributing ... TODO
 
     Describe disabling semantics ... TODO
+
+    Describe the behavior when an object of the wrong type is supplied to a function or view (an exception is thrown), and how to spot that in the documentation ... TODO
 */
 
 
@@ -485,8 +487,8 @@ else:
 
     \section eve_control_button_adam_interaction Adam Interaction Notes
 
-    The control_button will assign \a expression to its bound cell.  Changes
-    to the bound cell are not reflected in the control_button.
+    The control_button will assign \a expression to its controller-bound cell.
+    Changes to the bound cell are not reflected in the control_button.
 
     \section eve_control_button_usage control_button() Usage
 
@@ -523,8 +525,9 @@ else:
 
     The image expects the view-bound Adam cell to set a texture.  The built-in
     function \ref eve_expression_image_fn can be used to specify a texture.
-    The image emits metadata, as described above.  This makes using \a bind
-    problematic.  \a bind_controller and \a bind_view should be used instead.
+    The image assigns its metadata, as described above, to the
+    controller-bound cell.  This makes using plain \a bind problematic.  \a
+    bind_controller and \a bind_view should be used instead.
 
     \section eve_image_usage image() Usage
 
@@ -674,7 +677,28 @@ else:
 */
 
 /** \page eve_display_text display_text()
-    TODO
+    display_text() creates a user-noninteractive labeled text view.
+
+    \section eve_display_text_interaction_semantics User Interaction Semantics
+
+    Eve display_texts are non-interactive.
+
+    \section eve_image_adam_interaction Adam Interaction Notes
+
+    The popup expects the controller-bound Adam cell to set its value to a
+    string, name, boolean, number, or empty.  Boolean values are displayed as
+    "1" or "0".  Numbers are displayed using the default C++ iostreams
+    formatting.  Empty values are displayed as "".
+
+    \section eve_display_text_usage display_text() Usage
+
+    \code display_text(param: value, param: value, ...); \endcode
+
+    \ref eve_common_view_params
+
+    \param name The text label that appears to the left of the display_text.
+    \param alt The tooltip text that appears when the cursor hovers over the display_text.
+    \param characters The minimum width of the display_text, in text of characters.
 */
 
 /** \page eve_display_number display_number()
@@ -686,7 +710,8 @@ else:
 
     \section eve_image_adam_interaction Adam Interaction Notes
 
-    Eve display_numbers do not interact with Adam property sheets.
+    The popup expects the controller-bound Adam cell to set its value to a
+    number.
 
     \section eve_display_number_usage display_number() Usage
 
@@ -734,9 +759,9 @@ else:
 
     \section eve_image_adam_interaction Adam Interaction Notes
 
-    The edit_number expects the bound Adam cell to set a number.  The popup
-    portion of the edit_number (if present) will only set the bound Adam cell
-    (to the string name of its current unit), but will not change if the bound
+    The edit_number expects the controller-bound Adam cell to set a number.
+    The popup portion of the edit_number (if present) will set \a bind_units
+    to the string name of its current unit, but will not change if the bound
     value changes.
 
     \section eve_edit_number_usage edit_number() Usage
@@ -767,7 +792,7 @@ else:
 
     \section eve_image_adam_interaction Adam Interaction Notes
 
-    The edit_text expects the bound Adam cell to set a string.
+    The edit_text expects the controller-bound Adam cell to set a string.
 
     \section eve_edit_text_usage edit_text() Usage
 
@@ -976,7 +1001,7 @@ else:
     Note that all views are constructed with a function-like syntax, with a
     named-parameter interface.  Adding extra named parameters that don't apply
     to a certain view have no effect.  For instance, it is always fine to add
-    \code foo: "bar" \endcode to any view in an Eve sheet.
+    the parameter \code foo: "bar" \endcode to any view in an Eve sheet.
 
     \note Eve layouts can contain property cells, like those in an Adam
     property sheet.  In the documentation pages below, reference is often

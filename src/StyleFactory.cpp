@@ -24,6 +24,7 @@
 
 #include <GG/StyleFactory.h>
 
+#include <GG/BrowseInfoWnd.h>
 #include <GG/Button.h>
 #include <GG/DropDownList.h>
 #include <GG/DynamicGraphic.h>
@@ -79,6 +80,13 @@ const std::string& StyleFactory::DefaultFontName() const
 {
     static std::string retval = DEFAULT_FONT_NAME;
     return retval;
+}
+
+const boost::shared_ptr<BrowseInfoWnd>& StyleFactory::DefaultBrowseInfoWnd()
+{
+    if (!m_browse_info_wnd)
+        m_browse_info_wnd.reset(new TextBoxBrowseInfoWnd(X1, DefaultFont(), CLR_GRAY, CLR_BLACK, CLR_BLACK));
+    return m_browse_info_wnd;
 }
 
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,

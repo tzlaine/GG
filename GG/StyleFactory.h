@@ -98,6 +98,9 @@ public:
     /** The filename of the font returned by DefaultFont(). */
     virtual const std::string& DefaultFontName() const;
 
+    /** Returns the BrowseInfoWnd to be used with this style. */
+    const boost::shared_ptr<BrowseInfoWnd>& DefaultBrowseInfoWnd();
+
     /** \name Controls */ ///@{
     /** Returns a new GG Button. */
     virtual Button*            NewButton(X x, Y y, X w, Y h, const std::string& str,
@@ -323,6 +326,9 @@ public:
     /** Deletes \a wnd.  It is only necessary to use this method to destroy
         Wnds when the factory that created them exists in a plugin. */
     virtual void               DeleteWnd(Wnd* wnd) const;
+
+private:
+    boost::shared_ptr<BrowseInfoWnd> m_browse_info_wnd;
 };
 
 } // namespace GG

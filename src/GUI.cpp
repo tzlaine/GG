@@ -957,7 +957,7 @@ boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned 
 boost::shared_ptr<Font> GUI::GetFont(const boost::shared_ptr<Font>& font, unsigned int pts)
 {
     boost::shared_ptr<Font> retval;
-    if (font->FontName() == StyleFactory::DefaultFontName()) {
+    if (font->FontName() == GetStyleFactory()->DefaultFontName()) {
         retval = GetStyleFactory()->DefaultFont(pts);
     } else {
         retval = GetFont(font->FontName(), font->PointSize(),

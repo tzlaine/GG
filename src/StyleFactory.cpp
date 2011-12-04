@@ -75,6 +75,12 @@ boost::shared_ptr<Font> StyleFactory::DefaultFont(unsigned int pts,
     }
 }
 
+const std::string& StyleFactory::DefaultFontName() const
+{
+    static std::string retval = DEFAULT_FONT_NAME;
+    return retval;
+}
+
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const
 { return new Button(x, y, w, h, str, font, color, text_color, flags); }
@@ -298,9 +304,3 @@ ThreeButtonDlg* StyleFactory::NewThreeButtonDlg(X w, Y h, const std::string& msg
 
 void StyleFactory::DeleteWnd(Wnd* wnd) const
 { delete wnd; }
-
-const std::string& StyleFactory::DefaultFontName()
-{
-    static std::string retval = DEFAULT_FONT_NAME;
-    return retval;
-}

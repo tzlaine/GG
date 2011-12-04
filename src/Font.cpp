@@ -1508,7 +1508,7 @@ void Font::HandleTag(const boost::shared_ptr<FormattingTag>& tag, double* orig_c
 }
 
 bool Font::IsDefaultFont()
-{ return m_font_filename == StyleFactory::DefaultFontName(); }
+{ return m_font_filename == GG::GUI::GetGUI()->GetStyleFactory()->DefaultFontName(); }
 
 boost::shared_ptr<Font> Font::GetDefaultFont(unsigned int pts)
 { return GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(pts); }

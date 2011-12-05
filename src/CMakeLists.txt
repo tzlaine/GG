@@ -160,8 +160,10 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
 
         # GG extensions to the Adobe Eve widget set
         adobe/future/widgets/sources/GG/display_text_factory.cpp
+        adobe/future/widgets/sources/GG/listbox_factory.cpp
 
         adobe/future/widgets/sources/GG/platform_display_text.cpp
+        adobe/future/widgets/sources/GG/platform_listbox.cpp
 
         adobe/future/widgets/sources/GG/functions.cpp
     )

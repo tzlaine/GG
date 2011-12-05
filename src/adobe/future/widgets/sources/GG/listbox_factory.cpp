@@ -74,12 +74,10 @@ namespace adobe {
             );
         }
 
-        listbox_t::item_set_t::value_type* first_value(item_set.empty() ? 0 : &item_set[0]);
-
         if (!rows && items.empty())
             rows = 8;
 
-        listbox = new listbox_t(name, alt_text, characters, rows, first_value, first_value + item_set.size());
+        listbox = new listbox_t(name, alt_text, characters, rows, item_set);
     }
 
     namespace implementation {

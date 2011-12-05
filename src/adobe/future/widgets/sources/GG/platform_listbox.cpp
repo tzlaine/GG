@@ -59,13 +59,6 @@ namespace {
         }
     }
 
-    void set_item_set(adobe::listbox_t& p, const adobe::listbox_t::item_t* first, const adobe::listbox_t::item_t* last)
-    {
-        for (; first != last; ++first) {
-            p.items_m.push_back(*first);
-        }
-    }
-
     void message_item_set(adobe::listbox_t& listbox)
     {
         assert(listbox.control_m);
@@ -90,15 +83,15 @@ namespace adobe {
                          const std::string& alt_text,
                          int characters,
                          int rows,
-                         const item_t* first,
-                         const item_t* last) :
+                         const item_set_t& items) :
         control_m(0),
         name_m(name, alt_text, 0, GG::FORMAT_NONE, theme_t()),
         alt_text_m(alt_text),
         using_label_m(!name.empty()),
+        items_m(items),
         characters_m(characters),
         rows_m(rows)
-    { ::set_item_set(*this, first, last); }
+    {}
 
     void listbox_t::measure(extents_t& result)
     {
@@ -217,7 +210,9 @@ namespace adobe {
     {
         assert(control_m);
         clear_items(*this);
-        ::set_item_set(*this, first, last);
+        for (; first != last; ++first) {
+            items_m.push_back(*first);
+        }
         ::message_item_set(*this);
     }
 
@@ -235,29 +230,6 @@ namespace adobe {
             }
         }
     }
-
-#if 0
-    void listbox_t::select_with_text(const std::string& text)
-    {
-        assert(control_m);
-
-        std::size_t old_index(control_m->CurrentItemIndex());
-
-        std::size_t new_index = std::numeric_limits<std::size_t>::max();
-        for (std::size_t i = 0; i < items_m.size(); ++i) {
-            if (items_m[i].first == text) {
-                new_index = i;
-                break;
-            }
-        }
-
-        if (new_index < items_m.size())
-            control_m->Select(new_index);
-
-        if (new_index != old_index && !value_proc_m.empty())
-            value_proc_m(items_m.at(new_index).second);
-    }
-#endif
 
     void listbox_t::monitor(const setter_type& proc)
     {

@@ -52,22 +52,10 @@ namespace adobe {
                   const std::string& alt_text,
                   int characters,
                   int rows,
-                  const item_t* first,
-                  const item_t* last);
+                  const item_set_t& items);
 
         void reset_item_set(const item_t* first, const item_t* last);
 
-        inline void reset_item_set(const item_set_t& item_set)
-            {
-                if (item_set.empty())
-                    reset_item_set(0, 0);
-                else
-                    reset_item_set(&item_set[0], &item_set[0] + item_set.size());
-            }
-
-#if 0
-        void select_with_text(const std::string& text);
-#endif
         void measure(extents_t& result);
         void place(const place_data_t& place_data);
         void display(const any_regular_t& item);

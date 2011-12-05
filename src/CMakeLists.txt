@@ -162,6 +162,8 @@ if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
         adobe/future/widgets/sources/GG/display_text_factory.cpp
 
         adobe/future/widgets/sources/GG/platform_display_text.cpp
+
+        adobe/future/widgets/sources/GG/functions.cpp
     )
 endif ()
 

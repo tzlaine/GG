@@ -186,6 +186,12 @@ public:
     /** Blit sub-texture unscaled to \a pt (upper left corner) \see
         GG::Texture::OrthoBlit*/
     void OrthoBlit(const Pt& pt) const;
+
+    /** Equality operator. */
+    bool operator==(const SubTexture& rhs) const;
+
+    /** Inequality operator. */
+    bool operator!=(const SubTexture& rhs) const;
     //@}
 
     /** \name Exceptions */ ///@{

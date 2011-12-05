@@ -618,6 +618,21 @@ void SubTexture::OrthoBlit(const Pt& pt1, const Pt& pt2) const
 void SubTexture::OrthoBlit(const Pt& pt) const
 { if (m_texture) m_texture->OrthoBlit(pt, pt + Pt(m_width, m_height), m_tex_coords); }
 
+bool SubTexture::operator==(const SubTexture& rhs) const
+{
+    return
+        m_texture == rhs.m_texture &&
+        m_width == rhs.m_width &&
+        m_height == rhs.m_height &&
+        m_tex_coords[0] == rhs.m_tex_coords[0] &&
+        m_tex_coords[1] == rhs.m_tex_coords[1] &&
+        m_tex_coords[2] == rhs.m_tex_coords[2] &&
+        m_tex_coords[3] == rhs.m_tex_coords[3];
+}
+
+bool SubTexture::operator!=(const SubTexture& rhs) const
+{ return !(*this == rhs); }
+
 
 ///////////////////////////////////////
 // class GG::TextureManager

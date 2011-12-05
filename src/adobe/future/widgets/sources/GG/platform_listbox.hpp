@@ -52,6 +52,8 @@ namespace adobe {
                   const std::string& alt_text,
                   int characters,
                   int rows,
+                  int width,
+                  int height,
                   const item_set_t& items);
 
         void reset_item_set(const item_t* first, const item_t* last);
@@ -71,6 +73,8 @@ namespace adobe {
         item_set_t items_m;
         int characters_m;
         int rows_m;
+        int width_m;
+        int height_m;
     };
 
     namespace view_implementation {

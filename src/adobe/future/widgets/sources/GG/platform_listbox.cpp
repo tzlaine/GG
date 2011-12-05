@@ -83,6 +83,8 @@ namespace adobe {
                          const std::string& alt_text,
                          int characters,
                          int rows,
+                         int width,
+                         int height,
                          const item_set_t& items) :
         control_m(0),
         name_m(name, alt_text, 0, GG::FORMAT_NONE, theme_t()),
@@ -90,7 +92,9 @@ namespace adobe {
         using_label_m(!name.empty()),
         items_m(items),
         characters_m(characters),
-        rows_m(rows)
+        rows_m(rows),
+        width_m(width),
+        height_m(height)
     {}
 
     void listbox_t::measure(extents_t& result)

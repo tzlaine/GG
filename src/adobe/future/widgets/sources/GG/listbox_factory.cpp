@@ -56,12 +56,17 @@ namespace adobe {
         std::string alt_text;
         long characters(50);
         long rows(0);
+        long width(0);
+        long height(0);
         array_t items;
         listbox_t::item_set_t item_set;
 
         get_value(parameters, key_name, name);
         get_value(parameters, key_alt_text, alt_text);
         get_value(parameters, key_characters, characters);
+        get_value(parameters, static_name_t("rows"), rows);
+        get_value(parameters, static_name_t("width"), width);
+        get_value(parameters, static_name_t("height"), height);
         get_value(parameters, key_items, items);
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
@@ -77,7 +82,7 @@ namespace adobe {
         if (!rows && items.empty())
             rows = 8;
 
-        listbox = new listbox_t(name, alt_text, characters, rows, item_set);
+        listbox = new listbox_t(name, alt_text, characters, rows, width, height, item_set);
     }
 
     namespace implementation {

@@ -846,6 +846,10 @@ else:
     \param custom_item_name The name of the custom item in the popup.
 */
 
+/** \page eve_listbox listbox()
+    TODO
+*/
+
 /** \page eve_number_format Number Format
     Eve number format strings control how numbers are displayed in Eve.  The
     format string is searched for a decimal point, and the number of
@@ -1184,6 +1188,7 @@ else:
     - \ref eve_edit_number
     - \ref eve_edit_text
     - \ref eve_popup
+    - \ref eve_listbox
 
     \section eve_misc_reference Miscellaneous Reference
 

@@ -6,6 +6,8 @@
 
 /*************************************************************************************************/
 
+#include <GG/EveParser.h>
+
 #include <GG/adobe/adam.hpp>
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/cmath.hpp>
@@ -274,7 +276,7 @@ namespace adobe {
 
 /*************************************************************************************************/
 
-auto_ptr<eve_client_holder> make_view(name_t                                 file_path,
+auto_ptr<eve_client_holder> make_view(const std::string&                     stream_source,
                                       const line_position_t::getline_proc_t& getline_proc,
                                       std::istream&                          stream,
                                       sheet_t&                               sheet,
@@ -300,16 +302,19 @@ auto_ptr<eve_client_holder> make_view(name_t                                 fil
         empty eve iterator and the given dialog size.
     */
     get_main_display().set_root(display_root);
-    parse(stream,
-                 line_position_t(file_path, getline_proc),
-                 widget_node_t(dialog_size,
-                                      eve_t::iterator(),
-                                      get_main_display().root(),
-                                      keyboard_t::iterator()),
-                 bind_layout(boost::bind(&client_assembler,
-                                         boost::ref(token), _1, _2, _3, boost::cref(proc)),
-                             result->layout_sheet_m,
-                             evaluator));
+    std::string stream_contents;
+    std::getline(stream, stream_contents, '\0');
+    if (!GG::Parse(stream_contents,
+                   stream_source,
+                   widget_node_t(dialog_size,
+                                 eve_t::iterator(),
+                                 get_main_display().root(),
+                                 keyboard_t::iterator()),
+                   bind_layout(boost::bind(&client_assembler, boost::ref(token), _1, _2, _3, boost::cref(proc)),
+                               result->layout_sheet_m,
+                               evaluator))) {
+        throw std::logic_error("Eve parse failed.");
+    }
     
     result->contributing_m = sheet.contributing();
 

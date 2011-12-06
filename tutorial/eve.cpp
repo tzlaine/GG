@@ -168,7 +168,7 @@ void EveGGApp::Initialize()
 "    result <== { dummy_value: 42 };\n"
 "}");
 
-    GG::ExecuteModalDialog(eve, adam, &OkHandler);
+    GG::ExecuteModalDialog(eve, "inline eve code", adam, "inline adam code", &OkHandler);
 
     Exit(0);
 }

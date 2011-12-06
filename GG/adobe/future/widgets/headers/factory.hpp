@@ -358,7 +358,7 @@ inline widget_factory_proc_t default_widget_factory_proc()
 
 /*************************************************************************************************/
 
-adobe::auto_ptr<eve_client_holder> make_view(name_t                                 file_name,
+adobe::auto_ptr<eve_client_holder> make_view(const std::string&                     stream_source,
                                              const line_position_t::getline_proc_t& getline_proc,
                                              std::istream&                          stream,
                                              sheet_t&                               sheet,

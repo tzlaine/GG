@@ -142,8 +142,8 @@ bool OkHandler(adobe::name_t name, const adobe::any_regular_t&)
 
 void MinimalGGApp::Initialize()
 {
-    std::ifstream eve(g_eve_file);
-    std::ifstream adam(g_adam_file);
+    boost::filesystem::path eve(g_eve_file);
+    boost::filesystem::path adam(g_adam_file);
     std::auto_ptr<GG::EveDialog> eve_dialog(GG::MakeEveDialog(eve, adam, &OkHandler));
 
     boost::filesystem::path input(g_eve_file);

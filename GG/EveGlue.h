@@ -39,6 +39,7 @@
 #include <GG/adobe/future/widgets/headers/display.hpp>
 
 #include <boost/function.hpp>
+#include <boost/filesystem/path.hpp>
 
 
 namespace adobe {
@@ -82,14 +83,30 @@ typedef boost::function <bool (adobe::name_t, const adobe::any_regular_t&)> Butt
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler. */
+ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definition,
+                                     const boost::filesystem::path& adam_definition,
+                                     ButtonHandler handler);
+
+/** Returns the result of executing the modal dialog described by \a
+    eve_definition and \a adam_definition.  \see ButtonHandler. */
 ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
+                                     const std::string& eve_filename,
                                      std::istream& adam_definition,
+                                     const std::string& adam_filename,
                                      ButtonHandler handler);
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  \see ButtonHandler. */
+EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
+                         const boost::filesystem::path& adam_definition,
+                         ButtonHandler handler);
+
+/** Parses \a eve_definition and \a adam_definition, then instantiates and
+    returns an EveDialog.  \see ButtonHandler. */
 EveDialog* MakeEveDialog(std::istream& eve_definition,
+                         const std::string& eve_filename,
                          std::istream& adam_definition,
+                         const std::string& adam_filename,
                          ButtonHandler handler);
 
 /** A GG Eve dialog that handles all the interaction with the Eve engine
@@ -137,11 +154,15 @@ private:
 
 
     friend ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
-                                     std::istream& adam_definition,
-                                     ButtonHandler handler);
+                                                const std::string& eve_filename,
+                                                std::istream& adam_definition,
+                                                const std::string& adam_filename,
+                                                ButtonHandler handler);
 
     friend EveDialog* MakeEveDialog(std::istream& eve_definition,
+                                    const std::string& eve_filename,
                                     std::istream& adam_definition,
+                                    const std::string& adam_filename,
                                     ButtonHandler handler);
 };
 

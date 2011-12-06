@@ -66,7 +66,7 @@ void window_server_t::push_back(const char* name, size_enum_t dialog_size)
     
     sheet_m.update();
 
-    window_list_m.back() = make_view(   name_t(file_name.string().c_str()),
+    window_list_m.back() = make_view(   file_name.string(),
                                         line_position_t::getline_proc_t(),
                                         stream,
                                         sheet_m,
@@ -105,7 +105,7 @@ void window_server_t::push_back(std::istream&                                   
     //                          push_back API where this is filled in. It should be valid, lest the
     //                          user not know the erroneous file.
     //
-    window_list_m.back() = make_view(   name_t(path.string().c_str()),
+    window_list_m.back() = make_view(   path.string(),
                                         getline_proc,
                                         data,
                                         sheet_m,

@@ -32,6 +32,7 @@
 #include <GG/adobe/future/widgets/headers/platform_window.hpp>
 
 #include <boost/cast.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 
 using namespace GG;
@@ -164,8 +165,19 @@ void EveDialog::SetEveModalDialog(adobe::modal_dialog_t* modal_dialog)
 { m_eve_modal_dialog.reset(modal_dialog); }
 
 
+ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition,
+                                         const boost::filesystem::path& adam_definition,
+                                         ButtonHandler handler)
+{
+    boost::filesystem::ifstream eve_stream(eve_definition);
+    boost::filesystem::ifstream adam_stream(adam_definition);
+    return ExecuteModalDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), handler);
+}
+
 ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
+                                         const std::string& eve_filename,
                                          std::istream& adam_definition,
+                                         const std::string& adam_filename,
                                          ButtonHandler handler)
 {
     ModalDialogResult retval;
@@ -194,7 +206,7 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
         dialog->vm_lookup_m.insert_array_function(it->first, it->second);
     }
 
-    std::auto_ptr<Wnd> w(dialog->init(eve_definition, adam_definition));
+    std::auto_ptr<Wnd> w(dialog->init(eve_definition, eve_filename, adam_definition, adam_filename));
     EveDialog* gg_dialog = boost::polymorphic_downcast<EveDialog*>(w.get());
     gg_dialog->SetKeyboard(dialog->keyboard());
     adobe::dialog_result_t adobe_result = dialog->go();
@@ -205,8 +217,19 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     return retval;
 }
 
+EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
+                             const boost::filesystem::path& adam_definition,
+                             ButtonHandler handler)
+{
+    boost::filesystem::ifstream eve_stream(eve_definition);
+    boost::filesystem::ifstream adam_stream(adam_definition);
+    return MakeEveDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), handler);
+}
+
 EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
+                             const std::string& eve_filename,
                              std::istream& adam_definition,
+                             const std::string& adam_filename,
                              ButtonHandler handler)
 {
     EveDialog* retval = 0;
@@ -235,7 +258,7 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
         dialog->vm_lookup_m.insert_array_function(it->first, it->second);
     }
 
-    Wnd* w = dialog->init(eve_definition, adam_definition);
+    Wnd* w = dialog->init(eve_definition, eve_filename, adam_definition, adam_filename);
     retval = boost::polymorphic_downcast<EveDialog*>(w);
 
     retval->SetKeyboard(dialog->keyboard());

@@ -45,7 +45,7 @@ widget_node_t sublayout_t::evaluate(const std::string&       sheet_description,
 
     std::stringstream layout_stream(layout_description);
 
-    sublayout_holder_m = make_view(static_name_t("sublayout layout"),
+    sublayout_holder_m = make_view("sublayout layout",
                                    line_position_t::getline_proc_t(),
                                    layout_stream,
                                    sublayout_sheet_m,

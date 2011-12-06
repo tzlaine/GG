@@ -8,6 +8,7 @@
 
 #define ADOBE_DLL_SAFE 0
 
+#include <GG/AdamParser.h>
 #include <GG/Wnd.h>
 
 #include <GG/adobe/config.hpp>
@@ -85,7 +86,10 @@ modal_dialog_t::modal_dialog_t() :
 
 /****************************************************************************************************/
 
-platform_display_type modal_dialog_t::init(std::istream& layout, std::istream& sheet)
+platform_display_type modal_dialog_t::init(std::istream& layout,
+                                           const std::string& layout_source,
+                                           std::istream& sheet,
+                                           const std::string& sheet_source)
 {
     resource_context_t res_context(working_directory_m);
 
@@ -98,18 +102,10 @@ platform_display_type modal_dialog_t::init(std::istream& layout, std::istream& s
     // Parse the proprty model stream
     //
 
-    try
-    {
-        parse( sheet, line_position_t( "Proprty model sheet definition" ), bind_to_sheet( sheet_m ) );
-    }
-    catch (const stream_error_t& error)
-    {
-        throw std::logic_error(format_stream_error(sheet, error));
-    }
-    catch (...)
-    {
-        throw; // here for completeness' sake
-    }
+    std::string sheet_contents;
+    std::getline(sheet, sheet_contents, '\0');
+    if (!GG::Parse(sheet_contents, sheet_source, bind_to_sheet(sheet_m)))
+        throw std::logic_error("Adam parse failed.");
 
     //
     // REVISIT (2006/09/28, fbrereto): The sheet initializers don't run until the first update().
@@ -167,16 +163,19 @@ platform_display_type modal_dialog_t::init(std::istream& layout, std::istream& s
     {
         line_position_t::getline_proc_t getline_proc(new line_position_t::getline_proc_impl_t(boost::bind(&mdi_error_getline, boost::ref(layout), _1, _2)));
 
-        view_m.reset( make_view( static_name_t( "eve definition" ),
-                                        getline_proc,
-                                        layout,
-                                        sheet_m,
-                                        root_behavior_m,
-                                        boost::bind(&modal_dialog_t::latch_callback, boost::ref(*this), _1, _2),
-                                        size_normal_s,
-                                        default_widget_factory_proc(),
-                                        parent_m).release()
-                                        );
+        view_m.reset(
+            make_view(
+                sheet_source,
+                getline_proc,
+                layout,
+                sheet_m,
+                root_behavior_m,
+                boost::bind(&modal_dialog_t::latch_callback, boost::ref(*this), _1, _2),
+                size_normal_s,
+                default_widget_factory_proc(),
+                parent_m
+            ).release()
+        );
 
         // Set up the view's sheet with display state values, etc.
         //

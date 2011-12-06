@@ -144,7 +144,7 @@ void MinimalGGApp::Initialize()
 {
     std::ifstream eve(g_eve_file);
     std::ifstream adam(g_adam_file);
-    GG::EveDialog* eve_dialog = GG::MakeEveDialog(eve, adam, &OkHandler);
+    std::auto_ptr<GG::EveDialog> eve_dialog(GG::MakeEveDialog(eve, adam, &OkHandler));
 
     boost::filesystem::path input(g_eve_file);
     std::string input_stem =
@@ -156,7 +156,7 @@ void MinimalGGApp::Initialize()
         ;
     GG::Timer timer(100);
     if (!g_dont_exit)
-        GG::Connect(timer.FiredSignal, GenerateEvents(timer, eve_dialog, input_stem));
+        GG::Connect(timer.FiredSignal, GenerateEvents(timer, eve_dialog.get(), input_stem));
     eve_dialog->Run();
 
     std::cout << "Terminating action: " << eve_dialog->TerminatingAction() << "\n"

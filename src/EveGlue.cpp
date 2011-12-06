@@ -194,8 +194,8 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
         dialog->vm_lookup_m.insert_array_function(it->first, it->second);
     }
 
-    Wnd* w = dialog->init(eve_definition, adam_definition);
-    EveDialog* gg_dialog = boost::polymorphic_downcast<EveDialog*>(w);
+    std::auto_ptr<Wnd> w(dialog->init(eve_definition, adam_definition));
+    EveDialog* gg_dialog = boost::polymorphic_downcast<EveDialog*>(w.get());
     gg_dialog->SetKeyboard(dialog->keyboard());
     adobe::dialog_result_t adobe_result = dialog->go();
 

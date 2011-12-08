@@ -161,8 +161,10 @@ public:
     /** \name Structors */ ///@{
     SubTexture(); ///< default ctor
 
+    /** Creates a SubTexture from the entire image of a GG::Texture. */
+    SubTexture(const boost::shared_ptr<const Texture>& texture);
+
     /** Creates a SubTexture from a GG::Texture and coordinates into it.
-        \throw GG::SubTexture::BadTexture Throws if the given Texture is null.
         \throw GG::SubTexture::InvalidTextureCoordinates Throws if the texture
         coordinates are not well formed.*/
     SubTexture(const boost::shared_ptr<const Texture>& texture, X x1, Y y1, X x2, Y y2);

@@ -77,7 +77,7 @@ StaticGraphic::StaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture
     m_style(style)
 {
     if (texture)
-        Init(SubTexture(texture, X0, Y0, texture->DefaultWidth(), texture->DefaultHeight()));
+        Init(SubTexture(texture));
 }
 
 StaticGraphic::StaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture, Flags<GraphicStyle> style/* = GRAPHIC_NONE*/,

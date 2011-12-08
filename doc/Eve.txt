@@ -108,6 +108,14 @@
     \remark Note that the parameter to \a image() may be named or not.
 */
 
+/** \page eve_expression_texture_fn texture()
+    TODO
+*/
+
+/** \page eve_expression_subtexture_fn subtexture()
+    TODO
+*/
+
 
 /** \page eve_common_view_params Common View Parameters
     \section Usage
@@ -1119,6 +1127,8 @@ else:
     - \ref eve_expression_localize_fn
     - \ref eve_expression_scale_fn
     - \ref eve_expression_image_fn
+    - \ref eve_expression_texture_fn
+    - \ref eve_expression_subtexture_fn
 
     \section eve_views Views
 

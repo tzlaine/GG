@@ -157,6 +157,10 @@ StaticGraphic* StyleFactory::NewStaticGraphic(X x, Y y, X w, Y h, const boost::s
                                               Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 { return new StaticGraphic(x, y, w, h, texture, style, flags); }
 
+StaticGraphic* StyleFactory::NewStaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture,
+                                              Flags<GraphicStyle> style/* = GRAPHIC_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
+{ return new StaticGraphic(x, y, w, h, subtexture, style, flags); }
+
 TextControl* StyleFactory::NewTextControl(X x, Y y, X w, Y h, const std::string& str,
                                           const boost::shared_ptr<Font>& font, Clr color/* = CLR_BLACK*/,
                                           Flags<TextFormat> format/* = FORMAT_NONE*/, Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const

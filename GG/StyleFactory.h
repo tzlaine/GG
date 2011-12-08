@@ -174,6 +174,10 @@ public:
     virtual StaticGraphic*     NewStaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture>& texture,
                                                 Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()) const;
 
+    /** Returns a new GG StaticGraphic. */
+    virtual StaticGraphic*     NewStaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture,
+                                                Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()) const;
+
     /** Returns a new GG TabBar. */
     virtual TabBar*            NewTabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color,
                                          Clr text_color = CLR_BLACK, TabBarStyle style = TAB_BAR_ATTACHED,

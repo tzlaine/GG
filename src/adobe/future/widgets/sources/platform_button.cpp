@@ -53,6 +53,8 @@ namespace adobe {
 button_t::button_t(bool                             is_default,
                    bool                             is_cancel,
                    modifiers_t                      modifier_mask,
+                   const GG::Clr&                   color,
+                   const GG::Clr&                   text_color,
                    const button_state_descriptor_t* first,
                    const button_state_descriptor_t* last,
                    theme_t                          theme) :
@@ -63,7 +65,9 @@ button_t::button_t(bool                             is_default,
     modifiers_m(modifiers_none_s),
     is_default_m(is_default),
     is_cancel_m(is_cancel),
-    enabled_m(true)
+    enabled_m(true),
+    color_m(color),
+    text_color_m(text_color)
 { }
 
 /****************************************************************************************************/
@@ -198,7 +202,8 @@ platform_display_type insert<button_t>(display_t&             display,
 
     element.control_m =
         implementation::Factory().NewButton(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
-                                            state->name_m, implementation::DefaultFont(), GG::CLR_GRAY);
+                                            state->name_m, implementation::DefaultFont(),
+                                            element.color_m, element.text_color_m);
 
     GG::Connect(element.control_m->ClickedSignal, Clicked(element));
 

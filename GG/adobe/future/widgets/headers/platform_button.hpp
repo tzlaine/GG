@@ -35,7 +35,9 @@ struct button_t : boost::noncopyable
 
     button_t(bool                             is_default,
              bool                             is_cancel,
-             modifiers_t               modifier_mask,
+             modifiers_t                      modifier_mask,
+             const GG::Clr&                   color,
+             const GG::Clr&                   text_color,
              const button_state_descriptor_t* first,
              const button_state_descriptor_t* last,
              theme_t                          theme);
@@ -64,6 +66,8 @@ struct button_t : boost::noncopyable
     bool               is_default_m;
     bool               is_cancel_m;
     bool               enabled_m;
+    GG::Clr            color_m;
+    GG::Clr            text_color_m;
 };
 
 /****************************************************************************************************/

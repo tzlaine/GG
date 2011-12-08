@@ -16,6 +16,8 @@
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 
+#include <GG/ClrConstants.h>
+
 /****************************************************************************************************/
 
 namespace {
@@ -43,7 +45,7 @@ struct button_item_t
         get_value(parameters, adobe::key_bind_output, bind_output_m);
         get_value(parameters, adobe::key_action, action_m);
         get_value(parameters, adobe::key_value, value_m);
-        
+
         // modifers can be a name or array
 
         /*
@@ -55,7 +57,7 @@ struct button_item_t
 
         if (iter == parameters.end())
             iter = parameters.find(adobe::key_modifier_set);
-        
+
         if (iter != parameters.end())
             modifier_set_m |= adobe::value_to_modifier(iter->second);
     }
@@ -67,7 +69,7 @@ struct button_item_t
     adobe::name_t        action_m;
     adobe::any_regular_t value_m;
     adobe::dictionary_t  contributing_m;
-    adobe::modifiers_t   modifier_set_m;  
+    adobe::modifiers_t   modifier_set_m;
 };
 
 /*************************************************************************************************/
@@ -186,9 +188,11 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     bool               is_cancel(false);
     bool               is_default(false);
     modifiers_t        modifier_mask(modifiers_none_s);
-    button_state_set_t state_set;
     array_t            items;
     button_item_t      item;
+    button_state_set_t state_set;
+    GG::Clr            color(GG::CLR_GRAY);
+    GG::Clr            text_color(GG::CLR_BLACK);
 
     get_value(parameters, key_name,        item.name_m);
     get_value(parameters, key_alt_text,    item.alt_text_m);
@@ -199,6 +203,8 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     get_value(parameters, key_items,       items);
     get_value(parameters, key_default,     is_default);
     get_value(parameters, key_cancel,      is_cancel);
+    get_color(parameters, static_name_t("color"), color);
+    get_color(parameters, static_name_t("text_color"), text_color);
 
     for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter)
         state_set_push_back(state_set, token, button_item_t(item, iter->cast<dictionary_t>()));
@@ -214,7 +220,7 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     button_state_descriptor_t* first_state(state_set.empty() ? 0 : &state_set[0]);
     std::size_t                n(state_set.size());
 
-    button_t* result = new button_t(is_default, is_cancel, modifier_mask,
+    button_t* result = new button_t(is_default, is_cancel, modifier_mask, color, text_color,
                                     first_state, first_state + n,
                                     implementation::size_to_theme(size));
 

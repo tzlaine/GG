@@ -419,6 +419,8 @@ else:
     \param cancel If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
     \param items An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
 
+    TODO: Colors.  All the other views that have them need them documented as well.  There also needs to be a dedicated section for the format of a color ({r:[0,255], g:[0,255], b:[0,255], a:[0,255]}).
+
     \section eve_button_items_usage items Usage
 
     \code items: [ { param: value, param: value, ... }, { param: value, param: value, ... }, ... ] \endcode

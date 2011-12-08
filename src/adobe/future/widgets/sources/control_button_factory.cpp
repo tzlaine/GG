@@ -12,10 +12,12 @@
 #include <GG/adobe/future/widgets/headers/control_button.hpp>
 
 #include <GG/adobe/adam_parser.hpp>
+#include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/future/widgets/headers/control_button_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
-#include <GG/adobe/layout_attributes.hpp>
+
+#include <GG/ClrConstants.h>
 
 /****************************************************************************************************/
 
@@ -59,10 +61,14 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
     std::string   name;
     std::string   alt_text;
     std::string   expression_string;
+    GG::Clr       color(GG::CLR_GRAY);
+    GG::Clr       text_color(GG::CLR_BLACK);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, static_name_t("expression"), expression_string);
+    implementation::get_color(parameters, static_name_t("color"), color);
+    implementation::get_color(parameters, static_name_t("text_color"), text_color);
 
     control_button_t* widget(NULL);
 
@@ -70,6 +76,8 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
                                   alt_text,
                                   boost::bind(&sheet_t::inspect, boost::ref(token.sheet_m), _1),
                                   parse_adam_expression(expression_string),
+                                  color,
+                                  text_color,
                                   implementation::size_to_theme(size));
 
     assemblage_cleanup_ptr(token.client_holder_m.assemblage_m, widget);

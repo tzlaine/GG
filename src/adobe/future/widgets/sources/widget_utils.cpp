@@ -8,7 +8,10 @@
 
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
+#include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/name.hpp>
+
+#include <GG/Clr.h>
 
 /****************************************************************************************************/
 
@@ -87,6 +90,35 @@ void align_slices(extents_t::slice_t& slice_one, extents_t::slice_t slice_two)
     slice_one.guide_set_m[0] = poi;
     slice_one.length_m = length;
 }
+
+/****************************************************************************************************/
+
+namespace implementation {
+
+/****************************************************************************************************/
+
+bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color)
+{
+    dictionary_t colors;
+    if (!get_value(parameters, name, colors))
+        return false;
+
+    unsigned int r = 0, g = 0, b = 0, a = 255;
+    bool color_set = false;
+    color_set |= get_value(colors, static_name_t("r"), r);
+    color_set |= get_value(colors, static_name_t("g"), g);
+    color_set |= get_value(colors, static_name_t("b"), b);
+    color_set |= get_value(colors, static_name_t("a"), a);
+
+    if (color_set)
+        color = GG::Clr(r, g, b, a);
+
+    return color_set;
+}
+
+/****************************************************************************************************/
+
+} // namespace implementation
 
 /****************************************************************************************************/
 

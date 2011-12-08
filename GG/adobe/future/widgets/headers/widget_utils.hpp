@@ -11,11 +11,16 @@
 
 /****************************************************************************************************/
 
+#include <GG/adobe/dictionary_fwd.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
-
 #include <GG/adobe/future/platform_primitives.hpp>
 
 #include <boost/filesystem/path.hpp>
+
+
+namespace GG {
+    struct Clr;
+}
 
 /****************************************************************************************************/
 
@@ -105,6 +110,10 @@ bool pick_file(boost::filesystem::path& path);
     \return whether or not \c path is a valid, user-selected path.
 */
 bool pick_save_path(boost::filesystem::path& path);
+
+/****************************************************************************************************/
+
+bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color);
 
 /****************************************************************************************************/
 

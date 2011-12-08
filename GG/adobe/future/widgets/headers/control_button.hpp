@@ -30,6 +30,8 @@ struct control_button_t
                      const std::string&          alt_text,
                      const expression_eval_proc& eval_proc,
                      const array_t&              expression,
+                     const GG::Clr&              color,
+                     const GG::Clr&              text_color,
                      theme_t                     theme);
 
     /*!

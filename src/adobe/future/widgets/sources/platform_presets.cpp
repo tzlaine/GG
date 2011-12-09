@@ -34,7 +34,7 @@ GG::SubTexture normal_image()
     static boost::shared_ptr<GG::Texture> texture_s;
     if (!texture_s)
         texture_s = GG::GUI::GetGUI()->GetTexture("preset_button_unpressed.png");
-    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
+    return GG::SubTexture(texture_s);
 }
 
 /****************************************************************************************************/
@@ -44,7 +44,7 @@ GG::SubTexture clicked_image()
     static boost::shared_ptr<GG::Texture> texture_s;
     if (!texture_s)
         texture_s = GG::GUI::GetGUI()->GetTexture("preset_button_pressed.png");
-    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
+    return GG::SubTexture(texture_s);
 }
 
 /****************************************************************************************************/
@@ -54,7 +54,7 @@ GG::SubTexture disabled_image()
     static boost::shared_ptr<GG::Texture> texture_s;
     if (!texture_s)
         texture_s = GG::GUI::GetGUI()->GetTexture("preset_button_disabled.png");
-    return GG::SubTexture(texture_s, GG::X0, GG::Y0, texture_s->Width(), texture_s->Height());
+    return GG::SubTexture(texture_s);
 }
 
 /****************************************************************************************************/

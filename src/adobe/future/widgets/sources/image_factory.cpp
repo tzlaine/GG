@@ -31,17 +31,12 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         /*size*/,
                    image_t*&           widget)
 {
-    std::string              image_filename;
+    GG::SubTexture           subtexture;
     image_t::view_model_type actual_image;
 
-    get_value(parameters, key_image, image_filename);
+    implementation::get_subtexture(parameters, key_image, subtexture);
 
-    try {
-        actual_image = GG::GUI::GetGUI()->GetTexture(image_filename);
-        actual_image->SetFilters(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
-    } catch (...) {}
-
-    widget = new image_t(actual_image);
+    widget = new image_t(subtexture);
 }
 
 /*************************************************************************************************/

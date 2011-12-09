@@ -11,7 +11,8 @@
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/name.hpp>
 
-#include <GG/Clr.h>
+#include <GG/GUI.h>
+#include <GG/Texture.h>
 
 /****************************************************************************************************/
 
@@ -114,6 +115,36 @@ bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color)
         color = GG::Clr(r, g, b, a);
 
     return color_set;
+}
+
+/****************************************************************************************************/
+
+bool get_subtexture(const dictionary_t& parameters, name_t name, GG::SubTexture& subtexture)
+{
+    bool retval = false;
+
+    any_regular_t value;
+    if (!get_value(parameters, name, value))
+        return false;
+
+    if (value.cast(subtexture)) {
+        retval = true;
+    } else {
+        boost::shared_ptr<GG::Texture> texture;
+        std::string texture_name;
+        if (value.cast(texture_name)) {
+            try {
+                texture = GG::GUI::GetGUI()->GetTexture(texture_name);
+                texture->SetFilters(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+            } catch (...) {}
+            retval = true;
+        } else if (value.cast(texture)) {
+            retval = true;
+        }
+        subtexture = GG::SubTexture(texture);
+    }
+
+    return retval;
 }
 
 /****************************************************************************************************/

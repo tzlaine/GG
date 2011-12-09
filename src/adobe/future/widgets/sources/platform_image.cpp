@@ -115,12 +115,12 @@ const GG::Y fixed_height(Value(fixed_width));
 /****************************************************************************************************/
 
 GG::X get_width(adobe::image_t& image)
-{ return image.image_m ? image.image_m->DefaultWidth() : fixed_width; }
+{ return image.image_m.Empty() ? fixed_width : image.image_m.Width(); }
 
 /****************************************************************************************************/
 
 GG::Y get_height(adobe::image_t& image)
-{ return image.image_m ? image.image_m->DefaultHeight() : fixed_height; }
+{ return image.image_m.Empty() ? fixed_height : image.image_m.Height(); }
 
 /****************************************************************************************************/
 
@@ -128,7 +128,7 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
 {
     assert(image.window_m);
 
-    if (view) {
+    if (!view.Empty()) {
         GG::Wnd* parent = image.window_m->Parent();
         GG::Pt ul = image.window_m->RelativeUpperLeft();
         GG::Pt size = image.window_m->Size();
@@ -159,7 +159,7 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-image_t::image_t(const view_model_type& image) :
+image_t::image_t(const GG::SubTexture& image) :
     window_m(0),
     image_m(image),
     filter_m(*this)
@@ -252,18 +252,18 @@ platform_display_type insert<image_t>(display_t&             display,
                                       image_t&               element)
 {
     assert(!element.window_m);
-    if (element.image_m) {
+    if (element.image_m.Empty()) {
         element.window_m =
             adobe::implementation::Factory().NewStaticGraphic(
-                GG::X0, GG::Y0, element.image_m->DefaultWidth(), element.image_m->DefaultHeight(),
-                element.image_m, GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
+                GG::X0, GG::Y0, fixed_width, fixed_height,
+                boost::shared_ptr<GG::Texture>(), GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
                 GG::INTERACTIVE
             );
     } else {
         element.window_m =
             adobe::implementation::Factory().NewStaticGraphic(
-                GG::X0, GG::Y0, fixed_width, fixed_height,
-                boost::shared_ptr<GG::Texture>(), GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
+                GG::X0, GG::Y0, element.image_m.Width(), element.image_m.Height(),
+                element.image_m, GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
                 GG::INTERACTIVE
             );
     }

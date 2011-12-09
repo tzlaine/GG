@@ -18,6 +18,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <GG/Texture.h>
+
 
 namespace GG {
     class Button;
@@ -38,6 +40,9 @@ struct button_t : boost::noncopyable
              modifiers_t                      modifier_mask,
              const GG::Clr&                   color,
              const GG::Clr&                   text_color,
+             const GG::SubTexture&            unpressed,
+             const GG::SubTexture&            pressed,
+             const GG::SubTexture&            rollover,
              const button_state_descriptor_t* first,
              const button_state_descriptor_t* last,
              theme_t                          theme);
@@ -68,6 +73,9 @@ struct button_t : boost::noncopyable
     bool               enabled_m;
     GG::Clr            color_m;
     GG::Clr            text_color_m;
+    GG::SubTexture     unpressed_m;
+    GG::SubTexture     pressed_m;
+    GG::SubTexture     rollover_m;
 };
 
 /****************************************************************************************************/

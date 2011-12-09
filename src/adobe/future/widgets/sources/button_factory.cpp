@@ -193,6 +193,7 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     button_state_set_t state_set;
     GG::Clr            color(GG::CLR_GRAY);
     GG::Clr            text_color(GG::CLR_BLACK);
+    dictionary_t       image;
 
     get_value(parameters, key_name,        item.name_m);
     get_value(parameters, key_alt_text,    item.alt_text_m);
@@ -205,6 +206,15 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     get_value(parameters, key_cancel,      is_cancel);
     get_color(parameters, static_name_t("color"), color);
     get_color(parameters, static_name_t("text_color"), text_color);
+    get_value(parameters, key_image,       image);
+
+    GG::SubTexture unpressed;
+    GG::SubTexture pressed;
+    GG::SubTexture rollover;
+
+    get_subtexture(image, static_name_t("unpressed"), unpressed);
+    get_subtexture(image, static_name_t("pressed"), pressed);
+    get_subtexture(image, static_name_t("rollover"), rollover);
 
     for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter)
         state_set_push_back(state_set, token, button_item_t(item, iter->cast<dictionary_t>()));
@@ -220,7 +230,8 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     button_state_descriptor_t* first_state(state_set.empty() ? 0 : &state_set[0]);
     std::size_t                n(state_set.size());
 
-    button_t* result = new button_t(is_default, is_cancel, modifier_mask, color, text_color,
+    button_t* result = new button_t(is_default, is_cancel, modifier_mask,
+                                    color, text_color, unpressed, pressed, rollover,
                                     first_state, first_state + n,
                                     implementation::size_to_theme(size));
 

@@ -11,7 +11,7 @@
 
 /****************************************************************************************************/
 
-#include <GG/PtRect.h>
+#include <GG/Texture.h>
 #include <GG/Wnd.h>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/memory.hpp>
@@ -25,7 +25,6 @@
 
 namespace GG {
     class StaticGraphic;
-    class Texture;
     class Wnd;
 }
 
@@ -56,7 +55,7 @@ struct image_t : boost::noncopyable
 {
     /// model types for this widget
     typedef dictionary_t                                         controller_model_type;
-    typedef boost::shared_ptr<GG::Texture>                       view_model_type;
+    typedef GG::SubTexture                                       view_model_type;
     typedef boost::function<void (const controller_model_type&)> setter_proc_type;
 
     image_t(const view_model_type& image);

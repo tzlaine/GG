@@ -40,7 +40,9 @@ control_button_t::control_button_t(const std::string&          name,
     state.hit_proc_m = boost::bind(&control_button_t::button_fire, boost::ref(*this), _1, _2);
 
     button_m.reset(
-        new button_t(false, false, modifiers_t(), color, text_color, first, boost::next(first), theme)
+        new button_t(false, false, modifiers_t(),
+                     color, text_color, GG::SubTexture(), GG::SubTexture(), GG::SubTexture(),
+                     first, boost::next(first), theme)
     );
 }
 

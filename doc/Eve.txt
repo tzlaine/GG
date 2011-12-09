@@ -421,6 +421,8 @@ else:
 
     TODO: Colors.  All the other views that have them need them documented as well.  There also needs to be a dedicated section for the format of a color ({r:[0,255], g:[0,255], b:[0,255], a:[0,255]}).
 
+    TODO: image: {unpressed: <subtexture>, pressed: <subtexture>, rollover: <subtexture>}
+
     \section eve_button_items_usage items Usage
 
     \code items: [ { param: value, param: value, ... }, { param: value, param: value, ... }, ... ] \endcode
@@ -545,7 +547,7 @@ else:
 
     \ref eve_common_view_params
 
-    \param image The filename of the image.
+    \param image The GG::SubTexture to use in the image.  This may be specified as a filename from which to load a texture, or as the result of a call to either of \ref eve_expression_texture_fn or \ref eve_expression_subtexture_fn.
     \param bind The cell in the Adam property sheet to which this image is bound.
 */
 

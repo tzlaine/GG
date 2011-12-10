@@ -553,6 +553,8 @@ else:
 
     \param image The GG::SubTexture to use in the image.  This may be specified as a filename from which to load a texture, or as the result of a call to either of \ref eve_expression_texture_fn or \ref eve_expression_subtexture_fn.
     \param bind The cell in the Adam property sheet to which this image is bound.
+
+    TODO: width, height, horizontal, vertical, fit_graphic, shrink_to_fit, proportional
 */
 
 /** \page eve_toggle toggle()

@@ -8,11 +8,12 @@
 
 #include <GG/adobe/future/widgets/headers/platform_image.hpp>
 
+#include <GG/adobe/eve_evaluate.hpp>
+#include <GG/adobe/memory.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
-#include <GG/adobe/memory.hpp>
 
 #include <string>
 #include <cassert>
@@ -170,9 +171,23 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-image_t::image_t(const any_regular_t& image) :
+image_t::image_t(const any_regular_t& image,
+                 int                  width,
+                 int                  height,
+                 name_t               horizontal,
+                 name_t               vertical,
+                 bool                 fit_graphic,
+                 bool                 shrink_to_fit,
+                 bool                 proportional) :
     window_m(0),
     image_m(image),
+    width_m(width),
+    height_m(height),
+    horizontal_m(horizontal),
+    vertical_m(vertical),
+    fit_graphic_m(fit_graphic),
+    shrink_to_fit_m(shrink_to_fit),
+    proportional_m(proportional),
     filter_m(*this)
 {
     typedef dictionary_t::value_type value_type;
@@ -263,24 +278,53 @@ platform_display_type insert<image_t>(display_t&             display,
                                       image_t&               element)
 {
     assert(!element.window_m);
+
+    GG::Flags<GG::GraphicStyle> style;
+
+    if (element.horizontal_m == key_align_left)
+        style |= GG::GRAPHIC_LEFT;
+    else if (element.horizontal_m == key_align_center)
+        style |= GG::GRAPHIC_CENTER;
+    else if (element.horizontal_m == key_align_right)
+        style |= GG::GRAPHIC_RIGHT;
+
+    if (element.vertical_m == key_align_top)
+        style |= GG::GRAPHIC_TOP;
+    else if (element.vertical_m == key_align_center)
+        style |= GG::GRAPHIC_VCENTER;
+    else if (element.vertical_m == key_align_bottom)
+        style |= GG::GRAPHIC_BOTTOM;
+
+    if (element.fit_graphic_m)
+        style |= GG::GRAPHIC_FITGRAPHIC;
+
+    if (element.shrink_to_fit_m)
+        style |= GG::GRAPHIC_SHRINKFIT;
+
+    if (element.proportional_m)
+        style |= GG::GRAPHIC_PROPSCALE;
+
     GG::SubTexture subtexture;
     adobe::implementation::get_subtexture(element.image_m, subtexture);
-    if (subtexture.Empty()) {
-        element.window_m =
-            adobe::implementation::Factory().NewStaticGraphic(
-                GG::X0, GG::Y0, fixed_width, fixed_height,
-                boost::shared_ptr<GG::Texture>(), GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
-                GG::INTERACTIVE
-            );
-    } else {
-        element.window_m =
-            adobe::implementation::Factory().NewStaticGraphic(
-                GG::X0, GG::Y0, subtexture.Width(), subtexture.Height(),
-                subtexture, GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
-                GG::INTERACTIVE
-            );
-    }
+
+    GG::X width =
+        0 < element.width_m ?
+        GG::X(element.width_m) :
+        (subtexture.Empty() ? fixed_width : subtexture.Width());
+
+    GG::Y height =
+        0 < element.height_m ?
+        GG::Y(element.height_m) :
+        (subtexture.Empty() ? fixed_height : subtexture.Height());
+
+    element.window_m =
+        adobe::implementation::Factory().NewStaticGraphic(
+            GG::X0, GG::Y0, width, height,
+            subtexture, style, GG::INTERACTIVE
+        );
+
     element.window_m->InstallEventFilter(&element.filter_m);
+
     return display.insert(parent, get_display(element));
 }
 

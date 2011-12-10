@@ -31,12 +31,28 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         /*size*/,
                    image_t*&           widget)
 {
-    any_regular_t            image;
-    image_t::view_model_type actual_image;
+    image_t::view_model_type image;
+    int                      width(0);
+    int                      height(0);
+    name_t                   horizontal;
+    name_t                   vertical;
+    bool                     fit_graphic(true);
+    bool                     shrink_to_fit(false);
+    bool                     proportional(true);
 
     get_value(parameters, key_image, image);
+    get_value(parameters, static_name_t("width"), width);
+    get_value(parameters, static_name_t("height"), height);
+    get_value(parameters, key_horizontal, horizontal);
+    get_value(parameters, key_vertical, vertical);
+    get_value(parameters, static_name_t("fit_graphic"), fit_graphic);
+    get_value(parameters, static_name_t("shrink_to_fit"), shrink_to_fit);
+    get_value(parameters, static_name_t("proportional"), proportional);
 
-    widget = new image_t(image);
+    widget = new image_t(image,
+                         width, height,
+                         horizontal, vertical,
+                         fit_graphic, shrink_to_fit, proportional);
 }
 
 /*************************************************************************************************/

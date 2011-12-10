@@ -58,13 +58,27 @@ struct image_t : boost::noncopyable
     typedef any_regular_t                                        view_model_type;
     typedef boost::function<void (const controller_model_type&)> setter_proc_type;
 
-    image_t(const view_model_type& image);
+    image_t(const view_model_type& image,
+            int                    width,
+            int                    height,
+            name_t                 horizontal,
+            name_t                 vertical,
+            bool                   fit_graphic,
+            bool                   shrink_to_fit,
+            bool                   proportional);
 
     void display(const view_model_type& value);
     void monitor(const setter_proc_type& proc);
 
     GG::StaticGraphic*                 window_m;
     view_model_type                    image_m;
+    int                                width_m;
+    int                                height_m;
+    name_t                             horizontal_m;
+    name_t                             vertical_m;
+    bool                               fit_graphic_m;
+    bool                               shrink_to_fit_m;
+    bool                               proportional_m;
     setter_proc_type                   callback_m;
     dictionary_t                       metadata_m;
     GG::Pt                             last_point_m;

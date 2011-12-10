@@ -8,6 +8,7 @@
 
 #define ADOBE_DLL_SAFE 0
 
+#include <GG/ClrConstants.h>
 #include <GG/EveGlue.h>
 
 #include <GG/adobe/future/modal_dialog_interface.hpp>
@@ -35,12 +36,14 @@ void create_widget(const dictionary_t& parameters,
     bool        move_(false);
     bool        on_top(false);
     bool        modal(true);
+    GG::Clr     color(GG::CLR_GRAY);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_grow, grow);
     get_value(parameters, key_move, move_);
     get_value(parameters, key_on_top, on_top);
     get_value(parameters, key_modal, modal);
+    implementation::get_color(parameters, static_name_t("color"), color);
 
     GG::Flags<GG::WndFlag> flags = GG::INTERACTIVE;
 
@@ -56,7 +59,7 @@ void create_widget(const dictionary_t& parameters,
     if (modal)
         flags |= GG::MODAL;
 
-    window = new window_t(name, flags, implementation::size_to_theme(size));
+    window = new window_t(name, flags, color);
 }
 
 /****************************************************************************************************/

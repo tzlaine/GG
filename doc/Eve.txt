@@ -206,6 +206,8 @@
     \param move Whether the dialog box should be movable (see GG::DRAGABLE).
     \param on_top Whether the dialog box should be always-on-top (see GG::ONTOP).
     \param modal Whether the dialog box should be modal (see GG::MODAL).
+
+    TODO: color
 */
 
 /** \page eve_group group()

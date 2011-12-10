@@ -42,7 +42,7 @@ struct window_t
 {
     window_t(const std::string&     name,
              GG::Flags<GG::WndFlag> flags,
-             theme_t                theme);
+             const GG::Clr&         color);
 
     ~window_t();
 
@@ -65,7 +65,7 @@ struct window_t
     GG::EveDialog*         window_m;
     GG::Flags<GG::WndFlag> flags_m;
     std::string            name_m;
-    theme_t                theme_m;
+    GG::Clr                color_m;
     place_data_t           place_data_m;
     window_resize_proc_t   resize_proc_m;
     bool                   debounce_m;

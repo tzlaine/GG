@@ -59,10 +59,11 @@ const unsigned int EveDialog::BEVEL = 2;
 const int EveDialog::FRAME_WIDTH = 2;
 const Pt EveDialog::BEVEL_OFFSET(X(EveDialog::FRAME_WIDTH), Y(EveDialog::FRAME_WIDTH));
 
-EveDialog::EveDialog(adobe::window_t& imp) :
+EveDialog::EveDialog(adobe::window_t& imp, const GG::Clr& color) :
     Wnd(X0, Y0, X1, Y1, imp.flags_m),
     m_imp(imp),
     m_title(0),
+    m_color(color),
     m_keyboard(0)
 {
     if (!m_imp.name_m.empty()) {
@@ -140,7 +141,7 @@ void EveDialog::SizeMove(const Pt& ul, const Pt& lr)
 }
 
 void EveDialog::Render()
-{ BeveledRectangle(UpperLeft(), LowerRight(), CLR_GRAY, CLR_GRAY, true, BEVEL); }
+{ BeveledRectangle(UpperLeft(), LowerRight(), m_color, m_color, true, BEVEL); }
 
 void EveDialog::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {

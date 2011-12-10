@@ -133,12 +133,13 @@ public:
     virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
 private:
-    EveDialog(adobe::window_t& imp);
+    EveDialog(adobe::window_t& imp, const GG::Clr& color);
 
     void SetKeyboard(adobe::keyboard_t& keyboard);
     void SetEveModalDialog(adobe::modal_dialog_t* modal_dialog);
 
     adobe::window_t& m_imp;
+    GG::Clr m_color;
     TextControl* m_title;
     adobe::keyboard_t* m_keyboard;
     std::auto_ptr<adobe::modal_dialog_t> m_eve_modal_dialog;

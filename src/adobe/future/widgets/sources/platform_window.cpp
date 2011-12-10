@@ -29,11 +29,11 @@ namespace adobe {
 
 window_t::window_t(const std::string&     name,
                    GG::Flags<GG::WndFlag> flags,
-                   theme_t                theme) :
+                   const GG::Clr&         color) :
     window_m(0),
     flags_m(flags),
     name_m(name),
-    theme_m(theme),
+    color_m(color),
     debounce_m(false),
     placed_once_m(false)
 { }
@@ -170,7 +170,7 @@ platform_display_type insert<window_t>(display_t&             display,
     assert(!element.window_m);
     assert(!parent);
 
-    element.window_m = new GG::EveDialog(element);
+    element.window_m = new GG::EveDialog(element, element.color_m);
 
     return display.insert(parent, element.window_m);
 }

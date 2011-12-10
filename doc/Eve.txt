@@ -584,6 +584,8 @@ else:
     \param wrap If true, the label's text is word-wrapped.
     \param text_horizontal The horizontal alignment of the text ( \a align_left, \a align_center, or \a align_right ).
     \param text_vertical The horizontal alignment of the text ( \a align_top, \a align_center, or \a align_bottom ).
+
+    TODO: color
 */
 
 /** \page eve_preset preset()

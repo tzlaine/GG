@@ -31,10 +31,10 @@ label_t::label_t(const std::string&        name,
                  const std::string&        alt_text,
                  std::size_t               characters,
                  GG::Flags<GG::TextFormat> format,
-                 theme_t                   theme) :
+                 const GG::Clr&            color) :
     window_m(0),
     format_m(format),
-    theme_m(theme),
+    color_m(color),
     name_m(name),
     alt_text_m(alt_text),
     characters_m(characters)
@@ -109,7 +109,7 @@ platform_display_type insert<label_t>(display_t& display,
     element.window_m =
         implementation::Factory().NewTextControl(GG::X0, GG::Y0, extent.x, extent.y,
                                                  element.name_m, implementation::DefaultFont(),
-                                                 GG::CLR_BLACK, element.format_m, GG::INTERACTIVE);
+                                                 element.color_m, element.format_m, GG::INTERACTIVE);
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);

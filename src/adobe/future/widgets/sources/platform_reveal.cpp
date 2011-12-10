@@ -15,6 +15,7 @@
 #include <GG/adobe/placeable_concept.hpp>
 
 #include <GG/Button.h>
+#include <GG/Clr.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
@@ -76,7 +77,7 @@ reveal_t::reveal_t(const std::string&   name,
                    const std::string&   alt_text) :
     control_m(0),
     theme_m(theme),
-    name_m(name, std::string(), 0, GG::FORMAT_NONE, theme),
+    name_m(name, std::string(), 0, GG::FORMAT_NONE, GG::CLR_BLACK),
     using_label_m(!name.empty()),
     show_value_m(show_value),
     alt_text_m(alt_text)

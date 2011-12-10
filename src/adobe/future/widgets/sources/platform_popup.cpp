@@ -13,6 +13,7 @@
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/DropDownList.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
@@ -140,7 +141,7 @@ popup_t::popup_t(const std::string& name,
                  theme_t            theme) :
     control_m(0),
     theme_m(theme),
-    name_m(name, alt_text, 0, GG::FORMAT_NONE, theme),
+    name_m(name, alt_text, 0, GG::FORMAT_NONE, GG::CLR_BLACK),
     alt_text_m(alt_text),
     using_label_m(!name.empty()),
     custom_m(false),

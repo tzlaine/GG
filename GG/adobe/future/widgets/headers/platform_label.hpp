@@ -12,6 +12,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <GG/Clr.h>
 #include <GG/FontFwd.h>
 
 #include <GG/adobe/memory.hpp>
@@ -31,12 +32,11 @@ namespace adobe {
                 const std::string&        alt_text, 
                 std::size_t               characters,
                 GG::Flags<GG::TextFormat> format,
-                theme_t                   theme
-                );
+                const GG::Clr&            color);
 
         GG::TextControl*          window_m;
         GG::Flags<GG::TextFormat> format_m;
-        theme_t                   theme_m;
+        GG::Clr                   color_m;
         std::string               name_m;
         std::string               alt_text_m;
         std::size_t               characters_m;
@@ -45,7 +45,7 @@ namespace adobe {
     void measure(label_t& value, extents_t& result);
 
     void measure_vertical(label_t& value, extents_t& calculated_horizontal, 
-        const place_data_t& placed_horizontal);       
+                          const place_data_t& placed_horizontal);
 
     void place(label_t& value, const place_data_t& place_data);
 

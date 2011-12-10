@@ -12,8 +12,9 @@
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 
-#include <GG/ListBox.h>
+#include <GG/ClrConstants.h>
 #include <GG/GUI.h>
+#include <GG/ListBox.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
 
@@ -87,7 +88,7 @@ namespace adobe {
                          int height,
                          const item_set_t& items) :
         control_m(0),
-        name_m(name, alt_text, 0, GG::FORMAT_NONE, theme_t()),
+        name_m(name, alt_text, 0, GG::FORMAT_NONE, GG::CLR_BLACK),
         alt_text_m(alt_text),
         using_label_m(!name.empty()),
         items_m(items),

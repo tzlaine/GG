@@ -8,6 +8,7 @@
 
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/label_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
@@ -33,6 +34,7 @@ void create_widget(const dictionary_t& parameters,
     bool          wrap(true);
     adobe::name_t text_horizontal = key_align_left;
     adobe::name_t text_vertical;
+    GG::Clr       color(GG::CLR_BLACK);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
@@ -40,6 +42,7 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, key_wrap, wrap);
     get_value(parameters, key_text_horizontal, text_horizontal);
     get_value(parameters, key_text_vertical, text_vertical);
+    implementation::get_color(parameters, static_name_t("color"), color);
 
     GG::Flags<GG::TextFormat> format;
 
@@ -60,8 +63,7 @@ void create_widget(const dictionary_t& parameters,
     else if (text_vertical == key_align_bottom)
         format |= GG::FORMAT_BOTTOM;
 
-    widget = new label_t(name, alt_text, characters, format, 
-                         implementation::size_to_theme(size));
+    widget = new label_t(name, alt_text, characters, format, color);
 }
 
 /****************************************************************************************************/

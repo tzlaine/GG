@@ -421,7 +421,7 @@ else:
 
     TODO: Colors.  All the other views that have them need them documented as well.  There also needs to be a dedicated section for the format of a color ({r:[0,255], g:[0,255], b:[0,255], a:[0,255]}).
 
-    TODO: image: {unpressed: <subtexture>, pressed: <subtexture>, rollover: <subtexture>}
+    TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
     \section eve_button_items_usage items Usage
 
@@ -485,6 +485,8 @@ else:
     \param bind The cell in the Adam property sheet to which this checkbox is bound.
     \param value_on The value emitted when checking the checkbox.
     \param value_off The value emitted when unchecking the checkbox.
+
+    TODO: color, text_color, interior_color, and style
 */
 
 /** \page eve_control_button control_button()
@@ -540,6 +542,8 @@ else:
     The image assigns its metadata, as described above, to the
     controller-bound cell.  This makes using plain \a bind problematic.  \a
     bind_controller and \a bind_view should be used instead.
+
+    TODO: Document that subtextures, textures, and filenames can all be used.
 
     \section eve_image_usage image() Usage
 
@@ -615,6 +619,8 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the radio_button.
     \param bind The cell in the Adam property sheet to which this radio_button is bound.
     \param value The value emitted when checking the radio_button.
+
+    TODO: color, text_color, interior_color, and style
 
     \note The idiomatic way to associate a set of radio_buttons with each
     other (making them mutually exclusive) is to bind them all to the same

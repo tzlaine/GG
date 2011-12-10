@@ -13,6 +13,7 @@
 
 #include <GG/adobe/config.hpp>
 
+#include <GG/Clr.h>
 #include <GG/adobe/extents.hpp>
 #include <GG/adobe/future/widgets/headers/slider_helper.hpp>
 #include <GG/adobe/layout_attributes.hpp>
@@ -45,7 +46,8 @@ struct slider_t : boost::noncopyable
              slider_style_t              style,
              std::size_t                 num_ticks,
              const value_range_format_t& format,
-             theme_t                     theme);
+             int                         length,
+             const GG::Clr&              color);
 
     void measure(extents_t& result);
 
@@ -63,7 +65,8 @@ struct slider_t : boost::noncopyable
     slider_style_t       style_m;
     std::size_t          num_ticks_m;
     value_range_format_t format_m;
-    theme_t              theme_m;
+    int                  length_m;
+    GG::Clr              color_m;
     setter_type          value_proc_m;
     model_type           last_m; // Used to debounce
     model_type           value_m;

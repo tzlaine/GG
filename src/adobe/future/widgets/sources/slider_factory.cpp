@@ -9,6 +9,7 @@
 // slider.hpp needs to come before widget_factory to hook the overrides
 #include <GG/adobe/future/widgets/headers/platform_slider.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/adobe/future/widgets/headers/slider_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
@@ -24,11 +25,13 @@ void create_widget(const dictionary_t& parameters,
                    slider_t*&          widget)
 {
     std::string           alt_text;
-    name_t         slider_pointing;
+    name_t                slider_pointing;
     long                  num_ticks(0);
     value_range_format_t  format;
-    name_t         orientation(key_horizontal);
-    slider_style_t style(slider_points_not_s);
+    name_t                orientation(key_horizontal);
+    slider_style_t        style(slider_points_not_s);
+    int                   length(0);
+    GG::Clr               color(GG::CLR_GRAY);
 
     if (parameters.count(key_format))
         format.set(get_value(parameters, key_format).cast<dictionary_t>());
@@ -37,6 +40,8 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, key_orientation, orientation);
     get_value(parameters, key_slider_ticks, num_ticks);
     get_value(parameters, key_slider_point, slider_pointing);
+    get_value(parameters, static_name_t("length"), length);
+    implementation::get_color(parameters, static_name_t("color"), color);
 
     if (slider_pointing == static_name_t("up"))         style = slider_points_up_s;
     else if (slider_pointing == static_name_t("down"))  style = slider_points_down_s;
@@ -44,11 +49,12 @@ void create_widget(const dictionary_t& parameters,
     else if (slider_pointing == static_name_t("right")) style = slider_points_right_s;
 
     widget = new slider_t(alt_text,
-                                 orientation == key_vertical,
-                                 style,
-                                 num_ticks,
-                                 format,
-                                 implementation::size_to_theme(size));
+                          orientation == key_vertical,
+                          style,
+                          num_ticks,
+                          format,
+                          length,
+                          color);
 }
 
 /****************************************************************************************************/

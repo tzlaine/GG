@@ -690,6 +690,8 @@ else:
     \param orientation The orientation of the slider (horizontal or vertical).
     \param format A dictionary specifying the range of values the slider can take.
 
+    TODO: color, length
+
     \section eve_slider_format_usage format Usage
 
     \param first The value associated with the left end (if horizontal) or bottom end (if vertical) of the slider.

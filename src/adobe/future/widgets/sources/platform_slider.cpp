@@ -48,14 +48,16 @@ slider_t::slider_t(const std::string&          alt_text,
                    slider_style_t              style,
                    std::size_t                 num_ticks,
                    const value_range_format_t& format,
-                   theme_t                     theme) :
+                   int                         length,
+                   const GG::Clr&              color) :
     control_m(0),
     alt_text_m(alt_text),
     is_vertical_m(is_vertical),
     style_m(style),
     num_ticks_m(num_ticks),
     format_m(format),
-    theme_m(theme)
+    length_m(length),
+    color_m(color)
 { }
 
 /****************************************************************************************************/
@@ -109,10 +111,11 @@ platform_display_type insert<slider_t>(display_t&             display,
     double min = element.format_m.at(0).cast<slider_t::model_type>();
     double max = element.format_m.at(element.format_m.size() - 1).cast<slider_t::model_type>();
     const int unsigned tab_width = 6;
+    const int length = 0 < element.length_m ? element.length_m : 100;
     element.control_m =
-        style->NewDoubleSlider(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
+        style->NewDoubleSlider(GG::X0, GG::Y0, GG::X(length), GG::Y(length),
                                min, max, element.is_vertical_m ? GG::VERTICAL : GG::HORIZONTAL,
-                               GG::GROOVED, GG::CLR_GRAY, tab_width);
+                               GG::GROOVED, element.color_m, tab_width);
 
     const int unsigned tab_length = tab_width * 3;
     element.control_m->SetMinSize(GG::Pt(element.is_vertical_m ? GG::X(tab_length) : GG::X0,

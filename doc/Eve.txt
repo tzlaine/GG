@@ -657,6 +657,8 @@ else:
     \param bind The cell in the Adam property sheet to which this reveal is bound.
     \param value_on The value associated with the "show" state of the reveal.
 
+    TODO: text_color, showing_image, hiding_image
+
     \note The idiomatic way to create a showable/hidable portion of an
     interface is to bind a reveal and an \link eve_optional optional \endlink
     to the same cell.  */

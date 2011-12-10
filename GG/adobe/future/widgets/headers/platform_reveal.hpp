@@ -15,6 +15,7 @@
 
 #include <GG/adobe/any_regular.hpp>
 
+#include <GG/Texture.h>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 
 #include <boost/function.hpp>
@@ -36,10 +37,16 @@ struct reveal_t : boost::noncopyable
 
     typedef boost::function<void (const model_type&)> setter_type;
 
-    reveal_t(const std::string&     name,
-             const any_regular_t&   show_value,
-             theme_t                theme,
-             const std::string&     alt_text);
+    reveal_t(const std::string&    name,
+             const any_regular_t&  show_value,
+             const std::string&    alt_text,
+             const GG::Clr&        text_color,
+             const GG::SubTexture& show_unpressed,
+             const GG::SubTexture& show_pressed,
+             const GG::SubTexture& show_rollover,
+             const GG::SubTexture& hide_unpressed,
+             const GG::SubTexture& hide_pressed,
+             const GG::SubTexture& hide_rollover);
 
     void measure(extents_t& result);
 
@@ -50,7 +57,13 @@ struct reveal_t : boost::noncopyable
     void monitor(const setter_type& proc);
 
     GG::Button*         control_m;
-    theme_t             theme_m;
+    GG::Clr             text_color_m;
+    GG::SubTexture      show_unpressed_m;
+    GG::SubTexture      show_pressed_m;
+    GG::SubTexture      show_rollover_m;
+    GG::SubTexture      hide_unpressed_m;
+    GG::SubTexture      hide_pressed_m;
+    GG::SubTexture      hide_rollover_m;
     label_t             name_m;
     bool                using_label_m;
     setter_type         hit_proc_m;

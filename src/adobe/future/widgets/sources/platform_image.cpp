@@ -115,12 +115,20 @@ const GG::Y fixed_height(Value(fixed_width));
 /****************************************************************************************************/
 
 GG::X get_width(adobe::image_t& image)
-{ return image.image_m.Empty() ? fixed_width : image.image_m.Width(); }
+{
+    GG::SubTexture subtexture;
+    adobe::implementation::get_subtexture(image.image_m, subtexture);
+    return subtexture.Empty() ? fixed_width : subtexture.Width();
+}
 
 /****************************************************************************************************/
 
 GG::Y get_height(adobe::image_t& image)
-{ return image.image_m.Empty() ? fixed_height : image.image_m.Height(); }
+{
+    GG::SubTexture subtexture;
+    adobe::implementation::get_subtexture(image.image_m, subtexture);
+    return subtexture.Empty() ? fixed_height : subtexture.Height();
+}
 
 /****************************************************************************************************/
 
@@ -128,7 +136,10 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
 {
     assert(image.window_m);
 
-    if (!view.Empty()) {
+    GG::SubTexture subtexture;
+    adobe::implementation::get_subtexture(view, subtexture);
+
+    if (!subtexture.Empty()) {
         GG::Wnd* parent = image.window_m->Parent();
         GG::Pt ul = image.window_m->RelativeUpperLeft();
         GG::Pt size = image.window_m->Size();
@@ -140,7 +151,7 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
 
         image.window_m =
             adobe::implementation::Factory().NewStaticGraphic(
-                ul.x, ul.y, size.x, size.y, view,
+                ul.x, ul.y, size.x, size.y, subtexture,
                 GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE, GG::INTERACTIVE
             );
         parent->AttachChild(image.window_m);
@@ -159,7 +170,7 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-image_t::image_t(const GG::SubTexture& image) :
+image_t::image_t(const any_regular_t& image) :
     window_m(0),
     image_m(image),
     filter_m(*this)
@@ -252,7 +263,9 @@ platform_display_type insert<image_t>(display_t&             display,
                                       image_t&               element)
 {
     assert(!element.window_m);
-    if (element.image_m.Empty()) {
+    GG::SubTexture subtexture;
+    adobe::implementation::get_subtexture(element.image_m, subtexture);
+    if (subtexture.Empty()) {
         element.window_m =
             adobe::implementation::Factory().NewStaticGraphic(
                 GG::X0, GG::Y0, fixed_width, fixed_height,
@@ -262,8 +275,8 @@ platform_display_type insert<image_t>(display_t&             display,
     } else {
         element.window_m =
             adobe::implementation::Factory().NewStaticGraphic(
-                GG::X0, GG::Y0, element.image_m.Width(), element.image_m.Height(),
-                element.image_m, GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
+                GG::X0, GG::Y0, subtexture.Width(), subtexture.Height(),
+                subtexture, GG::GRAPHIC_FITGRAPHIC | GG::GRAPHIC_PROPSCALE,
                 GG::INTERACTIVE
             );
     }

@@ -47,7 +47,7 @@ struct ImageFilter : GG::Wnd
     image_t& m_image;
 };
 
-}
+} // implementation
 
 /****************************************************************************************************/
 
@@ -55,7 +55,7 @@ struct image_t : boost::noncopyable
 {
     /// model types for this widget
     typedef dictionary_t                                         controller_model_type;
-    typedef GG::SubTexture                                       view_model_type;
+    typedef any_regular_t                                        view_model_type;
     typedef boost::function<void (const controller_model_type&)> setter_proc_type;
 
     image_t(const view_model_type& image);

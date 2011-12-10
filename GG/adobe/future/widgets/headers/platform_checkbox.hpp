@@ -13,6 +13,8 @@
 
 #include <GG/adobe/config.hpp>
 
+#include <GG/Base.h>
+#include <GG/Clr.h>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/extents.hpp>
 #include <GG/adobe/layout_attributes.hpp>
@@ -41,7 +43,10 @@ struct checkbox_t
     checkbox_t(const std::string&   name,
                const any_regular_t& true_value,
                const any_regular_t& false_value,
-               theme_t              theme,
+               const GG::Clr&       color,
+               const GG::Clr&       text_color,
+               const GG::Clr&       interior_color,
+               GG::StateButtonStyle style,
                const std::string&   alt_text);
 
     void measure(extents_t& result);
@@ -63,6 +68,10 @@ struct checkbox_t
     any_regular_t        false_value_m;
     any_regular_t        current_value_m;
     std::string          name_m;
+    GG::Clr              color_m;
+    GG::Clr              text_color_m;
+    GG::Clr              interior_color_m;
+    GG::StateButtonStyle style_m;
     std::string          alt_text_m;
 };
 

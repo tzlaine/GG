@@ -51,13 +51,19 @@ namespace adobe {
 checkbox_t::checkbox_t( const std::string&                      name,
                         const any_regular_t&                    true_value,
                         const any_regular_t&                    false_value,
-                        theme_t                                 theme,
+                        const GG::Clr&                          color,
+                        const GG::Clr&                          text_color,
+                        const GG::Clr&                          interior_color,
+                        GG::StateButtonStyle                    style,
                         const std::string&                      alt_text) :
     control_m(0),
-    theme_m(theme),
     true_value_m(true_value),
     false_value_m(false_value),
     name_m(name),
+    color_m(color),
+    text_color_m(text_color),
+    interior_color_m(interior_color),
+    style_m(style),
     alt_text_m(alt_text)
 { }
 
@@ -131,7 +137,8 @@ platform_display_type insert<checkbox_t>(display_t&             display,
     element.control_m =
         implementation::Factory().NewStateButton(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
                                                  element.name_m, implementation::DefaultFont(),
-                                                 GG::CLR_GRAY);
+                                                 element.color_m, element.text_color_m,
+                                                 element.interior_color_m, element.style_m);
 
     GG::Connect(element.control_m->CheckedSignal, Checked(element));
 

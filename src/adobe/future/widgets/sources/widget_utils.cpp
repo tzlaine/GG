@@ -121,11 +121,18 @@ bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color)
 
 bool get_subtexture(const dictionary_t& parameters, name_t name, GG::SubTexture& subtexture)
 {
-    bool retval = false;
-
     any_regular_t value;
     if (!get_value(parameters, name, value))
         return false;
+
+    return get_subtexture(value, subtexture);
+}
+
+/****************************************************************************************************/
+
+bool get_subtexture(const any_regular_t& value, GG::SubTexture& subtexture)
+{
+    bool retval = false;
 
     if (value.cast(subtexture)) {
         retval = true;
@@ -145,6 +152,24 @@ bool get_subtexture(const dictionary_t& parameters, name_t name, GG::SubTexture&
     }
 
     return retval;
+}
+
+/****************************************************************************************************/
+
+GG::StateButtonStyle name_to_style(adobe::name_t name)
+{
+#define CASE(x) if (name == adobe::static_name_t(#x)) return GG::x
+
+    CASE(SBSTYLE_3D_XBOX);
+    else CASE(SBSTYLE_3D_CHECKBOX);
+    else CASE(SBSTYLE_3D_RADIO);
+    else CASE(SBSTYLE_3D_BUTTON);
+    else CASE(SBSTYLE_3D_ROUND_BUTTON);
+    else CASE(SBSTYLE_3D_TOP_ATTACHED_TAB);
+    else CASE(SBSTYLE_3D_TOP_DETACHED_TAB);
+    else throw std::runtime_error("Unknown StateButtonStyle name");
+
+#undef CASE
 }
 
 /****************************************************************************************************/

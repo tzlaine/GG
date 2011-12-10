@@ -43,12 +43,18 @@ namespace adobe {
 radio_button_t::radio_button_t(const std::string&   name,
                                const std::string&   alt_text,
                                const any_regular_t& set_value,
-                               theme_t              theme) :
+                               const GG::Clr&       color,
+                               const GG::Clr&       text_color,
+                               const GG::Clr&       interior_color,
+                               GG::StateButtonStyle style) :
     control_m(0),
     name_m(name),
     alt_text_m(alt_text),
     set_value_m(set_value),
-    theme_m(theme)
+    color_m(color),
+    text_color_m(text_color),
+    interior_color_m(interior_color),
+    style_m(style)
 { }
 
 /****************************************************************************************************/
@@ -113,8 +119,8 @@ platform_display_type insert<radio_button_t>(display_t&             display,
         implementation::Factory().NewStateButton(GG::X0, GG::Y0, GG::X1,
                                                  implementation::StandardHeight(), element.name_m,
                                                  implementation::DefaultFont(),
-                                                 GG::CLR_GRAY, GG::CLR_BLACK, GG::CLR_ZERO,
-                                                 GG::SBSTYLE_3D_RADIO);
+                                                 element.color_m, element.text_color_m,
+                                                 element.interior_color_m, element.style_m);
 
     GG::Connect(element.control_m->CheckedSignal,
                 boost::bind(&radio_button_clicked, boost::ref(element), _1));

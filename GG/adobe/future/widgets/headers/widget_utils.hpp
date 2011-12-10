@@ -11,6 +11,7 @@
 
 /****************************************************************************************************/
 
+#include <GG/Base.h>
 #include <GG/adobe/dictionary_fwd.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/future/platform_primitives.hpp>
@@ -119,6 +120,14 @@ bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color);
 /****************************************************************************************************/
 
 bool get_subtexture(const dictionary_t& parameters, name_t name, GG::SubTexture& subtexture);
+
+/****************************************************************************************************/
+
+bool get_subtexture(const any_regular_t& value, GG::SubTexture& subtexture);
+
+/****************************************************************************************************/
+
+GG::StateButtonStyle name_to_style(adobe::name_t name);
 
 /****************************************************************************************************/
 

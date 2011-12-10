@@ -31,12 +31,12 @@ void create_widget(const dictionary_t& parameters,
                    size_enum_t         /*size*/,
                    image_t*&           widget)
 {
-    GG::SubTexture           subtexture;
+    any_regular_t            image;
     image_t::view_model_type actual_image;
 
-    implementation::get_subtexture(parameters, key_image, subtexture);
+    get_value(parameters, key_image, image);
 
-    widget = new image_t(subtexture);
+    widget = new image_t(image);
 }
 
 /*************************************************************************************************/

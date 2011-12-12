@@ -48,7 +48,10 @@ struct tab_group_t : boost::noncopyable
 
     typedef std::vector<tab_t>  tab_set_t;
     
-    tab_group_t(const tab_t* first, const tab_t* last, theme_t theme);
+    tab_group_t(const tab_t* first, const tab_t* last,
+                const GG::Clr& color,
+                const GG::Clr& text_color,
+                GG::TabBarStyle style);
 
 
     void        measure(extents_t& result);
@@ -65,6 +68,9 @@ struct tab_group_t : boost::noncopyable
     theme_t                 theme_m;
     tab_group_value_proc_t  value_proc_m;
     tab_set_t               items_m;
+    GG::Clr                 color_m;
+    GG::Clr                 text_color_m;
+    GG::TabBarStyle         style_m;
 };
 
 /****************************************************************************************************/

@@ -51,11 +51,15 @@ namespace adobe {
 
 tab_group_t::tab_group_t(const tab_t* first,
                          const tab_t* last,
-                         theme_t theme) :
+                         const GG::Clr& color,
+                         const GG::Clr& text_color,
+                         GG::TabBarStyle style) :
     control_m(NULL),
-    theme_m(theme),
     value_proc_m(),
-    items_m(first, last)
+    items_m(first, last),
+    color_m(color),
+    text_color_m(text_color),
+    style_m(style)
 {}
 
 /****************************************************************************************************/
@@ -133,11 +137,13 @@ platform_display_type insert<tab_group_t>(display_t&             display,
 
     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     element.tab_bar_m = style->NewTabBar(GG::X0, GG::Y0, GG::X(100),
-                                         style->DefaultFont(), GG::CLR_GRAY);
+                                         style->DefaultFont(), element.color_m, element.text_color_m,
+                                         element.style_m);
     element.tab_bar_m->SetMinSize(GG::Pt(element.tab_bar_m->MinSize().x, element.tab_bar_m->Height()));
 
     element.control_m = style->NewTabWnd(GG::X0, GG::Y0, GG::X(100), element.tab_bar_m->Height() + 20,
-                                         style->DefaultFont(), GG::CLR_GRAY);
+                                         style->DefaultFont(), element.color_m, element.text_color_m,
+                                         element.style_m);
 
     GG::Layout* layout = element.control_m->DetachLayout();
     delete layout;

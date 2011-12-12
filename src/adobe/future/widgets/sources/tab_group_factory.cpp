@@ -9,10 +9,31 @@
 // tab_group.hpp needs to come before widget_factory to hook the overrides
 #include <GG/adobe/future/widgets/headers/platform_tab_group.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/adobe/future/widgets/headers/tab_group_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/dictionary.hpp>
+
+/*************************************************************************************************/
+
+namespace {
+
+/****************************************************************************************************/
+
+GG::TabBarStyle name_to_style(adobe::name_t style_name)
+{
+    if (style_name == adobe::static_name_t("attached"))
+        return GG::TAB_BAR_ATTACHED;
+    else if (style_name == adobe::static_name_t("detached"))
+        return GG::TAB_BAR_DETACHED;
+    else
+        throw std::runtime_error("Unknown tab bar style.");
+}
+
+/****************************************************************************************************/
+
+}
 
 /*************************************************************************************************/
 
@@ -25,8 +46,14 @@ void create_widget(const dictionary_t& parameters,
                    tab_group_t*&       widget)
 {
     array_t items;
-    
+    GG::Clr color(GG::CLR_GRAY);
+    GG::Clr text_color(GG::CLR_BLACK);
+    name_t  style_name("attached");
+
     get_value(parameters, key_items, items);
+    implementation::get_color(parameters, static_name_t("color"), color);
+    implementation::get_color(parameters, static_name_t("text_color"), text_color);
+    get_value(parameters, static_name_t("style"), style_name);
 
     std::vector<tab_group_t::tab_t>  tabs;
     array_t::const_iterator          first(items.begin());
@@ -45,7 +72,8 @@ void create_widget(const dictionary_t& parameters,
     tab_group_t::tab_t* first_tab(tabs.empty() ? 0 : &tabs[0]);
     theme_t theme(implementation::size_to_theme(size));
 
-    widget = new tab_group_t(first_tab, first_tab + tabs.size(), theme);
+    widget = new tab_group_t(first_tab, first_tab + tabs.size(),
+                             color, text_color, name_to_style(style_name));
 }
 
 /****************************************************************************************************/

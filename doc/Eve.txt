@@ -368,6 +368,8 @@
     \param bind The cell in the Adam property sheet to which this button is bound.
     \param items A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.
 
+    TODO: color, text_color, style
+
     \note The idiomatic way to use tab_group is to populate it entirely with
     \link eve_panel panels \endlink that are all bound to the same cell, so
     that only one at a time is visible.

@@ -14,6 +14,28 @@
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 
+/*************************************************************************************************/
+
+namespace {
+
+/****************************************************************************************************/
+
+GG::SliderLineStyle name_to_style(adobe::name_t style_name)
+{
+    if (style_name == adobe::static_name_t("flat"))
+        return GG::FLAT;
+    else if (style_name == adobe::static_name_t("raised"))
+        return GG::RAISED;
+    else if (style_name == adobe::static_name_t("grooved"))
+        return GG::GROOVED;
+    else
+        throw std::runtime_error("Unknown slider line style.");
+}
+
+/****************************************************************************************************/
+
+}
+
 /****************************************************************************************************/
 
 namespace adobe {
@@ -29,9 +51,12 @@ void create_widget(const dictionary_t& parameters,
     long                  num_ticks(0);
     value_range_format_t  format;
     name_t                orientation(key_horizontal);
-    slider_style_t        style(slider_points_not_s);
     int                   length(0);
     GG::Clr               color(GG::CLR_GRAY);
+    int                   tab_width(6);
+    int                   tab_length(3 * tab_width);
+    int                   line_width(5);
+    name_t                style_name("grooved");
 
     if (parameters.count(key_format))
         format.set(get_value(parameters, key_format).cast<dictionary_t>());
@@ -42,19 +67,21 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, key_slider_point, slider_pointing);
     get_value(parameters, static_name_t("length"), length);
     implementation::get_color(parameters, static_name_t("color"), color);
-
-    if (slider_pointing == static_name_t("up"))         style = slider_points_up_s;
-    else if (slider_pointing == static_name_t("down"))  style = slider_points_down_s;
-    else if (slider_pointing == static_name_t("left"))  style = slider_points_left_s;
-    else if (slider_pointing == static_name_t("right")) style = slider_points_right_s;
+    get_value(parameters, static_name_t("tab_width"), tab_width);
+    get_value(parameters, static_name_t("tab_length"), tab_length);
+    get_value(parameters, static_name_t("line_width"), line_width);
+    get_value(parameters, static_name_t("line_style"), style_name);
 
     widget = new slider_t(alt_text,
                           orientation == key_vertical,
-                          style,
                           num_ticks,
                           format,
                           length,
-                          color);
+                          color,
+                          tab_width,
+                          tab_length,
+                          line_width,
+                          name_to_style(style_name));
 }
 
 /****************************************************************************************************/

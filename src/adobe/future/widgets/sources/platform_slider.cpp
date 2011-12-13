@@ -24,13 +24,23 @@ namespace {
 
 void slider_slid(adobe::slider_t& slider, int tab, int min, int max)
 {
-    if (!slider.value_proc_m.empty()) {
+    if (slider.value_proc_m) {
         double new_value(slider.format_m.at(tab).cast<double>());
         if (new_value != slider.value_m) {
             slider.value_m = new_value;
             slider.value_proc_m(static_cast<adobe::slider_t::model_type>(slider.value_m));
         }
+    } else if (slider.slid_proc_m) {
+        slider.slid_proc_m(tab, min, max);
     }
+}
+
+/****************************************************************************************************/
+
+void slider_slid_and_stopped(adobe::slider_t& slider, int tab, int min, int max)
+{
+    if (slider.slid_and_stopped_proc_m)
+        slider.slid_and_stopped_proc_m(tab, min, max);
 }
 
 /****************************************************************************************************/
@@ -130,6 +140,9 @@ platform_display_type insert<slider_t>(display_t&             display,
 
     GG::Connect(element.control_m->SlidSignal,
                 boost::bind(&slider_slid, boost::ref(element), _1, _2, _3));
+
+    GG::Connect(element.control_m->SlidAndStoppedSignal,
+                boost::bind(&slider_slid_and_stopped, boost::ref(element), _1, _2, _3));
 
     return display.insert(parent, element.control_m);
 }

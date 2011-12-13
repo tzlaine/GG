@@ -10,6 +10,7 @@
 #include <GG/adobe/future/widgets/headers/platform_slider.hpp>
 
 #include <GG/ClrConstants.h>
+#include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/future/widgets/headers/slider_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
@@ -30,6 +31,71 @@ GG::SliderLineStyle name_to_style(adobe::name_t style_name)
         return GG::GROOVED;
     else
         throw std::runtime_error("Unknown slider line style.");
+}
+
+/****************************************************************************************************/
+
+void replace_placeholder(adobe::array_t& expression,
+                         adobe::name_t name,
+                         const adobe::any_regular_t& value)
+{
+    for (std::size_t i = 0; i < expression.size(); ++i) {
+        adobe::name_t element_name;
+        if (expression[i].cast<adobe::name_t>(element_name) && element_name == name)
+            expression[i] = value;
+    }
+}
+
+/****************************************************************************************************/
+
+void replace_placeholders(adobe::array_t& expression,
+                          const adobe::any_regular_t& _,
+                          const adobe::any_regular_t& _1,
+                          const adobe::any_regular_t& _2,
+                          const adobe::any_regular_t& _3)
+{
+    replace_placeholder(expression, adobe::static_name_t("_"), _);
+    replace_placeholder(expression, adobe::static_name_t("_1"), _1);
+    replace_placeholder(expression, adobe::static_name_t("_2"), _2);
+    replace_placeholder(expression, adobe::static_name_t("_3"), _3);
+}
+
+/****************************************************************************************************/
+
+void handle_slid_signal(adobe::sheet_t& sheet, adobe::name_t bind, adobe::array_t expression,
+                        int pos, int min, int max)
+{
+    adobe::array_t params;
+    params.push_back(adobe::any_regular_t(pos));
+    params.push_back(adobe::any_regular_t(min));
+    params.push_back(adobe::any_regular_t(max));
+    adobe::any_regular_t _(params);
+
+    if (bind) {
+        if (expression.empty()) {
+            sheet.set(bind, _);
+        } else {
+            replace_placeholders(expression, _, params[0], params[1], params[2]);
+            sheet.set(bind, sheet.inspect(expression));
+        }
+        sheet.update();
+    }
+    //else if (notifier) ... TODO: If !bind, pass to a notifier, a la the button handler.
+}
+
+/****************************************************************************************************/
+
+void cell_and_expression(const adobe::any_regular_t& value,
+                         adobe::name_t& cell,
+                         adobe::array_t& expression)
+{
+    adobe::array_t cell_and_expression;
+    value.cast<adobe::name_t>(cell);
+    if (!cell && value.cast<adobe::array_t>(cell_and_expression)) {
+        cell = cell_and_expression[0].cast<adobe::name_t>();
+        const std::string& expression_string = cell_and_expression[0].cast<std::string>();
+        expression = adobe::parse_adam_expression(expression_string);
+    }
 }
 
 /****************************************************************************************************/
@@ -96,10 +162,9 @@ void attach_view_and_controller(slider_t&              control,
 {
     basic_sheet_t& layout_sheet(token.client_holder_m.layout_sheet_m);
 
-    if (parameters.count(key_bind) != 0)
-    {
+    if (parameters.count(key_bind) != 0) {
         name_t cell(get_value(parameters, key_bind).cast<name_t>());
-    
+
         attach_view_direct(control, parameters, token, cell);
 
         // is the cell in the layout sheet or the Adam sheet?
@@ -107,6 +172,24 @@ void attach_view_and_controller(slider_t&              control,
             couple_controller_to_cell(control, cell, layout_sheet, token, parameters);
         else
             couple_controller_to_cell(control, cell, token.sheet_m, token, parameters);
+    }
+
+    any_regular_t slid_binding;
+    if (get_value(parameters, static_name_t("bind_slid_signal"), slid_binding)) {
+        name_t cell;
+        array_t expression;
+        cell_and_expression(slid_binding, cell, expression);
+        control.slid_proc_m =
+            boost::bind(&handle_slid_signal, boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
+    }
+
+    any_regular_t slid_and_stopped_binding;
+    if (get_value(parameters, static_name_t("bind_slid_and_stopped_signal"), slid_and_stopped_binding)) {
+        name_t cell;
+        array_t expression;
+        cell_and_expression(slid_binding, cell, expression);
+        control.slid_and_stopped_proc_m =
+            boost::bind(&handle_slid_signal, boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
     }
 }
 
@@ -119,7 +202,8 @@ widget_node_t make_slider(const dictionary_t&     parameters,
 { 
     return create_and_hookup_widget<slider_t, poly_placeable_t>(parameters, parent, token, 
         factory.is_container(static_name_t("slider")), 
-        factory.layout_attributes(static_name_t("slider"))); }
+        factory.layout_attributes(static_name_t("slider")));
+}
 
 /****************************************************************************************************/
 

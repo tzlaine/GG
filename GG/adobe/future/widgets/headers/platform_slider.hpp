@@ -77,6 +77,9 @@ struct slider_t : boost::noncopyable
     setter_type          value_proc_m;
     model_type           last_m; // Used to debounce
     model_type           value_m;
+
+    boost::function<void (int, int, int)> slid_proc_m;
+    boost::function<void (int, int, int)> slid_and_stopped_proc_m;
 };
 
 /****************************************************************************************************/

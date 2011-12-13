@@ -545,6 +545,7 @@ void append_user_preset(presets_t& control, const dictionary_t& snapshot)
                                       layout,
                                       model,
                                       &always_break,
+                                      signal_notifier_t(),
                                       boost::filesystem::path(),
                                       get_top_level_window(control.control_m));
 
@@ -688,6 +689,7 @@ void delete_user_preset(presets_t& control)
                                       layout,
                                       model,
                                       &always_break,
+                                      signal_notifier_t(),
                                       boost::filesystem::path(),
                                       get_top_level_window(control.control_m));
 

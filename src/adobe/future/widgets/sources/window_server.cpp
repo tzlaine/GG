@@ -73,6 +73,7 @@ void window_server_t::push_back(const char* name, size_enum_t dialog_size)
                                         behavior_m,
                                         boost::bind(&window_server_t::dispatch_window_action,
                                             boost::ref(*this), window, _1, _2),
+                                        signal_notifier_t(),
                                         dialog_size,
                                         default_widget_factory_proc_with_factory(widget_factory_m)).release();
     
@@ -112,6 +113,7 @@ void window_server_t::push_back(std::istream&                                   
                                         behavior_m,
                                         boost::bind(&window_server_t::dispatch_window_action,
                                             boost::ref(*this), window, _1, _2),
+                                        signal_notifier_t(),
                                         dialog_size,
                                         default_widget_factory_proc_with_factory(widget_factory_m)).release();
 

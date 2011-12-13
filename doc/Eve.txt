@@ -462,6 +462,10 @@ else:
     only one such action, "reset".  Clicking a button whose action is "reset"
     will cause the entire containing UI to have its original values reset to
     what they were when the UI was launched.
+
+    \section eve_signal_handler The Signal Handler
+
+    TODO
 */
 
 /** \page eve_checkbox checkbox()

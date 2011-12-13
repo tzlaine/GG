@@ -168,18 +168,20 @@ void EveDialog::SetEveModalDialog(adobe::modal_dialog_t* modal_dialog)
 
 ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition,
                                          const boost::filesystem::path& adam_definition,
-                                         ButtonHandler handler)
+                                         ButtonHandler button_handler,
+                                         SignalHandler signal_handler/* = SignalHandler()*/)
 {
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
-    return ExecuteModalDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), handler);
+    return ExecuteModalDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), button_handler, signal_handler);
 }
 
 ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                                          const std::string& eve_filename,
                                          std::istream& adam_definition,
                                          const std::string& adam_filename,
-                                         ButtonHandler handler)
+                                         ButtonHandler button_handler,
+                                         SignalHandler signal_handler/* = SignalHandler()*/)
 {
     ModalDialogResult retval;
 
@@ -189,7 +191,8 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     dialog->record_m = adobe::dictionary_t();
     dialog->display_state_m = adobe::dictionary_t();
     dialog->display_options_m = adobe::dialog_display_s;
-    dialog->callback_m = handler;
+    dialog->button_callback_m = button_handler;
+    dialog->signal_notifier_m = signal_handler;
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
@@ -220,18 +223,20 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
 
 EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                              const boost::filesystem::path& adam_definition,
-                             ButtonHandler handler)
+                             ButtonHandler button_handler,
+                             SignalHandler signal_handler/* = SignalHandler()*/)
 {
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
-    return MakeEveDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), handler);
+    return MakeEveDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), button_handler, signal_handler);
 }
 
 EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                              const std::string& eve_filename,
                              std::istream& adam_definition,
                              const std::string& adam_filename,
-                             ButtonHandler handler)
+                             ButtonHandler button_handler,
+                             SignalHandler signal_handler/* = SignalHandler()*/)
 {
     EveDialog* retval = 0;
 
@@ -241,7 +246,8 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
     dialog->record_m = adobe::dictionary_t();
     dialog->display_state_m = adobe::dictionary_t();
     dialog->display_options_m = adobe::dialog_display_s;
-    dialog->callback_m = handler;
+    dialog->button_callback_m = button_handler;
+    dialog->signal_notifier_m = signal_handler;
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 

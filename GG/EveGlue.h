@@ -74,18 +74,25 @@ struct ModalDialogResult
     adobe::name_t m_terminating_action;
 };
 
-/** The type of button click handle function expected by the UI creation
+/** The type of button click handler function expected by the UI creation
     functions.  Handlers accept the name of the \a action associated with the
     button click and the \a value emitted by the click as specified in the
     Adam and Eve scripts, and return true if the click should result in the
     closure of the dialog.  \see \ref eve_button_handler. */
 typedef boost::function <bool (adobe::name_t, const adobe::any_regular_t&)> ButtonHandler;
 
+/** The type of signal handler function (optionally) expected by the UI
+    creation functions.  Handlers accept the name of the \a widget_type, the
+    name of the \a signal, and the name of the particular widget emitting the
+    signal, \a widget_id.  \see \ref eve_signal_handler. */
+typedef boost::function<void (adobe::name_t, adobe::name_t, adobe::name_t, const adobe::any_regular_t&)> SignalHandler;
+
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler. */
 ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definition,
                                      const boost::filesystem::path& adam_definition,
-                                     ButtonHandler handler);
+                                     ButtonHandler button_handler,
+                                     SignalHandler signal_handler = SignalHandler());
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler. */
@@ -93,13 +100,15 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      const std::string& eve_filename,
                                      std::istream& adam_definition,
                                      const std::string& adam_filename,
-                                     ButtonHandler handler);
+                                     ButtonHandler button_handler,
+                                     SignalHandler signal_handler = SignalHandler());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  \see ButtonHandler. */
 EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
                          const boost::filesystem::path& adam_definition,
-                         ButtonHandler handler);
+                         ButtonHandler button_handler,
+                         SignalHandler signal_handler = SignalHandler());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  \see ButtonHandler. */
@@ -107,7 +116,8 @@ EveDialog* MakeEveDialog(std::istream& eve_definition,
                          const std::string& eve_filename,
                          std::istream& adam_definition,
                          const std::string& adam_filename,
-                         ButtonHandler handler);
+                         ButtonHandler button_handler,
+                         SignalHandler signal_handler = SignalHandler());
 
 /** A GG Eve dialog that handles all the interaction with the Eve engine
     (e.g. relayout on resize).  Must be created via MakeEveDialog(). */
@@ -158,13 +168,15 @@ private:
                                                 const std::string& eve_filename,
                                                 std::istream& adam_definition,
                                                 const std::string& adam_filename,
-                                                ButtonHandler handler);
+                                                ButtonHandler button_handler,
+                                                SignalHandler signal_handler);
 
     friend EveDialog* MakeEveDialog(std::istream& eve_definition,
                                     const std::string& eve_filename,
                                     std::istream& adam_definition,
                                     const std::string& adam_filename,
-                                    ButtonHandler handler);
+                                    ButtonHandler button_handler,
+                                    SignalHandler signal_handler);
 };
 
 /** The type of function used to evaluate named-parameter functions in Adam

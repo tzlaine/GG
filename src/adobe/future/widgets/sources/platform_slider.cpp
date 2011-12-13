@@ -62,7 +62,8 @@ slider_t::slider_t(const std::string&          alt_text,
                    int                         tab_width,
                    int                         tab_length,
                    int                         line_width,
-                   GG::SliderLineStyle         line_style) :
+                   GG::SliderLineStyle         line_style,
+                   name_t                      signal_id) :
     control_m(0),
     alt_text_m(alt_text),
     is_vertical_m(is_vertical),
@@ -73,7 +74,8 @@ slider_t::slider_t(const std::string&          alt_text,
     tab_width_m(tab_width),
     tab_length_m(tab_length),
     line_width_m(line_width),
-    line_style_m(line_style)
+    line_style_m(line_style),
+    signal_id_m(signal_id)
 { }
 
 /****************************************************************************************************/

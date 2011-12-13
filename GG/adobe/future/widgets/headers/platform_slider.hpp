@@ -51,7 +51,8 @@ struct slider_t : boost::noncopyable
              int                         tab_width,
              int                         tab_length,
              int                         line_width,
-             GG::SliderLineStyle         line_style);
+             GG::SliderLineStyle         line_style,
+             name_t                      signal_id);
 
     void measure(extents_t& result);
 
@@ -74,6 +75,7 @@ struct slider_t : boost::noncopyable
     int                  tab_length_m;
     int                  line_width_m;
     GG::SliderLineStyle  line_style_m;
+    name_t               signal_id_m;
     setter_type          value_proc_m;
     model_type           last_m; // Used to debounce
     model_type           value_m;

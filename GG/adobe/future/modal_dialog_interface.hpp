@@ -155,7 +155,18 @@ struct dialog_result_t
     the terminating_action_m field in the dialog return results will be
     this action name.
 */
-typedef boost::function <bool (name_t, const any_regular_t&)> action_callback_t;
+typedef boost::function <bool (name_t, const any_regular_t&)> button_callback_t;
+
+/****************************************************************************************************/
+/*!
+    \ingroup modal_dialog_kit
+
+    The modal dialog interface now sports an API call back to the client
+    in the case when an unbound GG signal is emitted.
+*/
+typedef boost::function<
+    void (name_t widget_type_name, name_t signal_name, name_t widget_id, const any_regular_t&)
+> signal_notifier_t;
 
 /****************************************************************************************************/
 /*!
@@ -181,7 +192,8 @@ public:
     dictionary_t            record_m;
     dictionary_t            display_state_m;
     display_options_t       display_options_m;
-    action_callback_t       callback_m;
+    button_callback_t       button_callback_m;
+    signal_notifier_t       signal_notifier_m;
     boost::filesystem::path working_directory_m;
     platform_display_type   parent_m;
     vm_lookup_t             vm_lookup_m;
@@ -192,7 +204,11 @@ public:
     const dialog_result_t& result();
 
 private:
-    void              latch_callback(name_t action, const any_regular_t&);
+    void              latch_button_callback(name_t action, const any_regular_t&);
+    void              latch_signal_callback(name_t widget_type_name,
+                                            name_t signal_name,
+                                            name_t widget_id,
+                                            const any_regular_t&);
 
     void              monitor_record(const dictionary_t& record_info);
     void              monitor_invariant(bool valid);
@@ -268,7 +284,8 @@ inline dialog_result_t handle_dialog(const dictionary_t&            input,
                                      display_options_t              display_options,
                                      std::istream&                  layout_definition,
                                      std::istream&                  sheet_definition,
-                                     action_callback_t              callback,
+                                     button_callback_t              button_callback,
+                                     signal_notifier_t              signal_notifier,
                                      const boost::filesystem::path& working_directory,
                                      platform_display_type          parent=platform_display_type())
 {
@@ -281,7 +298,8 @@ inline dialog_result_t handle_dialog(const dictionary_t&            input,
     dialog.record_m = record;
     dialog.display_state_m = display_state;
     dialog.display_options_m = display_options;
-    dialog.callback_m = callback;
+    dialog.button_callback_m = button_callback;
+    dialog.signal_notifier_m = signal_notifier;
     dialog.working_directory_m = working_directory;
     dialog.parent_m = parent;
 

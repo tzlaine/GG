@@ -148,6 +148,7 @@ std::pair<const char*, bool> alert(const char*                    message_text,
                                          layout,
                                          sheet,
                                          &always_break,
+                                         signal_notifier_t(),
                                          icon_directory_path));
 
     bool is_checked(get_value(result.command_m, static_name_t("checkbox_value")).cast<bool>());

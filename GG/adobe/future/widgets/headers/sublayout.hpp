@@ -47,7 +47,8 @@ public:
                            const widget_node_t&     parent,
                            const factory_token_t&   token,
                            const widget_factory_t&  factory,
-                           const button_notifier_t& notifier,
+                           const button_notifier_t& button_notifier,
+                           const signal_notifier_t& signal_notifier,
                            behavior_t&              behavior);
 
     template <typename T>

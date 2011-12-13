@@ -281,7 +281,8 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                       std::istream&                          stream,
                                       sheet_t&                               sheet,
                                       behavior_t&                            root_behavior,
-                                      const button_notifier_t&               notifier,
+                                      const button_notifier_t&               button_notifier,
+                                      const signal_notifier_t&               signal_notifier,
                                       size_enum_t                            dialog_size,
                                       const widget_factory_proc_t&           proc,
                                       platform_display_type                  display_root)
@@ -290,7 +291,8 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
     factory_token_t                     token(get_main_display(),
                                               sheet,
                                               *(result.get()),
-                                              notifier);
+                                              button_notifier,
+                                              signal_notifier);
 
     virtual_machine_t evaluator;
     vm_lookup_t       lookup;
@@ -315,7 +317,7 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                evaluator))) {
         throw std::logic_error("Eve parse failed.");
     }
-    
+
     result->contributing_m = sheet.contributing();
 
     return result;

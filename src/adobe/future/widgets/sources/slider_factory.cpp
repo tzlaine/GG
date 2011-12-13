@@ -62,7 +62,12 @@ void replace_placeholders(adobe::array_t& expression,
 
 /****************************************************************************************************/
 
-void handle_slid_signal(adobe::sheet_t& sheet, adobe::name_t bind, adobe::array_t expression,
+void handle_slid_signal(adobe::signal_notifier_t signal_notifier,
+                        adobe::name_t signal_name,
+                        adobe::name_t widget_id,
+                        adobe::sheet_t& sheet,
+                        adobe::name_t bind,
+                        adobe::array_t expression,
                         int pos, int min, int max)
 {
     adobe::array_t params;
@@ -71,16 +76,21 @@ void handle_slid_signal(adobe::sheet_t& sheet, adobe::name_t bind, adobe::array_
     params.push_back(adobe::any_regular_t(max));
     adobe::any_regular_t _(params);
 
+    if (!bind && !signal_notifier)
+        return;
+
+    adobe::any_regular_t value;
+    if (expression.empty())
+        value = _;
+    else
+        value = sheet.inspect(expression);
+
     if (bind) {
-        if (expression.empty()) {
-            sheet.set(bind, _);
-        } else {
-            replace_placeholders(expression, _, params[0], params[1], params[2]);
-            sheet.set(bind, sheet.inspect(expression));
-        }
+        sheet.set(bind, value);
         sheet.update();
+    } else if (signal_notifier) {
+        signal_notifier(adobe::static_name_t("slider"), signal_name, widget_id, value);
     }
-    //else if (notifier) ... TODO: If !bind, pass to a notifier, a la the button handler.
 }
 
 /****************************************************************************************************/
@@ -123,6 +133,7 @@ void create_widget(const dictionary_t& parameters,
     int                   tab_length(3 * tab_width);
     int                   line_width(5);
     name_t                style_name("grooved");
+    name_t                signal_id;
 
     if (parameters.count(key_format))
         format.set(get_value(parameters, key_format).cast<dictionary_t>());
@@ -137,6 +148,7 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, static_name_t("tab_length"), tab_length);
     get_value(parameters, static_name_t("line_width"), line_width);
     get_value(parameters, static_name_t("line_style"), style_name);
+    get_value(parameters, static_name_t("signal_id"), signal_id);
 
     widget = new slider_t(alt_text,
                           orientation == key_vertical,
@@ -147,7 +159,8 @@ void create_widget(const dictionary_t& parameters,
                           tab_width,
                           tab_length,
                           line_width,
-                          name_to_style(style_name));
+                          name_to_style(style_name),
+                          signal_id);
 }
 
 /****************************************************************************************************/
@@ -180,7 +193,9 @@ void attach_view_and_controller(slider_t&              control,
         array_t expression;
         cell_and_expression(slid_binding, cell, expression);
         control.slid_proc_m =
-            boost::bind(&handle_slid_signal, boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
+            boost::bind(&handle_slid_signal,
+                        token.signal_notifier_m, static_name_t("slid"), control.signal_id_m,
+                        boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
     }
 
     any_regular_t slid_and_stopped_binding;
@@ -189,7 +204,9 @@ void attach_view_and_controller(slider_t&              control,
         array_t expression;
         cell_and_expression(slid_binding, cell, expression);
         control.slid_and_stopped_proc_m =
-            boost::bind(&handle_slid_signal, boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
+            boost::bind(&handle_slid_signal,
+                        token.signal_notifier_m, static_name_t("slid_and_stopped"), control.signal_id_m,
+                        boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
     }
 }
 

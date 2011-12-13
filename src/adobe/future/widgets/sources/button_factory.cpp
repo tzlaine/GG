@@ -74,7 +74,7 @@ struct button_item_t
 
 /*************************************************************************************************/
 
-void proxy_button_hit(  adobe::button_notifier_t    notifier,
+void proxy_button_hit(  adobe::button_notifier_t    button_notifier,
                         adobe::sheet_t&             sheet,
                         adobe::name_t               bind,
                         adobe::name_t               bind_output,
@@ -88,18 +88,18 @@ void proxy_button_hit(  adobe::button_notifier_t    notifier,
         sheet.set(bind_output, value);
         sheet.update();
     }
-    else if (notifier)
+    else if (button_notifier)
     {
         if (bind)
         {
             adobe::dictionary_t result;
             result.insert(std::make_pair(adobe::key_value, value));
             result.insert(std::make_pair(adobe::key_contributing, adobe::any_regular_t(contributing)));
-            notifier(action, adobe::any_regular_t(result));
+            button_notifier(action, adobe::any_regular_t(result));
         }
         else
         {
-            notifier(action, value);
+            button_notifier(action, value);
         }
     }
 }
@@ -114,7 +114,7 @@ void state_set_push_back(Cont& state_set, const adobe::factory_token_t& token, c
     state_set.back().name_m         = temp.name_m;
     state_set.back().alt_text_m     = temp.alt_text_m;
     state_set.back().modifier_set_m = temp.modifier_set_m;
-    state_set.back().hit_proc_m     = boost::bind(&proxy_button_hit, token.notifier_m,
+    state_set.back().hit_proc_m     = boost::bind(&proxy_button_hit, token.button_notifier_m,
                                                     boost::ref(token.sheet_m), temp.bind_m,
                                                     temp.bind_output_m,
                                                     temp.action_m, _1, _2);

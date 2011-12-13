@@ -90,13 +90,14 @@ widget_node_t make_preview(const dictionary_t&     parameters,
     assemblage_cleanup_ptr(assemblage, widget);
 
     widget_node_t sublayout_result(widget->evaluate(sheet_s,
-                                   layout_s,
-                                   parameters,
-                                   parent,
-                                   token,
-                                   factory,
-                                   boost::bind(&preview_sublayout_notifier, boost::ref(*widget), _1, _2),
-                                   token.client_holder_m.root_behavior_m));
+                                                    layout_s,
+                                                    parameters,
+                                                    parent,
+                                                    token,
+                                                    factory,
+                                                    boost::bind(&preview_sublayout_notifier, boost::ref(*widget), _1, _2),
+                                                    token.signal_notifier_m,
+                                                    token.client_holder_m.root_behavior_m));
 
     //assemblage_cleanup_connection(assemblage, /*propagate controller_bind from sublayout to main sheet*/);
     //assemblage_cleanup_connection(assemblage, /*propagate view_bind from main sheet to sublayout*/);

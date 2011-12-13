@@ -170,7 +170,8 @@ platform_display_type modal_dialog_t::init(std::istream& layout,
                 layout,
                 sheet_m,
                 root_behavior_m,
-                boost::bind(&modal_dialog_t::latch_callback, boost::ref(*this), _1, _2),
+                boost::bind(&modal_dialog_t::latch_button_callback, boost::ref(*this), _1, _2),
+                boost::bind(&modal_dialog_t::latch_signal_callback, boost::ref(*this), _1, _2, _3, _4),
                 size_normal_s,
                 default_widget_factory_proc(),
                 parent_m
@@ -211,18 +212,18 @@ dialog_result_t modal_dialog_t::go()
 
 /****************************************************************************************************/
 
-void modal_dialog_t::latch_callback(name_t action, const any_regular_t& value)
+void modal_dialog_t::latch_button_callback(name_t action, const any_regular_t& value)
 try
 {
     assert(view_m);
-    assert(callback_m);
+    assert(button_callback_m);
 
     if (action == static_name_t("reset"))
     {
         sheet_m.set(contributing_m);
         sheet_m.update();
     }
-    else if (callback_m(action, value))
+    else if (button_callback_m(action, value))
     {
         result_m.terminating_action_m = action;
         view_m->root_display_m->EndRun();
@@ -235,6 +236,17 @@ catch(const std::exception& error)
 catch(...)
 {
     std::cerr << "Unknown exception (modal_dialog_t::latch_callback)" << std::endl;
+}
+
+/****************************************************************************************************/
+
+void modal_dialog_t::latch_signal_callback(name_t widget_type_name,
+                                           name_t signal_name,
+                                           name_t widget_id,
+                                           const any_regular_t& value)
+{
+    if (signal_notifier_m)
+        signal_notifier_m(widget_type_name, signal_name, widget_id, value);
 }
 
 /****************************************************************************************************/

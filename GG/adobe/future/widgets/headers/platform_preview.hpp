@@ -87,8 +87,9 @@ struct preview_t
                            const widget_node_t&     parent,
                            const factory_token_t&   token,
                            const widget_factory_t&  factory,
-                           const button_notifier_t& notifier,
-                                                   behavior_t&                          behavior)
+                           const button_notifier_t& button_notifier,
+                           const signal_notifier_t& signal_notifier,
+                           behavior_t&              behavior)
     {
         widget_node_t result(sublayout_m.evaluate(sheet_description,
                                                   layout_description,
@@ -96,8 +97,9 @@ struct preview_t
                                                   parent,
                                                   token,
                                                   factory,
-                                                  notifier,
-                                                                                                  behavior));
+                                                  button_notifier,
+                                                  signal_notifier,
+                                                  behavior));
 
         sublayout_m.sublayout_sheet_update();
 

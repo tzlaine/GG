@@ -74,13 +74,13 @@ struct button_item_t
 
 /*************************************************************************************************/
 
-void proxy_button_hit(  adobe::button_notifier_t    button_notifier,
-                        adobe::sheet_t&             sheet,
-                        adobe::name_t               bind,
-                        adobe::name_t               bind_output,
-                        adobe::name_t               action,
-                        const adobe::any_regular_t& value,
-                        const adobe::dictionary_t&  contributing)
+void proxy_button_hit(adobe::button_notifier_t    button_notifier,
+                      adobe::sheet_t&             sheet,
+                      adobe::name_t               bind,
+                      adobe::name_t               bind_output,
+                      adobe::name_t               action,
+                      const adobe::any_regular_t& value,
+                      const adobe::dictionary_t&  contributing)
 {
     if (bind_output)
     {
@@ -176,10 +176,6 @@ namespace adobe {
 namespace implementation {
 
 /****************************************************************************************************/
-
-button_t* create_button_widget(const dictionary_t&    parameters,
-                               const factory_token_t& token,
-                               size_enum_t            size);
 
 button_t* create_button_widget(const dictionary_t&    parameters,
                                const factory_token_t& token,

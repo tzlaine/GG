@@ -284,9 +284,13 @@ void handle_signal(signal_notifier_t signal_notifier,
                    name_t bind,
                    array_t expression,
                    const any_regular_t& _1,
+                   name_t _1_name/* = name_t()*/,
                    const any_regular_t& _2/* = any_regular_t()*/,
+                   name_t _2_name/* = name_t()*/,
                    const any_regular_t& _3/* = any_regular_t()*/,
-                   const any_regular_t& _4/* = any_regular_t()*/)
+                   name_t _3_name/* = name_t()*/,
+                   const any_regular_t& _4/* = any_regular_t()*/,
+                   name_t _4_name/* = name_t()*/)
 {
     if (!bind && !signal_notifier)
         return;
@@ -295,16 +299,33 @@ void handle_signal(signal_notifier_t signal_notifier,
     {
         dictionary_t dict;
 
-        if (!empty(_1))
-            dict[static_name_t("_1")] = _1;
-        if (!empty(_2))
-            dict[static_name_t("_2")] = _2;
-        if (!empty(_3))
-            dict[static_name_t("_3")] = _3;
-        if (!empty(_4))
-            dict[static_name_t("_4")] = _4;
+        std::size_t count = 0;
+        if (!empty(_1)) {
+            dict[_1_name] = _1;
+            ++count;
+        }
+        if (!empty(_2)) {
+            assert(_2_name);
+            dict[_2_name] = _2;
+            ++count;
+        }
+        if (!empty(_3)) {
+            assert(_3_name);
+            dict[_3_name] = _3;
+            ++count;
+        }
+        if (!empty(_4)) {
+            assert(_4_name);
+            dict[_4_name] = _4;
+            ++count;
+        }
 
-        _ = any_regular_t(dict);
+        if (count <= 1) {
+            _ = _1;
+        } else {
+            assert(_1_name);
+            _ = any_regular_t(dict);
+        }
     }
 
     any_regular_t value;
@@ -325,9 +346,7 @@ void handle_signal(signal_notifier_t signal_notifier,
 
 /****************************************************************************************************/
 
-void cell_and_expression(const any_regular_t& value,
-                         name_t& cell,
-                         array_t& expression)
+void cell_and_expression(const any_regular_t& value, name_t& cell, array_t& expression)
 {
     array_t cell_and_expression;
     value.cast<name_t>(cell);

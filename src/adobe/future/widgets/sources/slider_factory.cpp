@@ -51,8 +51,11 @@ void handle_slid_signal(adobe::signal_notifier_t signal_notifier,
                                          bind,
                                          expression,
                                          adobe::any_regular_t(pos),
+                                         adobe::static_name_t("slider_pos"),
                                          adobe::any_regular_t(min),
-                                         adobe::any_regular_t(max));
+                                         adobe::static_name_t("slider_min"),
+                                         adobe::any_regular_t(max),
+                                         adobe::static_name_t("slider_max"));
 }
 
 /****************************************************************************************************/

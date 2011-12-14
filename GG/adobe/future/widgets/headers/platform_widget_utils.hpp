@@ -149,15 +149,17 @@ void handle_signal(signal_notifier_t signal_notifier,
                    name_t bind,
                    array_t expression,
                    const any_regular_t& _1,
+                   name_t _1_name = name_t(),
                    const any_regular_t& _2 = any_regular_t(),
+                   name_t _2_name = name_t(),
                    const any_regular_t& _3 = any_regular_t(),
-                   const any_regular_t& _4 = any_regular_t());
+                   name_t _3_name = name_t(),
+                   const any_regular_t& _4 = any_regular_t(),
+                   name_t _4_name = name_t());
 
 /****************************************************************************************************/
 
-void cell_and_expression(const any_regular_t& value,
-                         name_t& cell,
-                         array_t& expression);
+void cell_and_expression(const any_regular_t& value, name_t& cell, array_t& expression);
 
 /****************************************************************************************************/
 

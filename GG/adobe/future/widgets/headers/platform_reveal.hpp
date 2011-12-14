@@ -40,7 +40,7 @@ struct reveal_t : boost::noncopyable
     reveal_t(const std::string&    name,
              const any_regular_t&  show_value,
              const std::string&    alt_text,
-             const GG::Clr&        text_color,
+             GG::Clr               text_color,
              const GG::SubTexture& show_unpressed,
              const GG::SubTexture& show_pressed,
              const GG::SubTexture& show_rollover,

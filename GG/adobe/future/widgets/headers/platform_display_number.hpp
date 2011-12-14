@@ -46,7 +46,7 @@ struct display_number_t  : boost::noncopyable
                      const std::string& alt_text,
                      ForwardIterator first,
                      ForwardIterator last, 
-                     const GG::Clr& color,
+                     GG::Clr        color,
                      int characters);
 
     GG::TextControl*         window_m;
@@ -72,7 +72,7 @@ display_number_t::display_number_t(
     const std::string& alt_text,
     ForwardIterator first,
     ForwardIterator last, 
-    const GG::Clr& color,
+    GG::Clr        color,
     int characters) :
     name_m(name),
     alt_text_m(alt_text),

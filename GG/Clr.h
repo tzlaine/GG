@@ -76,11 +76,11 @@ inline Clr FloatClr(float r, float g, float b, float a)
 }
 
 /** Returns true iff \a rhs and \a lhs are identical. */
-inline bool operator==(const Clr& rhs, const Clr& lhs)
+inline bool operator==(Clr rhs, Clr lhs)
 { return rhs.r == lhs.r && rhs.g == lhs.g && rhs.b == lhs.b && rhs.a == lhs.a; }
 
 /** Returns true iff \a rhs and \a lhs are different. */
-inline bool operator!=(const Clr& rhs, const Clr& lhs)
+inline bool operator!=(Clr rhs, Clr lhs)
 { return !(rhs == lhs); }
 
 } // namespace GG

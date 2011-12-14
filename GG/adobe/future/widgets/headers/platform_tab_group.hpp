@@ -49,8 +49,8 @@ struct tab_group_t : boost::noncopyable
     typedef std::vector<tab_t>  tab_set_t;
     
     tab_group_t(const tab_t* first, const tab_t* last,
-                const GG::Clr& color,
-                const GG::Clr& text_color,
+                GG::Clr        color,
+                GG::Clr        text_color,
                 GG::TabBarStyle style);
 
 

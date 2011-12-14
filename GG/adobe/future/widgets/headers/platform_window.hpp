@@ -42,7 +42,7 @@ struct window_t
 {
     window_t(const std::string&     name,
              GG::Flags<GG::WndFlag> flags,
-             const GG::Clr&         color);
+             GG::Clr                color);
 
     ~window_t();
 

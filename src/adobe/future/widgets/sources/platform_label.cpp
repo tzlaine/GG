@@ -31,7 +31,7 @@ label_t::label_t(const std::string&        name,
                  const std::string&        alt_text,
                  std::size_t               characters,
                  GG::Flags<GG::TextFormat> format,
-                 const GG::Clr&            color) :
+                 GG::Clr                   color) :
     window_m(0),
     format_m(format),
     color_m(color),

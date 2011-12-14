@@ -138,7 +138,7 @@ public:
     {
     public:
         /** \name Structors */ ///@{
-        ColorButton(const Clr& color);
+        ColorButton(Clr color);
         //@}
 
         /** \name Accessors */ ///@{
@@ -148,7 +148,7 @@ public:
 
         /** \name Mutators */ ///@{
         /** sets the custom color represented by the button */
-        void SetRepresentedColor(const Clr& color);
+        void SetRepresentedColor(Clr color);
         //@}
 
     protected:

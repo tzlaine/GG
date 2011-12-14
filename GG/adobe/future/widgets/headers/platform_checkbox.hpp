@@ -44,9 +44,9 @@ struct checkbox_t
     checkbox_t(const std::string&   name,
                const any_regular_t& true_value,
                const any_regular_t& false_value,
-               const GG::Clr&       color,
-               const GG::Clr&       text_color,
-               const GG::Clr&       interior_color,
+               GG::Clr              color,
+               GG::Clr              text_color,
+               GG::Clr              interior_color,
                GG::StateButtonStyle style,
                const std::string&   alt_text,
                name_t               signal_id);

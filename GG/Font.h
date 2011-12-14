@@ -51,7 +51,7 @@ namespace GG {
 
 /** Returns a string of the form "<rgba r g b a>" from a Clr object with color
     channels r, b, g, a. */
-GG_API std::string RgbaTag(const Clr& c);
+GG_API std::string RgbaTag(Clr c);
 
 
 /** \brief A bitmapped font rendering class.

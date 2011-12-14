@@ -29,7 +29,7 @@ namespace adobe {
 
 window_t::window_t(const std::string&     name,
                    GG::Flags<GG::WndFlag> flags,
-                   const GG::Clr&         color) :
+                   GG::Clr                color) :
     window_m(0),
     flags_m(flags),
     name_m(name),

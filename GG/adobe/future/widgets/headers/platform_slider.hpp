@@ -47,7 +47,7 @@ struct slider_t : boost::noncopyable
              std::size_t                 num_ticks,
              const value_range_format_t& format,
              int                         length,
-             const GG::Clr&              color,
+             GG::Clr                     color,
              int                         tab_width,
              int                         tab_length,
              int                         line_width,

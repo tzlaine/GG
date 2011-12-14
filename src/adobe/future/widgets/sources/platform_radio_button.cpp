@@ -46,9 +46,9 @@ namespace adobe {
 radio_button_t::radio_button_t(const std::string&   name,
                                const std::string&   alt_text,
                                const any_regular_t& set_value,
-                               const GG::Clr&       color,
-                               const GG::Clr&       text_color,
-                               const GG::Clr&       interior_color,
+                               GG::Clr              color,
+                               GG::Clr              text_color,
+                               GG::Clr              interior_color,
                                GG::StateButtonStyle style,
                                name_t               signal_id) :
     control_m(0),

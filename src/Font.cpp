@@ -205,7 +205,7 @@ const CPSize GG::INVALID_CP_SIZE(std::numeric_limits<std::size_t>::max());
 ///////////////////////////////////////
 // function GG::RgbaTag
 ///////////////////////////////////////
-std::string GG::RgbaTag(const Clr& c)
+std::string GG::RgbaTag(Clr c)
 {
     std::stringstream stream;
     stream << "<rgba "

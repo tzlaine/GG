@@ -39,7 +39,7 @@ using namespace GG;
 namespace {
     const double EPSILON = 0.0001;
 
-    HSVClr Convert(const Clr& color)
+    HSVClr Convert(Clr color)
     {
         HSVClr retval;
         retval.a = color.a;
@@ -310,7 +310,7 @@ void ValuePicker::SetValueFromPt(Pt pt)
 ////////////////////////////////////////////////
 
 // ColorDlg::ColorButton
-ColorDlg::ColorButton::ColorButton(const Clr& color) :
+ColorDlg::ColorButton::ColorButton(Clr color) :
     Button(X0, Y0, X1, Y1, "", boost::shared_ptr<Font>(), color),
     m_represented_color(CLR_BLACK)
 {}
@@ -318,7 +318,7 @@ ColorDlg::ColorButton::ColorButton(const Clr& color) :
 Clr ColorDlg::ColorButton::RepresentedColor() const
 { return m_represented_color; }
 
-void ColorDlg::ColorButton::SetRepresentedColor(const Clr& color)
+void ColorDlg::ColorButton::SetRepresentedColor(Clr color)
 { m_represented_color = color; }
 
 void ColorDlg::ColorButton::RenderUnpressed()

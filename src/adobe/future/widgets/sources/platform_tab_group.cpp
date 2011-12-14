@@ -51,8 +51,8 @@ namespace adobe {
 
 tab_group_t::tab_group_t(const tab_t* first,
                          const tab_t* last,
-                         const GG::Clr& color,
-                         const GG::Clr& text_color,
+                         GG::Clr        color,
+                         GG::Clr        text_color,
                          GG::TabBarStyle style) :
     control_m(NULL),
     value_proc_m(),

@@ -32,7 +32,7 @@ namespace adobe {
                 const std::string&        alt_text, 
                 std::size_t               characters,
                 GG::Flags<GG::TextFormat> format,
-                const GG::Clr&            color);
+                GG::Clr                   color);
 
         GG::TextControl*          window_m;
         GG::Flags<GG::TextFormat> format_m;

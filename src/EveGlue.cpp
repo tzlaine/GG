@@ -59,7 +59,7 @@ const unsigned int EveDialog::BEVEL = 2;
 const int EveDialog::FRAME_WIDTH = 2;
 const Pt EveDialog::BEVEL_OFFSET(X(EveDialog::FRAME_WIDTH), Y(EveDialog::FRAME_WIDTH));
 
-EveDialog::EveDialog(adobe::window_t& imp, const GG::Clr& color) :
+EveDialog::EveDialog(adobe::window_t& imp, const Clr color) :
     Wnd(X0, Y0, X1, Y1, imp.flags_m),
     m_imp(imp),
     m_title(0),

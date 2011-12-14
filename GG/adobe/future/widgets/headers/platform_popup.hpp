@@ -46,8 +46,8 @@ struct popup_t : boost::noncopyable
             const std::string& custom_item_name,
             const menu_item_t* first,
             const menu_item_t* last,
-            const GG::Clr&     color,
-            const GG::Clr&     text_color,
+            GG::Clr            color,
+            GG::Clr            text_color,
             name_t             signal_id);
 
     void                reset_menu_item_set(const menu_item_t* first, const menu_item_t* last);

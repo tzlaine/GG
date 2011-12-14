@@ -82,23 +82,17 @@ void proxy_button_hit(adobe::button_notifier_t    button_notifier,
                       const adobe::any_regular_t& value,
                       const adobe::dictionary_t&  contributing)
 {
-    if (bind_output)
-    {
+    if (bind_output) {
         //touch(); // REVISIT (sparent) : We should have per item touch!
         sheet.set(bind_output, value);
         sheet.update();
-    }
-    else if (button_notifier)
-    {
-        if (bind)
-        {
+    } else if (button_notifier) {
+        if (bind) {
             adobe::dictionary_t result;
             result.insert(std::make_pair(adobe::key_value, value));
             result.insert(std::make_pair(adobe::key_contributing, adobe::any_regular_t(contributing)));
             button_notifier(action, adobe::any_regular_t(result));
-        }
-        else
-        {
+        } else {
             button_notifier(action, value);
         }
     }
@@ -231,8 +225,7 @@ button_t* create_button_widget(const dictionary_t&    parameters,
                                     first_state, first_state + n,
                                     implementation::size_to_theme(size));
 
-    for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter)
-    {
+    for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter) {
         button_item_t temp(item, iter->cast<dictionary_t>());
 
         connect_button_state(*result,
@@ -242,8 +235,7 @@ button_t* create_button_widget(const dictionary_t&    parameters,
                              token.client_holder_m);
     }
 
-    if (state_set_originally_empty)
-    {
+    if (state_set_originally_empty) {
         connect_button_state(*result,
                              token.client_holder_m.assemblage_m,
                              token.sheet_m,

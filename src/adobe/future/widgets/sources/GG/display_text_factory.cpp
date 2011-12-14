@@ -31,6 +31,7 @@
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/EveGlue.h>
 
 
@@ -55,12 +56,14 @@ namespace adobe {
         std::string name;
         std::string alt_text;
         long characters(5);
+        GG::Clr color(GG::CLR_BLACK);
 
         get_value(parameters, key_name, name);
         get_value(parameters, key_alt_text, alt_text);
         get_value(parameters, key_characters, characters);
+        implementation::get_color(parameters, static_name_t("color"), color);
 
-        display_text = new display_text_t(name, alt_text, characters);
+        display_text = new display_text_t(name, alt_text, characters, color);
     }
 
     template <typename Sheet, typename FactoryToken>
@@ -69,7 +72,6 @@ namespace adobe {
                                           Sheet&,
                                           const FactoryToken&,
                                           const dictionary_t&)
-
     {}
 
     namespace implementation {

@@ -25,6 +25,7 @@
 #ifndef DISPLAY_TEXT_HPP
 #define DISPLAY_TEXT_HPP
 
+#include <GG/Clr.h>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/memory.hpp>
 #include <GG/adobe/layout_attributes.hpp>
@@ -47,12 +48,14 @@ namespace adobe {
 
         display_text_t(const std::string& name,
                        const std::string& alt_text,
-                       int characters);
+                       int characters,
+                       GG::Clr color);
 
         GG::TextControl* window_m;
         std::string name_m;
         std::string alt_text_m;
         int characters_m;
+        GG::Clr color_m;
 
         void measure(extents_t& result);
         void measure_vertical(extents_t& calculated_horizontal, const place_data_t& placed_horizontal);

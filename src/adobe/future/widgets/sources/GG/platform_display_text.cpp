@@ -44,10 +44,11 @@ namespace {
 
 namespace adobe {
 
-    display_text_t::display_text_t(const std::string& name, const std::string& alt_text, int characters) :
+    display_text_t::display_text_t(const std::string& name, const std::string& alt_text, int characters, GG::Clr color) :
         name_m(name),
         alt_text_m(alt_text),
-        characters_m(characters)
+        characters_m(characters),
+        color_m(color)
     {}
 
     void display_text_t::place(const place_data_t& place_data)
@@ -109,7 +110,7 @@ namespace adobe {
         element.window_m =
             implementation::Factory().NewTextControl(GG::X0, GG::Y0, GG::X1, GG::Y1,
                                                      element.name_m, implementation::DefaultFont(),
-                                                     GG::CLR_BLACK, GG::FORMAT_NONE, GG::INTERACTIVE);
+                                                     element.color_m, GG::FORMAT_NONE, GG::INTERACTIVE);
 
         if (!element.alt_text_m.empty())
             implementation::set_control_alt_text(element.window_m, element.alt_text_m);

@@ -136,7 +136,10 @@ void edit_text_t::display(const model_type& value) // values that come in from A
 
 /****************************************************************************************************/
 
-edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) : 
+edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
+    color_m(block.color_m),
+    text_color_m(block.text_color_m),
+    interior_color_m(block.interior_color_m),
     name_m(block.name_m, block.alt_text_m, 0, GG::FORMAT_NONE, GG::CLR_BLACK/*TODO*/),
     alt_text_m(block.alt_text_m),
     field_text_m(),
@@ -252,12 +255,6 @@ void edit_text_t::enable(bool active)
 
 /****************************************************************************************************/
 
-void edit_text_t::set_theme(theme_t theme)
-{ theme_m = theme; }
-
-
-/****************************************************************************************************/
-
 void edit_text_t::set_field_text(const std::string& text)
 {
     assert(control_m);
@@ -325,8 +322,12 @@ platform_display_type insert<edit_text_t>(display_t&             display,
     assert(0 < element.rows_m);
     if (element.rows_m <= 1) {
         element.control_m =
-            implementation::Factory().NewEdit(GG::X0, GG::Y0, GG::X1, "",
-                                              implementation::DefaultFont(), GG::CLR_GRAY);
+            implementation::Factory().NewEdit(GG::X0, GG::Y0, GG::X1,
+                                              "",
+                                              implementation::DefaultFont(),
+                                              element.color_m,
+                                              element.text_color_m,
+                                              element.interior_color_m);
         GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     } else {
         GG::Y height =
@@ -336,8 +337,14 @@ platform_display_type insert<edit_text_t>(display_t&             display,
         if (!element.scrollable_m)
             style |= GG::MULTI_NO_SCROLL;
         element.control_m =
-            implementation::Factory().NewMultiEdit(GG::X0, GG::Y0, GG::X1, height, "",
-                                                   implementation::DefaultFont(), GG::CLR_GRAY, style);
+            implementation::Factory().NewMultiEdit(GG::X0, GG::Y0, GG::X1,
+                                                   height,
+                                                   "",
+                                                   implementation::DefaultFont(),
+                                                   element.color_m,
+                                                   style,
+                                                   element.text_color_m,
+                                                   element.interior_color_m);
         GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     }
 

@@ -26,8 +26,6 @@ void create_widget(const dictionary_t&   parameters,
 {
     edit_text_ctor_block_t block;
 
-    block.theme_m = implementation::size_to_theme(size);
-
     get_value(parameters, key_name, block.name_m);
     get_value(parameters, key_alt_text, block.alt_text_m);
     get_value(parameters, key_characters, block.min_characters_m);
@@ -36,6 +34,9 @@ void create_widget(const dictionary_t&   parameters,
     get_value(parameters, key_monospaced, block.monospaced_m);
     get_value(parameters, key_scrollable, block.scrollable_m);
     get_value(parameters, key_password, block.password_m);
+    implementation::get_color(parameters, static_name_t("color"), block.color_m);
+    implementation::get_color(parameters, static_name_t("text_color"), block.text_color_m);
+    implementation::get_color(parameters, static_name_t("interior_color"), block.interior_color_m);
 
     widget = new edit_text_t(block);
 }

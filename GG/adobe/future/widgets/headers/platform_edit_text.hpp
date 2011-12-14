@@ -65,14 +65,15 @@ struct edit_text_t : boost::noncopyable
 //view
     void              display(const model_type&);
 
-    void              set_theme(theme_t theme);
     void              set_field_text(const std::string& text);
     void              set_static_disabled(bool is_static_disabled);
     void              signal_pre_edit(edit_text_pre_edit_proc_t proc);
 
     GG::Edit*                  control_m;
     unsigned int               original_height_m;
-    theme_t                    theme_m;
+    GG::Clr                    color_m;
+    GG::Clr                    text_color_m;
+    GG::Clr                    interior_color_m;
     label_t                    name_m;
     std::string                alt_text_m;
     std::string                field_text_m;

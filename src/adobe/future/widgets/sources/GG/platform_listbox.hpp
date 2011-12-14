@@ -31,6 +31,8 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
 
+#include <GG/Clr.h>
+
 #include <boost/noncopyable.hpp>
 
 
@@ -54,7 +56,9 @@ namespace adobe {
                   int rows,
                   int width,
                   int height,
-                  const item_set_t& items);
+                  const item_set_t& items,
+                  GG::Clr color,
+                  GG::Clr interior_color);
 
         void reset_item_set(const item_t* first, const item_t* last);
 
@@ -75,6 +79,8 @@ namespace adobe {
         int rows_m;
         int width_m;
         int height_m;
+        GG::Clr color_m;
+        GG::Clr interior_color_m;
     };
 
     namespace view_implementation {

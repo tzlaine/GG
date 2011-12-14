@@ -31,6 +31,7 @@
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/EveGlue.h>
 
 
@@ -60,6 +61,8 @@ namespace adobe {
         long height(0);
         array_t items;
         listbox_t::item_set_t item_set;
+        GG::Clr color(GG::CLR_GRAY);
+        GG::Clr interior_color(GG::CLR_ZERO);
 
         get_value(parameters, key_name, name);
         get_value(parameters, key_alt_text, alt_text);
@@ -68,6 +71,8 @@ namespace adobe {
         get_value(parameters, static_name_t("width"), width);
         get_value(parameters, static_name_t("height"), height);
         get_value(parameters, key_items, items);
+        implementation::get_color(parameters, static_name_t("color"), color);
+        implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
         {
@@ -82,7 +87,7 @@ namespace adobe {
         if (!rows && items.empty())
             rows = 8;
 
-        listbox = new listbox_t(name, alt_text, characters, rows, width, height, item_set);
+        listbox = new listbox_t(name, alt_text, characters, rows, width, height, item_set, color, interior_color);
     }
 
     namespace implementation {

@@ -86,7 +86,9 @@ namespace adobe {
                          int rows,
                          int width,
                          int height,
-                         const item_set_t& items) :
+                         const item_set_t& items,
+                         GG::Clr color,
+                         GG::Clr interior_color) :
         control_m(0),
         name_m(name, alt_text, 0, GG::FORMAT_NONE, GG::CLR_BLACK),
         alt_text_m(alt_text),
@@ -95,7 +97,9 @@ namespace adobe {
         characters_m(characters),
         rows_m(rows),
         width_m(width),
-        height_m(height)
+        height_m(height),
+        color_m(color),
+        interior_color_m(interior_color)
     {}
 
     void listbox_t::measure(extents_t& result)
@@ -255,7 +259,8 @@ namespace adobe {
         if (1 < element.rows_m)
             lines = element.rows_m;
         element.control_m =
-            implementation::Factory().NewListBox(GG::X0, GG::Y0, GG::X1, Height(lines), GG::CLR_GRAY);
+            implementation::Factory().NewListBox(GG::X0, GG::Y0, GG::X1, Height(lines),
+                                                 element.color_m, element.interior_color_m);
         element.control_m->SetStyle(GG::LIST_NOSORT | GG::LIST_SINGLESEL);
 
         element.original_height_m = Value(element.control_m->Height());

@@ -12,14 +12,17 @@
 /****************************************************************************************************/
 
 #include <GG/adobe/memory.hpp>
-#include <boost/operators.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
-#include <string>
-#include <boost/noncopyable.hpp>
 #include <GG/adobe/future/widgets/headers/number_unit.hpp>
 
+#include <GG/Clr.h>
 #include <GG/PtRect.h>
+
+#include <boost/noncopyable.hpp>
+#include <boost/operators.hpp>
+
+#include <string>
 
 
 namespace GG {
@@ -43,14 +46,14 @@ struct display_number_t  : boost::noncopyable
                      const std::string& alt_text,
                      ForwardIterator first,
                      ForwardIterator last, 
-                     theme_t theme,
+                     const GG::Clr& color,
                      int characters);
 
     GG::TextControl*         window_m;
     std::string              name_m;
     std::string              alt_text_m;
     unit_set_t               unit_set_m;
-    theme_t                  theme_m;
+    GG::Clr                  color_m;
     int                      characters_m;
 
     void measure(extents_t& result);
@@ -69,12 +72,12 @@ display_number_t::display_number_t(
     const std::string& alt_text,
     ForwardIterator first,
     ForwardIterator last, 
-    theme_t theme,
+    const GG::Clr& color,
     int characters) :
     name_m(name),
     alt_text_m(alt_text),
     unit_set_m(first, last),
-    theme_m(theme),
+    color_m(color),
     characters_m(characters)
 { }
 

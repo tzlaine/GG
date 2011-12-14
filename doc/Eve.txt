@@ -765,6 +765,8 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the display_number.
     \param characters The minimum width of the display_number, in number of characters.
     \param units An array of \link eve_number_unit units \endlink.
+
+    TODO: color
 */
 
 /** \page eve_edit_number edit_number()

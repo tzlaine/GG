@@ -8,13 +8,13 @@
 
 #include <GG/adobe/future/widgets/headers/platform_display_number.hpp>
 
+#include <GG/ClrConstants.h>
+#include <GG/adobe/static_table.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/display_number_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
-
-#include <GG/adobe/static_table.hpp>
 
 /****************************************************************************************************/
 
@@ -31,28 +31,31 @@ void create_widget(const dictionary_t&       parameters,
     theme_t     theme(implementation::size_to_theme(size));
     long        characters(5);
     unit_t      default_unit(to_unit(parameters));
+    GG::Clr     color(GG::CLR_BLACK);
 
     std::vector<unit_t> unit_set;
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_characters, characters);
+    implementation::get_color(parameters, static_name_t("color"), color);
 
-    if (parameters.count(key_units) == 0)
-    {
+    if (parameters.count(key_units) == 0) {
         unit_set.push_back(default_unit);
-    }
-    else
-    {
+    } else {
         array_t unit_array(get_value(parameters, key_units).cast<array_t>());
 
-        for (array_t::iterator iter(unit_array.begin()), last(unit_array.end());
-             iter != last; ++iter)
+        for (array_t::iterator iter(unit_array.begin()), last(unit_array.end()); iter != last; ++iter) {
             unit_set.push_back(to_unit(iter->cast<dictionary_t>(), default_unit));
+        }
     }
 
-    display_number = new display_number_t(name, alt_text, unit_set.begin(), unit_set.end(),
-                                          theme, characters);
+    display_number = new display_number_t(name,
+                                          alt_text,
+                                          unit_set.begin(),
+                                          unit_set.end(),
+                                          color,
+                                          characters);
 }
 
 /*************************************************************************************************/

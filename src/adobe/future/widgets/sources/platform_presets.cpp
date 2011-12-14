@@ -19,6 +19,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <GG/Button.h>
+#include <GG/ClrConstants.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 
@@ -141,7 +142,7 @@ presets_t::presets_t(const std::string&         name,
                         "Select a category of presets for this dialog"), 
                      implementation::localization_value(localization_set, 
                         key_preset_custom_category_name, "Custom"), 
-                     0, 0, name_t() /*TODO*/),
+                     0, 0, GG::CLR_GRAY, GG::CLR_BLACK, name_t() /*TODO*/),
     popup_m(implementation::localization_value(localization_set, 
                 key_preset_preset_popup_name, "Preset:"), 
             implementation::localization_value(localization_set, 
@@ -149,7 +150,7 @@ presets_t::presets_t(const std::string&         name,
                 "Select a preset for settings in this dialog"), 
             implementation::localization_value(localization_set, 
                 key_preset_custom_category_name, "Custom"), 
-            0, 0, name_t() /*TODO*/),
+            0, 0, GG::CLR_GRAY, GG::CLR_BLACK, name_t() /*TODO*/),
     theme_m(theme),
     bind_set_m(bind_set),
     name_m(name),

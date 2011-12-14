@@ -9,6 +9,7 @@
 // popup.hpp needs to come before widget_factory to hook the overrides
 #include <GG/adobe/future/widgets/headers/platform_popup.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/adobe/future/widgets/headers/popup_common.hpp>
 #include <GG/adobe/future/widgets/headers/popup_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
@@ -57,15 +58,18 @@ void create_widget(const dictionary_t& parameters,
     array_t                  items;
     popup_t::menu_item_set_t item_set;
     name_t                   signal_id;
+    GG::Clr                  color(GG::CLR_GRAY);
+    GG::Clr                  text_color(GG::CLR_BLACK);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_items, items);
     get_value(parameters, key_custom_item_name, custom_item_name);
+    implementation::get_color(parameters, static_name_t("color"), color);
+    implementation::get_color(parameters, static_name_t("text_color"), text_color);
     get_value(parameters, static_name_t("signal_id"), signal_id);
 
-    for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
-    {
+    for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
         dictionary_t cur_item(first->cast<dictionary_t>());
 
         item_set.push_back(
@@ -76,8 +80,13 @@ void create_widget(const dictionary_t& parameters,
     // REVISIT (fbrereto) : Should be called 'first' but for the fact that MSVC 7.1 complains.
     popup_t::menu_item_set_t::value_type* first_value(item_set.empty() ? 0 : &item_set[0]);
 
-    widget = new popup_t(name, alt_text, custom_item_name,
-                         first_value, first_value + item_set.size(),
+    widget = new popup_t(name,
+                         alt_text,
+                         custom_item_name,
+                         first_value,
+                         first_value + item_set.size(),
+                         color,
+                         text_color,
                          signal_id);
 }
 
@@ -94,16 +103,14 @@ void attach_view_and_controller(popup_t&               control,
     basic_sheet_t& layout_sheet(token.client_holder_m.layout_sheet_m);
     assemblage_t&  assemblage(token.client_holder_m.assemblage_m);
 
-    if (parameters.count(key_bind) != 0)
-    {
+    if (parameters.count(key_bind) != 0) {
         name_t cell(get_value(parameters, key_bind).cast<name_t>());
 
         attach_view_and_controller_direct(control, parameters, token, cell);
     }
 
     if (parameters.count(key_items) && 
-            get_value(parameters, key_items).type_info() == type_info<name_t>())
-    {
+        get_value(parameters, key_items).type_info() == type_info<name_t>()) {
         // dynamically bind to the cell instead of getting a static list of popup items
 
         name_t cell(get_value(parameters, key_items).cast<name_t>());

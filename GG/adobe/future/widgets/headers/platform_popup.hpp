@@ -13,11 +13,13 @@
 
 #include <GG/adobe/config.hpp>
 
-#include <boost/noncopyable.hpp>
+#include <GG/Clr.h>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
+
+#include <boost/noncopyable.hpp>
 
 
 namespace GG {
@@ -44,6 +46,8 @@ struct popup_t : boost::noncopyable
             const std::string& custom_item_name,
             const menu_item_t* first,
             const menu_item_t* last,
+            const GG::Clr&     color,
+            const GG::Clr&     text_color,
             name_t             signal_id);
 
     void                reset_menu_item_set(const menu_item_t* first, const menu_item_t* last);
@@ -80,6 +84,7 @@ struct popup_t : boost::noncopyable
     setter_type          selection_changed_proc_m;
     extended_setter_type extended_value_proc_m;
     menu_item_set_t      menu_items_m;
+    GG::Clr              color_m;
     name_t               signal_id_m;
     model_type           last_m;
     bool                 custom_m;

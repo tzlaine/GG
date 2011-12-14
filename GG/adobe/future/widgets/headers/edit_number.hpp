@@ -13,6 +13,7 @@
 
 #include <GG/adobe/config.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/adobe/future/debounce.hpp>
 #include <GG/adobe/future/number_formatter.hpp>
 #include <GG/adobe/future/widgets/headers/platform_edit_text.hpp>
@@ -252,7 +253,7 @@ edit_number_t::edit_number_t(const edit_text_ctor_block_t& block,
                              const ForwardIterator         first,
                              const ForwardIterator         last) :
     edit_text_m(block),
-    popup_m(std::string(), block.alt_text_m, std::string(), 0, 0, name_t()),
+    popup_m(std::string(), block.alt_text_m, std::string(), 0, 0, GG::CLR_GRAY, GG::CLR_BLACK, name_t()),
     edit_text_width_m(0),
     unit_index_m(0),
     unit_set_m(first, last),

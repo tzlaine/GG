@@ -21,7 +21,6 @@ namespace {
 /****************************************************************************************************/
 
 void handle_checked_signal(adobe::signal_notifier_t signal_notifier,
-                           adobe::name_t signal_name,
                            adobe::name_t widget_id,
                            adobe::sheet_t& sheet,
                            adobe::name_t bind,
@@ -119,7 +118,7 @@ void attach_view_and_controller(checkbox_t&            control,
         implementation::cell_and_expression(checked_binding, cell, expression);
         control.checked_proc_m =
             boost::bind(&handle_checked_signal,
-                        token.signal_notifier_m, static_name_t("checked"), control.signal_id_m,
+                        token.signal_notifier_m, control.signal_id_m,
                         boost::ref(token.sheet_m), cell, expression, _1);
     }
 }

@@ -31,8 +31,7 @@ struct control_button_t
                      const expression_eval_proc& eval_proc,
                      const array_t&              expression,
                      const GG::Clr&              color,
-                     const GG::Clr&              text_color,
-                     theme_t                     theme);
+                     const GG::Clr&              text_color);
 
     /*!
         @name Placeable Concept Operations

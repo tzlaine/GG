@@ -45,6 +45,7 @@ struct button_item_t
         get_value(parameters, adobe::key_bind_output, bind_output_m);
         get_value(parameters, adobe::key_action, action_m);
         get_value(parameters, adobe::key_value, value_m);
+        get_value(parameters, adobe::static_name_t("signal_id"), signal_id_m);
 
         // modifers can be a name or array
 
@@ -60,6 +61,16 @@ struct button_item_t
 
         if (iter != parameters.end())
             modifier_set_m |= adobe::value_to_modifier(iter->second);
+
+        adobe::any_regular_t clicked_binding;
+        if (get_value(parameters, adobe::static_name_t("bind_clicked_signal"), clicked_binding)) {
+            adobe::implementation::cell_and_expression(clicked_binding, bind_signal_m, expression_m);
+        }
+
+        if (!action_m)
+            action_m = signal_id_m;
+        if (!signal_id_m)
+            signal_id_m = action_m;
     }
 
     std::string          name_m;
@@ -67,9 +78,12 @@ struct button_item_t
     adobe::name_t        bind_m;
     adobe::name_t        bind_output_m;
     adobe::name_t        action_m;
+    adobe::name_t        bind_signal_m;
+    adobe::array_t       expression_m;
     adobe::any_regular_t value_m;
     adobe::dictionary_t  contributing_m;
     adobe::modifiers_t   modifier_set_m;
+    adobe::name_t        signal_id_m;
 };
 
 /*************************************************************************************************/
@@ -98,6 +112,25 @@ void proxy_button_hit(adobe::button_notifier_t    button_notifier,
     }
 }
 
+/****************************************************************************************************/
+
+void handle_clicked_signal(adobe::signal_notifier_t signal_notifier,
+                           adobe::name_t widget_id,
+                           adobe::sheet_t& sheet,
+                           adobe::name_t bind,
+                           adobe::array_t expression,
+                           const adobe::any_regular_t& value)
+{
+    adobe::implementation::handle_signal(signal_notifier,
+                                         adobe::static_name_t("button"),
+                                         adobe::static_name_t("clicked"),
+                                         widget_id,
+                                         sheet,
+                                         bind,
+                                         expression,
+                                         value);
+}
+
 /*************************************************************************************************/
 
 template <typename Cont>
@@ -112,6 +145,17 @@ void state_set_push_back(Cont& state_set, const adobe::factory_token_t& token, c
                                                     boost::ref(token.sheet_m), temp.bind_m,
                                                     temp.bind_output_m,
                                                     temp.action_m, _1, _2);
+
+    if (temp.bind_signal_m) {
+        state_set.back().clicked_proc_m = boost::bind(&handle_clicked_signal,
+                                                      token.signal_notifier_m,
+                                                      temp.signal_id_m,
+                                                      boost::ref(token.sheet_m),
+                                                      temp.bind_signal_m,
+                                                      temp.expression_m,
+                                                      _1);
+    }
+
     state_set.back().value_m        = temp.value_m;
     state_set.back().contributing_m = temp.contributing_m;
 }
@@ -220,10 +264,16 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     button_state_descriptor_t* first_state(state_set.empty() ? 0 : &state_set[0]);
     std::size_t                n(state_set.size());
 
-    button_t* result = new button_t(is_default, is_cancel, modifier_mask,
-                                    color, text_color, unpressed, pressed, rollover,
-                                    first_state, first_state + n,
-                                    implementation::size_to_theme(size));
+    button_t* result = new button_t(is_default,
+                                    is_cancel,
+                                    modifier_mask,
+                                    color,
+                                    text_color,
+                                    unpressed,
+                                    pressed,
+                                    rollover,
+                                    first_state,
+                                    first_state + n);
 
     for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter) {
         button_item_t temp(item, iter->cast<dictionary_t>());

@@ -427,6 +427,8 @@ else:
 
     TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
+    TODO: bind_clicked_signal
+
     \section eve_button_items_usage items Usage
 
     \code items: [ { param: value, param: value, ... }, { param: value, param: value, ... }, ... ] \endcode

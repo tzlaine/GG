@@ -27,8 +27,7 @@ control_button_t::control_button_t(const std::string&          name,
                                    const expression_eval_proc& eval_proc,
                                    const array_t&              expression,
                                    const GG::Clr&              color,
-                                   const GG::Clr&              text_color,
-                                   theme_t                     theme) :
+                                   const GG::Clr&              text_color) :
     eval_proc_m(eval_proc),
     expression_m(expression)
 {
@@ -42,7 +41,7 @@ control_button_t::control_button_t(const std::string&          name,
     button_m.reset(
         new button_t(false, false, modifiers_t(),
                      color, text_color, GG::SubTexture(), GG::SubTexture(), GG::SubTexture(),
-                     first, boost::next(first), theme)
+                     first, boost::next(first))
     );
 }
 

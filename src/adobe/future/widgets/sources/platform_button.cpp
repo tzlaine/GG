@@ -21,26 +21,23 @@
 
 namespace {
 
-struct Clicked
+void button_clicked(adobe::button_t& m_button)
 {
-    Clicked(adobe::button_t& button) :
-        m_button(button)
-        {}
-    void operator()()
-        {
-            adobe::button_state_set_t::iterator state(
-                adobe::button_modifier_state(m_button.state_set_m,
-                                             m_button.modifier_mask_m,
-                                             m_button.modifiers_m));
+    adobe::button_state_set_t::iterator state(
+        adobe::button_modifier_state(m_button.state_set_m,
+                                     m_button.modifier_mask_m,
+                                     m_button.modifiers_m)
+    );
 
-            if (state == m_button.state_set_m.end())
-                state = adobe::button_default_state(m_button.state_set_m);
+    if (state == m_button.state_set_m.end())
+        state = adobe::button_default_state(m_button.state_set_m);
 
-            if (!state->hit_proc_m.empty())
-                state->hit_proc_m(state->value_m, state->contributing_m);
-        }
-    adobe::button_t& m_button;
-};
+    if (!state->hit_proc_m.empty())
+        state->hit_proc_m(state->value_m, state->contributing_m);
+
+    if (!state->clicked_proc_m.empty())
+        state->clicked_proc_m(state->value_m);
+}
 
 }
 
@@ -59,10 +56,8 @@ button_t::button_t(bool                             is_default,
                    const GG::SubTexture&            pressed,
                    const GG::SubTexture&            rollover,
                    const button_state_descriptor_t* first,
-                   const button_state_descriptor_t* last,
-                   theme_t                          theme) :
+                   const button_state_descriptor_t* last) :
     control_m(0),
-    theme_m(theme),
     state_set_m(first, last),
     modifier_mask_m(modifier_mask),
     modifiers_m(modifiers_none_s),
@@ -215,7 +210,8 @@ platform_display_type insert<button_t>(display_t&             display,
     element.control_m->SetPressedGraphic(element.pressed_m);
     element.control_m->SetRolloverGraphic(element.rollover_m);
 
-    GG::Connect(element.control_m->ClickedSignal, Clicked(element));
+    GG::Connect(element.control_m->ClickedSignal,
+                boost::bind(&button_clicked, boost::ref(element)));
 
     if (!state->alt_text_m.empty())
         implementation::set_control_alt_text(element.control_m, state->alt_text_m);

@@ -44,8 +44,7 @@ struct button_t : boost::noncopyable
              const GG::SubTexture&            pressed,
              const GG::SubTexture&            rollover,
              const button_state_descriptor_t* first,
-             const button_state_descriptor_t* last,
-             theme_t                          theme);
+             const button_state_descriptor_t* last);
 
     void measure(extents_t& result);
 
@@ -64,7 +63,6 @@ struct button_t : boost::noncopyable
     bool handle_key(key_type key, bool pressed, modifiers_t modifiers);
 
     GG::Button*        control_m;
-    theme_t            theme_m;
     button_state_set_t state_set_m;
     modifiers_t        modifier_mask_m;
     modifiers_t        modifiers_m;

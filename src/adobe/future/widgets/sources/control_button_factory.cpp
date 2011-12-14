@@ -77,8 +77,7 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
                                   boost::bind(&sheet_t::inspect, boost::ref(token.sheet_m), _1),
                                   parse_adam_expression(expression_string),
                                   color,
-                                  text_color,
-                                  implementation::size_to_theme(size));
+                                  text_color);
 
     assemblage_cleanup_ptr(token.client_holder_m.assemblage_m, widget);
 

@@ -18,6 +18,7 @@
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/extents.hpp>
 #include <GG/adobe/layout_attributes.hpp>
+#include <GG/adobe/name_fwd.hpp>
 #include <GG/adobe/widget_attributes.hpp>
 
 #include <boost/function.hpp>
@@ -47,7 +48,8 @@ struct checkbox_t
                const GG::Clr&       text_color,
                const GG::Clr&       interior_color,
                GG::StateButtonStyle style,
-               const std::string&   alt_text);
+               const std::string&   alt_text,
+               name_t               signal_id);
 
     void measure(extents_t& result);
 
@@ -73,6 +75,9 @@ struct checkbox_t
     GG::Clr              interior_color_m;
     GG::StateButtonStyle style_m;
     std::string          alt_text_m;
+    name_t               signal_id_m;
+
+    boost::function<void (bool)> checked_proc_m;
 };
 
 /****************************************************************************************************/

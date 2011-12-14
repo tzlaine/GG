@@ -12,9 +12,11 @@
 /****************************************************************************************************/
 
 #include <GG/Base.h>
+#include <GG/adobe/any_regular.hpp>
+#include <GG/adobe/array_fwd.hpp>
 #include <GG/adobe/dictionary_fwd.hpp>
-#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/future/platform_primitives.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <boost/filesystem/path.hpp>
 
@@ -27,6 +29,14 @@ namespace GG {
 /****************************************************************************************************/
 
 namespace adobe {
+
+/****************************************************************************************************/
+
+typedef boost::function<
+    void (name_t widget_type_name, name_t signal_name, name_t widget_id, const any_regular_t&)
+> signal_notifier_t;
+
+class sheet_t;
 
 /****************************************************************************************************/
 
@@ -127,7 +137,40 @@ bool get_subtexture(const any_regular_t& value, GG::SubTexture& subtexture);
 
 /****************************************************************************************************/
 
-GG::StateButtonStyle name_to_style(adobe::name_t name);
+GG::StateButtonStyle name_to_style(name_t name);
+
+/****************************************************************************************************/
+
+void replace_placeholder(array_t& expression, name_t name, const any_regular_t& value);
+
+/****************************************************************************************************/
+
+void replace_placeholders(array_t& expression,
+                          const any_regular_t& _,
+                          const any_regular_t& _1,
+                          const any_regular_t& _2 = any_regular_t(),
+                          const any_regular_t& _3 = any_regular_t(),
+                          const any_regular_t& _4 = any_regular_t());
+
+/****************************************************************************************************/
+
+void handle_signal(signal_notifier_t signal_notifier,
+                   name_t widget_name,
+                   name_t signal_name,
+                   name_t widget_id,
+                   sheet_t& sheet,
+                   name_t bind,
+                   array_t expression,
+                   const any_regular_t& _1,
+                   const any_regular_t& _2 = any_regular_t(),
+                   const any_regular_t& _3 = any_regular_t(),
+                   const any_regular_t& _4 = any_regular_t());
+
+/****************************************************************************************************/
+
+void cell_and_expression(const any_regular_t& value,
+                         name_t& cell,
+                         array_t& expression);
 
 /****************************************************************************************************/
 

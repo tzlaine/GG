@@ -8,8 +8,8 @@
 
 #include <GG/Wnd.h>
 
-#include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/array.hpp>
+#include <GG/adobe/dictionary.hpp>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>

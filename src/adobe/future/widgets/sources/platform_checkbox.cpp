@@ -22,21 +22,19 @@
 
 namespace {
 
-struct Checked
+/****************************************************************************************************/
+
+void checkbox_checked(adobe::checkbox_t& checkbox, bool checked)
 {
-    Checked(adobe::checkbox_t& checkbox) :
-        m_checkbox(checkbox)
-        {}
-    void operator()(bool checked)
-        {
-            if (m_checkbox.hit_proc_m) {
-                m_checkbox.hit_proc_m(checked ?
-                                      adobe::any_regular_t(m_checkbox.true_value_m) :
-                                      adobe::any_regular_t(m_checkbox.false_value_m));
-            }
-        }
-    adobe::checkbox_t& m_checkbox;
-};
+    if (checkbox.hit_proc_m) {
+        checkbox.hit_proc_m(checked ?
+                            adobe::any_regular_t(checkbox.true_value_m) :
+                            adobe::any_regular_t(checkbox.false_value_m));
+    }
+
+    if (checkbox.checked_proc_m)
+        checkbox.checked_proc_m(checked);
+}
 
 /****************************************************************************************************/
 
@@ -55,7 +53,8 @@ checkbox_t::checkbox_t( const std::string&                      name,
                         const GG::Clr&                          text_color,
                         const GG::Clr&                          interior_color,
                         GG::StateButtonStyle                    style,
-                        const std::string&                      alt_text) :
+                        const std::string&                      alt_text,
+                        name_t                                  signal_id) :
     control_m(0),
     true_value_m(true_value),
     false_value_m(false_value),
@@ -64,7 +63,8 @@ checkbox_t::checkbox_t( const std::string&                      name,
     text_color_m(text_color),
     interior_color_m(interior_color),
     style_m(style),
-    alt_text_m(alt_text)
+    alt_text_m(alt_text),
+    signal_id_m(signal_id)
 { }
 
 /****************************************************************************************************/
@@ -140,7 +140,8 @@ platform_display_type insert<checkbox_t>(display_t&             display,
                                                  element.color_m, element.text_color_m,
                                                  element.interior_color_m, element.style_m);
 
-    GG::Connect(element.control_m->CheckedSignal, Checked(element));
+    GG::Connect(element.control_m->CheckedSignal,
+                boost::bind(&checkbox_checked, boost::ref(element), _1));
 
     if (!element.alt_text_m.empty())
         adobe::implementation::set_control_alt_text(element.control_m, element.alt_text_m);

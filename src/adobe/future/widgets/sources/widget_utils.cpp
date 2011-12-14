@@ -8,6 +8,8 @@
 
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
+#include <GG/adobe/adam.hpp>
+#include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/name.hpp>
 
@@ -170,6 +172,101 @@ GG::StateButtonStyle name_to_style(adobe::name_t name)
     else throw std::runtime_error("Unknown StateButtonStyle name");
 
 #undef CASE
+}
+
+/****************************************************************************************************/
+
+void replace_placeholder(array_t& expression, name_t name, const any_regular_t& value)
+{
+    for (std::size_t i = 0; i < expression.size(); ++i) {
+        name_t element_name;
+        if (expression[i].cast<name_t>(element_name) && element_name == name)
+            expression[i] = value;
+    }
+}
+
+/****************************************************************************************************/
+
+void replace_placeholders(array_t& expression,
+                          const any_regular_t& _,
+                          const any_regular_t& _1,
+                          const any_regular_t& _2/* = any_regular_t()*/,
+                          const any_regular_t& _3/* = any_regular_t()*/,
+                          const any_regular_t& _4/* = any_regular_t()*/)
+{
+    replace_placeholder(expression, static_name_t("_"), _);
+    if (!empty(_1))
+        replace_placeholder(expression, static_name_t("_1"), _1);
+    if (!empty(_2))
+        replace_placeholder(expression, static_name_t("_2"), _2);
+    if (!empty(_3))
+        replace_placeholder(expression, static_name_t("_3"), _3);
+    if (!empty(_4))
+        replace_placeholder(expression, static_name_t("_4"), _4);
+}
+
+/****************************************************************************************************/
+
+void handle_signal(signal_notifier_t signal_notifier,
+                   name_t widget_name,
+                   name_t signal_name,
+                   name_t widget_id,
+                   sheet_t& sheet,
+                   name_t bind,
+                   array_t expression,
+                   const any_regular_t& _1,
+                   const any_regular_t& _2/* = any_regular_t()*/,
+                   const any_regular_t& _3/* = any_regular_t()*/,
+                   const any_regular_t& _4/* = any_regular_t()*/)
+{
+    if (!bind && !signal_notifier)
+        return;
+
+    any_regular_t _;
+    {
+        dictionary_t dict;
+
+        if (!empty(_1))
+            dict[static_name_t("_1")] = _1;
+        if (!empty(_2))
+            dict[static_name_t("_2")] = _2;
+        if (!empty(_3))
+            dict[static_name_t("_3")] = _3;
+        if (!empty(_4))
+            dict[static_name_t("_4")] = _4;
+
+        _ = any_regular_t(dict);
+    }
+
+    any_regular_t value;
+    if (expression.empty()) {
+        value = _;
+    } else {
+        replace_placeholders(expression, _, _1, _2, _3, _4);
+        value = sheet.inspect(expression);
+    }
+
+    if (bind) {
+        sheet.set(bind, value);
+        sheet.update();
+    } else if (signal_notifier) {
+        signal_notifier(widget_name, signal_name, widget_id, value);
+    }
+}
+
+/****************************************************************************************************/
+
+void cell_and_expression(const any_regular_t& value,
+                         name_t& cell,
+                         array_t& expression)
+{
+    array_t cell_and_expression;
+    value.cast<name_t>(cell);
+    if (!cell && value.cast<array_t>(cell_and_expression)) {
+        cell = cell_and_expression[0].cast<name_t>();
+        const std::string& expression_string = cell_and_expression[0].cast<std::string>();
+        expression = parse_adam_expression(expression_string);
+    }
 }
 
 /****************************************************************************************************/

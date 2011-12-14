@@ -35,33 +35,6 @@ GG::SliderLineStyle name_to_style(adobe::name_t style_name)
 
 /****************************************************************************************************/
 
-void replace_placeholder(adobe::array_t& expression,
-                         adobe::name_t name,
-                         const adobe::any_regular_t& value)
-{
-    for (std::size_t i = 0; i < expression.size(); ++i) {
-        adobe::name_t element_name;
-        if (expression[i].cast<adobe::name_t>(element_name) && element_name == name)
-            expression[i] = value;
-    }
-}
-
-/****************************************************************************************************/
-
-void replace_placeholders(adobe::array_t& expression,
-                          const adobe::any_regular_t& _,
-                          const adobe::any_regular_t& _1,
-                          const adobe::any_regular_t& _2,
-                          const adobe::any_regular_t& _3)
-{
-    replace_placeholder(expression, adobe::static_name_t("_"), _);
-    replace_placeholder(expression, adobe::static_name_t("_1"), _1);
-    replace_placeholder(expression, adobe::static_name_t("_2"), _2);
-    replace_placeholder(expression, adobe::static_name_t("_3"), _3);
-}
-
-/****************************************************************************************************/
-
 void handle_slid_signal(adobe::signal_notifier_t signal_notifier,
                         adobe::name_t signal_name,
                         adobe::name_t widget_id,
@@ -70,42 +43,16 @@ void handle_slid_signal(adobe::signal_notifier_t signal_notifier,
                         adobe::array_t expression,
                         int pos, int min, int max)
 {
-    adobe::array_t params;
-    params.push_back(adobe::any_regular_t(pos));
-    params.push_back(adobe::any_regular_t(min));
-    params.push_back(adobe::any_regular_t(max));
-    adobe::any_regular_t _(params);
-
-    if (!bind && !signal_notifier)
-        return;
-
-    adobe::any_regular_t value;
-    if (expression.empty())
-        value = _;
-    else
-        value = sheet.inspect(expression);
-
-    if (bind) {
-        sheet.set(bind, value);
-        sheet.update();
-    } else if (signal_notifier) {
-        signal_notifier(adobe::static_name_t("slider"), signal_name, widget_id, value);
-    }
-}
-
-/****************************************************************************************************/
-
-void cell_and_expression(const adobe::any_regular_t& value,
-                         adobe::name_t& cell,
-                         adobe::array_t& expression)
-{
-    adobe::array_t cell_and_expression;
-    value.cast<adobe::name_t>(cell);
-    if (!cell && value.cast<adobe::array_t>(cell_and_expression)) {
-        cell = cell_and_expression[0].cast<adobe::name_t>();
-        const std::string& expression_string = cell_and_expression[0].cast<std::string>();
-        expression = adobe::parse_adam_expression(expression_string);
-    }
+    adobe::implementation::handle_signal(signal_notifier,
+                                         adobe::static_name_t("slider"),
+                                         signal_name,
+                                         widget_id,
+                                         sheet,
+                                         bind,
+                                         expression,
+                                         adobe::any_regular_t(pos),
+                                         adobe::any_regular_t(min),
+                                         adobe::any_regular_t(max));
 }
 
 /****************************************************************************************************/
@@ -191,7 +138,7 @@ void attach_view_and_controller(slider_t&              control,
     if (get_value(parameters, static_name_t("bind_slid_signal"), slid_binding)) {
         name_t cell;
         array_t expression;
-        cell_and_expression(slid_binding, cell, expression);
+        implementation::cell_and_expression(slid_binding, cell, expression);
         control.slid_proc_m =
             boost::bind(&handle_slid_signal,
                         token.signal_notifier_m, static_name_t("slid"), control.signal_id_m,
@@ -202,7 +149,7 @@ void attach_view_and_controller(slider_t&              control,
     if (get_value(parameters, static_name_t("bind_slid_and_stopped_signal"), slid_and_stopped_binding)) {
         name_t cell;
         array_t expression;
-        cell_and_expression(slid_binding, cell, expression);
+        implementation::cell_and_expression(slid_binding, cell, expression);
         control.slid_and_stopped_proc_m =
             boost::bind(&handle_slid_signal,
                         token.signal_notifier_m, static_name_t("slid_and_stopped"), control.signal_id_m,

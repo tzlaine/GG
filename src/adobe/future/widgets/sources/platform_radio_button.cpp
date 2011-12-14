@@ -28,6 +28,9 @@ void radio_button_clicked(adobe::radio_button_t& button, bool)
 {
     if (!button.hit_proc_m.empty())
         button.hit_proc_m(button.set_value_m);
+
+    if (!button.checked_proc_m.empty())
+        button.checked_proc_m(button.set_value_m);
 }
 
 /****************************************************************************************************/
@@ -46,7 +49,8 @@ radio_button_t::radio_button_t(const std::string&   name,
                                const GG::Clr&       color,
                                const GG::Clr&       text_color,
                                const GG::Clr&       interior_color,
-                               GG::StateButtonStyle style) :
+                               GG::StateButtonStyle style,
+                               name_t               signal_id) :
     control_m(0),
     name_m(name),
     alt_text_m(alt_text),
@@ -54,7 +58,8 @@ radio_button_t::radio_button_t(const std::string&   name,
     color_m(color),
     text_color_m(text_color),
     interior_color_m(interior_color),
-    style_m(style)
+    style_m(style),
+    signal_id_m(signal_id)
 { }
 
 /****************************************************************************************************/

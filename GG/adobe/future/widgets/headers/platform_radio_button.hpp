@@ -17,6 +17,7 @@
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/extents.hpp>
 #include <GG/adobe/layout_attributes.hpp>
+#include <GG/adobe/name.hpp>
 #include <GG/adobe/widget_attributes.hpp>
 
 #include <boost/function.hpp>
@@ -45,7 +46,8 @@ struct radio_button_t
                    const GG::Clr&       color,
                    const GG::Clr&       text_color,
                    const GG::Clr&       interior_color,
-                   GG::StateButtonStyle style);
+                   GG::StateButtonStyle style,
+                   name_t               signal_id);
 
     void measure(extents_t& result);
 
@@ -66,7 +68,9 @@ struct radio_button_t
     GG::Clr              interior_color_m;
     GG::StateButtonStyle style_m;
     setter_type          hit_proc_m;
+    setter_type          checked_proc_m;
     any_regular_t        last_m;
+    name_t               signal_id_m;
 };
 
 /****************************************************************************************************/

@@ -636,6 +636,7 @@ else:
     \param value The value emitted when checking the radio_button.
 
     TODO: color, text_color, interior_color, and style
+    TODO: bind_checked_signal
 
     \note The idiomatic way to associate a set of radio_buttons with each
     other (making them mutually exclusive) is to bind them all to the same

@@ -495,6 +495,7 @@ else:
     \param value_off The value emitted when unchecking the checkbox.
 
     TODO: color, text_color, interior_color, and style
+    TODO: bind_checked_signal
 */
 
 /** \page eve_control_button control_button()
@@ -699,6 +700,7 @@ else:
     \param format A dictionary specifying the range of values the slider can take.
 
     TODO: color, length, tab_width, tab_length, line_width, line_style
+    TODO: bind_slid_signal, bind_slid_and_stopped_signal
 
     \section eve_slider_format_usage format Usage
 
@@ -1155,6 +1157,10 @@ else:
     - \ref eve_expression_image_fn
     - \ref eve_expression_texture_fn
     - \ref eve_expression_subtexture_fn
+
+    \section eve_gg_signals Using GG Signals With Adam and Eve
+
+    TODO
 
     \section eve_views Views
 

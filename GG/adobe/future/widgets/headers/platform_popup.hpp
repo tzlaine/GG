@@ -44,7 +44,7 @@ struct popup_t : boost::noncopyable
             const std::string& custom_item_name,
             const menu_item_t* first,
             const menu_item_t* last,
-            theme_t            theme);
+            name_t             signal_id);
 
     void                reset_menu_item_set(const menu_item_t* first, const menu_item_t* last);
 
@@ -77,8 +77,10 @@ struct popup_t : boost::noncopyable
     std::string          alt_text_m;
     bool                 using_label_m;
     setter_type          value_proc_m;
+    setter_type          selection_changed_proc_m;
     extended_setter_type extended_value_proc_m;
     menu_item_set_t      menu_items_m;
+    name_t               signal_id_m;
     model_type           last_m;
     bool                 custom_m;
     std::string          custom_item_name_m;

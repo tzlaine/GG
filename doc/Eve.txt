@@ -883,6 +883,8 @@ else:
     \param bind The cell in the Adam property sheet to which this popup is bound.
     \param items A dictionary whose key-value pairs define the names and values of the items in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.
     \param custom_item_name The name of the custom item in the popup.
+
+    TODO: bind_selection_chenged_signal
 */
 
 /** \page eve_listbox listbox()

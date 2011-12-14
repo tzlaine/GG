@@ -62,9 +62,9 @@ void sel_changed_slot(adobe::popup_t& popup, GG::DropDownList::iterator it)
 {
     assert(popup.control_m);
 
-    if (!popup.value_proc_m.empty() || !popup.extended_value_proc_m.empty())
-    {
-        std::size_t new_index(popup.control_m->CurrentItemIndex());
+    std::size_t new_index(popup.control_m->CurrentItemIndex());
+
+    if (!popup.value_proc_m.empty() || !popup.extended_value_proc_m.empty()) {
 
         if (popup.custom_m)
             --new_index;
@@ -75,6 +75,9 @@ void sel_changed_slot(adobe::popup_t& popup, GG::DropDownList::iterator it)
         if (popup.extended_value_proc_m)
             popup.extended_value_proc_m(popup.menu_items_m.at(new_index).second, adobe::modifier_state());
     }
+
+    if (popup.selection_changed_proc_m)
+        popup.selection_changed_proc_m(popup.menu_items_m.at(new_index).second);
 }
 
 /****************************************************************************************************/
@@ -138,12 +141,12 @@ popup_t::popup_t(const std::string& name,
                  const std::string& custom_item_name,
                  const menu_item_t* first,
                  const menu_item_t* last,
-                 theme_t            theme) :
+                 name_t             signal_id) :
     control_m(0),
-    theme_m(theme),
     name_m(name, alt_text, 0, GG::FORMAT_NONE, GG::CLR_BLACK),
     alt_text_m(alt_text),
     using_label_m(!name.empty()),
+    signal_id_m(signal_id),
     custom_m(false),
     custom_item_name_m(custom_item_name)
 {

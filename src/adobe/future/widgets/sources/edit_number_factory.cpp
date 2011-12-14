@@ -93,6 +93,8 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
 
         get_value(parameters, adobe::key_bind_units, cell);
 
+        // TODO: Bind the unit popup's selection_changed signal.
+
         // add the cell to the layout sheet if its not there yet
         if (layout_sheet.count_interface(cell) == 0)
             layout_sheet.add_interface(cell, adobe::any_regular_t(unit_set.front().name_m));

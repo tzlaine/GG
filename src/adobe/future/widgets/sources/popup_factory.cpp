@@ -14,6 +14,33 @@
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 
+/*************************************************************************************************/
+
+namespace {
+
+/****************************************************************************************************/
+
+void handle_selection_changed_signal(adobe::signal_notifier_t signal_notifier,
+                                     adobe::name_t widget_id,
+                                     adobe::sheet_t& sheet,
+                                     adobe::name_t bind,
+                                     adobe::array_t expression,
+                                     const adobe::any_regular_t& value)
+{
+    adobe::implementation::handle_signal(signal_notifier,
+                                         adobe::static_name_t("popup"),
+                                         adobe::static_name_t("selection_changed"),
+                                         widget_id,
+                                         sheet,
+                                         bind,
+                                         expression,
+                                         value);
+}
+
+/****************************************************************************************************/
+
+}
+
 /****************************************************************************************************/
 
 namespace adobe {
@@ -27,14 +54,15 @@ void create_widget(const dictionary_t& parameters,
     std::string              name;
     std::string              alt_text;
     std::string              custom_item_name("Custom");
-    array_t           items;
-    theme_t           theme(implementation::size_to_theme(size));
+    array_t                  items;
     popup_t::menu_item_set_t item_set;
+    name_t                   signal_id;
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_items, items);
     get_value(parameters, key_custom_item_name, custom_item_name);
+    get_value(parameters, static_name_t("signal_id"), signal_id);
 
     for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
     {
@@ -49,8 +77,8 @@ void create_widget(const dictionary_t& parameters,
     popup_t::menu_item_set_t::value_type* first_value(item_set.empty() ? 0 : &item_set[0]);
 
     widget = new popup_t(name, alt_text, custom_item_name,
-                       first_value, first_value + item_set.size(),
-                       theme);
+                         first_value, first_value + item_set.size(),
+                         signal_id);
 }
 
 /*************************************************************************************************/
@@ -84,6 +112,17 @@ void attach_view_and_controller(popup_t&               control,
             attach_popup_menu_item_set(control, cell, layout_sheet, assemblage, token.client_holder_m);
         else
             attach_popup_menu_item_set(control, cell, token.sheet_m, assemblage, token.client_holder_m);
+    }
+
+    any_regular_t selection_changed_binding;
+    if (get_value(parameters, static_name_t("bind_selection_changed_signal"), selection_changed_binding)) {
+        name_t cell;
+        array_t expression;
+        implementation::cell_and_expression(selection_changed_binding, cell, expression);
+        control.selection_changed_proc_m =
+            boost::bind(&handle_selection_changed_signal,
+                        token.signal_notifier_m, control.signal_id_m,
+                        boost::ref(token.sheet_m), cell, expression, _1);
     }
 }
 

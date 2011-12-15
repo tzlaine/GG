@@ -232,6 +232,8 @@
 
     \param name The text that appears on the group box.
     \param alt The tooltip text that appears when the cursor hovers over the group box.
+
+    TODO: color, text_color, interior_color
 */
 
 /** \page eve_optional optional()
@@ -423,7 +425,7 @@ else:
     \param cancel If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
     \param items An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
 
-    TODO: Colors.  All the other views that have them need them documented as well.  There also needs to be a dedicated section for the format of a color ({r:[0,255], g:[0,255], b:[0,255], a:[0,255]}).
+    TODO: color, text_color.  There also needs to be a dedicated section for the format of a color ({r:[0,255], g:[0,255], b:[0,255], a:[0,255]}).
 
     TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
@@ -525,6 +527,8 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the control_button.
     \param bind The cell in the Adam property sheet to which this control_button is bound.
     \param expression The expression to be evaluated when the control_button is clicked, in a string.
+
+    TODO: color, text_color
 */
 
 /** \page eve_image image()
@@ -738,6 +742,8 @@ else:
     \param name The text label that appears to the left of the display_text.
     \param alt The tooltip text that appears when the cursor hovers over the display_text.
     \param characters The minimum width of the display_text, in text of characters.
+
+    TODO: color
 */
 
 /** \page eve_display_number display_number()
@@ -821,6 +827,8 @@ else:
     \param digits The minimum width of the edit_number, in number of characters.
     \param max_digits The maximum number of characters the user is allowed to type into the edit_number.
     \param units An array of \link eve_number_unit units \endlink.
+
+    TODO: color, text_color, interior_color
 */
 
 /** \page eve_edit_text edit_text()
@@ -849,6 +857,8 @@ else:
     \param lines The number of lines high the edit_text should be.
     \param scrollable Whether the edit_text has scrollbars.  This only applies when \a lines is greater than \c 1.
     \param password Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.
+
+    TODO: color, text_color, interior_color
 */
 
 /** \page eve_popup popup()

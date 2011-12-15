@@ -40,7 +40,7 @@ void create_widget(const dictionary_t&   parameters,
 
     widget = new edit_text_t(block);
 }
-    
+
 /****************************************************************************************************/
 
 namespace implementation {

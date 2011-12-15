@@ -9,6 +9,7 @@
 // group.hpp needs to come before widget_factory to hook the overrides
 #include <GG/adobe/future/widgets/headers/platform_group.hpp>
 
+#include <GG/ClrConstants.h>
 #include <GG/adobe/future/widgets/headers/group_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
@@ -24,12 +25,17 @@ void create_widget(const dictionary_t& parameters,
 {
     std::string    name;
     std::string    alt_text;
-    theme_t theme(implementation::size_to_theme(size));
+    GG::Clr        color(GG::CLR_GRAY);
+    GG::Clr        text_color(GG::CLR_BLACK);
+    GG::Clr        interior_color(GG::CLR_ZERO);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
+    implementation::get_color(parameters, static_name_t("color"), color);
+    implementation::get_color(parameters, static_name_t("text_color"), text_color);
+    implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
 
-    group = new group_t(name, alt_text, theme);
+    group = new group_t(name, alt_text, color, text_color, interior_color);
 }
 
 /****************************************************************************************************/

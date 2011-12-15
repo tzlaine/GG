@@ -27,11 +27,15 @@ namespace adobe {
 
 group_t::group_t(const std::string& name,
                  const std::string& alt_text,
-                 theme_t            theme) :
+                 GG::Clr            color,
+                 GG::Clr            text_color,
+                 GG::Clr            interior_color) :
     control_m(0),
     name_m(name),
     alt_text_m(alt_text),
-    theme_m(theme)
+    color_m(color),
+    text_color_m(text_color),
+    interior_color_m(interior_color)
 { }
 
 /****************************************************************************************************/
@@ -40,8 +44,7 @@ void group_t::measure(extents_t& result)
 {
     assert(control_m);
 
-    if (name_m.empty())
-    {
+    if (name_m.empty()) {
         result.height() = 15;
         result.width() = 15;
 
@@ -75,8 +78,12 @@ platform_display_type insert<group_t>(display_t&             display,
                                       group_t&               element)
 {
     element.control_m =
-        implementation::Factory().NewGroupBox(GG::X0, GG::Y0, GG::X1, GG::Y1, element.name_m,
-                                              implementation::DefaultFont(), GG::CLR_GRAY);
+        implementation::Factory().NewGroupBox(GG::X0, GG::Y0, GG::X1, GG::Y1,
+                                              element.name_m,
+                                              implementation::DefaultFont(),
+                                              element.color_m,
+                                              element.text_color_m,
+                                              element.interior_color_m);
     element.control_m->SetClientCornersEqualToBoxCorners(true);
 
     return display.insert(parent, element.control_m);

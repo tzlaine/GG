@@ -18,6 +18,8 @@
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
 
+#include <GG/Clr.h>
+
 #include <string>
 
 
@@ -35,7 +37,9 @@ struct group_t
 {
     group_t(const std::string& name,
             const std::string& alt_text,
-            theme_t            theme);
+            GG::Clr            color,
+            GG::Clr            text_color,
+            GG::Clr            interior_color);
 
     void measure(extents_t& result);
 
@@ -44,7 +48,9 @@ struct group_t
     GG::GroupBox*        control_m;
     std::string          name_m;
     std::string          alt_text_m;
-    theme_t              theme_m;
+    GG::Clr              color_m;
+    GG::Clr              text_color_m;
+    GG::Clr              interior_color_m;
 };
 
 /****************************************************************************************************/

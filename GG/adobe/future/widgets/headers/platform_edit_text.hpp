@@ -82,6 +82,9 @@ struct edit_text_t : boost::noncopyable
     long                       rows_m;
     long                       cols_m;
     long                       max_cols_m;
+    bool                       read_only_m;
+    bool                       terminal_style_m;
+    bool                       wrap_m;
     bool                       scrollable_m;
     bool                       password_m;
     edit_text_pre_edit_proc_t  pre_edit_proc_m;

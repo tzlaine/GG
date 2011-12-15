@@ -859,6 +859,7 @@ else:
     \param password Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.
 
     TODO: color, text_color, interior_color
+    TODO: read_only, terminal_style, wrap
 */
 
 /** \page eve_popup popup()

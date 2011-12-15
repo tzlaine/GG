@@ -25,9 +25,11 @@ namespace adobe {
 struct edit_text_ctor_block_t
 {
     edit_text_ctor_block_t() :
+        read_only_m(false),
+        terminal_style_m(false),
+        wrap_m(true),
         scrollable_m(false),
         password_m(false),
-        monospaced_m(false),
         min_characters_m(10),
         max_characters_m(0),
         num_lines_m(1)
@@ -35,9 +37,11 @@ struct edit_text_ctor_block_t
 
     std::string name_m;
     std::string alt_text_m;
+    bool        read_only_m;
+    bool        terminal_style_m;
+    bool        wrap_m;
     bool        scrollable_m;
     bool        password_m;
-    bool        monospaced_m;
     long        min_characters_m;
     long        max_characters_m; // 0 here means unlimited. Only matters when num_lines_m == 1
     long        num_lines_m;

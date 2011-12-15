@@ -31,7 +31,9 @@ void create_widget(const dictionary_t&   parameters,
     get_value(parameters, key_characters, block.min_characters_m);
     get_value(parameters, key_max_characters, block.max_characters_m);
     get_value(parameters, key_lines, block.num_lines_m);
-    get_value(parameters, key_monospaced, block.monospaced_m);
+    get_value(parameters, static_name_t("read_only"), block.read_only_m);
+    get_value(parameters, static_name_t("terminal_style"), block.terminal_style_m);
+    get_value(parameters, static_name_t("wrap"), block.wrap_m);
     get_value(parameters, key_scrollable, block.scrollable_m);
     get_value(parameters, key_password, block.password_m);
     implementation::get_color(parameters, static_name_t("color"), block.color_m);

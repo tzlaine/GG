@@ -47,7 +47,7 @@ std::vector<adobe::unit_t> extract_unit_set(const adobe::dictionary_t& parameter
     return result;
 }
 
-/**************************************************************************     **************************/
+/****************************************************************************************************/
 
 void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
                                 const adobe::dictionary_t&     parameters,
@@ -57,8 +57,7 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
     adobe::assemblage_t&  assemblage(token.client_holder_m.assemblage_m);
 
     for (adobe::edit_number_t::view_iterator iter(control.view_begin()), last(control.view_end());
-         iter != last; ++iter)
-    {
+         iter != last; ++iter) {
         adobe::name_t cell(iter->cell());
 
         if (cell == adobe::name_t())
@@ -68,8 +67,7 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
     }
 
     for (adobe::edit_number_t::controller_iterator iter(control.controller_begin()), last(control.controller_end());
-         iter != last; ++iter)
-    {
+         iter != last; ++iter) {
         adobe::name_t cell(iter->cell());
 
         if (cell == adobe::name_t())
@@ -111,8 +109,7 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
         adobe::attach_view(assemblage, cell, *tmp, layout_sheet);
     }
 
-    if (parameters.count(adobe::key_bind_group))
-    {
+    if (parameters.count(adobe::key_bind_group)) {
         adobe::array_t bind_group_set;
 
         get_value(parameters, adobe::key_bind_group, bind_group_set);
@@ -170,8 +167,8 @@ platform_display_type insert<edit_number_t>(display_t&             display,
                                             edit_number_t&  element)
 {
     platform_display_type pos(insert(display, parent, element.edit_text()));
-        
-        if (element.using_popup())
+
+    if (element.using_popup())
         insert(display, parent, element.popup());
 
     element.initialize();

@@ -147,6 +147,9 @@ edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
     rows_m(block.num_lines_m),
     cols_m(block.min_characters_m),
     max_cols_m(block.max_characters_m),
+    read_only_m(block.read_only_m),
+    terminal_style_m(block.terminal_style_m),
+    wrap_m(block.wrap_m),
     scrollable_m(block.scrollable_m),
     password_m(block.password_m)
 {}
@@ -333,7 +336,13 @@ platform_display_type insert<edit_text_t>(display_t&             display,
         GG::Y height =
             implementation::CharHeight() * static_cast<int>(element.rows_m) +
             static_cast<int>(2 * GG::MultiEdit::BORDER_THICK);
-        GG::Flags<GG::MultiEditStyle> style = GG::MULTI_LINEWRAP;
+        GG::Flags<GG::MultiEditStyle> style;
+        if (element.read_only_m)
+            style |= GG::MULTI_READ_ONLY;
+        if (element.terminal_style_m)
+            style |= GG::MULTI_TERMINAL_STYLE;
+        if (element.wrap_m)
+            style |= GG::MULTI_WORDBREAK;
         if (!element.scrollable_m)
             style |= GG::MULTI_NO_SCROLL;
         element.control_m =

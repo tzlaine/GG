@@ -829,6 +829,7 @@ else:
     \param units An array of \link eve_number_unit units \endlink.
 
     TODO: color, text_color, interior_color
+    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
 */
 
 /** \page eve_edit_text edit_text()
@@ -860,6 +861,7 @@ else:
 
     TODO: color, text_color, interior_color
     TODO: read_only, terminal_style, wrap
+    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
 */
 
 /** \page eve_popup popup()
@@ -898,7 +900,7 @@ else:
     \param custom_item_name The name of the custom item in the popup.
 
     TODO: color, text_color
-    TODO: bind_selection_chenged_signal
+    TODO: bind_selection_changed_signal
 */
 
 /** \page eve_listbox listbox()

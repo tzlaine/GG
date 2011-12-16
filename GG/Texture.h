@@ -162,7 +162,7 @@ public:
     SubTexture(); ///< default ctor
 
     /** Creates a SubTexture from the entire image of a GG::Texture. */
-    SubTexture(const boost::shared_ptr<const Texture>& texture);
+    explicit SubTexture(const boost::shared_ptr<const Texture>& texture);
 
     /** Creates a SubTexture from a GG::Texture and coordinates into it.
         \throw GG::SubTexture::InvalidTextureCoordinates Throws if the texture

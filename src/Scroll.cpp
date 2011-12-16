@@ -321,48 +321,6 @@ void Scroll::LClick(const Pt& pt, Flags<ModKey> mod_keys)
 void Scroll::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 { LButtonUp(pt, mod_keys); }
 
-bool Scroll::EventFilter(Wnd* w, const WndEvent& event)
-{
-    if (w == m_tab) {
-        switch (event.Type()) {
-        case WndEvent::LDrag: {
-            if (!Disabled()) {
-                Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
-                if (m_orientation == VERTICAL) {
-                    new_ul.x = m_tab->RelativeUpperLeft().x;
-                    new_ul.y = std::max(0 + m_decr->Height(),
-                                        std::min(new_ul.y, ClientHeight() - m_incr->Height() - m_tab->Height()));
-                    m_tab_dragged |= bool(m_tab->RelativeUpperLeft().y - new_ul.y);
-                } else {
-                    new_ul.x = std::max(0 + m_decr->Width(),
-                                        std::min(new_ul.x, ClientWidth() - m_incr->Width() - m_tab->Width()));
-                    new_ul.y = m_tab->RelativeUpperLeft().y;
-                    m_tab_dragged |= bool(m_tab->RelativeUpperLeft().x - new_ul.x);
-                }
-                m_tab->MoveTo(new_ul);
-                UpdatePosn();
-            }
-            return true;
-        }
-        case WndEvent::LButtonDown:
-            m_dragging_tab = true;
-            break;
-        case WndEvent::LButtonUp:
-        case WndEvent::LClick:
-            if (m_tab_dragged)
-                ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
-            m_dragging_tab = false;
-            m_tab_dragged = false;
-            break;
-        case WndEvent::MouseLeave:
-            return m_dragging_tab;
-        default:
-            break;
-        }
-    }
-    return false;
-}
-
 void Scroll::UpdatePosn()
 {
     int old_posn = m_posn;
@@ -420,6 +378,48 @@ void Scroll::ScrollLineDecrImpl(bool signal)
         ScrolledSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
         ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
     }
+}
+
+bool Scroll::FilterImpl(Wnd* w, const WndEvent& event)
+{
+    if (w == m_tab) {
+        switch (event.Type()) {
+        case WndEvent::LDrag: {
+            if (!Disabled()) {
+                Pt new_ul = m_tab->RelativeUpperLeft() + event.DragMove();
+                if (m_orientation == VERTICAL) {
+                    new_ul.x = m_tab->RelativeUpperLeft().x;
+                    new_ul.y = std::max(0 + m_decr->Height(),
+                                        std::min(new_ul.y, ClientHeight() - m_incr->Height() - m_tab->Height()));
+                    m_tab_dragged |= bool(m_tab->RelativeUpperLeft().y - new_ul.y);
+                } else {
+                    new_ul.x = std::max(0 + m_decr->Width(),
+                                        std::min(new_ul.x, ClientWidth() - m_incr->Width() - m_tab->Width()));
+                    new_ul.y = m_tab->RelativeUpperLeft().y;
+                    m_tab_dragged |= bool(m_tab->RelativeUpperLeft().x - new_ul.x);
+                }
+                m_tab->MoveTo(new_ul);
+                UpdatePosn();
+            }
+            return true;
+        }
+        case WndEvent::LButtonDown:
+            m_dragging_tab = true;
+            break;
+        case WndEvent::LButtonUp:
+        case WndEvent::LClick:
+            if (m_tab_dragged)
+                ScrolledAndStoppedSignal(m_posn, m_posn + m_page_sz, m_range_min, m_range_max);
+            m_dragging_tab = false;
+            m_tab_dragged = false;
+            break;
+        case WndEvent::MouseLeave:
+            return m_dragging_tab;
+        default:
+            break;
+        }
+    }
+    return false;
 }
 
 

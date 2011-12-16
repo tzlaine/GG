@@ -52,11 +52,10 @@ namespace implementation {
 /*************************************************************************************************/
 
 ImageFilter::ImageFilter(image_t& image) :
-    Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
     m_image(image)
 {}
 
-bool ImageFilter::EventFilter(GG::Wnd*, const GG::WndEvent& event)
+bool ImageFilter::FilterImpl(GG::Wnd*, const GG::WndEvent& event)
 {
     bool retval = false;
 
@@ -100,7 +99,11 @@ bool ImageFilter::EventFilter(GG::Wnd*, const GG::WndEvent& event)
     return retval;
 }
 
+/****************************************************************************************************/
+
 } // implementation
+
+/****************************************************************************************************/
 
 } // adobe
 
@@ -166,6 +169,7 @@ void reset_image(adobe::image_t& image, const adobe::image_t::view_model_type& v
 
 } // namespace
 
+/****************************************************************************************************/
 
 namespace adobe {
 

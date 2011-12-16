@@ -120,14 +120,13 @@ protected:
     virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
-    virtual bool EventFilter(Wnd* w, const WndEvent& event);
-
     void MoveTabToPosn(); ///< moves the tab to the current logical position
     //@}
 
 private:
     void SlideToImpl(T p, bool signal);
     void UpdatePosn();
+    virtual bool FilterImpl(Wnd* w, const WndEvent& event);
 
     struct SlidEcho
     {
@@ -383,7 +382,51 @@ void Slider<T>::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> 
 }
 
 template <class T>
-bool Slider<T>::EventFilter(Wnd* w, const WndEvent& event)
+void Slider<T>::MoveTabToPosn()
+{
+    assert(m_range_min <= m_posn && m_posn <= m_range_max ||
+           m_range_max <= m_posn && m_posn <= m_range_min);
+    double fractional_distance = static_cast<double>(m_posn - m_range_min) / (m_range_max - m_range_min);
+    int tab_width = m_orientation == VERTICAL ? Value(m_tab->Height()) : Value(m_tab->Width());
+    int line_length = (m_orientation == VERTICAL ? Value(Height()) : Value(Width())) - tab_width;
+    int pixel_distance = static_cast<int>(line_length * fractional_distance);
+    if (m_orientation == VERTICAL)
+        m_tab->MoveTo(Pt(m_tab->RelativeUpperLeft().x, Height() - tab_width - pixel_distance));
+    else
+        m_tab->MoveTo(Pt(X(pixel_distance), m_tab->RelativeUpperLeft().y));
+}
+
+template <class T>
+void Slider<T>::SlideToImpl(T p, bool signal)
+{
+    T old_posn = m_posn;
+    if (0 < (m_range_max - m_range_min) ? p < m_range_min : p > m_range_min)
+        m_posn = m_range_min;
+    else if (0 < (m_range_max - m_range_min) ? m_range_max < p : m_range_max > p)
+        m_posn = m_range_max;
+    else
+        m_posn = p;
+    MoveTabToPosn();
+    if (signal && m_posn != old_posn) {
+        SlidSignal(m_posn, m_range_min, m_range_max);
+        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
+    }
+}
+
+template <class T>
+void Slider<T>::UpdatePosn()
+{
+    T old_posn = m_posn;
+    int line_length = m_orientation == VERTICAL ? Value(Height() - m_tab->Height()) : Value(Width() - m_tab->Width());
+    int tab_posn = (m_orientation == VERTICAL ? Value(Height() - m_tab->RelativeLowerRight().y) : Value(m_tab->RelativeUpperLeft().x));
+    double fractional_distance = static_cast<double>(tab_posn) / line_length;
+    m_posn = m_range_min + static_cast<T>((m_range_max - m_range_min) * fractional_distance);
+    if (m_posn != old_posn)
+        SlidSignal(m_posn, m_range_min, m_range_max);
+}
+
+template <class T>
+bool Slider<T>::FilterImpl(Wnd* w, const WndEvent& event)
 {
     if (w == m_tab) {
         switch (event.Type()) {
@@ -419,50 +462,6 @@ bool Slider<T>::EventFilter(Wnd* w, const WndEvent& event)
         }
     }
     return false;
-}
-
-template <class T>
-void Slider<T>::MoveTabToPosn()
-{
-    assert(m_range_min <= m_posn && m_posn <= m_range_max ||
-           m_range_max <= m_posn && m_posn <= m_range_min);
-    double fractional_distance = static_cast<double>(m_posn - m_range_min) / (m_range_max - m_range_min);
-    int tab_width = m_orientation == VERTICAL ? Value(m_tab->Height()) : Value(m_tab->Width());
-    int line_length = (m_orientation == VERTICAL ? Value(Height()) : Value(Width())) - tab_width;
-    int pixel_distance = static_cast<int>(line_length * fractional_distance);
-    if (m_orientation == VERTICAL)
-        m_tab->MoveTo(Pt(m_tab->RelativeUpperLeft().x, Height() - tab_width - pixel_distance));
-    else
-        m_tab->MoveTo(Pt(X(pixel_distance), m_tab->RelativeUpperLeft().y));
-}
-
-template <class T>
-void Slider<T>::UpdatePosn()
-{
-    T old_posn = m_posn;
-    int line_length = m_orientation == VERTICAL ? Value(Height() - m_tab->Height()) : Value(Width() - m_tab->Width());
-    int tab_posn = (m_orientation == VERTICAL ? Value(Height() - m_tab->RelativeLowerRight().y) : Value(m_tab->RelativeUpperLeft().x));
-    double fractional_distance = static_cast<double>(tab_posn) / line_length;
-    m_posn = m_range_min + static_cast<T>((m_range_max - m_range_min) * fractional_distance);
-    if (m_posn != old_posn)
-        SlidSignal(m_posn, m_range_min, m_range_max);
-}
-
-template <class T>
-void Slider<T>::SlideToImpl(T p, bool signal)
-{
-    T old_posn = m_posn;
-    if (0 < (m_range_max - m_range_min) ? p < m_range_min : p > m_range_min)
-        m_posn = m_range_min;
-    else if (0 < (m_range_max - m_range_min) ? m_range_max < p : m_range_max > p)
-        m_posn = m_range_max;
-    else
-        m_posn = p;
-    MoveTabToPosn();
-    if (signal && m_posn != old_posn) {
-        SlidSignal(m_posn, m_range_min, m_range_max);
-        SlidAndStoppedSignal(m_posn, m_range_min, m_range_max);
-    }
 }
 
 template <class T>

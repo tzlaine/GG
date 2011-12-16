@@ -386,6 +386,9 @@ const Button* TabBar::LeftButton() const
 const Button* TabBar::RightButton() const
 { return m_right_button; }
 
+void TabBar::RaiseCurrentTabButton()
+{ m_tabs->RaiseCheckedButton(); }
+
 void TabBar::DistinguishCurrentTab(const std::vector<StateButton*>& tab_buttons)
 { RaiseCurrentTabButton(); }
 
@@ -449,13 +452,10 @@ void TabBar::UpdateLeftRightButtons()
     }
 }
 
-bool TabBar::EventFilter(Wnd* w, const WndEvent& event)
+bool TabBar::FilterImpl(Wnd* w, const WndEvent& event)
 {
     if (event.Type() == WndEvent::LButtonDown ||
         event.Type() == WndEvent::RButtonDown)
         MoveChildUp(m_left_right_button_layout);
     return false;
 }
-
-void TabBar::RaiseCurrentTabButton()
-{ m_tabs->RaiseCheckedButton(); }

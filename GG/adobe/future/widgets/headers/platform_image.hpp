@@ -40,10 +40,13 @@ namespace implementation {
 
 /****************************************************************************************************/
 
-struct ImageFilter : GG::Wnd
+class ImageFilter : public GG::EventFilter
 {
+public:
     ImageFilter(image_t& image);
-    virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event);
+
+private:
+    virtual bool FilterImpl(GG::Wnd*, const GG::WndEvent& event);
     image_t& m_image;
 };
 

@@ -148,8 +148,6 @@ protected:
     /** \name Mutators */ ///@{
     virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     virtual void MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys);
-
-    virtual bool EventFilter(Wnd* w, const WndEvent& event);
     //@}
 
 private:
@@ -159,6 +157,7 @@ private:
     void IncrImpl(bool signal);
     void DecrImpl(bool signal);
     void SetValueImpl(T value, bool signal);
+    virtual bool FilterImpl(Wnd* w, const WndEvent& event);
 
     T          m_value;
     T          m_step_size;
@@ -404,20 +403,6 @@ void Spin<T>::MouseWheel(const Pt& pt, int move, Flags<ModKey> mod_keys)
 }
 
 template<class T>
-bool Spin<T>::EventFilter(Wnd* w, const WndEvent& event)
-{
-    if (w == m_edit) {
-        if (!m_editable && event.Type() == WndEvent::GainingFocus) {
-            GUI::GetGUI()->SetFocusWnd(this);
-            return true;
-        } else {
-            return !m_editable;
-        }
-    }
-    return false;
-}
-
-template<class T>
 void Spin<T>::ConnectSignals()
 {
     Connect(m_edit->FocusUpdateSignal, &Spin::ValueUpdated, this);
@@ -494,6 +479,20 @@ void Spin<T>::SetValueImpl(T value, bool signal)
     m_edit->SetValue(m_value);
     if (signal && m_value != old_value)
         ValueChangedSignal(m_value);
+}
+
+template<class T>
+bool Spin<T>::FilterImpl(Wnd* w, const WndEvent& event)
+{
+    if (w == m_edit) {
+        if (!m_editable && event.Type() == WndEvent::GainingFocus) {
+            GUI::GetGUI()->SetFocusWnd(this);
+            return true;
+        } else {
+            return !m_editable;
+        }
+    }
+    return false;
 }
 
 template <class T>

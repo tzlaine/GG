@@ -30,6 +30,7 @@
 #define _GG_Wnd_h_
 
 #include <GG/Base.h>
+#include <GG/EventFilter.h>
 #include <GG/Exception.h>
 #include <GG/Flags.h>
 
@@ -43,7 +44,6 @@ class BrowseInfoWnd;
 class Layout;
 class StyleFactory;
 class Timer;
-class WndEvent;
 
 
 /** Wnd creation flags type. */
@@ -146,24 +146,23 @@ extern GG_API const WndFlag MODAL;
     <h3>Event Filters</h3>
 
     <br>Every Wnd can also have its incoming WndEvents filtered by an
-    arbitrary number of other Wnds.  Each such Wnd in a Wnd's "filter chain"
-    gets an opportunity, one at a time, to process an incoming WndEvent, or
-    pass it on to the next filter in the chain.  If all EventFilter() calls in
-    the chain return false, the filtered Wnd then gets the chance to process
-    the WndEvent as normal.  Filter Wnds are traversed in reverse order that
-    they are installed, and no filter Wnd can be in a filter chain more than
-    once.  Installing the same filter Wnd more than once removes the Wnd from
-    the filter chain and re-adds it to the beginning of the chain.  Note that
-    the default implementation of EventFilter() is to return false and do
-    nothing else, so installing a Wnd-derived type with no overridden
-    EventFilter() in a filter Wnd will have no effect.  Also note that just as
-    it is legal for keyboard accelerator slots to do nontrivial work and still
-    return false (causing a keystroke event to be generated), EventFilter()
-    may return false even when it does nontrivial work, and the next filter in
-    the chain will also get a chance to process the WndEvent.  It is even
-    possible to have an arbitrary number of filters that all do processing on
-    an WndEvent, and finally let the filtered Wnd do its normal WndEvent
-    processing.
+    arbitrary number of EventFilters.  Each such EventFilter in a Wnd's
+    "filter chain" gets an opportunity, one at a time, to process an incoming
+    WndEvent, or pass it on to the next filter in the chain.  If all Filter()
+    calls in the chain return false, the filtered Wnd then gets the chance to
+    process the WndEvent as normal.  EventFilters are traversed in reverse
+    order that they are installed, and no EventFilter can be in a filter chain
+    more than once.  Installing the same EventFilter more than once removes it
+    from the filter chain and re-adds it to the beginning of the chain.  Note
+    that the default implementation of Filter() is to return false and do
+    nothing else, so installing an EventFilter type with no overridden
+    Filter() will have no effect.  Also note that just as it is legal for
+    keyboard accelerator slots to do nontrivial work and still return false
+    (causing a keystroke event to be generated), Filter() may return false
+    even when it does nontrivial work, and the next filter in the chain will
+    also get a chance to process the WndEvent.  It is even possible to have an
+    arbitrary number of filters that all do processing on an WndEvent, and
+    finally let the filtered Wnd do its normal WndEvent processing.
 
     <h3>Layouts</h3>
 
@@ -217,7 +216,9 @@ extern GG_API const WndFlag MODAL;
     complete customization, each Wnd may have one installed as well.  The
     GetStyleFactory() method returns the one installed in the Wnd, if one
     exists, or the GUI-wide one otherwise. */
-class GG_API Wnd : public boost::signals::trackable
+class GG_API Wnd :
+    public boost::signals::trackable,
+    public EventFilter
 {
 public:
     /** \brief The data necessary to represent a browse info mode.
@@ -530,11 +531,11 @@ public:
     /** Removes, detaches, and deletes all Wnds in the child list. */
     void DeleteChildren();
 
-    /** Adds \a wnd to the front of the event filtering chain. */
-    void InstallEventFilter(Wnd* wnd);
+    /** Adds \a filter to the front of the event filtering chain. */
+    void InstallEventFilter(EventFilter* filter);
 
-    /** Removes \a wnd from the filter chain. */
-    void RemoveEventFilter(Wnd* wnd);
+    /** Removes \a filter from the filter chain. */
+    void RemoveEventFilter(EventFilter* filter);
 
     /** Places the window's client-area children in a horizontal layout,
         handing ownership of the window's client-area children over to the
@@ -827,11 +828,6 @@ protected:
     /** Respond to Timer \a timer firing at time \a ticks. */
     virtual void TimerFiring(unsigned int ticks, Timer* timer);
 
-    /** Handles an WndEvent destined for Wnd \a w, but which this Wnd is
-        allowed to handle first.  Returns true if this filter processed the
-        message. */
-    virtual bool EventFilter(Wnd* w, const WndEvent& event);
-
     /** Handles all messages, and calls appropriate function (LButtonDown(),
         LDrag(), etc.). */
     void HandleEvent(const WndEvent& event);
@@ -868,7 +864,6 @@ private:
     virtual void BeginNonclientClippingImpl();
     virtual void EndNonclientClippingImpl();
 
-
     Wnd*              m_parent;        ///< Ptr to this window's parent; may be 0
     std::string       m_name;          ///< A user-significant name for this Wnd
     std::list<Wnd*>   m_children;      ///< List of ptrs to child windows kept in order of decreasing area
@@ -882,9 +877,9 @@ private:
     Pt                m_min_size;      ///< Minimum window size Pt(0, 0) (= none) by default
     Pt                m_max_size;      ///< Maximum window size Pt(1 << 30, 1 << 30) (= none) by default
 
-    /** The Wnds that are filtering this Wnd's events. These are in reverse
-        order: top of the stack is back(). */
-    std::vector<Wnd*> m_filters;
+    /** The EventFilters that are filtering this Wnd's events. These are in
+        reverse order: top of the stack is back(). */
+    std::vector<EventFilter*> m_filters;
 
     std::set<Wnd*>    m_filtering;         ///< The Wnds in whose filter chains this Wnd lies
     Layout*           m_layout;            ///< The layout for this Wnd, if any

@@ -487,8 +487,6 @@ protected:
     virtual void    DragDropLeave();
     virtual void    TimerFiring(unsigned int ticks, Timer* timer);
 
-    virtual bool    EventFilter(Wnd* w, const WndEvent& event);
-
     iterator        Insert(Row* row, iterator it, bool dropped);  ///< insertion sorts into list, or inserts into an unsorted list before \a it; returns insertion point
     Row*            Erase(iterator it, bool removing_duplicate, bool signal); ///< erases the row at index \a idx, handling it as a duplicate removal (such as for drag-and-drops within a single ListBox) if indicated
     void            BringCaretIntoView();           ///< makes sure caret is visible when scrolling occurs due to keystrokes etc.
@@ -507,6 +505,7 @@ private:
     void            NormalizeRow(Row* row); ///< adjusts a Row so that it has the same number of cells as other rows, and that each cell has the correct width and alignment
     iterator        FirstRowShownWhenBottomIs(iterator bottom_row, Y client_height); ///< Returns the first row shown when the last row shown is \a bottom_row
     std::size_t     FirstColShownWhenRightIs(std::size_t right_col, X client_width); ///< Returns the index of the first column shown when the last column shown is \a right_col
+    virtual bool    FilterImpl(Wnd* w, const WndEvent& event);
 
     std::list<Row*> m_rows;             ///< line item data
 

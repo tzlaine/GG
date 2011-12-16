@@ -193,14 +193,15 @@ Wnd::~Wnd()
 {
     // remove this-references from Wnds that this Wnd filters
     for (std::set<Wnd*>::iterator it1 = m_filtering.begin(); it1 != m_filtering.end(); ++it1) {
-        std::vector<Wnd*>::iterator it2 = std::find((*it1)->m_filters.begin(), (*it1)->m_filters.end(), this);
+        std::vector<EventFilter*>::iterator it2 = std::find((*it1)->m_filters.begin(), (*it1)->m_filters.end(), this);
         if (it2 != (*it1)->m_filters.end())
             (*it1)->m_filters.erase(it2);
     }
 
     // remove this-references from Wnds that filter this Wnd
-    for (std::vector<Wnd*>::iterator it1 = m_filters.begin(); it1 != m_filters.end(); ++it1) {
-        (*it1)->m_filtering.erase(this);
+    for (std::vector<EventFilter*>::iterator it1 = m_filters.begin(); it1 != m_filters.end(); ++it1) {
+        if (Wnd* wnd = dynamic_cast<Wnd*>(*it1))
+            wnd->m_filtering.erase(this);
     }
 
     if (Wnd* parent = Parent())
@@ -576,22 +577,24 @@ void Wnd::DeleteChildren()
     }
 }
 
-void Wnd::InstallEventFilter(Wnd* wnd)
+void Wnd::InstallEventFilter(EventFilter* filter)
 {
-    if (wnd) {
-        RemoveEventFilter(wnd);
-        m_filters.push_back(wnd);
-        wnd->m_filtering.insert(this);
+    if (filter) {
+        RemoveEventFilter(filter);
+        m_filters.push_back(filter);
+        if (Wnd* wnd = dynamic_cast<Wnd*>(filter))
+            wnd->m_filtering.insert(this);
     }
 }
 
-void Wnd::RemoveEventFilter(Wnd* wnd)
+void Wnd::RemoveEventFilter(EventFilter* filter)
 {
-    if (wnd) {
-        std::vector<Wnd*>::iterator it = std::find(m_filters.begin(), m_filters.end(), wnd);
+    if (filter) {
+        std::vector<EventFilter*>::iterator it = std::find(m_filters.begin(), m_filters.end(), filter);
         if (it != m_filters.end())
             m_filters.erase(it);
-        wnd->m_filtering.erase(this);
+        if (Wnd* wnd = dynamic_cast<Wnd*>(filter))
+            wnd->m_filtering.erase(this);
     }
 }
 
@@ -983,13 +986,10 @@ void Wnd::LosingFocus() {}
 
 void Wnd::TimerFiring(unsigned int ticks, Timer* timer) {}
 
-bool Wnd::EventFilter(Wnd* w, const WndEvent& event)
-{ return false; }
-
 void Wnd::HandleEvent(const WndEvent& event)
 {
-    for (std::vector<Wnd*>::reverse_iterator it = m_filters.rbegin(); it != m_filters.rend(); ++it) {
-        if ((*it)->EventFilter(this, event))
+    for (std::vector<EventFilter*>::reverse_iterator it = m_filters.rbegin(); it != m_filters.rend(); ++it) {
+        if ((*it)->Filter(this, event))
             return;
     }
 

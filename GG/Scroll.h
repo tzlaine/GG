@@ -125,8 +125,6 @@ protected:
     virtual void  LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void  LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void  MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
-
-    virtual bool  EventFilter(Wnd* w, const WndEvent& event);
     //@}
 
 private:
@@ -134,6 +132,7 @@ private:
     void              MoveTabToPosn();     ///< adjusts tab due to a button click, PgUp, etc.
     void              ScrollLineIncrImpl(bool signal);
     void              ScrollLineDecrImpl(bool signal);
+    virtual bool      FilterImpl(Wnd* w, const WndEvent& event);
 
     Clr               m_int_color;   ///< color inside border of slide area
     const Orientation m_orientation; ///< vertical or horizontal scroll? (use enum for these declared above)

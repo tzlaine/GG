@@ -279,8 +279,6 @@ protected:
     //@}
 
     /** \name Mutators */ ///@{
-    virtual bool EventFilter(Wnd* w, const WndEvent& event);
-
     /** Brings the currently-selected tab button to the top within the tab
         button group. */
     void RaiseCurrentTabButton();
@@ -294,6 +292,8 @@ private:
     void RightClicked();
     void BringTabIntoView(std::size_t index);
     void UpdateLeftRightButtons();
+
+    virtual bool FilterImpl(Wnd* w, const WndEvent& event);
 
     RadioButtonGroup*         m_tabs;
     std::vector<StateButton*> m_tab_buttons;

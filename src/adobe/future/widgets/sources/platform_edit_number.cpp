@@ -19,20 +19,22 @@
 
 namespace adobe {
 
+/****************************************************************************************************/
+
 namespace implementation {
 
 /****************************************************************************************************/
 
 class EditNumberLabelFilter :
-    public GG::Wnd
+    public GG::EventFilter
 {
 public:
     EditNumberLabelFilter(edit_number_platform_data_t& data) :
-        Wnd(GG::X0, GG::Y0, GG::X1, GG::Y1),
         m_data(data)
         {}
 
-    virtual bool EventFilter(GG::Wnd*, const GG::WndEvent& event)
+private:
+    virtual bool FilterImpl(GG::Wnd*, const GG::WndEvent& event)
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseEnter) {
@@ -66,9 +68,9 @@ public:
     edit_number_platform_data_t& m_data;
 };
 
-} // namespace implementation
-
 /****************************************************************************************************/
+
+} // namespace implementation
 
 /****************************************************************************************************/
 

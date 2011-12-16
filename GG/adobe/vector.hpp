@@ -343,7 +343,7 @@ void vector<T, A>::move_append(I f, I l, std::forward_iterator_tag)
     size_type n(std::distance(f, l));
     
         if (remaining() < n) reserve((adobe::max)(size() + n, 2 * size()));
-    set_finish(uninitialized_move(f, l, end()));
+    set_finish(::adobe::uninitialized_move(f, l, end()));
 }
     
 template <typename T, typename A>
@@ -430,7 +430,7 @@ void vector<T, A>::reserve(size_type n)
     if (capacity() < n) {
         vector tmp;
         tmp.header_m = allocate(get_allocator(), n);
-        tmp.header_m->finish() = uninitialized_move(begin(), end(), tmp.end());
+        tmp.header_m->finish() = ::adobe::uninitialized_move(begin(), end(), tmp.end());
         swap(tmp);
     }
 }

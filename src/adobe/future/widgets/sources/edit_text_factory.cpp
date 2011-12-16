@@ -14,6 +14,35 @@
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 
+/*************************************************************************************************/
+
+namespace {
+
+/*************************************************************************************************/
+
+void handle_edited_signal(adobe::signal_notifier_t signal_notifier,
+                          adobe::name_t widget_type,
+                          adobe::name_t signal_name,
+                          adobe::name_t widget_id,
+                          adobe::sheet_t& sheet,
+                          adobe::name_t bind,
+                          adobe::array_t expression,
+                          const std::string& str)
+{
+    adobe::implementation::handle_signal(signal_notifier,
+                                         widget_type,
+                                         signal_name,
+                                         widget_id,
+                                         sheet,
+                                         bind,
+                                         expression,
+                                         adobe::any_regular_t(str));
+}
+
+/****************************************************************************************************/
+
+} //namespace
+
 /****************************************************************************************************/
 
 namespace adobe {
@@ -39,8 +68,59 @@ void create_widget(const dictionary_t&   parameters,
     implementation::get_color(parameters, static_name_t("color"), block.color_m);
     implementation::get_color(parameters, static_name_t("text_color"), block.text_color_m);
     implementation::get_color(parameters, static_name_t("interior_color"), block.interior_color_m);
+    get_value(parameters, static_name_t("signal_id"), block.signal_id_m);
 
     widget = new edit_text_t(block);
+}
+
+/****************************************************************************************************/
+
+template <>
+void attach_view_and_controller(edit_text_t&           control,
+                                const dictionary_t&    parameters,
+                                const factory_token_t& token,
+                                adobe::name_t,
+                                adobe::name_t,
+                                adobe::name_t)
+{
+    if (parameters.count(key_bind) != 0) {
+        attach_view_and_controller_direct(control, parameters, token,
+                                          key_bind, key_bind_view, key_bind_controller);
+    }
+
+    any_regular_t edited_binding;
+    if (get_value(parameters, static_name_t("bind_edited_signal"), edited_binding)) {
+        name_t cell;
+        array_t expression;
+        implementation::cell_and_expression(edited_binding, cell, expression);
+        control.edited_proc_m =
+            boost::bind(&handle_edited_signal,
+                        token.signal_notifier_m,
+                        static_name_t("edit_text"),
+                        static_name_t("edited"),
+                        control.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1);
+    }
+
+    any_regular_t focus_update_binding;
+    if (get_value(parameters, static_name_t("bind_focus_update_signal"), focus_update_binding)) {
+        name_t cell;
+        array_t expression;
+        implementation::cell_and_expression(focus_update_binding, cell, expression);
+        control.focus_update_proc_m =
+            boost::bind(&handle_edited_signal,
+                        token.signal_notifier_m,
+                        static_name_t("edit_text"),
+                        static_name_t("focus_update"),
+                        control.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1);
+    }
 }
 
 /****************************************************************************************************/

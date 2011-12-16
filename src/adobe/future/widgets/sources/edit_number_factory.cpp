@@ -20,28 +20,68 @@
 
 #include <limits>
 
-/****************************************************************************************************/
+/*************************************************************************************************/
 
 namespace {
 
-/****************************************************************************************************/
+/*************************************************************************************************/
+
+void handle_edited_signal(adobe::signal_notifier_t signal_notifier,
+                          adobe::name_t widget_type,
+                          adobe::name_t signal_name,
+                          adobe::name_t widget_id,
+                          adobe::sheet_t& sheet,
+                          adobe::name_t bind,
+                          adobe::array_t expression,
+                          double value)
+{
+    adobe::implementation::handle_signal(signal_notifier,
+                                         widget_type,
+                                         signal_name,
+                                         widget_id,
+                                         sheet,
+                                         bind,
+                                         expression,
+                                         adobe::any_regular_t(value));
+}
+
+/*************************************************************************************************/
+
+void handle_unit_changed_signal(adobe::signal_notifier_t signal_notifier,
+                                adobe::name_t widget_type,
+                                adobe::name_t signal_name,
+                                adobe::name_t widget_id,
+                                adobe::sheet_t& sheet,
+                                adobe::name_t bind,
+                                adobe::array_t expression,
+                                const adobe::any_regular_t& unit)
+{
+    adobe::implementation::handle_signal(signal_notifier,
+                                         widget_type,
+                                         signal_name,
+                                         widget_id,
+                                         sheet,
+                                         bind,
+                                         expression,
+                                         unit);
+}
+
+/*************************************************************************************************/
 
 std::vector<adobe::unit_t> extract_unit_set(const adobe::dictionary_t& parameters)
 {
     std::vector<adobe::unit_t> result;
     adobe::unit_t              default_unit(adobe::to_unit(parameters));
 
-    if (parameters.count(adobe::key_units) == 0)
-    {
+    if (parameters.count(adobe::key_units) == 0) {
         result.push_back(default_unit);
-    }
-    else
-    {
+    } else {
         adobe::array_t unit_array(get_value(parameters, adobe::key_units).cast<adobe::array_t>());
 
         for (adobe::array_t::iterator iter(unit_array.begin()), last(unit_array.end());
-             iter != last; ++iter)
+             iter != last; ++iter) {
             result.push_back(adobe::to_unit(iter->cast<adobe::dictionary_t>(), default_unit));
+        }
     }
 
     return result;
@@ -79,6 +119,40 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
             adobe::couple_controller_to_cell(*iter, cell, token.sheet_m, token, parameters);
     }
 
+    adobe::any_regular_t edited_binding;
+    if (get_value(parameters, adobe::static_name_t("bind_edited_signal"), edited_binding)) {
+        adobe::name_t cell;
+        adobe::array_t expression;
+        adobe::implementation::cell_and_expression(edited_binding, cell, expression);
+        control.platform_m.edited_proc_m =
+            boost::bind(&handle_edited_signal,
+                        token.signal_notifier_m,
+                        adobe::static_name_t("edit_number"),
+                        adobe::static_name_t("edited"),
+                        control.edit_text_m.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1);
+    }
+
+    adobe::any_regular_t focus_update_binding;
+    if (get_value(parameters, adobe::static_name_t("bind_focus_update_signal"), focus_update_binding)) {
+        adobe::name_t cell;
+        adobe::array_t expression;
+        adobe::implementation::cell_and_expression(focus_update_binding, cell, expression);
+        control.platform_m.focus_update_proc_m =
+            boost::bind(&handle_edited_signal,
+                        token.signal_notifier_m,
+                        adobe::static_name_t("edit_number"),
+                        adobe::static_name_t("focus_update"),
+                        control.edit_text_m.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1);
+    }
+
     if (!control.using_popup())
         return;
 
@@ -90,8 +164,6 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
         std::vector<adobe::unit_t> unit_set(extract_unit_set(parameters));
 
         get_value(parameters, adobe::key_bind_units, cell);
-
-        // TODO: Bind the unit popup's selection_changed signal.
 
         // add the cell to the layout sheet if its not there yet
         if (layout_sheet.count_interface(cell) == 0)
@@ -127,6 +199,23 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
 
         assemblage_cleanup_ptr(assemblage, splitter);
     }
+
+    adobe::any_regular_t unit_changed_binding;
+    if (get_value(parameters, adobe::static_name_t("bind_unit_changed_signal"), unit_changed_binding)) {
+        adobe::name_t cell;
+        adobe::array_t expression;
+        adobe::implementation::cell_and_expression(unit_changed_binding, cell, expression);
+        control.platform_m.unit_changed_proc_m =
+            boost::bind(&handle_unit_changed_signal,
+                        token.signal_notifier_m,
+                        adobe::static_name_t("edit_number"),
+                        adobe::static_name_t("unit_changed"),
+                        control.edit_text_m.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1);
+    }
 }
 
 /****************************************************************************************************/
@@ -152,6 +241,7 @@ void create_widget(const dictionary_t& parameters,
     implementation::get_color(parameters, static_name_t("color"), block.color_m);
     implementation::get_color(parameters, static_name_t("text_color"), block.text_color_m);
     implementation::get_color(parameters, static_name_t("interior_color"), block.interior_color_m);
+    get_value(parameters, static_name_t("signal_id"), block.signal_id_m);
 
     std::vector<unit_t> unit_set(extract_unit_set(parameters));
 

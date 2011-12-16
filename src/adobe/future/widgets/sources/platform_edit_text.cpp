@@ -28,20 +28,23 @@ namespace {
 
 /*************************************************************************************************/
 
-struct EditHandler
+void edit_edited(adobe::edit_text_t& edit_text, const std::string& str)
 {
-    EditHandler(adobe::edit_text_t& edit_text) :
-        m_edit_text(&edit_text)
-        {}
+    edit_text.value_m = str;
 
-    void operator()(const std::string& text)
-        {
-            m_edit_text->value_m = text;
-            m_edit_text->post_edit_proc_m(text);
-        }
+    edit_text.post_edit_proc_m(str);
 
-    adobe::edit_text_t* m_edit_text;
-};
+    if (edit_text.edited_proc_m)
+        edit_text.edited_proc_m(str);
+}
+
+/*************************************************************************************************/
+
+void edit_focus_update(adobe::edit_text_t& edit_text, const std::string& str)
+{
+    if (edit_text.focus_update_proc_m)
+        edit_text.focus_update_proc_m(str);
+}
 
 /*************************************************************************************************/
 
@@ -151,7 +154,8 @@ edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
     terminal_style_m(block.terminal_style_m),
     wrap_m(block.wrap_m),
     scrollable_m(block.scrollable_m),
-    password_m(block.password_m)
+    password_m(block.password_m),
+    signal_id_m(block.signal_id_m)
 {}
 
 /****************************************************************************************************/
@@ -331,7 +335,6 @@ platform_display_type insert<edit_text_t>(display_t&             display,
                                               element.color_m,
                                               element.text_color_m,
                                               element.interior_color_m);
-        GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     } else {
         GG::Y height =
             implementation::CharHeight() * static_cast<int>(element.rows_m) +
@@ -354,8 +357,12 @@ platform_display_type insert<edit_text_t>(display_t&             display,
                                                    style,
                                                    element.text_color_m,
                                                    element.interior_color_m);
-        GG::Connect(element.control_m->EditedSignal, EditHandler(element));
     }
+
+    GG::Connect(element.control_m->EditedSignal,
+                boost::bind(&edit_edited, boost::ref(element), _1));
+    GG::Connect(element.control_m->FocusUpdateSignal,
+                boost::bind(&edit_focus_update, boost::ref(element), _1));
 
     if (element.password_m)
         element.control_m->PasswordMode(true);

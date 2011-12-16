@@ -195,11 +195,13 @@ struct edit_number_t : boost::noncopyable
     //                      of insert(display, etc.) can get to them
     inline edit_text_t& edit_text()  { return edit_text_m; }
     inline popup_t&     popup()      { return popup_m; }
+
     void        initialize();
     void        monitor_locale(const dictionary_t& value);
 
-private:
+//private:
     void        monitor_text(const std::string& new_value, bool display_was_updated=true);
+    void        monitor_focus_update(const std::string& new_value);
     void        monitor_popup(const any_regular_t& new_value);
     void        field_text_filter(const std::string& candidate, bool& squelch);
     void        increment(bool up);
@@ -241,6 +243,7 @@ private:
     double                      min_m;
     double                      max_m;
     edit_number_platform_data_t platform_m;
+
 public:
     boost::signals::connection  locale_change_connection_m;
 #endif
@@ -253,25 +256,21 @@ edit_number_t::edit_number_t(const edit_text_ctor_block_t& block,
                              const ForwardIterator         first,
                              const ForwardIterator         last) :
     edit_text_m(block),
-    popup_m(std::string(), block.alt_text_m, std::string(), 0, 0, GG::CLR_GRAY, GG::CLR_BLACK, name_t()),
+    popup_m(std::string(), block.alt_text_m, std::string(), 0, 0, block.color_m, block.text_color_m, name_t()),
     edit_text_width_m(0),
     unit_index_m(0),
     unit_set_m(first, last),
     platform_m(0)
-{
-    platform_m = edit_number_platform_data_t(this);
-}
+{ platform_m = edit_number_platform_data_t(this); }
 
 /****************************************************************************************************/
 
 inline edit_number_unit_subwidget_t::edit_number_unit_subwidget_t(edit_number_t& edit_number) :
     edit_number_m(edit_number)
-{ }
+{}
 
 inline void edit_number_unit_subwidget_t::display(const model_type& value)
-{
-    edit_number_m.display_unit(value);
-}
+{ edit_number_m.display_unit(value); }
 
 /****************************************************************************************************/
 

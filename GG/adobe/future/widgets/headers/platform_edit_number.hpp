@@ -9,6 +9,8 @@
 #ifndef ADOBE_WIDGET_EDIT_NUMBER_EDGE_HPP
 #define ADOBE_WIDGET_EDIT_NUMBER_EDGE_HPP
 
+#include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
+
 #include <GG/PtRect.h>
 
 
@@ -43,8 +45,13 @@ struct edit_number_platform_data_t
 
     edit_number_t* control_m;
     GG::Pt         last_point_m;
+
     boost::shared_ptr<implementation::EditNumberLabelFilter>
                    filter_m;
+
+    boost::function<void (double)> edited_proc_m;
+    boost::function<void (double)> focus_update_proc_m;
+    popup_setter_type unit_changed_proc_m;
 };
 
 /****************************************************************************************************/

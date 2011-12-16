@@ -11,8 +11,10 @@
 
 /****************************************************************************************************/
 
+#include <GG/adobe/array.hpp>
 #include <GG/adobe/config.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <string>
 
@@ -48,6 +50,7 @@ struct edit_text_ctor_block_t
     GG::Clr     color_m;
     GG::Clr     text_color_m;
     GG::Clr     interior_color_m;
+    name_t      signal_id_m;
 };
 
 /*************************************************************************************************/

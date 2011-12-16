@@ -45,22 +45,17 @@ adobe::edit_number_t::base_unit_set_t base_unit_set(ForwardIterator first, Forwa
 {
     adobe::edit_number_t::base_unit_set_t result;
 
-    for (; first != last; ++first)
-    {
+    for (; first != last; ++first) {
         adobe::edit_number_t::base_unit_set_t::iterator base_unit_iter(
             find(result, first->base_unit_m));
 
-        if (base_unit_iter == result.end())
-        {
+        if (base_unit_iter == result.end()) {
             result.push_back(adobe::edit_number_t::base_unit_t(first->base_unit_m,
                                                                first->min_value_m,
                                                                first->max_value_m));
-        }
-        else
-        {
+        } else {
             // set the minimum value to the min (valid) value (::min() is considered not valid)
-            if (first->min_value_m != (std::numeric_limits<double>::min)())
-            {
+            if (first->min_value_m != (std::numeric_limits<double>::min)()) {
                 base_unit_iter->min_m =
                     base_unit_iter->min_m == (std::numeric_limits<double>::min)() ?
                         first->min_value_m :
@@ -68,8 +63,7 @@ adobe::edit_number_t::base_unit_set_t base_unit_set(ForwardIterator first, Forwa
             }
 
             // set the maximum value to the max (valid) value (::max() is considered not valid)
-            if (first->max_value_m != (std::numeric_limits<double>::max)())
-            {
+            if (first->max_value_m != (std::numeric_limits<double>::max)()) {
                 base_unit_iter->max_m =
                     base_unit_iter->max_m == (std::numeric_limits<double>::max)() ?
                         first->max_value_m :
@@ -110,8 +104,6 @@ namespace adobe {
 
 /*************************************************************************************************/
 
-/*************************************************************************************************/
-
 const adobe_cursor_t edit_number_t::scrubby_cursor()
 {
     static adobe_cursor_t scrubby_cursor;
@@ -123,8 +115,7 @@ const adobe_cursor_t edit_number_t::scrubby_cursor()
     // if we fail to load it the first time, we do not
     // try again.
 
-    if (!inited)
-    {
+    if (!inited) {
         inited = true;
         scrubby_cursor = make_cursor("cursor_scrub_slider.tga", 15, 15);
     }
@@ -224,9 +215,7 @@ void edit_number_t::monitor_text(const std::string& new_value, bool display_was_
         // given a '0' in the edit text field they are editing.
 
         display_was_updated = true;
-    }
-    else
-    {
+    } else {
         // reverse-scale the value to the base units    
 
         real = to_pinned_base_value(real, unit,
@@ -242,6 +231,37 @@ void edit_number_t::monitor_text(const std::string& new_value, bool display_was_
 
     if (controller.setter_m)
         controller.setter_m(real);
+
+    if (platform_m.edited_proc_m)
+        platform_m.edited_proc_m(real);
+}
+
+/*************************************************************************************************/
+
+void edit_number_t::monitor_focus_update(const std::string& new_value)
+{
+    unit_t&          unit(unit_set_m[unit_index_m]);
+    std::size_t      base_unit_index(current_base_unit_index());
+    double           real(number_formatter_m.parse<model_type>(new_value));
+
+    if (is_intermediate_state(new_value)) {
+        real = 0;
+    } else {
+        real = to_pinned_base_value(real, unit,
+                                    base_unit_set_m[base_unit_index].min_m,
+                                    base_unit_set_m[base_unit_index].max_m);
+    }
+
+    if (platform_m.focus_update_proc_m)
+        platform_m.focus_update_proc_m(real);
+}
+
+/*************************************************************************************************/
+
+void edit_number_t::monitor_popup(const any_regular_t& value)
+{
+    if (platform_m.unit_changed_proc_m)
+        platform_m.unit_changed_proc_m(value);
 }
 
 /*************************************************************************************************/
@@ -272,15 +292,12 @@ void edit_number_t::display_unit(const edit_number_unit_subwidget_t::model_type&
 
     // check for edit_text focus and do the right thing.
     if (implementation::is_focused(edit_text_m.control_m) && 
-        controller_set_m[base_unit_index].enabled_m)
-    {
+        controller_set_m[base_unit_index].enabled_m) {
         // reset the value of the new unit to the scale of the new value
         // as it can be extracted from the edit_text field at this point.
 
         monitor_text(implementation::get_field_text(edit_text_m));
-    }
-    else
-    {
+    } else {
         // not touching the model; just change up what's being shown
         refresh_view(&view_set_m[base_unit_index], debounce_set_m[base_unit_index], true);
     }
@@ -297,12 +314,10 @@ void edit_number_t::field_text_filter(const std::string& candidate, bool& squelc
         increment(true);
     else if (candidate.find(31) != std::string::npos) // down key
         increment(false);
-    else
-    {
+    else {
         squelch = !completely_valid_number_string_given_current_locale(candidate);
 
-        if (squelch == false)
-        {
+        if (squelch == false) {
             double      real(number_formatter_m.parse<model_type>(candidate));
             unit_t&     unit(unit_set_m[unit_index_m]);
             std::size_t base_unit_index(current_base_unit_index());
@@ -349,17 +364,14 @@ void edit_number_t::refresh_view(edit_number_t::view_t* src, const model_type& n
     std::size_t base_unit_index(current_base_unit_index());
     std::string num_str(number_formatter_m.format(new_value));
 
-    if (&view_set_m[base_unit_index] != src)
-    {
+    if (&view_set_m[base_unit_index] != src) {
         // if this isn't the currently visible view,
         // we still need to update its debounce value.
 
         debounce_type* value(0);
 
-        for (std::size_t i(0); i < base_unit_set_m.size(); ++i)
-        {
-            if (&view_set_m[i] == src)
-            {
+        for (std::size_t i(0); i < base_unit_set_m.size(); ++i) {
+            if (&view_set_m[i] == src) {
                 value = &debounce_set_m[i];
                 break;
             }
@@ -395,11 +407,12 @@ void edit_number_t::refresh_view(edit_number_t::view_t* src, const model_type& n
 std::size_t edit_number_t::current_base_unit_index()
 {
     name_t base_unit_name(unit_set_m[unit_index_m].base_unit_m);
-    std::size_t   count(base_unit_set_m.size());
+    std::size_t count(base_unit_set_m.size());
 
-    for (std::size_t i(0); i < count; ++i)
+    for (std::size_t i(0); i < count; ++i) {
         if (base_unit_set_m[i].name_m == base_unit_name)
             return i;
+    }
 
     throw std::runtime_error("base unit not found");
 }
@@ -422,8 +435,7 @@ void edit_number_t::initialize()
                                         (std::numeric_limits<debounce_type>::min)() :
                                         debounce_type());
 
-    for (std::size_t i(0); i < count; ++i)
-    {
+    for (std::size_t i(0); i < count; ++i) {
         view_set_m.push_back(view_type(this, base_unit_set_m[i].name_m));
         controller_set_m.push_back(controller_type(this, base_unit_set_m[i].name_m));
     }
@@ -434,10 +446,8 @@ void edit_number_t::initialize()
                                             boost::ref(*this), _1, _2));
     edit_text_m.monitor(boost::bind(&edit_number_t::monitor_text, boost::ref(*this), _1, true));
 
-    if (!using_popup())
-    {
+    if (!using_popup()) {
         platform_m.initialize();
-
         return;
     }
 
@@ -448,8 +458,7 @@ void edit_number_t::initialize()
     set.reserve(unit_set_m.size());
 
     for (unit_set_t::iterator iter(unit_set_m.begin()), last(unit_set_m.end()); iter != last;
-         ++iter)
-    {
+         ++iter) {
         popup_t::menu_item_t cur;
 
         cur.first = iter->name_m;
@@ -461,14 +470,14 @@ void edit_number_t::initialize()
     popup_m.reset_menu_item_set(set);
 
     platform_m.initialize();
+
+    popup_m.monitor(boost::bind(&edit_number_t::monitor_popup, boost::ref(*this), _1));
 }
 
 /*************************************************************************************************/
 
 void edit_number_t::controller_t::monitor(const setter_proc_t& value)
-{
-    setter_m = value;
-}
+{ setter_m = value; }
 
 /*************************************************************************************************/
 
@@ -508,9 +517,7 @@ void edit_number_t::view_t::display(const model_type& value)
 /*************************************************************************************************/
 
 void edit_number_t::increment(bool up)
-{
-    increment_n(up ? 1 : -1);
-}
+{ increment_n(up ? 1 : -1); }
 
 /*************************************************************************************************/
 

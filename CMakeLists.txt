@@ -24,8 +24,6 @@ option(BUILD_SHARED "Enables building of shared libraries." ON)
 option(BUILD_DEBUG "Controls generation of debug code; OFF implies release code." OFF)
 option(BUILD_MULTI_THREADED "Controls generation of multi-threaded code; OFF implies single-threaded code." ON)
 
-option(BUILD_EXPERIMENTAL_EVE_SUPPORT "Enables building of experimental Adobe Eve bindings." OFF)
-
 if (BUILD_DEBUG)
     set(BUILD_RELEASE OFF)
 else ()

@@ -26,8 +26,11 @@ namespace {
 
 void tab_changed(adobe::tab_group_t& tab_group, std::size_t index)
 {
-    if (!tab_group.value_proc_m.empty())
+    if (tab_group.value_proc_m)
         tab_group.value_proc_m(tab_group.items_m[index].value_m);
+
+    if (tab_group.tab_changed_proc_m)
+        tab_group.tab_changed_proc_m(tab_group.items_m[index].value_m);
 }
 
 /****************************************************************************************************/
@@ -49,17 +52,19 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-tab_group_t::tab_group_t(const tab_t* first,
-                         const tab_t* last,
-                         GG::Clr        color,
-                         GG::Clr        text_color,
-                         GG::TabBarStyle style) :
+tab_group_t::tab_group_t(const tab_t*    first,
+                         const tab_t*    last,
+                         GG::Clr         color,
+                         GG::Clr         text_color,
+                         GG::TabBarStyle style,
+                         name_t          signal_id) :
     control_m(NULL),
     value_proc_m(),
     items_m(first, last),
     color_m(color),
     text_color_m(text_color),
-    style_m(style)
+    style_m(style),
+    signal_id_m(signal_id)
 {}
 
 /****************************************************************************************************/

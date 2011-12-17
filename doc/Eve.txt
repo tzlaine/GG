@@ -906,6 +906,7 @@ else:
 /** \page eve_listbox listbox()
     TODO
 
+    TODO: color, interior_color
     TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal
 */
 

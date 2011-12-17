@@ -70,6 +70,10 @@ public:
         UpperLeft()-relative coordinates.  This may not be the entire area of
         the StaticGraphic, based on the style being used. */
     Rect RenderedArea() const;
+
+    /** Returns the underlying SubTexture used to render this
+        StaticGraphic. */
+    const SubTexture& GetSubTexture() const;
     //@}
 
     /** \name Mutators */ ///@{

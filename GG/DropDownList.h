@@ -72,11 +72,11 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    iterator       CurrentItem() const;      ///< returns the currently selected list item (returns end() if none is selected)
+    const_iterator CurrentItem() const;      ///< returns the currently selected list item (returns end() if none is selected)
     std::size_t    CurrentItemIndex() const; ///< returns the position of the currently selected list item within the list (returns -1 if none is selected)
 
     std::size_t    IteratorToIndex(iterator it) const; ///< returns the position of \a it within the list (returns -1 if \a it == end())
-    iterator       IndexToIterator(std::size_t n) const; ///< returns an iterator to the row in position \a n (returns end() if \a n is an invalid index)
+    const_iterator IndexToIterator(std::size_t n) const; ///< returns an iterator to the row in position \a n (returns end() if \a n is an invalid index)
 
     bool           Empty() const;            ///< returns true when the list is empty
     const_iterator begin() const;            ///< returns an iterator to the first list row
@@ -119,6 +119,9 @@ public:
     virtual void   SizeMove(const Pt& ul, const Pt& lr); ///< resizes the control, ensuring the proper height is maintained based on the list's row height
 
     virtual void   SetColor(Clr c);
+
+    iterator       CurrentItem();      ///< returns the currently selected list item (returns end() if none is selected)
+    iterator       IndexToIterator(std::size_t n); ///< returns an iterator to the row in position \a n (returns end() if \a n is an invalid index)
 
     /** Insertion sorts \a row into a sorted list, or inserts into an unsorted
         list before \a it; returns index of insertion point.  This Row becomes

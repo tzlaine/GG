@@ -45,11 +45,11 @@ namespace {
         control.control_m->Clear();
     }
 
-    void sel_changed_slot(adobe::listbox_t& listbox, const GG::ListBox::SelectionSet& selections)
+    void listbox_selection_changed(adobe::listbox_t& listbox, const GG::ListBox::SelectionSet& selections)
     {
         assert(listbox.control_m);
 
-        if (!listbox.value_proc_m.empty()) {
+        if (listbox.value_proc_m) {
             for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(), end_it = selections.end();
                  it != end_it;
                  ++it) {
@@ -58,6 +58,51 @@ namespace {
                     listbox.value_proc_m(listbox.items_m.at(index).second);
             }
         }
+
+        if (listbox.selection_changed_proc_m)
+            listbox.selection_changed_proc_m(listbox, selections);
+    }
+
+    void listbox_dropped(adobe::listbox_t& listbox, GG::ListBox::iterator row)
+    {
+        if (listbox.dropped_proc_m)
+            listbox.dropped_proc_m(listbox, row);
+    }
+
+    void listbox_drop_acceptable(adobe::listbox_t& listbox, GG::ListBox::const_iterator row)
+    {
+        if (listbox.drop_acceptable_proc_m)
+            listbox.drop_acceptable_proc_m(listbox, row);
+    }
+
+    void listbox_left_clicked(adobe::listbox_t& listbox, GG::ListBox::iterator row, const GG::Pt& pt)
+    {
+        if (listbox.left_clicked_proc_m)
+            listbox.left_clicked_proc_m(listbox, row, pt);
+    }
+
+    void listbox_right_clicked(adobe::listbox_t& listbox, GG::ListBox::iterator row, const GG::Pt& pt)
+    {
+        if (listbox.right_clicked_proc_m)
+            listbox.right_clicked_proc_m(listbox, row, pt);
+    }
+
+    void listbox_double_clicked(adobe::listbox_t& listbox, GG::ListBox::iterator row)
+    {
+        if (listbox.double_clicked_proc_m)
+            listbox.double_clicked_proc_m(listbox, row);
+    }
+
+    void listbox_erased(adobe::listbox_t& listbox, GG::ListBox::iterator row)
+    {
+        if (listbox.erased_proc_m)
+            listbox.erased_proc_m(listbox, row);
+    }
+
+    void listbox_browsed(adobe::listbox_t& listbox, GG::ListBox::iterator row)
+    {
+        if (listbox.browsed_proc_m)
+            listbox.browsed_proc_m(listbox, row);
     }
 
     void message_item_set(adobe::listbox_t& listbox)
@@ -88,7 +133,8 @@ namespace adobe {
                          int height,
                          const item_set_t& items,
                          GG::Clr color,
-                         GG::Clr interior_color) :
+                         GG::Clr interior_color,
+                         name_t signal_id) :
         control_m(0),
         name_m(name, alt_text, 0, GG::FORMAT_NONE, GG::CLR_BLACK),
         alt_text_m(alt_text),
@@ -99,7 +145,8 @@ namespace adobe {
         width_m(width),
         height_m(height),
         color_m(color),
-        interior_color_m(interior_color)
+        interior_color_m(interior_color),
+        signal_id_m(signal_id)
     {}
 
     void listbox_t::measure(extents_t& result)
@@ -246,9 +293,10 @@ namespace adobe {
         value_proc_m = proc;
     }
 
-    template <> platform_display_type insert<listbox_t>(display_t& display,
-                                                        platform_display_type& parent,
-                                                        listbox_t& element)
+    template <>
+    platform_display_type insert<listbox_t>(display_t& display,
+                                            platform_display_type& parent,
+                                            listbox_t& element)
     {
         if (element.using_label_m)
             insert(display, parent, element.name_m);
@@ -266,7 +314,28 @@ namespace adobe {
         element.original_height_m = Value(element.control_m->Height());
 
         GG::Connect(element.control_m->SelChangedSignal,
-                    boost::bind(&sel_changed_slot, boost::ref(element), _1));
+                    boost::bind(&listbox_selection_changed, boost::ref(element), _1));
+
+        GG::Connect(element.control_m->DroppedSignal,
+                    boost::bind(&listbox_dropped, boost::ref(element), _1));
+
+        GG::Connect(element.control_m->DropAcceptableSignal,
+                    boost::bind(&listbox_drop_acceptable, boost::ref(element), _1));
+
+        GG::Connect(element.control_m->LeftClickedSignal,
+                    boost::bind(&listbox_left_clicked, boost::ref(element), _1, _2));
+
+        GG::Connect(element.control_m->RightClickedSignal,
+                    boost::bind(&listbox_right_clicked, boost::ref(element), _1, _2));
+
+        GG::Connect(element.control_m->DoubleClickedSignal,
+                    boost::bind(&listbox_double_clicked, boost::ref(element), _1));
+
+        GG::Connect(element.control_m->ErasedSignal,
+                    boost::bind(&listbox_erased, boost::ref(element), _1));
+
+        GG::Connect(element.control_m->BrowsedSignal,
+                    boost::bind(&listbox_browsed, boost::ref(element), _1));
 
         if (!element.alt_text_m.empty())
             adobe::implementation::set_control_alt_text(element.control_m, element.alt_text_m);

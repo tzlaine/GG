@@ -131,7 +131,7 @@ DropDownList::DropDownList(X x, Y y, X w, Y h, Y drop_ht, Clr color,
 DropDownList::~DropDownList()
 { delete m_LB; }
 
-DropDownList::iterator DropDownList::CurrentItem() const
+DropDownList::const_iterator DropDownList::CurrentItem() const
 { return m_current_item; }
 
 std::size_t DropDownList::CurrentItemIndex() const
@@ -140,8 +140,8 @@ std::size_t DropDownList::CurrentItemIndex() const
 std::size_t DropDownList::IteratorToIndex(iterator it) const
 { return it == m_LB->end() ? -1 : std::distance(m_LB->begin(), it); }
 
-DropDownList::iterator DropDownList::IndexToIterator(std::size_t n) const
-{ return n < m_LB->NumRows() ? boost::next(m_LB->begin(), n) : m_LB->end(); }
+DropDownList::const_iterator DropDownList::IndexToIterator(std::size_t n) const
+{ return const_cast<DropDownList * const>(this)->IndexToIterator(n); }
 
 bool DropDownList::Empty() const
 { return m_LB->Empty(); }
@@ -235,6 +235,12 @@ void DropDownList::SizeMove(const Pt& ul, const Pt& lr)
 
 void DropDownList::SetColor(Clr c)
 { m_LB->SetColor(c); }
+
+DropDownList::iterator DropDownList::CurrentItem()
+{ return m_current_item; }
+
+DropDownList::iterator DropDownList::IndexToIterator(std::size_t n)
+{ return n < m_LB->NumRows() ? boost::next(m_LB->begin(), n) : m_LB->end(); }
 
 DropDownList::iterator DropDownList::Insert(Row* row, iterator it)
 {

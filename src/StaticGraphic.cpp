@@ -142,6 +142,9 @@ Rect StaticGraphic::RenderedArea() const
     return Rect(pt1, pt2);
 }
 
+const SubTexture& StaticGraphic::GetSubTexture() const
+{ return m_graphic; }
+
 void StaticGraphic::Render()
 {
     if (!m_graphic.Empty()) {

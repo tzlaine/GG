@@ -31,14 +31,10 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
 
-#include <GG/Clr.h>
+#include <GG/ListBox.h>
 
 #include <boost/noncopyable.hpp>
 
-
-namespace GG {
-    class ListBox;
-}
 
 namespace adobe {
 
@@ -58,7 +54,8 @@ namespace adobe {
                   int height,
                   const item_set_t& items,
                   GG::Clr color,
-                  GG::Clr interior_color);
+                  GG::Clr interior_color,
+                  name_t signal_id);
 
         void reset_item_set(const item_t* first, const item_t* last);
 
@@ -81,6 +78,21 @@ namespace adobe {
         int height_m;
         GG::Clr color_m;
         GG::Clr interior_color_m;
+        name_t signal_id_m;
+
+        typedef boost::function<void (const listbox_t& listbox, const GG::ListBox::SelectionSet&)> selection_changed_signal_t;
+        typedef boost::function<void (const listbox_t& listbox, GG::ListBox::iterator)> row_signal_t;
+        typedef boost::function<void (const listbox_t& listbox, GG::ListBox::const_iterator)> const_row_signal_t;
+        typedef boost::function<void (const listbox_t& listbox, GG::ListBox::iterator, const GG::Pt&)> row_click_signal_t;
+
+        selection_changed_signal_t selection_changed_proc_m;
+        row_signal_t dropped_proc_m;
+        const_row_signal_t drop_acceptable_proc_m;
+        row_click_signal_t left_clicked_proc_m;
+        row_click_signal_t right_clicked_proc_m;
+        row_signal_t double_clicked_proc_m;
+        row_signal_t erased_proc_m;
+        row_signal_t browsed_proc_m;
     };
 
     namespace view_implementation {

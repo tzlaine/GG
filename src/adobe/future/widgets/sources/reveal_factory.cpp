@@ -27,14 +27,14 @@ void create_widget(const dictionary_t&  parameters,
     std::string             name;
     std::string             alt_text;
     any_regular_t           show_value(true);
-    GG::Clr                 text_color(GG::CLR_BLACK);
+    GG::Clr                 label_color(GG::CLR_BLACK);
     dictionary_t            show_image;
     dictionary_t            hide_image;
 
     get_value(parameters, key_value_on, show_value);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_name, name);
-    implementation::get_color(parameters, static_name_t("text_color"), text_color);
+    implementation::get_color(parameters, static_name_t("label_color"), label_color);
 
     get_value(parameters, static_name_t("showing_image"), show_image);
     GG::SubTexture show_unpressed;
@@ -52,9 +52,16 @@ void create_widget(const dictionary_t&  parameters,
     implementation::get_subtexture(hide_image, static_name_t("pressed"), hide_pressed);
     implementation::get_subtexture(hide_image, static_name_t("rollover"), hide_rollover);
 
-    widget = new reveal_t(name, show_value, alt_text, text_color,
-                          show_unpressed, show_pressed, show_rollover,
-                          hide_unpressed, hide_pressed, hide_rollover);
+    widget = new reveal_t(name,
+                          show_value,
+                          alt_text,
+                          label_color,
+                          show_unpressed,
+                          show_pressed,
+                          show_rollover,
+                          hide_unpressed,
+                          hide_pressed,
+                          hide_rollover);
 }
 
 /****************************************************************************************************/

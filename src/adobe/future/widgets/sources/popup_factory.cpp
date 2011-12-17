@@ -59,14 +59,14 @@ void create_widget(const dictionary_t& parameters,
     popup_t::menu_item_set_t item_set;
     name_t                   signal_id;
     GG::Clr                  color(GG::CLR_GRAY);
-    GG::Clr                  text_color(GG::CLR_BLACK);
+    GG::Clr                  label_color(GG::CLR_BLACK);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_items, items);
     get_value(parameters, key_custom_item_name, custom_item_name);
     implementation::get_color(parameters, static_name_t("color"), color);
-    implementation::get_color(parameters, static_name_t("text_color"), text_color);
+    implementation::get_color(parameters, static_name_t("label_color"), label_color);
     get_value(parameters, static_name_t("signal_id"), signal_id);
 
     for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
@@ -86,7 +86,7 @@ void create_widget(const dictionary_t& parameters,
                          first_value,
                          first_value + item_set.size(),
                          color,
-                         text_color,
+                         label_color,
                          signal_id);
 }
 

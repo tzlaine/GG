@@ -55,6 +55,7 @@ namespace adobe {
                   const item_set_t& items,
                   GG::Clr color,
                   GG::Clr interior_color,
+                  GG::Clr label_color,
                   name_t signal_id);
 
         void reset_item_set(const item_t* first, const item_t* last);

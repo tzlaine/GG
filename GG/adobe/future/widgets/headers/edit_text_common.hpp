@@ -16,6 +16,8 @@
 #include <GG/adobe/widget_attributes.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
+#include <GG/ClrConstants.h>
+
 #include <string>
 
 /*************************************************************************************************/
@@ -34,8 +36,13 @@ struct edit_text_ctor_block_t
         password_m(false),
         min_characters_m(10),
         max_characters_m(0),
-        num_lines_m(1)
-    { }
+        num_lines_m(1),
+        color_m(GG::CLR_GRAY),
+        text_color_m(GG::CLR_BLACK),
+        interior_color_m(GG::CLR_ZERO),
+        label_color_m(GG::CLR_BLACK),
+        popup_color_m(GG::CLR_GRAY)
+    {}
 
     std::string name_m;
     std::string alt_text_m;
@@ -50,6 +57,8 @@ struct edit_text_ctor_block_t
     GG::Clr     color_m;
     GG::Clr     text_color_m;
     GG::Clr     interior_color_m;
+    GG::Clr     label_color_m;
+    GG::Clr     popup_color_m;
     name_t      signal_id_m;
 };
 

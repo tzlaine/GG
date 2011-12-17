@@ -256,7 +256,7 @@ edit_number_t::edit_number_t(const edit_text_ctor_block_t& block,
                              const ForwardIterator         first,
                              const ForwardIterator         last) :
     edit_text_m(block),
-    popup_m(std::string(), block.alt_text_m, std::string(), 0, 0, block.color_m, block.text_color_m, name_t()),
+    popup_m(std::string(), block.alt_text_m, std::string(), 0, 0, block.popup_color_m, GG::CLR_ZERO, name_t()),
     edit_text_width_m(0),
     unit_index_m(0),
     unit_set_m(first, last),

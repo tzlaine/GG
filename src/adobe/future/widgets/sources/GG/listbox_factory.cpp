@@ -222,6 +222,7 @@ namespace adobe {
         listbox_t::item_set_t item_set;
         GG::Clr color(GG::CLR_GRAY);
         GG::Clr interior_color(GG::CLR_ZERO);
+        GG::Clr label_color(GG::CLR_BLACK);
         name_t signal_id;
 
         get_value(parameters, key_name, name);
@@ -233,6 +234,7 @@ namespace adobe {
         get_value(parameters, key_items, items);
         implementation::get_color(parameters, static_name_t("color"), color);
         implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
+        implementation::get_color(parameters, static_name_t("label_color"), label_color);
         get_value(parameters, static_name_t("signal_id"), signal_id);
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
@@ -257,6 +259,7 @@ namespace adobe {
                                 item_set,
                                 color,
                                 interior_color,
+                                label_color,
                                 signal_id);
     }
 

@@ -134,9 +134,10 @@ namespace adobe {
                          const item_set_t& items,
                          GG::Clr color,
                          GG::Clr interior_color,
+                         GG::Clr label_color,
                          name_t signal_id) :
         control_m(0),
-        name_m(name, alt_text, 0, GG::FORMAT_NONE, GG::CLR_BLACK),
+        name_m(name, alt_text, 0, GG::FORMAT_NONE, label_color),
         alt_text_m(alt_text),
         using_label_m(!name.empty()),
         items_m(items),

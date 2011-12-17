@@ -109,7 +109,7 @@ namespace adobe {
 reveal_t::reveal_t(const std::string&    name,
                    const any_regular_t&  show_value,
                    const std::string&    alt_text,
-                   GG::Clr               text_color,
+                   GG::Clr               label_color,
                    const GG::SubTexture& show_unpressed,
                    const GG::SubTexture& show_pressed,
                    const GG::SubTexture& show_rollover,
@@ -117,7 +117,7 @@ reveal_t::reveal_t(const std::string&    name,
                    const GG::SubTexture& hide_pressed,
                    const GG::SubTexture& hide_rollover) :
     control_m(0),
-    name_m(name, std::string(), 0, GG::FORMAT_NONE, text_color),
+    name_m(name, std::string(), 0, GG::FORMAT_NONE, label_color),
     using_label_m(!name.empty()),
     show_value_m(show_value),
     alt_text_m(alt_text),
@@ -222,7 +222,7 @@ platform_display_type insert<reveal_t>(display_t&             display,
     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
     element.control_m = style->NewButton(GG::X0, GG::Y0, GG::X(100), GG::Y(100),
                                          "", style->DefaultFont(),
-                                         GG::CLR_WHITE, element.text_color_m);
+                                         GG::CLR_WHITE, GG::CLR_ZERO);
 
     set_graphics(element);
 

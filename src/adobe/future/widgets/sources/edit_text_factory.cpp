@@ -68,6 +68,7 @@ void create_widget(const dictionary_t&   parameters,
     implementation::get_color(parameters, static_name_t("color"), block.color_m);
     implementation::get_color(parameters, static_name_t("text_color"), block.text_color_m);
     implementation::get_color(parameters, static_name_t("interior_color"), block.interior_color_m);
+    implementation::get_color(parameters, static_name_t("label_color"), block.label_color_m);
     get_value(parameters, static_name_t("signal_id"), block.signal_id_m);
 
     widget = new edit_text_t(block);

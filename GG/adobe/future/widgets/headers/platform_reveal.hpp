@@ -40,7 +40,7 @@ struct reveal_t : boost::noncopyable
     reveal_t(const std::string&    name,
              const any_regular_t&  show_value,
              const std::string&    alt_text,
-             GG::Clr               text_color,
+             GG::Clr               label_color,
              const GG::SubTexture& show_unpressed,
              const GG::SubTexture& show_pressed,
              const GG::SubTexture& show_rollover,
@@ -57,7 +57,6 @@ struct reveal_t : boost::noncopyable
     void monitor(const setter_type& proc);
 
     GG::Button*         control_m;
-    GG::Clr             text_color_m;
     GG::SubTexture      show_unpressed_m;
     GG::SubTexture      show_pressed_m;
     GG::SubTexture      show_rollover_m;

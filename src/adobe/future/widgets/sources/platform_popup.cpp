@@ -142,10 +142,10 @@ popup_t::popup_t(const std::string& name,
                  const menu_item_t* first,
                  const menu_item_t* last,
                  GG::Clr            color,
-                 GG::Clr            text_color,
+                 GG::Clr            label_color,
                  name_t             signal_id) :
     control_m(0),
-    name_m(name, alt_text, 0, GG::FORMAT_NONE, text_color),
+    name_m(name, alt_text, 0, GG::FORMAT_NONE, label_color),
     alt_text_m(alt_text),
     using_label_m(!name.empty()),
     color_m(color),
@@ -395,7 +395,7 @@ template <> platform_display_type insert<popup_t>(display_t&             display
     int lines = std::min(element.menu_items_m.size(), std::size_t(20u));
     element.control_m =
         implementation::Factory().NewDropDownList(GG::X0, GG::Y0, GG::X1, implementation::StandardHeight(),
-                                                  DropHeight(lines), GG::CLR_GRAY);
+                                                  DropHeight(lines), element.color_m);
     element.control_m->SetStyle(GG::LIST_NOSORT);
 
     element.original_height_m = Value(element.control_m->Height());

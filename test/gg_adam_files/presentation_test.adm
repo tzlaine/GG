@@ -3,4 +3,9 @@ sheet color_test
 interface:
     number: 100;
     text: "text";
+    long_text: "This should be long enough to wrap, if text wrapping is turned on.";
+    multiline_text: "This should be long enough to wrap, if text wrapping is turned on.
+It should also consist of
+multiple
+lines.";
 }

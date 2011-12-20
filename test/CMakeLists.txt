@@ -102,3 +102,12 @@ if ((TARGET GiGiSDL))
         endif ()
     endforeach ()
 endif ()
+
+file(GLOB color_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_eve_files/*.eve)
+
+if ((TARGET GiGiSDL))
+    file(COPY ColorTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    foreach (test_file ${color_test_files})
+        add_test_and_data_files(EveLayout ${test_file} gg_adam_files/color_test.adm ${CMAKE_CURRENT_BINARY_DIR})
+    endforeach ()
+endif ()

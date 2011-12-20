@@ -57,13 +57,15 @@ namespace adobe {
         std::string alt_text;
         long characters(5);
         GG::Clr color(GG::CLR_BLACK);
+        GG::Clr label_color(GG::CLR_BLACK);
 
         get_value(parameters, key_name, name);
         get_value(parameters, key_alt_text, alt_text);
         get_value(parameters, key_characters, characters);
         implementation::get_color(parameters, static_name_t("color"), color);
+        implementation::get_color(parameters, static_name_t("label_color"), label_color);
 
-        display_text = new display_text_t(name, alt_text, characters, color);
+        display_text = new display_text_t(name, alt_text, characters, color, label_color);
     }
 
     template <typename Sheet, typename FactoryToken>

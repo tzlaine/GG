@@ -26,9 +26,10 @@ namespace {
 
 /****************************************************************************************************/
 
-std::string set_field_text(const std::string&                label,
-                           double                            value,
-                           const std::vector<adobe::unit_t>& unit_set)
+std::string field_text(const std::string&                label,
+                       double                            value,
+                       const std::vector<adobe::unit_t>& unit_set,
+                       GG::Clr label_color)
 {
     std::stringstream result;
 
@@ -58,7 +59,7 @@ std::string set_field_text(const std::string&                label,
     }
 
     if (!label.empty())
-        result << label << " ";
+        result << GG::RgbaTag(label_color) << label << "</rgba> ";
 
     result << number_formatter.format(value);
 
@@ -79,16 +80,14 @@ namespace adobe {
 /****************************************************************************************************/
 
 void display_number_t::place(const place_data_t& place_data)
-{
-    implementation::set_control_bounds(window_m, place_data);
-}
+{ implementation::set_control_bounds(window_m, place_data); }
 
 /****************************************************************************************************/
 
 void display_number_t::display(const model_type& value)
 {
     assert(window_m);
-    window_m->SetText(set_field_text(name_m, value, unit_set_m));
+    window_m->SetText(field_text(name_m, value, unit_set_m, label_color_m));
 }
 
 /****************************************************************************************************/

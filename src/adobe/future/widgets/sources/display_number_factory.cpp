@@ -32,6 +32,7 @@ void create_widget(const dictionary_t&       parameters,
     long        characters(5);
     unit_t      default_unit(to_unit(parameters));
     GG::Clr     color(GG::CLR_BLACK);
+    GG::Clr     label_color(GG::CLR_BLACK);
 
     std::vector<unit_t> unit_set;
 
@@ -39,6 +40,7 @@ void create_widget(const dictionary_t&       parameters,
     get_value(parameters, key_alt_text, alt_text);
     get_value(parameters, key_characters, characters);
     implementation::get_color(parameters, static_name_t("color"), color);
+    implementation::get_color(parameters, static_name_t("label_color"), label_color);
 
     if (parameters.count(key_units) == 0) {
         unit_set.push_back(default_unit);
@@ -55,6 +57,7 @@ void create_widget(const dictionary_t&       parameters,
                                           unit_set.begin(),
                                           unit_set.end(),
                                           color,
+                                          label_color,
                                           characters);
 }
 

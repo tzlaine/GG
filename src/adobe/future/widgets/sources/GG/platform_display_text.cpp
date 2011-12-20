@@ -22,11 +22,11 @@
 
 namespace {
 
-    std::string field_text(const std::string& label, adobe::any_regular_t value)
+    std::string field_text(const std::string& label, adobe::any_regular_t value, GG::Clr label_color)
     {
         std::stringstream result;
         if (!label.empty())
-            result << label << " ";
+            result << GG::RgbaTag(label_color) << label << "</rbga> ";
         if (value != adobe::any_regular_t()) {
             adobe::type_info_t type(value.type_info());
             if (type == adobe::type_info<double>() ||
@@ -44,11 +44,16 @@ namespace {
 
 namespace adobe {
 
-    display_text_t::display_text_t(const std::string& name, const std::string& alt_text, int characters, GG::Clr color) :
+    display_text_t::display_text_t(const std::string& name,
+                                   const std::string& alt_text,
+                                   int characters,
+                                   GG::Clr color,
+                                   GG::Clr label_color) :
         name_m(name),
         alt_text_m(alt_text),
         characters_m(characters),
-        color_m(color)
+        color_m(color),
+        label_color_m(label_color)
     {}
 
     void display_text_t::place(const place_data_t& place_data)
@@ -57,7 +62,7 @@ namespace adobe {
     void display_text_t::display(const model_type& value)
     {
         assert(window_m);
-        window_m->SetText(field_text(name_m, value));
+        window_m->SetText(field_text(name_m, value, label_color_m));
     }
 
     void display_text_t::measure(extents_t& result)

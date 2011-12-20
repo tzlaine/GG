@@ -44,16 +44,18 @@ struct display_number_t  : boost::noncopyable
     template <class ForwardIterator>
     display_number_t(const std::string& name,
                      const std::string& alt_text,
-                     ForwardIterator first,
-                     ForwardIterator last, 
-                     GG::Clr        color,
-                     int characters);
+                     ForwardIterator    first,
+                     ForwardIterator    last,
+                     GG::Clr            color,
+                     GG::Clr            label_color,
+                     int                characters);
 
     GG::TextControl*         window_m;
     std::string              name_m;
     std::string              alt_text_m;
     unit_set_t               unit_set_m;
     GG::Clr                  color_m;
+    GG::Clr                  label_color_m;
     int                      characters_m;
 
     void measure(extents_t& result);
@@ -70,14 +72,16 @@ template <typename ForwardIterator>
 display_number_t::display_number_t(
     const std::string& name,
     const std::string& alt_text,
-    ForwardIterator first,
-    ForwardIterator last, 
-    GG::Clr        color,
-    int characters) :
+    ForwardIterator    first,
+    ForwardIterator    last, 
+    GG::Clr            color,
+    GG::Clr            label_color,
+    int                characters) :
     name_m(name),
     alt_text_m(alt_text),
     unit_set_m(first, last),
     color_m(color),
+    label_color_m(label_color),
     characters_m(characters)
 { }
 

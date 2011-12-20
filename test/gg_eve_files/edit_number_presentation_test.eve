@@ -1,0 +1,21 @@
+layout alert_dialog
+{
+    view dialog(name: "Edit Number Color Test")
+    {
+        column()
+        {
+            edit_number(name: "red color, blue text_color, white interior, green label:",
+                        bind: @number,
+                        color: {r:255},
+                        text_color: {b:255},
+                        interior_color: {r:255, g:255, b:255},
+                        label_color: {g:255});
+            edit_number(name: "Red popup_color and blue popup_item_text_color:",
+                        bind: @number,
+                        units: [ { name: "pixels", bind: @number },
+                                 { name: "percent", bind: @number } ],
+                        popup_color: {r:255},
+                        popup_item_text_color: {b:255});
+        }
+    }
+}

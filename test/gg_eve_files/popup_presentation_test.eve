@@ -1,0 +1,11 @@
+layout alert_dialog
+{
+    view dialog(name: "Popup Color Test")
+    {
+        popup(name: "red color, blue item_text_color, green label:",
+              items: [ { name: "Foo option", value: 1 } ],
+              color: {r:255},
+              item_text_color: {b:255},
+              label_color: {g:255});
+    }
+}

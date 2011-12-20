@@ -743,7 +743,7 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the display_text.
     \param characters The minimum width of the display_text, in text of characters.
 
-    TODO: color
+    TODO: color, label_color
 */
 
 /** \page eve_display_number display_number()
@@ -772,7 +772,7 @@ else:
     \param characters The minimum width of the display_number, in number of characters.
     \param units An array of \link eve_number_unit units \endlink.
 
-    TODO: color
+    TODO: color, label_color
 */
 
 /** \page eve_edit_number edit_number()
@@ -828,7 +828,7 @@ else:
     \param max_digits The maximum number of characters the user is allowed to type into the edit_number.
     \param units An array of \link eve_number_unit units \endlink.
 
-    TODO: color, text_color, interior_color
+    TODO: color, text_color, interior_color, popup_color, popup_item_text_color
     TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
 */
 
@@ -899,14 +899,14 @@ else:
     \param items A dictionary whose key-value pairs define the names and values of the items in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.
     \param custom_item_name The name of the custom item in the popup.
 
-    TODO: color, text_color
+    TODO: color, text_color, item_text_color
     TODO: bind_selection_changed_signal
 */
 
 /** \page eve_listbox listbox()
     TODO
 
-    TODO: color, interior_color
+    TODO: color, interior_color, item_text_color
     TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal
 */
 

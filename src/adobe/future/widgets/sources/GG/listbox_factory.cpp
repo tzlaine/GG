@@ -223,6 +223,7 @@ namespace adobe {
         GG::Clr color(GG::CLR_GRAY);
         GG::Clr interior_color(GG::CLR_ZERO);
         GG::Clr label_color(GG::CLR_BLACK);
+        GG::Clr item_text_color(GG::CLR_BLACK);
         name_t signal_id;
 
         get_value(parameters, key_name, name);
@@ -235,6 +236,7 @@ namespace adobe {
         implementation::get_color(parameters, static_name_t("color"), color);
         implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
         implementation::get_color(parameters, static_name_t("label_color"), label_color);
+        implementation::get_color(parameters, static_name_t("item_text_color"), item_text_color);
         get_value(parameters, static_name_t("signal_id"), signal_id);
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
@@ -260,6 +262,7 @@ namespace adobe {
                                 color,
                                 interior_color,
                                 label_color,
+                                item_text_color,
                                 signal_id);
     }
 

@@ -114,9 +114,11 @@ namespace {
              first != last;
              ++first) {
             GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
-            row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
-                                                                           adobe::implementation::DefaultFont(),
-                                                                           GG::CLR_BLACK, GG::FORMAT_LEFT));
+            row->push_back(
+                adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
+                                                                adobe::implementation::DefaultFont(),
+                                                                listbox.item_text_color_m, GG::FORMAT_LEFT)
+            );
             listbox.control_m->Insert(row);
         }
     }
@@ -135,6 +137,7 @@ namespace adobe {
                          GG::Clr color,
                          GG::Clr interior_color,
                          GG::Clr label_color,
+                         GG::Clr item_text_color,
                          name_t signal_id) :
         control_m(0),
         name_m(name, alt_text, 0, GG::FORMAT_NONE, label_color),
@@ -147,6 +150,7 @@ namespace adobe {
         height_m(height),
         color_m(color),
         interior_color_m(interior_color),
+        item_text_color_m(item_text_color),
         signal_id_m(signal_id)
     {}
 
@@ -220,8 +224,7 @@ namespace adobe {
 
         place_data_t local_place_data(place_data);
 
-        if (using_label_m)
-        {
+        if (using_label_m) {
             //
             // The vertical offset of the label is the geometry's
             // baseline - the label's baseline.

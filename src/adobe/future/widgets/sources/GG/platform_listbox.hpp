@@ -56,6 +56,7 @@ namespace adobe {
                   GG::Clr color,
                   GG::Clr interior_color,
                   GG::Clr label_color,
+                  GG::Clr item_text_color,
                   name_t signal_id);
 
         void reset_item_set(const item_t* first, const item_t* last);
@@ -79,6 +80,7 @@ namespace adobe {
         int height_m;
         GG::Clr color_m;
         GG::Clr interior_color_m;
+        GG::Clr item_text_color_m;
         name_t signal_id_m;
 
         typedef boost::function<void (const listbox_t& listbox, const GG::ListBox::SelectionSet&)> selection_changed_signal_t;

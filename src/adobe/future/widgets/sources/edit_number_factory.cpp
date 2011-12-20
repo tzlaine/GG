@@ -243,6 +243,7 @@ void create_widget(const dictionary_t& parameters,
     implementation::get_color(parameters, static_name_t("interior_color"), block.interior_color_m);
     implementation::get_color(parameters, static_name_t("label_color"), block.label_color_m);
     implementation::get_color(parameters, static_name_t("popup_color"), block.popup_color_m);
+    implementation::get_color(parameters, static_name_t("popup_item_text_color"), block.popup_item_text_color_m);
     get_value(parameters, static_name_t("signal_id"), block.signal_id_m);
 
     std::vector<unit_t> unit_set(extract_unit_set(parameters));
@@ -251,7 +252,6 @@ void create_widget(const dictionary_t& parameters,
 }
 
 /****************************************************************************************************/
-
 
 template <>
 platform_display_type insert<edit_number_t>(display_t&             display,

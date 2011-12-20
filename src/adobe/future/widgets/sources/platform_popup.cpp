@@ -112,9 +112,11 @@ void message_menu_item_set(adobe::popup_t& popup)
          first != last;
          ++first) {
         GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
-        row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
-                                                                       adobe::implementation::DefaultFont(),
-                                                                       GG::CLR_BLACK, GG::FORMAT_LEFT));
+        row->push_back(
+            adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
+                                                            adobe::implementation::DefaultFont(),
+                                                            popup.item_text_color_m, GG::FORMAT_LEFT)
+        );
         popup.control_m->Insert(row);
     }
 
@@ -143,18 +145,18 @@ popup_t::popup_t(const std::string& name,
                  const menu_item_t* last,
                  GG::Clr            color,
                  GG::Clr            label_color,
+                 GG::Clr            item_text_color,
                  name_t             signal_id) :
     control_m(0),
     name_m(name, alt_text, 0, GG::FORMAT_NONE, label_color),
     alt_text_m(alt_text),
     using_label_m(!name.empty()),
     color_m(color),
+    item_text_color_m(item_text_color),
     signal_id_m(signal_id),
     custom_m(false),
     custom_item_name_m(custom_item_name)
-{
-    ::set_menu_item_set(*this, first, last);
-}
+{ ::set_menu_item_set(*this, first, last); }
 
 /****************************************************************************************************/
 
@@ -173,8 +175,7 @@ void popup_t::measure(extents_t& result)
     menu_item_set_t::iterator last(menu_items_m.end());
     GG::Pt largest_extent;
     bool have_extents = false;
-    for (; first != last; ++first)
-    {
+    for (; first != last; ++first) {
         GG::Pt extent = font->TextExtent(first->first) + GG::Pt(implementation::CharWidth(), GG::Y0);
         if (largest_extent.x < extent.x)
             largest_extent = extent;
@@ -240,8 +241,7 @@ void popup_t::place(const place_data_t& place_data)
 
     place_data_t local_place_data(place_data);
 
-    if (using_label_m)
-    {
+    if (using_label_m) {
         //
         // The vertical offset of the label is the geometry's
         // baseline - the label's baseline.
@@ -330,9 +330,11 @@ void popup_t::display_custom()
 
     custom_m = true;
     GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
-    row->push_back(adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, custom_item_name_m,
-                                                                   adobe::implementation::DefaultFont(),
-                                                                   GG::CLR_BLACK, GG::FORMAT_LEFT));
+    row->push_back(
+        adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, custom_item_name_m,
+                                                        adobe::implementation::DefaultFont(),
+                                                        item_text_color_m, GG::FORMAT_LEFT)
+    );
     control_m->Insert(row, control_m->begin());
     control_m->Select(0);
 }

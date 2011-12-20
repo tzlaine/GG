@@ -48,6 +48,7 @@ struct popup_t : boost::noncopyable
             const menu_item_t* last,
             GG::Clr            color,
             GG::Clr            label_color,
+            GG::Clr            item_text_color,
             name_t             signal_id);
 
     void                reset_menu_item_set(const menu_item_t* first, const menu_item_t* last);
@@ -85,6 +86,7 @@ struct popup_t : boost::noncopyable
     extended_setter_type extended_value_proc_m;
     menu_item_set_t      menu_items_m;
     GG::Clr              color_m;
+    GG::Clr              item_text_color_m;
     name_t               signal_id_m;
     model_type           last_m;
     bool                 custom_m;

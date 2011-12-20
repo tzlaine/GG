@@ -41,7 +41,8 @@ struct edit_text_ctor_block_t
         text_color_m(GG::CLR_BLACK),
         interior_color_m(GG::CLR_ZERO),
         label_color_m(GG::CLR_BLACK),
-        popup_color_m(GG::CLR_GRAY)
+        popup_color_m(GG::CLR_GRAY),
+        popup_item_text_color_m(GG::CLR_BLACK)
     {}
 
     std::string name_m;
@@ -59,6 +60,7 @@ struct edit_text_ctor_block_t
     GG::Clr     interior_color_m;
     GG::Clr     label_color_m;
     GG::Clr     popup_color_m;
+    GG::Clr     popup_item_text_color_m;
     name_t      signal_id_m;
 };
 

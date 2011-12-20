@@ -1,0 +1,17 @@
+layout alert_dialog
+{
+    view dialog(name: "Slider Color Test")
+    {
+        column()
+        {
+            slider(format: {first: 0, last: 100}, color: {r:200});
+            slider(format: {first: 0, last: 100}, length: 200);
+            slider(format: {first: 0, last: 100}, tab_width: 20);
+            slider(format: {first: 0, last: 100}, tab_length: 20);
+            slider(format: {first: 0, last: 100}, color: {r:200});
+            slider(format: {first: 0, last: 100}, line_style: @flat);
+            slider(format: {first: 0, last: 100}, line_style: @raised);
+            slider(format: {first: 0, last: 100}, line_style: @grooved);
+        }
+    }
+}

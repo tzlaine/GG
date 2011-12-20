@@ -108,7 +108,6 @@ void attach_view_and_controller(popup_t&               control,
 
     if (parameters.count(key_bind) != 0) {
         name_t cell(get_value(parameters, key_bind).cast<name_t>());
-
         attach_view_and_controller_direct(control, parameters, token, cell);
     }
 

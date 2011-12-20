@@ -275,8 +275,8 @@ namespace adobe {
                                     adobe::name_t)
     {
         if (parameters.count(key_bind) != 0) {
-            attach_view_and_controller_direct(control, parameters, token,
-                                              key_bind, key_bind_view, key_bind_controller);
+            name_t cell(get_value(parameters, key_bind).cast<name_t>());
+            attach_view_and_controller_direct(control, parameters, token, cell);
         }
 
         any_regular_t selection_changed_binding;

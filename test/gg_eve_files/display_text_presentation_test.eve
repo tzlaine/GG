@@ -1,0 +1,8 @@
+layout alert_dialog
+{
+    view dialog(name: "Display Text Test")
+    {
+        display_text(name: "Red text:", bind: @text, color: {r:255});
+        display_text(name: "Red label:", bind: @text, label_color: {r:255});
+    }
+}

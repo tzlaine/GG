@@ -1,0 +1,17 @@
+layout alert_dialog
+{
+    view dialog(name: "Display Number Test")
+    {
+        column()
+        {
+            display_number(name: "Red text:", bind: @number, units: [], color: {r:255});
+            display_number(name: "Red label:", bind: @number, units: [], label_color: {r:255});
+            display_number(name: "Red text:", bind: @number,
+                           units: [ { name: "unit ", format: "#", scale: [ 1, 0 ] } ],
+                           color: {r:255});
+            display_number(name: "Red label:", bind: @number,
+                           units: [ { name: "unit", format: "#", scale: [ 1, 0 ] } ],
+                           label_color: {r:255});
+        }
+    }
+}

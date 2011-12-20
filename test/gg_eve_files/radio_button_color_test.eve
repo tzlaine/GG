@@ -1,0 +1,9 @@
+layout alert_dialog
+{
+    view dialog(name: "Radio Button Color Test")
+    {
+        radio_button(name: "Red color", color: {r:255});
+        radio_button(name: "Green text color", text_color: {g:255});
+        radio_button(name: "Blue interior color", interior_color: {b:255});
+    }
+}

@@ -1,0 +1,8 @@
+layout alert_dialog
+{
+    view dialog(name: "Control Button Color Test")
+    {
+        control_button(name: "Cancel (yellow)", expression: "1", color: {r:255, g:255});
+        control_button(name: "OK (half-alpha white)", expression: "1", text_color: {r:255, g:255, b:255, a:127});
+    }
+}

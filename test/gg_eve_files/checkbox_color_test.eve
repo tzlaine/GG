@@ -1,0 +1,9 @@
+layout alert_dialog
+{
+    view dialog(name: "Checkbox Color Test")
+    {
+        checkbox(name: "Red color", color: {r:255});
+        checkbox(name: "Green text color", text_color: {g:255});
+        checkbox(name: "Blue interior color", interior_color: {b:255});
+    }
+}

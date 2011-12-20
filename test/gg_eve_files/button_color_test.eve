@@ -2,7 +2,7 @@ layout alert_dialog
 {
     view dialog(name: "Button Color Test")
     {
-        button(name: "Cancel", action: @cancel, cancel: true, color: {r:255, g:255});
-        button(name: "OK", action: @ok, default: true, text_color: {r:255, g:255, b:255, a:127});
+        button(name: "Cancel (yellow)", action: @cancel, cancel: true, color: {r:255, g:255});
+        button(name: "OK (half-alpha white)", action: @ok, default: true, text_color: {r:255, g:255, b:255, a:127});
     }
 }

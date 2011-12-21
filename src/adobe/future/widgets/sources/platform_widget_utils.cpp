@@ -261,8 +261,10 @@ void replace_placeholder(array_t& expression, name_t name, const any_regular_t& 
 {
     for (std::size_t i = 0; i < expression.size(); ++i) {
         name_t element_name;
-        if (expression[i].cast<name_t>(element_name) && element_name == name)
+        if (expression[i].cast<name_t>(element_name) && element_name == name) {
             expression[i] = value;
+            expression.erase(expression.begin() + i + 1);
+        }
     }
 }
 

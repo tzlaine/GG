@@ -77,7 +77,7 @@ struct checkbox_t
     std::string          alt_text_m;
     name_t               signal_id_m;
 
-    boost::function<void (bool)> checked_proc_m;
+    boost::function<void (const any_regular_t&)> checked_proc_m;
 };
 
 /****************************************************************************************************/

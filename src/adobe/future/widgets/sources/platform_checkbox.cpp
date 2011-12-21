@@ -26,14 +26,11 @@ namespace {
 
 void checkbox_checked(adobe::checkbox_t& checkbox, bool checked)
 {
-    if (checkbox.hit_proc_m) {
-        checkbox.hit_proc_m(checked ?
-                            adobe::any_regular_t(checkbox.true_value_m) :
-                            adobe::any_regular_t(checkbox.false_value_m));
-    }
+    if (checkbox.hit_proc_m)
+        checkbox.hit_proc_m(checked ? checkbox.true_value_m : checkbox.false_value_m);
 
     if (checkbox.checked_proc_m)
-        checkbox.checked_proc_m(checked);
+        checkbox.checked_proc_m(checked ? checkbox.true_value_m : checkbox.false_value_m);
 }
 
 /****************************************************************************************************/

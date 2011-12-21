@@ -25,7 +25,7 @@ void handle_checked_signal(adobe::signal_notifier_t signal_notifier,
                            adobe::sheet_t& sheet,
                            adobe::name_t bind,
                            adobe::array_t expression,
-                           bool checked)
+                           const adobe::any_regular_t& value)
 {
     adobe::implementation::handle_signal(signal_notifier,
                                          adobe::static_name_t("checkbox"),
@@ -34,7 +34,7 @@ void handle_checked_signal(adobe::signal_notifier_t signal_notifier,
                                          sheet,
                                          bind,
                                          expression,
-                                         adobe::any_regular_t(checked));
+                                         value);
 }
 
 /****************************************************************************************************/

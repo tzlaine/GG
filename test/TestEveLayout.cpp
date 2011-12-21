@@ -153,9 +153,9 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
         BOOST_CHECK(signal == adobe::static_name_t("checked"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
         if (!widget_id)
-            BOOST_CHECK(value == adobe::any_regular_t(std::string("button value 1")));
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("checkbox value 1")));
         else
-            BOOST_CHECK(value == adobe::any_regular_t(std::string("button value 2")));
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("checkbox value 2")));
     }
 }
 

@@ -8,29 +8,29 @@ layout alert_dialog
                      bind: @bind_cell_0,
                      value_on: "checkbox value", value_off: "not checked",
                      bind_checked_signal: @checked_signal_cell_0);
-            display_text(name: "Normal bind:", bind: @bind_cell_0);
-            display_text(name: "Checked signal bind:", bind: @checked_signal_cell_0);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_0);
+            display_text(name: "Checked signal bind:", characters: 15, bind: @checked_signal_cell_0);
 
             checkbox(name: "simple expression",
                      bind: @bind_cell_1,
                      value_on: "checkbox value", value_off: "not checked",
                      bind_checked_signal: [@checked_signal_cell_1, '"checked signal value"']);
-            display_text(name: "Normal bind:", bind: @bind_cell_1);
-            display_text(name: "Checked signal bind:", bind: @checked_signal_cell_1);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_1);
+            display_text(name: "Checked signal bind:", characters: 15, bind: @checked_signal_cell_1);
 
             checkbox(name: '"_" placeholder',
                      bind: @bind_cell_2,
                      value_on: "checkbox value", value_off: "not checked",
                      bind_checked_signal: [@checked_signal_cell_2, "_"]);
-            display_text(name: "Normal bind:", bind: @bind_cell_2);
-            display_text(name: "Checked signal bind:", bind: @checked_signal_cell_2);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_2);
+            display_text(name: "Checked signal bind:", characters: 15, bind: @checked_signal_cell_2);
 
             checkbox(name: '"_1" placeholder',
                      bind: @bind_cell_3,
                      value_on: "checkbox value", value_off: "not checked",
                      bind_checked_signal: [@checked_signal_cell_3, "_1"]);
-            display_text(name: "Normal bind:", bind: @bind_cell_3);
-            display_text(name: "Checked signal bind:", bind: @checked_signal_cell_3);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_3);
+            display_text(name: "Checked signal bind:", characters: 15, bind: @checked_signal_cell_3);
         }
 
         group(name: "Checked-Signal Not Bound")
@@ -38,12 +38,12 @@ layout alert_dialog
             checkbox(name: "no signal_id",
                      bind: @bind_cell_4,
                      value_on: "checkbox value 1", value_off: "not checked");
-            display_text(name: "Normal bind:", bind: @bind_cell_4);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
 
             checkbox(name: "signal_id: @test_id",
                      bind: @bind_cell_5,
                      value_on: "checkbox value 2", value_off: "not checked", signal_id: @test_id);
-            display_text(name: "Normal bind:", bind: @bind_cell_5);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_5);
         }
     }
 }

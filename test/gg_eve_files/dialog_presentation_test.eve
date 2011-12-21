@@ -1,0 +1,8 @@
+layout alert_dialog
+{
+    view dialog(name: "Dialog Color Test (red color, blue text_color)",
+                color: {r:255},
+                text_color: {b:255})
+    {
+    }
+}

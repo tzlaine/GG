@@ -1,0 +1,10 @@
+layout alert_dialog
+{
+    view dialog(name: "Group Color Test")
+    {
+        group(name: "red color, blue text_color, white interior_color:",
+                color: {r:255},
+                text_color: {b:255},
+                interior_color: {r:255, g:255, b:255});
+    }
+}

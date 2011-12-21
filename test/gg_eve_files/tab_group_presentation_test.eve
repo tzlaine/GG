@@ -1,0 +1,25 @@
+layout alert_dialog
+{
+    view dialog(name: "Tab Group Color Test")
+    {
+        column()
+        {
+            tab_group(items: [
+                          { name: "red color", value: 1 },
+                          { name: "blue text_color", value: 2 },
+                          { name: "attached style", value: 3 }
+                      ],
+                      color: {r:255},
+                      text_color: {b:255},
+                      style: @attached);
+            tab_group(items: [
+                          { name: "red color", value: 1 },
+                          { name: "blue text_color", value: 2 },
+                          { name: "detached style", value: 3 }
+                      ],
+                      color: {r:255},
+                      text_color: {b:255},
+                      style: @detached);
+        }
+    }
+}

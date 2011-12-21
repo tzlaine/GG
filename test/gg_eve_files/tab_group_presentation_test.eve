@@ -1,6 +1,6 @@
 layout alert_dialog
 {
-    view dialog(name: "Tab Group Color Test")
+    view dialog(name: "Tab Group Presentation Test")
     {
         column()
         {

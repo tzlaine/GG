@@ -1,6 +1,6 @@
 layout alert_dialog
 {
-    view dialog(name: "Edit Number Color Test")
+    view dialog(name: "Edit Number Presentation Test")
     {
         column()
         {

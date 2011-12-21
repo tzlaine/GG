@@ -1,6 +1,6 @@
 layout alert_dialog
 {
-    view dialog(name: "Slider Color Test")
+    view dialog(name: "Slider Presentation Test")
     {
         column()
         {

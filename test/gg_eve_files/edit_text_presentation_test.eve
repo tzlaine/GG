@@ -1,6 +1,6 @@
 layout alert_dialog
 {
-    view dialog(name: "Edit Text Color Test", placement: place_column)
+    view dialog(name: "Edit Text Presentation Test", placement: place_column)
     {
         column()
         {

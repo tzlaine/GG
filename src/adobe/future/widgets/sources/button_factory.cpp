@@ -149,15 +149,13 @@ void state_set_push_back(Cont& state_set, const adobe::factory_token_t& token, c
                                                     temp.bind_output_m,
                                                     temp.action_m, _1, _2);
 
-    if (temp.bind_signal_m) {
-        state_set.back().clicked_proc_m = boost::bind(&handle_clicked_signal,
-                                                      token.signal_notifier_m,
-                                                      temp.signal_id_m,
-                                                      boost::ref(token.sheet_m),
-                                                      temp.bind_signal_m,
-                                                      temp.expression_m,
-                                                      _1);
-    }
+    state_set.back().clicked_proc_m = boost::bind(&handle_clicked_signal,
+                                                  token.signal_notifier_m,
+                                                  temp.signal_id_m,
+                                                  boost::ref(token.sheet_m),
+                                                  temp.bind_signal_m,
+                                                  temp.expression_m,
+                                                  _1);
 
     state_set.back().value_m        = temp.value_m;
     state_set.back().contributing_m = temp.contributing_m;

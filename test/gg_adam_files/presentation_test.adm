@@ -1,4 +1,4 @@
-sheet color_test
+sheet presentation_test
 {
 interface:
     number: 100;

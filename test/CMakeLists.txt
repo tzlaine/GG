@@ -105,11 +105,22 @@ if ((TARGET GiGiSDL))
     endforeach ()
 endif ()
 
-file(GLOB presentation_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_eve_files/*.eve)
+file(GLOB presentation_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_eve_files/*_presentation_test.eve)
 
 if ((TARGET GiGiSDL))
     file(COPY PresentationTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     foreach (test_file ${presentation_test_files})
         add_test_and_data_files(EveLayout ${test_file} gg_adam_files/presentation_test.adm ${CMAKE_CURRENT_BINARY_DIR})
+    endforeach ()
+endif ()
+
+file(GLOB signal_binding_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_eve_files/*_signal_binding_test.eve)
+
+if ((TARGET GiGiSDL))
+    file(COPY SignalBindingTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    foreach (test_file ${signal_binding_test_files})
+        string(REPLACE gg_eve_files gg_adam_files tmp ${test_file})
+        string(REPLACE .eve .adm adam_test_file ${tmp})
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR})
     endforeach ()
 endif ()

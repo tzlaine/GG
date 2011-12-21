@@ -1,0 +1,15 @@
+sheet signal_binding_test
+{
+interface:
+    bind_cell_0 : "not checked";
+    checked_signal_cell_0 : "not checked";
+    bind_cell_1 : "not checked";
+    checked_signal_cell_1 : "not checked";
+    bind_cell_2 : "not checked";
+    checked_signal_cell_2 : "not checked";
+    bind_cell_3 : "not checked";
+    checked_signal_cell_3 : "not checked";
+
+    bind_cell_4 : "not checked";
+    bind_cell_5 : "not checked";
+}

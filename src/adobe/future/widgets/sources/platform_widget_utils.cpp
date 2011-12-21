@@ -364,7 +364,7 @@ void cell_and_expression(const any_regular_t& value, name_t& cell, array_t& expr
     value.cast<name_t>(cell);
     if (!cell && value.cast<array_t>(cell_and_expression)) {
         cell = cell_and_expression[0].cast<name_t>();
-        const std::string& expression_string = cell_and_expression[0].cast<std::string>();
+        const std::string& expression_string = cell_and_expression[1].cast<std::string>();
         expression = parse_adam_expression(expression_string);
     }
 }

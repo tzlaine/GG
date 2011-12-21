@@ -35,9 +35,12 @@ struct button_item_t
         bind_m(default_item.bind_m),
         bind_output_m(default_item.bind_output_m),
         action_m(default_item.action_m),
+        bind_signal_m(default_item.bind_signal_m),
+        expression_m(default_item.expression_m),
         value_m(default_item.value_m),
         contributing_m(default_item.contributing_m),
-        modifier_set_m(default_item.modifier_set_m)
+        modifier_set_m(default_item.modifier_set_m),
+        signal_id_m(default_item.signal_id_m)
     {
         get_value(parameters, adobe::key_name, name_m);
         get_value(parameters, adobe::key_alt_text, alt_text_m);
@@ -235,6 +238,7 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     get_value(parameters, key_bind_output, item.bind_output_m);
     get_value(parameters, key_action,      item.action_m);
     get_value(parameters, key_value,       item.value_m);
+    get_value(parameters, adobe::static_name_t("signal_id"), item.signal_id_m);
     get_value(parameters, key_items,       items);
     get_value(parameters, key_default,     is_default);
     get_value(parameters, key_cancel,      is_cancel);
@@ -249,6 +253,11 @@ button_t* create_button_widget(const dictionary_t&    parameters,
     get_subtexture(image, static_name_t("unpressed"), unpressed);
     get_subtexture(image, static_name_t("pressed"), pressed);
     get_subtexture(image, static_name_t("rollover"), rollover);
+
+    adobe::any_regular_t clicked_binding;
+    if (get_value(parameters, adobe::static_name_t("bind_clicked_signal"), clicked_binding)) {
+        adobe::implementation::cell_and_expression(clicked_binding, item.bind_signal_m, item.expression_m);
+    }
 
     for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter)
         state_set_push_back(state_set, token, button_item_t(item, iter->cast<dictionary_t>()));

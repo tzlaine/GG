@@ -29,11 +29,13 @@ namespace adobe {
 
 window_t::window_t(const std::string&     name,
                    GG::Flags<GG::WndFlag> flags,
-                   GG::Clr                color) :
+                   GG::Clr                color,
+                   GG::Clr                text_color) :
     window_m(0),
     flags_m(flags),
     name_m(name),
     color_m(color),
+    text_color_m(text_color),
     debounce_m(false),
     placed_once_m(false)
 { }
@@ -126,7 +128,7 @@ void window_t::reposition()
 
     GG::X app_width(GG::GUI::GetGUI()->AppWidth());
     GG::Y app_height(GG::GUI::GetGUI()->AppHeight());
-    
+
     GG::X left(std::max(GG::X(10), (app_width - width) / 2));
     GG::Y top(std::max(GG::Y(10), (app_height - height) / 2));
 
@@ -170,7 +172,7 @@ platform_display_type insert<window_t>(display_t&             display,
     assert(!element.window_m);
     assert(!parent);
 
-    element.window_m = new GG::EveDialog(element, element.color_m);
+    element.window_m = new GG::EveDialog(element, element.color_m, element.text_color_m);
 
     return display.insert(parent, element.window_m);
 }

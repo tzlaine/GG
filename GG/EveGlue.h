@@ -143,7 +143,7 @@ public:
     virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
 private:
-    EveDialog(adobe::window_t& imp, Clr color);
+    EveDialog(adobe::window_t& imp, Clr color, Clr text_color);
 
     void SetKeyboard(adobe::keyboard_t& keyboard);
     void SetEveModalDialog(adobe::modal_dialog_t* modal_dialog);

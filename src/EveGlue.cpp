@@ -59,7 +59,7 @@ const unsigned int EveDialog::BEVEL = 2;
 const int EveDialog::FRAME_WIDTH = 2;
 const Pt EveDialog::BEVEL_OFFSET(X(EveDialog::FRAME_WIDTH), Y(EveDialog::FRAME_WIDTH));
 
-EveDialog::EveDialog(adobe::window_t& imp, const Clr color) :
+EveDialog::EveDialog(adobe::window_t& imp, Clr color, Clr text_color) :
     Wnd(X0, Y0, X1, Y1, imp.flags_m),
     m_imp(imp),
     m_title(0),
@@ -69,7 +69,7 @@ EveDialog::EveDialog(adobe::window_t& imp, const Clr color) :
     if (!m_imp.name_m.empty()) {
         m_title = adobe::implementation::Factory().NewTextControl(
             BEVEL_OFFSET.x, BEVEL_OFFSET.y - adobe::implementation::CharHeight(),
-            m_imp.name_m, adobe::implementation::DefaultFont()
+            m_imp.name_m, adobe::implementation::DefaultFont(), text_color
         );
         AttachChild(m_title);
     }

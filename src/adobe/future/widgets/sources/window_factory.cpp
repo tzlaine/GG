@@ -37,6 +37,7 @@ void create_widget(const dictionary_t& parameters,
     bool        on_top(false);
     bool        modal(true);
     GG::Clr     color(GG::CLR_GRAY);
+    GG::Clr     text_color(GG::CLR_BLACK);
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_grow, grow);
@@ -44,6 +45,7 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, key_on_top, on_top);
     get_value(parameters, key_modal, modal);
     implementation::get_color(parameters, static_name_t("color"), color);
+    implementation::get_color(parameters, static_name_t("text_color"), text_color);
 
     GG::Flags<GG::WndFlag> flags = GG::INTERACTIVE;
 
@@ -59,7 +61,7 @@ void create_widget(const dictionary_t& parameters,
     if (modal)
         flags |= GG::MODAL;
 
-    window = new window_t(name, flags, color);
+    window = new window_t(name, flags, color, text_color);
 }
 
 /****************************************************************************************************/

@@ -42,7 +42,8 @@ struct window_t
 {
     window_t(const std::string&     name,
              GG::Flags<GG::WndFlag> flags,
-             GG::Clr                color);
+             GG::Clr                color,
+             GG::Clr                text_color);
 
     ~window_t();
 
@@ -66,6 +67,7 @@ struct window_t
     GG::Flags<GG::WndFlag> flags_m;
     std::string            name_m;
     GG::Clr                color_m;
+    GG::Clr                text_color_m;
     place_data_t           place_data_m;
     window_resize_proc_t   resize_proc_m;
     bool                   debounce_m;

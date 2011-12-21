@@ -79,13 +79,17 @@ struct ModalDialogResult
     button click and the \a value emitted by the click as specified in the
     Adam and Eve scripts, and return true if the click should result in the
     closure of the dialog.  \see \ref eve_button_handler. */
-typedef boost::function <bool (adobe::name_t, const adobe::any_regular_t&)> ButtonHandler;
+typedef boost::function <
+    bool (adobe::name_t, const adobe::any_regular_t&)
+> ButtonHandler;
 
 /** The type of signal handler function (optionally) expected by the UI
     creation functions.  Handlers accept the name of the \a widget_type, the
     name of the \a signal, and the name of the particular widget emitting the
     signal, \a widget_id.  \see \ref eve_signal_handler. */
-typedef boost::function<void (adobe::name_t, adobe::name_t, adobe::name_t, const adobe::any_regular_t&)> SignalHandler;
+typedef boost::function<
+    void (adobe::name_t, adobe::name_t, adobe::name_t, const adobe::any_regular_t&)
+> SignalHandler;
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler. */
@@ -118,6 +122,64 @@ EveDialog* MakeEveDialog(std::istream& eve_definition,
                          const std::string& adam_filename,
                          ButtonHandler button_handler,
                          SignalHandler signal_handler = SignalHandler());
+
+/** Usable as a SignalHandler, providing a convenient interface for handling a
+    multitude of signals with separate SignalHandlers. */
+class DefaultSignalHandler
+{
+public:
+    /** Call operator.  If more than one match is found, due to the use of
+        wildcards, the last handler added with SetHandler will be called. */
+    void operator()(adobe::name_t widget_type,
+                    adobe::name_t signal,
+                    adobe::name_t widget_id,
+                    const adobe::any_regular_t& value) const;
+
+    /** Sets signal handler \a handler for signals associated with the given
+        \a widget_type, \a signal, and \a widget_id.  Special values \a
+        any_widget_type, \a any_signal, and \a any_widget_id can be provided
+        for \a widget_type, \a signal, and \a widget_id, respectively; these
+        act as wildcards when matching an emitted signal to a handler.
+        Behavior is undefined if there is already a handler set associated
+        with the given names. */
+    void SetHandler(adobe::name_t widget_type,
+                    adobe::name_t signal,
+                    adobe::name_t widget_id,
+                    SignalHandler handler);
+
+    /** A special value that matches any widget type. */
+    static const adobe::aggregate_name_t any_widget_type;
+
+    /** A special value that matches any signal. */
+    static const adobe::aggregate_name_t any_signal;
+
+    /** A special value that matches any widget ID. */
+    static const adobe::aggregate_name_t any_widget_id;
+
+private:
+    struct HandlerKey
+    {
+        HandlerKey();
+        HandlerKey(adobe::name_t widget_type,
+                   adobe::name_t signal,
+                   adobe::name_t widget_id);
+        bool matches(const HandlerKey& rhs) const;
+        adobe::name_t m_widget_type;
+        adobe::name_t m_signal;
+        adobe::name_t m_widget_id;
+    };
+
+    typedef std::pair<HandlerKey, SignalHandler> Handler;
+
+    struct KeyEquals
+    {
+        KeyEquals(const HandlerKey& lhs) : m_lhs(lhs) {}
+        bool operator()(const Handler& rhs);
+        const HandlerKey& m_lhs;
+    };
+
+    std::vector<Handler> m_handlers;
+};
 
 /** A GG Eve dialog that handles all the interaction with the Eve engine
     (e.g. relayout on resize).  Must be created via MakeEveDialog(). */
@@ -199,10 +261,12 @@ void RegisterArrayFunction(adobe::name_t function_name, const ArrayFunction& fun
 
 /** The type of function used to instantiate a user-defined Eve view.  \see
     \ref eve_adding_user_views. */
-typedef boost::function<adobe::widget_node_t (const adobe::dictionary_t&,
-                                              const adobe::widget_node_t&,
-                                              const adobe::factory_token_t&,
-                                              const adobe::widget_factory_t&)> MakeViewFunction;
+typedef boost::function<
+    adobe::widget_node_t (const adobe::dictionary_t&,
+                          const adobe::widget_node_t&,
+                          const adobe::factory_token_t&,
+                          const adobe::widget_factory_t&)
+> MakeViewFunction;
 
 /** Registers user-defined Eve view \a name, for use in Eve sheets.  \see \ref
     eve_adding_user_views. */

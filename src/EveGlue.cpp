@@ -55,6 +55,71 @@ namespace {
 
 }
 
+DefaultSignalHandler::HandlerKey::HandlerKey()
+{}
+
+DefaultSignalHandler::HandlerKey::HandlerKey(adobe::name_t widget_type,
+                                             adobe::name_t signal,
+                                             adobe::name_t widget_id) :
+    m_widget_type(widget_type),
+    m_signal(signal),
+    m_widget_id(widget_id)
+{}
+
+bool DefaultSignalHandler::HandlerKey::matches(const HandlerKey& rhs) const
+{
+    return
+        (m_widget_type == rhs.m_widget_type || rhs.m_widget_type == DefaultSignalHandler::any_widget_type) &&
+        (m_signal == rhs.m_signal || rhs.m_signal == DefaultSignalHandler::any_signal) &&
+        (m_widget_id == rhs.m_widget_id || rhs.m_widget_id == DefaultSignalHandler::any_widget_id);
+}
+
+bool DefaultSignalHandler::KeyEquals::operator()(const Handler& rhs)
+{
+    return
+        m_lhs.m_widget_type == rhs.first.m_widget_type &&
+        m_lhs.m_signal == rhs.first.m_signal &&
+        m_lhs.m_widget_id == rhs.first.m_widget_id;
+}
+
+const adobe::aggregate_name_t DefaultSignalHandler::any_widget_type = { "any_widget_type" };
+const adobe::aggregate_name_t DefaultSignalHandler::any_signal = { "any_signal" };
+const adobe::aggregate_name_t DefaultSignalHandler::any_widget_id = { "any_widget_id" };
+
+void DefaultSignalHandler::operator()(adobe::name_t widget_type,
+                                      adobe::name_t signal,
+                                      adobe::name_t widget_id,
+                                      const adobe::any_regular_t& value) const
+{
+    HandlerKey key(widget_type, signal, widget_id);
+    unsigned int best_match_wildcards = 3;
+    std::size_t best_match_index = 0;
+    for (std::size_t i = 0; i < m_handlers.size(); ++i) {
+        if (key.matches(m_handlers[i].first)) {
+            unsigned int wildcards =
+                static_cast<int>(m_handlers[i].first.m_widget_type == DefaultSignalHandler::any_widget_type) +
+                static_cast<int>(m_handlers[i].first.m_signal == DefaultSignalHandler::any_signal) +
+                static_cast<int>(m_handlers[i].first.m_widget_id == DefaultSignalHandler::any_widget_id);
+            if (wildcards <= best_match_wildcards) {
+                best_match_index = i;
+                best_match_wildcards = wildcards;
+            }
+        }
+    }
+    if (best_match_index < m_handlers.size())
+        m_handlers[best_match_index].second(widget_type, signal, widget_id, value);
+}
+
+void DefaultSignalHandler::SetHandler(adobe::name_t widget_type,
+                                      adobe::name_t signal,
+                                      adobe::name_t widget_id,
+                                      SignalHandler handler)
+{
+    HandlerKey key(widget_type, signal, widget_id);
+    assert(std::find_if(m_handlers.begin(), m_handlers.end(), KeyEquals(key)) == m_handlers.end());
+    m_handlers.push_back(std::make_pair(key, handler));
+}
+
 const unsigned int EveDialog::BEVEL = 2;
 const int EveDialog::FRAME_WIDTH = 2;
 const Pt EveDialog::BEVEL_OFFSET(X(EveDialog::FRAME_WIDTH), Y(EveDialog::FRAME_WIDTH));

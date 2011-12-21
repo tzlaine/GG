@@ -52,6 +52,7 @@ make_test_exec(AdamWriter)
 make_test_exec(EveParser)
 make_test_exec(EveWriter)
 make_test_exec(EveLayout)
+make_test_exec(DefaultSignalHandler)
 
 add_test_and_data_files(StrongIntegralTypedef)
 add_test_and_data_files(StrongSizeTypedef)
@@ -61,6 +62,7 @@ add_test_and_data_files(ExpressionParser test_expressions adam)
 add_test_and_data_files(ExpressionParser test_expressions eve)
 add_test_and_data_files(ExpressionWriter test_expressions adam)
 add_test_and_data_files(ExpressionWriter test_expressions eve)
+add_test_and_data_files(DefaultSignalHandler)
 
 file(GLOB adam_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} asl_1.0.43_adam_files/*.adm)
 

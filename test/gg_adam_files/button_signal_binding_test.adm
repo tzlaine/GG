@@ -1,15 +1,40 @@
 sheet signal_binding_test
 {
-interface:
-    bind_cell_0 : "not clicked";
-    clicked_signal_cell_0 : "not clicked";
-    bind_cell_1 : "not clicked";
-    clicked_signal_cell_1 : "not clicked";
-    bind_cell_2 : "not clicked";
-    clicked_signal_cell_2 : "not clicked";
-    bind_cell_3 : "not clicked";
-    clicked_signal_cell_3 : "not clicked";
+constant:
+    expected_bind_cell_0 : "button value";
+    expected_clicked_signal_cell_0 : "button value";
+    expected_bind_cell_1 : "button value";
+    expected_clicked_signal_cell_1 : "clicked signal value";
+    expected_bind_cell_2 : "button value";
+    expected_clicked_signal_cell_2 : "button value";
+    expected_bind_cell_3 : "button value";
+    expected_clicked_signal_cell_3 : "button value";
 
-    bind_cell_4 : "not clicked";
-    bind_cell_5 : "not clicked";
+    expected_bind_cell_4 : "button value 1";
+    expected_bind_cell_5 : "button value 2";
+
+interface:
+    bind_cell_0 : "<rgba 255 0 0 255>not clicked</rgba>";
+    clicked_signal_cell_0 : "<rgba 255 0 0 255>not clicked</rgba>";
+    bind_cell_1 : "<rgba 255 0 0 255>not clicked</rgba>";
+    clicked_signal_cell_1 : "<rgba 255 0 0 255>not clicked</rgba>";
+    bind_cell_2 : "<rgba 255 0 0 255>not clicked</rgba>";
+    clicked_signal_cell_2 : "<rgba 255 0 0 255>not clicked</rgba>";
+    bind_cell_3 : "<rgba 255 0 0 255>not clicked</rgba>";
+    clicked_signal_cell_3 : "<rgba 255 0 0 255>not clicked</rgba>";
+
+    bind_cell_4 : "<rgba 255 0 0 255>not clicked</rgba>";
+    bind_cell_5 : "<rgba 255 0 0 255>not clicked</rgba>";
+
+    result_bind_cell_0 <== bind_cell_0 == expected_bind_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_clicked_signal_cell_0 <== clicked_signal_cell_0 == expected_clicked_signal_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_1 <== bind_cell_1 == expected_bind_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_clicked_signal_cell_1 <== clicked_signal_cell_1 == expected_clicked_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_2 <== bind_cell_2 == expected_bind_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_clicked_signal_cell_2 <== clicked_signal_cell_2 == expected_clicked_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_3 <== bind_cell_3 == expected_bind_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_clicked_signal_cell_3 <== clicked_signal_cell_3 == expected_clicked_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+
+    result_bind_cell_4 <== bind_cell_4 == expected_bind_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_5 <== bind_cell_5 == expected_bind_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
 }

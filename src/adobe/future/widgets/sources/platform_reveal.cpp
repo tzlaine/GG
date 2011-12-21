@@ -117,7 +117,7 @@ reveal_t::reveal_t(const std::string&    name,
                    const GG::SubTexture& hide_pressed,
                    const GG::SubTexture& hide_rollover) :
     control_m(0),
-    name_m(name, std::string(), 0, GG::FORMAT_NONE, label_color),
+    name_m(name, std::string(), 0, GG::FORMAT_LEFT | GG::FORMAT_TOP, label_color),
     using_label_m(!name.empty()),
     show_value_m(show_value),
     alt_text_m(alt_text),

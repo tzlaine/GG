@@ -115,7 +115,8 @@ namespace adobe {
         element.window_m =
             implementation::Factory().NewTextControl(GG::X0, GG::Y0, GG::X1, GG::Y1,
                                                      element.name_m, implementation::DefaultFont(),
-                                                     element.color_m, GG::FORMAT_NONE, GG::INTERACTIVE);
+                                                     element.color_m, GG::FORMAT_LEFT | GG::FORMAT_TOP,
+                                                     GG::INTERACTIVE);
 
         if (!element.alt_text_m.empty())
             implementation::set_control_alt_text(element.window_m, element.alt_text_m);

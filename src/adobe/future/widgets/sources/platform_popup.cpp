@@ -148,7 +148,7 @@ popup_t::popup_t(const std::string& name,
                  GG::Clr            item_text_color,
                  name_t             signal_id) :
     control_m(0),
-    name_m(name, alt_text, 0, GG::FORMAT_NONE, label_color),
+    name_m(name, alt_text, 0, GG::FORMAT_LEFT | GG::FORMAT_TOP, label_color),
     alt_text_m(alt_text),
     using_label_m(!name.empty()),
     color_m(color),

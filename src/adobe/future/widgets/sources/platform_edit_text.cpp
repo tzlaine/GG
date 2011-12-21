@@ -143,7 +143,7 @@ edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
     color_m(block.color_m),
     text_color_m(block.text_color_m),
     interior_color_m(block.interior_color_m),
-    name_m(block.name_m, block.alt_text_m, 0, GG::FORMAT_NONE, block.label_color_m),
+    name_m(block.name_m, block.alt_text_m, 0, GG::FORMAT_LEFT | GG::FORMAT_TOP, block.label_color_m),
     alt_text_m(block.alt_text_m),
     field_text_m(),
     using_label_m(!block.name_m.empty()),

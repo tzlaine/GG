@@ -137,14 +137,26 @@ void MinimalGGApp::GLInit()
     glMatrixMode(GL_MODELVIEW);
 }
 
-bool OkHandler(adobe::name_t name, const adobe::any_regular_t&)
+bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
 { return name == adobe::static_name_t("ok") || name == adobe::static_name_t("cancel"); }
+
+void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t widget_id, const adobe::any_regular_t& value)
+{
+    if (widget_type == adobe::static_name_t("button")) {
+        BOOST_CHECK(signal == adobe::static_name_t("clicked"));
+        BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
+        if (!widget_id)
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("button value 1")));
+        else
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("button value 2")));
+    }
+}
 
 void MinimalGGApp::Initialize()
 {
     boost::filesystem::path eve(g_eve_file);
     boost::filesystem::path adam(g_adam_file);
-    std::auto_ptr<GG::EveDialog> eve_dialog(GG::MakeEveDialog(eve, adam, &OkHandler));
+    std::auto_ptr<GG::EveDialog> eve_dialog(GG::MakeEveDialog(eve, adam, &ButtonHandler, &SignalTester));
 
     boost::filesystem::path input(g_eve_file);
     std::string input_stem =

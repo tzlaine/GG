@@ -1,0 +1,45 @@
+layout alert_dialog
+{
+    view dialog(name: "Button Signal Binding Test")
+    {
+        group(name: "Clicked-Signal Bound")
+        {
+            button(name: "no expression",
+                   characters: 25,
+                   bind_output: @bind_cell_0, value: "button value",
+                   bind_clicked_signal: @clicked_signal_cell_0);
+            display_text(name: "Normal bind:", bind: @bind_cell_0);
+            display_text(name: "Clicked signal bind:", bind: @clicked_signal_cell_0);
+
+            button(name: "simple expression",
+                   characters: 25,
+                   bind_output: @bind_cell_1, value: "button value",
+                   bind_clicked_signal: [@clicked_signal_cell_1, '"clicked signal value"']);
+            display_text(name: "Normal bind:", bind: @bind_cell_1);
+            display_text(name: "Clicked signal bind:", bind: @clicked_signal_cell_1);
+
+            button(name: '"_" placeholder',
+                   characters: 25,
+                   bind_output: @bind_cell_2, value: "button value",
+                   bind_clicked_signal: [@clicked_signal_cell_2, "_"]);
+            display_text(name: "Normal bind:", bind: @bind_cell_2);
+            display_text(name: "Clicked signal bind:", bind: @clicked_signal_cell_2);
+
+            button(name: '"_1" placeholder',
+                   characters: 25,
+                   bind_output: @bind_cell_3, value: "button value",
+                   bind_clicked_signal: [@clicked_signal_cell_3, "_1"]);
+            display_text(name: "Normal bind:", bind: @bind_cell_3);
+            display_text(name: "Clicked signal bind:", bind: @clicked_signal_cell_3);
+        }
+
+        group(name: "Clicked-Signal Not Bound")
+        {
+            button(name: "no signal_id", characters: 25, bind_output: @bind_cell_4, value: "button value 1");
+            display_text(name: "Normal bind:", bind: @bind_cell_4);
+
+            button(name: "signal_id: @test_id", characters: 25, bind_output: @bind_cell_5, value: "button value 2", signal_id: @test_id);
+            display_text(name: "Normal bind:", bind: @bind_cell_5);
+        }
+    }
+}

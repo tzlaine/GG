@@ -1,0 +1,15 @@
+sheet signal_binding_test
+{
+interface:
+    bind_cell_0 : "not clicked";
+    clicked_signal_cell_0 : "not clicked";
+    bind_cell_1 : "not clicked";
+    clicked_signal_cell_1 : "not clicked";
+    bind_cell_2 : "not clicked";
+    clicked_signal_cell_2 : "not clicked";
+    bind_cell_3 : "not clicked";
+    clicked_signal_cell_3 : "not clicked";
+
+    bind_cell_4 : "not clicked";
+    bind_cell_5 : "not clicked";
+}

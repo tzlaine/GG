@@ -1,15 +1,40 @@
 sheet signal_binding_test
 {
-interface:
-    bind_cell_0 : "not checked";
-    checked_signal_cell_0 : "not checked";
-    bind_cell_1 : "not checked";
-    checked_signal_cell_1 : "not checked";
-    bind_cell_2 : "not checked";
-    checked_signal_cell_2 : "not checked";
-    bind_cell_3 : "not checked";
-    checked_signal_cell_3 : "not checked";
+constant:
+    expected_bind_cell_0 : "checkbox value";
+    expected_checked_signal_cell_0 : "checkbox value";
+    expected_bind_cell_1 : "checkbox value";
+    expected_checked_signal_cell_1 : "checked signal value";
+    expected_bind_cell_2 : "checkbox value";
+    expected_checked_signal_cell_2 : "checkbox value";
+    expected_bind_cell_3 : "checkbox value";
+    expected_checked_signal_cell_3 : "checkbox value";
 
-    bind_cell_4 : "not checked";
-    bind_cell_5 : "not checked";
+    expected_bind_cell_4 : "checkbox value 1";
+    expected_bind_cell_5 : "checkbox value 2";
+
+interface:
+    bind_cell_0 : "<rgba 255 0 0 255>not checked</rgba>";
+    checked_signal_cell_0 : "<rgba 255 0 0 255>not checked</rgba>";
+    bind_cell_1 : "<rgba 255 0 0 255>not checked</rgba>";
+    checked_signal_cell_1 : "<rgba 255 0 0 255>not checked</rgba>";
+    bind_cell_2 : "<rgba 255 0 0 255>not checked</rgba>";
+    checked_signal_cell_2 : "<rgba 255 0 0 255>not checked</rgba>";
+    bind_cell_3 : "<rgba 255 0 0 255>not checked</rgba>";
+    checked_signal_cell_3 : "<rgba 255 0 0 255>not checked</rgba>";
+
+    bind_cell_4 : "<rgba 255 0 0 255>not checked</rgba>";
+    bind_cell_5 : "<rgba 255 0 0 255>not checked</rgba>";
+
+    result_bind_cell_0 <== bind_cell_0 == expected_bind_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_checked_signal_cell_0 <== checked_signal_cell_0 == expected_checked_signal_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_1 <== bind_cell_1 == expected_bind_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_checked_signal_cell_1 <== checked_signal_cell_1 == expected_checked_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_2 <== bind_cell_2 == expected_bind_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_checked_signal_cell_2 <== checked_signal_cell_2 == expected_checked_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_3 <== bind_cell_3 == expected_bind_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_checked_signal_cell_3 <== checked_signal_cell_3 == expected_checked_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+
+    result_bind_cell_4 <== bind_cell_4 == expected_bind_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_5 <== bind_cell_5 == expected_bind_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
 }

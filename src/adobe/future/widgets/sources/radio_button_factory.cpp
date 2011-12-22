@@ -95,15 +95,19 @@ void attach_view_and_controller(radio_button_t&        control,
     }
 
     any_regular_t checked_binding;
+    name_t cell;
+    array_t expression;
     if (get_value(parameters, static_name_t("bind_checked_signal"), checked_binding)) {
-        name_t cell;
-        array_t expression;
         implementation::cell_and_expression(checked_binding, cell, expression);
-        control.checked_proc_m =
-            boost::bind(&handle_checked_signal,
-                        token.signal_notifier_m, control.signal_id_m,
-                        boost::ref(token.sheet_m), cell, expression, _1);
     }
+    control.checked_proc_m =
+        boost::bind(&handle_checked_signal,
+                    token.signal_notifier_m,
+                    control.signal_id_m,
+                    boost::ref(token.sheet_m),
+                    cell,
+                    expression,
+                    _1);
 }
 
 /****************************************************************************************************/

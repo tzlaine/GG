@@ -185,6 +185,14 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
             BOOST_CHECK(value == adobe::any_regular_t(std::string("radio button value 1")));
         else
             BOOST_CHECK(value == adobe::any_regular_t(std::string("radio button value 2")));
+    } else if (widget_type == adobe::static_name_t("slider")) {
+        BOOST_CHECK(signal == adobe::static_name_t("slid") ||
+                    signal == adobe::static_name_t("slid_and_stopped"));
+        BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
+        if (!widget_id)
+            BOOST_CHECK(value == adobe::any_regular_t(25));
+        else
+            BOOST_CHECK(value == adobe::any_regular_t(75));
     }
 }
 

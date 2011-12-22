@@ -1,0 +1,95 @@
+layout alert_dialog
+{
+    view dialog(name: "Slider Signal Binding Test")
+    {
+        group(name: "Slid and Slid-And-Stopped Signals Bound", placement: place_row)
+        {
+            column()
+            {
+                group(name: "no expression")
+                {
+                    slider(bind: @bind_cell_0,
+                           format: {first: 0, last: 100},
+                           bind_slid_signal: @slid_signal_cell_0,
+                           bind_slid_and_stopped_signal: @slid_and_stopped_signal_cell_0);
+                    display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_0);
+                    display_text(name: "Normal bind result:", characters: 5, bind: @result_bind_cell_0);
+                    display_text(name: "Slid signal result:", characters: 5, bind: @result_slid_signal_cell_0);
+                    display_text(name: "Slid and stopped signal result:", characters: 5, bind: @result_slid_and_stopped_signal_cell_0);
+                }
+
+                group(name: "simple expression")
+                {
+                    slider(bind: @bind_cell_1,
+                           format: {first: 0, last: 100},
+                           bind_slid_signal: [@slid_signal_cell_1, '"slid signal value"'],
+                           bind_slid_and_stopped_signal: [@slid_and_stopped_signal_cell_1, '"slid_and_stopped signal value"']);
+                    display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_1);
+                    display_text(name: "Normal bind result:", characters: 5, bind: @result_bind_cell_1);
+                    display_text(name: "Slid signal result:", characters: 5, bind: @result_slid_signal_cell_1);
+                    display_text(name: "Slid and stopped signal result:", characters: 5, bind: @result_slid_and_stopped_signal_cell_1);
+                }
+
+                group(name: '"_" placeholder')
+                {
+                    slider(bind: @bind_cell_2,
+                           format: {first: 0, last: 100},
+                           bind_slid_signal: [@slid_signal_cell_2, "_"],
+                           bind_slid_and_stopped_signal: [@slid_and_stopped_signal_cell_2, "_"]);
+                    display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_2);
+                    display_text(name: "Normal bind result:", characters: 5, bind: @result_bind_cell_2);
+                    display_text(name: "Slid signal result:", characters: 5, bind: @result_slid_signal_cell_2);
+                    display_text(name: "Slid and stopped signal result:", characters: 5, bind: @result_slid_and_stopped_signal_cell_2);
+                }
+            }
+
+            column()
+            {
+                group(name: '"_1" placeholder')
+                {
+                    slider(bind: @bind_cell_3,
+                           format: {first: 0, last: 100},
+                           bind_slid_signal: [@slid_signal_cell_3, "_1"],
+                           bind_slid_and_stopped_signal: [@slid_and_stopped_signal_cell_3, "_1"]);
+                    display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_3);
+                    display_text(name: "Result:", characters: 5, bind: @result_bind_cell_3);
+                    display_text(name: "Slid signal bind:", characters: 5, bind: @slid_signal_cell_3);
+                    display_text(name: "Result:", characters: 5, bind: @result_slid_signal_cell_3);
+                    display_text(name: "Slid and stopped signal bind:", characters: 5, bind: @slid_and_stopped_signal_cell_3);
+                    display_text(name: "Result:", characters: 5, bind: @result_slid_and_stopped_signal_cell_3);
+                }
+
+                group(name: '"_.slider_pos"')
+                {
+                    slider(bind: @bind_cell_4,
+                           format: {first: 0, last: 100},
+                           bind_slid_signal: [@slid_signal_cell_4, "_.slider_pos"],
+                           bind_slid_and_stopped_signal: [@slid_and_stopped_signal_cell_4, "_.slider_pos"]);
+                    display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_4);
+                    display_text(name: "Result:", characters: 5, bind: @result_bind_cell_4);
+                    display_text(name: "Slid signal bind:", characters: 5, bind: @slid_signal_cell_4);
+                    display_text(name: "Result:", characters: 5, bind: @result_slid_signal_cell_4);
+                    display_text(name: "Slid and stopped signal bind:", characters: 5, bind: @slid_and_stopped_signal_cell_4);
+                    display_text(name: "Result:", characters: 5, bind: @result_slid_and_stopped_signal_cell_4);
+                }
+            }
+        }
+
+        group(name: "Slid and Slid-And-Stopped Signals Not Bound")
+        {
+            group(name: "no signal_id")
+            {
+                slider(bind: @bind_cell_5, format: {first: 0, last: 100});
+                display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_5);
+                display_text(name: "Result:", characters: 5, bind: @result_bind_cell_5);
+            }
+
+            group(name: "signal_id: @test_id")
+            {
+                slider(bind: @bind_cell_6, format: {first: 0, last: 100}, signal_id: @test_id);
+                display_text(name: "Normal bind:", characters: 5, bind: @bind_cell_6);
+                display_text(name: "Result:", characters: 5, bind: @result_bind_cell_6);
+            }
+        }
+    }
+}

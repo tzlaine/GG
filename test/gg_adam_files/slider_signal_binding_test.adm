@@ -1,0 +1,61 @@
+sheet signal_binding_test
+{
+constant:
+    expected_bind_cell_0 : 50;
+    expected_slid_signal_cell_0 : {slider_pos: 50, slider_min: 0, slider_max: 99};
+    expected_slid_and_stopped_signal_cell_0 : {slider_pos: 50, slider_min: 0, slider_max: 99};
+    expected_bind_cell_1 : 50;
+    expected_slid_signal_cell_1 : "slid signal value";
+    expected_slid_and_stopped_signal_cell_1 : "slid_and_stopped signal value";
+    expected_bind_cell_2 : 50;
+    expected_slid_signal_cell_2 : {slider_pos: 50, slider_min: 0, slider_max: 99};
+    expected_slid_and_stopped_signal_cell_2 : {slider_pos: 50, slider_min: 0, slider_max: 99};
+    expected_bind_cell_3 : 50;
+    expected_slid_signal_cell_3 : 50;
+    expected_slid_and_stopped_signal_cell_3 : 50;
+    expected_bind_cell_4 : 50;
+    expected_slid_signal_cell_4 : 50;
+    expected_slid_and_stopped_signal_cell_4 : 50;
+
+    expected_bind_cell_5 : 25;
+    expected_bind_cell_6 : 75;
+
+interface:
+    bind_cell_0 : 0;
+    slid_signal_cell_0 : "<rgba 255 0 0 255>not slid</rgba>";
+    slid_and_stopped_signal_cell_0 : "<rgba 255 0 0 255>not slid</rgba>";
+    bind_cell_1 : 0;
+    slid_signal_cell_1 : "<rgba 255 0 0 255>not slid</rgba>";
+    slid_and_stopped_signal_cell_1 : "<rgba 255 0 0 255>not slid</rgba>";
+    bind_cell_2 : 0;
+    slid_signal_cell_2 : "<rgba 255 0 0 255>not slid</rgba>";
+    slid_and_stopped_signal_cell_2 : "<rgba 255 0 0 255>not slid</rgba>";
+    bind_cell_3 : 0;
+    slid_signal_cell_3 : "<rgba 255 0 0 255>not slid</rgba>";
+    slid_and_stopped_signal_cell_3 : "<rgba 255 0 0 255>not slid</rgba>";
+    bind_cell_4 : 0;
+    slid_signal_cell_4 : "<rgba 255 0 0 255>not slid</rgba>";
+    slid_and_stopped_signal_cell_4 : "<rgba 255 0 0 255>not slid</rgba>";
+
+    bind_cell_5 : 0;
+    bind_cell_6 : 0;
+
+    result_bind_cell_0 <== bind_cell_0 == expected_bind_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_signal_cell_0 <== slid_signal_cell_0 == expected_slid_signal_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_and_stopped_signal_cell_0 <== slid_and_stopped_signal_cell_0 == expected_slid_and_stopped_signal_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_1 <== bind_cell_1 == expected_bind_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_signal_cell_1 <== slid_signal_cell_1 == expected_slid_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_and_stopped_signal_cell_1 <== slid_and_stopped_signal_cell_1 == expected_slid_and_stopped_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_2 <== bind_cell_2 == expected_bind_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_signal_cell_2 <== slid_signal_cell_2 == expected_slid_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_and_stopped_signal_cell_2 <== slid_and_stopped_signal_cell_2 == expected_slid_and_stopped_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_3 <== bind_cell_3 == expected_bind_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_signal_cell_3 <== slid_signal_cell_3 == expected_slid_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_and_stopped_signal_cell_3 <== slid_and_stopped_signal_cell_3 == expected_slid_and_stopped_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_4 <== bind_cell_4 == expected_bind_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_signal_cell_4 <== slid_signal_cell_4 == expected_slid_signal_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_slid_and_stopped_signal_cell_4 <== slid_and_stopped_signal_cell_4 == expected_slid_and_stopped_signal_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+
+    result_bind_cell_5 <== bind_cell_5 == expected_bind_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_6 <== bind_cell_6 == expected_bind_cell_6 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+}

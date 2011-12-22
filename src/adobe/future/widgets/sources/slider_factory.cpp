@@ -137,26 +137,42 @@ void attach_view_and_controller(slider_t&              control,
             couple_controller_to_cell(control, cell, token.sheet_m, token, parameters);
     }
 
-    any_regular_t slid_binding;
-    if (get_value(parameters, static_name_t("bind_slid_signal"), slid_binding)) {
+    {
+        any_regular_t slid_binding;
         name_t cell;
         array_t expression;
-        implementation::cell_and_expression(slid_binding, cell, expression);
+        if (get_value(parameters, static_name_t("bind_slid_signal"), slid_binding))
+            implementation::cell_and_expression(slid_binding, cell, expression);
         control.slid_proc_m =
             boost::bind(&handle_slid_signal,
-                        token.signal_notifier_m, static_name_t("slid"), control.signal_id_m,
-                        boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
+                        token.signal_notifier_m,
+                        static_name_t("slid"),
+                        control.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1,
+                        _2,
+                        _3);
     }
 
-    any_regular_t slid_and_stopped_binding;
-    if (get_value(parameters, static_name_t("bind_slid_and_stopped_signal"), slid_and_stopped_binding)) {
+    {
+        any_regular_t slid_and_stopped_binding;
         name_t cell;
         array_t expression;
-        implementation::cell_and_expression(slid_binding, cell, expression);
+        if (get_value(parameters, static_name_t("bind_slid_and_stopped_signal"), slid_and_stopped_binding))
+            implementation::cell_and_expression(slid_and_stopped_binding, cell, expression);
         control.slid_and_stopped_proc_m =
             boost::bind(&handle_slid_signal,
-                        token.signal_notifier_m, static_name_t("slid_and_stopped"), control.signal_id_m,
-                        boost::ref(token.sheet_m), cell, expression, _1, _2, _3);
+                        token.signal_notifier_m,
+                        static_name_t("slid_and_stopped"),
+                        control.signal_id_m,
+                        boost::ref(token.sheet_m),
+                        cell,
+                        expression,
+                        _1,
+                        _2,
+                        _3);
     }
 }
 

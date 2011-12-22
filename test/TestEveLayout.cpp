@@ -19,12 +19,27 @@
 #include "TestingUtils.h"
 
 
+struct Action
+{
+    Action()
+        {}
+    Action(const GG::Pt& pt_1, const GG::Pt& pt_2, bool drag) :
+        m_pt_1(pt_1),
+        m_pt_2(pt_2),
+        m_drag(drag)
+        {}
+    GG::Pt m_pt_1;
+    GG::Pt m_pt_2;
+    bool m_drag;
+};
+
 const char* g_eve_file = 0;
 const char* g_adam_file = 0;
 const char* g_output_dir = 0;
-std::vector<std::pair<GG::Pt, GG::Pt> > g_click_locations;
+std::vector<Action> g_click_locations;
 bool g_generate_variants = false;
 bool g_dont_exit = false;
+bool g_test_signals = false;
 
 struct GenerateEvents
 {
@@ -38,12 +53,19 @@ struct GenerateEvents
             if (m_iteration <= g_click_locations.size()) {
                 GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, OutputFilename());
                 if (m_iteration) {
-                    if (g_click_locations[m_iteration - 1].first != g_click_locations[m_iteration - 1].second) {
-                        GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].second, GG::Pt());
-                        GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].second, GG::Pt());
+                    const Action& action = g_click_locations[m_iteration - 1];
+                    if (action.m_drag) {
+                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
+                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                    } else {
+                        if (action.m_pt_1 != action.m_pt_2) {
+                            GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                            GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                        }
+                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
+                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
                     }
-                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].first, GG::Pt());
-                    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), g_click_locations[m_iteration - 1].first, GG::Pt());
                 }
                 timer->Reset();
             } else {
@@ -170,7 +192,11 @@ void MinimalGGApp::Initialize()
 {
     boost::filesystem::path eve(g_eve_file);
     boost::filesystem::path adam(g_adam_file);
-    std::auto_ptr<GG::EveDialog> eve_dialog(GG::MakeEveDialog(eve, adam, &ButtonHandler, &SignalTester));
+    std::auto_ptr<GG::EveDialog> eve_dialog(
+        g_test_signals ?
+        GG::MakeEveDialog(eve, adam, &ButtonHandler, &SignalTester) :
+        GG::MakeEveDialog(eve, adam, &ButtonHandler)
+    );
 
     boost::filesystem::path input(g_eve_file);
     std::string input_stem =
@@ -245,12 +271,19 @@ main( int argc, char* argv[] )
         GG::Pt point_1(GG::X(boost::lexical_cast<int>(token.substr(0, comma_1))),
                        GG::Y(boost::lexical_cast<int>(token.substr(comma_1 + 1, comma_2 - comma_1 - 1))));
         GG::Pt point_2 = point_1;
+        bool drag = false;
         if (comma_2 != std::string::npos) {
             std::size_t comma_3 = token.find(',', comma_2 + 1);
+            std::size_t end = token.find('d', comma_3 + 1);
+            drag = end != std::string::npos;
             point_2 = GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(comma_2 + 1, comma_3 - comma_2 - 1))),
-                             GG::Y(boost::lexical_cast<int>(token.substr(comma_3 + 1, -1))));
+                             GG::Y(boost::lexical_cast<int>(token.substr(comma_3 + 1, end - comma_3 - 1))));
         }
-        g_click_locations.push_back(std::make_pair(point_1, point_2));
+        g_click_locations.push_back(Action(point_1, point_2, drag));
+        ++i;
+    }
+    if (i < argc && (token = argv[i], token == "test_signals")) {
+        g_test_signals = true;
         ++i;
     }
     if (i < argc)

@@ -138,6 +138,7 @@ namespace adobe {
                          GG::Clr interior_color,
                          GG::Clr label_color,
                          GG::Clr item_text_color,
+                         const std::vector<std::string>& drop_types,
                          name_t signal_id) :
         control_m(0),
         name_m(name, alt_text, 0, GG::FORMAT_LEFT | GG::FORMAT_TOP, label_color),
@@ -151,6 +152,7 @@ namespace adobe {
         color_m(color),
         interior_color_m(interior_color),
         item_text_color_m(item_text_color),
+        drop_types_m(drop_types),
         signal_id_m(signal_id)
     {}
 
@@ -316,6 +318,10 @@ namespace adobe {
         element.control_m->SetStyle(GG::LIST_NOSORT | GG::LIST_SINGLESEL);
 
         element.original_height_m = Value(element.control_m->Height());
+
+        for (std::size_t i = 0; i < element.drop_types_m.size(); ++i) {
+            element.control_m->AllowDropType(element.drop_types_m[i]);
+        }
 
         GG::Connect(element.control_m->SelChangedSignal,
                     boost::bind(&listbox_selection_changed, boost::ref(element), _1));

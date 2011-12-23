@@ -225,6 +225,7 @@ namespace adobe {
         GG::Clr label_color(GG::CLR_BLACK);
         GG::Clr item_text_color(GG::CLR_BLACK);
         name_t signal_id;
+        array_t allowed_drop_types;
 
         get_value(parameters, key_name, name);
         get_value(parameters, key_alt_text, alt_text);
@@ -238,9 +239,9 @@ namespace adobe {
         implementation::get_color(parameters, static_name_t("label_color"), label_color);
         implementation::get_color(parameters, static_name_t("item_text_color"), item_text_color);
         get_value(parameters, static_name_t("signal_id"), signal_id);
+        get_value(parameters, static_name_t("allowed_drop_types"), allowed_drop_types);
 
-        for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first)
-        {
+        for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
             dictionary_t cur_item(first->cast<dictionary_t>());
             item_set.push_back(
                 listbox_t::item_set_t::value_type(
@@ -251,6 +252,11 @@ namespace adobe {
 
         if (!rows && items.empty())
             rows = 8;
+
+        std::vector<std::string> drop_types;
+        for (array_t::iterator first(allowed_drop_types.begin()), last(allowed_drop_types.end()); first != last; ++first) {
+            drop_types.push_back(first->cast<std::string>());
+        }
 
         listbox = new listbox_t(name,
                                 alt_text,
@@ -263,6 +269,7 @@ namespace adobe {
                                 interior_color,
                                 label_color,
                                 item_text_color,
+                                drop_types,
                                 signal_id);
     }
 
@@ -279,11 +286,12 @@ namespace adobe {
             attach_view_and_controller_direct(control, parameters, token, cell);
         }
 
-        any_regular_t selection_changed_binding;
-        if (get_value(parameters, static_name_t("bind_selection_changed_signal"), selection_changed_binding)) {
+        {
+            any_regular_t selection_changed_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(selection_changed_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_selection_changed_signal"), selection_changed_binding))
+                implementation::cell_and_expression(selection_changed_binding, cell, expression);
             control.selection_changed_proc_m =
                 boost::bind(&handle_selection_changed_signal,
                             _1,
@@ -296,11 +304,12 @@ namespace adobe {
                             _2);
         }
 
-        any_regular_t dropped_binding;
-        if (get_value(parameters, static_name_t("bind_dropped_signal"), dropped_binding)) {
+        {
+            any_regular_t dropped_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(dropped_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_dropped_signal"), dropped_binding))
+                implementation::cell_and_expression(dropped_binding, cell, expression);
             control.dropped_proc_m =
                 boost::bind(&handle_row_signal<GG::ListBox::iterator>,
                             _1,
@@ -313,11 +322,12 @@ namespace adobe {
                             _2);
         }
 
-        any_regular_t drop_acceptable_binding;
-        if (get_value(parameters, static_name_t("bind_drop_acceptable_signal"), drop_acceptable_binding)) {
+        {
+            any_regular_t drop_acceptable_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(drop_acceptable_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_drop_acceptable_signal"), drop_acceptable_binding))
+                implementation::cell_and_expression(drop_acceptable_binding, cell, expression);
             control.drop_acceptable_proc_m =
                 boost::bind(&handle_row_signal<GG::ListBox::const_iterator>,
                             _1,
@@ -330,11 +340,12 @@ namespace adobe {
                             _2);
         }
 
-        any_regular_t left_clicked_binding;
-        if (get_value(parameters, static_name_t("bind_left_clicked_signal"), left_clicked_binding)) {
+        {
+            any_regular_t left_clicked_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(left_clicked_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_left_clicked_signal"), left_clicked_binding))
+                implementation::cell_and_expression(left_clicked_binding, cell, expression);
             control.left_clicked_proc_m =
                 boost::bind(&handle_row_click_signal,
                             _1,
@@ -348,11 +359,12 @@ namespace adobe {
                             _3);
         }
 
-        any_regular_t right_clicked_binding;
-        if (get_value(parameters, static_name_t("bind_right_clicked_signal"), right_clicked_binding)) {
+        {
+            any_regular_t right_clicked_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(right_clicked_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_right_clicked_signal"), right_clicked_binding))
+                implementation::cell_and_expression(right_clicked_binding, cell, expression);
             control.right_clicked_proc_m =
                 boost::bind(&handle_row_click_signal,
                             _1,
@@ -366,11 +378,12 @@ namespace adobe {
                             _3);
         }
 
-        any_regular_t double_clicked_binding;
-        if (get_value(parameters, static_name_t("bind_double_clicked_signal"), double_clicked_binding)) {
+        {
+            any_regular_t double_clicked_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(double_clicked_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_double_clicked_signal"), double_clicked_binding))
+                implementation::cell_and_expression(double_clicked_binding, cell, expression);
             control.double_clicked_proc_m =
                 boost::bind(&handle_row_signal<GG::ListBox::iterator>,
                             _1,
@@ -383,11 +396,12 @@ namespace adobe {
                             _2);
         }
 
-        any_regular_t erased_binding;
-        if (get_value(parameters, static_name_t("bind_erased_signal"), erased_binding)) {
+        {
+            any_regular_t erased_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(erased_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_erased_signal"), erased_binding))
+                implementation::cell_and_expression(erased_binding, cell, expression);
             control.erased_proc_m =
                 boost::bind(&handle_row_signal<GG::ListBox::iterator>,
                             _1,
@@ -400,11 +414,12 @@ namespace adobe {
                             _2);
         }
 
-        any_regular_t browsed_binding;
-        if (get_value(parameters, static_name_t("bind_browsed_signal"), browsed_binding)) {
+        {
+            any_regular_t browsed_binding;
             name_t cell;
             array_t expression;
-            implementation::cell_and_expression(browsed_binding, cell, expression);
+            if (get_value(parameters, static_name_t("bind_browsed_signal"), browsed_binding))
+                implementation::cell_and_expression(browsed_binding, cell, expression);
             control.browsed_proc_m =
                 boost::bind(&handle_row_signal<GG::ListBox::iterator>,
                             _1,

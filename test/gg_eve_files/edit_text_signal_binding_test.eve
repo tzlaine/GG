@@ -2,7 +2,7 @@ layout alert_dialog
 {
     view dialog(name: "Edit Text Signal Binding Test")
     {
-        group(name: "Edited and Focus-Changed Signals Bound")
+        group(name: "Edited and Focus-Update Signals Bound")
         {
             row()
             {
@@ -17,8 +17,8 @@ layout alert_dialog
                     display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_0);
                     display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_0);
                     display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_0);
-                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_0);
-                    display_text(name: "Focus changed signal result:", characters: 15, bind: @result_focus_update_signal_cell_0);
+                    display_text(name: "Focus update signal bind:", characters: 15, bind: @focus_update_signal_cell_0);
+                    display_text(name: "Focus update signal result:", characters: 15, bind: @result_focus_update_signal_cell_0);
 
                     edit_text(name: "simple expression",
                               bind: @bind_cell_1,
@@ -29,8 +29,8 @@ layout alert_dialog
                     display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_1);
                     display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_1);
                     display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_1);
-                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_1);
-                    display_text(name: "Focus changed signal result:", characters: 15, bind: @result_focus_update_signal_cell_1);
+                    display_text(name: "Focus update signal bind:", characters: 15, bind: @focus_update_signal_cell_1);
+                    display_text(name: "Focus update signal result:", characters: 15, bind: @result_focus_update_signal_cell_1);
                 }
 
                 column()
@@ -44,8 +44,8 @@ layout alert_dialog
                     display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_2);
                     display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_2);
                     display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_2);
-                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_2);
-                    display_text(name: "Focus changed signal result:", characters: 15, bind: @result_focus_update_signal_cell_2);
+                    display_text(name: "Focus update signal bind:", characters: 15, bind: @focus_update_signal_cell_2);
+                    display_text(name: "Focus update signal result:", characters: 15, bind: @result_focus_update_signal_cell_2);
 
                     edit_text(name: '"_1" placeholder',
                               bind: @bind_cell_3,
@@ -56,13 +56,13 @@ layout alert_dialog
                     display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
                     display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_3);
                     display_text(name: "Result:", characters: 15, bind: @result_edited_signal_cell_3);
-                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_3);
+                    display_text(name: "Focus update signal bind:", characters: 15, bind: @focus_update_signal_cell_3);
                     display_text(name: "Result:", characters: 15, bind: @result_focus_update_signal_cell_3);
                 }
             }
         }
 
-        group(name: "Edited and Focus-Changed Signals Not Bound")
+        group(name: "Edited and Focus-Update Signals Not Bound")
         {
             edit_text(name: "no signal_id", bind: @bind_cell_4, characters: 10);
             display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);

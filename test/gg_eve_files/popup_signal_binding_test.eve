@@ -1,0 +1,78 @@
+layout alert_dialog
+{
+    view dialog(name: "Popup Signal Binding Test")
+    {
+        group(name: "Selection-Changed Bound")
+        {
+            popup(name: "no expression",
+                  bind: @bind_cell_0,
+                  items: [
+                      { name: "One", value: "One" },
+                      { name: "Two", value: 2 }
+                  ],
+                  bind_selection_changed_signal: @selection_changed_signal_cell_0);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_0);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_0);
+            display_text(name: "Selection Changed signal bind:", characters: 15, bind: @selection_changed_signal_cell_0);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_0);
+
+            popup(name: "simple expression",
+                  bind: @bind_cell_1,
+                  items: [
+                      { name: "One", value: "One" },
+                      { name: "Two", value: 2 }
+                  ],
+                  bind_selection_changed_signal: [@selection_changed_signal_cell_1, '"selection_changed signal value"']);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_1);
+            display_text(name: "Selection Changed signal bind:", characters: 15, bind: @selection_changed_signal_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_1);
+
+            popup(name: '"_" placeholder',
+                  bind: @bind_cell_2,
+                  items: [
+                      { name: "One", value: "One" },
+                      { name: "Two", value: 2 }
+                  ],
+                  bind_selection_changed_signal: [@selection_changed_signal_cell_2, "_"]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_2);
+            display_text(name: "Selection Changed signal bind:", characters: 15, bind: @selection_changed_signal_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_2);
+
+            popup(name: '"_1" placeholder',
+                  bind: @bind_cell_3,
+                  items: [
+                      { name: "One", value: "One" },
+                      { name: "Two", value: 2 }
+                  ],
+                  bind_selection_changed_signal: [@selection_changed_signal_cell_3, "_1"]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
+            display_text(name: "Selection Changed signal bind:", characters: 15, bind: @selection_changed_signal_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_3);
+        }
+
+        group(name: "Selection Changed-Signal Not Bound")
+        {
+            popup(name: "no signal_id",
+                  bind: @bind_cell_4,
+                  items: [
+                      { name: "One", value: "One" },
+                      { name: "Two", value: 2 }
+                  ]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
+
+            popup(name: "signal_id: @test_id",
+                  bind: @bind_cell_5,
+                  items: [
+                      { name: "One", value: "One" },
+                      { name: "Three", value: 3 }
+                  ],
+                  signal_id: @test_id);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_5);
+        }
+    }
+}

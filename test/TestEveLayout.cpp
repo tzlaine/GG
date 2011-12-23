@@ -164,7 +164,7 @@ bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
 
 void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t widget_id, const adobe::any_regular_t& value)
 {
-#define INSTRUMENT 1
+#define INSTRUMENT 0
 #if INSTRUMENT
     std::cerr << "Testing unbound signals ...\n";
 #endif
@@ -251,6 +251,16 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
             if (widget_id == adobe::static_name_t("test_id_1"))
                 BOOST_CHECK(value == adobe::any_regular_t(std::string("cm")));
         }
+    } else if (widget_type == adobe::static_name_t("popup")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound popup signals ...\n";
+#endif
+        BOOST_CHECK(signal == adobe::static_name_t("selection_changed"));
+        BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
+        if (!widget_id)
+            BOOST_CHECK(value == adobe::any_regular_t(2));
+        else
+            BOOST_CHECK(value == adobe::any_regular_t(3));
     }
 #undef INSTRUMENT
 }

@@ -1,0 +1,76 @@
+layout alert_dialog
+{
+    view dialog(name: "Edit Text Signal Binding Test")
+    {
+        group(name: "Edited and Focus-Changed Signals Bound")
+        {
+            row()
+            {
+                column()
+                {
+                    edit_text(name: "no expression",
+                              bind: @bind_cell_0,
+                              characters: 10,
+                              bind_edited_signal: @edited_signal_cell_0,
+                              bind_focus_update_signal: @focus_update_signal_cell_0);
+                    display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_0);
+                    display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_0);
+                    display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_0);
+                    display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_0);
+                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_0);
+                    display_text(name: "Focus changed signal result:", characters: 15, bind: @result_focus_update_signal_cell_0);
+
+                    edit_text(name: "simple expression",
+                              bind: @bind_cell_1,
+                              characters: 10,
+                              bind_edited_signal: [@edited_signal_cell_1, '"edited value"'],
+                              bind_focus_update_signal: [@focus_update_signal_cell_1, '"focus_update value"']);
+                    display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_1);
+                    display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_1);
+                    display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_1);
+                    display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_1);
+                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_1);
+                    display_text(name: "Focus changed signal result:", characters: 15, bind: @result_focus_update_signal_cell_1);
+                }
+
+                column()
+                {
+                    edit_text(name: '"_" placeholder',
+                              bind: @bind_cell_2,
+                              characters: 10,
+                              bind_edited_signal: [@edited_signal_cell_2, "_"],
+                              bind_focus_update_signal: [@focus_update_signal_cell_2, "_"]);
+                    display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_2);
+                    display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_2);
+                    display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_2);
+                    display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_2);
+                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_2);
+                    display_text(name: "Focus changed signal result:", characters: 15, bind: @result_focus_update_signal_cell_2);
+
+                    edit_text(name: '"_1" placeholder',
+                              bind: @bind_cell_3,
+                              characters: 10,
+                              bind_edited_signal: [@edited_signal_cell_3, "_1"],
+                              bind_focus_update_signal: [@focus_update_signal_cell_3, "_1"]);
+                    display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_3);
+                    display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
+                    display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_3);
+                    display_text(name: "Result:", characters: 15, bind: @result_edited_signal_cell_3);
+                    display_text(name: "Focus changed signal bind:", characters: 15, bind: @focus_update_signal_cell_3);
+                    display_text(name: "Result:", characters: 15, bind: @result_focus_update_signal_cell_3);
+                }
+            }
+        }
+
+        group(name: "Edited and Focus-Changed Signals Not Bound")
+        {
+            edit_text(name: "no signal_id", bind: @bind_cell_4, characters: 10);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
+
+            edit_text(name: "signal_id: @test_id", bind: @bind_cell_5, characters: 10, signal_id: @test_id);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_5);
+        }
+    }
+}

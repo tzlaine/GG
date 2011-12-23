@@ -34,16 +34,7 @@ void edit_edited(adobe::edit_text_t& edit_text, const std::string& str)
 
     edit_text.post_edit_proc_m(str);
 
-    if (edit_text.edited_proc_m)
-        edit_text.edited_proc_m(str);
-}
-
-/*************************************************************************************************/
-
-void edit_focus_update(adobe::edit_text_t& edit_text, const std::string& str)
-{
-    if (edit_text.focus_update_proc_m)
-        edit_text.focus_update_proc_m(str);
+    edit_text.edited_proc_m(str);
 }
 
 /*************************************************************************************************/
@@ -361,8 +352,7 @@ platform_display_type insert<edit_text_t>(display_t&             display,
 
     GG::Connect(element.control_m->EditedSignal,
                 boost::bind(&edit_edited, boost::ref(element), _1));
-    GG::Connect(element.control_m->FocusUpdateSignal,
-                boost::bind(&edit_focus_update, boost::ref(element), _1));
+    GG::Connect(element.control_m->FocusUpdateSignal, element.focus_update_proc_m);
 
     if (element.password_m)
         element.control_m->PasswordMode(true);

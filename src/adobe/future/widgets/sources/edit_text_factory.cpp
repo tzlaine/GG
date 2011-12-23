@@ -89,11 +89,12 @@ void attach_view_and_controller(edit_text_t&           control,
         attach_view_and_controller_direct(control, parameters, token, cell);
     }
 
-    any_regular_t edited_binding;
-    if (get_value(parameters, static_name_t("bind_edited_signal"), edited_binding)) {
+    {
+        any_regular_t edited_binding;
         name_t cell;
         array_t expression;
-        implementation::cell_and_expression(edited_binding, cell, expression);
+        if (get_value(parameters, static_name_t("bind_edited_signal"), edited_binding))
+            implementation::cell_and_expression(edited_binding, cell, expression);
         control.edited_proc_m =
             boost::bind(&handle_edited_signal,
                         token.signal_notifier_m,
@@ -106,11 +107,12 @@ void attach_view_and_controller(edit_text_t&           control,
                         _1);
     }
 
-    any_regular_t focus_update_binding;
-    if (get_value(parameters, static_name_t("bind_focus_update_signal"), focus_update_binding)) {
+    {
+        any_regular_t focus_update_binding;
         name_t cell;
         array_t expression;
-        implementation::cell_and_expression(focus_update_binding, cell, expression);
+        if (get_value(parameters, static_name_t("bind_focus_update_signal"), focus_update_binding))
+            implementation::cell_and_expression(focus_update_binding, cell, expression);
         control.focus_update_proc_m =
             boost::bind(&handle_edited_signal,
                         token.signal_notifier_m,

@@ -1,0 +1,52 @@
+sheet signal_binding_test
+{
+constant:
+    expected_bind_cell_0 : "foo";
+    expected_edited_signal_cell_0 : "foo";
+    expected_focus_update_signal_cell_0 : "foo";
+    expected_bind_cell_1 : "foo";
+    expected_edited_signal_cell_1 : "edited value";
+    expected_focus_update_signal_cell_1 : "focus_update value";
+    expected_bind_cell_2 : "foo";
+    expected_edited_signal_cell_2 : "foo";
+    expected_focus_update_signal_cell_2 : "foo";
+    expected_bind_cell_3 : "foo";
+    expected_edited_signal_cell_3 : "foo";
+    expected_focus_update_signal_cell_3 : "foo";
+
+    expected_bind_cell_4 : "f";
+    expected_bind_cell_5 : "g";
+
+interface:
+    bind_cell_0 : "";
+    edited_signal_cell_0 : "<rgba 255 0 0 255>not edited</rgba>";
+    focus_update_signal_cell_0 : "<rgba 255 0 0 255>not edited</rgba>";
+    bind_cell_1 : "";
+    edited_signal_cell_1 : "<rgba 255 0 0 255>not edited</rgba>";
+    focus_update_signal_cell_1 : "<rgba 255 0 0 255>not edited</rgba>";
+    bind_cell_2 : "";
+    edited_signal_cell_2 : "<rgba 255 0 0 255>not edited</rgba>";
+    focus_update_signal_cell_2 : "<rgba 255 0 0 255>not edited</rgba>";
+    bind_cell_3 : "";
+    edited_signal_cell_3 : "<rgba 255 0 0 255>not edited</rgba>";
+    focus_update_signal_cell_3 : "<rgba 255 0 0 255>not edited</rgba>";
+
+    bind_cell_4 : "";
+    bind_cell_5 : "";
+
+    result_bind_cell_0 <== bind_cell_0 == expected_bind_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_edited_signal_cell_0 <== edited_signal_cell_0 == expected_edited_signal_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_focus_update_signal_cell_0 <== focus_update_signal_cell_0 == expected_focus_update_signal_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_1 <== bind_cell_1 == expected_bind_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_edited_signal_cell_1 <== edited_signal_cell_1 == expected_edited_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_focus_update_signal_cell_1 <== focus_update_signal_cell_1 == expected_focus_update_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_2 <== bind_cell_2 == expected_bind_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_edited_signal_cell_2 <== edited_signal_cell_2 == expected_edited_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_focus_update_signal_cell_2 <== focus_update_signal_cell_2 == expected_focus_update_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_3 <== bind_cell_3 == expected_bind_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_edited_signal_cell_3 <== edited_signal_cell_3 == expected_edited_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_focus_update_signal_cell_3 <== focus_update_signal_cell_3 == expected_focus_update_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+
+    result_bind_cell_4 <== bind_cell_4 == expected_bind_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_5 <== bind_cell_5 == expected_bind_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+}

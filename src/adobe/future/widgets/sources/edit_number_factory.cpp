@@ -119,11 +119,12 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
             adobe::couple_controller_to_cell(*iter, cell, token.sheet_m, token, parameters);
     }
 
-    adobe::any_regular_t edited_binding;
-    if (get_value(parameters, adobe::static_name_t("bind_edited_signal"), edited_binding)) {
+    {
+        adobe::any_regular_t edited_binding;
         adobe::name_t cell;
         adobe::array_t expression;
-        adobe::implementation::cell_and_expression(edited_binding, cell, expression);
+        if (get_value(parameters, adobe::static_name_t("bind_edited_signal"), edited_binding))
+            adobe::implementation::cell_and_expression(edited_binding, cell, expression);
         control.platform_m.edited_proc_m =
             boost::bind(&handle_edited_signal,
                         token.signal_notifier_m,
@@ -136,11 +137,12 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
                         _1);
     }
 
-    adobe::any_regular_t focus_update_binding;
-    if (get_value(parameters, adobe::static_name_t("bind_focus_update_signal"), focus_update_binding)) {
+    {
+        adobe::any_regular_t focus_update_binding;
         adobe::name_t cell;
         adobe::array_t expression;
-        adobe::implementation::cell_and_expression(focus_update_binding, cell, expression);
+        if (get_value(parameters, adobe::static_name_t("bind_focus_update_signal"), focus_update_binding))
+            adobe::implementation::cell_and_expression(focus_update_binding, cell, expression);
         control.platform_m.focus_update_proc_m =
             boost::bind(&handle_edited_signal,
                         token.signal_notifier_m,
@@ -200,11 +202,12 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
         assemblage_cleanup_ptr(assemblage, splitter);
     }
 
-    adobe::any_regular_t unit_changed_binding;
-    if (get_value(parameters, adobe::static_name_t("bind_unit_changed_signal"), unit_changed_binding)) {
+    {
+        adobe::any_regular_t unit_changed_binding;
         adobe::name_t cell;
         adobe::array_t expression;
-        adobe::implementation::cell_and_expression(unit_changed_binding, cell, expression);
+        if (get_value(parameters, adobe::static_name_t("bind_unit_changed_signal"), unit_changed_binding))
+            adobe::implementation::cell_and_expression(unit_changed_binding, cell, expression);
         control.platform_m.unit_changed_proc_m =
             boost::bind(&handle_unit_changed_signal,
                         token.signal_notifier_m,

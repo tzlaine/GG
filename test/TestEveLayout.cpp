@@ -164,7 +164,7 @@ bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
 
 void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t widget_id, const adobe::any_regular_t& value)
 {
-#define INSTRUMENT 0
+#define INSTRUMENT 1
 #if INSTRUMENT
     std::cerr << "Testing unbound signals ...\n";
 #endif
@@ -231,6 +231,26 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
             BOOST_CHECK(value == adobe::any_regular_t(std::string("f")));
         else
             BOOST_CHECK(value == adobe::any_regular_t(std::string("g")));
+    } else if (widget_type == adobe::static_name_t("edit_number")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound edit_number signals ...\n";
+#endif
+        BOOST_CHECK(signal == adobe::static_name_t("edited") ||
+                    signal == adobe::static_name_t("focus_update") ||
+                    signal == adobe::static_name_t("unit_changed"));
+        BOOST_CHECK(!widget_id ||
+                    widget_id == adobe::static_name_t("test_id_1") ||
+                    widget_id == adobe::static_name_t("test_id_2"));
+        if (signal == adobe::static_name_t("edited") ||
+            signal == adobe::static_name_t("focus_update")) {
+            if (!widget_id)
+                BOOST_CHECK(value == adobe::any_regular_t(1));
+            else if (widget_id == adobe::static_name_t("test_id_1"))
+                BOOST_CHECK(value == adobe::any_regular_t(2));
+        } else {
+            if (widget_id == adobe::static_name_t("test_id_1"))
+                BOOST_CHECK(value == adobe::any_regular_t(std::string("cm")));
+        }
     }
 #undef INSTRUMENT
 }

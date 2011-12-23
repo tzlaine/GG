@@ -1,0 +1,64 @@
+layout alert_dialog
+{
+    view dialog(name: "Edit Number Signal Binding Test")
+    {
+        group(name: "Edited, Focus-Update, and Unit-Changed Signals Bound")
+        {
+            edit_number(name: "no expression",
+                        characters: 10,
+                        units: [
+                            { name: "m", bind: @bind_cell_0 },
+                            { name: "cm", bind: @bind_cell_0, scale: [ 0.01, 0 ]  }
+                        ],
+                        bind_edited_signal: @edited_signal_cell_0,
+                        bind_focus_update_signal: @focus_update_signal_cell_0,
+                        bind_unit_changed_signal: @unit_changed_signal_cell_0);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_0);
+            display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_0);
+            display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_0);
+            display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_0);
+            display_text(name: "Focus update signal bind:", characters: 15, bind: @focus_update_signal_cell_0);
+            display_text(name: "Focus update signal result:", characters: 15, bind: @result_focus_update_signal_cell_0);
+            display_text(name: "Unit changed signal bind:", characters: 15, bind: @unit_changed_signal_cell_0);
+            display_text(name: "Unit changed signal result:", characters: 15, bind: @result_unit_changed_signal_cell_0);
+
+            edit_number(name: "simple expression",
+                        characters: 10,
+                        units: [
+                            { name: "m", bind: @bind_cell_1 },
+                            { name: "cm", bind: @bind_cell_1, scale: [ 0.01, 0 ]  }
+                        ],
+                        bind_edited_signal: [@edited_signal_cell_1, '"edited value"'],
+                        bind_focus_update_signal: [@focus_update_signal_cell_1, '"focus_update value"'],
+                        bind_unit_changed_signal: [@unit_changed_signal_cell_1, '"unit_changed value"']);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_1);
+            display_text(name: "Normal bind result:", characters: 15, bind: @result_bind_cell_1);
+            display_text(name: "Edited signal bind:", characters: 15, bind: @edited_signal_cell_1);
+            display_text(name: "Edited signal result:", characters: 15, bind: @result_edited_signal_cell_1);
+            display_text(name: "Focus update signal bind:", characters: 15, bind: @focus_update_signal_cell_1);
+            display_text(name: "Focus update signal result:", characters: 15, bind: @result_focus_update_signal_cell_1);
+            display_text(name: "Unit changed signal bind:", characters: 15, bind: @unit_changed_signal_cell_1);
+            display_text(name: "Unit changed signal result:", characters: 15, bind: @result_unit_changed_signal_cell_1);
+        }
+
+        group(name: "Edited and Focus-Changed Signals Not Bound")
+        {
+            edit_number(name: "no signal_id", bind: @bind_cell_2, characters: 10);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_2);
+
+            edit_number(name: "signal_id: @test_id_1", bind: @bind_cell_3, characters: 10, signal_id: @test_id_1);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
+
+            edit_number(name: "signal_id: @test_id_2", characters: 10,
+                        units: [
+                            { name: "m", bind: @bind_cell_4 },
+                            { name: "cm", bind: @bind_cell_4, scale: [ 0.01, 0 ]  }
+                        ],
+                        signal_id: @test_id_2);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
+        }
+    }
+}

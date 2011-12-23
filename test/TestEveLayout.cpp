@@ -164,7 +164,14 @@ bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
 
 void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t widget_id, const adobe::any_regular_t& value)
 {
+#define INSTRUMENT 0
+#if INSTRUMENT
+    std::cerr << "Testing unbound signals ...\n";
+#endif
     if (widget_type == adobe::static_name_t("button")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound button signals ...\n";
+#endif
         BOOST_CHECK(signal == adobe::static_name_t("clicked"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
         if (!widget_id)
@@ -172,6 +179,9 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
         else
             BOOST_CHECK(value == adobe::any_regular_t(std::string("button value 2")));
     } else if (widget_type == adobe::static_name_t("checkbox")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound checkbox signals ...\n";
+#endif
         BOOST_CHECK(signal == adobe::static_name_t("checked"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
         if (!widget_id)
@@ -179,6 +189,9 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
         else
             BOOST_CHECK(value == adobe::any_regular_t(std::string("checkbox value 2")));
     } else if (widget_type == adobe::static_name_t("radio_button")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound radio_button signals ...\n";
+#endif
         BOOST_CHECK(signal == adobe::static_name_t("checked"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
         if (!widget_id)
@@ -186,6 +199,9 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
         else
             BOOST_CHECK(value == adobe::any_regular_t(std::string("radio button value 2")));
     } else if (widget_type == adobe::static_name_t("slider")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound slider signals ...\n";
+#endif
         BOOST_CHECK(signal == adobe::static_name_t("slid") ||
                     signal == adobe::static_name_t("slid_and_stopped"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
@@ -193,7 +209,19 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
             BOOST_CHECK(value == adobe::any_regular_t(25));
         else
             BOOST_CHECK(value == adobe::any_regular_t(75));
+    } else if (widget_type == adobe::static_name_t("edit_text")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound edit_text signals ...\n";
+#endif
+        BOOST_CHECK(signal == adobe::static_name_t("edited") ||
+                    signal == adobe::static_name_t("focus_update"));
+        BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
+        if (!widget_id)
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("edited value")));
+        else
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("focus_update value")));
     }
+#undef INSTRUMENT
 }
 
 void MinimalGGApp::Initialize()

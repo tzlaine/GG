@@ -205,10 +205,21 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
         BOOST_CHECK(signal == adobe::static_name_t("slid") ||
                     signal == adobe::static_name_t("slid_and_stopped"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
-        if (!widget_id)
-            BOOST_CHECK(value == adobe::any_regular_t(25));
-        else
-            BOOST_CHECK(value == adobe::any_regular_t(75));
+        if (!widget_id) {
+            adobe::dictionary_t dict;
+            dict[adobe::static_name_t("slider_pos")] = adobe::any_regular_t(25);
+            dict[adobe::static_name_t("slider_min")] = adobe::any_regular_t(0);
+            dict[adobe::static_name_t("slider_max")] = adobe::any_regular_t(99);
+            adobe::any_regular_t expected_value(dict);
+            BOOST_CHECK(value == expected_value);
+        } else {
+            adobe::dictionary_t dict;
+            dict[adobe::static_name_t("slider_pos")] = adobe::any_regular_t(75);
+            dict[adobe::static_name_t("slider_min")] = adobe::any_regular_t(0);
+            dict[adobe::static_name_t("slider_max")] = adobe::any_regular_t(99);
+            adobe::any_regular_t expected_value(dict);
+            BOOST_CHECK(value == expected_value);
+        }
     } else if (widget_type == adobe::static_name_t("edit_text")) {
 #if INSTRUMENT
         std::cerr << "Testing unbound edit_text signals ...\n";
@@ -217,9 +228,9 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
                     signal == adobe::static_name_t("focus_update"));
         BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
         if (!widget_id)
-            BOOST_CHECK(value == adobe::any_regular_t(std::string("edited value")));
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("f")));
         else
-            BOOST_CHECK(value == adobe::any_regular_t(std::string("focus_update value")));
+            BOOST_CHECK(value == adobe::any_regular_t(std::string("g")));
     }
 #undef INSTRUMENT
 }

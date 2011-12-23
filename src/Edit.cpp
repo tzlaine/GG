@@ -442,8 +442,8 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
         case GGK_RETURN:
         case GGK_KP_ENTER:
             FocusUpdateSignal(Text());
-            m_text->KeyPress(key, key_code_point, mod_keys);
             m_recently_edited = false;
+            ForwardEventToParent();
             break;
         default:
             std::string translated_code_point;
@@ -458,14 +458,16 @@ void Edit::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_k
                 if (LastVisibleChar() <= m_cursor_pos.first)
                     AdjustView();
             } else {
-                m_text->KeyPress(key, key_code_point, mod_keys);
+                ForwardEventToParent();
             }
             break;
         }
-        if (emit_signal)
+        if (emit_signal) {
+            m_recently_edited = true;
             EditedSignal(Text());
+        }
     } else {
-        m_text->KeyPress(key, key_code_point, mod_keys);
+        ForwardEventToParent();
     }
 }
 

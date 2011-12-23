@@ -95,7 +95,7 @@ Pt Edit::ClientLowerRight() const
 { return LowerRight() - Pt(X(PIXEL_MARGIN), Y(PIXEL_MARGIN)); }
 
 const std::string& Edit::Text() const
-{ return m_text->Text(); }
+{ return m_text->RawText(); }
 
 const std::pair<CPSize, CPSize>& Edit::CursorPosn() const
 { return m_cursor_pos; }

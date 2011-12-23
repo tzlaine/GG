@@ -261,6 +261,16 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
             BOOST_CHECK(value == adobe::any_regular_t(2));
         else
             BOOST_CHECK(value == adobe::any_regular_t(3));
+    } else if (widget_type == adobe::static_name_t("tab_group")) {
+#if INSTRUMENT
+        std::cerr << "Testing unbound tab_group signals ...\n";
+#endif
+        BOOST_CHECK(signal == adobe::static_name_t("tab_changed"));
+        BOOST_CHECK(!widget_id || widget_id == adobe::static_name_t("test_id"));
+        if (!widget_id)
+            BOOST_CHECK(value == adobe::any_regular_t(2));
+        else
+            BOOST_CHECK(value == adobe::any_regular_t(3));
     }
 #undef INSTRUMENT
 }

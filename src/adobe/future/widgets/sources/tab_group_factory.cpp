@@ -119,15 +119,14 @@ void attach_view_and_controller(tab_group_t&           control,
     }
 
     any_regular_t tab_changed_binding;
-    if (get_value(parameters, static_name_t("bind_tab_changed_signal"), tab_changed_binding)) {
-        name_t cell;
-        array_t expression;
+    name_t cell;
+    array_t expression;
+    if (get_value(parameters, static_name_t("bind_tab_changed_signal"), tab_changed_binding))
         implementation::cell_and_expression(tab_changed_binding, cell, expression);
-        control.tab_changed_proc_m =
-            boost::bind(&handle_tab_changed_signal,
-                        token.signal_notifier_m, control.signal_id_m,
-                        boost::ref(token.sheet_m), cell, expression, _1);
-    }
+    control.tab_changed_proc_m =
+        boost::bind(&handle_tab_changed_signal,
+                    token.signal_notifier_m, control.signal_id_m,
+                    boost::ref(token.sheet_m), cell, expression, _1);
 }
 
 /****************************************************************************************************/

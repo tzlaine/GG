@@ -51,7 +51,6 @@ struct edit_number_platform_data_t
 
     boost::function<void (double)> edited_proc_m;
     boost::function<void (double)> focus_update_proc_m;
-    popup_setter_type unit_changed_proc_m;
 };
 
 /****************************************************************************************************/

@@ -18,6 +18,8 @@
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 
+#include <GG/Edit.h>
+
 #include <limits>
 
 /*************************************************************************************************/
@@ -208,7 +210,7 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
         adobe::array_t expression;
         if (get_value(parameters, adobe::static_name_t("bind_unit_changed_signal"), unit_changed_binding))
             adobe::implementation::cell_and_expression(unit_changed_binding, cell, expression);
-        control.platform_m.unit_changed_proc_m =
+        control.popup_m.selection_changed_proc_m =
             boost::bind(&handle_unit_changed_signal,
                         token.signal_notifier_m,
                         adobe::static_name_t("edit_number"),
@@ -270,6 +272,9 @@ platform_display_type insert<edit_number_t>(display_t&             display,
 
     element.locale_change_connection_m =
         monitor_locale(boost::bind(&edit_number_t::monitor_locale, boost::ref(element), _1));
+
+    GG::Connect(element.edit_text_m.control_m->FocusUpdateSignal,
+                boost::bind(&edit_number_t::monitor_focus_update, boost::ref(element), _1));
 
     return pos;
 }

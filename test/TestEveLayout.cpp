@@ -248,7 +248,7 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
             else if (widget_id == adobe::static_name_t("test_id_1"))
                 BOOST_CHECK(value == adobe::any_regular_t(2));
         } else {
-            if (widget_id == adobe::static_name_t("test_id_1"))
+            if (widget_id == adobe::static_name_t("test_id_2"))
                 BOOST_CHECK(value == adobe::any_regular_t(std::string("cm")));
         }
     } else if (widget_type == adobe::static_name_t("popup")) {

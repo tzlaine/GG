@@ -232,8 +232,7 @@ void edit_number_t::monitor_text(const std::string& new_value, bool display_was_
     if (controller.setter_m)
         controller.setter_m(real);
 
-    if (platform_m.edited_proc_m)
-        platform_m.edited_proc_m(real);
+    platform_m.edited_proc_m(real);
 }
 
 /*************************************************************************************************/
@@ -252,17 +251,13 @@ void edit_number_t::monitor_focus_update(const std::string& new_value)
                                     base_unit_set_m[base_unit_index].max_m);
     }
 
-    if (platform_m.focus_update_proc_m)
-        platform_m.focus_update_proc_m(real);
+    platform_m.focus_update_proc_m(real);
 }
 
 /*************************************************************************************************/
 
 void edit_number_t::monitor_popup(const any_regular_t& value)
-{
-    if (platform_m.unit_changed_proc_m)
-        platform_m.unit_changed_proc_m(value);
-}
+{ popup_m.selection_changed_proc_m(value); }
 
 /*************************************************************************************************/
 

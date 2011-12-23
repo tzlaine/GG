@@ -5,6 +5,7 @@ layout alert_dialog
         group(name: "Edited, Focus-Update, and Unit-Changed Signals Bound")
         {
             edit_number(name: "no expression",
+                        format: "#.##",
                         characters: 10,
                         units: [
                             { name: "m", bind: @bind_cell_0 },
@@ -23,6 +24,7 @@ layout alert_dialog
             display_text(name: "Unit changed signal result:", characters: 15, bind: @result_unit_changed_signal_cell_0);
 
             edit_number(name: "simple expression",
+                        format: "#.##",
                         characters: 10,
                         units: [
                             { name: "m", bind: @bind_cell_1 },
@@ -53,12 +55,10 @@ layout alert_dialog
 
             edit_number(name: "signal_id: @test_id_2", characters: 10,
                         units: [
-                            { name: "m", bind: @bind_cell_4 },
-                            { name: "cm", bind: @bind_cell_4, scale: [ 0.01, 0 ]  }
+                            { name: "m" },
+                            { name: "cm", scale: [ 0.01, 0 ]  }
                         ],
                         signal_id: @test_id_2);
-            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
-            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
         }
     }
 }

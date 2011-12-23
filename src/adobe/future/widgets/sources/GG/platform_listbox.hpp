@@ -52,6 +52,7 @@ namespace adobe {
                   int rows,
                   int width,
                   int height,
+                  GG::Flags<GG::ListBoxStyle> style,
                   const item_set_t& items,
                   GG::Clr color,
                   GG::Clr interior_color,
@@ -79,6 +80,7 @@ namespace adobe {
         int rows_m;
         int width_m;
         int height_m;
+        GG::Flags<GG::ListBoxStyle> style_m;
         GG::Clr color_m;
         GG::Clr interior_color_m;
         GG::Clr item_text_color_m;

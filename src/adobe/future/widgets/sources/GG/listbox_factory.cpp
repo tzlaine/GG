@@ -204,6 +204,26 @@ namespace {
                                              adobe::any_regular_t(value));
     }
 
+    void get_sort_order_style(adobe::name_t sort_order, GG::Flags<GG::ListBoxStyle>& style)
+    {
+        if (sort_order == adobe::static_name_t("descending"))
+            style |= GG::LIST_SORTDESCENDING;
+        else if (sort_order != adobe::static_name_t("ascending"))
+            throw std::runtime_error("Unknown listbox sort order.");
+    }
+
+    void get_selection_style(adobe::name_t selections, GG::Flags<GG::ListBoxStyle>& style)
+    {
+        if (selections == adobe::static_name_t("none"))
+            style |= GG::LIST_NOSEL;
+        else if (selections == adobe::static_name_t("single"))
+            style |= GG::LIST_SINGLESEL;
+        else if (selections == adobe::static_name_t("quick"))
+            style |= GG::LIST_QUICKSEL;
+        else if (selections != adobe::static_name_t("multiple"))
+            throw std::runtime_error("Unknown listbox selections type.");
+    }
+
 }
 
 namespace adobe {
@@ -218,6 +238,11 @@ namespace adobe {
         long rows(0);
         long width(0);
         long height(0);
+        bool sort(true);
+        name_t sort_order("ascending");
+        name_t selections("single");
+        bool user_delete(false);
+        bool browse_updates(false);
         array_t items;
         listbox_t::item_set_t item_set;
         GG::Clr color(GG::CLR_GRAY);
@@ -233,6 +258,11 @@ namespace adobe {
         get_value(parameters, static_name_t("rows"), rows);
         get_value(parameters, static_name_t("width"), width);
         get_value(parameters, static_name_t("height"), height);
+        get_value(parameters, static_name_t("sort"), sort);
+        get_value(parameters, static_name_t("sort_order"), sort_order);
+        get_value(parameters, static_name_t("selections"), selections);
+        get_value(parameters, static_name_t("user_delete"), user_delete);
+        get_value(parameters, static_name_t("browse_updates"), browse_updates);
         get_value(parameters, key_items, items);
         implementation::get_color(parameters, static_name_t("color"), color);
         implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
@@ -240,6 +270,19 @@ namespace adobe {
         implementation::get_color(parameters, static_name_t("item_text_color"), item_text_color);
         get_value(parameters, static_name_t("signal_id"), signal_id);
         get_value(parameters, static_name_t("allowed_drop_types"), allowed_drop_types);
+
+        GG::Flags<GG::ListBoxStyle> style;
+        if (!sort)
+            style |= GG::LIST_NOSORT;
+
+        get_sort_order_style(sort_order, style);
+        get_selection_style(selections, style);
+
+        if (!user_delete)
+            style |= GG::LIST_USERDELETE;
+
+        if (!browse_updates)
+            style |= GG::LIST_BROWSEUPDATES;
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
             dictionary_t cur_item(first->cast<dictionary_t>());
@@ -264,6 +307,7 @@ namespace adobe {
                                 rows,
                                 width,
                                 height,
+                                style,
                                 item_set,
                                 color,
                                 interior_color,

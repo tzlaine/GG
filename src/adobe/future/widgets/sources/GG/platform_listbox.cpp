@@ -133,6 +133,7 @@ namespace adobe {
                          int rows,
                          int width,
                          int height,
+                         GG::Flags<GG::ListBoxStyle> style,
                          const item_set_t& items,
                          GG::Clr color,
                          GG::Clr interior_color,
@@ -149,6 +150,7 @@ namespace adobe {
         rows_m(rows),
         width_m(width),
         height_m(height),
+        style_m(style),
         color_m(color),
         interior_color_m(interior_color),
         item_text_color_m(item_text_color),
@@ -315,7 +317,7 @@ namespace adobe {
         element.control_m =
             implementation::Factory().NewListBox(GG::X0, GG::Y0, GG::X1, Height(lines),
                                                  element.color_m, element.interior_color_m);
-        element.control_m->SetStyle(GG::LIST_NOSORT | GG::LIST_SINGLESEL);
+        element.control_m->SetStyle(element.style_m);
 
         element.original_height_m = Value(element.control_m->Height());
 

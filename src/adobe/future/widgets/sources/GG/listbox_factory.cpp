@@ -234,7 +234,7 @@ namespace adobe {
     {
         std::string name;
         std::string alt_text;
-        long characters(50);
+        long characters(25);
         long rows(0);
         bool sort(true);
         name_t sort_order("ascending");

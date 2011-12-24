@@ -294,11 +294,6 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                               button_notifier,
                                               signal_notifier);
 
-    virtual_machine_t evaluator;
-    vm_lookup_t       lookup;
-
-    lookup.attach_to(evaluator);
-
     /*
         We set the initial parent to be the root of the main display, an
         empty eve iterator and the given dialog size.
@@ -314,7 +309,7 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                  keyboard_t::iterator()),
                    bind_layout(boost::bind(&client_assembler, boost::ref(token), _1, _2, _3, boost::cref(proc)),
                                result->layout_sheet_m,
-                               evaluator))) {
+                               sheet.machine_m))) {
         throw std::logic_error("Eve parse failed.");
     }
 

@@ -140,6 +140,7 @@ namespace adobe {
 
 popup_t::popup_t(const std::string& name,
                  const std::string& alt_text,
+                 int max_characters,
                  const std::string& custom_item_name,
                  const menu_item_t* first,
                  const menu_item_t* last,
@@ -150,6 +151,7 @@ popup_t::popup_t(const std::string& name,
     control_m(0),
     name_m(name, alt_text, 0, GG::FORMAT_LEFT | GG::FORMAT_TOP, label_color),
     alt_text_m(alt_text),
+    max_characters_m(max_characters),
     using_label_m(!name.empty()),
     color_m(color),
     item_text_color_m(item_text_color),
@@ -173,14 +175,14 @@ void popup_t::measure(extents_t& result)
 
     menu_item_set_t::iterator first(menu_items_m.begin());
     menu_item_set_t::iterator last(menu_items_m.end());
-    GG::Pt largest_extent;
-    bool have_extents = false;
+    GG::Pt largest_extent(font->TextExtent(custom_item_name_m));
     for (; first != last; ++first) {
-        GG::Pt extent = font->TextExtent(first->first) + GG::Pt(implementation::CharWidth(), GG::Y0);
+        GG::Pt extent = font->TextExtent(first->first);
         if (largest_extent.x < extent.x)
             largest_extent = extent;
-        have_extents = true;
     }
+    largest_extent.x += implementation::CharWidth();
+    largest_extent.x = std::min(largest_extent.x, max_characters_m * implementation::CharWidth());
 
     GG::Pt non_client_size = implementation::NonClientSize(*control_m);
 
@@ -218,11 +220,6 @@ void popup_t::measure(extents_t& result)
     // resulting width.
     //
     result.width() += gap + label_bounds.width();
-
-    //
-    // Don't let the width of the popup go too crazy now...
-    //
-    result.width() = std::min(result.width(), 300L); // REVISIT (fbrereto) : fixed width
 
     //
     // Add a point-of-interest where the label ends.

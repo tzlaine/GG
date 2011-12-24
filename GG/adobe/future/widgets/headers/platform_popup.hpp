@@ -43,6 +43,7 @@ struct popup_t : boost::noncopyable
 
     popup_t(const std::string& name,
             const std::string& alt_text,
+            int max_characters,
             const std::string& custom_item_name,
             const menu_item_t* first,
             const menu_item_t* last,
@@ -80,6 +81,7 @@ struct popup_t : boost::noncopyable
     theme_t              theme_m;
     label_t              name_m;
     std::string          alt_text_m;
+    int                  max_characters_m;
     bool                 using_label_m;
     setter_type          value_proc_m;
     setter_type          selection_changed_proc_m;

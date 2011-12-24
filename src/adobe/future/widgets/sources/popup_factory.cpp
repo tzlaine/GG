@@ -54,6 +54,7 @@ void create_widget(const dictionary_t& parameters,
 {
     std::string              name;
     std::string              alt_text;
+    int                      max_characters(25);
     std::string              custom_item_name("Custom");
     array_t                  items;
     popup_t::menu_item_set_t item_set;
@@ -64,6 +65,7 @@ void create_widget(const dictionary_t& parameters,
 
     get_value(parameters, key_name, name);
     get_value(parameters, key_alt_text, alt_text);
+    get_value(parameters, key_max_characters, max_characters);
     get_value(parameters, key_items, items);
     get_value(parameters, key_custom_item_name, custom_item_name);
     implementation::get_color(parameters, static_name_t("color"), color);
@@ -84,6 +86,7 @@ void create_widget(const dictionary_t& parameters,
 
     widget = new popup_t(name,
                          alt_text,
+                         max_characters,
                          custom_item_name,
                          first_value,
                          first_value + item_set.size(),

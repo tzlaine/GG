@@ -140,7 +140,7 @@ namespace {
     bool register_()
     {
         GG::RegisterDictionaryFunction(adobe::static_name_t("texture"), &texture);
-        GG::RegisterDictionaryFunction(adobe::static_name_t("subtexture"), &texture);
+        GG::RegisterDictionaryFunction(adobe::static_name_t("subtexture"), &subtexture);
 
         return true;
     }

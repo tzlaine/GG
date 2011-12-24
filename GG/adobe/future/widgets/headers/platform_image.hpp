@@ -11,8 +11,8 @@
 
 /****************************************************************************************************/
 
-#include <GG/Texture.h>
-#include <GG/Wnd.h>
+#include <GG/StaticGraphic.h>
+#include <GG/WndEvent.h>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/memory.hpp>
 #include <GG/adobe/layout_attributes.hpp>
@@ -24,7 +24,6 @@
 
 
 namespace GG {
-    class StaticGraphic;
     class Wnd;
 }
 
@@ -61,14 +60,10 @@ struct image_t : boost::noncopyable
     typedef any_regular_t                                        view_model_type;
     typedef boost::function<void (const controller_model_type&)> setter_proc_type;
 
-    image_t(const view_model_type& image,
-            int                    width,
-            int                    height,
-            name_t                 horizontal,
-            name_t                 vertical,
-            bool                   fit_graphic,
-            bool                   shrink_to_fit,
-            bool                   proportional);
+    image_t(const view_model_type&      image,
+            int                         width,
+            int                         height,
+            GG::Flags<GG::GraphicStyle> style);
 
     void display(const view_model_type& value);
     void monitor(const setter_proc_type& proc);
@@ -77,11 +72,9 @@ struct image_t : boost::noncopyable
     view_model_type                    image_m;
     int                                width_m;
     int                                height_m;
-    name_t                             horizontal_m;
-    name_t                             vertical_m;
-    bool                               fit_graphic_m;
-    bool                               shrink_to_fit_m;
-    bool                               proportional_m;
+    int                                original_width_m;
+    int                                original_height_m;
+    GG::Flags<GG::GraphicStyle>        style_m;
     setter_proc_type                   callback_m;
     dictionary_t                       metadata_m;
     GG::Pt                             last_point_m;

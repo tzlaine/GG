@@ -49,10 +49,32 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, static_name_t("shrink_to_fit"), shrink_to_fit);
     get_value(parameters, static_name_t("proportional"), proportional);
 
-    widget = new image_t(image,
-                         width, height,
-                         horizontal, vertical,
-                         fit_graphic, shrink_to_fit, proportional);
+    GG::Flags<GG::GraphicStyle> style;
+
+    if (horizontal == key_align_left)
+        style |= GG::GRAPHIC_LEFT;
+    else if (horizontal == key_align_center)
+        style |= GG::GRAPHIC_CENTER;
+    else if (horizontal == key_align_right)
+        style |= GG::GRAPHIC_RIGHT;
+
+    if (vertical == key_align_top)
+        style |= GG::GRAPHIC_TOP;
+    else if (vertical == key_align_center)
+        style |= GG::GRAPHIC_VCENTER;
+    else if (vertical == key_align_bottom)
+        style |= GG::GRAPHIC_BOTTOM;
+
+    if (fit_graphic)
+        style |= GG::GRAPHIC_FITGRAPHIC;
+
+    if (shrink_to_fit)
+        style |= GG::GRAPHIC_SHRINKFIT;
+
+    if (proportional)
+        style |= GG::GRAPHIC_PROPSCALE;
+
+    widget = new image_t(image, width, height, style);
 }
 
 /*************************************************************************************************/
@@ -70,8 +92,7 @@ void subscribe_view_to_model(image_t&                control,
 
     assemblage_cleanup_ptr(assemblage, view_adaptor);
 
-    if (layout_sheet)
-    {
+    if (layout_sheet) {
         attach_view(assemblage, cell, *view_adaptor, *layout_sheet);
         return;
     }

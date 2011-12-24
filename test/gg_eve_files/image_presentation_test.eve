@@ -4,46 +4,53 @@ layout alert_dialog
     {
         row()
         {
-            group(name: "empty")
+            group()
             {
                 image();
             }
-            group(name: "image")
+            group()
             {
                 image(image: "small_warning_icon.png");
             }
-            group(name: "texture")
+            group()
             {
                 image(image: texture(name: "small_warning_icon.png"));
             }
-            group(name: "subtexture")
+            group()
             {
-                image(image: subtexture(name: "small_warning_icon.png", x1: 0, y1: 0, x2: 11, y2: 11));
+                image(image: subtexture(texture: "small_warning_icon.png", x1: 0, y1: 0, x2: 11, y2: 11));
+            }
+            group()
+            {
+                image(image: subtexture(texture: texture(name: "small_warning_icon.png"),
+                                                         x1: 0, y1: 0, x2: 11, y2: 11));
             }
         }
         row()
         {
-            group(name: "50 width, 50 height")
+            group()
             {
                 image(image: "small_warning_icon.png",
+                      fit_graphic: false,
                       width: 50, height: 50);
             }
-            group(name: "align_left, align_bottom")
+            group()
             {
                 image(image: "small_warning_icon.png",
+                      fit_graphic: false,
                       width: 50, height: 50,
-                      horiziontal: align_left, vertical: align_bottom);
+                      horizontal: align_right, vertical: align_top);
             }
         }
         row()
         {
-            group(name: "fit_graphic")
+            group()
             {
                 image(image: "small_warning_icon.png",
                       width: 50, height: 75,
-                      fit_graphic: true);
+                      fit_graphic: true, proportional: false);
             }
-            group(name: "fit_graphic, proportional")
+            group()
             {
                 image(image: "small_warning_icon.png",
                       width: 50, height: 75,
@@ -52,16 +59,16 @@ layout alert_dialog
         }
         row()
         {
-            group(name: "shrink_to_fit")
+            group()
             {
                 image(image: "stop.png",
-                      width: 25, height: 50,
-                      shrink_to_fit: true);
+                      width: 50, height: 25,
+                      shrink_to_fit: true, proportional: false);
             }
-            group(name: "shrink_to_fit, proportional")
+            group()
             {
                 image(image: "stop.png",
-                      width: 25, height: 50,
+                      width: 50, height: 25,
                       shrink_to_fit: true, proportional: true);
             }
         }

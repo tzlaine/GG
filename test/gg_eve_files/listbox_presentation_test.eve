@@ -1,11 +1,51 @@
 layout alert_dialog
 {
-    view dialog(name: "Listbox Presentation Test")
+    view dialog(name: "Listbox Presentation Test", placement: place_column, child_horizontal: align_fill)
     {
-        listbox(name: "red color, blue item_text_color, green label:",
-                items: [ { name: "Foo option", value: 1 } ],
-                color: {r:255},
-                item_text_color: {b:255},
-                label_color: {g:255});
+        group(name: "red color, blue item_text_color, green label", child_horizontal: align_left)
+        {
+            listbox(items: [ { name: "Option", value: 1 } ],
+                    color: {r:255},
+                    item_text_color: {b:255},
+                    label_color: {g:255});
+        }
+
+        group(name: "2 rows, 20 characters", child_horizontal: align_left)
+        {
+            listbox(rows: 2,
+                    characters: 20,
+                    items: [ { name: "Option", value: 1 } ]);
+        }
+
+        group(name: "not sorted", child_horizontal: align_left)
+        {
+            listbox(sort: false,
+                    items: [
+                        { name: "Option 3", value: 3 },
+                        { name: "Option 1", value: 1 },
+                        { name: "Option 2", value: 2 }
+                    ]);
+        }
+
+        group(name: "sorted ascending", child_horizontal: align_left)
+        {
+            listbox(sort: true,
+                    items: [
+                        { name: "Option 3", value: 3 },
+                        { name: "Option 1", value: 1 },
+                        { name: "Option 2", value: 2 }
+                    ]);
+        }
+
+        group(name: "sorted descending", child_horizontal: align_left)
+        {
+            listbox(sort: true,
+                    sort_order: @descending,
+                    items: [
+                        { name: "Option 3", value: 3 },
+                        { name: "Option 1", value: 1 },
+                        { name: "Option 2", value: 2 }
+                    ]);
+        }
     }
 }

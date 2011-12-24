@@ -131,8 +131,6 @@ namespace adobe {
                          const std::string& alt_text,
                          int characters,
                          int rows,
-                         int width,
-                         int height,
                          GG::Flags<GG::ListBoxStyle> style,
                          const item_set_t& items,
                          GG::Clr color,
@@ -148,8 +146,6 @@ namespace adobe {
         items_m(items),
         characters_m(characters),
         rows_m(rows),
-        width_m(width),
-        height_m(height),
         style_m(style),
         color_m(color),
         interior_color_m(interior_color),
@@ -207,11 +203,6 @@ namespace adobe {
         // resulting width.
         //
         result.width() += gap + label_bounds.width();
-
-        //
-        // Don't let the width of the listbox go too crazy now...
-        //
-        result.width() = std::min(result.width(), 300L); // REVISIT (fbrereto) : fixed width
 
         //
         // Add a point-of-interest where the label ends.

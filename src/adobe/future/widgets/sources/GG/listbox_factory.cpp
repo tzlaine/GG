@@ -236,8 +236,6 @@ namespace adobe {
         std::string alt_text;
         long characters(50);
         long rows(0);
-        long width(0);
-        long height(0);
         bool sort(true);
         name_t sort_order("ascending");
         name_t selections("single");
@@ -256,8 +254,6 @@ namespace adobe {
         get_value(parameters, key_alt_text, alt_text);
         get_value(parameters, key_characters, characters);
         get_value(parameters, static_name_t("rows"), rows);
-        get_value(parameters, static_name_t("width"), width);
-        get_value(parameters, static_name_t("height"), height);
         get_value(parameters, static_name_t("sort"), sort);
         get_value(parameters, static_name_t("sort_order"), sort_order);
         get_value(parameters, static_name_t("selections"), selections);
@@ -305,8 +301,6 @@ namespace adobe {
                                 alt_text,
                                 characters,
                                 rows,
-                                width,
-                                height,
                                 style,
                                 item_set,
                                 color,

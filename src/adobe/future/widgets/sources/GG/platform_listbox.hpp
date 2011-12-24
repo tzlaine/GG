@@ -50,8 +50,6 @@ namespace adobe {
                   const std::string& alt_text,
                   int characters,
                   int rows,
-                  int width,
-                  int height,
                   GG::Flags<GG::ListBoxStyle> style,
                   const item_set_t& items,
                   GG::Clr color,
@@ -78,8 +76,6 @@ namespace adobe {
         item_set_t items_m;
         int characters_m;
         int rows_m;
-        int width_m;
-        int height_m;
         GG::Flags<GG::ListBoxStyle> style_m;
         GG::Clr color_m;
         GG::Clr interior_color_m;

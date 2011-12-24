@@ -119,20 +119,29 @@ namespace {
         if (named_argument_set.empty())
             return adobe::any_regular_t(adobe::empty_t());
 
+        std::string texture_name;
         boost::shared_ptr<GG::Texture> texture;
-        GG::X x1, x2;
-        GG::Y y1, y2;
+        int x1;
+        int x2;
+        int y1;
+        int y2;
 
         bool all_needed_args = true;
 
-        get_value(named_argument_set, adobe::static_name_t("texture"), texture);
-        all_needed_args |= get_value(named_argument_set, adobe::static_name_t("x1"), x1);
-        all_needed_args |= get_value(named_argument_set, adobe::static_name_t("y1"), y1);
-        all_needed_args |= get_value(named_argument_set, adobe::static_name_t("x2"), x2);
-        all_needed_args |= get_value(named_argument_set, adobe::static_name_t("y2"), y2);
+        if (get_value(named_argument_set, adobe::static_name_t("texture"), texture_name)) {
+            try {
+                texture = GG::GUI::GetGUI()->GetTexture(texture_name);
+            } catch (...) {}
+        } else {
+            get_value(named_argument_set, adobe::static_name_t("texture"), texture);
+        }
+        all_needed_args &= get_value(named_argument_set, adobe::static_name_t("x1"), x1);
+        all_needed_args &= get_value(named_argument_set, adobe::static_name_t("y1"), y1);
+        all_needed_args &= get_value(named_argument_set, adobe::static_name_t("x2"), x2);
+        all_needed_args &= get_value(named_argument_set, adobe::static_name_t("y2"), y2);
 
         if (texture && all_needed_args)
-            return adobe::any_regular_t(GG::SubTexture(texture, x1, y1, x2, y2));
+            return adobe::any_regular_t(GG::SubTexture(texture, GG::X(x1), GG::Y(y1), GG::X(x2), GG::Y(y2)));
         else
             return adobe::any_regular_t(adobe::empty_t());
     }

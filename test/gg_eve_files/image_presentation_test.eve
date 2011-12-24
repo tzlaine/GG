@@ -1,0 +1,69 @@
+layout alert_dialog
+{
+    view dialog(name: "Image Presentation Test", placement: place_column)
+    {
+        row()
+        {
+            group(name: "empty")
+            {
+                image();
+            }
+            group(name: "image")
+            {
+                image(image: "small_warning_icon.png");
+            }
+            group(name: "texture")
+            {
+                image(image: texture(name: "small_warning_icon.png"));
+            }
+            group(name: "subtexture")
+            {
+                image(image: subtexture(name: "small_warning_icon.png", x1: 0, y1: 0, x2: 11, y2: 11));
+            }
+        }
+        row()
+        {
+            group(name: "50 width, 50 height")
+            {
+                image(image: "small_warning_icon.png",
+                      width: 50, height: 50);
+            }
+            group(name: "align_left, align_bottom")
+            {
+                image(image: "small_warning_icon.png",
+                      width: 50, height: 50,
+                      horiziontal: align_left, vertical: align_bottom);
+            }
+        }
+        row()
+        {
+            group(name: "fit_graphic")
+            {
+                image(image: "small_warning_icon.png",
+                      width: 50, height: 75,
+                      fit_graphic: true);
+            }
+            group(name: "fit_graphic, proportional")
+            {
+                image(image: "small_warning_icon.png",
+                      width: 50, height: 75,
+                      fit_graphic: true, proportional: true);
+            }
+        }
+        row()
+        {
+            group(name: "shrink_to_fit")
+            {
+                image(image: "stop.png",
+                      width: 25, height: 50,
+                      shrink_to_fit: true);
+            }
+            group(name: "shrink_to_fit, proportional")
+            {
+                image(image: "stop.png",
+                      width: 25, height: 50,
+                      shrink_to_fit: true, proportional: true);
+            }
+        }
+    }
+}

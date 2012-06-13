@@ -281,6 +281,7 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                       std::istream&                          stream,
                                       sheet_t&                               sheet,
                                       behavior_t&                            root_behavior,
+                                      vm_lookup_t&                           lookup,
                                       const button_notifier_t&               button_notifier,
                                       const signal_notifier_t&               signal_notifier,
                                       size_enum_t                            dialog_size,
@@ -295,7 +296,6 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                               signal_notifier);
 
     virtual_machine_t evaluator;
-    vm_lookup_t       lookup;
 
     lookup.attach_to(evaluator);
 

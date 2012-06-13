@@ -371,11 +371,16 @@ inline widget_factory_proc_t default_widget_factory_proc()
 
 /*************************************************************************************************/
 
+struct vm_lookup_t;
+
+/*************************************************************************************************/
+
 adobe::auto_ptr<eve_client_holder> make_view(const std::string&                     stream_source,
                                              const line_position_t::getline_proc_t& getline_proc,
                                              std::istream&                          stream,
                                              sheet_t&                               sheet,
                                              behavior_t&                            root_behavior,
+                                             vm_lookup_t&                           lookup,
                                              const button_notifier_t&               button_notifier,
                                              const signal_notifier_t&               signal_notifier,
                                              size_enum_t                            dialog_size,

@@ -46,11 +46,14 @@ widget_node_t sublayout_t::evaluate(const std::string&       sheet_description,
 
     std::stringstream layout_stream(layout_description);
 
+    vm_lookup_t lookup;
+
     sublayout_holder_m = make_view("sublayout layout",
                                    line_position_t::getline_proc_t(),
                                    layout_stream,
                                    sublayout_sheet_m,
                                    behavior,
+                                   lookup,
                                    button_notifier,
                                    signal_notifier,
                                    size,

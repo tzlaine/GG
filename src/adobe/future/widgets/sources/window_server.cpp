@@ -8,6 +8,7 @@
 
 #include <GG/adobe/future/widgets/headers/window_server.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
+#include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 
 #include <GG/adobe/algorithm/for_each.hpp>
 #include <GG/adobe/future/resources.hpp>
@@ -66,11 +67,14 @@ void window_server_t::push_back(const char* name, size_enum_t dialog_size)
     
     sheet_m.update();
 
+    vm_lookup_t lookup;
+
     window_list_m.back() = make_view(   file_name.string(),
                                         line_position_t::getline_proc_t(),
                                         stream,
                                         sheet_m,
                                         behavior_m,
+                                        lookup,
                                         boost::bind(&window_server_t::dispatch_window_action,
                                             boost::ref(*this), window, _1, _2),
                                         signal_notifier_t(),
@@ -98,6 +102,8 @@ void window_server_t::push_back(std::istream&                                   
 
     iterator window (window_list_m.insert(window_list_m.end(), NULL));
 
+    vm_lookup_t lookup;
+
     //
     // REVISIT (ralpht): Where does this made-up filename get used? Does it need to be localized
     //  or actually be an existing file?
@@ -111,6 +117,7 @@ void window_server_t::push_back(std::istream&                                   
                                         data,
                                         sheet_m,
                                         behavior_m,
+                                        lookup,
                                         boost::bind(&window_server_t::dispatch_window_action,
                                             boost::ref(*this), window, _1, _2),
                                         signal_notifier_t(),

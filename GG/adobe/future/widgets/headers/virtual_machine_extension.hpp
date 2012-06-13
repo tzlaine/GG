@@ -101,6 +101,9 @@ public:
 
     vm_lookup_t();
 
+    any_regular_t dproc(name_t name, const dictionary_t& argument_set) const;
+    any_regular_t aproc(name_t name, const array_t& argument_set) const;
+
     void insert_dictionary_function(name_t name, const dictionary_function_t& proc);
     void insert_array_function(name_t name, const array_function_t& proc);
 
@@ -108,9 +111,6 @@ public:
     void attach_to(sheet_t&);
 
 private:
-    any_regular_t dproc(name_t name, const dictionary_t& argument_set) const;
-    any_regular_t aproc(name_t name, const array_t& argument_set) const;
-
     dictionary_function_map_t dmap_m;
     array_function_map_t      amap_m;
     

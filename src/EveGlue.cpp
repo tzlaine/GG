@@ -51,6 +51,191 @@ namespace {
         return retval;
     }
 
+    adobe::aggregate_name_t key_key = { "key" };
+    adobe::aggregate_name_t key_state = { "state" };
+    adobe::aggregate_name_t key_transform = { "transform" };
+    adobe::aggregate_name_t key_fold = { "fold" };
+    adobe::aggregate_name_t key_foldr = { "foldr" };
+
+    // NOTE: Most GG-defined builtin functions are defined in
+    // src/adobe/future/widgets/sources/GG/functions.cpp.  These (and all
+    // future) higher-order functions must be defined here, since they need
+    // access to the function lookup mechanism.
+
+    adobe::any_regular_t transform(const adobe::vm_lookup_t& lookup, const adobe::array_t& arguments)
+    {
+        adobe::any_regular_t retval;
+
+        if (arguments.size() != 2u)
+            throw std::runtime_error("for_each() takes exactly 2 arguments; " + boost::lexical_cast<std::string>(arguments.size()) + " given.");
+
+        adobe::name_t f;
+        if (!arguments[1].cast(f))
+            throw std::runtime_error("The second argument to for_each() must be the name of a function.");
+
+        adobe::dictionary_t f_arguments;
+
+        if (const adobe::dictionary_t* sequence = arguments[0].cast<adobe::dictionary_t*>()) {
+            retval = adobe::any_regular_t(adobe::dictionary_t());
+            adobe::dictionary_t& result_elements = retval.cast<adobe::dictionary_t>();
+            for (adobe::dictionary_t::const_iterator
+                     it = sequence->begin(), end_it = sequence->end();
+                 it != end_it;
+                 ++it) {
+                f_arguments[key_key] = adobe::any_regular_t(it->first);
+                f_arguments[adobe::key_value] = it->second;
+                result_elements[it->first] = lookup.dproc(f, f_arguments);
+            }
+        } else if (const adobe::array_t* sequence = arguments[0].cast<adobe::array_t*>()) {
+            retval = adobe::any_regular_t(adobe::array_t());
+            adobe::array_t& result_elements = retval.cast<adobe::array_t>();
+            result_elements.reserve(sequence->size());
+            for (adobe::array_t::const_iterator
+                     it = sequence->begin(), end_it = sequence->end();
+                 it != end_it;
+                 ++it) {
+                f_arguments[adobe::key_value] = *it;
+                result_elements.push_back(lookup.dproc(f, f_arguments));
+            }
+        } else {
+            f_arguments[adobe::key_value] = arguments[0];
+            retval = lookup.dproc(f, f_arguments);
+        }
+
+        return retval;
+    }
+
+    template <typename Iter>
+    void fold_dictionary_impl(const adobe::vm_lookup_t& lookup,
+                              adobe::name_t f,
+                              Iter it,
+                              Iter end_it,
+                              adobe::any_regular_t& retval)
+    {
+        adobe::dictionary_t f_arguments;
+        for (; it != end_it; ++it) {
+            f_arguments[key_state] = retval;
+            f_arguments[key_key] = adobe::any_regular_t(it->first);
+            f_arguments[adobe::key_value] = it->second;
+            retval = lookup.dproc(f, f_arguments);
+        }
+    }
+
+    template <typename Iter>
+    void fold_array_impl(const adobe::vm_lookup_t& lookup,
+                         adobe::name_t f,
+                         Iter it,
+                         Iter end_it,
+                         adobe::any_regular_t& retval)
+    {
+        adobe::dictionary_t f_arguments;
+        for (; it != end_it; ++it) {
+            f_arguments[key_state] = retval;
+            f_arguments[adobe::key_value] = *it;
+            retval = lookup.dproc(f, f_arguments);
+        }
+    }
+
+    adobe::any_regular_t fold(const adobe::vm_lookup_t& lookup, const adobe::array_t& arguments)
+    {
+        adobe::any_regular_t retval;
+
+        if (arguments.size() != 3u)
+            throw std::runtime_error("fold() takes exactly 3 arguments; " + boost::lexical_cast<std::string>(arguments.size()) + " given.");
+
+        adobe::name_t f;
+        if (!arguments[2].cast(f))
+            throw std::runtime_error("The third argument to fold() must be the name of a function.");
+
+        retval = arguments[1];
+
+        if (const adobe::dictionary_t* sequence = arguments[0].cast<adobe::dictionary_t*>()) {
+            fold_dictionary_impl(lookup, f, sequence->begin(), sequence->end(), retval);
+        } else if (const adobe::array_t* sequence = arguments[0].cast<adobe::array_t*>()) {
+            fold_array_impl(lookup, f, sequence->begin(), sequence->end(), retval);
+        } else {
+            adobe::dictionary_t f_arguments;
+            f_arguments[adobe::key_value] = arguments[0];
+            retval = lookup.dproc(f, f_arguments);
+        }
+
+        return retval;
+    }
+
+    adobe::any_regular_t foldr(const adobe::vm_lookup_t& lookup, const adobe::array_t& arguments)
+    {
+        adobe::any_regular_t retval;
+
+        if (arguments.size() != 3u)
+            throw std::runtime_error("foldr() takes exactly 3 arguments; " + boost::lexical_cast<std::string>(arguments.size()) + " given.");
+
+        adobe::name_t f;
+        if (!arguments[2].cast(f))
+            throw std::runtime_error("The third argument to foldr() must be the name of a function.");
+
+        retval = arguments[1];
+
+        if (const adobe::dictionary_t* sequence = arguments[0].cast<adobe::dictionary_t*>()) {
+            fold_dictionary_impl(lookup, f, sequence->rbegin(), sequence->rend(), retval);
+        } else if (const adobe::array_t* sequence = arguments[0].cast<adobe::array_t*>()) {
+            fold_array_impl(lookup, f, sequence->rbegin(), sequence->rend(), retval);
+        } else {
+            adobe::dictionary_t f_arguments;
+            f_arguments[adobe::key_value] = arguments[0];
+            retval = lookup.dproc(f, f_arguments);
+        }
+
+        return retval;
+    }
+
+    void AttachFunctions(const GG::DictionaryFunctions& dictionary_functions,
+                         const GG::ArrayFunctions& array_functions,
+                         adobe::modal_dialog_t* dialog)
+    {
+        for (GG::DictionaryFunctions::const_iterator
+                 it = GetDictionaryFunctions().begin(), end_it = GetDictionaryFunctions().end();
+             it != end_it;
+             ++it) {
+            dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
+        }
+
+        for (GG::DictionaryFunctions::const_iterator
+                 it = dictionary_functions.begin(), end_it = dictionary_functions.end();
+             it != end_it;
+             ++it) {
+            dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
+        }
+
+        for (GG::ArrayFunctions::const_iterator
+                 it = GetArrayFunctions().begin(), end_it = GetArrayFunctions().end();
+             it != end_it;
+             ++it) {
+            dialog->vm_lookup_m.insert_array_function(it->first, it->second);
+        }
+
+        for (GG::ArrayFunctions::const_iterator
+                 it = array_functions.begin(), end_it = array_functions.end();
+             it != end_it;
+             ++it) {
+            dialog->vm_lookup_m.insert_array_function(it->first, it->second);
+        }
+
+        dialog->vm_lookup_m.insert_array_function(
+            key_transform,
+            boost::bind(&transform, boost::cref(dialog->vm_lookup_m), _1)
+        );
+
+        dialog->vm_lookup_m.insert_array_function(
+            key_fold,
+            boost::bind(&fold, boost::cref(dialog->vm_lookup_m), _1)
+        );
+
+        dialog->vm_lookup_m.insert_array_function(
+            key_foldr,
+            boost::bind(&foldr, boost::cref(dialog->vm_lookup_m), _1)
+        );
+    }
+
 }
 
 DefaultSignalHandler::HandlerKey::HandlerKey()
@@ -300,33 +485,7 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
-    for (DictionaryFunctions::const_iterator
-             it = GetDictionaryFunctions().begin(), end_it = GetDictionaryFunctions().end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
-    }
-
-    for (DictionaryFunctions::const_iterator
-             it = dictionary_functions.begin(), end_it = dictionary_functions.end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
-    }
-
-    for (ArrayFunctions::const_iterator
-             it = GetArrayFunctions().begin(), end_it = GetArrayFunctions().end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
-    }
-
-    for (ArrayFunctions::const_iterator
-             it = array_functions.begin(), end_it = array_functions.end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
-    }
+    AttachFunctions(dictionary_functions, array_functions, dialog.get());
 
     std::auto_ptr<Wnd> w(dialog->init(eve_definition, eve_filename, adam_definition, adam_filename));
     EveDialog* gg_dialog = boost::polymorphic_downcast<EveDialog*>(w.get());
@@ -410,33 +569,7 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
-    for (DictionaryFunctions::const_iterator
-             it = GetDictionaryFunctions().begin(), end_it = GetDictionaryFunctions().end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
-    }
-
-    for (DictionaryFunctions::const_iterator
-             it = dictionary_functions.begin(), end_it = dictionary_functions.end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
-    }
-
-    for (ArrayFunctions::const_iterator
-             it = GetArrayFunctions().begin(), end_it = GetArrayFunctions().end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
-    }
-
-    for (ArrayFunctions::const_iterator
-             it = array_functions.begin(), end_it = array_functions.end();
-         it != end_it;
-         ++it) {
-        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
-    }
+    AttachFunctions(dictionary_functions, array_functions, dialog.get());
 
     Wnd* w = dialog->init(eve_definition, eve_filename, adam_definition, adam_filename);
     retval = boost::polymorphic_downcast<EveDialog*>(w);

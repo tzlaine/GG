@@ -91,15 +91,47 @@ typedef boost::function<
     void (adobe::name_t, adobe::name_t, adobe::name_t, const adobe::any_regular_t&)
 > SignalHandler;
 
+/** The type of function used to evaluate named-parameter functions in Adam
+    and Eve expressions.  \see \ref eve_adding_user_functions. */
+typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)> DictionaryFunction;
+
+/** The map of functions used to evaluate named-parameter functions in Adam
+    and Eve expressions.  \see \ref eve_adding_user_functions. */
+typedef std::map<adobe::name_t, DictionaryFunction> DictionaryFunctions;
+
+/** The type of function used to evaluate positional-parameter functions in
+    Adam and Eve expressions.  \see \ref eve_adding_user_functions. */
+typedef boost::function<adobe::any_regular_t (const adobe::array_t&)> ArrayFunction;
+
+/** The map of functions used to evaluate positional-parameter functions in
+    Adam and Eve expressions.  \see \ref eve_adding_user_functions. */
+    typedef std::map<adobe::name_t, ArrayFunction> ArrayFunctions;
+
 /** Returns the result of executing the modal dialog described by \a
-    eve_definition and \a adam_definition.  \see ButtonHandler. */
+    eve_definition and \a adam_definition.  \see ButtonHandler.  \see
+    SignalHandler. */
 ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definition,
                                      const boost::filesystem::path& adam_definition,
                                      ButtonHandler button_handler,
                                      SignalHandler signal_handler = SignalHandler());
 
 /** Returns the result of executing the modal dialog described by \a
-    eve_definition and \a adam_definition.  \see ButtonHandler. */
+    eve_definition and \a adam_definition.  The functions provided in \a
+    dictionary_functions and \a array_functions will be available in the
+    associated Adam and Eve scripts.  They will override any functions with
+    the same name registered with RegisterDictionaryFunction() and
+    RegisterArrayFunction(), respectively.  \see ButtonHandler.  \see
+    SignalHandler. */
+ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definition,
+                                     const boost::filesystem::path& adam_definition,
+                                     const DictionaryFunctions& dictionary_functions,
+                                     const ArrayFunctions& array_functions,
+                                     ButtonHandler button_handler,
+                                     SignalHandler signal_handler = SignalHandler());
+
+/** Returns the result of executing the modal dialog described by \a
+    eve_definition and \a adam_definition.  \see ButtonHandler.  \see
+    SignalHandler. */
 ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      const std::string& eve_filename,
                                      std::istream& adam_definition,
@@ -107,19 +139,63 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      ButtonHandler button_handler,
                                      SignalHandler signal_handler = SignalHandler());
 
+/** Returns the result of executing the modal dialog described by \a
+    eve_definition and \a adam_definition.  The functions provided in \a
+    dictionary_functions and \a array_functions will be available in the
+    associated Adam and Eve scripts.  They will override any functions with
+    the same name registered with RegisterDictionaryFunction() and
+    RegisterArrayFunction(), respectively.  \see ButtonHandler.  \see
+    SignalHandler. */
+ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
+                                     const std::string& eve_filename,
+                                     std::istream& adam_definition,
+                                     const std::string& adam_filename,
+                                     const DictionaryFunctions& dictionary_functions,
+                                     const ArrayFunctions& array_functions,
+                                     ButtonHandler button_handler,
+                                     SignalHandler signal_handler = SignalHandler());
+
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
-    returns an EveDialog.  \see ButtonHandler. */
+    returns an EveDialog.  \see ButtonHandler.  \see SignalHandler. */
 EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
                          const boost::filesystem::path& adam_definition,
                          ButtonHandler button_handler,
                          SignalHandler signal_handler = SignalHandler());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
-    returns an EveDialog.  \see ButtonHandler. */
+    returns an EveDialog.  The functions provided in \a dictionary_functions
+    and \a array_functions will be available in the associated Adam and Eve
+    scripts.  They will override any functions with the same name registered
+    with RegisterDictionaryFunction() and RegisterArrayFunction(),
+    respectively.  \see ButtonHandler.  \see SignalHandler. */
+EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
+                         const boost::filesystem::path& adam_definition,
+                         const DictionaryFunctions& dictionary_functions,
+                         const ArrayFunctions& array_functions,
+                         ButtonHandler button_handler,
+                         SignalHandler signal_handler = SignalHandler());
+
+/** Parses \a eve_definition and \a adam_definition, then instantiates and
+    returns an EveDialog.  \see ButtonHandler.  \see SignalHandler. */
 EveDialog* MakeEveDialog(std::istream& eve_definition,
                          const std::string& eve_filename,
                          std::istream& adam_definition,
                          const std::string& adam_filename,
+                         ButtonHandler button_handler,
+                         SignalHandler signal_handler = SignalHandler());
+
+/** Parses \a eve_definition and \a adam_definition, then instantiates and
+    returns an EveDialog.  The functions provided in \a dictionary_functions
+    and \a array_functions will be available in the associated Adam and Eve
+    scripts.  They will override any functions with the same name registered
+    with RegisterDictionaryFunction() and RegisterArrayFunction(),
+    respectively.  \see ButtonHandler.  \see SignalHandler. */
+EveDialog* MakeEveDialog(std::istream& eve_definition,
+                         const std::string& eve_filename,
+                         std::istream& adam_definition,
+                         const std::string& adam_filename,
+                         const DictionaryFunctions& dictionary_functions,
+                         const ArrayFunctions& array_functions,
                          ButtonHandler button_handler,
                          SignalHandler signal_handler = SignalHandler());
 
@@ -230,6 +306,8 @@ private:
                                                 const std::string& eve_filename,
                                                 std::istream& adam_definition,
                                                 const std::string& adam_filename,
+                                                const DictionaryFunctions& dictionary_functions,
+                                                const ArrayFunctions& array_functions,
                                                 ButtonHandler button_handler,
                                                 SignalHandler signal_handler);
 
@@ -237,17 +315,11 @@ private:
                                     const std::string& eve_filename,
                                     std::istream& adam_definition,
                                     const std::string& adam_filename,
+                                    const DictionaryFunctions& dictionary_functions,
+                                    const ArrayFunctions& array_functions,
                                     ButtonHandler button_handler,
                                     SignalHandler signal_handler);
 };
-
-/** The type of function used to evaluate named-parameter functions in Adam
-    and Eve expressions.  \see \ref eve_adding_user_functions. */
-typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)> DictionaryFunction;
-
-/** The type of function used to evaluate positional-parameter functions in
-    Adam and Eve expressions.  \see \ref eve_adding_user_functions. */
-typedef boost::function<adobe::any_regular_t (const adobe::array_t&)> ArrayFunction;
 
 /** Registers user-defined function \a function, callable as a named-parameter
     function in Adam and Eve expressions.  \see \ref

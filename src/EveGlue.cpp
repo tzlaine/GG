@@ -39,17 +39,15 @@ using namespace GG;
 
 namespace {
 
-    typedef std::list<std::pair<adobe::name_t, DictionaryFunction> > DictionaryFunctionList;
-    DictionaryFunctionList& DictionaryFunctions()
+    GG::DictionaryFunctions& GetDictionaryFunctions()
     {
-        static DictionaryFunctionList retval;
+        static GG::DictionaryFunctions retval;
         return retval;
     }
 
-    typedef std::list<std::pair<adobe::name_t, ArrayFunction> > ArrayFunctionList;
-    ArrayFunctionList& ArrayFunctions()
+    GG::ArrayFunctions& GetArrayFunctions()
     {
-        static ArrayFunctionList retval;
+        static GG::ArrayFunctions retval;
         return retval;
     }
 
@@ -236,15 +234,56 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                                          ButtonHandler button_handler,
                                          SignalHandler signal_handler/* = SignalHandler()*/)
 {
+    return ExecuteModalDialog(eve_definition,
+                              adam_definition,
+                              DictionaryFunctions(),
+                              ArrayFunctions(),
+                              button_handler,
+                              signal_handler);
+}
+
+ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition,
+                                         const boost::filesystem::path& adam_definition,
+                                         const DictionaryFunctions& dictionary_functions,
+                                         const ArrayFunctions& array_functions,
+                                         ButtonHandler button_handler,
+                                         SignalHandler signal_handler/* = SignalHandler()*/)
+{
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
-    return ExecuteModalDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), button_handler, signal_handler);
+    return ExecuteModalDialog(eve_stream,
+                              eve_definition.string(),
+                              adam_stream,
+                              adam_definition.string(),
+                              dictionary_functions,
+                              array_functions,
+                              button_handler,
+                              signal_handler);
 }
 
 ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                                          const std::string& eve_filename,
                                          std::istream& adam_definition,
                                          const std::string& adam_filename,
+                                         ButtonHandler button_handler,
+                                         SignalHandler signal_handler/* = SignalHandler()*/)
+{
+    return ExecuteModalDialog(eve_definition,
+                              eve_filename,
+                              adam_definition,
+                              adam_filename,
+                              DictionaryFunctions(),
+                              ArrayFunctions(),
+                              button_handler,
+                              signal_handler);
+}
+
+ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
+                                         const std::string& eve_filename,
+                                         std::istream& adam_definition,
+                                         const std::string& adam_filename,
+                                         const DictionaryFunctions& dictionary_functions,
+                                         const ArrayFunctions& array_functions,
                                          ButtonHandler button_handler,
                                          SignalHandler signal_handler/* = SignalHandler()*/)
 {
@@ -261,15 +300,29 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
-    for (DictionaryFunctionList::const_iterator
-             it = DictionaryFunctions().begin(), end_it = DictionaryFunctions().end();
+    for (DictionaryFunctions::const_iterator
+             it = GetDictionaryFunctions().begin(), end_it = GetDictionaryFunctions().end();
          it != end_it;
          ++it) {
         dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
     }
 
-    for (ArrayFunctionList::const_iterator
-             it = ArrayFunctions().begin(), end_it = ArrayFunctions().end();
+    for (DictionaryFunctions::const_iterator
+             it = dictionary_functions.begin(), end_it = dictionary_functions.end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
+    }
+
+    for (ArrayFunctions::const_iterator
+             it = GetArrayFunctions().begin(), end_it = GetArrayFunctions().end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
+    }
+
+    for (ArrayFunctions::const_iterator
+             it = array_functions.begin(), end_it = array_functions.end();
          it != end_it;
          ++it) {
         dialog->vm_lookup_m.insert_array_function(it->first, it->second);
@@ -291,15 +344,56 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                              ButtonHandler button_handler,
                              SignalHandler signal_handler/* = SignalHandler()*/)
 {
+    return MakeEveDialog(eve_definition,
+                         adam_definition,
+                         DictionaryFunctions(),
+                         ArrayFunctions(),
+                         button_handler,
+                         signal_handler);
+}
+
+EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
+                             const boost::filesystem::path& adam_definition,
+                             const DictionaryFunctions& dictionary_functions,
+                             const ArrayFunctions& array_functions,
+                             ButtonHandler button_handler,
+                             SignalHandler signal_handler/* = SignalHandler()*/)
+{
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
-    return MakeEveDialog(eve_stream, eve_definition.string(), adam_stream, adam_definition.string(), button_handler, signal_handler);
+    return MakeEveDialog(eve_stream,
+                         eve_definition.string(),
+                         adam_stream,
+                         adam_definition.string(),
+                         dictionary_functions,
+                         array_functions,
+                         button_handler,
+                         signal_handler);
 }
 
 EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                              const std::string& eve_filename,
                              std::istream& adam_definition,
                              const std::string& adam_filename,
+                             ButtonHandler button_handler,
+                             SignalHandler signal_handler/* = SignalHandler()*/)
+{
+    return MakeEveDialog(eve_definition,
+                         eve_filename,
+                         adam_definition,
+                         adam_filename,
+                         DictionaryFunctions(),
+                         ArrayFunctions(),
+                         button_handler,
+                         signal_handler);
+}
+
+EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
+                             const std::string& eve_filename,
+                             std::istream& adam_definition,
+                             const std::string& adam_filename,
+                             const DictionaryFunctions& dictionary_functions,
+                             const ArrayFunctions& array_functions,
                              ButtonHandler button_handler,
                              SignalHandler signal_handler/* = SignalHandler()*/)
 {
@@ -316,15 +410,29 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
-    for (DictionaryFunctionList::const_iterator
-             it = DictionaryFunctions().begin(), end_it = DictionaryFunctions().end();
+    for (DictionaryFunctions::const_iterator
+             it = GetDictionaryFunctions().begin(), end_it = GetDictionaryFunctions().end();
          it != end_it;
          ++it) {
         dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
     }
 
-    for (ArrayFunctionList::const_iterator
-             it = ArrayFunctions().begin(), end_it = ArrayFunctions().end();
+    for (DictionaryFunctions::const_iterator
+             it = dictionary_functions.begin(), end_it = dictionary_functions.end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_dictionary_function(it->first, it->second);
+    }
+
+    for (ArrayFunctions::const_iterator
+             it = GetArrayFunctions().begin(), end_it = GetArrayFunctions().end();
+         it != end_it;
+         ++it) {
+        dialog->vm_lookup_m.insert_array_function(it->first, it->second);
+    }
+
+    for (ArrayFunctions::const_iterator
+             it = array_functions.begin(), end_it = array_functions.end();
          it != end_it;
          ++it) {
         dialog->vm_lookup_m.insert_array_function(it->first, it->second);
@@ -340,10 +448,16 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
 }
 
 void GG::RegisterDictionaryFunction(adobe::name_t function_name, const DictionaryFunction& function)
-{ DictionaryFunctions().push_back(std::make_pair(function_name, function)); }
+{
+    assert(GetDictionaryFunctions().find(function_name) == GetDictionaryFunctions().end());
+    GetDictionaryFunctions()[function_name] = function;
+}
 
 void GG::RegisterArrayFunction(adobe::name_t function_name, const ArrayFunction& function)
-{ ArrayFunctions().push_back(std::make_pair(function_name, function)); }
+{
+    assert(GetArrayFunctions().find(function_name) == GetArrayFunctions().end());
+    GetArrayFunctions()[function_name] = function;
+}
 
 void GG::RegisterView(adobe::name_t name,
                       const MakeViewFunction& method,

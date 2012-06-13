@@ -1013,10 +1013,10 @@ else:
     Just as with the \ref eve_expression_builtin_functions, there are two
     kinds of functions supported, named-parameter functions (like \ref
     eve_expression_scale_fn) and positional-parameter functions (like \ref
-    eve_expression_min_fn).  The former are registered with
-    RegisterDictionaryFunction(), and the latter with RegisterArrayFunction().
-    Note that both forms can be defined for a function, like \ref
-    eve_expression_image_fn.
+    eve_expression_min_fn).  User-defined functions can be passed to the UI
+    creation functions, or can be registered for use globally with
+    RegisterDictionaryFunction(), and RegisterArrayFunction().  Note that both
+    forms can be defined for a function, like \ref eve_expression_image_fn.
 
     For consistency with the \ref eve_expression_builtin_functions,
     user-defined functions should throw when they are called with unusable

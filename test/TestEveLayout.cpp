@@ -394,6 +394,8 @@ main( int argc, char* argv[] )
         }
         ++i;
     }
+    if (!g_click_locations.empty())
+        g_click_locations.push_back(Action(GG::Pt(), GG::Pt(), false));
     if (i < argc)
         g_dont_exit = true;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );

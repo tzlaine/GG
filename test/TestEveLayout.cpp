@@ -397,7 +397,7 @@ main( int argc, char* argv[] )
         if (keys != std::string::npos) {
             g_click_locations.push_back(Action(token.substr(5, token.size() - 6)));
         } else {
-            g_generate_variants = true;
+            g_generate_variants = !g_test_signals;
             std::size_t comma_2 = token.find(',', comma_1 + 1);
             GG::Pt point_1(GG::X(boost::lexical_cast<int>(token.substr(0, comma_1))),
                            GG::Y(boost::lexical_cast<int>(token.substr(comma_1 + 1, comma_2 - comma_1 - 1))));

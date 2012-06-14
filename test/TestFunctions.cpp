@@ -27,6 +27,28 @@ adobe::any_regular_t increment(const adobe::dictionary_t& parameters)
     return adobe::any_regular_t(retval);
 }
 
+adobe::any_regular_t push_back(const adobe::dictionary_t& parameters)
+{
+    adobe::any_regular_t state;
+    get_value(parameters, adobe::static_name_t("state"), state);
+    adobe::array_t& array = state.cast<adobe::array_t>();
+    adobe::any_regular_t value;
+    get_value(parameters, adobe::static_name_t("value"), value);
+    array.push_back(value);
+    return state;
+}
+
+adobe::any_regular_t push_back_key(const adobe::dictionary_t& parameters)
+{
+    adobe::any_regular_t state;
+    get_value(parameters, adobe::static_name_t("state"), state);
+    adobe::array_t& array = state.cast<adobe::array_t>();
+    adobe::any_regular_t key;
+    get_value(parameters, adobe::static_name_t("key"), key);
+    array.push_back(key);
+    return state;
+}
+
 struct Test
 {
     Test() {}
@@ -48,7 +70,53 @@ const std::vector<Test>& Tests()
             result[adobe::static_name_t("two")] = adobe::any_regular_t(3.0);
             retval.push_back(Test("function_test_transform_dictionary.adm", adobe::any_regular_t(result)));
         }
-        // TODO: Add more tests!
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(4.0));
+            result.push_back(adobe::any_regular_t(5.0));
+            retval.push_back(Test("function_test_transform_array.adm", adobe::any_regular_t(result)));
+        }
+        retval.push_back(Test("function_test_transform_unary.adm", adobe::any_regular_t(6.0)));
+
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(adobe::static_name_t("one")));
+            result.push_back(adobe::any_regular_t(adobe::static_name_t("two")));
+            result.push_back(adobe::any_regular_t(adobe::static_name_t("three")));
+            retval.push_back(Test("function_test_fold_dictionary.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(4.0));
+            result.push_back(adobe::any_regular_t(5.0));
+            result.push_back(adobe::any_regular_t(6.0));
+            retval.push_back(Test("function_test_fold_array.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            retval.push_back(Test("function_test_fold_unary.adm", adobe::any_regular_t(result)));
+        }
+
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(3.0));
+            result.push_back(adobe::any_regular_t(2.0));
+            result.push_back(adobe::any_regular_t(1.0));
+            retval.push_back(Test("function_test_foldr_dictionary.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(6.0));
+            result.push_back(adobe::any_regular_t(5.0));
+            result.push_back(adobe::any_regular_t(4.0));
+            retval.push_back(Test("function_test_foldr_array.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            retval.push_back(Test("function_test_foldr_unary.adm", adobe::any_regular_t(result)));
+        }
     }
     return retval;
 }
@@ -191,5 +259,7 @@ int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
     GG::RegisterDictionaryFunction(adobe::static_name_t("increment"), &increment);
+    GG::RegisterDictionaryFunction(adobe::static_name_t("push_back"), &push_back);
+    GG::RegisterDictionaryFunction(adobe::static_name_t("push_back_key"), &push_back_key);
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

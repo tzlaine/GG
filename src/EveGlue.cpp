@@ -159,6 +159,7 @@ namespace {
             fold_array_impl(lookup, f, sequence.begin(), sequence.end(), retval);
         } else {
             adobe::dictionary_t f_arguments;
+            f_arguments[key_state] = retval;
             f_arguments[adobe::key_value] = arguments[0];
             retval = lookup.dproc(f, f_arguments);
         }
@@ -187,6 +188,7 @@ namespace {
             fold_array_impl(lookup, f, sequence.rbegin(), sequence.rend(), retval);
         } else {
             adobe::dictionary_t f_arguments;
+            f_arguments[key_state] = retval;
             f_arguments[adobe::key_value] = arguments[0];
             retval = lookup.dproc(f, f_arguments);
         }

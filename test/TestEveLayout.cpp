@@ -26,15 +26,24 @@ struct Action
     Action(const GG::Pt& pt_1, const GG::Pt& pt_2, bool drag) :
         m_pt_1(pt_1),
         m_pt_2(pt_2),
-        m_drag(drag)
+        m_drag(drag),
+        m_pressed_for_drag(false),
+        m_moved_for_drag(false),
+        m_released_for_drag(false)
         {}
     Action(const std::string& keys) :
         m_keys(keys),
-        m_drag(false)
+        m_drag(false),
+        m_pressed_for_drag(false),
+        m_moved_for_drag(false),
+        m_released_for_drag(false)
         {}
     GG::Pt m_pt_1;
     GG::Pt m_pt_2;
     bool m_drag;
+    bool m_pressed_for_drag;
+    bool m_moved_for_drag;
+    bool m_released_for_drag;
     std::string m_keys;
 };
 
@@ -45,6 +54,7 @@ std::vector<Action> g_click_locations;
 bool g_generate_variants = false;
 bool g_dont_exit = false;
 bool g_test_signals = false;
+bool g_drags = false;
 
 struct GenerateEvents
 {
@@ -55,19 +65,28 @@ struct GenerateEvents
         {}
     void operator()(unsigned int, GG::Timer* timer)
         {
+            bool increment = true;
             if (m_iteration <= g_click_locations.size()) {
                 GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, OutputFilename());
                 if (m_iteration) {
-                    const Action& action = g_click_locations[m_iteration - 1];
+                    Action& action = g_click_locations[m_iteration - 1];
                     if (!action.m_keys.empty()) {
                         for (std::string::const_iterator it = action.m_keys.begin(); it != action.m_keys.end(); ++it) {
                             GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::KEYPRESS, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
                             GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::KEYRELEASE, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
                         }
                     } else if (action.m_drag) {
-                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
-                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
-                        GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                        if (!action.m_pressed_for_drag) {
+                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
+                            action.m_pressed_for_drag = true;
+                        } else if (!action.m_moved_for_drag) {
+                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, action.m_pt_2 - action.m_pt_1);
+                            action.m_moved_for_drag = true;
+                        } else if (!action.m_released_for_drag) {
+                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                            action.m_released_for_drag = true;
+                        }
+                        increment = action.m_released_for_drag;
                     } else {
                         if (action.m_pt_1 != action.m_pt_2) {
                             GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
@@ -81,7 +100,8 @@ struct GenerateEvents
             } else {
                 m_dialog->EndRun();
             }
-            ++m_iteration;
+            if (increment)
+                ++m_iteration;
         }
     std::string OutputFilename()
         {
@@ -303,7 +323,7 @@ void MinimalGGApp::Initialize()
         input.stem()
 #endif
         ;
-    GG::Timer timer(100);
+    GG::Timer timer(g_drags ? 300 : 100);
     if (!g_dont_exit)
         GG::Connect(timer.FiredSignal, GenerateEvents(timer, eve_dialog.get(), input_stem));
     eve_dialog->Run();
@@ -391,6 +411,8 @@ main( int argc, char* argv[] )
                                  GG::Y(boost::lexical_cast<int>(token.substr(comma_3 + 1, end - comma_3 - 1))));
             }
             g_click_locations.push_back(Action(point_1, point_2, drag));
+            if (drag)
+                g_drags = true;
         }
         ++i;
     }

@@ -1,0 +1,5 @@
+sheet function_test_dialog
+{
+output:
+    result <== { value: fold([4, 5, 6], [], @push_back) };
+}

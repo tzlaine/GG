@@ -116,6 +116,37 @@
     TODO
 */
 
+/** \page eve_expression_transform_fn transform()
+    \section eve_transform_fn_usage transform() Usage
+
+    \code transform(sequence, f) \endcode
+
+    \param sequence Any Adam and Eve expression.  Dictionaries and arrays are treated differently from other types; see Returns below.
+    \param f The name of the function to call on each element of the sequence.  The given name must name a known dictionary function (see \ref eve_expression_function_kinds).
+
+    Returns \code {key_1: f(key: key_1, value: value_1), key_2: f(key: key_2, value: value_2), ...} \endcode if \a sequence is a dictionary,<br>
+    \code [f(value: value_1), f(value: value_2), ...] \endcode if \a sequence is an array,<br>
+    \code f(sequence) \endcode otherwise.
+*/
+
+/** \page eve_expression_fold_fn fold()
+    \section eve_fold_fn_usage fold() Usage
+
+    \code fold(sequence, initial_state, f) \endcode
+
+    \param sequence Any Adam and Eve expression.  Dictionaries and arrays are treated differently from other types; see Returns below.
+    \param initial_state Any Adam and Eve expression.
+    \param f The name of the function to call on each element of the sequence.  The given name must name a known dictionary function (see \ref eve_expression_function_kinds).
+
+    Returns \code f(state: f(state: f(state: initial_state, key: key_1, value: value_1), key: key_2, value: value_2), ...) \endcode if \a sequence is a dictionary,<br>
+    \code f(state: f(state: f(state: initial_state, value: value_1), value: value_2), ...)  \endcode if \a sequence is an array,<br>
+    \code f(initial_state, sequence) \endcode otherwise.
+*/
+
+/** \page eve_expression_foldr_fn foldr()
+    foldr() is like fold(), except that it evaluates the elements of the given sequence in reverse order.  See \ref eve_expression_fold_fn .
+*/
+
 
 /** \page eve_common_view_params Common View Parameters
     \section Usage
@@ -1168,6 +1199,19 @@ else:
     href="http://stlab.adobe.com/group__expression__reference.html">here</a>
     to learn about the data types and expressions available.
 
+    \section eve_expression_function_kinds Kinds of Functions
+
+    There are two kinds of functions in Adam and Eve expressions: those that
+    take positional parameters, a la C++; and those that take named
+    parameters, a la Javascript.  The former are known as array functions,
+    since the parameters are packaged up as an adobe::array_t and supplied to
+    the function's C++ implementation.  The latter are known as dictionary
+    functions, since the parameters are packaged up as an adobe::dictionary_t
+    and supplied to the function's C++ implementation.  Note that all
+    functions are one kind or the other; the Adam and Eve expression grammar
+    does not allow mixing of named and unnamed parameters in the same function
+    call.
+
     \section eve_expression_builtin_functions Built-in Functions
 
     Adam and Eve expressions support several built-in functions.  It is
@@ -1184,6 +1228,9 @@ else:
     - \ref eve_expression_image_fn
     - \ref eve_expression_texture_fn
     - \ref eve_expression_subtexture_fn
+    - \ref eve_expression_transform_fn
+    - \ref eve_expression_fold_fn
+    - \ref eve_expression_foldr_fn
 
     \section eve_gg_signals Using GG Signals With Adam and Eve
 

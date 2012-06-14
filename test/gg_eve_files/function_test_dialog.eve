@@ -1,0 +1,10 @@
+layout function_test_dialog
+{
+    view dialog()
+    {
+        row()
+        {
+            button(name: "OK", bind: @result, action: @ok, default: true);
+        }
+    }
+}

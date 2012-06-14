@@ -53,6 +53,7 @@ make_test_exec(EveParser)
 make_test_exec(EveWriter)
 make_test_exec(EveLayout)
 make_test_exec(DefaultSignalHandler)
+make_test_exec(Functions)
 
 add_test_and_data_files(StrongIntegralTypedef)
 add_test_and_data_files(StrongSizeTypedef)
@@ -63,6 +64,9 @@ add_test_and_data_files(ExpressionParser test_expressions eve)
 add_test_and_data_files(ExpressionWriter test_expressions adam)
 add_test_and_data_files(ExpressionWriter test_expressions eve)
 add_test_and_data_files(DefaultSignalHandler)
+
+file(GLOB function_test_adam_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_adam_files/function_test_*.adm)
+add_test_and_data_files(Functions gg_eve_files/function_test_dialog.eve ${function_test_adam_test_files})
 
 file(GLOB adam_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} asl_1.0.43_adam_files/*.adm)
 

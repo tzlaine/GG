@@ -19,6 +19,14 @@
 #include "TestingUtils.h"
 
 
+adobe::any_regular_t increment(const adobe::dictionary_t& parameters)
+{
+    double retval;
+    get_value(parameters, adobe::static_name_t("value"), retval);
+    ++retval;
+    return adobe::any_regular_t(retval);
+}
+
 struct Test
 {
     Test() {}
@@ -33,16 +41,25 @@ struct Test
 const std::vector<Test>& Tests()
 {
     static std::vector<Test> retval;
-    retval.push_back(Test("function_test_dialog.adm", adobe::any_regular_t(adobe::static_name_t("TODO"))));
-    // TODO: Add real tests!
+    if (retval.empty()) {
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("one")] = adobe::any_regular_t(2.0);
+            result[adobe::static_name_t("two")] = adobe::any_regular_t(3.0);
+            retval.push_back(Test("function_test_transform_dictionary.adm", adobe::any_regular_t(result)));
+        }
+        // TODO: Add more tests!
+    }
     return retval;
 }
 
-void CheckResult(const GG::EveDialog& eve_dialog, const adobe::dictionary_t& expected_result)
+void CheckResult(const GG::EveDialog& eve_dialog, const adobe::any_regular_t& expected_result)
 {
-    // TODO: send click event to ok button.
-    BOOST_CHECK(!eve_dialog.TerminatingAction().empty());
-    BOOST_CHECK(eve_dialog.Result() == expected_result);
+    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), GG::Pt(GG::X(48), GG::Y(22)), GG::Pt());
+    GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), GG::Pt(GG::X(48), GG::Y(22)), GG::Pt());
+    BOOST_CHECK(eve_dialog.TerminatingAction());
+    BOOST_CHECK(eve_dialog.Result().find(adobe::static_name_t("value")) != eve_dialog.Result().end());
+    BOOST_CHECK(eve_dialog.Result().find(adobe::static_name_t("value"))->second == expected_result);
 }
 
 bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
@@ -53,9 +70,9 @@ void RunTest(std::size_t i)
     const Test& test = Tests()[i];
     boost::filesystem::path eve("function_test_dialog.eve");
     boost::filesystem::path adam(test.m_adam_filename);
-    std::auto_ptr<GG::EveDialog> eve_dialog(GG::MakeEveDialog(eve, adam, &ButtonHandler));
+    GG::EveDialog* eve_dialog(GG::MakeEveDialog(eve, adam, &ButtonHandler));
     GG::Timer timer(100);
-    GG::Connect(timer.FiredSignal, boost::bind(&CheckResult, boost::cref(test.m_expected_result), boost::cref(*eve_dialog)));
+    GG::Connect(timer.FiredSignal, boost::bind(&CheckResult, boost::cref(*eve_dialog), boost::cref(test.m_expected_result)));
     eve_dialog->Run();
 }
 
@@ -130,7 +147,7 @@ void MinimalGGApp::GLInit()
 
 void MinimalGGApp::Initialize()
 {
-    for (std::size_t i < Tests().size(); ++it) {
+    for (std::size_t i = 0; i < Tests().size(); ++i) {
         RunTest(i);
     }
 
@@ -173,5 +190,6 @@ init_unit_test_suite( int, char* [] )   {
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
+    GG::RegisterDictionaryFunction(adobe::static_name_t("increment"), &increment);
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }

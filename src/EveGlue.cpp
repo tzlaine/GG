@@ -75,23 +75,25 @@ namespace {
 
         adobe::dictionary_t f_arguments;
 
-        if (const adobe::dictionary_t* sequence = arguments[0].cast<adobe::dictionary_t*>()) {
+        if (arguments[0].type_info() == adobe::type_info<adobe::dictionary_t>()) {
+            const adobe::dictionary_t& sequence = arguments[0].cast<adobe::dictionary_t>();
             retval = adobe::any_regular_t(adobe::dictionary_t());
             adobe::dictionary_t& result_elements = retval.cast<adobe::dictionary_t>();
             for (adobe::dictionary_t::const_iterator
-                     it = sequence->begin(), end_it = sequence->end();
+                     it = sequence.begin(), end_it = sequence.end();
                  it != end_it;
                  ++it) {
                 f_arguments[key_key] = adobe::any_regular_t(it->first);
                 f_arguments[adobe::key_value] = it->second;
                 result_elements[it->first] = lookup.dproc(f, f_arguments);
             }
-        } else if (const adobe::array_t* sequence = arguments[0].cast<adobe::array_t*>()) {
+        } else if (arguments[0].type_info() == adobe::type_info<adobe::array_t>()) {
+            const adobe::array_t& sequence = arguments[0].cast<adobe::array_t>();
             retval = adobe::any_regular_t(adobe::array_t());
             adobe::array_t& result_elements = retval.cast<adobe::array_t>();
-            result_elements.reserve(sequence->size());
+            result_elements.reserve(sequence.size());
             for (adobe::array_t::const_iterator
-                     it = sequence->begin(), end_it = sequence->end();
+                     it = sequence.begin(), end_it = sequence.end();
                  it != end_it;
                  ++it) {
                 f_arguments[adobe::key_value] = *it;
@@ -149,10 +151,12 @@ namespace {
 
         retval = arguments[1];
 
-        if (const adobe::dictionary_t* sequence = arguments[0].cast<adobe::dictionary_t*>()) {
-            fold_dictionary_impl(lookup, f, sequence->begin(), sequence->end(), retval);
-        } else if (const adobe::array_t* sequence = arguments[0].cast<adobe::array_t*>()) {
-            fold_array_impl(lookup, f, sequence->begin(), sequence->end(), retval);
+        if (arguments[0].type_info() == adobe::type_info<adobe::dictionary_t>()) {
+            const adobe::dictionary_t& sequence = arguments[0].cast<adobe::dictionary_t>();
+            fold_dictionary_impl(lookup, f, sequence.begin(), sequence.end(), retval);
+        } else if (arguments[0].type_info() == adobe::type_info<adobe::array_t>()) {
+            const adobe::array_t& sequence = arguments[0].cast<adobe::array_t>();
+            fold_array_impl(lookup, f, sequence.begin(), sequence.end(), retval);
         } else {
             adobe::dictionary_t f_arguments;
             f_arguments[adobe::key_value] = arguments[0];
@@ -175,10 +179,12 @@ namespace {
 
         retval = arguments[1];
 
-        if (const adobe::dictionary_t* sequence = arguments[0].cast<adobe::dictionary_t*>()) {
-            fold_dictionary_impl(lookup, f, sequence->rbegin(), sequence->rend(), retval);
-        } else if (const adobe::array_t* sequence = arguments[0].cast<adobe::array_t*>()) {
-            fold_array_impl(lookup, f, sequence->rbegin(), sequence->rend(), retval);
+        if (arguments[0].type_info() == adobe::type_info<adobe::dictionary_t>()) {
+            const adobe::dictionary_t& sequence = arguments[0].cast<adobe::dictionary_t>();
+            fold_dictionary_impl(lookup, f, sequence.rbegin(), sequence.rend(), retval);
+        } else if (arguments[0].type_info() == adobe::type_info<adobe::array_t>()) {
+            const adobe::array_t& sequence = arguments[0].cast<adobe::array_t>();
+            fold_array_impl(lookup, f, sequence.rbegin(), sequence.rend(), retval);
         } else {
             adobe::dictionary_t f_arguments;
             f_arguments[adobe::key_value] = arguments[0];

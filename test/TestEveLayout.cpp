@@ -352,6 +352,10 @@ main( int argc, char* argv[] )
     int i = 4;
     std::string token;
     std::size_t comma_1;
+    if (i < argc && (token = argv[i], token == "test_signals")) {
+        g_test_signals = true;
+        ++i;
+    }
     while (i < argc && (token = argv[i], comma_1 = token.find(',')) != std::string::npos) {
         g_generate_variants = true;
         std::size_t comma_2 = token.find(',', comma_1 + 1);
@@ -367,10 +371,6 @@ main( int argc, char* argv[] )
                              GG::Y(boost::lexical_cast<int>(token.substr(comma_3 + 1, end - comma_3 - 1))));
         }
         g_click_locations.push_back(Action(point_1, point_2, drag));
-        ++i;
-    }
-    if (i < argc && (token = argv[i], token == "test_signals")) {
-        g_test_signals = true;
         ++i;
     }
     if (i < argc)

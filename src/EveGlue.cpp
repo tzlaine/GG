@@ -384,8 +384,10 @@ void EveDialog::SizeMove(const Pt& ul, const Pt& lr)
         m_imp.debounce_m = false;
     }
 
-    Pt new_title_size((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
-    m_title->Resize(new_title_size);
+    if (m_title) {
+        Pt new_title_size((LowerRight() - UpperLeft()).x - BEVEL_OFFSET.x * 2, m_title->Height());
+        m_title->Resize(new_title_size);
+    }
 }
 
 void EveDialog::Render()

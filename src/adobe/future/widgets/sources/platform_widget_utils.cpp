@@ -241,18 +241,21 @@ bool get_subtexture(const any_regular_t& value, GG::SubTexture& subtexture)
 
 GG::StateButtonStyle name_to_style(adobe::name_t name)
 {
-#define CASE(x) if (name == adobe::static_name_t(#x)) return GG::x
-
-    CASE(SBSTYLE_3D_XBOX);
-    else CASE(SBSTYLE_3D_CHECKBOX);
-    else CASE(SBSTYLE_3D_RADIO);
-    else CASE(SBSTYLE_3D_BUTTON);
-    else CASE(SBSTYLE_3D_ROUND_BUTTON);
-    else CASE(SBSTYLE_3D_TOP_ATTACHED_TAB);
-    else CASE(SBSTYLE_3D_TOP_DETACHED_TAB);
-    else throw std::runtime_error("Unknown StateButtonStyle name");
-
-#undef CASE
+    if (name == adobe::static_name_t("xbox"))
+        return GG::SBSTYLE_3D_XBOX;
+    else if (name == adobe::static_name_t("checkbox"))
+        return GG::SBSTYLE_3D_CHECKBOX;
+    else if (name == adobe::static_name_t("radio"))
+        return GG::SBSTYLE_3D_RADIO;
+    else if (name == adobe::static_name_t("button"))
+        return GG::SBSTYLE_3D_BUTTON;
+    else if (name == adobe::static_name_t("round_button"))
+        return GG::SBSTYLE_3D_ROUND_BUTTON;
+    else if (name == adobe::static_name_t("top_attached_tab"))
+        return GG::SBSTYLE_3D_TOP_ATTACHED_TAB;
+    else if (name == adobe::static_name_t("top_detached_tab"))
+        return GG::SBSTYLE_3D_TOP_DETACHED_TAB;
+    else throw std::runtime_error(adobe::make_string("Unknown StateButtonStyle name ", name.c_str()));
 }
 
 /****************************************************************************************************/

@@ -40,7 +40,7 @@ layout alert_dialog
         group(name: "sorted descending", child_horizontal: align_left)
         {
             listbox(sort: true,
-                    sort_order: @descending,
+                    sort_order: descending,
                     items: [
                         { name: "Option 3", value: 3 },
                         { name: "Option 1", value: 1 },

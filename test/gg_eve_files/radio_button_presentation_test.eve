@@ -7,11 +7,11 @@ layout alert_dialog
             radio_button(name: "Red color", color: {r:255});
             radio_button(name: "Green text color", text_color: {g:255});
             radio_button(name: "Blue interior color", interior_color: {b:255});
-            radio_button(name: "SBSTYLE_3D_XBOX", style: SBSTYLE_3D_XBOX);
-            radio_button(name: "SBSTYLE_3D_CHECKBOX", style: SBSTYLE_3D_CHECKBOX);
-            radio_button(name: "SBSTYLE_3D_RADIO", style: SBSTYLE_3D_RADIO);
-            radio_button(name: "SBSTYLE_3D_BUTTON", style: SBSTYLE_3D_BUTTON);
-            radio_button(name: "SBSTYLE_3D_ROUND_BUTTON", style: SBSTYLE_3D_ROUND_BUTTON);
+            radio_button(name: "xbox", style: xbox);
+            radio_button(name: "checkbox", style: checkbox);
+            radio_button(name: "radio", style: radio);
+            radio_button(name: "button", style: button);
+            radio_button(name: "round_button", style: round_button);
         }
     }
 }

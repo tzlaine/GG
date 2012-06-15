@@ -11,7 +11,7 @@ layout alert_dialog
                       ],
                       color: {r:255},
                       text_color: {b:255},
-                      style: @attached);
+                      style: attached);
             tab_group(items: [
                           { name: "red color", value: 1 },
                           { name: "blue text_color", value: 2 },
@@ -19,7 +19,7 @@ layout alert_dialog
                       ],
                       color: {r:255},
                       text_color: {b:255},
-                      style: @detached);
+                      style: detached);
         }
     }
 }

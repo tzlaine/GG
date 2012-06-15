@@ -58,7 +58,7 @@ void create_widget(const dictionary_t& parameters,
     GG::Clr              color(GG::CLR_GRAY);
     GG::Clr              text_color(GG::CLR_BLACK);
     GG::Clr              interior_color(GG::CLR_ZERO);
-    name_t               style_name("SBSTYLE_3D_XBOX");
+    name_t               style_name("xbox");
     name_t               signal_id;
 
     get_value(parameters, key_name, name);

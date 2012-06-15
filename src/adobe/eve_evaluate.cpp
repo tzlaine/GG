@@ -126,17 +126,27 @@ void init_once()
         adobe::key_horizontal,
         adobe::key_vertical,
 
-        // StateButton styles (leaving out tab styles)
-        adobe::static_name_t("SBSTYLE_3D_XBOX"),
-        adobe::static_name_t("SBSTYLE_3D_CHECKBOX"),
-        adobe::static_name_t("SBSTYLE_3D_RADIO"),
-        adobe::static_name_t("SBSTYLE_3D_BUTTON"),
-        adobe::static_name_t("SBSTYLE_3D_ROUND_BUTTON"),
+        // StateButton styles
+        adobe::static_name_t("xbox"),
+        adobe::static_name_t("checkbox"),
+        adobe::static_name_t("radio"),
+        adobe::static_name_t("button"),
+        adobe::static_name_t("round_button"),
+        adobe::static_name_t("attached"),
+        adobe::static_name_t("detached"),
 
         // Slider styles
         adobe::static_name_t("flat"),
         adobe::static_name_t("raised"),
-        adobe::static_name_t("grooved")
+        adobe::static_name_t("grooved"),
+
+        // ListBox styles
+        adobe::static_name_t("ascending"),
+        adobe::static_name_t("descending"),
+        adobe::static_name_t("none"),
+        adobe::static_name_t("single"),
+        adobe::static_name_t("quick"),
+        adobe::static_name_t("multiple")
     };
     static reflected_table_range_t reflected_table_range_s;
 

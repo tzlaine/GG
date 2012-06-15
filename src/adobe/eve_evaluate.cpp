@@ -105,8 +105,8 @@ void init_once()
 
     alignment_table_g = &alignment_table_s;
     placement_table_g = &placement_table_s;
-    
-    static adobe::name_t    reflected[] =
+
+    static adobe::name_t reflected[] =
     {
         adobe::key_align_left,
         adobe::key_align_right,
@@ -115,10 +115,28 @@ void init_once()
         adobe::key_align_center,
         adobe::key_align_proportional,
         adobe::key_align_fill,
-        
+
         adobe::key_place_row,
         adobe::key_place_column,
-        adobe::key_place_overlay
+        adobe::key_place_overlay,
+
+        // GG extensions
+
+        // orientations
+        adobe::key_horizontal,
+        adobe::key_vertical,
+
+        // StateButton styles (leaving out tab styles)
+        adobe::static_name_t("SBSTYLE_3D_XBOX"),
+        adobe::static_name_t("SBSTYLE_3D_CHECKBOX"),
+        adobe::static_name_t("SBSTYLE_3D_RADIO"),
+        adobe::static_name_t("SBSTYLE_3D_BUTTON"),
+        adobe::static_name_t("SBSTYLE_3D_ROUND_BUTTON"),
+
+        // Slider styles
+        adobe::static_name_t("flat"),
+        adobe::static_name_t("raised"),
+        adobe::static_name_t("grooved")
     };
     static reflected_table_range_t reflected_table_range_s;
 

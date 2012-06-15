@@ -8,11 +8,11 @@ layout alert_dialog
             checkbox(name: "Green text color", text_color: {g:255});
             checkbox(name: "Blue interior color", interior_color: {b:255});
             checkbox(name: "Blue interior color", interior_color: {b:255});
-            checkbox(name: "SBSTYLE_3D_XBOX", style: @SBSTYLE_3D_XBOX);
-            checkbox(name: "SBSTYLE_3D_CHECKBOX", style: @SBSTYLE_3D_CHECKBOX);
-            checkbox(name: "SBSTYLE_3D_RADIO", style: @SBSTYLE_3D_RADIO);
-            checkbox(name: "SBSTYLE_3D_BUTTON", style: @SBSTYLE_3D_BUTTON);
-            checkbox(name: "SBSTYLE_3D_ROUND_BUTTON", style: @SBSTYLE_3D_ROUND_BUTTON);
+            checkbox(name: "SBSTYLE_3D_XBOX", style: SBSTYLE_3D_XBOX);
+            checkbox(name: "SBSTYLE_3D_CHECKBOX", style: SBSTYLE_3D_CHECKBOX);
+            checkbox(name: "SBSTYLE_3D_RADIO", style: SBSTYLE_3D_RADIO);
+            checkbox(name: "SBSTYLE_3D_BUTTON", style: SBSTYLE_3D_BUTTON);
+            checkbox(name: "SBSTYLE_3D_ROUND_BUTTON", style: SBSTYLE_3D_ROUND_BUTTON);
         }
     }
 }

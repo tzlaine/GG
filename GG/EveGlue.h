@@ -105,7 +105,7 @@ typedef boost::function<adobe::any_regular_t (const adobe::array_t&)> ArrayFunct
 
 /** The map of functions used to evaluate positional-parameter functions in
     Adam and Eve expressions.  \see \ref eve_adding_user_functions. */
-    typedef std::map<adobe::name_t, ArrayFunction> ArrayFunctions;
+typedef std::map<adobe::name_t, ArrayFunction> ArrayFunctions;
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler.  \see

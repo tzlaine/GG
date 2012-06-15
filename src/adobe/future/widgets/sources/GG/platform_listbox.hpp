@@ -54,6 +54,7 @@ namespace adobe {
                   const item_set_t& items,
                   GG::Clr color,
                   GG::Clr interior_color,
+                  GG::Clr hilite_color,
                   GG::Clr label_color,
                   GG::Clr item_text_color,
                   const std::vector<std::string>& drop_types,
@@ -79,6 +80,7 @@ namespace adobe {
         GG::Flags<GG::ListBoxStyle> style_m;
         GG::Clr color_m;
         GG::Clr interior_color_m;
+        GG::Clr hilite_color_m;
         GG::Clr item_text_color_m;
         std::vector<std::string> drop_types_m;
         name_t signal_id_m;

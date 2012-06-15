@@ -144,6 +144,7 @@ namespace adobe {
                          const item_set_t& items,
                          GG::Clr color,
                          GG::Clr interior_color,
+                         GG::Clr hilite_color,
                          GG::Clr label_color,
                          GG::Clr item_text_color,
                          const std::vector<std::string>& drop_types,
@@ -158,6 +159,7 @@ namespace adobe {
         style_m(style),
         color_m(color),
         interior_color_m(interior_color),
+        hilite_color_m(hilite_color),
         item_text_color_m(item_text_color),
         drop_types_m(drop_types),
         signal_id_m(signal_id)
@@ -328,6 +330,7 @@ namespace adobe {
         element.control_m =
             implementation::Factory().NewListBox(GG::X0, GG::Y0, GG::X1, Height(lines),
                                                  element.color_m, element.interior_color_m);
+        element.control_m->SetHiliteColor(element.hilite_color_m);
         element.control_m->SetStyle(element.style_m);
 
         element.original_height_m = Value(element.control_m->Height());

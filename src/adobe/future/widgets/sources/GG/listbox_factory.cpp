@@ -245,6 +245,7 @@ namespace adobe {
         listbox_t::item_set_t item_set;
         GG::Clr color(GG::CLR_GRAY);
         GG::Clr interior_color(GG::CLR_ZERO);
+        GG::Clr hilite_color(GG::CLR_SHADOW);
         GG::Clr label_color(GG::CLR_BLACK);
         GG::Clr item_text_color(GG::CLR_BLACK);
         name_t signal_id;
@@ -262,6 +263,7 @@ namespace adobe {
         get_value(parameters, key_items, items);
         implementation::get_color(parameters, static_name_t("color"), color);
         implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
+        implementation::get_color(parameters, static_name_t("hilite_color"), hilite_color);
         implementation::get_color(parameters, static_name_t("label_color"), label_color);
         implementation::get_color(parameters, static_name_t("item_text_color"), item_text_color);
         get_value(parameters, static_name_t("signal_id"), signal_id);
@@ -305,6 +307,7 @@ namespace adobe {
                                 item_set,
                                 color,
                                 interior_color,
+                                hilite_color,
                                 label_color,
                                 item_text_color,
                                 drop_types,

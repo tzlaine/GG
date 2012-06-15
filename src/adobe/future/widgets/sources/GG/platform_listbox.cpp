@@ -10,6 +10,7 @@
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
+#include <GG/adobe/array.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 
 #include <GG/ClrConstants.h>
@@ -50,13 +51,21 @@ namespace {
         assert(listbox.control_m);
 
         if (listbox.value_proc_m) {
-            for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(), end_it = selections.end();
-                 it != end_it;
-                 ++it) {
-                std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *it);
-                if (listbox.value_proc_m)
-                    listbox.value_proc_m(listbox.items_m.at(index).second);
+            adobe::any_regular_t value;
+            if (selections.size() == 1u) {
+                std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *selections.begin());
+                value = listbox.items_m.at(index).second;
+            } else {
+                value.assign(adobe::array_t());
+                adobe::array_t& array = value.cast<adobe::array_t>();
+                for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(), end_it = selections.end();
+                     it != end_it;
+                     ++it) {
+                    std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *it);
+                    array.push_back(listbox.items_m.at(index).second);
+                }
             }
+            listbox.value_proc_m(value);
         }
 
         if (listbox.selection_changed_proc_m)
@@ -275,13 +284,24 @@ namespace adobe {
     {
         assert(control_m);
 
-        GG::ListBox::iterator it = control_m->begin();
-        for (item_set_t::iterator first = items_m.begin(), last = items_m.end();
-             first != last;
-             ++first, ++it) {
-            if ((*first).second == value) {
-                control_m->SelectRow(it);
-                return;
+        const bool value_is_array = value.type_info() == adobe::type_info<adobe::array_t>();
+
+        adobe::array_t single_value;
+        if (!value_is_array)
+            single_value.push_back(value);
+        const adobe::array_t& values = value_is_array ? value.cast<adobe::array_t>() : single_value;
+
+        control_m->DeselectAll();
+
+        for (adobe::array_t::const_iterator it = values.begin(), end_it = values.end(); it != end_it; ++it) {
+            GG::ListBox::iterator row_it = control_m->begin();
+            for (item_set_t::iterator first = items_m.begin(), last = items_m.end();
+                 first != last;
+                 ++first, ++row_it) {
+                if ((*first).second == value) {
+                    control_m->SelectRow(row_it);
+                    break;
+                }
             }
         }
     }

@@ -124,9 +124,13 @@
     \param sequence Any Adam and Eve expression.  Dictionaries and arrays are treated differently from other types; see Returns below.
     \param f The name of the function to call on each element of the sequence.  The given name must name a known dictionary function (see \ref eve_expression_function_kinds).
 
-    Returns \code {key_1: f(key: key_1, value: value_1), key_2: f(key: key_2, value: value_2), ...} \endcode if \a sequence is a dictionary,<br>
-    \code [f(value: value_1), f(value: value_2), ...] \endcode if \a sequence is an array,<br>
+    Returns \code {key_1: f(key: key_1, value: value_1), key_2: f(key: key_2, value: value_2), ...} \endcode if \a sequence is a dictionary,
+    \n
+    \code [f(value: value_1), f(value: value_2), ...] \endcode if \a sequence is an array,
+    \n
     \code f(sequence) \endcode otherwise.
+
+    \remark Note that the parameters to \a transform() are not named.
 */
 
 /** \page eve_expression_fold_fn fold()
@@ -138,13 +142,17 @@
     \param initial_state Any Adam and Eve expression.
     \param f The name of the function to call on each element of the sequence.  The given name must name a known dictionary function (see \ref eve_expression_function_kinds).
 
-    Returns \code f(state: f(state: f(state: initial_state, key: key_1, value: value_1), key: key_2, value: value_2), ...) \endcode if \a sequence is a dictionary,<br>
-    \code f(state: f(state: f(state: initial_state, value: value_1), value: value_2), ...)  \endcode if \a sequence is an array,<br>
+    Returns \code f(state: f(state: f(state: initial_state, key: key_1, value: value_1), key: key_2, value: value_2), ...) \endcode if \a sequence is a dictionary,
+    \n
+    \code f(state: f(state: f(state: initial_state, value: value_1), value: value_2), ...)  \endcode if \a sequence is an array,
+    \n
     \code f(initial_state, sequence) \endcode otherwise.
+
+    \remark Note that the parameters to \a fold() are not named.
 */
 
 /** \page eve_expression_foldr_fn foldr()
-    foldr() is like fold(), except that it evaluates the elements of the given sequence in reverse order.  See \ref eve_expression_fold_fn .
+    foldr() is like fold(), except that it iterates over the elements of the given sequence in reverse order.  See \ref eve_expression_fold_fn .
 */
 
 
@@ -152,8 +160,8 @@
     \section Usage
 
     \param bind The cell in the Adam property sheet to which this view is bound.  If this is defined, \a bind_controller and \a bind_view are ignored.
-    \param bind_controller The "controller" half of the binding to the cell in the Adam property sheet.  This is half of the cell binding that covers assignment to the bound cell.  See \a bind_controller in \ref eve_image for an example.
-    \param bind_view The "view" half of the binding to the cell in the Adam property sheet.  This is half of the cell binding that covers assignment to the Eve view from the bound cell.  See \a bind_view in \ref eve_image for an example.
+    \param bind_controller The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.  See \a bind_controller in \ref eve_image for an example.
+    \param bind_view The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.  See \a bind_view in \ref eve_image for an example.
     \param horizontal The horizontal alignment of this view in its available space (see \ref eve_alignments).
     \param vertical The vertical alignment of this view in its available space (see \ref eve_alignments).
     \param indent The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.
@@ -296,6 +304,10 @@
 
     \param bind The cell in the Adam property sheet to which this button is bound.
     \param value The value of the bound cell that causes the optional to be shown.
+
+    \note The idiomatic way to create a showable/hidable portion of an
+    interface is to bind a \link eve_reveal reveal \endlink and an optional to
+    the same cell.
 */
 
 /** \page eve_overlay overlay()
@@ -708,7 +720,8 @@ else:
 
     \note The idiomatic way to create a showable/hidable portion of an
     interface is to bind a reveal and an \link eve_optional optional \endlink
-    to the same cell.  */
+    to the same cell.
+*/
 
 /** \page eve_separator separator()
     TODO
@@ -1022,7 +1035,7 @@ else:
     - \c align_left Align the view to the left of available space.
     - \c align_right Align the view to the right of available space.
     - \c align_top Align the view to the top of available space.
-    - \c align_bottom Align the view to the top of available space.
+    - \c align_bottom Align the view to the bottom of available space.
     - \c align_center Align the view to the center of available (vertical or horizontal) space.
     - \c align_proportional Place the \c i-th view of \c N views \c i/N of the way through the available (vertical or horizontal) space.
     - \c align_fill Expand the view to fill the available (vertical or horizontal) space.
@@ -1235,6 +1248,8 @@ else:
     \section eve_gg_signals Using GG Signals With Adam and Eve
 
     TODO
+
+    Document placeholders ... TODO
 
     \section eve_views Views
 

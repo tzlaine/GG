@@ -72,7 +72,7 @@ struct preset_popup_menu_item_set_view_t
         if (set.empty())
             return;
 
-        imbue_preset(sheet_m, set[0].second);
+        imbue_preset(sheet_m, set[0].find(key_value)->second);
     }
 
     presets_t& preset_m;

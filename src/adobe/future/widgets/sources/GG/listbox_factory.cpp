@@ -283,12 +283,8 @@ namespace adobe {
             style |= GG::LIST_BROWSEUPDATES;
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
-            dictionary_t cur_item(first->cast<dictionary_t>());
-            item_set.push_back(
-                listbox_t::item_set_t::value_type(
-                    get_value(cur_item, key_name).cast<std::string>(), get_value(cur_item, key_value)
-                )
-            );
+            item_set.push_back(first->cast<dictionary_t>());
+            get_value(item_set.back(), key_value);
         }
 
         if (!rows && items.empty())

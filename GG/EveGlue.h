@@ -31,7 +31,7 @@
 #ifndef _EveGlue_h_
 #define _EveGlue_h_
 
-#include <GG/Wnd.h>
+#include <GG/ListBox.h>
 
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
@@ -91,6 +91,28 @@ typedef boost::function<
     void (adobe::name_t, adobe::name_t, adobe::name_t, const adobe::any_regular_t&)
 > SignalHandler;
 
+/** The type of ListBox::Row factory function, which may be used to create
+    rows for both listboxes and popups.  Factory functions accept the
+    dictionary of parameters to use to construct the row.  \see \ref
+    eve_row_factory. */
+typedef boost::function<
+    ListBox::Row* (const adobe::dictionary_t&)
+> RowFactoryFunction;
+
+/** The type of ListBox::Row factory (optionally) expected by the UI creation
+    functions, and used to create rows in both listboxes and popups.  \see
+    \ref eve_row_factory. */
+typedef std::map<adobe::name_t, RowFactoryFunction> RowFactory;
+
+/** The default RowFactoryFunction, which is used to create rows in both
+    listboxes and popups when constructing an item with no \a type parameter,
+    when constructing an item with \a type parameter not found in the
+    user-defined row factory, or when no user-defined row factory is given.
+    The default factory function creates rows consisting of a single string
+    (the \a name parameter), rendered in the color specified in the \a color
+    parameter (if given).  \see \ref eve_row_factory. */
+ListBox::Row* DefaultRowFactoryFunction(const adobe::dictionary_t& parameters);
+
 /** The type of function used to evaluate named-parameter functions in Adam
     and Eve expressions.  \see \ref eve_adding_user_functions. */
 typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)> DictionaryFunction;
@@ -107,13 +129,15 @@ typedef boost::function<adobe::any_regular_t (const adobe::array_t&)> ArrayFunct
     Adam and Eve expressions.  \see \ref eve_adding_user_functions. */
 typedef std::map<adobe::name_t, ArrayFunction> ArrayFunctions;
 
+
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler.  \see
     SignalHandler. */
 ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definition,
                                      const boost::filesystem::path& adam_definition,
                                      ButtonHandler button_handler,
-                                     SignalHandler signal_handler = SignalHandler());
+                                     SignalHandler signal_handler = SignalHandler(),
+                                     RowFactory row_factory = RowFactory());
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  The functions provided in \a
@@ -127,7 +151,8 @@ ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definiti
                                      const DictionaryFunctions& dictionary_functions,
                                      const ArrayFunctions& array_functions,
                                      ButtonHandler button_handler,
-                                     SignalHandler signal_handler = SignalHandler());
+                                     SignalHandler signal_handler = SignalHandler(),
+                                     RowFactory row_factory = RowFactory());
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  \see ButtonHandler.  \see
@@ -137,7 +162,8 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      std::istream& adam_definition,
                                      const std::string& adam_filename,
                                      ButtonHandler button_handler,
-                                     SignalHandler signal_handler = SignalHandler());
+                                     SignalHandler signal_handler = SignalHandler(),
+                                     RowFactory row_factory = RowFactory());
 
 /** Returns the result of executing the modal dialog described by \a
     eve_definition and \a adam_definition.  The functions provided in \a
@@ -153,14 +179,16 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      const DictionaryFunctions& dictionary_functions,
                                      const ArrayFunctions& array_functions,
                                      ButtonHandler button_handler,
-                                     SignalHandler signal_handler = SignalHandler());
+                                     SignalHandler signal_handler = SignalHandler(),
+                                     RowFactory row_factory = RowFactory());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  \see ButtonHandler.  \see SignalHandler. */
 EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
                          const boost::filesystem::path& adam_definition,
                          ButtonHandler button_handler,
-                         SignalHandler signal_handler = SignalHandler());
+                         SignalHandler signal_handler = SignalHandler(),
+                         RowFactory row_factory = RowFactory());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  The functions provided in \a dictionary_functions
@@ -173,7 +201,8 @@ EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
                          const DictionaryFunctions& dictionary_functions,
                          const ArrayFunctions& array_functions,
                          ButtonHandler button_handler,
-                         SignalHandler signal_handler = SignalHandler());
+                         SignalHandler signal_handler = SignalHandler(),
+                         RowFactory row_factory = RowFactory());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  \see ButtonHandler.  \see SignalHandler. */
@@ -182,7 +211,8 @@ EveDialog* MakeEveDialog(std::istream& eve_definition,
                          std::istream& adam_definition,
                          const std::string& adam_filename,
                          ButtonHandler button_handler,
-                         SignalHandler signal_handler = SignalHandler());
+                         SignalHandler signal_handler = SignalHandler(),
+                         RowFactory row_factory = RowFactory());
 
 /** Parses \a eve_definition and \a adam_definition, then instantiates and
     returns an EveDialog.  The functions provided in \a dictionary_functions
@@ -197,7 +227,8 @@ EveDialog* MakeEveDialog(std::istream& eve_definition,
                          const DictionaryFunctions& dictionary_functions,
                          const ArrayFunctions& array_functions,
                          ButtonHandler button_handler,
-                         SignalHandler signal_handler = SignalHandler());
+                         SignalHandler signal_handler = SignalHandler(),
+                         RowFactory row_factory = RowFactory());
 
 /** Usable as a SignalHandler, providing a convenient interface for handling a
     multitude of signals with separate SignalHandlers. */
@@ -309,7 +340,8 @@ private:
                                                 const DictionaryFunctions& dictionary_functions,
                                                 const ArrayFunctions& array_functions,
                                                 ButtonHandler button_handler,
-                                                SignalHandler signal_handler);
+                                                SignalHandler signal_handler,
+                                                RowFactory row_factory);
 
     friend EveDialog* MakeEveDialog(std::istream& eve_definition,
                                     const std::string& eve_filename,
@@ -318,7 +350,8 @@ private:
                                     const DictionaryFunctions& dictionary_functions,
                                     const ArrayFunctions& array_functions,
                                     ButtonHandler button_handler,
-                                    SignalHandler signal_handler);
+                                    SignalHandler signal_handler,
+                                    RowFactory row_factory);
 };
 
 /** Registers user-defined function \a function, callable as a named-parameter

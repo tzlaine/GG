@@ -6,8 +6,10 @@
 
 /****************************************************************************************************/
 
+#include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
+#include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_popup.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
@@ -26,20 +28,8 @@ namespace {
 
 /****************************************************************************************************/
 
-GG::Y RowHeight()
-{
-    static GG::Y retval = GG::Y0;
-    if (!retval) {
-        const GG::Y DEFAULT_MARGIN(8); // DEFAULT_ROW_HEIGHT from ListBox.cpp, minus the default font's lineskip of 14
-        retval = adobe::implementation::DefaultFont()->Lineskip() + DEFAULT_MARGIN;
-    }
-    return retval;
-}
-
-/****************************************************************************************************/
-
 GG::Y DropHeight(unsigned int lines)
-{ return RowHeight() * static_cast<int>(lines) + static_cast<int>(2 * GG::ListBox::BORDER_THICK); }
+{ return adobe::implementation::RowHeight() * static_cast<int>(lines) + static_cast<int>(2 * GG::ListBox::BORDER_THICK); }
 
 /****************************************************************************************************/
 
@@ -70,14 +60,14 @@ void sel_changed_slot(adobe::popup_t& popup, GG::DropDownList::iterator it)
             --new_index;
 
         if (popup.value_proc_m)
-            popup.value_proc_m(popup.menu_items_m.at(new_index).second);
+            popup.value_proc_m(popup.menu_items_m.at(new_index).find(adobe::key_value)->second);
 
         if (popup.extended_value_proc_m)
-            popup.extended_value_proc_m(popup.menu_items_m.at(new_index).second, adobe::modifier_state());
+            popup.extended_value_proc_m(popup.menu_items_m.at(new_index).find(adobe::key_value)->second, adobe::modifier_state());
     }
 
     if (popup.selection_changed_proc_m)
-        popup.selection_changed_proc_m(popup.menu_items_m.at(new_index).second);
+        popup.selection_changed_proc_m(popup.menu_items_m.at(new_index).find(adobe::key_value)->second);
 }
 
 /****************************************************************************************************/
@@ -93,7 +83,8 @@ void set_menu_item_set(adobe::popup_t& p, const adobe::popup_t::menu_item_t* fir
         // Since I don't know a way I intercept -'s here. (Dashes inidcate separators
         // on the macintosh and also in eve at the moment).
 
-        if (first->first != "-" && first->first != "__separator") 
+        const adobe::string_t& name = first->find(adobe::key_name)->second.cast<adobe::string_t>();
+        if (name != "-" && name != "__separator") 
             p.menu_items_m.push_back(*first);
     }
 
@@ -111,13 +102,7 @@ void message_menu_item_set(adobe::popup_t& popup)
              first = popup.menu_items_m.begin(), last = popup.menu_items_m.end();
          first != last;
          ++first) {
-        GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
-        row->push_back(
-            adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
-                                                            adobe::implementation::DefaultFont(),
-                                                            popup.item_text_color_m, GG::FORMAT_LEFT)
-        );
-        popup.control_m->Insert(row);
+        popup.control_m->Insert(adobe::implementation::item_to_row(*first, popup.item_text_color_m));
     }
 
     popup.enable(!popup.menu_items_m.empty());
@@ -177,7 +162,7 @@ void popup_t::measure(extents_t& result)
     menu_item_set_t::iterator last(menu_items_m.end());
     GG::Pt largest_extent(font->TextExtent(custom_item_name_m));
     for (; first != last; ++first) {
-        GG::Pt extent = font->TextExtent(first->first);
+        GG::Pt extent = font->TextExtent(first->find(key_name)->second.cast<std::string>());
         if (largest_extent.x < extent.x)
             largest_extent = extent;
     }
@@ -304,7 +289,7 @@ void popup_t::display(const model_type& value)
     menu_item_set_t::iterator  last(menu_items_m.end());
 
     for (; first != last; ++first) {
-        if ((*first).second == value) {
+        if (first->find(key_value)->second == value) {
             if (custom_m) {
                 custom_m = false;
                 control_m->Erase(control_m->begin());
@@ -326,13 +311,10 @@ void popup_t::display_custom()
         return;
 
     custom_m = true;
-    GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
-    row->push_back(
-        adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, custom_item_name_m,
-                                                        adobe::implementation::DefaultFont(),
-                                                        item_text_color_m, GG::FORMAT_LEFT)
-    );
-    control_m->Insert(row, control_m->begin());
+    dictionary_t item;
+    item[key_name] = any_regular_t(custom_item_name_m);
+    item[static_name_t("color")] = any_regular_t(implementation::color_dictionary(item_text_color_m));
+    control_m->Insert(implementation::item_to_row(item, item_text_color_m), control_m->begin());
     control_m->Select(0);
 }
 
@@ -346,7 +328,7 @@ void popup_t::select_with_text(const std::string& text)
 
     std::size_t new_index = std::numeric_limits<std::size_t>::max();
     for (std::size_t i = 0; i < menu_items_m.size(); ++i) {
-        if (menu_items_m[i].first == text) {
+        if (menu_items_m[i].find(key_name)->second.cast<std::string>().c_str() == text) {
             new_index = i;
             break;
         }
@@ -359,7 +341,7 @@ void popup_t::select_with_text(const std::string& text)
         return;
 
     if (new_index != old_index)
-        value_proc_m(menu_items_m.at(new_index).second);
+        value_proc_m(menu_items_m.at(new_index).find(adobe::key_value)->second);
 }
 
 /****************************************************************************************************/

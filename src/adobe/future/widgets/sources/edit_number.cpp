@@ -15,6 +15,7 @@
 #include <GG/adobe/algorithm/find.hpp>
 #include <GG/adobe/poly_placeable.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
+#include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 #include <GG/adobe/name.hpp>
 #include <GG/adobe/future/widgets/headers/edit_number.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
@@ -456,8 +457,9 @@ void edit_number_t::initialize()
          ++iter) {
         popup_t::menu_item_t cur;
 
-        cur.first = iter->name_m;
-        cur.second = any_regular_t(iter->name_m);
+        any_regular_t name(iter->name_m);
+        cur[key_name] = name;
+        cur[key_value] = name;
 
         set.push_back(cur);
     }

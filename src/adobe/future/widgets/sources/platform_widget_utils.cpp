@@ -83,6 +83,19 @@ GG::Pt NonClientSize(GG::Wnd& w)
 
 /****************************************************************************************************/
 
+GG::Y RowHeight()
+{
+    static GG::Y retval = GG::Y0;
+    if (!retval) {
+        const GG::Y DEFAULT_MARGIN(8); // DEFAULT_ROW_HEIGHT from ListBox.cpp, minus the default font's lineskip of 14
+        retval = adobe::implementation::DefaultFont()->Lineskip() + DEFAULT_MARGIN;
+    }
+    return retval;
+}
+
+/****************************************************************************************************/
+
+// TODO: Expose this?  It's not in the header.
 bool pick_file(boost::filesystem::path& path)
 {
     GG::StyleFactory& style(Factory());
@@ -104,6 +117,7 @@ bool pick_file(boost::filesystem::path& path)
 
 /****************************************************************************************************/
 
+// TODO: Expose this?  It's not in the header.
 bool pick_save_path(boost::filesystem::path& path)
 {
     GG::StyleFactory& style(Factory());
@@ -178,6 +192,19 @@ const std::string& get_field_text<GG::TextControl*>(GG::TextControl*& x)
 
 bool is_focused(GG::Wnd* w)
 { return GG::GUI::GetGUI()->FocusWnd() == w; }
+
+/****************************************************************************************************/
+
+dictionary_t color_dictionary(const GG::Clr& color)
+{
+    dictionary_t retval;
+    retval[static_name_t("r")] = any_regular_t(color.r * 1.0);
+    retval[static_name_t("g")] = any_regular_t(color.g * 1.0);
+    retval[static_name_t("b")] = any_regular_t(color.b * 1.0);
+    if (color.a != 255)
+        retval[static_name_t("a")] = any_regular_t(color.a * 1.0);
+    return retval;
+}
 
 /****************************************************************************************************/
 
@@ -376,6 +403,21 @@ void cell_and_expression(const any_regular_t& value, name_t& cell, array_t& expr
 
 /****************************************************************************************************/
 
+GG::ListBox::Row* item_to_row(const dictionary_t& item, const GG::Clr& default_item_color)
+{
+    const bool contains_color = item.count(adobe::static_name_t("color"));
+    adobe::dictionary_t colorful_dictionary;
+    if (!contains_color) {
+        colorful_dictionary = item;
+        colorful_dictionary[adobe::static_name_t("color")] =
+            adobe::any_regular_t(color_dictionary(default_item_color));
+    }
+    const adobe::dictionary_t& dictionary = contains_color ? item : colorful_dictionary;
+    return GG::DefaultRowFactoryFunction(dictionary);
+}
+
+/****************************************************************************************************/
+
 } // namespace implementation
 
 /****************************************************************************************************/
@@ -449,5 +491,28 @@ platform_display_type get_top_level_window(platform_display_type thing)
 /****************************************************************************************************/
 
 } // namespace adobe
+
+/****************************************************************************************************/
+
+namespace GG {
+
+/****************************************************************************************************/
+
+ListBox::Row* DefaultRowFactoryFunction(const adobe::dictionary_t& parameters)
+{
+    GG::ListBox::Row* retval = new GG::ListBox::Row(GG::X1, adobe::implementation::RowHeight(), "");
+    std::string name;
+    adobe::get_value(parameters, adobe::static_name_t("name"), name);
+    Clr color;
+    adobe::implementation::get_color(parameters, adobe::static_name_t("color"), color);
+    retval->push_back(
+        adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, name,
+                                                        adobe::implementation::DefaultFont(),
+                                                        color, GG::FORMAT_LEFT)
+    );
+    return retval;
+}
+
+} // namespace GG
 
 /****************************************************************************************************/

@@ -424,10 +424,13 @@ void EveDialog::SetEveModalDialog(adobe::modal_dialog_t* modal_dialog)
 { m_eve_modal_dialog.reset(modal_dialog); }
 
 
+// GG::DefaultRowFactoryFunction defined in platform_widget_utils.cpp
+
 ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition,
                                          const boost::filesystem::path& adam_definition,
                                          ButtonHandler button_handler,
-                                         SignalHandler signal_handler/* = SignalHandler()*/)
+                                         SignalHandler signal_handler/* = SignalHandler()*/,
+                                         RowFactory row_factory/* = RowFactory()*/)
 {
     return ExecuteModalDialog(eve_definition,
                               adam_definition,
@@ -442,7 +445,8 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                                          const DictionaryFunctions& dictionary_functions,
                                          const ArrayFunctions& array_functions,
                                          ButtonHandler button_handler,
-                                         SignalHandler signal_handler/* = SignalHandler()*/)
+                                         SignalHandler signal_handler/* = SignalHandler()*/,
+                                         RowFactory row_factory/* = RowFactory()*/)
 {
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
@@ -461,7 +465,8 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                                          std::istream& adam_definition,
                                          const std::string& adam_filename,
                                          ButtonHandler button_handler,
-                                         SignalHandler signal_handler/* = SignalHandler()*/)
+                                         SignalHandler signal_handler/* = SignalHandler()*/,
+                                         RowFactory row_factory/* = RowFactory()*/)
 {
     return ExecuteModalDialog(eve_definition,
                               eve_filename,
@@ -480,7 +485,8 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                                          const DictionaryFunctions& dictionary_functions,
                                          const ArrayFunctions& array_functions,
                                          ButtonHandler button_handler,
-                                         SignalHandler signal_handler/* = SignalHandler()*/)
+                                         SignalHandler signal_handler/* = SignalHandler()*/,
+                                         RowFactory row_factory/* = RowFactory()*/)
 {
     ModalDialogResult retval;
 
@@ -511,7 +517,8 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
 EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                              const boost::filesystem::path& adam_definition,
                              ButtonHandler button_handler,
-                             SignalHandler signal_handler/* = SignalHandler()*/)
+                             SignalHandler signal_handler/* = SignalHandler()*/,
+                             RowFactory row_factory/* = RowFactory()*/)
 {
     return MakeEveDialog(eve_definition,
                          adam_definition,
@@ -526,7 +533,8 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                              const DictionaryFunctions& dictionary_functions,
                              const ArrayFunctions& array_functions,
                              ButtonHandler button_handler,
-                             SignalHandler signal_handler/* = SignalHandler()*/)
+                             SignalHandler signal_handler/* = SignalHandler()*/,
+                             RowFactory row_factory/* = RowFactory()*/)
 {
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
@@ -545,7 +553,8 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                              std::istream& adam_definition,
                              const std::string& adam_filename,
                              ButtonHandler button_handler,
-                             SignalHandler signal_handler/* = SignalHandler()*/)
+                             SignalHandler signal_handler/* = SignalHandler()*/,
+                             RowFactory row_factory/* = RowFactory()*/)
 {
     return MakeEveDialog(eve_definition,
                          eve_filename,
@@ -564,7 +573,8 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                              const DictionaryFunctions& dictionary_functions,
                              const ArrayFunctions& array_functions,
                              ButtonHandler button_handler,
-                             SignalHandler signal_handler/* = SignalHandler()*/)
+                             SignalHandler signal_handler/* = SignalHandler()*/,
+                             RowFactory row_factory/* = RowFactory()*/)
 {
     EveDialog* retval = 0;
 

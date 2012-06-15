@@ -945,6 +945,9 @@ else:
 
     TODO: max_characters, color, text_color, item_text_color
     TODO: bind_selection_changed_signal
+
+    \note Rows with a custom look, or containing more than just a single
+    string label can be created using \ref eve_row_factory.
 */
 
 /** \page eve_listbox listbox()
@@ -955,6 +958,32 @@ else:
     TODO: color, interior_color, hilite_color, item_text_color
     TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal
     TODO: allowed_drop_types
+
+    \section eve_row_factory The Row Factory
+
+    Listboxes and popups contain an array of items that define how each row of
+    that view should look and behave.  By default, each item contains a \a
+    name and a \a value.  By defining and using a row factory, it is possible
+    to change the rows of such views to look different from one another, or to
+    contain more, less, or different content from the default single string
+    label.
+
+    Note that there is a default row factory function that is used when a
+    user-defined factory is not supplied, and it only relies on the \a name
+    and \a color item parameters.  If \a color is not provided (and by default
+    it is not), the listbox's or popup's \a text_color parameter is used
+    instead.  Even using the default factory, color may be specified, to
+    indicate a particular color for a particular item.
+
+    The row factory type is a map from names to dictionary functions.  The key
+    used comes from the \a type parameter in an Eve script row item.  If this
+    parameter is not given, or if it does not match any key in the factory's
+    map, the default row factory function is used instead.
+
+    A row factory function receives the entire dictionary specified in the Eve
+    script for a given item.  It is free to construct its ListBox::Row in any
+    way the user chooses, perhaps by using a certain style, or by constructing
+    a certain ListBox::Row subclass.
 */
 
 /** \page eve_number_format Number Format

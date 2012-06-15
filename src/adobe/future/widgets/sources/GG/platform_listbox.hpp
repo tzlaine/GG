@@ -40,7 +40,7 @@ namespace adobe {
 
     struct listbox_t : boost::noncopyable
     {
-        typedef std::pair<std::string, any_regular_t> item_t;
+        typedef dictionary_t item_t;
         typedef std::vector<item_t> item_set_t;
 
         typedef any_regular_t model_type;

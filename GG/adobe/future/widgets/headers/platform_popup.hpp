@@ -15,6 +15,7 @@
 
 #include <GG/Clr.h>
 #include <GG/adobe/any_regular.hpp>
+#include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
@@ -34,8 +35,8 @@ namespace adobe {
 
 struct popup_t : boost::noncopyable
 {
-    typedef std::pair<std::string, any_regular_t>   menu_item_t;
-    typedef std::vector<menu_item_t>                menu_item_set_t;
+    typedef dictionary_t               menu_item_t;
+    typedef std::vector<menu_item_t>   menu_item_set_t;
 
     typedef any_regular_t              model_type;
     typedef popup_setter_type          setter_type;

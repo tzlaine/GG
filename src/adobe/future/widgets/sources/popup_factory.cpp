@@ -74,11 +74,8 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, static_name_t("signal_id"), signal_id);
 
     for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
-        dictionary_t cur_item(first->cast<dictionary_t>());
-
-        item_set.push_back(
-            popup_t::menu_item_set_t::value_type(
-                get_value(cur_item, key_name).cast<std::string>(), get_value(cur_item, key_value)));
+        item_set.push_back(first->cast<dictionary_t>());
+        get_value(item_set.back(), key_value);
     }
 
     // REVISIT (fbrereto) : Should be called 'first' but for the fact that MSVC 7.1 complains.

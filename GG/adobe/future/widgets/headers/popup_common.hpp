@@ -45,7 +45,10 @@ static popup_t::menu_item_set_t array_to_menu_item_set(const array_t& value)
             value_iter == cur_new_item.end())
             continue;
 
-        set.push_back(popup_t::menu_item_t(name_iter->second.cast<std::string>(), value_iter->second));
+        popup_t::menu_item_t menu_item;
+        menu_item[key_name] = name_iter->second;
+        menu_item[key_value] = value_iter->second;
+        set.push_back(menu_item);
     }
 
     return set;

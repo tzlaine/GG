@@ -177,8 +177,10 @@ void populate_category_popup(adobe::presets_t& control, const adobe::array_t& co
         adobe::any_regular_t preset_set; // could be empty (e.g., in a separator)
 
         get_value(cur_category, adobe::key_preset_items, preset_set);
-
-        menu_item_set.push_back(value_type(cur_preset_name, preset_set));
+        value_type value;
+        value[adobe::key_name] = adobe::any_regular_t(cur_preset_name);
+        value[adobe::key_value] = preset_set;
+        menu_item_set.push_back(value);
     }
 
     control.type_2_debounce_m = true;

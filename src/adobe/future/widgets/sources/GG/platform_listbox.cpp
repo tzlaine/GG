@@ -6,12 +6,13 @@
 
 #include "platform_listbox.hpp"
 
+#include <GG/adobe/array.hpp>
+#include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/placeable_concept.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
-#include <GG/adobe/array.hpp>
-#include <GG/adobe/placeable_concept.hpp>
 
 #include <GG/ClrConstants.h>
 #include <GG/GUI.h>
@@ -22,18 +23,8 @@
 
 namespace {
 
-    GG::Y RowHeight()
-    {
-        static GG::Y retval = GG::Y0;
-        if (!retval) {
-            const GG::Y DEFAULT_MARGIN(8); // DEFAULT_ROW_HEIGHT from ListBox.cpp, minus the default font's lineskip of 14
-            retval = adobe::implementation::DefaultFont()->Lineskip() + DEFAULT_MARGIN;
-        }
-        return retval;
-    }
-
     GG::Y Height(unsigned int lines)
-    { return RowHeight() * static_cast<int>(lines) + static_cast<int>(2 * GG::ListBox::BORDER_THICK); }
+    { return adobe::implementation::RowHeight() * static_cast<int>(lines) + static_cast<int>(2 * GG::ListBox::BORDER_THICK); }
 
     enum metrics {
         gap = 4 // Measured as space from listbox to label.
@@ -54,7 +45,7 @@ namespace {
             adobe::any_regular_t value;
             if (selections.size() == 1u) {
                 std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *selections.begin());
-                value = listbox.items_m.at(index).second;
+                value = listbox.items_m.at(index).find(adobe::static_name_t("value"))->second;
             } else {
                 value.assign(adobe::array_t());
                 adobe::array_t& array = value.cast<adobe::array_t>();
@@ -62,7 +53,7 @@ namespace {
                      it != end_it;
                      ++it) {
                     std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *it);
-                    array.push_back(listbox.items_m.at(index).second);
+                    array.push_back(listbox.items_m.at(index).find(adobe::static_name_t("value"))->second);
                 }
             }
             listbox.value_proc_m(value);
@@ -122,13 +113,7 @@ namespace {
                  first = listbox.items_m.begin(), last = listbox.items_m.end();
              first != last;
              ++first) {
-            GG::ListBox::Row* row = new GG::ListBox::Row(GG::X1, RowHeight(), "");
-            row->push_back(
-                adobe::implementation::Factory().NewTextControl(GG::X0, GG::Y0, first->first,
-                                                                adobe::implementation::DefaultFont(),
-                                                                listbox.item_text_color_m, GG::FORMAT_LEFT)
-            );
-            listbox.control_m->Insert(row);
+            listbox.control_m->Insert(adobe::implementation::item_to_row(*first, listbox.item_text_color_m));
         }
     }
 
@@ -300,7 +285,7 @@ namespace adobe {
             for (item_set_t::iterator first = items_m.begin(), last = items_m.end();
                  first != last;
                  ++first, ++row_it) {
-                if ((*first).second == value) {
+                if (first->find(static_name_t("value"))->second == value) {
                     control_m->SelectRow(row_it);
                     break;
                 }

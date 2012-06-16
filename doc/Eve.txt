@@ -1245,9 +1245,9 @@ else:
 
     There are two kinds of functions in Adam and Eve expressions: those that
     take positional parameters, a la C++; and those that take named
-    parameters, a la Javascript.  The former are known as array functions,
-    since the parameters are packaged up as an adobe::array_t and supplied to
-    the function's C++ implementation.  The latter are known as dictionary
+    parameters, a la Python.  The former are known as array functions, since
+    the parameters are packaged up as an adobe::array_t and supplied to the
+    function's C++ implementation.  The latter are known as dictionary
     functions, since the parameters are packaged up as an adobe::dictionary_t
     and supplied to the function's C++ implementation.  Note that all
     functions are one kind or the other; the Adam and Eve expression grammar

@@ -132,6 +132,8 @@ void attach_view_and_controller(popup_t&               control,
         boost::bind(&handle_selection_changed_signal,
                     token.signal_notifier_m, control.signal_id_m,
                     boost::ref(token.sheet_m), cell, expression, _1);
+
+    control.row_factory_m = token.row_factory_m;
 }
 
 /****************************************************************************************************/

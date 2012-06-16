@@ -98,6 +98,7 @@ namespace adobe {
         row_signal_t double_clicked_proc_m;
         row_signal_t erased_proc_m;
         row_signal_t browsed_proc_m;
+        const row_factory_t* row_factory_m;
     };
 
     namespace view_implementation {

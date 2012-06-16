@@ -21,6 +21,7 @@
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/name_fwd.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
 
 #include <boost/filesystem/path.hpp>
 
@@ -170,7 +171,9 @@ void cell_and_expression(const any_regular_t& value, name_t& cell, array_t& expr
 
 /****************************************************************************************************/
 
-GG::ListBox::Row* item_to_row(const dictionary_t& item, const GG::Clr& default_item_color);
+GG::ListBox::Row* item_to_row(const dictionary_t& item,
+                              const row_factory_t* row_factory,
+                              const GG::Clr& default_item_color);
 
 /****************************************************************************************************/
 

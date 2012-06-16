@@ -56,6 +56,7 @@ widget_node_t sublayout_t::evaluate(const std::string&       sheet_description,
                                    lookup,
                                    button_notifier,
                                    signal_notifier,
+                                   row_factory_t(),
                                    size,
                                    default_widget_factory_proc_with_factory(factory),
                                    root_m.control_m);

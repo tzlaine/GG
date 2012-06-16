@@ -403,17 +403,25 @@ void cell_and_expression(const any_regular_t& value, name_t& cell, array_t& expr
 
 /****************************************************************************************************/
 
-GG::ListBox::Row* item_to_row(const dictionary_t& item, const GG::Clr& default_item_color)
+GG::ListBox::Row* item_to_row(const dictionary_t& item,
+                              const row_factory_t* row_factory,
+                              const GG::Clr& default_item_color)
 {
-    const bool contains_color = item.count(adobe::static_name_t("color"));
-    adobe::dictionary_t colorful_dictionary;
+    const bool contains_color = item.count(static_name_t("color"));
+    dictionary_t colorful_dictionary;
     if (!contains_color) {
         colorful_dictionary = item;
-        colorful_dictionary[adobe::static_name_t("color")] =
-            adobe::any_regular_t(color_dictionary(default_item_color));
+        colorful_dictionary[static_name_t("color")] =
+            any_regular_t(color_dictionary(default_item_color));
     }
-    const adobe::dictionary_t& dictionary = contains_color ? item : colorful_dictionary;
-    return GG::DefaultRowFactoryFunction(dictionary);
+    const dictionary_t& dictionary = contains_color ? item : colorful_dictionary;
+    name_t type;
+    get_value(dictionary, static_name_t("type"), type);
+    row_factory_t::const_iterator it;
+    if (row_factory && (it = row_factory->find(type)) != row_factory->end())
+        return it->second(dictionary);
+    else
+        return GG::DefaultRowFactoryFunction(dictionary);
 }
 
 /****************************************************************************************************/

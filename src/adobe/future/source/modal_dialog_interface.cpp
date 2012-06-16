@@ -173,6 +173,7 @@ platform_display_type modal_dialog_t::init(std::istream& layout,
                 vm_lookup_m,
                 boost::bind(&modal_dialog_t::latch_button_callback, boost::ref(*this), _1, _2),
                 boost::bind(&modal_dialog_t::latch_signal_callback, boost::ref(*this), _1, _2, _3, _4),
+                row_factory_m,
                 size_normal_s,
                 default_widget_factory_proc(),
                 parent_m

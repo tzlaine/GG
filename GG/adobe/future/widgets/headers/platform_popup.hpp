@@ -94,6 +94,7 @@ struct popup_t : boost::noncopyable
     model_type           last_m;
     bool                 custom_m;
     std::string          custom_item_name_m;
+    const row_factory_t* row_factory_m;
 
 private:
     void display_custom();

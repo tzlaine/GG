@@ -102,7 +102,9 @@ void message_menu_item_set(adobe::popup_t& popup)
              first = popup.menu_items_m.begin(), last = popup.menu_items_m.end();
          first != last;
          ++first) {
-        popup.control_m->Insert(adobe::implementation::item_to_row(*first, popup.item_text_color_m));
+        popup.control_m->Insert(
+            adobe::implementation::item_to_row(*first, popup.row_factory_m, popup.item_text_color_m)
+        );
     }
 
     popup.enable(!popup.menu_items_m.empty());
@@ -142,7 +144,8 @@ popup_t::popup_t(const std::string& name,
     item_text_color_m(item_text_color),
     signal_id_m(signal_id),
     custom_m(false),
-    custom_item_name_m(custom_item_name)
+    custom_item_name_m(custom_item_name),
+    row_factory_m(0)
 { ::set_menu_item_set(*this, first, last); }
 
 /****************************************************************************************************/
@@ -314,7 +317,9 @@ void popup_t::display_custom()
     dictionary_t item;
     item[key_name] = any_regular_t(custom_item_name_m);
     item[static_name_t("color")] = any_regular_t(implementation::color_dictionary(item_text_color_m));
-    control_m->Insert(implementation::item_to_row(item, item_text_color_m), control_m->begin());
+    control_m->Insert(
+        implementation::item_to_row(item, row_factory_m, item_text_color_m), control_m->begin()
+    );
     control_m->Select(0);
 }
 

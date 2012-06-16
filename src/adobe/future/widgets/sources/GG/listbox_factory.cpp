@@ -468,6 +468,8 @@ namespace adobe {
                             expression,
                             _2);
         }
+
+        control.row_factory_m = token.row_factory_m;
     }
 
     namespace implementation {

@@ -284,6 +284,7 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                       vm_lookup_t&                           lookup,
                                       const button_notifier_t&               button_notifier,
                                       const signal_notifier_t&               signal_notifier,
+                                      const row_factory_t&                   row_factory,
                                       size_enum_t                            dialog_size,
                                       const widget_factory_proc_t&           proc,
                                       platform_display_type                  display_root)
@@ -293,7 +294,8 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                               sheet,
                                               *(result.get()),
                                               button_notifier,
-                                              signal_notifier);
+                                              signal_notifier,
+                                              row_factory);
 
     virtual_machine_t evaluator;
 

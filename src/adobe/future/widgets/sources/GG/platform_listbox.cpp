@@ -113,7 +113,7 @@ namespace {
                  first = listbox.items_m.begin(), last = listbox.items_m.end();
              first != last;
              ++first) {
-            listbox.control_m->Insert(adobe::implementation::item_to_row(*first, listbox.item_text_color_m));
+            listbox.control_m->Insert(adobe::implementation::item_to_row(*first, listbox.row_factory_m, listbox.item_text_color_m));
         }
     }
 
@@ -147,7 +147,8 @@ namespace adobe {
         hilite_color_m(hilite_color),
         item_text_color_m(item_text_color),
         drop_types_m(drop_types),
-        signal_id_m(signal_id)
+        signal_id_m(signal_id),
+        row_factory_m(0)
     {}
 
     void listbox_t::measure(extents_t& result)

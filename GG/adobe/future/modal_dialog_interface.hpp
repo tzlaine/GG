@@ -18,6 +18,7 @@
 
 #include <GG/adobe/future/platform_primitives.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
+#include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 
 namespace adobe {
@@ -194,6 +195,7 @@ public:
     display_options_t       display_options_m;
     button_callback_t       button_callback_m;
     signal_notifier_t       signal_notifier_m;
+    row_factory_t           row_factory_m;
     boost::filesystem::path working_directory_m;
     platform_display_type   parent_m;
     vm_lookup_t             vm_lookup_m;

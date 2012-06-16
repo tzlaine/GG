@@ -13,6 +13,7 @@
 
 #include <boost/function.hpp>
 
+#include <GG/ListBox.h>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/widget_attributes.hpp>
 
@@ -24,6 +25,14 @@ namespace adobe {
 
 typedef boost::function<void (const any_regular_t&)>              popup_setter_type;
 typedef boost::function<void (const any_regular_t&, modifiers_t)> popup_extended_setter_type;
+
+/****************************************************************************************************/
+
+typedef boost::function<
+    GG::ListBox::Row* (const dictionary_t&)
+> row_factory_function_t;
+
+typedef std::map<name_t, row_factory_function_t> row_factory_t;
 
 /****************************************************************************************************/
 

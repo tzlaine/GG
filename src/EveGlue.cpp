@@ -437,7 +437,8 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                               DictionaryFunctions(),
                               ArrayFunctions(),
                               button_handler,
-                              signal_handler);
+                              signal_handler,
+                              row_factory);
 }
 
 ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition,
@@ -457,7 +458,8 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                               dictionary_functions,
                               array_functions,
                               button_handler,
-                              signal_handler);
+                              signal_handler,
+                              row_factory);
 }
 
 ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
@@ -475,7 +477,8 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                               DictionaryFunctions(),
                               ArrayFunctions(),
                               button_handler,
-                              signal_handler);
+                              signal_handler,
+                              row_factory);
 }
 
 ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
@@ -498,6 +501,7 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     dialog->display_options_m = adobe::dialog_display_s;
     dialog->button_callback_m = button_handler;
     dialog->signal_notifier_m = signal_handler;
+    dialog->row_factory_m = row_factory;
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
@@ -525,7 +529,8 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                          DictionaryFunctions(),
                          ArrayFunctions(),
                          button_handler,
-                         signal_handler);
+                         signal_handler,
+                         row_factory);
 }
 
 EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
@@ -545,7 +550,8 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                          dictionary_functions,
                          array_functions,
                          button_handler,
-                         signal_handler);
+                         signal_handler,
+                         row_factory);
 }
 
 EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
@@ -563,7 +569,8 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                          DictionaryFunctions(),
                          ArrayFunctions(),
                          button_handler,
-                         signal_handler);
+                         signal_handler,
+                         row_factory);
 }
 
 EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
@@ -586,6 +593,7 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
     dialog->display_options_m = adobe::dialog_display_s;
     dialog->button_callback_m = button_handler;
     dialog->signal_notifier_m = signal_handler;
+    dialog->row_factory_m = row_factory;
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 

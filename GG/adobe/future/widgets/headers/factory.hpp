@@ -23,6 +23,7 @@
 #include <GG/adobe/future/assemblage.hpp>
 #include <GG/adobe/future/behavior.hpp>
 #include <GG/adobe/future/debounce.hpp>
+#include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 #include <GG/adobe/future/widgets/headers/visible_change_queue.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
@@ -201,14 +202,16 @@ struct factory_token_t
 {
     factory_token_t(display_t&                display,
                     sheet_t&                  sheet,
-                    eve_client_holder& client_holder,
-                    button_notifier_t  button_notifier,
-                    signal_notifier_t  signal_notifier) :
+                    eve_client_holder&        client_holder,
+                    button_notifier_t         button_notifier,
+                    signal_notifier_t         signal_notifier,
+                    const row_factory_t&      row_factory) :
         display_m(display),
         sheet_m(sheet),
         client_holder_m(client_holder),
         button_notifier_m(button_notifier),
-        signal_notifier_m(signal_notifier)
+        signal_notifier_m(signal_notifier),
+        row_factory_m(&row_factory)
     { }
 
     //
@@ -242,6 +245,11 @@ struct factory_token_t
     /// The function to call when an unhandled GG signal is emitted.
     //
     signal_notifier_t signal_notifier_m;
+
+    //
+    /// The row factory to use to create listbox and popup rows.
+    //
+    const row_factory_t* row_factory_m;
 };
 
 /*************************************************************************************************/
@@ -383,6 +391,7 @@ adobe::auto_ptr<eve_client_holder> make_view(const std::string&                 
                                              vm_lookup_t&                           lookup,
                                              const button_notifier_t&               button_notifier,
                                              const signal_notifier_t&               signal_notifier,
+                                             const row_factory_t&                   row_factory,
                                              size_enum_t                            dialog_size,
                                              const widget_factory_proc_t&           proc = default_widget_factory_proc(),
                                              platform_display_type                  display_root=platform_display_type());

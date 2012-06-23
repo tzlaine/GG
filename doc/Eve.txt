@@ -27,8 +27,10 @@
     - string
     - array
     - dictionary
+    - color
 
     \remark Note that the parameters to \a typeof() are not named.
+    \remark Note that the \c color type indicates a GG::Clr.
 */
 
 /** \page eve_expression_min_fn min()
@@ -92,6 +94,22 @@
     \param b An Adam and Eve expression of type number.
 
     Returns \code m * x + b \endcode .
+*/
+
+/** \page eve_expression_color_fn color()
+    \section eve_color_fn_usage color() Usage
+
+    \code color(r: expr, g: expr, b: expr, a: expr) \endcode
+    \code color(r, g, b) \endcode
+    \code color(r, g, b, a) \endcode
+
+    \param r An Adam and Eve expression of type number, in the range [0, 255].
+    \param g An Adam and Eve expression of type number, in the range [0, 255].
+    \param b An Adam and Eve expression of type number, in the range [0, 255].
+    \param a An Adam and Eve expression of type number, in the range [0, 255].
+
+    The first form returns \code GG::Clr(r, g, b, a) \endcode , substituting \code r=0, g=0, b=0, a=255 \endcode for any values not given.
+    The latter forms return \code GG::Clr(r, g, b, 255) \endcode or \code GG::Clr(r, g, b, a) \endcode , respectively.
 */
 
 /** \page eve_expression_image_fn image()
@@ -468,7 +486,7 @@ else:
     \param cancel If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
     \param items An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
 
-    TODO: color, text_color.  There also needs to be a dedicated section for the format of a color ({r:[0,255], g:[0,255], b:[0,255], a:[0,255]}).
+    TODO: color, text_color.
 
     TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
@@ -1261,6 +1279,7 @@ else:
 
     \link eve_adding_user_functions Adding User-Defined Functions \endlink
 
+    - \ref eve_expression_color_fn
     - \ref eve_expression_typeof_fn
     - \ref eve_expression_min_fn
     - \ref eve_expression_max_fn

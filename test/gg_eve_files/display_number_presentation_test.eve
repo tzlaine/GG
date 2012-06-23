@@ -4,14 +4,14 @@ layout alert_dialog
     {
         column()
         {
-            display_number(name: "Red text:", bind: @number, units: [], color: {r:255});
-            display_number(name: "Red label:", bind: @number, units: [], label_color: {r:255});
+            display_number(name: "Red text:", bind: @number, units: [], color: color(r:255));
+            display_number(name: "Red label:", bind: @number, units: [], label_color: color(r:255));
             display_number(name: "Red text:", bind: @number,
                            units: [ { name: "unit ", format: "#", scale: [ 1, 0 ] } ],
-                           color: {r:255});
+                           color: color(r:255));
             display_number(name: "Red label:", bind: @number,
                            units: [ { name: "unit", format: "#", scale: [ 1, 0 ] } ],
-                           label_color: {r:255});
+                           label_color: color(r:255));
         }
     }
 }

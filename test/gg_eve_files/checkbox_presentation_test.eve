@@ -4,10 +4,10 @@ layout alert_dialog
     {
         column()
         {
-            checkbox(name: "Red color", color: {r:255});
-            checkbox(name: "Green text color", text_color: {g:255});
-            checkbox(name: "Blue interior color", interior_color: {b:255});
-            checkbox(name: "Blue interior color", interior_color: {b:255});
+            checkbox(name: "Red color", color: color(r:255));
+            checkbox(name: "Green text color", text_color: color(g:255));
+            checkbox(name: "Blue interior color", interior_color: color(b:255));
+            checkbox(name: "Blue interior color", interior_color: color(b:255));
             checkbox(name: "xbox", style: xbox);
             checkbox(name: "checkbox", style: checkbox);
             checkbox(name: "radio", style: radio);

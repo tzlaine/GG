@@ -4,8 +4,8 @@ layout alert_dialog
     {
         popup(name: "red color, blue item_text_color, green label:",
               items: [ { name: "Foo option", value: 1 } ],
-              color: {r:255},
-              item_text_color: {b:255},
-              label_color: {g:255});
+              color: color(r:255),
+              item_text_color: color(b:255),
+              label_color: color(g:255));
     }
 }

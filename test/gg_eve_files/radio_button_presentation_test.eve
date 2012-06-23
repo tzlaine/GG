@@ -4,9 +4,9 @@ layout alert_dialog
     {
         column()
         {
-            radio_button(name: "Red color", color: {r:255});
-            radio_button(name: "Green text color", text_color: {g:255});
-            radio_button(name: "Blue interior color", interior_color: {b:255});
+            radio_button(name: "Red color", color: color(r:255));
+            radio_button(name: "Green text color", text_color: color(g:255));
+            radio_button(name: "Blue interior color", interior_color: color(b:255));
             radio_button(name: "xbox", style: xbox);
             radio_button(name: "checkbox", style: checkbox);
             radio_button(name: "radio", style: radio);

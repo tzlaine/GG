@@ -2,6 +2,6 @@ layout alert_dialog
 {
     view dialog(name: "Label Presentation Test")
     {
-        label(name: "Yellow label", color: {r:255, g:255});
+        label(name: "Yellow label", color: color(r:255, g:255));
     }
 }

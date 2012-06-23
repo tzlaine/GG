@@ -6,10 +6,10 @@ layout alert_dialog
         {
             edit_text(name: "red color, blue text_color, white interior, green label:",
                       bind: @text,
-                      color: {r:255},
-                      text_color: {b:255},
-                      interior_color: {r:255, g:255, b:255},
-                      label_color: {g:255});
+                      color: color(r:255),
+                      text_color: color(b:255),
+                      interior_color: color(r:255, g:255, b:255),
+                      label_color: color(g:255));
             edit_text(name: "read only:", bind: @text, read_only: true);
             edit_text(name: "terminal_style:", bind: @text, terminal_style: true);
             edit_text(name: "no-wrap:", bind: @long_text, wrap: false);
@@ -21,10 +21,10 @@ layout alert_dialog
             edit_text(name: "red color, blue text_color, white interior, green label:",
                       bind: @multiline_text,
                       lines: 3,
-                      color: {r:255},
-                      text_color: {b:255},
-                      interior_color: {r:255, g:255, b:255},
-                      label_color: {g:255});
+                      color: color(r:255),
+                      text_color: color(b:255),
+                      interior_color: color(r:255, g:255, b:255),
+                      label_color: color(g:255));
             edit_text(name: "read only:", bind: @multiline_text, lines: 3, read_only: true);
             edit_text(name: "terminal_style:", bind: @multiline_text, lines: 3, terminal_style: true);
             edit_text(name: "no-wrap:", bind: @long_text, lines: 3, wrap: false);

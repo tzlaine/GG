@@ -210,21 +210,14 @@ dictionary_t color_dictionary(const GG::Clr& color)
 
 bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color)
 {
-    dictionary_t colors;
-    if (!get_value(parameters, name, colors))
+    any_regular_t color_;
+    if (!get_value(parameters, name, color_))
         return false;
 
-    unsigned int r = 0, g = 0, b = 0, a = 255;
-    bool color_set = false;
-    color_set |= get_value(colors, static_name_t("r"), r);
-    color_set |= get_value(colors, static_name_t("g"), g);
-    color_set |= get_value(colors, static_name_t("b"), b);
-    color_set |= get_value(colors, static_name_t("a"), a);
+    if (!color_.cast<GG::Clr>(color))
+        return false;
 
-    if (color_set)
-        color = GG::Clr(r, g, b, a);
-
-    return color_set;
+    return true;
 }
 
 /****************************************************************************************************/

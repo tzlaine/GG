@@ -97,9 +97,9 @@ typedef adobe::vector<adobe::any_regular_t>                    stack_type; // RE
 
 #if !defined(ADOBE_NO_DOCUMENTATION)
 typedef adobe::static_table<adobe::name_t, operator_t, 22>              operator_table_t;
-typedef adobe::static_table<adobe::name_t, array_function_t, 7>         array_function_table_t;
-typedef adobe::static_table<adobe::name_t, dictionary_function_t, 1>    dictionary_function_table_t;
-typedef adobe::static_table<adobe::type_info_t, adobe::name_t, 7>       type_table_t;
+typedef adobe::static_table<adobe::name_t, array_function_t, 8>         array_function_table_t;
+typedef adobe::static_table<adobe::name_t, dictionary_function_t, 2>    dictionary_function_table_t;
+typedef adobe::static_table<adobe::type_info_t, adobe::name_t, 8>       type_table_t;
 #endif // !defined(ADOBE_NO_DOCUMENTATION)
 
 /*************************************************************************************************/
@@ -129,7 +129,8 @@ void get_type_name_init()
         type_table_t::entry_type(adobe::type_info<adobe::string_t>(),      adobe::static_name_t("string")),
         type_table_t::entry_type(adobe::type_info<adobe::array_t>(),       adobe::static_name_t("array")),
         type_table_t::entry_type(adobe::type_info<adobe::dictionary_t>(),  adobe::static_name_t("dictionary")),
-        type_table_t::entry_type(adobe::type_info<adobe::name_t>(),        adobe::static_name_t("name"))
+        type_table_t::entry_type(adobe::type_info<adobe::name_t>(),        adobe::static_name_t("name")),
+        type_table_t::entry_type(adobe::type_info<GG::Clr>(),              adobe::static_name_t("color"))
     }};
 
     type_table_s.sort();
@@ -238,6 +239,23 @@ adobe::any_regular_t typeof_function(const adobe::array_t& parameters)
 
 /*************************************************************************************************/
 
+adobe::any_regular_t array_color_function(const adobe::array_t& parameters)
+{
+    if (parameters.size() < 3u)
+        throw std::runtime_error("color: parameter error");
+
+    unsigned char
+        r = parameters[0].cast<unsigned int>(),
+        g = parameters[1].cast<unsigned int>(),
+        b = parameters[2].cast<unsigned int>();
+    GG::Clr color(r, g, b, 255);
+    if (4u <= parameters.size())
+        color.a = parameters[4].cast<unsigned int>();
+    return adobe::any_regular_t(color);
+}
+
+/*************************************************************************************************/
+
 #if 0
 #pragma mark -
 #endif
@@ -255,6 +273,19 @@ adobe::any_regular_t scale_function(const adobe::dictionary_t& parameters)
     get_value(parameters, adobe::static_name_t("b"), b);
 
     return adobe::any_regular_t(m * x + b);
+}
+
+/*************************************************************************************************/
+
+adobe::any_regular_t dictionary_color_function(const adobe::dictionary_t& parameters)
+{
+    GG::Clr color;
+    unsigned int r = 0, g = 0, b = 0, a = 255;
+    get_value(parameters, adobe::static_name_t("r"), r);
+    get_value(parameters, adobe::static_name_t("g"), g);
+    get_value(parameters, adobe::static_name_t("b"), b);
+    get_value(parameters, adobe::static_name_t("a"), a);
+    return adobe::any_regular_t(GG::Clr(r, g, b, a));
 }
 
 /*************************************************************************************************/
@@ -385,12 +416,14 @@ void virtual_machine_init_once()
         array_function_table_t::entry_type(adobe::static_name_t("round"),        &round_function),
         array_function_table_t::entry_type(adobe::static_name_t("localize"),     &localize_function),
         array_function_table_t::entry_type(adobe::static_name_t("xml_escape"),   &xml_escape_function),
-        array_function_table_t::entry_type(adobe::static_name_t("xml_unescape"), &xml_unescape_function)
+        array_function_table_t::entry_type(adobe::static_name_t("xml_unescape"), &xml_unescape_function),
+        array_function_table_t::entry_type(adobe::static_name_t("color"),        &array_color_function)
     }};
 
     static dictionary_function_table_t dictionary_function_table_s =
     {{
-        dictionary_function_table_t::entry_type(adobe::static_name_t("scale"),  &scale_function)
+        dictionary_function_table_t::entry_type(adobe::static_name_t("scale"),  &scale_function),
+        dictionary_function_table_t::entry_type(adobe::static_name_t("color"),  &dictionary_color_function)
     }};
 
     operator_table_s.sort();

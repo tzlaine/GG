@@ -13,6 +13,8 @@
 
 #include <GG/adobe/config.hpp>
 
+#include <GG/Clr.h>
+
 #include <boost/operators.hpp>
 #include <boost/range/as_literal.hpp>
 
@@ -446,6 +448,7 @@ ADOBE_NAME_TYPE_0("char",           char)
 ADOBE_NAME_TYPE_0("signed_char",    signed char)
 ADOBE_NAME_TYPE_0("unsigned_char",  unsigned char)
 ADOBE_NAME_TYPE_0("bool",           bool)
+ADOBE_NAME_TYPE_0("color",          GG::Clr)
 
 ADOBE_NAME_TYPE_1("pointer",        T0*)
 ADOBE_NAME_TYPE_1("const",          const T0)
@@ -463,6 +466,7 @@ ADOBE_SHORT_NAME_TYPE('c','h','a','r',  char)
 ADOBE_SHORT_NAME_TYPE('s','c','h','r',  signed char)
 ADOBE_SHORT_NAME_TYPE('u','c','h','r',  unsigned char)
 ADOBE_SHORT_NAME_TYPE('b','o','o','l',  bool)
+ADOBE_SHORT_NAME_TYPE('c','o','l','r',  GG::Clr)
 
 /**************************************************************************************************/
 

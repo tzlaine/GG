@@ -110,11 +110,11 @@ touch_set_t touch_set(const dictionary_t& parameters);
 
 template <typename Sheet, typename ModelType>
 inline typename boost::enable_if<boost::is_same<Sheet, basic_sheet_t>, void>::type
-    touch_set_update(Sheet&                          /*sheet*/,
-                     const sheet_t::monitor_value_t& set_proc,
-                     const ModelType&                new_value,
-                     touch_set_t                     /*touch_set*/,
-                     behavior_t&                     layout_behavior)
+touch_set_update(Sheet&                          /*sheet*/,
+                 const sheet_t::monitor_value_t& set_proc,
+                 const ModelType&                new_value,
+                 touch_set_t                     /*touch_set*/,
+                 behavior_t&                     layout_behavior)
 {
     set_proc(any_regular_t(new_value));
 
@@ -125,11 +125,11 @@ inline typename boost::enable_if<boost::is_same<Sheet, basic_sheet_t>, void>::ty
 
 template <typename Sheet, typename ModelType>
 inline typename boost::disable_if<boost::is_same<Sheet, basic_sheet_t>, void>::type
-    touch_set_update(Sheet&                          sheet,
-                     const sheet_t::monitor_value_t& set_proc,
-                     const ModelType&                new_value,
-                     touch_set_t                     touch_set,
-                     behavior_t&                     layout_behavior)
+touch_set_update(Sheet&                          sheet,
+                 const sheet_t::monitor_value_t& set_proc,
+                 const ModelType&                new_value,
+                 touch_set_t                     touch_set,
+                 behavior_t&                     layout_behavior)
 {
     // If the cell is not bound to the Adam sheet, but rather the layout sheet,
     // then should this step be taking place?
@@ -146,8 +146,8 @@ inline typename boost::disable_if<boost::is_same<Sheet, basic_sheet_t>, void>::t
 template <typename Sheet>
 inline typename boost::enable_if<boost::is_same<Sheet, basic_sheet_t>, 
                                  sheet_t::monitor_value_t>::type
-    obtain_set_cell_from_controller_proc(Sheet&        sheet,
-                                         name_t cell)
+obtain_set_cell_from_controller_proc(Sheet&        sheet,
+                                     name_t cell)
 {
     return boost::bind(&implementation::layout_sheet_set,
                        &sheet,
@@ -160,8 +160,8 @@ inline typename boost::enable_if<boost::is_same<Sheet, basic_sheet_t>,
 template <typename Sheet>
 inline typename boost::disable_if<boost::is_same<Sheet, basic_sheet_t>, 
                                   sheet_t::monitor_value_t>::type
-    obtain_set_cell_from_controller_proc(Sheet&        sheet,
-                                         name_t cell)
+obtain_set_cell_from_controller_proc(Sheet&        sheet,
+                                     name_t cell)
 {
     return boost::bind(&implementation::sheet_set,
                        &sheet,
@@ -177,11 +177,11 @@ inline typename boost::disable_if<boost::is_same<Sheet, basic_sheet_t>,
 
 template <class AP, class P> // P models poly_placeable_t or poly_placeable_twopass_t, 
 inline eve_t::iterator attach_placeable(eve_t::iterator     parent_token,
-                                               P&                         widget,
-                                               const dictionary_t&        parameters,
-                                               const factory_token_t&     token,
-                                               bool                       is_container,
-                                               const layout_attributes_t& layout_attributes)
+                                        P&                         widget,
+                                        const dictionary_t&        parameters,
+                                        const factory_token_t&     token,
+                                        bool                       is_container,
+                                        const layout_attributes_t& layout_attributes)
 {
     AP* element = new AP(&widget);
     token.client_holder_m.assemblage_m.cleanup(boost::bind(delete_ptr<AP*>(), element));
@@ -211,13 +211,13 @@ void attach_monitor(Controller&         controller,
 
     boost::function<void (const controller_model_type&)> setter
         (boost::bind(&implementation::touch_set_update<Sheet, controller_model_type>,
-                                                       boost::ref(sheet),
-                                                       set_cell_from_controller_proc,
-                                                       _1,
-                                                       implementation::touch_set(parameters),
-                                                       boost::ref(token_layout_behavior(token))));
+                     boost::ref(sheet),
+                     set_cell_from_controller_proc,
+                     _1,
+                     implementation::touch_set(parameters),
+                     boost::ref(token_layout_behavior(token))));
 
-     controller.monitor(setter);
+    controller.monitor(setter);
 }
 
 /*************************************************************************************************/
@@ -241,26 +241,26 @@ public:
         layout_behavior_m(&layout_behavior),
         cell_set_m(cell_set),
         pass_thru_m(pass_thru)
-    { }
+        { }
 
     void operator()(const model_type& value,
                     modifiers_t       modifiers = modifiers_t())
-    {
-        if ((pass_thru_m & modifiers) == 0)
-            return;
-
-        array_t::iterator iter(cell_set_m.begin());
-        array_t::iterator last(cell_set_m.end());
-
-        while (iter != last)
         {
-            sheet_m->set(iter->cast<name_t>(), value);
+            if ((pass_thru_m & modifiers) == 0)
+                return;
 
-            ++iter;
+            array_t::iterator iter(cell_set_m.begin());
+            array_t::iterator last(cell_set_m.end());
+
+            while (iter != last)
+            {
+                sheet_m->set(iter->cast<name_t>(), value);
+
+                ++iter;
+            }
+
+            (*layout_behavior_m)();
         }
-
-        (*layout_behavior_m)();
-    }
 
 private:
     basic_sheet_t* sheet_m;
@@ -279,16 +279,16 @@ struct force_relayout_view_adaptor
     force_relayout_view_adaptor(View& view, visible_change_queue_t& queue) :
         view_m(&view),
         queue_m(&queue)
-    { }
+        { }
 
     void display(const model_type& value)
-    {
-        assert(view_m && queue_m);
+        {
+            assert(view_m && queue_m);
 
-        ViewConcept<View>::display(*view_m, value);
+            ViewConcept<View>::display(*view_m, value);
 
-        queue_m->force_m = true;
-    }
+            queue_m->force_m = true;
+        }
 
     View*                   view_m;
     visible_change_queue_t* queue_m;
@@ -304,29 +304,29 @@ void attach_view(assemblage_t& assemblage,
 {
     poly_view_t* view(new poly_view_t(boost::ref(control)));
     assemblage_cleanup_ptr(assemblage, view);
-        sheet_t::monitor_value_t m(boost::bind(&ViewConcept<poly_view_t>::display, 
+    sheet_t::monitor_value_t m(boost::bind(&ViewConcept<poly_view_t>::display, 
                                            boost::ref(*view), _1));
-        typename Sheet::connection_t c(sheet.monitor_value(cell, m));
-        assemblage_cleanup_connection(assemblage, c);
+    typename Sheet::connection_t c(sheet.monitor_value(cell, m));
+    assemblage_cleanup_connection(assemblage, c);
 }
 
 /*************************************************************************************************/
 
 template <class Controller, class Sheet>
 typename boost::disable_if<boost::is_same<Sheet, basic_sheet_t>, void>::type
-    attach_enabler(assemblage_t& assemblage, name_t cell, Controller& control, Sheet& sheet,
-                    const dictionary_t& parameters)
+attach_enabler(assemblage_t& assemblage, name_t cell, Controller& control, Sheet& sheet,
+               const dictionary_t& parameters)
 {
     poly_controller_t* controller(new poly_controller_t(&control));
     assemblage_cleanup_ptr(assemblage, controller);
     touch_set_t v(implementation::touch_set(parameters));
-        sheet_t::monitor_enabled_t 
+    sheet_t::monitor_enabled_t 
         m(boost::bind(&ControllerConcept<poly_controller_t>::enable, boost::ref(*controller), _1));
         
     typename Sheet::connection_t c;
     if(v.empty()) c = sheet.monitor_enabled(cell, NULL, NULL, m);
     else c = sheet.monitor_enabled(cell, &v[0], &v[0] + v.size(), m);
-        assemblage_cleanup_connection(assemblage, c);
+    assemblage_cleanup_connection(assemblage, c);
 }
 
 /*************************************************************************************************/
@@ -340,10 +340,10 @@ inline typename boost::enable_if<boost::is_same<Sheet, basic_sheet_t>, void>::ty
 
 template <typename T, typename P>
 inline widget_node_t create_and_hookup_widget(const dictionary_t& parameters,
-                                       const widget_node_t&       parent,
-                                       const factory_token_t&     token,
-                                       bool                       is_container,
-                                       const layout_attributes_t& layout_attributes)
+                                              const widget_node_t&       parent,
+                                              const factory_token_t&     token,
+                                              bool                       is_container,
+                                              const layout_attributes_t& layout_attributes)
 {
     size_enum_t   size(parameters.count(key_size) ?
                        implementation::enumerate_size(
@@ -366,11 +366,11 @@ inline widget_node_t create_and_hookup_widget(const dictionary_t& parameters,
     eve_t::iterator eve_token;
 
     eve_token = attach_placeable<P>(parent.eve_token_m,
-                                           *widget,
-                                           parameters,
-                                           token,
-                                           is_container,
-                                           layout_attributes);
+                                    *widget,
+                                    parameters,
+                                    token,
+                                    is_container,
+                                    layout_attributes);
 
     attach_view_and_controller(*widget, parameters, token);
 
@@ -400,23 +400,23 @@ void couple_controller_to_cell(Controller&           controller,
 
 template <typename T, typename FactoryToken>
 void attach_controller_direct(T&                                                        control,
-                                                          const adobe::dictionary_t&    parameters,
-                                                          const FactoryToken&                   token,
-                                                          adobe::name_t                                 cell)
+                              const adobe::dictionary_t&    parameters,
+                              const FactoryToken&                   token,
+                              adobe::name_t                                 cell)
 {
-        if (cell == name_t())
-                return;
+    if (cell == name_t())
+        return;
         
-        basic_sheet_t& layout_sheet(token_layout_sheet(token));
-        sheet_t&       property_model(token_property_model(token));
+    basic_sheet_t& layout_sheet(token_layout_sheet(token));
+    sheet_t&       property_model(token_property_model(token));
         
-        // is the cell in the layout sheet or the Adam sheet?
-        if (layout_sheet.count_interface(cell) != 0)
-                couple_controller_to_cell(control, cell, layout_sheet,
-                                                                  token, parameters);
-        else
-                couple_controller_to_cell(control, cell, property_model,
-                                                                  token, parameters);
+    // is the cell in the layout sheet or the Adam sheet?
+    if (layout_sheet.count_interface(cell) != 0)
+        couple_controller_to_cell(control, cell, layout_sheet,
+                                  token, parameters);
+    else
+        couple_controller_to_cell(control, cell, property_model,
+                                  token, parameters);
 }
 
 /*************************************************************************************************/
@@ -431,28 +431,28 @@ void attach_controller(T&                                                 contro
 
     get_value(parameters, key_name, cell);
         
-        attach_controller_direct(control,parameters,token,cell);
+    attach_controller_direct(control,parameters,token,cell);
 }
 
 /*************************************************************************************************/
 
 template <typename T, typename FactoryToken>
 void attach_view_direct(T&                                                      control,
-                                                const adobe::dictionary_t&      /*parameters*/,
-                                                const FactoryToken&         token,
-                                                adobe::name_t               cell)
+                        const adobe::dictionary_t&      /*parameters*/,
+                        const FactoryToken&         token,
+                        adobe::name_t               cell)
 {
-        if (cell == name_t())
-                return;
+    if (cell == name_t())
+        return;
         
-        basic_sheet_t& layout_sheet(token_layout_sheet(token));
-        assemblage_t&  assemblage(token_assemblage(token));
+    basic_sheet_t& layout_sheet(token_layout_sheet(token));
+    assemblage_t&  assemblage(token_assemblage(token));
         
-        // is the cell in the layout sheet or the Adam sheet?
-        if (layout_sheet.count_interface(cell) != 0)
-                attach_view(assemblage, cell, control, layout_sheet);
-        else
-                attach_view(assemblage, cell, control, token_property_model(token));    
+    // is the cell in the layout sheet or the Adam sheet?
+    if (layout_sheet.count_interface(cell) != 0)
+        attach_view(assemblage, cell, control, layout_sheet);
+    else
+        attach_view(assemblage, cell, control, token_property_model(token));    
 }
         
 /*************************************************************************************************/
@@ -467,7 +467,7 @@ void attach_view(T&                                                     control,
 
     get_value(parameters, key_name, cell);
 
-        attach_view_direct(control, parameters, token, cell);
+    attach_view_direct(control, parameters, token, cell);
 }
 
 /*************************************************************************************************/
@@ -480,13 +480,13 @@ void attach_view_and_controller_direct(T&                                       
                                        adobe::name_t                            view_cell = name_t(),
                                        adobe::name_t                            controller_cell = name_t())
 {
-        if (widget_cell == name_t() && view_cell== name_t() && controller_cell== name_t())
-                return;
+    if (widget_cell == name_t() && view_cell== name_t() && controller_cell== name_t())
+        return;
 
-        basic_sheet_t& layout_sheet(token_layout_sheet(token));
+    basic_sheet_t& layout_sheet(token_layout_sheet(token));
     sheet_t&       property_model(token_property_model(token));
         
-        if (widget_cell != name_t())
+    if (widget_cell != name_t())
     {
         controller_cell = widget_cell;
         view_cell = widget_cell;
@@ -540,7 +540,7 @@ void attach_view_and_controller(T&                  control,
     get_value(parameters, bind_view_cell_name, view_cell);
     get_value(parameters, bind_cell_name, widget_cell);
 
-        attach_view_and_controller_direct(control, parameters, token, widget_cell, view_cell, controller_cell);
+    attach_view_and_controller_direct(control, parameters, token, widget_cell, view_cell, controller_cell);
 }
 
 /*************************************************************************************************/

@@ -31,6 +31,7 @@ set(THIS_LIB_SOURCES
     Menu.cpp
     MultiEdit.cpp
     PluginInterface.cpp
+    ProgressBar.cpp
     PtRect.cpp
     ReportParseError.cpp
     Scroll.cpp

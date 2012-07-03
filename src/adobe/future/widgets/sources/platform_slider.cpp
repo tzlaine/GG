@@ -22,8 +22,12 @@ namespace {
 
 /****************************************************************************************************/
 
-void slider_slid(adobe::slider_t& slider, int tab, int min, int max)
+void slider_slid(adobe::slider_t& slider, double tab_, double min_, double max_)
 {
+    int tab = static_cast<int>(tab_),
+        min = static_cast<int>(min_),
+        max = static_cast<int>(max_);
+
     if (slider.value_proc_m) {
         double new_value(slider.format_m.at(tab).cast<double>());
         if (new_value != slider.value_m) {
@@ -38,8 +42,11 @@ void slider_slid(adobe::slider_t& slider, int tab, int min, int max)
 
 /****************************************************************************************************/
 
-void slider_slid_and_stopped(adobe::slider_t& slider, int tab, int min, int max)
+void slider_slid_and_stopped(adobe::slider_t& slider, double tab_, double min_, double max_)
 {
+    int tab = static_cast<int>(tab_),
+        min = static_cast<int>(min_),
+        max = static_cast<int>(max_);
     if (slider.slid_and_stopped_proc_m)
         slider.slid_and_stopped_proc_m(tab, min, max);
 }

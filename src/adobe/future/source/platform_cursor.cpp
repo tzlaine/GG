@@ -27,7 +27,7 @@ adobe_cursor_t make_cursor(const char* cursor_path, float hot_spot_x, float hot_
     if (!g_default_cursor)
         g_default_cursor = GG::GUI::GetGUI()->GetCursor();
     boost::shared_ptr<GG::Texture> texture = GG::GUI::GetGUI()->GetTexture(cursor_path);
-    GG::Pt hotspot(GG::X(hot_spot_x + 0.5), GG::Y(hot_spot_y + 0.5));
+    GG::Pt hotspot(GG::X_d(hot_spot_x + 0.5), GG::Y_d(hot_spot_y + 0.5));
     return adobe_cursor_t(new GG::TextureCursor(texture, hotspot));
 }
 

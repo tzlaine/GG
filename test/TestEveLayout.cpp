@@ -7,6 +7,7 @@
 #include <GG/Wnd.h>
 #include <GG/SDL/SDLGUI.h>
 #include <GG/adobe/adam.hpp>
+#include <GG/adobe/future/modal_dialog_interface.hpp>
 
 #include <boost/filesystem.hpp>
 

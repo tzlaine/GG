@@ -9,7 +9,9 @@
 #include <GG/adobe/future/widgets/headers/platform_progress_bar.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 
-#include <GG/Control.h>
+#include <GG/GUI.h>
+#include <GG/ProgressBar.h>
+#include <GG/StyleFactory.h>
 
 
 /****************************************************************************************************/
@@ -18,35 +20,38 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-void progress_bar_t::display(const any_regular_t& value)
-{
-    value_m = value.type_info() == type_info<empty_t>() ? 0 : value.cast<double>();
-    
-    std::size_t new_position(format_m.find(value));
+progress_bar_t::progress_bar_t(bool is_vertical,
+                               int length,
+                               int width,
+                               GG::Clr color,
+                               GG::Clr bar_color,
+                               GG::Clr interior_color) :
+    control_m(0),
+    is_vertical_m(is_vertical),
+    length_m(length),
+    width_m(width),
+    color_m(color),
+    bar_color_m(bar_color),
+    interior_color_m(interior_color),
+    last_m(-1.0),
+    value_m(0.0)
+{}
 
-    if (new_position != last_m)
-    {
-        last_m = new_position;
-        if (bar_style_m != pb_style_indeterminate_bar_s)
-        {
-#if 0 // TODO
-            (void) SendMessageW((HWND) control_m,     // handle to destination control     
-                            (UINT) PBM_SETPOS,    // message ID     
-                            (WPARAM)(int) last_m,  // = (WPARAM) (int) nNewPos;    
-                            (LPARAM) 0);          // = 0; not used, must be zero );
-#endif
-        }
-    }
+/****************************************************************************************************/
+
+void progress_bar_t::display(const model_type& value)
+{
+    if ((value_m = std::max(0.0, std::min(value, 1.0))) != last_m)
+        control_m->SetPosition(last_m = value_m);
 }
 
 /*************************************************************************************************/
 
 void progress_bar_t::measure(extents_t& result)
 {
-    assert(control_m);
-
-    result.height() = is_vertical_m ? 100 : 15;
-    result.width() = is_vertical_m ? 15 : 100;
+    GG::Pt min_size = control_m->MinUsableSize();
+    result.width() = Value(min_size.x);
+    result.height() = Value(min_size.y);
 }
 
 /*************************************************************************************************/
@@ -56,63 +61,22 @@ void progress_bar_t::place(const place_data_t& place_data)
 
 /****************************************************************************************************/
 
-progress_bar_t::progress_bar_t(pb_style_t bar_style, 
-                               bool is_vertical,
-                               const value_range_format_t& format,
-                               theme_t theme) :
-    control_m(0),
-    bar_style_m(bar_style),
-    is_vertical_m(is_vertical),
-    format_m(format),
-    theme_m(theme)
-{ }
-
-/****************************************************************************************************/
-
 template <>
 platform_display_type insert<progress_bar_t>(display_t&              display,
                                              platform_display_type&  parent,
                                              progress_bar_t&         element)
 {
-    assert(!"GG has no progress bar type yet!");
-#if 0 // TODO
-    HWND parent_hwnd(parent);
+    assert(!element.control_m);
 
-    assert(!control_m);
+    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
 
-    DWORD style(PBS_SMOOTH);
-    if (is_vertical_m)
-        style |= PBS_VERTICAL;
-    if (bar_style_m == pb_style_indeterminate_bar_s)
-        style |= PBS_MARQUEE;
-    control_m = ::CreateWindowExW(  WS_EX_COMPOSITED,
-                    PROGRESS_CLASS,
-                    NULL,
-                    WS_CHILD | WS_VISIBLE | style,
-                    0, 0, 10, 10,
-                    parent,
-                    0,
-                    ::GetModuleHandle(NULL),
-                    NULL);
+    const int length = 0 < element.length_m ? element.length_m : 100;
+    const int width = 0 < element.width_m ? element.width_m : 14;
+    element.control_m =
+        style->NewProgressBar(GG::X0, GG::Y0, GG::X(length), GG::Y(length),
+                              element.is_vertical_m ? GG::VERTICAL : GG::HORIZONTAL,
+                              width, element.color_m, element.bar_color_m, element.interior_color_m);
 
-    if (bar_style_m == pb_style_indeterminate_bar_s)
-    {
-        (void) ::SendMessageW((HWND) control_m,    // handle to destination control     
-                        (UINT) PBM_SETMARQUEE,   // message ID     
-                        (WPARAM)(BOOL) 1, // = (WPARAM) (bool) on or off;    
-                        (LPARAM) 100);           // = (LPARAM) (UINT) time in milliseconds between updates
-    }
-    else
-    {
-        // REVISIT: this is a hack to match mac version
-        (void) ::SendMessageW(       // returns LRESULT in lResult
-        (HWND) control_m,             // handle to destination control
-        (UINT) PBM_SETRANGE,           // message ID
-        (WPARAM) 0,                    // = (WPARAM) 0; not used, must be zero
-        (LPARAM) MAKELPARAM (0, 100)   // = (LPARAM) MAKELPARAM (nMinRange, nMaxRange)
-        );
-    }
-#endif
     return display.insert(parent, element.control_m);
 }
 

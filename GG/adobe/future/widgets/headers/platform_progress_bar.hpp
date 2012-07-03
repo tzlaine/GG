@@ -22,7 +22,7 @@
 
 
 namespace GG {
-    class Control;
+    class ProgressBar;
 }
 
 /****************************************************************************************************/
@@ -31,61 +31,31 @@ namespace adobe {
 
 /****************************************************************************************************/
 
-/*!
-\ingroup ui_core
-
-\brief Specifies the style of progress bar to be presented to the user
-
-\note
-    Could probably be refactored to specify the intention for the
-    progress bar instead of the end-look-and-feel of the progress bar.
-*/
-
-enum pb_style_t
-{
-    /// Typical progress bar intention; repeatedly updated to reflect
-    /// the progress of an ongoing task
-    pb_style_progress_bar_s,
-
-    /// Updated once (typically) to reflect an amount a certain value
-    /// relates to another value. For instance, the relevance of a
-    /// search result to the search criterion
-    pb_style_relevance_bar_s,
-
-    /// "Barber"-style animation of a bar; repeatedly animated to
-    /// reflect the fact that while we don't know how long the task
-    /// will take to complete, we can tell you that the app isn't
-    /// frozen, it's just thinking hard
-    pb_style_indeterminate_bar_s
-};
-
-/****************************************************************************************************/
-
 struct progress_bar_t : boost::noncopyable
 {
-    typedef     progress_bar_t   widget_type_t;
-    typedef     any_regular_t    model_type;
+    typedef progress_bar_t widget_type_t;
+    typedef double model_type;
 
-                progress_bar_t(pb_style_t bar_style, 
-                               bool is_vertical,
-                               const value_range_format_t& format,
-                               theme_t theme);
+    progress_bar_t(bool is_vertical,
+                   int length,
+                   int width,
+                   GG::Clr color,
+                   GG::Clr bar_color,
+                   GG::Clr interior_color);
 
-    void        measure(extents_t& result);
-    void        place(const place_data_t& place_data);
+    void measure(extents_t& result);
+    void place(const place_data_t& place_data);
+    void display(const model_type& value);
 
-    void        display(const any_regular_t& value);
-
-    GG::Control*                control_m; // TODO
-
-private:
-    pb_style_t                  bar_style_m;
-    bool                        is_vertical_m;
-
-    double                      last_m;
-    double                      value_m;
-    value_range_format_t        format_m;
-    theme_t                     theme_m;
+    GG::ProgressBar* control_m;
+    bool             is_vertical_m;
+    int              length_m;
+    int              width_m;
+    GG::Clr          color_m;
+    GG::Clr          bar_color_m;
+    GG::Clr          interior_color_m;
+    model_type       last_m;
+    model_type       value_m;
 };
 
 /****************************************************************************************************/

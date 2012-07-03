@@ -48,6 +48,7 @@ class GroupBox;
 class ListBox;
 class MenuBar;
 class MultiEdit;
+class ProgressBar;
 class RadioButtonGroup;
 class Scroll;
 template <class T>
@@ -197,6 +198,11 @@ public:
     virtual GroupBox*          NewGroupBox(X x, Y y, X w, Y h, const std::string& label, const boost::shared_ptr<Font>& font,
                                            Clr color, Clr text_color = CLR_BLACK, Clr interior = CLR_ZERO,
                                            Flags<WndFlag> flags = Flags<WndFlag>()) const;
+
+    /** Returns a new GG ProgressBar. */
+    virtual ProgressBar*       NewProgressBar(X x, Y y, X w, Y h, Orientation orientation,
+                                              unsigned int bar_width, Clr color,
+                                              Clr bar_color = CLR_SHADOW, Clr interior_color = CLR_ZERO) const;
     //@}
 
     /** \name Subcontrols */ ///@{

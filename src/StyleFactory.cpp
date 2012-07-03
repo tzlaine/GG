@@ -33,6 +33,7 @@
 #include <GG/ListBox.h>
 #include <GG/Menu.h>
 #include <GG/MultiEdit.h>
+#include <GG/ProgressBar.h>
 #include <GG/Scroll.h>
 #include <GG/Slider.h>
 #include <GG/Spin.h>
@@ -174,6 +175,11 @@ GroupBox* StyleFactory::NewGroupBox(X x, Y y, X w, Y h, const std::string& label
                                     Clr color, Clr text_color/* = CLR_BLACK*/, Clr interior/* = CLR_ZERO*/,
                                     Flags<WndFlag> flags/* = Flags<WndFlag>()*/) const
 { return new GroupBox(x, y, w, h, label, font, color, text_color, interior, flags); }
+
+ProgressBar* StyleFactory::NewProgressBar(X x, Y y, X w, Y h, Orientation orientation,
+                                          unsigned int bar_width, Clr color,
+                                          Clr bar_color/* = CLR_SHADOW*/, Clr interior_color/* = CLR_ZERO*/) const
+{ return new ProgressBar(x, y, w, h, orientation, bar_width, color, bar_color, interior_color); }
 
 TabBar* StyleFactory::NewTabBar(X x, Y y, X w, const boost::shared_ptr<Font>& font, Clr color, Clr text_color/* = CLR_BLACK*/,
                                 TabBarStyle style/* = TAB_BAR_ATTACHED*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const

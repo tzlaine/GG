@@ -21,6 +21,7 @@ namespace adobe {
 /****************************************************************************************************/
 
 progress_bar_t::progress_bar_t(bool is_vertical,
+                               const value_range_format_t& format,
                                int length,
                                int width,
                                GG::Clr color,
@@ -34,15 +35,22 @@ progress_bar_t::progress_bar_t(bool is_vertical,
     bar_color_m(bar_color),
     interior_color_m(interior_color),
     last_m(-1.0),
-    value_m(0.0)
+    value_m(0.0),
+    format_m(format)
 {}
 
 /****************************************************************************************************/
 
 void progress_bar_t::display(const model_type& value)
 {
-    if ((value_m = std::max(0.0, std::min(value, 1.0))) != last_m)
-        control_m->SetPosition(last_m = value_m);
+    value_m = value.type_info() == type_info<empty_t>() ? 0 : value.cast<double>();
+
+    double new_position(format_m.find(value) / static_cast<double>(format_m.size()));
+
+    if (new_position != last_m) {
+        last_m = new_position;
+        control_m->SetPosition(last_m);
+    }
 }
 
 /*************************************************************************************************/

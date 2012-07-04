@@ -34,9 +34,10 @@ namespace adobe {
 struct progress_bar_t : boost::noncopyable
 {
     typedef progress_bar_t widget_type_t;
-    typedef double model_type;
+    typedef any_regular_t model_type;
 
     progress_bar_t(bool is_vertical,
+                   const value_range_format_t& format,
                    int length,
                    int width,
                    GG::Clr color,
@@ -47,15 +48,16 @@ struct progress_bar_t : boost::noncopyable
     void place(const place_data_t& place_data);
     void display(const model_type& value);
 
-    GG::ProgressBar* control_m;
-    bool             is_vertical_m;
-    int              length_m;
-    int              width_m;
-    GG::Clr          color_m;
-    GG::Clr          bar_color_m;
-    GG::Clr          interior_color_m;
-    model_type       last_m;
-    model_type       value_m;
+    GG::ProgressBar*     control_m;
+    bool                 is_vertical_m;
+    int                  length_m;
+    int                  width_m;
+    GG::Clr              color_m;
+    GG::Clr              bar_color_m;
+    GG::Clr              interior_color_m;
+    double               last_m;
+    double               value_m;
+    value_range_format_t format_m;
 };
 
 /****************************************************************************************************/

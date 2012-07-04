@@ -31,6 +31,11 @@ void create_widget(const dictionary_t& parameters,
     GG::Clr bar_color(GG::CLR_SHADOW);
     GG::Clr interior_color(GG::CLR_ZERO);
 
+    dictionary_t::const_iterator it(parameters.find(key_format));
+    value_range_format_t format;
+    if (it != parameters.end())
+        format.set(it->second.cast<dictionary_t>());
+
     get_value(parameters, key_orientation, orientation);
     get_value(parameters, static_name_t("length"), length);
     get_value(parameters, static_name_t("width"), width);
@@ -39,6 +44,7 @@ void create_widget(const dictionary_t& parameters,
     implementation::get_color(parameters, static_name_t("interior_color"), interior_color);
 
     widget = new progress_bar_t(orientation == key_vertical,
+                                format,
                                 length,
                                 width,
                                 color,

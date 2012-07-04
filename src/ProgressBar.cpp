@@ -89,7 +89,7 @@ void ProgressBar::Render()
         if (y_pos != ul.y)
             FlatRectangle(Pt(ul.x, y_pos), lr, bar_color_to_use, CLR_ZERO, 0);
     } else {
-        X x_pos(lr.x + (lr.x - ul.x) * m_pos + X_d(0.5));
+        X x_pos(ul.x + (lr.x - ul.x) * m_pos + X_d(0.5));
         if (x_pos != ul.x)
             FlatRectangle(ul, Pt(x_pos, lr.y), bar_color_to_use, CLR_ZERO, 0);
     }

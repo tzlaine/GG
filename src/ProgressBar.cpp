@@ -37,7 +37,7 @@ namespace {
 
 ProgressBar::ProgressBar(X x, Y y, X w, Y h, Orientation orientation,
                          unsigned int bar_width, Clr color,
-                         Clr bar_color/* = CLR_SHADOW*/,
+                         Clr bar_color/* = CLR_BLUE*/,
                          Clr interior_color/* = CLR_ZERO*/) :
     Control(x, y, w, h, Flags<WndFlag>()),
     m_pos(0.0),

@@ -28,7 +28,7 @@ void create_widget(const dictionary_t& parameters,
     int length(100);
     int width(14);
     GG::Clr color(GG::CLR_BLACK);
-    GG::Clr bar_color(GG::CLR_SHADOW);
+    GG::Clr bar_color(GG::CLR_BLUE);
     GG::Clr interior_color(GG::CLR_ZERO);
 
     dictionary_t::const_iterator it(parameters.find(key_format));

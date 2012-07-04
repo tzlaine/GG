@@ -40,7 +40,7 @@ public:
     /** Ctor. */
     ProgressBar(X x, Y y, X w, Y h, Orientation orientation,
                 unsigned int bar_width, Clr color,
-                Clr bar_color = CLR_SHADOW, Clr interior_color = CLR_ZERO);
+                Clr bar_color = CLR_BLUE, Clr interior_color = CLR_ZERO);
     //@}
 
     /** \name Accessors */ ///@{

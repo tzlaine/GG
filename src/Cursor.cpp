@@ -42,25 +42,34 @@ Cursor::~Cursor()
 
 TextureCursor::TextureCursor(const boost::shared_ptr<Texture>& texture,
                              const Pt& hotspot/* = Pt()*/) :
-    m_texture(texture),
+    m_subtexture(texture),
     m_hotspot(hotspot)
 {
-    m_hotspot.x = std::max(X0, std::min(m_hotspot.x, m_texture->DefaultWidth() - 1));
-    m_hotspot.y = std::max(Y0, std::min(m_hotspot.y, m_texture->DefaultHeight() - 1));
+    m_hotspot.x = std::max(X0, std::min(m_hotspot.x, m_subtexture.Width() - 1));
+    m_hotspot.y = std::max(Y0, std::min(m_hotspot.y, m_subtexture.Height() - 1));
 }
 
-const boost::shared_ptr<Texture>& TextureCursor::GetTexture() const
-{ return m_texture; }
+TextureCursor::TextureCursor(const SubTexture& subtexture,
+                             const Pt& hotspot/* = Pt()*/) :
+    m_subtexture(subtexture),
+    m_hotspot(hotspot)
+{
+    m_hotspot.x = std::max(X0, std::min(m_hotspot.x, m_subtexture.Width() - 1));
+    m_hotspot.y = std::max(Y0, std::min(m_hotspot.y, m_subtexture.Height() - 1));
+}
+
+const SubTexture& TextureCursor::GetSubTexture() const
+{ return m_subtexture; }
 
 const Pt& TextureCursor::Hotspot() const
 { return m_hotspot; }
 
 void TextureCursor::Render(const Pt& pt)
 {
-    assert(m_texture);
+    assert(!m_subtexture.Empty());
     Pt ul = pt - m_hotspot;
     if (OUTLINE_CURSOR) {
-        Pt lr = ul + Pt(m_texture->DefaultWidth(), m_texture->DefaultHeight());
+        Pt lr = ul + Pt(m_subtexture.Width(), m_subtexture.Height());
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_LINE_LOOP);
         glColor3ub(255, 0, 0);
@@ -72,5 +81,5 @@ void TextureCursor::Render(const Pt& pt)
         glEnable(GL_TEXTURE_2D);
     }
     glColor3ub(255, 255, 255);
-    m_texture->OrthoBlit(ul);
+    m_subtexture.OrthoBlit(ul);
 }

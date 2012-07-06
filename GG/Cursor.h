@@ -29,14 +29,10 @@
 #ifndef _GG_Cursor_h_
 #define _GG_Cursor_h_
 
-#include <GG/PtRect.h>
-
-#include <boost/shared_ptr.hpp>
+#include <GG/Texture.h>
 
 
 namespace GG {
-
-class Texture;
 
 /** \brief Cursor is the base class for GUI-renderable cursors.
 
@@ -72,11 +68,16 @@ public:
         offset within \a texture where the click-point is located.  \a hotspot
         is clamped to \a texture's valid area. */
     TextureCursor(const boost::shared_ptr<Texture>& texture, const Pt& hotspot = Pt());
+
+    /** Ctor.  \a subtexture is the portion of a larger texture to render and
+        \a hotspot is the offset within \a subtexture where the click-point is
+        located.  \a hotspot is clamped to \a subtexture's valid area. */
+    TextureCursor(const SubTexture& subtexture, const Pt& hotspot = Pt());
     //@}
 
     /** \name Accessors */ ///@{
     /** Returns the texture used to render this TextureCursor. */
-    const boost::shared_ptr<Texture>& GetTexture() const;
+    const SubTexture& GetSubTexture() const;
 
     /** Returns the position within Texture() of the cursor hotspot. */
     const Pt& Hotspot() const;
@@ -87,8 +88,8 @@ public:
     //@}
 
 private:
-    boost::shared_ptr<Texture> m_texture;
-    Pt                         m_hotspot;
+    SubTexture m_subtexture;
+    Pt         m_hotspot;
 };
 
 } // namespace GG

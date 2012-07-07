@@ -210,8 +210,6 @@ struct edit_number_t : boost::noncopyable
     void        refresh_view(edit_number_t::view_t* src, const model_type& new_value, bool force = false);
     std::size_t current_base_unit_index();
 
-    static const adobe_cursor_t scrubby_cursor();
-
     // these are for edit_number_unit_subwidget_t
     friend struct edit_number_unit_subwidget_t;
     void display_unit(const edit_number_unit_subwidget_t::model_type& unit_name);

@@ -105,27 +105,6 @@ namespace adobe {
 
 /*************************************************************************************************/
 
-const adobe_cursor_t edit_number_t::scrubby_cursor()
-{
-    static adobe_cursor_t scrubby_cursor;
-    static bool           inited(false);
-
-    // make_cursor has the potential to throw, so we are
-    // a little more guarded about constructing the
-    // cursor than we usually are to account for this.
-    // if we fail to load it the first time, we do not
-    // try again.
-
-    if (!inited) {
-        inited = true;
-        scrubby_cursor = make_cursor("cursor_scrub_slider.tga", 15, 15);
-    }
-
-    return scrubby_cursor;
-}
-
-/*************************************************************************************************/
-
 bool edit_number_t::handle_key(key_type key, bool pressed, modifiers_t /*modifiers*/)
 {
     if (!implementation::is_focused(edit_text_m.control_m) || !pressed)

@@ -18,6 +18,32 @@
 namespace {
     adobe_cursor_t g_default_cursor;
     bool g_default_established = false;
+
+    boost::shared_ptr<GG::Texture> default_cursor_texture()
+    {
+        // TODO: Create a uu-encocded array that can be used to construct a
+        // cursors image, a la DefaultFont.cpp.
+        return GG::GUI::GetGUI()->GetTexture("cursors.png");
+    }
+
+    adobe_cursor_t get_cursor(unsigned int row,
+                              unsigned int column,
+                              unsigned int hotspot_x,
+                              unsigned int hotspot_y)
+    {
+        boost::shared_ptr<GG::Texture> texture = default_cursor_texture();
+        const unsigned int cursor_size = 32u;
+        return adobe_cursor_t(
+            new GG::TextureCursor(
+                GG::SubTexture(texture,
+                               GG::X(row * cursor_size),
+                               GG::Y(column * cursor_size),
+                               GG::X((row + 1) * cursor_size),
+                               GG::Y((column + 1) * cursor_size)),
+                GG::Pt(GG::X(hotspot_x), GG::Y(hotspot_y))
+            )
+        );
+    }
 }
 
 /****************************************************************************************************/
@@ -59,14 +85,21 @@ adobe_cursor_t make_cursor(const char* cursor_path,
 
 /****************************************************************************************************/
 
+void delete_cursor(adobe_cursor_t cursor)
+{}
+
+/****************************************************************************************************/
+
 void push_cursor(adobe_cursor_t cursor)
 {
     if (!g_default_established) {
         g_default_cursor = GG::GUI::GetGUI()->GetCursor();
         g_default_established = true;
     }
-    cursor_stack_push(cursor);
-    GG::GUI::GetGUI()->SetCursor(cursor);
+    if (cursor) {
+        cursor_stack_push(cursor);
+        GG::GUI::GetGUI()->SetCursor(cursor);
+    }
 }
 
 /****************************************************************************************************/
@@ -88,9 +121,95 @@ void reset_cursor()
     GG::GUI::GetGUI()->SetCursor(g_default_cursor);
 }
 
-/****************************************************************************************************/
+/*************************************************************************************************/
 
-void delete_cursor(adobe_cursor_t cursor)
-{}
+const adobe_cursor_t pointer_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(0, 0, 0, 0);
+    }
+    return retval;
+}
+
+/*************************************************************************************************/
+
+const adobe_cursor_t text_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(0, 1, 15, 15);
+    }
+    return retval;
+}
+
+/*************************************************************************************************/
+
+const adobe_cursor_t move_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(0, 2, 15, 15);
+    }
+    return retval;
+}
+
+/*************************************************************************************************/
+
+const adobe_cursor_t resize_left_right_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(1, 0, 15, 15);
+    }
+    return retval;
+}
+
+/*************************************************************************************************/
+
+const adobe_cursor_t resize_up_down_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(1, 1, 15, 15);
+    }
+    return retval;
+}
+
+/*************************************************************************************************/
+
+const adobe_cursor_t resize_ul_lr_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(1, 2, 15, 15);
+    }
+    return retval;
+}
+
+/*************************************************************************************************/
+
+const adobe_cursor_t resize_ll_ur_cursor()
+{
+    static adobe_cursor_t retval;
+    static bool inited(false);
+    if (!inited) {
+        inited = true;
+        retval = get_cursor(1, 3, 15, 15);
+    }
+    return retval;
+}
 
 /****************************************************************************************************/

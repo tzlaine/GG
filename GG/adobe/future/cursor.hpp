@@ -44,6 +44,17 @@ adobe_cursor_t pop_cursor();
 // references to all your cursors so you can delete them from memory!
 void           reset_cursor();
 
+
+// TODO: Move to StyleFactory.
+const adobe_cursor_t pointer_cursor();
+const adobe_cursor_t text_cursor();
+const adobe_cursor_t move_cursor();
+const adobe_cursor_t resize_left_right_cursor();
+const adobe_cursor_t resize_up_down_cursor();
+const adobe_cursor_t resize_ul_lr_cursor();
+const adobe_cursor_t resize_ll_ur_cursor();
+
+
 /****************************************************************************************************/
 
 // ADOBE_CURSOR_HPP

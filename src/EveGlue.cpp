@@ -28,6 +28,7 @@
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
+#include <GG/adobe/future/cursor.hpp>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
 #include <GG/adobe/future/widgets/headers/platform_window.hpp>
 
@@ -244,6 +245,22 @@ namespace {
         );
     }
 
+    void SetWndRegionCursor(WndRegion region)
+    {
+        switch (region) {
+        case WR_TOP:
+        case WR_BOTTOM: push_cursor(resize_up_down_cursor()); break;
+        case WR_MIDLEFT:
+        case WR_MIDRIGHT: push_cursor(resize_left_right_cursor()); break;
+        case WR_TOPLEFT:
+        case WR_BOTTOMRIGHT: push_cursor(resize_ul_lr_cursor()); break;
+        case WR_TOPRIGHT:
+        case WR_BOTTOMLEFT: push_cursor(resize_ll_ur_cursor()); break;
+        default:
+        case WR_MIDDLE: break;
+        }
+    }
+
 }
 
 DefaultSignalHandler::HandlerKey::HandlerKey()
@@ -320,7 +337,8 @@ EveDialog::EveDialog(adobe::window_t& imp, Clr color, Clr text_color) :
     m_imp(imp),
     m_title(0),
     m_color(color),
-    m_keyboard(0)
+    m_keyboard(0),
+    m_prev_wnd_region(WR_NONE)
 {
     if (!m_imp.name_m.empty()) {
         m_title = adobe::implementation::Factory().NewTextControl(
@@ -400,6 +418,23 @@ void EveDialog::SizeMove(const Pt& ul, const Pt& lr)
 
 void EveDialog::Render()
 { BeveledRectangle(UpperLeft(), LowerRight(), m_color, m_color, true, BEVEL); }
+
+void EveDialog::MouseEnter(const Pt& pt, Flags<ModKey> mod_keys)
+{ SetWndRegionCursor(m_prev_wnd_region = WindowRegion(pt)); }
+
+void EveDialog::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
+{
+    if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
+        pop_cursor();
+    SetWndRegionCursor(m_prev_wnd_region = WindowRegion(pt));
+}
+
+void EveDialog::MouseLeave()
+{
+    if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
+        pop_cursor();
+    m_prev_wnd_region = WR_NONE;
+}
 
 void EveDialog::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)
 {

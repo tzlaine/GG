@@ -308,6 +308,9 @@ public:
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
+    virtual void MouseEnter(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void MouseLeave();
     virtual void KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
     virtual void KeyRelease(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys);
 
@@ -322,6 +325,7 @@ private:
     TextControl* m_title;
     adobe::keyboard_t* m_keyboard;
     std::auto_ptr<adobe::modal_dialog_t> m_eve_modal_dialog;
+    WndRegion m_prev_wnd_region;
 
     static const unsigned int BEVEL;
     static const int FRAME_WIDTH;

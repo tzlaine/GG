@@ -38,10 +38,10 @@ private:
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseEnter) {
-                // TODO set cursor to edit_number_t::scrubby_cursor()
+                push_cursor(text_cursor());
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
-                // TODO set cursor to original
+                pop_cursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::LDrag) {
                 GG::Pt point = event.Point();

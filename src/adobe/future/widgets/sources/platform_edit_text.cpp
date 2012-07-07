@@ -10,6 +10,7 @@
 
 #include <GG/adobe/controller_concept.hpp>
 #include <GG/adobe/placeable_concept.hpp>
+#include <GG/adobe/future/cursor.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
@@ -75,6 +76,12 @@ private:
             if (event.Type() == GG::WndEvent::MouseWheel) {
                 bool squelch;
                 m_edit_text.pre_edit_proc_m(std::string(1, 0 < event.WheelMove() ? 30 : 31), squelch);
+                retval = true;
+            } else if (event.Type() == GG::WndEvent::MouseEnter) {
+                push_cursor(text_cursor());
+                retval = true;
+            } else if (event.Type() == GG::WndEvent::MouseLeave) {
+                pop_cursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::KeyPress) {
                 bool nontext =

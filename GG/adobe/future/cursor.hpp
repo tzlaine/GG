@@ -47,12 +47,21 @@ void           reset_cursor();
 
 // TODO: Move to StyleFactory.
 const adobe_cursor_t pointer_cursor();
-const adobe_cursor_t text_cursor();
+const adobe_cursor_t help_cursor();
+const adobe_cursor_t crosshair_cursor();
 const adobe_cursor_t move_cursor();
+const adobe_cursor_t link_cursor();
+const adobe_cursor_t grabable_cursor();
+const adobe_cursor_t grabbing_cursor();
+const adobe_cursor_t text_cursor();
 const adobe_cursor_t resize_left_right_cursor();
 const adobe_cursor_t resize_up_down_cursor();
 const adobe_cursor_t resize_ul_lr_cursor();
 const adobe_cursor_t resize_ll_ur_cursor();
+const adobe_cursor_t zoom_in_cursor();
+const adobe_cursor_t zoom_out_cursor();
+const adobe_cursor_t drop_cursor();
+const adobe_cursor_t disallow_cursor();
 
 
 /****************************************************************************************************/

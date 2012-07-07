@@ -123,93 +123,48 @@ void reset_cursor()
 
 /*************************************************************************************************/
 
-const adobe_cursor_t pointer_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(0, 0, 0, 0);
+#define DEFINE_CURSOR_FUNCTION(name, row, column, hotspot_x, hotspot_y) \
+    const adobe_cursor_t name()                                         \
+    {                                                                   \
+        static adobe_cursor_t retval;                                   \
+        static bool inited(false);                                      \
+        if (!inited) {                                                  \
+            inited = true;                                              \
+            retval = get_cursor(row, column, hotspot_x, hotspot_y);     \
+        }                                                               \
+        return retval;                                                  \
     }
-    return retval;
-}
 
-/*************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(pointer_cursor, 0, 0, 3, 4)
 
-const adobe_cursor_t text_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(0, 1, 15, 15);
-    }
-    return retval;
-}
+DEFINE_CURSOR_FUNCTION(help_cursor, 0, 1, 3, 4)
 
-/*************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(crosshair_cursor, 0, 2, 15, 15)
 
-const adobe_cursor_t move_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(0, 2, 15, 15);
-    }
-    return retval;
-}
+DEFINE_CURSOR_FUNCTION(move_cursor, 0, 3, 15, 15)
 
-/*************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(link_cursor, 1, 0, 3, 11)
 
-const adobe_cursor_t resize_left_right_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(1, 0, 15, 15);
-    }
-    return retval;
-}
+DEFINE_CURSOR_FUNCTION(grabable_cursor, 1, 1, 15, 12)
 
-/*************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(grabbing_cursor, 1, 2, 14, 12)
 
-const adobe_cursor_t resize_up_down_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(1, 1, 15, 15);
-    }
-    return retval;
-}
+DEFINE_CURSOR_FUNCTION(text_cursor, 1, 3, 12, 14)
 
-/*************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(resize_left_right_cursor, 2, 0, 16, 16)
 
-const adobe_cursor_t resize_ul_lr_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(1, 2, 15, 15);
-    }
-    return retval;
-}
+DEFINE_CURSOR_FUNCTION(resize_up_down_cursor, 2, 1, 16, 17)
 
-/*************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(resize_ul_lr_cursor, 2, 2, 16, 16)
 
-const adobe_cursor_t resize_ll_ur_cursor()
-{
-    static adobe_cursor_t retval;
-    static bool inited(false);
-    if (!inited) {
-        inited = true;
-        retval = get_cursor(1, 3, 15, 15);
-    }
-    return retval;
-}
+DEFINE_CURSOR_FUNCTION(resize_ll_ur_cursor, 2, 3, 16, 17)
 
-/****************************************************************************************************/
+DEFINE_CURSOR_FUNCTION(zoom_in_cursor, 3, 0, 14, 15)
+
+DEFINE_CURSOR_FUNCTION(zoom_out_cursor, 3, 1, 14, 15)
+
+DEFINE_CURSOR_FUNCTION(drop_cursor, 3, 2, 15, 15)
+
+DEFINE_CURSOR_FUNCTION(disallow_cursor, 3, 3, 16, 16)
+
+#undef DEFINE_CURSOR_FUNCTION

@@ -22,13 +22,39 @@ namespace {
 
 /****************************************************************************************************/
 
-adobe_cursor_t make_cursor(const char* cursor_path, float hot_spot_x, float hot_spot_y)
+adobe_cursor_t make_cursor(const char* cursor_path,
+                           float hot_spot_x,
+                           float hot_spot_y)
 {
     if (!g_default_cursor)
         g_default_cursor = GG::GUI::GetGUI()->GetCursor();
-    boost::shared_ptr<GG::Texture> texture = GG::GUI::GetGUI()->GetTexture(cursor_path);
+    boost::shared_ptr<GG::Texture> texture =
+        GG::GUI::GetGUI()->GetTexture(cursor_path);
     GG::Pt hotspot(GG::X_d(hot_spot_x + 0.5), GG::Y_d(hot_spot_y + 0.5));
     return adobe_cursor_t(new GG::TextureCursor(texture, hotspot));
+}
+
+/****************************************************************************************************/
+
+adobe_cursor_t make_cursor(const char* cursor_path,
+                           unsigned int subtexture_ul_x,
+                           unsigned int subtexture_ul_y,
+                           unsigned int subtexture_lr_x,
+                           unsigned int subtexture_lr_y,
+                           float hot_spot_x,
+                           float hot_spot_y)
+{
+    if (!g_default_cursor)
+        g_default_cursor = GG::GUI::GetGUI()->GetCursor();
+    boost::shared_ptr<GG::Texture> texture =
+        GG::GUI::GetGUI()->GetTexture(cursor_path);
+    GG::SubTexture subtexture(texture,
+                              GG::X(subtexture_ul_x),
+                              GG::Y(subtexture_ul_y),
+                              GG::X(subtexture_lr_x),
+                              GG::Y(subtexture_lr_y));
+    GG::Pt hotspot(GG::X_d(hot_spot_x + 0.5), GG::Y_d(hot_spot_y + 0.5));
+    return adobe_cursor_t(new GG::TextureCursor(subtexture, hotspot));
 }
 
 /****************************************************************************************************/

@@ -23,7 +23,16 @@ typedef boost::shared_ptr<GG::Cursor> adobe_cursor_t;
 /****************************************************************************************************/
 
 // Allocation and deallocation of cursors. Cursor will be loaded relative to the resource root path.
-adobe_cursor_t make_cursor(const char* cursor_path, float hot_spot_x, float hot_spot_y);
+adobe_cursor_t make_cursor(const char* cursor_path,
+                           float hot_spot_x,
+                           float hot_spot_y);
+adobe_cursor_t make_cursor(const char* cursor_path,
+                           unsigned int subtexture_ul_x,
+                           unsigned int subtexture_ul_y,
+                           unsigned int subtexture_lr_x,
+                           unsigned int subtexture_lr_y,
+                           float hot_spot_x,
+                           float hot_spot_y);
 void           delete_cursor(adobe_cursor_t cursor);
 
 // Stack-based cursor manipulation; you are still responsible for deleting the cursors you 

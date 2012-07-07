@@ -7,6 +7,7 @@
 #include <GG/Wnd.h>
 #include <GG/SDL/SDLGUI.h>
 #include <GG/adobe/adam.hpp>
+#include <GG/adobe/future/cursor.hpp>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
 
 #include <boost/filesystem.hpp>
@@ -308,6 +309,9 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
 
 void MinimalGGApp::Initialize()
 {
+    push_cursor(pointer_cursor());
+    RenderCursor(true);
+
     boost::filesystem::path eve(g_eve_file);
     boost::filesystem::path adam(g_adam_file);
     std::auto_ptr<GG::EveDialog> eve_dialog(

@@ -338,7 +338,8 @@ EveDialog::EveDialog(adobe::window_t& imp, Clr color, Clr text_color) :
     m_title(0),
     m_color(color),
     m_keyboard(0),
-    m_prev_wnd_region(WR_NONE)
+    m_prev_wnd_region(WR_NONE),
+    m_left_button_down(false)
 {
     if (!m_imp.name_m.empty()) {
         m_title = adobe::implementation::Factory().NewTextControl(
@@ -419,21 +420,44 @@ void EveDialog::SizeMove(const Pt& ul, const Pt& lr)
 void EveDialog::Render()
 { BeveledRectangle(UpperLeft(), LowerRight(), m_color, m_color, true, BEVEL); }
 
+void EveDialog::LButtonDown(const Pt& pt, Flags<ModKey> mod_keys)
+{ m_left_button_down = true; }
+
+void EveDialog::LButtonUp(const Pt& pt, Flags<ModKey> mod_keys)
+{
+    m_left_button_down = false;
+    MouseLeave();
+    MouseHere(pt, mod_keys);
+}
+
+void EveDialog::LClick(const Pt& pt, Flags<ModKey> mod_keys)
+{ LButtonUp(pt, mod_keys); }
+
 void EveDialog::MouseEnter(const Pt& pt, Flags<ModKey> mod_keys)
-{ SetWndRegionCursor(m_prev_wnd_region = WindowRegion(pt)); }
+{
+    if (Resizable() && !m_left_button_down)
+        SetWndRegionCursor(m_prev_wnd_region = WindowRegion(pt));
+}
 
 void EveDialog::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
 {
-    if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
-        pop_cursor();
-    SetWndRegionCursor(m_prev_wnd_region = WindowRegion(pt));
+    if (Resizable() && !m_left_button_down) {
+        WndRegion wnd_region = WindowRegion(pt);
+        if (wnd_region != m_prev_wnd_region) {
+            if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
+                pop_cursor();
+            SetWndRegionCursor(m_prev_wnd_region = wnd_region);
+        }
+    }
 }
 
 void EveDialog::MouseLeave()
 {
-    if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
-        pop_cursor();
-    m_prev_wnd_region = WR_NONE;
+    if (Resizable() && !m_left_button_down) {
+        if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
+            pop_cursor();
+        m_prev_wnd_region = WR_NONE;
+    }
 }
 
 void EveDialog::KeyPress(Key key, boost::uint32_t key_code_point, Flags<ModKey> mod_keys)

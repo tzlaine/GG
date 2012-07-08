@@ -308,6 +308,9 @@ public:
 
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
+    virtual void LButtonDown(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LButtonUp(const Pt& pt, Flags<ModKey> mod_keys);
+    virtual void LClick(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void MouseEnter(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void MouseHere(const Pt& pt, Flags<ModKey> mod_keys);
     virtual void MouseLeave();
@@ -326,6 +329,7 @@ private:
     adobe::keyboard_t* m_keyboard;
     std::auto_ptr<adobe::modal_dialog_t> m_eve_modal_dialog;
     WndRegion m_prev_wnd_region;
+    bool m_left_button_down;
 
     static const unsigned int BEVEL;
     static const int FRAME_WIDTH;

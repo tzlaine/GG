@@ -36,10 +36,10 @@ namespace {
         return adobe_cursor_t(
             new GG::TextureCursor(
                 GG::SubTexture(texture,
-                               GG::X(row * cursor_size),
-                               GG::Y(column * cursor_size),
-                               GG::X((row + 1) * cursor_size),
-                               GG::Y((column + 1) * cursor_size)),
+                               GG::X(column * cursor_size),
+                               GG::Y(row * cursor_size),
+                               GG::X((column + 1) * cursor_size),
+                               GG::Y((row + 1) * cursor_size)),
                 GG::Pt(GG::X(hotspot_x), GG::Y(hotspot_y))
             )
         );

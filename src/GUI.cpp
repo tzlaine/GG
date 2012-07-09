@@ -35,6 +35,7 @@
 #include <GG/Timer.h>
 #include <GG/ZList.h>
 #include <GG/utf8/checked.h>
+#include <GG/adobe/future/cursor.hpp>
 
 #if GG_HAVE_LIBPNG
 #include "GIL/extension/io/png_io.hpp"
@@ -174,7 +175,7 @@ struct GG::GUIImpl
         m_double_click_time(-1),
         m_style_factory(new StyleFactory()),
         m_render_cursor(false),
-        m_cursor(),
+        m_cursors(),
         m_save_as_png_wnd(0)
     {
         m_button_state[0] = m_button_state[1] = m_button_state[2] = false;
@@ -247,9 +248,10 @@ struct GG::GUIImpl
     int          m_double_click_start_time;// the time from which we started measuring double_click_time, in ms
     int          m_double_click_time;     // time elapsed since last click, in ms
 
-    boost::shared_ptr<StyleFactory> m_style_factory;
-    bool                            m_render_cursor;
-    boost::shared_ptr<Cursor>       m_cursor;
+    boost::shared_ptr<StyleFactory>        m_style_factory;
+    bool                                   m_render_cursor;
+    boost::shared_ptr<Cursor>              m_default_cursor;
+    std::stack<boost::shared_ptr<Cursor> > m_cursors;
 
     std::set<Timer*>  m_timers;
 
@@ -629,7 +631,11 @@ bool GUI::RenderCursor() const
 { return s_impl->m_render_cursor; }
 
 const boost::shared_ptr<Cursor>& GUI::GetCursor() const
-{ return s_impl->m_cursor; }
+{
+    if (s_impl->m_cursors.empty() && !s_impl->m_default_cursor)
+        s_impl->m_default_cursor = pointer_cursor();
+    return s_impl->m_cursors.empty() ? s_impl->m_default_cursor : s_impl->m_cursors.top();
+}
 
 GUI::const_accel_iterator GUI::accel_begin() const
 { return s_impl->m_accelerators.begin(); }
@@ -992,8 +998,11 @@ void GUI::SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory)
 void GUI::RenderCursor(bool render)
 { s_impl->m_render_cursor = render; }
 
-void GUI::SetCursor(const boost::shared_ptr<Cursor>& cursor)
-{ s_impl->m_cursor = cursor; }
+void GUI::PushCursor(const boost::shared_ptr<Cursor>& cursor)
+{ s_impl->m_cursors.push(cursor); }
+
+void GUI::PopCursor()
+{ s_impl->m_cursors.pop(); }
 
 GUI* GUI::GetGUI()
 { return s_gui; }
@@ -1105,8 +1114,9 @@ void GUI::Render()
             it->first->Hide();
     }
     s_impl->m_rendering_drag_drop_wnds = false;
-    if (s_impl->m_render_cursor && s_impl->m_cursor)
-        s_impl->m_cursor->Render(s_impl->m_mouse_pos);
+    boost::shared_ptr<Cursor> cursor;
+    if (s_impl->m_render_cursor && (cursor = GetCursor()))
+        cursor->Render(s_impl->m_mouse_pos);
     Exit2DMode();
 }
 

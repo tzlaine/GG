@@ -81,7 +81,6 @@ set(THIS_LIB_SOURCES
     adobe/future/source/behavior.cpp
     adobe/future/source/locale.cpp
     adobe/future/source/cmd_system.cpp
-    adobe/future/source/cursor_stack.cpp
     adobe/future/source/modal_dialog_interface.cpp
     adobe/future/source/resources.cpp
     adobe/future/source/drag_and_drop.cpp

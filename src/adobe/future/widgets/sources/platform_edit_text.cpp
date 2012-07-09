@@ -78,10 +78,10 @@ private:
                 m_edit_text.pre_edit_proc_m(std::string(1, 0 < event.WheelMove() ? 30 : 31), squelch);
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseEnter) {
-                push_cursor(text_cursor());
+                GG::GUI::GetGUI()->PushCursor(text_cursor());
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
-                pop_cursor();
+                GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::KeyPress) {
                 bool nontext =

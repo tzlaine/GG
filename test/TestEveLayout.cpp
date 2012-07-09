@@ -309,7 +309,6 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
 
 void MinimalGGApp::Initialize()
 {
-    push_cursor(pointer_cursor());
     RenderCursor(true);
 
     boost::filesystem::path eve(g_eve_file);

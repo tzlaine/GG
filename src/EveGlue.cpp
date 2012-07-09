@@ -247,15 +247,16 @@ namespace {
 
     void SetWndRegionCursor(WndRegion region)
     {
+        GUI& gui = *GG::GUI::GetGUI();
         switch (region) {
         case WR_TOP:
-        case WR_BOTTOM: push_cursor(resize_up_down_cursor()); break;
+        case WR_BOTTOM: gui.PushCursor(resize_up_down_cursor()); break;
         case WR_MIDLEFT:
-        case WR_MIDRIGHT: push_cursor(resize_left_right_cursor()); break;
+        case WR_MIDRIGHT: gui.PushCursor(resize_left_right_cursor()); break;
         case WR_TOPLEFT:
-        case WR_BOTTOMRIGHT: push_cursor(resize_ul_lr_cursor()); break;
+        case WR_BOTTOMRIGHT: gui.PushCursor(resize_ul_lr_cursor()); break; break;
         case WR_TOPRIGHT:
-        case WR_BOTTOMLEFT: push_cursor(resize_ll_ur_cursor()); break;
+        case WR_BOTTOMLEFT: gui.PushCursor(resize_ll_ur_cursor()); break;
         default:
         case WR_MIDDLE: break;
         }
@@ -445,7 +446,7 @@ void EveDialog::MouseHere(const Pt& pt, Flags<ModKey> mod_keys)
         WndRegion wnd_region = WindowRegion(pt);
         if (wnd_region != m_prev_wnd_region) {
             if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
-                pop_cursor();
+                GG::GUI::GetGUI()->PopCursor();
             SetWndRegionCursor(m_prev_wnd_region = wnd_region);
         }
     }
@@ -455,7 +456,7 @@ void EveDialog::MouseLeave()
 {
     if (Resizable() && !m_left_button_down) {
         if (m_prev_wnd_region != WR_NONE && m_prev_wnd_region != WR_MIDDLE)
-            pop_cursor();
+            GG::GUI::GetGUI()->PopCursor();
         m_prev_wnd_region = WR_NONE;
     }
 }

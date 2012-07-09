@@ -38,10 +38,10 @@ private:
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseEnter) {
-                push_cursor(text_cursor());
+                GG::GUI::GetGUI()->PushCursor(text_cursor());
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
-                pop_cursor();
+                GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::LDrag) {
                 GG::Pt point = event.Point();

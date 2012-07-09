@@ -20,48 +20,23 @@ namespace GG {
 
 typedef boost::shared_ptr<GG::Cursor> adobe_cursor_t;
 
-/****************************************************************************************************/
-
-// Allocation and deallocation of cursors. Cursor will be loaded relative to the resource root path.
-adobe_cursor_t make_cursor(const char* cursor_path,
-                           float hot_spot_x,
-                           float hot_spot_y);
-adobe_cursor_t make_cursor(const char* cursor_path,
-                           unsigned int subtexture_ul_x,
-                           unsigned int subtexture_ul_y,
-                           unsigned int subtexture_lr_x,
-                           unsigned int subtexture_lr_y,
-                           float hot_spot_x,
-                           float hot_spot_y);
-void           delete_cursor(adobe_cursor_t cursor);
-
-// Stack-based cursor manipulation; you are still responsible for deleting the cursors you 
-// push and pop here; these functions do no memory management.
-void           push_cursor(adobe_cursor_t cursor);
-adobe_cursor_t pop_cursor();
-
-// Flushes any stack and sets the cursor to the arrow cursor-- be sure you still have
-// references to all your cursors so you can delete them from memory!
-void           reset_cursor();
-
-
 // TODO: Move to StyleFactory.
-const adobe_cursor_t pointer_cursor();
-const adobe_cursor_t help_cursor();
-const adobe_cursor_t crosshair_cursor();
-const adobe_cursor_t move_cursor();
-const adobe_cursor_t link_cursor();
-const adobe_cursor_t grabable_cursor();
-const adobe_cursor_t grabbing_cursor();
-const adobe_cursor_t text_cursor();
-const adobe_cursor_t resize_left_right_cursor();
-const adobe_cursor_t resize_up_down_cursor();
-const adobe_cursor_t resize_ul_lr_cursor();
-const adobe_cursor_t resize_ll_ur_cursor();
-const adobe_cursor_t zoom_in_cursor();
-const adobe_cursor_t zoom_out_cursor();
-const adobe_cursor_t drop_cursor();
-const adobe_cursor_t disallow_cursor();
+adobe_cursor_t pointer_cursor();
+adobe_cursor_t help_cursor();
+adobe_cursor_t crosshair_cursor();
+adobe_cursor_t move_cursor();
+adobe_cursor_t link_cursor();
+adobe_cursor_t grabable_cursor();
+adobe_cursor_t grabbing_cursor();
+adobe_cursor_t text_cursor();
+adobe_cursor_t resize_left_right_cursor();
+adobe_cursor_t resize_up_down_cursor();
+adobe_cursor_t resize_ul_lr_cursor();
+adobe_cursor_t resize_ll_ur_cursor();
+adobe_cursor_t zoom_in_cursor();
+adobe_cursor_t zoom_out_cursor();
+adobe_cursor_t drop_cursor();
+adobe_cursor_t disallow_cursor();
 
 
 /****************************************************************************************************/

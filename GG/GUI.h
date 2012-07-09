@@ -195,7 +195,7 @@ public:
     const boost::shared_ptr<StyleFactory>& GetStyleFactory() const; ///< returns the currently-installed style factory
 
     bool                                   RenderCursor() const; ///< returns true iff the GUI is responsible for rendering the cursor
-    const boost::shared_ptr<Cursor>&       GetCursor() const; ///< returns the currently-installed cursor
+    const boost::shared_ptr<Cursor>&       GetCursor() const; ///< returns the top of the cursor stack, or the default cursor if the stack is empty
 
     /** Returns an iterator to one past the first defined keyboard accelerator. */
     const_accel_iterator accel_begin() const;
@@ -315,7 +315,8 @@ public:
     void SetStyleFactory(const boost::shared_ptr<StyleFactory>& factory); ///< sets the currently-installed style factory
 
     void RenderCursor(bool render); ///< set this to true iff the GUI should render the cursor
-    void SetCursor(const boost::shared_ptr<Cursor>& cursor); ///< sets the currently-installed cursor
+    void PushCursor(const boost::shared_ptr<Cursor>& cursor); ///< pushes \a cursor onto the cursor stack
+    void PopCursor(); ///< pops the last cursor off of the cursor stack
     //@}
 
     static GUI*  GetGUI();                ///< allows any GG code access to GUI framework by calling GUI::GetGUI()

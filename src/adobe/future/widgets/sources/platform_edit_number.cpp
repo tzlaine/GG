@@ -8,10 +8,9 @@
 
 #include <GG/adobe/future/widgets/headers/edit_number.hpp>
 
-#include <GG/adobe/future/cursor.hpp>
-
 #include <GG/Edit.h>
 #include <GG/GUI.h>
+#include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
 
 
@@ -38,7 +37,8 @@ private:
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseEnter) {
-                GG::GUI::GetGUI()->PushCursor(text_cursor());
+                boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+                GG::GUI::GetGUI()->PushCursor(style->GetCursor(GG::TEXT_CURSOR));
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
                 GG::GUI::GetGUI()->PopCursor();

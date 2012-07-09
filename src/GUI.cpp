@@ -34,8 +34,8 @@
 #include <GG/StyleFactory.h>
 #include <GG/Timer.h>
 #include <GG/ZList.h>
+#include <GG/adobe/name.hpp>
 #include <GG/utf8/checked.h>
-#include <GG/adobe/future/cursor.hpp>
 
 #if GG_HAVE_LIBPNG
 #include "GIL/extension/io/png_io.hpp"
@@ -633,7 +633,7 @@ bool GUI::RenderCursor() const
 const boost::shared_ptr<Cursor>& GUI::GetCursor() const
 {
     if (s_impl->m_cursors.empty() && !s_impl->m_default_cursor)
-        s_impl->m_default_cursor = pointer_cursor();
+        s_impl->m_default_cursor = s_impl->m_style_factory->GetCursor(POINTER_CURSOR);
     return s_impl->m_cursors.empty() ? s_impl->m_default_cursor : s_impl->m_cursors.top();
 }
 

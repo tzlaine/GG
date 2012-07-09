@@ -33,12 +33,14 @@
 #include  <GG/DynamicGraphic.h>
 #include  <GG/FontFwd.h>
 #include  <GG/MultiEditFwd.h>
+#include  <GG/adobe/name_fwd.hpp>
 
 
 namespace GG {
 
 class Button;
 class ColorDlg;
+class Cursor;
 class DropDownList;
 class DynamicGraphic;
 class FileDlg;
@@ -63,6 +65,23 @@ class TextControl;
 class Texture;
 class ThreeButtonDlg;
 struct UnicodeCharset;
+
+extern GG_API adobe::aggregate_name_t POINTER_CURSOR;
+extern GG_API adobe::aggregate_name_t HELP_CURSOR;
+extern GG_API adobe::aggregate_name_t CROSSHAIR_CURSOR;
+extern GG_API adobe::aggregate_name_t MOVE_CURSOR;
+extern GG_API adobe::aggregate_name_t LINK_CURSOR;
+extern GG_API adobe::aggregate_name_t GRABABLE_CURSOR;
+extern GG_API adobe::aggregate_name_t GRABBING_CURSOR;
+extern GG_API adobe::aggregate_name_t TEXT_CURSOR;
+extern GG_API adobe::aggregate_name_t RESIZE_LEFT_RIGHT_CURSOR;
+extern GG_API adobe::aggregate_name_t RESIZE_UP_DOWN_CURSOR;
+extern GG_API adobe::aggregate_name_t RESIZE_UL_LR_CURSOR;
+extern GG_API adobe::aggregate_name_t RESIZE_LL_UR_CURSOR;
+extern GG_API adobe::aggregate_name_t ZOOM_IN_CURSOR;
+extern GG_API adobe::aggregate_name_t ZOOM_OUT_CURSOR;
+extern GG_API adobe::aggregate_name_t DROP_CURSOR;
+extern GG_API adobe::aggregate_name_t DISALLOW_CURSOR;
 
 /** \brief Creates new dialogs and Controls.
 
@@ -100,7 +119,34 @@ public:
     virtual const std::string& DefaultFontName() const;
 
     /** Returns the BrowseInfoWnd to be used with this style. */
-    const boost::shared_ptr<BrowseInfoWnd>& DefaultBrowseInfoWnd();
+    const boost::shared_ptr<BrowseInfoWnd>& DefaultBrowseInfoWnd() const;
+
+    /** Returns the cursors to be used with this style.  Available cursors
+        must include, but need not be limited to:
+
+        - \c pointer  The default pointer cursor.
+        - \c help  Indicates that clicking the object under the cursor will provide online help.
+        - \c crosshair  A cursor suitable for picking small objects.
+        - \c move  Indicates that the object under the cursor can or is being moved.
+        - \c link  Indicates that clicking the object under the cursor will follow a link (e.g. as in a web page).
+        - \c grabable  Indicates that the object under the cursor can be grabbed or dragged.
+        - \c grabbing  Indicates that the object under the cursor is being grabbed or dragged.
+        - \c text  Indicates that clicking the object under the cursor will set focus into a text-editing control.
+        - \c resize_left_right  Indicates that dragging the object under the cursor will result in a resize along the X axis.
+        - \c resize_up_down  Indicates that dragging the object under the cursor will result in a resize along the Y axis.
+        - \c resize_ul_lr  Indicates that dragging the object under the cursor will result in a resize along either axis (northwest-southeast).
+        - \c resize_ll_ur  Indicates that dragging the object under the cursor will result in a resize along either axis (southwest-northeast).
+        - \c zoom_in  Indicates that clicking the object under the cursor will zoom in the view of that object.
+        - \c zoom_out  Indicates that clicking the object under the cursor will zoom out the view of that object.
+        - \c drop  Indicates that a drag-drop is being done, and that the object under the cursor is an acceptable drop target.
+        - \c disallow  Indicates that a pending action is not allowed on the object under the cursor (e.g. an unacceptable drop target).
+
+        A request for an unknown cursor returns \c
+        boost::shared_ptr<Cursor>().
+
+        \note All the above names can return the same default cursor if that
+        is desired. */
+    boost::shared_ptr<Cursor> GetCursor(adobe::name_t name) const;
 
     /** \name Controls */ ///@{
     /** Returns a new GG Button. */
@@ -338,7 +384,10 @@ public:
     virtual void               DeleteWnd(Wnd* wnd) const;
 
 private:
-    boost::shared_ptr<BrowseInfoWnd> m_browse_info_wnd;
+    typedef std::map<adobe::name_t, boost::shared_ptr<Cursor> > CursorMap;
+
+    mutable boost::shared_ptr<BrowseInfoWnd> m_browse_info_wnd;
+    mutable CursorMap m_cursors;
 };
 
 } // namespace GG

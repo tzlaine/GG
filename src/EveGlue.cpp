@@ -28,7 +28,6 @@
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
-#include <GG/adobe/future/cursor.hpp>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
 #include <GG/adobe/future/widgets/headers/platform_window.hpp>
 
@@ -250,13 +249,13 @@ namespace {
         GUI& gui = *GG::GUI::GetGUI();
         switch (region) {
         case WR_TOP:
-        case WR_BOTTOM: gui.PushCursor(resize_up_down_cursor()); break;
+        case WR_BOTTOM: gui.PushCursor(gui.GetStyleFactory()->GetCursor(RESIZE_UP_DOWN_CURSOR)); break;
         case WR_MIDLEFT:
-        case WR_MIDRIGHT: gui.PushCursor(resize_left_right_cursor()); break;
+        case WR_MIDRIGHT: gui.PushCursor(gui.GetStyleFactory()->GetCursor(RESIZE_LEFT_RIGHT_CURSOR)); break;
         case WR_TOPLEFT:
-        case WR_BOTTOMRIGHT: gui.PushCursor(resize_ul_lr_cursor()); break; break;
+        case WR_BOTTOMRIGHT: gui.PushCursor(gui.GetStyleFactory()->GetCursor(RESIZE_UL_LR_CURSOR)); break; break;
         case WR_TOPRIGHT:
-        case WR_BOTTOMLEFT: gui.PushCursor(resize_ll_ur_cursor()); break;
+        case WR_BOTTOMLEFT: gui.PushCursor(gui.GetStyleFactory()->GetCursor(RESIZE_LL_UR_CURSOR)); break;
         default:
         case WR_MIDDLE: break;
         }

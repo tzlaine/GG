@@ -85,7 +85,6 @@ set(THIS_LIB_SOURCES
     adobe/future/source/resources.cpp
     adobe/future/source/drag_and_drop.cpp
     adobe/future/source/menu_system.cpp
-    adobe/future/source/platform_cursor.cpp
     adobe/future/source/platform_drag_and_drop_data.cpp
     adobe/future/source/platform_file_monitor_impl.cpp
     adobe/future/source/platform_locale_data.cpp

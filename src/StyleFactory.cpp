@@ -26,6 +26,7 @@
 
 #include <GG/BrowseInfoWnd.h>
 #include <GG/Button.h>
+#include <GG/Cursor.h>
 #include <GG/DropDownList.h>
 #include <GG/DynamicGraphic.h>
 #include <GG/Edit.h>
@@ -40,15 +41,63 @@
 #include <GG/StaticGraphic.h>
 #include <GG/TabWnd.h>
 #include <GG/TextControl.h>
-
+#include <GG/adobe/name.hpp>
 #include <GG/dialogs/ColorDlg.h>
 #include <GG/dialogs/FileDlg.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
+
 
 #include "DefaultFont.h"
 
 
 using namespace GG;
+
+namespace {
+
+    boost::shared_ptr<Texture> DefaultCursorTexture()
+    {
+        // TODO: Create a uu-encocded array that can be used to construct a
+        // cursors image, a la DefaultFont.h.
+        return GUI::GetGUI()->GetTexture("cursors.png");
+    }
+
+    boost::shared_ptr<Cursor> GetCursor(unsigned int row,
+                                        unsigned int column,
+                                        unsigned int hotspot_x,
+                                        unsigned int hotspot_y)
+    {
+        boost::shared_ptr<Texture> texture = DefaultCursorTexture();
+        const unsigned int cursor_size = 32u;
+        return boost::shared_ptr<Cursor>(
+            new TextureCursor(
+                SubTexture(texture,
+                           X(column * cursor_size),
+                           Y(row * cursor_size),
+                           X((column + 1) * cursor_size),
+                           Y((row + 1) * cursor_size)),
+                Pt(X(hotspot_x), Y(hotspot_y))
+            )
+        );
+    }
+
+}
+
+adobe::aggregate_name_t GG::POINTER_CURSOR = { "pointer" };
+adobe::aggregate_name_t GG::HELP_CURSOR = { "help" };
+adobe::aggregate_name_t GG::CROSSHAIR_CURSOR = { "crosshair" };
+adobe::aggregate_name_t GG::MOVE_CURSOR = { "move" };
+adobe::aggregate_name_t GG::LINK_CURSOR = { "link" };
+adobe::aggregate_name_t GG::GRABABLE_CURSOR = { "grabable" };
+adobe::aggregate_name_t GG::GRABBING_CURSOR = { "grabbing" };
+adobe::aggregate_name_t GG::TEXT_CURSOR = { "text" };
+adobe::aggregate_name_t GG::RESIZE_LEFT_RIGHT_CURSOR = { "resize_left_right" };
+adobe::aggregate_name_t GG::RESIZE_UP_DOWN_CURSOR = { "resize_up_down" };
+adobe::aggregate_name_t GG::RESIZE_UL_LR_CURSOR = { "resize_ul_lr" };
+adobe::aggregate_name_t GG::RESIZE_LL_UR_CURSOR = { "resize_ll_ur" };
+adobe::aggregate_name_t GG::ZOOM_IN_CURSOR = { "zoom_in" };
+adobe::aggregate_name_t GG::ZOOM_OUT_CURSOR = { "zoom_out" };
+adobe::aggregate_name_t GG::DROP_CURSOR = { "drop" };
+adobe::aggregate_name_t GG::DISALLOW_CURSOR = { "disallow" };
 
 StyleFactory::~StyleFactory()
 {}
@@ -83,11 +132,35 @@ const std::string& StyleFactory::DefaultFontName() const
     return retval;
 }
 
-const boost::shared_ptr<BrowseInfoWnd>& StyleFactory::DefaultBrowseInfoWnd()
+const boost::shared_ptr<BrowseInfoWnd>& StyleFactory::DefaultBrowseInfoWnd() const
 {
     if (!m_browse_info_wnd)
         m_browse_info_wnd.reset(new TextBoxBrowseInfoWnd(X1, DefaultFont(), CLR_GRAY, CLR_BLACK, CLR_BLACK));
     return m_browse_info_wnd;
+}
+
+boost::shared_ptr<Cursor> StyleFactory::GetCursor(adobe::name_t name) const
+{
+    if (m_cursors.empty()) {
+        m_cursors[POINTER_CURSOR] = ::GetCursor(0, 0, 3, 4);
+        m_cursors[HELP_CURSOR] = ::GetCursor(0, 1, 3, 4);
+        m_cursors[CROSSHAIR_CURSOR] = ::GetCursor(0, 2, 15, 15);
+        m_cursors[MOVE_CURSOR] = ::GetCursor(0, 3, 15, 15);
+        m_cursors[LINK_CURSOR] = ::GetCursor(1, 0, 3, 11);
+        m_cursors[GRABABLE_CURSOR] = ::GetCursor(1, 1, 15, 12);
+        m_cursors[GRABBING_CURSOR] = ::GetCursor(1, 2, 14, 12);
+        m_cursors[TEXT_CURSOR] = ::GetCursor(1, 3, 12, 14);
+        m_cursors[RESIZE_LEFT_RIGHT_CURSOR] = ::GetCursor(2, 0, 16, 16);
+        m_cursors[RESIZE_UP_DOWN_CURSOR] = ::GetCursor(2, 1, 16, 17);
+        m_cursors[RESIZE_UL_LR_CURSOR] = ::GetCursor(2, 2, 16, 16);
+        m_cursors[RESIZE_LL_UR_CURSOR] = ::GetCursor(2, 3, 16, 17);
+        m_cursors[ZOOM_IN_CURSOR] = ::GetCursor(3, 0, 14, 15);
+        m_cursors[ZOOM_OUT_CURSOR] = ::GetCursor(3, 1, 14, 15);
+        m_cursors[DROP_CURSOR] = ::GetCursor(3, 2, 15, 15);
+        m_cursors[DISALLOW_CURSOR] = ::GetCursor(3, 3, 16, 16);
+    }
+    CursorMap::const_iterator it = m_cursors.find(name);
+    return it == m_cursors.end() ? boost::shared_ptr<Cursor>() : it->second;
 }
 
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,

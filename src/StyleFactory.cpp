@@ -48,25 +48,22 @@
 
 
 #include "DefaultFont.h"
+#include "DefaultCursors.h"
 
 
 using namespace GG;
 
 namespace {
 
-    boost::shared_ptr<Texture> DefaultCursorTexture()
-    {
-        // TODO: Create a uu-encocded array that can be used to construct a
-        // cursors image, a la DefaultFont.h.
-        return GUI::GetGUI()->GetTexture("cursors.png");
-    }
+    boost::shared_ptr<Texture> CursorTexture()
+    { return GUI::GetGUI()->GetTexture(CursorsFilename()); }
 
     boost::shared_ptr<Cursor> GetCursor(unsigned int row,
                                         unsigned int column,
                                         unsigned int hotspot_x,
                                         unsigned int hotspot_y)
     {
-        boost::shared_ptr<Texture> texture = DefaultCursorTexture();
+        boost::shared_ptr<Texture> texture = CursorTexture();
         const unsigned int cursor_size = 32u;
         return boost::shared_ptr<Cursor>(
             new TextureCursor(

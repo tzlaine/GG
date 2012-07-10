@@ -55,8 +55,6 @@ make_test_exec(EveLayout)
 make_test_exec(DefaultSignalHandler)
 make_test_exec(Functions)
 
-file(COPY ${CMAKE_HOME_DIRECTORY}/cursors.png DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
 add_test_and_data_files(StrongIntegralTypedef)
 add_test_and_data_files(StrongSizeTypedef)
 add_test_and_data_files(Lexer test_expressions adam_test_expressions_tokens)

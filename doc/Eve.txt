@@ -673,7 +673,30 @@ else:
 */
 
 /** \page eve_progress_bar progress_bar()
-    TODO
+    progress_bar() creates a progress bar.
+
+    \section eve_progress_bar_interaction_semantics User Interaction Semantics
+
+    Eve progress_bars are non-interactive.
+
+    \section eve_progress_bar_adam_interaction Adam Interaction Notes
+
+    The progress_bar will be set to the value of the controller-bound Adam cell.
+
+    \section eve_progress_bar_usage progress_bar() Usage
+
+    \code progress_bar(param: value, param: value, ...); \endcode
+
+    \ref eve_common_view_params
+
+    \param bind The cell in the Adam property sheet to which this progress_bar is bound.
+    \param orientation The orientation of the progress_bar (horizontal or vertical).
+    \param format A dictionary specifying the range of values the progress_bar can take.
+
+    \param length The length in pixels that the progress_bar should be, in the direction of \a orientation.
+    \param width The length in pixels that the progress_bar should be, in the direction perpendicular to \a orientation.
+
+    TODO: color, bar_color, interior_color
 */
 
 /** \page eve_radio_button radio_button()

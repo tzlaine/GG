@@ -127,11 +127,62 @@
 */
 
 /** \page eve_expression_texture_fn texture()
-    TODO
+    \section eve_texture_fn_usage texture() Usage
+
+    \code texture(name: expr, filter: expr, wrap: expr, mipmap: expr) \endcode
+
+    \param name The filename from which to load the texture.
+    \param filter A dictionary containing minification filter \a min and magnification filter \a mag.
+    \param wrap A dictionary containing \a s and \a t texture wrapping parameters.
+    \param mipmap A boolean indicating whether or not mimaps should be generated for the texture.
+
+    \section eve_texture_fn_filters Min/mag filter values
+
+    Minification filters must be one the following names.  See the OpenGL
+    documentation for their meanings.
+
+    - \c \@GL_NEAREST
+    - \c \@GL_LINEAR
+    - \c \@GL_NEAREST_MIPMAP_NEAREST
+    - \c \@GL_LINEAR_MIPMAP_NEAREST
+    - \c \@GL_NEAREST_MIPMAP_LINEAR
+    - \c \@GL_LINEAR_MIPMAP_LINEAR
+
+    Magnification filters must be one the following names.  See the OpenGL
+    documentation for their meanings.
+
+    - \c \@GL_NEAREST
+    - \c \@GL_LINEAR
+
+    \section eve_texture_fn_wraps Wrap values
+
+    Wrap parameters must be one the following names.  See the OpenGL
+    documentation for their meanings.
+
+    - \c \@GL_CLAMP
+    - \c \@GL_CLAMP_TO_BORDER
+    - \c \@GL_CLAMP_TO_EDGE
+    - \c \@GL_MIRRORED_REPEAT
+    - \c \@GL_REPEAT
+
+    Returns a boost::shared_ptr<GG::Texture> to the loaded texture, or \c
+    empty if there was an error in either loading the texture or setting the
+    wrap and/or filter modes.
 */
 
 /** \page eve_expression_subtexture_fn subtexture()
-    TODO
+    \section eve_subtexture_fn_usage subtexture() Usage
+
+    \code subtexture(texture: expr, x1: expr, y1: expr, x2: expr, y2: expr) \endcode
+
+    \param texture Either a string indicating the name of the texture file to load, or a boost::shared_ptr<GG::Texture>, such as from a call to \ref eve_expression_texture_fn.
+    \param x1 The x-coordinate of the upper-left corner of the subtexture within its containing texture.
+    \param y1 The y-coordinate of the upper-left corner of the subtexture within its containing texture.
+    \param x2 The x-coordinate of the lower-right corner of the subtexture within its containing texture.
+    \param y2 The y-coordinate of the lower-right corner of the subtexture within its containing texture.
+
+    Returns the GG::SubTexture described by the parameters, or \c empty if \a
+    texture is invalid or any of the coordinates is omitted.
 */
 
 /** \page eve_expression_transform_fn transform()
@@ -171,6 +222,68 @@
 
 /** \page eve_expression_foldr_fn foldr()
     foldr() is like fold(), except that it iterates over the elements of the given sequence in reverse order.  See \ref eve_expression_fold_fn .
+*/
+
+/** \page eve_expression_color_dialog_fn color_dialog()
+    \section eve_color_dialog_fn_usage color_dialog() Usage
+
+    \code color_dialog(dialog_color: expr, border_color: expr, text_color: expr) \endcode
+    \code color_dialog(original_color: expr, dialog_color: expr, border_color: expr, text_color: expr) \endcode
+
+    \param original_color The color to be shown next to the new color for comparison purposes.
+    \param dialog_color The color to be used to render the color dialog.  This parameter is optional.
+    \param border_color The color to be used to render the border of the color dialog.  This parameter is optional.
+    \param text_color The color to be used to render text in the color dialog.  This parameter is optional.
+
+    Returns the color selected in the resulting dialog, or \c empty if
+    "Cancel" is clicked.
+
+    \see GG::ColorDlg
+*/
+
+/** \page eve_expression_file_dialog_fn file_dialog()
+    \section eve_file_dialog_fn_usage file_dialog() Usage
+
+    \code file_dialog(directory: expr, filename: expr, save: expr, multi: expr, color: expr, border_color: expr, text_color: expr) \endcode
+
+    \param directory The initial directory passed to the dialog.
+    \param filename The initial file passed to the dialog.
+    \param save A boolean indicating whether this is a save or load dialog.
+    \param multi A boolean indicating whether multiple file selections are allowed.
+    \param color The color to be used to render the file dialog.  This parameter is optional.
+    \param border_color The color to be used to render the border of the file dialog.  This parameter is optional.
+    \param text_color The color to be used to render text in the file dialog.  This parameter is optional.
+
+    Returns an array of selected filenames (the array will have a size of 1 if
+    \a multi is \c false ), or \c empty if "Cancel" is clicked.
+
+    \see GG::FileDlg
+*/
+
+/** \page eve_expression_three_button_dialog_fn three_button_dialog()
+    \section eve_three_button_dialog_fn_usage three_button_dialog() Usage
+
+    \code three_button_dialog(message: expr, width: expr, height: expr, color: expr, border_color: expr, button_color: expr, text_color: expr, buttons: expr) \endcode
+    \code three_button_dialog(message: expr, color: expr, border_color: expr, button_color: expr, text_color: expr, buttons: expr) \endcode
+    \code three_button_dialog(message: expr, width: expr, height: expr, color: expr, border_color: expr, button_color: expr, text_color: expr, buttons: expr, zero: expr, one: expr, two: expr) \endcode
+    \code three_button_dialog(message: expr, color: expr, border_color: expr, button_color: expr, text_color: expr, buttons: expr, zero: expr, one: expr, two: expr) \endcode
+
+    \param message The message shown in the dialog.
+    \param width The desired width in pixels the dialog.  This parameter is optional, but must be specified with \a height to have an effect.
+    \param height The desired height in pixels the dialog.  This parameter is optional, but must be specified with \a width to have an effect.
+    \param color The color to be used to render the dialog.  This parameter is optional.
+    \param border_color The color to be used to render the border of the dialog.  This parameter is optional.
+    \param button_color The color to be used to render the buttons in the dialog.  This parameter is optional.
+    \param text_color The color to be used to render text in the dialog.  This parameter is optional.
+    \param buttons The number of buttons to show in the dialog.  Must be in the range [1, 3].
+    \param zero The text to use to label the first button in the dialog.  This parameter is optional.
+    \param one The text to use to label the second button in the dialog (if it exists).  This parameter is optional.
+    \param two The text to use to label the third button in the dialog (if it exists).  This parameter is optional.
+
+    Returns the numeric index of the button clicked to close the dialog.  The
+    result will be in the range [0, \a buttons - 1].
+
+    \see GG::ThreeButtonDlg
 */
 
 
@@ -527,6 +640,8 @@ else:
     only one such action, "reset".  Clicking a button whose action is "reset"
     will cause the entire containing UI to have its original values reset to
     what they were when the UI was launched.
+
+    TODO Document "dialog" action.
 
     \section eve_signal_handler The Signal Handler
 
@@ -1315,6 +1430,9 @@ else:
     - \ref eve_expression_transform_fn
     - \ref eve_expression_fold_fn
     - \ref eve_expression_foldr_fn
+    - \ref eve_expression_color_dialog_fn
+    - \ref eve_expression_file_dialog_fn
+    - \ref eve_expression_three_button_dialog_fn
 
     \section eve_gg_signals Using GG Signals With Adam and Eve
 

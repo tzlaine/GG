@@ -98,10 +98,10 @@ namespace {
         adobe::name_t min_filter;
         adobe::name_t mag_filter;
 
-        get_value(wrap, adobe::static_name_t("s"), filename);
-        get_value(wrap, adobe::static_name_t("t"), filename);
-        get_value(filter, adobe::static_name_t("min"), filename);
-        get_value(filter, adobe::static_name_t("mag"), filename);
+        get_value(wrap, adobe::static_name_t("s"), wrap_s);
+        get_value(wrap, adobe::static_name_t("t"), wrap_t);
+        get_value(filter, adobe::static_name_t("min"), min_filter);
+        get_value(filter, adobe::static_name_t("mag"), mag_filter);
 
         boost::shared_ptr<GG::Texture> texture;
         if (!filename.empty()) {

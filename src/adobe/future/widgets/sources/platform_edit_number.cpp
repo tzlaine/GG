@@ -29,19 +29,23 @@ class EditNumberLabelFilter :
 {
 public:
     EditNumberLabelFilter(edit_number_platform_data_t& data) :
-        m_data(data)
+        m_data(data),
+        m_left_button_down(false)
         {}
 
 private:
-    virtual bool FilterImpl(GG::Wnd*, const GG::WndEvent& event)
+    virtual bool FilterImpl(GG::Wnd* w, const GG::WndEvent& event)
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseEnter) {
-                boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-                GG::GUI::GetGUI()->PushCursor(style->GetCursor(GG::TEXT_CURSOR));
+                if (!m_left_button_down) {
+                    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+                    GG::GUI::GetGUI()->PushCursor(style->GetCursor(GG::RESIZE_UP_DOWN_CURSOR));
+                }
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
-                GG::GUI::GetGUI()->PopCursor();
+                if (!m_left_button_down)
+                    GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::LDrag) {
                 GG::Pt point = event.Point();
@@ -49,10 +53,8 @@ private:
 
                 if (m_data.last_point_m.y != 0 && delta != 0) {
                     modifiers_t modifiers(modifier_state());
-
                     if (modifiers & modifiers_any_shift_s)
                         delta *= 10;
-
                     m_data.increment_n(Value(delta));
                 }
 
@@ -60,12 +62,19 @@ private:
                 retval = true;
             } else if (event.Type() == GG::WndEvent::LButtonDown) {
                 m_data.last_point_m = GG::Pt();
+                m_left_button_down = true;
+                retval = true;
+            } else if (event.Type() == GG::WndEvent::LButtonUp || event.Type() == GG::WndEvent::LClick) {
+                m_left_button_down = false;
+                if (!w->InWindow(event.Point()))
+                    GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             }
             return retval;
         }
 
     edit_number_platform_data_t& m_data;
+    bool m_left_button_down;
 };
 
 /****************************************************************************************************/

@@ -215,6 +215,16 @@ any_regular_t vm_lookup_t::aproc(name_t name, const array_t& argument_set) const
 
 /**************************************************************************************************/
 
+const vm_lookup_t::dictionary_function_map_t& vm_lookup_t::dictionary_functions() const
+{ return dmap_m; }
+
+/**************************************************************************************************/
+
+const vm_lookup_t::array_function_map_t& vm_lookup_t::array_functions() const
+{ return amap_m; }
+
+/**************************************************************************************************/
+
 } // namespace adobe
 
 /**************************************************************************************************/

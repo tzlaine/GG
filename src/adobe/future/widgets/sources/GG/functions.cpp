@@ -24,10 +24,15 @@
 
 #include <GG/EveGlue.h>
 #include <GG/GUI.h>
+#include <GG/StyleFactory.h>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/name.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
+#include <GG/dialogs/ColorDlg.h>
+#include <GG/dialogs/FileDlg.h>
+#include <GG/dialogs/ThreeButtonDlg.h>
 
 
 namespace {
@@ -146,10 +151,194 @@ namespace {
             return adobe::any_regular_t(adobe::empty_t());
     }
 
+}
+
+namespace adobe { namespace implementation {
+
+    any_regular_t color_dialog(const dictionary_t& parameters)
+    {
+        any_regular_t retval;
+
+        GG::Clr original_color;
+        GG::Clr dialog_color;
+        GG::Clr border_color;
+        GG::Clr text_color(GG::CLR_BLACK);
+        get_value(parameters, static_name_t("original_color"), original_color);
+        get_value(parameters, static_name_t("dialog_color"), dialog_color);
+        get_value(parameters, static_name_t("border_color"), border_color);
+        get_value(parameters, static_name_t("text_color"), text_color);
+        std::auto_ptr<GG::ColorDlg> color_dialog;
+        if (parameters.count(static_name_t("original_color"))) {
+            color_dialog.reset(
+                implementation::Factory().NewColorDlg(
+                    GG::X0, GG::Y0,
+                    original_color,
+                    implementation::DefaultFont(),
+                    dialog_color,
+                    border_color,
+                    text_color
+                )
+            );
+        } else {
+            color_dialog.reset(
+                implementation::Factory().NewColorDlg(
+                    GG::X0, GG::Y0,
+                    implementation::DefaultFont(),
+                    dialog_color,
+                    border_color,
+                    text_color
+                )
+            );
+        }
+
+        GG::X app_width = GG::GUI::GetGUI()->AppWidth();
+        GG::Y app_height = GG::GUI::GetGUI()->AppHeight();
+        color_dialog->MoveTo(
+            GG::Pt((app_width - color_dialog->Width()) / 2,
+                   (app_height - color_dialog->Height()) / 2)
+        );
+
+        color_dialog->Run();
+        if (color_dialog->ColorWasSelected())
+            retval = any_regular_t(color_dialog->Result());
+
+        return retval;
+    }
+
+    any_regular_t file_dialog(const dictionary_t& parameters)
+    {
+        any_regular_t retval;
+
+        std::string directory;
+        std::string filename;
+        bool save = false;
+        bool multi = false;
+        GG::Clr color;
+        GG::Clr border_color;
+        GG::Clr text_color(GG::CLR_BLACK);
+        get_value(parameters, adobe::static_name_t("directory"), directory);
+        get_value(parameters, adobe::static_name_t("filename"), filename);
+        get_value(parameters, adobe::static_name_t("save"), save);
+        get_value(parameters, adobe::static_name_t("multi"), multi);
+        get_value(parameters, adobe::static_name_t("color"), color);
+        get_value(parameters, adobe::static_name_t("border_color"), border_color);
+        get_value(parameters, adobe::static_name_t("text_color"), text_color);
+        std::auto_ptr<GG::FileDlg> file_dialog(
+            adobe::implementation::Factory().NewFileDlg(
+                directory,
+                filename,
+                save,
+                multi,
+                adobe::implementation::DefaultFont(),
+                color,
+                border_color,
+                text_color
+            )
+        );
+
+        file_dialog->Run();
+
+        array_t* array = 0;
+        if (!file_dialog->Result().empty()) {
+            retval.assign(array_t());
+            array = &retval.cast<array_t>();
+        }
+        for (std::set<std::string>::const_iterator it = file_dialog->Result().begin();
+             it != file_dialog->Result().end();
+             ++it) {
+            array->push_back(any_regular_t(*it));
+        }
+
+        return retval;
+    }
+
+    any_regular_t three_button_dialog(const dictionary_t& parameters)
+    {
+        any_regular_t retval;
+
+        std::string message;
+        unsigned int width = 0;
+        unsigned int height = 0;
+        GG::Clr color;
+        GG::Clr border_color;
+        GG::Clr button_color;
+        GG::Clr text_color(GG::CLR_BLACK);
+        unsigned int buttons;
+        std::string zero;
+        std::string one;
+        std::string two;
+        get_value(parameters, adobe::static_name_t("message"), message);
+        get_value(parameters, adobe::static_name_t("width"), width);
+        get_value(parameters, adobe::static_name_t("height"), height);
+        get_value(parameters, adobe::static_name_t("color"), color);
+        get_value(parameters, adobe::static_name_t("border_color"), border_color);
+        get_value(parameters, adobe::static_name_t("button_color"), button_color);
+        get_value(parameters, adobe::static_name_t("text_color"), text_color);
+        get_value(parameters, adobe::static_name_t("buttons"), buttons);
+        get_value(parameters, adobe::static_name_t("zero"), zero);
+        get_value(parameters, adobe::static_name_t("one"), one);
+        get_value(parameters, adobe::static_name_t("two"), two);
+        std::auto_ptr<GG::ThreeButtonDlg> three_button_dialog;
+        if (width && height) {
+            three_button_dialog.reset(
+                adobe::implementation::Factory().NewThreeButtonDlg(
+                    GG::X0, GG::Y0,
+                    GG::X(width), GG::Y(height),
+                    message,
+                    adobe::implementation::DefaultFont(),
+                    color,
+                    border_color,
+                    button_color,
+                    text_color,
+                    buttons,
+                    zero,
+                    one,
+                    two
+                )
+            );
+        } else {
+            three_button_dialog.reset(
+                adobe::implementation::Factory().NewThreeButtonDlg(
+                    GG::X0, GG::Y0,
+                    message,
+                    adobe::implementation::DefaultFont(),
+                    color,
+                    border_color,
+                    button_color,
+                    text_color,
+                    buttons,
+                    zero,
+                    one,
+                    two
+                )
+            );
+        }
+
+        GG::X app_width = GG::GUI::GetGUI()->AppWidth();
+        GG::Y app_height = GG::GUI::GetGUI()->AppHeight();
+        three_button_dialog->MoveTo(
+            GG::Pt((app_width - three_button_dialog->Width()) / 2,
+                   (app_height - three_button_dialog->Height()) / 2)
+        );
+
+        three_button_dialog->Run();
+
+        retval = any_regular_t(three_button_dialog->Result());
+
+        return retval;
+    }
+
+} }
+
+namespace {
+
     bool register_()
     {
         GG::RegisterDictionaryFunction(adobe::static_name_t("texture"), &texture);
         GG::RegisterDictionaryFunction(adobe::static_name_t("subtexture"), &subtexture);
+        GG::RegisterDictionaryFunction(adobe::static_name_t("color_dialog"), &adobe::implementation::color_dialog);
+        GG::RegisterDictionaryFunction(adobe::static_name_t("file_dialog"), &adobe::implementation::file_dialog);
+        GG::RegisterDictionaryFunction(adobe::static_name_t("three_button_dialog"), &adobe::implementation::three_button_dialog);
 
         return true;
     }

@@ -37,14 +37,11 @@ struct button_t : boost::noncopyable
 
     button_t(bool                             is_default,
              bool                             is_cancel,
-             modifiers_t                      modifier_mask,
              GG::Clr                          color,
              GG::Clr                          text_color,
              const GG::SubTexture&            unpressed,
              const GG::SubTexture&            pressed,
-             const GG::SubTexture&            rollover,
-             const button_state_descriptor_t* first,
-             const button_state_descriptor_t* last);
+             const GG::SubTexture&            rollover);
 
     void measure(extents_t& result);
 

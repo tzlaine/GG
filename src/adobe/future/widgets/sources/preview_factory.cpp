@@ -20,10 +20,11 @@ namespace {
 
 /****************************************************************************************************/
 
-void preview_sublayout_notifier(adobe::preview_t&           /*widget*/,
+bool preview_sublayout_notifier(adobe::preview_t&           /*widget*/,
                                 adobe::name_t               /*action*/,
                                 const adobe::any_regular_t& /*value*/)
 {
+    return false;
 }
 
 /*************************************************************************************************/

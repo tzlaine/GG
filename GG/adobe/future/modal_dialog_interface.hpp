@@ -206,7 +206,7 @@ public:
     const dialog_result_t& result();
 
 private:
-    void              latch_button_callback(name_t action, const any_regular_t&);
+    bool              latch_button_callback(name_t action, const any_regular_t&);
     void              latch_signal_callback(name_t widget_type_name,
                                             name_t signal_name,
                                             name_t widget_id,

@@ -214,9 +214,11 @@ dialog_result_t modal_dialog_t::go()
 
 /****************************************************************************************************/
 
-void modal_dialog_t::latch_button_callback(name_t action, const any_regular_t& value)
+bool modal_dialog_t::latch_button_callback(name_t action, const any_regular_t& value)
 try
 {
+    bool retval = false;
+
     assert(view_m);
     assert(button_callback_m);
 
@@ -229,7 +231,10 @@ try
     {
         result_m.terminating_action_m = action;
         view_m->root_display_m->EndRun();
+        retval = true;
     }
+
+    return retval;
 }
 catch(const std::exception& error)
 {

@@ -292,7 +292,8 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
     adobe::auto_ptr<eve_client_holder>  result(new eve_client_holder(root_behavior));
     factory_token_t                     token(get_main_display(),
                                               sheet,
-                                              *(result.get()),
+                                              *result.get(),
+                                              lookup,
                                               button_notifier,
                                               signal_notifier,
                                               row_factory);

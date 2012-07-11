@@ -13,10 +13,17 @@
 #include <GG/adobe/functional.hpp>
 #include <GG/adobe/future/widgets/headers/button_helper.hpp>
 #include <GG/adobe/future/widgets/headers/button_factory.hpp>
+#include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
+#include <GG/adobe/future/widgets/headers/window_server.hpp>
 
+#include <GG/Button.h>
 #include <GG/ClrConstants.h>
+#include <GG/EveGlue.h>
+
+#include "GG/functions.hpp"
+
 
 /****************************************************************************************************/
 
@@ -91,14 +98,21 @@ struct button_item_t
 
 /*************************************************************************************************/
 
-void proxy_button_hit(adobe::button_notifier_t    button_notifier,
-                      adobe::sheet_t&             sheet,
-                      adobe::name_t               bind,
-                      adobe::name_t               bind_output,
-                      adobe::name_t               action,
-                      const adobe::any_regular_t& value,
-                      const adobe::dictionary_t&  contributing)
+void proxy_button_hit(const adobe::factory_token_t&  token,
+                      adobe::name_t                  bind,
+                      adobe::name_t                  bind_output,
+                      adobe::name_t                  action,
+                      const adobe::any_regular_t&    value,
+                      const adobe::dictionary_t&     contributing,
+                      const adobe::widget_factory_t& factory)
 {
+    adobe::sheet_t& sheet = token.sheet_m;
+    adobe::behavior_t& behavior = token.client_holder_m.root_behavior_m;
+    adobe::vm_lookup_t& vm_lookup = token.vm_lookup_m;
+    const adobe::button_notifier_t& button_notifier = token.button_notifier_m;
+    const adobe::signal_notifier_t& signal_notifier = token.signal_notifier_m;
+    const adobe::row_factory_t* row_factory = token.row_factory_m;
+
     if (bind_output) {
         //touch(); // REVISIT (sparent) : We should have per item touch!
         sheet.set(bind_output, value);
@@ -110,7 +124,80 @@ void proxy_button_hit(adobe::button_notifier_t    button_notifier,
             result.insert(std::make_pair(adobe::key_contributing, adobe::any_regular_t(contributing)));
             button_notifier(action, adobe::any_regular_t(result));
         } else {
-            button_notifier(action, value);
+            if (action == adobe::static_name_t("dialog")) {
+                std::string eve_script;
+                if (value.cast<std::string>(eve_script)) {
+                    adobe::window_server_t window_server(sheet,
+                                                         behavior,
+                                                         vm_lookup,
+                                                         signal_notifier,
+                                                         row_factory,
+                                                         factory);
+                    window_server.run(eve_script.c_str());
+                } else {
+                    std::string adam_script;
+                    std::string eve_script;
+                    adobe::name_t name;
+                    adobe::name_t bind_result;
+                    adobe::dictionary_t dialog_parameters;
+                    const adobe::dictionary_t& parameters =
+                        value.cast<adobe::dictionary_t>();
+                    get_value(parameters, adobe::static_name_t("adam_script"), adam_script);
+                    get_value(parameters, adobe::static_name_t("eve_script"), eve_script);
+                    get_value(parameters, adobe::static_name_t("name"), name);
+                    get_value(parameters, adobe::static_name_t("bind_result"), bind_result);
+                    get_value(parameters, adobe::static_name_t("dialog_parameters"), dialog_parameters);
+
+                    if (eve_script.empty() == static_cast<bool>(name))
+                        throw std::runtime_error("Exactly one of eve_script and name must be defined");
+                    if (static_cast<bool>(name) != static_cast<bool>(bind_result))
+                        throw std::runtime_error("Both or neither of name and bind_result must be defined");
+
+                    if (name) {
+                        adobe::any_regular_t result;
+                        if (name == adobe::static_name_t("color_dialog")) {
+                            result = adobe::implementation::color_dialog(dialog_parameters);
+                        } else if (name == adobe::static_name_t("file_dialog")) {
+                            result = adobe::implementation::file_dialog(dialog_parameters);
+                        } else if (name == adobe::static_name_t("three_button_dialog")) {
+                            result = adobe::implementation::three_button_dialog(dialog_parameters);
+                        } else {
+                            throw std::runtime_error("Unknown builtin dialog type specified");
+                        }
+                        sheet.set(bind_result, result);
+                        sheet.update();
+                    } else if (!adam_script.empty() && !eve_script.empty()) {
+                        GG::DictionaryFunctions df;
+                        for (adobe::vm_lookup_t::dictionary_function_map_t::const_iterator
+                                 it = vm_lookup.dictionary_functions().begin();
+                             it != vm_lookup.dictionary_functions().end();
+                             ++it) {
+                            df[it->first] = it->second;
+                        }
+                        GG::ArrayFunctions af;
+                        for (adobe::vm_lookup_t::array_function_map_t::const_iterator
+                                 it = vm_lookup.array_functions().begin();
+                             it != vm_lookup.array_functions().end();
+                             ++it) {
+                            af[it->first] = it->second;
+                        }
+                        const GG::ModalDialogResult& result =
+                            GG::ExecuteModalDialog(boost::filesystem::path(eve_script),
+                                                   boost::filesystem::path(adam_script),
+                                                   df,
+                                                   af,
+                                                   button_notifier,
+                                                   signal_notifier,
+                                                   row_factory ? *row_factory : GG::RowFactory());
+                        if (bind_result && result.m_terminating_action == adobe::static_name_t("ok")) {
+                            sheet.set(bind_result, adobe::any_regular_t(result.m_result));
+                            sheet.update();
+                        }
+                    }
+                }
+            } else {
+                button_notifier(action, value);
+            }
         }
     }
 }
@@ -136,29 +223,37 @@ void handle_clicked_signal(adobe::signal_notifier_t signal_notifier,
 
 /*************************************************************************************************/
 
-template <typename Cont>
-void state_set_push_back(Cont& state_set, const adobe::factory_token_t& token, const button_item_t& temp)
+void state_set_push_back(adobe::button_t& button,
+                         const adobe::factory_token_t& token,
+                         const button_item_t& temp,
+                         const adobe::widget_factory_t& factory)
 {
-    state_set.push_back(adobe::button_state_descriptor_t());
+    button.state_set_m.push_back(adobe::button_state_descriptor_t());
 
-    state_set.back().name_m         = temp.name_m;
-    state_set.back().alt_text_m     = temp.alt_text_m;
-    state_set.back().modifier_set_m = temp.modifier_set_m;
-    state_set.back().hit_proc_m     = boost::bind(&proxy_button_hit, token.button_notifier_m,
-                                                    boost::ref(token.sheet_m), temp.bind_m,
-                                                    temp.bind_output_m,
-                                                    temp.action_m, _1, _2);
+    button.state_set_m.back().name_m         = temp.name_m;
+    button.state_set_m.back().alt_text_m     = temp.alt_text_m;
+    button.state_set_m.back().modifier_set_m = temp.modifier_set_m;
+    button.state_set_m.back().hit_proc_m     =
+        boost::bind(&proxy_button_hit,
+                    token,
+                    temp.bind_m,
+                    temp.bind_output_m,
+                    temp.action_m,
+                    _1,
+                    _2,
+                    boost::cref(factory));
 
-    state_set.back().clicked_proc_m = boost::bind(&handle_clicked_signal,
-                                                  token.signal_notifier_m,
-                                                  temp.signal_id_m,
-                                                  boost::ref(token.sheet_m),
-                                                  temp.bind_signal_m,
-                                                  temp.expression_m,
-                                                  _1);
+    button.state_set_m.back().clicked_proc_m =
+        boost::bind(&handle_clicked_signal,
+                    token.signal_notifier_m,
+                    temp.signal_id_m,
+                    boost::ref(token.sheet_m),
+                    temp.bind_signal_m,
+                    temp.expression_m,
+                    _1);
 
-    state_set.back().value_m        = temp.value_m;
-    state_set.back().contributing_m = temp.contributing_m;
+    button.state_set_m.back().value_m        = temp.value_m;
+    button.state_set_m.back().contributing_m = temp.contributing_m;
 }
 
 /****************************************************************************************************/
@@ -216,16 +311,16 @@ namespace implementation {
 
 /****************************************************************************************************/
 
-button_t* create_button_widget(const dictionary_t&    parameters,
-                               const factory_token_t& token,
-                               size_enum_t            size)
+button_t* create_button_widget(const dictionary_t&     parameters,
+                               const factory_token_t&  token,
+                               size_enum_t             size,
+                               const widget_factory_t& factory)
 {
     bool               is_cancel(false);
     bool               is_default(false);
     modifiers_t        modifier_mask(modifiers_none_s);
     array_t            items;
     button_item_t      item;
-    button_state_set_t state_set;
     GG::Clr            color(GG::CLR_GRAY);
     GG::Clr            text_color(GG::CLR_BLACK);
     dictionary_t       image;
@@ -257,30 +352,30 @@ button_t* create_button_widget(const dictionary_t&    parameters,
         adobe::implementation::cell_and_expression(clicked_binding, item.bind_signal_m, item.expression_m);
     }
 
-    for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter)
-        state_set_push_back(state_set, token, button_item_t(item, iter->cast<dictionary_t>()));
-
-    bool state_set_originally_empty(state_set.empty());
-
-    if (state_set_originally_empty)
-        state_set_push_back(state_set, token, item);
-
-    for (button_state_set_t::const_iterator first(state_set.begin()), last(state_set.end()); first != last; ++first)
-        modifier_mask |= first->modifier_set_m;
-
-    button_state_descriptor_t* first_state(state_set.empty() ? 0 : &state_set[0]);
-    std::size_t                n(state_set.size());
-
     button_t* result = new button_t(is_default,
                                     is_cancel,
-                                    modifier_mask,
                                     color,
                                     text_color,
                                     unpressed,
                                     pressed,
-                                    rollover,
-                                    first_state,
-                                    first_state + n);
+                                    rollover);
+
+    for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter) {
+        state_set_push_back(*result,
+                            token,
+                            button_item_t(item, iter->cast<dictionary_t>()),
+                            factory);
+    }
+
+    bool state_set_originally_empty(result->state_set_m.empty());
+
+    if (state_set_originally_empty)
+        state_set_push_back(*result, token, item, factory);
+
+    for (button_state_set_t::const_iterator first(result->state_set_m.begin()), last(result->state_set_m.end()); first != last; ++first)
+        modifier_mask |= first->modifier_set_m;
+
+    result->modifier_mask_m = modifier_mask;
 
     for (array_t::const_iterator iter(items.begin()), last(items.end()); iter != last; ++iter) {
         button_item_t temp(item, iter->cast<dictionary_t>());
@@ -318,7 +413,8 @@ widget_node_t make_button(const dictionary_t&     parameters,
                        implementation::enumerate_size(get_value(parameters, key_size).cast<name_t>()) :
                        parent.size_m);
 
-    button_t* widget = implementation::create_button_widget(parameters, token, size);
+    button_t* widget =
+        implementation::create_button_widget(parameters, token, size, factory);
     token.client_holder_m.assemblage_m.cleanup(boost::bind(delete_ptr<button_t*>(),widget));
    
     //

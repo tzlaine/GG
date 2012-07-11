@@ -165,7 +165,7 @@ struct eve_client_holder : public boost::noncopyable
 
 /*************************************************************************************************/
 
-typedef boost::function<void (name_t action, const any_regular_t&)> button_notifier_t;
+typedef boost::function<bool (name_t action, const any_regular_t&)> button_notifier_t;
 
 /*************************************************************************************************/
 
@@ -191,6 +191,10 @@ enum size_enum_t
     size_maximum_s  = size_normal_s
 };
 
+struct vm_lookup_t;
+
+/*************************************************************************************************/
+
 /*************************************************************************************************/
 
 //
@@ -203,12 +207,14 @@ struct factory_token_t
     factory_token_t(display_t&                display,
                     sheet_t&                  sheet,
                     eve_client_holder&        client_holder,
+                    vm_lookup_t&              vm_lookup,
                     button_notifier_t         button_notifier,
                     signal_notifier_t         signal_notifier,
                     const row_factory_t&      row_factory) :
         display_m(display),
         sheet_m(sheet),
         client_holder_m(client_holder),
+        vm_lookup_m(vm_lookup),
         button_notifier_m(button_notifier),
         signal_notifier_m(signal_notifier),
         row_factory_m(&row_factory)
@@ -233,6 +239,8 @@ struct factory_token_t
     /// quite a bit.
     //
     eve_client_holder& client_holder_m;
+
+    vm_lookup_t& vm_lookup_m;
 
     //
     /// The function to call when a button is pressed. This should be called by
@@ -376,10 +384,6 @@ inline widget_factory_proc_t default_widget_factory_proc_with_factory(const widg
 
 inline widget_factory_proc_t default_widget_factory_proc()
 { return default_widget_factory_proc_with_factory(default_asl_widget_factory()); }
-
-/*************************************************************************************************/
-
-struct vm_lookup_t;
 
 /*************************************************************************************************/
 

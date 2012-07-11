@@ -49,17 +49,13 @@ namespace adobe {
 
 button_t::button_t(bool                             is_default,
                    bool                             is_cancel,
-                   modifiers_t                      modifier_mask,
                    GG::Clr                          color,
                    GG::Clr                          text_color,
                    const GG::SubTexture&            unpressed,
                    const GG::SubTexture&            pressed,
-                   const GG::SubTexture&            rollover,
-                   const button_state_descriptor_t* first,
-                   const button_state_descriptor_t* last) :
+                   const GG::SubTexture&            rollover) :
     control_m(0),
-    state_set_m(first, last),
-    modifier_mask_m(modifier_mask),
+    modifier_mask_m(modifiers_none_s),
     modifiers_m(modifiers_none_s),
     is_default_m(is_default),
     is_cancel_m(is_cancel),

@@ -376,8 +376,8 @@
     \param move Whether the dialog box should be movable (see GG::DRAGABLE).
     \param on_top Whether the dialog box should be always-on-top (see GG::ONTOP).
     \param modal Whether the dialog box should be modal (see GG::MODAL).
-
-    TODO: color
+    \param color The color in which to render the dialog.
+    \param text_color The color in which to render the text directly associated with the dialog (e.g. the title).
 */
 
 /** \page eve_group group()
@@ -402,8 +402,9 @@
 
     \param name The text that appears on the group box.
     \param alt The tooltip text that appears when the cursor hovers over the group box.
-
-    TODO: color, text_color, interior_color
+    \param color The color in which to render the group box.
+    \param text_color The color in which to render the group's label text.
+    \param interior_color The color in which to render the interior of the group box.
 */
 
 /** \page eve_optional optional()
@@ -543,8 +544,10 @@
 
     \param bind The cell in the Adam property sheet to which this button is bound.
     \param items A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.
+    \param color The color in which to render the tab_group.
+    \param text_color The color in which to render the tab_group's labels.
 
-    TODO: color, text_color, style
+    TODO: style
     TODO: bind_tab_changed_signal, signal_id
 
     \note The idiomatic way to use tab_group is to populate it entirely with
@@ -599,8 +602,8 @@ else:
     \param default If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.
     \param cancel If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.
     \param items An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
-
-    TODO: color, text_color.
+    \param color The color in which to render the button.
+    \param text_color The color in which to render the button label.
 
     TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
@@ -670,8 +673,11 @@ else:
     \param bind The cell in the Adam property sheet to which this checkbox is bound.
     \param value_on The value emitted when checking the checkbox.
     \param value_off The value emitted when unchecking the checkbox.
+    \param color The color in which to render the checkbox.
+    \param text_color The color in which to render the checkbox text.
+    \param interior_color The color in which to render the interior of the checkbox.
 
-    TODO: color, text_color, interior_color, and style
+    TODO: style
     TODO: bind_checked_signal, signal_id
 */
 
@@ -700,8 +706,8 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the control_button.
     \param bind The cell in the Adam property sheet to which this control_button is bound.
     \param expression The expression to be evaluated when the control_button is clicked, in a string.
-
-    TODO: color, text_color
+    \param color The color in which to render the button.
+    \param text_color The color in which to render the button label.
 */
 
 /** \page eve_image image()
@@ -772,8 +778,7 @@ else:
     \param wrap If true, the label's text is word-wrapped.
     \param text_horizontal The horizontal alignment of the text ( \a align_left, \a align_center, or \a align_right ).
     \param text_vertical The horizontal alignment of the text ( \a align_top, \a align_center, or \a align_bottom ).
-
-    TODO: color
+    \param color The color in which to render the label.
 */
 
 /** \page eve_preset preset()
@@ -807,8 +812,9 @@ else:
 
     \param length The length in pixels that the progress_bar should be, in the direction of \a orientation.
     \param width The length in pixels that the progress_bar should be, in the direction perpendicular to \a orientation.
-
-    TODO: color, bar_color, interior_color
+    \param color The color in which to render the border of the progress_bar.
+    \param bar_color The color in which to render the bar within the progress_bar.
+    \param interior_color The color in which to render the interior of the progress_bar.
 */
 
 /** \page eve_radio_button radio_button()
@@ -834,8 +840,11 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the radio_button.
     \param bind The cell in the Adam property sheet to which this radio_button is bound.
     \param value The value emitted when checking the radio_button.
+    \param color The color in which to render the radio_button.
+    \param text_color The color in which to render the radio_button label.
+    \param interior_color The color in which to render the interior of the radio_button.
 
-    TODO: color, text_color, interior_color, and style
+    TODO: style
     TODO: bind_checked_signal, signal_id
 
     \note The idiomatic way to associate a set of radio_buttons with each
@@ -868,8 +877,9 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the reveal.
     \param bind The cell in the Adam property sheet to which this reveal is bound.
     \param value_on The value associated with the "show" state of the reveal.
+    \param label_color The color in which to render the reveal's label.
 
-    TODO: text_color, showing_image, hiding_image
+    TODO: showing_image, hiding_image
 
     \note The idiomatic way to create a showable/hidable portion of an
     interface is to bind a reveal and an \link eve_optional optional \endlink
@@ -902,8 +912,9 @@ else:
     \param bind The cell in the Adam property sheet to which this slider is bound.
     \param orientation The orientation of the slider (horizontal or vertical).
     \param format A dictionary specifying the range of values the slider can take.
+    \param color The color in which to render the slider.
 
-    TODO: color, length, tab_width, tab_length, line_width, line_style
+    TODO: length, tab_width, tab_length, line_width, line_style
     TODO: bind_slid_signal, bind_slid_and_stopped_signal, signal_id
 
     \section eve_slider_format_usage format Usage
@@ -939,8 +950,8 @@ else:
     \param name The text label that appears to the left of the display_text.
     \param alt The tooltip text that appears when the cursor hovers over the display_text.
     \param characters The minimum width of the display_text, in text of characters.
-
-    TODO: color, label_color
+    \param color The color in which to render the displayed text.
+    \param label_color The color in which to render the label text.
 */
 
 /** \page eve_display_number display_number()
@@ -968,8 +979,8 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the display_number.
     \param characters The minimum width of the display_number, in number of characters.
     \param units An array of \link eve_number_unit units \endlink.
-
-    TODO: color, label_color
+    \param color The color in which to render the displayed number.
+    \param label_color The color in which to render the label text.
 */
 
 /** \page eve_edit_number edit_number()
@@ -1024,8 +1035,13 @@ else:
     \param digits The minimum width of the edit_number, in number of characters.
     \param max_digits The maximum number of characters the user is allowed to type into the edit_number.
     \param units An array of \link eve_number_unit units \endlink.
+    \param color The color in which to render the edit_number.
+    \param text_color The color in which to render the number edit box's text.
+    \param interior_color The color in which to render the interior of the number edit box and the unit popup.
+    \param label_color The color in which to render the edit_number's label.
+    \param popup_color The color in which to render the unit popup.
+    \param popup_item_text_color The color in which to render the unit popup's text.
 
-    TODO: color, text_color, interior_color, popup_color, popup_item_text_color
     TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal, signal_id
 */
 
@@ -1055,8 +1071,11 @@ else:
     \param lines The number of lines high the edit_text should be.
     \param scrollable Whether the edit_text has scrollbars.  This only applies when \a lines is greater than \c 1.
     \param password Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.
+    \param color The color in which to render the edit_text.
+    \param text_color The color in which to render the editable text.
+    \param interior_color The color in which to render the interior of the number edit box.
+    \param label_color The color in which to render the edit_text's label.
 
-    TODO: color, text_color, interior_color
     TODO: read_only, terminal_style, wrap
     TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal, signal_id
 */
@@ -1095,8 +1114,11 @@ else:
     \param bind The cell in the Adam property sheet to which this popup is bound.
     \param items A dictionary whose key-value pairs define the names and values of the items in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.
     \param custom_item_name The name of the custom item in the popup.
+    \param color The color in which to render the popup.
+    \param label_color The color in which to render the label text.
+    \param item_text_color The color in which to render the text of the items in the popup.
 
-    TODO: max_characters, color, text_color, item_text_color
+    TODO: max_characters
     TODO: bind_selection_changed_signal, signal_id
 
     \note Rows with a custom look, or containing more than just a single
@@ -1108,9 +1130,15 @@ else:
 
     TODO: name, alt_text, characters, rows
     TODO: sort, sort_order, selections, user_delete, browse_updates
-    TODO: color, interior_color, hilite_color, item_text_color
-    TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal, signal_id
+
+    \param color The color in which to render the listbox.
+    \param interior_color The color in which to render the interior of the listbox.
+    \param label_color The color in which to render the listbox's label.
+    \param item_text_color The color in which to render the text of the items in the listbox.
+    \param hilite_color The color in which to render the hiliting of selected items in the listbox.
+
     TODO: allowed_drop_types
+    TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal, signal_id
 
     \section eve_row_factory The Row Factory
 

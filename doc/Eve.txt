@@ -545,6 +545,7 @@
     \param items A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.
 
     TODO: color, text_color, style
+    TODO: bind_tab_changed_signal, signal_id
 
     \note The idiomatic way to use tab_group is to populate it entirely with
     \link eve_panel panels \endlink that are all bound to the same cell, so
@@ -603,7 +604,7 @@ else:
 
     TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
-    TODO: bind_clicked_signal
+    TODO: bind_clicked_signal, signal_id
 
     \section eve_button_items_usage items Usage
 
@@ -642,10 +643,6 @@ else:
     what they were when the UI was launched.
 
     TODO Document "dialog" action.
-
-    \section eve_signal_handler The Signal Handler
-
-    TODO
 */
 
 /** \page eve_checkbox checkbox()
@@ -675,7 +672,7 @@ else:
     \param value_off The value emitted when unchecking the checkbox.
 
     TODO: color, text_color, interior_color, and style
-    TODO: bind_checked_signal
+    TODO: bind_checked_signal, signal_id
 */
 
 /** \page eve_control_button control_button()
@@ -839,7 +836,7 @@ else:
     \param value The value emitted when checking the radio_button.
 
     TODO: color, text_color, interior_color, and style
-    TODO: bind_checked_signal
+    TODO: bind_checked_signal, signal_id
 
     \note The idiomatic way to associate a set of radio_buttons with each
     other (making them mutually exclusive) is to bind them all to the same
@@ -907,7 +904,7 @@ else:
     \param format A dictionary specifying the range of values the slider can take.
 
     TODO: color, length, tab_width, tab_length, line_width, line_style
-    TODO: bind_slid_signal, bind_slid_and_stopped_signal
+    TODO: bind_slid_signal, bind_slid_and_stopped_signal, signal_id
 
     \section eve_slider_format_usage format Usage
 
@@ -1029,7 +1026,7 @@ else:
     \param units An array of \link eve_number_unit units \endlink.
 
     TODO: color, text_color, interior_color, popup_color, popup_item_text_color
-    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
+    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal, signal_id
 */
 
 /** \page eve_edit_text edit_text()
@@ -1061,7 +1058,7 @@ else:
 
     TODO: color, text_color, interior_color
     TODO: read_only, terminal_style, wrap
-    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
+    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal, signal_id
 */
 
 /** \page eve_popup popup()
@@ -1100,7 +1097,7 @@ else:
     \param custom_item_name The name of the custom item in the popup.
 
     TODO: max_characters, color, text_color, item_text_color
-    TODO: bind_selection_changed_signal
+    TODO: bind_selection_changed_signal, signal_id
 
     \note Rows with a custom look, or containing more than just a single
     string label can be created using \ref eve_row_factory.
@@ -1112,7 +1109,7 @@ else:
     TODO: name, alt_text, characters, rows
     TODO: sort, sort_order, selections, user_delete, browse_updates
     TODO: color, interior_color, hilite_color, item_text_color
-    TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal
+    TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal, signal_id
     TODO: allowed_drop_types
 
     \section eve_row_factory The Row Factory
@@ -1434,12 +1431,6 @@ else:
     - \ref eve_expression_file_dialog_fn
     - \ref eve_expression_three_button_dialog_fn
 
-    \section eve_gg_signals Using GG Signals With Adam and Eve
-
-    TODO
-
-    Document placeholders ... TODO
-
     \section eve_views Views
 
     The term that Eve uses to describe Eve widgets and layout elements is
@@ -1516,4 +1507,122 @@ else:
     - \ref eve_number_unit
     - \ref eve_alignments
     - \ref eve_modifier_keys
+
+    \section eve_gg_signals Using GG Signals With Adam and Eve
+
+    In a typical modal dialog, all the GG signals are used to update state
+    contained entirely within the dialog's property sheet; the result of the
+    dialog is communicated out of the dialog only after the dialog has
+    finished executing.  Sometimes, however, a UI should not be entirely
+    self-contained.  For instance, consider a dialog that allows the user to
+    select a Gaussian blur to apply to an image outside of the dialog.  If
+    that dialog were to contain a "Preview" or "Apply" button, it would be
+    handy if pressing that button would cause the image (again, outside the
+    dialog) to be re-rendered with a blur using the parameters indicated in
+    the dialog.  In such a case, one would want to have a GG button-press
+    signal leak out of the dialog.  The signal binding parameters to Eve views
+    allow exactly that.  Before covering that feature, let's look at signals
+    bound into Adam cells.
+
+    \subsection eve_gg_signals_bound GG Signals Bound to Adam Cells
+
+    Any view that is based on a GG window type that emits signals (e.g. \ref
+    eve_slider, which is based on GG::Slider) will have \c bind_*_signal
+    parameters.  Consider \ref eve_slider as a case study.  GG::Slider emits
+    two signals, GG::Slider::SlidSignal, and GG::Slider::SlidAndStoppedSignal,
+    each of which communicates three values: the slider's current value, the
+    slider's min value, and the slider's max value.  \ref eve_slider has two
+    parameters that control the binding of these two signals, respectively: \a
+    bind_slid_signal and \a bind_slid_and_stopped_signal.  Let's look at \a
+    bind_slid_signal.  If \a bind_slid_signal is given a value that is an
+    adobe::name_t \a A:
+
+    \code slider(..., bind_slid_signal: @some_cell_name); \endcode
+
+    the value assigned to cell \a A when the signal is emitted is a dictionary
+    containing the three values emitted by the signal.  Each value in the
+    dictionary is given a key name; in the case of \ref eve_slider the
+    dictionary looks like:
+
+    \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode
+
+    The names above are specific to the \ref eve_slider implementation, and
+    are documented in the \ref eve_slider detailed documentation.
+
+    Some views have signals that emit a single value.  The signal bindings for
+    such signals just emit that single value; the value is not placed in a
+    dictionary.
+
+    There is another way to specify a signal binding.  Instead of specifying
+    just an adobe::name_t, an array with two elements, an adobe::name_t \a A
+    and an expression string \a S, can be specified:
+
+    \code slider(..., bind_slid_signal: [@some_cell_name, "some expression"]); \endcode
+
+    When the signal is emitted, \a S is evaluated, and the result is assigned
+    to cell \a A.  Any valid Adam and Eve expression may be placed in \a S.
+    The expression need not include the value(s) originally emitted by the
+    underlying GG signal.
+
+    In addition, there is a placeholder syntax that can be used to construct
+    Adam and eve expressions that contain some or all of the value(s)
+    originally emitted by the underlying GG signal.  For a signal that emits
+    \a N values, the following placeholders are defined:
+
+    - \c _
+    - \c _1
+    - ...
+    - \c _N
+
+    The \c _ placeholder represents the signal's values as they are normally
+    emitted.  So, this:
+
+    \code slider(..., bind_slid_signal: [@some_cell_name, "_"]); \endcode
+
+    is always equivalent to this:
+
+    \code slider(..., bind_slid_signal: @some_cell_name); \endcode
+
+    \c _ will be a dictionary for those signals that emit multiple values, or
+    a single value for those signals that only emit one value.  When the
+    placeholder represents a dictionary, it can be used as a dictionary
+    normally would, including indexing into it to retrieve individual values.
+    This:
+
+    \code slider(..., bind_slid_signal: [@some_cell_name, "_.slider_pos"]); \endcode
+
+    is equivalent to this:
+
+    \code slider(..., bind: @some_cell_name); \endcode
+
+    since they both bind the current slider position to \c \@some_cell_name.
+
+    The \c _1 ... \c _N placeholders represent the individual values in \c _
+    (for signals that emit a single value, \c _1 is always equivalent to \c
+    _).  So, this:
+
+    \code slider(..., bind_slid_signal: [@some_cell_name, "_.slider_min"]); \endcode
+
+    is equivalent to this:
+
+    \code slider(..., bind: [@some_cell_name, "_2"]); \endcode
+
+    \subsection eve_gg_signals_unbound GG Signals Not Bound to Adam Cells
+
+    All GG signals that are not bound using any of the methods shown above are
+    still passed out of the dialog, via \ref eve_signal_handler.
+
+    \section eve_signal_handler The Signal Handler
+
+    GG's UI creation functions all accept an (optional) user-defined
+    GG::SignalHandler.  This handler accepts four parameters:
+
+    \param widget_type An adobe::name_t indicating the type of the Eve view from which the signal was emitted (e.g. \c checkbox).
+    \param signal An adobe::name_t indicating the name of the signal (e.g. slider's \a slid_and_stopped signal).
+    \param widget_id An adobe::name_t indicating the particular view which the signal was emitted.  This value is taken from the \a signal_id parameter of the view emitting the signal.
+    \param value An adobe::any_regular_t indicating the value emitted by the underlying GG signal.  This will be a single value or a dictionary, depending on the type of the underlying GG signal.  See \ref eve_gg_signals_bound for details.
+
+    Any GG signals that are not bound to Adam cells call the signal handler
+    (if supplied).  This allows the user to associate arbitrary actions with
+    signals emitted by controls within a dialog.
 */

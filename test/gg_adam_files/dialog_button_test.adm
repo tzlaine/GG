@@ -1,0 +1,49 @@
+sheet signal_binding_test
+{
+constant:
+    expected_bind_cell_0 : false;
+    expected_bind_cell_1 : false;
+    expected_bind_cell_2 : false;
+    expected_bind_cell_3 : true;
+    expected_bind_cell_4 : false;
+    expected_bind_cell_5 : false;
+    expected_bind_cell_6 : false;
+    expected_bind_cell_7 : true;
+    expected_bind_cell_8 : false;
+    expected_bind_cell_9 : true;
+    expected_bind_cell_10 : false;
+    expected_bind_cell_11 : true;
+    expected_bind_cell_12 : 0;
+    expected_bind_cell_13 : 1;
+
+interface:
+    bind_cell_0 : false;
+    bind_cell_1 : false;
+    bind_cell_2 : false;
+    bind_cell_3 : false;
+    bind_cell_4 : false;
+    bind_cell_5 : false;
+    bind_cell_6 : false;
+    bind_cell_7 : false;
+    bind_cell_8 : false;
+    bind_cell_9 : false;
+    bind_cell_10 : false;
+    bind_cell_11 : false;
+    bind_cell_12 : 0;
+    bind_cell_13 : 0;
+
+    result_bind_cell_0 <== bind_cell_0 == expected_bind_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_1 <== bind_cell_1 == expected_bind_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_2 <== bind_cell_2 == expected_bind_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_3 <== bind_cell_3 == expected_bind_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_4 <== bind_cell_4 == expected_bind_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_5 <== bind_cell_5 == expected_bind_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_6 <== bind_cell_6 == expected_bind_cell_6 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_7 <== bind_cell_7 == expected_bind_cell_7 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_8 <== bind_cell_8 == expected_bind_cell_8 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_9 <== bind_cell_9 == expected_bind_cell_9 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_10 <== bind_cell_10 == expected_bind_cell_10 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_11 <== bind_cell_11 == expected_bind_cell_11 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_12 <== bind_cell_12 == expected_bind_cell_12 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_bind_cell_13 <== bind_cell_13 == expected_bind_cell_13 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+}

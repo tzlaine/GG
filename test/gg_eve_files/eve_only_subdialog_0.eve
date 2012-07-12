@@ -1,0 +1,19 @@
+layout alert_dialog
+{
+    view dialog(name: "Eve File Only Subdialog")
+    {
+        row(child_horizontal: align_fill, horizontal: align_fill)
+        {
+            column(child_horizontal: align_fill, horizontal: align_fill)
+            { 
+                checkbox(name: "Toggle", bind: @bind_cell_0);
+            }
+    
+            column(child_horizontal: align_fill, horizontal: align_right)
+            {
+                button(name: "OK", action: @ok);
+                button(name: "Cancel", action: @cancel);
+            }
+        }
+    }
+}

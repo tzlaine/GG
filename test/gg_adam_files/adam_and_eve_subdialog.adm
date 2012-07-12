@@ -1,0 +1,8 @@
+sheet alert_dialog
+{
+interface:
+    value: false;
+
+output:
+    result <== { value: value };
+}

@@ -1,0 +1,146 @@
+layout alert_dialog
+{
+    view dialog(name: "Dialog Button Test")
+    {
+        group(name: "Eve File Only")
+        {
+            button(name: "cancel",
+                   characters: 32,
+                   action: @dialog,
+                   value: "eve_only_subdialog_0.eve");
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_0);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_0);
+
+            button(name: "ok",
+                   characters: 32,
+                   action: @dialog,
+                   value: "eve_only_subdialog_1.eve");
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_1);
+
+            button(name: "change-and-cancel",
+                   characters: 32,
+                   action: @dialog,
+                   value: "eve_only_subdialog_2.eve");
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_2);
+
+            button(name: "change-and-ok",
+                   characters: 32,
+                   action: @dialog,
+                   value: "eve_only_subdialog_3.eve");
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
+        }
+
+        group(name: "Adam and Eve Files")
+        {
+            button(name: "cancel",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       adam_script: "adam_and_eve_subdialog.adm",
+                       eve_script: "adam_and_eve_subdialog.eve",
+                       bind_result: @bind_cell_4
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
+
+            button(name: "ok",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       adam_script: "adam_and_eve_subdialog.adm",
+                       eve_script: "adam_and_eve_subdialog.eve",
+                       bind_result: @bind_cell_5
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_5);
+
+            button(name: "change-and-cancel",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       adam_script: "adam_and_eve_subdialog.adm",
+                       eve_script: "adam_and_eve_subdialog.eve",
+                       bind_result: @bind_cell_6
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_6);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_6);
+
+            button(name: "change-and-ok",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       adam_script: "adam_and_eve_subdialog.adm",
+                       eve_script: "adam_and_eve_subdialog.eve",
+                       bind_result: @bind_cell_7
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_7);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_7);
+        }
+
+        group(name: "Standard Dialogs")
+        {
+            button(name: "color dialog cancel",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       name: @color_dialog,
+                       bind_result: @bind_cell_8
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_8);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_8);
+
+            button(name: "color dialog ok",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       name: @color_dialog,
+                       bind_result: @bind_cell_9
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_9);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_9);
+
+            button(name: "file dialog cancel",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       name: @file_dialog,
+                       bind_result: @bind_cell_10
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_10);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_10);
+
+            button(name: "file dialog ok",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       name: @file_dialog,
+                       bind_result: @bind_cell_11
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_11);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_11);
+
+            button(name: "three button dialog button one",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       name: @three_button_dialog,
+                       bind_result: @bind_cell_12
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_12);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_12);
+
+            button(name: "three button dialog button two",
+                   characters: 32,
+                   action: @dialog,
+                   value: {
+                       name: @three_button_dialog,
+                       bind_result: @bind_cell_13
+                   });
+            display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_13);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_13);
+        }
+    }
+}

@@ -1,0 +1,19 @@
+layout alert_dialog
+{
+    view dialog(name: "Adam And Eve Subdialog")
+    {
+        row(child_horizontal: align_fill, horizontal: align_fill)
+        {
+            column(child_horizontal: align_fill, horizontal: align_fill)
+            { 
+                checkbox(name: "Toggle", bind: @value);
+            }
+    
+            column(child_horizontal: align_fill, horizontal: align_right)
+            {
+                button(name: "OK", action: @ok);
+                button(name: "Cancel", action: @cancel);
+            }
+        }
+    }
+}

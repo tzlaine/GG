@@ -148,9 +148,9 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
                     get_value(parameters, adobe::static_name_t("bind_result"), bind_result);
                     get_value(parameters, adobe::static_name_t("dialog_parameters"), dialog_parameters);
 
-                    if (eve_script.empty() == static_cast<bool>(name))
+                    if (eve_script.empty() == !name)
                         throw std::runtime_error("Exactly one of eve_script and name must be defined");
-                    if (static_cast<bool>(name) != static_cast<bool>(bind_result))
+                    if (!name != !bind_result)
                         throw std::runtime_error("Both or neither of name and bind_result must be defined");
 
                     if (name) {

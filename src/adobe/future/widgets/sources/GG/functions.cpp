@@ -160,8 +160,8 @@ namespace adobe { namespace implementation {
         any_regular_t retval;
 
         GG::Clr original_color;
-        GG::Clr dialog_color;
-        GG::Clr border_color;
+        GG::Clr dialog_color(GG::CLR_GRAY);
+        GG::Clr border_color(GG::CLR_GRAY);
         GG::Clr text_color(GG::CLR_BLACK);
         get_value(parameters, static_name_t("original_color"), original_color);
         get_value(parameters, static_name_t("dialog_color"), dialog_color);
@@ -213,8 +213,8 @@ namespace adobe { namespace implementation {
         std::string filename;
         bool save = false;
         bool multi = false;
-        GG::Clr color;
-        GG::Clr border_color;
+        GG::Clr color(GG::CLR_GRAY);
+        GG::Clr border_color(GG::CLR_GRAY);
         GG::Clr text_color(GG::CLR_BLACK);
         get_value(parameters, adobe::static_name_t("directory"), directory);
         get_value(parameters, adobe::static_name_t("filename"), filename);
@@ -259,9 +259,9 @@ namespace adobe { namespace implementation {
         std::string message;
         unsigned int width = 0;
         unsigned int height = 0;
-        GG::Clr color;
-        GG::Clr border_color;
-        GG::Clr button_color;
+        GG::Clr color(GG::CLR_GRAY);
+        GG::Clr border_color(GG::CLR_GRAY);
+        GG::Clr button_color(GG::CLR_GRAY);
         GG::Clr text_color(GG::CLR_BLACK);
         unsigned int buttons;
         std::string zero;

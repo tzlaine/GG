@@ -548,7 +548,7 @@
     \param text_color The color in which to render the tab_group's labels.
     \param style The style in which to render the tab_group.  The style must be one of \c attached or \c detached (see GG::TabBarStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-    \param bind_tab_changed_signal Binds GG::TabBar::TabChangedSignal.
+    \param bind_tab_changed_signal Binds GG::TabBar::TabChangedSignal.    The value emitted is the value emitted by the tab_group.
 
     \note The idiomatic way to use tab_group is to populate it entirely with
     \link eve_panel panels \endlink that are all bound to the same cell, so
@@ -608,8 +608,7 @@ else:
     TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
 
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_clicked_signal
+    \param bind_clicked_signal Binds GG::Button::ClickedSignal.  The value emitted is \a value.
 
     \section eve_button_items_usage items Usage
 
@@ -680,8 +679,7 @@ else:
     \param interior_color The color in which to render the interior of the checkbox.
     \param style The style in which to render the checkbox.  The style must be one of \c xbox, \c checkbox, \c radio, \c button, \c round_button, \c top_attached_tab, or \c top_detached_tab (see GG::StateButtonStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_checked_signal
+    \param bind_checked_signal Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.
 */
 
 /** \page eve_control_button control_button()
@@ -848,8 +846,7 @@ else:
     \param interior_color The color in which to render the interior of the radio_button.
     \param style The style in which to render the radio_button.  The style must be one of \c xbox, \c checkbox, \c radio, \c button, \c round_button, \c top_attached_tab, or \c top_detached_tab (see GG::StateButtonStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_checked_signal
+    \param bind_checked_signal Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the radio_button.
 
     \note The idiomatic way to associate a set of radio_buttons with each
     other (making them mutually exclusive) is to bind them all to the same
@@ -922,8 +919,8 @@ else:
 
     \param line_style The style in which to render the slider.  The style must be one of \c flat, \c raised, or \c grooved (see GG::SliderLineStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_slid_signal, bind_slid_and_stopped_signal
+    \param bind_slid_signal Binds GG::Slider::SlidSignal.  The signature is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
+    \param bind_slid_and_stopped_signal Binds GG::Slider::SlidAndStoppedSignal.  The signature is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
 
     \section eve_slider_format_usage format Usage
 
@@ -1050,8 +1047,9 @@ else:
     \param popup_color The color in which to render the unit popup.
     \param popup_item_text_color The color in which to render the unit popup's text.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
+    \param bind_edited_signal Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_number.
+    \param bind_focus_update_signal Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_number.
+    \param bind_unit_changed_signal Binds GG::DropDownList::SelChangedSignal from the unit popup.  The value emitted is the value emitted by the popup.
 */
 
 /** \page eve_edit_text edit_text()
@@ -1088,8 +1086,9 @@ else:
     TODO: read_only, terminal_style, wrap
 
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_edited_signal, bind_focus_update_signal, bind_unit_changed_signal
+    \param bind_edited_signal Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.
+    \param bind_focus_update_signal Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.
+    \param bind_unit_changed_signal Binds GG::DropDownList::SelChangedSignal from the unit popup.  The value emitted is the value emitted by the popup.
 */
 
 /** \page eve_popup popup()
@@ -1133,8 +1132,7 @@ else:
     TODO: max_characters
 
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-
-    TODO: bind_selection_changed_signal
+    \param bind_selection_changed_signal Binds GG::DropDownList::SelChangedSignal.  The value emitted is the value emitted by the popup.
 
     \note Rows with a custom look, or containing more than just a single
     string label can be created using \ref eve_row_factory.

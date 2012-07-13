@@ -1216,14 +1216,14 @@ else:
     \param allowed_drop_types An array of strings indicating the drag and drop types accepted by the listbox.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
 
-    \param bind_selection_changed_signal TODO
-    \param bind_dropped_signal TODO
-    \param bind_drop_acceptable_signal TODO
-    \param bind_left_clicked_signal TODO
-    \param bind_right_clicked_signal TODO
-    \param bind_double_clicked_signal TODO
-    \param bind_erased_signal TODO
-    \param bind_browsed_signal TODO
+    \param bind_selection_changed_signal Binds GG::ListBox::SelChangedSignal.  TODO
+    \param bind_dropped_signal Binds GG::ListBox::DroppedSignal.  TODO
+    \param bind_drop_acceptable_signal Binds GG::ListBox::DropAcceptableSignal.  TODO
+    \param bind_left_clicked_signal Binds GG::ListBox::LeftClickedSignal.  TODO
+    \param bind_right_clicked_signal Binds GG::ListBox::RightClickedSignal.  TODO
+    \param bind_double_clicked_signal Binds GG::ListBox::DoubleClickedSignal.  TODO
+    \param bind_erased_signal Binds GG::ListBox::ErasedSignal.  TODO
+    \param bind_browsed_signal Binds GG::ListBox::BrowsedSignal.  TODO
 
     \section eve_row_factory The Row Factory
 

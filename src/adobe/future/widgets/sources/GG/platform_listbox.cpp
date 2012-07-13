@@ -46,7 +46,7 @@ namespace {
             if (selections.size() == 1u) {
                 std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *selections.begin());
                 value = listbox.items_m.at(index).find(adobe::static_name_t("value"))->second;
-            } else {
+            } else if (!selections.empty()) {
                 value.assign(adobe::array_t());
                 adobe::array_t& array = value.cast<adobe::array_t>();
                 for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(), end_it = selections.end();

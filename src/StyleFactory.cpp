@@ -160,6 +160,14 @@ boost::shared_ptr<Cursor> StyleFactory::GetCursor(adobe::name_t name) const
     return it == m_cursors.end() ? boost::shared_ptr<Cursor>() : it->second;
 }
 
+boost::shared_ptr<PopupMenu> StyleFactory::NewPopupMenu(X x, Y y,
+                                                        const boost::shared_ptr<Font>& font,
+                                                        const MenuItem& m,
+                                                        Clr text_color/* = CLR_WHITE*/,
+                                                        Clr color/* = CLR_BLACK*/,
+                                                        Clr interior/* = CLR_SHADOW*/) const
+{ return boost::shared_ptr<PopupMenu>(new PopupMenu(x, y, font, m, text_color, color, interior)); }
+
 Button* StyleFactory::NewButton(X x, Y y, X w, Y h, const std::string& str, const boost::shared_ptr<Font>& font,
                                 Clr color, Clr text_color/* = CLR_BLACK*/, Flags<WndFlag> flags/* = INTERACTIVE*/) const
 { return new Button(x, y, w, h, str, font, color, text_color, flags); }

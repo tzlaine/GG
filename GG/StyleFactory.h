@@ -49,7 +49,9 @@ class Font;
 class GroupBox;
 class ListBox;
 class MenuBar;
+class MenuItem;
 class MultiEdit;
+class PopupMenu;
 class ProgressBar;
 class RadioButtonGroup;
 class Scroll;
@@ -147,6 +149,14 @@ public:
         \note All the above names can return the same default cursor if that
         is desired. */
     boost::shared_ptr<Cursor> GetCursor(adobe::name_t name) const;
+
+    /** Returns a new GG PopupMenu. */
+    virtual boost::shared_ptr<PopupMenu> NewPopupMenu(X x, Y y,
+                                                      const boost::shared_ptr<Font>& font,
+                                                      const MenuItem& m,
+                                                      Clr text_color = CLR_WHITE,
+                                                      Clr color = CLR_BLACK,
+                                                      Clr interior = CLR_SHADOW) const;
 
     /** \name Controls */ ///@{
     /** Returns a new GG Button. */

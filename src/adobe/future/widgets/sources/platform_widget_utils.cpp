@@ -449,8 +449,9 @@ bool context_menu(const GG::Pt& pt,
         );
     }
 
-    GG::PopupMenu popup(pt.x, pt.y, style.DefaultFont(), items);
-    int result_id = popup.Run();
+    boost::shared_ptr<GG::PopupMenu> popup =
+        style.NewPopupMenu(pt.x, pt.y, style.DefaultFont(), items);
+    int result_id = popup->Run();
 
     if (result_id)
         result = *(first + result_id - 1);

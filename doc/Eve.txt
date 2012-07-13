@@ -1230,12 +1230,15 @@ else:
     sequence of GG::Control*, and a Signal Row contains a sequence of values,
     each of which is the current value of the corresponding GG::Control.  For
     instance, a GG::ListBox::Row consisting of a GG::TextControl and a
-    GG::Spin<double> might yield the Signal Row: \code [ "local value of pi:",
-    3.0 ] \endcode.  A GG::ListBox::Row containing no controls is represented
-    by \c empty.  A GG::ListBox::Row containing a single control is
-    represented by a single value.  A GG::ListBox::Row containing multiple
-    controls is represented by an array of values.  Here are the Adam and Eve
-    value types associated with each GG::Control subclass:
+    GG::Spin<double> might yield the Signal Row:
+
+    \code [ "local value of pi:", 3.0 ] \endcode
+
+    .  A GG::ListBox::Row containing no controls is represented by \c empty.
+    A GG::ListBox::Row containing a single control is represented by a single
+    value.  A GG::ListBox::Row containing multiple controls is represented by
+    an array of values.  Here are the Adam and Eve value types associated with
+    each GG::Control subclass:
 
     - GG::Button \c string
     - GG::DropDownList The \ref eve_listbox_signal_row "row" for the currently-selected item.
@@ -1250,8 +1253,9 @@ else:
 
     Some signals emit the original GG::ListBox row iterator along with the
     Signal Row.  These are referred to as Iterator Signal Rows here.  They
-    look like this: \code {row: <Signal Row>, gg_row_iter: <iterator>}
-    \endcode
+    look like this:
+
+    \code {row: <Signal Row>, gg_row_iter: <iterator>} \endcode
 
     \subsection eve_listbox_click_signal_row Click Signal Rows
 
@@ -1259,7 +1263,9 @@ else:
     the location of a click on the row.  These are referred to as Click Signal
     Rows here.  They contain both the GG::Pt of the click and an Adam and
     Eve-friendly array of two values representing the click point as well.
-    Click Signal Rows look like this: \code {row: <Signal Row>, pt: [x, y], gg_row_iter: <iterator>, gg_pt: <GG::Pt>} \endcode
+    Click Signal Rows look like this:
+
+    \code {row: <Signal Row>, pt: [x, y], gg_row_iter: <iterator>, gg_pt: <GG::Pt>} \endcode
 
     \section eve_row_factory The Row Factory
 

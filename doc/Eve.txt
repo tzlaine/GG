@@ -1178,11 +1178,19 @@ else:
 
     \section eve_listbox_interaction_semantics User Interaction Semantics
 
-    TODO
+    Clicking a new tab causes a value to be assigned to the bound cell, if
+
+    Selecting one or more items in the listbox causes those items' values to
+    be assigned to the bound Adam cell.  When a single item is selected, this
+    is represented by a single value.  When multiple items are selected, this
+    is represented by an array of values.
 
     \section eve_listbox_adam_interaction Adam Interaction Notes
 
-    TODO
+    The listbox expects the bound Adam cell to set its selected items, using
+    one or more of the values specified in \a items.  When a single item is
+    selected, this is represented by a single value.  When multiple items are
+    selected, this is represented by an array of values.
 
     \section eve_listbox_usage listbox() Usage
 
@@ -1192,6 +1200,7 @@ else:
 
     \param name The text label that appears to the left of the listbox.
     \param alt The tooltip text that appears when the cursor hovers over the listbox.
+    \param items A dictionary whose key-value pairs define the names and values of the items in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.
     \param characters The width of the listbox, in number of characters.
     \param rows The height of the listbox, in number of rows.
     \param sort Whether the rows should be shown in the order added to the listbox, or in sorted order.

@@ -957,8 +957,8 @@ else:
     \param tab_length The size of the tab in the direction perpendicular to \a orientation in pixels.
     \param line_style The style in which to render the slider.  The style must be one of \c flat, \c raised, or \c grooved (see GG::SliderLineStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
-    \param bind_slid_signal Binds GG::Slider::SlidSignal.  The signature is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
-    \param bind_slid_and_stopped_signal Binds GG::Slider::SlidAndStoppedSignal.  The signature is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
+    \param bind_slid_signal Binds GG::Slider::SlidSignal.  The value emitted is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
+    \param bind_slid_and_stopped_signal Binds GG::Slider::SlidAndStoppedSignal.  The value emitted is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
 
     \section eve_slider_format_usage format Usage
 
@@ -1213,15 +1213,53 @@ else:
     \param hilite_color The color in which to render the hiliting of selected items in the listbox.
     \param allowed_drop_types An array of strings indicating the drag and drop types accepted by the listbox.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
+    \param bind_selection_changed_signal Binds GG::ListBox::SelChangedSignal.  The value emitted is an array of \ref eve_listbox_signal_row "signal rows".
+    \param bind_dropped_signal Binds GG::ListBox::DroppedSignal.  The value emitted is a single \ref eve_listbox_iterator_signal_row "iterator row".
+    \param bind_drop_acceptable_signal Binds GG::ListBox::DropAcceptableSignal.  The value emitted is a single \ref eve_listbox_iterator_signal_row "iterator row".
+    \param bind_left_clicked_signal Binds GG::ListBox::LeftClickedSignal.  The value emitted is a single \ref eve_listbox_click_signal_row "click row".
+    \param bind_right_clicked_signal Binds GG::ListBox::RightClickedSignal.  The value emitted is a single \ref eve_listbox_click_signal_row "click row".
+    \param bind_double_clicked_signal Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single \ref eve_listbox_click_signal_row "click row".
+    \param bind_erased_signal Binds GG::ListBox::ErasedSignal.  The value emitted is a single \ref eve_listbox_iterator_signal_row "iterator row".
+    \param bind_browsed_signal Binds GG::ListBox::BrowsedSignal.  The value emitted is a single \ref eve_listbox_iterator_signal_row "iterator row".
 
-    \param bind_selection_changed_signal Binds GG::ListBox::SelChangedSignal.  TODO
-    \param bind_dropped_signal Binds GG::ListBox::DroppedSignal.  TODO
-    \param bind_drop_acceptable_signal Binds GG::ListBox::DropAcceptableSignal.  TODO
-    \param bind_left_clicked_signal Binds GG::ListBox::LeftClickedSignal.  TODO
-    \param bind_right_clicked_signal Binds GG::ListBox::RightClickedSignal.  TODO
-    \param bind_double_clicked_signal Binds GG::ListBox::DoubleClickedSignal.  TODO
-    \param bind_erased_signal Binds GG::ListBox::ErasedSignal.  TODO
-    \param bind_browsed_signal Binds GG::ListBox::BrowsedSignal.  TODO
+    \subsection eve_listbox_signal_row Signal Rows
+
+    Most of GG::ListBox's signals emit a GG::ListBox iterator.  The
+    corresponding signals emitted by listbox emit the contents of each row.
+    Such a row is referred to as a Signal Row here.  GG::ListBox::Row is a
+    sequence of GG::Control*, and a Signal Row contains a sequence of values,
+    each of which is the current value of the corresponding GG::Control.  For
+    instance, a GG::ListBox::Row consisting of a GG::TextControl and a
+    GG::Spin<double> might yield the Signal Row: \code [ "local value of pi:",
+    3.0 ] \endcode.  A GG::ListBox::Row containing no controls is represented
+    by \c empty.  A GG::ListBox::Row containing a single control is
+    represented by a single value.  A GG::ListBox::Row containing multiple
+    controls is represented by an array of values.  Here are the Adam and Eve
+    value types associated with each GG::Control subclass:
+
+    - GG::Button \c string
+    - GG::DropDownList The \ref eve_listbox_signal_row "row" for the currently-selected item.
+    - GG::Edit \c string
+    - GG::Slider<T> \c number
+    - GG::Spin<T> \c number
+    - GG::StateButton \c bool
+    - GG::StaticGraphic GG::SubTexture
+    - GG::TextControl \c string
+
+    \subsection eve_listbox_iterator_signal_row Iterator Signal Rows
+
+    Some signals emit the original GG::ListBox row iterator along with the
+    Signal Row.  These are referred to as Iterator Signal Rows here.  They
+    look like this: \code {row: <Signal Row>, gg_row_iter: <iterator>}
+    \endcode
+
+    \subsection eve_listbox_click_signal_row Click Signal Rows
+
+    Some signals emit the original GG::ListBox row iterator, Signal Row, and
+    the location of a click on the row.  These are referred to as Click Signal
+    Rows here.  They contain both the GG::Pt of the click and an Adam and
+    Eve-friendly array of two values representing the click point as well.
+    Click Signal Rows look like this: \code {row: <Signal Row>, pt: [x, y], gg_row_iter: <iterator>, gg_pt: <GG::Pt>} \endcode
 
     \section eve_row_factory The Row Factory
 

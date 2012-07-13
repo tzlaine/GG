@@ -3,11 +3,9 @@
 */
 
 /*
-    Define contributing ... TODO
-
-    Describe disabling semantics ... TODO
-
-    Describe the behavior when an object of the wrong type is supplied to a function or view (an exception is thrown), and how to spot that in the documentation ... TODO
+    Describe the behavior when an object of the wrong type is supplied to a
+    function or view (an exception is thrown), and how to spot that in the
+    documentation ... TODO
 */
 
 
@@ -1610,6 +1608,62 @@ else:
     - \ref eve_number_unit
     - \ref eve_alignments
     - \ref eve_modifier_keys
+
+    \section eve_contributing "Contributing"
+
+    Adam property sheets have a notion called "contributing".  An Adam cell is
+    said to be contributing to the property sheet result if its value is being
+    used to compute the value of the sheet's "result" cell.  This is the
+    typical use of "contributing" used in the GG documentation.  More
+    generally, an Adam cell \a A is said to be contributing to the value of
+    Adam cell \a B if \a A's value is being used to compute \a B's value.  For
+    example, consider the following simple dialog:
+
+    \image html clippingpath.jpg
+
+    based on this Adam property sheet:
+
+    \code sheet clipping_path
+ {
+ output:
+     result                  <== { path: path, flatness: flatness };
+
+ interface:
+     unlink flatness : 0.0   <== (path == empty) ? 0.0 : flatness;
+     path            : 1;
+ } \endcode
+
+    and this Eve sheet:
+
+    \code layout clipping_path
+ {
+     view dialog(name: "Clipping Path")
+     {
+         column(child_horizontal: align_fill)
+         {
+             popup(name: "Path:", bind: @path, items:
+             [
+                 { name: "None", value: empty },
+                 { name: "Path 1", value: 1 },
+                 { name: "Path 2", value: 2 }
+             ]);
+             edit_number(name: "Flatness:", digits: 9, bind: @flatness);
+         }
+         button(name: "OK", default: true, bind: @result);
+     }
+ } \endcode
+
+    Consider what happens when the user selects the first option "None" in the
+    popup.  Then the flatness cell no longer constributes to the current state
+    of the property sheet.  Because of this, the edit box is automatically
+    disabled.
+
+    \section eve_disabling Widget Disabling Semantics
+
+    A widget is disabled if, given the current state of the other widgets, it
+    would have no effect.  Stated another way, if an Adam cell \a A bound to
+    an Eve widget \a E does not contribute to the current state of the Adam
+    property sheet, \a E is disabled.
 
     \section eve_gg_signals Using GG Signals With Adam and Eve
 

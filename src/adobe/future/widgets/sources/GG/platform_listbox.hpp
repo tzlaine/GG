@@ -85,10 +85,10 @@ namespace adobe {
         std::vector<std::string> drop_types_m;
         name_t signal_id_m;
 
-        typedef boost::function<void (const listbox_t& listbox, const GG::ListBox::SelectionSet&)> selection_changed_signal_t;
-        typedef boost::function<void (const listbox_t& listbox, GG::ListBox::iterator)> row_signal_t;
-        typedef boost::function<void (const listbox_t& listbox, GG::ListBox::const_iterator)> const_row_signal_t;
-        typedef boost::function<void (const listbox_t& listbox, GG::ListBox::iterator, const GG::Pt&)> row_click_signal_t;
+        typedef boost::function<void (const listbox_t&, const GG::ListBox::SelectionSet&)> selection_changed_signal_t;
+        typedef boost::function<void (const listbox_t&, GG::ListBox::iterator)> row_signal_t;
+        typedef boost::function<void (const listbox_t&, GG::ListBox::const_iterator)> const_row_signal_t;
+        typedef boost::function<void (const listbox_t&, GG::ListBox::iterator, const GG::Pt&)> row_click_signal_t;
 
         selection_changed_signal_t selection_changed_proc_m;
         row_signal_t dropped_proc_m;

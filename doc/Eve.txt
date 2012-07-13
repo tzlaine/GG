@@ -1125,22 +1125,47 @@ else:
 */
 
 /** \page eve_listbox listbox()
+    listbox() creates a listbox.
+
+    \section eve_listbox_interaction_semantics User Interaction Semantics
+
     TODO
 
-    TODO: name, alt_text, characters, rows
-    TODO: sort, sort_order, selections, user_delete, browse_updates
+    \section eve_listbox_adam_interaction Adam Interaction Notes
 
+    TODO
+
+    \section eve_listbox_usage listbox() Usage
+
+    \code listbox(param: value, param: value, ...); \endcode
+
+    \ref eve_common_view_params
+
+    \param name The text label that appears to the left of the listbox.
+    \param alt The tooltip text that appears when the cursor hovers over the listbox.
+    \param characters The width of the listbox, in number of characters.
+    \param rows The height of the listbox, in number of rows.
+    \param sort Whether the rows should be shown in the order added to the listbox, or in sorted order.
+    \param sort_order The direction in which to sort the rows.  Must be either \c ascending or \c descending.
+    \param selections The policy for click-selecting rows.  Must be one of \c none (no selections), \c single (one row selected at a time), \c quick (each click toggles the clicked row without affecting the others), or \c multiple (the default, including shift- and ctrl-clicks).
+    \param user_delete Whether the user is allowed to delete rows by pressing the delete key.
+    \param browse_updates Whether moving the mouse over the listbox emits the row currently under the cursor.
     \param color The color in which to render the listbox.
     \param interior_color The color in which to render the interior of the listbox.
     \param label_color The color in which to render the listbox's label.
     \param item_text_color The color in which to render the text of the items in the listbox.
     \param hilite_color The color in which to render the hiliting of selected items in the listbox.
-
-    TODO: allowed_drop_types
-
+    \param allowed_drop_types An array of strings indicating the drag and drop types accepted by the listbox.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
 
-    TODO: bind_selection_changed_signal, bind_dropped_signal, bind_drop_acceptable_signal, bind_left_clicked_signal, bind_right_clicked_signal, bind_double_clicked_signal, bind_erased_signal, bind_browsed_signal
+    \param bind_selection_changed_signal TODO
+    \param bind_dropped_signal TODO
+    \param bind_drop_acceptable_signal TODO
+    \param bind_left_clicked_signal TODO
+    \param bind_right_clicked_signal TODO
+    \param bind_double_clicked_signal TODO
+    \param bind_erased_signal TODO
+    \param bind_browsed_signal TODO
 
     \section eve_row_factory The Row Factory
 

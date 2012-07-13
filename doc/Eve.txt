@@ -639,12 +639,63 @@ else:
     \section eve_button_predefined_actions Predefined Actions
 
     Some values of \a action have predefined meanings, and are handled by the
-    Eve engine before they ever reach the button handler.  Currently, there is
-    only one such action, "reset".  Clicking a button whose action is "reset"
-    will cause the entire containing UI to have its original values reset to
-    what they were when the UI was launched.
+    Eve engine before they ever reach the button handler.  Here are the
+    predefined actions:
 
-    TODO Document "dialog" action.
+    \subsection eve_button_predefined_actions_ok ok
+
+    Clicking a button whose action is "ok" will cause the containing UI to end
+    its execution, and will take no other action.  This will cause the UI's
+    result to be returned normally.
+
+    \subsection eve_button_predefined_actions_cancel cancel
+
+    Clicking a button whose action is "cancel" will cause the containing UI to
+    end its execution, and to have the UI's original values reset to what they
+    were when the UI was launched.
+
+    \subsection eve_button_predefined_actions_reset reset
+
+    Clicking a button whose action is "reset" will cause the entire containing
+    UI to have its original values reset to what they were when the UI was
+    launched.  The "reset" action does not terminate the UI's execution.
+
+    \subsection eve_button_predefined_actions_dialog dialog
+
+    Clicking a button whose action is "dialog" will cause a modal dialog to be
+    launched.  There are three distinct modes for the "dialog" action.
+
+    The first form launches a new dialog from a single Eve script file,
+    binding the new dialog to the current property sheet:
+
+    \code button(..., action: @dialog, value: "eve_script.eve") \endcode
+
+    The second form launches a new dialog from a pair of Adam and Eve script
+    files.  This creates a completely independent dialog, whose result is
+    assigned to the given result cell:
+
+    \code button(...,
+        action: @dialog,
+        value: {
+            adam_script: "adam_script.adm",
+            eve_script: "eve_script.eve",
+            bind_result: @result_cell
+        }) \endcode
+
+
+    The third form launches one of the GG standard dialogs, using one of the
+    builtin functions \ref eve_expression_color_dialog_fn , \ref
+    eve_expression_file_dialog_fn , and \ref
+    eve_expression_three_button_dialog_fn , using the given parameters, and
+    assigning the result to the given result cell:
+
+    \code button(...,
+        action: @dialog,
+        value: {
+            name: @file_dialog,
+            dialog_parameters: {param: expr, param: expr, ...},
+            bind_result: @result_cell
+        }); \endcode
 */
 
 /** \page eve_checkbox checkbox()

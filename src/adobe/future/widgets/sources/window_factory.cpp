@@ -33,7 +33,7 @@ void create_widget(const dictionary_t& parameters,
 {
     std::string name;
     bool        grow(false);
-    bool        move_(false);
+    bool        move_(true);
     bool        on_top(false);
     bool        modal(true);
     GG::Clr     color(GG::CLR_GRAY);

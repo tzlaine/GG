@@ -753,10 +753,6 @@ else:
     \param proportional Whether scaling should be done proportionally (maintaining ascpect ratio).
 */
 
-/** \page eve_toggle toggle()
-    TODO
-*/
-
 /** \page eve_label label()
     label() creates a text label.
 
@@ -781,14 +777,6 @@ else:
     \param text_horizontal The horizontal alignment of the text ( \c align_left, \c align_center, or \c align_right ).
     \param text_vertical The horizontal alignment of the text ( \c align_top, \c align_center, or \c align_bottom ).
     \param color The color in which to render the label.
-*/
-
-/** \page eve_preset preset()
-    TODO
-*/
-
-/** \page eve_preview preview()
-    TODO
 */
 
 /** \page eve_progress_bar progress_bar()
@@ -1519,10 +1507,7 @@ else:
     - \ref eve_checkbox
     - \ref eve_control_button
     - \ref eve_image
-    - \ref eve_toggle
     - \ref eve_label
-    - \ref eve_preset
-    - \ref eve_preview
     - \ref eve_progress_bar
     - \ref eve_radio_button
     - \ref eve_reveal

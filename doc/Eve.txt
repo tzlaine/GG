@@ -1178,8 +1178,6 @@ else:
 
     \section eve_listbox_interaction_semantics User Interaction Semantics
 
-    Clicking a new tab causes a value to be assigned to the bound cell, if
-
     Selecting one or more items in the listbox causes those items' values to
     be assigned to the bound Adam cell.  When a single item is selected, this
     is represented by a single value.  When multiple items are selected, this
@@ -1663,7 +1661,7 @@ else:
  } \endcode
 
     Consider what happens when the user selects the first option "None" in the
-    popup.  Then the flatness cell no longer constributes to the current state
+    popup.  Then the flatness cell no longer contributes to the current state
     of the property sheet.  Because of this, the edit box is automatically
     disabled.
 

@@ -58,8 +58,17 @@ class GG_API StaticGraphic : public Control
 {
 public:
     /** \name Structors */ ///@{
-    StaticGraphic(X x, Y y, X w, Y h, const boost::shared_ptr<Texture>& texture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing Texture.
-    StaticGraphic(X x, Y y, X w, Y h, const SubTexture& subtexture, Flags<GraphicStyle> style = GRAPHIC_NONE, Flags<WndFlag> flags = Flags<WndFlag>()); ///< creates a StaticGraphic from a pre-existing SubTexture.
+    /** Creates a StaticGraphic from a pre-existing Texture. */
+    StaticGraphic(X x, Y y, X w, Y h,
+                  const boost::shared_ptr<Texture>& texture,
+                  Flags<GraphicStyle> style = GRAPHIC_NONE,
+                  Flags<WndFlag> flags = Flags<WndFlag>());
+
+    /** Creates a StaticGraphic from a pre-existing SubTexture. */
+    StaticGraphic(X x, Y y, X w, Y h,
+                  const SubTexture& subtexture,
+                  Flags<GraphicStyle> style = GRAPHIC_NONE,
+                  Flags<WndFlag> flags = Flags<WndFlag>());
     //@}
 
     /** \name Accessors */ ///@{
@@ -85,11 +94,11 @@ public:
     //@}
 
 private:
-    void     Init(const SubTexture& subtexture); ///< initializes a StaticGraphic from a SubTexture
-    void     ValidateStyle();   ///< ensures that the style flags are consistent
+    void Init(const SubTexture& subtexture);
+    void ValidateStyle();
 
     SubTexture          m_graphic;
-    Flags<GraphicStyle> m_style;        ///< position of texture wrt the window area
+    Flags<GraphicStyle> m_style; ///< position of texture wrt the window area
 };
 
 } // namespace GG

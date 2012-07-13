@@ -409,7 +409,7 @@
 
 /** \page eve_optional optional()
     optional() creates an optionally-visible layout.  The optional's layout
-    defaults to \a place_column and \a align_fill in both horizontal and
+    defaults to \a place_column and \c align_fill in both horizontal and
     vertical directions.  An Eve optional notifies its containing layout when
     it is shown or hidden.  This is the only thing that differentiates
     optional from \link eve_panel panel \endlink.  If you don't need this
@@ -469,7 +469,7 @@
 
 /** \page eve_panel panel()
     panel() creates an optionally-visible layout.  The panel's layout defaults
-    to \a place_column and \a align_fill in both horizontal and vertical
+    to \a place_column and \c align_fill in both horizontal and vertical
     directions.  An Eve panel does not notify its containing layout when it is
     shown or hidden.  This is the only thing that differentiates panel from
     \link eve_overlay overlay \endlink.  If you need this behavior (such as
@@ -604,9 +604,7 @@ else:
     \param items An array of dictionaries, each of which represents a state of the button, each with its own text, tooltip, etc.  Each dictionary contains an independent set of parameters, each of which has the same meaning for this button state as it would for the overall button if it were given outside of \a items.
     \param color The color in which to render the button.
     \param text_color The color in which to render the button label.
-
-    TODO: image: {unpressed: <subtexture/texture/filename>, pressed: <subtexture/texture/filename>, rollover: <subtexture/texture/filename>}
-
+    \param image A dictionary containing the \c unpressed , \c pressed , and \c rollover graphics to use to render the button.  Each value can be a GG::SubTexture, a GG::Texture, or a filename.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_clicked_signal Binds GG::Button::ClickedSignal.  The value emitted is \a value.
 
@@ -738,18 +736,21 @@ else:
     controller-bound cell.  This makes using plain \a bind problematic.  \a
     bind_controller and \a bind_view should be used instead.
 
-    TODO: Document that subtextures, textures, and filenames can all be used.
-
     \section eve_image_usage image() Usage
 
     \code image(param: value, param: value, ...); \endcode
 
     \ref eve_common_view_params
 
-    \param image The GG::SubTexture to use in the image.  This may be specified as a filename from which to load a texture, or as the result of a call to either of \ref eve_expression_texture_fn or \ref eve_expression_subtexture_fn.
+    \param image The graphic to use in the image.  This may be a GG::SubTexture, a GG::Texture, or a filename.
     \param bind The cell in the Adam property sheet to which this image is bound.
-
-    TODO: width, height, horizontal, vertical, fit_graphic, shrink_to_fit, proportional
+    \param width The width of the space in which to render the image, in pixels.
+    \param height The height of the space in which to render the image, in pixels.
+    \param horizontal The horizontal placement of the image within \a width ( \c align_left, \c align_center, or \c align_right ).
+    \param vertical The vertical placement of the image within \a height ( \c align_top, \c align_center, or \c align_bottom ).
+    \param fit_graphic Whether to scale the image to fit \a width and \a height.
+    \param shrink_to_fit Whether to scale the image, but only if the image is too large to fit \a width and \a height.
+    \param proportional Whether scaling should be done proportionally (maintaining ascpect ratio).
 */
 
 /** \page eve_toggle toggle()
@@ -777,8 +778,8 @@ else:
     \param alt The tooltip text that appears when the cursor hovers over the label.
     \param characters The minimum width of the label, in number of characters.
     \param wrap If true, the label's text is word-wrapped.
-    \param text_horizontal The horizontal alignment of the text ( \a align_left, \a align_center, or \a align_right ).
-    \param text_vertical The horizontal alignment of the text ( \a align_top, \a align_center, or \a align_bottom ).
+    \param text_horizontal The horizontal alignment of the text ( \c align_left, \c align_center, or \c align_right ).
+    \param text_vertical The horizontal alignment of the text ( \c align_top, \c align_center, or \c align_bottom ).
     \param color The color in which to render the label.
 */
 
@@ -810,7 +811,6 @@ else:
     \param bind The cell in the Adam property sheet to which this progress_bar is bound.
     \param orientation The orientation of the progress_bar (horizontal or vertical).
     \param format A dictionary specifying the range of values the progress_bar can take.
-
     \param length The length in pixels that the progress_bar should be, in the direction of \a orientation.
     \param width The length in pixels that the progress_bar should be, in the direction perpendicular to \a orientation.
     \param color The color in which to render the border of the progress_bar.
@@ -879,8 +879,8 @@ else:
     \param bind The cell in the Adam property sheet to which this reveal is bound.
     \param value_on The value associated with the "show" state of the reveal.
     \param label_color The color in which to render the reveal's label.
-
-    TODO: showing_image, hiding_image
+    \param showing_image A dictionary containing the \c unpressed , \c pressed , and \c rollover graphics to use to render the reveal's button.  Each value can be a GG::SubTexture, a GG::Texture, or a filename.
+    \param hiding_image A dictionary containing the \c unpressed , \c pressed , and \c rollover graphics to use to render the reveal's button.  Each value can be a GG::SubTexture, a GG::Texture, or a filename.
 
     \note The idiomatic way to create a showable/hidable portion of an
     interface is to bind a reveal and an \link eve_optional optional \endlink
@@ -914,9 +914,10 @@ else:
     \param orientation The orientation of the slider (horizontal or vertical).
     \param format A dictionary specifying the range of values the slider can take.
     \param color The color in which to render the slider.
-
-    TODO: length, tab_width, tab_length, line_width
-
+    \param length The length of the slider, in pixels.
+    \param line_width The thickness of the slider bar, in pixels.
+    \param tab_width The size of the tab in the direction of \a orientation in pixels.
+    \param tab_length The size of the tab in the direction perpendicular to \a orientation in pixels.
     \param line_style The style in which to render the slider.  The style must be one of \c flat, \c raised, or \c grooved (see GG::SliderLineStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_slid_signal Binds GG::Slider::SlidSignal.  The signature is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
@@ -1077,18 +1078,17 @@ else:
     \param max_characters The maximum number of characters the user is allowed to type into the edit_text.  This only applies when \a lines is \c 1.
     \param lines The number of lines high the edit_text should be.
     \param scrollable Whether the edit_text has scrollbars.  This only applies when \a lines is greater than \c 1.
+    \param read_only Whether the edit_text is read-only or editable.
+    \param terminal_style Whether the edit_text keeps the bottom of the text visible, as in a console terminal, or the top, when auto-scrolling.  This only applies when \a lines is greater than \c 1.
+    \param wrap Whether lines should be wrapped when they exceed the width of the edit_text.  This only applies when \a lines is greater than \c 1.
     \param password Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.
     \param color The color in which to render the edit_text.
     \param text_color The color in which to render the editable text.
     \param interior_color The color in which to render the interior of the number edit box.
     \param label_color The color in which to render the edit_text's label.
-
-    TODO: read_only, terminal_style, wrap
-
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_edited_signal Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.
     \param bind_focus_update_signal Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.
-    \param bind_unit_changed_signal Binds GG::DropDownList::SelChangedSignal from the unit popup.  The value emitted is the value emitted by the popup.
 */
 
 /** \page eve_popup popup()
@@ -1128,9 +1128,7 @@ else:
     \param color The color in which to render the popup.
     \param label_color The color in which to render the label text.
     \param item_text_color The color in which to render the text of the items in the popup.
-
-    TODO: max_characters
-
+    \param max_characters The width of the popup, in number of characters.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_selection_changed_signal Binds GG::DropDownList::SelChangedSignal.  The value emitted is the value emitted by the popup.
 

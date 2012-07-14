@@ -60,7 +60,7 @@ namespace adobe {
                   const std::vector<std::string>& drop_types,
                   name_t signal_id);
 
-        void reset_item_set(const item_t* first, const item_t* last);
+        void reset_item_set(const array_t& items);
 
         void measure(extents_t& result);
         void place(const place_data_t& place_data);

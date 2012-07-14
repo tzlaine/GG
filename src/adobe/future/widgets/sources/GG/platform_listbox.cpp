@@ -10,6 +10,7 @@
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
+#include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
@@ -258,12 +259,15 @@ namespace adobe {
         control_m->Disable(!make_enabled);
     }
 
-    void listbox_t::reset_item_set(const item_t* first, const item_t* last)
+    void listbox_t::reset_item_set(const array_t& items)
     {
         assert(control_m);
         clear_items(*this);
-        for (; first != last; ++first) {
-            items_m.push_back(*first);
+        for (array_t::const_iterator it = items.begin(), end_it = items.end();
+             it != end_it;
+             ++it) {
+            items_m.push_back(it->cast<dictionary_t>());
+            get_value(items_m.back(), key_value);
         }
         ::message_item_set(*this);
     }

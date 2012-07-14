@@ -228,6 +228,34 @@ namespace {
 
 namespace adobe {
 
+    struct dynamic_list_item_set_view_t
+    {
+        typedef array_t model_type;
+
+        explicit dynamic_list_item_set_view_t(listbox_t& listbox) :
+            listbox_m(listbox)
+            {}
+
+        void display(const model_type& value)
+            { listbox_m.reset_item_set(value); }
+
+        listbox_t& listbox_m;
+    };
+
+    template <typename Sheet>
+    void attach_listbox_list_item_set(listbox_t&         control,
+                                      name_t             cell,
+                                      Sheet&             sheet,
+                                      assemblage_t&      assemblage,
+                                      eve_client_holder& /*client_holder*/)
+    {
+        dynamic_list_item_set_view_t* tmp = new dynamic_list_item_set_view_t(control);
+
+        assemblage.cleanup(boost::bind(delete_ptr<dynamic_list_item_set_view_t*>(), tmp));
+
+        attach_view(assemblage, cell, *tmp, sheet);
+    }
+
     void create_widget(const dictionary_t& parameters,
                        size_enum_t,
                        listbox_t*& listbox)
@@ -318,9 +346,24 @@ namespace adobe {
                                     adobe::name_t,
                                     adobe::name_t)
     {
+        basic_sheet_t& layout_sheet(token.client_holder_m.layout_sheet_m);
+        assemblage_t&  assemblage(token.client_holder_m.assemblage_m);
+
         if (parameters.count(key_bind) != 0) {
             name_t cell(get_value(parameters, key_bind).cast<name_t>());
             attach_view_and_controller_direct(control, parameters, token, cell);
+        }
+
+        if (parameters.count(key_items) && 
+            get_value(parameters, key_items).type_info() == type_info<name_t>()) {
+            // dynamically bind to the cell instead of getting a static list of listbox items
+
+            name_t cell(get_value(parameters, key_items).cast<name_t>());
+
+            if (layout_sheet.count_interface(cell))
+                attach_listbox_list_item_set(control, cell, layout_sheet, assemblage, token.client_holder_m);
+            else
+                attach_listbox_list_item_set(control, cell, token.sheet_m, assemblage, token.client_holder_m);
         }
 
         {

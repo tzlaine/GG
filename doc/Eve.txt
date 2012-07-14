@@ -1160,7 +1160,7 @@ else:
     \param name The text label that appears to the left of the popup.
     \param alt The tooltip text that appears when the cursor hovers over the popup.
     \param bind The cell in the Adam property sheet to which this popup is bound.
-    \param items A dictionary whose key-value pairs define the names and values of the items in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.
+    \param items An array of dictionaries.  Each dictionary has a \c name and a \c value element defining an item in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for \a items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.
     \param custom_item_name The name of the custom item in the popup.
     \param color The color in which to render the popup.
     \param label_color The color in which to render the label text.
@@ -1198,7 +1198,7 @@ else:
 
     \param name The text label that appears to the left of the listbox.
     \param alt The tooltip text that appears when the cursor hovers over the listbox.
-    \param items A dictionary whose key-value pairs define the names and values of the items in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  A single name may be specified for \a items instead of a dictionary.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.
+    \param items An array of dictionaries.  Each dictionary has a \c name and a \c value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  A single name may be specified for \a items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.
     \param characters The width of the listbox, in number of characters.
     \param rows The height of the listbox, in number of rows.
     \param sort Whether the rows should be shown in the order added to the listbox, or in sorted order.

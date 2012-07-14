@@ -14,6 +14,11 @@ constant:
     expected_bind_cell_5 : 3;
 
 interface:
+    items: [
+        { name: "One", value: "One" },
+        { name: "Two", value: 2 }
+    ];
+
     bind_cell_0 : "One";
     selection_changed_signal_cell_0 : "<rgba 255 0 0 255>not selected</rgba>";
     bind_cell_1 : "One";

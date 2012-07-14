@@ -6,10 +6,7 @@ layout alert_dialog
         {
             popup(name: "no expression",
                   bind: @bind_cell_0,
-                  items: [
-                      { name: "One", value: "One" },
-                      { name: "Two", value: 2 }
-                  ],
+                  items: @items,
                   bind_selection_changed_signal: @selection_changed_signal_cell_0);
             display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_0);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_0);
@@ -18,10 +15,7 @@ layout alert_dialog
 
             popup(name: "simple expression",
                   bind: @bind_cell_1,
-                  items: [
-                      { name: "One", value: "One" },
-                      { name: "Two", value: 2 }
-                  ],
+                  items: @items,
                   bind_selection_changed_signal: [@selection_changed_signal_cell_1, '"selection_changed signal value"']);
             display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_1);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_1);
@@ -30,10 +24,7 @@ layout alert_dialog
 
             popup(name: '"_" placeholder',
                   bind: @bind_cell_2,
-                  items: [
-                      { name: "One", value: "One" },
-                      { name: "Two", value: 2 }
-                  ],
+                  items: @items,
                   bind_selection_changed_signal: [@selection_changed_signal_cell_2, "_"]);
             display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_2);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_2);
@@ -42,10 +33,7 @@ layout alert_dialog
 
             popup(name: '"_1" placeholder',
                   bind: @bind_cell_3,
-                  items: [
-                      { name: "One", value: "One" },
-                      { name: "Two", value: 2 }
-                  ],
+                  items: @items,
                   bind_selection_changed_signal: [@selection_changed_signal_cell_3, "_1"]);
             display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_3);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
@@ -57,10 +45,7 @@ layout alert_dialog
         {
             popup(name: "no signal_id",
                   bind: @bind_cell_4,
-                  items: [
-                      { name: "One", value: "One" },
-                      { name: "Two", value: 2 }
-                  ]);
+                  items: @items);
             display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
 

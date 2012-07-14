@@ -110,6 +110,8 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
     adobe::behavior_t& behavior = token.client_holder_m.root_behavior_m;
     adobe::vm_lookup_t& vm_lookup = token.vm_lookup_m;
     const adobe::button_notifier_t& button_notifier = token.button_notifier_m;
+    const adobe::button_notifier_t& top_level_button_notifier =
+        token.top_level_button_notifier_m;
     const adobe::signal_notifier_t& signal_notifier = token.signal_notifier_m;
     const adobe::row_factory_t* row_factory = token.row_factory_m;
 
@@ -130,6 +132,7 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
                     adobe::window_server_t window_server(sheet,
                                                          behavior,
                                                          vm_lookup,
+                                                         top_level_button_notifier,
                                                          signal_notifier,
                                                          row_factory,
                                                          factory);
@@ -186,7 +189,7 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
                                                    boost::filesystem::path(adam_script),
                                                    df,
                                                    af,
-                                                   button_notifier,
+                                                   top_level_button_notifier,
                                                    signal_notifier,
                                                    row_factory ? *row_factory : GG::RowFactory());
                         if (bind_result && result.m_terminating_action == adobe::static_name_t("ok")) {

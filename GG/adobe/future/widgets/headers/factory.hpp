@@ -208,6 +208,7 @@ struct factory_token_t
                     sheet_t&                  sheet,
                     eve_client_holder&        client_holder,
                     vm_lookup_t&              vm_lookup,
+                    button_notifier_t         top_level_button_notifier,
                     button_notifier_t         button_notifier,
                     signal_notifier_t         signal_notifier,
                     const row_factory_t&      row_factory) :
@@ -215,6 +216,7 @@ struct factory_token_t
         sheet_m(sheet),
         client_holder_m(client_holder),
         vm_lookup_m(vm_lookup),
+        top_level_button_notifier_m(top_level_button_notifier),
         button_notifier_m(button_notifier),
         signal_notifier_m(signal_notifier),
         row_factory_m(&row_factory)
@@ -241,6 +243,8 @@ struct factory_token_t
     eve_client_holder& client_holder_m;
 
     vm_lookup_t& vm_lookup_m;
+
+    button_notifier_t top_level_button_notifier_m;
 
     //
     /// The function to call when a button is pressed. This should be called by
@@ -393,6 +397,7 @@ adobe::auto_ptr<eve_client_holder> make_view(const std::string&                 
                                              sheet_t&                               sheet,
                                              behavior_t&                            root_behavior,
                                              vm_lookup_t&                           lookup,
+                                             const button_notifier_t&               top_level_button_notifier,
                                              const button_notifier_t&               button_notifier,
                                              const signal_notifier_t&               signal_notifier,
                                              const row_factory_t&                   row_factory,

@@ -80,6 +80,7 @@ public:
     window_server_t(sheet_t& sheet,
                     behavior_t& behavior,
                     vm_lookup_t& vm_lookup,
+                    const button_notifier_t& button_notifier,
                     const signal_notifier_t& signal_notifier,
                     const row_factory_t* row_factory,
                     const widget_factory_t& factory);
@@ -115,6 +116,7 @@ private:
     sheet_t&                 sheet_m;
     behavior_t&              behavior_m;
     vm_lookup_t&             vm_lookup_m;
+    const button_notifier_t& button_notifier_m;
     const signal_notifier_t& signal_notifier_m;
     const row_factory_t*     row_factory_m;
     widget_factory_t         widget_factory_m;

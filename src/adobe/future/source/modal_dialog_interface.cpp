@@ -171,6 +171,7 @@ platform_display_type modal_dialog_t::init(std::istream& layout,
                 sheet_m,
                 root_behavior_m,
                 vm_lookup_m,
+                button_callback_m,
                 boost::bind(&modal_dialog_t::latch_button_callback, boost::ref(*this), _1, _2),
                 boost::bind(&modal_dialog_t::latch_signal_callback, boost::ref(*this), _1, _2, _3, _4),
                 row_factory_m,
@@ -226,6 +227,16 @@ try
     {
         sheet_m.set(contributing_m);
         sheet_m.update();
+    }
+    else if (action == static_name_t("cancel"))
+    {
+        sheet_m.set(contributing_m);
+        sheet_m.update();
+        retval = true;
+    }
+    else if (action == static_name_t("ok"))
+    {
+        retval = true;
     }
     else if (button_callback_m(action, value))
     {

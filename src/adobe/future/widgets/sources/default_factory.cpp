@@ -282,6 +282,7 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                       sheet_t&                               sheet,
                                       behavior_t&                            root_behavior,
                                       vm_lookup_t&                           lookup,
+                                      const button_notifier_t&               top_level_button_notifier,
                                       const button_notifier_t&               button_notifier,
                                       const signal_notifier_t&               signal_notifier,
                                       const row_factory_t&                   row_factory,
@@ -294,6 +295,7 @@ auto_ptr<eve_client_holder> make_view(const std::string&                     str
                                               sheet,
                                               *result.get(),
                                               lookup,
+                                              top_level_button_notifier,
                                               button_notifier,
                                               signal_notifier,
                                               row_factory);

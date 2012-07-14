@@ -25,12 +25,14 @@ namespace adobe {
 window_server_t::window_server_t(sheet_t& sheet,
                                  behavior_t& behavior,
                                  vm_lookup_t& vm_lookup,
+                                 const button_notifier_t& button_notifier,
                                  const signal_notifier_t& signal_notifier,
                                  const row_factory_t* row_factory,
                                  const widget_factory_t& factory) :
     sheet_m(sheet),
     behavior_m(behavior),
     vm_lookup_m(vm_lookup),
+    button_notifier_m(button_notifier),
     signal_notifier_m(signal_notifier),
     row_factory_m(row_factory),
     widget_factory_m(factory)
@@ -72,6 +74,7 @@ void window_server_t::run(const char* name)
                   sheet_m,
                   behavior_m,
                   vm_lookup_m,
+                  button_notifier_m,
                   boost::bind(&window_server_t::button_handler, this, _1, _2),
                   signal_notifier_m,
                   row_factory_m ? *row_factory_m : row_factory_t(),
@@ -114,6 +117,7 @@ void window_server_t::run(
                   sheet_m,
                   behavior_m,
                   vm_lookup_m,
+                  button_notifier_m,
                   boost::bind(&window_server_t::button_handler, this, _1, _2),
                   signal_notifier_m,
                   row_factory_m ? *row_factory_m : row_factory_t(),
@@ -146,6 +150,8 @@ bool window_server_t::button_handler(adobe::name_t action,
         retval = true;
     } else if (action == static_name_t("ok")) {
         retval = true;
+    } else {
+        retval = button_notifier_m(action, value);
     }
 
     if (retval)

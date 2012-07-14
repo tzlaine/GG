@@ -316,7 +316,7 @@ void popup_t::display_custom()
     custom_m = true;
     dictionary_t item;
     item[key_name] = any_regular_t(custom_item_name_m);
-    item[static_name_t("color")] = any_regular_t(implementation::color_dictionary(item_text_color_m));
+    item[static_name_t("color")] = any_regular_t(item_text_color_m);
     control_m->Insert(
         implementation::item_to_row(item, row_factory_m, item_text_color_m), control_m->begin()
     );

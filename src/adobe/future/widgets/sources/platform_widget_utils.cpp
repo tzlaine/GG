@@ -195,19 +195,6 @@ bool is_focused(GG::Wnd* w)
 
 /****************************************************************************************************/
 
-dictionary_t color_dictionary(const GG::Clr& color)
-{
-    dictionary_t retval;
-    retval[static_name_t("r")] = any_regular_t(color.r * 1.0);
-    retval[static_name_t("g")] = any_regular_t(color.g * 1.0);
-    retval[static_name_t("b")] = any_regular_t(color.b * 1.0);
-    if (color.a != 255)
-        retval[static_name_t("a")] = any_regular_t(color.a * 1.0);
-    return retval;
-}
-
-/****************************************************************************************************/
-
 bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color)
 {
     any_regular_t color_;
@@ -404,8 +391,7 @@ GG::ListBox::Row* item_to_row(const dictionary_t& item,
     dictionary_t colorful_dictionary;
     if (!contains_color) {
         colorful_dictionary = item;
-        colorful_dictionary[static_name_t("color")] =
-            any_regular_t(color_dictionary(default_item_color));
+        colorful_dictionary[static_name_t("color")] = any_regular_t(default_item_color);
     }
     const dictionary_t& dictionary = contains_color ? item : colorful_dictionary;
     name_t type;

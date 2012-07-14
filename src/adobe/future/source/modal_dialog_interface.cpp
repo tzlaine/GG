@@ -234,15 +234,14 @@ try
         sheet_m.update();
         retval = true;
     }
-    else if (action == static_name_t("ok"))
+    else if (action == static_name_t("ok") || button_callback_m(action, value))
     {
         retval = true;
     }
-    else if (button_callback_m(action, value))
-    {
+
+    if (retval) {
         result_m.terminating_action_m = action;
         view_m->root_display_m->EndRun();
-        retval = true;
     }
 
     return retval;

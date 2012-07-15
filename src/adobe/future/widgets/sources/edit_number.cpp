@@ -9,6 +9,7 @@
 #define ADOBE_DLL_SAFE 0
 
 #include <GG/Edit.h>
+#include <GG/DropDownList.h>
 
 #include <GG/adobe/config.hpp>
 
@@ -213,6 +214,15 @@ void edit_number_t::monitor_text(const std::string& new_value, bool display_was_
         controller.setter_m(real);
 
     platform_m.edited_proc_m(real);
+}
+
+/*************************************************************************************************/
+
+void edit_number_t::set_interior_color(GG::Clr color)
+{
+    edit_text_m.control_m->SetInteriorColor(color);
+    if (using_popup())
+        popup_m.control_m->SetInteriorColor(color);
 }
 
 /*************************************************************************************************/

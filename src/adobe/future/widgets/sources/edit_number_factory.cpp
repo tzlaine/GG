@@ -18,7 +18,9 @@
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 
+#include <GG/DropDownList.h>
 #include <GG/Edit.h>
+#include <GG/TextControl.h>
 
 #include <limits>
 
@@ -157,6 +159,16 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
                         _1);
     }
 
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(text_color);
+    BIND_COLOR(interior_color);
+    BIND_COLOR(label_color);
+    BIND_COLOR(popup_color);
+    BIND_COLOR(popup_item_text_color);
+#undef BIND_COLOR
+
     if (!control.using_popup())
         return;
 
@@ -275,6 +287,29 @@ platform_display_type insert<edit_number_t>(display_t&             display,
 
     GG::Connect(element.edit_text_m.control_m->FocusUpdateSignal,
                 boost::bind(&edit_number_t::monitor_focus_update, boost::ref(element), _1));
+
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::Edit::SetColor, element.edit_text_m.control_m, _1)
+    );
+    element.text_color_proxy_m.initialize(
+        boost::bind(&GG::Edit::SetTextColor, element.edit_text_m.control_m, _1)
+    );
+    element.interior_color_proxy_m.initialize(
+        boost::bind(&edit_number_t::set_interior_color, &element, _1)
+    );
+    if (element.edit_text_m.using_label_m) {
+        element.label_color_proxy_m.initialize(
+            boost::bind(&GG::TextControl::SetColor, element.edit_text_m.name_m.window_m, _1)
+        );
+    }
+    if (element.using_popup()) {
+        element.popup_color_proxy_m.initialize(
+            boost::bind(&GG::DropDownList::SetColor, element.popup_m.control_m, _1)
+        );
+        element.popup_item_text_color_proxy_m.initialize(
+            boost::bind(&popup_t::set_item_text_color, &element.popup_m, _1)
+        );
+    }
 
     return pos;
 }

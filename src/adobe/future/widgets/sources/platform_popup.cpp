@@ -272,6 +272,19 @@ void popup_t::enable(bool make_enabled)
 
 /****************************************************************************************************/
 
+void popup_t::set_item_text_color(GG::Clr color)
+{
+    const bool color_changed = color != item_text_color_m;
+    item_text_color_m = color;
+    if (color_changed && !menu_items_m.empty()) {
+        menu_item_set_t menu_items;
+        std::swap(menu_items, menu_items_m);
+        reset_menu_item_set(&menu_items.front(), &menu_items.back() + 1);
+    }
+}
+
+/****************************************************************************************************/
+
 void popup_t::reset_menu_item_set(const menu_item_t* first, const menu_item_t* last)
 {
     assert(control_m);

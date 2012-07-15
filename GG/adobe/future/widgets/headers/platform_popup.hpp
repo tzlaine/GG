@@ -77,6 +77,8 @@ struct popup_t : boost::noncopyable
 
     void                enable(bool make_enabled);
 
+    void                set_item_text_color(GG::Clr color);
+
     GG::DropDownList*    control_m;
     unsigned int         original_height_m;
     theme_t              theme_m;

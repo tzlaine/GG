@@ -173,6 +173,26 @@ GG::ListBox::Row* item_to_row(const dictionary_t& item,
 
 /****************************************************************************************************/
 
+// A widget work-alike that has no on-screen representation at all; it simply
+// provides the view and controller interface for tying a widget's color to an
+// Adam cell.
+class color_proxy_t
+{
+public:
+    typedef GG::Clr model_type;
+    typedef boost::function<void (model_type)> setter_proc_t;
+
+    void initialize(const setter_proc_t& setter_proc);
+
+    void display(const model_type& value);
+    void enable(bool) {}
+
+private:
+    setter_proc_t setter_m;
+};
+
+/****************************************************************************************************/
+
 } // namespace implementation
 
 /****************************************************************************************************/

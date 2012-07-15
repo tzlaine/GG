@@ -193,11 +193,13 @@ struct edit_number_t : boost::noncopyable
     // REVISIT (fbrereto) : I'm not happy about these, but we need them
     //                      for the time being so the template specialization
     //                      of insert(display, etc.) can get to them
-    inline edit_text_t& edit_text()  { return edit_text_m; }
-    inline popup_t&     popup()      { return popup_m; }
+    inline edit_text_t& edit_text() { return edit_text_m; }
+    inline popup_t&     popup()     { return popup_m; }
 
     void        initialize();
     void        monitor_locale(const dictionary_t& value);
+
+    void        set_interior_color(GG::Clr color);
 
 //private:
     void        monitor_text(const std::string& new_value, bool display_was_updated=true);
@@ -241,6 +243,13 @@ struct edit_number_t : boost::noncopyable
     double                      min_m;
     double                      max_m;
     edit_number_platform_data_t platform_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t text_color_proxy_m;
+    implementation::color_proxy_t interior_color_proxy_m;
+    implementation::color_proxy_t label_color_proxy_m;
+    implementation::color_proxy_t popup_color_proxy_m;
+    implementation::color_proxy_t popup_item_text_color_proxy_m;
 
 public:
     boost::signals::connection  locale_change_connection_m;

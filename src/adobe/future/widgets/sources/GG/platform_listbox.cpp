@@ -118,6 +118,31 @@ namespace {
         }
     }
 
+    void sort_items(adobe::listbox_t& listbox)
+    {
+        if (listbox.style_m & GG::LIST_NOSORT)
+            return;
+
+        typedef std::map<adobe::string_t, adobe::dictionary_t*> sorted_item_map;
+        sorted_item_map sorted_items;
+        adobe::listbox_t::item_set_t sorted_item_set(listbox.items_m.size());
+        for (adobe::listbox_t::item_set_t::iterator
+                 it = listbox.items_m.begin(), end_it = listbox.items_m.end();
+             it != end_it;
+             ++it) {
+            adobe::string_t name;
+            get_value(*it, adobe::key_name, name);
+            sorted_items[name] = &*it;
+        }
+        std::size_t i = 0;
+        for (sorted_item_map::iterator it = sorted_items.begin(), end_it = sorted_items.end();
+             it != end_it;
+             ++it) {
+            std::swap(sorted_item_set[i++], *it->second);
+        }
+        std::swap(listbox.items_m, sorted_item_set);
+    }
+
 }
 
 namespace adobe {
@@ -150,7 +175,7 @@ namespace adobe {
         drop_types_m(drop_types),
         signal_id_m(signal_id),
         row_factory_m(0)
-    {}
+    { ::sort_items(*this); }
 
     void listbox_t::measure(extents_t& result)
     {
@@ -269,6 +294,7 @@ namespace adobe {
             items_m.push_back(it->cast<dictionary_t>());
             get_value(items_m.back(), key_value);
         }
+        ::sort_items(*this);
         ::message_item_set(*this);
     }
 

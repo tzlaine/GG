@@ -264,7 +264,7 @@ namespace adobe {
         std::string alt_text;
         long characters(25);
         long rows(0);
-        bool sort(true);
+        bool sort(false);
         name_t sort_order("ascending");
         name_t selections("single");
         bool user_delete(false);

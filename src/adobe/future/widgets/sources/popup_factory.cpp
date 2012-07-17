@@ -134,6 +134,13 @@ void attach_view_and_controller(popup_t&               control,
                     boost::ref(token.sheet_m), cell, expression, _1);
 
     control.row_factory_m = token.row_factory_m;
+
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(item_text_color);
+    BIND_COLOR(label_color);
+#undef BIND_COLOR
 }
 
 /****************************************************************************************************/

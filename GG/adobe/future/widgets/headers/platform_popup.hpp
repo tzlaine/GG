@@ -98,6 +98,10 @@ struct popup_t : boost::noncopyable
     std::string          custom_item_name_m;
     const row_factory_t* row_factory_m;
 
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t item_text_color_proxy_m;
+    implementation::color_proxy_t label_color_proxy_m;
+
 private:
     void display_custom();
 };

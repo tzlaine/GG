@@ -159,14 +159,14 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
                         _1);
     }
 
-    adobe::attach_view(control.edit_text_m.color_proxy_m, parameters, token, adobe::static_name_t("bind_color"));
-    adobe::attach_view(control.edit_text_m.text_color_proxy_m, parameters, token, adobe::static_name_t("bind_text_color"));
-#define BIND_COLOR(name)                                                \
-    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
-    BIND_COLOR(interior_color);
-    BIND_COLOR(label_color);
-    BIND_COLOR(popup_color);
-    BIND_COLOR(popup_item_text_color);
+#define BIND_COLOR(object, proxy, name)                                 \
+    adobe::attach_view(object.proxy##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(control, interior_color, interior_color);
+    BIND_COLOR(control, label_color, label_color);
+    BIND_COLOR(control.edit_text_m, color, color);
+    BIND_COLOR(control.edit_text_m, text_color, text_color);
+    BIND_COLOR(control.popup_m, color, popup_color);
+    BIND_COLOR(control.popup_m, item_text_color, popup_item_text_color);
 #undef BIND_COLOR
 
     if (!control.using_popup())
@@ -294,14 +294,6 @@ platform_display_type insert<edit_number_t>(display_t&             display,
     if (element.edit_text_m.using_label_m) {
         element.label_color_proxy_m.initialize(
             boost::bind(&GG::TextControl::SetColor, element.edit_text_m.name_m.window_m, _1)
-        );
-    }
-    if (element.using_popup()) {
-        element.popup_color_proxy_m.initialize(
-            boost::bind(&GG::DropDownList::SetColor, element.popup_m.control_m, _1)
-        );
-        element.popup_item_text_color_proxy_m.initialize(
-            boost::bind(&popup_t::set_item_text_color, &element.popup_m, _1)
         );
     }
 

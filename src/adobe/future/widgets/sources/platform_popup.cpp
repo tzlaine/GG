@@ -407,6 +407,18 @@ template <> platform_display_type insert<popup_t>(display_t&             display
 
     ::message_menu_item_set(element);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::DropDownList::SetColor, element.control_m, _1)
+    );
+    element.item_text_color_proxy_m.initialize(
+        boost::bind(&popup_t::set_item_text_color, &element, _1)
+    );
+    if (element.using_label_m) {
+        element.label_color_proxy_m.initialize(
+            boost::bind(&GG::TextControl::SetColor, element.name_m.window_m, _1)
+        );
+    }
+
     return display.insert(parent, element.control_m);
 }
 

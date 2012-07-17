@@ -124,6 +124,13 @@ void attach_view_and_controller(checkbox_t&            control,
                                          cell,
                                          expression,
                                          _1);
+
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(text_color);
+    BIND_COLOR(interior_color);
+#undef BIND_COLOR
 }
 
 /****************************************************************************************************/

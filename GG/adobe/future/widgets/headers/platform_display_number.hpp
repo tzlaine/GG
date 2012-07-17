@@ -67,6 +67,7 @@ struct display_number_t  : boost::noncopyable
     void set_label_color(GG::Clr color);
 
     implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t label_color_proxy_m;
 };
 
 /****************************************************************************************************/

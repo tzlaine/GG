@@ -84,7 +84,8 @@ namespace adobe {
     void display_text_t::display(const model_type& value)
     {
         assert(window_m);
-        window_m->SetText(field_text(name_m, value, label_color_m));
+        value_m = value;
+        window_m->SetText(field_text(name_m, value_m, label_color_m));
     }
 
     void display_text_t::measure(extents_t& result)
@@ -129,6 +130,12 @@ namespace adobe {
         vert.guide_set_m.push_back(Value(implementation::DefaultFont()->Ascent()));
     }
 
+    void display_text_t::set_label_color(GG::Clr color)
+    {
+        label_color_m = color;
+        display(value_m);
+    }
+
     template <>
     platform_display_type insert<display_text_t>(display_t& display,
                                                  platform_display_type& parent,
@@ -142,6 +149,13 @@ namespace adobe {
 
         if (!element.alt_text_m.empty())
             implementation::set_control_alt_text(element.window_m, element.alt_text_m);
+
+        element.color_proxy_m.initialize(
+            boost::bind(&GG::TextControl::SetColor, element.window_m, _1)
+        );
+        element.label_color_proxy_m.initialize(
+            boost::bind(&display_text_t::set_label_color, &element, _1)
+        );
 
         return display.insert(parent, get_display(element));
     }

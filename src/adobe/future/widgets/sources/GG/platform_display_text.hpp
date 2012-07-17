@@ -30,6 +30,7 @@
 #include <GG/adobe/memory.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <boost/noncopyable.hpp>
 
@@ -58,11 +59,16 @@ namespace adobe {
         int characters_m;
         GG::Clr color_m;
         GG::Clr label_color_m;
+        any_regular_t value_m;
 
         void measure(extents_t& result);
         void measure_vertical(extents_t& calculated_horizontal, const place_data_t& placed_horizontal);
         void place(const place_data_t& place_data);
         void display(const model_type& value);
+        void set_label_color(GG::Clr color);
+
+        implementation::color_proxy_t color_proxy_m;
+        implementation::color_proxy_t label_color_proxy_m;
     };
 
     inline GG::TextControl* get_display(display_text_t& widget)

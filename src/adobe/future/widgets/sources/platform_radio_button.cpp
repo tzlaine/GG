@@ -133,6 +133,16 @@ platform_display_type insert<radio_button_t>(display_t&             display,
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.control_m, element.alt_text_m);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::StateButton::SetColor, element.control_m, _1)
+    );
+    element.text_color_proxy_m.initialize(
+        boost::bind(&GG::StateButton::SetTextColor, element.control_m, _1)
+    );
+    element.interior_color_proxy_m.initialize(
+        boost::bind(&GG::StateButton::SetInteriorColor, element.control_m, _1)
+    );
+
     return display.insert(parent, element.control_m);
 }
 

@@ -19,6 +19,7 @@
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/name.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
 #include <boost/function.hpp>
 
@@ -71,6 +72,10 @@ struct radio_button_t
     setter_type          checked_proc_m;
     any_regular_t        last_m;
     name_t               signal_id_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t text_color_proxy_m;
+    implementation::color_proxy_t interior_color_proxy_m;
 };
 
 /****************************************************************************************************/

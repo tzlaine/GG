@@ -135,6 +135,7 @@ void attach_view_and_controller(popup_t&               control,
 
     control.row_factory_m = token.row_factory_m;
 
+    adobe::attach_view(control.name_m.color_proxy_m, parameters, token, adobe::static_name_t("bind_label_color"));
 #define BIND_COLOR(name)                                                \
     adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
     BIND_COLOR(color);

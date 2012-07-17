@@ -261,6 +261,9 @@ public:
     /** Sets the current tab in the sequence to the tab in the \a index
         position within the sequence.  Not range checked. */
     void SetCurrentTab(std::size_t index);
+
+    /** Sets the color used to render the text in this TabBar. */
+    void SetTextColor(Clr color);
     //@}
 
     mutable TabChangedSignalType TabChangedSignal; ///< The tab change signal object for this TabBar

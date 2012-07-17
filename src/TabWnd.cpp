@@ -380,6 +380,9 @@ void TabBar::SetCurrentTab(std::size_t index)
     TabChanged(index, false);
 }
 
+void TabBar::SetTextColor(Clr color)
+{ m_text_color = color; }
+
 const Button* TabBar::LeftButton() const
 { return m_left_button; }
 

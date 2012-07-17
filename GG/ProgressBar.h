@@ -59,6 +59,12 @@ public:
     /** Sets the progress shown on the bar, in the range [0.0, 1.0].  Values
         outside this range will be clamped. */
     void SetPosition(double pos);
+
+    /** Sets the color used to render the bar. */
+    void SetBarColor(Clr color);
+
+    /** Sets the color used to render the non-bar interior of the control. */
+    void SetInteriorColor(Clr color);
     //@}
 
 private:

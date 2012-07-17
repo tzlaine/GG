@@ -97,3 +97,9 @@ void ProgressBar::Render()
 
 void ProgressBar::SetPosition(double pos)
 { m_pos = std::max(0.0, std::min(pos, 1.0)); }
+
+void ProgressBar::SetBarColor(Clr color)
+{ m_bar_color = color; }
+
+void ProgressBar::SetInteriorColor(Clr color)
+{ m_interior_color = color; }

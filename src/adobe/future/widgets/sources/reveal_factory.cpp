@@ -67,13 +67,15 @@ void create_widget(const dictionary_t&  parameters,
 /****************************************************************************************************/
 
 template <typename Sheet>
-void couple_controller_to_cell(reveal_t&                 controller,
+void couple_controller_to_cell(reveal_t&                 control,
                                name_t                    cell, 
                                Sheet&                    sheet, 
-                               const factory_token_t& token, 
+                               const factory_token_t&    token, 
                                const dictionary_t&       parameters)
 {
-    attach_monitor(controller, cell, sheet, token, parameters);
+    attach_monitor(control, cell, sheet, token, parameters);
+
+    adobe::attach_view(control.name_m.color_proxy_m, parameters, token, adobe::static_name_t("bind_label_color"));
 }
     
 /****************************************************************************************************/

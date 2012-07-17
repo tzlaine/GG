@@ -39,15 +39,6 @@ enum metrics {
 
 /****************************************************************************************************/
 
-void clear_menu_items(adobe::popup_t& control)
-{
-    assert(control.control_m);
-    control.menu_items_m.clear();
-    control.control_m->Clear();
-}
-
-/****************************************************************************************************/
-
 void sel_changed_slot(adobe::popup_t& popup, GG::DropDownList::iterator it)
 {
     assert(popup.control_m);
@@ -288,7 +279,8 @@ void popup_t::set_item_text_color(GG::Clr color)
 void popup_t::reset_menu_item_set(const menu_item_t* first, const menu_item_t* last)
 {
     assert(control_m);
-    clear_menu_items(*this);
+    menu_items_m.clear();
+    control_m->Clear();
     ::set_menu_item_set(*this, first, last);
     ::message_menu_item_set(*this);
 }

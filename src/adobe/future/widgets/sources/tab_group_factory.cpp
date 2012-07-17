@@ -127,6 +127,12 @@ void attach_view_and_controller(tab_group_t&           control,
         boost::bind(&handle_tab_changed_signal,
                     token.signal_notifier_m, control.signal_id_m,
                     boost::ref(token.sheet_m), cell, expression, _1);
+
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(text_color);
+#undef BIND_COLOR
 }
 
 /****************************************************************************************************/

@@ -171,6 +171,13 @@ platform_display_type insert<tab_group_t>(display_t&             display,
         element.tab_bar_m->AddTab(first->name_m);
     }
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::TabBar::SetColor, element.tab_bar_m, _1)
+    );
+    element.text_color_proxy_m.initialize(
+        boost::bind(&GG::TabBar::SetTextColor, element.tab_bar_m, _1)
+    );
+
     return display.insert(parent, element.control_m);
 }
 

@@ -75,6 +75,9 @@ struct tab_group_t : boost::noncopyable
     GG::Clr                 text_color_m;
     GG::TabBarStyle         style_m;
     name_t                  signal_id_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t text_color_proxy_m;
 };
 
 /****************************************************************************************************/

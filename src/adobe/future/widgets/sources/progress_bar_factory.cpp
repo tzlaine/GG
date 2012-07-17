@@ -55,13 +55,20 @@ void create_widget(const dictionary_t& parameters,
 /*************************************************************************************************/
 
 template <typename Sheet, typename FactoryToken>
-inline void couple_controller_to_cell(progress_bar_t&,
+inline void couple_controller_to_cell(progress_bar_t&     control,
                                       name_t,
                                       Sheet&,
-                                      const FactoryToken&,
-                                      const dictionary_t&)
+                                      const FactoryToken& token,
+                                      const dictionary_t& parameters)
 {
     // no adam interaction
+
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(bar_color);
+    BIND_COLOR(interior_color);
+#undef BIND_COLOR
 }
 
 /****************************************************************************************************/

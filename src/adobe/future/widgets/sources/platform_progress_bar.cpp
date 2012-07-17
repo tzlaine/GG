@@ -85,6 +85,16 @@ platform_display_type insert<progress_bar_t>(display_t&              display,
                               element.is_vertical_m ? GG::VERTICAL : GG::HORIZONTAL,
                               width, element.color_m, element.bar_color_m, element.interior_color_m);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::ProgressBar::SetColor, element.control_m, _1)
+    );
+    element.bar_color_proxy_m.initialize(
+        boost::bind(&GG::ProgressBar::SetBarColor, element.control_m, _1)
+    );
+    element.interior_color_proxy_m.initialize(
+        boost::bind(&GG::ProgressBar::SetInteriorColor, element.control_m, _1)
+    );
+
     return display.insert(parent, element.control_m);
 }
 

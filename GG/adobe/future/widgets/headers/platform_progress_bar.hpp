@@ -58,6 +58,10 @@ struct progress_bar_t : boost::noncopyable
     double               last_m;
     double               value_m;
     value_range_format_t format_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t bar_color_proxy_m;
+    implementation::color_proxy_t interior_color_proxy_m;
 };
 
 /****************************************************************************************************/

@@ -29,7 +29,7 @@ namespace {
 std::string field_text(const std::string&                label,
                        double                            value,
                        const std::vector<adobe::unit_t>& unit_set,
-                       GG::Clr label_color)
+                       GG::Clr                           label_color)
 {
     std::stringstream result;
 
@@ -87,7 +87,8 @@ void display_number_t::place(const place_data_t& place_data)
 void display_number_t::display(const model_type& value)
 {
     assert(window_m);
-    window_m->SetText(field_text(name_m, value, unit_set_m, label_color_m));
+    value_m = value;
+    window_m->SetText(field_text(name_m, value_m, unit_set_m, label_color_m));
 }
 
 /****************************************************************************************************/
@@ -151,6 +152,14 @@ void display_number_t::measure_vertical(extents_t& calculated_horizontal, const 
 
 /****************************************************************************************************/
 
+void display_number_t::set_label_color(GG::Clr color)
+{
+    label_color_m = color;
+    display(value_m);
+}
+
+/****************************************************************************************************/
+
 // REVISIT: MM--we need to replace the display_t mechanism with concepts/any_*/container idiom for event and drawing system.
 
 template <>
@@ -166,6 +175,13 @@ platform_display_type insert<display_number_t>(display_t& display,
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);
+
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::TextControl::SetColor, element.window_m, _1)
+    );
+    element.label_color_proxy_m.initialize(
+        boost::bind(&display_number_t::set_label_color, &element, _1)
+    );
 
     return display.insert(parent, get_display(element));
 }

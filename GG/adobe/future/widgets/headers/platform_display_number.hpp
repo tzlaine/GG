@@ -15,6 +15,7 @@
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
 #include <GG/adobe/future/widgets/headers/number_unit.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <GG/Clr.h>
 #include <GG/PtRect.h>
@@ -57,13 +58,16 @@ struct display_number_t  : boost::noncopyable
     GG::Clr                  color_m;
     GG::Clr                  label_color_m;
     int                      characters_m;
+    double                   value_m;
 
     void measure(extents_t& result);
     void measure_vertical(extents_t& calculated_horizontal, const place_data_t& placed_horizontal);       
-
     void place(const place_data_t& place_data);
-
     void display(const model_type& value);
+    void set_label_color(GG::Clr color);
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t label_color_proxy_m;
 };
 
 /****************************************************************************************************/
@@ -82,8 +86,9 @@ display_number_t::display_number_t(
     unit_set_m(first, last),
     color_m(color),
     label_color_m(label_color),
-    characters_m(characters)
-{ }
+    characters_m(characters),
+    value_m(0)
+{}
 
 /****************************************************************************************************/
 

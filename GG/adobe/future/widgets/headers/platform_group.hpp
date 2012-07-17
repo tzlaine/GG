@@ -17,6 +17,7 @@
 #include <GG/adobe/eve.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
 #include <GG/Clr.h>
 
@@ -51,6 +52,10 @@ struct group_t
     GG::Clr              color_m;
     GG::Clr              text_color_m;
     GG::Clr              interior_color_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t text_color_proxy_m;
+    implementation::color_proxy_t interior_color_proxy_m;
 };
 
 /****************************************************************************************************/

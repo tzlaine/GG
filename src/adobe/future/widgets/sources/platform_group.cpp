@@ -86,6 +86,16 @@ platform_display_type insert<group_t>(display_t&             display,
                                               element.interior_color_m);
     element.control_m->SetClientCornersEqualToBoxCorners(true);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::GroupBox::SetColor, element.control_m, _1)
+    );
+    element.text_color_proxy_m.initialize(
+        boost::bind(&GG::GroupBox::SetTextColor, element.control_m, _1)
+    );
+    element.interior_color_proxy_m.initialize(
+        boost::bind(&GG::GroupBox::SetInteriorColor, element.control_m, _1)
+    );
+
     return display.insert(parent, element.control_m);
 }
 

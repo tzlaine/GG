@@ -69,14 +69,19 @@ void create_widget(const dictionary_t& parameters,
 /****************************************************************************************************/
 
 template <>
-void attach_view_and_controller(label_t&,
-                                const dictionary_t&,
-                                const factory_token_t&,
+void attach_view_and_controller(label_t&               control,
+                                const dictionary_t&    parameters,
+                                const factory_token_t& token,
                                 adobe::name_t,
                                 adobe::name_t,
                                 adobe::name_t)
 {
     // no adam interaction
+
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+#undef BIND_COLOR
 }
 
 /****************************************************************************************************/

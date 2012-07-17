@@ -114,6 +114,10 @@ platform_display_type insert<label_t>(display_t& display,
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.window_m, element.alt_text_m);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::TextControl::SetColor, element.window_m, _1)
+    );
+
     return display.insert(parent, get_display(element));
 }
 

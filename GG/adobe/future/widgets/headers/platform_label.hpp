@@ -18,6 +18,7 @@
 #include <GG/adobe/memory.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
 
 namespace GG {
@@ -40,6 +41,8 @@ namespace adobe {
         std::string               name_m;
         std::string               alt_text_m;
         std::size_t               characters_m;
+
+        implementation::color_proxy_t color_proxy_m;
     };
 
     void measure(label_t& value, extents_t& result);

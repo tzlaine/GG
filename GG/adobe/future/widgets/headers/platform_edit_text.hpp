@@ -101,6 +101,11 @@ struct edit_text_t : boost::noncopyable
 
     boost::function<void (const std::string&)> edited_proc_m;
     boost::function<void (const std::string&)> focus_update_proc_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t text_color_proxy_m;
+    implementation::color_proxy_t interior_color_proxy_m;
+    implementation::color_proxy_t label_color_proxy_m;
 };
 
 const std::string& get_control_string(const edit_text_t& widget);

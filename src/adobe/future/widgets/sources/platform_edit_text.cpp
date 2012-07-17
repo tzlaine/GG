@@ -19,6 +19,7 @@
 #include <GG/GUI.h>
 #include <GG/MultiEdit.h>
 #include <GG/StyleFactory.h>
+#include <GG/TextControl.h>
 #include <GG/utf8/checked.h>
 
 
@@ -381,6 +382,21 @@ platform_display_type insert<edit_text_t>(display_t&             display,
 
     if (!element.alt_text_m.empty())
         implementation::set_control_alt_text(element.control_m, element.alt_text_m);
+
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::Edit::SetColor, element.control_m, _1)
+    );
+    element.text_color_proxy_m.initialize(
+        boost::bind(&GG::Edit::SetTextColor, element.control_m, _1)
+    );
+    element.interior_color_proxy_m.initialize(
+        boost::bind(&GG::Edit::SetInteriorColor, element.control_m, _1)
+    );
+    if (element.using_label_m) {
+        element.label_color_proxy_m.initialize(
+            boost::bind(&GG::TextControl::SetColor, element.name_m.window_m, _1)
+        );
+    }
 
    return display.insert(parent, get_display(element));
 }

@@ -159,10 +159,10 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
                         _1);
     }
 
+    adobe::attach_view(control.edit_text_m.color_proxy_m, parameters, token, adobe::static_name_t("bind_color"));
+    adobe::attach_view(control.edit_text_m.text_color_proxy_m, parameters, token, adobe::static_name_t("bind_text_color"));
 #define BIND_COLOR(name)                                                \
     adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
-    BIND_COLOR(color);
-    BIND_COLOR(text_color);
     BIND_COLOR(interior_color);
     BIND_COLOR(label_color);
     BIND_COLOR(popup_color);
@@ -288,12 +288,6 @@ platform_display_type insert<edit_number_t>(display_t&             display,
     GG::Connect(element.edit_text_m.control_m->FocusUpdateSignal,
                 boost::bind(&edit_number_t::monitor_focus_update, boost::ref(element), _1));
 
-    element.color_proxy_m.initialize(
-        boost::bind(&GG::Edit::SetColor, element.edit_text_m.control_m, _1)
-    );
-    element.text_color_proxy_m.initialize(
-        boost::bind(&GG::Edit::SetTextColor, element.edit_text_m.control_m, _1)
-    );
     element.interior_color_proxy_m.initialize(
         boost::bind(&edit_number_t::set_interior_color, &element, _1)
     );

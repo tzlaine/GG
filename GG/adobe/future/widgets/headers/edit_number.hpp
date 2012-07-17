@@ -244,8 +244,6 @@ struct edit_number_t : boost::noncopyable
     double                      max_m;
     edit_number_platform_data_t platform_m;
 
-    implementation::color_proxy_t color_proxy_m;
-    implementation::color_proxy_t text_color_proxy_m;
     implementation::color_proxy_t interior_color_proxy_m;
     implementation::color_proxy_t label_color_proxy_m;
     implementation::color_proxy_t popup_color_proxy_m;

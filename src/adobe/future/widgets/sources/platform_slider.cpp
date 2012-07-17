@@ -157,6 +157,10 @@ platform_display_type insert<slider_t>(display_t&             display,
     if (!element.alt_text_m.empty())
         adobe::implementation::set_control_alt_text(element.control_m, element.alt_text_m);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::Slider<double>::SetColor, element.control_m, _1)
+    );
+
     return display.insert(parent, element.control_m);
 }
 

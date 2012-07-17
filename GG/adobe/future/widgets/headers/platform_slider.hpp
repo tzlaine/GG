@@ -16,9 +16,10 @@
 #include <GG/Base.h>
 #include <GG/Clr.h>
 #include <GG/adobe/extents.hpp>
-#include <GG/adobe/future/widgets/headers/slider_helper.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/widget_attributes.hpp>
+#include <GG/adobe/future/widgets/headers/slider_helper.hpp>
+#include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
@@ -82,6 +83,8 @@ struct slider_t : boost::noncopyable
 
     boost::function<void (int, int, int)> slid_proc_m;
     boost::function<void (int, int, int)> slid_and_stopped_proc_m;
+
+    implementation::color_proxy_t color_proxy_m;
 };
 
 /****************************************************************************************************/

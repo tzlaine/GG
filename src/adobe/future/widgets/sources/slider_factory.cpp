@@ -174,6 +174,8 @@ void attach_view_and_controller(slider_t&              control,
                         _2,
                         _3);
     }
+
+    adobe::attach_view(control.color_proxy_m, parameters, token, adobe::static_name_t("bind_color"));
 }
 
 /****************************************************************************************************/

@@ -81,6 +81,12 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
 
     assemblage_cleanup_ptr(token.client_holder_m.assemblage_m, widget);
 
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(widget->button_m->name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(text_color);
+#undef BIND_COLOR
+
     //
     // Call display_insertion to embed the new widget within the view heirarchy
     //

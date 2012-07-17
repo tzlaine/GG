@@ -398,6 +398,12 @@ button_t* create_button_widget(const dictionary_t&     parameters,
                              token.client_holder_m);
     }
 
+#define BIND_COLOR(name)                                                \
+    adobe::attach_view(result->name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
+    BIND_COLOR(color);
+    BIND_COLOR(text_color);
+#undef BIND_COLOR
+
     return result;
 }
 

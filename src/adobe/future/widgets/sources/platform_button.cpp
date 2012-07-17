@@ -214,6 +214,13 @@ platform_display_type insert<button_t>(display_t&             display,
 
     element.control_m->Disable(!element.enabled_m);
 
+    element.color_proxy_m.initialize(
+        boost::bind(&GG::Button::SetColor, element.control_m, _1)
+    );
+    element.text_color_proxy_m.initialize(
+        boost::bind(&GG::Button::SetTextColor, element.control_m, _1)
+    );
+
     return display.insert(parent, element.control_m);
 }
 

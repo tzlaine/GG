@@ -71,6 +71,9 @@ struct button_t : boost::noncopyable
     GG::SubTexture     unpressed_m;
     GG::SubTexture     pressed_m;
     GG::SubTexture     rollover_m;
+
+    implementation::color_proxy_t color_proxy_m;
+    implementation::color_proxy_t text_color_proxy_m;
 };
 
 /****************************************************************************************************/

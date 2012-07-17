@@ -413,11 +413,6 @@ template <> platform_display_type insert<popup_t>(display_t&             display
     element.item_text_color_proxy_m.initialize(
         boost::bind(&popup_t::set_item_text_color, &element, _1)
     );
-    if (element.using_label_m) {
-        element.label_color_proxy_m.initialize(
-            boost::bind(&GG::TextControl::SetColor, element.name_m.window_m, _1)
-        );
-    }
 
     return display.insert(parent, element.control_m);
 }

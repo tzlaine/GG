@@ -179,9 +179,6 @@ platform_display_type insert<display_number_t>(display_t& display,
     element.color_proxy_m.initialize(
         boost::bind(&GG::TextControl::SetColor, element.window_m, _1)
     );
-    element.label_color_proxy_m.initialize(
-        boost::bind(&display_number_t::set_label_color, &element, _1)
-    );
 
     return display.insert(parent, get_display(element));
 }

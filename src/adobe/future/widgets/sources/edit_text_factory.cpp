@@ -130,7 +130,6 @@ void attach_view_and_controller(edit_text_t&           control,
     BIND_COLOR(color);
     BIND_COLOR(text_color);
     BIND_COLOR(interior_color);
-    BIND_COLOR(label_color);
 #undef BIND_COLOR
 }
 

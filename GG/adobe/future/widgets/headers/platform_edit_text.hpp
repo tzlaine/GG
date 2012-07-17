@@ -105,7 +105,6 @@ struct edit_text_t : boost::noncopyable
     implementation::color_proxy_t color_proxy_m;
     implementation::color_proxy_t text_color_proxy_m;
     implementation::color_proxy_t interior_color_proxy_m;
-    implementation::color_proxy_t label_color_proxy_m;
 };
 
 const std::string& get_control_string(const edit_text_t& widget);

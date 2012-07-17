@@ -245,9 +245,6 @@ struct edit_number_t : boost::noncopyable
     edit_number_platform_data_t platform_m;
 
     implementation::color_proxy_t interior_color_proxy_m;
-    implementation::color_proxy_t label_color_proxy_m;
-    implementation::color_proxy_t popup_color_proxy_m;
-    implementation::color_proxy_t popup_item_text_color_proxy_m;
 
 public:
     boost::signals::connection  locale_change_connection_m;

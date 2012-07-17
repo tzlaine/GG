@@ -392,11 +392,6 @@ platform_display_type insert<edit_text_t>(display_t&             display,
     element.interior_color_proxy_m.initialize(
         boost::bind(&GG::Edit::SetInteriorColor, element.control_m, _1)
     );
-    if (element.using_label_m) {
-        element.label_color_proxy_m.initialize(
-            boost::bind(&GG::TextControl::SetColor, element.name_m.window_m, _1)
-        );
-    }
 
    return display.insert(parent, get_display(element));
 }

@@ -73,11 +73,7 @@ inline void couple_controller_to_cell(display_number_t& control,
 {
     // no adam interaction
 
-#define BIND_COLOR(name)                                                \
-    adobe::attach_view(control.name##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
-    BIND_COLOR(color);
-    BIND_COLOR(label_color);
-#undef BIND_COLOR
+    adobe::attach_view(control.color_proxy_m, parameters, token, adobe::static_name_t("bind_color"));
 }
 
 /****************************************************************************************************/

@@ -162,7 +162,7 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
 #define BIND_COLOR(object, proxy, name)                                 \
     adobe::attach_view(object.proxy##_proxy_m, parameters, token, adobe::static_name_t("bind_" #name))
     BIND_COLOR(control, interior_color, interior_color);
-    BIND_COLOR(control, label_color, label_color);
+    BIND_COLOR(control.edit_text_m.name_m, color, label_color);
     BIND_COLOR(control.edit_text_m, color, color);
     BIND_COLOR(control.edit_text_m, text_color, text_color);
     BIND_COLOR(control.popup_m, color, popup_color);
@@ -291,11 +291,6 @@ platform_display_type insert<edit_number_t>(display_t&             display,
     element.interior_color_proxy_m.initialize(
         boost::bind(&edit_number_t::set_interior_color, &element, _1)
     );
-    if (element.edit_text_m.using_label_m) {
-        element.label_color_proxy_m.initialize(
-            boost::bind(&GG::TextControl::SetColor, element.edit_text_m.name_m.window_m, _1)
-        );
-    }
 
     return pos;
 }

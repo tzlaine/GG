@@ -61,12 +61,14 @@ namespace adobe {
                   name_t signal_id);
 
         void reset_item_set(const array_t& items);
+        void reset_item_set(const item_set_t& items);
 
         void measure(extents_t& result);
         void place(const place_data_t& place_data);
         void display(const any_regular_t& item);
         void monitor(const setter_type& proc);
         void enable(bool make_enabled);
+        void set_item_text_color(GG::Clr color);
 
         GG::ListBox* control_m;
         unsigned int original_height_m;
@@ -99,6 +101,11 @@ namespace adobe {
         row_signal_t erased_proc_m;
         row_signal_t browsed_proc_m;
         const row_factory_t* row_factory_m;
+
+        implementation::color_proxy_t color_proxy_m;
+        implementation::color_proxy_t interior_color_proxy_m;
+        implementation::color_proxy_t hilite_color_proxy_m;
+        implementation::color_proxy_t item_text_color_proxy_m;
     };
 
     namespace view_implementation {

@@ -287,11 +287,27 @@ namespace adobe {
     void listbox_t::reset_item_set(const array_t& items)
     {
         assert(control_m);
-        clear_items(*this);
+        items_m.clear();
+        control_m->Clear();
         for (array_t::const_iterator it = items.begin(), end_it = items.end();
              it != end_it;
              ++it) {
             items_m.push_back(it->cast<dictionary_t>());
+            get_value(items_m.back(), key_value);
+        }
+        ::sort_items(*this);
+        ::message_item_set(*this);
+    }
+
+    void listbox_t::reset_item_set(const item_set_t& items)
+    {
+        assert(control_m);
+        items_m.clear();
+        control_m->Clear();
+        for (item_set_t::const_iterator it = items.begin(), end_it = items.end();
+             it != end_it;
+             ++it) {
+            items_m.push_back(*it);
             get_value(items_m.back(), key_value);
         }
         ::sort_items(*this);
@@ -328,6 +344,17 @@ namespace adobe {
     {
         assert(control_m);
         value_proc_m = proc;
+    }
+
+    void listbox_t::set_item_text_color(GG::Clr color)
+    {
+        const bool color_changed = color != item_text_color_m;
+        item_text_color_m = color;
+        if (color_changed && !items_m.empty()) {
+            item_set_t items;
+            std::swap(items, items_m);
+            reset_item_set(items);
+        }
     }
 
     template <>
@@ -383,6 +410,19 @@ namespace adobe {
             adobe::implementation::set_control_alt_text(element.control_m, element.alt_text_m);
 
         ::message_item_set(element);
+
+        element.color_proxy_m.initialize(
+            boost::bind(&GG::ListBox::SetColor, element.control_m, _1)
+        );
+        element.interior_color_proxy_m.initialize(
+            boost::bind(&GG::ListBox::SetInteriorColor, element.control_m, _1)
+        );
+        element.hilite_color_proxy_m.initialize(
+            boost::bind(&GG::ListBox::SetHiliteColor, element.control_m, _1)
+        );
+        element.item_text_color_proxy_m.initialize(
+            boost::bind(&listbox_t::set_item_text_color, &element, _1)
+        );
 
         return display.insert(parent, element.control_m);
     }

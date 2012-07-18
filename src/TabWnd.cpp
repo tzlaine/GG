@@ -329,6 +329,14 @@ void TabBar::SizeMove(const Pt& ul, const Pt& lr)
 void TabBar::Render()
 {}
 
+void TabBar::SetColor(Clr color)
+{
+    Control::SetColor(color);
+    for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
+        m_tab_buttons[i]->SetColor(color);
+    }
+}
+
 std::size_t TabBar::AddTab(const std::string& name)
 {
     std::size_t retval = m_tab_buttons.size();
@@ -381,7 +389,12 @@ void TabBar::SetCurrentTab(std::size_t index)
 }
 
 void TabBar::SetTextColor(Clr color)
-{ m_text_color = color; }
+{
+    m_text_color = color;
+    for (std::size_t i = 0; i < m_tab_buttons.size(); ++i) {
+        m_tab_buttons[i]->SetTextColor(color);
+    }
+}
 
 const Button* TabBar::LeftButton() const
 { return m_left_button; }

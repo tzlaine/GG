@@ -242,6 +242,7 @@ public:
     /** \name Mutators */ ///@{
     virtual void SizeMove(const Pt& ul, const Pt& lr);
     virtual void Render();
+    virtual void SetColor(Clr color);
 
     /** Adds a tab called \a name to the sequence of tabs in this TabBar.  \a
         name can be used later to remove the tab (\a name is not checked for

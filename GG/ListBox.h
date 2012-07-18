@@ -186,6 +186,7 @@ public:
 
         /** \name Mutators */ ///@{
         virtual void Render();
+        virtual void Disable(bool b = true);
 
         void         push_back(Control* c); ///< adds a given Control to the end of the Row; this Control becomes property of the Row
         void         push_back(const std::string& str, const boost::shared_ptr<Font>& font, Clr color = CLR_BLACK); ///< overload of push_back that creates a TextControl and adds it to the Row
@@ -212,6 +213,7 @@ public:
         std::vector<Alignment> m_col_alignments; ///< column alignments; each is one of ALIGN_TOP, ALIGN_VCENTER, or ALIGN_BOTTOM
         std::vector<X>         m_col_widths;     ///< column widths
         unsigned int           m_margin;         ///< the amount of space left between the contents of adjacent cells, in pixels
+        std::vector<bool>      m_preferred_disabled;
 
         bool                   m_ignore_adjust_layout;
 

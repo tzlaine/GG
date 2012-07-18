@@ -258,6 +258,22 @@ Control* ListBox::Row::CreateControl(const SubTexture& st) const
 void ListBox::Row::Render()
 {}
 
+void ListBox::Row::Disable(bool b/* = true*/)
+{
+    Control::Disable(b);
+    if (b) {
+        for (std::size_t i = 0; i < m_cells.size(); ++i) {
+            if (m_cells[i])
+                m_cells[i]->Disable(true);
+        }
+    } else {
+        for (std::size_t i = 0; i < m_cells.size(); ++i) {
+            if (m_cells[i])
+                m_cells[i]->Disable(m_preferred_disabled[i]);
+        }
+    }
+}
+
 void ListBox::Row::push_back(Control* c)
 {
     m_cells.push_back(c);
@@ -266,6 +282,7 @@ void ListBox::Row::push_back(Control* c)
     if (1 < m_cells.size()) {
         m_col_widths.back() = m_col_widths[m_cells.size() - 1];
     }
+    m_preferred_disabled.push_back(c ? c->Disabled() : false);
     AdjustLayout();
 }
 
@@ -283,6 +300,7 @@ void ListBox::Row::push_back(const SubTexture& st)
 void ListBox::Row::clear()
 {
     m_cells.clear();
+    m_preferred_disabled.clear();
     RemoveLayout();
     DeleteChildren();
 }
@@ -303,6 +321,7 @@ void ListBox::Row::resize(std::size_t n)
         m_col_widths[i] = old_size ? m_col_widths[old_size - 1] : X(5); // assign new cells reasonable default widths
         m_col_alignments[i] = ALIGN_NONE;
     }
+    m_preferred_disabled.resize(n);
     AdjustLayout();
 }
 
@@ -311,6 +330,7 @@ void ListBox::Row::SetCell(std::size_t n, Control* c)
     assert(c != m_cells[n]);
     delete m_cells[n];
     m_cells[n] = c;
+    m_preferred_disabled[n] = c ? c->Disabled() : false;
     AdjustLayout();
 }
 

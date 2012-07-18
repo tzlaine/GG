@@ -131,7 +131,11 @@ void GroupBox::SetColor(Clr c)
 { m_color = c; }
 
 void GroupBox::SetTextColor(Clr c)
-{ m_text_color = c; }
+{
+    m_text_color = c;
+    if (m_label)
+        m_label->SetTextColor(c);
+}
 
 void GroupBox::SetInteriorColor(Clr c)
 { m_int_color = c; }

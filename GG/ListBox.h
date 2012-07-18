@@ -162,8 +162,8 @@ public:
         typedef std::string SortKeyType;
 
         /** \name Structors */ ///@{
-        Row(); ///< default ctor
-        Row(X w, Y h, const std::string& drag_drop_data_type, Alignment align = ALIGN_VCENTER, unsigned int margin = 2); ///< ctor
+        explicit Row(Flags<WndFlag> flags = INTERACTIVE); ///< default ctor
+        Row(X w, Y h, const std::string& drag_drop_data_type, Alignment align = ALIGN_VCENTER, unsigned int margin = 2, Flags<WndFlag> flags = INTERACTIVE); ///< ctor
         virtual ~Row();
         //@}
 

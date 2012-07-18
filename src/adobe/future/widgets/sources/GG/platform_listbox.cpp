@@ -135,10 +135,20 @@ namespace {
             sorted_items[name] = &*it;
         }
         std::size_t i = 0;
-        for (sorted_item_map::iterator it = sorted_items.begin(), end_it = sorted_items.end();
-             it != end_it;
-             ++it) {
-            std::swap(sorted_item_set[i++], *it->second);
+        if (listbox.style_m & GG::LIST_SORTDESCENDING) {
+            for (sorted_item_map::reverse_iterator
+                     it = sorted_items.rbegin(), end_it = sorted_items.rend();
+                 it != end_it;
+                 ++it) {
+                std::swap(sorted_item_set[i++], *it->second);
+            }
+        } else {
+            for (sorted_item_map::iterator
+                     it = sorted_items.begin(), end_it = sorted_items.end();
+                 it != end_it;
+                 ++it) {
+                std::swap(sorted_item_set[i++], *it->second);
+            }
         }
         std::swap(listbox.items_m, sorted_item_set);
     }

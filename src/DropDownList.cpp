@@ -220,7 +220,12 @@ void DropDownList::Render()
         ChildClippingMode old_clipping_mode = GetChildClippingMode();
         SetChildClippingMode(ClipToClient);
         BeginClipping();
+        const bool current_item_disabled = current_item->Disabled();
+        if (Disabled())
+            current_item->Disable(true);
         GUI::GetGUI()->RenderWindow(current_item);
+        if (Disabled())
+            current_item->Disable(current_item_disabled);
         EndClipping();
         SetChildClippingMode(old_clipping_mode);
         current_item->OffsetMove(-offset);

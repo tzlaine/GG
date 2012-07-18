@@ -301,6 +301,16 @@
     bind_controller, and \a bind_view are ignored.
 */
 
+/*
+    \param guide_mask TODO
+    \param guide_balance TODO
+
+    \section eve_container_layout_guide_mask_guide_balance_usage guide_mask/guide_balance Usage
+
+    \param guide_baseline TODO
+    \param guide_label TODO
+*/
+
 /** \page eve_container_layout_params Container Layout Parameters
     \section Usage
 
@@ -308,17 +318,10 @@
     \param child_horizontal The horizontal alignment of views within this container (see \ref eve_alignments).
     \param child_vertical The vertical alignment of views within this container (see \ref eve_alignments).
     \param spacing An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.
-    \param guide_mask TODO
-    \param guide_balance TODO
 
     \note An view's \a horizontal and \a vertical parameters (if defined)
     override the alignments specified in its containing view's \a
     child_horizontal and \a child_vertical (see \a eve_common_view_params).
-
-    \section eve_container_layout_guide_mask_guide_balance_usage guide_mask/guide_balance Usage
-
-    \param guide_baseline TODO
-    \param guide_label TODO
 
     \section eve_placements Placements
 

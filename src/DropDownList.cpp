@@ -217,9 +217,12 @@ void DropDownList::Render()
         current_item->OffsetMove(offset);
         if (!visible)
             current_item->Show();
+        ChildClippingMode old_clipping_mode = GetChildClippingMode();
+        SetChildClippingMode(ClipToClient);
         BeginClipping();
         GUI::GetGUI()->RenderWindow(current_item);
         EndClipping();
+        SetChildClippingMode(old_clipping_mode);
         current_item->OffsetMove(-offset);
         if (!visible)
             current_item->Hide();

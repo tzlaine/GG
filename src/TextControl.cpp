@@ -139,11 +139,14 @@ void TextControl::Render()
     Clr clr_to_use = Disabled() ? DisabledColor(TextColor()) : TextColor();
     glColor(clr_to_use);
     if (m_font) {
+        ChildClippingMode old_clipping_mode = GetChildClippingMode();
+        SetChildClippingMode(ClipToClient);
         if (m_clip_text)
             BeginClipping();
         m_font->RenderText(UpperLeft(), LowerRight(), Text(), m_format, &m_line_data);
         if (m_clip_text)
             EndClipping();
+        SetChildClippingMode(old_clipping_mode);
     }
 }
 

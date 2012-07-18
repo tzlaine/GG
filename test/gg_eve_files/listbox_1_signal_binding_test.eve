@@ -1,0 +1,150 @@
+layout alert_dialog
+{
+    view dialog(name: "Listbox Signal Binding Test")
+    {
+        column()
+        {
+            group(name: "Selection Changed Signal Bound - No Selections", child_vertical: align_proportional)
+            {
+                listbox(name: "no expression",
+                        bind: @bind_cell_0,
+                        items: @items,
+                        characters: 10,
+                        rows: 3,
+                        hilite_color: color(b:255),
+                        bind_selection_changed_signal: @selection_changed_signal_cell_0);
+                display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_0);
+                display_text(name: "Result:", characters: 15, bind: @result_bind_cell_0);
+                display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_0);
+                display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_0);
+            }
+
+            group(name: "Selection Changed Signal Not Bound", child_vertical: align_proportional)
+            {
+                listbox(name: "no signal_id",
+                        bind: @bind_cell_9,
+                        characters: 10,
+                        rows: 3,
+                        hilite_color: color(b:255),
+                        items: @items);
+                display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_9);
+                display_text(name: "Result:", characters: 15, bind: @result_bind_cell_9);
+
+                listbox(name: "signal_id: @test_id",
+                        bind: @bind_cell_10,
+                        characters: 10,
+                        rows: 3,
+                        hilite_color: color(b:255),
+                        items: @items);
+                display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_10);
+                display_text(name: "Result:", characters: 15, bind: @result_bind_cell_10);
+            }
+        }
+
+        group(name: "Selection Changed Signal Bound - One Selection", child_vertical: align_proportional)
+        {
+            listbox(name: "no expression",
+                    bind: @bind_cell_1,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: @selection_changed_signal_cell_1);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_1);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_1);
+
+            listbox(name: "simple expression",
+                    bind: @bind_cell_2,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: [@selection_changed_signal_cell_2, '"selection signal value"']);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_2);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_2);
+
+            listbox(name: '"_" placeholder',
+                    bind: @bind_cell_3,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: [@selection_changed_signal_cell_3, "_"]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_3);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_3);
+
+            listbox(name: '"_1" placeholder',
+                    bind: @bind_cell_4,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: [@selection_changed_signal_cell_4, "_1"]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_4);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_4);
+        }
+
+        group(name: "Selection Changed Signal Bound - Two Selections", child_vertical: align_proportional)
+        {
+            listbox(name: "no expression",
+                    bind: @bind_cell_5,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    selections: quick,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: @selection_changed_signal_cell_5);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_5);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_5);
+
+            listbox(name: "simple expression",
+                    bind: @bind_cell_6,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    selections: quick,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: [@selection_changed_signal_cell_6, '"selection signal value"']);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_6);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_6);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_6);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_6);
+
+            listbox(name: '"_" placeholder',
+                    bind: @bind_cell_7,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    selections: quick,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: [@selection_changed_signal_cell_7, "_"]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_7);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_7);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_7);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_7);
+
+            listbox(name: '"_1" placeholder',
+                    bind: @bind_cell_8,
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    selections: quick,
+                    hilite_color: color(b:255),
+                    bind_selection_changed_signal: [@selection_changed_signal_cell_8, "_1"]);
+            display_text(name: "Normal bind:", characters: 15, bind: @bind_cell_8);
+            display_text(name: "Result:", characters: 15, bind: @result_bind_cell_8);
+            display_text(name: "Selected signal bind:", characters: 15, bind: @selection_changed_signal_cell_8);
+            display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_8);
+        }
+    }
+}

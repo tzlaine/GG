@@ -790,9 +790,12 @@ void ListBox::Clear()
 {
     m_rows.clear();
     m_caret = m_rows.end();
-    DetachChild(m_header_row);
+    const bool header_attached = m_header_row->Parent() == this;
+    if (header_attached)
+        DetachChild(m_header_row);
     DeleteChildren();
-    AttachChild(m_header_row);
+    if (header_attached)
+        AttachChild(m_header_row);
     m_vscroll = 0;
     m_hscroll = 0;
     m_first_row_shown = m_rows.end();

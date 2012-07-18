@@ -38,13 +38,15 @@ private:
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseEnter) {
-                if (!m_left_button_down) {
+                GG::Control* c = dynamic_cast<GG::Control*>(w);
+                if (!m_left_button_down && (!c || !c->Disabled())) {
                     boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
                     GG::GUI::GetGUI()->PushCursor(style->GetCursor(GG::RESIZE_UP_DOWN_CURSOR));
                 }
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
-                if (!m_left_button_down)
+                GG::Control* c = dynamic_cast<GG::Control*>(w);
+                if (!m_left_button_down && (!c || !c->Disabled()))
                     GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::LDrag) {
@@ -66,7 +68,8 @@ private:
                 retval = true;
             } else if (event.Type() == GG::WndEvent::LButtonUp || event.Type() == GG::WndEvent::LClick) {
                 m_left_button_down = false;
-                if (!w->InWindow(event.Point()))
+                GG::Control* c = dynamic_cast<GG::Control*>(w);
+                if (!w->InWindow(event.Point()) && (!c || !c->Disabled()))
                     GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             }

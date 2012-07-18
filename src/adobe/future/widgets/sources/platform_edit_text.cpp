@@ -70,7 +70,7 @@ public:
         {}
 
 private:
-    virtual bool FilterImpl(GG::Wnd*, const GG::WndEvent& event)
+    virtual bool FilterImpl(GG::Wnd* w, const GG::WndEvent& event)
         {
             bool retval = false;
             if (event.Type() == GG::WndEvent::MouseWheel) {
@@ -78,11 +78,16 @@ private:
                 m_edit_text.pre_edit_proc_m(std::string(1, 0 < event.WheelMove() ? 30 : 31), squelch);
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseEnter) {
-                boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
-                GG::GUI::GetGUI()->PushCursor(style->GetCursor(GG::TEXT_CURSOR));
+                GG::Control* c = dynamic_cast<GG::Control*>(w);
+                if (!c || !c->Disabled()) {
+                    boost::shared_ptr<GG::StyleFactory> style = GG::GUI::GetGUI()->GetStyleFactory();
+                    GG::GUI::GetGUI()->PushCursor(style->GetCursor(GG::TEXT_CURSOR));
+                }
                 retval = true;
             } else if (event.Type() == GG::WndEvent::MouseLeave) {
-                GG::GUI::GetGUI()->PopCursor();
+                GG::Control* c = dynamic_cast<GG::Control*>(w);
+                if (!c || !c->Disabled())
+                    GG::GUI::GetGUI()->PopCursor();
                 retval = true;
             } else if (event.Type() == GG::WndEvent::KeyPress) {
                 bool nontext =

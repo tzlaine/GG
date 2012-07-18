@@ -259,6 +259,11 @@ void popup_t::enable(bool make_enabled)
 {
     assert(control_m);
     control_m->Disable(!make_enabled);
+
+    if (using_label_m) {
+        using adobe::enable;
+        enable(name_m, make_enabled);
+    }
 }
 
 /****************************************************************************************************/

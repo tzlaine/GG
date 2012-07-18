@@ -42,6 +42,8 @@ control_button_t::control_button_t(const std::string&          name,
         new button_t(false, false,
                      color, text_color, GG::SubTexture(), GG::SubTexture(), GG::SubTexture())
     );
+    button_m->color_proxy_m.initialize(set_button_color(false, *button_m));
+    button_m->text_color_proxy_m.initialize(set_button_color(true, *button_m));
     button_m->state_set_m.assign(first, boost::next(first));
 }
 

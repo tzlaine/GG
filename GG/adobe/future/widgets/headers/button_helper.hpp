@@ -45,6 +45,8 @@
 */
 
 namespace GG {
+    class Button;
+    class Clr;
     class Texture;
 }
 
@@ -331,6 +333,21 @@ display_compositor_t<Control, UserData>* make_display_compositor(Control& contro
 {
     return new display_compositor_t<Control, UserData>(control, index);
 }
+
+/****************************************************************************************************/
+
+struct button_t;
+
+struct set_button_color
+{
+    set_button_color(bool text, button_t& button);
+
+    void operator()(GG::Clr c) const;
+
+    const bool text_m;
+    GG::Clr& color_m;
+    GG::Button*& button_m;
+};
 
 /****************************************************************************************************/
 

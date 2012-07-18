@@ -314,32 +314,6 @@ namespace implementation {
 
 /****************************************************************************************************/
 
-struct set_button_color
-{
-    set_button_color(bool text, button_t& button) :
-        text_m(text),
-        color_m(text ? button.text_color_m : button.color_m),
-        button_m(button.control_m)
-        {}
-
-    void operator()(GG::Clr c) const
-        {
-            color_m = c;
-            if (button_m) {
-                if (text_m)
-                    button_m->SetTextColor(c);
-                else
-                    button_m->SetColor(c);
-            }
-        }
-
-    const bool text_m;
-    GG::Clr& color_m;
-    GG::Button*& button_m;
-};
-
-/****************************************************************************************************/
-
 button_t* create_button_widget(const dictionary_t&     parameters,
                                const factory_token_t&  token,
                                size_enum_t             size,

@@ -787,6 +787,9 @@ void ListBox::Disable(bool b/* = true*/)
         m_vscroll->Disable(b);
     if (m_hscroll)
         m_hscroll->Disable(b);
+    for (std::list<Row*>::iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
+        (*it)->Disable(b);
+    }
 }
 
 void ListBox::SetColor(Clr c)

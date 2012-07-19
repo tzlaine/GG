@@ -158,7 +158,7 @@ void attach_view_and_controller(presets_t&             control,
 
     {
         // create the cell and set it to an empty array (menu item set) for now
-        layout_sheet.add_interface(state_cell, any_regular_t(array_t()));
+        layout_sheet.add_interface(state_cell, line_position_t(), array_t(), any_regular_t(array_t()));
 
         // attach the category popup as a bonafide view/controller to the state cell
         attach_monitor(control.category_popup_m, state_cell, 

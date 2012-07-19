@@ -19,7 +19,6 @@ set(THIS_LIB_SOURCES
     EventPump.cpp
     EveGlue.cpp
     EveParser.cpp
-    EveLayout.cpp
     ExpressionParser.cpp
     ExpressionWriter.cpp
     Font.cpp

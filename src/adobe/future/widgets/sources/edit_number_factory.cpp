@@ -183,7 +183,7 @@ void attach_edit_num_view_and_controller(adobe::edit_number_t& control,
 
         // add the cell to the layout sheet if its not there yet
         if (layout_sheet.count_interface(cell) == 0)
-            layout_sheet.add_interface(cell, adobe::any_regular_t(unit_set.front().name_m));
+            layout_sheet.add_interface(cell, adobe::line_position_t(), adobe::array_t(), adobe::any_regular_t(unit_set.front().name_m));
 
         // attach the popup to the cell as a normal widget
         adobe::attach_view(assemblage, cell, control.popup(), layout_sheet);

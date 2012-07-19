@@ -85,7 +85,9 @@ foreach (test_file ${eve_test_files})
 endforeach ()
 
 foreach (test_file ${eve_test_files})
-    add_test_and_data_files(EveWriter ${test_file})
+    string(REPLACE asl_1.0.43_eve_files asl_1.0.43_adam_files tmp ${test_file})
+    string(REPLACE .eve .adm adam_test_file ${tmp})
+    add_test_and_data_files(EveWriter ${test_file} ${adam_test_file})
 endforeach ()
 
 if ((TARGET GiGiSDL))

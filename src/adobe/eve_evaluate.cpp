@@ -197,18 +197,41 @@ adobe::any_regular_t evaluate_initializer(adobe::virtual_machine_t& evaluator,
 
 /*************************************************************************************************/
 
-void add_cell(  adobe::basic_sheet_t&                       sheet,
-                adobe::eve_callback_suite_t::cell_type_t    type,
-                adobe::name_t                               name,
-                const adobe::any_regular_t&                 value)
+adobe::eve_callback_suite_t::position_t
+add_view(const adobe::eve_callback_suite_t::position_t& parent,
+         const adobe::line_position_t&                  position,
+         adobe::name_t                                  name,
+         const adobe::array_t&                          initializer,
+         const std::string&                             brief,
+         const std::string&                             detailed,
+         const adobe::bind_layout_proc_t&               proc,
+         adobe::basic_sheet_t&                          sheet,
+         adobe::virtual_machine_t&                      evaluator)
 {
-    switch(type)
+    adobe::eve_callback_suite_t::position_t retval =
+        proc(parent, name, evaluate_named_arguments(evaluator, initializer));
+    sheet.add_view(parent, name, position, initializer, retval);
+    return retval;
+}
+
+/*************************************************************************************************/
+
+void add_cell(adobe::eve_callback_suite_t::cell_type_t cell_type,
+              adobe::name_t                            name,
+              const adobe::line_position_t&            position,
+              const adobe::array_t&                    initializer,
+              const std::string&                       brief,
+              const std::string&                       detailed,
+              adobe::basic_sheet_t&                    sheet,
+              const adobe::any_regular_t&              value)
+{
+    switch (cell_type)
     {
         case adobe::eve_callback_suite_t::constant_k:
-            sheet.add_constant(name, value);
+            sheet.add_constant(name, position, initializer, value);
             break;
         case adobe::eve_callback_suite_t::interface_k:
-            sheet.add_interface(name, value);
+            sheet.add_interface(name, position, initializer, value);
             break;
         default:
             assert(false); // Type not supported
@@ -229,20 +252,26 @@ namespace adobe {
 
 /*************************************************************************************************/
 
-eve_callback_suite_t bind_layout(const bind_layout_proc_t& proc, basic_sheet_t& layout_sheet,
-        virtual_machine_t& evaluator)
+eve_callback_suite_t bind_layout(const bind_layout_proc_t& proc,
+                                 basic_sheet_t& layout_sheet,
+                                 virtual_machine_t& evaluator)
 {
     ADOBE_ONCE_INSTANCE(adobe_eve_evaluate);
-    
+
     eve_callback_suite_t suite;
-    
+
     evaluator.set_variable_lookup(
             boost::bind(&reflected_variables, boost::cref(layout_sheet), _1));
 
-    suite.add_view_proc_m   = boost::bind(proc, _1, _3, boost::bind(&evaluate_named_arguments,
-            boost::ref(evaluator), _4));
-    suite.add_cell_proc_m   = boost::bind(&add_cell, boost::ref(layout_sheet), _1, _2,
-            boost::bind(&evaluate_initializer, boost::ref(evaluator), _4));
+    suite.add_view_proc_m =
+        boost::bind(&add_view, _1, _2, _3, _4, _5, _6,
+                    proc,
+                    boost::ref(layout_sheet),
+                    boost::ref(evaluator));
+    suite.add_cell_proc_m =
+        boost::bind(&add_cell, _1, _2, _3, _4, _5, _6,
+                    boost::ref(layout_sheet),
+                    boost::bind(&evaluate_initializer, boost::ref(evaluator), _4));
 
     return suite;
 }

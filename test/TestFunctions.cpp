@@ -131,7 +131,7 @@ void CheckResult(const GG::EveDialog& eve_dialog, const adobe::any_regular_t& ex
 }
 
 bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
-{ return name == adobe::static_name_t("ok") || name == adobe::static_name_t("cancel"); }
+{ return false; }
 
 void RunTest(std::size_t i)
 {

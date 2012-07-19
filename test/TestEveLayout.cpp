@@ -192,7 +192,7 @@ void MinimalGGApp::GLInit()
 }
 
 bool ButtonHandler(adobe::name_t name, const adobe::any_regular_t&)
-{ return name == adobe::static_name_t("ok") || name == adobe::static_name_t("cancel"); }
+{ return false; }
 
 void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t widget_id, const adobe::any_regular_t& value)
 {

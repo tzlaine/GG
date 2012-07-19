@@ -1,0 +1,40 @@
+sheet signal_binding_test
+{
+constant:
+    expected_left_clicked_signal_cell_1 : "left click value";
+    expected_left_clicked_signal_cell_2 : ["Two", [0, 0]];
+    expected_left_clicked_signal_cell_3 : ["Three", [0, 0]];
+    expected_right_clicked_signal_cell_4 : "right click value";
+    expected_right_clicked_signal_cell_5 : ["Two", [0, 0]];
+    expected_right_clicked_signal_cell_6 : ["Three", [0, 0]];
+    expected_double_clicked_signal_cell_7 : "double click value";
+    expected_double_clicked_signal_cell_8 : "Two";
+    expected_double_clicked_signal_cell_9 : "Three";
+
+interface:
+    items: [
+        { name: "One", value: "One" },
+        { name: "Two", value: 2 },
+        { name: "Three", value: @three }
+    ];
+
+    left_clicked_signal_cell_1 : "<rgba 255 0 0 255>no clicks</rgba>";
+    left_clicked_signal_cell_2 : "<rgba 255 0 0 255>no clicks</rgba>";
+    left_clicked_signal_cell_3 : "<rgba 255 0 0 255>no clicks</rgba>";
+    right_clicked_signal_cell_4 : "<rgba 255 0 0 255>no clicks</rgba>";
+    right_clicked_signal_cell_5 : "<rgba 255 0 0 255>no clicks</rgba>";
+    right_clicked_signal_cell_6 : "<rgba 255 0 0 255>no clicks</rgba>";
+    double_clicked_signal_cell_7 : "<rgba 255 0 0 255>no clicks</rgba>";
+    double_clicked_signal_cell_8 : "<rgba 255 0 0 255>no clicks</rgba>";
+    double_clicked_signal_cell_9 : "<rgba 255 0 0 255>no clicks</rgba>";
+
+    result_left_clicked_signal_cell_1 <== left_clicked_signal_cell_1 == expected_left_clicked_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_left_clicked_signal_cell_2 <== left_clicked_signal_cell_2 == expected_left_clicked_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_left_clicked_signal_cell_3 <== left_clicked_signal_cell_3 == expected_left_clicked_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_right_clicked_signal_cell_4 <== right_clicked_signal_cell_4 == expected_right_clicked_signal_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_right_clicked_signal_cell_5 <== right_clicked_signal_cell_5 == expected_right_clicked_signal_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_right_clicked_signal_cell_6 <== right_clicked_signal_cell_6 == expected_right_clicked_signal_cell_6 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_double_clicked_signal_cell_7 <== double_clicked_signal_cell_7 == expected_double_clicked_signal_cell_7 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_double_clicked_signal_cell_8 <== double_clicked_signal_cell_8 == expected_double_clicked_signal_cell_8 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_double_clicked_signal_cell_9 <== double_clicked_signal_cell_9 == expected_double_clicked_signal_cell_9 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+}

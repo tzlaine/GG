@@ -1,0 +1,86 @@
+layout alert_dialog
+{
+    view dialog(name: "Listbox Signal Binding Test")
+    {
+        group(name: "Left Click Signal Bound", child_vertical: align_proportional)
+        {
+            listbox(name: "simple expression",
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_left_clicked_signal: [@left_clicked_signal_cell_1, '"left click value"']);
+            display_text(name: "Left-click signal bind:", characters: 15, bind: @left_clicked_signal_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_left_clicked_signal_cell_1);
+
+            listbox(name: '"[_.row, _.pt]"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_left_clicked_signal: [@left_clicked_signal_cell_2, "[_.row, _.pt]"]);
+            display_text(name: "Left-click signal bind:", characters: 15, bind: @left_clicked_signal_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_left_clicked_signal_cell_2);
+
+            listbox(name: '"[_1, _2]"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_left_clicked_signal: [@left_clicked_signal_cell_3, "[_1, _2]"]);
+            display_text(name: "Left-click signal bind:", characters: 15, bind: @left_clicked_signal_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_left_clicked_signal_cell_3);
+        }
+
+        group(name: "Right Click Signal Bound", child_vertical: align_proportional)
+        {
+            listbox(name: "simple expression",
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_right_clicked_signal: [@right_clicked_signal_cell_4, '"right click value"']);
+            display_text(name: "Right-click signal bind:", characters: 15, bind: @right_clicked_signal_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_right_clicked_signal_cell_4);
+
+            listbox(name: '"[_.row, _.pt]"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_right_clicked_signal: [@right_clicked_signal_cell_5, "[_.row, _.pt]"]);
+            display_text(name: "Right-click signal bind:", characters: 15, bind: @right_clicked_signal_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_right_clicked_signal_cell_5);
+
+            listbox(name: '"[_1, _2]"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_right_clicked_signal: [@right_clicked_signal_cell_6, "[_1, _2]"]);
+            display_text(name: "Right-click signal bind:", characters: 15, bind: @right_clicked_signal_cell_6);
+            display_text(name: "Result:", characters: 15, bind: @result_right_clicked_signal_cell_6);
+        }
+
+        group(name: "Double Click Signal Bound", child_vertical: align_proportional)
+        {
+            listbox(name: "simple expression",
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_double_clicked_signal: [@double_clicked_signal_cell_7, '"double click value"']);
+            display_text(name: "Double-click signal bind:", characters: 15, bind: @double_clicked_signal_cell_7);
+            display_text(name: "Result:", characters: 15, bind: @result_double_clicked_signal_cell_7);
+
+            listbox(name: '"_.row"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_double_clicked_signal: [@double_clicked_signal_cell_8, "_.row"]);
+            display_text(name: "Double-click signal bind:", characters: 15, bind: @double_clicked_signal_cell_8);
+            display_text(name: "Result:", characters: 15, bind: @result_double_clicked_signal_cell_8);
+
+            listbox(name: '"_1"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_double_clicked_signal: [@double_clicked_signal_cell_9, "_1"]);
+            display_text(name: "Double-click signal bind:", characters: 15, bind: @double_clicked_signal_cell_9);
+            display_text(name: "Result:", characters: 15, bind: @result_double_clicked_signal_cell_9);
+        }
+    }
+}

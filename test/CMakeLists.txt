@@ -143,6 +143,8 @@ if ((TARGET GiGiSDL))
             add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 40,72 40,230 40,360 40,485 320,72 320,150)
         elseif (test_file MATCHES "listbox_1_signal_binding_test")
             add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
+        elseif (test_file MATCHES "listbox_2_signal_binding_test")
+            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
         else ()
             add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals)
         endif ()

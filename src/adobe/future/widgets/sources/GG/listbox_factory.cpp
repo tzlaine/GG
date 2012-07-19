@@ -156,10 +156,6 @@ namespace {
                            adobe::array_t expression,
                            Iter row)
     {
-        adobe::dictionary_t value;
-        value[adobe::static_name_t("row")] = row_value(row, listbox.control_m->end());
-        value[adobe::static_name_t("gg_row_iter")] = adobe::any_regular_t(row);
-
         adobe::implementation::handle_signal(signal_notifier,
                                              adobe::static_name_t("listbox"),
                                              signal_type,
@@ -167,7 +163,10 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             adobe::any_regular_t(value));
+                                             row_value(row, listbox.control_m->end()),
+                                             adobe::static_name_t("row"),
+                                             adobe::any_regular_t(row),
+                                             adobe::static_name_t("gg_row_iter"));
     }
 
     void handle_row_click_signal(const adobe::listbox_t& listbox,
@@ -180,19 +179,9 @@ namespace {
                                  GG::ListBox::iterator row,
                                  const GG::Pt& pt)
     {
-        adobe::dictionary_t value;
-
-        value[adobe::static_name_t("row")] = row_value(row, listbox.control_m->end());
-
-        {
-            adobe::array_t pt_array;
-            pt_array.push_back(adobe::any_regular_t(Value(pt.x)));
-            pt_array.push_back(adobe::any_regular_t(Value(pt.y)));
-            value[adobe::static_name_t("pt")] = adobe::any_regular_t(pt_array);
-        }
-
-        value[adobe::static_name_t("gg_row_iter")] = adobe::any_regular_t(row);
-        value[adobe::static_name_t("gg_pt")] = adobe::any_regular_t(pt);
+        adobe::array_t pt_array;
+        pt_array.push_back(adobe::any_regular_t(Value(pt.x)));
+        pt_array.push_back(adobe::any_regular_t(Value(pt.y)));
 
         adobe::implementation::handle_signal(signal_notifier,
                                              adobe::static_name_t("listbox"),
@@ -201,7 +190,14 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             adobe::any_regular_t(value));
+                                             row_value(row, listbox.control_m->end()),
+                                             adobe::static_name_t("row"),
+                                             adobe::any_regular_t(pt_array),
+                                             adobe::static_name_t("pt"),
+                                             adobe::any_regular_t(row),
+                                             adobe::static_name_t("gg_row_iter"),
+                                             adobe::any_regular_t(pt),
+                                             adobe::static_name_t("gg_pt"));
     }
 
     void get_sort_order_style(adobe::name_t sort_order, GG::Flags<GG::ListBoxStyle>& style)

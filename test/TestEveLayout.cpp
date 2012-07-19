@@ -1,5 +1,3 @@
-#include <GG/EveLayout.h>
-
 #include <GG/EveGlue.h>
 #include <GG/EveParser.h>
 #include <GG/GUI.h>

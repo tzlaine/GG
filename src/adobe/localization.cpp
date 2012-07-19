@@ -40,10 +40,7 @@ void localization_register(const localization_lookup_proc_t& proc)
 
 std::string localization_invoke(const std::string& source)
 {
-    if (!localization_proc())
-        throw std::runtime_error("Attempting to call an unregistered localization routine.");
-
-    return localization_proc()(source);
+    return localization_ready() ? localization_proc()(source) : source;
 }
 
 bool localization_ready()

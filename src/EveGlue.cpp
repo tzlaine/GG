@@ -28,6 +28,7 @@
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
+#include <GG/adobe/localization.hpp>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
 #include <GG/adobe/future/widgets/headers/platform_window.hpp>
 
@@ -684,3 +685,6 @@ void GG::RegisterView(adobe::name_t name,
                       bool container/* = false*/,
                       const adobe::layout_attributes_t& layout_attributes/* = adobe::layout_attributes_t()*/)
 { adobe::default_asl_widget_factory().reg(name, method, container, layout_attributes); }
+
+void GG::RegisterLocalizationFunction(const LocalizationFunction& f)
+{ adobe::localization_register(f); }

@@ -388,6 +388,12 @@ void RegisterView(adobe::name_t name,
                   bool container = false,
                   const adobe::layout_attributes_t& layout_attributes = adobe::layout_attributes_t());
 
+/** The type of function used to perform user-defined string localization. */
+typedef boost::function<std::string (const std::string&)> LocalizationFunction;
+
+/** Registers a user-defined string localization function. */
+void RegisterLocalizationFunction(const LocalizationFunction& f);
+
 }
 
 #endif

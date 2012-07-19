@@ -188,9 +188,7 @@ adobe::any_regular_t localize_function(const adobe::array_t& parameters)
     if (parameters.size() != 1)
         throw std::runtime_error("localize: parameter error");
 
-    return adobe::any_regular_t(adobe::localization_ready() ?
-                              adobe::localization_invoke(parameters.front().cast<std::string>()) :
-                              parameters.front().cast<std::string>());
+    return adobe::any_regular_t(adobe::localization_invoke(parameters.front().cast<std::string>()));
 }
 
 /*************************************************************************************************/

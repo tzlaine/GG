@@ -77,9 +77,11 @@
     Returns the localized (i.e. translated) and UTF-8 encoded version of \a
     expr if a localization function has been registered, and \a expr
     otherwise.  A localization function can be registered with
-    adobe::localization_register().
+    RegisterLocalizationFunction().
 
     \remark Note that the parameter to \a localize() is not named.
+
+    \see \ref eve_localization.
 */
 
 /** \page eve_expression_scale_fn scale()
@@ -1662,6 +1664,21 @@ else:
     - \ref eve_number_unit
     - \ref eve_alignments
     - \ref eve_modifier_keys
+
+    \section eve_localization String Localization
+
+    Most strings in Eve views are localized automatically, as long as a
+    user-provided localization function is registered.  For instance, when
+    this:
+
+    \code button(name: "foo"); \endcode
+
+    is displayed, the text that will appear in the button will be F("foo") if
+    there is a localization function F registered with
+    RegisterLocalizationFunction(), or "foo" otherwise.  Some strings that may
+    appear in Eve views are not automatically localized; those strings that
+    come from Adam cells are not.  In such cases, the \ref
+    eve_expression_localize_fn function can be used.
 
     \section eve_contributing "Contributing"
 

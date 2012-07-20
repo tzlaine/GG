@@ -81,8 +81,6 @@ set(THIS_LIB_SOURCES
     adobe/future/source/locale.cpp
     adobe/future/source/modal_dialog_interface.cpp
     adobe/future/source/resources.cpp
-    adobe/future/source/drag_and_drop.cpp
-    adobe/future/source/platform_drag_and_drop_data.cpp
     adobe/future/source/platform_locale_data.cpp
     adobe/future/source/platform_number_formatter_data.cpp
 

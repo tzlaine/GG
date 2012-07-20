@@ -10,7 +10,6 @@
 
 #include <GG/adobe/future/platform_locale_data.hpp>
 
-#include <GG/adobe/future/periodical.hpp>
 #include <GG/adobe/name.hpp>
 #include <GG/adobe/once.hpp>
 
@@ -30,9 +29,6 @@ typedef boost::signal<void (const adobe::dictionary_t&)> locale_signal_type;
 
 void init_locale_once()
 {
-    static adobe::periodical_t periodical(&adobe::implementation::do_locale_check, 1000);
-
-    // get the current locale information as part of the initialization
     adobe::implementation::do_locale_check();
 }
 
@@ -98,7 +94,7 @@ void signal_locale_change(const dictionary_t& new_locale_data)
 
 /*************************************************************************************************/
 
-aggregate_name_t key_locale_identifier                  = { "key_locale_identifier" };
+aggregate_name_t key_locale_identifier          = { "key_locale_identifier" };
 aggregate_name_t key_locale_decimal_point       = { "key_locale_decimal_point" };
 aggregate_name_t key_locale_thousands_separator = { "key_locale_thousands_separator" };
 

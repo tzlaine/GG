@@ -87,7 +87,6 @@ set(THIS_LIB_SOURCES
     adobe/future/source/platform_file_monitor_impl.cpp
     adobe/future/source/platform_locale_data.cpp
     adobe/future/source/platform_number_formatter_data.cpp
-    adobe/future/source/platform_periodical_data.cpp
 
     adobe/future/widgets/sources/edit_number.cpp
     adobe/future/widgets/sources/panel_factory.cpp

@@ -32,7 +32,6 @@
 #include <GG/adobe/future/widgets/headers/optional_panel_factory.hpp>
 #include <GG/adobe/future/widgets/headers/panel_factory.hpp>
 #include <GG/adobe/future/widgets/headers/popup_factory.hpp>
-#include <GG/adobe/future/widgets/headers/presets_factory.hpp>
 #include <GG/adobe/future/widgets/headers/preview_factory.hpp>
 #include <GG/adobe/future/widgets/headers/progress_bar_factory.hpp>
 #include <GG/adobe/future/widgets/headers/radio_button_factory.hpp>
@@ -236,7 +235,6 @@ widget_factory_t& default_asl_widget_factory()
         default_factory_s.reg(name_optional, &make_optional_panel, true, optional_panel_layout_attributes());
         default_factory_s.reg(name_panel, &make_panel, true, panel_layout_attributes());
         default_factory_s.reg(name_popup, &make_popup);
-        default_factory_s.reg(name_preset, &make_presets);
         default_factory_s.reg(name_preview, &make_preview);
         default_factory_s.reg(name_progress_bar, &make_progress_bar);
         default_factory_s.reg(name_radio_button, &make_radio_button);

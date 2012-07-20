@@ -93,7 +93,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/group_factory.cpp
     adobe/future/widgets/sources/image_factory.cpp
     adobe/future/widgets/sources/preview_factory.cpp
-    adobe/future/widgets/sources/presets_common.cpp
     adobe/future/widgets/sources/label_factory.cpp
     adobe/future/widgets/sources/reveal_factory.cpp
     adobe/future/widgets/sources/button_factory.cpp
@@ -108,7 +107,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/sublayout.cpp
     adobe/future/widgets/sources/widget_utils.cpp
     adobe/future/widgets/sources/optional_panel_factory.cpp
-    adobe/future/widgets/sources/presets_factory.cpp
     adobe/future/widgets/sources/control_button.cpp
     adobe/future/widgets/sources/control_button_factory.cpp
     adobe/future/widgets/sources/widget_factory.cpp
@@ -132,7 +130,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/platform_optional_panel.cpp
     adobe/future/widgets/sources/platform_panel.cpp
     adobe/future/widgets/sources/platform_popup.cpp
-    adobe/future/widgets/sources/platform_presets.cpp
     adobe/future/widgets/sources/platform_preview.cpp
     adobe/future/widgets/sources/platform_progress_bar.cpp
     adobe/future/widgets/sources/platform_radio_button.cpp

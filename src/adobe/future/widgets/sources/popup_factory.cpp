@@ -14,6 +14,7 @@
 #include <GG/adobe/future/widgets/headers/popup_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
+#include <GG/adobe/localization.hpp>
 
 /*************************************************************************************************/
 
@@ -55,7 +56,7 @@ void create_widget(const dictionary_t& parameters,
     std::string              name;
     std::string              alt_text;
     int                      max_characters(25);
-    std::string              custom_item_name("Custom");
+    std::string              custom_item_name(localization_invoke("Custom"));
     array_t                  items;
     popup_t::menu_item_set_t item_set;
     name_t                   signal_id;
@@ -63,8 +64,8 @@ void create_widget(const dictionary_t& parameters,
     GG::Clr                  label_color(GG::CLR_BLACK);
     GG::Clr                  item_text_color(GG::CLR_BLACK);
 
-    get_value(parameters, key_name, name);
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, key_max_characters, max_characters);
     get_value(parameters, key_items, items);
     get_value(parameters, key_custom_item_name, custom_item_name);
@@ -76,6 +77,10 @@ void create_widget(const dictionary_t& parameters,
     for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
         item_set.push_back(first->cast<dictionary_t>());
         get_value(item_set.back(), key_value);
+        dictionary_t::iterator it = item_set.back().find(key_name);
+        if (it != item_set.back().end() && it->second.type_info() == type_info<adobe::string_t>()) {
+            it->second.assign(localization_invoke(it->second.cast<std::string>()));
+        }
     }
 
     // REVISIT (fbrereto) : Should be called 'first' but for the fact that MSVC 7.1 complains.

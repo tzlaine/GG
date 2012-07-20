@@ -120,6 +120,10 @@ bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color);
 
 /****************************************************************************************************/
 
+bool get_localized_string(const dictionary_t& parameters, name_t key, std::string& value);
+
+/****************************************************************************************************/
+
 bool get_subtexture(const dictionary_t& parameters, name_t name, GG::SubTexture& subtexture);
 
 /****************************************************************************************************/

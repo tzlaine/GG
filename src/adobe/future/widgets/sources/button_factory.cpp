@@ -49,8 +49,8 @@ struct button_item_t
         modifier_set_m(default_item.modifier_set_m),
         signal_id_m(default_item.signal_id_m)
     {
-        get_value(parameters, adobe::key_name, name_m);
-        get_value(parameters, adobe::key_alt_text, alt_text_m);
+        adobe::implementation::get_localized_string(parameters, adobe::key_name, name_m);
+        adobe::implementation::get_localized_string(parameters, adobe::key_alt_text, alt_text_m);
         get_value(parameters, adobe::key_bind, bind_m);
         get_value(parameters, adobe::key_bind_output, bind_output_m);
         get_value(parameters, adobe::key_action, action_m);
@@ -328,8 +328,8 @@ button_t* create_button_widget(const dictionary_t&     parameters,
     GG::Clr            text_color(GG::CLR_BLACK);
     dictionary_t       image;
 
-    get_value(parameters, key_name,        item.name_m);
-    get_value(parameters, key_alt_text,    item.alt_text_m);
+    implementation::get_localized_string(parameters, key_name,        item.name_m);
+    implementation::get_localized_string(parameters, key_alt_text,    item.alt_text_m);
     get_value(parameters, key_bind,        item.bind_m);
     get_value(parameters, key_bind_output, item.bind_output_m);
     get_value(parameters, key_action,      item.action_m);

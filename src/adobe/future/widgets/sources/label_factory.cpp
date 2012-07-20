@@ -36,8 +36,8 @@ void create_widget(const dictionary_t& parameters,
     adobe::name_t text_vertical;
     GG::Clr       color(GG::CLR_BLACK);
 
-    get_value(parameters, key_name, name);
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, key_characters, characters);
     get_value(parameters, key_wrap, wrap);
     get_value(parameters, key_text_horizontal, text_horizontal);

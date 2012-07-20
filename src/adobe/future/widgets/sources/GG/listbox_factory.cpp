@@ -26,6 +26,7 @@
 
 #include "listbox_factory.hpp"
 
+#include <GG/adobe/localization.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
@@ -275,8 +276,8 @@ namespace adobe {
         name_t signal_id;
         array_t allowed_drop_types;
 
-        get_value(parameters, key_name, name);
-        get_value(parameters, key_alt_text, alt_text);
+        implementation::get_localized_string(parameters, key_name, name);
+        implementation::get_localized_string(parameters, key_alt_text, alt_text);
         get_value(parameters, key_characters, characters);
         get_value(parameters, static_name_t("rows"), rows);
         get_value(parameters, static_name_t("sort"), sort);
@@ -309,6 +310,10 @@ namespace adobe {
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
             item_set.push_back(first->cast<dictionary_t>());
             get_value(item_set.back(), key_value);
+            dictionary_t::iterator it = item_set.back().find(key_name);
+            if (it != item_set.back().end() && it->second.type_info() == type_info<adobe::string_t>()) {
+                it->second.assign(localization_invoke(it->second.cast<std::string>()));
+            }
         }
 
         if (!rows && items.empty())

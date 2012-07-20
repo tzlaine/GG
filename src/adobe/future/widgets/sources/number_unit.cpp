@@ -11,6 +11,7 @@
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
+#include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/name.hpp>
@@ -26,8 +27,8 @@ unit_t to_unit(const dictionary_t& dict, const unit_t& default_unit)
     unit_t  single_unit(default_unit);
     array_t scale;
 
-    get_value(dict,             key_name,                       single_unit.name_m);
-    get_value(dict,             key_short_name,                 single_unit.short_name_m);
+    implementation::get_localized_string(dict, key_name,        single_unit.name_m);
+    implementation::get_localized_string(dict, key_short_name,  single_unit.short_name_m);
     get_value(dict,             key_bind,                       single_unit.base_unit_m);
     get_value(dict,             key_format,                     single_unit.format_m);
     get_value(dict,             key_min_max_filter,             single_unit.base_unit_filter_m);

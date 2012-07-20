@@ -12,6 +12,7 @@
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/name.hpp>
+#include <GG/adobe/localization.hpp>
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 
 #include <boost/cstdint.hpp>
@@ -205,6 +206,18 @@ bool get_color(const dictionary_t& parameters, name_t name, GG::Clr& color)
         return false;
 
     return true;
+}
+
+/****************************************************************************************************/
+
+bool get_localized_string(const dictionary_t& parameters, name_t key, std::string& value)
+{
+    dictionary_t::const_iterator i = parameters.find(key);
+    if (i == parameters.end()) return false;
+    bool retval = i->second.cast(value);
+    if (retval)
+        value = localization_invoke(value);
+    return retval;
 }
 
 /****************************************************************************************************/

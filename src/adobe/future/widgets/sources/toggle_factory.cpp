@@ -34,7 +34,7 @@ void create_widget(const dictionary_t&  parameters,
     toggle_t::image_type image_disabled;
     theme_t              theme(implementation::size_to_theme(size));
 
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, key_value_on, value_on);
     get_value(parameters, key_image_on, image_on);
     get_value(parameters, key_image_off, image_off);

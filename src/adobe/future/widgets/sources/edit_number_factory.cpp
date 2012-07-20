@@ -251,8 +251,8 @@ void create_widget(const dictionary_t& parameters,
 {
     edit_text_ctor_block_t block;
 
-    get_value(parameters, key_name, block.name_m);
-    get_value(parameters, key_alt_text, block.alt_text_m);
+    implementation::get_localized_string(parameters, key_name, block.name_m);
+    implementation::get_localized_string(parameters, key_alt_text, block.alt_text_m);
     get_value(parameters, key_digits, block.min_characters_m);
     get_value(parameters, key_max_digits, block.max_characters_m);
     implementation::get_color(parameters, static_name_t("color"), block.color_m);

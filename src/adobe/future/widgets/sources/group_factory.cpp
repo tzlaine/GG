@@ -29,8 +29,8 @@ void create_widget(const dictionary_t& parameters,
     GG::Clr        text_color(GG::CLR_BLACK);
     GG::Clr        interior_color(GG::CLR_ZERO);
 
-    get_value(parameters, key_name, name);
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     implementation::get_color(parameters, static_name_t("color"), color);
     implementation::get_color(parameters, static_name_t("text_color"), text_color);
     implementation::get_color(parameters, static_name_t("interior_color"), interior_color);

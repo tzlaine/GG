@@ -88,7 +88,7 @@ void create_widget(const dictionary_t& parameters,
     if (parameters.count(key_format))
         format.set(get_value(parameters, key_format).cast<dictionary_t>());
 
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, key_orientation, orientation);
     get_value(parameters, key_slider_ticks, num_ticks);
     get_value(parameters, key_slider_point, slider_pointing);

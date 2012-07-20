@@ -13,6 +13,7 @@
 #include <GG/adobe/future/widgets/headers/platform_metrics.hpp>
 #include <GG/adobe/future/widgets/headers/platform_popup.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
+#include <GG/adobe/localization.hpp>
 #include <GG/adobe/placeable_concept.hpp>
 
 #include <GG/ClrConstants.h>

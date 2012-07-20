@@ -39,7 +39,7 @@ void create_widget(const dictionary_t& parameters,
     GG::Clr     color(GG::CLR_GRAY);
     GG::Clr     text_color(GG::CLR_BLACK);
 
-    get_value(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_name, name);
     get_value(parameters, key_grow, grow);
     get_value(parameters, key_move, move_);
     get_value(parameters, key_on_top, on_top);

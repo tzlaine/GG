@@ -43,7 +43,7 @@ void create_widget(const dictionary_t& parameters,
 {
     std::string alt_text;
 
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
 
     widget = new preview_t(alt_text, implementation::size_to_theme(size));
 }

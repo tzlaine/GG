@@ -32,8 +32,8 @@ void create_widget(const dictionary_t&  parameters,
     dictionary_t            hide_image;
 
     get_value(parameters, key_value_on, show_value);
-    get_value(parameters, key_alt_text, alt_text);
-    get_value(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
     implementation::get_color(parameters, static_name_t("label_color"), label_color);
 
     get_value(parameters, static_name_t("showing_image"), show_image);

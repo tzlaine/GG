@@ -59,8 +59,8 @@ namespace adobe {
         GG::Clr color(GG::CLR_BLACK);
         GG::Clr label_color(GG::CLR_BLACK);
 
-        get_value(parameters, key_name, name);
-        get_value(parameters, key_alt_text, alt_text);
+        implementation::get_localized_string(parameters, key_name, name);
+        implementation::get_localized_string(parameters, key_alt_text, alt_text);
         get_value(parameters, key_characters, characters);
         implementation::get_color(parameters, static_name_t("color"), color);
         implementation::get_color(parameters, static_name_t("label_color"), label_color);

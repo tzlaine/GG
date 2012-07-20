@@ -36,8 +36,8 @@ void create_widget(const dictionary_t&       parameters,
 
     std::vector<unit_t> unit_set;
 
-    get_value(parameters, key_name, name);
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, key_characters, characters);
     implementation::get_color(parameters, static_name_t("color"), color);
     implementation::get_color(parameters, static_name_t("label_color"), label_color);

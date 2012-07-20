@@ -64,8 +64,8 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
     GG::Clr       color(GG::CLR_GRAY);
     GG::Clr       text_color(GG::CLR_BLACK);
 
-    get_value(parameters, key_name, name);
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, static_name_t("expression"), expression_string);
     implementation::get_color(parameters, static_name_t("color"), color);
     implementation::get_color(parameters, static_name_t("text_color"), text_color);

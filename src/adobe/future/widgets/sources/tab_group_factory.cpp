@@ -14,6 +14,7 @@
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/localization.hpp>
 
 /*************************************************************************************************/
 
@@ -86,7 +87,7 @@ void create_widget(const dictionary_t& parameters,
     {
         tab_group_t::tab_t new_tab;
 
-        new_tab.name_m = get_value((*first).cast<dictionary_t>(), key_name).cast<std::string>();
+        new_tab.name_m = localization_invoke(get_value((*first).cast<dictionary_t>(), key_name).cast<std::string>());
         new_tab.value_m = get_value((*first).cast<dictionary_t>(), key_value);
 
         tabs.push_back(new_tab);

@@ -60,8 +60,8 @@ void create_widget(const dictionary_t& parameters,
     name_t        style_name("radio");
     name_t        signal_id;
 
-    get_value(parameters, key_name, name);
-    get_value(parameters, key_alt_text, alt_text);
+    implementation::get_localized_string(parameters, key_name, name);
+    implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, key_value, set_value);
     implementation::get_color(parameters, static_name_t("color"), color);
     implementation::get_color(parameters, static_name_t("text_color"), text_color);

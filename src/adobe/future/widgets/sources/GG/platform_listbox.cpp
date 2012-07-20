@@ -123,15 +123,15 @@ namespace {
         if (listbox.style_m & GG::LIST_NOSORT)
             return;
 
-        typedef std::map<adobe::string_t, adobe::dictionary_t*> sorted_item_map;
+        typedef std::map<std::string, adobe::dictionary_t*> sorted_item_map;
         sorted_item_map sorted_items;
         adobe::listbox_t::item_set_t sorted_item_set(listbox.items_m.size());
         for (adobe::listbox_t::item_set_t::iterator
                  it = listbox.items_m.begin(), end_it = listbox.items_m.end();
              it != end_it;
              ++it) {
-            adobe::string_t name;
-            get_value(*it, adobe::key_name, name);
+            std::string name;
+            adobe::implementation::get_localized_string(*it, adobe::key_name, name);
             sorted_items[name] = &*it;
         }
         std::size_t i = 0;

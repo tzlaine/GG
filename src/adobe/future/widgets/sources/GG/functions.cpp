@@ -26,6 +26,7 @@
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/localization.hpp>
 #include <GG/adobe/name.hpp>
 #include <GG/adobe/future/widgets/headers/platform_widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
@@ -191,6 +192,20 @@ namespace adobe { namespace implementation {
             );
         }
 
+#define LOCALIZE(name) color_dialog->Set##name(localization_invoke(color_dialog->name()))
+        LOCALIZE(NewString);
+        LOCALIZE(OldString);
+        LOCALIZE(RedString);
+        LOCALIZE(GreenString);
+        LOCALIZE(BlueString);
+        LOCALIZE(HueString);
+        LOCALIZE(SaturationString);
+        LOCALIZE(ValueString);
+        LOCALIZE(AlphaString);
+        LOCALIZE(OkString);
+        LOCALIZE(CancelString);
+#undef LOCALIZE
+
         GG::X app_width = GG::GUI::GetGUI()->AppWidth();
         GG::Y app_height = GG::GUI::GetGUI()->AppHeight();
         color_dialog->MoveTo(
@@ -236,6 +251,22 @@ namespace adobe { namespace implementation {
             )
         );
 
+#define LOCALIZE(name) file_dialog->Set##name(localization_invoke(file_dialog->name()))
+        LOCALIZE(FilesString);
+        LOCALIZE(FileTypesString);
+        LOCALIZE(SaveString);
+        LOCALIZE(OpenString);
+        LOCALIZE(CancelString);
+        LOCALIZE(MalformedFilenameString);
+        LOCALIZE(OverwritePromptString);
+        LOCALIZE(InvalidFilenameString);
+        LOCALIZE(FilenameIsADirectoryString);
+        LOCALIZE(FileDoesNotExistString);
+        LOCALIZE(DeviceIsNotReadyString);
+        LOCALIZE(ThreeButtonDlgOKString);
+        LOCALIZE(ThreeButtonDlgCancelString);
+#undef LOCALIZE
+
         file_dialog->Run();
 
         array_t* array = 0;
@@ -267,7 +298,7 @@ namespace adobe { namespace implementation {
         std::string zero;
         std::string one;
         std::string two;
-        get_value(parameters, adobe::static_name_t("message"), message);
+        implementation::get_localized_string(parameters, adobe::static_name_t("message"), message);
         get_value(parameters, adobe::static_name_t("width"), width);
         get_value(parameters, adobe::static_name_t("height"), height);
         get_value(parameters, adobe::static_name_t("color"), color);
@@ -275,9 +306,9 @@ namespace adobe { namespace implementation {
         get_value(parameters, adobe::static_name_t("button_color"), button_color);
         get_value(parameters, adobe::static_name_t("text_color"), text_color);
         get_value(parameters, adobe::static_name_t("buttons"), buttons);
-        get_value(parameters, adobe::static_name_t("zero"), zero);
-        get_value(parameters, adobe::static_name_t("one"), one);
-        get_value(parameters, adobe::static_name_t("two"), two);
+        implementation::get_localized_string(parameters, adobe::static_name_t("zero"), zero);
+        implementation::get_localized_string(parameters, adobe::static_name_t("one"), one);
+        implementation::get_localized_string(parameters, adobe::static_name_t("two"), two);
         std::auto_ptr<GG::ThreeButtonDlg> three_button_dialog;
         if (width && height) {
             three_button_dialog.reset(

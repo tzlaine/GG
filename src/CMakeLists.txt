@@ -92,7 +92,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/tab_group_factory.cpp
     adobe/future/widgets/sources/group_factory.cpp
     adobe/future/widgets/sources/image_factory.cpp
-    adobe/future/widgets/sources/preview_factory.cpp
     adobe/future/widgets/sources/label_factory.cpp
     adobe/future/widgets/sources/reveal_factory.cpp
     adobe/future/widgets/sources/button_factory.cpp
@@ -130,7 +129,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/platform_optional_panel.cpp
     adobe/future/widgets/sources/platform_panel.cpp
     adobe/future/widgets/sources/platform_popup.cpp
-    adobe/future/widgets/sources/platform_preview.cpp
     adobe/future/widgets/sources/platform_progress_bar.cpp
     adobe/future/widgets/sources/platform_radio_button.cpp
     adobe/future/widgets/sources/platform_reveal.cpp

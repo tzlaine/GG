@@ -38,7 +38,6 @@
 #include <GG/adobe/future/widgets/headers/separator_factory.hpp>
 #include <GG/adobe/future/widgets/headers/slider_factory.hpp>
 #include <GG/adobe/future/widgets/headers/tab_group_factory.hpp>
-#include <GG/adobe/future/widgets/headers/toggle_factory.hpp>
 #include <GG/adobe/future/widgets/headers/value_range_format.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
@@ -229,7 +228,6 @@ widget_factory_t& default_asl_widget_factory()
         default_factory_s.reg(name_edit_text, &implementation::make_edit_text);
         default_factory_s.reg(name_group, &make_group, true, group_layout_attributes());
         default_factory_s.reg(name_image, &implementation::make_image_hack);
-        default_factory_s.reg(name_toggle, &make_toggle);
         default_factory_s.reg(name_label, &implementation::make_label_hack);
         default_factory_s.reg(name_optional, &make_optional_panel, true, optional_panel_layout_attributes());
         default_factory_s.reg(name_panel, &make_panel, true, panel_layout_attributes());

@@ -113,7 +113,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/button_helper.cpp
     adobe/future/widgets/sources/edit_number_factory.cpp
     adobe/future/widgets/sources/radio_button_factory.cpp
-    adobe/future/widgets/sources/toggle_factory.cpp
     adobe/future/widgets/sources/virtual_machine_extension.cpp
     adobe/future/widgets/sources/widget_tokens.cpp
     adobe/future/widgets/sources/platform_button.cpp
@@ -135,7 +134,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/platform_separator.cpp
     adobe/future/widgets/sources/platform_slider.cpp
     adobe/future/widgets/sources/platform_tab_group.cpp
-    adobe/future/widgets/sources/platform_toggle.cpp
     adobe/future/widgets/sources/platform_widget_utils.cpp
     adobe/future/widgets/sources/platform_window.cpp
 

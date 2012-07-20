@@ -476,37 +476,37 @@ bool ColorDlg::ColorWasSelected() const
 Clr ColorDlg::Result() const
 { return Convert(m_current_color); }
 
-const std::string& ColorDlg::NewString(const std::string& str) const
+const std::string& ColorDlg::NewString() const
 { return m_new_str; }
 
-const std::string& ColorDlg::OldString(const std::string& str) const
+const std::string& ColorDlg::OldString() const
 { return m_old_str; }
 
-const std::string& ColorDlg::RedString(const std::string& str) const
+const std::string& ColorDlg::RedString() const
 { return m_red_str; }
 
-const std::string& ColorDlg::GreenString(const std::string& str) const
+const std::string& ColorDlg::GreenString() const
 { return m_green_str; }
 
-const std::string& ColorDlg::BlueString(const std::string& str) const
+const std::string& ColorDlg::BlueString() const
 { return m_blue_str; }
 
-const std::string& ColorDlg::HueString(const std::string& str) const
+const std::string& ColorDlg::HueString() const
 { return m_hue_str; }
 
-const std::string& ColorDlg::SaturationString(const std::string& str) const
+const std::string& ColorDlg::SaturationString() const
 { return m_saturation_str; }
 
-const std::string& ColorDlg::ValueString(const std::string& str) const
+const std::string& ColorDlg::ValueString() const
 { return m_value_str; }
 
-const std::string& ColorDlg::AlphaString(const std::string& str) const
+const std::string& ColorDlg::AlphaString() const
 { return m_alpha_str; }
 
-const std::string& ColorDlg::OkString(const std::string& str) const
+const std::string& ColorDlg::OkString() const
 { return m_ok_str; }
 
-const std::string& ColorDlg::CancelString(const std::string& str) const
+const std::string& ColorDlg::CancelString() const
 { return m_cancel_str; }
 
 void ColorDlg::SetNewString(const std::string& str)

@@ -20,7 +20,6 @@
 #include <GG/adobe/virtual_machine.hpp>
 #include <GG/adobe/future/resources.hpp>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
-#include <GG/adobe/future/widgets/headers/alert.hpp>
 #include <GG/adobe/future/widgets/headers/popup_common.hpp>
 #include <GG/adobe/implementation/expression_parser.hpp>
 
@@ -653,7 +652,7 @@ void delete_user_preset(presets_t& control)
 
     if (items.empty())
     {
-        alert(localization_value(control, key_preset_user_preset_list_empty_warning, "The custom preset list is empty.").c_str());
+        //alert(localization_value(control, key_preset_user_preset_list_empty_warning, "The custom preset list is empty.").c_str());
 
         return;
     }

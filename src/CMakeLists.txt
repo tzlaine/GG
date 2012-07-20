@@ -102,7 +102,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/slider_factory.cpp
     adobe/future/widgets/sources/default_factory.cpp
     adobe/future/widgets/sources/window_server.cpp
-    adobe/future/widgets/sources/alert.cpp
     adobe/future/widgets/sources/popup_factory.cpp
     adobe/future/widgets/sources/window_factory.cpp
     adobe/future/widgets/sources/widget_factory_registry.cpp

@@ -78,36 +78,6 @@ void set_control_alt_text(platform_control_type control, const std::string& alt_
 
 /****************************************************************************************************/
 
-/*!
-    \ingroup apl_widgets
-
-    A utility function that will open a dialog allowing the user to pick
-    a file. The picked file must already exist.The implementation is
-    platform-specific.
-
-    \param path is the resultant path to the file picked by the user
-
-    \return whether or not \c path is a valid, user-selected path.
-*/
-bool pick_file(boost::filesystem::path& path);
-
-/****************************************************************************************************/
-
-/*!
-    \ingroup apl_widgets
-
-    A utility function that will open a dialog allowing the user to pick
-    a path (typically to save a file). The picked file need not already
-    exist. The implementation is platform-specific.
-
-    \param path is the resultant path to the file picked by the user
-
-    \return whether or not \c path is a valid, user-selected path.
-*/
-bool pick_save_path(boost::filesystem::path& path);
-
-/****************************************************************************************************/
-
 } // namespace implementation
 
 /****************************************************************************************************/
@@ -124,15 +94,6 @@ bool pick_save_path(boost::filesystem::path& path);
     \return the parent of the display element passed
 */
 platform_display_type get_top_level_window(platform_display_type display_element);
-
-/****************************************************************************************************/
-
-/*!
-    \ingroup apl_widgets
-
-    Causes the computer to beep once. Current implementations only exist for Mac and Windows.
-*/
-inline void system_beep() {}
 
 /****************************************************************************************************/
 

@@ -96,51 +96,6 @@ GG::Y RowHeight()
 
 /****************************************************************************************************/
 
-// TODO: Expose this?  It's not in the header.
-bool pick_file(boost::filesystem::path& path)
-{
-    GG::StyleFactory& style(Factory());
-    assert(style.DefaultFont());
-
-    std::auto_ptr<GG::FileDlg> dlg(
-        style.NewFileDlg("", "", false, false, style.DefaultFont(), GG::CLR_GRAY, GG::CLR_GRAY)
-    );
-    dlg->Run();
-    assert(dlg->Result().size() <= 1u);
-
-    bool result(!dlg->Result().empty());
-
-    if (result)
-        path = to_path(*dlg->Result().begin());
-
-    return result;
-}
-
-/****************************************************************************************************/
-
-// TODO: Expose this?  It's not in the header.
-bool pick_save_path(boost::filesystem::path& path)
-{
-    GG::StyleFactory& style(Factory());
-    assert(style.DefaultFont());
-
-    std::auto_ptr<GG::FileDlg> dlg(
-        style.NewFileDlg("", "", true, false, style.DefaultFont(), GG::CLR_GRAY, GG::CLR_GRAY)
-    );
-    dlg->SelectDirectories(true);
-    dlg->Run();
-    assert(dlg->Result().size() <= 1u);
-
-    bool result(!dlg->Result().empty());
-
-    if (result)
-        path = to_path(*dlg->Result().begin());
-
-    return result;
-}
-
-/****************************************************************************************************/
-
 void set_control_alt_text(GG::Wnd* control, const std::string& alt_text)
 {
     if (control->BrowseModes().empty())

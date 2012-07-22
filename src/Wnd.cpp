@@ -191,17 +191,9 @@ Wnd::Wnd(X x, Y y, X w, Y h, Flags<WndFlag> flags/* = INTERACTIVE | DRAGABLE*/) 
 
 Wnd::~Wnd()
 {
-    // remove this-references from Wnds that this Wnd filters
-    for (std::set<Wnd*>::iterator it1 = m_filtering.begin(); it1 != m_filtering.end(); ++it1) {
-        std::vector<EventFilter*>::iterator it2 = std::find((*it1)->m_filters.begin(), (*it1)->m_filters.end(), this);
-        if (it2 != (*it1)->m_filters.end())
-            (*it1)->m_filters.erase(it2);
-    }
-
     // remove this-references from Wnds that filter this Wnd
-    for (std::vector<EventFilter*>::iterator it1 = m_filters.begin(); it1 != m_filters.end(); ++it1) {
-        if (Wnd* wnd = dynamic_cast<Wnd*>(*it1))
-            wnd->m_filtering.erase(this);
+    for (std::vector<EventFilter*>::iterator it = m_filters.begin(); it != m_filters.end(); ++it) {
+        (*it)->RemoveTarget(this);
     }
 
     if (Wnd* parent = Parent())
@@ -582,8 +574,7 @@ void Wnd::InstallEventFilter(EventFilter* filter)
     if (filter) {
         RemoveEventFilter(filter);
         m_filters.push_back(filter);
-        if (Wnd* wnd = dynamic_cast<Wnd*>(filter))
-            wnd->m_filtering.insert(this);
+        filter->AddTarget(this);
     }
 }
 
@@ -593,8 +584,7 @@ void Wnd::RemoveEventFilter(EventFilter* filter)
         std::vector<EventFilter*>::iterator it = std::find(m_filters.begin(), m_filters.end(), filter);
         if (it != m_filters.end())
             m_filters.erase(it);
-        if (Wnd* wnd = dynamic_cast<Wnd*>(filter))
-            wnd->m_filtering.erase(this);
+        filter->RemoveTarget(this);
     }
 }
 

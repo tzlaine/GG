@@ -881,7 +881,6 @@ private:
         reverse order: top of the stack is back(). */
     std::vector<EventFilter*> m_filters;
 
-    std::set<Wnd*>    m_filtering;         ///< The Wnds in whose filter chains this Wnd lies
     Layout*           m_layout;            ///< The layout for this Wnd, if any
     Layout*           m_containing_layout; ///< The layout that contains this Wnd, if any
     std::vector<BrowseInfoMode>
@@ -902,6 +901,7 @@ private:
         m_browse_mode_times during Wnd contruction */
     static boost::shared_ptr<BrowseInfoWnd> s_default_browse_info_wnd;
 
+    friend class EventFilter;
     friend class GUI;   ///< GUI needs access to \a m_zorder, m_children, etc.
     friend class GUIImpl;
     friend class Timer; ///< Timer needs to be able to call HandleEvent

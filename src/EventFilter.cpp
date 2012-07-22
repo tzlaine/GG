@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* GG is a GUI for SDL and OpenGL.
    Copyright (C) 2003-2008 T. Zachary Laine
 
@@ -23,46 +22,31 @@
    Zach Laine
    whatwasthataddress@gmail.com */
 
-/** \file EventFilter.h \brief Contains the EventFilter class, which is used
-    filter events passed to Wnds. */
+#include <GG/EventFilter.h>
 
-#ifndef _GG_EventFilter_h_
-#define _GG_EventFilter_h_
-
-#include <GG/Export.h>
-
-#include <set>
+#include <GG/Wnd.h>
 
 
-namespace GG {
+using namespace GG;
 
-class Wnd;
-class WndEvent;
-
-/** Filters the events passed to the Wnds on which it is installed. */
-class GG_API EventFilter
+EventFilter::~EventFilter()
 {
-public:
-    /** Virtual dtor.*/
-    virtual ~EventFilter();
+    for (std::set<Wnd*>::iterator it = m_targets.begin(); it != m_targets.end(); ++it) {
+        std::vector<EventFilter*>::iterator filter_it =
+            std::find((*it)->m_filters.begin(), (*it)->m_filters.end(), this);
+        if (filter_it != (*it)->m_filters.end())
+            (*it)->m_filters.erase(filter_it);
+    }
+}
 
-    /** Adds \a w to the set of Wnds this filter is filtering. */
-    void AddTarget(Wnd* w);
+void EventFilter::AddTarget(Wnd* w)
+{ m_targets.insert(w); }
 
-    /** Removes \a w from the set of Wnds this filter is filtering. */
-    void RemoveTarget(Wnd* w);
+void EventFilter::RemoveTarget(Wnd* w)
+{ m_targets.erase(w); }
 
-    /** Handles a WndEvent bound for Wnd \a w, but which this filter is
-        allowed to handle first.  Returns true if this filter processed the
-        message. */
-    bool Filter(Wnd* w, const WndEvent& event);
+bool EventFilter::Filter(Wnd* w, const WndEvent& event)
+{ return FilterImpl(w, event); }
 
-private:
-    virtual bool FilterImpl(Wnd* w, const WndEvent& event);
-
-    std::set<Wnd*> m_targets;
-};
-
-} // namespace GG
-
-#endif
+bool EventFilter::FilterImpl(Wnd* w, const WndEvent& event)
+{ return false; }

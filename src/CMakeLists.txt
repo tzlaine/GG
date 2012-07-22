@@ -16,6 +16,7 @@ set(THIS_LIB_SOURCES
     DropDownList.cpp
     DynamicGraphic.cpp
     Edit.cpp
+    EventFilter.cpp
     EventPump.cpp
     EveGlue.cpp
     EveParser.cpp

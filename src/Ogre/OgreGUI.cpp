@@ -125,6 +125,7 @@ void OgreGUI::Exit(int code)
 OgreGUI* OgreGUI::GetGUI()
 { return dynamic_cast<OgreGUI*>(GUI::GetGUI()); }
 
+void OgreGUI::Initialize() {}
 void OgreGUI::RenderBegin() {}
 void OgreGUI::RenderEnd() {}
 
@@ -135,6 +136,7 @@ void OgreGUI::Run()
     assert(active_renderer);
     active_renderer->_initRenderTargets();
     root.clearEventTimes();
+    Initialize();
     try {
         bool done = false;
         OgreModalEventPump pump(done);

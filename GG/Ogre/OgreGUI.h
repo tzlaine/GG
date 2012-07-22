@@ -163,6 +163,7 @@ public:
     static OgreGUI* GetGUI();
 
 protected:
+    virtual void Initialize(); ///< provides one-time gui initialization
     virtual void RenderBegin();
     virtual void RenderEnd();
     virtual void Run();

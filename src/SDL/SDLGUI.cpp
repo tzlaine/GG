@@ -181,6 +181,9 @@ void SDLGUI::GLInit()
     gluPerspective(50.0, ratio, 1.0, 10.0);
 }
 
+void SDLGUI::Initialize()
+{}
+
 void SDLGUI::HandleSystemEvents()
 {
     // handle events

@@ -28,7 +28,6 @@ void create_widget(const dictionary_t&       parameters,
 {
     std::string name;
     std::string alt_text;
-    theme_t     theme(implementation::size_to_theme(size));
     long        characters(5);
     unit_t      default_unit(to_unit(parameters));
     GG::Clr     color(GG::CLR_BLACK);

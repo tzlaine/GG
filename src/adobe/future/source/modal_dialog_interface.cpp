@@ -249,10 +249,12 @@ try
 catch(const std::exception& error)
 {
     std::cerr << "Exception (modal_dialog_t::latch_callback) : " << error.what() << std::endl;
+    return false;
 }
 catch(...)
 {
     std::cerr << "Unknown exception (modal_dialog_t::latch_callback)" << std::endl;
+    return false;
 }
 
 /****************************************************************************************************/

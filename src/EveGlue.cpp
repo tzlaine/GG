@@ -336,8 +336,8 @@ const Pt EveDialog::BEVEL_OFFSET(X(EveDialog::FRAME_WIDTH), Y(EveDialog::FRAME_W
 EveDialog::EveDialog(adobe::window_t& imp, Clr color, Clr text_color) :
     Wnd(X0, Y0, X1, Y1, imp.flags_m),
     m_imp(imp),
-    m_title(0),
     m_color(color),
+    m_title(0),
     m_keyboard(0),
     m_prev_wnd_region(WR_NONE),
     m_left_button_down(false)

@@ -116,7 +116,7 @@ private:
                 bool squelch =
                     m_edit_text.rows_m == 1 &&
                     0 < m_edit_text.max_cols_m &&
-                    static_cast<std::size_t>(m_edit_text.max_cols_m) <
+                    static_cast<std::ptrdiff_t>(m_edit_text.max_cols_m) <
                     utf8::distance(text.begin(), text.end()) + 1;
 
                 if (squelch)

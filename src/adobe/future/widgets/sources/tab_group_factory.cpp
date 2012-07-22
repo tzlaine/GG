@@ -94,7 +94,6 @@ void create_widget(const dictionary_t& parameters,
     }
 
     tab_group_t::tab_t* first_tab(tabs.empty() ? 0 : &tabs[0]);
-    theme_t theme(implementation::size_to_theme(size));
 
     widget = new tab_group_t(first_tab,
                              first_tab + tabs.size(),

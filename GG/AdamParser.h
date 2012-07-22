@@ -29,6 +29,7 @@
 #define _GG_AdamParser_h_
 
 #include <GG/Export.h>
+#include <GG/adobe/array_fwd.hpp>
 
 #include <string>
 
@@ -42,6 +43,8 @@ namespace GG {
 GG_API bool Parse(const std::string& sheet,
                   const std::string& filename,
                   const adobe::adam_callback_suite_t& callbacks);
+
+GG_API adobe::array_t ParseAdamExpression(const std::string& expr);
 
 }
 

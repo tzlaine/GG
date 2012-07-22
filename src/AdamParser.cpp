@@ -591,3 +591,22 @@ bool GG::Parse(const std::string& sheet,
                         adam_rules.sheet_specifier,
                         boost::spirit::qi::in_state("WS")[AdamLexer().self]);
 }
+
+adobe::array_t GG::ParseAdamExpression(const std::string& expr)
+{
+    adobe::array_t retval;
+    using boost::spirit::qi::phrase_parse;
+    text_iterator it(expr.begin());
+    detail::s_text_it = &it;
+    detail::s_begin = it;
+    detail::s_end = text_iterator(expr.end());
+    detail::s_filename = "adam expression";
+    token_iterator iter = AdamLexer().begin(it, detail::s_end);
+    token_iterator end = AdamLexer().end();
+    const expression_parser_rules::expression_rule& expression = AdamExpressionParser();
+    phrase_parse(iter,
+                 end,
+                 expression(boost::phoenix::ref(retval)),
+                 boost::spirit::qi::in_state("WS")[AdamLexer().self]);
+    return retval;
+}

@@ -1,9 +1,14 @@
+#if USE_SDL_BACKEND
+#include "SDLBackend.h"
+#else
+#include "OgreBackend.h"
+#endif
+
 #include <GG/EveGlue.h>
 #include <GG/EveParser.h>
 #include <GG/GUI.h>
 #include <GG/Timer.h>
 #include <GG/Wnd.h>
-#include <GG/SDL/SDLGUI.h>
 #include <GG/adobe/adam.hpp>
 
 #include <boost/filesystem.hpp>
@@ -142,91 +147,24 @@ void RunTest(std::size_t i)
     eve_dialog->Run();
 }
 
-class MinimalGGApp : public GG::SDLGUI
-{
-public:
-    MinimalGGApp();
-
-    virtual void Enter2DMode();
-    virtual void Exit2DMode();
-
-private:
-    virtual void GLInit();
-    virtual void Initialize();
-    virtual void FinalCleanup();
-};
-
-MinimalGGApp::MinimalGGApp() : 
-    SDLGUI(1024, 768, false, "Minimal GG App")
-{}
-
-void MinimalGGApp::Enter2DMode()
-{
-    glPushAttrib(GL_ENABLE_BIT | GL_PIXEL_MODE_BIT | GL_TEXTURE_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glViewport(0, 0, Value(AppWidth()), Value(AppHeight()));
-
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glOrtho(0.0, Value(AppWidth()), Value(AppHeight()), 0.0, 0.0, Value(AppWidth()));
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-}
-
-void MinimalGGApp::Exit2DMode()
-{
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glPopAttrib();
-}
-
-void MinimalGGApp::GLInit()
-{
-    double ratio = Value(AppWidth() * 1.0) / Value(AppHeight());
-
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, Value(AppWidth()), Value(AppHeight()));
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(50.0, ratio, 1.0, 10.0);
-    gluLookAt(0.0, 0.0, 5.0,
-              0.0, 0.0, 0.0,
-              0.0, 1.0, 0.0);
-    glMatrixMode(GL_MODELVIEW);
-}
-
-void MinimalGGApp::Initialize()
+void CustomInit()
 {
     for (std::size_t i = 0; i < Tests().size(); ++i) {
         RunTest(i);
     }
 
-    Exit(0);
+    GG::GUI::GetGUI()->Exit(0);
 }
-
-void MinimalGGApp::FinalCleanup()
-{}
 
 BOOST_AUTO_TEST_CASE( eve_layout )
 {
-    MinimalGGApp app;
-    app();
+#if USE_SDL_BACKEND
+    MinimalSDLGUI::CustomInit = &CustomInit;
+    MinimalSDLMain();
+#else
+    MinimalOgreGUI::CustomInit = &CustomInit;
+    MinimalOgreMain();
+#endif
 }
 
 // Most of this is boilerplate cut-and-pasted from Boost.Test.  We need to

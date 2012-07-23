@@ -1,4 +1,8 @@
+#if USE_SDL_BACKEND
 #include "SDLBackend.h"
+#else
+#include "OgreBackend.h"
+#endif
 
 #include <GG/EveGlue.h>
 #include <GG/EveParser.h>
@@ -274,8 +278,13 @@ void CustomInit()
 
 BOOST_AUTO_TEST_CASE( eve_layout )
 {
+#if USE_SDL_BACKEND
     MinimalSDLGUI::CustomInit = &CustomInit;
     MinimalSDLMain();
+#else
+    MinimalOgreGUI::CustomInit = &CustomInit;
+    MinimalOgreMain();
+#endif
 }
 
 // Most of this is boilerplate cut-and-pasted from Boost.Test.  We need to

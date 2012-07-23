@@ -131,13 +131,13 @@ void OgreGUI::RenderEnd() {}
 
 void OgreGUI::Run()
 {
-    Ogre::Root& root = Ogre::Root::getSingleton();
-    Ogre::RenderSystem* active_renderer = root.getRenderSystem();
-    assert(active_renderer);
-    active_renderer->_initRenderTargets();
-    root.clearEventTimes();
-    Initialize();
     try {
+        Ogre::Root& root = Ogre::Root::getSingleton();
+        Ogre::RenderSystem* active_renderer = root.getRenderSystem();
+        assert(active_renderer);
+        active_renderer->_initRenderTargets();
+        root.clearEventTimes();
+        Initialize();
         bool done = false;
         OgreModalEventPump pump(done);
         pump();

@@ -3,7 +3,37 @@ cmake_policy(VERSION 2.6.4)
 
 message("-- Configuring Tests")
 
+if (TARGET GiGiSDL)
+    set(test_backend SDL)
+    message("     Using the SDL driver for the tests.")
+elseif (TARGET GiGiOgre)
+    set(test_backend Ogre)
+    message("     Using the Ogre driver for the tests.")
+else ()
+    message("     Neither the SDL nor the Ogre backend was built; skipping tests.")
+    return()
+endif()
+
 find_package(Boost ${MINIMUM_BOOST_VERSION} COMPONENTS unit_test_framework REQUIRED)
+
+if (test_backend STREQUAL SDL)
+    include_directories(${SDL_INCLUDE_DIR})
+    add_definitions(-DUSE_SDL_BACKEND=1)
+elseif (test_backend STREQUAL Ogre)
+    include_directories(${OGRE_INCLUDE_DIR})
+    link_directories(${OGRE_LIB_DIR})
+    add_definitions(-DUSE_SDL_BACKEND=0)
+    file(GLOB rendersystem_gl ${OGRE_LIB_DIR}/OGRE/*RenderSystem_GL*)
+    file(GLOB plugin_octreescenemanager ${OGRE_LIB_DIR}/OGRE/*Plugin_OctreeSceneManager*)
+    file(COPY
+             ${rendersystem_gl}
+             ${plugin_octreescenemanager}
+             ${CMAKE_HOME_DIRECTORY}/src/Ogre/Plugins/OISInput.cfg
+             ogre_plugins.cfg
+         DESTINATION
+             ${CMAKE_CURRENT_BINARY_DIR}
+    )
+endif ()
 
 macro (make_test_exec name)
     add_executable(${name}-test Test${name}.cpp)
@@ -12,8 +42,17 @@ macro (make_test_exec name)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
     target_link_libraries(${name}-test GiGi ${Boost_LIBRARIES})
-    if (TARGET GiGiSDL)
+    if (test_backend STREQUAL SDL)
         target_link_libraries(${name}-test GiGiSDL ${Boost_LIBRARIES})
+    elseif (test_backend STREQUAL Ogre)
+        target_link_libraries(${name}-test GiGiOgre ${Boost_LIBRARIES})
+        get_target_property(ois_lib GiGiOgrePlugin_OIS LOCATION)
+        if (NOT TARGET copy_ois_lib)
+            add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ois_lib}
+                               COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ois_lib} ${CMAKE_CURRENT_BINARY_DIR}
+                               DEPENDS GiGiOgrePlugin_OIS ${name}-test)
+            add_custom_target(copy_ois_lib ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ois_lib})
+        endif ()
     endif ()
     if (0)
         set_target_properties(${name}-test
@@ -90,81 +129,73 @@ foreach (test_file ${eve_test_files})
     add_test_and_data_files(EveWriter ${test_file} ${adam_test_file})
 endforeach ()
 
-if ((TARGET GiGiSDL))
-    file(GLOB pngs *.png)
-    file(COPY EveLayout_vs_Adobe_Begin.html begin_images ${pngs} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB pngs *.png)
+file(COPY EveLayout_vs_Adobe_Begin.html begin_images ${pngs} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-    foreach (test_file ${eve_test_files})
-        string(REPLACE asl_1.0.43_eve_files asl_1.0.43_adam_files tmp ${test_file})
-        string(REPLACE .eve .adm adam_test_file ${tmp})
-        if (test_file MATCHES "optional_panel")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 18,36 18,72 28,141)
-        elseif (test_file MATCHES "mini_image_size_2")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 19,137)
-        elseif (test_file MATCHES "mini_image_size_3")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 19,240)
-        elseif (test_file MATCHES "widget_palette")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 201,42,200,92 201,42,200,114 201,42,200,136 201,42,200,158 201,42,200,180 201,42,200,202 201,42,200,224)
-        else ()
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR})
-        endif ()
-    endforeach ()
-endif ()
+foreach (test_file ${eve_test_files})
+    string(REPLACE asl_1.0.43_eve_files asl_1.0.43_adam_files tmp ${test_file})
+    string(REPLACE .eve .adm adam_test_file ${tmp})
+    if (test_file MATCHES "optional_panel")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 18,36 18,72 28,141)
+    elseif (test_file MATCHES "mini_image_size_2")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 19,137)
+    elseif (test_file MATCHES "mini_image_size_3")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 19,240)
+    elseif (test_file MATCHES "widget_palette")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} 201,42,200,92 201,42,200,114 201,42,200,136 201,42,200,158 201,42,200,180 201,42,200,202 201,42,200,224)
+    else ()
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR})
+    endif ()
+endforeach ()
 
 file(GLOB presentation_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_eve_files/*_presentation_test.eve)
 
-if ((TARGET GiGiSDL))
-    file(COPY PresentationTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    foreach (test_file ${presentation_test_files})
-        add_test_and_data_files(EveLayout ${test_file} gg_adam_files/presentation_test.adm ${CMAKE_CURRENT_BINARY_DIR})
-    endforeach ()
-endif ()
+file(COPY PresentationTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+foreach (test_file ${presentation_test_files})
+    add_test_and_data_files(EveLayout ${test_file} gg_adam_files/presentation_test.adm ${CMAKE_CURRENT_BINARY_DIR})
+endforeach ()
 
 file(GLOB signal_binding_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_eve_files/*_signal_binding_test.eve)
 
-if ((TARGET GiGiSDL))
-    file(COPY SignalBindingTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    foreach (test_file ${signal_binding_test_files})
-        string(REPLACE gg_eve_files gg_adam_files tmp ${test_file})
-        string(REPLACE .eve .adm adam_test_file ${tmp})
-        if (test_file MATCHES "edit_text_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 208,74 keys{foo} 208,254 keys{foo} 518,74 keys{foo} 518,254 keys{foo} 802,74 keys{f} 802,158 keys{g})
-        elseif (test_file MATCHES "radio_button_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 134,68 134,193 134,314 134,437 444,69 444,142)
-        elseif (test_file MATCHES "tab_group_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 96,74 96,284 96,436 96,590 424,76 424,178)
-        elseif (test_file MATCHES "checkbox_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 28,69 28,193 28,315 28,437 326,69 326,143)
-        elseif (test_file MATCHES "popup_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 250,75,250,125 250,225,250,275 250,360,250,410 250,495,250,545 535,75,535,125 535,160,535,210)
-        elseif (test_file MATCHES "edit_number_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 256,75,164,75d keys{314} 336,75,336,125 256,325,164,325d keys{314} 336,325,336,375 600,75,500,75d keys{1} 600,160,500,160d keys{2})
-        elseif (test_file MATCHES "slider_signal_binding_test")
-           add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 35,102,83,102d 35,269,83,269d 35,436,83,436d 304,102,352,102d 304,317,352,317d 594,102,618,102d 594,221,666,221d)
-        elseif (test_file MATCHES "button_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 40,72 40,230 40,360 40,485 320,72 320,150)
-        elseif (test_file MATCHES "listbox_1_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
-        elseif (test_file MATCHES "listbox_2_signal_binding_test")
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
-        else ()
-            add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals)
-        endif ()
-    endforeach ()
-endif ()
+file(COPY SignalBindingTests.html DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+foreach (test_file ${signal_binding_test_files})
+    string(REPLACE gg_eve_files gg_adam_files tmp ${test_file})
+    string(REPLACE .eve .adm adam_test_file ${tmp})
+    if (test_file MATCHES "edit_text_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 208,74 keys{foo} 208,254 keys{foo} 518,74 keys{foo} 518,254 keys{foo} 802,74 keys{f} 802,158 keys{g})
+    elseif (test_file MATCHES "radio_button_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 134,68 134,193 134,314 134,437 444,69 444,142)
+    elseif (test_file MATCHES "tab_group_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 96,74 96,284 96,436 96,590 424,76 424,178)
+    elseif (test_file MATCHES "checkbox_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 28,69 28,193 28,315 28,437 326,69 326,143)
+    elseif (test_file MATCHES "popup_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 250,75,250,125 250,225,250,275 250,360,250,410 250,495,250,545 535,75,535,125 535,160,535,210)
+    elseif (test_file MATCHES "edit_number_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 256,75,164,75d keys{314} 336,75,336,125 256,325,164,325d keys{314} 336,325,336,375 600,75,500,75d keys{1} 600,160,500,160d keys{2})
+    elseif (test_file MATCHES "slider_signal_binding_test")
+       add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 35,102,83,102d 35,269,83,269d 35,436,83,436d 304,102,352,102d 304,317,352,317d 594,102,618,102d 594,221,666,221d)
+    elseif (test_file MATCHES "button_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 40,72 40,230 40,360 40,485 320,72 320,150)
+    elseif (test_file MATCHES "listbox_1_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
+    elseif (test_file MATCHES "listbox_2_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
+    else ()
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals)
+    endif ()
+endforeach ()
 
-if ((TARGET GiGiSDL))
-    add_test_and_data_files(
-        EveLayout
-        gg_eve_files/dialog_button_test.eve
-        gg_adam_files/dialog_button_test.adm
-        gg_eve_files/eve_only_subdialog_0.eve
-        gg_eve_files/eve_only_subdialog_1.eve
-        gg_eve_files/eve_only_subdialog_2.eve
-        gg_eve_files/eve_only_subdialog_3.eve
-        gg_adam_files/adam_and_eve_subdialog.adm
-        gg_eve_files/adam_and_eve_subdialog.eve
-        ${CMAKE_CURRENT_BINARY_DIR}
-        #################### TODO: keystrokes!
-    )
-endif ()
+add_test_and_data_files(
+    EveLayout
+    gg_eve_files/dialog_button_test.eve
+    gg_adam_files/dialog_button_test.adm
+    gg_eve_files/eve_only_subdialog_0.eve
+    gg_eve_files/eve_only_subdialog_1.eve
+    gg_eve_files/eve_only_subdialog_2.eve
+    gg_eve_files/eve_only_subdialog_3.eve
+    gg_adam_files/adam_and_eve_subdialog.adm
+    gg_eve_files/adam_and_eve_subdialog.eve
+    ${CMAKE_CURRENT_BINARY_DIR}
+    #################### TODO: keystrokes!
+)

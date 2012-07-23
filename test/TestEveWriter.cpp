@@ -1,3 +1,9 @@
+#if USE_SDL_BACKEND
+#include "SDLBackend.h"
+#else
+#include "OgreBackend.h"
+#endif
+
 #include <GG/AdamParser.h>
 #include <GG/EveParser.h>
 #include <GG/Wnd.h>
@@ -7,7 +13,6 @@
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/future/modal_dialog_interface.hpp>
-#include <GG/SDL/SDLGUI.h>
 
 #include <fstream>
 #include <iostream>
@@ -137,91 +142,84 @@ namespace GG {
 std::string getline_proc (adobe::name_t, std::streampos)
 { return std::string(); }
 
-class MinimalGGApp : public GG::SDLGUI
+void CustomInit()
 {
-public:
-    MinimalGGApp() : SDLGUI(1024, 768, false, "") {}
+    std::string file_contents = read_file(g_eve_file);
 
-    virtual void Enter2DMode() {}
-    virtual void Exit2DMode() {}
+    adobe::array_t new_parse;
 
-private:
-    virtual void GLInit() {}
-    virtual void Initialize()
-        {
-            std::string file_contents = read_file(g_eve_file);
+    adobe::eve_callback_suite_t new_parse_callbacks;
+    new_parse_callbacks.add_view_proc_m = GG::StoreAddViewParams(new_parse, file_contents);
+    new_parse_callbacks.add_cell_proc_m = GG::StoreAddCellParams(new_parse, file_contents);
 
-            adobe::array_t new_parse;
+    std::cout << "layout:\"\n" << file_contents << "\n\"\n"
+              << "filename: " << g_eve_file << '\n';
+    bool new_parse_failed = !GG::Parse(file_contents, g_eve_file, boost::any(), new_parse_callbacks);
+    std::cout << "new:      <parse " << (new_parse_failed ? "failure" : "success") << ">\n";
 
-            adobe::eve_callback_suite_t new_parse_callbacks;
-            new_parse_callbacks.add_view_proc_m = GG::StoreAddViewParams(new_parse, file_contents);
-            new_parse_callbacks.add_cell_proc_m = GG::StoreAddCellParams(new_parse, file_contents);
+    adobe::vm_lookup_t vm_lookup;
+    adobe::sheet_t sheet;
+    vm_lookup.attach_to(sheet);
+    vm_lookup.attach_to(sheet.machine_m);
+    std::string sheet_contents = read_file(g_adam_file);
+    if (!GG::Parse(sheet_contents, g_adam_file, adobe::bind_to_sheet(sheet)))
+        throw std::logic_error("Adam parse failed.");
+    sheet.update();
+    std::istringstream iss(file_contents);
+    adobe::behavior_t root_behavior(true);
+    adobe::auto_ptr<adobe::eve_client_holder> eve_holder(
+        make_view("",
+                  adobe::line_position_t::getline_proc_t(
+                      new adobe::line_position_t::getline_proc_impl_t(&getline_proc)
+                  ),
+                  iss,
+                  sheet,
+                  root_behavior,
+                  vm_lookup,
+                  adobe::button_notifier_t(),
+                  adobe::button_notifier_t(),
+                  adobe::signal_notifier_t(),
+                  adobe::row_factory_t(),
+                  adobe::size_enum_t(),
+                  adobe::default_widget_factory_proc(),
+                  adobe::platform_display_type())
+    );
+    std::stringstream os;
+    eve_holder->layout_sheet_m.print(os);
+    adobe::array_t round_trip_parse;
+    adobe::eve_callback_suite_t round_trip_parse_callbacks;
+    round_trip_parse_callbacks.add_view_proc_m = GG::StoreAddViewParams(round_trip_parse, os.str());
+    round_trip_parse_callbacks.add_cell_proc_m = GG::StoreAddCellParams(round_trip_parse, os.str());
+    bool round_trip_parse_pass =
+        GG::Parse(os.str(), g_eve_file, boost::any(), round_trip_parse_callbacks);
+    bool pass =
+        !round_trip_parse_pass && new_parse_failed ||
+        round_trip_parse == new_parse;
 
-            std::cout << "layout:\"\n" << file_contents << "\n\"\n"
-                      << "filename: " << g_eve_file << '\n';
-            bool new_parse_failed = !GG::Parse(file_contents, g_eve_file, boost::any(), new_parse_callbacks);
-            std::cout << "new:      <parse " << (new_parse_failed ? "failure" : "success") << ">\n";
+    std::cout << "Round-trip parse: " << (pass ? "PASS" : "FAIL") << "\n\n";
 
-            adobe::vm_lookup_t vm_lookup;
-            adobe::sheet_t sheet;
-            vm_lookup.attach_to(sheet);
-            vm_lookup.attach_to(sheet.machine_m);
-            std::string sheet_contents = read_file(g_adam_file);
-            if (!GG::Parse(sheet_contents, g_adam_file, adobe::bind_to_sheet(sheet)))
-                throw std::logic_error("Adam parse failed.");
-            sheet.update();
-            std::istringstream iss(file_contents);
-            adobe::behavior_t root_behavior(true);
-            adobe::auto_ptr<adobe::eve_client_holder> eve_holder(
-                make_view("",
-                          adobe::line_position_t::getline_proc_t(
-                              new adobe::line_position_t::getline_proc_impl_t(&getline_proc)
-                          ),
-                          iss,
-                          sheet,
-                          root_behavior,
-                          vm_lookup,
-                          adobe::button_notifier_t(),
-                          adobe::button_notifier_t(),
-                          adobe::signal_notifier_t(),
-                          adobe::row_factory_t(),
-                          adobe::size_enum_t(),
-                          adobe::default_widget_factory_proc(),
-                          adobe::platform_display_type())
-            );
-            std::stringstream os;
-            eve_holder->layout_sheet_m.print(os);
-            adobe::array_t round_trip_parse;
-            adobe::eve_callback_suite_t round_trip_parse_callbacks;
-            round_trip_parse_callbacks.add_view_proc_m = GG::StoreAddViewParams(round_trip_parse, os.str());
-            round_trip_parse_callbacks.add_cell_proc_m = GG::StoreAddCellParams(round_trip_parse, os.str());
-            bool round_trip_parse_pass =
-                GG::Parse(os.str(), g_eve_file, boost::any(), round_trip_parse_callbacks);
-            bool pass =
-                !round_trip_parse_pass && new_parse_failed ||
-                round_trip_parse == new_parse;
+    if (!pass) {
+        std::cout << "rewritten layout:\"\n" << os.str() << "\n\"\n";
+        std::cout << "initial (verbose):\n";
+        verbose_dump(new_parse);
+        std::cout << "roud-trip (verbose):\n";
+        verbose_dump(round_trip_parse);
+    }
 
-            std::cout << "Round-trip parse: " << (pass ? "PASS" : "FAIL") << "\n\n";
+    BOOST_CHECK(pass);
 
-            if (!pass) {
-                std::cout << "rewritten layout:\"\n" << os.str() << "\n\"\n";
-                std::cout << "initial (verbose):\n";
-                verbose_dump(new_parse);
-                std::cout << "roud-trip (verbose):\n";
-                verbose_dump(round_trip_parse);
-            }
-
-            BOOST_CHECK(pass);
-
-            Exit(0);
-        }
-    virtual void FinalCleanup() {}
-};
+    GG::GUI::GetGUI()->Exit(0);
+}
 
 BOOST_AUTO_TEST_CASE( eve_writer )
 {
-    MinimalGGApp app;
-    app();
+#if USE_SDL_BACKEND
+    MinimalSDLGUI::CustomInit = &CustomInit;
+    MinimalSDLMain();
+#else
+    MinimalOgreGUI::CustomInit = &CustomInit;
+    MinimalOgreMain();
+#endif
 }
 
 // Most of this is boilerplate cut-and-pasted from Boost.Test.  We need to

@@ -252,13 +252,7 @@ void CustomInit()
     );
 
     boost::filesystem::path input(g_eve_file);
-    std::string input_stem =
-#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
-        input.stem().native()
-#else
-        input.stem()
-#endif
-        ;
+    std::string input_stem = input.stem().native();
     GG::Timer timer(g_drags ? 300 : 100);
     if (!g_dont_exit)
         GG::Connect(timer.FiredSignal, GenerateEvents(timer, eve_dialog.get(), input_stem));

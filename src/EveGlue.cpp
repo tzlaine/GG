@@ -571,6 +571,10 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     std::auto_ptr<Wnd> w(dialog->init(eve_definition, eve_filename, adam_definition, adam_filename));
     EveDialog* gg_dialog = boost::polymorphic_downcast<EveDialog*>(w.get());
     gg_dialog->SetKeyboard(dialog->keyboard());
+    gg_dialog->MoveTo(
+        GG::Pt((GG::GUI::GetGUI()->AppWidth() - gg_dialog->Width()) / 2,
+               (GG::GUI::GetGUI()->AppHeight() - gg_dialog->Height()) / 2)
+    );
     adobe::dialog_result_t adobe_result = dialog->go();
 
     swap(adobe_result.command_m, retval.m_result);

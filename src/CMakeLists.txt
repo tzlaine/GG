@@ -105,7 +105,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/popup_factory.cpp
     adobe/future/widgets/sources/window_factory.cpp
     adobe/future/widgets/sources/widget_factory_registry.cpp
-    adobe/future/widgets/sources/sublayout.cpp
     adobe/future/widgets/sources/widget_utils.cpp
     adobe/future/widgets/sources/optional_panel_factory.cpp
     adobe/future/widgets/sources/control_button.cpp

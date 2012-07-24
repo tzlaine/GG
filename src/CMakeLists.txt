@@ -22,6 +22,7 @@ set(THIS_LIB_SOURCES
     EveParser.cpp
     ExpressionParser.cpp
     ExpressionWriter.cpp
+    Filesystem.cpp
     Font.cpp
     GroupBox.cpp
     GUI.cpp

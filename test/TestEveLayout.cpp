@@ -6,6 +6,7 @@
 
 #include <GG/EveGlue.h>
 #include <GG/EveParser.h>
+#include <GG/Filesystem.h>
 #include <GG/GUI.h>
 #include <GG/Timer.h>
 #include <GG/Wnd.h>
@@ -110,7 +111,7 @@ struct GenerateEvents
         }
     std::string OutputFilename()
         {
-            boost::filesystem::path out(g_output_dir);
+            boost::filesystem::path out(GG::UTF8ToPath(g_output_dir));
             std::string filename = m_input_stem;
             if (g_generate_variants) {
                 filename += '_';
@@ -118,7 +119,7 @@ struct GenerateEvents
             }
             filename += ".png";
             out /= filename;
-            return out.string();
+            return GG::PathToUTF8(out);
         }
     std::size_t m_iteration;
     GG::Wnd* m_dialog;
@@ -243,15 +244,15 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
 
 void CustomInit()
 {
-    boost::filesystem::path eve(g_eve_file);
-    boost::filesystem::path adam(g_adam_file);
+    boost::filesystem::path eve(GG::UTF8ToPath(g_eve_file));
+    boost::filesystem::path adam(GG::UTF8ToPath(g_adam_file));
     std::auto_ptr<GG::EveDialog> eve_dialog(
         g_test_signals ?
         GG::MakeEveDialog(eve, adam, &ButtonHandler, &SignalTester) :
         GG::MakeEveDialog(eve, adam, &ButtonHandler)
     );
 
-    boost::filesystem::path input(g_eve_file);
+    boost::filesystem::path input(GG::UTF8ToPath(g_eve_file));
     std::string input_stem = input.stem().native();
     GG::Timer timer(g_drags ? 300 : 100);
     if (!g_dont_exit)

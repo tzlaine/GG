@@ -46,6 +46,8 @@ Copyright for cursors:
    DEALINGS IN THE SOFTWARE.
 */
 
+#include <GG/Filesystem.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -180,7 +182,7 @@ namespace {
             detail::DecodeBase64(buffer, CURSORS, CURSORS_SIZE);
             fs::path tmp_cursors_path =
                 temp_directory /
-                ("gigi_cursors_" + fs::unique_path().string() + ".png");
+                GG::UTF8ToPath("gigi_cursors_" + GG::PathToUTF8(fs::unique_path()) + ".png");
             {
                 fs::ofstream ofs(tmp_cursors_path);
                 ofs.write(static_cast<char*>(static_cast<void*>(&buffer[0])),
@@ -188,7 +190,7 @@ namespace {
             }
             fs::rename(tmp_cursors_path, cursors_path);
         }
-        return cursors_path.string();
+        return GG::PathToUTF8(cursors_path);
     }
 
 }

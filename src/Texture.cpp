@@ -27,6 +27,7 @@
 #include <GG/GUI.h>
 #include <GG/Config.h>
 #include <GG/DrawUtil.h>
+#include <GG/Filesystem.h>
 
 #if GG_USE_DEVIL_IMAGE_LOAD_LIBRARY
 # include <IL/il.h>
@@ -285,7 +286,7 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     > ImageTypes;
     typedef gil::any_image<ImageTypes> ImageType;
 
-    fs::path path(filename);
+    fs::path path(UTF8ToPath(filename));
 
     if (!fs::exists(path))
         throw BadFile("Texture file \"" + filename + "\" does not exist");
@@ -293,7 +294,7 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     if (!fs::is_regular_file(path))
         throw BadFile("Texture \"file\" \"" + filename + "\" is not a file");
 
-    std::string extension = boost::algorithm::to_lower_copy(path.extension().string());
+    std::string extension = boost::algorithm::to_lower_copy(PathToUTF8(path.extension()));
 
     ImageType image;
     try {

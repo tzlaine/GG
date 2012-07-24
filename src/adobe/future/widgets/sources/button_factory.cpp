@@ -21,6 +21,7 @@
 #include <GG/Button.h>
 #include <GG/ClrConstants.h>
 #include <GG/EveGlue.h>
+#include <GG/Filesystem.h>
 
 #include "GG/functions.hpp"
 
@@ -185,8 +186,8 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
                             af[it->first] = it->second;
                         }
                         const GG::ModalDialogResult& result =
-                            GG::ExecuteModalDialog(boost::filesystem::path(eve_script),
-                                                   boost::filesystem::path(adam_script),
+                            GG::ExecuteModalDialog(GG::UTF8ToPath(eve_script),
+                                                   GG::UTF8ToPath(adam_script),
                                                    df,
                                                    af,
                                                    top_level_button_notifier,

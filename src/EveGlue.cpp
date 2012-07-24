@@ -25,6 +25,7 @@
 #include <GG/EveGlue.h>
 
 #include <GG/DrawUtil.h>
+#include <GG/Filesystem.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
@@ -512,9 +513,9 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
     return ExecuteModalDialog(eve_stream,
-                              eve_definition.string(),
+                              PathToUTF8(eve_definition),
                               adam_stream,
-                              adam_definition.string(),
+                              PathToUTF8(adam_definition),
                               dictionary_functions,
                               array_functions,
                               button_handler,
@@ -604,9 +605,9 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
     return MakeEveDialog(eve_stream,
-                         eve_definition.string(),
+                         PathToUTF8(eve_definition),
                          adam_stream,
-                         adam_definition.string(),
+                         PathToUTF8(adam_definition),
                          dictionary_functions,
                          array_functions,
                          button_handler,

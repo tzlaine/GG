@@ -6,6 +6,7 @@
 
 #include <GG/EveGlue.h>
 #include <GG/EveParser.h>
+#include <GG/Filesystem.h>
 #include <GG/GUI.h>
 #include <GG/Timer.h>
 #include <GG/Wnd.h>
@@ -140,7 +141,7 @@ void RunTest(std::size_t i)
 {
     const Test& test = Tests()[i];
     boost::filesystem::path eve("function_test_dialog.eve");
-    boost::filesystem::path adam(test.m_adam_filename);
+    boost::filesystem::path adam(GG::UTF8ToPath(test.m_adam_filename));
     GG::EveDialog* eve_dialog(GG::MakeEveDialog(eve, adam, &ButtonHandler));
     GG::Timer timer(100);
     GG::Connect(timer.FiredSignal, boost::bind(&CheckResult, boost::cref(*eve_dialog), boost::cref(test.m_expected_result)));

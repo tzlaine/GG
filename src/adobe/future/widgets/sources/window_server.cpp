@@ -6,6 +6,7 @@
 
 /****************************************************************************************************/
 
+#include <GG/Filesystem.h>
 #include <GG/adobe/future/widgets/headers/window_server.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
@@ -51,7 +52,7 @@ eve_client_holder& window_server_t::client_holder()
 
 void window_server_t::run(const char* name)
 {
-    boost::filesystem::path path(name);
+    boost::filesystem::path path(GG::UTF8ToPath(name));
     boost::filesystem::path file_name;
 
     try {
@@ -68,7 +69,7 @@ void window_server_t::run(const char* name)
     sheet_m.update();
 
     window_m.reset(
-        make_view(file_name.string(),
+        make_view(GG::PathToUTF8(file_name),
                   line_position_t::getline_proc_t(),
                   stream,
                   sheet_m,
@@ -111,7 +112,7 @@ void window_server_t::run(
     //  be valid, lest the user not know the erroneous file.
     //
     window_m.reset(
-        make_view(path.string(),
+        make_view(GG::PathToUTF8(path),
                   getline_proc,
                   data,
                   sheet_m,

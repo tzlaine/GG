@@ -6,8 +6,8 @@
 
 /****************************************************************************************************/
 
+#include <GG/Filesystem.h>
 #include <GG/adobe/future/resources.hpp>
-
 #include <GG/adobe/string.hpp>
 
 #include <boost/filesystem/operations.hpp>
@@ -72,7 +72,7 @@ boost::filesystem::path find_resource(const boost::filesystem::path& name)
 
     std::string err;
 
-    err << "Could not locate resource \"" << name.string() << "\" in any resource path.";
+    err << "Could not locate resource \"" << GG::PathToUTF8(name) << "\" in any resource path.";
 
     throw std::runtime_error(err);
 }

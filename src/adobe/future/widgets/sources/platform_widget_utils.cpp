@@ -8,6 +8,7 @@
 
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 
+#include <GG/Filesystem.h>
 #include <GG/adobe/adam.hpp>
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/dictionary.hpp>
@@ -35,7 +36,7 @@ namespace {
 /****************************************************************************************************/
 
 boost::filesystem::path to_path(const std::string& path_string)
-{ return boost::filesystem::path(path_string); }
+{ return boost::filesystem::path(GG::UTF8ToPath(path_string)); }
 
 /****************************************************************************************************/
 

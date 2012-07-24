@@ -106,6 +106,11 @@ void window_server_t::run(
     window_m->eve_m.evaluate(eve_t::evaluate_nested);
     window_m->show_window_m();
 
+    window_m->root_display_m->MoveTo(
+        GG::Pt((GG::GUI::GetGUI()->AppWidth() - window_m->root_display_m->Width()) / 2,
+               (GG::GUI::GetGUI()->AppHeight() - window_m->root_display_m->Height()) / 2)
+    );
+
     window_m->root_display_m->Run();
 }
 

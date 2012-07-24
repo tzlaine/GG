@@ -63,33 +63,7 @@ void window_server_t::run(const char* name)
 
     boost::filesystem::ifstream stream(file_name);
 
-    /* Update before attaching the window so that we can correctly capture
-       contributing for reset. */
-
-    sheet_m.update();
-
-    window_m.reset(
-        make_view(GG::PathToUTF8(file_name),
-                  line_position_t::getline_proc_t(),
-                  stream,
-                  sheet_m,
-                  behavior_m,
-                  vm_lookup_m,
-                  button_notifier_m,
-                  boost::bind(&window_server_t::button_handler, this, _1, _2),
-                  signal_notifier_m,
-                  row_factory_m ? *row_factory_m : row_factory_t(),
-                  size_enum_t(),
-                  default_widget_factory_proc_with_factory(widget_factory_m)).release()
-    );
-
-    sheet_m.update(); // Force values to their correct states.
-
-    window_m->path_m = file_name;
-    window_m->eve_m.evaluate(eve_t::evaluate_nested);
-    window_m->show_window_m();
-
-    window_m->root_display_m->Run();
+    run(stream, file_name, line_position_t::getline_proc_t());
 }
 
 /*************************************************************************************************/

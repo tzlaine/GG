@@ -227,6 +227,27 @@ platform_display_type insert<button_t>(display_t&             display,
     element.control_m->SetPressedGraphic(element.pressed_m);
     element.control_m->SetRolloverGraphic(element.rollover_m);
 
+    const GG::X max_width =
+        std::max(element.unpressed_m.Empty() ? GG::X0 : element.unpressed_m.Width(),
+                 std::max(element.pressed_m.Empty() ? GG::X0 : element.pressed_m.Width(),
+                          element.rollover_m.Empty() ? GG::X0 : element.rollover_m.Width()));
+    const GG::Y max_height =
+        std::max(element.unpressed_m.Empty() ? GG::Y0 : element.unpressed_m.Height(),
+                 std::max(element.pressed_m.Empty() ? GG::Y0 : element.pressed_m.Height(),
+                          element.rollover_m.Empty() ? GG::Y0 : element.rollover_m.Height()));
+    const GG::X min_width =
+        std::min(element.unpressed_m.Empty() ? GG::X0 : element.unpressed_m.Width(),
+                 std::min(element.pressed_m.Empty() ? GG::X0 : element.pressed_m.Width(),
+                          element.rollover_m.Empty() ? GG::X0 : element.rollover_m.Width()));
+    const GG::Y min_height =
+        std::min(element.unpressed_m.Empty() ? GG::Y0 : element.unpressed_m.Height(),
+                 std::min(element.pressed_m.Empty() ? GG::Y0 : element.pressed_m.Height(),
+                          element.rollover_m.Empty() ? GG::Y0 : element.rollover_m.Height()));
+    if (max_width && max_height && min_width && min_height) {
+        element.control_m->SetMaxSize(GG::Pt(max_width, max_height));
+        element.control_m->SetMinSize(GG::Pt(min_width, min_height));
+    }
+
     GG::Connect(element.control_m->ClickedSignal,
                 boost::bind(&button_clicked, boost::ref(element)));
 

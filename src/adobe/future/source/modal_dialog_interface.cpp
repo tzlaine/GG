@@ -9,6 +9,7 @@
 #define ADOBE_DLL_SAFE 0
 
 #include <GG/AdamParser.h>
+#include <GG/GUI.h>
 #include <GG/Wnd.h>
 
 #include <GG/adobe/config.hpp>
@@ -91,7 +92,7 @@ platform_display_type modal_dialog_t::init(std::istream& layout,
                                            std::istream& sheet,
                                            const std::string& sheet_source)
 {
-    resource_context_t res_context(working_directory_m);
+    GG::ScopedResourcePath scoped_path(working_directory_m);
 
     vm_lookup_m.attach_to(sheet_m);
     vm_lookup_m.attach_to(sheet_m.machine_m);

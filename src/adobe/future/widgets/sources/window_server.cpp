@@ -53,17 +53,9 @@ eve_client_holder& window_server_t::client_holder()
 void window_server_t::run(const char* name)
 {
     boost::filesystem::path path(GG::UTF8ToPath(name));
-    boost::filesystem::path file_name;
-
-    try {
-        file_name = find_resource(name);
-    } catch (...) {
-        file_name = path;
-    }
-
-    boost::filesystem::ifstream stream(file_name);
-
-    run(stream, file_name, line_position_t::getline_proc_t());
+    path = GG::GUI::GetGUI()->FindResource(path);
+    boost::filesystem::ifstream stream(path);
+    run(stream, path, line_position_t::getline_proc_t());
 }
 
 /*************************************************************************************************/

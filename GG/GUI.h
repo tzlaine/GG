@@ -33,10 +33,19 @@
 #include <GG/WndEvent.h>
 
 
-namespace boost { namespace archive {
-    class xml_oarchive;
-    class xml_iarchive;
-} }
+namespace boost {
+    namespace archive {
+        class xml_oarchive;
+        class xml_iarchive;
+    }
+    namespace filesystem3 {
+        class path;
+    }
+    namespace filesystem {
+        using filesystem3::path;
+    }
+}
+
 
 namespace GG {
 
@@ -49,6 +58,14 @@ class StyleFactory;
 class Texture;
 class Timer;
 struct GUIImpl;
+
+/** Temporarily pushes \a path onto the GUI resource path stack, popping \a
+    path on destruction. */
+struct ScopedResourcePath
+{
+    explicit ScopedResourcePath(const boost::filesystem::path& path);
+    ~ScopedResourcePath();
+};
 
 /** \brief An abstract base for an GUI framework class to drive the GG GUI.
 
@@ -197,6 +214,11 @@ public:
     bool                                   RenderCursor() const; ///< returns true iff the GUI is responsible for rendering the cursor
     const boost::shared_ptr<Cursor>&       GetCursor() const; ///< returns the top of the cursor stack, or the default cursor if the stack is empty
 
+    /** Searches the stack of paths registered with PushResourcePath()
+        (top-to-bottom). Returns <i>P/resource</i> if some path \a P in the
+        path stack contains \a resource, or \a resource otherwise. */
+    boost::filesystem::path FindResource(const boost::filesystem::path& resource) const;
+
     /** Returns an iterator to one past the first defined keyboard accelerator. */
     const_accel_iterator accel_begin() const;
 
@@ -272,6 +294,14 @@ public:
 
     /** Removes a keyboard accelerator. */
     void           RemoveAccelerator(accel_iterator it);
+
+    /** Pushes \a path to the top of the stack of paths searched when calling
+        FindResource(). */
+    void PushResourcePath(const boost::filesystem::path& path);
+
+    /** Pops \a path off the top of the stack of paths searched when calling
+        FindResource(). */
+    void PopResourcePath();
 
     /** Returns a shared_ptr to the desired font, supporting all printable
         ASCII characters. */

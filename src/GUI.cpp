@@ -41,6 +41,7 @@
 #include "GIL/extension/io/png_io.hpp"
 #endif
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
 #include <boost/xpressive/xpressive.hpp>
@@ -139,6 +140,12 @@ namespace {
 #endif
     }
 }
+
+ScopedResourcePath::ScopedResourcePath(const boost::filesystem::path& path)
+{ GG::GUI::GetGUI()->PushResourcePath(path); }
+
+ScopedResourcePath::~ScopedResourcePath()
+{ GG::GUI::GetGUI()->PopResourcePath(); }
 
 // implementation data types
 struct GG::GUIImpl
@@ -252,8 +259,9 @@ struct GG::GUIImpl
     bool                                   m_render_cursor;
     boost::shared_ptr<Cursor>              m_default_cursor;
     std::stack<boost::shared_ptr<Cursor> > m_cursors;
+    std::vector<boost::filesystem::path>   m_resource_stack;
 
-    std::set<Timer*>  m_timers;
+    std::set<Timer*> m_timers;
 
     const Wnd* m_save_as_png_wnd;
     std::string m_save_as_png_filename;
@@ -637,6 +645,19 @@ const boost::shared_ptr<Cursor>& GUI::GetCursor() const
     return s_impl->m_cursors.empty() ? s_impl->m_default_cursor : s_impl->m_cursors.top();
 }
 
+boost::filesystem::path GUI::FindResource(const boost::filesystem::path& resource) const
+{
+    const std::vector<boost::filesystem::path>& stack = s_impl->m_resource_stack;
+    for (std::vector<boost::filesystem::path>::const_reverse_iterator it = stack.rbegin();
+         it != stack.rend();
+         ++it) {
+        boost::filesystem::path p(*it / resource);
+        if (boost::filesystem::exists(p))
+            return p;
+    }
+    return resource;
+}
+
 GUI::const_accel_iterator GUI::accel_begin() const
 { return s_impl->m_accelerators.begin(); }
 
@@ -956,6 +977,12 @@ void GUI::RemoveAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
 
 void GUI::RemoveAccelerator(accel_iterator it)
 { s_impl->m_accelerators.erase(it); }
+
+void GUI::PushResourcePath(const boost::filesystem::path& path)
+{ s_impl->m_resource_stack.push_back(path); }
+
+void GUI::PopResourcePath()
+{ s_impl->m_resource_stack.pop_back(); }
 
 boost::shared_ptr<Font> GUI::GetFont(const std::string& font_filename, unsigned int pts)
 { return GetFontManager().GetFont(font_filename, pts); }

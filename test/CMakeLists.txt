@@ -186,16 +186,24 @@ foreach (test_file ${signal_binding_test_files})
     endif ()
 endforeach ()
 
+file(COPY
+         gg_eve_files/eve_only_subdialog_0.eve
+         gg_eve_files/eve_only_subdialog_1.eve
+         gg_eve_files/eve_only_subdialog_2.eve
+         gg_eve_files/eve_only_subdialog_3.eve
+         gg_adam_files/adam_and_eve_subdialog.adm
+         gg_eve_files/adam_and_eve_subdialog.eve
+     DESTINATION
+         ${CMAKE_CURRENT_BINARY_DIR}
+)
 add_test_and_data_files(
     EveLayout
     gg_eve_files/dialog_button_test.eve
     gg_adam_files/dialog_button_test.adm
-    gg_eve_files/eve_only_subdialog_0.eve
-    gg_eve_files/eve_only_subdialog_1.eve
-    gg_eve_files/eve_only_subdialog_2.eve
-    gg_eve_files/eve_only_subdialog_3.eve
-    gg_adam_files/adam_and_eve_subdialog.adm
-    gg_eve_files/adam_and_eve_subdialog.eve
     ${CMAKE_CURRENT_BINARY_DIR}
-    #################### TODO: keystrokes!
+    54,70,574,406
+    54,147,574,375
+    91,226,420,372,574,406
+    76,305,420,372,574,375
+    #################### TODO: moar keystrokes!
 )

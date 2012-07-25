@@ -54,7 +54,7 @@ macro (make_test_exec name)
             add_custom_target(copy_ois_lib ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${ois_lib})
         endif ()
     endif ()
-    if (0)
+    if (1)
         set_target_properties(${name}-test
             PROPERTIES
             COMPILE_FLAGS "${DEBUG_COMPILE_FLAGS}"
@@ -178,9 +178,9 @@ foreach (test_file ${signal_binding_test_files})
     elseif (test_file MATCHES "button_signal_binding_test")
         add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 40,72 40,230 40,360 40,485 320,72 320,150)
     elseif (test_file MATCHES "listbox_1_signal_binding_test")
-        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 215,288 215,439 548,73 548,270 548,422 548,644) # TODO: Moar keystrokes!
     elseif (test_file MATCHES "listbox_2_signal_binding_test")
-        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: Keystrokes!
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 212,70 212,222 212,370 520,70r 520,222r 520,370r 840,70b 840,222b 840,370b)
     else ()
         add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals)
     endif ()
@@ -205,5 +205,5 @@ add_test_and_data_files(
     54,147,574,375
     91,226,420,372,574,406
     76,305,420,372,574,375
-    #################### TODO: moar keystrokes!
+    #################### TODO: Moar keystrokes!
 )

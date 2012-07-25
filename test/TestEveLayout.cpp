@@ -29,9 +29,9 @@ struct Action
 {
     Action()
         {}
-    Action(const GG::Pt& pt_1, const GG::Pt& pt_2, bool drag) :
+    Action(const GG::Pt& pt_1, const std::vector<GG::Pt>& next_pts, bool drag) :
         m_pt_1(pt_1),
-        m_pt_2(pt_2),
+        m_next_pts(next_pts),
         m_drag(drag),
         m_pressed_for_drag(false),
         m_moved_for_drag(false),
@@ -45,7 +45,7 @@ struct Action
         m_released_for_drag(false)
         {}
     GG::Pt m_pt_1;
-    GG::Pt m_pt_2;
+    std::vector<GG::Pt> m_next_pts;
     bool m_drag;
     bool m_pressed_for_drag;
     bool m_moved_for_drag;
@@ -86,17 +86,19 @@ struct GenerateEvents
                             GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
                             action.m_pressed_for_drag = true;
                         } else if (!action.m_moved_for_drag) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, action.m_pt_2 - action.m_pt_1);
+                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[0], action.m_next_pts[0] - action.m_pt_1);
                             action.m_moved_for_drag = true;
                         } else if (!action.m_released_for_drag) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[0], GG::Pt());
                             action.m_released_for_drag = true;
                         }
                         increment = action.m_released_for_drag;
                     } else {
-                        if (action.m_pt_1 != action.m_pt_2) {
-                            GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
-                            GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
+                        if (!action.m_next_pts.empty()) {
+                            for (std::size_t i = 0; i < action.m_next_pts.size(); ++i) {
+                                GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
+                                GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
+                            }
                         }
                         GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
                         GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
@@ -331,26 +333,32 @@ main( int argc, char* argv[] )
             g_click_locations.push_back(Action(token.substr(5, token.size() - 6)));
         } else {
             g_generate_variants = !g_test_signals;
-            std::size_t comma_2 = token.find(',', comma_1 + 1);
+            std::size_t comma_next = token.find(',', comma_1 + 1);
             GG::Pt point_1(GG::X(boost::lexical_cast<int>(token.substr(0, comma_1))),
-                           GG::Y(boost::lexical_cast<int>(token.substr(comma_1 + 1, comma_2 - comma_1 - 1))));
-            GG::Pt point_2 = point_1;
+                           GG::Y(boost::lexical_cast<int>(token.substr(comma_1 + 1, comma_next - comma_1 - 1))));
+            std::vector<GG::Pt> next_points;
             bool drag = false;
-            if (comma_2 != std::string::npos) {
-                std::size_t comma_3 = token.find(',', comma_2 + 1);
-                std::size_t end = token.find('d', comma_3 + 1);
-                drag = end != std::string::npos;
-                point_2 = GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(comma_2 + 1, comma_3 - comma_2 - 1))),
-                                 GG::Y(boost::lexical_cast<int>(token.substr(comma_3 + 1, end - comma_3 - 1))));
+            while (comma_next != std::string::npos) {
+                std::size_t comma_latest = token.find(',', comma_next + 1);
+                std::size_t end = token.find_first_of(",d", comma_latest + 1);
+                if (end != std::string::npos && token[end] == 'd')
+                    drag = true;
+                next_points.push_back(
+                    GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(comma_next + 1, comma_latest - comma_next - 1))),
+                           GG::Y(boost::lexical_cast<int>(token.substr(comma_latest + 1, end - comma_latest - 1))))
+                );
+                if (drag)
+                    break;
+                comma_next = end;
             }
-            g_click_locations.push_back(Action(point_1, point_2, drag));
+            g_click_locations.push_back(Action(point_1, next_points, drag));
             if (drag)
                 g_drags = true;
         }
         ++i;
     }
     if (!g_click_locations.empty())
-        g_click_locations.push_back(Action(GG::Pt(), GG::Pt(), false));
+        g_click_locations.push_back(Action(GG::Pt(), std::vector<GG::Pt>(), false));
     if (i < argc)
         g_dont_exit = true;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );

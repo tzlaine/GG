@@ -139,10 +139,31 @@ namespace {
                                             Value(size.x) * sizeof(rgba8_pixel_t))));
 #endif
     }
+
+    std::pair<boost::filesystem::path, bool>
+    FindResourceRecursive(const boost::filesystem::path& dir, const boost::filesystem::path& resource)
+    {
+        namespace fs = boost::filesystem;
+        fs::directory_iterator end_it;
+        for (fs::directory_iterator it(dir); it != end_it; ++it) {
+            try {
+                if (fs::exists(*it) && fs::is_directory(*it)) {
+                    fs::path p(*it / resource);
+                    if (fs::exists(p))
+                        return std::pair<fs::path, bool>(p, true);
+                    std::pair<fs::path, bool> result = FindResourceRecursive(*it, resource);
+                    if (result.second)
+                        return result;
+                }
+            } catch (const fs::filesystem_error&) {
+            }
+        }
+        return std::pair<fs::path, bool>(resource, false);
+    }
 }
 
-ScopedResourcePath::ScopedResourcePath(const boost::filesystem::path& path)
-{ GG::GUI::GetGUI()->PushResourcePath(path); }
+ScopedResourcePath::ScopedResourcePath(const boost::filesystem::path& path, bool recursive/* = false*/)
+{ GG::GUI::GetGUI()->PushResourcePath(path, recursive); }
 
 ScopedResourcePath::~ScopedResourcePath()
 { GG::GUI::GetGUI()->PopResourcePath(); }
@@ -259,7 +280,9 @@ struct GG::GUIImpl
     bool                                   m_render_cursor;
     boost::shared_ptr<Cursor>              m_default_cursor;
     std::stack<boost::shared_ptr<Cursor> > m_cursors;
-    std::vector<boost::filesystem::path>   m_resource_stack;
+
+    typedef std::vector<std::pair<boost::filesystem::path, bool> > ResourceStack;
+    ResourceStack m_resource_stack;
 
     std::set<Timer*> m_timers;
 
@@ -647,14 +670,23 @@ const boost::shared_ptr<Cursor>& GUI::GetCursor() const
 
 boost::filesystem::path GUI::FindResource(const boost::filesystem::path& resource) const
 {
-    const std::vector<boost::filesystem::path>& stack = s_impl->m_resource_stack;
-    for (std::vector<boost::filesystem::path>::const_reverse_iterator it = stack.rbegin();
+    namespace fs = boost::filesystem;
+
+    const GUIImpl::ResourceStack& stack = s_impl->m_resource_stack;
+    for (GUIImpl::ResourceStack::const_reverse_iterator it = stack.rbegin();
          it != stack.rend();
          ++it) {
-        boost::filesystem::path p(*it / resource);
-        if (boost::filesystem::exists(p))
+        fs::path p(it->first / resource);
+        if (fs::exists(p))
             return p;
+        if (it->second) {
+            std::pair<boost::filesystem::path, bool> result =
+                FindResourceRecursive(it->first, resource);
+            if (result.second)
+                return result.first;
+        }
     }
+
     return resource;
 }
 
@@ -978,8 +1010,8 @@ void GUI::RemoveAccelerator(Key key, Flags<ModKey> mod_keys/* = MOD_KEY_NONE*/)
 void GUI::RemoveAccelerator(accel_iterator it)
 { s_impl->m_accelerators.erase(it); }
 
-void GUI::PushResourcePath(const boost::filesystem::path& path)
-{ s_impl->m_resource_stack.push_back(path); }
+void GUI::PushResourcePath(const boost::filesystem::path& path, bool recursive/* = false*/)
+{ s_impl->m_resource_stack.push_back(std::make_pair(path, recursive)); }
 
 void GUI::PopResourcePath()
 { s_impl->m_resource_stack.pop_back(); }

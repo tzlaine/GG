@@ -63,7 +63,7 @@ struct GUIImpl;
     path on destruction. */
 struct ScopedResourcePath
 {
-    explicit ScopedResourcePath(const boost::filesystem::path& path);
+    explicit ScopedResourcePath(const boost::filesystem::path& path, bool recursive = false);
     ~ScopedResourcePath();
 };
 
@@ -216,7 +216,8 @@ public:
 
     /** Searches the stack of paths registered with PushResourcePath()
         (top-to-bottom). Returns <i>P/resource</i> if some path \a P in the
-        path stack contains \a resource, or \a resource otherwise. */
+        path stack contains \a resource (perhaps recursively, see
+        PushResourcePath()), or \a resource otherwise. */
     boost::filesystem::path FindResource(const boost::filesystem::path& resource) const;
 
     /** Returns an iterator to one past the first defined keyboard accelerator. */
@@ -296,8 +297,9 @@ public:
     void           RemoveAccelerator(accel_iterator it);
 
     /** Pushes \a path to the top of the stack of paths searched when calling
-        FindResource(). */
-    void PushResourcePath(const boost::filesystem::path& path);
+        FindResource().  If \a recursive is true, the path will be searched
+        recursively. */
+    void PushResourcePath(const boost::filesystem::path& path, bool recursive = false);
 
     /** Pops \a path off the top of the stack of paths searched when calling
         FindResource(). */

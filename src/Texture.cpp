@@ -222,6 +222,11 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     if (m_opengl_id)
         Clear();
 
+    namespace fs = boost::filesystem;
+
+    fs::path path(GUI::GetGUI()->FindResource(UTF8ToPath(filename)));
+    std::string path_name = PathToUTF8(path);
+
 #if GG_USE_DEVIL_IMAGE_LOAD_LIBRARY
 
     InitDevIL();
@@ -231,18 +236,18 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     CheckILErrors("ilGenImages(1, &id)");
     ilBindImage(id);
     CheckILErrors("ilBindImage(id)");
-    ilLoadImage(const_cast<char*>(filename.c_str()));
+    ilLoadImage(const_cast<char*>(path_name.c_str()));
     if ((error = ilGetError()) != IL_NO_ERROR) {
-        std::string call = "ilLoadImage(\"" + filename + "\")";
+        std::string call = "ilLoadImage(\"" + path_name + "\")";
         if (VERBOSE_DEVIL_ERROR_REPORTING) {
             std::cerr << "IL call \"" << call << "\" failed with IL error \"" << iluErrorString(error)
                       << "\" (code " << error << ")\n";
         }
         CheckILErrors(call);
-        throw BadFile("Could not load temporary DevIL image from file \"" + filename + "\"");
+        throw BadFile("Could not load temporary DevIL image from file \"" + path_name + "\"");
     }
 
-    m_filename = filename;
+    m_filename = path_name;
     m_default_width = X(ilGetInteger(IL_IMAGE_WIDTH));
     CheckILErrors("ilGetInteger(IL_IMAGE_WIDTH)");
     m_default_height = Y(ilGetInteger(IL_IMAGE_HEIGHT));
@@ -271,7 +276,6 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
 #else
 
     namespace gil = boost::gil;
-    namespace fs = boost::filesystem;
 
     BOOST_STATIC_ASSERT((sizeof(gil::gray8_pixel_t) == 1));
     BOOST_STATIC_ASSERT((sizeof(gil::gray_alpha8_pixel_t) == 2));
@@ -286,13 +290,11 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     > ImageTypes;
     typedef gil::any_image<ImageTypes> ImageType;
 
-    fs::path path(UTF8ToPath(filename));
-
     if (!fs::exists(path))
-        throw BadFile("Texture file \"" + filename + "\" does not exist");
+        throw BadFile("Texture file \"" + path_name + "\" does not exist");
 
     if (!fs::is_regular_file(path))
-        throw BadFile("Texture \"file\" \"" + filename + "\" is not a file");
+        throw BadFile("Texture \"file\" \"" + path_name + "\" is not a file");
 
     std::string extension = boost::algorithm::to_lower_copy(PathToUTF8(path.extension()));
 
@@ -302,47 +304,47 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
         // formats above.
 #if GG_HAVE_LIBJPEG
         if (extension == ".jpg" || extension == ".jpe" || extension == ".jpeg")
-            gil::jpeg_read_image(filename, image);
+            gil::jpeg_read_image(path_name, image);
         else
 #endif
 #if GG_HAVE_LIBPNG
         if (extension == ".png")
-            gil::png_read_image(filename, image);
+            gil::png_read_image(path_name, image);
         else
 #endif
 #if GG_HAVE_LIBTIFF
         if (extension == ".tif" || extension == ".tiff")
-            gil::tiff_read_image(filename, image);
+            gil::tiff_read_image(path_name, image);
         else
 #endif
-            throw BadFile("Texture file \"" + filename + "\" does not have a supported file extension");
+            throw BadFile("Texture file \"" + path_name + "\" does not have a supported file extension");
     } catch (const std::ios_base::failure &) {
         // Second attempt -- If *_read_image() throws, see if we can convert
         // the image to RGBA.  This is needed for color-indexed images.
 #if GG_HAVE_LIBJPEG
         if (extension == ".jpg" || extension == ".jpe" || extension == ".jpeg") {
             gil::rgba8_image_t rgba_image;
-            gil::jpeg_read_and_convert_image(filename, rgba_image);
+            gil::jpeg_read_and_convert_image(path_name, rgba_image);
             image.move_in(rgba_image);
         }
 #endif
 #if GG_HAVE_LIBPNG
         if (extension == ".png") {
             gil::rgba8_image_t rgba_image;
-            gil::png_read_and_convert_image(filename, rgba_image);
+            gil::png_read_and_convert_image(path_name, rgba_image);
             image.move_in(rgba_image);
         }
 #endif
 #if GG_HAVE_LIBTIFF
         if (extension == ".tif" || extension == ".tiff") {
             gil::rgba8_image_t rgba_image;
-            gil::tiff_read_and_convert_image(filename, rgba_image);
+            gil::tiff_read_and_convert_image(path_name, rgba_image);
             image.move_in(rgba_image);
         }
 #endif
     }
 
-    m_filename = filename;
+    m_filename = path_name;
     m_default_width = X(image.width());
     m_default_height = Y(image.height());
     m_type = GL_UNSIGNED_BYTE;
@@ -368,7 +370,7 @@ void Texture::Load(const std::string& filename, bool mipmap/* = false*/)
     case 2:  m_format = GL_LUMINANCE_ALPHA; break;
     case 3:  m_format = GL_RGB; break;
     case 4:  m_format = GL_RGBA; break;
-    default: throw BadFile("Texture file \"" + filename + "\" does not have a supported number of color channels (1-4)");
+    default: throw BadFile("Texture file \"" + path_name + "\" does not have a supported number of color channels (1-4)");
     }
 
     assert(image_data);

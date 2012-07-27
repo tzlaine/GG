@@ -502,14 +502,16 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                               row_factory);
 }
 
-ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition,
-                                         const boost::filesystem::path& adam_definition,
+ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_definition_,
+                                         const boost::filesystem::path& adam_definition_,
                                          const DictionaryFunctions& dictionary_functions,
                                          const ArrayFunctions& array_functions,
                                          ButtonHandler button_handler,
                                          SignalHandler signal_handler/* = SignalHandler()*/,
                                          RowFactory row_factory/* = RowFactory()*/)
 {
+    boost::filesystem::path eve_definition = GUI::GetGUI()->FindResource(eve_definition_);
+    boost::filesystem::path adam_definition = GUI::GetGUI()->FindResource(adam_definition_);
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
     return ExecuteModalDialog(eve_stream,
@@ -598,14 +600,16 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                          row_factory);
 }
 
-EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
-                             const boost::filesystem::path& adam_definition,
+EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition_,
+                             const boost::filesystem::path& adam_definition_,
                              const DictionaryFunctions& dictionary_functions,
                              const ArrayFunctions& array_functions,
                              ButtonHandler button_handler,
                              SignalHandler signal_handler/* = SignalHandler()*/,
                              RowFactory row_factory/* = RowFactory()*/)
 {
+    boost::filesystem::path eve_definition = GUI::GetGUI()->FindResource(eve_definition_);
+    boost::filesystem::path adam_definition = GUI::GetGUI()->FindResource(adam_definition_);
     boost::filesystem::ifstream eve_stream(eve_definition);
     boost::filesystem::ifstream adam_stream(adam_definition);
     return MakeEveDialog(eve_stream,

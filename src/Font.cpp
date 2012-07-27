@@ -27,6 +27,7 @@
 #include <GG/GUI.h>
 #include <GG/Base.h>
 #include <GG/DrawUtil.h>
+#include <GG/Filesystem.h>
 #include <GG/StyleFactory.h>
 #include <GG/utf8/checked.h>
 
@@ -526,7 +527,7 @@ std::set<std::string> Font::s_action_tags;
 std::set<std::string> Font::s_known_tags;
 
 Font::Font(const std::string& font_filename, unsigned int pts) :
-    m_font_filename(font_filename),
+    m_font_filename(ResolveFilename(font_filename)),
     m_pt_sz(pts),
     m_ascent(0),
     m_descent(0),
@@ -547,7 +548,7 @@ Font::Font(const std::string& font_filename, unsigned int pts) :
 
 Font::Font(const std::string& font_filename, unsigned int pts,
            const std::vector<unsigned char>& file_contents) :
-    m_font_filename(font_filename),
+    m_font_filename(ResolveFilename(font_filename)),
     m_pt_sz(pts),
     m_ascent(0),
     m_descent(0),
@@ -1512,6 +1513,13 @@ bool Font::IsDefaultFont()
 
 boost::shared_ptr<Font> Font::GetDefaultFont(unsigned int pts)
 { return GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont(pts); }
+
+std::string Font::ResolveFilename(const std::string& filename)
+{
+    if (filename == "")
+        return "";
+    return PathToUTF8(GUI::GetGUI()->FindResource(UTF8ToPath(filename)));
+}
 
 
 ///////////////////////////////////////

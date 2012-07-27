@@ -528,6 +528,8 @@ private:
     boost::shared_ptr<Font>
                       GetDefaultFont(unsigned int pts);
 
+    static std::string ResolveFilename(const std::string& filename);
+
     std::string          m_font_filename;
     unsigned int         m_pt_sz;
     std::vector<UnicodeCharset>
@@ -702,7 +704,7 @@ namespace detail {
 template <class CharSetIter>
 GG::Font::Font(const std::string& font_filename, unsigned int pts,
                CharSetIter first, CharSetIter last) :
-    m_font_filename(font_filename),
+    m_font_filename(ResolveFilename(font_filename)),
     m_pt_sz(pts),
     m_charsets(first, last),
     m_ascent(0),
@@ -726,7 +728,7 @@ template <class CharSetIter>
 GG::Font::Font(const std::string& font_filename, unsigned int pts,
                const std::vector<unsigned char>& file_contents,
                CharSetIter first, CharSetIter last) :
-    m_font_filename(font_filename),
+    m_font_filename(ResolveFilename(font_filename)),
     m_pt_sz(pts),
     m_charsets(first, last),
     m_ascent(0),

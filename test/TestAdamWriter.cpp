@@ -1,5 +1,11 @@
 #include <GG/AdamParser.h>
 
+#if USE_SDL_BACKEND
+#include "SDLBackend.h"
+#else
+#include "OgreBackend.h"
+#endif
+
 #include <GG/adobe/adam_evaluate.hpp>
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/array.hpp>
@@ -224,6 +230,12 @@ namespace GG {
 
 BOOST_AUTO_TEST_CASE( adam_writer )
 {
+#if USE_SDL_BACKEND
+    MinimalSDLGUI gui;
+#else
+    MinimalOgreGUI gui;
+#endif
+
     std::string file_contents = read_file(g_input_file);
 
     adobe::array_t new_parse;

@@ -26,6 +26,7 @@
 
 #include <GG/EventPump.h>
 
+#include <OgreFileSystem.h>
 #include <OgreRenderSystem.h>
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
@@ -40,6 +41,8 @@
 #else
 #include <GL/glx.h>
 #endif
+
+#include <boost/filesystem.hpp>
 
 
 using namespace GG;
@@ -90,6 +93,19 @@ OgreGUI::OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename/
     if (ifs) {
         Ogre::FileStreamDataStream file_stream(&ifs, false);
         m_config_file_data.bind(new Ogre::MemoryDataStream(file_stream));
+    }
+
+    const Ogre::ResourceGroupManager::LocationList& resource_locations =
+        Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
+        );
+    for (Ogre::ResourceGroupManager::LocationList::const_iterator it = resource_locations.begin();
+         it != resource_locations.end();
+         ++it) {
+        if (const Ogre::FileSystemArchive* archive =
+            dynamic_cast<const Ogre::FileSystemArchive*>((*it)->archive)) {
+            PushResourcePath(boost::filesystem::path(archive->getName()), (*it)->recursive);
+        }
     }
 }
 

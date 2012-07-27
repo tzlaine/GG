@@ -119,6 +119,12 @@ namespace GG {
     ogre_root->uninstallPlugin(ois_input_plugin);
     delete ois_input_plugin;
     \endverbatim
+    <p>
+    OgreGUI's constructor takes all \c "FileSystem" Ogre resource locations
+    and adds them to the GG resource paths.  Be sure to make all your calls to
+    Ogre::ResourceGroupManager::addResourceLocation() before contructing your
+    app's OgreGUI object if you want to take advantage of this bit of
+    automation.
     */
 class GG_OGRE_API OgreGUI :
     public GUI,
@@ -128,7 +134,13 @@ class GG_OGRE_API OgreGUI :
 public:
     /** Basic ctor.  A nonzero \a window is required, and an optional
         configuration filename, \a config_filename.  If \a config_filename is
-        supplied, it will be available via ConfigFileStream(). */
+        supplied, it will be available via ConfigFileStream().  All \c
+        "FileSystem" archives that have been added with
+        Ogre::ResourceGroupManager::addResourceLocation() before this ctor is
+        called will be added as GG resource paths with calls to
+        GUI::PushResourcePath().  Subsequent calls to
+        Ogre::ResourceGroupManager::addResourceLocation() will have no effect
+        on the GG resource path stack. */
     explicit OgreGUI(Ogre::RenderWindow* window, const std::string& config_filename = "");
 
     /** Dtor. */

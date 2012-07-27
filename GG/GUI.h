@@ -83,6 +83,7 @@ struct ScopedResourcePath
     - mouse state information
     - keyboard accelerators
     - management of fonts and textures
+    - management of resource search paths
 
     <p>The user is required to provide several functions.  The most vital
     functions the user is required to provide are: Enter2DMode(),
@@ -118,6 +119,15 @@ struct ScopedResourcePath
     (e.g. when FileDlg encounters an error and creates a ThreeButtonDlg).
     This is overridden by any StyleFactory that may be installed in an
     individual Wnd.
+
+    <p>GUI manages resource search paths for the user, if desired.  One can
+    add paths to a stack of search paths, using PushResourcePath().  All Font
+    and Texture objects, and all Adam and Eve scripts, that are subsequently
+    loaded will use FindResource() to try to resolve the location of the
+    requested resource.  If no paths have beed added with PushResourcePath(),
+    the given path will be used as-is.
+
+    <p>To temporarily add a path to the path stack, use ScopedResourcePath.
 
     <p>A note about "button-down-repeat".  When you click on the down-button
     on a scroll-bar, you probably expect the the button's action (scrolling

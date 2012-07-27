@@ -154,8 +154,6 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
 
                     if (eve_script.empty() == !name)
                         throw std::runtime_error("Exactly one of eve_script and name must be defined");
-                    if (!name != !bind_result)
-                        throw std::runtime_error("Both or neither of name and bind_result must be defined");
 
                     if (name) {
                         adobe::any_regular_t result;

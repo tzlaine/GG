@@ -86,7 +86,6 @@ layout find_and_replace
                 static_text(name: localize("Separator"));
             }
             edit_text(size: @size_small, characters: 60, lines: 3, scrollable: false, monospaced: true, vertical: align_fill);
-            separator();
             checkbox(name: 'Multi-File Search', bind: @multi_file_search, value: true);
             popup(  name: 'Saved Search Sources:', popup_bind: @saved_search_sources, popup_placement: @down,
                     items: [

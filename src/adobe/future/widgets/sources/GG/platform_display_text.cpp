@@ -46,6 +46,7 @@ namespace {
                 }
                 result <<  " ]";
             } else if (type == adobe::type_info<adobe::dictionary_t>()) {
+                result << '{';
                 const adobe::dictionary_t& dictionary = value.cast<adobe::dictionary_t>();
                 for (adobe::dictionary_t::const_iterator it = dictionary.begin(), end_it = dictionary.end();
                      it != end_it;
@@ -54,7 +55,7 @@ namespace {
                     if (boost::next(it) != end_it)
                         result << ',';
                 }
-                result <<  " ]";
+                result <<  " }";
             } else {
                 result << value.cast<adobe::string_t>();
             }

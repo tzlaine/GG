@@ -35,7 +35,6 @@
 #include <GG/adobe/future/widgets/headers/progress_bar_factory.hpp>
 #include <GG/adobe/future/widgets/headers/radio_button_factory.hpp>
 #include <GG/adobe/future/widgets/headers/reveal_factory.hpp>
-#include <GG/adobe/future/widgets/headers/separator_factory.hpp>
 #include <GG/adobe/future/widgets/headers/slider_factory.hpp>
 #include <GG/adobe/future/widgets/headers/tab_group_factory.hpp>
 #include <GG/adobe/future/widgets/headers/value_range_format.hpp>
@@ -235,7 +234,6 @@ widget_factory_t& default_asl_widget_factory()
         default_factory_s.reg(name_progress_bar, &make_progress_bar);
         default_factory_s.reg(name_radio_button, &make_radio_button);
         default_factory_s.reg(name_reveal, &make_reveal);
-        default_factory_s.reg(name_separator, &make_separator, false, separator_layout_attributes());
         default_factory_s.reg(name_slider, &make_slider);
         default_factory_s.reg(name_static_text, &implementation::make_label_hack);
         default_factory_s.reg(name_tab_group, &make_tab_group, true, tab_group_layout_attributes());

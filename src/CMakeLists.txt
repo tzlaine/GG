@@ -109,7 +109,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/control_button.cpp
     adobe/future/widgets/sources/control_button_factory.cpp
     adobe/future/widgets/sources/widget_factory.cpp
-    adobe/future/widgets/sources/separator_factory.cpp
     adobe/future/widgets/sources/button_helper.cpp
     adobe/future/widgets/sources/edit_number_factory.cpp
     adobe/future/widgets/sources/radio_button_factory.cpp
@@ -131,7 +130,6 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/platform_progress_bar.cpp
     adobe/future/widgets/sources/platform_radio_button.cpp
     adobe/future/widgets/sources/platform_reveal.cpp
-    adobe/future/widgets/sources/platform_separator.cpp
     adobe/future/widgets/sources/platform_slider.cpp
     adobe/future/widgets/sources/platform_tab_group.cpp
     adobe/future/widgets/sources/platform_widget_utils.cpp

@@ -6,13 +6,13 @@ constant:
     expected_bind_cell_2 : false;
     expected_bind_cell_3 : true;
     expected_bind_cell_4 : false;
-    expected_bind_cell_5 : false;
+    expected_bind_cell_5 : {value: false};
     expected_bind_cell_6 : false;
-    expected_bind_cell_7 : true;
+    expected_bind_cell_7 : {value: true};
     expected_bind_cell_8 : false;
-    expected_bind_cell_9 : true;
+    expected_bind_cell_9 : color(r:255);
     expected_bind_cell_10 : false;
-    expected_bind_cell_11 : true;
+    expected_bind_cell_11 : "/tmp/gigi_cursors.png";
     expected_bind_cell_12 : 0;
     expected_bind_cell_13 : 1;
 

@@ -127,7 +127,8 @@ layout alert_dialog
                    action: @dialog,
                    value: {
                        name: @three_button_dialog,
-                       bind_result: @bind_cell_12
+                       bind_result: @bind_cell_12,
+                       dialog_parameters: {message: "Click one of these!", buttons: 2}
                    });
             display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_12);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_12);
@@ -137,7 +138,8 @@ layout alert_dialog
                    action: @dialog,
                    value: {
                        name: @three_button_dialog,
-                       bind_result: @bind_cell_13
+                       bind_result: @bind_cell_13,
+                       dialog_parameters: {message: "Click one of these!", buttons: 2}
                    });
             display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_13);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_13);

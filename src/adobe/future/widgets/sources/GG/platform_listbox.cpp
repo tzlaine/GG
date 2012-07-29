@@ -57,6 +57,7 @@ namespace {
                     array.push_back(listbox.items_m.at(index).find(adobe::static_name_t("value"))->second);
                 }
             }
+            listbox.debounce_m = value;
             listbox.value_proc_m(value);
         }
 
@@ -327,6 +328,9 @@ namespace adobe {
     void listbox_t::display(const model_type& value)
     {
         assert(control_m);
+
+        if (value == debounce_m)
+            return;
 
         const bool value_is_array = value.type_info() == adobe::type_info<adobe::array_t>();
 

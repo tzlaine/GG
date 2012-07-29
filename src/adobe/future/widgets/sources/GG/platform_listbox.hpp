@@ -86,6 +86,7 @@ namespace adobe {
         GG::Clr item_text_color_m;
         std::vector<std::string> drop_types_m;
         name_t signal_id_m;
+        any_regular_t debounce_m;
 
         typedef boost::function<void (const listbox_t&, const GG::ListBox::SelectionSet&)> selection_changed_signal_t;
         typedef boost::function<void (const listbox_t&, GG::ListBox::iterator)> row_signal_t;

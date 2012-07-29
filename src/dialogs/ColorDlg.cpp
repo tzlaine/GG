@@ -511,13 +511,15 @@ const std::string& ColorDlg::CancelString() const
 
 void ColorDlg::SetNewString(const std::string& str)
 {
-    m_new_color_square_text->SetText(str);
+    if (m_new_color_square_text)
+        m_new_color_square_text->SetText(str);
     m_new_str = str;
 }
 
 void ColorDlg::SetOldString(const std::string& str)
 {
-    m_old_color_square_text->SetText(str);
+    if (m_old_color_square_text)
+        m_old_color_square_text->SetText(str);
     m_old_str = str;
 }
 

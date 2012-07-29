@@ -28,7 +28,9 @@ namespace {
         std::stringstream result;
         if (!label.empty())
             result << GG::RgbaTag(label_color) << label << "</rgba> ";
-        if (value != adobe::any_regular_t()) {
+        if (value == adobe::any_regular_t()) {
+            result << "<empty>";
+        } else {
             adobe::type_info_t type(value.type_info());
             if (type == adobe::type_info<double>() ||
                 type == adobe::type_info<bool>() ||

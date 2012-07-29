@@ -76,7 +76,7 @@ Pt Button::MinUsableSize() const
             const std::vector<Font::LineData>& line_data = m_text->GetLineData();
             retval = Pt();
             for (std::size_t i = 0; i < line_data.size(); ++i) {
-                retval.x = std::max(retval.x, line_data[i].Width());
+                retval.x = std::max(retval.x, line_data[i].Width() + m_text->GetFont()->SpaceWidth() * 4);
                 retval.y += i ? m_text->GetFont()->Lineskip() : m_text->GetFont()->Height();
             }
         } else {

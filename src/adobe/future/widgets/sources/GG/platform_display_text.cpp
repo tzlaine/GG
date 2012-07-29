@@ -56,6 +56,32 @@ namespace {
                         result << ',';
                 }
                 result << '}';
+            } else if (type == adobe::type_info<GG::Clr>()) {
+                result << "color(";
+                const GG::Clr& color = value.cast<GG::Clr>();
+                bool previous_element = false;
+                if (color.r) {
+                    result << "r: " << static_cast<int>(color.r);
+                    previous_element = true;
+                }
+                if (color.g) {
+                    if (previous_element)
+                        result << ", ";
+                    result << "g: " << static_cast<int>(color.g);
+                    previous_element = true;
+                }
+                if (color.b) {
+                    if (previous_element)
+                        result << ", ";
+                    result << "b: " << static_cast<int>(color.b);
+                    previous_element = true;
+                }
+                if (color.a != 255) {
+                    if (previous_element)
+                        result << ", ";
+                    result << "a: " << static_cast<int>(color.a);
+                }
+                result << ')';
             } else {
                 result << value.cast<adobe::string_t>();
             }

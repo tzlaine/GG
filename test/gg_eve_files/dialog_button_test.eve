@@ -117,7 +117,8 @@ layout alert_dialog
                    action: @dialog,
                    value: {
                        name: @file_dialog,
-                       bind_result: @bind_cell_11
+                       bind_result: @bind_cell_11,
+                       dialog_parameters: {directory: "/tmp"}
                    });
             display_text(name: "Bound Cell:", characters: 15, bind: @bind_cell_11);
             display_text(name: "Result:", characters: 15, bind: @result_bind_cell_11);

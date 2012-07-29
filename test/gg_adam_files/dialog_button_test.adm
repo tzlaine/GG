@@ -11,8 +11,8 @@ constant:
     expected_bind_cell_7 : {value: true};
     expected_bind_cell_8 : false;
     expected_bind_cell_9 : color(r:255);
-    expected_bind_cell_10 : false;
-    expected_bind_cell_11 : "/tmp/gigi_cursors.png";
+    expected_bind_cell_10 : empty;
+    expected_bind_cell_11 : ["/tmp/gigi_cursors.png"];
     expected_bind_cell_12 : 0;
     expected_bind_cell_13 : 1;
 
@@ -29,8 +29,8 @@ interface:
     bind_cell_9 : false;
     bind_cell_10 : false;
     bind_cell_11 : false;
-    bind_cell_12 : 0;
-    bind_cell_13 : 0;
+    bind_cell_12 : 2;
+    bind_cell_13 : 2;
 
     result_bind_cell_0 <== bind_cell_0 == expected_bind_cell_0 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
     result_bind_cell_1 <== bind_cell_1 == expected_bind_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";

@@ -294,7 +294,7 @@ namespace adobe { namespace implementation {
         GG::Clr border_color(GG::CLR_GRAY);
         GG::Clr button_color(GG::CLR_GRAY);
         GG::Clr text_color(GG::CLR_BLACK);
-        unsigned int buttons;
+        unsigned int buttons = 2;
         std::string zero;
         std::string one;
         std::string two;
@@ -330,7 +330,7 @@ namespace adobe { namespace implementation {
         } else {
             three_button_dialog.reset(
                 adobe::implementation::Factory().NewThreeButtonDlg(
-                    GG::X0, GG::Y0,
+                    GG::X1, GG::Y1,
                     message,
                     adobe::implementation::DefaultFont(),
                     color,

@@ -71,7 +71,7 @@ public:
     //@}
 
     /** \name Accessors */ ///@{
-    std::set<std::string> Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
+    const std::set<std::string>& Result() const; ///< returns a set of strings that contains the files chosen by the user; there will be only one file if \a multi == false was passed to the ctor
 
     /** Returns true iff this FileDlg will select directories instead of files. */
     bool SelectDirectories() const;

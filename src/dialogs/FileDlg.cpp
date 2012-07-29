@@ -165,7 +165,7 @@ FileDlg::FileDlg(const std::string& directory, const std::string& filename, bool
     Init(directory);
 }
 
-std::set<std::string> FileDlg::Result() const
+const std::set<std::string>& FileDlg::Result() const
 { return m_result; }
 
 bool FileDlg::SelectDirectories() const

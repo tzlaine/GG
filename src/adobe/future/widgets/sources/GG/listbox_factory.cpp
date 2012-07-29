@@ -132,10 +132,16 @@ namespace {
                                          adobe::array_t expression,
                                          const GG::ListBox::SelectionSet& selections)
     {
-        adobe::array_t value;
+        adobe::array_t array;
         for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(); it != selections.end(); ++it) {
-            value.push_back(row_value(*it, listbox.control_m->end()));
+            array.push_back(row_value(*it, listbox.control_m->end()));
         }
+
+        adobe::any_regular_t value;
+        if (array.size() == 1u)
+            value = array[0];
+        else if (!array.empty())
+            value.assign(array);
 
         adobe::implementation::handle_signal(signal_notifier,
                                              adobe::static_name_t("listbox"),
@@ -144,7 +150,7 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             adobe::any_regular_t(value));
+                                             value);
     }
 
     template <typename Iter>

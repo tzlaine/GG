@@ -167,16 +167,19 @@ void ThreeButtonDlg::Init(const std::string& msg, const boost::shared_ptr<Font>&
 
     m_button_0 = style->NewButton(X0, Y0, X1, Y1, (zero == "" ? (buttons < 3 ? "Ok" : "Yes") : zero),
                                   font, m_button_color, m_text_color);
+    m_button_0->SetMinSize(m_button_0->MinUsableSize());
     button_layout->Add(m_button_0, 0, 0);
 
     if (2 <= buttons) {
         m_button_1 = style->NewButton(X0, Y0, X1, Y1, (one == "" ? (buttons < 3 ? "Cancel" : "No") : one),
                                       font, m_button_color, m_text_color);
+        m_button_1->SetMinSize(m_button_1->MinUsableSize());
         button_layout->Add(m_button_1, 0, 1);
     }
     if (3 <= buttons) {
         m_button_2 = style->NewButton(X0, Y0, X1, Y1, (two == "" ? "Cancel" : two),
                                       font, m_button_color, m_text_color);
+        m_button_2->SetMinSize(m_button_2->MinUsableSize());
         button_layout->Add(m_button_2, 0, 2);
     }
     layout->Add(button_layout, 1, 0);

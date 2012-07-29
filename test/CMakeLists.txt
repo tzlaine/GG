@@ -212,8 +212,7 @@ add_test_and_data_files(
     576,71,597,514
     561,150,597,481 # TODO: need to drag the red slider to 255
     568,228,655,536
-    #556,308,
+    #556,308, # TODO: need to pick gigi_cursor.png
     619,387,477,403
     619,466,533,403
-    #################### TODO: Moar keystrokes!
 )

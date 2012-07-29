@@ -9,7 +9,7 @@ constant:
     expected_bind_cell_5 : {value: false};
     expected_bind_cell_6 : false;
     expected_bind_cell_7 : {value: true};
-    expected_bind_cell_8 : false;
+    expected_bind_cell_8 : empty;
     expected_bind_cell_9 : color(r:255);
     expected_bind_cell_10 : empty;
     expected_bind_cell_11 : ["/tmp/gigi_cursors.png"];

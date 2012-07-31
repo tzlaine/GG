@@ -23,47 +23,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestingUtils.h"
+#include "Action.h"
 
-
-struct Action
-{
-    enum Semantic
-    {
-        LeftClick,
-        RightClick,
-        DoubleClick,
-        Drag
-    };
-
-    Action()
-        {}
-    Action(const GG::Pt& pt_1, const std::vector<GG::Pt>& next_pts, Semantic semantic) :
-        m_pt_1(pt_1),
-        m_next_pts(next_pts),
-        m_semantic(semantic),
-        m_pressed_for_drag(false),
-        m_moved_for_drag(false),
-        m_released_for_drag(false)
-        {}
-    Action(const std::string& keys) :
-        m_keys(keys),
-        m_pressed_for_drag(false),
-        m_moved_for_drag(false),
-        m_released_for_drag(false)
-        {}
-    GG::Pt m_pt_1;
-    std::vector<GG::Pt> m_next_pts;
-    Semantic m_semantic;
-    bool m_pressed_for_drag;
-    bool m_moved_for_drag;
-    bool m_released_for_drag;
-    std::string m_keys;
-};
 
 const char* g_eve_file = 0;
 const char* g_adam_file = 0;
 const char* g_output_dir = 0;
-std::vector<Action> g_click_locations;
+std::vector<Actions> g_inputs;
 bool g_generate_variants = false;
 bool g_dont_exit = false;
 bool g_test_signals = false;
@@ -71,61 +37,44 @@ bool g_drags = false;
 
 struct GenerateEvents
 {
-    GenerateEvents(GG::Timer& timer, GG::Wnd* dialog, const std::string& input_stem) :
+    GenerateEvents(GG::Wnd* dialog, const std::string& input_stem) :
         m_iteration(0),
         m_dialog(dialog),
         m_input_stem(input_stem)
         {}
+
     void operator()(unsigned int, GG::Timer* timer)
         {
-            bool increment = true;
-            if (m_iteration <= g_click_locations.size()) {
+            if (m_iteration <= g_inputs.size()) {
                 GG::GUI::GetGUI()->SaveWndAsPNG(m_dialog, OutputFilename());
                 if (m_iteration) {
-                    Action& action = g_click_locations[m_iteration - 1];
-                    if (!action.m_keys.empty()) {
-                        for (std::string::const_iterator it = action.m_keys.begin(); it != action.m_keys.end(); ++it) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::KEYPRESS, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::KEYRELEASE, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
-                        }
-                    } else if (action.m_semantic == Action::Drag) {
-                        if (!action.m_pressed_for_drag) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
-                            action.m_pressed_for_drag = true;
-                        } else if (!action.m_moved_for_drag) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[0], action.m_next_pts[0] - action.m_pt_1);
-                            action.m_moved_for_drag = true;
-                        } else if (!action.m_released_for_drag) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[0], GG::Pt());
-                            action.m_released_for_drag = true;
-                        }
-                        increment = action.m_released_for_drag;
-                    } else {
-                        if (!action.m_next_pts.empty()) {
-                            for (std::size_t i = 0; i < action.m_next_pts.size(); ++i) {
-                                if (action.m_semantic != Action::RightClick) {
-                                    GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
-                                    GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
-                                } else {
-                                    GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::RPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
-                                    GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::RRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
-                                }
-                                if (action.m_semantic == Action::DoubleClick) {
-                                    GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
-                                    GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_next_pts[i], GG::Pt());
-                                }
+                    Actions& actions = g_inputs[m_iteration - 1];
+                    for (std::size_t i_ = 0; i_ < actions.size(); ++i_) {
+                        typedef void (GG::GUI::*EventFunction)(GG::GUI::EventType, GG::Key, boost::uint32_t, GG::Flags<GG::ModKey>, const GG::Pt&, const GG::Pt&);
+                        const std::size_t i = (i_ + 1) % actions.size();
+                        EventFunction handle = i ? &GG::GUI::QueueGGEvent : &GG::GUI::HandleGGEvent;
+                        Action& action = actions[i];
+                        if (!action.m_keys.empty()) {
+                            for (std::string::const_iterator it = action.m_keys.begin(); it != action.m_keys.end(); ++it) {
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::KEYPRESS, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::KEYRELEASE, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
                             }
-                        }
-                        if (action.m_semantic != Action::RightClick) {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
+                        } else if (action.m_semantic == Action::Drag) {
+                            (GG::GUI::GetGUI()->*handle)(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                            (GG::GUI::GetGUI()->*handle)(GG::GUI::MOUSEMOVE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, action.m_pt_2 - action.m_pt);
+                            (GG::GUI::GetGUI()->*handle)(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_2, GG::Pt());
                         } else {
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::RPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
-                            GG::GUI::GetGUI()->HandleGGEvent(GG::GUI::RRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
-                        }
-                        if (action.m_semantic == Action::DoubleClick) {
-                            GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
-                            GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt_1, GG::Pt());
+                            if (action.m_semantic != Action::RightClick) {
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                            } else {
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::RPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::RRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                            }
+                            if (action.m_semantic == Action::DoubleClick) {
+                                GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                                GG::GUI::GetGUI()->QueueGGEvent(GG::GUI::LRELEASE, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());
+                            }
                         }
                     }
                 }
@@ -133,9 +82,9 @@ struct GenerateEvents
             } else {
                 m_dialog->EndRun();
             }
-            if (increment)
-                ++m_iteration;
+            ++m_iteration;
         }
+
     std::string OutputFilename()
         {
             boost::filesystem::path out(GG::UTF8ToPath(g_output_dir));
@@ -148,6 +97,7 @@ struct GenerateEvents
             out /= filename;
             return GG::PathToUTF8(out);
         }
+
     std::size_t m_iteration;
     GG::Wnd* m_dialog;
     std::string m_input_stem;
@@ -271,6 +221,8 @@ void SignalTester(adobe::name_t widget_type, adobe::name_t signal, adobe::name_t
 
 void CustomInit()
 {
+    GG::GUI::GetGUI()->SetMinDragTime(0);
+
     boost::filesystem::path eve(GG::UTF8ToPath(g_eve_file));
     boost::filesystem::path adam(GG::UTF8ToPath(g_adam_file));
     std::auto_ptr<GG::EveDialog> eve_dialog(
@@ -283,7 +235,7 @@ void CustomInit()
     std::string input_stem = input.stem().native();
     GG::Timer timer(g_drags ? 300 : 100);
     if (!g_dont_exit)
-        GG::Connect(timer.FiredSignal, GenerateEvents(timer, eve_dialog.get(), input_stem));
+        GG::Connect(timer.FiredSignal, GenerateEvents(eve_dialog.get(), input_stem));
     eve_dialog->Run();
 
     std::cout << "Terminating action: " << eve_dialog->TerminatingAction() << "\n"
@@ -333,6 +285,39 @@ init_unit_test_suite( int, char* [] )   {
 }
 #endif
 
+std::ostream& operator<<(std::ostream& os, const Action& action)
+{
+    if (!action.m_keys.empty()) {
+        os << "keys{" << action.m_keys << "}";
+    } else {
+        switch (action.m_semantic) {
+        case Action::LeftClick:
+            os << action.m_pt.x << ',' << action.m_pt.y;
+            break;
+        case Action::RightClick:
+            os << action.m_pt.x << ',' << action.m_pt.y << 'r';
+            break;
+        case Action::DoubleClick:
+            os << action.m_pt.x << ',' << action.m_pt.y << 'b';
+            break;
+        case Action::Drag:
+            os << action.m_pt.x << ',' << action.m_pt.y << ',' << action.m_pt_2.x << ',' << action.m_pt_2.y << 'd';
+            break;
+        }
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Actions& actions)
+{
+    for (std::size_t i = 0; i < actions.size(); ++i) {
+        if (i)
+            os << ',';
+        os << actions[i];
+    }
+    return os;
+}
+
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
@@ -341,56 +326,19 @@ main( int argc, char* argv[] )
     g_output_dir = argv[3];
     int i = 4;
     std::string token;
-    std::size_t comma_1;
-    std::size_t keys;
     if (i < argc && (token = argv[i], token == "test_signals")) {
         g_test_signals = true;
         ++i;
     }
-    while (
-        i < argc &&
-        (token = argv[i],
-         keys = std::string::npos,
-         (comma_1 = token.find(',')) != std::string::npos ||
-         (keys = token.find("keys{")) == 0)
-    ) {
-        if (keys != std::string::npos) {
-            g_click_locations.push_back(Action(token.substr(5, token.size() - 6)));
-        } else {
-            g_generate_variants = !g_test_signals;
-            std::size_t comma_next = token.find_first_of(",rb", comma_1 + 1);
-            GG::Pt point_1(GG::X(boost::lexical_cast<int>(token.substr(0, comma_1))),
-                           GG::Y(boost::lexical_cast<int>(token.substr(comma_1 + 1, comma_next - comma_1 - 1))));
-            std::vector<GG::Pt> next_points;
-            Action::Semantic semantic = Action::LeftClick;
-            if (token.find('r') == token.size() - 1)
-                semantic = Action::RightClick;
-            if (token.find('b') == token.size() - 1)
-                semantic = Action::DoubleClick;
-            bool drag = false;
-            while (comma_next != std::string::npos && token[comma_next] == ',') {
-                std::size_t comma_latest = token.find(',', comma_next + 1);
-                std::size_t end = token.find_first_of(",d", comma_latest + 1);
-                if (end != std::string::npos && token[end] == 'd')
-                    drag = true;
-                next_points.push_back(
-                    GG::Pt(GG::X(boost::lexical_cast<int>(token.substr(comma_next + 1, comma_latest - comma_next - 1))),
-                           GG::Y(boost::lexical_cast<int>(token.substr(comma_latest + 1, end - comma_latest - 1))))
-                );
-                if (drag)
-                    break;
-                comma_next = end;
-            }
-            if (drag)
-                semantic = Action::Drag;
-            g_click_locations.push_back(Action(point_1, next_points, semantic));
-            if (drag)
-                g_drags = true;
-        }
-        ++i;
+    g_generate_variants = !g_test_signals;
+    for (; i < argc; ++i) {
+        const Actions& actions = ParseActions(argv[i]);
+        if (actions.empty())
+            break;
+        g_inputs.push_back(actions);
     }
-    if (!g_click_locations.empty())
-        g_click_locations.push_back(Action(GG::Pt(), std::vector<GG::Pt>(), Action::LeftClick));
+    if (!g_inputs.empty())
+        g_inputs.push_back(Actions(1, Action(0, 0, Action::LeftClick)));
     if (i < argc)
         g_dont_exit = true;
     return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );

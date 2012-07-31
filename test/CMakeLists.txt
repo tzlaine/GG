@@ -36,7 +36,11 @@ elseif (test_backend STREQUAL Ogre)
 endif ()
 
 macro (make_test_exec name)
-    add_executable(${name}-test Test${name}.cpp Action.cpp)
+    set(action_cpp)
+    if (${name} STREQUAL EveLayout)
+        set(action_cpp Action.cpp)
+    endif ()
+    add_executable(${name}-test Test${name}.cpp ${action_cpp})
     set_target_properties(${name}-test
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}

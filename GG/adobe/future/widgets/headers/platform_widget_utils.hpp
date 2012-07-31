@@ -143,9 +143,13 @@ void replace_placeholder(array_t& expression, name_t name, const any_regular_t& 
 void replace_placeholders(array_t& expression,
                           const any_regular_t& _,
                           const any_regular_t& _1,
+                          name_t _1_name = name_t(),
                           const any_regular_t& _2 = any_regular_t(),
+                          name_t _2_name = name_t(),
                           const any_regular_t& _3 = any_regular_t(),
-                          const any_regular_t& _4 = any_regular_t());
+                          name_t _3_name = name_t(),
+                          const any_regular_t& _4 = any_regular_t(),
+                          name_t _4_name = name_t());
 
 /****************************************************************************************************/
 

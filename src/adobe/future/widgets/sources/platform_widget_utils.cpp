@@ -252,18 +252,22 @@ void replace_placeholder(array_t& expression, name_t name, const any_regular_t& 
 void replace_placeholders(array_t& expression,
                           const any_regular_t& _,
                           const any_regular_t& _1,
+                          name_t _1_name/* = name_t()*/,
                           const any_regular_t& _2/* = any_regular_t()*/,
+                          name_t _2_name/* = name_t()*/,
                           const any_regular_t& _3/* = any_regular_t()*/,
-                          const any_regular_t& _4/* = any_regular_t()*/)
+                          name_t _3_name/* = name_t()*/,
+                          const any_regular_t& _4/* = any_regular_t()*/,
+                          name_t _4_name/* = name_t()*/)
 {
     replace_placeholder(expression, static_name_t("_"), _);
-    if (!empty(_1))
+    if (_1_name)
         replace_placeholder(expression, static_name_t("_1"), _1);
-    if (!empty(_2))
+    if (_2_name)
         replace_placeholder(expression, static_name_t("_2"), _2);
-    if (!empty(_3))
+    if (_3_name)
         replace_placeholder(expression, static_name_t("_3"), _3);
-    if (!empty(_4))
+    if (_4_name)
         replace_placeholder(expression, static_name_t("_4"), _4);
 }
 
@@ -293,22 +297,19 @@ void handle_signal(signal_notifier_t signal_notifier,
         dictionary_t dict;
 
         std::size_t count = 0;
-        if (!empty(_1)) {
+        if (_1_name) {
             dict[_1_name] = _1;
             ++count;
         }
-        if (!empty(_2)) {
-            assert(_2_name);
+        if (_2_name) {
             dict[_2_name] = _2;
             ++count;
         }
-        if (!empty(_3)) {
-            assert(_3_name);
+        if (_3_name) {
             dict[_3_name] = _3;
             ++count;
         }
-        if (!empty(_4)) {
-            assert(_4_name);
+        if (_4_name) {
             dict[_4_name] = _4;
             ++count;
         }
@@ -325,7 +326,7 @@ void handle_signal(signal_notifier_t signal_notifier,
     if (expression.empty()) {
         value = _;
     } else {
-        replace_placeholders(expression, _, _1, _2, _3, _4);
+        replace_placeholders(expression, _, _1, _1_name, _2, _2_name, _3, _3_name, _4, _4_name);
         value = sheet.inspect(expression);
     }
 

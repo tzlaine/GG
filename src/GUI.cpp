@@ -339,8 +339,8 @@ void GUIImpl::HandleDrag(unsigned int mouse_button, const Pt& pos, int curr_tick
         Pt diff = m_prev_button_press_pos - pos;
         int drag_distance = Value(diff.x * diff.x) + Value(diff.y * diff.y);
         // ensure that the minimum drag requirements are met
-        if (m_min_drag_time < (curr_ticks - m_prev_button_press_time) &&
-            (m_min_drag_distance * m_min_drag_distance < drag_distance) &&
+        if (m_min_drag_time <= (curr_ticks - m_prev_button_press_time) &&
+            (m_min_drag_distance * m_min_drag_distance <= drag_distance) &&
             m_drag_drop_wnds.find(m_drag_wnds[mouse_button]) == m_drag_drop_wnds.end()) {
             if (!m_drag_wnds[mouse_button]->Dragable() &&
                 m_drag_wnds[mouse_button]->DragDropDataType() != "" &&

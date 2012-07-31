@@ -181,6 +181,8 @@ foreach (test_file ${signal_binding_test_files})
         add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 215,288 215,439 548,73 548,270 548,422 548,644 891,73 891,95 891,249 891,270 891,422 891,468 891,623 891,644)
     elseif (test_file MATCHES "listbox_2_signal_binding_test")
         add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals 212,70 212,222 212,370 520,70r 520,222r 520,370r 840,70b 840,222b 840,370b)
+    elseif (test_file MATCHES "listbox_3_signal_binding_test")
+        add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals ) # TODO: keystrokes!
     else ()
         add_test_and_data_files(EveLayout ${test_file} ${adam_test_file} ${CMAKE_CURRENT_BINARY_DIR} test_signals)
     endif ()

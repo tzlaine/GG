@@ -1,0 +1,50 @@
+sheet signal_binding_test
+{
+constant:
+    expected_erased_signal_cell_1 : "erased value";
+    expected_erased_signal_cell_2 : "Two";
+    expected_erased_signal_cell_3 : "Three";
+    expected_browsed_signal_cell_4 : "browsed value";
+    expected_browsed_signal_cell_5 : "Two";
+    expected_browsed_signal_cell_6 : "Three";
+    expected_drop_signal_cell_7 : "dropped value";
+    expected_drop_signal_cell_8 : "drop acceptable value";
+    expected_drop_signal_cell_9_10 : "Two";
+    expected_drop_signal_cell_11_12 : "Three";
+
+interface:
+    items: [
+        { name: "One", value: "One" },
+        { name: "Two", value: 2 },
+        { name: "Three", value: @three }
+    ];
+
+    erased_signal_cell_1 : "<rgba 255 0 0 255>no clicks</rgba>";
+    erased_signal_cell_2 : "<rgba 255 0 0 255>no clicks</rgba>";
+    erased_signal_cell_3 : "<rgba 255 0 0 255>no clicks</rgba>";
+    browsed_signal_cell_4 : "<rgba 255 0 0 255>no clicks</rgba>";
+    browsed_signal_cell_5 : "<rgba 255 0 0 255>no clicks</rgba>";
+    browsed_signal_cell_6 : "<rgba 255 0 0 255>no clicks</rgba>";
+    dropped_signal_cell_7 : "<rgba 255 0 0 255>no clicks</rgba>";
+    drop_acceptable_signal_cell_8 : "<rgba 255 0 0 255>no clicks</rgba>";
+    dropped_signal_cell_9 : "<rgba 255 0 0 255>no clicks</rgba>";
+    drop_acceptable_signal_cell_10 : "<rgba 255 0 0 255>no clicks</rgba>";
+    dropped_signal_cell_11 : "<rgba 255 0 0 255>no clicks</rgba>";
+    drop_acceptable_signal_cell_12 : "<rgba 255 0 0 255>no clicks</rgba>";
+
+    result_erased_signal_cell_1 <== erased_signal_cell_1 == expected_erased_signal_cell_1 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_erased_signal_cell_2 <== erased_signal_cell_2 == expected_erased_signal_cell_2 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_erased_signal_cell_3 <== erased_signal_cell_3 == expected_erased_signal_cell_3 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_browsed_signal_cell_4 <== browsed_signal_cell_4 == expected_browsed_signal_cell_4 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_browsed_signal_cell_5 <== browsed_signal_cell_5 == expected_browsed_signal_cell_5 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_browsed_signal_cell_6 <== browsed_signal_cell_6 == expected_browsed_signal_cell_6 ? "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_drop_signal_cell_7_8 <==
+        dropped_signal_cell_7 == expected_drop_signal_cell_7 && drop_acceptable_signal_cell_8 == expected_drop_signal_cell_8 ?
+        "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_drop_signal_cell_9_10 <==
+        dropped_signal_cell_9 == expected_drop_signal_cell_9_10 && drop_acceptable_signal_cell_10 == expected_drop_signal_cell_9_10 ?
+        "pass" : "<rgba 255 0 0 255>fail</rgba>";
+    result_drop_signal_cell_11_12 <==
+        dropped_signal_cell_11 == expected_drop_signal_cell_11_12 && drop_acceptable_signal_cell_12 == expected_drop_signal_cell_11_12 ?
+        "pass" : "<rgba 255 0 0 255>fail</rgba>";
+}

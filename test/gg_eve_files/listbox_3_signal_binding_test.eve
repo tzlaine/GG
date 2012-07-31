@@ -1,0 +1,94 @@
+layout alert_dialog
+{
+    view dialog(name: "Listbox Signal Binding Test")
+    {
+        group(name: "Erased Signal Bound", child_vertical: align_proportional)
+        {
+            listbox(name: "simple expression",
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_erased_signal: [@erased_signal_cell_1, '"erased value"']);
+            display_text(name: "Erased signal bind:", characters: 15, bind: @erased_signal_cell_1);
+            display_text(name: "Result:", characters: 15, bind: @result_erased_signal_cell_1);
+
+            listbox(name: '"_.row"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_erased_signal: [@erased_signal_cell_2, "_.row"]);
+            display_text(name: "Erased signal bind:", characters: 15, bind: @erased_signal_cell_2);
+            display_text(name: "Result:", characters: 15, bind: @result_erased_signal_cell_2);
+
+            listbox(name: '"_1"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    hilite_color: color(b:255),
+                    bind_erased_signal: [@erased_signal_cell_3, "_1"]);
+            display_text(name: "Erased signal bind:", characters: 15, bind: @erased_signal_cell_3);
+            display_text(name: "Result:", characters: 15, bind: @result_erased_signal_cell_3);
+        }
+
+        group(name: "Browsed Signal Bound", child_vertical: align_proportional)
+        {
+            listbox(name: "simple expression",
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_browsed_signal: [@browsed_signal_cell_4, '"browsed value"']);
+            display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_4);
+            display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_4);
+
+            listbox(name: '"_.row"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_browsed_signal: [@browsed_signal_cell_5, "_.row"]);
+            display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_5);
+            display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_5);
+
+            listbox(name: '"_1"',
+                    items: @items,
+                    characters: 10,
+                    rows: 3,
+                    bind_browsed_signal: [@browsed_signal_cell_6, "_1"]);
+            display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_6);
+            display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_6);
+        }
+
+        group(name: "Dropped/Drop Acceptable Signal Bound", child_vertical: align_proportional)
+        {
+            listbox(name: "drag source", items: @items, characters: 10, rows: 3);
+
+            listbox(name: "simple expression",
+                    characters: 10,
+                    rows: 3,
+                    bind_dropped_signal: [@dropped_signal_cell_7, '"dropped value"'],
+                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_8, '"drop acceptable value"']);
+            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @dropped_signal_cell_7);
+            display_text(name: "Dropped signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_8);
+            display_text(name: "Result:", characters: 15, bind: @result_drop_signal_cell_7_8);
+
+            listbox(name: '"_.row"',
+                    characters: 10,
+                    rows: 3,
+                    bind_dropped_signal: [@dropped_signal_cell_9, "_.row"],
+                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_10, '"drop acceptable value"']);
+            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @dropped_signal_cell_9);
+            display_text(name: "Dropped signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_10);
+            display_text(name: "Result:", characters: 15, bind: @result_drop_signal_cell_9_10);
+
+            listbox(name: '"_1"',
+                    characters: 10,
+                    rows: 3,
+                    bind_dropped_signal: [@dropped_signal_cell_11, "_1"],
+                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_12, '"drop acceptable value"']);
+            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @dropped_signal_cell_11);
+            display_text(name: "Dropped signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_12);
+            display_text(name: "Result:", characters: 15, bind: @result_drop_signal_cell_11_12);
+        }
+    }
+}

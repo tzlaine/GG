@@ -8,6 +8,7 @@ layout alert_dialog
                     items: @items,
                     characters: 10,
                     rows: 3,
+                    user_delete: true,
                     hilite_color: color(b:255),
                     bind_erased_signal: [@erased_signal_cell_1, '"erased value"']);
             display_text(name: "Erased signal bind:", characters: 15, bind: @erased_signal_cell_1);
@@ -17,6 +18,7 @@ layout alert_dialog
                     items: @items,
                     characters: 10,
                     rows: 3,
+                    user_delete: true,
                     hilite_color: color(b:255),
                     bind_erased_signal: [@erased_signal_cell_2, "_.row"]);
             display_text(name: "Erased signal bind:", characters: 15, bind: @erased_signal_cell_2);
@@ -26,6 +28,7 @@ layout alert_dialog
                     items: @items,
                     characters: 10,
                     rows: 3,
+                    user_delete: true,
                     hilite_color: color(b:255),
                     bind_erased_signal: [@erased_signal_cell_3, "_1"]);
             display_text(name: "Erased signal bind:", characters: 15, bind: @erased_signal_cell_3);
@@ -38,6 +41,7 @@ layout alert_dialog
                     items: @items,
                     characters: 10,
                     rows: 3,
+                    browse_updates: true,
                     bind_browsed_signal: [@browsed_signal_cell_4, '"browsed value"']);
             display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_4);
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_4);
@@ -46,6 +50,7 @@ layout alert_dialog
                     items: @items,
                     characters: 10,
                     rows: 3,
+                    browse_updates: true,
                     bind_browsed_signal: [@browsed_signal_cell_5, "_.row"]);
             display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_5);
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_5);
@@ -54,6 +59,7 @@ layout alert_dialog
                     items: @items,
                     characters: 10,
                     rows: 3,
+                    browse_updates: true,
                     bind_browsed_signal: [@browsed_signal_cell_6, "_1"]);
             display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_6);
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_6);

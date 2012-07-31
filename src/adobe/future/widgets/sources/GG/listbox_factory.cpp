@@ -307,10 +307,10 @@ namespace adobe {
         get_sort_order_style(sort_order, style);
         get_selection_style(selections, style);
 
-        if (!user_delete)
+        if (user_delete)
             style |= GG::LIST_USERDELETE;
 
-        if (!browse_updates)
+        if (browse_updates)
             style |= GG::LIST_BROWSEUPDATES;
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {

@@ -26,6 +26,8 @@
 
 #include "listbox_factory.hpp"
 
+#include <GG/adobe/any_regular.hpp>
+#include <GG/adobe/array.hpp>
 #include <GG/adobe/localization.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
@@ -83,9 +85,6 @@ namespace {
     adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
                                    GG::ListBox::const_iterator end_it)
     {
-        if (it == end_it)
-            return adobe::any_regular_t();
-
         adobe::array_t elements;
 
         const std::size_t size = (*it)->size();
@@ -115,12 +114,7 @@ namespace {
                 elements.push_back(adobe::any_regular_t());
         }
 
-        if (elements.empty())
-            return adobe::any_regular_t();
-        else if (elements.size() == 1u)
-            return adobe::any_regular_t(elements[0]);
-        else
-            return adobe::any_regular_t(elements);
+        return adobe::any_regular_t(elements);
     }
 
     void handle_selection_changed_signal(const adobe::listbox_t& listbox,
@@ -137,12 +131,6 @@ namespace {
             array.push_back(row_value(*it, listbox.control_m->end()));
         }
 
-        adobe::any_regular_t value;
-        if (array.size() == 1u)
-            value = array[0];
-        else if (!array.empty())
-            value.assign(array);
-
         adobe::implementation::handle_signal(signal_notifier,
                                              adobe::static_name_t("listbox"),
                                              signal_type,
@@ -150,7 +138,7 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             value);
+                                             adobe::any_regular_t(array));
     }
 
     template <typename Iter>
@@ -541,7 +529,8 @@ namespace adobe {
             return create_and_hookup_widget<listbox_t, poly_placeable_t>(
                 parameters, parent, token,
                 factory.is_container(static_name_t("listbox")),
-                factory.layout_attributes(static_name_t("listbox")));
+                factory.layout_attributes(static_name_t("listbox"))
+            );
         }
 
     }

@@ -261,14 +261,10 @@ void replace_placeholders(array_t& expression,
                           name_t _4_name/* = name_t()*/)
 {
     replace_placeholder(expression, static_name_t("_"), _);
-    if (_1_name)
-        replace_placeholder(expression, static_name_t("_1"), _1);
-    if (_2_name)
-        replace_placeholder(expression, static_name_t("_2"), _2);
-    if (_3_name)
-        replace_placeholder(expression, static_name_t("_3"), _3);
-    if (_4_name)
-        replace_placeholder(expression, static_name_t("_4"), _4);
+    replace_placeholder(expression, static_name_t("_1"), _1);
+    replace_placeholder(expression, static_name_t("_2"), _2);
+    replace_placeholder(expression, static_name_t("_3"), _3);
+    replace_placeholder(expression, static_name_t("_4"), _4);
 }
 
 /****************************************************************************************************/

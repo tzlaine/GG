@@ -2,14 +2,14 @@ sheet signal_binding_test
 {
 constant:
     expected_left_clicked_signal_cell_1 : "left click value";
-    expected_left_clicked_signal_cell_2 : ["Two", [212, 222]];
-    expected_left_clicked_signal_cell_3 : ["Three", [212, 370]];
+    expected_left_clicked_signal_cell_2 : [["Two"], [212, 222]];
+    expected_left_clicked_signal_cell_3 : [["Three"], [212, 370]];
     expected_right_clicked_signal_cell_4 : "right click value";
-    expected_right_clicked_signal_cell_5 : ["Two", [520, 222]];
-    expected_right_clicked_signal_cell_6 : ["Three", [520, 370]];
+    expected_right_clicked_signal_cell_5 : [["Two"], [520, 222]];
+    expected_right_clicked_signal_cell_6 : [["Three"], [520, 370]];
     expected_double_clicked_signal_cell_7 : "double click value";
-    expected_double_clicked_signal_cell_8 : "Two";
-    expected_double_clicked_signal_cell_9 : "Three";
+    expected_double_clicked_signal_cell_8 : ["Two"];
+    expected_double_clicked_signal_cell_9 : ["Three"];
 
 interface:
     items: [

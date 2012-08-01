@@ -1184,16 +1184,14 @@ else:
     \section eve_listbox_interaction_semantics User Interaction Semantics
 
     Selecting one or more items in the listbox causes those items' values to
-    be assigned to the bound Adam cell.  When a single item is selected, this
-    is represented by a single value.  When multiple items are selected, this
-    is represented by an array of values.
+    be assigned to the bound Adam cell.  This is represented by a (possibly
+    empty) array of values.
 
     \section eve_listbox_adam_interaction Adam Interaction Notes
 
     The listbox expects the bound Adam cell to set its selected items, using
-    one or more of the values specified in \a items.  When a single item is
-    selected, this is represented by a single value.  When multiple items are
-    selected, this is represented by an array of values.
+    one or more of the values specified in \a items.  This is expected as a
+    (possibly empty) array of values.
 
     \section eve_listbox_usage listbox() Usage
 
@@ -1239,9 +1237,8 @@ else:
 
     \code [ "local value of pi:", 3.0 ] \endcode
 
-    .  A GG::ListBox::Row containing no controls is represented by \c empty.
-    A GG::ListBox::Row containing a single control is represented by a single
-    value.  A GG::ListBox::Row containing multiple controls is represented by
+    .  A GG::ListBox::Row containing no controls is represented by an empty
+    array. A GG::ListBox::Row containing multiple controls is represented by
     an array of values.  Here are the Adam and Eve value types associated with
     each GG::Control subclass:
 

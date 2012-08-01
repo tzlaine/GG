@@ -1,28 +1,28 @@
 sheet signal_binding_test
 {
 constant:
-    expected_bind_cell_0 : empty;
+    expected_bind_cell_0 : [];
     expected_selection_changed_signal_cell_0 : empty;
 
-    expected_bind_cell_1 : "One";
-    expected_selection_changed_signal_cell_1 : "One";
-    expected_bind_cell_2 : 2;
+    expected_bind_cell_1 : ["One"];
+    expected_selection_changed_signal_cell_1 : [["One"]];
+    expected_bind_cell_2 : [2];
     expected_selection_changed_signal_cell_2 : "selection signal value";
-    expected_bind_cell_3 : "One";
-    expected_selection_changed_signal_cell_3 : "One";
-    expected_bind_cell_4 : @three;
-    expected_selection_changed_signal_cell_4 : "Three";
+    expected_bind_cell_3 : ["One"];
+    expected_selection_changed_signal_cell_3 : [["One"]];
+    expected_bind_cell_4 : [@three];
+    expected_selection_changed_signal_cell_4 : [["Three"]];
     expected_bind_cell_5 : ["One", 2];
-    expected_selection_changed_signal_cell_5 : ["One", "Two"];
+    expected_selection_changed_signal_cell_5 : [["One"], ["Two"]];
     expected_bind_cell_6 : ["One", 2];
     expected_selection_changed_signal_cell_6 : "selection signal value";
     expected_bind_cell_7 : ["One", @three];
-    expected_selection_changed_signal_cell_7 : ["One", "Three"];
+    expected_selection_changed_signal_cell_7 : [["One"], ["Three"]];
     expected_bind_cell_8 : [2, @three];
-    expected_selection_changed_signal_cell_8 : ["Two", "Three"];
+    expected_selection_changed_signal_cell_8 : [["Two"], ["Three"]];
 
-    expected_bind_cell_9 : "One";
-    expected_bind_cell_10 : 2;
+    expected_bind_cell_9 : ["One"];
+    expected_bind_cell_10 : [2];
 
 interface:
     items: [
@@ -31,7 +31,7 @@ interface:
         { name: "Three", value: @three }
     ];
 
-    bind_cell_0;
+    bind_cell_0 : [];
     selection_changed_signal_cell_0;
 
     bind_cell_1;

@@ -43,22 +43,14 @@ namespace {
         assert(listbox.control_m);
 
         if (listbox.value_proc_m) {
-            adobe::any_regular_t value;
-            if (selections.size() == 1u) {
-                std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *selections.begin());
-                value = listbox.items_m.at(index).find(adobe::static_name_t("value"))->second;
-            } else if (!selections.empty()) {
-                value.assign(adobe::array_t());
-                adobe::array_t& array = value.cast<adobe::array_t>();
-                for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(), end_it = selections.end();
-                     it != end_it;
-                     ++it) {
-                    std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *it);
-                    array.push_back(listbox.items_m.at(index).find(adobe::static_name_t("value"))->second);
-                }
+            adobe::array_t array;
+            for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(), end_it = selections.end();
+                 it != end_it;
+                 ++it) {
+                std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *it);
+                array.push_back(listbox.items_m.at(index).find(adobe::static_name_t("value"))->second);
             }
-            listbox.debounce_m = value;
-            listbox.value_proc_m(value);
+            listbox.value_proc_m(listbox.debounce_m = adobe::any_regular_t(array));
         }
 
         if (listbox.selection_changed_proc_m)

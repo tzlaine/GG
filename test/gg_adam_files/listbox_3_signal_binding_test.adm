@@ -2,11 +2,11 @@ sheet signal_binding_test
 {
 constant:
     expected_erased_signal_cell_1 : "erased value";
-    expected_erased_signal_cell_2 : "Two";
-    expected_erased_signal_cell_3 : "Three";
+    expected_erased_signal_cell_2 : ["Two"];
+    expected_erased_signal_cell_3 : ["Three"];
     expected_browsed_signal_cell_4 : "browsed value";
-    expected_browsed_signal_cell_5 : "Two";
-    expected_browsed_signal_cell_6 : "Three";
+    expected_browsed_signal_cell_5 : ["Two"];
+    expected_browsed_signal_cell_6 : ["Three"];
     expected_drop_signal_cell_7 : "dropped value";
     expected_drop_signal_cell_8 : "drop acceptable value";
     expected_drop_signal_cell_9_10 : "Two";

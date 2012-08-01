@@ -85,6 +85,9 @@ namespace {
     adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
                                    GG::ListBox::const_iterator end_it)
     {
+        if (it == end_it)
+            return adobe::any_regular_t(adobe::array_t());
+
         adobe::array_t elements;
 
         const std::size_t size = (*it)->size();

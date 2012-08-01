@@ -55,9 +55,9 @@ struct GenerateEvents
                         EventFunction handle = i ? &GG::GUI::QueueGGEvent : &GG::GUI::HandleGGEvent;
                         Action& action = actions[i];
                         if (!action.m_keys.empty()) {
-                            for (std::string::const_iterator it = action.m_keys.begin(); it != action.m_keys.end(); ++it) {
-                                (GG::GUI::GetGUI()->*handle)(GG::GUI::KEYPRESS, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
-                                (GG::GUI::GetGUI()->*handle)(GG::GUI::KEYRELEASE, GG::Key(*it), boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
+                            for (std::vector<GG::Key>::const_iterator it = action.m_keys.begin(); it != action.m_keys.end(); ++it) {
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::KEYPRESS, *it, boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
+                                (GG::GUI::GetGUI()->*handle)(GG::GUI::KEYRELEASE, *it, boost::uint32_t(*it), GG::Flags<GG::ModKey>(), GG::Pt(), GG::Pt());
                             }
                         } else if (action.m_semantic == Action::Drag) {
                             (GG::GUI::GetGUI()->*handle)(GG::GUI::LPRESS, GG::Key(), boost::uint32_t(), GG::Flags<GG::ModKey>(), action.m_pt, GG::Pt());

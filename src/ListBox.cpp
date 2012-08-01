@@ -1859,7 +1859,8 @@ bool ListBox::FilterImpl(Wnd* w, const WndEvent& event)
             break;
         }
 
-        case WndEvent::MouseEnter: {
+        case WndEvent::MouseEnter:
+        case WndEvent::MouseHere: {
             if (m_style & LIST_BROWSEUPDATES) {
                 iterator sel_row = RowUnderPt(pt);
                 if (m_last_row_browsed != sel_row)
@@ -1867,9 +1868,6 @@ bool ListBox::FilterImpl(Wnd* w, const WndEvent& event)
             }
             break;
         }
-
-        case WndEvent::MouseHere:
-            break;
 
         case WndEvent::MouseLeave: {
             if (m_style & LIST_BROWSEUPDATES) {

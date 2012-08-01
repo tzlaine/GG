@@ -471,7 +471,10 @@ namespace GG {
 
 ListBox::Row* DefaultRowFactoryFunction(const adobe::dictionary_t& parameters)
 {
-    GG::ListBox::Row* retval = new GG::ListBox::Row(GG::X1, adobe::implementation::RowHeight(), "");
+    std::string drag_drop_data_type;
+    adobe::get_value(parameters, adobe::static_name_t("drag_drop_data_type"), drag_drop_data_type);
+    GG::ListBox::Row* retval =
+        new GG::ListBox::Row(GG::X1, adobe::implementation::RowHeight(), drag_drop_data_type);
     std::string name;
     adobe::get_value(parameters, adobe::static_name_t("name"), name);
     Clr color;

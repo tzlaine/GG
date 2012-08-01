@@ -1203,7 +1203,7 @@ else:
 
     \param name The text label that appears to the left of the listbox.
     \param alt The tooltip text that appears when the cursor hovers over the listbox.
-    \param items An array of dictionaries.  Each dictionary has a \c name and a \c value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  A single name may be specified for \a items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.
+    \param items An array of dictionaries.  Each dictionary has a \c name and a \c value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  Optionally, \c drag_drop_data_type may be specified as well (see GG::ListBox::Row).  A single name may be specified for \a items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.
     \param characters The width of the listbox, in number of characters.
     \param rows The height of the listbox, in number of rows.
     \param sort Whether the rows should be shown in the order added to the listbox, or in sorted order.
@@ -1282,11 +1282,12 @@ else:
     label.
 
     Note that there is a default row factory function that is used when a
-    user-defined factory is not supplied, and it only relies on the \a name
-    and \a color item parameters.  If \a color is not provided (and by default
-    it is not), the listbox's or popup's \a text_color parameter is used
-    instead.  Even using the default factory, color may be specified, to
-    indicate a particular color for a particular item.
+    user-defined factory is not supplied, and it only relies on the \a name,
+    \a color, and \a drag_drop_data_type item parameters.  If \a color is not
+    provided (and by default it is not), the listbox's or popup's \a
+    text_color parameter is used instead.  Even using the default factory,
+    color may be specified, to indicate a particular color for a particular
+    item.
 
     The row factory type is a map from names to dictionary functions.  The key
     used comes from the \a type parameter in an Eve script row item.  If this

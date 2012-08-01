@@ -14,9 +14,9 @@ constant:
 
 interface:
     items: [
-        { name: "One", value: "One" },
-        { name: "Two", value: 2 },
-        { name: "Three", value: @three }
+        { name: "One", value: "One", drag_drop_data_type: "drag me" },
+        { name: "Two", value: 2, drag_drop_data_type: "drag me" },
+        { name: "Three", value: @three, drag_drop_data_type: "drag me" }
     ];
 
     erased_signal_cell_1 : "<rgba 255 0 0 255>no clicks</rgba>";

@@ -262,7 +262,7 @@ void DynamicGraphic::AddFrames(const std::vector<boost::shared_ptr<Texture> >& t
         for (std::size_t i = 0; i < textures.size() - 1; ++i) {
             AddFrames(textures[i], ALL_FRAMES);
         }
-        AddFrames(textures.back(), m_frames - old_frames);
+        AddFrames(textures.back(), textures.size() == 1u ? frames : m_frames - old_frames);
     }
 }
 

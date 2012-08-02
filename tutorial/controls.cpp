@@ -358,7 +358,7 @@ void ControlsTestApp::Initialize()
     // These two lines load my crappy image of circles used for the next two
     // controls, and then restores the state of GL_TEXTURE_2D, which is
     // changed in the process.
-    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("tutorial/hatchcircle.png");
+    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("hatchcircle.png");
     glDisable(GL_TEXTURE_2D);
 
     // A slideshow-type changing graphic control.

@@ -15,6 +15,7 @@ endmacro ()
 
 make_gigi_tutorial(minimal minimal.cpp)
 make_gigi_tutorial(controls controls.cpp)
-if (BUILD_EXPERIMENTAL_EVE_SUPPORT)
-    make_gigi_tutorial(eve eve.cpp)
-endif ()
+make_gigi_tutorial(eve eve.cpp)
+
+file(COPY ${CMAKE_HOME_DIRECTORY}/tutorial/hatchcircle.png DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_HOME_DIRECTORY}/test/stop.png DESTINATION ${CMAKE_BINARY_DIR})

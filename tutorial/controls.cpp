@@ -1,3 +1,9 @@
+#if USE_SDL_BACKEND
+#include "../test/SDLBackend.h"
+#else
+#include "../test/OgreBackend.h"
+#endif
+
 #include <GG/Button.h>
 #include <GG/DropDownList.h>
 #include <GG/DynamicGraphic.h>
@@ -13,7 +19,6 @@
 #include <GG/TextControl.h>
 #include <GG/dialogs/FileDlg.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
-#include <GG/SDL/SDLGUI.h>
 
 #include <iostream>
 
@@ -96,74 +101,14 @@ struct CustomTextRow : GG::ListBox::Row
     }
 };
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Ignore all code until ControlsTestApp::Initialize(); the enclosed code is
-// straight from Tutorial 1.
-////////////////////////////////////////////////////////////////////////////////
-class ControlsTestApp : public GG::SDLGUI
-{
-public:
-    ControlsTestApp();
-
-    virtual void Enter2DMode();
-    virtual void Exit2DMode();
-
-protected:
-    virtual void Render();
-
-private:
-    virtual void GLInit();
-    virtual void Initialize();
-    virtual void FinalCleanup();
-};
-
-ControlsTestApp::ControlsTestApp() : 
-    SDLGUI(1024, 768, false, "Control-Test GG App")
-{
-}
-
-void ControlsTestApp::Enter2DMode()
-{
-    glPushAttrib(GL_ENABLE_BIT | GL_PIXEL_MODE_BIT | GL_TEXTURE_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glViewport(0, 0, Value(AppWidth()), Value(AppHeight()));
-
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glOrtho(0.0, Value(AppWidth()), Value(AppHeight()), 0.0, 0.0, Value(AppWidth()));
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-}
-
-void ControlsTestApp::Exit2DMode()
-{
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-
-    glPopAttrib();
-}
-
-void ControlsTestApp::Render()
+void CustomRender()
 {
     const double RPM = 4;
     const double DEGREES_PER_MS = 360.0 * RPM / 60000.0;
 
-    glRotated(DeltaT() * DEGREES_PER_MS, 0.0, 1.0, 0.0);
+    // DeltaT() returns the time in whole milliseconds since the last frame
+    // was rendered (in other words, since this method was last invoked).
+    glRotated(GG::GUI::GetGUI()->DeltaT() * DEGREES_PER_MS, 0.0, 1.0, 0.0);
 
     glBegin(GL_QUADS);
 
@@ -204,40 +149,20 @@ void ControlsTestApp::Render()
     glVertex3d(1.0, -1.0, -1.0);
 
     glEnd();
-
-    GG::GUI::Render();
 }
 
-void ControlsTestApp::GLInit()
+// This is the launch point for your GG app.  This is where you should place
+// your main GG::Wnd(s) that should appear when the application starts, if
+// any.
+void CustomInit()
 {
-    double ratio = Value(AppWidth() * 1.0) / Value(AppHeight());
-
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, Value(AppWidth()), Value(AppHeight()));
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(50.0, ratio, 1.0, 10.0);
-    gluLookAt(0.0, 0.0, 5.0,
-              0.0, 0.0, 0.0,
-              0.0, 1.0, 0.0);
-    glMatrixMode(GL_MODELVIEW);
-}
-////////////////////////////////////////////////////////////////////////////////
-// End of old tutorial code.
-////////////////////////////////////////////////////////////////////////////////
-
-void ControlsTestApp::Initialize()
-{
-    SDL_WM_SetCaption("Control-Test GG App", "Control-Test GG App");
-
-    boost::shared_ptr<GG::Font> font = GetStyleFactory()->DefaultFont();
+    boost::shared_ptr<GG::Font> font =
+        GG::GUI::GetGUI()->GetStyleFactory()->DefaultFont();
 
     // We're creating a layout for this window, so that we don't have to come up with position coordinates for all the
     // Controls.
-    GG::Layout* layout = new GG::Layout(GG::X0, GG::Y0, AppWidth(), AppHeight(), 1, 1, 10);
+    GG::Layout* layout =
+        new GG::Layout(GG::X0, GG::Y0, GG::GUI::GetGUI()->AppWidth(), GG::GUI::GetGUI()->AppHeight(), 1, 1, 10);
 
     // Create a menu bar for the top of the app.
     GG::MenuItem menu_contents;
@@ -249,7 +174,7 @@ void ControlsTestApp::Initialize()
                      GG::MenuItem::SelectedSignalType::slot_type(BrowseFilesFunctor())));
     menu_contents.next_level.push_back(file_menu);
     GG::MenuBar* menu_bar =
-        new GG::MenuBar(GG::X0, GG::Y0, AppWidth(), font, menu_contents, GG::CLR_WHITE);
+        new GG::MenuBar(GG::X0, GG::Y0, GG::GUI::GetGUI()->AppWidth(), font, menu_contents, GG::CLR_WHITE);
     layout->Add(menu_bar, 0, 0, 1, 2, GG::ALIGN_TOP);
 
     // Here we create a RadioButtonGroup, then create two StateButtons and add
@@ -358,7 +283,8 @@ void ControlsTestApp::Initialize()
     // These two lines load my crappy image of circles used for the next two
     // controls, and then restores the state of GL_TEXTURE_2D, which is
     // changed in the process.
-    boost::shared_ptr<GG::Texture> circle_texture = GetTexture("hatchcircle.png");
+    boost::shared_ptr<GG::Texture> circle_texture =
+        GG::GUI::GetGUI()->GetTexture("hatchcircle.png");
     glDisable(GL_TEXTURE_2D);
 
     // A slideshow-type changing graphic control.
@@ -389,23 +315,22 @@ void ControlsTestApp::Initialize()
     GG::Connect(quit_button->ClickedSignal, &QuitButtonClicked);
 
     // This registers our Layout (which is a Wnd subclass) with the App, causing it to be displayed.
-    Register(layout);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// More old tutorial code.
-////////////////////////////////////////////////////////////////////////////////
-void ControlsTestApp::FinalCleanup()
-{
+    GG::GUI::GetGUI()->Register(layout);
 }
 
 extern "C"
 int main(int argc, char* argv[])
 {
-    ControlsTestApp app;
-
     try {
-        app();
+#if USE_SDL_BACKEND
+        MinimalSDLGUI::CustomInit = &CustomInit;
+        MinimalSDLGUI::CustomRender = &CustomRender;
+        MinimalSDLMain();
+#else
+        MinimalOgreGUI::CustomInit = &CustomInit;
+        MinimalOgreGUI::CustomRender = &CustomRender;
+        MinimalOgreMain();
+#endif
     } catch (const std::invalid_argument& e) {
         std::cerr << "main() caught exception(std::invalid_arg): " << e.what();
     } catch (const std::runtime_error& e) {

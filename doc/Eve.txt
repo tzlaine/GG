@@ -574,16 +574,16 @@ if bind_output is defined:
     adam_cell(bind_output) = value
 else:
     if bind is defined:
-        button_handler(action, {value: contributing})
+        button_handler(action, {value: expr, contributing: expr})
     else:
         button_handler(action, value)\endverbatim
 
     Briefly, if \a bind_output is defined, \a value is assigned to the Adam
     property sheet cell with the name \a bind_output.  Otherwise, the button
     handler is called with \a action as its first argument.  If \a bind is
-    defined, the second argument is a dictionary containing ( \a value, \a
-    contributing ) as its only elemement; if \a bind is not defined, the
-    second argument to the button handler is just \a value.
+    defined, the second argument is a dictionary containing \a value and \a
+    contributing as its only elemements; if \a bind is not defined, the second
+    argument to the button handler is just \a value.
 
     \section eve_button_adam_interaction Adam Interaction Notes
 

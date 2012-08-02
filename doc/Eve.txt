@@ -929,10 +929,6 @@ else:
     to the same cell.
 */
 
-/** \page eve_separator separator()
-    TODO
-*/
-
 /** \page eve_slider slider()
     slider() creates a slider.
 

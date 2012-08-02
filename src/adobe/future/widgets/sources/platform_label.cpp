@@ -70,7 +70,8 @@ void measure_vertical(label_t& value, extents_t& calculated_horizontal,
                                                               GG::X(width(placed_horizontal)));
     calculated_horizontal.vertical().length_m = Value(extent.y);
     calculated_horizontal.vertical().guide_set_m.push_back(
-        Value(implementation::DefaultFont()->Ascent()));
+        Value(implementation::DefaultFont()->Ascent())
+    );
 }
 
 /****************************************************************************************************/

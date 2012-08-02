@@ -168,10 +168,9 @@ void popup_t::measure(extents_t& result)
 
     result.width() = Value(largest_extent.x + non_client_size.x);
     result.height() = original_height_m;
-    GG::Y baseline =
-        (static_cast<int>(result.height()) - implementation::CharHeight()) / 2 +
-        implementation::DefaultFont()->Ascent();
-    result.vertical().guide_set_m.push_back(Value(baseline));
+    GG::Y baseline_offset =
+        control_m->ClientUpperLeft().y - control_m->UpperLeft().y + 2; // the +2 comes from the default ListBox::Row margin
+    result.vertical().guide_set_m.push_back(Value(baseline_offset));
 
     //
     // If we have a label (always on our left side?) then we
@@ -188,7 +187,7 @@ void popup_t::measure(extents_t& result)
     // the widgets in set_bounds.
     //
     extents_t label_bounds(measure_text(name_m.name_m, font));
-    label_bounds.vertical().guide_set_m.push_back(Value(font->Ascent()));
+    label_bounds.vertical().guide_set_m.push_back(0);
     //
     // Now we can align the label within the vertical
     // slice of the result. This doesn't do anything if
@@ -224,10 +223,11 @@ void popup_t::place(const place_data_t& place_data)
         // baseline - the label's baseline.
         //
         assert(place_data.vertical().guide_set_m.empty() == false);
+        long baseline = place_data.vertical().guide_set_m[0];
 
         place_data_t label_place_data;
         label_place_data.horizontal().position_m = left(place_data);
-        label_place_data.vertical().position_m = top(place_data);
+        label_place_data.vertical().position_m = top(place_data) + baseline;
 
         //
         // The width of the label is the first horizontal

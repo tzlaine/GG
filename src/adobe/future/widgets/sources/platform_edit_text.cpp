@@ -173,25 +173,25 @@ edit_text_t::edit_text_t(const edit_text_ctor_block_t& block) :
 
 /****************************************************************************************************/
 
-extents_t calculate_edit_bounds(GG::Edit* edit, int cols, int rows);
+extents_t calculate_edit_bounds(GG::Edit* edit, const GG::Font& font, int rows, int cols, int original_height);
 
 void edit_text_t::measure(extents_t& result)
 {
     assert(control_m);
+    const boost::shared_ptr<GG::Font>& font = implementation::DefaultFont();
     //
     // The calculate_edit_bounds function can figure out the size this edit box
     // should be, based on the number of rows and columns.
     //
-    result = calculate_edit_bounds(control_m, cols_m, original_height_m);
+    result = calculate_edit_bounds(control_m, *font, rows_m, cols_m, original_height_m);
     //
     // If we have a label then we need to make extra space
     // for it.
     //
     if (!using_label_m)
         return;
-    const boost::shared_ptr<GG::Font>& font = implementation::DefaultFont();
     extents_t label_bounds(measure_text(name_m.name_m, font));
-    label_bounds.vertical().guide_set_m.push_back(Value(font->Ascent()));
+    label_bounds.vertical().guide_set_m.push_back(0);
     //
     // Make sure that the height can accomodate both the label
     // and the edit widget.
@@ -223,11 +223,12 @@ void edit_text_t::place(const place_data_t& place_data)
         // The vertical offset of the label is the geometry's
         // baseline - the label's baseline.
         //
-        assert(place_data.vertical().guide_set_m.empty() == false);
+        assert(local_place_data.vertical().guide_set_m.empty() == false);
+        long baseline = local_place_data.vertical().guide_set_m[0];
 
         place_data_t label_place_data;
         label_place_data.horizontal().position_m = left(local_place_data);
-        label_place_data.vertical().position_m = top(local_place_data);
+        label_place_data.vertical().position_m = top(local_place_data) + baseline;
 
         //
         // The width of the label is the first horizontal
@@ -235,7 +236,7 @@ void edit_text_t::place(const place_data_t& place_data)
         //
         assert(place_data.horizontal().guide_set_m.empty() == false);
         width(label_place_data) = place_data.horizontal().guide_set_m[0];
-        height(label_place_data) = height(place_data);;
+        height(label_place_data) = height(place_data);
 
         //
         // Set the label dimensions.
@@ -309,7 +310,7 @@ void edit_text_t::monitor(setter_type proc)
 ///
 /// \return the best bounds for the edit control, including baseline.
 //
-extents_t calculate_edit_bounds(GG::Edit* edit, int cols, int original_height)
+extents_t calculate_edit_bounds(GG::Edit* edit, const GG::Font& font, int rows, int cols, int original_height)
 {
     extents_t result;
 
@@ -321,10 +322,11 @@ extents_t calculate_edit_bounds(GG::Edit* edit, int cols, int original_height)
 
     result.width() = Value(cols * implementation::CharWidth() + non_client_size.x);
     result.height() = original_height;
-    GG::Y baseline =
-        (static_cast<int>(result.height()) - implementation::CharHeight()) / 2 +
-        implementation::DefaultFont()->Ascent();
-    result.vertical().guide_set_m.push_back(Value(baseline));
+    GG::Y baseline_offset =
+        rows <= 1 ?
+        (edit->Height() - font.Height()) / 2 :
+        edit->ClientUpperLeft().y - edit->UpperLeft().y;
+    result.vertical().guide_set_m.push_back(Value(baseline_offset));
 
     return result;
 }

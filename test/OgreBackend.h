@@ -93,8 +93,15 @@ public:
 
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
+    virtual void Render()
+        {
+            if (CustomRender)
+                CustomRender();
+            GUI::Render();
+        }
 
     static boost::function<void ()> CustomInit;
+    static boost::function<void ()> CustomRender;
 
 private:
     virtual void Initialize()
@@ -108,6 +115,7 @@ private:
 };
 
 boost::function<void ()> MinimalOgreGUI::CustomInit;
+boost::function<void ()> MinimalOgreGUI::CustomRender;
 
 int MinimalOgreMain()
 {

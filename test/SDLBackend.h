@@ -43,8 +43,15 @@ public:
             glPopMatrix();
             glPopAttrib();
         }
+    virtual void Render()
+        {
+            if (CustomRender)
+                CustomRender();
+            GUI::Render();
+        }
 
     static boost::function<void ()> CustomInit;
+    static boost::function<void ()> CustomRender;
 
 private:
     virtual void GLInit()
@@ -74,6 +81,7 @@ private:
 };
 
 boost::function<void ()> MinimalSDLGUI::CustomInit;
+boost::function<void ()> MinimalSDLGUI::CustomRender;
 
 int MinimalSDLMain()
 {

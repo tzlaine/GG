@@ -775,6 +775,20 @@ void ListBox::Render()
 void ListBox::SizeMove(const Pt& ul, const Pt& lr)
 {
     Wnd::SizeMove(ul, lr);
+    if (!m_keep_col_widths && !m_col_widths.empty()) {
+        const X WIDTH = ClientSize().x - SCROLL_WIDTH;
+        const X OLD_COL_WIDTHS = std::accumulate(m_col_widths.begin(), m_col_widths.end(), X0);
+        const X_d SCALE_FACTOR = 1.0 * WIDTH / OLD_COL_WIDTHS;
+
+        X total = X0;
+        for (std::size_t i = 0; i < m_col_widths.size(); ++i) {
+            total += (m_col_widths[i] *= SCALE_FACTOR);
+        }
+        m_col_widths.back() += total - WIDTH;
+        for (iterator it = m_rows.begin(); it != m_rows.end(); ++it) {
+            NormalizeRow(*it);
+        }
+    }
     if (!m_header_row->empty())
         NormalizeRow(m_header_row);
     AdjustScrolls(true);

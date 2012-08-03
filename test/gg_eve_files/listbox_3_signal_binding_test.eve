@@ -42,6 +42,7 @@ layout alert_dialog
                     characters: 10,
                     rows: 3,
                     browse_updates: true,
+                    hilite_color: color(b:255),
                     bind_browsed_signal: [@browsed_signal_cell_4, '"browsed value"']);
             display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_4);
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_4);
@@ -51,6 +52,7 @@ layout alert_dialog
                     characters: 10,
                     rows: 3,
                     browse_updates: true,
+                    hilite_color: color(b:255),
                     bind_browsed_signal: [@browsed_signal_cell_5, "_.row"]);
             display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_5);
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_5);
@@ -60,6 +62,7 @@ layout alert_dialog
                     characters: 10,
                     rows: 3,
                     browse_updates: true,
+                    hilite_color: color(b:255),
                     bind_browsed_signal: [@browsed_signal_cell_6, "_1"]);
             display_text(name: "Browsed signal bind:", characters: 15, bind: @browsed_signal_cell_6);
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_6);
@@ -72,31 +75,34 @@ layout alert_dialog
             listbox(name: "simple expression",
                     characters: 10,
                     rows: 3,
-                    allowed_drop_types: "drag me",
-                    bind_dropped_signal: [@dropped_signal_cell_7, '"dropped value"'],
-                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_8, '"drop acceptable value"']);
-            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @dropped_signal_cell_7);
-            display_text(name: "Dropped signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_8);
+                    allowed_drop_types: ["drag me"],
+                    hilite_color: color(b:255),
+                    bind_dropped_signal: [@dropped_signal_cell_8, '"dropped value"'],
+                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_7, '"drop acceptable value"']);
+            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_7);
+            display_text(name: "Dropped signal bind:", characters: 15, bind: @dropped_signal_cell_8);
             display_text(name: "Result:", characters: 15, bind: @result_drop_signal_cell_7_8);
 
             listbox(name: '"_.row"',
                     characters: 10,
                     rows: 3,
-                    allowed_drop_types: "drag me",
-                    bind_dropped_signal: [@dropped_signal_cell_9, "_.row"],
-                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_10, '"drop acceptable value"']);
-            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @dropped_signal_cell_9);
-            display_text(name: "Dropped signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_10);
+                    allowed_drop_types: ["drag me"],
+                    hilite_color: color(b:255),
+                    bind_dropped_signal: [@dropped_signal_cell_10, "_.row"],
+                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_9, "_.row"]);
+            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_9);
+            display_text(name: "Dropped signal bind:", characters: 15, bind: @dropped_signal_cell_10);
             display_text(name: "Result:", characters: 15, bind: @result_drop_signal_cell_9_10);
 
             listbox(name: '"_1"',
                     characters: 10,
                     rows: 3,
-                    allowed_drop_types: "drag me",
-                    bind_dropped_signal: [@dropped_signal_cell_11, "_1"],
-                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_12, '"drop acceptable value"']);
-            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @dropped_signal_cell_11);
-            display_text(name: "Dropped signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_12);
+                    allowed_drop_types: ["drag me"],
+                    hilite_color: color(b:255),
+                    bind_dropped_signal: [@dropped_signal_cell_12, "_1"],
+                    bind_drop_acceptable_signal: [@drop_acceptable_signal_cell_11, "_1"]);
+            display_text(name: "Drop acceptable signal bind:", characters: 15, bind: @drop_acceptable_signal_cell_11);
+            display_text(name: "Dropped signal bind:", characters: 15, bind: @dropped_signal_cell_12);
             display_text(name: "Result:", characters: 15, bind: @result_drop_signal_cell_11_12);
         }
     }

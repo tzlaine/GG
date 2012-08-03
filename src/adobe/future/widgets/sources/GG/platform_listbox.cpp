@@ -81,10 +81,10 @@ namespace {
             listbox.dropped_proc_m(listbox, row);
     }
 
-    void listbox_drop_acceptable(adobe::listbox_t& listbox, GG::ListBox::const_iterator row)
+    void listbox_drop_acceptable(adobe::listbox_t& listbox, const GG::ListBox::Row& row, GG::ListBox::const_iterator it)
     {
         if (listbox.drop_acceptable_proc_m)
-            listbox.drop_acceptable_proc_m(listbox, row);
+            listbox.drop_acceptable_proc_m(listbox, row, it);
     }
 
     void listbox_left_clicked(adobe::listbox_t& listbox, GG::ListBox::iterator row, const GG::Pt& pt)
@@ -413,7 +413,7 @@ namespace adobe {
                     boost::bind(&listbox_dropped, boost::ref(element), _1));
 
         GG::Connect(element.control_m->DropAcceptableSignal,
-                    boost::bind(&listbox_drop_acceptable, boost::ref(element), _1));
+                    boost::bind(&listbox_drop_acceptable, boost::ref(element), _1, _2));
 
         GG::Connect(element.control_m->LeftClickedSignal,
                     boost::bind(&listbox_left_clicked, boost::ref(element), _1, _2));

@@ -69,6 +69,8 @@ namespace {
                 std::cerr << "GG SIGNAL : " << m_name
                           << "(row=" << RowIndex(it) << " pt=" << pt << ")\n";
             }
+        void operator()(const ListBox::Row&, ListBox::const_iterator it)
+            { std::cerr << "GG SIGNAL : " << m_name << "(insertion point=" << RowIndex(it) << ")\n"; }
         std::size_t RowIndex(ListBox::const_iterator it)
             { return std::distance(m_LB.begin(), it); }
         const ListBox& m_LB;
@@ -500,7 +502,7 @@ void ListBox::DropsAcceptable(DropsAcceptableIter first, DropsAcceptableIter las
              m_allowed_drop_types.find(row->DragDropDataType()) != m_allowed_drop_types.end())) {
             iterator insertion_it = RowUnderPt(pt);
             try {
-                DropAcceptableSignal(insertion_it);
+                DropAcceptableSignal(*row, insertion_it);
                 it->second = true;
             } catch (const DontAcceptDrop&) {}
         }

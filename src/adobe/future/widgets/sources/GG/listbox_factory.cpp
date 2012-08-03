@@ -82,21 +82,17 @@ namespace {
     adobe::any_regular_t to_any_regular(const GG::TextControl& text_control)
     { return adobe::any_regular_t(text_control.RawText()); }
 
-    adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
-                                   GG::ListBox::const_iterator end_it)
+    adobe::any_regular_t row_value(const GG::ListBox::Row& row)
     {
-        if (it == end_it)
-            return adobe::any_regular_t(adobe::array_t());
-
         adobe::array_t elements;
 
-        const std::size_t size = (*it)->size();
+        const std::size_t size = row.size();
         for (std::size_t i = 0; i < size; ++i) {
-            GG::Control* element = (**it)[i];
+            GG::Control* element = row[i];
             if (const GG::Button* button = dynamic_cast<const GG::Button*>(element))
                 elements.push_back(to_any_regular(*button));
             else if (const GG::DropDownList* drop_list = dynamic_cast<const GG::DropDownList*>(element))
-                elements.push_back(to_any_regular(*drop_list, end_it));
+                elements.push_back(to_any_regular(*drop_list, drop_list->end()));
             else if (const GG::Edit* edit = dynamic_cast<const GG::Edit*>(element))
                 elements.push_back(to_any_regular(*edit));
             else if (const GG::Slider<double>* double_slider = dynamic_cast<const GG::Slider<double>*>(element))
@@ -119,6 +115,10 @@ namespace {
 
         return adobe::any_regular_t(elements);
     }
+
+    adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
+                                   GG::ListBox::const_iterator end_it)
+    { return it == end_it ? adobe::any_regular_t(adobe::array_t()) : row_value(**it); }
 
     void handle_selection_changed_signal(const adobe::listbox_t& listbox,
                                          adobe::signal_notifier_t signal_notifier,
@@ -144,7 +144,6 @@ namespace {
                                              adobe::any_regular_t(array));
     }
 
-    template <typename Iter>
     void handle_row_signal(const adobe::listbox_t& listbox,
                            adobe::signal_notifier_t signal_notifier,
                            adobe::name_t signal_type,
@@ -152,7 +151,7 @@ namespace {
                            adobe::sheet_t& sheet,
                            adobe::name_t bind,
                            adobe::array_t expression,
-                           Iter row)
+                           GG::ListBox::iterator row)
     {
         adobe::implementation::handle_signal(signal_notifier,
                                              adobe::static_name_t("listbox"),
@@ -165,6 +164,33 @@ namespace {
                                              adobe::static_name_t("row"),
                                              adobe::any_regular_t(row),
                                              adobe::static_name_t("gg_row_iter"));
+    }
+
+    void handle_drop_acceptable_signal(const adobe::listbox_t& listbox,
+                                       adobe::signal_notifier_t signal_notifier,
+                                       adobe::name_t signal_type,
+                                       adobe::name_t widget_id,
+                                       adobe::sheet_t& sheet,
+                                       adobe::name_t bind,
+                                       adobe::array_t expression,
+                                       const GG::ListBox::Row& row,
+                                       GG::ListBox::const_iterator insertion_it)
+    {
+        adobe::implementation::handle_signal(signal_notifier,
+                                             adobe::static_name_t("listbox"),
+                                             signal_type,
+                                             widget_id,
+                                             sheet,
+                                             bind,
+                                             expression,
+                                             row_value(row),
+                                             adobe::static_name_t("row"),
+                                             adobe::any_regular_t(&row),
+                                             adobe::static_name_t("gg_row"),
+                                             row_value(insertion_it, listbox.control_m->end()),
+                                             adobe::static_name_t("insertion_iter"),
+                                             adobe::any_regular_t(insertion_it),
+                                             adobe::static_name_t("gg_insertion_iter"));
     }
 
     void handle_row_click_signal(const adobe::listbox_t& listbox,
@@ -389,7 +415,7 @@ namespace adobe {
             if (get_value(parameters, static_name_t("bind_dropped_signal"), dropped_binding))
                 implementation::cell_and_expression(dropped_binding, cell, expression);
             control.dropped_proc_m =
-                boost::bind(&handle_row_signal<GG::ListBox::iterator>,
+                boost::bind(&handle_row_signal,
                             _1,
                             token.signal_notifier_m,
                             static_name_t("dropped"),
@@ -407,7 +433,7 @@ namespace adobe {
             if (get_value(parameters, static_name_t("bind_drop_acceptable_signal"), drop_acceptable_binding))
                 implementation::cell_and_expression(drop_acceptable_binding, cell, expression);
             control.drop_acceptable_proc_m =
-                boost::bind(&handle_row_signal<GG::ListBox::const_iterator>,
+                boost::bind(&handle_drop_acceptable_signal,
                             _1,
                             token.signal_notifier_m,
                             static_name_t("drop_acceptable"),
@@ -415,7 +441,8 @@ namespace adobe {
                             boost::ref(token.sheet_m),
                             cell,
                             expression,
-                            _2);
+                            _2,
+                            _3);
         }
 
         {
@@ -463,7 +490,7 @@ namespace adobe {
             if (get_value(parameters, static_name_t("bind_double_clicked_signal"), double_clicked_binding))
                 implementation::cell_and_expression(double_clicked_binding, cell, expression);
             control.double_clicked_proc_m =
-                boost::bind(&handle_row_signal<GG::ListBox::iterator>,
+                boost::bind(&handle_row_signal,
                             _1,
                             token.signal_notifier_m,
                             static_name_t("double_clicked"),
@@ -481,7 +508,7 @@ namespace adobe {
             if (get_value(parameters, static_name_t("bind_erased_signal"), erased_binding))
                 implementation::cell_and_expression(erased_binding, cell, expression);
             control.erased_proc_m =
-                boost::bind(&handle_row_signal<GG::ListBox::iterator>,
+                boost::bind(&handle_row_signal,
                             _1,
                             token.signal_notifier_m,
                             static_name_t("erased"),
@@ -499,7 +526,7 @@ namespace adobe {
             if (get_value(parameters, static_name_t("bind_browsed_signal"), browsed_binding))
                 implementation::cell_and_expression(browsed_binding, cell, expression);
             control.browsed_proc_m =
-                boost::bind(&handle_row_signal<GG::ListBox::iterator>,
+                boost::bind(&handle_row_signal,
                             _1,
                             token.signal_notifier_m,
                             static_name_t("browsed"),

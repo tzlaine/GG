@@ -228,15 +228,14 @@ public:
     typedef std::set<iterator, RowPtrIteratorLess<std::list<Row*> > > SelectionSet;
 
     /** \name Signal Types */ ///@{
-    typedef boost::signal<void ()>                    ClearedSignalType;    ///< emitted when the list box is cleared
-    typedef boost::signal<void (const SelectionSet&)> SelChangedSignalType; ///< emitted when one or more rows are selected or deselected
-    typedef boost::signal<void (iterator)>            RowSignalType;        ///< the signature of row-change-notification signals
-    typedef boost::signal<void (const_iterator)>      ConstRowSignalType;   ///< the signature of const row-change-notification signals
-    typedef boost::signal<void (iterator, const Pt&)> RowClickSignalType;   ///< the signature of row-click-notification signals
+    typedef boost::signal<void ()>                           ClearedSignalType;        ///< emitted when the list box is cleared
+    typedef boost::signal<void (const SelectionSet&)>        SelChangedSignalType;     ///< emitted when one or more rows are selected or deselected
+    typedef boost::signal<void (iterator)>                   RowSignalType;            ///< the signature of row-change-notification signals
+    typedef boost::signal<void (iterator, const Pt&)>        RowClickSignalType;       ///< the signature of row-click-notification signals
+    typedef boost::signal<void (const Row&, const_iterator)> DropAcceptableSignalType; ///< emitted when a row may be inserted into the list box via drag-and-drop; provides the row being dropped, and an iterator to the insertion point
 
     typedef RowSignalType      InsertedSignalType;       ///< emitted when a row is inserted into the list box
     typedef RowSignalType      DroppedSignalType;        ///< emitted when a row is inserted into the list box via drag-and-drop
-    typedef ConstRowSignalType DropAcceptableSignalType; ///< emitted when a row may be inserted into the list box via drag-and-drop
     typedef RowClickSignalType LeftClickedSignalType;    ///< emitted when a row in the listbox is left-clicked; provides the row left-clicked and the clicked point
     typedef RowClickSignalType RightClickedSignalType;   ///< emitted when a row in the listbox is right-clicked; provides the row right-clicked and the clicked point
     typedef RowSignalType      DoubleClickedSignalType;  ///< emitted when a row in the listbox is left-double-clicked

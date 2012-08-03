@@ -2,7 +2,7 @@ layout alert_dialog
 {
     view dialog(name: "Popup Signal Binding Test")
     {
-        group(name: "Selection-Changed Bound")
+        group(name: "Selection-Changed Bound", child_vertical: align_proportional)
         {
             popup(name: "no expression",
                   bind: @bind_cell_0,
@@ -41,7 +41,7 @@ layout alert_dialog
             display_text(name: "Result:", characters: 15, bind: @result_selection_changed_signal_cell_3);
         }
 
-        group(name: "Selection Changed-Signal Not Bound")
+        group(name: "Selection Changed-Signal Not Bound", child_vertical: align_proportional)
         {
             popup(name: "no signal_id",
                   bind: @bind_cell_4,

@@ -1240,7 +1240,7 @@ void ListBox::DragDropHere(const Pt& pt, const std::map<Wnd*, Pt>& drag_drop_wnd
         m_auto_scrolling_right = client_no_scroll_hole.lr.x < pt.x;
         if (m_auto_scrolling_up || m_auto_scrolling_down || m_auto_scrolling_left || m_auto_scrolling_right) {
             bool acceptible_drop = false;
-            for (std::map<Wnd*, GG::Pt>::const_iterator it = drag_drop_wnds.begin(); it != drag_drop_wnds.end(); ++it) {
+            for (std::map<Wnd*, Pt>::const_iterator it = drag_drop_wnds.begin(); it != drag_drop_wnds.end(); ++it) {
                 if (m_allowed_drop_types.find("") != m_allowed_drop_types.end() ||
                     m_allowed_drop_types.find(it->first->DragDropDataType()) != m_allowed_drop_types.end()) {
                     acceptible_drop = true;
@@ -1317,11 +1317,11 @@ ListBox::iterator ListBox::Insert(Row* row, iterator it, bool dropped)
     // The first row inserted into an empty list box defines the number of
     // columns, and initializes the column widths and alignments.
     if (m_rows.empty() && (m_col_widths.empty() || !m_keep_col_widths)) {
-        const GG::X WIDTH = ClientSize().x - SCROLL_WIDTH;
+        const X WIDTH = ClientSize().x - SCROLL_WIDTH;
 
         m_col_widths.resize(row->size());
         m_col_alignments.resize(row->size());
-        GG::X total = GG::X0;
+        X total = X0;
         for (std::size_t i = 0; i < row->size(); ++i) {
             // use the column width from the Row
             total += row->ColWidth(i);
@@ -1334,9 +1334,9 @@ ListBox::iterator ListBox::Insert(Row* row, iterator it, bool dropped)
             m_col_alignments[i] = a;
         }
 
-        const GG::X_d SCALE_FACTOR = 1.0 * WIDTH / total;
+        const X_d SCALE_FACTOR = 1.0 * WIDTH / total;
 
-        total = GG::X0;
+        total = X0;
         for (std::size_t i = 0; i < row->size(); ++i) {
             total += (m_col_widths[i] = row->ColWidth(i) * SCALE_FACTOR);
         }

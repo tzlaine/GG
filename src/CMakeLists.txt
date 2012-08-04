@@ -136,9 +136,11 @@ set(THIS_LIB_SOURCES
     adobe/future/widgets/sources/platform_window.cpp
 
     # GG extensions to the Adobe Eve widget set
+    adobe/future/widgets/sources/GG/color_button_factory.cpp
     adobe/future/widgets/sources/GG/display_text_factory.cpp
     adobe/future/widgets/sources/GG/listbox_factory.cpp
 
+    adobe/future/widgets/sources/GG/platform_color_button.cpp
     adobe/future/widgets/sources/GG/platform_display_text.cpp
     adobe/future/widgets/sources/GG/platform_listbox.cpp
 

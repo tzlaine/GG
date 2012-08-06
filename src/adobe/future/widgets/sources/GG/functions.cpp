@@ -359,6 +359,93 @@ namespace adobe { namespace implementation {
         return retval;
     }
 
+    any_regular_t append(const array_t& parameters)
+    {
+        if (parameters.size() < 2u)
+            throw std::runtime_error("append() requires at least 2 parameters");
+        array_t array = parameters[0].cast<array_t>();
+        array.insert(array.end(),
+                     boost::next(parameters.begin()),
+                     parameters.end());
+        return any_regular_t(array);
+    }
+
+    any_regular_t prepend(const array_t& parameters)
+    {
+        if (parameters.size() < 2u)
+            throw std::runtime_error("prepend() requires at least 2 parameters");
+        array_t array(boost::next(parameters.begin()), parameters.end());
+        array.insert(array.end(),
+                     parameters[0].cast<array_t>().begin(),
+                     parameters[0].cast<array_t>().end());
+        return any_regular_t(array);
+    }
+
+    any_regular_t insert(const array_t& parameters)
+    {
+        if (parameters[0].type_info() == type_info<array_t>()) {
+            if (parameters.size() < 3u)
+                throw std::runtime_error("insert(array_t, i, ...) requires at least 3 parameters");
+            array_t array = parameters[0].cast<array_t>();
+            std::size_t index;
+            if (!parameters[1].cast(index))
+                throw std::runtime_error("insert(array_t, i, ...) requires a number as its second parameter");
+            else if (index < 0 || parameters.size() <= index)
+                throw std::runtime_error("index i passed to insert(array_t, i, ...) is out of bounds");
+            array.insert(array.begin() + index,
+                         boost::next(parameters.begin(), 2),
+                         parameters.end());
+            return any_regular_t(array);
+        } else if (parameters[0].type_info() == type_info<dictionary_t>()) {
+            if (parameters.size() < 2u)
+                throw std::runtime_error("insert(dictionary_t, ...) requires at least 2 parameters");
+            dictionary_t dictionary = parameters[0].cast<dictionary_t>();
+            name_t key;
+            if (parameters[1].cast(key)) {
+                if (parameters.size() < 3u)
+                    throw std::runtime_error("insert(dictionary_t, key, ...) requires at least 3 parameters");
+                dictionary.insert(std::make_pair(key, parameters[2]));
+            } else {
+                if (parameters[1].type_info() != type_info<dictionary_t>())
+                    throw std::runtime_error("insert(dictionary_t, ...) requires a dictionary at its second parameter");
+                dictionary.insert(parameters[1].cast<dictionary_t>().begin(),
+                                  parameters[1].cast<dictionary_t>().end());
+            }
+            return any_regular_t(dictionary);
+        } else {
+            throw std::runtime_error("insert() requires an array or dictionary as its first parameter");
+        }
+    }
+
+    any_regular_t erase(const array_t& parameters)
+    {
+        if (parameters[0].type_info() == type_info<array_t>()) {
+            if (parameters.size() < 2u)
+                throw std::runtime_error("erase(array_t, i) requires at least 2 parameters");
+            array_t array = parameters[0].cast<array_t>();
+            std::size_t index;
+            if (!parameters[1].cast(index))
+                throw std::runtime_error("erase(array_t, i) requires a number as its second parameter");
+            else if (index < 0 || parameters.size() <= index)
+                throw std::runtime_error("index i passed to erase(array_t, i) is out of bounds");
+            array.erase(array.begin() + index);
+            return any_regular_t(array);
+        } else if (parameters[0].type_info() == type_info<dictionary_t>()) {
+            if (parameters.size() < 2u)
+                throw std::runtime_error("erase(dictionary_t, ...) requires at least 2 parameters");
+            dictionary_t dictionary = parameters[0].cast<dictionary_t>();
+            for (std::size_t i = 1; i < parameters.size(); ++i) {
+                name_t key;
+                if (!parameters[1].cast(key))
+                    throw std::runtime_error("erase(dictionary_t, ...) requires names for all its parameters after the first");
+                dictionary.erase(key);
+            }
+            return any_regular_t(dictionary);
+        } else {
+            throw std::runtime_error("erase() requires an array or dictionary as its first parameter");
+        }
+    }
+
 } }
 
 namespace {
@@ -370,6 +457,10 @@ namespace {
         GG::RegisterDictionaryFunction(adobe::static_name_t("color_dialog"), &adobe::implementation::color_dialog);
         GG::RegisterDictionaryFunction(adobe::static_name_t("file_dialog"), &adobe::implementation::file_dialog);
         GG::RegisterDictionaryFunction(adobe::static_name_t("three_button_dialog"), &adobe::implementation::three_button_dialog);
+        GG::RegisterArrayFunction(adobe::static_name_t("append"), &adobe::implementation::append);
+        GG::RegisterArrayFunction(adobe::static_name_t("prepend"), &adobe::implementation::prepend);
+        GG::RegisterArrayFunction(adobe::static_name_t("insert"), &adobe::implementation::insert);
+        GG::RegisterArrayFunction(adobe::static_name_t("erase"), &adobe::implementation::erase);
 
         return true;
     }

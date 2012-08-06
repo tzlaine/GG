@@ -35,6 +35,10 @@ namespace adobe {
         any_regular_t color_dialog(const dictionary_t& parameters);
         any_regular_t file_dialog(const dictionary_t& parameters);
         any_regular_t three_button_dialog(const dictionary_t& parameters);
+        any_regular_t append(const array_t& parameters);
+        any_regular_t prepend(const array_t& parameters);
+        any_regular_t insert(const array_t& parameters);
+        any_regular_t erase(const array_t& parameters);
 
     }
 

@@ -1,0 +1,5 @@
+sheet function_test_dialog
+{
+output:
+    result <== { value: prepend([@nine], 7, '8') };
+}

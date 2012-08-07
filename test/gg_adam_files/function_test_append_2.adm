@@ -1,0 +1,5 @@
+sheet function_test_dialog
+{
+output:
+    result <== { value: append([7], '8') };
+}

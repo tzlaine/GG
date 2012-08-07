@@ -121,6 +121,42 @@ const std::vector<Test>& Tests()
             result.push_back(adobe::any_regular_t(7.0));
             retval.push_back(Test("function_test_foldr_unary.adm", adobe::any_regular_t(result)));
         }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            retval.push_back(Test("function_test_append_1.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            result.push_back(adobe::any_regular_t(std::string("8")));
+            retval.push_back(Test("function_test_append_2.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            result.push_back(adobe::any_regular_t(std::string("8")));
+            result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
+            retval.push_back(Test("function_test_append_3.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            retval.push_back(Test("function_test_prepend_1.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            result.push_back(adobe::any_regular_t(std::string("8")));
+            retval.push_back(Test("function_test_prepend_2.adm", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            result.push_back(adobe::any_regular_t(std::string("8")));
+            result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
+            retval.push_back(Test("function_test_prepend_3.adm", adobe::any_regular_t(result)));
+        }
     }
     return retval;
 }

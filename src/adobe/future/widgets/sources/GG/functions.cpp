@@ -383,14 +383,16 @@ namespace adobe { namespace implementation {
 
     any_regular_t insert(const array_t& parameters)
     {
+        if (parameters.size() < 1u)
+            throw std::runtime_error("insert() requires at least 1 parameter");
         if (parameters[0].type_info() == type_info<array_t>()) {
-            if (parameters.size() < 3u)
-                throw std::runtime_error("insert(array_t, i, ...) requires at least 3 parameters");
+            if (parameters.size() < 2u)
+                throw std::runtime_error("insert(array_t, i, ...) requires at least 2 parameters");
             array_t array = parameters[0].cast<array_t>();
             std::size_t index;
             if (!parameters[1].cast(index))
                 throw std::runtime_error("insert(array_t, i, ...) requires a number as its second parameter");
-            else if (index < 0 || parameters.size() <= index)
+            else if (index < 0 || array.size() < index)
                 throw std::runtime_error("index i passed to insert(array_t, i, ...) is out of bounds");
             array.insert(array.begin() + index,
                          boost::next(parameters.begin(), 2),
@@ -403,11 +405,11 @@ namespace adobe { namespace implementation {
             name_t key;
             if (parameters[1].cast(key)) {
                 if (parameters.size() < 3u)
-                    throw std::runtime_error("insert(dictionary_t, key, ...) requires at least 3 parameters");
+                    throw std::runtime_error("insert(dictionary_t, key, value) requires 3 parameters");
                 dictionary.insert(std::make_pair(key, parameters[2]));
             } else {
                 if (parameters[1].type_info() != type_info<dictionary_t>())
-                    throw std::runtime_error("insert(dictionary_t, ...) requires a dictionary at its second parameter");
+                    throw std::runtime_error("insert(dictionary_t, {...}) requires a dictionary at its second parameter");
                 dictionary.insert(parameters[1].cast<dictionary_t>().begin(),
                                   parameters[1].cast<dictionary_t>().end());
             }
@@ -419,6 +421,8 @@ namespace adobe { namespace implementation {
 
     any_regular_t erase(const array_t& parameters)
     {
+        if (parameters.size() < 1u)
+            throw std::runtime_error("erase() requires at least 1 parameter");
         if (parameters[0].type_info() == type_info<array_t>()) {
             if (parameters.size() < 2u)
                 throw std::runtime_error("erase(array_t, i) requires at least 2 parameters");

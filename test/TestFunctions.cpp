@@ -174,6 +174,73 @@ const std::vector<Test>& Tests()
             result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
             retval.push_back(Test("prepend([@nine], 7, '8')", adobe::any_regular_t(result)));
         }
+
+        retval.push_back(Test("insert()", adobe::any_regular_t(), true));
+
+        // insert() on arrays
+        retval.push_back(Test("insert([])", adobe::any_regular_t(), true));
+        retval.push_back(Test("insert([], 'foo')", adobe::any_regular_t(), true));
+        retval.push_back(Test("insert([], 1)", adobe::any_regular_t(), true));
+        retval.push_back(Test("insert([], -1)", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            retval.push_back(Test("insert([], 0)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            retval.push_back(Test("insert([], 0, 'one')", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            result.push_back(adobe::any_regular_t(2));
+            retval.push_back(Test("insert([], 0, 'one', 2)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            retval.push_back(Test("insert(['one'], 0)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            result.push_back(adobe::any_regular_t(2));
+            retval.push_back(Test("insert([2], 0, 'one')", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            result.push_back(adobe::any_regular_t(2));
+            result.push_back(adobe::any_regular_t(adobe::name_t("three")));
+            retval.push_back(Test("insert([@three], 0, 'one', 2)", adobe::any_regular_t(result)));
+        }
+
+        // insert() on dictionaries
+        retval.push_back(Test("insert({})", adobe::any_regular_t(), true));
+        retval.push_back(Test("insert({}, @foo)", adobe::any_regular_t(), true));
+        retval.push_back(Test("insert({}, [1])", adobe::any_regular_t(), true));
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("foo")] = adobe::any_regular_t(std::string("bar"));
+            retval.push_back(Test("insert({}, @foo, 'bar')", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("foo")] = adobe::any_regular_t(std::string("baz"));
+            retval.push_back(Test("insert({foo: 'bar'}, @foo, 'baz')", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("foo")] = adobe::any_regular_t(std::string("bar"));
+            retval.push_back(Test("insert({foo: 'bar'}, {})", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("foo")] = adobe::any_regular_t(std::string("bar"));
+            result[adobe::static_name_t("baz")] = adobe::any_regular_t(1);
+            retval.push_back(Test("insert({foo: 'bar'}, {baz: 1})", adobe::any_regular_t(result)));
+        }
     }
     return retval;
 }

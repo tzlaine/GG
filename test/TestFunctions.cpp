@@ -13,6 +13,7 @@
 #include <GG/adobe/adam.hpp>
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <fstream>
 
@@ -56,11 +57,11 @@ adobe::any_regular_t push_back_key(const adobe::dictionary_t& parameters)
 struct Test
 {
     Test() {}
-    Test(const char* adam_filename,  const adobe::any_regular_t& expected_result) :
-        m_adam_filename(adam_filename),
+    Test(const char* expression,  const adobe::any_regular_t& expected_result) :
+        m_expression(expression),
         m_expected_result(expected_result)
         {}
-    const char* m_adam_filename;
+    const char* m_expression;
     adobe::any_regular_t m_expected_result;
 };
 
@@ -72,34 +73,34 @@ const std::vector<Test>& Tests()
             adobe::dictionary_t result;
             result[adobe::static_name_t("one")] = adobe::any_regular_t(2.0);
             result[adobe::static_name_t("two")] = adobe::any_regular_t(3.0);
-            retval.push_back(Test("function_test_transform_dictionary.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("transform({one: 1, two: 2}, @increment)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(4.0));
             result.push_back(adobe::any_regular_t(5.0));
-            retval.push_back(Test("function_test_transform_array.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("transform([3, 4], @increment)", adobe::any_regular_t(result)));
         }
-        retval.push_back(Test("function_test_transform_unary.adm", adobe::any_regular_t(6.0)));
+        retval.push_back(Test("transform(5, @increment)", adobe::any_regular_t(6.0)));
 
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(adobe::static_name_t("one")));
             result.push_back(adobe::any_regular_t(adobe::static_name_t("two")));
             result.push_back(adobe::any_regular_t(adobe::static_name_t("three")));
-            retval.push_back(Test("function_test_fold_dictionary.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("fold({one: 1, two: 2, three: 3}, [], @push_back_key)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(4.0));
             result.push_back(adobe::any_regular_t(5.0));
             result.push_back(adobe::any_regular_t(6.0));
-            retval.push_back(Test("function_test_fold_array.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("fold([4, 5, 6], [], @push_back)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(7.0));
-            retval.push_back(Test("function_test_fold_unary.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("fold(7, [], @push_back)", adobe::any_regular_t(result)));
         }
 
         {
@@ -107,55 +108,55 @@ const std::vector<Test>& Tests()
             result.push_back(adobe::any_regular_t(3.0));
             result.push_back(adobe::any_regular_t(2.0));
             result.push_back(adobe::any_regular_t(1.0));
-            retval.push_back(Test("function_test_foldr_dictionary.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("foldr({one: 1, two: 2, three: 3}, [], @push_back)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(6.0));
             result.push_back(adobe::any_regular_t(5.0));
             result.push_back(adobe::any_regular_t(4.0));
-            retval.push_back(Test("function_test_foldr_array.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("foldr([4, 5, 6], [], @push_back)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(7.0));
-            retval.push_back(Test("function_test_foldr_unary.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("foldr(7, [], @push_back)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(7.0));
-            retval.push_back(Test("function_test_append_1.adm", adobe::any_regular_t(result)));
-        }
-        {
-            adobe::array_t result;
-            result.push_back(adobe::any_regular_t(7.0));
-            result.push_back(adobe::any_regular_t(std::string("8")));
-            retval.push_back(Test("function_test_append_2.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("append([], 7)", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(7.0));
             result.push_back(adobe::any_regular_t(std::string("8")));
-            result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
-            retval.push_back(Test("function_test_append_3.adm", adobe::any_regular_t(result)));
-        }
-        {
-            adobe::array_t result;
-            result.push_back(adobe::any_regular_t(7.0));
-            retval.push_back(Test("function_test_prepend_1.adm", adobe::any_regular_t(result)));
-        }
-        {
-            adobe::array_t result;
-            result.push_back(adobe::any_regular_t(7.0));
-            result.push_back(adobe::any_regular_t(std::string("8")));
-            retval.push_back(Test("function_test_prepend_2.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("append([7], '8')", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(7.0));
             result.push_back(adobe::any_regular_t(std::string("8")));
             result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
-            retval.push_back(Test("function_test_prepend_3.adm", adobe::any_regular_t(result)));
+            retval.push_back(Test("append([7], '8', @nine)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            retval.push_back(Test("prepend([], 7)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            result.push_back(adobe::any_regular_t(std::string("8")));
+            retval.push_back(Test("prepend(['8'], 7)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(7.0));
+            result.push_back(adobe::any_regular_t(std::string("8")));
+            result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
+            retval.push_back(Test("prepend([@nine], 7, '8')", adobe::any_regular_t(result)));
         }
     }
     return retval;
@@ -177,8 +178,18 @@ void RunTest(std::size_t i)
 {
     const Test& test = Tests()[i];
     boost::filesystem::path eve("function_test_dialog.eve");
-    boost::filesystem::path adam(GG::UTF8ToPath(test.m_adam_filename));
-    GG::EveDialog* eve_dialog(GG::MakeEveDialog(eve, adam, &ButtonHandler));
+    std::string adam_str = "sheet function_test_dialog { output: result <== { value: ";
+    adam_str += test.m_expression;
+    adam_str += " }; }";
+    boost::filesystem::ifstream eve_stream(eve);
+    std::istringstream adam_stream(adam_str);
+    GG::EveDialog* eve_dialog(
+        GG::MakeEveDialog(eve_stream,
+                          "function_test_dialog.eve",
+                          adam_stream,
+                          "inline Adam expression",
+                          &ButtonHandler)
+    );
     GG::Timer timer(100);
     GG::Connect(timer.FiredSignal, boost::bind(&CheckResult, boost::cref(*eve_dialog), boost::cref(test.m_expected_result)));
     eve_dialog->Run();

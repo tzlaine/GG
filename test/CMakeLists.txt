@@ -108,8 +108,7 @@ add_test_and_data_files(ExpressionWriter test_expressions adam)
 add_test_and_data_files(ExpressionWriter test_expressions eve)
 add_test_and_data_files(DefaultSignalHandler)
 
-file(GLOB function_test_adam_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} gg_adam_files/function_test_*.adm)
-add_test_and_data_files(Functions gg_eve_files/function_test_dialog.eve ${function_test_adam_test_files})
+add_test_and_data_files(Functions gg_eve_files/function_test_dialog.eve)
 
 file(GLOB adam_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} asl_1.0.43_adam_files/*.adm)
 

@@ -1,5 +1,0 @@
-sheet function_test_dialog
-{
-output:
-    result <== { value: transform(5, @increment) };
-}

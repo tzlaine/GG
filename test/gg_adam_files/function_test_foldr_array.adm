@@ -1,5 +1,0 @@
-sheet function_test_dialog
-{
-output:
-    result <== { value: foldr([4, 5, 6], [], @push_back) };
-}

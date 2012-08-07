@@ -57,12 +57,16 @@ adobe::any_regular_t push_back_key(const adobe::dictionary_t& parameters)
 struct Test
 {
     Test() {}
-    Test(const char* expression,  const adobe::any_regular_t& expected_result) :
+    Test(const char* expression,
+         const adobe::any_regular_t& expected_result,
+         bool expect_exception = false) :
         m_expression(expression),
-        m_expected_result(expected_result)
+        m_expected_result(expected_result),
+        m_expect_exception(expect_exception)
         {}
     const char* m_expression;
     adobe::any_regular_t m_expected_result;
+    bool m_expect_exception;
 };
 
 const std::vector<Test>& Tests()
@@ -122,6 +126,12 @@ const std::vector<Test>& Tests()
             result.push_back(adobe::any_regular_t(7.0));
             retval.push_back(Test("foldr(7, [], @push_back)", adobe::any_regular_t(result)));
         }
+
+        retval.push_back(Test("append()", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            retval.push_back(Test("append([])", adobe::any_regular_t(result)));
+        }
         {
             adobe::array_t result;
             result.push_back(adobe::any_regular_t(7.0));
@@ -139,6 +149,12 @@ const std::vector<Test>& Tests()
             result.push_back(adobe::any_regular_t(std::string("8")));
             result.push_back(adobe::any_regular_t(adobe::name_t("nine")));
             retval.push_back(Test("append([7], '8', @nine)", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("prepend()", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            retval.push_back(Test("prepend([])", adobe::any_regular_t(result)));
         }
         {
             adobe::array_t result;
@@ -178,20 +194,34 @@ void RunTest(std::size_t i)
 {
     const Test& test = Tests()[i];
     boost::filesystem::path eve("function_test_dialog.eve");
-    std::string adam_str = "sheet function_test_dialog { output: result <== { value: ";
+    std::string adam_str =
+        "sheet function_test_dialog { output: result <== { value: ";
     adam_str += test.m_expression;
     adam_str += " }; }";
     boost::filesystem::ifstream eve_stream(eve);
     std::istringstream adam_stream(adam_str);
-    GG::EveDialog* eve_dialog(
+    if (test.m_expect_exception) {
+        BOOST_CHECK_THROW(
+            (GG::MakeEveDialog(eve_stream,
+                               "function_test_dialog.eve",
+                               adam_stream,
+                               "inline Adam expression",
+                               &ButtonHandler)),
+            adobe::stream_error_t
+        );
+        return;
+    }
+    GG::EveDialog* eve_dialog =
         GG::MakeEveDialog(eve_stream,
                           "function_test_dialog.eve",
                           adam_stream,
                           "inline Adam expression",
-                          &ButtonHandler)
-    );
+                          &ButtonHandler);
     GG::Timer timer(100);
-    GG::Connect(timer.FiredSignal, boost::bind(&CheckResult, boost::cref(*eve_dialog), boost::cref(test.m_expected_result)));
+    GG::Connect(timer.FiredSignal,
+                boost::bind(&CheckResult,
+                            boost::cref(*eve_dialog),
+                            boost::cref(test.m_expected_result)));
     eve_dialog->Run();
 }
 

@@ -361,8 +361,8 @@ namespace adobe { namespace implementation {
 
     any_regular_t append(const array_t& parameters)
     {
-        if (parameters.size() < 2u)
-            throw std::runtime_error("append() requires at least 2 parameters");
+        if (parameters.size() < 1u)
+            throw std::runtime_error("append() requires at least 1 parameter");
         array_t array = parameters[0].cast<array_t>();
         array.insert(array.end(),
                      boost::next(parameters.begin()),
@@ -372,8 +372,8 @@ namespace adobe { namespace implementation {
 
     any_regular_t prepend(const array_t& parameters)
     {
-        if (parameters.size() < 2u)
-            throw std::runtime_error("prepend() requires at least 2 parameters");
+        if (parameters.size() < 1u)
+            throw std::runtime_error("prepend() requires at least 1 parameter");
         array_t array(boost::next(parameters.begin()), parameters.end());
         array.insert(array.end(),
                      parameters[0].cast<array_t>().begin(),

@@ -1718,7 +1718,6 @@ else:
     - \ref eve_progress_bar
     - \ref eve_radio_button
     - \ref eve_reveal
-    - \ref eve_separator
     - \ref eve_slider
     - \ref eve_static_text
 

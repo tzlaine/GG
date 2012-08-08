@@ -11,13 +11,18 @@ constant:
     expected_drop_signal_cell_8 : "dropped value";
     expected_drop_signal_cell_9_10 : ["Two"];
     expected_drop_signal_cell_11_12 : ["Three"];
-
-interface:
     items: [
         { name: "One", value: "One", drag_drop_data_type: "drag me" },
         { name: "Two", value: 2, drag_drop_data_type: "drag me" },
         { name: "Three", value: @three, drag_drop_data_type: "drag me" }
     ];
+
+interface:
+    items_1: items;
+    items_2: items;
+    items_3: items;
+    items_4: items;
+    items_5: items;
 
     erased_signal_cell_1 : "<rgba 255 0 0 255>no clicks</rgba>";
     erased_signal_cell_2 : "<rgba 255 0 0 255>no clicks</rgba>";

@@ -5,7 +5,7 @@ layout alert_dialog
         group(name: "Erased Signal Bound", child_vertical: align_proportional)
         {
             listbox(name: "simple expression",
-                    items: @items,
+                    items: @items_1,
                     characters: 10,
                     rows: 3,
                     user_delete: true,
@@ -15,7 +15,7 @@ layout alert_dialog
             display_text(name: "Result:", characters: 15, bind: @result_erased_signal_cell_1);
 
             listbox(name: '"_.row"',
-                    items: @items,
+                    items: @items_2,
                     characters: 10,
                     rows: 3,
                     user_delete: true,
@@ -25,7 +25,7 @@ layout alert_dialog
             display_text(name: "Result:", characters: 15, bind: @result_erased_signal_cell_2);
 
             listbox(name: '"_1"',
-                    items: @items,
+                    items: @items_3,
                     characters: 10,
                     rows: 3,
                     user_delete: true,
@@ -38,7 +38,7 @@ layout alert_dialog
         group(name: "Browsed Signal Bound", child_vertical: align_proportional)
         {
             listbox(name: "simple expression",
-                    items: @items,
+                    items: @items_4,
                     characters: 10,
                     rows: 3,
                     browse_updates: true,
@@ -48,7 +48,7 @@ layout alert_dialog
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_4);
 
             listbox(name: '"_.row"',
-                    items: @items,
+                    items: @items_4,
                     characters: 10,
                     rows: 3,
                     browse_updates: true,
@@ -58,7 +58,7 @@ layout alert_dialog
             display_text(name: "Result:", characters: 15, bind: @result_browsed_signal_cell_5);
 
             listbox(name: '"_1"',
-                    items: @items,
+                    items: @items_4,
                     characters: 10,
                     rows: 3,
                     browse_updates: true,
@@ -70,7 +70,7 @@ layout alert_dialog
 
         group(name: "Dropped/Drop Acceptable Signal Bound", child_vertical: align_proportional)
         {
-            listbox(name: "drag source", items: @items, characters: 10, rows: 3);
+            listbox(name: "drag source", items: @items_5, characters: 10, rows: 3);
 
             listbox(name: "simple expression",
                     characters: 10,

@@ -430,7 +430,7 @@ namespace adobe { namespace implementation {
             std::size_t index;
             if (!parameters[1].cast(index))
                 throw std::runtime_error("erase(array_t, i) requires a number as its second parameter");
-            else if (index < 0 || parameters.size() <= index)
+            else if (index < 0 || array.size() <= index)
                 throw std::runtime_error("index i passed to erase(array_t, i) is out of bounds");
             array.erase(array.begin() + index);
             return any_regular_t(array);
@@ -440,7 +440,7 @@ namespace adobe { namespace implementation {
             dictionary_t dictionary = parameters[0].cast<dictionary_t>();
             for (std::size_t i = 1; i < parameters.size(); ++i) {
                 name_t key;
-                if (!parameters[1].cast(key))
+                if (!parameters[i].cast(key))
                     throw std::runtime_error("erase(dictionary_t, ...) requires names for all its parameters after the first");
                 dictionary.erase(key);
             }

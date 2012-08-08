@@ -241,6 +241,46 @@ const std::vector<Test>& Tests()
             result[adobe::static_name_t("baz")] = adobe::any_regular_t(1);
             retval.push_back(Test("insert({foo: 'bar'}, {baz: 1})", adobe::any_regular_t(result)));
         }
+
+        retval.push_back(Test("erase()", adobe::any_regular_t(), true));
+
+        // erase() on arrays
+        retval.push_back(Test("erase([])", adobe::any_regular_t(), true));
+        retval.push_back(Test("erase([], 'foo')", adobe::any_regular_t(), true));
+        retval.push_back(Test("erase([], 1)", adobe::any_regular_t(), true));
+        retval.push_back(Test("erase([], 0)", adobe::any_regular_t(), true));
+        retval.push_back(Test("erase([], -1)", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            retval.push_back(Test("erase([@foo], 0)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(2));
+            result.push_back(adobe::any_regular_t(adobe::name_t("three")));
+            retval.push_back(Test("erase(['one', 2, @three], 0)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            result.push_back(adobe::any_regular_t(adobe::name_t("three")));
+            retval.push_back(Test("erase(['one', 2, @three], 1)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("one")));
+            result.push_back(adobe::any_regular_t(2));
+            retval.push_back(Test("erase(['one', 2, @three], 2)", adobe::any_regular_t(result)));
+        }
+
+        // erase() on dictionaries
+        retval.push_back(Test("erase({})", adobe::any_regular_t(), true));
+        retval.push_back(Test("erase({}, [1])", adobe::any_regular_t(), true));
+        retval.push_back(Test("erase({foo: 'bar'}, @foo, 1)", adobe::any_regular_t(), true));
+        {
+            adobe::dictionary_t result;
+            retval.push_back(Test("erase({one: 2, two: 3}, @one, @two)", adobe::any_regular_t(result)));
+        }
     }
     return retval;
 }

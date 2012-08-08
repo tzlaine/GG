@@ -363,10 +363,13 @@ GG::ListBox::Row* item_to_row(const dictionary_t& item,
     name_t type;
     get_value(dictionary, static_name_t("type"), type);
     row_factory_t::const_iterator it;
+    GG::ListBox::Row* retval = 0;
     if (row_factory && (it = row_factory->find(type)) != row_factory->end())
-        return it->second(dictionary);
+        retval = it->second(dictionary);
     else
-        return GG::DefaultRowFactoryFunction(dictionary);
+        retval = GG::DefaultRowFactoryFunction(dictionary);
+    retval->SetItem(item);
+    return retval;
 }
 
 /****************************************************************************************************/

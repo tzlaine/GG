@@ -251,6 +251,9 @@ X ListBox::Row::ColWidth(std::size_t n) const
 unsigned int ListBox::Row::Margin() const
 { return m_margin; }
 
+const adobe::dictionary_t& ListBox::Row::Item() const
+{ return m_item; }
+
 Control* ListBox::Row::CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const
 { return GetStyleFactory()->NewTextControl(X0, Y0, str, font, color); }
 
@@ -397,6 +400,9 @@ void ListBox::Row::SetMargin(unsigned int margin)
     m_margin = margin;
     AdjustLayout();
 }
+
+void ListBox::Row::SetItem(const adobe::dictionary_t& item)
+{ m_item = item; }
 
 void ListBox::Row::AdjustLayout(bool adjust_for_push_back/* = false*/)
 {
@@ -1383,8 +1389,6 @@ ListBox::iterator ListBox::Insert(Row* row, iterator it, bool dropped)
     AdjustScrolls(false);
 
     if (dropped) {
-        // TODO: Can these be inverted without breaking anything?  It would be
-        // semantically clearer if they were.
         DroppedSignal(retval);
         if (original_dropped_position != m_rows.end())
             Erase(original_dropped_position, true, false);

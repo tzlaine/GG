@@ -33,6 +33,7 @@
 #include <GG/ClrConstants.h>
 #include <GG/Control.h>
 #include <GG/Timer.h>
+#include <GG/adobe/dictionary.hpp>
 
 #include <set>
 
@@ -179,6 +180,7 @@ public:
         Alignment    ColAlignment(std::size_t n) const; ///< returns the horizontal alignment of the Control in the \a nth cell of this Row; not range checked
         X            ColWidth(std::size_t n) const; ///< returns the width of the \a nth cell of this Row; not range checked
         unsigned int Margin() const;             ///< returns the amount of space left between the contents of adjacent cells, in pixels
+        const adobe::dictionary_t& Item() const; ///< returns the adobe::dictionary_t used to construct this Row from an Eve item, if it was so constructed
 
         Control*     CreateControl(const std::string& str, const boost::shared_ptr<Font>& font, Clr color) const; ///< creates a "shrink-fit" TextControl from text, font, and color parameters
         Control*     CreateControl(const SubTexture& st) const; ///< creates a "shrink-fit" StaticGraphic Control from a SubTexture parameter
@@ -203,6 +205,7 @@ public:
         void         SetColAlignments(const std::vector<Alignment>& aligns); ///< sets the horizontal alignment of all the Controls in this Row; not range checked
         void         SetColWidths(const std::vector<X>& widths); ///< sets all the widths of the cells of this Row; not range checked
         void         SetMargin(unsigned int margin); ///< sets the amount of space left between the contents of adjacent cells, in pixels
+        void         SetItem(const adobe::dictionary_t& item); ///< sets the adobe::dictionary_t used to construct this Row from an Eve item
         //@}
 
     private:
@@ -216,6 +219,8 @@ public:
         std::vector<bool>      m_preferred_disabled;
 
         bool                   m_ignore_adjust_layout;
+
+        adobe::dictionary_t    m_item;
 
         friend class DeferAdjustLayout;
     };

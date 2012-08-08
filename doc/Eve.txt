@@ -1262,11 +1262,17 @@ else:
     be assigned to the bound Adam cell.  This is represented by a (possibly
     empty) array of values.
 
+    If \a items is bound to an Adam cell, changes to the items in the listbox
+    (such as via drag and drop) are reflected in the bound \a items cell.
+
     \section eve_listbox_adam_interaction Adam Interaction Notes
 
     The listbox expects the bound Adam cell to set its selected items, using
     one or more of the values specified in \a items.  This is expected as a
     (possibly empty) array of values.
+
+    As indicated below, binding \a items to an Adam cell will populate the
+    listbox dynamically, instead of relying on a static list of items.
 
     \section eve_listbox_usage listbox() Usage
 

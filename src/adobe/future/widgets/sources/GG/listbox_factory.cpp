@@ -248,34 +248,6 @@ namespace {
 
 namespace adobe {
 
-    struct dynamic_list_item_set_view_t
-    {
-        typedef array_t model_type;
-
-        explicit dynamic_list_item_set_view_t(listbox_t& listbox) :
-            listbox_m(listbox)
-            {}
-
-        void display(const model_type& value)
-            { listbox_m.reset_item_set(value); }
-
-        listbox_t& listbox_m;
-    };
-
-    template <typename Sheet>
-    void attach_listbox_list_item_set(listbox_t&         control,
-                                      name_t             cell,
-                                      Sheet&             sheet,
-                                      assemblage_t&      assemblage,
-                                      eve_client_holder& /*client_holder*/)
-    {
-        dynamic_list_item_set_view_t* tmp = new dynamic_list_item_set_view_t(control);
-
-        assemblage.cleanup(boost::bind(delete_ptr<dynamic_list_item_set_view_t*>(), tmp));
-
-        attach_view(assemblage, cell, *tmp, sheet);
-    }
-
     void create_widget(const dictionary_t& parameters,
                        size_enum_t,
                        listbox_t*& listbox)
@@ -331,10 +303,11 @@ namespace adobe {
             style |= GG::LIST_BROWSEUPDATES;
 
         for (array_t::iterator first(items.begin()), last(items.end()); first != last; ++first) {
-            item_set.push_back(first->cast<dictionary_t>());
-            get_value(item_set.back(), key_value);
-            dictionary_t::iterator it = item_set.back().find(key_name);
-            if (it != item_set.back().end() && it->second.type_info() == type_info<adobe::string_t>()) {
+            item_set.push_back(any_regular_t(first->cast<dictionary_t>()));
+            dictionary_t& back = item_set.back().cast<dictionary_t>();
+            get_value(back, key_value);
+            dictionary_t::iterator it = back.find(key_name);
+            if (it != back.end() && it->second.type_info() == type_info<adobe::string_t>()) {
                 it->second.assign(localization_invoke(it->second.cast<std::string>()));
             }
         }
@@ -380,14 +353,15 @@ namespace adobe {
 
         if (parameters.count(key_items) && 
             get_value(parameters, key_items).type_info() == type_info<name_t>()) {
-            // dynamically bind to the cell instead of getting a static list of listbox items
-
             name_t cell(get_value(parameters, key_items).cast<name_t>());
-
-            if (layout_sheet.count_interface(cell))
-                attach_listbox_list_item_set(control, cell, layout_sheet, assemblage, token.client_holder_m);
-            else
-                attach_listbox_list_item_set(control, cell, token.sheet_m, assemblage, token.client_holder_m);
+            listbox_t::item_set_view_controller_t& tmp = control.item_set_view_controller_m;
+            if (layout_sheet.count_interface(cell)) {
+                attach_view(assemblage, cell, tmp, layout_sheet);
+                attach_controller_direct(tmp, parameters, token, cell);
+            } else {
+                attach_view(assemblage, cell, tmp, token.sheet_m);
+                attach_controller_direct(tmp, parameters, token, cell);
+            }
         }
 
         {

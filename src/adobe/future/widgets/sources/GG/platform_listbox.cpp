@@ -66,7 +66,9 @@ namespace {
                  it != end_it;
                  ++it) {
                 std::ptrdiff_t index = std::distance(listbox.control_m->begin(), *it);
-                array.push_back(listbox.items_m.at(index).find(adobe::static_name_t("value"))->second);
+                array.push_back(
+                    listbox.items_m[index].cast<adobe::dictionary_t>().find(adobe::static_name_t("value"))->second
+                );
             }
             listbox.value_proc_m(listbox.debounce_m = adobe::any_regular_t(array));
         }
@@ -77,6 +79,26 @@ namespace {
 
     void listbox_dropped(adobe::listbox_t& listbox, GG::ListBox::iterator row)
     {
+        const bool internal_drag_and_drop =
+            std::count(listbox.control_m->begin(), listbox.control_m->end(), *row) == 2u;
+        GG::ListBox::iterator other_row =
+            internal_drag_and_drop ?
+            std::find(listbox.control_m->begin(), row, *row) :
+            listbox.control_m->end();
+        const bool dropped_before_self = other_row == row;
+        if (internal_drag_and_drop && dropped_before_self) {
+            other_row = std::find(++other_row, listbox.control_m->end(), *row);
+            assert(other_row != row);
+            assert(other_row != listbox.control_m->end());
+        }
+        const std::size_t i = std::distance(listbox.control_m->begin(), row);
+        listbox.items_m.insert(listbox.items_m.begin() + i, adobe::any_regular_t((*row)->Item()));
+        if (internal_drag_and_drop) {
+            std::size_t old_i = std::distance(listbox.control_m->begin(), other_row);
+            listbox.items_m.erase(listbox.items_m.begin() + old_i);
+        }
+        if (listbox.item_set_view_controller_m.value_proc_m)
+            listbox.item_set_view_controller_m.value_proc_m(listbox.items_m);
         if (listbox.dropped_proc_m)
             listbox.dropped_proc_m(listbox, row);
     }
@@ -107,6 +129,10 @@ namespace {
 
     void listbox_erased(adobe::listbox_t& listbox, GG::ListBox::iterator row)
     {
+        const std::size_t i = std::distance(listbox.control_m->begin(), row);
+        listbox.items_m.erase(listbox.items_m.begin() + i);
+        if (listbox.item_set_view_controller_m.value_proc_m)
+            listbox.item_set_view_controller_m.value_proc_m(listbox.items_m);
         if (listbox.erased_proc_m)
             listbox.erased_proc_m(listbox, row);
     }
@@ -125,7 +151,11 @@ namespace {
                  first = listbox.items_m.begin(), last = listbox.items_m.end();
              first != last;
              ++first) {
-            listbox.control_m->Insert(adobe::implementation::item_to_row(*first, listbox.row_factory_m, listbox.item_text_color_m));
+            listbox.control_m->Insert(
+                adobe::implementation::item_to_row(first->cast<adobe::dictionary_t>(),
+                                                   listbox.row_factory_m,
+                                                   listbox.item_text_color_m)
+            );
         }
     }
 
@@ -136,14 +166,18 @@ namespace {
 
         typedef std::map<std::string, adobe::dictionary_t*> sorted_item_map;
         sorted_item_map sorted_items;
-        adobe::listbox_t::item_set_t sorted_item_set(listbox.items_m.size());
+        adobe::listbox_t::item_set_t sorted_item_set(
+            listbox.items_m.size(),
+            adobe::any_regular_t(adobe::dictionary_t())
+        );
         for (adobe::listbox_t::item_set_t::iterator
                  it = listbox.items_m.begin(), end_it = listbox.items_m.end();
              it != end_it;
              ++it) {
             std::string name;
-            adobe::implementation::get_localized_string(*it, adobe::key_name, name);
-            sorted_items[name] = &*it;
+            adobe::dictionary_t& d = it->cast<adobe::dictionary_t>();
+            adobe::implementation::get_localized_string(d, adobe::key_name, name);
+            sorted_items[name] = &d;
         }
         std::size_t i = 0;
         if (listbox.style_m & GG::LIST_SORTDESCENDING) {
@@ -151,14 +185,14 @@ namespace {
                      it = sorted_items.rbegin(), end_it = sorted_items.rend();
                  it != end_it;
                  ++it) {
-                std::swap(sorted_item_set[i++], *it->second);
+                std::swap(sorted_item_set[i++].cast<adobe::dictionary_t>(), *it->second);
             }
         } else {
             for (sorted_item_map::iterator
                      it = sorted_items.begin(), end_it = sorted_items.end();
                  it != end_it;
                  ++it) {
-                std::swap(sorted_item_set[i++], *it->second);
+                std::swap(sorted_item_set[i++].cast<adobe::dictionary_t>(), *it->second);
             }
         }
         std::swap(listbox.items_m, sorted_item_set);
@@ -167,6 +201,26 @@ namespace {
 }
 
 namespace adobe {
+
+    listbox_t::item_set_view_controller_t::item_set_view_controller_t() :
+        listbox_m(0)
+    {}
+
+    void listbox_t::item_set_view_controller_t::initialize(listbox_t& listbox)
+    { listbox_m = &listbox; }
+
+    void listbox_t::item_set_view_controller_t::display(const model_type& value)
+    {
+        assert(listbox_m);
+        if (value != listbox_m->items_m)
+            listbox_m->reset_item_set(value);
+    }
+
+    void listbox_t::item_set_view_controller_t::monitor(const setter_type& proc)
+    { value_proc_m = proc; }
+
+    void listbox_t::item_set_view_controller_t::enable(bool)
+    {}
 
     listbox_t::listbox_t(const std::string& name,
                          const std::string& alt_text,
@@ -308,29 +362,13 @@ namespace adobe {
     void listbox_t::reset_item_set(const array_t& items)
     {
         assert(control_m);
-        items_m.clear();
-        control_m->Clear();
-        for (array_t::const_iterator it = items.begin(), end_it = items.end();
+        items_m = items;
+        for (array_t::iterator it = items_m.begin(), end_it = items_m.end();
              it != end_it;
              ++it) {
-            items_m.push_back(it->cast<dictionary_t>());
-            get_value(items_m.back(), key_value);
+            get_value(it->cast<dictionary_t>(), key_value);
         }
-        ::sort_items(*this);
-        ::message_item_set(*this);
-    }
-
-    void listbox_t::reset_item_set(const item_set_t& items)
-    {
-        assert(control_m);
-        items_m.clear();
         control_m->Clear();
-        for (item_set_t::const_iterator it = items.begin(), end_it = items.end();
-             it != end_it;
-             ++it) {
-            items_m.push_back(*it);
-            get_value(items_m.back(), key_value);
-        }
         ::sort_items(*this);
         ::message_item_set(*this);
     }
@@ -356,7 +394,7 @@ namespace adobe {
             for (item_set_t::iterator first = items_m.begin(), last = items_m.end();
                  first != last;
                  ++first, ++row_it) {
-                if (first->find(static_name_t("value"))->second == value) {
+                if (first->cast<dictionary_t>().find(static_name_t("value"))->second == value) {
                     control_m->SelectRow(row_it);
                     break;
                 }
@@ -405,6 +443,8 @@ namespace adobe {
         for (std::size_t i = 0; i < element.drop_types_m.size(); ++i) {
             element.control_m->AllowDropType(element.drop_types_m[i]);
         }
+
+        element.item_set_view_controller_m.initialize(element);
 
         GG::Connect(element.control_m->SelChangedSignal,
                     boost::bind(&listbox_selection_changed, boost::ref(element), _1));

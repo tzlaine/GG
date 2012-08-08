@@ -27,6 +27,7 @@
 
 #include <GG/adobe/config.hpp>
 #include <GG/adobe/any_regular.hpp>
+#include <GG/adobe/array.hpp>
 #include <GG/adobe/future/widgets/headers/platform_label.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/widgets/headers/popup_common_fwd.hpp>
@@ -40,11 +41,26 @@ namespace adobe {
 
     struct listbox_t : boost::noncopyable
     {
-        typedef dictionary_t item_t;
-        typedef std::vector<item_t> item_set_t;
+        typedef array_t item_set_t;
 
         typedef any_regular_t model_type;
         typedef boost::function<void (const any_regular_t&)> setter_type;
+
+        struct item_set_view_controller_t
+        {
+            typedef array_t model_type;
+            typedef boost::function<void (const model_type&)> setter_type;
+
+            item_set_view_controller_t();
+
+            void initialize(listbox_t& listbox);
+            void display(const model_type& value);
+            void monitor(const setter_type& proc);
+            void enable(bool);
+
+            listbox_t* listbox_m;
+            setter_type value_proc_m;
+        };
 
         listbox_t(const std::string& name,
                   const std::string& alt_text,
@@ -60,7 +76,6 @@ namespace adobe {
                   const std::vector<std::string>& drop_types,
                   name_t signal_id);
 
-        void reset_item_set(const array_t& items);
         void reset_item_set(const item_set_t& items);
 
         void measure(extents_t& result);
@@ -103,6 +118,8 @@ namespace adobe {
         row_signal_t erased_proc_m;
         row_signal_t browsed_proc_m;
         const row_factory_t* row_factory_m;
+
+        item_set_view_controller_t item_set_view_controller_m;
 
         implementation::color_proxy_t color_proxy_m;
         implementation::color_proxy_t interior_color_proxy_m;

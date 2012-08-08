@@ -185,6 +185,85 @@
     texture is invalid or any of the coordinates is omitted.
 */
 
+/** \page eve_expression_append_fn append()
+    \section eve_append_fn_usage append() Usage
+
+    \code append(array, expr, ...) \endcode
+
+    \param array An Adam and Eve expression of type array.
+    \param expr Any Adam and Eve expression.
+
+    Returns \code [array[0], array[1], ... array[N - 1], expr, ...] \endcode where N is the size of the given array.
+
+    \remark Note that the parameters to \a append() are not named.
+    \remark Note that \a append() is a pure function; the input array is not modified.
+*/
+
+/** \page eve_expression_prepend_fn prepend()
+    \section eve_prepend_fn_usage prepend() Usage
+
+    \code prepend(array, expr, ...) \endcode
+
+    \param array An Adam and Eve expression of type array.
+    \param expr Any Adam and Eve expression.
+
+    Returns \code [expr, ..., array[0], array[1], ... array[N - 1]] \endcode where N is the size of the given array.
+
+    \remark Note that the parameters to \a prepend() are not named.
+    \remark Note that \a prepend() is a pure function; the input array is not modified.
+*/
+
+/** \page eve_expression_insert_fn insert()
+    \section eve_insert_fn_usage insert() Usage
+
+    \code insert(array, i, expr, ...) \endcode
+
+    \param array An Adam and Eve expression of type array.
+    \param i Any Adam and Eve expression of type number in the range [0, N], where N is the size of the given array.
+    \param expr Any Adam and Eve expression.
+
+    Returns \code [array[0], ..., array[i - 1], expr, ..., array[i], ..., array[N - 1]] \endcode where N is the size of the given array.
+
+    \code insert(dictionary, key, expr) \endcode
+
+    \param dictionary An Adam and Eve expression of type dictionary.
+    \param key An Adam and Eve expression of type name.
+    \param expr Any Adam and Eve expression.
+
+    Returns \a dictionary with the key-value pair <i>(key, expr)</i> inserted; \a expr replaces the value previously associated with \a key in \a dictionary, if any.
+
+    \code insert(dictionary_1, dictionary_2) \endcode
+
+    \param dictionary_1 An Adam and Eve expression of type dictionary.
+    \param dictionary_2 An Adam and Eve expression of type dictionary.
+
+    Returns the dictionary that would result from calling \code insert(dictionary_1, x) \endcode for each \a x in \a dictionary_2.
+
+    \remark Note that the parameters to \a insert() are not named.
+    \remark Note that \a insert() is a pure function; the input sequence is not modified.
+*/
+
+/** \page eve_expression_erase_fn erase()
+    \section eve_erase_fn_usage erase() Usage
+
+    \code erase(array, i) \endcode
+
+    \param array An Adam and Eve expression of type array.
+    \param i Any Adam and Eve expression of type number in the range [0, N), where N is the size of the given array.
+
+    Returns \code [array[0], ..., array[i - 1], array[i + 1], ..., array[N - 1]] \endcode where N is the size of the given array.
+
+    \code erase(dictionary, key, ...) \endcode
+
+    \param dictionary An Adam and Eve expression of type dictionary.
+    \param key An Adam and Eve expression of type name.
+
+    Returns \a dictionary with all key-value pairs matching those in <i>key, ...</i> removed.
+
+    \remark Note that the parameters to \a erase() are not named.
+    \remark Note that \a erase() is a pure function; the input sequence is not modified.
+*/
+
 /** \page eve_expression_transform_fn transform()
     \section eve_transform_fn_usage transform() Usage
 
@@ -1578,6 +1657,10 @@ else:
     - \ref eve_expression_image_fn
     - \ref eve_expression_texture_fn
     - \ref eve_expression_subtexture_fn
+    - \ref eve_expression_append_fn
+    - \ref eve_expression_prepend_fn
+    - \ref eve_expression_insert_fn
+    - \ref eve_expression_erase_fn
     - \ref eve_expression_transform_fn
     - \ref eve_expression_fold_fn
     - \ref eve_expression_foldr_fn

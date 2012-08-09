@@ -29,6 +29,7 @@
 #define _GG_AdamParser_h_
 
 #include <GG/Export.h>
+#include <GG/ExpressionParser.h>
 #include <GG/adobe/array_fwd.hpp>
 
 #include <string>
@@ -39,6 +40,10 @@ namespace adobe {
 }
 
 namespace GG {
+
+GG_API const lexer& AdamLexer();
+
+GG_API const expression_parser_rules::expression_rule& AdamExpressionParser();
 
 GG_API bool Parse(const std::string& sheet,
                   const std::string& filename,

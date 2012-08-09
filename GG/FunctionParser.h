@@ -29,6 +29,7 @@
 #define _GG_FunctionParser_h_
 
 #include <GG/StatementParser.h>
+#include <GG/adobe/adam_function.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
@@ -45,9 +46,12 @@ struct GG_API function_parser_rules
 
     typedef boost::spirit::qi::rule<
         token_iterator,
-        void(adobe::name_t&,
-             std::vector<adobe::name_t>&,
-             std::vector<adobe::array_t>&),
+        void(std::map<adobe::name_t, adobe::adam_function>&),
+        boost::spirit::qi::locals<
+            adobe::name_t,
+            std::vector<adobe::name_t>,
+            std::vector<adobe::array_t>
+        >,
         skipper_type
     > function_rule;
 
@@ -56,6 +60,10 @@ struct GG_API function_parser_rules
 
     statement_parser_rules statement_parser;
 };
+
+GG_API bool ParseFunctions(const std::string& functions,
+                           const std::string& filename,
+                           std::map<adobe::name_t, adobe::adam_function>&);
 
 }
 

@@ -20,6 +20,9 @@ namespace {
 
 namespace adobe {
 
+adam_function::adam_function()
+{}
+
 adam_function::adam_function(name_t name,
                              const std::vector<name_t>& parameter_names,
                              const std::vector<array_t>& statements) :

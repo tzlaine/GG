@@ -73,6 +73,11 @@ aggregate_name_t dictionary_k           = { ".dictionary" };
 aggregate_name_t parenthesized_expression_k = { ".parenthesized_expression_k" };
 aggregate_name_t name_k                 = { ".name_k" };
 
+aggregate_name_t const_decl_k           = { ".const_decl" };
+aggregate_name_t decl_k                 = { ".decl" };
+aggregate_name_t lvalue_k               = { ".lvalue" };
+aggregate_name_t return_k               = { ".return" };
+
 /*************************************************************************************************/
 
 } // namespace adobe

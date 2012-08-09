@@ -83,6 +83,11 @@ extern aggregate_name_t dictionary_k;
 extern aggregate_name_t parenthesized_expression_k;
 extern aggregate_name_t name_k;
 
+extern aggregate_name_t const_decl_k;
+extern aggregate_name_t decl_k;
+extern aggregate_name_t lvalue_k;
+extern aggregate_name_t return_k;
+
 /*************************************************************************************************/
 
 } // namespace adobe

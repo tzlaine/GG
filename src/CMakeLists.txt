@@ -22,6 +22,7 @@ set(THIS_LIB_SOURCES
     EveParser.cpp
     ExpressionParser.cpp
     ExpressionWriter.cpp
+    FunctionParser.cpp
     Filesystem.cpp
     Font.cpp
     GroupBox.cpp
@@ -36,6 +37,7 @@ set(THIS_LIB_SOURCES
     PtRect.cpp
     ReportParseError.cpp
     Scroll.cpp
+    StatementParser.cpp
     StaticGraphic.cpp
     StyleFactory.cpp
     TabWnd.cpp

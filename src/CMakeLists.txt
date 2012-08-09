@@ -55,6 +55,7 @@ set(THIS_LIB_SOURCES
 
     adobe/adam.cpp
     adobe/adam_evaluate.cpp
+    adobe/adam_function.cpp
     adobe/adam_parser.cpp
     adobe/any_regular.cpp
     adobe/basic_sheet.cpp

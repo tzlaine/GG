@@ -20,9 +20,9 @@ namespace {
 
 namespace adobe {
 
-function::function(name_t name,
-                   const std::vector<name_t>& parameter_names,
-                   const std::vector<array_t>& statements) :
+adam_function::adam_function(name_t name,
+                             const std::vector<name_t>& parameter_names,
+                             const std::vector<array_t>& statements) :
     m_function_name(name),
     m_parameter_names(parameter_names),
     m_statements(statements)
@@ -43,7 +43,7 @@ function::function(name_t name,
     }
 }
 
-any_regular_t function::operator()(
+any_regular_t adam_function::operator()(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -77,7 +77,7 @@ any_regular_t function::operator()(
     return common_impl(local_scope);
 }
 
-any_regular_t function::operator()(
+any_regular_t adam_function::operator()(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -113,7 +113,7 @@ any_regular_t function::operator()(
     return common_impl(local_scope);
 }
 
-void function::init_sheet(
+void adam_function::init_sheet(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -152,7 +152,7 @@ void function::init_sheet(
     }
 }
 
-any_regular_t function::common_impl(sheet_t& local_scope) const
+any_regular_t adam_function::common_impl(sheet_t& local_scope) const
 {
     for (std::vector<array_t>::const_iterator
              it = m_statements.begin(),

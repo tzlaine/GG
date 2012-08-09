@@ -817,7 +817,7 @@ void virtual_machine_t::implementation_t::function_operator()
         } else if (array_function_lookup_m) {
             value_stack_m.back() = array_function_lookup_m(function_name, arguments);
         } else if (adam_function_lookup_m) {
-            const function& f = adam_function_lookup_m(function_name);
+            const adam_function& f = adam_function_lookup_m(function_name);
             value_stack_m.back() = f(variable_lookup_m,
                                      array_function_lookup_m,
                                      dictionary_function_lookup_m,
@@ -838,7 +838,7 @@ void virtual_machine_t::implementation_t::function_operator()
         } else if (dictionary_function_lookup_m) {
             value_stack_m.back() = dictionary_function_lookup_m(function_name, arguments);
         } else if (adam_function_lookup_m) {
-            const function& f = adam_function_lookup_m(function_name);
+            const adam_function& f = adam_function_lookup_m(function_name);
             value_stack_m.back() = f(variable_lookup_m,
                                      array_function_lookup_m,
                                      dictionary_function_lookup_m,

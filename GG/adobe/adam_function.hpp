@@ -5,7 +5,7 @@
 
 namespace adobe {
 
-class function
+class adam_function
 {
 public:
     typedef virtual_machine_t::variable_lookup_t            variable_lookup_t;
@@ -15,9 +15,9 @@ public:
     typedef virtual_machine_t::create_const_decl_t          create_const_decl_t;
     typedef virtual_machine_t::create_decl_t                create_decl_t;
 
-    function(name_t name,
-             const std::vector<name_t>& parameter_names,
-             const std::vector<array_t>& statements);
+    adam_function(name_t name,
+                  const std::vector<name_t>& parameter_names,
+                  const std::vector<array_t>& statements);
 
     any_regular_t operator()(const variable_lookup_t& variable_lookup,
                              const array_function_lookup_t& array_function_lookup,

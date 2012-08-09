@@ -167,7 +167,7 @@ public:
     void set(name_t, const any_regular_t&); // input cell.
     void touch(const name_t*, const name_t*); // range of input cells.
     
-    any_regular_t get(name_t);
+    any_regular_t& get(name_t);
     
     void add_input      (name_t, const line_position_t&, const array_t& initializer);
     void add_output     (name_t, const line_position_t&, const array_t& expression);
@@ -811,7 +811,7 @@ void sheet_t::reinitialize()
 void sheet_t::set(const dictionary_t& dictionary)
 { object_m->set(dictionary); }
 
-any_regular_t sheet_t::get(name_t cell)
+any_regular_t& sheet_t::get(name_t cell)
 { return object_m->get(cell); }
 
 dictionary_t sheet_t::contributing(const dictionary_t& mark) const
@@ -1656,7 +1656,7 @@ void sheet_t::implementation_t::set(const dictionary_t& dict)
 
 /**************************************************************************************************/
 
-any_regular_t sheet_t::implementation_t::get(name_t variable_name)
+any_regular_t& sheet_t::implementation_t::get(name_t variable_name)
 {
     if (initialize_mode_m) {
         index_t::iterator iter(input_index_m.find(variable_name));

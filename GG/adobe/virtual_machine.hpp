@@ -32,18 +32,30 @@ namespace adobe {
 
 /*************************************************************************************************/
 
+class function;
+
+/*************************************************************************************************/
+
 class virtual_machine_t
 {
  public:
     typedef array_t             expression_t;
 
     typedef any_regular_t(variable_lookup_signature_t)(name_t);
+    typedef any_regular_t*(lvalue_lookup_signature_t)(name_t);
     typedef any_regular_t(dictionary_function_lookup_signature_t)(name_t, const dictionary_t&);
     typedef any_regular_t(array_function_lookup_signature_t)(name_t, const array_t&);
+    typedef const function&(adam_function_lookup_signature_t)(name_t);
+    typedef void(create_const_decl_signature_t)(name_t, const array_t&);
+    typedef void(create_decl_signature_t)(name_t, const array_t&);
 
     typedef boost::function<variable_lookup_signature_t>            variable_lookup_t;
+    typedef boost::function<lvalue_lookup_signature_t>              lvalue_lookup_t;
     typedef boost::function<dictionary_function_lookup_signature_t> dictionary_function_lookup_t;
     typedef boost::function<array_function_lookup_signature_t>      array_function_lookup_t;
+    typedef boost::function<adam_function_lookup_signature_t>       adam_function_lookup_t;
+    typedef boost::function<create_const_decl_signature_t>          create_const_decl_t;
+    typedef boost::function<create_decl_signature_t>                create_decl_t;
 
 #if !defined(ADOBE_NO_DOCUMENTATION)
     virtual_machine_t();
@@ -64,8 +76,12 @@ class virtual_machine_t
     void pop_back();
 
     void set_variable_lookup(const variable_lookup_t&);
+    void set_lvalue_lookup(const lvalue_lookup_t&);
     void set_array_function_lookup(const array_function_lookup_t&);
     void set_dictionary_function_lookup(const dictionary_function_lookup_t&);
+    void set_adam_function_lookup(const adam_function_lookup_t&);
+    void set_create_const_decl(const create_const_decl_t&);
+    void set_create_decl(const create_decl_t&);
 
     class implementation_t;
  private:

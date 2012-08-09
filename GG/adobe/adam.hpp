@@ -147,7 +147,7 @@ class sheet_t : boost::noncopyable
 
     \param name of cell to calculate/get the value.
 */
-    any_regular_t get(name_t cell);
+    any_regular_t& get(name_t cell);
     
 /*!
 

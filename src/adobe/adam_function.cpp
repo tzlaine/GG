@@ -1,48 +1,62 @@
 #include <GG/adobe/adam_function.hpp>
 
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/implementation/token.hpp>
 
+
+namespace {
+
+    struct lvalue_adapter
+    {
+        lvalue_adapter(adobe::sheet_t& sheet) :
+            m_sheet(sheet)
+            {}
+        adobe::any_regular_t* operator()(adobe::name_t name)
+            { return &m_sheet.get(name); }
+        adobe::sheet_t& m_sheet;
+    };
+
+}
 
 namespace adobe {
 
-function::function() :
-    m_global_scope(0)
-{}
-
-function::function(name_t name, sheet_t& property_sheet) :
+function::function(name_t name,
+                   const std::vector<name_t>& parameter_names,
+                   const std::vector<array_t>& statements) :
     m_function_name(name),
-    m_global_scope(&property_sheet)
-{}
-
-void function::add_parameter(name_t parameter)
-{ m_parameter_names.push_back(parameter); }
-
-void function::add_statement(const array_t& statement)
+    m_parameter_names(parameter_names),
+    m_statements(statements)
 {
-    m_statements.resize(m_statements.size() + 1);
-    m_statements.back().m_statement = statement;
-    for (array_t::const_iterator
-             it = statement.begin(),
-             end_it = statement.end();
-         it != end_it;
-         ++it) {
-        if (it->type_info() == type_info<name_t>()) {
-            array_t::const_iterator next_it = boost::next(it);
-            name_t name;
-            if (next_it != end_it &&
-                next_it->cast(name) &&
-                name == static_name_t(".variable")) {
-                m_statements.back().m_global_variables.push_back(
-                    it->cast<name_t>()
-                );
+    for (std::size_t i = 0; i < m_statements.size(); ++i) {
+        for (array_t::const_iterator
+                 it = m_statements[i].begin(),
+                 end_it = m_statements[i].end();
+             it != end_it;
+             ++it) {
+            if (it->type_info() == type_info<name_t>()) {
+                array_t::const_iterator next_it = boost::next(it);
+                name_t name;
+                if (next_it != end_it && next_it->cast(name) && name == variable_k)
+                    m_global_variables.insert(it->cast<name_t>());
             }
         }
     }
 }
 
-any_regular_t function::array_function(const array_t& parameters)
+any_regular_t function::operator()(
+    const variable_lookup_t& variable_lookup,
+    const array_function_lookup_t& array_function_lookup,
+    const dictionary_function_lookup_t& dictionary_function_lookup,
+    const adam_function_lookup_t& adam_function_lookup,
+    const array_t& parameters
+) const
 {
     sheet_t local_scope;
+    init_sheet(variable_lookup,
+               array_function_lookup,
+               dictionary_function_lookup,
+               adam_function_lookup,
+               local_scope);
     for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
         if (i < parameters.size()) {
             local_scope.add_interface(m_parameter_names[i],
@@ -63,9 +77,20 @@ any_regular_t function::array_function(const array_t& parameters)
     return common_impl(local_scope);
 }
 
-any_regular_t function::dictionary_function(const dictionary_t& parameters)
+any_regular_t function::operator()(
+    const variable_lookup_t& variable_lookup,
+    const array_function_lookup_t& array_function_lookup,
+    const dictionary_function_lookup_t& dictionary_function_lookup,
+    const adam_function_lookup_t& adam_function_lookup,
+    const dictionary_t& parameters
+) const
 {
     sheet_t local_scope;
+    init_sheet(variable_lookup,
+               array_function_lookup,
+               dictionary_function_lookup,
+               adam_function_lookup,
+               local_scope);
     for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
         dictionary_t::const_iterator it =
             parameters.find(m_parameter_names[i]);
@@ -88,43 +113,58 @@ any_regular_t function::dictionary_function(const dictionary_t& parameters)
     return common_impl(local_scope);
 }
 
-void function::add_global_variables(sheet_t& local_scope,
-                                    const std::vector<name_t>& global_variables)
+void function::init_sheet(
+    const variable_lookup_t& variable_lookup,
+    const array_function_lookup_t& array_function_lookup,
+    const dictionary_function_lookup_t& dictionary_function_lookup,
+    const adam_function_lookup_t& adam_function_lookup,
+    sheet_t& local_scope
+) const
 {
-    for (std::vector<name_t>::const_iterator
-             it = global_variables.begin(),
-             end_it = global_variables.end();
+    local_scope.machine_m.set_array_function_lookup(array_function_lookup);
+    local_scope.machine_m.set_dictionary_function_lookup(dictionary_function_lookup);
+    local_scope.machine_m.set_adam_function_lookup(adam_function_lookup);
+    local_scope.machine_m.set_variable_lookup(boost::bind(&sheet_t::get, &local_scope, _1));
+    local_scope.machine_m.set_lvalue_lookup(lvalue_adapter(local_scope));
+    local_scope.machine_m.set_create_const_decl(
+        boost::bind(&sheet_t::add_constant,
+                    &local_scope,
+                    _1,
+                    line_position_t(),
+                    _2)
+    );
+    local_scope.machine_m.set_create_decl(
+        boost::bind(&sheet_t::add_interface,
+                    &local_scope,
+                    _1,
+                    false,
+                    line_position_t(),
+                    _2,
+                    line_position_t(),
+                    array_t())
+    );
+    for (std::set<name_t>::const_iterator
+             it = m_global_variables.begin(),
+             end_it = m_global_variables.end();
          it != end_it;
          ++it) {
-        local_scope.add_constant(
-            *it,
-            line_position_t(),
-            array_t(1, m_global_scope->get(*it))
-        );
+        local_scope.add_constant(*it, line_position_t(), array_t(1, variable_lookup(*it)));
     }
 }
 
-any_regular_t function::common_impl(sheet_t& local_scope)
+any_regular_t function::common_impl(sheet_t& local_scope) const
 {
-    local_scope.add_interface(
-        static_name_t("dont_name_your_cells_retval_okay"),
-        false,
-        line_position_t(),
-        array_t(),
-        line_position_t(),
-        array_t()
-    );
-    for (std::vector<statement>::const_iterator
+    for (std::vector<array_t>::const_iterator
              it = m_statements.begin(),
              end_it = m_statements.end();
          it != end_it;
          ++it) {
-        add_global_variables(local_scope, it->m_global_variables);
-        local_scope.inspect(it->m_statement);
+        any_regular_t value = local_scope.inspect(*it);
+        name_t last_op_name;
+        if (it->back().cast(last_op_name) && last_op_name == return_k)
+            return value;
     }
-    return local_scope.get(
-        static_name_t("dont_name_your_cells_retval_okay")
-    );
+    return any_regular_t();
 }
 
 }

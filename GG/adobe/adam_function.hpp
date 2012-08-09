@@ -1,34 +1,47 @@
 #include <GG/adobe/adam.hpp>
 
+#include <set>
+
 
 namespace adobe {
 
 class function
 {
 public:
-    function();
-    function(name_t name, sheet_t& property_sheet);
+    typedef virtual_machine_t::variable_lookup_t            variable_lookup_t;
+    typedef virtual_machine_t::dictionary_function_lookup_t dictionary_function_lookup_t;
+    typedef virtual_machine_t::array_function_lookup_t      array_function_lookup_t;
+    typedef virtual_machine_t::adam_function_lookup_t       adam_function_lookup_t;
+    typedef virtual_machine_t::create_const_decl_t          create_const_decl_t;
+    typedef virtual_machine_t::create_decl_t                create_decl_t;
 
-    void add_parameter(name_t parameter);
-    void add_statement(const array_t& statement);
-    any_regular_t array_function(const array_t& parameters);
-    any_regular_t dictionary_function(const dictionary_t& parameters);
+    function(name_t name,
+             const std::vector<name_t>& parameter_names,
+             const std::vector<array_t>& statements);
+
+    any_regular_t operator()(const variable_lookup_t& variable_lookup,
+                             const array_function_lookup_t& array_function_lookup,
+                             const dictionary_function_lookup_t& dictionary_function_lookup,
+                             const adam_function_lookup_t& adam_function_lookup,
+                             const array_t& parameters) const;
+    any_regular_t operator()(const variable_lookup_t& variable_lookup,
+                             const array_function_lookup_t& array_function_lookup,
+                             const dictionary_function_lookup_t& dictionary_function_lookup,
+                             const adam_function_lookup_t& adam_function_lookup,
+                             const dictionary_t& parameters) const;
 
 private:
-    struct statement
-    {
-        array_t m_statement;
-        std::vector<name_t> m_global_variables;
-    };
-
     name_t m_function_name;
     std::vector<name_t> m_parameter_names;
-    std::vector<statement> m_statements;
-    sheet_t* m_global_scope;
+    std::vector<array_t> m_statements;
+    std::set<name_t> m_global_variables;
 
-    void add_global_variables(sheet_t& local_scope,
-                              const std::vector<name_t>& global_variables);
-    any_regular_t common_impl(sheet_t& local_scope);
+    void init_sheet(const variable_lookup_t& variable_lookup,
+                    const array_function_lookup_t& array_function_lookup,
+                    const dictionary_function_lookup_t& dictionary_function_lookup,
+                    const adam_function_lookup_t& adam_function_lookup,
+                    sheet_t& local_scope) const;
+    any_regular_t common_impl(sheet_t& local_scope) const;
 };
 
 }

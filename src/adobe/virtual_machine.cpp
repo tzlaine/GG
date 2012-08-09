@@ -16,6 +16,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 
 #include <GG/adobe/algorithm/minmax.hpp>
+#include <GG/adobe/adam_function.hpp>
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/array.hpp>
 #include <GG/adobe/cmath.hpp>
@@ -96,7 +97,7 @@ typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)>    di
 typedef adobe::vector<adobe::any_regular_t>                    stack_type; // REVISIT (sparent) : GCC 3.1 the symbol stack_t conflicts with a symbol in signal.h
 
 #if !defined(ADOBE_NO_DOCUMENTATION)
-typedef adobe::static_table<adobe::name_t, operator_t, 22>              operator_table_t;
+typedef adobe::static_table<adobe::name_t, operator_t, 27>              operator_table_t;
 typedef adobe::static_table<adobe::name_t, array_function_t, 8>         array_function_table_t;
 typedef adobe::static_table<adobe::name_t, dictionary_function_t, 2>    dictionary_function_table_t;
 typedef adobe::static_table<adobe::type_info_t, adobe::name_t, 8>       type_table_t;
@@ -321,8 +322,12 @@ class virtual_machine_t::implementation_t
     void pop_back();
 
     variable_lookup_t               variable_lookup_m;
+    lvalue_lookup_t                 lvalue_lookup_m;
     array_function_lookup_t         array_function_lookup_m;
     dictionary_function_lookup_t    dictionary_function_lookup_m;
+    adam_function_lookup_t          adam_function_lookup_m;
+    create_const_decl_t             create_const_decl_m;
+    create_decl_t                   create_decl_m;
 
  private:
     stack_type              value_stack_m;
@@ -347,6 +352,13 @@ class virtual_machine_t::implementation_t
     void function_operator();
     void array_operator();
     void dictionary_operator();
+
+    // function-specific operators
+    void lvalue_operator();
+    void assign_operator();
+    void const_decl_operator();
+    void decl_operator();
+    void return_operator();
 
     static operator_table_t*            operator_table_g;
     static array_function_table_t*      array_function_table_g;
@@ -403,7 +415,14 @@ void virtual_machine_init_once()
         op_entry_type(adobe::dictionary_k,      &implementation_t::dictionary_operator),
         op_entry_type(adobe::variable_k,        &implementation_t::variable_operator),
         op_entry_type(adobe::and_k,             &implementation_t::logical_and_operator),
-        op_entry_type(adobe::or_k,              &implementation_t::logical_or_operator)
+        op_entry_type(adobe::or_k,              &implementation_t::logical_or_operator),
+
+        // function-specific operators
+        op_entry_type(adobe::lvalue_k,          &implementation_t::lvalue_operator),
+        op_entry_type(adobe::assign_k,          &implementation_t::assign_operator),
+        op_entry_type(adobe::const_decl_k,      &implementation_t::const_decl_operator),
+        op_entry_type(adobe::decl_k,            &implementation_t::decl_operator),
+        op_entry_type(adobe::return_k,          &implementation_t::return_operator)
     }};
 
     static array_function_table_t array_function_table_s =
@@ -711,6 +730,71 @@ void virtual_machine_t::implementation_t::dictionary_operator()
 
 /*************************************************************************************************/
 
+void virtual_machine_t::implementation_t::lvalue_operator()
+{
+    adobe::name_t lvalue(back().cast<adobe::name_t>());
+
+    pop_back();
+
+    if (!lvalue_lookup_m)
+        throw std::logic_error("No lvalue lookup installed.");
+
+    value_stack_m.push_back(any_regular_t(lvalue_lookup_m(lvalue)));
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::implementation_t::assign_operator()
+{
+    stack_type::iterator iter(value_stack_m.end());
+
+    any_regular_t& lvalue = *(iter - 2)->cast<any_regular_t*>();
+    any_regular_t& value(*(iter - 1));
+    lvalue = value;
+
+    pop_back();
+    pop_back();
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::implementation_t::const_decl_operator()
+{
+    stack_type::iterator iter(value_stack_m.end());
+
+    name_t var_name((iter - 2)->cast<name_t>());
+    any_regular_t& value(*(iter - 1));
+
+    if (create_const_decl_m)
+        create_const_decl_m(var_name, value.cast<array_t>());
+
+    pop_back();
+    pop_back();
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::implementation_t::decl_operator()
+{
+    stack_type::iterator iter(value_stack_m.end());
+
+    name_t var_name((iter - 2)->cast<name_t>());
+    any_regular_t& value(*(iter - 1));
+
+    if (create_decl_m)
+        create_decl_m(var_name, value.cast<array_t>());
+
+    pop_back();
+    pop_back();
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::implementation_t::return_operator()
+{}
+
+/*************************************************************************************************/
+
 void virtual_machine_t::implementation_t::function_operator()
 {
     ADOBE_ONCE_INSTANCE(adobe_virtual_machine);
@@ -718,7 +802,8 @@ void virtual_machine_t::implementation_t::function_operator()
     // pop the function name
     adobe::name_t   function_name(back().cast<adobe::name_t>());
     pop_back();
-    
+
+    bool need_rety = false;
     if (back().type_info() == type_info<adobe::array_t>())
     {
         // handle unnamed parameter functions
@@ -727,12 +812,20 @@ void virtual_machine_t::implementation_t::function_operator()
         
         // handle function lookup
         
-        if ((*array_function_table_g)(function_name, array_func))
+        if ((*array_function_table_g)(function_name, array_func)) {
             value_stack_m.back() = array_func(arguments);
-        else if (array_function_lookup_m)
+        } else if (array_function_lookup_m) {
             value_stack_m.back() = array_function_lookup_m(function_name, arguments);
-        else
+        } else if (adam_function_lookup_m) {
+            const function& f = adam_function_lookup_m(function_name);
+            value_stack_m.back() = f(variable_lookup_m,
+                                     array_function_lookup_m,
+                                     dictionary_function_lookup_m,
+                                     adam_function_lookup_m,
+                                     arguments);
+        } else {
             throw_function_not_defined(function_name);
+        }
     }
     else
     {
@@ -740,12 +833,20 @@ void virtual_machine_t::implementation_t::function_operator()
         dictionary_function_t   dictionary_func;
         adobe::dictionary_t     arguments(back().cast<adobe::dictionary_t>());
 
-        if ((*dictionary_function_table_g)(function_name, dictionary_func))
+        if ((*dictionary_function_table_g)(function_name, dictionary_func)) {
             value_stack_m.back() = dictionary_func(arguments);
-        else if (dictionary_function_lookup_m)
+        } else if (dictionary_function_lookup_m) {
             value_stack_m.back() = dictionary_function_lookup_m(function_name, arguments);
-        else
+        } else if (adam_function_lookup_m) {
+            const function& f = adam_function_lookup_m(function_name);
+            value_stack_m.back() = f(variable_lookup_m,
+                                     array_function_lookup_m,
+                                     dictionary_function_lookup_m,
+                                     adam_function_lookup_m,
+                                     arguments);
+        } else {
             throw_function_not_defined(function_name);
+        }
     }
 }
 
@@ -790,6 +891,13 @@ void virtual_machine_t::set_variable_lookup(const variable_lookup_t& lookup)
     
 /*************************************************************************************************/
     
+void virtual_machine_t::set_lvalue_lookup(const lvalue_lookup_t& lookup)
+{
+    object_m->lvalue_lookup_m = lookup;
+}
+    
+/*************************************************************************************************/
+    
 void virtual_machine_t::set_array_function_lookup(const array_function_lookup_t& function)
 {
     object_m->array_function_lookup_m = function;
@@ -801,7 +909,28 @@ void virtual_machine_t::set_dictionary_function_lookup(const dictionary_function
 {
     object_m->dictionary_function_lookup_m = function;
 }
-    
+
+/*************************************************************************************************/
+
+void virtual_machine_t::set_adam_function_lookup(const adam_function_lookup_t& function)
+{
+    object_m->adam_function_lookup_m = function;
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::set_create_const_decl(const create_const_decl_t& function)
+{
+    object_m->create_const_decl_m = function;
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::set_create_decl(const create_decl_t& function)
+{
+    object_m->create_decl_m = function;
+}
+
 /*************************************************************************************************/
     
 void virtual_machine_t::evaluate(const expression_t& expression)

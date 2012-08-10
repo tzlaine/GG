@@ -33,6 +33,30 @@ using namespace GG;
 
 namespace {
 
+    bool ContainsStatementBlockRecursive(const adobe::array_t& if_statement)
+    {
+        const adobe::array_t& if_case =
+            if_statement[1].cast<adobe::array_t>();
+        if (if_case.empty() || 1u < if_case.size()) {
+            return true;
+        } else {
+            const adobe::array_t& else_case =
+                if_statement[2].cast<adobe::array_t>();
+            adobe::name_t first_op;
+            if (1u < else_case.size()) {
+                return true;
+            } else if (else_case.size() == 1u) {
+                const adobe::array_t& first_stmt =
+                    else_case[0].cast<adobe::array_t>();
+                if (boost::prior(first_stmt.end())->cast(first_op) &&
+                    first_op == adobe::stmt_ifelse_k) {
+                    return ContainsStatementBlockRecursive(first_stmt);
+                }
+            }
+        }
+        return false;
+    }
+
     void WriteStatementImpl(adobe::array_t::const_reverse_iterator& it,
                             adobe::array_t::const_reverse_iterator end_it,
                             std::string& output,
@@ -77,17 +101,20 @@ namespace {
             std::string else_case;
             bool else_case_multiline = false;
             bool else_if = false;
-            bool else_if_if_multiline = false;
+            bool else_if_multiline = false;
             {
                 const adobe::array_t& block = it->cast<adobe::array_t>();
-                adobe::name_t first_op;
                 if (block.size() == 1u) {
                     const adobe::array_t& block_first_stmt =
                         block[0].cast<adobe::array_t>();
+                    adobe::name_t first_op;
                     else_if =
                         boost::prior(block_first_stmt.end())->cast(first_op) &&
                         first_op == adobe::stmt_ifelse_k;
-                    else_if_if_multiline = 1u < block_first_stmt.size();
+                    if (else_if) {
+                        else_if_multiline =
+                            ContainsStatementBlockRecursive(block_first_stmt);
+                    }
                 }
                 else_case_multiline = 1u < block.size();
                 for (adobe::array_t::const_iterator block_it = block.begin();
@@ -122,7 +149,10 @@ namespace {
             ++it;
 
             const bool use_braces =
-                if_case.empty() && else_case.empty() || if_case_multiline || else_case_multiline;
+                if_case.empty() ||
+                if_case_multiline ||
+                else_case_multiline ||
+                else_if_multiline;
 
             output += "if ( ";
             output += condition;
@@ -153,7 +183,7 @@ namespace {
                     output += '\n';
                 }
                 output += else_case;
-                if (use_braces && !else_if_if_multiline) {
+                if (use_braces && !else_if_multiline) {
                     if (!else_case.empty())
                         output += "\n";
                     output += std::string(indent * 4, ' ');

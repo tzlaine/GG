@@ -88,3 +88,61 @@ f16 () {
         c = 1 + 2;
     }
 }
+
+f17 () {
+    if (0) {
+        c = 1 + 2;
+        return 1;
+    } else if (0) {
+    } else if (0) {
+    } else {
+    }
+}
+
+f18 () {
+    if (0) {
+        c = 1 + 2;
+        return 1;
+    } else if (0) {
+    } else if (0) {
+    } else {
+        if (0) {
+            c = 1 + 2;
+            return 1;
+        } else if (1) {
+            if (0) {
+            }
+            return @none;
+            c = 1 + 2;
+        }
+    }
+}
+
+f19 () {
+    if (0) {
+    } else if (0) {
+    } else if (0) {
+        c = 1 + 2;
+        return 1;
+    } else {
+    }
+}
+
+f20 () {
+    if (0) {
+    } else if (0) {
+    } else if (0) {
+    } else {
+    }
+}
+
+f21 () {
+    if (0)
+        return 0;
+    else if (0)
+        return 0;
+    else if (0)
+        return 0;
+    else
+        return 0;
+}

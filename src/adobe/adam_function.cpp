@@ -81,11 +81,16 @@ adam_function_t::adam_function_t(name_t name,
     m_parameter_names(parameter_names),
     m_statements(statements)
 {
+    std::set<name_t> declared_vars(m_parameter_names.begin(), m_parameter_names.end());
     for (std::size_t i = 0; i < m_statements.size(); ++i) {
         name_t op_name;
-        if (m_statements[i][m_statements[i].size() - 1].cast(op_name) &&
-            op_name == assign_k) {
-            m_variables.insert(m_statements[i][0].cast<name_t>());
+        m_statements[i][m_statements[i].size() - 1].cast(op_name);
+        if (op_name == decl_k || op_name == const_decl_k) {
+            declared_vars.insert(m_statements[i][0].cast<name_t>());
+        } else if (op_name == assign_k) {
+            name_t var = m_statements[i][0].cast<name_t>();
+            if (declared_vars.find(var) == declared_vars.end())
+                m_variables.insert(var);
         }
         for (array_t::const_iterator
                  it = m_statements[i].begin(),
@@ -95,8 +100,11 @@ adam_function_t::adam_function_t(name_t name,
             if (it->type_info() == type_info<name_t>()) {
                 array_t::const_iterator next_it = boost::next(it);
                 name_t name;
-                if (next_it != end_it && next_it->cast(name) && name == variable_k)
-                    m_variables.insert(it->cast<name_t>());
+                if (next_it != end_it && next_it->cast(name) && name == variable_k) {
+                    name_t var = it->cast<name_t>();
+                    if (declared_vars.find(var) == declared_vars.end())
+                        m_variables.insert(var);
+                }
             }
         }
     }

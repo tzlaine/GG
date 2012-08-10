@@ -106,7 +106,7 @@ statement_parser_rules::statement_parser_rules(
                    lit(':')
                 >  expression(_b)
               )
-        >>    lit(';')
+        >     lit(';')
               [
                   push(_r1, _a, _b, adobe::decl_k)
               ]
@@ -133,9 +133,9 @@ statement_parser_rules::statement_parser_rules(
 
     statement
         =     const_declaration(_val)
-        |     declaration(_val)
-        |     assignment(_val)
         |     return_(_val)
+        |     assignment(_val)
+        |     declaration(_val)
         ;
 
 

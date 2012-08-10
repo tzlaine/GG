@@ -77,6 +77,7 @@ lexer::lexer(const adobe::name_t* first_keyword,
         |     define
         |     or_
         |     and_
+        |     '='
         |     '+'
         |     '-'
         |     '!'

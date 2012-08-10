@@ -74,14 +74,10 @@ function_parser_rules::function_parser_rules(
     using qi::_val;
     using qi::lit;
 
-    const boost::spirit::lex::token_def<adobe::name_t>& function_ =
-        tok.keywords.find(function_k)->second;
-
     function
-        =     function_
-        >     tok.identifier [_a = _1]
+        =     tok.identifier [_a = _1]
         >     '('
-        >     ((tok.identifier [push_back(_b, _1)]) % ',')
+        >   - ((tok.identifier [push_back(_b, _1)]) % ',')
         >     ')'
         >     '{'
         >   * statement_parser.statement [push_back(_c, _1)]
@@ -113,8 +109,10 @@ bool GG::ParseFunctions(const std::string& functions,
     token_iterator iter = AdamLexer().begin(it, detail::s_end);
     token_iterator end = AdamLexer().end();
     function_parser_rules rules(AdamLexer(), AdamExpressionParser());
-    return phrase_parse(iter,
-                        end,
-                        *rules.function(boost::phoenix::ref(retval)),
-                        boost::spirit::qi::in_state("WS")[AdamLexer().self]);
+    bool result =
+        phrase_parse(iter,
+                     end,
+                     *rules.function(boost::phoenix::ref(retval)),
+                     boost::spirit::qi::in_state("WS")[AdamLexer().self]);
+    return result && iter == end;
 }

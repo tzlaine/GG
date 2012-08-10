@@ -40,7 +40,7 @@ adam_function::adam_function(name_t name,
                 array_t::const_iterator next_it = boost::next(it);
                 name_t name;
                 if (next_it != end_it && next_it->cast(name) && name == variable_k)
-                    m_global_variables.insert(it->cast<name_t>());
+                    m_variables.insert(it->cast<name_t>());
             }
         }
     }
@@ -55,11 +55,11 @@ any_regular_t adam_function::operator()(
 ) const
 {
     sheet_t local_scope;
-    init_sheet(variable_lookup,
-               array_function_lookup,
-               dictionary_function_lookup,
-               adam_function_lookup,
-               local_scope);
+    common_init(variable_lookup,
+                array_function_lookup,
+                dictionary_function_lookup,
+                adam_function_lookup,
+                local_scope);
     for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
         if (i < parameters.size()) {
             local_scope.add_interface(m_parameter_names[i],
@@ -89,11 +89,11 @@ any_regular_t adam_function::operator()(
 ) const
 {
     sheet_t local_scope;
-    init_sheet(variable_lookup,
-               array_function_lookup,
-               dictionary_function_lookup,
-               adam_function_lookup,
-               local_scope);
+    common_init(variable_lookup,
+                array_function_lookup,
+                dictionary_function_lookup,
+                adam_function_lookup,
+                local_scope);
     for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
         dictionary_t::const_iterator it =
             parameters.find(m_parameter_names[i]);
@@ -116,7 +116,29 @@ any_regular_t adam_function::operator()(
     return common_impl(local_scope);
 }
 
-void adam_function::init_sheet(
+void adam_function::dump(std::ostream& os) const
+{
+    os << m_function_name << " (";
+    for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
+        if (i)
+            os << ", ";
+        os << m_parameter_names[i];
+    }
+    os << ") {\n";
+    for (std::size_t i = 0; i < m_statements.size(); ++i) {
+        os << "    " << m_statements[i] << " ;\n";
+    }
+    os << "}\n"
+       << "variables:";
+    for (std::set<name_t>::const_iterator it = m_variables.begin();
+         it != m_variables.end();
+         ++it) {
+        os << ' ' << *it;
+    }
+    os << '\n';
+}
+
+void adam_function::common_init(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -147,11 +169,13 @@ void adam_function::init_sheet(
                     array_t())
     );
     for (std::set<name_t>::const_iterator
-             it = m_global_variables.begin(),
-             end_it = m_global_variables.end();
+             it = m_variables.begin(), end_it = m_variables.end();
          it != end_it;
          ++it) {
-        local_scope.add_constant(*it, line_position_t(), array_t(1, variable_lookup(*it)));
+        try {
+            any_regular_t value = variable_lookup(*it);
+            local_scope.add_constant(*it, line_position_t(), array_t(1, value));
+        } catch (const std::logic_error&) {}
     }
 }
 

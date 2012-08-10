@@ -29,6 +29,8 @@
 #include <GG/adobe/implementation/token.hpp>
 
 
+using namespace GG;
+
 namespace {
 
     adobe::aggregate_name_t function_k = { "function" };
@@ -40,7 +42,7 @@ namespace {
         { typedef void type; };
 
         void operator()(
-            std::map<adobe::name_t, adobe::adam_function>& arg1,
+            AdamFunctions& arg1,
             adobe::name_t arg2,
             const std::vector<adobe::name_t>& arg3,
             const std::vector<adobe::array_t>& arg4
@@ -51,8 +53,6 @@ namespace {
     const boost::phoenix::function<add_function_> add_function;
 
 }
-
-using namespace GG;
 
 function_parser_rules::function_parser_rules(
     const lexer& tok,
@@ -102,7 +102,7 @@ function_parser_rules::function_parser_rules(
 
 bool GG::ParseFunctions(const std::string& functions,
                         const std::string& filename,
-                        std::map<adobe::name_t, adobe::adam_function>& retval)
+                        AdamFunctions& retval)
 {
     using boost::spirit::qi::phrase_parse;
     text_iterator it(functions.begin());

@@ -182,11 +182,17 @@ void vm_lookup_t::insert_array_function(name_t name, const array_function_t& pro
 
 /**************************************************************************************************/
 
+void vm_lookup_t::add_adam_functions(const adam_function_map_t& map)
+{ adam_map_m = map; }
+
+/**************************************************************************************************/
+
 void vm_lookup_t::attach_to(virtual_machine_t& vm)
 {
     vm.set_dictionary_function_lookup(boost::bind(&vm_lookup_t::dproc, boost::cref(*this), _1, _2));
     vm.set_array_function_lookup(boost::bind(&vm_lookup_t::aproc, boost::cref(*this), _1, _2));
     vm.set_variable_lookup(boost::ref(variable_lookup_m));
+    vm.set_adam_function_lookup(boost::bind(&vm_lookup_t::adamproc, boost::cref(*this), _1));
 }
 
 /**************************************************************************************************/
@@ -198,7 +204,7 @@ any_regular_t vm_lookup_t::dproc(name_t name, const dictionary_t& argument_set) 
     if (found != dmap_m.end())
         return found->second(argument_set);
 
-    throw std::runtime_error(adobe::make_string("DFunction ", name.c_str(), " not found."));
+    throw std::runtime_error(adobe::make_string("Dictionary function ", name.c_str(), " not found."));
 }
 
 /**************************************************************************************************/
@@ -210,7 +216,19 @@ any_regular_t vm_lookup_t::aproc(name_t name, const array_t& argument_set) const
     if (found != amap_m.end())
         return found->second(argument_set);
 
-    throw std::runtime_error(adobe::make_string("AFunction ", name.c_str(), " not found."));
+    throw std::runtime_error(adobe::make_string("Array function ", name.c_str(), " not found."));
+}
+
+/**************************************************************************************************/
+
+const adam_function& vm_lookup_t::adamproc(name_t name) const
+{
+    adam_function_map_t::const_iterator found(adam_map_m.find(name));
+
+    if (found != adam_map_m.end())
+        return found->second;
+
+    throw std::runtime_error(adobe::make_string("Adam function ", name.c_str(), " not found."));
 }
 
 /**************************************************************************************************/
@@ -222,6 +240,11 @@ const vm_lookup_t::dictionary_function_map_t& vm_lookup_t::dictionary_functions(
 
 const vm_lookup_t::array_function_map_t& vm_lookup_t::array_functions() const
 { return amap_m; }
+
+/**************************************************************************************************/
+
+const vm_lookup_t::adam_function_map_t& vm_lookup_t::adam_functions() const
+{ return adam_map_m; }
 
 /**************************************************************************************************/
 

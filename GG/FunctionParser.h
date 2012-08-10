@@ -37,6 +37,10 @@
 
 namespace GG {
 
+/** The map of functions used to evaluate user-defined Adam functions in Adam
+    and Eve expressions.  \see \ref eve_adding_user_functions. */
+typedef adobe::closed_hash_map<adobe::name_t, adobe::adam_function> AdamFunctions;
+
 struct GG_API function_parser_rules
 {
     function_parser_rules(
@@ -46,7 +50,7 @@ struct GG_API function_parser_rules
 
     typedef boost::spirit::qi::rule<
         token_iterator,
-        void(std::map<adobe::name_t, adobe::adam_function>&),
+        void(AdamFunctions&),
         boost::spirit::qi::locals<
             adobe::name_t,
             std::vector<adobe::name_t>,
@@ -63,7 +67,7 @@ struct GG_API function_parser_rules
 
 GG_API bool ParseFunctions(const std::string& functions,
                            const std::string& filename,
-                           std::map<adobe::name_t, adobe::adam_function>&);
+                           AdamFunctions&);
 
 }
 

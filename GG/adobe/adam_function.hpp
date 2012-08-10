@@ -1,3 +1,6 @@
+#ifndef ADOBE_ADAM_FUNCTION_HPP
+#define ADOBE_ADAM_FUNCTION_HPP
+
 #include <GG/adobe/adam.hpp>
 
 #include <set>
@@ -46,3 +49,5 @@ private:
 };
 
 }
+
+#endif

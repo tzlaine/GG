@@ -188,6 +188,7 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
                                                    GG::UTF8ToPath(adam_script),
                                                    df,
                                                    af,
+                                                   vm_lookup.adam_functions(),
                                                    top_level_button_notifier,
                                                    signal_notifier,
                                                    row_factory ? *row_factory : GG::RowFactory());

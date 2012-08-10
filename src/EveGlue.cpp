@@ -200,6 +200,7 @@ namespace {
 
     void AttachFunctions(const GG::DictionaryFunctions& dictionary_functions,
                          const GG::ArrayFunctions& array_functions,
+                         const GG::AdamFunctions& adam_functions,
                          adobe::modal_dialog_t* dialog)
     {
         for (GG::DictionaryFunctions::const_iterator
@@ -244,6 +245,8 @@ namespace {
             key_foldr,
             boost::bind(&foldr, boost::cref(dialog->vm_lookup_m), _1)
         );
+
+        dialog->vm_lookup_m.add_adam_functions(adam_functions);
     }
 
     void SetWndRegionCursor(WndRegion region)
@@ -497,6 +500,7 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                               adam_definition,
                               DictionaryFunctions(),
                               ArrayFunctions(),
+                              AdamFunctions(),
                               button_handler,
                               signal_handler,
                               row_factory);
@@ -506,6 +510,7 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                                          const boost::filesystem::path& adam_definition_,
                                          const DictionaryFunctions& dictionary_functions,
                                          const ArrayFunctions& array_functions,
+                                         const AdamFunctions& adam_functions,
                                          ButtonHandler button_handler,
                                          SignalHandler signal_handler/* = SignalHandler()*/,
                                          RowFactory row_factory/* = RowFactory()*/)
@@ -520,6 +525,7 @@ ModalDialogResult GG::ExecuteModalDialog(const boost::filesystem::path& eve_defi
                               PathToUTF8(adam_definition),
                               dictionary_functions,
                               array_functions,
+                              adam_functions,
                               button_handler,
                               signal_handler,
                               row_factory);
@@ -539,6 +545,7 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                               adam_filename,
                               DictionaryFunctions(),
                               ArrayFunctions(),
+                              AdamFunctions(),
                               button_handler,
                               signal_handler,
                               row_factory);
@@ -550,6 +557,7 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
                                          const std::string& adam_filename,
                                          const DictionaryFunctions& dictionary_functions,
                                          const ArrayFunctions& array_functions,
+                                         const AdamFunctions& adam_functions,
                                          ButtonHandler button_handler,
                                          SignalHandler signal_handler/* = SignalHandler()*/,
                                          RowFactory row_factory/* = RowFactory()*/)
@@ -568,7 +576,7 @@ ModalDialogResult GG::ExecuteModalDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
-    AttachFunctions(dictionary_functions, array_functions, dialog.get());
+    AttachFunctions(dictionary_functions, array_functions, adam_functions, dialog.get());
 
     std::auto_ptr<Wnd> w(dialog->init(eve_definition, eve_filename, adam_definition, adam_filename));
     EveDialog* gg_dialog = boost::polymorphic_downcast<EveDialog*>(w.get());
@@ -595,6 +603,7 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition,
                          adam_definition,
                          DictionaryFunctions(),
                          ArrayFunctions(),
+                         AdamFunctions(),
                          button_handler,
                          signal_handler,
                          row_factory);
@@ -604,6 +613,7 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition_,
                              const boost::filesystem::path& adam_definition_,
                              const DictionaryFunctions& dictionary_functions,
                              const ArrayFunctions& array_functions,
+                             const AdamFunctions& adam_functions,
                              ButtonHandler button_handler,
                              SignalHandler signal_handler/* = SignalHandler()*/,
                              RowFactory row_factory/* = RowFactory()*/)
@@ -618,6 +628,7 @@ EveDialog* GG::MakeEveDialog(const boost::filesystem::path& eve_definition_,
                          PathToUTF8(adam_definition),
                          dictionary_functions,
                          array_functions,
+                         adam_functions,
                          button_handler,
                          signal_handler,
                          row_factory);
@@ -637,6 +648,7 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                          adam_filename,
                          DictionaryFunctions(),
                          ArrayFunctions(),
+                         AdamFunctions(),
                          button_handler,
                          signal_handler,
                          row_factory);
@@ -648,6 +660,7 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
                              const std::string& adam_filename,
                              const DictionaryFunctions& dictionary_functions,
                              const ArrayFunctions& array_functions,
+                             const AdamFunctions& adam_functions,
                              ButtonHandler button_handler,
                              SignalHandler signal_handler/* = SignalHandler()*/,
                              RowFactory row_factory/* = RowFactory()*/)
@@ -666,7 +679,7 @@ EveDialog* GG::MakeEveDialog(std::istream& eve_definition,
     dialog->working_directory_m = boost::filesystem::path();
     dialog->parent_m = 0;
 
-    AttachFunctions(dictionary_functions, array_functions, dialog.get());
+    AttachFunctions(dictionary_functions, array_functions, adam_functions, dialog.get());
 
     Wnd* w = dialog->init(eve_definition, eve_filename, adam_definition, adam_filename);
     retval = boost::polymorphic_downcast<EveDialog*>(w);

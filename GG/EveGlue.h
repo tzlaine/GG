@@ -33,8 +33,8 @@
 
 #include <GG/ListBox.h>
 
-#include <GG/adobe/array.hpp>
-#include <GG/adobe/dictionary.hpp>
+#include <GG/FunctionParser.h>
+#include <GG/adobe/adam_function.hpp>
 #include <GG/adobe/layout_attributes.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
 
@@ -150,6 +150,7 @@ ModalDialogResult ExecuteModalDialog(const boost::filesystem::path& eve_definiti
                                      const boost::filesystem::path& adam_definition,
                                      const DictionaryFunctions& dictionary_functions,
                                      const ArrayFunctions& array_functions,
+                                     const AdamFunctions& adam_functions,
                                      ButtonHandler button_handler,
                                      SignalHandler signal_handler = SignalHandler(),
                                      RowFactory row_factory = RowFactory());
@@ -178,6 +179,7 @@ ModalDialogResult ExecuteModalDialog(std::istream& eve_definition,
                                      const std::string& adam_filename,
                                      const DictionaryFunctions& dictionary_functions,
                                      const ArrayFunctions& array_functions,
+                                     const AdamFunctions& adam_functions,
                                      ButtonHandler button_handler,
                                      SignalHandler signal_handler = SignalHandler(),
                                      RowFactory row_factory = RowFactory());
@@ -200,6 +202,7 @@ EveDialog* MakeEveDialog(const boost::filesystem::path& eve_definition,
                          const boost::filesystem::path& adam_definition,
                          const DictionaryFunctions& dictionary_functions,
                          const ArrayFunctions& array_functions,
+                         const AdamFunctions& adam_functions,
                          ButtonHandler button_handler,
                          SignalHandler signal_handler = SignalHandler(),
                          RowFactory row_factory = RowFactory());
@@ -226,6 +229,7 @@ EveDialog* MakeEveDialog(std::istream& eve_definition,
                          const std::string& adam_filename,
                          const DictionaryFunctions& dictionary_functions,
                          const ArrayFunctions& array_functions,
+                         const AdamFunctions& adam_functions,
                          ButtonHandler button_handler,
                          SignalHandler signal_handler = SignalHandler(),
                          RowFactory row_factory = RowFactory());
@@ -347,6 +351,7 @@ private:
                                                 const std::string& adam_filename,
                                                 const DictionaryFunctions& dictionary_functions,
                                                 const ArrayFunctions& array_functions,
+                                                const AdamFunctions& adam_functions,
                                                 ButtonHandler button_handler,
                                                 SignalHandler signal_handler,
                                                 RowFactory row_factory);
@@ -357,6 +362,7 @@ private:
                                     const std::string& adam_filename,
                                     const DictionaryFunctions& dictionary_functions,
                                     const ArrayFunctions& array_functions,
+                                    const AdamFunctions& adam_functions,
                                     ButtonHandler button_handler,
                                     SignalHandler signal_handler,
                                     RowFactory row_factory);

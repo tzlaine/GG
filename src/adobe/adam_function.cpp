@@ -106,6 +106,9 @@ const std::vector<name_t>& adam_function_t::parameter_names() const
 const std::vector<array_t>& adam_function_t::statements() const
 { return m_statements; }
 
+const std::set<name_t>& adam_function_t::variables() const
+{ return m_variables; }
+
 any_regular_t adam_function_t::operator()(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,

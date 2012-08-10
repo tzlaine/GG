@@ -32,7 +32,15 @@ BOOST_AUTO_TEST_CASE( function_parser )
     for (GG::AdamFunctions::iterator it = functions.begin();
          it != functions.end();
          ++it) {
-        std::cout << GG::WriteFunction(it->second) << '\n' << std::endl;
+        std::cout << GG::WriteFunction(it->second) << '\n'
+                  << "variables:";
+        for (std::set<adobe::name_t>::const_iterator
+                 var_it = it->second.variables().begin();
+             var_it != it->second.variables().end();
+             ++var_it) {
+            std::cout << ' ' << *var_it;
+        }
+        std::cout << '\n' << std::endl;
     }
 
     std::cout << "\n";

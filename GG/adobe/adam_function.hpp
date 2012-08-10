@@ -26,6 +26,7 @@ public:
     name_t name() const;
     const std::vector<name_t>& parameter_names() const;
     const std::vector<array_t>& statements() const;
+    const std::set<name_t>& variables() const;
 
     any_regular_t operator()(const variable_lookup_t& variable_lookup,
                              const array_function_lookup_t& array_function_lookup,

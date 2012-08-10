@@ -815,8 +815,17 @@ void virtual_machine_t::implementation_t::function_operator()
         if ((*array_function_table_g)(function_name, array_func)) {
             value_stack_m.back() = array_func(arguments);
         } else if (array_function_lookup_m) {
-            value_stack_m.back() = array_function_lookup_m(function_name, arguments);
-        } else if (adam_function_lookup_m) {
+            try {
+                value_stack_m.back() =
+                    array_function_lookup_m(function_name, arguments);
+                return;
+            } catch (const std::runtime_error&) {
+                if (!adam_function_lookup_m)
+                    throw;
+            }
+        }
+
+        if (adam_function_lookup_m) {
             const adam_function_t& f = adam_function_lookup_m(function_name);
             value_stack_m.back() = f(variable_lookup_m,
                                      array_function_lookup_m,
@@ -836,8 +845,17 @@ void virtual_machine_t::implementation_t::function_operator()
         if ((*dictionary_function_table_g)(function_name, dictionary_func)) {
             value_stack_m.back() = dictionary_func(arguments);
         } else if (dictionary_function_lookup_m) {
-            value_stack_m.back() = dictionary_function_lookup_m(function_name, arguments);
-        } else if (adam_function_lookup_m) {
+            try {
+                value_stack_m.back() =
+                    dictionary_function_lookup_m(function_name, arguments);
+                return;
+            } catch (const std::runtime_error&) {
+                if (!adam_function_lookup_m)
+                    throw;
+            }
+        }
+
+        if (adam_function_lookup_m) {
             const adam_function_t& f = adam_function_lookup_m(function_name);
             value_stack_m.back() = f(variable_lookup_m,
                                      array_function_lookup_m,

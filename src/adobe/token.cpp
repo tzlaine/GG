@@ -25,7 +25,7 @@ aggregate_name_t trail_comment_k        = { "trail_comment" };
 
 aggregate_name_t semicolon_k            = { "semicolon" };
 aggregate_name_t comma_k                = { "comma" };
-aggregate_name_t assign_k               = { "assign" };
+aggregate_name_t assign_k               = { ".assign" };
 aggregate_name_t question_k             = { "question" };
 aggregate_name_t colon_k                = { "colon" };
 aggregate_name_t open_brace_k           = { "open_brace" };

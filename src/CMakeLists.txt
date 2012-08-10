@@ -23,6 +23,7 @@ set(THIS_LIB_SOURCES
     ExpressionParser.cpp
     ExpressionWriter.cpp
     FunctionParser.cpp
+    FunctionWriter.cpp
     Filesystem.cpp
     Font.cpp
     GroupBox.cpp
@@ -38,6 +39,7 @@ set(THIS_LIB_SOURCES
     ReportParseError.cpp
     Scroll.cpp
     StatementParser.cpp
+    StatementWriter.cpp
     StaticGraphic.cpp
     StyleFactory.cpp
     TabWnd.cpp

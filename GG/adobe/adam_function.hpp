@@ -23,6 +23,10 @@ public:
                     const std::vector<name_t>& parameter_names,
                     const std::vector<array_t>& statements);
 
+    name_t name() const;
+    const std::vector<name_t>& parameter_names() const;
+    const std::vector<array_t>& statements() const;
+
     any_regular_t operator()(const variable_lookup_t& variable_lookup,
                              const array_function_lookup_t& array_function_lookup,
                              const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -33,8 +37,6 @@ public:
                              const dictionary_function_lookup_t& dictionary_function_lookup,
                              const adam_function_lookup_t& adam_function_lookup,
                              const dictionary_t& parameters) const;
-
-    void dump(std::ostream& os) const;
 
 private:
     name_t m_function_name;

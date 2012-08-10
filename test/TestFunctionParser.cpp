@@ -1,5 +1,7 @@
 #include <GG/FunctionParser.h>
 
+#include <GG/FunctionWriter.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -30,7 +32,7 @@ BOOST_AUTO_TEST_CASE( function_parser )
     for (GG::AdamFunctions::iterator it = functions.begin();
          it != functions.end();
          ++it) {
-        it->second.dump(std::cout);
+        std::cout << GG::WriteFunction(it->second) << '\n' << std::endl;
     }
 
     std::cout << "\n";

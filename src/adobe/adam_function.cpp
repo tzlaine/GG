@@ -97,6 +97,15 @@ adam_function_t::adam_function_t(name_t name,
     }
 }
 
+name_t adam_function_t::name() const
+{ return m_function_name; }
+
+const std::vector<name_t>& adam_function_t::parameter_names() const
+{ return m_parameter_names; }
+
+const std::vector<array_t>& adam_function_t::statements() const
+{ return m_statements; }
+
 any_regular_t adam_function_t::operator()(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
@@ -165,28 +174,6 @@ any_regular_t adam_function_t::operator()(
         }
     }
     return common_impl(local_scope);
-}
-
-void adam_function_t::dump(std::ostream& os) const
-{
-    os << m_function_name << " (";
-    for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
-        if (i)
-            os << ", ";
-        os << m_parameter_names[i];
-    }
-    os << ") {\n";
-    for (std::size_t i = 0; i < m_statements.size(); ++i) {
-        os << "    " << m_statements[i] << " ;\n";
-    }
-    os << "}\n"
-       << "variables:";
-    for (std::set<name_t>::const_iterator it = m_variables.begin();
-         it != m_variables.end();
-         ++it) {
-        os << ' ' << *it;
-    }
-    os << '\n';
 }
 
 void adam_function_t::common_init(

@@ -754,6 +754,8 @@ void virtual_machine_t::implementation_t::assign_operator()
 
     pop_back();
     pop_back();
+
+    value_stack_m.push_back(any_regular_t());
 }
 
 /*************************************************************************************************/
@@ -763,13 +765,15 @@ void virtual_machine_t::implementation_t::const_decl_operator()
     stack_type::iterator iter(value_stack_m.end());
 
     name_t var_name((iter - 2)->cast<name_t>());
-    any_regular_t& value(*(iter - 1));
+    any_regular_t value(*(iter - 1));
 
     if (create_const_decl_m)
         create_const_decl_m(var_name, value.cast<array_t>());
 
     pop_back();
     pop_back();
+
+    value_stack_m.push_back(any_regular_t());
 }
 
 /*************************************************************************************************/
@@ -779,13 +783,15 @@ void virtual_machine_t::implementation_t::decl_operator()
     stack_type::iterator iter(value_stack_m.end());
 
     name_t var_name((iter - 2)->cast<name_t>());
-    any_regular_t& value(*(iter - 1));
+    any_regular_t value(*(iter - 1));
 
     if (create_decl_m)
         create_decl_m(var_name, value.cast<array_t>());
 
     pop_back();
     pop_back();
+
+    value_stack_m.push_back(any_regular_t());
 }
 
 /*************************************************************************************************/

@@ -40,30 +40,30 @@ f9 () {
 }
 
 f10 () {
-    if (0) {
+    if (false) {
     }
 }
 
 f11 () {
-    if (0)
+    if (false)
         return 1;
 }
 
 f12 () {
-    if (0) {
+    if (false) {
         return 1;
     }
 }
 
 f13 () {
-    if (0)
+    if (false)
         return 1;
     else
         return @none;
 }
 
 f14 () {
-    if (0) {
+    if (false) {
         c = 1 + 2;
         return 1;
     } else {
@@ -73,44 +73,44 @@ f14 () {
 }
 
 f15 () {
-    if (0)
+    if (false)
         return 1;
-    else if (1)
+    else if (true)
         return @none;
 }
 
 f16 () {
-    if (0) {
+    if (false) {
         c = 1 + 2;
         return 1;
-    } else if (1) {
+    } else if (true) {
         return @none;
         c = 1 + 2;
     }
 }
 
 f17 () {
-    if (0) {
+    if (false) {
         c = 1 + 2;
         return 1;
-    } else if (0) {
-    } else if (0) {
+    } else if (false) {
+    } else if (false) {
     } else {
     }
 }
 
 f18 () {
-    if (0) {
+    if (false) {
         c = 1 + 2;
         return 1;
-    } else if (0) {
-    } else if (0) {
+    } else if (false) {
+    } else if (false) {
     } else {
-        if (0) {
+        if (false) {
             c = 1 + 2;
             return 1;
-        } else if (1) {
-            if (0) {
+        } else if (true) {
+            if (false) {
             }
             return @none;
             c = 1 + 2;
@@ -119,9 +119,9 @@ f18 () {
 }
 
 f19 () {
-    if (0) {
-    } else if (0) {
-    } else if (0) {
+    if (false) {
+    } else if (false) {
+    } else if (false) {
         c = 1 + 2;
         return 1;
     } else {
@@ -129,20 +129,115 @@ f19 () {
 }
 
 f20 () {
-    if (0) {
-    } else if (0) {
-    } else if (0) {
+    if (false) {
+    } else if (false) {
+    } else if (false) {
     } else {
     }
 }
 
 f21 () {
-    if (0)
+    if (false)
         return 0;
-    else if (0)
+    else if (false)
         return 0;
-    else if (0)
+    else if (false)
         return 0;
     else
         return 0;
+}
+
+empty_fn () {
+}
+
+simple_number_fn () {
+    return 1;
+}
+
+decl_fn () {
+    a: @none;
+    return a;
+}
+
+const_decl_fn () {
+    constant b: @none;
+    return b;
+}
+
+const_cell_fn () {
+    return const_cell;
+}
+
+interface_cell_fn () {
+    return interface_cell;
+}
+
+assign_cell_1_fn () {
+    const_cell = {};
+}
+
+assign_cell_2_fn () {
+    interface_cell = {};
+}
+
+shadowed_param_1_fn (const_cell) {
+    return const_cell;
+}
+
+shadowed_param_2_fn (const_cell) {
+    const_cell = [];
+    return const_cell;
+}
+
+shadowed_param_3_fn () {
+    const_cell: [];
+    return const_cell;
+}
+
+assignment_fn () {
+    c: [];
+    c = {};
+    return c;
+    c = 1;
+    return c;
+}
+
+nested_ifs_fn (x, y, z) {
+    if (x) {
+        if (y) {
+            if (z)
+                return 0;
+            else
+                return 1;
+        } else {
+            if (z)
+                return 2;
+            else
+                return 3;
+        }
+    } else {
+        if (y) {
+            if (z)
+                return 4;
+            else
+                return 5;
+        } else {
+            if (z)
+                return 6;
+            else
+                return 7;
+        }
+    }
+}
+
+chained_ifs_fn (x, y, z) {
+    if (x) {
+        return 0;
+    } else if (y) {
+        return 1;
+    } else if (z) {
+        return 2;
+    } else {
+        return 3;
+    }
 }

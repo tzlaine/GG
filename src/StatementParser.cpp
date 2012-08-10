@@ -67,6 +67,7 @@ namespace {
             {
                 adobe::push_back(array, arg2);
                 adobe::push_back(array, arg3);
+                adobe::push_back(array, arg4);
                 adobe::push_back(array, arg5);
             }
     };

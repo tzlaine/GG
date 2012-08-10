@@ -38,3 +38,30 @@ f9 () {
     d: c + 1;
     return d + 1;
 }
+
+f10 () {
+    if (0) {
+    }
+}
+
+f11 () {
+    if (0) {
+        return 1;
+    }
+}
+
+f12 () {
+    if (0) {
+        return 1;
+    } else {
+        return @none;
+    }
+}
+
+f13 () {
+    if (0) {
+        return 1;
+    } else if (1) {
+        return @none;
+    }
+}

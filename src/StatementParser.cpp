@@ -92,6 +92,7 @@ statement_parser_rules::statement_parser_rules(
     using qi::_d;
     using qi::_r1;
     using qi::_val;
+    using qi::eps;
     using qi::lit;
 
     const boost::spirit::lex::token_def<adobe::name_t>& constant =
@@ -159,6 +160,7 @@ statement_parser_rules::statement_parser_rules(
                    else__
                >   if_statements(_d)
               )
+        >     eps
               [
                   push(_val, _b, _c, _d, adobe::stmt_ifelse_k)
               ]

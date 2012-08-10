@@ -16,6 +16,57 @@ namespace {
         adobe::sheet_t& m_sheet;
     };
 
+    adobe::any_regular_t exec_statement(const adobe::array_t& statement,
+                                        adobe::sheet_t& local_scope,
+                                        bool& done);
+
+    adobe::any_regular_t exec_block(adobe::array_t::const_iterator first,
+                                    adobe::array_t::const_iterator last,
+                                    adobe::sheet_t& local_scope,
+                                    bool& done)
+    {
+        for (; first != last; ++first) {
+            bool done_ = false;
+            adobe::any_regular_t value =
+                exec_statement(first->cast<adobe::array_t>(), local_scope, done);
+            if (done_) {
+                done = true;
+                return value;
+            }
+        }
+        return adobe::any_regular_t();
+    }
+
+    adobe::any_regular_t exec_statement(const adobe::array_t& statement,
+                                        adobe::sheet_t& local_scope,
+                                        bool& done)
+    {
+        adobe::name_t op;
+        statement.back().cast(op);
+        if (op == adobe::stmt_ifelse_k) {
+            bool done_ = false;
+            const adobe::array_t& condition_expr =
+               statement[0].cast<adobe::array_t>();
+            const bool condition =
+                local_scope.inspect(condition_expr).cast<bool>();
+            const adobe::array_t& stmt_block =
+                (condition ? statement[1] : statement[2]).cast<adobe::array_t>();
+            adobe::any_regular_t value =
+                exec_block(stmt_block.begin(), stmt_block.end(), local_scope, done_);
+            if (done_) {
+                done = true;
+                return value;
+            }
+        } else {
+            adobe::any_regular_t value = local_scope.inspect(statement);
+            if (op == adobe::return_k) {
+                done = true;
+                return value;
+            }
+        }
+        return adobe::any_regular_t();
+    }
+
 }
 
 namespace adobe {
@@ -186,9 +237,9 @@ any_regular_t adam_function::common_impl(sheet_t& local_scope) const
              end_it = m_statements.end();
          it != end_it;
          ++it) {
-        any_regular_t value = local_scope.inspect(*it);
-        name_t last_op_name;
-        if (it->back().cast(last_op_name) && last_op_name == return_k)
+        bool done = false;
+        any_regular_t value = exec_statement(*it, local_scope, done);
+        if (done)
             return value;
     }
     return any_regular_t();

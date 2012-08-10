@@ -77,6 +77,7 @@ aggregate_name_t const_decl_k           = { ".const_decl" };
 aggregate_name_t decl_k                 = { ".decl" };
 aggregate_name_t lvalue_k               = { ".lvalue" };
 aggregate_name_t return_k               = { ".return" };
+aggregate_name_t stmt_ifelse_k          = { ".stmt_ifelse"};
 
 /*************************************************************************************************/
 

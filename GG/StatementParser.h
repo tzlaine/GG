@@ -46,9 +46,19 @@ struct GG_API statement_parser_rules
     typedef boost::spirit::qi::rule<
         token_iterator,
         adobe::array_t(),
-        boost::spirit::qi::locals<adobe::name_t, adobe::array_t>,
+        boost::spirit::qi::locals<
+            adobe::name_t,
+            adobe::array_t,
+            adobe::array_t,
+            adobe::array_t
+        >,
         skipper_type
     > statement_rule;
+    typedef boost::spirit::qi::rule<
+        token_iterator,
+        void(adobe::array_t&),
+        skipper_type
+    > statements_rule;
 
     // statement grammar
     statement_rule statement;
@@ -56,6 +66,9 @@ struct GG_API statement_parser_rules
     statement_rule const_declaration;
     statement_rule declaration;
     statement_rule assignment;
+    statements_rule block;
+    statements_rule if_statements;
+    statement_rule if_;
     statement_rule return_;
 };
 

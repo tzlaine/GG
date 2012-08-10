@@ -87,6 +87,7 @@ extern aggregate_name_t const_decl_k;
 extern aggregate_name_t decl_k;
 extern aggregate_name_t lvalue_k;
 extern aggregate_name_t return_k;
+extern aggregate_name_t stmt_ifelse_k;
 
 /*************************************************************************************************/
 

@@ -95,17 +95,17 @@ public:
     typedef boost::function<any_regular_t (const dictionary_t&)> dictionary_function_t;
     typedef boost::function<any_regular_t (const array_t&)>      array_function_t;
     typedef boost::function<any_regular_t (name_t)>              variable_function_t;
-    typedef boost::function<const adam_function& (name_t)>       adam_function_lookup_t;
+    typedef boost::function<const adam_function_t& (name_t)>     adam_function_lookup_t;
 
     typedef closed_hash_map<name_t, dictionary_function_t> dictionary_function_map_t;
     typedef closed_hash_map<name_t, array_function_t>      array_function_map_t;
-    typedef closed_hash_map<name_t, adam_function>         adam_function_map_t;
+    typedef closed_hash_map<name_t, adam_function_t>       adam_function_map_t;
 
     vm_lookup_t();
 
     any_regular_t dproc(name_t name, const dictionary_t& argument_set) const;
     any_regular_t aproc(name_t name, const array_t& argument_set) const;
-    const adam_function& adamproc(name_t name) const;
+    const adam_function_t& adamproc(name_t name) const;
 
     const dictionary_function_map_t& dictionary_functions() const;
     const array_function_map_t& array_functions() const;

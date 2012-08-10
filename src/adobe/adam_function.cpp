@@ -71,12 +71,12 @@ namespace {
 
 namespace adobe {
 
-adam_function::adam_function()
+adam_function_t::adam_function_t()
 {}
 
-adam_function::adam_function(name_t name,
-                             const std::vector<name_t>& parameter_names,
-                             const std::vector<array_t>& statements) :
+adam_function_t::adam_function_t(name_t name,
+                                 const std::vector<name_t>& parameter_names,
+                                 const std::vector<array_t>& statements) :
     m_function_name(name),
     m_parameter_names(parameter_names),
     m_statements(statements)
@@ -97,7 +97,7 @@ adam_function::adam_function(name_t name,
     }
 }
 
-any_regular_t adam_function::operator()(
+any_regular_t adam_function_t::operator()(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -131,7 +131,7 @@ any_regular_t adam_function::operator()(
     return common_impl(local_scope);
 }
 
-any_regular_t adam_function::operator()(
+any_regular_t adam_function_t::operator()(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -167,7 +167,7 @@ any_regular_t adam_function::operator()(
     return common_impl(local_scope);
 }
 
-void adam_function::dump(std::ostream& os) const
+void adam_function_t::dump(std::ostream& os) const
 {
     os << m_function_name << " (";
     for (std::size_t i = 0; i < m_parameter_names.size(); ++i) {
@@ -189,7 +189,7 @@ void adam_function::dump(std::ostream& os) const
     os << '\n';
 }
 
-void adam_function::common_init(
+void adam_function_t::common_init(
     const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
@@ -230,7 +230,7 @@ void adam_function::common_init(
     }
 }
 
-any_regular_t adam_function::common_impl(sheet_t& local_scope) const
+any_regular_t adam_function_t::common_impl(sheet_t& local_scope) const
 {
     for (std::vector<array_t>::const_iterator
              it = m_statements.begin(),

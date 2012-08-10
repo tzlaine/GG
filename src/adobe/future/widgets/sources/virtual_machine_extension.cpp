@@ -221,7 +221,7 @@ any_regular_t vm_lookup_t::aproc(name_t name, const array_t& argument_set) const
 
 /**************************************************************************************************/
 
-const adam_function& vm_lookup_t::adamproc(name_t name) const
+const adam_function_t& vm_lookup_t::adamproc(name_t name) const
 {
     adam_function_map_t::const_iterator found(adam_map_m.find(name));
 

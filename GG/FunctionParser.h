@@ -39,7 +39,7 @@ namespace GG {
 
 /** The map of functions used to evaluate user-defined Adam functions in Adam
     and Eve expressions.  \see \ref eve_adding_user_functions. */
-typedef adobe::closed_hash_map<adobe::name_t, adobe::adam_function> AdamFunctions;
+typedef adobe::closed_hash_map<adobe::name_t, adobe::adam_function_t> AdamFunctions;
 
 struct GG_API function_parser_rules
 {

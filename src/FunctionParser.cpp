@@ -47,7 +47,7 @@ namespace {
             const std::vector<adobe::name_t>& arg3,
             const std::vector<adobe::array_t>& arg4
         ) const
-            { arg1[arg2] = adobe::adam_function(arg2, arg3, arg4); }
+            { arg1[arg2] = adobe::adam_function_t(arg2, arg3, arg4); }
     };
 
     const boost::phoenix::function<add_function_> add_function;

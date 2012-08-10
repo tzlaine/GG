@@ -32,7 +32,7 @@ namespace adobe {
 
 /*************************************************************************************************/
 
-class adam_function;
+class adam_function_t;
 
 /*************************************************************************************************/
 
@@ -45,7 +45,7 @@ class virtual_machine_t
     typedef any_regular_t*(lvalue_lookup_signature_t)(name_t);
     typedef any_regular_t(dictionary_function_lookup_signature_t)(name_t, const dictionary_t&);
     typedef any_regular_t(array_function_lookup_signature_t)(name_t, const array_t&);
-    typedef const adam_function&(adam_function_lookup_signature_t)(name_t);
+    typedef const adam_function_t&(adam_function_lookup_signature_t)(name_t);
     typedef void(create_const_decl_signature_t)(name_t, const array_t&);
     typedef void(create_decl_signature_t)(name_t, const array_t&);
 

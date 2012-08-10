@@ -78,7 +78,6 @@ statement_parser_rules::statement_parser_rules(
     using qi::_4;
     using qi::_a;
     using qi::_b;
-    using qi::_r1;
     using qi::_val;
     using qi::lit;
 
@@ -96,7 +95,7 @@ statement_parser_rules::statement_parser_rules(
               )
         >     lit(';')
               [
-                  push(_r1, _a, _b, adobe::const_decl_k)
+                  push(_val, _a, _b, adobe::const_decl_k)
               ]
         ;
 
@@ -108,34 +107,34 @@ statement_parser_rules::statement_parser_rules(
               )
         >     lit(';')
               [
-                  push(_r1, _a, _b, adobe::decl_k)
+                  push(_val, _a, _b, adobe::decl_k)
               ]
         ;
 
     assignment
         =     tok.identifier [_a = _1]
-        >>    lit('=') [push(_r1, _a, adobe::lvalue_k)]
-        >     expression(_r1)
+        >>    lit('=') [push(_val, _a, adobe::lvalue_k)]
+        >     expression(_val)
         >     lit(';')
               [
-                  push(_r1, adobe::assign_k)
+                  push(_val, adobe::assign_k)
               ]
         ;
 
     return_
         =     return__
-        >     expression(_r1)
+        >     expression(_val)
         >     lit(';')
               [
-                  push(_r1, adobe::return_k)
+                  push(_val, adobe::return_k)
               ]
         ;
 
     statement
-        =     const_declaration(_val)
-        |     return_(_val)
-        |     assignment(_val)
-        |     declaration(_val)
+        %=    const_declaration
+        |     return_
+        |     assignment
+        |     declaration
         ;
 
 

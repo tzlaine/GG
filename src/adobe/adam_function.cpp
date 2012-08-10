@@ -82,6 +82,11 @@ adam_function_t::adam_function_t(name_t name,
     m_statements(statements)
 {
     for (std::size_t i = 0; i < m_statements.size(); ++i) {
+        name_t op_name;
+        if (m_statements[i][m_statements[i].size() - 1].cast(op_name) &&
+            op_name == assign_k) {
+            m_variables.insert(m_statements[i][0].cast<name_t>());
+        }
         for (array_t::const_iterator
                  it = m_statements[i].begin(),
                  end_it = m_statements[i].end();

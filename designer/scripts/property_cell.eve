@@ -1,0 +1,67 @@
+layout property_cell
+{
+    view dialog()
+    {
+        overlay()
+        {
+            panel(bind: @cell_type, value: @input)
+            {
+                edit_text(name: "Name:", bind: @cell_name);
+                edit_text(name: "Initial Value:", bind: @initial_cell_value); // optional
+            }
+            panel(bind: @cell_type, value: @constant)
+            {
+                edit_text(name: "Name:", bind: @cell_name);
+                edit_text(name: "Initial Value:", bind: @initial_cell_value);
+            }
+            panel(bind: @cell_type, value: @logic)
+            {
+                edit_text(name: "Name:", bind: @cell_name);
+                checkbox(name: "Relate", bind: @logic_cell_relate);
+                overlay()
+                {
+                    panel(bind: @logic_cell_relate, value: true)
+                    {
+                        edit_text(name: "Condition:", bind: @relate_cell_condition);
+                        control_button(name: "Add relate clause",
+                                       bind: @logic_cell_relate_clauses,
+                                       value: "append(logic_cell_relate_clauses, {name: @edit, value: "edit"})");
+                        listbox(name: "Relate clauses:",
+                                characters: 30,
+                                rows: 5,
+                                hilite_color: color(b:255),
+                                items: @logic_cell_relate_clauses);
+                    }
+                    panel(bind: @logic_cell_relate, value: false)
+                    {
+                        edit_text(name: "Expression:", bind: @cell_define_expression);
+                    }
+                }
+            }
+            panel(bind: @cell_type, value: @invariant)
+            {
+                edit_text(name: "Name:", bind: @cell_name);
+                edit_text(name: "Expression:", bind: @cell_define_expression);
+            }
+            panel(bind: @cell_type, value: @interface)
+            {
+                edit_text(name: "Name:", bind: @cell_name);
+                checkbox(name: "Unlink:", bind: @interface_cell_unlink);
+                edit_text(name: "Initial Value:", bind: @initial_cell_value);
+                edit_text(name: "Expression:", bind: @cell_define_expression);
+            }
+            panel(bind: @cell_type, value: @output)
+            {
+                label(name: "Name: result");
+                control_button(name: "Add output element",
+                               bind: @output_cell_elements,
+                               value: "append(output_cell_elements, {name: @edit, value: "edit"})");
+                listbox(name: "Output elements:",
+                        characters: 30,
+                        rows: 5,
+                        hilite_color: color(b:255),
+                        items: @output_cell_elements);
+            }
+        }
+    }
+}

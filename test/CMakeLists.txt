@@ -90,6 +90,7 @@ make_test_exec(StrongSizeTypedef)
 make_test_exec(Lexer)
 make_test_exec(ExpressionParser)
 make_test_exec(ExpressionWriter)
+make_test_exec(AdamFunctions)
 make_test_exec(AdamParser)
 make_test_exec(AdamWriter)
 make_test_exec(EveParser)
@@ -137,6 +138,10 @@ file(GLOB function_parser_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} functi
 
 foreach (test_file ${function_parser_test_files})
     add_test_and_data_files(FunctionParser ${test_file})
+endforeach ()
+
+foreach (test_file ${function_parser_test_files})
+    add_test_and_data_files(AdamFunctions ${test_file})
 endforeach ()
 
 file(GLOB pngs *.png)

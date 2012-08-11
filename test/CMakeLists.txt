@@ -113,7 +113,6 @@ add_test_and_data_files(Functions gg_eve_files/function_test_dialog.eve)
 
 file(GLOB adam_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} asl_1.0.43_adam_files/*.adm)
 
-if (0)
 foreach (test_file ${adam_test_files})
     add_test_and_data_files(AdamParser ${test_file})
 endforeach ()
@@ -133,7 +132,6 @@ foreach (test_file ${eve_test_files})
     string(REPLACE .eve .adm adam_test_file ${tmp})
     add_test_and_data_files(EveWriter ${test_file} ${adam_test_file})
 endforeach ()
-endif ()
 
 file(GLOB function_parser_test_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} function_parser_test*.fn)
 

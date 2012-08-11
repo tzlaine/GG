@@ -809,7 +809,6 @@ void virtual_machine_t::implementation_t::function_operator()
     adobe::name_t   function_name(back().cast<adobe::name_t>());
     pop_back();
 
-    bool need_rety = false;
     if (back().type_info() == type_info<adobe::array_t>())
     {
         // handle unnamed parameter functions
@@ -820,6 +819,7 @@ void virtual_machine_t::implementation_t::function_operator()
         
         if ((*array_function_table_g)(function_name, array_func)) {
             value_stack_m.back() = array_func(arguments);
+            return;
         } else if (array_function_lookup_m) {
             try {
                 value_stack_m.back() =
@@ -850,6 +850,7 @@ void virtual_machine_t::implementation_t::function_operator()
 
         if ((*dictionary_function_table_g)(function_name, dictionary_func)) {
             value_stack_m.back() = dictionary_func(arguments);
+            return;
         } else if (dictionary_function_lookup_m) {
             try {
                 value_stack_m.back() =

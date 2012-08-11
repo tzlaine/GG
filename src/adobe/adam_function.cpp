@@ -28,7 +28,7 @@ namespace {
         for (; first != last; ++first) {
             bool done_ = false;
             adobe::any_regular_t value =
-                exec_statement(first->cast<adobe::array_t>(), local_scope, done);
+                exec_statement(first->cast<adobe::array_t>(), local_scope, done_);
             if (done_) {
                 done = true;
                 return value;

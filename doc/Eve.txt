@@ -883,7 +883,7 @@ else:
     \param vertical The vertical placement of the image within \a height ( \c align_top, \c align_center, or \c align_bottom ).
     \param fit_graphic Whether to scale the image to fit \a width and \a height.
     \param shrink_to_fit Whether to scale the image, but only if the image is too large to fit \a width and \a height.
-    \param proportional Whether scaling should be done proportionally (maintaining ascpect ratio).
+    \param proportional Whether scaling should be done proportionally (maintaining aspect ratio).
 */
 
 /** \page eve_label label()

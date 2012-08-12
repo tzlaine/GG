@@ -249,7 +249,7 @@ adobe::any_regular_t array_color_function(const adobe::array_t& parameters)
         b = parameters[2].cast<unsigned int>();
     GG::Clr color(r, g, b, 255);
     if (4u <= parameters.size())
-        color.a = parameters[4].cast<unsigned int>();
+        color.a = parameters[3].cast<unsigned int>();
     return adobe::any_regular_t(color);
 }
 

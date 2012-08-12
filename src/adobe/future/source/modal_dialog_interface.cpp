@@ -166,7 +166,7 @@ platform_display_type modal_dialog_t::init(std::istream& layout,
 
         view_m.reset(
             make_view(
-                sheet_source,
+                layout_source,
                 getline_proc,
                 layout,
                 sheet_m,

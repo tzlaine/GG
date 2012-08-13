@@ -1,0 +1,55 @@
+sheet widget
+{
+interface:
+    show_colors: false;
+
+    horizontal_alignments: [
+        {key: "align_left", value: @align_left},
+        {key: "align_right", value: @align_right},
+        {key: "align_center", value: @align_center},
+        {key: "align_proportional", value: @align_proportional},
+        {key: "align_fill", value:@ align_fill}
+    ];
+
+    vertical_alignments: [
+        {key: "align_top", value: @align_top},
+        {key: "align_bottom", value: @align_bottom},
+        {key: "align_center", value: @align_center},
+        {key: "align_proportional", value: @align_proportional},
+        {key: "align_fill", value: @align_fill}
+    ];
+
+    placements: [
+        {key: "place_row", value: @place_row},
+        {key: "place_column", value: @place_column},
+        {key: "place_overlay", value: @place_overlay}
+    ];
+
+    placement: @place_row;
+    child_horizontal: @align_left;
+    child_vertical: @align_top;
+    spacing: "[0, 20]";
+    name: "";
+    grow: false;
+    move: true;
+    on_top: false;
+    modal: true;
+    color: color(127, 127, 127);
+    text_color: color(0, 0, 0);
+
+output:
+    result <== {
+        placement: placement,
+        child_horizontal: child_horizontal,
+        child_vertical: child_vertical,
+        spacing: spacing,
+        margin: "[10, 10, 10, 10]",
+        name: name,
+        grow: grow,
+        move: move,
+        on_top: on_top,
+        modal: modal,
+        color: color,
+        text_color: text_color
+    };
+}

@@ -57,6 +57,7 @@ namespace adobe {
         GG::Control* control_m;
         unsigned int width_m;
         unsigned int height_m;
+        GG::Pt original_size_m;
         label_t name_m;
         std::string alt_text_m;
         bool using_label_m;

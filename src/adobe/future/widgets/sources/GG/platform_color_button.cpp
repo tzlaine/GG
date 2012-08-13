@@ -148,13 +148,16 @@ namespace adobe {
     void color_button_t::measure(extents_t& result)
     {
         assert(control_m);
-        result.width() = Value(control_m->Width());
-        result.height() = Value(control_m->Height());
+        result.width() = Value(original_size_m.x);
+        result.height() = Value(original_size_m.y);
+
+        boost::shared_ptr<GG::Font> font = implementation::DefaultFont();
+
+        GG::Y baseline_offset = (control_m->Height() - font->Height()) / 2;
+        result.vertical().guide_set_m.push_back(Value(baseline_offset));
 
         if (!using_label_m)
             return;
-
-        boost::shared_ptr<GG::Font> font = implementation::DefaultFont();
 
         extents_t label_bounds(measure_text(name_m.name_m, font));
         label_bounds.vertical().guide_set_m.push_back(0);
@@ -207,6 +210,7 @@ namespace adobe {
                                               element.dialog_color_m,
                                               element.dialog_border_color_m,
                                               element.dialog_text_color_m);
+        element.original_size_m = GG::Pt(button->Width(), button->Height());
 
         element.control_m = button;
 

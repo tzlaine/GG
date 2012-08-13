@@ -74,8 +74,7 @@ void checkbox_t::measure(extents_t& result)
     result.height() = Value(min_usable_size.y);
 
     result.vertical().guide_set_m.push_back(
-        Value((min_usable_size.y - implementation::DefaultFont()->Lineskip()) / 2 +
-              implementation::DefaultFont()->Ascent())
+        Value((min_usable_size.y - implementation::DefaultFont()->Lineskip()) / 2)
     );
 }
 

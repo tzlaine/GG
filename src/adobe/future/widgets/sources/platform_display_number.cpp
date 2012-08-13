@@ -147,7 +147,7 @@ void display_number_t::measure_vertical(extents_t& calculated_horizontal, const 
 
     extents_t::slice_t& vert = calculated_horizontal.vertical();
     vert.length_m = Value(implementation::DefaultFont()->Lineskip());
-    vert.guide_set_m.push_back(Value(implementation::DefaultFont()->Ascent()));
+    vert.guide_set_m.push_back(0);
 }
 
 /****************************************************************************************************/

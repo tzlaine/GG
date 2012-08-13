@@ -330,13 +330,13 @@ main( int argc, char* argv[] )
         g_test_signals = true;
         ++i;
     }
-    g_generate_variants = !g_test_signals;
     for (; i < argc; ++i) {
         const Actions& actions = ParseActions(argv[i]);
         if (actions.empty())
             break;
         g_inputs.push_back(actions);
     }
+    g_generate_variants = !g_test_signals && 4 < i;
     if (!g_inputs.empty())
         g_inputs.push_back(Actions(1, Action(0, 0, Action::LeftClick)));
     if (i < argc)

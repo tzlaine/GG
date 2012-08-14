@@ -1,0 +1,75 @@
+sheet edit_number_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "";
+    name: "";
+    alt: "";
+    bind: "";
+    bind_controller: "";
+    bind_view: "";
+    bind_units: "";
+    digits: 0;
+    max_digits: 0;
+    units: "";
+    signal_id: "";
+    bind_edited_signal: "";
+    bind_focus_update_signal: "";
+    bind_unit_changed_signal: "";
+    color: color(127, 127, 127);
+    text_color: color(0, 0, 0);
+    interior_color: color(0, 0, 0, 0);
+    label_color: color(0, 0, 0);
+    popup_color: color(127, 127, 127);
+    popup_item_text_color: color(0, 0, 0);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        name: name,
+        alt: alt,
+        bind: bind,
+        bind_controller: bind_controller,
+        bind_view: bind_view,
+        bind_units: bind_units,
+        digits: digits,
+        max_digits: max_digits,
+        units: units,
+        signal_id: signal_id,
+        bind_edited_signal: bind_edited_signal,
+        bind_focus_update_signal: bind_focus_update_signal,
+        bind_unit_changed_signal: bind_unit_changed_signal,
+        color: color,
+        text_color: text_color,
+        interior_color: interior_color,
+        label_color: label_color,
+        popup_color: popup_color,
+        popup_item_text_color: popup_item_text_color
+    };
+}

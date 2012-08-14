@@ -132,7 +132,7 @@ const std::string& StyleFactory::DefaultFontName() const
 const boost::shared_ptr<BrowseInfoWnd>& StyleFactory::DefaultBrowseInfoWnd() const
 {
     if (!m_browse_info_wnd)
-        m_browse_info_wnd.reset(new TextBoxBrowseInfoWnd(X1, DefaultFont(), CLR_GRAY, CLR_BLACK, CLR_BLACK));
+        m_browse_info_wnd.reset(new TextBoxBrowseInfoWnd(X(200), DefaultFont(), CLR_GRAY, CLR_BLACK, CLR_BLACK));
     return m_browse_info_wnd;
 }
 

@@ -1,0 +1,75 @@
+sheet slider_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    line_styles: [
+        {name: "flat", value: @flat},
+        {name: "raised", value: @raised},
+        {name: "grooved", value: @grooved}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "";
+    alt: "";
+    bind: "";
+    bind_controller: "";
+    bind_view: "";
+    orientation: @horizontal;
+    format_first: 0;
+    format_second: 0;
+    format_intervals: 0;
+    length: 0;
+    line_width: 5;
+    tab_width: 6;
+    tab_length: 18;
+    line_style: @grooved;
+    signal_id: "";
+    bind_slid_signal: "";
+    bind_slid_and_stopped_signal: "";
+    color: color(127, 127, 127);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        alt: alt,
+        bind: bind,
+        bind_controller: bind_controller,
+        bind_view: bind_view,
+        orientation: orientation,
+        format: {first: format_first, last: format_second, interval_count: format_intervals},
+        length: length,
+        line_width: line_width,
+        tab_width: tab_width,
+        tab_length: tab_length,
+        line_style: line_style,
+        signal_id: signal_id,
+        bind_slid_signal: bind_slid_signal,
+        bind_slid_and_stopped_signal: bind_slid_and_stopped_signal,
+        color: color
+    };
+}

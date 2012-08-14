@@ -2,130 +2,24 @@ layout widget
 {
     view dialog(placement: place_column)
     {
-        popup(name: "View type:", bind: @view_type, items: [
-            {name: "dialog", value: @dialog},
-            {name: "group", value: @group},
-            {name: "optional", value: @optional},
-            {name: "panel", value: @panel},
-            {name: "tab_group", value: @tab_group},
-            {name: "button", value: @button},
-            {name: "checkbox", value: @checkbox},
-            {name: "control_button", value: @control_button},
-            {name: "image", value: @image},
-            {name: "label", value: @label},
-            {name: "progress_bar", value: @progress_bar},
-            {name: "radio_button", value: @radio_button},
-            {name: "reveal", value: @reveal},
-            {name: "slider", value: @slider},
-            {name: "display_text", value: @display_text},
-            {name: "display_number", value: @display_number},
-            {name: "edit_number", value: @edit_number},
-            {name: "edit_text", value: @edit_text},
-            {name: "popup", value: @popup},
-            {name: "listbox", value: @listbox}
-        ]);
-
-        popup(name: "placement", bind: @widget_placement, items: @placements, alt: 'The placement of views within this container.');
-        popup(name: "child_horizontal", bind: @widget_child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
-        popup(name: "child_vertical", bind: @widget_child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
-        edit_text(name: "spacing", bind: @widget_spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
-
-        popup(name: "horizontal", bind: @widget_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
-        popup(name: "vertical", bind: @widget_vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
-        edit_number(name: "indent", bind: @widget_indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
-        edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
-
-        panel(bind: @view_type, value: @tab_group)
+        reveal(name: "Container Layout Parameters", bind: @show_container_layout);
+        optional(bind: @show_container_layout)
         {
-            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-            edit_text(name: "items", rows: 10, bind: @widget_items, alt: 'A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.');
-            popup(name: "style", bind: @widget_style, items: [@attached, @detached], alt: 'The style in which to render the tab_group.  The style must be one of attached or detached.');
-            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-            edit_text(name: "bind_tab_changed_signal", bind: @widget_bind_tab_changed_signal, alt: 'Binds GG::TabBar::TabChangedSignal.  The value emitted is the value emitted by the tab_group.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the tab_group.');
-                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the tab_group's labels.');
-            }
+            popup(name: "placement", bind: @widget_placement, items: @placements, alt: 'The placement of views within this container.');
+            popup(name: "child_horizontal", bind: @widget_child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
+            popup(name: "child_vertical", bind: @widget_child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
+            edit_text(name: "spacing", bind: @widget_spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
         }
-        panel(bind: @view_type, value: @button)
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
         {
-            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the button.');
-            popup(name: "Button use:",
-                  items: [
-                      {name: "Ok button", value: @button_use_ok},
-                      {name: "Cancel button", value: @button_use_cancel},
-                      {name: "Reset button", value: @button_use_reset},
-                      {name: "Set Adam cell", value: @button_use_set_cell},
-                      {name: "Launch dialog", value: @button_use_dialog},
-                      {name: "Emit action and value", value: @button_use_action}
-                  ],
-                  bind: @button_use);
-            overlay()
-            {
-                panel(bind: @button_use, value: @button_use_set_cell)
-                {
-                    edit_text(name: "bind_output", bind: @widget_bind_output, alt: 'The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned value.  When bind_output is specified, the button handler is not notified of this button's presses, and so action is ignored.');
-                }
-                panel(bind: @button_use, value: @button_use_dialog)
-                {
-                   popup(name: "Dialog type:",
-                         items: [
-                             {name: "Dependent", value: @dialog_type_dependent},
-                             {name: "Independent", value: @dialog_type_independent},
-                             {name: "Standard dialogs", value: @dialog_type_standard}
-                         ],
-                         bind: @dialog_type);
-                   overlay()
-                   {
-                       panel(bind: @dialog_type, value: @dialog_type_dependent)
-                       {
-                           edit_text(name: "eve_script", bind: @widget_value);
-                       }
-                       panel(bind: @dialog_type, value: @dialog_type_independent)
-                       {
-                           edit_text(name: "adam_script", bind: @widget_value_adam_script);
-                           edit_text(name: "eve_script", bind: @widget_value_eve_script);
-                           edit_text(name: "bind_result", bind: @widget_value_bind_result);
-                       }
-                       panel(bind: @dialog_type, value: @dialog_type_standard)
-                       {
-                           popup(name: "Dialog:",
-                                 items: [
-                                     {name: "Color Dialog", value: @color_dialog},
-                                     {name: "File Dialog", value: @file_dialog},
-                                     {name: "Three-Button Dialog", value: @three_button_dialog}
-                                 ],
-                                 bind: @dialog_type);
-                           edit(name: "dialog_parameters", bind: @widget_value_dialog_parameters, rows: 10);
-                           edit_text(name: "bind_result", bind: @widget_value_bind_result);
-                       }
-                   }
-                }
-                panel(bind: @button_use, value: @button_use_action)
-                {
-                    checkbox(name: "Emit contributing:", bind: @widget_emit_contributing);
-                    edit_text(name: "action", bind: @widget_action, alt: 'The action associated with this button.  The button handler (if available) will be called with action as its first argument.');
-                    edit_text(name: "value", bind: @widget_value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
-                }
-            }
-            checkbox(name: "default", bind: @widget_default, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.');
-            checkbox(name: "cancel", bind: @widget_cancel, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.');
-            edit_text(name: "unpressed", bind: @widget_image_unpressed, alt: 'The unpressed graphic to use to render the button.');
-            edit_text(name: "rollover", bind: @widget_image_rollover, alt: 'The rollover graphic to use to render the button.');
-            edit_text(name: "pressed", bind: @widget_image_pressed, alt: 'The pressed graphic to use to render the button.');
-            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-            edit_text(name: "bind_clicked_signal", bind: @widget_bind_clicked_signal, alt: 'Binds GG::Button::ClickedSignal.  The value emitted is value.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the button.');
-                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the button label.');
-            }
+            popup(name: "horizontal", bind: @widget_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @widget_vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @widget_indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
+
         panel(bind: @view_type, value: @checkbox)
         {
             edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the checkbox.');

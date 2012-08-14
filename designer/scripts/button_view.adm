@@ -1,0 +1,98 @@
+sheet button_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+    button_use: @button_use_ok;
+    dialog_type: @dialog_type_dependent;
+    dialog_name: @three_button_dialog;
+    value_adam_script: "";
+    value_eve_script: "";
+    value_bind_result: "";
+    value_dialog_parameters: "";
+    dependent_dialog_script: "";
+    action_value: "";
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "Default";
+    name: "";
+    alt: "";
+    bind: "";
+    bind_output: "";
+    action: "";
+    value: "";
+    default: false;
+    cancel: false;
+    unpressed: "";
+    rollover: "";
+    pressed: "";
+    signal_id: "";
+    bind_clicked_signal: "";
+    color: color(127, 127, 127);
+    text_color: color(0, 0, 0);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        name: name,
+        alt: alt,
+        action: button_use == @button_use_ok ?
+            @ok :
+            (button_use == @button_use_cancel ?
+                 @cancel :
+                 (button_use == @button_use_reset ?
+                      @reset :
+                      action
+                 )
+            ),
+        value: button_use == @button_use_action ?
+            "" :
+            (button_use == @button_use_action ?
+                 action_value :
+                 ((button_use == @button_use_dialog && dialog_type == @dialog_type_dependent) ?
+                      dependent_dialog_script :
+                      ((button_use == @button_use_dialog && dialog_type == @dialog_type_independent) ?
+                           {adam_script: value_adam_script, eve_script: value_eve_script, bind_result: value_bind_result} :
+                           ((button_use == @button_use_dialog && dialog_type == @dialog_type_standard) ?
+                                {name: dialog_name, dialog_parameters: value_dialog_parameters, bind_result: value_bind_result} :
+                                ""
+                           )
+                      )
+                 )
+            ),
+        bind: button_use == @button_use_action ? bind : empty,
+        bind_output: button_use == @button_use_set_cell ? bind_output : empty,
+        default: default,
+        cancel: cancel,
+        unpressed: unpressed,
+        rollover: rollover,
+        pressed: pressed,
+        signal_id: signal_id,
+        bind_clicked_signal: bind_clicked_signal,
+        color: color,
+        text_color: text_color
+    };
+}

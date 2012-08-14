@@ -1,0 +1,89 @@
+layout button_view
+{
+    view dialog(placement: place_column)
+    {
+        edit_text(name: "name", bind: @name, alt: 'The text that appears on the button.');
+        edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the button.');
+        popup(name: "Button use:",
+              items: [
+                  {name: "Ok button", value: @button_use_ok},
+                  {name: "Cancel button", value: @button_use_cancel},
+                  {name: "Reset button", value: @button_use_reset},
+                  {name: "Set Adam cell", value: @button_use_set_cell},
+                  {name: "Launch dialog", value: @button_use_dialog},
+                  {name: "Emit action and value", value: @button_use_action}
+              ],
+              bind: @button_use);
+        overlay()
+        {
+            optional(bind: @button_use, value: @button_use_set_cell)
+            {
+                edit_text(name: "bind_output", bind: @bind_output, alt: "The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned value.  When bind_output is specified, the button handler is not notified of this button's presses, and so action is ignored.");
+            }
+            optional(bind: @button_use, value: @button_use_dialog)
+            {
+               popup(name: "Dialog type:",
+                     items: [
+                         {name: "Dependent", value: @dialog_type_dependent},
+                         {name: "Independent", value: @dialog_type_independent},
+                         {name: "Standard dialogs", value: @dialog_type_standard}
+                     ],
+                     bind: @dialog_type);
+               overlay()
+               {
+                   optional(bind: @dialog_type, value: @dialog_type_dependent)
+                   {
+                       edit_text(name: "eve_script", bind: @dependent_dialog_script);
+                   }
+                   optional(bind: @dialog_type, value: @dialog_type_independent)
+                   {
+                       edit_text(name: "adam_script", bind: @value_adam_script);
+                       edit_text(name: "eve_script", bind: @value_eve_script);
+                       edit_text(name: "bind_result", bind: @value_bind_result);
+                   }
+                   optional(bind: @dialog_type, value: @dialog_type_standard)
+                   {
+                       popup(name: "Dialog:",
+                             items: [
+                                 {name: "Color Dialog", value: @color_dialog},
+                                 {name: "File Dialog", value: @file_dialog},
+                                 {name: "Three-Button Dialog", value: @three_button_dialog}
+                             ],
+                             bind: @dialog_name);
+                       edit_text(name: "dialog_parameters", bind: @value_dialog_parameters, lines: 5);
+                       edit_text(name: "bind_result", bind: @value_bind_result);
+                   }
+               }
+            }
+            panel(bind: @button_use, value: @button_use_action)
+            {
+                edit_text(name: "action", bind: @action, alt: 'The action associated with this button.  The button handler (if available) will be called with action as its first argument.');
+                edit_text(name: "value", bind: @action_value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
+                edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this button is bound.  If defined, value is ignored.');
+            }
+        }
+        checkbox(name: "default", bind: @default, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.');
+        checkbox(name: "cancel", bind: @cancel, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.');
+        edit_text(name: "unpressed", bind: @unpressed, alt: 'The unpressed graphic to use to render the button.');
+        edit_text(name: "rollover", bind: @rollover, alt: 'The rollover graphic to use to render the button.');
+        edit_text(name: "pressed", bind: @pressed, alt: 'The pressed graphic to use to render the button.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the id parameter of eve_signal_handler.');
+        edit_text(name: "bind_clicked_signal", bind: @bind_clicked_signal, alt: 'Binds GG::Button::ClickedSignal.  The value emitted is value.');
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
+        {
+            popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+
+        reveal(name: "Colors", bind: @show_colors);
+        optional(bind: @show_colors)
+        {
+            color_button(name: "color", bind: @color, alt: 'The color in which to render the button.');
+            color_button(name: "text_color", bind: @text_color, alt: 'The color in which to render the button label.');
+        }
+    }
+}

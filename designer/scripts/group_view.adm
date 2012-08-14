@@ -1,4 +1,4 @@
-sheet widget
+sheet group_view
 {
 interface:
     show_colors: false;

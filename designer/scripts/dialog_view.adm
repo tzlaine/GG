@@ -1,4 +1,4 @@
-sheet widget
+sheet dialog_view
 {
 interface:
     show_colors: false;

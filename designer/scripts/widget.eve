@@ -1,11 +1,6 @@
 layout widget
 {
-interface:
-    show_colors: false;
-    button_use: @button_use_ok;
-    dialog_type: @dialog_type_dependent;
-
-    view dialog()
+    view dialog(placement: place_column)
     {
         popup(name: "View type:", bind: @view_type, items: [
             {name: "dialog", value: @dialog},
@@ -30,486 +25,454 @@ interface:
             {name: "listbox", value: @listbox}
         ]);
 
-        optional (bind: @widget_is_container)
-        {
-            popup(name: "placement", bind: @widget_placement, items: @placements, alt: 'The placement of views within this container.');
-            popup(name: "child_horizontal", bind: @widget_child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
-            popup(name: "child_vertical", bind: @widget_child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
-            edit_text(name: "spacing", bind: @widget_spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
-        }
+        popup(name: "placement", bind: @widget_placement, items: @placements, alt: 'The placement of views within this container.');
+        popup(name: "child_horizontal", bind: @widget_child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
+        popup(name: "child_vertical", bind: @widget_child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
+        edit_text(name: "spacing", bind: @widget_spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
 
         popup(name: "horizontal", bind: @widget_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
         popup(name: "vertical", bind: @widget_vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
         edit_number(name: "indent", bind: @widget_indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
         edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
 
-        overlay()
+        panel(bind: @view_type, value: @optional)
         {
-            panel(bind: @view_type, value: @dialog)
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "value", bind: @widget_value, alt: 'The value of the bound cell that causes the optional to be shown.');
+        }
+        panel(bind: @view_type, value: @panel)
+        {
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "value", bind: @widget_value, alt: 'The value of the bound cell that causes the panel to be shown.');
+        }
+        panel(bind: @view_type, value: @tab_group)
+        {
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_text(name: "items", rows: 10, bind: @widget_items, alt: 'A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.');
+            popup(name: "style", bind: @widget_style, items: [@attached, @detached], alt: 'The style in which to render the tab_group.  The style must be one of attached or detached.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_tab_changed_signal", bind: @widget_bind_tab_changed_signal, alt: 'Binds GG::TabBar::TabChangedSignal.  The value emitted is the value emitted by the tab_group.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
             {
-                edit_text(name: "name", bind: @widget_name, alt: 'The title text that appears on the dialog box.');
-                checkbox(name: "grow", bind: @widget_grow, alt: 'Whether the dialog box should be resizable.');
-                checkbox(name: "move", bind: @widget_move, alt: 'Whether the dialog box should be movable.');
-                checkbox(name: "on_top", bind: @widget_on_top, alt: 'Whether the dialog box should be always-on-top.');
-                checkbox(name: "modal", bind: @widget_modal, alt: 'Whether the dialog box should be modal.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the tab_group.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the tab_group's labels.');
+            }
+        }
+        panel(bind: @view_type, value: @button)
+        {
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the button.');
+            popup(name: "Button use:",
+                  items: [
+                      {name: "Ok button", value: @button_use_ok},
+                      {name: "Cancel button", value: @button_use_cancel},
+                      {name: "Reset button", value: @button_use_reset},
+                      {name: "Set Adam cell", value: @button_use_set_cell},
+                      {name: "Launch dialog", value: @button_use_dialog},
+                      {name: "Emit action and value", value: @button_use_action}
+                  ],
+                  bind: @button_use);
+            overlay()
+            {
+                panel(bind: @button_use, value: @button_use_set_cell)
                 {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the dialog.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the text directly associated with the dialog (e.g. the title).');
+                    edit_text(name: "bind_output", bind: @widget_bind_output, alt: 'The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned value.  When bind_output is specified, the button handler is not notified of this button's presses, and so action is ignored.');
                 }
-            }
-            panel(bind: @view_type, value: @group)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text that appears on the group box.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the group box.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
+                panel(bind: @button_use, value: @button_use_dialog)
                 {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the group box.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: "The color in which to render the group's label text.");
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the group box.');
-                }
-            }
-            panel(bind: @view_type, value: @optional)
-            {
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "value", bind: @widget_value, alt: 'The value of the bound cell that causes the optional to be shown.');
-            }
-            panel(bind: @view_type, value: @panel)
-            {
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "value", bind: @widget_value, alt: 'The value of the bound cell that causes the panel to be shown.');
-            }
-            panel(bind: @view_type, value: @tab_group)
-            {
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_text(name: "items", rows: 10, bind: @widget_items, alt: 'A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.');
-                popup(name: "style", bind: @widget_style, items: [@attached, @detached], alt: 'The style in which to render the tab_group.  The style must be one of attached or detached.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_tab_changed_signal", bind: @widget_bind_tab_changed_signal, alt: 'Binds GG::TabBar::TabChangedSignal.  The value emitted is the value emitted by the tab_group.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the tab_group.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the tab_group's labels.');
-                }
-            }
-            panel(bind: @view_type, value: @button)
-            {
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the button.');
-                popup(name: "Button use:",
-                      items: [
-                          {name: "Ok button", value: @button_use_ok},
-                          {name: "Cancel button", value: @button_use_cancel},
-                          {name: "Reset button", value: @button_use_reset},
-                          {name: "Set Adam cell", value: @button_use_set_cell},
-                          {name: "Launch dialog", value: @button_use_dialog},
-                          {name: "Emit action and value", value: @button_use_action}
-                      ],
-                      bind: @button_use);
-                overlay()
-                {
-                    panel(bind: @button_use, value: @button_use_set_cell)
-                    {
-                        edit_text(name: "bind_output", bind: @widget_bind_output, alt: 'The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned value.  When bind_output is specified, the button handler is not notified of this button's presses, and so action is ignored.');
-                    }
-                    panel(bind: @button_use, value: @button_use_dialog)
-                    {
-                       popup(name: "Dialog type:",
-                             items: [
-                                 {name: "Dependent", value: @dialog_type_dependent},
-                                 {name: "Independent", value: @dialog_type_independent},
-                                 {name: "Standard dialogs", value: @dialog_type_standard}
-                             ],
-                             bind: @dialog_type);
-                       overlay()
+                   popup(name: "Dialog type:",
+                         items: [
+                             {name: "Dependent", value: @dialog_type_dependent},
+                             {name: "Independent", value: @dialog_type_independent},
+                             {name: "Standard dialogs", value: @dialog_type_standard}
+                         ],
+                         bind: @dialog_type);
+                   overlay()
+                   {
+                       panel(bind: @dialog_type, value: @dialog_type_dependent)
                        {
-                           panel(bind: @dialog_type, value: @dialog_type_dependent)
-                           {
-                               edit_text(name: "eve_script", bind: @widget_value);
-                           }
-                           panel(bind: @dialog_type, value: @dialog_type_independent)
-                           {
-                               edit_text(name: "adam_script", bind: @widget_value_adam_script);
-                               edit_text(name: "eve_script", bind: @widget_value_eve_script);
-                               edit_text(name: "bind_result", bind: @widget_value_bind_result);
-                           }
-                           panel(bind: @dialog_type, value: @dialog_type_standard)
-                           {
-                               popup(name: "Dialog:",
-                                     items: [
-                                         {name: "Color Dialog", value: @color_dialog},
-                                         {name: "File Dialog", value: @file_dialog},
-                                         {name: "Three-Button Dialog", value: @three_button_dialog}
-                                     ],
-                                     bind: @dialog_type);
-                               edit(name: "dialog_parameters", bind: @widget_value_dialog_parameters, rows: 10);
-                               edit_text(name: "bind_result", bind: @widget_value_bind_result);
-                           }
+                           edit_text(name: "eve_script", bind: @widget_value);
                        }
-                    }
-                    panel(bind: @button_use, value: @button_use_action)
-                    {
-                        checkbox(name: "Emit contributing:", bind: @widget_emit_contributing);
-                        edit_text(name: "action", bind: @widget_action, alt: 'The action associated with this button.  The button handler (if available) will be called with action as its first argument.');
-                        edit_text(name: "value", bind: @widget_value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
-                    }
+                       panel(bind: @dialog_type, value: @dialog_type_independent)
+                       {
+                           edit_text(name: "adam_script", bind: @widget_value_adam_script);
+                           edit_text(name: "eve_script", bind: @widget_value_eve_script);
+                           edit_text(name: "bind_result", bind: @widget_value_bind_result);
+                       }
+                       panel(bind: @dialog_type, value: @dialog_type_standard)
+                       {
+                           popup(name: "Dialog:",
+                                 items: [
+                                     {name: "Color Dialog", value: @color_dialog},
+                                     {name: "File Dialog", value: @file_dialog},
+                                     {name: "Three-Button Dialog", value: @three_button_dialog}
+                                 ],
+                                 bind: @dialog_type);
+                           edit(name: "dialog_parameters", bind: @widget_value_dialog_parameters, rows: 10);
+                           edit_text(name: "bind_result", bind: @widget_value_bind_result);
+                       }
+                   }
                 }
-                checkbox(name: "default", bind: @widget_default, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.');
-                checkbox(name: "cancel", bind: @widget_cancel, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.');
-                edit_text(name: "unpressed", bind: @widget_image_unpressed, alt: 'The unpressed graphic to use to render the button.');
-                edit_text(name: "rollover", bind: @widget_image_rollover, alt: 'The rollover graphic to use to render the button.');
-                edit_text(name: "pressed", bind: @widget_image_pressed, alt: 'The pressed graphic to use to render the button.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_clicked_signal", bind: @widget_bind_clicked_signal, alt: 'Binds GG::Button::ClickedSignal.  The value emitted is value.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
+                panel(bind: @button_use, value: @button_use_action)
                 {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the button.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the button label.');
+                    checkbox(name: "Emit contributing:", bind: @widget_emit_contributing);
+                    edit_text(name: "action", bind: @widget_action, alt: 'The action associated with this button.  The button handler (if available) will be called with action as its first argument.');
+                    edit_text(name: "value", bind: @widget_value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
                 }
             }
-            panel(bind: @view_type, value: @checkbox)
+            checkbox(name: "default", bind: @widget_default, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and either return or enter is pressed.');
+            checkbox(name: "cancel", bind: @widget_cancel, alt: 'If true, this button will be clicked when its modifiers are depressed (if any) and escape is pressed.');
+            edit_text(name: "unpressed", bind: @widget_image_unpressed, alt: 'The unpressed graphic to use to render the button.');
+            edit_text(name: "rollover", bind: @widget_image_rollover, alt: 'The rollover graphic to use to render the button.');
+            edit_text(name: "pressed", bind: @widget_image_pressed, alt: 'The pressed graphic to use to render the button.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_clicked_signal", bind: @widget_bind_clicked_signal, alt: 'Binds GG::Button::ClickedSignal.  The value emitted is value.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
             {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the checkbox.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the checkbox.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_text(name: "value_on", bind: @widget_value_on, alt: 'The value emitted when checking the checkbox.');
-                edit_text(name: "value_off", bind: @widget_value_off, alt: 'The value emitted when unchecking the checkbox.');
-                edit_text(name: "style", bind: @widget_style, alt: 'The style in which to render the checkbox.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_checked_signal", bind: @widget_bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the button.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the button label.');
+            }
+        }
+        panel(bind: @view_type, value: @checkbox)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the checkbox.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the checkbox.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_text(name: "value_on", bind: @widget_value_on, alt: 'The value emitted when checking the checkbox.');
+            edit_text(name: "value_off", bind: @widget_value_off, alt: 'The value emitted when unchecking the checkbox.');
+            edit_text(name: "style", bind: @widget_style, alt: 'The style in which to render the checkbox.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_checked_signal", bind: @widget_bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the checkbox.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the checkbox text.');
+                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the checkbox.');
+            }
+        }
+        panel(bind: @view_type, value: @control_button)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text that appears on the control_button.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the control_button.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "expression", bind: @widget_expression, alt: 'The expression to be evaluated when the control_button is clicked, in a string.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the button.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the button label.');
+            }
+        }
+        panel(bind: @view_type, value: @image)
+        {
+            edit_text(name: "image", bind: @widget_image, alt: 'The graphic to use in the image.  This may be a GG::SubTexture, a GG::Texture, or a filename.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_number(name: "width", bind: @widget_width, alt: 'The width of the space in which to render the image, in pixels.');
+            edit_number(name: "height", bind: @widget_height, alt: 'The height of the space in which to render the image, in pixels.');
+            popup(name: "horizontal",
+                  items: [
+                      {name: "left", value: @align_left},
+                      {name: "center", value: @align_center},
+                      {name: "right", value: @align_right}
+                  ],
+                  bind: @widget_horizontal,
+                  alt: 'The horizontal placement of the image within width (align_left, align_center, or align_right).');
+            popup(name: "vertical",
+                  items: [
+                      {name: "top", value: @align_top},
+                      {name: "center", value: @align_center},
+                      {name: "bottom", value: @align_bottom}
+                  ],
+                  bind: @widget_vertical,
+                  alt: 'The vertical placement of the image within height (align_top, align_center, or align_bottom).');
+            checkbox(name: "fit_graphic", bind: @widget_fit_graphic, alt: 'Whether to scale the image to fit width and height.');
+            checkbox(name: "shrink_to_fit", bind: @widget_shrink_to_fit, alt: 'Whether to scale the image, but only if the image is too large to fit width and height.');
+            checkbox(name: "proportional", bind: @widget_proportional, alt: 'Whether scaling should be done proportionally (maintaining aspect ratio).');
+        }
+        panel(bind: @view_type, value: @label)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text of the label.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the label.');
+            edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the label, in number of characters.');
+            checkbox(name: "wrap", bind: @widget_wrap, alt: 'If true, the label's text is word-wrapped.');
+            popup(name: "text_horizontal",
+                  items: [
+                      {name: "left", value: @align_left},
+                      {name: "center", value: @align_center},
+                      {name: "right", value: @align_right}
+                  ],
+                  bind: @widget_text_horizontal,
+                  alt: 'The horizontal alignment of the text (align_left, align_center, or align_right).');
+            popup(name: "text_vertical",
+                  items: [
+                      {name: "top", value: @align_top},
+                      {name: "center", value: @align_center},
+                      {name: "bottom", value: @align_bottom}
+                  ],
+                  bind: @widget_text_vertical,
+                  alt: 'The horizontal alignment of the text (align_top, align_center, or align_bottom).');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the label.');
+            }
+        }
+        panel(bind: @view_type, value: @progress_bar)
+        {
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            popup(name: "orientation",
+                  items: [
+                      {name: "horizontal", value: @horizontal},
+                      {name: "vertical", value: @vertical}
+                  ],
+                  bind: @widget_orientation,
+                  alt: 'The orientation of the progress_bar (horizontal or vertical).');
+            edit_number(name: "min_value", bind: @widget_format_first, alt: 'The minimum value the progress_bar can take.');
+            edit_number(name: "max_value", bind: @widget_format_second, alt: 'The maximum value the progress_bar can take.');
+            edit_number(name: "length", bind: @widget_length, alt: 'The length in pixels that the progress_bar should be, in the direction of orientation.');
+            edit_number(name: "width", bind: @widget_width, alt: 'The length in pixels that the progress_bar should be, in the direction perpendicular to orientation.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the border of the progress_bar.');
+                color_button(name: "bar_color", bind: @widget_bar_color, alt: 'The color in which to render the bar within the progress_bar.');
+                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the progress_bar.');
+            }
+        }
+        panel(bind: @view_type, value: @radio_button)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the radio_button.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the radio_button.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_text(name: "value", bind: @widget_value, alt: 'The value emitted when checking the radio_button.');
+            edit_text(name: "style", bind: @widget_style, alt: 'The style in which to render the radio_button.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_checked_signal", bind: @widget_bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the radio_button.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the radio_button.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the radio_button label.');
+                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the radio_button.');
+            }
+        }
+        panel(bind: @view_type, value: @reveal)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the reveal.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the reveal.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_text(name: "value_on", bind: @widget_value_on, alt: 'The value associated with the "show" state of the reveal.');
+            edit_text(name: "showing_unpressed", bind: @widget_showing_image_unpressed, alt: 'The unpressed graphic to use to render the reveal's showing-button.');
+            edit_text(name: "showing_rollover", bind: @widget_showing_image_rollover, alt: 'The rollover graphics to use to render the reveal's showing-button.');
+            edit_text(name: "showing_pressed", bind: @widget_showing_image_pressed, alt: 'The pressed graphic to use to render the reveal's showing-button.');
+            edit_text(name: "hiding_unpressed", bind: @widget_hiding_image_unpressed, alt: 'The unpressed graphic to use to render the reveal's hiding-button.');
+            edit_text(name: "hiding_rollover", bind: @widget_hiding_image_rollover, alt: 'The rollover graphics to use to render the reveal's hiding-button.');
+            edit_text(name: "hiding_pressed", bind: @widget_hiding_image_pressed, alt: 'The pressed graphic to use to render the reveal's hiding-button.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the reveal's label.');
+            }
+        }
+        panel(bind: @view_type, value: @slider)
+        {
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the slider.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            popup(name: "orientation",
+                  items: [
+                      {name: "horizontal", value: @horizontal},
+                      {name: "vertical", value: @vertical}
+                  ],
+                  bind: @widget_orientation,
+                  alt: 'The orientation of the slider (horizontal or vertical).');
+            edit_number(name: "min_value", bind: @widget_format_first, alt: 'The minimum value the slider can take.');
+            edit_number(name: "max_value", bind: @widget_format_second, alt: 'The maximum value the slider can take.');
+            edit_number(name: "length", bind: @widget_length, alt: 'The length of the slider, in pixels.');
+            edit_number(name: "line_width", bind: @widget_line_width, alt: 'The thickness of the slider bar, in pixels.');
+            edit_number(name: "tab_width", bind: @widget_tab_width, alt: 'The size of the tab in the direction of orientation in pixels.');
+            edit_number(name: "tab_length", bind: @widget_tab_length, alt: 'The size of the tab in the direction perpendicular to orientation in pixels.');
+            edit_text(name: "line_style", bind: @widget_line_style, alt: 'The style in which to render the slider.  The style must be one of flat, raised, or grooved.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_slid_signal", bind: @widget_bind_slid_signal, alt: 'Binds GG::Slider::SlidSignal.  The value emitted is {slider_pos: expr, slider_min: expr, slider_max: expr}.');
+            edit_text(name: "bind_slid_and_stopped_signal", bind: @widget_bind_slid_and_stopped_signal, alt: 'Binds GG::Slider::SlidAndStoppedSignal.  The value emitted is {slider_pos: expr, slider_min: expr, slider_max: expr}.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the slider.');
+            }
+        }
+        panel(bind: @view_type, value: @display_text)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_text.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the display_text, in text of characters.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the displayed text.');
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the label text.');
+            }
+        }
+        panel(bind: @view_type, value: @display_number)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_number.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_number.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the display_number, in number of characters.');
+            (name: "units", bind: @widget_units, alt: 'An array of eve_number_unit units.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the displayed number.');
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the label text.');
+            }
+        }
+        panel(bind: @view_type, value: @edit_number)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_text.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_text(name: "bind_units", bind: @widget_bind_units, alt: 'The cell in the Adam property sheet to which this edit_number's unit type is bound.');
+            edit_number(name: "digits", bind: @widget_digits, alt: 'The minimum width of the edit_number, in number of characters.');
+            edit_number(name: "max_digits", bind: @widget_max_digits, alt: 'The maximum number of characters the user is allowed to type into the edit_number.');
+            (name: "units", bind: @widget_units, alt: 'An array of eve_number_unit units.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_edited_signal", bind: @widget_bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_number.');
+            edit_text(name: "bind_focus_update_signal", bind: @widget_bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_number.');
+            edit_text(name: "bind_unit_changed_signal", bind: @widget_bind_unit_changed_signal, alt: 'Binds GG::DropDownList::SelChangedSignal from the unit popup.  The value emitted is the value emitted by the popup.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the edit_number.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the number edit box's text.');
+                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the number edit box and the unit popup.');
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the edit_number's label.');
+                color_button(name: "popup_color", bind: @widget_popup_color, alt: 'The color in which to render the unit popup.');
+                color_button(name: "popup_item_text_color", bind: @widget_popup_item_text_color, alt: 'The color in which to render the unit popup's text.');
+            }
+        }
+        panel(bind: @view_type, value: @edit_text)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_text.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the edit_text, based on space needed to see this many characters.');
+            edit_number(name: "max_characters", bind: @widget_max_characters, alt: 'The maximum number of characters the user is allowed to type into the edit_text.  This only applies when lines is 1.');
+            edit_number(name: "lines", bind: @widget_lines, alt: 'The number of lines high the edit_text should be.');
+            checkbox(name: "scrollable", bind: @widget_scrollable, alt: 'Whether the edit_text has scrollbars.  This only applies when lines is greater than 1.');
+            checkbox(name: "read_only", bind: @widget_read_only, alt: 'Whether the edit_text is read-only or editable.');
+            checkbox(name: "terminal_style", bind: @widget_terminal_style, alt: 'Whether the edit_text keeps the bottom of the text visible, as in a console terminal, or the top, when auto-scrolling.  This only applies when lines is greater than 1.');
+            checkbox(name: "wrap", bind: @widget_wrap, alt: 'Whether lines should be wrapped when they exceed the width of the edit_text.  This only applies when lines is greater than 1.');
+            checkbox(name: "password", bind: @widget_password, alt: 'Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_edited_signal", bind: @widget_bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.');
+            edit_text(name: "bind_focus_update_signal", bind: @widget_bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the edit_text.');
+                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the editable text.');
+                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the number edit box.');
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the edit_text's label.');
+            }
+        }
+        panel(bind: @view_type, value: @popup)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the popup.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the popup.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            (name: "items", bind: @widget_items, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.');
+            edit_text(name: "custom_item_name", bind: @widget_custom_item_name, alt: 'The name of the custom item in the popup.');
+            edit_number(name: "max_characters", bind: @widget_max_characters, alt: 'The width of the popup, in number of characters.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_selection_changed_signal", bind: @widget_bind_selection_changed_signal, alt: 'Binds GG::DropDownList::SelChangedSignal.  The value emitted is the value emitted by the popup.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
+            {
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the popup.');
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the label text.');
+                color_button(name: "item_text_color", bind: @widget_item_text_color, alt: 'The color in which to render the text of the items in the popup.');
+            }
+        }
+        panel(bind: @view_type, value: @listbox)
+        {
+            edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the listbox.');
+            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the listbox.');
+            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+            checkbox(name: "Bind items to cell:", bind: @widget_bind_items_to_cell);
+            overlay()
+            {
+                panel(bind: @widget_bind_items_to_cell)
                 {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the checkbox.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the checkbox text.');
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the checkbox.');
+                    edit_text(name: "items", bind: @widget_items, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  Optionally, drag_drop_data_type may be specified as well.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.');
+                }
+                panel(bind: @widget_bind_items_to_cell, value: false)
+                {
+                    (name: "items", bind: @widget_items, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  Optionally, drag_drop_data_type may be specified as well.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.');
                 }
             }
-            panel(bind: @view_type, value: @control_button)
+            edit_number(name: "characters", bind: @widget_characters, alt: 'The width of the listbox, in number of characters.');
+            edit_number(name: "rows", bind: @widget_rows, alt: 'The height of the listbox, in number of rows.');
+            checkbox(name: "sort", bind: @widget_sort, alt: 'Whether the rows should be shown in the order added to the listbox, or in sorted order.');
+            popup(name: "sort_order",
+                  items: [
+                      {name: "ascending", value: @ascending},
+                      {name: "descending", value: @descending}
+                  ],
+                  bind: @widget_sort_order,
+                  alt: 'The direction in which to sort the rows.  Must be either ascending or descending.');
+            popup(name: "selections",
+                  items: [
+                      {name: "none", value: @none},
+                      {name: "single", value: @single},
+                      {name: "quick", value: @quick},
+                      {name: "multiple", value: @multiple}
+                  ],
+                  bind: @widget_selections,
+                  alt: 'The policy for click-selecting rows.  Must be one of none (no selections), single (one row selected at a time), quick (each click toggles the clicked row without affecting the others), or multiple (the default, including shift- and ctrl-clicks).');
+            checkbox(name: "user_delete", bind: @widget_user_delete, alt: 'Whether the user is allowed to delete rows by pressing the delete key.');
+            checkbox(name: "browse_updates", bind: @widget_browse_updates, alt: 'Whether moving the mouse over the listbox emits the row currently under the cursor.');
+            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+            edit_text(name: "bind_selection_changed_signal", bind: @widget_bind_selection_changed_signal, alt: 'Binds GG::ListBox::SelChangedSignal.  The value emitted is an array of eve_listbox_signal_row "signal rows".');
+            edit_text(name: "bind_dropped_signal", bind: @widget_bind_dropped_signal, alt: 'Binds GG::ListBox::DroppedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+            edit_text(name: "bind_drop_acceptable_signal", bind: @widget_bind_drop_acceptable_signal, alt: 'Binds GG::ListBox::DropAcceptableSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+            edit_text(name: "bind_left_clicked_signal", bind: @widget_bind_left_clicked_signal, alt: 'Binds GG::ListBox::LeftClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
+            edit_text(name: "bind_right_clicked_signal", bind: @widget_bind_right_clicked_signal, alt: 'Binds GG::ListBox::RightClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
+            edit_text(name: "bind_double_clicked_signal", bind: @widget_bind_double_clicked_signal, alt: 'Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
+            edit_text(name: "bind_erased_signal", bind: @widget_bind_erased_signal, alt: 'Binds GG::ListBox::ErasedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+            edit_text(name: "bind_browsed_signal", bind: @widget_bind_browsed_signal, alt: 'Binds GG::ListBox::BrowsedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+            (name: "allowed_drop_types", bind: @widget_allowed_drop_types, alt: 'An array of strings indicating the drag and drop types accepted by the listbox.');
+            reveal(name: "Colors", bind: @show_colors);
+            optional(bind: @show_colors)
             {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text that appears on the control_button.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the control_button.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "expression", bind: @widget_expression, alt: 'The expression to be evaluated when the control_button is clicked, in a string.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the button.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the button label.
-                }
-            }
-            panel(bind: @view_type, value: @image)
-            {
-                edit_text(name: "image", bind: @widget_image, alt: 'The graphic to use in the image.  This may be a GG::SubTexture, a GG::Texture, or a filename.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_number(name: "width", bind: @widget_width, alt: 'The width of the space in which to render the image, in pixels.');
-                edit_number(name: "height", bind: @widget_height, alt: 'The height of the space in which to render the image, in pixels.');
-                popup(name: "horizontal",
-                      items: [
-                          {name: "left", value: @align_left},
-                          {name: "center", value: @align_center},
-                          {name: "right", value: @align_right}
-                      ],
-                      bind: @widget_horizontal,
-                      alt: 'The horizontal placement of the image within width (align_left, align_center, or align_right).');
-                popup(name: "vertical",
-                      items: [
-                          {name: "top", value: @align_top},
-                          {name: "center", value: @align_center},
-                          {name: "bottom", value: @align_bottom}
-                      ],
-                      bind: @widget_vertical,
-                      alt: 'The vertical placement of the image within height (align_top, align_center, or align_bottom).');
-                checkbox(name: "fit_graphic", bind: @widget_fit_graphic, alt: 'Whether to scale the image to fit width and height.');
-                checkbox(name: "shrink_to_fit", bind: @widget_shrink_to_fit, alt: 'Whether to scale the image, but only if the image is too large to fit width and height.');
-                checkbox(name: "proportional", bind: @widget_proportional, alt: 'Whether scaling should be done proportionally (maintaining aspect ratio).');
-            }
-            panel(bind: @view_type, value: @label)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text of the label.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the label.');
-                edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the label, in number of characters.');
-                checkbox(name: "wrap", bind: @widget_wrap, alt: 'If true, the label's text is word-wrapped.');
-                popup(name: "text_horizontal",
-                      items: [
-                          {name: "left", value: @align_left},
-                          {name: "center", value: @align_center},
-                          {name: "right", value: @align_right}
-                      ],
-                      bind: @widget_text_horizontal,
-                      alt: 'The horizontal alignment of the text (align_left, align_center, or align_right).');
-                popup(name: "text_vertical",
-                      items: [
-                          {name: "top", value: @align_top},
-                          {name: "center", value: @align_center},
-                          {name: "bottom", value: @align_bottom}
-                      ],
-                      bind: @widget_text_vertical,
-                      alt: 'The horizontal alignment of the text (align_top, align_center, or align_bottom).');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the label.
-                }
-            }
-            panel(bind: @view_type, value: @progress_bar)
-            {
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                popup(name: "orientation",
-                      items: [
-                          {name: "horizontal", value: @horizontal},
-                          {name: "vertical", value: @vertical}
-                      ],
-                      bind: @widget_orientation,
-                      alt: 'The orientation of the progress_bar (horizontal or vertical).');
-                edit_number(name: "min_value", bind: @widget_format_first, alt: 'The minimum value the progress_bar can take.');
-                edit_number(name: "max_value", bind: @widget_format_second, alt: 'The maximum value the progress_bar can take.');
-                edit_number(name: "length", bind: @widget_length, alt: 'The length in pixels that the progress_bar should be, in the direction of orientation.');
-                edit_number(name: "width", bind: @widget_width, alt: 'The length in pixels that the progress_bar should be, in the direction perpendicular to orientation.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the border of the progress_bar.');
-                    color_button(name: "bar_color", bind: @widget_bar_color, alt: 'The color in which to render the bar within the progress_bar.');
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the progress_bar.');
-                }
-            }
-            panel(bind: @view_type, value: @radio_button)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the radio_button.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the radio_button.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_text(name: "value", bind: @widget_value, alt: 'The value emitted when checking the radio_button.');
-                edit_text(name: "style", bind: @widget_style, alt: 'The style in which to render the radio_button.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_checked_signal", bind: @widget_bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the radio_button.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the radio_button.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the radio_button label.');
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the radio_button.');
-                }
-            }
-            panel(bind: @view_type, value: @reveal)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the reveal.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the reveal.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_text(name: "value_on", bind: @widget_value_on, alt: 'The value associated with the "show" state of the reveal.');
-                edit_text(name: "showing_unpressed", bind: @widget_showing_image_unpressed, alt: 'The unpressed graphic to use to render the reveal's showing-button.');
-                edit_text(name: "showing_rollover", bind: @widget_showing_image_rollover, alt: 'The rollover graphics to use to render the reveal's showing-button.');
-                edit_text(name: "showing_pressed", bind: @widget_showing_image_pressed, alt: 'The pressed graphic to use to render the reveal's showing-button.');
-                edit_text(name: "hiding_unpressed", bind: @widget_hiding_image_unpressed, alt: 'The unpressed graphic to use to render the reveal's hiding-button.');
-                edit_text(name: "hiding_rollover", bind: @widget_hiding_image_rollover, alt: 'The rollover graphics to use to render the reveal's hiding-button.');
-                edit_text(name: "hiding_pressed", bind: @widget_hiding_image_pressed, alt: 'The pressed graphic to use to render the reveal's hiding-button.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the reveal's label.');
-                }
-            }
-            panel(bind: @view_type, value: @slider)
-            {
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the slider.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                popup(name: "orientation",
-                      items: [
-                          {name: "horizontal", value: @horizontal},
-                          {name: "vertical", value: @vertical}
-                      ],
-                      bind: @widget_orientation,
-                      alt: 'The orientation of the slider (horizontal or vertical).');
-                edit_number(name: "min_value", bind: @widget_format_first, alt: 'The minimum value the slider can take.');
-                edit_number(name: "max_value", bind: @widget_format_second, alt: 'The maximum value the slider can take.');
-                edit_number(name: "length", bind: @widget_length, alt: 'The length of the slider, in pixels.');
-                edit_number(name: "line_width", bind: @widget_line_width, alt: 'The thickness of the slider bar, in pixels.');
-                edit_number(name: "tab_width", bind: @widget_tab_width, alt: 'The size of the tab in the direction of orientation in pixels.');
-                edit_number(name: "tab_length", bind: @widget_tab_length, alt: 'The size of the tab in the direction perpendicular to orientation in pixels.');
-                edit_text(name: "line_style", bind: @widget_line_style, alt: 'The style in which to render the slider.  The style must be one of flat, raised, or grooved.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_slid_signal", bind: @widget_bind_slid_signal, alt: 'Binds GG::Slider::SlidSignal.  The value emitted is {slider_pos: expr, slider_min: expr, slider_max: expr}.');
-                edit_text(name: "bind_slid_and_stopped_signal", bind: @widget_bind_slid_and_stopped_signal, alt: 'Binds GG::Slider::SlidAndStoppedSignal.  The value emitted is {slider_pos: expr, slider_min: expr, slider_max: expr}.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the slider.');
-                }
-            }
-            panel(bind: @view_type, value: @display_text)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_text.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the display_text, in text of characters.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the displayed text.');
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the label text.
-                }
-            }
-            panel(bind: @view_type, value: @display_number)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_number.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_number.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the display_number, in number of characters.');
-                (name: "units", bind: @widget_units, alt: 'An array of eve_number_unit units.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the displayed number.');
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the label text.
-                }
-            }
-            panel(bind: @view_type, value: @edit_number)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_text.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_text(name: "bind_units", bind: @widget_bind_units, alt: 'The cell in the Adam property sheet to which this edit_number's unit type is bound.');
-                edit_number(name: "digits", bind: @widget_digits, alt: 'The minimum width of the edit_number, in number of characters.');
-                edit_number(name: "max_digits", bind: @widget_max_digits, alt: 'The maximum number of characters the user is allowed to type into the edit_number.');
-                (name: "units", bind: @widget_units, alt: 'An array of eve_number_unit units.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_edited_signal", bind: @widget_bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_number.');
-                edit_text(name: "bind_focus_update_signal", bind: @widget_bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_number.');
-                edit_text(name: "bind_unit_changed_signal", bind: @widget_bind_unit_changed_signal, alt: 'Binds GG::DropDownList::SelChangedSignal from the unit popup.  The value emitted is the value emitted by the popup.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the edit_number.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the number edit box's text.');
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the number edit box and the unit popup.');
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the edit_number's label.');
-                    color_button(name: "popup_color", bind: @widget_popup_color, alt: 'The color in which to render the unit popup.');
-                    color_button(name: "popup_item_text_color", bind: @widget_popup_item_text_color, alt: 'The color in which to render the unit popup's text.');
-                }
-            }
-            panel(bind: @view_type, value: @edit_text)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the display_text.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the edit_text, based on space needed to see this many characters.');
-                edit_number(name: "max_characters", bind: @widget_max_characters, alt: 'The maximum number of characters the user is allowed to type into the edit_text.  This only applies when lines is 1.');
-                edit_number(name: "lines", bind: @widget_lines, alt: 'The number of lines high the edit_text should be.');
-                checkbox(name: "scrollable", bind: @widget_scrollable, alt: 'Whether the edit_text has scrollbars.  This only applies when lines is greater than 1.');
-                checkbox(name: "read_only", bind: @widget_read_only, alt: 'Whether the edit_text is read-only or editable.');
-                checkbox(name: "terminal_style", bind: @widget_terminal_style, alt: 'Whether the edit_text keeps the bottom of the text visible, as in a console terminal, or the top, when auto-scrolling.  This only applies when lines is greater than 1.');
-                checkbox(name: "wrap", bind: @widget_wrap, alt: 'Whether lines should be wrapped when they exceed the width of the edit_text.  This only applies when lines is greater than 1.');
-                checkbox(name: "password", bind: @widget_password, alt: 'Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_edited_signal", bind: @widget_bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.');
-                edit_text(name: "bind_focus_update_signal", bind: @widget_bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the edit_text.');
-                    color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the editable text.');
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the number edit box.');
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the edit_text's label.');
-                }
-            }
-            panel(bind: @view_type, value: @popup)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the popup.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the popup.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                (name: "items", bind: @widget_items, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.');
-                edit_text(name: "custom_item_name", bind: @widget_custom_item_name, alt: 'The name of the custom item in the popup.');
-                edit_number(name: "max_characters", bind: @widget_max_characters, alt: 'The width of the popup, in number of characters.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_selection_changed_signal", bind: @widget_bind_selection_changed_signal, alt: 'Binds GG::DropDownList::SelChangedSignal.  The value emitted is the value emitted by the popup.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the popup.');
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the label text.');
-                    color_button(name: "item_text_color", bind: @widget_item_text_color, alt: 'The color in which to render the text of the items in the popup.');
-                }
-            }
-            panel(bind: @view_type, value: @listbox)
-            {
-                edit_text(name: "name", bind: @widget_name, alt: 'The text label that appears to the left of the listbox.');
-                edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the listbox.');
-                edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-                edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-                edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-                checkbox(name: "Bind items to cell:", bind: @widget_bind_items_to_cell);
-                overlay()
-                {
-                    panel(bind: @widget_bind_items_to_cell)
-                    {
-                        edit_text(name: "items", bind: @widget_items, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  Optionally, drag_drop_data_type may be specified as well.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.');
-                    }
-                    panel(bind: @widget_bind_items_to_cell, value: false)
-                    {
-                        (name: "items", bind: @widget_items, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  Optionally, drag_drop_data_type may be specified as well.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.');
-                    }
-                }
-                edit_number(name: "characters", bind: @widget_characters, alt: 'The width of the listbox, in number of characters.');
-                edit_number(name: "rows", bind: @widget_rows, alt: 'The height of the listbox, in number of rows.');
-                checkbox(name: "sort", bind: @widget_sort, alt: 'Whether the rows should be shown in the order added to the listbox, or in sorted order.');
-                popup(name: "sort_order",
-                      items: [
-                          {name: "ascending", value: @ascending},
-                          {name: "descending", value: @descending}
-                      ],
-                      bind: @widget_sort_order,
-                      alt: 'The direction in which to sort the rows.  Must be either ascending or descending.');
-                popup(name: "selections",
-                      items: [
-                          {name: "none", value: @none},
-                          {name: "single", value: @single},
-                          {name: "quick", value: @quick},
-                          {name: "multiple", value: @multiple}
-                      ],
-                      bind: @widget_selections,
-                      alt: 'The policy for click-selecting rows.  Must be one of none (no selections), single (one row selected at a time), quick (each click toggles the clicked row without affecting the others), or multiple (the default, including shift- and ctrl-clicks).');
-                checkbox(name: "user_delete", bind: @widget_user_delete, alt: 'Whether the user is allowed to delete rows by pressing the delete key.');
-                checkbox(name: "browse_updates", bind: @widget_browse_updates, alt: 'Whether moving the mouse over the listbox emits the row currently under the cursor.');
-                edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-                edit_text(name: "bind_selection_changed_signal", bind: @widget_bind_selection_changed_signal, alt: 'Binds GG::ListBox::SelChangedSignal.  The value emitted is an array of eve_listbox_signal_row "signal rows".');
-                edit_text(name: "bind_dropped_signal", bind: @widget_bind_dropped_signal, alt: 'Binds GG::ListBox::DroppedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-                edit_text(name: "bind_drop_acceptable_signal", bind: @widget_bind_drop_acceptable_signal, alt: 'Binds GG::ListBox::DropAcceptableSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-                edit_text(name: "bind_left_clicked_signal", bind: @widget_bind_left_clicked_signal, alt: 'Binds GG::ListBox::LeftClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
-                edit_text(name: "bind_right_clicked_signal", bind: @widget_bind_right_clicked_signal, alt: 'Binds GG::ListBox::RightClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
-                edit_text(name: "bind_double_clicked_signal", bind: @widget_bind_double_clicked_signal, alt: 'Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
-                edit_text(name: "bind_erased_signal", bind: @widget_bind_erased_signal, alt: 'Binds GG::ListBox::ErasedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-                edit_text(name: "bind_browsed_signal", bind: @widget_bind_browsed_signal, alt: 'Binds GG::ListBox::BrowsedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-                (name: "allowed_drop_types", bind: @widget_allowed_drop_types, alt: 'An array of strings indicating the drag and drop types accepted by the listbox.');
-                reveal(name: "Colors", bind: @show_colors);
-                optional(bind: @show_colors)
-                {
-                    color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the listbox.');
-                    color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the listbox.');
-                    color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the listbox's label.');
-                    color_button(name: "item_text_color", bind: @widget_item_text_color, alt: 'The color in which to render the text of the items in the listbox.');
-                    color_button(name: "hilite_color", bind: @widget_hilite_color, alt: 'The color in which to render the hiliting of selected items in the listbox.');
-                }
+                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the listbox.');
+                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the listbox.');
+                color_button(name: "label_color", bind: @widget_label_color, alt: 'The color in which to render the listbox's label.');
+                color_button(name: "item_text_color", bind: @widget_item_text_color, alt: 'The color in which to render the text of the items in the listbox.');
+                color_button(name: "hilite_color", bind: @widget_hilite_color, alt: 'The color in which to render the hiliting of selected items in the listbox.');
             }
         }
     }

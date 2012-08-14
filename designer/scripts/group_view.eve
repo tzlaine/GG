@@ -1,8 +1,5 @@
 layout group_view
 {
-interface:
-    show_colors: false;
-
     view dialog(placement: place_column)
     {
         popup(name: "placement", bind: @placement, items: @placements, alt: 'The placement of views within this container.');

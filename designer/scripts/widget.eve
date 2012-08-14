@@ -11,34 +11,6 @@ layout widget
             edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @label)
-        {
-            edit_text(name: "name", bind: @widget_name, alt: 'The text of the label.');
-            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the label.');
-            edit_number(name: "characters", bind: @widget_characters, alt: 'The minimum width of the label, in number of characters.');
-            checkbox(name: "wrap", bind: @widget_wrap, alt: 'If true, the label's text is word-wrapped.');
-            popup(name: "text_horizontal",
-                  items: [
-                      {name: "left", value: @align_left},
-                      {name: "center", value: @align_center},
-                      {name: "right", value: @align_right}
-                  ],
-                  bind: @widget_text_horizontal,
-                  alt: 'The horizontal alignment of the text (align_left, align_center, or align_right).');
-            popup(name: "text_vertical",
-                  items: [
-                      {name: "top", value: @align_top},
-                      {name: "center", value: @align_center},
-                      {name: "bottom", value: @align_bottom}
-                  ],
-                  bind: @widget_text_vertical,
-                  alt: 'The horizontal alignment of the text (align_top, align_center, or align_bottom).');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the label.');
-            }
-        }
         panel(bind: @view_type, value: @progress_bar)
         {
             edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');

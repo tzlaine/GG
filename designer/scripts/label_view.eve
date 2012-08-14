@@ -1,0 +1,43 @@
+layout label_view
+{
+    view dialog(placement: place_column)
+    {
+        edit_text(name: "name", bind: @name, alt: 'The text of the label.');
+        edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the label.');
+        edit_number(name: "characters", bind: @characters, alt: 'The minimum width of the label, in number of characters.');
+        checkbox(name: "wrap", bind: @wrap, alt: "If true, the label's text is word-wrapped.");
+        popup(name: "text_horizontal",
+              items: [
+                  {name: "Default", value: @default},
+                  {name: "left", value: @align_left},
+                  {name: "center", value: @align_center},
+                  {name: "right", value: @align_right}
+              ],
+              bind: @text_horizontal,
+              alt: 'The horizontal alignment of the text (align_left, align_center, or align_right).');
+        popup(name: "text_vertical",
+              items: [
+                  {name: "Default", value: @default},
+                  {name: "top", value: @align_top},
+                  {name: "center", value: @align_center},
+                  {name: "bottom", value: @align_bottom}
+              ],
+              bind: @text_vertical,
+              alt: 'The horizontal alignment of the text (align_top, align_center, or align_bottom).');
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
+        {
+            popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+
+        reveal(name: "Colors", bind: @show_colors);
+        optional(bind: @show_colors)
+        {
+            color_button(name: "color", bind: @color, alt: 'The color in which to render the label.');
+        }
+    }
+}

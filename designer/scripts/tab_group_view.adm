@@ -1,0 +1,70 @@
+sheet tab_group_view
+{
+interface:
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    placements: [
+        {name: "place_row", value: @place_row},
+        {name: "place_column", value: @place_column},
+        {name: "place_overlay", value: @place_overlay}
+    ];
+
+    styles: [
+        {name: "attached", value: @attached},
+        {name: "detached", value: @detached}
+    ];
+
+    child_horizontal: @align_left;
+    child_vertical: @align_top;
+    spacing: "";
+    horizontal: @align_left;
+    vertical: @align_top;
+    indent: 0;
+    margin: "[10, 10, 10, 10]";
+    bind: "";
+    bind_controller: "";
+    bind_view: "";
+    items: "";
+    style: @attached;
+    signal_id: "";
+    bind_tab_changed_signal: "";
+    color: color(127, 127, 127);
+    text_color: color(0, 0, 0);
+
+output:
+    result <== {
+        placement: @place_overlay,
+        child_horizontal: child_horizontal,
+        child_vertical: child_vertical,
+        spacing: spacing,
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        bind: bind,
+        bind_controller: bind_controller,
+        bind_view: bind_view,
+        items: items,
+        style: style,
+        signal_id: signal_id,
+        bind_tab_changed_signal: bind_tab_changed_signal,
+        color: color,
+        text_color: text_color
+    };
+}

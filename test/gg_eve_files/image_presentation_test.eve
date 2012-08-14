@@ -39,7 +39,7 @@ layout alert_dialog
                 image(image: "small_warning_icon.png",
                       fit_graphic: false,
                       width: 50, height: 50,
-                      horizontal: align_right, vertical: align_top);
+                      image_horizontal: align_right, image_vertical: align_top);
             }
         }
         row()

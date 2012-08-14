@@ -11,34 +11,6 @@ layout widget
             edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @image)
-        {
-            edit_text(name: "image", bind: @widget_image, alt: 'The graphic to use in the image.  This may be a GG::SubTexture, a GG::Texture, or a filename.');
-            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-            edit_number(name: "width", bind: @widget_width, alt: 'The width of the space in which to render the image, in pixels.');
-            edit_number(name: "height", bind: @widget_height, alt: 'The height of the space in which to render the image, in pixels.');
-            popup(name: "horizontal",
-                  items: [
-                      {name: "left", value: @align_left},
-                      {name: "center", value: @align_center},
-                      {name: "right", value: @align_right}
-                  ],
-                  bind: @widget_horizontal,
-                  alt: 'The horizontal placement of the image within width (align_left, align_center, or align_right).');
-            popup(name: "vertical",
-                  items: [
-                      {name: "top", value: @align_top},
-                      {name: "center", value: @align_center},
-                      {name: "bottom", value: @align_bottom}
-                  ],
-                  bind: @widget_vertical,
-                  alt: 'The vertical placement of the image within height (align_top, align_center, or align_bottom).');
-            checkbox(name: "fit_graphic", bind: @widget_fit_graphic, alt: 'Whether to scale the image to fit width and height.');
-            checkbox(name: "shrink_to_fit", bind: @widget_shrink_to_fit, alt: 'Whether to scale the image, but only if the image is too large to fit width and height.');
-            checkbox(name: "proportional", bind: @widget_proportional, alt: 'Whether scaling should be done proportionally (maintaining aspect ratio).');
-        }
         panel(bind: @view_type, value: @label)
         {
             edit_text(name: "name", bind: @widget_name, alt: 'The text of the label.');

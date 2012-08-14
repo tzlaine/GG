@@ -43,8 +43,8 @@ void create_widget(const dictionary_t& parameters,
     get_value(parameters, key_image, image);
     get_value(parameters, static_name_t("width"), width);
     get_value(parameters, static_name_t("height"), height);
-    get_value(parameters, key_horizontal, horizontal);
-    get_value(parameters, key_vertical, vertical);
+    get_value(parameters, static_name_t("image_horizontal"), horizontal);
+    get_value(parameters, static_name_t("image_vertical"), vertical);
     get_value(parameters, static_name_t("fit_graphic"), fit_graphic);
     get_value(parameters, static_name_t("shrink_to_fit"), shrink_to_fit);
     get_value(parameters, static_name_t("proportional"), proportional);

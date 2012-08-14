@@ -1,0 +1,42 @@
+layout image_view
+{
+    view dialog(placement: place_column)
+    {
+        edit_text(name: "image", bind: @image, alt: 'The graphic to use in the image.  This may be a GG::SubTexture, a GG::Texture, or a filename.');
+        edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+        edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+        edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+        edit_number(name: "width", bind: @width, alt: 'The width of the space in which to render the image, in pixels.');
+        edit_number(name: "height", bind: @height, alt: 'The height of the space in which to render the image, in pixels.');
+        popup(name: "horizontal",
+              items: [
+                  {name: "Default", value: @default},
+                  {name: "left", value: @align_left},
+                  {name: "center", value: @align_center},
+                  {name: "right", value: @align_right}
+              ],
+              bind: @image_horizontal,
+              alt: 'The horizontal placement of the image within width (align_left, align_center, or align_right).');
+        popup(name: "vertical",
+              items: [
+                  {name: "Default", value: @default},
+                  {name: "top", value: @align_top},
+                  {name: "center", value: @align_center},
+                  {name: "bottom", value: @align_bottom}
+              ],
+              bind: @image_vertical,
+              alt: 'The vertical placement of the image within height (align_top, align_center, or align_bottom).');
+        checkbox(name: "fit_graphic", bind: @fit_graphic, alt: 'Whether to scale the image to fit width and height.');
+        checkbox(name: "shrink_to_fit", bind: @shrink_to_fit, alt: 'Whether to scale the image, but only if the image is too large to fit width and height.');
+        checkbox(name: "proportional", bind: @proportional, alt: 'Whether scaling should be done proportionally (maintaining aspect ratio).');
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
+        {
+            popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+    }
+}

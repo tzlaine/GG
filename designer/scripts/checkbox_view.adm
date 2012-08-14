@@ -1,0 +1,71 @@
+sheet checkbox_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    styles: [
+        {name: "X-box", value: @SBSTYLE_3D_XBOX},
+        {name: "Checkbox", value: @SBSTYLE_3D_CHECKBOX},
+        {name: "Radio Button", value: @SBSTYLE_3D_RADIO},
+        {name: "Square Button", value: @SBSTYLE_3D_BUTTON},
+        {name: "Round Button", value: @SBSTYLE_3D_ROUND_BUTTON}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "";
+    name: "";
+    alt: "";
+    bind: "";
+    bind_controller: "";
+    bind_view: "";
+    value_on: "";
+    value_off: "";
+    style: @SBSTYLE_3D_XBOX;
+    signal_id: "";
+    bind_checked_signal: "";
+    color: color(127, 127, 127);
+    text_color: color(0, 0, 0);
+    interior_color: color(0, 0, 0, 0);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        name: name,
+        alt: alt,
+        bind: bind,
+        bind_controller: bind_controller,
+        bind_view: bind_view,
+        value_on: value_on,
+        value_off: value_off,
+        style: style,
+        signal_id: signal_id,
+        bind_checked_signal: bind_checked_signal,
+        color: color,
+        text_color: text_color,
+        interior_color: interior_color
+    };
+}

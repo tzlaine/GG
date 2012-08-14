@@ -20,26 +20,6 @@ layout widget
             edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @checkbox)
-        {
-            edit_text(name: "name", bind: @widget_name, alt: 'The text that appears to the right of the checkbox.');
-            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the checkbox.');
-            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "bind_controller", bind: @widget_bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-            edit_text(name: "bind_view", bind: @widget_bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-            edit_text(name: "value_on", bind: @widget_value_on, alt: 'The value emitted when checking the checkbox.');
-            edit_text(name: "value_off", bind: @widget_value_off, alt: 'The value emitted when unchecking the checkbox.');
-            edit_text(name: "style", bind: @widget_style, alt: 'The style in which to render the checkbox.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
-            edit_text(name: "signal_id", bind: @widget_signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-            edit_text(name: "bind_checked_signal", bind: @widget_bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the checkbox.');
-                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the checkbox text.');
-                color_button(name: "interior_color", bind: @widget_interior_color, alt: 'The color in which to render the interior of the checkbox.');
-            }
-        }
         panel(bind: @view_type, value: @control_button)
         {
             edit_text(name: "name", bind: @widget_name, alt: 'The text that appears on the control_button.');

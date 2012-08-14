@@ -1,0 +1,55 @@
+sheet progress_bar_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "";
+    bind: "";
+    orientation: @horizontal;
+    format_first: 0;
+    format_second: 0;
+    format_intervals: 0;
+    length: 100;
+    width: 14;
+    color: color(127, 127, 127);
+    bar_color: color(b: 255);
+    interior_color: color(0, 0, 0, 0);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        bind: bind,
+        orientation: orientation,
+        format: {first: format_first, last: format_second, interval_count: format_intervals},
+        length: length,
+        width: width,
+        color: color,
+        bar_color: bar_color,
+        interior_color: interior_color
+    };
+}

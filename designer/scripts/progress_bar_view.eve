@@ -1,0 +1,36 @@
+layout progress_bar_view
+{
+    view dialog(placement: place_column)
+    {
+        edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+        popup(name: "orientation",
+              items: [
+                  {name: "horizontal", value: @horizontal},
+                  {name: "vertical", value: @vertical}
+              ],
+              bind: @orientation,
+              alt: 'The orientation of the progress_bar (horizontal or vertical).');
+        edit_number(name: "min_value", bind: @format_first, alt: 'The minimum value the progress_bar can take.');
+        edit_number(name: "max_value", bind: @format_second, alt: 'The maximum value the progress_bar can take.');
+        edit_number(name: "interval_count", bind: @format_intervals, alt: 'The number of intervals used in the progress_bar.');
+        edit_number(name: "length", bind: @length, alt: 'The length in pixels that the progress_bar should be, in the direction of orientation.');
+        edit_number(name: "width", bind: @width, alt: 'The length in pixels that the progress_bar should be, in the direction perpendicular to orientation.');
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
+        {
+            popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+
+        reveal(name: "Colors", bind: @show_colors);
+        optional(bind: @show_colors)
+        {
+            color_button(name: "color", bind: @color, alt: 'The color in which to render the border of the progress_bar.');
+            color_button(name: "bar_color", bind: @bar_color, alt: 'The color in which to render the bar within the progress_bar.');
+            color_button(name: "interior_color", bind: @interior_color, alt: 'The color in which to render the interior of the progress_bar.');
+        }
+    }
+}

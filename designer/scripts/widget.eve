@@ -35,16 +35,6 @@ layout widget
         edit_number(name: "indent", bind: @widget_indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
         edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
 
-        panel(bind: @view_type, value: @optional)
-        {
-            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "value", bind: @widget_value, alt: 'The value of the bound cell that causes the optional to be shown.');
-        }
-        panel(bind: @view_type, value: @panel)
-        {
-            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "value", bind: @widget_value, alt: 'The value of the bound cell that causes the panel to be shown.');
-        }
         panel(bind: @view_type, value: @tab_group)
         {
             edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');

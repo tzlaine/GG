@@ -11,25 +11,6 @@ layout widget
             edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @radio_button)
-        {
-            edit_text(name: "name", bind: @name, alt: 'The text that appears to the right of the radio_button.');
-            edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the radio_button.');
-            edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-            edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-            edit_text(name: "value", bind: @value, alt: 'The value emitted when checking the radio_button.');
-            edit_text(name: "style", bind: @style, alt: 'The style in which to render the radio_button.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
-            edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-            edit_text(name: "bind_checked_signal", bind: @bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the radio_button.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @color, alt: 'The color in which to render the radio_button.');
-                color_button(name: "text_color", bind: @text_color, alt: 'The color in which to render the radio_button label.');
-                color_button(name: "interior_color", bind: @interior_color, alt: 'The color in which to render the interior of the radio_button.');
-            }
-        }
         panel(bind: @view_type, value: @reveal)
         {
             edit_text(name: "name", bind: @name, alt: 'The text that appears to the right of the reveal.');
@@ -38,12 +19,12 @@ layout widget
             edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
             edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
             edit_text(name: "value_on", bind: @value_on, alt: 'The value associated with the "show" state of the reveal.');
-            edit_text(name: "showing_unpressed", bind: @showing_image_unpressed, alt: 'The unpressed graphic to use to render the reveal's showing-button.');
-            edit_text(name: "showing_rollover", bind: @showing_image_rollover, alt: 'The rollover graphics to use to render the reveal's showing-button.');
-            edit_text(name: "showing_pressed", bind: @showing_image_pressed, alt: 'The pressed graphic to use to render the reveal's showing-button.');
-            edit_text(name: "hiding_unpressed", bind: @hiding_image_unpressed, alt: 'The unpressed graphic to use to render the reveal's hiding-button.');
-            edit_text(name: "hiding_rollover", bind: @hiding_image_rollover, alt: 'The rollover graphics to use to render the reveal's hiding-button.');
-            edit_text(name: "hiding_pressed", bind: @hiding_image_pressed, alt: 'The pressed graphic to use to render the reveal's hiding-button.');
+            edit_text(name: "showing_unpressed", bind: @showing_unpressed, alt: 'The unpressed graphic to use to render the reveal's showing-button.');
+            edit_text(name: "showing_rollover", bind: @showing_rollover, alt: 'The rollover graphics to use to render the reveal's showing-button.');
+            edit_text(name: "showing_pressed", bind: @showing_pressed, alt: 'The pressed graphic to use to render the reveal's showing-button.');
+            edit_text(name: "hiding_unpressed", bind: @hiding_unpressed, alt: 'The unpressed graphic to use to render the reveal's hiding-button.');
+            edit_text(name: "hiding_rollover", bind: @hiding_rollover, alt: 'The rollover graphics to use to render the reveal's hiding-button.');
+            edit_text(name: "hiding_pressed", bind: @hiding_pressed, alt: 'The pressed graphic to use to render the reveal's hiding-button.');
             reveal(name: "Colors", bind: @show_colors);
             optional(bind: @show_colors)
             {

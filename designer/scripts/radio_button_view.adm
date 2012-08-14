@@ -1,4 +1,4 @@
-sheet checkbox_view
+sheet radio_button_view
 {
 interface:
     show_layout: false;
@@ -39,9 +39,8 @@ interface:
     bind: "";
     bind_controller: "";
     bind_view: "";
-    value_on: "";
-    value_off: "";
-    style: @xbox;
+    value: "";
+    style: @radio;
     signal_id: "";
     bind_checked_signal: "";
     color: color(127, 127, 127);
@@ -59,8 +58,7 @@ output:
         bind: bind,
         bind_controller: bind_controller,
         bind_view: bind_view,
-        value_on: value_on,
-        value_off: value_off,
+        value: value,
         style: style,
         signal_id: signal_id,
         bind_checked_signal: bind_checked_signal,

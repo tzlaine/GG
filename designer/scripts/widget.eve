@@ -11,33 +11,6 @@ layout widget
             edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @edit_text)
-        {
-            edit_text(name: "name", bind: @name, alt: 'The text label that appears to the left of the display_text.');
-            edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
-            edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
-            edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-            edit_number(name: "characters", bind: @characters, alt: 'The minimum width of the edit_text, based on space needed to see this many characters.');
-            edit_number(name: "max_characters", bind: @max_characters, alt: 'The maximum number of characters the user is allowed to type into the edit_text.  This only applies when lines is 1.');
-            edit_number(name: "lines", bind: @lines, alt: 'The number of lines high the edit_text should be.');
-            checkbox(name: "scrollable", bind: @scrollable, alt: 'Whether the edit_text has scrollbars.  This only applies when lines is greater than 1.');
-            checkbox(name: "read_only", bind: @read_only, alt: 'Whether the edit_text is read-only or editable.');
-            checkbox(name: "terminal_style", bind: @terminal_style, alt: 'Whether the edit_text keeps the bottom of the text visible, as in a console terminal, or the top, when auto-scrolling.  This only applies when lines is greater than 1.');
-            checkbox(name: "wrap", bind: @wrap, alt: 'Whether lines should be wrapped when they exceed the width of the edit_text.  This only applies when lines is greater than 1.');
-            checkbox(name: "password", bind: @password, alt: 'Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.');
-            edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-            edit_text(name: "bind_edited_signal", bind: @bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.');
-            edit_text(name: "bind_focus_update_signal", bind: @bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @color, alt: 'The color in which to render the edit_text.');
-                color_button(name: "text_color", bind: @text_color, alt: 'The color in which to render the editable text.');
-                color_button(name: "interior_color", bind: @interior_color, alt: 'The color in which to render the interior of the number edit box.');
-                color_button(name: "label_color", bind: @label_color, alt: 'The color in which to render the edit_text's label.');
-            }
-        }
         panel(bind: @view_type, value: @popup)
         {
             edit_text(name: "name", bind: @name, alt: 'The text label that appears to the left of the popup.');

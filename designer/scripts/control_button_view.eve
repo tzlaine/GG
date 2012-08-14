@@ -1,0 +1,26 @@
+layout control_button_view
+{
+    view dialog(placement: place_column)
+    {
+        edit_text(name: "name", bind: @name, alt: 'The text that appears on the control_button.');
+        edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the control_button.');
+        edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+        edit_text(name: "expression", bind: @expression, alt: 'The expression to be evaluated when the control_button is clicked, in a string.');
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
+        {
+            popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+
+        reveal(name: "Colors", bind: @show_colors);
+        optional(bind: @show_colors)
+        {
+            color_button(name: "color", bind: @color, alt: 'The color in which to render the button.');
+            color_button(name: "text_color", bind: @text_color, alt: 'The color in which to render the button label.');
+        }
+    }
+}

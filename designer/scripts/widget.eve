@@ -2,15 +2,6 @@ layout widget
 {
     view dialog(placement: place_column)
     {
-        reveal(name: "Container Layout Parameters", bind: @show_container_layout);
-        optional(bind: @show_container_layout)
-        {
-            popup(name: "placement", bind: @widget_placement, items: @placements, alt: 'The placement of views within this container.');
-            popup(name: "child_horizontal", bind: @widget_child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
-            popup(name: "child_vertical", bind: @widget_child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
-            edit_text(name: "spacing", bind: @widget_spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
-        }
-
         reveal(name: "Layout Parameters", bind: @show_layout);
         optional(bind: @show_layout)
         {
@@ -20,19 +11,6 @@ layout widget
             edit_text(name: "margin", bind: @widget_margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @control_button)
-        {
-            edit_text(name: "name", bind: @widget_name, alt: 'The text that appears on the control_button.');
-            edit_text(name: "alt", bind: @widget_alt, alt: 'The tooltip text that appears when the cursor hovers over the control_button.');
-            edit_text(name: "bind", bind: @widget_bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_text(name: "expression", bind: @widget_expression, alt: 'The expression to be evaluated when the control_button is clicked, in a string.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @widget_color, alt: 'The color in which to render the button.');
-                color_button(name: "text_color", bind: @widget_text_color, alt: 'The color in which to render the button label.');
-            }
-        }
         panel(bind: @view_type, value: @image)
         {
             edit_text(name: "image", bind: @widget_image, alt: 'The graphic to use in the image.  This may be a GG::SubTexture, a GG::Texture, or a filename.');

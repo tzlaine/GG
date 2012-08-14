@@ -2,16 +2,21 @@ layout dialog_view
 {
     view dialog(placement: place_column)
     {
-        popup(name: "placement", bind: @placement, items: @placements, alt: 'The placement of views within this container.');
-        popup(name: "child_horizontal", bind: @child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
-        popup(name: "child_vertical", bind: @child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
-        edit_text(name: "spacing", bind: @spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
-
         edit_text(name: "name", bind: @name, alt: 'The title text that appears on the dialog box.');
         checkbox(name: "grow", bind: @grow, alt: 'Whether the dialog box should be resizable.');
         checkbox(name: "move", bind: @move, alt: 'Whether the dialog box should be movable.');
         checkbox(name: "on_top", bind: @on_top, alt: 'Whether the dialog box should be always-on-top.');
         checkbox(name: "modal", bind: @modal, alt: 'Whether the dialog box should be modal.');
+
+        reveal(name: "Container Layout Parameters", bind: @show_container_layout);
+        optional(bind: @show_container_layout)
+        {
+            popup(name: "placement", bind: @placement, items: @placements, alt: 'The placement of views within this container.');
+            popup(name: "child_horizontal", bind: @child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
+            popup(name: "child_vertical", bind: @child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
+            edit_text(name: "spacing", bind: @spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
+        }
+
         reveal(name: "Colors", bind: @show_colors);
         optional(bind: @show_colors)
         {

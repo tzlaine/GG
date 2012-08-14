@@ -1,6 +1,6 @@
 layout dialog_view
 {
-    view dialog()
+    view dialog(placement: place_column)
     {
         popup(name: "placement", bind: @placement, items: @placements, alt: 'The placement of views within this container (see eve_placements).');
         popup(name: "child_horizontal", bind: @child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container (see eve_alignments).');

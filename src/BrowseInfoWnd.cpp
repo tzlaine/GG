@@ -128,11 +128,10 @@ unsigned int TextBoxBrowseInfoWnd::TextMargin() const
 
 void TextBoxBrowseInfoWnd::SetText(const std::string& str)
 {
-    unsigned int margins = 2 * TextMargin();
-    Pt extent = m_font->TextExtent(str, GetTextFormat(), m_preferred_width - X(margins));
-    SetMinSize(extent + Pt(X(margins), Y(margins)));
+    const GG::Pt margins(X(2 * TextMargin()), Y(2 * TextMargin()));
+    Pt extent = m_font->TextExtent(str, GetTextFormat(), m_preferred_width);
+    Resize(extent + margins);
     m_text_control->SetText(str);
-    Resize(extent + Pt(X(margins), Y0));
     if (str.empty())
         Hide();
     else

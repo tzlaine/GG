@@ -11,19 +11,6 @@ layout widget
             edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
-        panel(bind: @view_type, value: @display_text)
-        {
-            edit_text(name: "name", bind: @name, alt: 'The text label that appears to the left of the display_text.');
-            edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the display_text.');
-            edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-            edit_number(name: "characters", bind: @characters, alt: 'The minimum width of the display_text, in text of characters.');
-            reveal(name: "Colors", bind: @show_colors);
-            optional(bind: @show_colors)
-            {
-                color_button(name: "color", bind: @color, alt: 'The color in which to render the displayed text.');
-                color_button(name: "label_color", bind: @label_color, alt: 'The color in which to render the label text.');
-            }
-        }
         panel(bind: @view_type, value: @display_number)
         {
             edit_text(name: "name", bind: @name, alt: 'The text label that appears to the left of the display_number.');

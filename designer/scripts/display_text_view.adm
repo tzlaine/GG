@@ -1,0 +1,49 @@
+sheet display_text_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "";
+    name: "";
+    alt: "";
+    bind: "";
+    characters: 5;
+    color: color(127, 127, 127);
+    label_color: color(0, 0, 0);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        name: name,
+        alt: alt,
+        bind: bind,
+        characters: characters,
+        color: color,
+        label_color: label_color
+    };
+}

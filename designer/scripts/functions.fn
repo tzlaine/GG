@@ -1,0 +1,12 @@
+range_format(format_first, format_second, format_intervals) {
+    if (format_first == 0 && format_second == 0 && format_intervals == 0)
+        return @sentinel_value;
+    retval: {};
+    if (format_first != 0)
+        retval = insert(retval, @first, format_first);
+    if (format_second != 0)
+        retval = insert(retval, @last, format_second);
+    if (format_intervals != 0)
+        retval = insert(retval, @interval_count, format_intervals);
+    return retval;
+}

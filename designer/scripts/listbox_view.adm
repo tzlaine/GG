@@ -1,0 +1,93 @@
+sheet listbox_view
+{
+interface:
+    show_layout: false;
+    show_colors: false;
+
+    horizontal_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_left", value: @align_left},
+        {name: "align_right", value: @align_right},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    vertical_alignments: [
+        {name: "Default", value: @default},
+        {name: "align_top", value: @align_top},
+        {name: "align_bottom", value: @align_bottom},
+        {name: "align_center", value: @align_center},
+        {name: "align_proportional", value: @align_proportional},
+        {name: "align_fill", value: @align_fill}
+    ];
+
+    horizontal: @default;
+    vertical: @default;
+    indent: 0;
+    margin: "";
+    name: "";
+    alt: "";
+    bind: "";
+    bind_controller: "";
+    bind_view: "";
+    items: "";
+    characters: 25;
+    rows: 0;
+    sort: false;
+    sort_order: @ascending;
+    selections: @single;
+    user_delete: false;
+    browse_updates: false;
+    signal_id: "";
+    bind_selection_changed_signal: "";
+    bind_dropped_signal: "";
+    bind_drop_acceptable_signal: "";
+    bind_left_clicked_signal: "";
+    bind_right_clicked_signal: "";
+    bind_double_clicked_signal: "";
+    bind_erased_signal: "";
+    bind_browsed_signal: "";
+    allowed_drop_types: "";
+    color: color(127, 127, 127);
+    interior_color: color(0, 0, 0, 0);
+    label_color: color(0, 0, 0);
+    item_text_color: color(0, 0, 0);
+    hilite_color: color(b: 255);
+
+output:
+    result <== {
+        horizontal: horizontal,
+        vertical: vertical,
+        indent: indent,
+        margin: margin,
+        name: name,
+        alt: alt,
+        bind: bind,
+        bind_controller: bind_controller,
+        bind_view: bind_view,
+        items: items,
+        characters: characters,
+        rows: rows,
+        sort: sort,
+        sort_order: sort_order,
+        selections: selections,
+        user_delete: user_delete,
+        browse_updates: browse_updates,
+        signal_id: signal_id,
+        bind_selection_changed_signal: bind_selection_changed_signal,
+        bind_dropped_signal: bind_dropped_signal,
+        bind_drop_acceptable_signal: bind_drop_acceptable_signal,
+        bind_left_clicked_signal: bind_left_clicked_signal,
+        bind_right_clicked_signal: bind_right_clicked_signal,
+        bind_double_clicked_signal: bind_double_clicked_signal,
+        bind_erased_signal: bind_erased_signal,
+        bind_browsed_signal: bind_browsed_signal,
+        allowed_drop_types: allowed_drop_types,
+        color: color,
+        interior_color: interior_color,
+        label_color: label_color,
+        item_text_color: item_text_color,
+        hilite_color: hilite_color
+    };
+}

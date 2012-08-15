@@ -1,0 +1,62 @@
+layout listbox_view
+{
+    view dialog(placement: place_column)
+    {
+        edit_text(name: "name", bind: @name, alt: 'The text label that appears to the left of the listbox.');
+        edit_text(name: "alt", bind: @alt, alt: 'The tooltip text that appears when the cursor hovers over the listbox.');
+        edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
+        edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
+        edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
+        edit_text(name: "items", bind: @items, lines: 5, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the listbox -- each name appears in the listbox, and each value is the value emitted when the item is selected in the listbox.  Optionally, drag_drop_data_type may be specified as well.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the listbox items.');
+        edit_number(name: "characters", bind: @characters, alt: 'The width of the listbox, in number of characters.');
+        edit_number(name: "rows", bind: @rows, alt: 'The height of the listbox, in number of rows.');
+        checkbox(name: "sort", bind: @sort, alt: 'Whether the rows should be shown in the order added to the listbox, or in sorted order.');
+        popup(name: "sort_order",
+              items: [
+                  {name: "ascending", value: @ascending},
+                  {name: "descending", value: @descending}
+              ],
+              bind: @sort_order,
+              alt: 'The direction in which to sort the rows.  Must be either ascending or descending.');
+        popup(name: "selections",
+              items: [
+                  {name: "none", value: @none},
+                  {name: "single", value: @single},
+                  {name: "quick", value: @quick},
+                  {name: "multiple", value: @multiple}
+              ],
+              bind: @selections,
+              alt: 'The policy for click-selecting rows.  Must be one of none (no selections), single (one row selected at a time), quick (each click toggles the clicked row without affecting the others), or multiple (the default, including shift- and ctrl-clicks).');
+        checkbox(name: "user_delete", bind: @user_delete, alt: 'Whether the user is allowed to delete rows by pressing the delete key.');
+        checkbox(name: "browse_updates", bind: @browse_updates, alt: 'Whether moving the mouse over the listbox emits the row currently under the cursor.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+        edit_text(name: "bind_selection_changed_signal", bind: @bind_selection_changed_signal, alt: 'Binds GG::ListBox::SelChangedSignal.  The value emitted is an array of eve_listbox_signal_row "signal rows".');
+        edit_text(name: "bind_dropped_signal", bind: @bind_dropped_signal, alt: 'Binds GG::ListBox::DroppedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+        edit_text(name: "bind_drop_acceptable_signal", bind: @bind_drop_acceptable_signal, alt: 'Binds GG::ListBox::DropAcceptableSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+        edit_text(name: "bind_left_clicked_signal", bind: @bind_left_clicked_signal, alt: 'Binds GG::ListBox::LeftClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
+        edit_text(name: "bind_right_clicked_signal", bind: @bind_right_clicked_signal, alt: 'Binds GG::ListBox::RightClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
+        edit_text(name: "bind_double_clicked_signal", bind: @bind_double_clicked_signal, alt: 'Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
+        edit_text(name: "bind_erased_signal", bind: @bind_erased_signal, alt: 'Binds GG::ListBox::ErasedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+        edit_text(name: "bind_browsed_signal", bind: @bind_browsed_signal, alt: 'Binds GG::ListBox::BrowsedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+        edit_text(name: "allowed_drop_types", bind: @allowed_drop_types, lines: 2, alt: 'An array of strings indicating the drag and drop types accepted by the listbox.');
+
+        reveal(name: "Layout Parameters", bind: @show_layout);
+        optional(bind: @show_layout)
+        {
+            popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
+            popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
+            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+
+        reveal(name: "Colors", bind: @show_colors);
+        optional(bind: @show_colors)
+        {
+            color_button(name: "color", bind: @color, alt: 'The color in which to render the listbox.');
+            color_button(name: "interior_color", bind: @interior_color, alt: 'The color in which to render the interior of the listbox.');
+            color_button(name: "label_color", bind: @label_color, alt: "The color in which to render the listbox's label.");
+            color_button(name: "item_text_color", bind: @item_text_color, alt: 'The color in which to render the text of the items in the listbox.');
+            color_button(name: "hilite_color", bind: @hilite_color, alt: 'The color in which to render the hiliting of selected items in the listbox.');
+        }
+    }
+}

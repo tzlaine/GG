@@ -47,7 +47,7 @@ output:
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
         spacing: spacing,
-        name: name,
+        name: name != "" ? name : @sentinel_value,
         grow: grow,
         move: move,
         on_top: on_top,

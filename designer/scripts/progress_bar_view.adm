@@ -41,9 +41,9 @@ output:
     result <== {
         horizontal: horizontal,
         vertical: vertical,
-        indent: indent,
-        margin: margin,
-        bind: bind,
+        indent: indent != 0 ? indent : @sentinel_value,
+        margin: margin != "" ? margin : @sentinel_value,
+        bind: bind != "" ? bind : @sentinel_value,
         orientation: orientation,
         format: {first: format_first, last: format_second, interval_count: format_intervals},
         length: length,

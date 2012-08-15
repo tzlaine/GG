@@ -15,7 +15,7 @@ layout edit_text_view
         checkbox(name: "terminal_style", bind: @terminal_style, alt: 'Whether the edit_text keeps the bottom of the text visible, as in a console terminal, or the top, when auto-scrolling.  This only applies when lines is greater than 1.');
         checkbox(name: "wrap", bind: @wrap, alt: 'Whether lines should be wrapped when they exceed the width of the edit_text.  This only applies when lines is greater than 1.');
         checkbox(name: "password", bind: @password, alt: 'Whether the characters typed into the edit_text appear as they are typed, or whether they are obscured, as in a password entry box.');
-        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_edited_signal", bind: @bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.');
         edit_text(name: "bind_focus_update_signal", bind: @bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.');
 

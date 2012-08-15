@@ -67,7 +67,7 @@ layout button_view
         edit_text(name: "unpressed", bind: @unpressed, alt: 'The unpressed graphic to use to render the button.');
         edit_text(name: "rollover", bind: @rollover, alt: 'The rollover graphic to use to render the button.');
         edit_text(name: "pressed", bind: @pressed, alt: 'The pressed graphic to use to render the button.');
-        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the id parameter of eve_signal_handler.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the id parameter of the signal handler.');
         edit_text(name: "bind_clicked_signal", bind: @bind_clicked_signal, alt: 'Binds GG::Button::ClickedSignal.  The value emitted is value.');
 
         reveal(name: "Layout Parameters", bind: @show_layout);

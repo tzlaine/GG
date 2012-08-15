@@ -10,7 +10,7 @@ layout popup_view
         edit_text(name: "items", bind: @items, lines: 5, alt: 'An array of dictionaries.  Each dictionary has a name and a value element defining an item in the popup -- each name appears in the popup, and each value is the value emitted when the item is selected in the popup.  A single name may be specified for items instead of an array.  In this case, the name specifies a cell in the Adam property sheet that will be used to supply the popup items.');
         edit_text(name: "custom_item_name", bind: @custom_item_name, alt: 'The name of the custom item in the popup.');
         edit_number(name: "max_characters", bind: @max_characters, alt: 'The width of the popup, in number of characters.');
-        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_selection_changed_signal", bind: @bind_selection_changed_signal, alt: 'Binds GG::DropDownList::SelChangedSignal.  The value emitted is the value emitted by the popup.');
 
         reveal(name: "Layout Parameters", bind: @show_layout);

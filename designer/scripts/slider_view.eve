@@ -21,7 +21,7 @@ layout slider_view
         edit_number(name: "tab_width", bind: @tab_width, alt: 'The size of the tab in the direction of orientation in pixels.');
         edit_number(name: "tab_length", bind: @tab_length, alt: 'The size of the tab in the direction perpendicular to orientation in pixels.');
         popup(name: "line_style", bind: @line_style, items: @line_styles, alt: 'The style in which to render the slider.  The style must be one of flat, raised, or grooved.');
-        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_slid_signal", bind: @bind_slid_signal, alt: 'Binds GG::Slider::SlidSignal.  The value emitted is {slider_pos: expr, slider_min: expr, slider_max: expr}.');
         edit_text(name: "bind_slid_and_stopped_signal", bind: @bind_slid_and_stopped_signal, alt: 'Binds GG::Slider::SlidAndStoppedSignal.  The value emitted is {slider_pos: expr, slider_min: expr, slider_max: expr}.');
 

@@ -10,7 +10,7 @@ layout checkbox_view
         edit_text(name: "value_on", bind: @value_on, alt: 'The value emitted when checking the checkbox.');
         edit_text(name: "value_off", bind: @value_off, alt: 'The value emitted when unchecking the checkbox.');
         popup(name: "style", bind: @style, items: @styles, alt: 'The style in which to render the checkbox.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
-        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_checked_signal", bind: @bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.');
 
         reveal(name: "Layout Parameters", bind: @show_layout);

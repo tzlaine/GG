@@ -29,15 +29,15 @@ layout listbox_view
               alt: 'The policy for click-selecting rows.  Must be one of none (no selections), single (one row selected at a time), quick (each click toggles the clicked row without affecting the others), or multiple (the default, including shift- and ctrl-clicks).');
         checkbox(name: "user_delete", bind: @user_delete, alt: 'Whether the user is allowed to delete rows by pressing the delete key.');
         checkbox(name: "browse_updates", bind: @browse_updates, alt: 'Whether moving the mouse over the listbox emits the row currently under the cursor.');
-        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of eve_signal_handler.');
-        edit_text(name: "bind_selection_changed_signal", bind: @bind_selection_changed_signal, alt: 'Binds GG::ListBox::SelChangedSignal.  The value emitted is an array of eve_listbox_signal_row "signal rows".');
-        edit_text(name: "bind_dropped_signal", bind: @bind_dropped_signal, alt: 'Binds GG::ListBox::DroppedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-        edit_text(name: "bind_drop_acceptable_signal", bind: @bind_drop_acceptable_signal, alt: 'Binds GG::ListBox::DropAcceptableSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-        edit_text(name: "bind_left_clicked_signal", bind: @bind_left_clicked_signal, alt: 'Binds GG::ListBox::LeftClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
-        edit_text(name: "bind_right_clicked_signal", bind: @bind_right_clicked_signal, alt: 'Binds GG::ListBox::RightClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
-        edit_text(name: "bind_double_clicked_signal", bind: @bind_double_clicked_signal, alt: 'Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single eve_listbox_click_signal_row "click row".');
-        edit_text(name: "bind_erased_signal", bind: @bind_erased_signal, alt: 'Binds GG::ListBox::ErasedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
-        edit_text(name: "bind_browsed_signal", bind: @bind_browsed_signal, alt: 'Binds GG::ListBox::BrowsedSignal.  The value emitted is a single eve_listbox_iterator_signal_row "iterator row".');
+        edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
+        edit_text(name: "bind_selection_changed_signal", bind: @bind_selection_changed_signal, alt: 'Binds GG::ListBox::SelChangedSignal.  The value emitted is an array of "signal rows".');
+        edit_text(name: "bind_dropped_signal", bind: @bind_dropped_signal, alt: 'Binds GG::ListBox::DroppedSignal.  The value emitted is a single "iterator row".');
+        edit_text(name: "bind_drop_acceptable_signal", bind: @bind_drop_acceptable_signal, alt: 'Binds GG::ListBox::DropAcceptableSignal.  The value emitted is a single "iterator row".');
+        edit_text(name: "bind_left_clicked_signal", bind: @bind_left_clicked_signal, alt: 'Binds GG::ListBox::LeftClickedSignal.  The value emitted is a single "click row".');
+        edit_text(name: "bind_right_clicked_signal", bind: @bind_right_clicked_signal, alt: 'Binds GG::ListBox::RightClickedSignal.  The value emitted is a single "click row".');
+        edit_text(name: "bind_double_clicked_signal", bind: @bind_double_clicked_signal, alt: 'Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single "click row".');
+        edit_text(name: "bind_erased_signal", bind: @bind_erased_signal, alt: 'Binds GG::ListBox::ErasedSignal.  The value emitted is a single "iterator row".');
+        edit_text(name: "bind_browsed_signal", bind: @bind_browsed_signal, alt: 'Binds GG::ListBox::BrowsedSignal.  The value emitted is a single "iterator row".');
         edit_text(name: "allowed_drop_types", bind: @allowed_drop_types, lines: 2, alt: 'An array of strings indicating the drag and drop types accepted by the listbox.');
 
         reveal(name: "Layout Parameters", bind: @show_layout);

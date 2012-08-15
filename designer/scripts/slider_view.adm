@@ -5,7 +5,7 @@ interface:
     show_colors: false;
 
     horizontal_alignments: [
-        {name: "Default", value: @default},
+        {name: "Default", value: @sentinel_value},
         {name: "align_left", value: @align_left},
         {name: "align_right", value: @align_right},
         {name: "align_center", value: @align_center},
@@ -14,7 +14,7 @@ interface:
     ];
 
     vertical_alignments: [
-        {name: "Default", value: @default},
+        {name: "Default", value: @sentinel_value},
         {name: "align_top", value: @align_top},
         {name: "align_bottom", value: @align_bottom},
         {name: "align_center", value: @align_center},
@@ -28,8 +28,8 @@ interface:
         {name: "grooved", value: @grooved}
     ];
 
-    horizontal: @default;
-    vertical: @default;
+    horizontal: @sentinel_value;
+    vertical: @sentinel_value;
     indent: 0;
     margin: "";
     alt: "";

@@ -8,7 +8,7 @@ layout label_view
         checkbox(name: "wrap", bind: @wrap, alt: "If true, the label's text is word-wrapped.");
         popup(name: "text_horizontal",
               items: [
-                  {name: "Default", value: @default},
+                  {name: "Default", value: @sentinel_value},
                   {name: "left", value: @align_left},
                   {name: "center", value: @align_center},
                   {name: "right", value: @align_right}
@@ -17,7 +17,7 @@ layout label_view
               alt: 'The horizontal alignment of the text (align_left, align_center, or align_right).');
         popup(name: "text_vertical",
               items: [
-                  {name: "Default", value: @default},
+                  {name: "Default", value: @sentinel_value},
                   {name: "top", value: @align_top},
                   {name: "center", value: @align_center},
                   {name: "bottom", value: @align_bottom}

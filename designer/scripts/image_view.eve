@@ -10,7 +10,7 @@ layout image_view
         edit_number(name: "height", bind: @height, alt: 'The height of the space in which to render the image, in pixels.');
         popup(name: "horizontal",
               items: [
-                  {name: "Default", value: @default},
+                  {name: "Default", value: @sentinel_value},
                   {name: "left", value: @align_left},
                   {name: "center", value: @align_center},
                   {name: "right", value: @align_right}
@@ -19,7 +19,7 @@ layout image_view
               alt: 'The horizontal placement of the image within width (align_left, align_center, or align_right).');
         popup(name: "vertical",
               items: [
-                  {name: "Default", value: @default},
+                  {name: "Default", value: @sentinel_value},
                   {name: "top", value: @align_top},
                   {name: "center", value: @align_center},
                   {name: "bottom", value: @align_bottom}

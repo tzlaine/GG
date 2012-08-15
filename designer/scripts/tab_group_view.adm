@@ -6,7 +6,7 @@ interface:
     show_colors: false;
 
     horizontal_alignments: [
-        {name: "Default", value: @default},
+        {name: "Default", value: @sentinel_value},
         {name: "align_left", value: @align_left},
         {name: "align_right", value: @align_right},
         {name: "align_center", value: @align_center},
@@ -15,7 +15,7 @@ interface:
     ];
 
     vertical_alignments: [
-        {name: "Default", value: @default},
+        {name: "Default", value: @sentinel_value},
         {name: "align_top", value: @align_top},
         {name: "align_bottom", value: @align_bottom},
         {name: "align_center", value: @align_center},
@@ -24,7 +24,7 @@ interface:
     ];
 
     placements: [
-        {name: "Default", value: @default},
+        {name: "Default", value: @sentinel_value},
         {name: "place_row", value: @place_row},
         {name: "place_column", value: @place_column},
         {name: "place_overlay", value: @place_overlay}
@@ -35,11 +35,11 @@ interface:
         {name: "detached", value: @detached}
     ];
 
-    child_horizontal: @default;
-    child_vertical: @default;
+    child_horizontal: @sentinel_value;
+    child_vertical: @sentinel_value;
     spacing: "Default";
-    horizontal: @default;
-    vertical: @default;
+    horizontal: @sentinel_value;
+    vertical: @sentinel_value;
     indent: 0;
     margin: "Default";
     bind: "";

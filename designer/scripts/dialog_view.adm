@@ -32,7 +32,7 @@ interface:
     placement: @sentinel_value;
     child_horizontal: @sentinel_value;
     child_vertical: @sentinel_value;
-    spacing: "Default";
+    spacing: "";
     name: "";
     grow: false;
     move: true;
@@ -46,13 +46,13 @@ output:
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
-        spacing: spacing,
+        spacing: spacing != "" ? spacing : @sentinel_value,
         name: name != "" ? name : @sentinel_value,
-        grow: grow,
-        move: move,
-        on_top: on_top,
-        modal: modal,
-        color: color,
-        text_color: text_color
+        grow: grow != false ? grow : @sentinel_value,
+        move: move != true ? move : @sentinel_value,
+        on_top: on_top != false ? on_top : @sentinel_value,
+        modal: modal != true ? modal : @sentinel_value,
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value
     };
 }

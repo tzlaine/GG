@@ -10,3 +10,9 @@ range_format(format_first, format_second, format_intervals) {
         retval = insert(retval, @interval_count, format_intervals);
     return retval;
 }
+
+button_images(unpressed, rollover, pressed) {
+    if (unpressed == '' && rollover == '' && pressed == '')
+        return @sentinel_value;
+    return {unpressed: unpressed, rollover: rollover, pressed: pressed};
+}

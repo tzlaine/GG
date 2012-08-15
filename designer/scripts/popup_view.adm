@@ -51,13 +51,13 @@ output:
         bind: bind != "" ? bind : @sentinel_value,
         bind_controller: bind == "" && bind_controller != "" ? bind_controller : @sentinel_value,
         bind_view: bind == "" && bind_view != "" ? bind_view : @sentinel_value,
-        items: items,
-        custom_item_name: custom_item_name,
+        items: items != "" ? items : @sentinel_value,
+        custom_item_name: custom_item_name != "Custom" ? custom_item_name : @sentinel_value,
         max_characters: max_characters,
-        signal_id: signal_id,
-        bind_selection_changed_signal: bind_selection_changed_signal,
-        color: color,
-        label_color: label_color,
-        item_text_color: item_text_color
+        signal_id: signal_id != "" ? signal_id : @sentinel_value,
+        bind_selection_changed_signal: bind_selection_changed_signal != "" ? bind_selection_changed_signal : @sentinel_value,
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value,
+        item_text_color: item_text_color != color(0, 0, 0) ? item_text_color : @sentinel_value
     };
 }

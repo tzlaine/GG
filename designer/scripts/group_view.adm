@@ -33,11 +33,11 @@ interface:
     placement: @sentinel_value;
     child_horizontal: @sentinel_value;
     child_vertical: @sentinel_value;
-    spacing: "Default";
+    spacing: "";
     horizontal: @sentinel_value;
     vertical: @sentinel_value;
     indent: 0;
-    margin: "Default";
+    margin: "";
     name: "";
     alt: "";
     color: color(127, 127, 127);
@@ -49,15 +49,15 @@ output:
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
-        spacing: spacing,
+        spacing: spacing != "" ? spacing : @sentinel_value,
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
         margin: margin != "" ? margin : @sentinel_value,
         name: name != "" ? name : @sentinel_value,
         alt: alt != "" ? alt : @sentinel_value,
-        color: color,
-        text_color: text_color,
-        interior_color: interior_color
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
+        interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value
     };
 }

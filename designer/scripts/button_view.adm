@@ -34,7 +34,7 @@ interface:
     horizontal: @sentinel_value;
     vertical: @sentinel_value;
     indent: 0;
-    margin: "Default";
+    margin: "";
     name: "";
     alt: "";
     bind: "";
@@ -69,7 +69,7 @@ output:
                  )
             ),
         value: button_use == @button_use_action ?
-            "" :
+            @sentinel_value :
             (button_use == @button_use_action ?
                  action_value :
                  ((button_use == @button_use_dialog && dialog_type == @dialog_type_dependent) ?
@@ -78,21 +78,21 @@ output:
                            {adam_script: value_adam_script, eve_script: value_eve_script, bind_result: value_bind_result} :
                            ((button_use == @button_use_dialog && dialog_type == @dialog_type_standard) ?
                                 {name: dialog_name, dialog_parameters: value_dialog_parameters, bind_result: value_bind_result} :
-                                ""
+                                @sentinel_value
                            )
                       )
                  )
             ),
-        bind: button_use == @button_use_action ? bind : empty,
-        bind_output: button_use == @button_use_set_cell ? bind_output : empty,
-        default: default,
-        cancel: cancel,
-        unpressed: unpressed,
-        rollover: rollover,
-        pressed: pressed,
-        signal_id: signal_id,
-        bind_clicked_signal: bind_clicked_signal,
-        color: color,
-        text_color: text_color
+        bind: button_use == @button_use_action ? bind : @sentinel_value,
+        bind_output: button_use == @button_use_set_cell ? bind_output : @sentinel_value,
+        default: default != false ? default : @sentinel_value,
+        cancel: cancel != false ? cancel : @sentinel_value,
+        unpressed: unpressed != "" ? unpressed : @sentinel_value,
+        rollover: rollover != "" ? rollover : @sentinel_value,
+        pressed: pressed != "" ? pressed : @sentinel_value,
+        signal_id: signal_id != "" ? signal_id : @sentinel_value,
+        bind_clicked_signal: bind_clicked_signal != "" ? bind_clicked_signal : @sentinel_value,
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value
     };
 }

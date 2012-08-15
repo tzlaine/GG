@@ -58,12 +58,12 @@ output:
         bind: bind != "" ? bind : @sentinel_value,
         bind_controller: bind == "" && bind_controller != "" ? bind_controller : @sentinel_value,
         bind_view: bind == "" && bind_view != "" ? bind_view : @sentinel_value,
-        value: value,
-        style: style,
-        signal_id: signal_id,
-        bind_checked_signal: bind_checked_signal,
-        color: color,
-        text_color: text_color,
-        interior_color: interior_color
+        value: value != "" ? value : @sentinel_value,
+        style: style != @radio ? style : @sentinel_value,
+        signal_id: signal_id != "" ? signal_id : @sentinel_value,
+        bind_checked_signal: bind_checked_signal != "" ? bind_checked_signal : @sentinel_value,
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
+        interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value
     };
 }

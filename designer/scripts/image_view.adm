@@ -44,16 +44,16 @@ output:
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
         margin: margin != "" ? margin : @sentinel_value,
-        image: image,
+        image: image != "" ? image : @sentinel_value,
         bind: bind != "" ? bind : @sentinel_value,
         bind_controller: bind == "" && bind_controller != "" ? bind_controller : @sentinel_value,
         bind_view: bind == "" && bind_view != "" ? bind_view : @sentinel_value,
-        width: width,
-        height: height,
+        width: width != 0 ? width : @sentinel_value,
+        height: height != 0 ? height : @sentinel_value,
         image_horizontal: image_horizontal,
         image_vertical: image_vertical,
-        fit_graphic: fit_graphic,
-        shrink_to_fit: shrink_to_fit,
-        proportional: proportional
+        fit_graphic: fit_graphic != true ? fit_graphic : @sentinel_value,
+        shrink_to_fit: shrink_to_fit != false ? shrink_to_fit : @sentinel_value,
+        proportional: proportional != true ? proportional : @sentinel_value
     };
 }

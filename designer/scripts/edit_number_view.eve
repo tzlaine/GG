@@ -10,7 +10,7 @@ layout edit_number_view
         edit_text(name: "bind_units", bind: @bind_units, alt: "The cell in the Adam property sheet to which this edit_number's unit type is bound.");
         edit_number(name: "digits", bind: @digits, alt: 'The minimum width of the edit_number, in number of characters.');
         edit_number(name: "max_digits", bind: @max_digits, alt: 'The maximum number of characters the user is allowed to type into the edit_number.');
-        edit_text(name: "units", bind: @units, lines: 10, alt: 'An array of number units.');
+        edit_text(name: "units", bind: @units, lines: 5, alt: 'An array of number units.');
         edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_edited_signal", bind: @bind_edited_signal, alt: 'Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_number.');
         edit_text(name: "bind_focus_update_signal", bind: @bind_focus_update_signal, alt: 'Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_number.');

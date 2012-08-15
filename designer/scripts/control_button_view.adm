@@ -42,8 +42,8 @@ output:
         name: name != "" ? name : @sentinel_value,
         alt: alt != "" ? alt : @sentinel_value,
         bind: bind != "" ? bind : @sentinel_value,
-        expression: expression,
-        color: color,
-        text_color: text_color
+        expression: expression != "" ? expression : @sentinel_value,
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value
     };
 }

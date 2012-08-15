@@ -51,9 +51,9 @@ output:
         bind: bind != "" ? bind : @sentinel_value,
         bind_controller: bind == "" && bind_controller != "" ? bind_controller : @sentinel_value,
         bind_view: bind == "" && bind_view != "" ? bind_view : @sentinel_value,
-        value_on: value_on,
-        showing_image: {unpressed: showing_unpressed, rollover: showing_rollover, pressed: showing_pressed},
-        hiding_image: {unpressed: hiding_unpressed, rollover: hiding_rollover, pressed: hiding_pressed},
-        label_color: label_color
+        value_on: value_on != "true" ? value_on : @sentinel_value,
+        showing_image: button_images(showing_unpressed, showing_rollover, showing_pressed),
+        hiding_image: button_images(hiding_unpressed, hiding_rollover, hiding_pressed),
+        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value
     };
 }

@@ -42,10 +42,10 @@ output:
         margin: margin != "" ? margin : @sentinel_value,
         name: name != "" ? name : @sentinel_value,
         alt: alt != "" ? alt : @sentinel_value,
-        characters: characters,
-        wrap: wrap,
+        characters: characters != 0 ? characters : @sentinel_value,
+        wrap: wrap != true ? wrap : @sentinel_value,
         text_horizontal: text_horizontal,
         text_vertical: text_vertical,
-        color: color
+        color: color != color(127, 127, 127) ? color : @sentinel_value
     };
 }

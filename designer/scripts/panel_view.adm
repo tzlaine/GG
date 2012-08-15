@@ -33,7 +33,7 @@ interface:
     placement: @sentinel_value;
     child_horizontal: @sentinel_value;
     child_vertical: @sentinel_value;
-    spacing: "Default";
+    spacing: "";
     horizontal: @sentinel_value;
     vertical: @sentinel_value;
     indent: 0;
@@ -46,12 +46,12 @@ output:
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
-        spacing: spacing,
+        spacing: spacing != "" ? spacing : @sentinel_value,
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
         margin: margin != "" ? margin : @sentinel_value,
         bind: bind != "" ? bind : @sentinel_value,
-        value: value
+        value: value != "" ? value : @sentinel_value
     };
 }

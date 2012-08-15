@@ -5,7 +5,7 @@ layout tab_group_view
         edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
         edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
         edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-        edit_text(name: "items", lines: 10, bind: @items, alt: 'A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.');
+        edit_text(name: "items", lines: 5, bind: @items, alt: 'A dictionary whose key-value pairs define the names and values of the tabs in the tab group -- each name appears in a tab, and each value is the value emitted when the tab is clicked.');
         popup(name: "style", bind: @style, items: @styles, alt: 'The style in which to render the tab_group.  The style must be one of attached or detached.');
         edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_tab_changed_signal", bind: @bind_tab_changed_signal, alt: 'Binds GG::TabBar::TabChangedSignal.  The value emitted is the value emitted by the tab_group.');

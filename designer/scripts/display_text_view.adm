@@ -42,8 +42,8 @@ output:
         name: name != "" ? name : @sentinel_value,
         alt: alt != "" ? alt : @sentinel_value,
         bind: bind != "" ? bind : @sentinel_value,
-        characters: characters,
-        color: color,
-        label_color: label_color
+        characters: characters != 5 ? characters : @sentinel_value,
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value
     };
 }

@@ -25,6 +25,7 @@
 #include <GG/EveGlue.h>
 #include <GG/GUI.h>
 #include <GG/StyleFactory.h>
+#include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/localization.hpp>
 #include <GG/adobe/name.hpp>
@@ -450,6 +451,32 @@ namespace adobe { namespace implementation {
         }
     }
 
+    any_regular_t parse(const array_t& parameters)
+    {
+        if (parameters.size() < 1u)
+            throw std::runtime_error("parse() requires at least 1 parameter");
+        std::string string;
+        if (!parameters[0].cast(string))
+            throw std::runtime_error("parse() requires a string as its first parameter");
+        try {
+            return any_regular_t(parse_adam_expression(string));
+        } catch (...) {
+            return any_regular_t();
+        }
+    }
+
+    any_regular_t size(const array_t& parameters)
+    {
+        if (parameters.size() < 1u)
+            throw std::runtime_error("parse() requires at least 1 parameter");
+        if (parameters[0].type_info() == type_info<array_t>())
+            return any_regular_t(parameters[0].cast<array_t>().size());
+        else if (parameters[0].type_info() == type_info<dictionary_t>())
+            return any_regular_t(parameters[0].cast<dictionary_t>().size());
+        else
+            return any_regular_t();
+    }
+
 } }
 
 namespace {
@@ -465,6 +492,8 @@ namespace {
         GG::RegisterArrayFunction(adobe::static_name_t("prepend"), &adobe::implementation::prepend);
         GG::RegisterArrayFunction(adobe::static_name_t("insert"), &adobe::implementation::insert);
         GG::RegisterArrayFunction(adobe::static_name_t("erase"), &adobe::implementation::erase);
+        GG::RegisterArrayFunction(adobe::static_name_t("parse"), &adobe::implementation::parse);
+        GG::RegisterArrayFunction(adobe::static_name_t("size"), &adobe::implementation::size);
 
         return true;
     }

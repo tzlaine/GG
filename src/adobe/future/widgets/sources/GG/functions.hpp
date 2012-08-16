@@ -39,6 +39,8 @@ namespace adobe {
         any_regular_t prepend(const array_t& parameters);
         any_regular_t insert(const array_t& parameters);
         any_regular_t erase(const array_t& parameters);
+        any_regular_t parse(const array_t& parameters);
+        any_regular_t size(const array_t& parameters);
 
     }
 

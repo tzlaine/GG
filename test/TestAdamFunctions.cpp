@@ -86,6 +86,12 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("chained_ifs_fn(false, true, true)", adobe::any_regular_t(1)));
         retval.push_back(Test("chained_ifs_fn(false, false, true)", adobe::any_regular_t(2)));
         retval.push_back(Test("chained_ifs_fn(false, false, false)", adobe::any_regular_t(3)));
+        retval.push_back(Test("slow_size([])", adobe::any_regular_t(0)));
+        retval.push_back(Test("slow_size([0])", adobe::any_regular_t(1)));
+        retval.push_back(Test("slow_size([0, @two])", adobe::any_regular_t(2)));
+        retval.push_back(Test("slow_size({})", adobe::any_regular_t(0)));
+        retval.push_back(Test("slow_size({one: 0})", adobe::any_regular_t(1)));
+        retval.push_back(Test("slow_size({one: 0, two: @two})", adobe::any_regular_t(2)));
     }
     return retval;
 }

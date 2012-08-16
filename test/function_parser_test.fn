@@ -253,3 +253,11 @@ chained_ifs_fn (x, y, z) {
         return 3;
     }
 }
+
+slow_size_impl(state, value) {
+    return state + 1;
+}
+
+slow_size(seq) {
+    return fold(seq, 0, @slow_size_impl);
+}

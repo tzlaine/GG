@@ -6,13 +6,16 @@
 
 namespace {
 
-    struct lvalue_adapter
+    struct lvalue_assign
     {
-        lvalue_adapter(adobe::sheet_t& sheet) :
+        lvalue_assign(adobe::sheet_t& sheet) :
             m_sheet(sheet)
             {}
-        adobe::any_regular_t* operator()(adobe::name_t name)
-            { return &m_sheet.get(name); }
+        void operator()(adobe::name_t name, const adobe::any_regular_t& value) const
+            {
+                m_sheet.set(name, value);
+                m_sheet.update();
+            }
         adobe::sheet_t& m_sheet;
     };
 
@@ -204,7 +207,7 @@ void adam_function_t::common_init(
     local_scope.machine_m.set_dictionary_function_lookup(dictionary_function_lookup);
     local_scope.machine_m.set_adam_function_lookup(adam_function_lookup);
     local_scope.machine_m.set_variable_lookup(boost::bind(&sheet_t::get, &local_scope, _1));
-    local_scope.machine_m.set_lvalue_lookup(lvalue_adapter(local_scope));
+    local_scope.machine_m.set_lvalue_assign(lvalue_assign(local_scope));
     local_scope.machine_m.set_create_const_decl(
         boost::bind(&sheet_t::add_constant,
                     &local_scope,

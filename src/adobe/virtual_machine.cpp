@@ -322,7 +322,7 @@ class virtual_machine_t::implementation_t
     void pop_back();
 
     variable_lookup_t               variable_lookup_m;
-    lvalue_lookup_t                 lvalue_lookup_m;
+    lvalue_assign_t                 lvalue_assign_m;
     array_function_lookup_t         array_function_lookup_m;
     dictionary_function_lookup_t    dictionary_function_lookup_m;
     adam_function_lookup_t          adam_function_lookup_m;
@@ -731,16 +731,7 @@ void virtual_machine_t::implementation_t::dictionary_operator()
 /*************************************************************************************************/
 
 void virtual_machine_t::implementation_t::lvalue_operator()
-{
-    adobe::name_t lvalue(back().cast<adobe::name_t>());
-
-    pop_back();
-
-    if (!lvalue_lookup_m)
-        throw std::logic_error("No lvalue lookup installed.");
-
-    value_stack_m.push_back(any_regular_t(lvalue_lookup_m(lvalue)));
-}
+{}
 
 /*************************************************************************************************/
 
@@ -748,9 +739,10 @@ void virtual_machine_t::implementation_t::assign_operator()
 {
     stack_type::iterator iter(value_stack_m.end());
 
-    any_regular_t& lvalue = *(iter - 2)->cast<any_regular_t*>();
-    any_regular_t& value(*(iter - 1));
-    lvalue = value;
+    if (!lvalue_assign_m)
+        throw std::logic_error("No lvalue assign function installed.");
+
+    lvalue_assign_m((iter - 2)->cast<name_t>(), *(iter - 1));
 
     pop_back();
     pop_back();
@@ -908,9 +900,9 @@ void virtual_machine_t::set_variable_lookup(const variable_lookup_t& lookup)
     
 /*************************************************************************************************/
     
-void virtual_machine_t::set_lvalue_lookup(const lvalue_lookup_t& lookup)
+void virtual_machine_t::set_lvalue_assign(const lvalue_assign_t& assign)
 {
-    object_m->lvalue_lookup_m = lookup;
+    object_m->lvalue_assign_m = assign;
 }
     
 /*************************************************************************************************/

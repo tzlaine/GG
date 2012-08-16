@@ -42,7 +42,7 @@ class virtual_machine_t
     typedef array_t             expression_t;
 
     typedef any_regular_t(variable_lookup_signature_t)(name_t);
-    typedef any_regular_t*(lvalue_lookup_signature_t)(name_t);
+    typedef void (lvalue_assign_signature_t)(name_t, const any_regular_t&);
     typedef bool(dictionary_function_lookup_signature_t)(name_t, const dictionary_t&, any_regular_t&);
     typedef bool(array_function_lookup_signature_t)(name_t, const array_t&, any_regular_t&);
     typedef const adam_function_t&(adam_function_lookup_signature_t)(name_t);
@@ -50,7 +50,7 @@ class virtual_machine_t
     typedef void(create_decl_signature_t)(name_t, const array_t&);
 
     typedef boost::function<variable_lookup_signature_t>            variable_lookup_t;
-    typedef boost::function<lvalue_lookup_signature_t>              lvalue_lookup_t;
+    typedef boost::function<lvalue_assign_signature_t>              lvalue_assign_t;
     typedef boost::function<dictionary_function_lookup_signature_t> dictionary_function_lookup_t;
     typedef boost::function<array_function_lookup_signature_t>      array_function_lookup_t;
     typedef boost::function<adam_function_lookup_signature_t>       adam_function_lookup_t;
@@ -76,7 +76,7 @@ class virtual_machine_t
     void pop_back();
 
     void set_variable_lookup(const variable_lookup_t&);
-    void set_lvalue_lookup(const lvalue_lookup_t&);
+    void set_lvalue_assign(const lvalue_assign_t&);
     void set_array_function_lookup(const array_function_lookup_t&);
     void set_dictionary_function_lookup(const dictionary_function_lookup_t&);
     void set_adam_function_lookup(const adam_function_lookup_t&);

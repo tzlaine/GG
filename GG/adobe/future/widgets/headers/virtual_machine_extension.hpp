@@ -55,11 +55,13 @@ std::ostream& operator<<(std::ostream& s, const boost::shared_ptr<GG::Texture>& 
 
 /**************************************************************************************************/
 
-any_regular_t asl_standard_dictionary_function_lookup(name_t              function_name,
-                                                      const dictionary_t& named_argument_set);
-
-any_regular_t asl_standard_array_function_lookup(name_t         function_name,
-                                                 const array_t& argument_set);
+bool asl_standard_dictionary_function_lookup(name_t              function_name,
+                                             const dictionary_t& named_argument_set,
+                                             any_regular_t&      result);
+    
+bool asl_standard_array_function_lookup(name_t         function_name,
+                                        const array_t& argument_set,
+                                        any_regular_t& result);
 
 /**************************************************************************************************/
 
@@ -103,13 +105,14 @@ public:
 
     vm_lookup_t();
 
-    any_regular_t dproc(name_t name, const dictionary_t& argument_set) const;
-    any_regular_t aproc(name_t name, const array_t& argument_set) const;
+    bool dproc(name_t name, const dictionary_t& argument_set, any_regular_t& result) const;
+    bool aproc(name_t name, const array_t& argument_set, any_regular_t& result) const;
     const adam_function_t& adamproc(name_t name) const;
 
     const dictionary_function_map_t& dictionary_functions() const;
     const array_function_map_t& array_functions() const;
     const adam_function_map_t& adam_functions() const;
+    const variable_function_t& var_function() const;
 
     void insert_dictionary_function(name_t name, const dictionary_function_t& proc);
     void insert_array_function(name_t name, const array_function_t& proc);

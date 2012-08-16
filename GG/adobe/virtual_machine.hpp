@@ -43,8 +43,8 @@ class virtual_machine_t
 
     typedef any_regular_t(variable_lookup_signature_t)(name_t);
     typedef any_regular_t*(lvalue_lookup_signature_t)(name_t);
-    typedef any_regular_t(dictionary_function_lookup_signature_t)(name_t, const dictionary_t&);
-    typedef any_regular_t(array_function_lookup_signature_t)(name_t, const array_t&);
+    typedef bool(dictionary_function_lookup_signature_t)(name_t, const dictionary_t&, any_regular_t&);
+    typedef bool(array_function_lookup_signature_t)(name_t, const array_t&, any_regular_t&);
     typedef const adam_function_t&(adam_function_lookup_signature_t)(name_t);
     typedef void(create_const_decl_signature_t)(name_t, const array_t&);
     typedef void(create_decl_signature_t)(name_t, const array_t&);

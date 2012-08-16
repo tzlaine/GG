@@ -292,6 +292,13 @@ const dialog_result_t& modal_dialog_t::result()
 
 /****************************************************************************************************/
 
+sheet_t& modal_dialog_t::sheet()
+{
+    return sheet_m;
+}
+
+/****************************************************************************************************/
+
 void modal_dialog_t::monitor_record(const dictionary_t& record_info)
 {
     result_m.record_m = record_info;

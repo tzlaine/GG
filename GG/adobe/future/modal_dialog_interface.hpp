@@ -204,6 +204,7 @@ public:
     void display(const model_type& value);
     keyboard_t& keyboard();
     const dialog_result_t& result();
+    sheet_t& sheet();
 
 private:
     bool              latch_button_callback(name_t action, const any_regular_t&);

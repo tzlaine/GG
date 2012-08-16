@@ -58,6 +58,19 @@ namespace {
     adobe::aggregate_name_t key_transform = { "transform" };
     adobe::aggregate_name_t key_fold = { "fold" };
     adobe::aggregate_name_t key_foldr = { "foldr" };
+    adobe::aggregate_name_t key_eval = { "eval" };
+
+    adobe::any_regular_t adam_function(const adobe::vm_lookup_t& lookup,
+                                       adobe::name_t f,
+                                       const adobe::dictionary_t& arguments)
+    {
+        const adobe::adam_function_t& function = lookup.adamproc(f);
+        return function(boost::ref(lookup.var_function()),
+                        boost::bind(&adobe::vm_lookup_t::aproc, &lookup, _1, _2, _3),
+                        boost::bind(&adobe::vm_lookup_t::dproc, &lookup, _1, _2, _3),
+                        boost::bind(&adobe::vm_lookup_t::adamproc, &lookup, _1),
+                        arguments);
+    }
 
     // NOTE: Most GG-defined builtin functions are defined in
     // src/adobe/future/widgets/sources/GG/functions.cpp.  These (and all
@@ -87,7 +100,8 @@ namespace {
                  ++it) {
                 f_arguments[key_key] = adobe::any_regular_t(it->first);
                 f_arguments[adobe::key_value] = it->second;
-                result_elements[it->first] = lookup.dproc(f, f_arguments);
+                if (!lookup.dproc(f, f_arguments, result_elements[it->first]))
+                    result_elements[it->first] = adam_function(lookup, f, f_arguments);
             }
         } else if (arguments[0].type_info() == adobe::type_info<adobe::array_t>()) {
             const adobe::array_t& sequence = arguments[0].cast<adobe::array_t>();
@@ -99,11 +113,16 @@ namespace {
                  it != end_it;
                  ++it) {
                 f_arguments[adobe::key_value] = *it;
-                result_elements.push_back(lookup.dproc(f, f_arguments));
+                adobe::any_regular_t result;
+                if (lookup.dproc(f, f_arguments, result))
+                    result_elements.push_back(result);
+                else
+                    result_elements.push_back(adam_function(lookup, f, f_arguments));
             }
         } else {
             f_arguments[adobe::key_value] = arguments[0];
-            retval = lookup.dproc(f, f_arguments);
+            if (!lookup.dproc(f, f_arguments, retval))
+                retval = adam_function(lookup, f, f_arguments);
         }
 
         return retval;
@@ -121,7 +140,8 @@ namespace {
             f_arguments[key_state] = retval;
             f_arguments[key_key] = adobe::any_regular_t(it->first);
             f_arguments[adobe::key_value] = it->second;
-            retval = lookup.dproc(f, f_arguments);
+            if (!lookup.dproc(f, f_arguments, retval))
+                retval = adam_function(lookup, f, f_arguments);
         }
     }
 
@@ -136,7 +156,8 @@ namespace {
         for (; it != end_it; ++it) {
             f_arguments[key_state] = retval;
             f_arguments[adobe::key_value] = *it;
-            retval = lookup.dproc(f, f_arguments);
+            if (!lookup.dproc(f, f_arguments, retval))
+                retval = adam_function(lookup, f, f_arguments);
         }
     }
 
@@ -163,7 +184,8 @@ namespace {
             adobe::dictionary_t f_arguments;
             f_arguments[key_state] = retval;
             f_arguments[adobe::key_value] = arguments[0];
-            retval = lookup.dproc(f, f_arguments);
+            if (!lookup.dproc(f, f_arguments, retval))
+                retval = adam_function(lookup, f, f_arguments);
         }
 
         return retval;
@@ -192,8 +214,24 @@ namespace {
             adobe::dictionary_t f_arguments;
             f_arguments[key_state] = retval;
             f_arguments[adobe::key_value] = arguments[0];
-            retval = lookup.dproc(f, f_arguments);
+            if (!lookup.dproc(f, f_arguments, retval))
+                retval = adam_function(lookup, f, f_arguments);
         }
+
+        return retval;
+    }
+
+    adobe::any_regular_t eval(adobe::sheet_t& sheet, const adobe::array_t& arguments)
+    {
+        adobe::any_regular_t retval;
+
+        if (arguments.size() != 1u)
+            throw std::runtime_error("eval() takes exactly 1 argument; " + boost::lexical_cast<std::string>(arguments.size()) + " given.");
+
+        if (arguments[0].type_info() != adobe::type_info<adobe::array_t>())
+            throw std::runtime_error("The argument to eval() must be an array, such as is returned by parse().");
+
+        retval = sheet.inspect(arguments[0].cast<adobe::array_t>());
 
         return retval;
     }
@@ -244,6 +282,11 @@ namespace {
         dialog->vm_lookup_m.insert_array_function(
             key_foldr,
             boost::bind(&foldr, boost::cref(dialog->vm_lookup_m), _1)
+        );
+
+        dialog->vm_lookup_m.insert_array_function(
+            key_eval,
+            boost::bind(&eval, boost::ref(dialog->sheet()), _1)
         );
 
         dialog->vm_lookup_m.add_adam_functions(adam_functions);

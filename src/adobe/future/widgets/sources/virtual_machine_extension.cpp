@@ -116,36 +116,42 @@ std::ostream& operator<<(std::ostream& s, const boost::shared_ptr<GG::Texture>& 
 
 /**************************************************************************************************/
 
-any_regular_t asl_standard_dictionary_function_lookup(name_t              function_name,
-                                                      const dictionary_t& named_argument_set)
+bool asl_standard_dictionary_function_lookup(name_t              function_name,
+                                             const dictionary_t& named_argument_set,
+                                             any_regular_t& result)
 {
     if (function_name == static_name_t("image"))
     {
-        return implementation::vm_dictionary_image_proc(named_argument_set);
+        result = implementation::vm_dictionary_image_proc(named_argument_set);
+        return true;
     }
     else
     {
-        throw_function_not_defined(function_name);
+        return false;
     }
 
-    return any_regular_t(empty_t());
+    result = any_regular_t(empty_t());
+    return false;
 }
 
 /**************************************************************************************************/
 
-any_regular_t asl_standard_array_function_lookup(name_t         function_name,
-                                                 const array_t& argument_set)
+bool asl_standard_array_function_lookup(name_t         function_name,
+                                        const array_t& argument_set,
+                                        any_regular_t& result)
 {
     if (function_name == static_name_t("image"))
     {
-        return implementation::vm_array_image_proc(argument_set);
+        result = implementation::vm_array_image_proc(argument_set);
+        return true;
     }
     else
     {
-        throw_function_not_defined(function_name);
+        return false;
     }
 
-    return any_regular_t(empty_t());
+    result = any_regular_t(empty_t());
+    return false;
 }
 
 /**************************************************************************************************/
@@ -189,34 +195,38 @@ void vm_lookup_t::add_adam_functions(const adam_function_map_t& map)
 
 void vm_lookup_t::attach_to(virtual_machine_t& vm)
 {
-    vm.set_dictionary_function_lookup(boost::bind(&vm_lookup_t::dproc, boost::cref(*this), _1, _2));
-    vm.set_array_function_lookup(boost::bind(&vm_lookup_t::aproc, boost::cref(*this), _1, _2));
+    vm.set_dictionary_function_lookup(boost::bind(&vm_lookup_t::dproc, boost::cref(*this), _1, _2, _3));
+    vm.set_array_function_lookup(boost::bind(&vm_lookup_t::aproc, boost::cref(*this), _1, _2, _3));
     vm.set_variable_lookup(boost::ref(variable_lookup_m));
     vm.set_adam_function_lookup(boost::bind(&vm_lookup_t::adamproc, boost::cref(*this), _1));
 }
 
 /**************************************************************************************************/
 
-any_regular_t vm_lookup_t::dproc(name_t name, const dictionary_t& argument_set) const
+bool vm_lookup_t::dproc(name_t name, const dictionary_t& argument_set, any_regular_t& result) const
 {
     dictionary_function_map_t::const_iterator found(dmap_m.find(name));
 
-    if (found != dmap_m.end())
-        return found->second(argument_set);
-
-    throw std::runtime_error(adobe::make_string("Dictionary function ", name.c_str(), " not found."));
+    if (found != dmap_m.end()) {
+        result = found->second(argument_set);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /**************************************************************************************************/
 
-any_regular_t vm_lookup_t::aproc(name_t name, const array_t& argument_set) const
+bool vm_lookup_t::aproc(name_t name, const array_t& argument_set, any_regular_t& result) const
 {
     array_function_map_t::const_iterator found(amap_m.find(name));
 
-    if (found != amap_m.end())
-        return found->second(argument_set);
-
-    throw std::runtime_error(adobe::make_string("Array function ", name.c_str(), " not found."));
+    if (found != amap_m.end()) {
+        result = found->second(argument_set);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /**************************************************************************************************/
@@ -245,6 +255,11 @@ const vm_lookup_t::array_function_map_t& vm_lookup_t::array_functions() const
 
 const vm_lookup_t::adam_function_map_t& vm_lookup_t::adam_functions() const
 { return adam_map_m; }
+
+/**************************************************************************************************/
+
+const vm_lookup_t::variable_function_t& vm_lookup_t::var_function() const
+{ return variable_lookup_m; }
 
 /**************************************************************************************************/
 

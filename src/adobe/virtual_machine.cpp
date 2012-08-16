@@ -821,14 +821,10 @@ void virtual_machine_t::implementation_t::function_operator()
             value_stack_m.back() = array_func(arguments);
             return;
         } else if (array_function_lookup_m) {
-            try {
-                value_stack_m.back() =
-                    array_function_lookup_m(function_name, arguments);
+            if (array_function_lookup_m(function_name, arguments, value_stack_m.back()))
                 return;
-            } catch (const std::runtime_error&) {
-                if (!adam_function_lookup_m)
-                    throw;
-            }
+            if (!adam_function_lookup_m)
+                throw std::runtime_error(adobe::make_string("Array function ", function_name.c_str(), " not found."));
         }
 
         if (adam_function_lookup_m) {
@@ -852,14 +848,10 @@ void virtual_machine_t::implementation_t::function_operator()
             value_stack_m.back() = dictionary_func(arguments);
             return;
         } else if (dictionary_function_lookup_m) {
-            try {
-                value_stack_m.back() =
-                    dictionary_function_lookup_m(function_name, arguments);
+            if (dictionary_function_lookup_m(function_name, arguments, value_stack_m.back()))
                 return;
-            } catch (const std::runtime_error&) {
-                if (!adam_function_lookup_m)
-                    throw;
-            }
+            if (!adam_function_lookup_m)
+                throw std::runtime_error(adobe::make_string("Dictionary function ", function_name.c_str(), " not found."));
         }
 
         if (adam_function_lookup_m) {

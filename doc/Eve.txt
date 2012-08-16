@@ -487,6 +487,9 @@
     \param color The color in which to render the group box.
     \param text_color The color in which to render the group's label text.
     \param interior_color The color in which to render the interior of the group box.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the group box.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the group's label text.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the group box.
 */
 
 /** \page eve_optional optional()
@@ -631,6 +634,8 @@
     \param style The style in which to render the tab_group.  The style must be one of \c attached or \c detached (see GG::TabBarStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_tab_changed_signal Binds GG::TabBar::TabChangedSignal.    The value emitted is the value emitted by the tab_group.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the tab_group.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the tab_group's labels.
 
     \note The idiomatic way to use tab_group is to populate it entirely with
     \link eve_panel panels \endlink that are all bound to the same cell, so
@@ -689,6 +694,8 @@ else:
     \param image A dictionary containing the \c unpressed , \c pressed , and \c rollover graphics to use to render the button.  Each value can be a GG::SubTexture, a GG::Texture, or a filename.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_clicked_signal Binds GG::Button::ClickedSignal.  The value emitted is \a value.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the button.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the button label.
 
     \section eve_button_items_usage items Usage
 
@@ -811,6 +818,9 @@ else:
     \param style The style in which to render the checkbox.  The style must be one of \c xbox, \c checkbox, \c radio, \c button, \c round_button, \c top_attached_tab, or \c top_detached_tab (see GG::StateButtonStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_checked_signal Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the checkbox.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the checkbox text.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the checkbox.
 */
 
 /** \page eve_control_button control_button()
@@ -840,6 +850,8 @@ else:
     \param expression The expression to be evaluated when the control_button is clicked, in a string.
     \param color The color in which to render the button.
     \param text_color The color in which to render the button label.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the button.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the button label.
 */
 
 /** \page eve_image image()
@@ -910,6 +922,7 @@ else:
     \param text_horizontal The horizontal alignment of the text ( \c align_left, \c align_center, or \c align_right ).
     \param text_vertical The horizontal alignment of the text ( \c align_top, \c align_center, or \c align_bottom ).
     \param color The color in which to render the label.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the label.
 */
 
 /** \page eve_progress_bar progress_bar()
@@ -937,6 +950,9 @@ else:
     \param color The color in which to render the border of the progress_bar.
     \param bar_color The color in which to render the bar within the progress_bar.
     \param interior_color The color in which to render the interior of the progress_bar.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the border of the progress_bar.
+    \param bind_bar_color The name of the Adam cell to which to bind the color in which to render the bar within the progress_bar.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the progress_bar.
 */
 
 /** \page eve_radio_button radio_button()
@@ -968,6 +984,9 @@ else:
     \param style The style in which to render the radio_button.  The style must be one of \c xbox, \c checkbox, \c radio, \c button, \c round_button, \c top_attached_tab, or \c top_detached_tab (see GG::StateButtonStyle).
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_checked_signal Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the radio_button.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the radio_button.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the radio_button label.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the radio_button.
 
     \note The idiomatic way to associate a set of radio_buttons with each
     other (making them mutually exclusive) is to bind them all to the same
@@ -1002,6 +1021,7 @@ else:
     \param label_color The color in which to render the reveal's label.
     \param showing_image A dictionary containing the \c unpressed , \c pressed , and \c rollover graphics to use to render the reveal's button.  Each value can be a GG::SubTexture, a GG::Texture, or a filename.
     \param hiding_image A dictionary containing the \c unpressed , \c pressed , and \c rollover graphics to use to render the reveal's button.  Each value can be a GG::SubTexture, a GG::Texture, or a filename.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the reveal's label.
 
     \note The idiomatic way to create a showable/hidable portion of an
     interface is to bind a reveal and an \link eve_optional optional \endlink
@@ -1039,6 +1059,7 @@ else:
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_slid_signal Binds GG::Slider::SlidSignal.  The value emitted is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
     \param bind_slid_and_stopped_signal Binds GG::Slider::SlidAndStoppedSignal.  The value emitted is \code {slider_pos: expr, slider_min: expr, slider_max: expr} \endcode .
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the slider.
 
     \section eve_slider_format_usage format Usage
 
@@ -1075,6 +1096,8 @@ else:
     \param characters The minimum width of the display_text, in text of characters.
     \param color The color in which to render the displayed text.
     \param label_color The color in which to render the label text.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the displayed text.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the label text.
 */
 
 /** \page eve_display_number display_number()
@@ -1104,6 +1127,8 @@ else:
     \param units An array of \link eve_number_unit units \endlink.
     \param color The color in which to render the displayed number.
     \param label_color The color in which to render the label text.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the displayed number.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the label text.
 */
 
 /** \page eve_edit_number edit_number()
@@ -1168,6 +1193,12 @@ else:
     \param bind_edited_signal Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_number.
     \param bind_focus_update_signal Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_number.
     \param bind_unit_changed_signal Binds GG::DropDownList::SelChangedSignal from the unit popup.  The value emitted is the value emitted by the popup.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the edit_number.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the number edit box's text.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the number edit box and the unit popup.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the edit_number's label.
+    \param bind_popup_color The name of the Adam cell to which to bind the color in which to render the unit popup.
+    \param bind_popup_item_text_color The name of the Adam cell to which to bind the color in which to render the unit popup's text.
 */
 
 /** \page eve_edit_text edit_text()
@@ -1206,6 +1237,10 @@ else:
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_edited_signal Binds GG::Edit::EditedSignal.  The value emitted is the value emitted by the edit_text.
     \param bind_focus_update_signal Binds GG::Edit::FocusUpdateSignal.  The value emitted is the value emitted by the edit_text.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the edit_text.
+    \param bind_text_color The name of the Adam cell to which to bind the color in which to render the editable text.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the number edit box.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the edit_text's label.
 */
 
 /** \page eve_popup popup()
@@ -1248,6 +1283,9 @@ else:
     \param max_characters The width of the popup, in number of characters.
     \param signal_id The name to supply to the \a widget_id parameter of \ref eve_signal_handler.
     \param bind_selection_changed_signal Binds GG::DropDownList::SelChangedSignal.  The value emitted is the value emitted by the popup.
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the popup.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the label text.
+    \param bind_item_text_color The name of the Adam cell to which to bind the color in which to render the text of the items in the popup.
 
     \note Rows with a custom look, or containing more than just a single
     string label can be created using \ref eve_row_factory.
@@ -1305,6 +1343,11 @@ else:
     \param bind_double_clicked_signal Binds GG::ListBox::DoubleClickedSignal.  The value emitted is a single \ref eve_listbox_click_signal_row "click row".
     \param bind_erased_signal Binds GG::ListBox::ErasedSignal.  The value emitted is a single \ref eve_listbox_iterator_signal_row "iterator row".
     \param bind_browsed_signal Binds GG::ListBox::BrowsedSignal.  The value emitted is a single \ref eve_listbox_iterator_signal_row "iterator row".
+    \param bind_color The name of the Adam cell to which to bind the color in which to render the listbox.
+    \param bind_interior_color The name of the Adam cell to which to bind the color in which to render the interior of the listbox.
+    \param bind_label_color The name of the Adam cell to which to bind the color in which to render the listbox's label.
+    \param bind_item_text_color The name of the Adam cell to which to bind the color in which to render the text of the items in the listbox.
+    \param bind_hilite_color The name of the Adam cell to which to bind the color in which to render the hiliting of selected items in the listbox.
 
     \subsection eve_listbox_signal_row Signal Rows
 

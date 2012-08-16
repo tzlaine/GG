@@ -32,6 +32,8 @@ layout tab_group_view
         {
             color_button(name: "color", bind: @color, alt: 'The color in which to render the tab_group.');
             color_button(name: "text_color", bind: @text_color, alt: "The color in which to render the tab_group's labels.");
+            edit_text(name: "bind_color", bind: @bind_color, alt: 'The name of the Adam cell to which to bind the color in which to render the tab_group.');
+            edit_text(name: "bind_text_color", bind: @bind_text_color, alt: "The name of the Adam cell to which to bind the color in which to render the tab_group's labels.");
         }
     }
 }

@@ -36,6 +36,9 @@ interface:
     color: color(127, 127, 127);
     bar_color: color(b: 255);
     interior_color: color(0, 0, 0, 0);
+    bind_color: "";
+    bind_bar_color: "";
+    bind_interior_color: "";
 
 output:
     result <== {
@@ -50,6 +53,9 @@ output:
         width: width != 14 ? width : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
         bar_color: bar_color != color(b: 255) ? bar_color : @sentinel_value,
-        interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value
+        interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value,
+        bind_bar_color: bind_bar_color != "" ? bind_bar_color : @sentinel_value,
+        bind_interior_color: bind_interior_color != "" ? bind_interior_color : @sentinel_value
     };
 }

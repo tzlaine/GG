@@ -38,6 +38,7 @@ layout slider_view
         optional(bind: @show_colors)
         {
             color_button(name: "color", bind: @color, alt: 'The color in which to render the slider.');
+            edit_text(name: "bind_color", bind: @bind_color, alt: 'The name of the Adam cell to which to bind the color in which to render the slider.');
         }
     }
 }

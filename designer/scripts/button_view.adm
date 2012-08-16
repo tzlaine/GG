@@ -50,6 +50,8 @@ interface:
     bind_clicked_signal: "";
     color: color(127, 127, 127);
     text_color: color(0, 0, 0);
+    bind_color: "";
+    bind_text_color: "";
 
 output:
     result <== {
@@ -93,6 +95,8 @@ output:
         signal_id: signal_id != "" ? signal_id : @sentinel_value,
         bind_clicked_signal: bind_clicked_signal != "" ? bind_clicked_signal : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
-        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value,
+        bind_text_color: bind_text_color != "" ? bind_text_color : @sentinel_value
     };
 }

@@ -39,6 +39,7 @@ interface:
     hiding_rollover: "";
     hiding_pressed: "";
     label_color: color(0, 0, 0);
+    bind_label_color: "";
 
 output:
     result <== {
@@ -54,6 +55,7 @@ output:
         value_on: value_on != "true" ? value_on : @sentinel_value,
         showing_image: button_images(showing_unpressed, showing_rollover, showing_pressed),
         hiding_image: button_images(hiding_unpressed, hiding_rollover, hiding_pressed),
-        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value
+        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value,
+        bind_label_color: bind_label_color != "" ? bind_label_color : @sentinel_value
     };
 }

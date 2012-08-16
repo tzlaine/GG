@@ -33,6 +33,8 @@ interface:
     units: "";
     color: color(127, 127, 127);
     label_color: color(0, 0, 0);
+    bind_color: "";
+    bind_label_color: "";
 
 output:
     result <== {
@@ -46,6 +48,8 @@ output:
         characters: characters != 5 ? characters : @sentinel_value,
         units: units != "" ? units : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
-        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value
+        label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value,
+        bind_label_color: bind_label_color != "" ? bind_label_color : @sentinel_value
     };
 }

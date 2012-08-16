@@ -32,6 +32,8 @@ interface:
     expression: "";
     color: color(127, 127, 127);
     text_color: color(0, 0, 0);
+    bind_color: "";
+    bind_text_color: "";
 
 output:
     result <== {
@@ -44,6 +46,8 @@ output:
         bind: bind != "" ? bind : @sentinel_value,
         expression: expression != "" ? expression : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
-        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value
+        text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value,
+        bind_text_color: bind_text_color != "" ? bind_text_color : @sentinel_value
     };
 }

@@ -34,6 +34,12 @@ layout edit_number_view
             color_button(name: "label_color", bind: @label_color, alt: "The color in which to render the edit_number's label.");
             color_button(name: "popup_color", bind: @popup_color, alt: 'The color in which to render the unit popup.');
             color_button(name: "popup_item_text_color", bind: @popup_item_text_color, alt: "The color in which to render the unit popup's text.");
+            edit_text(name: "bind_color", bind: @bind_color, alt: 'The name of the Adam cell to which to bind the color in which to render the edit_number.');
+            edit_text(name: "bind_text_color", bind: @bind_text_color, alt: "The name of the Adam cell to which to bind the color in which to render the number edit box's text.");
+            edit_text(name: "bind_interior_color", bind: @bind_interior_color, alt: 'The name of the Adam cell to which to bind the color in which to render the interior of the number edit box and the unit popup.');
+            edit_text(name: "bind_label_color", bind: @bind_label_color, alt: "The name of the Adam cell to which to bind the color in which to render the edit_number's label.");
+            edit_text(name: "bind_popup_color", bind: @bind_popup_color, alt: 'The name of the Adam cell to which to bind the color in which to render the unit popup.');
+            edit_text(name: "bind_popup_item_text_color", bind: @bind_popup_item_text_color, alt: "The name of the Adam cell to which to bind the color in which to render the unit popup's text.");
         }
     }
 }

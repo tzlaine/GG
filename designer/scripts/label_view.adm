@@ -33,6 +33,7 @@ interface:
     text_horizontal: @sentinel_value;
     text_vertical: @sentinel_value;
     color: color(127, 127, 127);
+    bind_color: "";
 
 output:
     result <== {
@@ -46,6 +47,7 @@ output:
         wrap: wrap != true ? wrap : @sentinel_value,
         text_horizontal: text_horizontal,
         text_vertical: text_vertical,
-        color: color != color(127, 127, 127) ? color : @sentinel_value
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value
     };
 }

@@ -49,6 +49,7 @@ interface:
     bind_slid_signal: "";
     bind_slid_and_stopped_signal: "";
     color: color(127, 127, 127);
+    bind_color: "";
 
 output:
     result <== {
@@ -70,6 +71,7 @@ output:
         signal_id: signal_id != "" ? signal_id : @sentinel_value,
         bind_slid_signal: bind_slid_signal != "" ? bind_slid_signal : @sentinel_value,
         bind_slid_and_stopped_signal: bind_slid_and_stopped_signal != "" ? bind_slid_and_stopped_signal : @sentinel_value,
-        color: color != color(127, 127, 127) ? color : @sentinel_value
+        color: color != color(127, 127, 127) ? color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value
     };
 }

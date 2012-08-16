@@ -45,6 +45,12 @@ interface:
     label_color: color(0, 0, 0);
     popup_color: color(127, 127, 127);
     popup_item_text_color: color(0, 0, 0);
+    bind_color: "";
+    bind_text_color: "";
+    bind_interior_color: "";
+    bind_label_color: "";
+    bind_popup_color: "";
+    bind_popup_item_text_color: "";
 
 output:
     result <== {
@@ -70,6 +76,12 @@ output:
         interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value,
         label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value,
         popup_color: popup_color != color(127, 127, 127) ? popup_color : @sentinel_value,
-        popup_item_text_color: popup_item_text_color != color(0, 0, 0) ? popup_item_text_color : @sentinel_value
+        popup_item_text_color: popup_item_text_color != color(0, 0, 0) ? popup_item_text_color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value,
+        bind_text_color: bind_text_color != "" ? bind_text_color : @sentinel_value,
+        bind_interior_color: bind_interior_color != "" ? bind_interior_color : @sentinel_value,
+        bind_label_color: bind_label_color != "" ? bind_label_color : @sentinel_value,
+        bind_popup_color: bind_popup_color != "" ? bind_popup_color : @sentinel_value,
+        bind_popup_item_text_color: bind_popup_item_text_color != "" ? bind_popup_item_text_color : @sentinel_value
     };
 }

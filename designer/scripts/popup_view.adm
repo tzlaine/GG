@@ -39,6 +39,9 @@ interface:
     color: color(127, 127, 127);
     label_color: color(0, 0, 0);
     item_text_color: color(0, 0, 0);
+    bind_color: "";
+    bind_label_color: "";
+    bind_item_text_color: "";
 
 output:
     result <== {
@@ -58,6 +61,9 @@ output:
         bind_selection_changed_signal: bind_selection_changed_signal != "" ? bind_selection_changed_signal : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
         label_color: label_color != color(0, 0, 0) ? label_color : @sentinel_value,
-        item_text_color: item_text_color != color(0, 0, 0) ? item_text_color : @sentinel_value
+        item_text_color: item_text_color != color(0, 0, 0) ? item_text_color : @sentinel_value,
+        bind_color: bind_color != "" ? bind_color : @sentinel_value,
+        bind_label_color: bind_label_color != "" ? bind_label_color : @sentinel_value,
+        bind_item_text_color: bind_item_text_color != "" ? bind_item_text_color : @sentinel_value
     };
 }

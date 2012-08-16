@@ -53,6 +53,11 @@ interface:
     bind_color: "";
     bind_text_color: "";
 
+    indent_valid <== 0 <= indent;
+    margin_valid <== valid_margin(margin);
+    indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
+    margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
+
 output:
     result <== {
         horizontal: horizontal,

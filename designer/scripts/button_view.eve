@@ -75,8 +75,8 @@ layout button_view
         {
             popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
             popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
-            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
-            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+            edit_number(name: "indent", bind: @indent, bind_label_color: @indent_color, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, bind_label_color: @margin_color, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
         reveal(name: "Colors", bind: @show_colors);
@@ -86,6 +86,14 @@ layout button_view
             color_button(name: "text_color", bind: @text_color, alt: 'The color in which to render the button label.');
             edit_text(name: "bind_color", bind: @bind_color, alt: 'The name of the Adam cell to which to bind the color in which to render the button.');
             edit_text(name: "bind_text_color", bind: @bind_text_color, alt: 'The name of the Adam cell to which to bind the color in which to render the button label.');
+        }
+
+        row(horizontal: align_right)
+        {
+            button(name: "OK", bind: @result, action: @ok);
+            button(name: "Apply", action: @apply);
+            button(name: "Reset", action: @reset);
+            button(name: "Cancel", action: @cancel);
         }
     }
 }

@@ -16,3 +16,20 @@ button_images(unpressed, rollover, pressed) {
         return @sentinel_value;
     return {unpressed: unpressed, rollover: rollover, pressed: pressed};
 }
+
+nonnegs(state, value) {
+    if (state[0] || typeof(value) != @number || value < 0)
+        return [true, state[1]];
+    return [false, state[1] + 1];
+}
+
+valid_margin(margin_str) {
+    if (margin_str == '')
+        return true;
+    margin: parse(margin_str);
+    if (margin == empty)
+        return false;
+    margin = eval(margin);
+    consecutive_nonnegs: fold(margin, [false, 0], @nonnegs)[1];
+    return min(4, size(margin)) <= consecutive_nonnegs;
+}

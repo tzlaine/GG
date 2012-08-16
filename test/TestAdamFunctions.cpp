@@ -146,7 +146,7 @@ void RunTest(std::size_t i)
                           GG::ArrayFunctions(),
                           AdamFunctions(),
                           &ButtonHandler);
-    GG::Timer timer(100);
+    GG::Timer timer(25);
     GG::Connect(timer.FiredSignal,
                 boost::bind(&CheckResult,
                             boost::cref(*eve_dialog),

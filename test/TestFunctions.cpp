@@ -324,7 +324,7 @@ void RunTest(std::size_t i)
                           adam_stream,
                           "inline Adam expression",
                           &ButtonHandler);
-    GG::Timer timer(100);
+    GG::Timer timer(25);
     GG::Connect(timer.FiredSignal,
                 boost::bind(&CheckResult,
                             boost::cref(*eve_dialog),

@@ -42,6 +42,7 @@ struct button_item_t
         alt_text_m(default_item.alt_text_m),
         bind_m(default_item.bind_m),
         bind_output_m(default_item.bind_output_m),
+        bind_enabled_m(default_item.bind_enabled_m),
         action_m(default_item.action_m),
         bind_signal_m(default_item.bind_signal_m),
         expression_m(default_item.expression_m),
@@ -54,6 +55,7 @@ struct button_item_t
         adobe::implementation::get_localized_string(parameters, adobe::key_alt_text, alt_text_m);
         get_value(parameters, adobe::key_bind, bind_m);
         get_value(parameters, adobe::key_bind_output, bind_output_m);
+        get_value(parameters, adobe::static_name_t("bind_enabled"), bind_enabled_m);
         get_value(parameters, adobe::key_action, action_m);
         get_value(parameters, adobe::key_value, value_m);
         get_value(parameters, adobe::static_name_t("signal_id"), signal_id_m);
@@ -88,6 +90,7 @@ struct button_item_t
     std::string          alt_text_m;
     adobe::name_t        bind_m;
     adobe::name_t        bind_output_m;
+    adobe::name_t        bind_enabled_m;
     adobe::name_t        action_m;
     adobe::name_t        bind_signal_m;
     adobe::array_t       expression_m;
@@ -207,6 +210,25 @@ void proxy_button_hit(const adobe::factory_token_t&  token,
 
 /****************************************************************************************************/
 
+void enable_from_value(adobe::button_t& control,
+                       adobe::modifiers_t modifiers,
+                       const adobe::any_regular_t& value)
+{
+    bool enable;
+    if (value.cast(enable) &&
+        enable != control.enabled_m &&
+        adobe::button_modifier_state(control.state_set_m,
+                                     control.modifier_mask_m,
+                                     control.modifiers_m) ==
+        adobe::button_modifier_state(control.state_set_m,
+                                     control.modifier_mask_m,
+                                     modifiers)) {
+        control.enable(enable);
+    }
+}
+
+/****************************************************************************************************/
+
 void handle_clicked_signal(adobe::signal_notifier_t signal_notifier,
                            adobe::name_t widget_id,
                            adobe::sheet_t& sheet,
@@ -267,6 +289,18 @@ void connect_button_state(adobe::button_t&          control,
                           const button_item_t&      temp,
                           adobe::eve_client_holder& /*client_holder*/)
 {
+    if (temp.bind_enabled_m) {
+        assemblage.cleanup(
+            boost::bind(
+                &boost::signals::connection::disconnect,
+                sheet.monitor_value(
+                    temp.bind_enabled_m,
+                    boost::bind(&enable_from_value, boost::ref(control), temp.modifier_set_m, _1)
+                )
+            )
+        );
+    }
+
     if (!temp.bind_m)
         return;
 
@@ -332,6 +366,7 @@ button_t* create_button_widget(const dictionary_t&     parameters,
     implementation::get_localized_string(parameters, key_alt_text,    item.alt_text_m);
     get_value(parameters, key_bind,        item.bind_m);
     get_value(parameters, key_bind_output, item.bind_output_m);
+    get_value(parameters, adobe::static_name_t("bind_enabled"), item.bind_enabled_m);
     get_value(parameters, key_action,      item.action_m);
     get_value(parameters, key_value,       item.value_m);
     get_value(parameters, adobe::static_name_t("signal_id"), item.signal_id_m);

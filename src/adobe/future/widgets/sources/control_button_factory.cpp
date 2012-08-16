@@ -19,6 +19,22 @@
 
 #include <GG/ClrConstants.h>
 
+
+namespace {
+
+/****************************************************************************************************/
+
+void enable_from_value(adobe::control_button_t& control, const adobe::any_regular_t& value)
+{
+    bool enable;
+    if (value.cast(enable) && enable != control.button_m->enabled_m)
+        control.enable(enable);
+}
+
+/****************************************************************************************************/
+
+}
+
 /****************************************************************************************************/
 
 namespace adobe {
@@ -61,12 +77,14 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
     std::string   name;
     std::string   alt_text;
     std::string   expression_string;
+    name_t        bind_enabled;
     GG::Clr       color(GG::CLR_GRAY);
     GG::Clr       text_color(GG::CLR_BLACK);
 
     implementation::get_localized_string(parameters, key_name, name);
     implementation::get_localized_string(parameters, key_alt_text, alt_text);
     get_value(parameters, static_name_t("expression"), expression_string);
+    get_value(parameters, adobe::static_name_t("bind_enabled"), bind_enabled);
     implementation::get_color(parameters, static_name_t("color"), color);
     implementation::get_color(parameters, static_name_t("text_color"), text_color);
 
@@ -86,6 +104,18 @@ create_and_hookup_widget<control_button_t, poly_placeable_t>(const dictionary_t&
     BIND_COLOR(color);
     BIND_COLOR(text_color);
 #undef BIND_COLOR
+
+    if (bind_enabled) {
+        token.client_holder_m.assemblage_m.cleanup(
+            boost::bind(
+                &boost::signals::connection::disconnect,
+                token.sheet_m.monitor_value(
+                    bind_enabled,
+                    boost::bind(&enable_from_value, boost::ref(*widget), _1)
+                )
+            )
+        );
+    }
 
     //
     // Call display_insertion to embed the new widget within the view heirarchy

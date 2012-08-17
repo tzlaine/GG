@@ -90,8 +90,8 @@ layout button_view
 
         row(horizontal: align_right)
         {
-            button(name: "OK", bind: @result, action: @ok);
-            button(name: "Apply", action: @apply);
+            button(name: "OK", bind: @result, action: @ok, bind_enabled: @valid);
+            button(name: "Apply", action: @apply, bind_enabled: @valid);
             button(name: "Reset", action: @reset);
             button(name: "Cancel", action: @cancel);
         }

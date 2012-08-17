@@ -58,6 +58,8 @@ interface:
     indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
     margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
 
+    valid <== indent_valid && margin_valid;
+
 output:
     result <== {
         horizontal: horizontal,

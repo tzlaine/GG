@@ -19,6 +19,7 @@ layout button_view
             optional(bind: @button_use, value: @button_use_set_cell)
             {
                 edit_text(name: "bind_output", bind: @bind_output, alt: "The cell in the Adam property sheet to which the output of this button is bound.  The bind_output cell will be assigned value.  When bind_output is specified, the button handler is not notified of this button's presses, and so action is ignored.");
+                edit_text(name: "value", bind: @value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
             }
             optional(bind: @button_use, value: @button_use_dialog)
             {
@@ -58,7 +59,7 @@ layout button_view
             panel(bind: @button_use, value: @button_use_action)
             {
                 edit_text(name: "action", bind: @action, alt: 'The action associated with this button.  The button handler (if available) will be called with action as its first argument.');
-                edit_text(name: "value", bind: @action_value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
+                edit_text(name: "value", bind: @value, alt: 'The value associated with this button.  This value is emitted when the button is pressed.  The value may be assigned to an Adam property sheet cell (see bind_output), or passed as the second argument in a call to the button handler.');
                 edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this button is bound.  If defined, value is ignored.');
             }
         }

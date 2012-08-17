@@ -11,7 +11,6 @@ interface:
     value_bind_result: "";
     value_dialog_parameters: "";
     dependent_dialog_script: "";
-    action_value: "";
 
     horizontal_alignments: [
         {name: "Default", value: @sentinel_value},
@@ -74,23 +73,26 @@ output:
                  @cancel :
                  (button_use == @button_use_reset ?
                       @reset :
-                      action
-                 )
-            ),
-        value: button_use == @button_use_action ?
-            @sentinel_value :
-            (button_use == @button_use_action ?
-                 action_value :
-                 ((button_use == @button_use_dialog && dialog_type == @dialog_type_dependent) ?
-                      dependent_dialog_script :
-                      ((button_use == @button_use_dialog && dialog_type == @dialog_type_independent) ?
-                           {adam_script: value_adam_script, eve_script: value_eve_script, bind_result: value_bind_result} :
-                           ((button_use == @button_use_dialog && dialog_type == @dialog_type_standard) ?
-                                {name: dialog_name, dialog_parameters: value_dialog_parameters, bind_result: value_bind_result} :
+                      (button_use == @button_use_dialog ?
+                           @dialog :
+                           (button_use == @button_use_action ?
+                                action :
                                 @sentinel_value
                            )
                       )
                  )
+            ),
+        value: button_use == @button_use_action || button_use == @button_use_set_cell ?
+             value :
+             ((button_use == @button_use_dialog && dialog_type == @dialog_type_dependent) ?
+                  dependent_dialog_script :
+                  ((button_use == @button_use_dialog && dialog_type == @dialog_type_independent) ?
+                       {adam_script: value_adam_script, eve_script: value_eve_script, bind_result: value_bind_result} :
+                       ((button_use == @button_use_dialog && dialog_type == @dialog_type_standard) ?
+                            {name: dialog_name, dialog_parameters: value_dialog_parameters, bind_result: value_bind_result} :
+                            @sentinel_value
+                       )
+                  )
             ),
         bind: button_use == @button_use_action ? bind : @sentinel_value,
         bind_output: button_use == @button_use_set_cell ? bind_output : @sentinel_value,

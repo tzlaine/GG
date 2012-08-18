@@ -453,8 +453,8 @@ namespace adobe { namespace implementation {
 
     any_regular_t parse(const array_t& parameters)
     {
-        if (parameters.size() < 1u)
-            throw std::runtime_error("parse() requires at least 1 parameter");
+        if (parameters.size() != 1u)
+            throw std::runtime_error("parse() requires 1 parameter");
         std::string string;
         if (!parameters[0].cast(string))
             throw std::runtime_error("parse() requires a string as its first parameter");
@@ -467,8 +467,8 @@ namespace adobe { namespace implementation {
 
     any_regular_t size(const array_t& parameters)
     {
-        if (parameters.size() < 1u)
-            throw std::runtime_error("parse() requires at least 1 parameter");
+        if (parameters.size() != 1u)
+            throw std::runtime_error("parse() requires 1 parameter");
         if (parameters[0].type_info() == type_info<array_t>())
             return any_regular_t(parameters[0].cast<array_t>().size());
         else if (parameters[0].type_info() == type_info<dictionary_t>())

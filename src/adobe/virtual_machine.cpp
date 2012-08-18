@@ -806,26 +806,30 @@ void virtual_machine_t::implementation_t::function_operator()
         // handle unnamed parameter functions
         array_function_t    array_func;
         adobe::array_t      arguments(back().cast<adobe::array_t>());
-        
+        pop_back();
+
         // handle function lookup
         
         if ((*array_function_table_g)(function_name, array_func)) {
-            value_stack_m.back() = array_func(arguments);
+            value_stack_m.push_back(array_func(arguments));
             return;
         } else if (array_function_lookup_m) {
-            if (array_function_lookup_m(function_name, arguments, value_stack_m.back()))
+            any_regular_t result;
+            if (array_function_lookup_m(function_name, arguments, result)) {
+                value_stack_m.push_back(result);
                 return;
+            }
             if (!adam_function_lookup_m)
                 throw std::runtime_error(adobe::make_string("Array function ", function_name.c_str(), " not found."));
         }
 
         if (adam_function_lookup_m) {
             const adam_function_t& f = adam_function_lookup_m(function_name);
-            value_stack_m.back() = f(variable_lookup_m,
-                                     array_function_lookup_m,
-                                     dictionary_function_lookup_m,
-                                     adam_function_lookup_m,
-                                     arguments);
+            value_stack_m.push_back(f(variable_lookup_m,
+                                      array_function_lookup_m,
+                                      dictionary_function_lookup_m,
+                                      adam_function_lookup_m,
+                                      arguments));
         } else {
             throw_function_not_defined(function_name);
         }
@@ -835,24 +839,28 @@ void virtual_machine_t::implementation_t::function_operator()
         // handle named parameter functions
         dictionary_function_t   dictionary_func;
         adobe::dictionary_t     arguments(back().cast<adobe::dictionary_t>());
+        pop_back();
 
         if ((*dictionary_function_table_g)(function_name, dictionary_func)) {
-            value_stack_m.back() = dictionary_func(arguments);
+            value_stack_m.push_back(dictionary_func(arguments));
             return;
         } else if (dictionary_function_lookup_m) {
-            if (dictionary_function_lookup_m(function_name, arguments, value_stack_m.back()))
+            any_regular_t result;
+            if (dictionary_function_lookup_m(function_name, arguments, result)) {
+                value_stack_m.push_back(result);
                 return;
+            }
             if (!adam_function_lookup_m)
                 throw std::runtime_error(adobe::make_string("Dictionary function ", function_name.c_str(), " not found."));
         }
 
         if (adam_function_lookup_m) {
             const adam_function_t& f = adam_function_lookup_m(function_name);
-            value_stack_m.back() = f(variable_lookup_m,
-                                     array_function_lookup_m,
-                                     dictionary_function_lookup_m,
-                                     adam_function_lookup_m,
-                                     arguments);
+            value_stack_m.push_back(f(variable_lookup_m,
+                                      array_function_lookup_m,
+                                      dictionary_function_lookup_m,
+                                      adam_function_lookup_m,
+                                      arguments));
         } else {
             throw_function_not_defined(function_name);
         }

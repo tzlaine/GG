@@ -281,6 +281,37 @@ const std::vector<Test>& Tests()
             adobe::dictionary_t result;
             retval.push_back(Test("erase({one: 2, two: 3}, @one, @two)", adobe::any_regular_t(result)));
         }
+
+        retval.push_back(Test("parse()", adobe::any_regular_t(), true));
+        retval.push_back(Test("parse(@one)", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(adobe::name_t("one")));
+            result.push_back(adobe::any_regular_t(adobe::name_t(".name_k")));
+            result.push_back(adobe::any_regular_t(2));
+            result.push_back(adobe::any_regular_t(2));
+            result.push_back(adobe::any_regular_t(adobe::name_t(".array")));
+            retval.push_back(Test("parse('[@one, 2]')", adobe::any_regular_t(result)));
+        }
+        retval.push_back(Test("parse('')", adobe::any_regular_t()));
+        retval.push_back(Test("parse('[')", adobe::any_regular_t()));
+
+        retval.push_back(Test("eval()", adobe::any_regular_t(), true));
+        retval.push_back(Test("eval(@one)", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(adobe::name_t("one")));
+            result.push_back(adobe::any_regular_t(2));
+            retval.push_back(Test("eval(parse('[@one, 2]'))", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("size()", adobe::any_regular_t(), true));
+        retval.push_back(Test("size(1)", adobe::any_regular_t(), true));
+        retval.push_back(Test("size(@one)", adobe::any_regular_t(), true));
+        retval.push_back(Test("size([])", adobe::any_regular_t(0)));
+        retval.push_back(Test("size([1, @two])", adobe::any_regular_t(2)));
+        retval.push_back(Test("size({})", adobe::any_regular_t(0)));
+        retval.push_back(Test("size({one: 1, two: @two, three: '3'})", adobe::any_regular_t(3)));
     }
     return retval;
 }

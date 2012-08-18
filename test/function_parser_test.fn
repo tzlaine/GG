@@ -172,14 +172,6 @@ interface_cell_fn () {
     return interface_cell;
 }
 
-assign_cell_1_fn () {
-    const_cell = {};
-}
-
-assign_cell_2_fn () {
-    interface_cell = {};
-}
-
 shadowed_param_1_fn (const_cell) {
     return const_cell;
 }

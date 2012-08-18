@@ -35,12 +35,17 @@
 
 #include <GG/ClrConstants.h>
 #include <GG/GUI.h>
+#include <GG/DropDownList.h>
 #include <GG/ListBox.h>
+#include <GG/Slider.h>
+#include <GG/Spin.h>
 #include <GG/StyleFactory.h>
 #include <GG/TextControl.h>
 
 
 namespace {
+
+    adobe::aggregate_name_t key_state = {"state"};
 
     GG::Y Height(unsigned int lines)
     { return adobe::implementation::RowHeight() * static_cast<int>(lines) + static_cast<int>(2 * GG::ListBox::BORDER_THICK); }
@@ -143,19 +148,86 @@ namespace {
             listbox.browsed_proc_m(listbox, row);
     }
 
+    struct notify_row_change
+    {
+        notify_row_change(adobe::listbox_t& listbox, GG::ListBox::iterator it) :
+            m_listbox(listbox),
+            m_it(it)
+            {}
+
+        void operator()() const
+            {
+                std::size_t i = std::distance(m_listbox.control_m->begin(), m_it);
+                adobe::any_regular_t& state =
+                    m_listbox.items_m[i].cast<adobe::dictionary_t>()[key_state];
+                adobe::any_regular_t row_value = adobe::listbox_t::row_value(**m_it);
+                if (state != row_value) {
+                    state = row_value;
+                    if (m_listbox.item_set_view_controller_m.value_proc_m)
+                        m_listbox.item_set_view_controller_m.value_proc_m(m_listbox.items_m);
+                }
+            }
+
+        adobe::listbox_t& m_listbox;
+        GG::ListBox::iterator m_it;
+    };
+
+    struct notifier_handle
+    {
+        typedef void result_type;
+
+        notifier_handle(const boost::shared_ptr<notify_row_change>& notifier) :
+            m_notifier(notifier)
+            {}
+
+        void operator()() const
+            { (*m_notifier)(); }
+
+        boost::shared_ptr<notify_row_change> m_notifier;
+    };
+
+    void connect_row_change_signals(adobe::listbox_t& listbox, GG::ListBox::iterator it)
+    {
+        boost::shared_ptr<notify_row_change> notifier(new notify_row_change(listbox, it));
+        const std::size_t size = (*it)->size();
+        for (std::size_t i = 0; i < size; ++i) {
+            GG::Control* element = (**it)[i];
+            if (const GG::DropDownList* drop_list = dynamic_cast<const GG::DropDownList*>(element))
+                GG::Connect(drop_list->SelChangedSignal, boost::bind(notifier_handle(notifier)));
+            else if (const GG::Edit* edit = dynamic_cast<const GG::Edit*>(element))
+                GG::Connect(edit->FocusUpdateSignal, boost::bind(notifier_handle(notifier)));
+            else if (const GG::Slider<double>* double_slider = dynamic_cast<const GG::Slider<double>*>(element))
+                GG::Connect(double_slider->SlidAndStoppedSignal, boost::bind(notifier_handle(notifier)));
+            else if (const GG::Slider<int>* int_slider = dynamic_cast<const GG::Slider<int>*>(element))
+                GG::Connect(int_slider->SlidAndStoppedSignal, boost::bind(notifier_handle(notifier)));
+            else if (const GG::Spin<double>* double_spin = dynamic_cast<const GG::Spin<double>*>(element))
+                GG::Connect(double_spin->ValueChangedSignal, boost::bind(notifier_handle(notifier)));
+            else if (const GG::Spin<int>* int_spin = dynamic_cast<const GG::Spin<int>*>(element))
+                GG::Connect(int_spin->ValueChangedSignal, boost::bind(notifier_handle(notifier)));
+            else if (const GG::StateButton* state_button = dynamic_cast<const GG::StateButton*>(element))
+                GG::Connect(state_button->CheckedSignal, boost::bind(notifier_handle(notifier)));
+        }
+    }
+
     void message_item_set(adobe::listbox_t& listbox)
     {
         assert(listbox.control_m);
 
-        for (adobe::listbox_t::item_set_t::const_iterator
+        for (adobe::listbox_t::item_set_t::iterator
                  first = listbox.items_m.begin(), last = listbox.items_m.end();
              first != last;
              ++first) {
-            listbox.control_m->Insert(
-                adobe::implementation::item_to_row(first->cast<adobe::dictionary_t>(),
+            adobe::dictionary_t& item = first->cast<adobe::dictionary_t>();
+            GG::ListBox::Row* row =
+                adobe::implementation::item_to_row(item,
                                                    listbox.row_factory_m,
-                                                   listbox.item_text_color_m)
-            );
+                                                   listbox.item_text_color_m);
+            GG::ListBox::iterator it = listbox.control_m->Insert(row);
+            if (item.count(key_state))
+                adobe::listbox_t::populate_row_values(*row, item[key_state].cast<adobe::array_t>());
+            else
+                item[key_state] = adobe::listbox_t::row_value(*row);
+            connect_row_change_signals(listbox, it);
         }
     }
 
@@ -197,6 +269,32 @@ namespace {
         }
         std::swap(listbox.items_m, sorted_item_set);
     }
+
+    adobe::any_regular_t to_any_regular(const GG::Button& button)
+    { return adobe::any_regular_t(button.Text()); }
+
+    adobe::any_regular_t to_any_regular(const GG::DropDownList& drop_list)
+    { return adobe::listbox_t::row_value(drop_list.CurrentItem(), drop_list.end()); }
+
+    adobe::any_regular_t to_any_regular(const GG::Edit& edit)
+    { return adobe::any_regular_t(edit.Text()); }
+
+    template <typename T>
+    adobe::any_regular_t to_any_regular(const GG::Slider<T>& slider)
+    { return adobe::any_regular_t(slider.Posn()); }
+
+    template <typename T>
+    adobe::any_regular_t to_any_regular(const GG::Spin<T>& spin)
+    { return adobe::any_regular_t(spin.Value()); }
+
+    adobe::any_regular_t to_any_regular(const GG::StateButton& button)
+    { return adobe::any_regular_t(button.Checked()); }
+
+    adobe::any_regular_t to_any_regular(const GG::StaticGraphic& graphic)
+    { return adobe::any_regular_t(graphic.GetSubTexture()); }
+
+    adobe::any_regular_t to_any_regular(const GG::TextControl& text_control)
+    { return adobe::any_regular_t(text_control.RawText()); }
 
 }
 
@@ -380,16 +478,16 @@ namespace adobe {
         if (value == debounce_m)
             return;
 
-        const bool value_is_array = value.type_info() == adobe::type_info<adobe::array_t>();
+        const bool value_is_array = value.type_info() == type_info<array_t>();
 
-        adobe::array_t single_value;
+        array_t single_value;
         if (!value_is_array)
             single_value.push_back(value);
-        const adobe::array_t& values = value_is_array ? value.cast<adobe::array_t>() : single_value;
+        const array_t& values = value_is_array ? value.cast<array_t>() : single_value;
 
         control_m->DeselectAll();
 
-        for (adobe::array_t::const_iterator it = values.begin(), end_it = values.end(); it != end_it; ++it) {
+        for (array_t::const_iterator it = values.begin(), end_it = values.end(); it != end_it; ++it) {
             GG::ListBox::iterator row_it = control_m->begin();
             for (item_set_t::iterator first = items_m.begin(), last = items_m.end();
                  first != last;
@@ -416,6 +514,75 @@ namespace adobe {
             item_set_t items;
             std::swap(items, items_m);
             reset_item_set(items);
+        }
+    }
+
+    any_regular_t listbox_t::row_value(GG::ListBox::const_iterator it, GG::ListBox::const_iterator end_it)
+    { return it == end_it ? any_regular_t(array_t()) : row_value(**it); }
+
+    any_regular_t listbox_t::row_value(const GG::ListBox::Row& row)
+    {
+        array_t elements;
+
+        const std::size_t size = row.size();
+        for (std::size_t i = 0; i < size; ++i) {
+            GG::Control* element = row[i];
+            if (const GG::Button* button = dynamic_cast<const GG::Button*>(element))
+                elements.push_back(to_any_regular(*button));
+            else if (const GG::DropDownList* drop_list = dynamic_cast<const GG::DropDownList*>(element))
+                elements.push_back(to_any_regular(*drop_list));
+            else if (const GG::Edit* edit = dynamic_cast<const GG::Edit*>(element))
+                elements.push_back(to_any_regular(*edit));
+            else if (const GG::Slider<double>* double_slider = dynamic_cast<const GG::Slider<double>*>(element))
+                elements.push_back(to_any_regular(*double_slider));
+            else if (const GG::Slider<int>* int_slider = dynamic_cast<const GG::Slider<int>*>(element))
+                elements.push_back(to_any_regular(*int_slider));
+            else if (const GG::Spin<double>* double_spin = dynamic_cast<const GG::Spin<double>*>(element))
+                elements.push_back(to_any_regular(*double_spin));
+            else if (const GG::Spin<int>* int_spin = dynamic_cast<const GG::Spin<int>*>(element))
+                elements.push_back(to_any_regular(*int_spin));
+            else if (const GG::StateButton* state_button = dynamic_cast<const GG::StateButton*>(element))
+                elements.push_back(to_any_regular(*state_button));
+            else if (const GG::StaticGraphic* static_graphic = dynamic_cast<const GG::StaticGraphic*>(element))
+                elements.push_back(to_any_regular(*static_graphic));
+            else if (const GG::TextControl* text_control = dynamic_cast<const GG::TextControl*>(element))
+                elements.push_back(to_any_regular(*text_control));
+            else
+                elements.push_back(any_regular_t());
+        }
+
+        return any_regular_t(elements);
+    }
+
+    void listbox_t::populate_row_values(GG::ListBox::Row& row, array_t& state)
+    {
+        assert(row.size() == state.size());
+        const std::size_t size = row.size();
+        for (std::size_t i = 0; i < size; ++i) {
+            GG::Control* element = row[i];
+            if (GG::Button* button = dynamic_cast<GG::Button*>(element))
+                button->SetText(state[i].cast<std::string>());
+            else if (GG::DropDownList* drop_list = dynamic_cast<GG::DropDownList*>(element)) {
+                for (GG::DropDownList::iterator it = drop_list->begin(); it != drop_list->end(); ++it) {
+                    if (row_value(**it) == state[i]) {
+                        drop_list->Select(it);
+                        break;
+                    }
+                }
+            } else if (GG::Edit* edit = dynamic_cast<GG::Edit*>(element))
+                edit->SetText(state[i].cast<std::string>());
+            else if (GG::Slider<double>* double_slider = dynamic_cast<GG::Slider<double>*>(element))
+                double_slider->SlideTo(state[i].cast<double>());
+            else if (GG::Slider<int>* int_slider = dynamic_cast<GG::Slider<int>*>(element))
+                int_slider->SlideTo(static_cast<int>(state[i].cast<double>()));
+            else if (GG::Spin<double>* double_spin = dynamic_cast<GG::Spin<double>*>(element))
+                double_spin->SetValue(state[i].cast<double>());
+            else if (GG::Spin<int>* int_spin = dynamic_cast<GG::Spin<int>*>(element))
+                int_spin->SetValue(static_cast<int>(state[i].cast<double>()));
+            else if (GG::StateButton* state_button = dynamic_cast<GG::StateButton*>(element))
+                state_button->SetCheck(state[i].cast<bool>());
+            else if (GG::TextControl* text_control = dynamic_cast<GG::TextControl*>(element))
+                text_control->SetText(state[i].cast<std::string>());
         }
     }
 
@@ -471,7 +638,7 @@ namespace adobe {
                     boost::bind(&listbox_browsed, boost::ref(element), _1));
 
         if (!element.alt_text_m.empty())
-            adobe::implementation::set_control_alt_text(element.control_m, element.alt_text_m);
+            implementation::set_control_alt_text(element.control_m, element.alt_text_m);
 
         ::message_item_set(element);
 

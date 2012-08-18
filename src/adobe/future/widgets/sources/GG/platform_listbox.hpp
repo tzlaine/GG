@@ -85,6 +85,11 @@ namespace adobe {
         void enable(bool make_enabled);
         void set_item_text_color(GG::Clr color);
 
+        static adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
+                                              GG::ListBox::const_iterator end_it);
+        static adobe::any_regular_t row_value(const GG::ListBox::Row& row);
+        static void populate_row_values(GG::ListBox::Row& row, array_t& state);
+
         GG::ListBox* control_m;
         unsigned int original_height_m;
         label_t name_m;

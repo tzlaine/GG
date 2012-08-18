@@ -34,12 +34,7 @@
 #include <GG/adobe/future/widgets/headers/widget_factory_registry.hpp>
 #include <GG/adobe/future/widgets/headers/widget_tokens.hpp>
 
-#include <GG/Button.h>
-#include <GG/DropDownList.h>
 #include <GG/EveGlue.h>
-#include <GG/Slider.h>
-#include <GG/Spin.h>
-#include <GG/TextControl.h>
 
 
 namespace {
@@ -52,74 +47,6 @@ namespace {
 
     bool dummy = register_();
 
-    adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
-                                   GG::ListBox::const_iterator end_it);
-
-    adobe::any_regular_t to_any_regular(const GG::Button& button)
-    { return adobe::any_regular_t(button.Text()); }
-
-    adobe::any_regular_t to_any_regular(const GG::DropDownList& drop_list,
-                                        GG::ListBox::const_iterator end_it)
-    { return row_value(drop_list.CurrentItem(), end_it); }
-
-    adobe::any_regular_t to_any_regular(const GG::Edit& edit)
-    { return adobe::any_regular_t(edit.Text()); }
-
-    template <typename T>
-    adobe::any_regular_t to_any_regular(const GG::Slider<T>& slider)
-    { return adobe::any_regular_t(slider.Posn()); }
-
-    template <typename T>
-    adobe::any_regular_t to_any_regular(const GG::Spin<T>& spin)
-    { return adobe::any_regular_t(spin.Value()); }
-
-    adobe::any_regular_t to_any_regular(const GG::StateButton& button)
-    { return adobe::any_regular_t(button.Checked()); }
-
-    adobe::any_regular_t to_any_regular(const GG::StaticGraphic& graphic)
-    { return adobe::any_regular_t(graphic.GetSubTexture()); }
-
-    adobe::any_regular_t to_any_regular(const GG::TextControl& text_control)
-    { return adobe::any_regular_t(text_control.RawText()); }
-
-    adobe::any_regular_t row_value(const GG::ListBox::Row& row)
-    {
-        adobe::array_t elements;
-
-        const std::size_t size = row.size();
-        for (std::size_t i = 0; i < size; ++i) {
-            GG::Control* element = row[i];
-            if (const GG::Button* button = dynamic_cast<const GG::Button*>(element))
-                elements.push_back(to_any_regular(*button));
-            else if (const GG::DropDownList* drop_list = dynamic_cast<const GG::DropDownList*>(element))
-                elements.push_back(to_any_regular(*drop_list, drop_list->end()));
-            else if (const GG::Edit* edit = dynamic_cast<const GG::Edit*>(element))
-                elements.push_back(to_any_regular(*edit));
-            else if (const GG::Slider<double>* double_slider = dynamic_cast<const GG::Slider<double>*>(element))
-                elements.push_back(to_any_regular(*double_slider));
-            else if (const GG::Slider<int>* int_slider = dynamic_cast<const GG::Slider<int>*>(element))
-                elements.push_back(to_any_regular(*int_slider));
-            else if (const GG::Spin<double>* double_spin = dynamic_cast<const GG::Spin<double>*>(element))
-                elements.push_back(to_any_regular(*double_spin));
-            else if (const GG::Spin<int>* int_spin = dynamic_cast<const GG::Spin<int>*>(element))
-                elements.push_back(to_any_regular(*int_spin));
-            else if (const GG::StateButton* state_button = dynamic_cast<const GG::StateButton*>(element))
-                elements.push_back(to_any_regular(*state_button));
-            else if (const GG::StaticGraphic* static_graphic = dynamic_cast<const GG::StaticGraphic*>(element))
-                elements.push_back(to_any_regular(*static_graphic));
-            else if (const GG::TextControl* text_control = dynamic_cast<const GG::TextControl*>(element))
-                elements.push_back(to_any_regular(*text_control));
-            else
-                elements.push_back(adobe::any_regular_t());
-        }
-
-        return adobe::any_regular_t(elements);
-    }
-
-    adobe::any_regular_t row_value(GG::ListBox::const_iterator it,
-                                   GG::ListBox::const_iterator end_it)
-    { return it == end_it ? adobe::any_regular_t(adobe::array_t()) : row_value(**it); }
-
     void handle_selection_changed_signal(const adobe::listbox_t& listbox,
                                          adobe::signal_notifier_t signal_notifier,
                                          adobe::name_t signal_type,
@@ -131,7 +58,7 @@ namespace {
     {
         adobe::array_t array;
         for (GG::ListBox::SelectionSet::const_iterator it = selections.begin(); it != selections.end(); ++it) {
-            array.push_back(row_value(*it, listbox.control_m->end()));
+            array.push_back(adobe::listbox_t::row_value(*it, listbox.control_m->end()));
         }
 
         adobe::implementation::handle_signal(signal_notifier,
@@ -160,7 +87,7 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             row_value(row, listbox.control_m->end()),
+                                             adobe::listbox_t::row_value(row, listbox.control_m->end()),
                                              adobe::static_name_t("row"),
                                              adobe::any_regular_t(row),
                                              adobe::static_name_t("gg_row_iter"));
@@ -183,11 +110,11 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             row_value(row),
+                                             adobe::listbox_t::row_value(row),
                                              adobe::static_name_t("row"),
                                              adobe::any_regular_t(&row),
                                              adobe::static_name_t("gg_row"),
-                                             row_value(insertion_it, listbox.control_m->end()),
+                                             adobe::listbox_t::row_value(insertion_it, listbox.control_m->end()),
                                              adobe::static_name_t("insertion_iter"),
                                              adobe::any_regular_t(insertion_it),
                                              adobe::static_name_t("gg_insertion_iter"));
@@ -214,7 +141,7 @@ namespace {
                                              sheet,
                                              bind,
                                              expression,
-                                             row_value(row, listbox.control_m->end()),
+                                             adobe::listbox_t::row_value(row, listbox.control_m->end()),
                                              adobe::static_name_t("row"),
                                              adobe::any_regular_t(pt_array),
                                              adobe::static_name_t("pt"),

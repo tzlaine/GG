@@ -30,6 +30,7 @@
 #include <GG/adobe/implementation/token.hpp>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <deque>
 #include <map>
@@ -196,6 +197,7 @@ namespace {
             ++it;
         } else if (it->type_info() == adobe::type_info<adobe::string_t>()) {
             std::string text = it->cast<adobe::string_t>();
+            boost::algorithm::replace_all(text, "\n", "\\n");
             char quote_char = '\'';
             if (text.find('\'') != std::string::npos)
                 quote_char = '"';

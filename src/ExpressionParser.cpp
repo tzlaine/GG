@@ -27,6 +27,7 @@
 
 #include <GG/adobe/implementation/token.hpp>
 
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
@@ -64,17 +65,21 @@ namespace {
 
     const boost::phoenix::function<array_t_push_back_> push;
 
-    struct strip_quotes_
+    struct process_strings_
     {
         template <typename Arg>
         struct result
         { typedef std::string type; };
 
-        std::string operator()(const std::string& arg1) const
-            { return arg1.substr(1, arg1.size() - 2); }
+        std::string operator()(std::string quoted_str) const
+            {
+                std::string str = quoted_str.substr(1, quoted_str.size() - 2);
+                boost::algorithm::replace_all(str, "\\n", "\n");
+                return str;
+            }
     };
 
-    const boost::phoenix::function<strip_quotes_> strip_quotes;
+    const boost::phoenix::function<process_strings_> process_strings;
 
 }
 
@@ -350,8 +355,8 @@ expression_parser_rules::expression_parser_rules(const lexer& tok, const keyword
 
     string
         =     (
-                     tok.quoted_string [_a = strip_quotes(_1)]
-                >> * tok.quoted_string [_a += strip_quotes(_1)]
+                     tok.quoted_string [_a = process_strings(_1)]
+                >> * tok.quoted_string [_a += process_strings(_1)]
               )
               [
                   push(_r1, _a)

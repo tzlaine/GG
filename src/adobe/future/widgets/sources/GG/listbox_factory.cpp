@@ -278,7 +278,9 @@ namespace adobe {
             attach_view_and_controller_direct(control, parameters, token, cell);
         }
 
-        if (parameters.count(key_items) && 
+        control.row_factory_m = token.row_factory_m;
+
+        if (parameters.count(key_items) &&
             get_value(parameters, key_items).type_info() == type_info<name_t>()) {
             name_t cell(get_value(parameters, key_items).cast<name_t>());
             listbox_t::item_set_view_controller_t& tmp = control.item_set_view_controller_m;
@@ -437,8 +439,6 @@ namespace adobe {
                             expression,
                             _2);
         }
-
-        control.row_factory_m = token.row_factory_m;
 
         adobe::attach_view(control.name_m.color_proxy_m, parameters, token, adobe::static_name_t("bind_label_color"));
 #define BIND_COLOR(name)                                                \

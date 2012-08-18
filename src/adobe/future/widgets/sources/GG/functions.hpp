@@ -41,6 +41,8 @@ namespace adobe {
         any_regular_t erase(const array_t& parameters);
         any_regular_t parse(const array_t& parameters);
         any_regular_t size(const array_t& parameters);
+        any_regular_t join(const array_t& parameters);
+        any_regular_t split(const array_t& parameters);
 
     }
 

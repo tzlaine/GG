@@ -36,6 +36,10 @@
 #include <GG/dialogs/FileDlg.h>
 #include <GG/dialogs/ThreeButtonDlg.h>
 
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
 
 namespace {
 
@@ -474,7 +478,60 @@ namespace adobe { namespace implementation {
         else if (parameters[0].type_info() == type_info<dictionary_t>())
             return any_regular_t(parameters[0].cast<dictionary_t>().size());
         else
-            return any_regular_t();
+            throw std::runtime_error("parse() requires an array or dictionary as its first parameter");
+    }
+
+    any_regular_t join(const array_t& parameters)
+    {
+        if (parameters.empty())
+            throw std::runtime_error("join() requires at least 1 parameter");
+        if (parameters[0].type_info() != type_info<array_t>())
+            throw std::runtime_error("join() requires an array of strings as its first parameter");
+
+        std::string retval;
+        std::string join_str;
+        if (2u <= parameters.size()) {
+            if (parameters[1].type_info() != type_info<string_t>())
+                throw std::runtime_error("The second parameter to join() must be a string, if provided");
+            join_str = parameters[1].cast<std::string>();
+        }
+
+        const array_t& array = parameters[0].cast<array_t>();
+        for (std::size_t i = 0; i < array.size(); ++i) {
+            if (array[i].type_info() != type_info<string_t>())
+                throw std::runtime_error("join() requires an array of strings as its first parameter");
+            retval += array[i].cast<std::string>();
+            if (i < array.size() - 1)
+                retval += join_str;
+        }
+
+        return any_regular_t(retval);
+    }
+
+    any_regular_t split(const array_t& parameters)
+    {
+        if (parameters.size() != 2u)
+            throw std::runtime_error("split() requires 2 parameters");
+        if (parameters[0].type_info() != type_info<string_t>())
+            throw std::runtime_error("split() requires a string as its first parameter");
+        if (parameters[1].type_info() != type_info<string_t>())
+            throw std::runtime_error("split() requires a string as its second parameter");
+
+        std::string str = parameters[0].cast<std::string>();
+        std::string split_str = parameters[1].cast<std::string>();
+
+        if (split_str.empty())
+            throw std::runtime_error("split() requires a nonempty string as its second parameter");
+
+        std::vector<std::string> split_vec;
+        boost::algorithm::split(split_vec, str, boost::algorithm::is_any_of(split_str));
+
+        array_t retval;
+        for (std::size_t i = 0; i < split_vec.size(); ++i) {
+            push_back(retval, split_vec[i]);
+        }
+
+        return any_regular_t(retval);
     }
 
 } }
@@ -494,6 +551,8 @@ namespace {
         GG::RegisterArrayFunction(adobe::static_name_t("erase"), &adobe::implementation::erase);
         GG::RegisterArrayFunction(adobe::static_name_t("parse"), &adobe::implementation::parse);
         GG::RegisterArrayFunction(adobe::static_name_t("size"), &adobe::implementation::size);
+        GG::RegisterArrayFunction(adobe::static_name_t("join"), &adobe::implementation::join);
+        GG::RegisterArrayFunction(adobe::static_name_t("split"), &adobe::implementation::split);
 
         return true;
     }

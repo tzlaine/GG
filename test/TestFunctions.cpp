@@ -312,6 +312,39 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("size([1, @two])", adobe::any_regular_t(2)));
         retval.push_back(Test("size({})", adobe::any_regular_t(0)));
         retval.push_back(Test("size({one: 1, two: @two, three: '3'})", adobe::any_regular_t(3)));
+
+        retval.push_back(Test("split()", adobe::any_regular_t(), true));
+        retval.push_back(Test("split('a', 'b', 'c')", adobe::any_regular_t(), true));
+        retval.push_back(Test("split(1, 'a')", adobe::any_regular_t(), true));
+        retval.push_back(Test("split('a', 1)", adobe::any_regular_t(), true));
+        retval.push_back(Test("split('a', '')", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("")));
+            retval.push_back(Test("split('', '\n')", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("foo")));
+            result.push_back(adobe::any_regular_t(std::string("bar")));
+            retval.push_back(Test("split('foo\nbar', '\n')", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(std::string("foo")));
+            result.push_back(adobe::any_regular_t(std::string("")));
+            result.push_back(adobe::any_regular_t(std::string("bar")));
+            result.push_back(adobe::any_regular_t(std::string("")));
+            retval.push_back(Test("split('foo\n\nbar\n', '\n')", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("join()", adobe::any_regular_t(), true));
+        retval.push_back(Test("join(1)", adobe::any_regular_t(), true));
+        retval.push_back(Test("join(['a'], 1)", adobe::any_regular_t(), true));
+        retval.push_back(Test("join(['a', 1])", adobe::any_regular_t(), true));
+        retval.push_back(Test("join(['a', 'b'])", adobe::any_regular_t(std::string("ab"))));
+        retval.push_back(Test("join(['a', 'b'], ' ')", adobe::any_regular_t(std::string("a b"))));
+        retval.push_back(Test("join(split('foo\n\nbar\n', '\n'), '\n')", adobe::any_regular_t(std::string("foo\n\nbar\n"))));
     }
     return retval;
 }

@@ -158,11 +158,12 @@ namespace {
         void operator()() const
             {
                 std::size_t i = std::distance(m_listbox.control_m->begin(), m_it);
-                adobe::any_regular_t& state =
-                    m_listbox.items_m[i].cast<adobe::dictionary_t>()[key_state];
+                adobe::dictionary_t& item = m_listbox.items_m[i].cast<adobe::dictionary_t>();
+                adobe::any_regular_t& state = item[key_state];
                 adobe::any_regular_t row_value = adobe::listbox_t::row_value(**m_it);
                 if (state != row_value) {
                     state = row_value;
+                    (*m_it)->SetItem(item);
                     if (m_listbox.item_set_view_controller_m.value_proc_m)
                         m_listbox.item_set_view_controller_m.value_proc_m(m_listbox.items_m);
                 }

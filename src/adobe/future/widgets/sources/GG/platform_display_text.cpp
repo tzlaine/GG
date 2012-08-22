@@ -6,6 +6,7 @@
 
 #include "platform_display_text.hpp"
 
+#include "functions.hpp"
 #include <GG/adobe/dictionary.hpp>
 #include <GG/adobe/string.hpp>
 #include <GG/adobe/future/widgets/headers/display.hpp>
@@ -28,66 +29,13 @@ namespace {
         std::stringstream result;
         if (!label.empty())
             result << GG::RgbaTag(label_color) << label << "</rgba> ";
-        if (value == adobe::any_regular_t()) {
-            result << "<empty>";
-        } else {
-            adobe::type_info_t type(value.type_info());
-            if (type == adobe::type_info<double>() ||
-                type == adobe::type_info<bool>() ||
-                type == adobe::type_info<adobe::name_t>()) {
-                result << value;
-            } else if (type == adobe::type_info<adobe::array_t>()) {
-                result << '[';
-                const adobe::array_t& array = value.cast<adobe::array_t>();
-                for (adobe::array_t::const_iterator it = array.begin(), end_it = array.end();
-                     it != end_it;
-                     ++it) {
-                    result << field_text("", *it, label_color);
-                    if (boost::next(it) != end_it)
-                        result << ',';
-                }
-                result << ']';
-            } else if (type == adobe::type_info<adobe::dictionary_t>()) {
-                result << '{';
-                const adobe::dictionary_t& dictionary = value.cast<adobe::dictionary_t>();
-                for (adobe::dictionary_t::const_iterator it = dictionary.begin(), end_it = dictionary.end();
-                     it != end_it;
-                     ++it) {
-                    result << it->first << ": " << field_text("", it->second, label_color);
-                    if (boost::next(it) != end_it)
-                        result << ',';
-                }
-                result << '}';
-            } else if (type == adobe::type_info<GG::Clr>()) {
-                result << "color(";
-                const GG::Clr& color = value.cast<GG::Clr>();
-                bool previous_element = false;
-                if (color.r) {
-                    result << "r: " << static_cast<int>(color.r);
-                    previous_element = true;
-                }
-                if (color.g) {
-                    if (previous_element)
-                        result << ", ";
-                    result << "g: " << static_cast<int>(color.g);
-                    previous_element = true;
-                }
-                if (color.b) {
-                    if (previous_element)
-                        result << ", ";
-                    result << "b: " << static_cast<int>(color.b);
-                    previous_element = true;
-                }
-                if (color.a != 255) {
-                    if (previous_element)
-                        result << ", ";
-                    result << "a: " << static_cast<int>(color.a);
-                }
-                result << ')';
-            } else {
-                result << value.cast<adobe::string_t>();
-            }
-        }
+        adobe::array_t parameters;
+        parameters.push_back(value);
+        parameters.push_back(adobe::any_regular_t(true));
+        std::string text = adobe::implementation::to_string(parameters).cast<std::string>();
+        if (text == "empty")
+            text = "<empty>";
+        result << text;
         return result.str();
     }
 

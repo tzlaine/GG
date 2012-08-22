@@ -346,6 +346,7 @@ class virtual_machine_t::implementation_t
     void logical_operator(bool do_and);
     void logical_and_operator();
     void logical_or_operator();
+    void add_operator();
     void index_operator();
     void ifelse_operator();
     void variable_operator();
@@ -396,7 +397,7 @@ void virtual_machine_init_once()
     {{
         op_entry_type(adobe::not_k,             &implementation_t::unary_operator<std::logical_not, bool>),
         op_entry_type(adobe::unary_negate_k,    &implementation_t::unary_operator<std::negate, double>),
-        op_entry_type(adobe::add_k,             &implementation_t::binary_operator<std::plus, double>),
+        op_entry_type(adobe::add_k,             &implementation_t::add_operator),
         op_entry_type(adobe::subtract_k,        &implementation_t::binary_operator<std::minus, double>),
         op_entry_type(adobe::multiply_k,        &implementation_t::binary_operator<std::multiplies, double>),
         op_entry_type(adobe::modulus_k,         &implementation_t::binary_operator<std::modulus, long>),
@@ -601,6 +602,25 @@ void virtual_machine_t::implementation_t::logical_and_operator()
 void virtual_machine_t::implementation_t::logical_or_operator()
 {
     logical_operator(false);
+}
+
+/*************************************************************************************************/
+
+void virtual_machine_t::implementation_t::add_operator()
+{
+    stack_type::iterator iter(value_stack_m.end()); // REVISIT (sparent) : GCC 3.1 requires :: qualifier
+
+    adobe::any_regular_t& operand1(*(iter - 2));
+    adobe::any_regular_t& operand2(*(iter - 1));
+
+    std::string str1;
+    std::string str2;
+    if (operand1.cast(str1) && operand2.cast(str2)) {
+        operand1.assign(str1 + str2);
+        pop_back();
+    } else {
+        binary_operator<std::plus, double>();
+    }
 }
 
 /*************************************************************************************************/

@@ -51,8 +51,21 @@ layout button_view
                                  {name: "Three-Button Dialog", value: @three_button_dialog}
                              ],
                              bind: @dialog_name);
-                       edit_text(name: "dialog_parameters", bind: @value_dialog_parameters, lines: 5);
-                       edit_text(name: "bind_result", bind: @value_bind_result);
+                       listbox(name: "dialog_parameters",
+                               items: @value_dialog_parameters,
+                               characters: 15,
+                               rows: 5,
+                               selections: @none,
+                               bind_label_color: @dialog_parameters_color);
+                       control_button(
+                           name: "Add parameter",
+                           bind: @value_dialog_parameters,
+                           expression: "append(value_dialog_parameters,"
+                                              "{value: size(value_dialog_parameters), "
+                                               "type: @dialog_parameter, "
+                                               "state: ['name', '" '"value"' "']})"
+                       );
+                       edit_text(name: "bind_result", bind: @value_bind_result, bind_label_color: @bind_result_color);
                    }
                }
             }

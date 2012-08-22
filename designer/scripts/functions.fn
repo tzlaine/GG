@@ -33,3 +33,44 @@ valid_margin(margin_str) {
     consecutive_nonnegs: fold(margin, [false, 0], @nonnegs)[1];
     return min(4, size(margin)) <= consecutive_nonnegs;
 }
+
+valid_dialog_parameters_impl(state, value) {
+    parsed: parse(value.state[1]);
+    if (parsed == empty)
+        return state;
+    else
+        return insert(state, to_name(value.state[0]), empty);
+}
+
+valid_dialog_parameters(items) {
+    return size(fold(items, {}, @valid_dialog_parameters_impl)) == size(items);
+}
+
+state_to_dictionary_element(state, value) {
+    expr: parse(value.state[1]);
+    if (expr == empty)
+        expr = value.state[1];
+    else
+        expr = eval(expr);
+    return insert(state, to_name(value.state[0]), expr);
+}
+
+make_dialog_parameters(items) {
+    return fold(items, {}, @state_to_dictionary_element);
+}
+
+make_result_impl(state, key, value) {
+    if (value == @sentinel_value)
+        return state;
+    retval: state[0];
+    if (!state[1])
+        retval = retval + ', ';
+    retval = retval + to_string(key) + ': ' + to_string(value, true);
+    return [retval, false];
+}
+
+make_result(view_name, parameters) {
+    retval: view_name + '(';
+    retval = retval + fold(parameters, ['', true], @make_result_impl)[0];
+    return retval + ')';
+}

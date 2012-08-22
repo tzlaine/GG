@@ -9,7 +9,7 @@ interface:
     value_adam_script: "";
     value_eve_script: "";
     value_bind_result: "";
-    value_dialog_parameters: "";
+    value_dialog_parameters: [];
     dependent_dialog_script: "";
 
     horizontal_alignments: [
@@ -56,11 +56,14 @@ interface:
     margin_valid <== valid_margin(margin);
     indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
     margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
+    bind_result_valid <== button_use != @button_use_dialog || dialog_type != @dialog_type_standard || value_bind_result != '';
+    bind_result_color <== bind_result_valid ? color(0, 0, 0) : color(r: 255);
+    dialog_parameters_valid <== valid_dialog_parameters(value_dialog_parameters);
+    dialog_parameters_color <== dialog_parameters_valid ? color(0, 0, 0) : color(r: 255);
 
-    valid <== indent_valid && margin_valid;
+    valid <== indent_valid && margin_valid && bind_result_valid && dialog_parameters_valid;
 
-output:
-    result <== {
+    results_dict <== {
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
@@ -87,25 +90,32 @@ output:
              ((button_use == @button_use_dialog && dialog_type == @dialog_type_dependent) ?
                   dependent_dialog_script :
                   ((button_use == @button_use_dialog && dialog_type == @dialog_type_independent) ?
-                       {adam_script: value_adam_script, eve_script: value_eve_script, bind_result: value_bind_result} :
+                       {adam_script: value_adam_script, eve_script: value_eve_script, bind_result: to_name(value_bind_result)} :
                        ((button_use == @button_use_dialog && dialog_type == @dialog_type_standard) ?
-                            {name: dialog_name, dialog_parameters: value_dialog_parameters, bind_result: value_bind_result} :
+                            {
+                                name: dialog_name,
+                                dialog_parameters: make_dialog_parameters(value_dialog_parameters),
+                                bind_result: to_name(value_bind_result)
+                            } :
                             @sentinel_value
                        )
                   )
             ),
-        bind: button_use == @button_use_action ? bind : @sentinel_value,
-        bind_output: button_use == @button_use_set_cell ? bind_output : @sentinel_value,
+        bind: button_use == @button_use_action ? to_name(bind) : @sentinel_value,
+        bind_output: button_use == @button_use_set_cell ? to_name(bind_output) : @sentinel_value,
         default: default != false ? default : @sentinel_value,
         cancel: cancel != false ? cancel : @sentinel_value,
         unpressed: unpressed != "" ? unpressed : @sentinel_value,
         rollover: rollover != "" ? rollover : @sentinel_value,
         pressed: pressed != "" ? pressed : @sentinel_value,
         signal_id: signal_id != "" ? signal_id : @sentinel_value,
-        bind_clicked_signal: bind_clicked_signal != "" ? bind_clicked_signal : @sentinel_value,
+        bind_clicked_signal: bind_clicked_signal != "" ? to_name(bind_clicked_signal) : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
         text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
-        bind_color: bind_color != "" ? bind_color : @sentinel_value,
-        bind_text_color: bind_text_color != "" ? bind_text_color : @sentinel_value
+        bind_color: bind_color != "" ? to_name(bind_color) : @sentinel_value,
+        bind_text_color: bind_text_color != "" ? to_name(bind_text_color) : @sentinel_value
     };
+
+output:
+    result <== {value: make_result("button", results_dict)};
 }

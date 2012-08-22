@@ -157,6 +157,78 @@ namespace {
             return adobe::any_regular_t(adobe::empty_t());
     }
 
+    std::string to_string_impl(const adobe::any_regular_t& value, bool round_trippable)
+    {
+        std::stringstream result;
+        if (value == adobe::any_regular_t()) {
+            result << "empty";
+        } else {
+            adobe::type_info_t type(value.type_info());
+            if (type == adobe::type_info<double>() ||
+                type == adobe::type_info<bool>()) {
+                result << value;
+            } else if (type == adobe::type_info<adobe::name_t>()) {
+                result << (round_trippable ? "@" : "") << value;
+            } else if (type == adobe::type_info<adobe::array_t>()) {
+                result << '[';
+                const adobe::array_t& array = value.cast<adobe::array_t>();
+                for (adobe::array_t::const_iterator it = array.begin(), end_it = array.end();
+                     it != end_it;
+                     ++it) {
+                    result << to_string_impl(*it, round_trippable);
+                    if (boost::next(it) != end_it)
+                        result << ", ";
+                }
+                result << ']';
+            } else if (type == adobe::type_info<adobe::dictionary_t>()) {
+                result << '{';
+                const adobe::dictionary_t& dictionary = value.cast<adobe::dictionary_t>();
+                for (adobe::dictionary_t::const_iterator it = dictionary.begin(), end_it = dictionary.end();
+                     it != end_it;
+                     ++it) {
+                    result << it->first << ": " << to_string_impl(it->second, round_trippable);
+                    if (boost::next(it) != end_it)
+                        result << ", ";
+                }
+                result << '}';
+            } else if (type == adobe::type_info<GG::Clr>()) {
+                result << "color(";
+                const GG::Clr& color = value.cast<GG::Clr>();
+                bool previous_element = false;
+                if (color.r) {
+                    result << "r: " << static_cast<int>(color.r);
+                    previous_element = true;
+                }
+                if (color.g) {
+                    if (previous_element)
+                        result << ", ";
+                    result << "g: " << static_cast<int>(color.g);
+                    previous_element = true;
+                }
+                if (color.b) {
+                    if (previous_element)
+                        result << ", ";
+                    result << "b: " << static_cast<int>(color.b);
+                    previous_element = true;
+                }
+                if (color.a != 255) {
+                    if (previous_element)
+                        result << ", ";
+                    result << "a: " << static_cast<int>(color.a);
+                }
+                result << ')';
+            } else {
+                std::string str = value.cast<adobe::string_t>();
+                if (round_trippable) {
+                    const char quote = str.find('\'') != std::string::npos ? '"' : '\'';
+                    result << quote << str << quote;
+                } else {
+                    result << str;
+                }
+            }
+        }
+        return result.str();
+    }
 }
 
 namespace adobe { namespace implementation {
@@ -534,6 +606,26 @@ namespace adobe { namespace implementation {
         return any_regular_t(retval);
     }
 
+    any_regular_t to_string(const array_t& parameters)
+    {
+        if (parameters.size() < 1u || 2u < parameters.size())
+            throw std::runtime_error("to_string() requires 1 or 2 parameters");
+
+        bool round_trippable = false;
+        if (1u < parameters.size() && !parameters[1].cast(round_trippable))
+            throw std::runtime_error("to_string() requires a bool as its second parameter");
+
+        return any_regular_t(to_string_impl(parameters[0], round_trippable));
+    }
+
+    any_regular_t to_name(const array_t& parameters)
+    {
+        if (parameters.size() != 1u)
+            throw std::runtime_error("to_name() requires 1 parameter");
+
+        return any_regular_t(name_t(to_string_impl(parameters[0], false).c_str()));
+    }
+
 } }
 
 namespace {
@@ -553,6 +645,8 @@ namespace {
         GG::RegisterArrayFunction(adobe::static_name_t("size"), &adobe::implementation::size);
         GG::RegisterArrayFunction(adobe::static_name_t("join"), &adobe::implementation::join);
         GG::RegisterArrayFunction(adobe::static_name_t("split"), &adobe::implementation::split);
+        GG::RegisterArrayFunction(adobe::static_name_t("to_string"), &adobe::implementation::to_string);
+        GG::RegisterArrayFunction(adobe::static_name_t("to_name"), &adobe::implementation::to_name);
 
         return true;
     }

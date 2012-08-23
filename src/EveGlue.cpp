@@ -231,7 +231,9 @@ namespace {
         if (arguments[0].type_info() != adobe::type_info<adobe::array_t>())
             throw std::runtime_error("The argument to eval() must be an array, such as is returned by parse().");
 
-        retval = sheet.inspect(arguments[0].cast<adobe::array_t>());
+        try {
+            retval = sheet.inspect(arguments[0].cast<adobe::array_t>());
+        } catch (...) {}
 
         return retval;
     }

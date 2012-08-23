@@ -167,7 +167,7 @@ namespace {
             if (type == adobe::type_info<double>()) {
                 result << value;
             } else if (type == adobe::type_info<bool>()) {
-                result << value.cast<bool>() ? "true" : "false";
+                result << (value.cast<bool>() ? "true" : "false");
             } else if (type == adobe::type_info<adobe::name_t>()) {
                 result << (round_trippable ? "@" : "") << value;
             } else if (type == adobe::type_info<adobe::array_t>()) {

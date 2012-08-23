@@ -45,6 +45,7 @@ namespace adobe {
         any_regular_t split(const array_t& parameters);
         any_regular_t to_string(const array_t& parameters);
         any_regular_t to_name(const array_t& parameters);
+        any_regular_t print(const array_t& parameters);
 
     }
 

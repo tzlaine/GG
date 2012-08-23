@@ -626,6 +626,17 @@ namespace adobe { namespace implementation {
         return any_regular_t(name_t(to_string_impl(parameters[0], false).c_str()));
     }
 
+    any_regular_t print(const array_t& parameters)
+    {
+        for (std::size_t i = 0; i < parameters.size(); ++i) {
+            if (i)
+                std::cout << ' ';
+            std::cout << to_string_impl(parameters[i], true);
+        }
+        std::cout << std::endl;
+        return any_regular_t();
+    }
+
 } }
 
 namespace {
@@ -647,6 +658,7 @@ namespace {
         GG::RegisterArrayFunction(adobe::static_name_t("split"), &adobe::implementation::split);
         GG::RegisterArrayFunction(adobe::static_name_t("to_string"), &adobe::implementation::to_string);
         GG::RegisterArrayFunction(adobe::static_name_t("to_name"), &adobe::implementation::to_name);
+        GG::RegisterArrayFunction(adobe::static_name_t("print"), &adobe::implementation::print);
 
         return true;
     }

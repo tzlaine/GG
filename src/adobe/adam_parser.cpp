@@ -26,6 +26,7 @@
 #include <GG/adobe/any_regular.hpp>
 #include <GG/adobe/dictionary.hpp>
 
+#include <GG/adobe/implementation/parser_shared.hpp>
 #include <GG/adobe/implementation/token.hpp>
 
 /*************************************************************************************************/
@@ -143,15 +144,21 @@ void parse(std::istream& stream, const line_position_t& position, const adam_cal
 array_t parse_adam_expression(const std::string& str_expression)
 {
     once_instance();
-    
+
     std::stringstream   expression_stream(str_expression);
-    
-    adobe::expression_parser parser(expression_stream, line_position_t("expression"));
+
+    adobe::expression_parser parser(expression_stream, adobe::line_position_t("expression"));
     parser.set_keyword_extension_lookup(boost::bind(&keyword_lookup, _1));
 
     adobe::array_t expression;
     parser.require_expression(expression);
-    
+
+    const adobe::line_position_t next = parser.next_position();
+    const std::size_t last_line_start = str_expression.find_last_of("\n") + 1;
+    const std::size_t last_line_size = str_expression.size() - last_line_start;
+    if (last_line_size + 1 != next.position_m - next.line_start_m)
+        throw_parser_exception("Unexpected tokens after parsed Adam expression", next);
+
     return expression;
 }
 

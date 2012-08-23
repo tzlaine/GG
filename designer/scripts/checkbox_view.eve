@@ -7,8 +7,8 @@ layout checkbox_view
         edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
         edit_text(name: "bind_controller", bind: @bind_controller, alt: 'The "controller" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the bound cell.');
         edit_text(name: "bind_view", bind: @bind_view, alt: 'The "view" half of the binding to the cell in the Adam property sheet.  This is the half of the cell binding that covers assignment to the Eve view from the bound cell.');
-        edit_text(name: "value_on", bind: @value_on, alt: 'The value emitted when checking the checkbox.');
-        edit_text(name: "value_off", bind: @value_off, alt: 'The value emitted when unchecking the checkbox.');
+        edit_text(name: "value_on", bind: @value_on, bind_label_color: @value_on_color, alt: 'The value emitted when checking the checkbox.');
+        edit_text(name: "value_off", bind: @value_off, bind_label_color: @value_off_color, alt: 'The value emitted when unchecking the checkbox.');
         popup(name: "style", bind: @style, items: @styles, alt: 'The style in which to render the checkbox.  The style must be one of xbox, checkbox, radio, button, round_button, top_attached_tab, or top_detached_tab.');
         edit_text(name: "signal_id", bind: @signal_id, alt: 'The name to supply to the widget_id parameter of the signal handler.');
         edit_text(name: "bind_checked_signal", bind: @bind_checked_signal, alt: 'Binds GG::StateButton::CheckedSignal.  The value emitted is the value emitted by the checkbox.');
@@ -18,8 +18,8 @@ layout checkbox_view
         {
             popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
             popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
-            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
-            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+            edit_number(name: "indent", bind: @indent, bind_label_color: @indent_color, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, bind_label_color: @margin_color, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
         }
 
         reveal(name: "Colors", bind: @show_colors);
@@ -31,6 +31,14 @@ layout checkbox_view
             edit_text(name: "bind_color", bind: @bind_color, alt: 'The name of the Adam cell to which to bind the color in which to render the checkbox.');
             edit_text(name: "bind_text_color", bind: @bind_text_color, alt: 'The name of the Adam cell to which to bind the color in which to render the checkbox text.');
             edit_text(name: "bind_interior_color", bind: @bind_interior_color, alt: 'The name of the Adam cell to which to bind the color in which to render the interior of the checkbox.');
+        }
+
+        row(horizontal: align_right)
+        {
+            button(name: "OK", bind: @result, action: @ok, bind_enabled: @valid);
+            button(name: "Apply", action: @apply, bind_enabled: @valid);
+            button(name: "Reset", action: @reset);
+            button(name: "Cancel", action: @cancel);
         }
     }
 }

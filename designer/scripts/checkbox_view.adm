@@ -51,27 +51,40 @@ interface:
     bind_text_color: "";
     bind_interior_color: "";
 
-output:
-    result <== {
+    indent_valid <== 0 <= indent;
+    margin_valid <== valid_margin(margin);
+    indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
+    margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
+    value_on_valid <== valid_expression(value_on);
+    value_on_color <== value_on_valid ? color(0, 0, 0) : color(r: 255);
+    value_off_valid <== valid_expression(value_off);
+    value_off_color <== value_off_valid ? color(0, 0, 0) : color(r: 255);
+
+    valid <== indent_valid && margin_valid && value_on_valid && value_off_valid;
+
+    results_dict <== {
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
         margin: margin != "" ? margin : @sentinel_value,
         name: name != "" ? name : @sentinel_value,
         alt: alt != "" ? alt : @sentinel_value,
-        bind: bind != "" ? bind : @sentinel_value,
-        bind_controller: bind == "" && bind_controller != "" ? bind_controller : @sentinel_value,
-        bind_view: bind == "" && bind_view != "" ? bind_view : @sentinel_value,
-        value_on: value_on != "" ? value_on : @sentinel_value,
-        value_off: value_off != "" ? value_off : @sentinel_value,
+        bind: bind != "" ? to_name(bind) : @sentinel_value,
+        bind_controller: bind == "" && bind_controller != "" ? to_name(bind_controller) : @sentinel_value,
+        bind_view: bind == "" && bind_view != "" ? to_name(bind_view) : @sentinel_value,
+        value_on: value_on != "" ? to_expression(value_on) : @sentinel_value,
+        value_off: value_off != "" ? to_expression(value_off) : @sentinel_value,
         style: style != @xbox ? style : @sentinel_value,
         signal_id: signal_id != "" ? signal_id : @sentinel_value,
-        bind_checked_signal: bind_checked_signal != "" ? bind_checked_signal : @sentinel_value,
+        bind_checked_signal: bind_checked_signal != "" ? to_name(bind_checked_signal) : @sentinel_value,
         color: color != color(127, 127, 127) ? color : @sentinel_value,
         text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
         interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value,
-        bind_color: bind_color != "" ? bind_color : @sentinel_value,
-        bind_text_color: bind_text_color != "" ? bind_text_color : @sentinel_value,
-        bind_interior_color: bind_interior_color != "" ? bind_interior_color : @sentinel_value
+        bind_color: bind_color != "" ? to_name(bind_color) : @sentinel_value,
+        bind_text_color: bind_text_color != "" ? to_name(bind_text_color) : @sentinel_value,
+        bind_interior_color: bind_interior_color != "" ? to_name(bind_interior_color) : @sentinel_value
     };
+
+output:
+    result <== {value: make_result("checkbox", results_dict)};
 }

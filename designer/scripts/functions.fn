@@ -34,6 +34,15 @@ valid_margin(margin_str) {
     return min(4, size(margin)) <= consecutive_nonnegs;
 }
 
+valid_expression(string) {
+    return string == '' || parse(string) != empty;
+}
+
+to_expression(string) {
+    expr: parse(string);
+    return expr == empty ? string : eval(expr);
+}
+
 valid_dialog_parameters_impl(state, value) {
     parsed: parse(value.state[1]);
     if (parsed == empty)

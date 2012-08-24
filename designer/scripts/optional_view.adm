@@ -41,8 +41,18 @@ interface:
     bind: "";
     value: "";
 
-output:
-    result <== {
+    indent_valid <== 0 <= indent;
+    margin_valid <== valid_margin(margin);
+    indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
+    margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
+    spacing_valid <== valid_spacing(spacing);
+    spacing_color <== spacing_valid ? color(0, 0, 0) : color(r: 255);
+    value_valid <== valid_expression(value);
+    value_color <== value_valid ? color(0, 0, 0) : color(r: 255);
+
+    valid <== indent_valid && margin_valid && spacing_valid && value_valid;
+
+    results_dict <== {
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
@@ -51,7 +61,10 @@ output:
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
         margin: margin != "" ? to_expression(margin) : @sentinel_value,
-        bind: bind != "" ? bind : @sentinel_value,
-        value: value != "" ? value : @sentinel_value
+        bind: bind != "" ? to_name(bind) : @sentinel_value,
+        value: value != "" ? to_expression(value) : @sentinel_value
     };
+
+output:
+    result <== {value: make_result("optional", results_dict)};
 }

@@ -3,7 +3,7 @@ layout optional_view
     view dialog(placement: place_column)
     {
         edit_text(name: "bind", bind: @bind, alt: 'The cell in the Adam property sheet to which this view is bound.  If this is defined, bind_controller and bind_view are ignored.');
-        edit_text(name: "value", bind: @value, alt: 'The value of the bound cell that causes the optional to be shown.');
+        edit_text(name: "value", bind: @value, bind_label_color: @value_color, alt: 'The value of the bound cell that causes the optional to be shown.');
 
         reveal(name: "Container Layout Parameters", bind: @show_container_layout);
         optional(bind: @show_container_layout)
@@ -11,7 +11,7 @@ layout optional_view
             popup(name: "placement", bind: @placement, items: @placements, alt: 'The placement of views within this container.');
             popup(name: "child_horizontal", bind: @child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
             popup(name: "child_vertical", bind: @child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
-            edit_text(name: "spacing", bind: @spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
+            edit_text(name: "spacing", bind: @spacing, bind_label_color: @spacing_color, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
         }
 
         reveal(name: "Layout Parameters", bind: @show_layout);
@@ -19,8 +19,16 @@ layout optional_view
         {
             popup(name: "horizontal", bind: @horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of this view in its available space.');
             popup(name: "vertical", bind: @vertical, items: @vertical_alignments, alt: 'The vertical alignment of this view in its available space.');
-            edit_number(name: "indent", bind: @indent, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
-            edit_text(name: "margin", bind: @margin, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+            edit_number(name: "indent", bind: @indent, bind_label_color: @indent_color, alt: 'The horizontal indentation of this view within its available space.  If the view is aligned left, the indentation pushes it right, and vice versa.');
+            edit_text(name: "margin", bind: @margin, bind_label_color: @margin_color, alt: 'An array of four numbers specifying the margin of space that should be placed around this view (in the order left, top, right, bottom), or a single number for all four values.');
+        }
+
+        row(horizontal: align_right)
+        {
+            button(name: "OK", bind: @result, action: @ok, bind_enabled: @valid);
+            button(name: "Apply", action: @apply, bind_enabled: @valid, signal_id: @apply);
+            button(name: "Reset", action: @reset);
+            button(name: "Cancel", action: @cancel);
         }
     }
 }

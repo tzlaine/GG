@@ -47,8 +47,16 @@ interface:
     bind_text_color: "";
     bind_interior_color: "";
 
-output:
-    result <== {
+    indent_valid <== 0 <= indent;
+    margin_valid <== valid_margin(margin);
+    indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
+    margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
+    spacing_valid <== valid_spacing(spacing);
+    spacing_color <== spacing_valid ? color(0, 0, 0) : color(r: 255);
+
+    valid <== indent_valid && margin_valid && spacing_valid;
+
+    results_dict <== {
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
@@ -62,8 +70,11 @@ output:
         color: color != color(127, 127, 127) ? color : @sentinel_value,
         text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value,
         interior_color: interior_color != color(0, 0, 0, 0) ? interior_color : @sentinel_value,
-        bind_color: bind_color != "" ? bind_color : @sentinel_value,
-        bind_text_color: bind_text_color != "" ? bind_text_color : @sentinel_value,
-        bind_interior_color: bind_interior_color != "" ? bind_interior_color : @sentinel_value
+        bind_color: bind_color != "" ? to_name(bind_color) : @sentinel_value,
+        bind_text_color: bind_text_color != "" ? to_name(bind_text_color) : @sentinel_value,
+        bind_interior_color: bind_interior_color != "" ? to_name(bind_interior_color) : @sentinel_value
     };
+
+output:
+    result <== {value: make_result("group", results_dict)};
 }

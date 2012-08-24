@@ -545,13 +545,13 @@ namespace adobe { namespace implementation {
     any_regular_t size(const array_t& parameters)
     {
         if (parameters.size() != 1u)
-            throw std::runtime_error("parse() requires 1 parameter");
+            throw std::runtime_error("size() requires 1 parameter");
         if (parameters[0].type_info() == type_info<array_t>())
             return any_regular_t(parameters[0].cast<array_t>().size());
         else if (parameters[0].type_info() == type_info<dictionary_t>())
             return any_regular_t(parameters[0].cast<dictionary_t>().size());
         else
-            throw std::runtime_error("parse() requires an array or dictionary as its first parameter");
+            throw std::runtime_error("size() requires an array or dictionary as its first parameter");
     }
 
     any_regular_t join(const array_t& parameters)

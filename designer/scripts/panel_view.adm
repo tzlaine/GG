@@ -46,7 +46,7 @@ output:
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
-        spacing: spacing != "" ? spacing : @sentinel_value,
+        spacing: spacing != "" ? to_expression(spacing) : @sentinel_value,
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,

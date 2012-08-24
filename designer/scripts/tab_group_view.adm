@@ -62,7 +62,7 @@ output:
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
-        margin: margin != "" ? margin : @sentinel_value,
+        margin: margin != "" ? to_expression(margin) : @sentinel_value,
         bind: bind != "" ? bind : @sentinel_value,
         bind_controller: bind == "" && bind_controller != "" ? bind_controller : @sentinel_value,
         bind_view: bind == "" && bind_view != "" ? bind_view : @sentinel_value,

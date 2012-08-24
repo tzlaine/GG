@@ -65,7 +65,7 @@ output:
         horizontal: horizontal,
         vertical: vertical,
         indent: indent != 0 ? indent : @sentinel_value,
-        margin: margin != "" ? margin : @sentinel_value,
+        margin: margin != "" ? to_expression(margin) : @sentinel_value,
         name: name != "" ? name : @sentinel_value,
         alt: alt != "" ? alt : @sentinel_value,
         bind: bind != "" ? bind : @sentinel_value,

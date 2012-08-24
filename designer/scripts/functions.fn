@@ -45,6 +45,24 @@ to_expression(string) {
     return expr == empty ? string : eval(expr);
 }
 
+all_numbers(state, value) {
+    if (!state)
+        return state;
+    return typeof(value) == @number;
+}
+
+valid_spacing(spacing_str) {
+    if (spacing_str == '')
+        return true;
+    spacing: parse(spacing_str);
+    if (spacing == empty)
+        return false;
+    spacing = eval(spacing);
+    if (typeof(spacing) != @array)
+        return false;
+    return fold(spacing, true, @all_numbers);
+}
+
 valid_dialog_parameters_impl(state, value) {
     parsed: parse(value.state[1]);
     if (parsed == empty)

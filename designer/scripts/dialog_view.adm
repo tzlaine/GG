@@ -41,12 +41,16 @@ interface:
     color: color(127, 127, 127);
     text_color: color(0, 0, 0);
 
-output:
-    result <== {
+    spacing_valid <== valid_spacing(spacing);
+    spacing_color <== spacing_valid ? color(0, 0, 0) : color(r: 255);
+
+    valid <== spacing_valid;
+
+    results_dict <== {
         placement: placement,
         child_horizontal: child_horizontal,
         child_vertical: child_vertical,
-        spacing: spacing != "" ? spacing : @sentinel_value,
+        spacing: spacing != "" ? to_expression(spacing) : @sentinel_value,
         name: name != "" ? name : @sentinel_value,
         grow: grow != false ? grow : @sentinel_value,
         move: move != true ? move : @sentinel_value,
@@ -55,4 +59,7 @@ output:
         color: color != color(127, 127, 127) ? color : @sentinel_value,
         text_color: text_color != color(0, 0, 0) ? text_color : @sentinel_value
     };
+
+output:
+    result <== {value: make_result("dialog", results_dict)};
 }

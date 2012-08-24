@@ -14,7 +14,7 @@ layout dialog_view
             popup(name: "placement", bind: @placement, items: @placements, alt: 'The placement of views within this container.');
             popup(name: "child_horizontal", bind: @child_horizontal, items: @horizontal_alignments, alt: 'The horizontal alignment of views within this container.');
             popup(name: "child_vertical", bind: @child_vertical, items: @vertical_alignments, alt: 'The vertical alignment of views within this container.');
-            edit_text(name: "spacing", bind: @spacing, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
+            edit_text(name: "spacing", bind: @spacing, bind_label_color: @spacing_color, alt: 'An array of numbers to be used for inter-view spacing of contained views, or a single number to use for all spacing.  If the array has more views than the number of contained views, only the applicable ones are used.  If the array has too few views (or a single number is used), the last value is used for all the subsequent view spacing.');
         }
 
         reveal(name: "Colors", bind: @show_colors);
@@ -22,6 +22,14 @@ layout dialog_view
         {
             color_button(name: "color", bind: @color, alt: 'The color in which to render the dialog.');
             color_button(name: "text_color", bind: @text_color, alt: 'The color in which to render the text directly associated with the dialog (e.g. the title).');
+        }
+
+        row(horizontal: align_right)
+        {
+            button(name: "OK", bind: @result, action: @ok, bind_enabled: @valid);
+            button(name: "Apply", action: @apply, bind_enabled: @valid, signal_id: @apply);
+            button(name: "Reset", action: @reset);
+            button(name: "Cancel", action: @cancel);
         }
     }
 }

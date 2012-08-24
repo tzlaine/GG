@@ -30,6 +30,8 @@ valid_margin(margin_str) {
     if (margin == empty)
         return false;
     margin = eval(margin);
+    if (typeof(margin) != @array)
+        return false;
     consecutive_nonnegs: fold(margin, [false, 0], @nonnegs)[1];
     return min(4, size(margin)) <= consecutive_nonnegs;
 }

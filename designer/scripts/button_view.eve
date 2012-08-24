@@ -55,14 +55,15 @@ layout button_view
                                items: @value_dialog_parameters,
                                characters: 15,
                                rows: 5,
-                               selections: @none,
+                               user_delete: true,
+                               hilite_color: color(b: 255),
                                bind_label_color: @dialog_parameters_color);
                        control_button(
                            name: "Add parameter",
                            bind: @value_dialog_parameters,
                            expression: "append(value_dialog_parameters,"
-                                              "{value: size(value_dialog_parameters), "
-                                               "type: @dialog_parameter, "
+                                              "{value: size(value_dialog_parameters),"
+                                               "type: @dialog_parameter,"
                                                "state: ['name', '" '"value"' "']})"
                        );
                        edit_text(name: "bind_result", bind: @value_bind_result, bind_label_color: @bind_result_color);

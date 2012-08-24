@@ -36,7 +36,7 @@ layout checkbox_view
         row(horizontal: align_right)
         {
             button(name: "OK", bind: @result, action: @ok, bind_enabled: @valid);
-            button(name: "Apply", action: @apply, bind_enabled: @valid);
+            button(name: "Apply", action: @apply, bind_enabled: @valid, signal_id: @apply);
             button(name: "Reset", action: @reset);
             button(name: "Cancel", action: @cancel);
         }

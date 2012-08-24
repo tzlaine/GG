@@ -63,7 +63,7 @@ valid_spacing(spacing_str) {
     return fold(spacing, true, @all_numbers);
 }
 
-valid_dialog_parameters_impl(state, value) {
+valid_key_value_pairs_impl(state, value) {
     parsed: parse(value.state[1]);
     if (parsed == empty)
         return state;
@@ -71,8 +71,11 @@ valid_dialog_parameters_impl(state, value) {
         return insert(state, to_name(value.state[0]), empty);
 }
 
-valid_dialog_parameters(items) {
-    return size(fold(items, {}, @valid_dialog_parameters_impl)) == size(items);
+valid_key_value_pairs(items, empty_is_ok) {
+    valid_pairs: size(fold(items, {}, @valid_key_value_pairs_impl));
+    if (!empty_is_ok && valid_pairs == 0)
+        return false;
+    return valid_pairs == size(items);
 }
 
 state_to_dictionary_element(state, value) {
@@ -84,7 +87,7 @@ state_to_dictionary_element(state, value) {
     return insert(state, to_name(value.state[0]), expr);
 }
 
-make_dialog_parameters(items) {
+make_key_value_pairs(items) {
     return fold(items, {}, @state_to_dictionary_element);
 }
 

@@ -60,7 +60,7 @@ interface:
     margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
     spacing_valid <== valid_spacing(spacing);
     spacing_color <== spacing_valid ? color(0, 0, 0) : color(r: 255);
-    items_valid <== valid_dialog_parameters(items);
+    items_valid <== valid_key_value_pairs(items, false);
     items_color <== items_valid ? color(0, 0, 0) : color(r: 255);
 
     valid <== indent_valid && margin_valid && spacing_valid && items_valid;
@@ -76,7 +76,7 @@ interface:
         bind: bind != "" ? to_name(bind) : @sentinel_value,
         bind_controller: bind == "" && bind_controller != "" ? to_name(bind_controller) : @sentinel_value,
         bind_view: bind == "" && bind_view != "" ? to_name(bind_view) : @sentinel_value,
-        items: items != [] ? make_dialog_parameters(items) : @sentinel_value,
+        items: items != [] ? make_key_value_pairs(items) : @sentinel_value,
         style: style != @attached ? style : @sentinel_value,
         signal_id: signal_id != "" ? signal_id : @sentinel_value,
         bind_tab_changed_signal: bind_tab_changed_signal != "" ? to_name(bind_tab_changed_signal) : @sentinel_value,

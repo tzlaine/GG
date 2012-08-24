@@ -58,7 +58,7 @@ interface:
     margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
     bind_result_valid <== button_use != @button_use_dialog || dialog_type != @dialog_type_standard || value_bind_result != '';
     bind_result_color <== bind_result_valid ? color(0, 0, 0) : color(r: 255);
-    dialog_parameters_valid <== valid_dialog_parameters(value_dialog_parameters);
+    dialog_parameters_valid <== valid_key_value_pairs(value_dialog_parameters, true);
     dialog_parameters_color <== dialog_parameters_valid ? color(0, 0, 0) : color(r: 255);
 
     valid <== indent_valid && margin_valid && bind_result_valid && dialog_parameters_valid;
@@ -94,7 +94,7 @@ interface:
                        ((button_use == @button_use_dialog && dialog_type == @dialog_type_standard) ?
                             {
                                 name: dialog_name,
-                                dialog_parameters: make_dialog_parameters(value_dialog_parameters),
+                                dialog_parameters: make_key_value_pairs(value_dialog_parameters),
                                 bind_result: to_name(value_bind_result)
                             } :
                             @sentinel_value

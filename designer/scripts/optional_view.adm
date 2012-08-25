@@ -47,7 +47,7 @@ interface:
     margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
     spacing_valid <== valid_spacing(spacing);
     spacing_color <== spacing_valid ? color(0, 0, 0) : color(r: 255);
-    value_valid <== valid_expression(value);
+    value_valid <== valid_expression(value, true);
     value_color <== value_valid ? color(0, 0, 0) : color(r: 255);
 
     valid <== indent_valid && margin_valid && spacing_valid && value_valid;

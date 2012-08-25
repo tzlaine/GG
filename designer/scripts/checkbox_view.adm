@@ -55,9 +55,9 @@ interface:
     margin_valid <== valid_margin(margin);
     indent_color <== indent_valid ? color(0, 0, 0) : color(r: 255);
     margin_color <== margin_valid ? color(0, 0, 0) : color(r: 255);
-    value_on_valid <== valid_expression(value_on);
+    value_on_valid <== valid_expression(value_on, true);
     value_on_color <== value_on_valid ? color(0, 0, 0) : color(r: 255);
-    value_off_valid <== valid_expression(value_off);
+    value_off_valid <== valid_expression(value_off, true);
     value_off_color <== value_off_valid ? color(0, 0, 0) : color(r: 255);
 
     valid <== indent_valid && margin_valid && value_on_valid && value_off_valid;

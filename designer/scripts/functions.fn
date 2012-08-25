@@ -36,8 +36,8 @@ valid_margin(margin_str) {
     return min(4, size(margin)) <= consecutive_nonnegs;
 }
 
-valid_expression(string) {
-    return string == '' || parse(string) != empty;
+valid_expression(string, empty_is_ok) {
+    return empty_is_ok && string == '' || parse(string) != empty;
 }
 
 to_expression(string) {
@@ -105,4 +105,67 @@ make_result(view_name, parameters) {
     retval: view_name + '(';
     retval = retval + fold(parameters, ['', true], @make_result_impl)[0];
     return retval + ')';
+}
+
+make_relate_clauses_impl(state, key, value) {
+    return state + '        ' + value.state[0] + ' <== ' + value.state[1] + ';\n';
+}
+
+make_relate_clauses(relate_clauses) {
+    return fold(relate_clauses, '', @make_relate_clauses_impl);
+}
+
+valid_relate_clauses(items) {
+    valid_pairs: size(fold(items, {}, @valid_key_value_pairs_impl));
+    return 2 <= valid_pairs && valid_pairs == size(items);
+}
+
+make_cell_decl(cell_type,
+               cell_name,
+               initial_cell_value,
+               logic_cell_relate,
+               relate_cell_condition,
+               logic_cell_relate_clauses,
+               cell_define_expression,
+               interface_cell_unlink,
+               output_cell_elements) {
+    retval: '    ' + cell_name;
+
+    if (cell_type == @output)
+        retval = '    result';
+    else if (cell_type == @logic && logic_cell_relate)
+        retval = '    ';
+
+    if (cell_type == @input) {
+        if (initial_cell_value != "")
+            retval = retval + ' : ' + initial_cell_value + ';';
+    } else if (cell_type == @constant) {
+        retval = retval + ' : ' + initial_cell_value + ';';
+    } else if (cell_type == @logic) {
+        if (logic_cell_relate) {
+            if (relate_cell_condition != "")
+                retval = retval + 'when (' + relate_cell_condition + ') ';
+            retval = retval + 'relate ';
+            retval = retval + '{\n' +
+                make_relate_clauses(logic_cell_relate_clauses) +
+                '    }';
+        } else {
+            retval = retval + ' <== ' + cell_define_expression + ';';
+        }
+    } else if (cell_type == @invariant) {
+        retval = retval + ' <== ' + cell_define_expression + ';';
+    } else if (cell_type == @interface) {
+        if (interface_cell_unlink)
+            retval = '    unlink ' + cell_name;
+        if (initial_cell_value != "")
+            retval = retval + ' : ' + initial_cell_value;
+        if (cell_define_expression != "")
+            retval = retval + ' <== ' + cell_define_expression;
+        retval = retval + ';';
+    } else if (cell_type == @output) {
+        retval = retval + ' <== ' +
+            to_string(make_key_value_pairs(output_cell_elements), true) + ';';
+    }
+
+    return retval;
 }

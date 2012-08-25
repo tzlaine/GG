@@ -1,0 +1,52 @@
+sheet tab_group_view
+{
+interface:
+    cell_type: @interface;
+    cell_name: "";
+    initial_cell_value: "";
+    logic_cell_relate: false;
+    relate_cell_condition: "";
+    logic_cell_relate_clauses: [];
+    cell_define_expression: "";
+    interface_cell_unlink: false;
+    output_cell_elements: [];
+
+    cell_name_valid: true <== cell_type == @logic && logic_cell_relate || cell_name != "";
+    cell_name_color <== cell_name_valid ? color(0, 0, 0) : color(r: 255);
+    initial_cell_value_valid: true <== valid_expression(initial_cell_value, cell_type != @constant);
+    initial_cell_value_color <== initial_cell_value_valid ? color(0, 0, 0) : color(r: 255);
+    relate_cell_condition_valid: true <== valid_expression(relate_cell_condition, true);
+    relate_cell_condition_color <== relate_cell_condition_valid ? color(0, 0, 0) : color(r: 255);
+    cell_define_expression_valid: true <== valid_expression(cell_define_expression, true);
+    cell_define_expression_color <== cell_define_expression_valid ? color(0, 0, 0) : color(r: 255);
+    logic_cell_relate_clauses_valid <== valid_relate_clauses(logic_cell_relate_clauses);
+    logic_cell_relate_clauses_color <== logic_cell_relate_clauses_valid ? color(0, 0, 0) : color(r: 255);
+    output_cell_elements_valid <== valid_key_value_pairs(output_cell_elements, true);
+    output_cell_elements_color <== output_cell_elements_valid ? color(0, 0, 0) : color(r: 255);
+
+    valid:
+        cell_name_valid &&
+        initial_cell_value_valid &&
+        (cell_type != @logic || !logic_cell_relate || relate_cell_condition_valid && logic_cell_relate_clauses_valid) &&
+        (!(cell_type == @logic && !logic_cell_relate ||
+           cell_type == @invariant ||
+           cell_type == @interface) ||
+         cell_define_expression_valid) &&
+        (cell_type != @output || output_cell_elements_valid);
+
+output:
+    result <== {
+        type: cell_type,
+        declaration: make_cell_decl(
+            cell_type: cell_type,
+            cell_name: cell_name,
+            initial_cell_value: initial_cell_value,
+            logic_cell_relate: logic_cell_relate,
+            relate_cell_condition: relate_cell_condition,
+            logic_cell_relate_clauses: logic_cell_relate_clauses,
+            cell_define_expression: cell_define_expression,
+            interface_cell_unlink: interface_cell_unlink,
+            output_cell_elements: output_cell_elements
+        )
+    };
+}

@@ -9,17 +9,29 @@ namespace {
 
     adobe::any_regular_t exec_statement(const adobe::array_t& statement,
                                         adobe::sheet_t& local_scope,
-                                        bool& done);
+                                        bool in_loop,
+                                        bool& block_continue,
+                                        bool& block_break,
+                                        bool& function_done);
 
     adobe::any_regular_t exec_block(adobe::array_t::const_iterator first,
                                     adobe::array_t::const_iterator last,
                                     adobe::sheet_t& local_scope,
-                                    bool& done)
+                                    bool in_loop,
+                                    bool& block_continue,
+                                    bool& block_break,
+                                    bool& function_done)
     {
         for (; first != last; ++first) {
-            adobe::any_regular_t value =
-                exec_statement(first->cast<adobe::array_t>(), local_scope, done);
-            if (done)
+            adobe::any_regular_t value = exec_statement(first->cast<adobe::array_t>(),
+                                                        local_scope,
+                                                        in_loop,
+                                                        block_continue,
+                                                        block_break,
+                                                        function_done);
+            if (block_continue || block_break)
+                break;
+            if (function_done)
                 return value;
         }
         return adobe::any_regular_t();
@@ -27,7 +39,10 @@ namespace {
 
     adobe::any_regular_t exec_statement(const adobe::array_t& statement,
                                         adobe::sheet_t& local_scope,
-                                        bool& done)
+                                        bool in_loop,
+                                        bool& block_continue,
+                                        bool& block_break,
+                                        bool& function_done)
     {
         adobe::name_t op;
         statement.back().cast(op);
@@ -55,14 +70,152 @@ namespace {
                 local_scope.inspect(condition_expr).cast<bool>();
             const adobe::array_t& stmt_block =
                 (condition ? statement[1] : statement[2]).cast<adobe::array_t>();
-            adobe::any_regular_t value =
-                exec_block(stmt_block.begin(), stmt_block.end(), local_scope, done);
-            if (done)
+            adobe::any_regular_t value = exec_block(stmt_block.begin(),
+                                                    stmt_block.end(),
+                                                    local_scope,
+                                                    false,
+                                                    block_continue,
+                                                    block_break,
+                                                    function_done);
+            assert(!block_continue && !block_break);
+            if (function_done)
                 return value;
+        } else if (op == adobe::simple_for_k) {
+            adobe::name_t loop_var_0 = statement[0].cast<adobe::name_t>();
+            local_scope.add_interface(loop_var_0,
+                                      false,
+                                      adobe::line_position_t(),
+                                      adobe::array_t(),
+                                      adobe::line_position_t(),
+                                      adobe::array_t());
+            adobe::name_t loop_var_1 = statement[1].cast<adobe::name_t>();
+            if (loop_var_1) {
+                local_scope.add_interface(loop_var_1,
+                                          false,
+                                          adobe::line_position_t(),
+                                          adobe::array_t(),
+                                          adobe::line_position_t(),
+                                          adobe::array_t());
+            }
+            const adobe::any_regular_t sequence =
+                local_scope.inspect(statement[2].cast<adobe::array_t>());
+            const adobe::array_t& stmt_block = statement[3].cast<adobe::array_t>();
+            if (sequence.type_info() == adobe::type_info<adobe::array_t>()) {
+                if (loop_var_1)
+                    throw std::runtime_error("Two loop variables passed to a for loop over an array");
+                const adobe::array_t& array = sequence.cast<adobe::array_t>();
+                for (adobe::array_t::const_iterator it = array.begin(), end_it = array.end();
+                     it != end_it;
+                     ++it) {
+                    local_scope.set(loop_var_0, *it);
+                    local_scope.update();
+                    adobe::any_regular_t value = exec_block(stmt_block.begin(),
+                                                            stmt_block.end(),
+                                                            local_scope,
+                                                            true,
+                                                            block_continue,
+                                                            block_break,
+                                                            function_done);
+                    block_continue = false;
+                    if (block_break) {
+                        block_break = false;
+                        break;
+                    }
+                    if (function_done)
+                        return value;
+                }
+            } else if (sequence.type_info() == adobe::type_info<adobe::dictionary_t>()) {
+                const adobe::dictionary_t& dictionary = sequence.cast<adobe::dictionary_t>();
+                for (adobe::dictionary_t::const_iterator it = dictionary.begin(), end_it = dictionary.end();
+                     it != end_it;
+                     ++it) {
+                    if (loop_var_1) {
+                        local_scope.set(loop_var_0, adobe::any_regular_t(it->first));
+                        local_scope.update();
+                        local_scope.set(loop_var_1, it->second);
+                        local_scope.update();
+                    } else {
+                        adobe::dictionary_t value;
+                        value[adobe::static_name_t("key")] = adobe::any_regular_t(it->first);
+                        value[adobe::static_name_t("value")] = it->second;
+                        local_scope.set(loop_var_0, adobe::any_regular_t(value));
+                        local_scope.update();
+                    }
+                    adobe::any_regular_t value = exec_block(stmt_block.begin(),
+                                                            stmt_block.end(),
+                                                            local_scope,
+                                                            true,
+                                                            block_continue,
+                                                            block_break,
+                                                            function_done);
+                    block_continue = false;
+                    if (block_break) {
+                        block_break = false;
+                        break;
+                    }
+                    if (function_done)
+                        return value;
+                }
+            }
+        } else if (op == adobe::complex_for_k) {
+            const adobe::array_t& vars_array = statement[0].cast<adobe::array_t>();
+            for (std::size_t i = 0; i < vars_array.size(); i += 3) {
+                local_scope.add_interface(vars_array[i / 3 + 0].cast<adobe::name_t>(),
+                                          false,
+                                          adobe::line_position_t(),
+                                          vars_array[i / 3 + 1].cast<adobe::array_t>(),
+                                          adobe::line_position_t(),
+                                          adobe::array_t());
+            }
+            const adobe::array_t& condition = statement[1].cast<adobe::array_t>();
+            const adobe::array_t& assignments_array = statement[2].cast<adobe::array_t>();
+            const adobe::array_t& stmt_block = statement[3].cast<adobe::array_t>();
+            const adobe::any_regular_t assign_token(adobe::assign_k);
+            adobe::any_regular_t condition_result = local_scope.inspect(condition);
+            while (condition_result.cast<bool>()) {
+                adobe::any_regular_t value = exec_block(stmt_block.begin(),
+                                                        stmt_block.end(),
+                                                        local_scope,
+                                                        true,
+                                                        block_continue,
+                                                        block_break,
+                                                        function_done);
+                block_continue = false;
+                if (block_break) {
+                    block_break = false;
+                    break;
+                }
+                if (function_done)
+                    return value;
+                adobe::array_t::const_iterator it = assignments_array.begin();
+                const adobe::array_t::const_iterator end_it = assignments_array.end();
+                while (it != end_it) {
+                    adobe::array_t::const_iterator assign_it =
+                        std::find(it, end_it, assign_token);
+                    ++assign_it;
+                    exec_statement(adobe::array_t(it, assign_it),
+                                   local_scope,
+                                   false,
+                                   block_continue,
+                                   block_break,
+                                   function_done);
+                    assert(!block_continue && !block_break && !function_done);
+                    it = assign_it;
+                }
+                condition_result = local_scope.inspect(condition);
+            }
+        } else if (op == adobe::continue_k) {
+            if (!in_loop)
+                throw std::runtime_error("continue statement outside of loop");
+            block_continue = true;
+        } else if (op == adobe::break_k) {
+            if (!in_loop)
+                throw std::runtime_error("break statement outside of loop");
+            block_break = true;
         } else if (op == adobe::return_k) {
             adobe::any_regular_t value =
                 local_scope.inspect(adobe::array_t(statement.begin(), statement.end() - 1));
-            done = true;
+            function_done = true;
             return value;
         }
 
@@ -223,9 +376,16 @@ any_regular_t adam_function_t::common_impl(sheet_t& local_scope) const
              end_it = m_statements.end();
          it != end_it;
          ++it) {
-        bool done = false;
-        any_regular_t value = exec_statement(*it, local_scope, done);
-        if (done)
+        bool function_done = false;
+        bool block_continue = false;
+        bool block_break = false;
+        any_regular_t value = exec_statement(*it,
+                                             local_scope,
+                                             false,
+                                             block_continue,
+                                             block_break,
+                                             function_done);
+        if (function_done)
             return value;
     }
     return any_regular_t();

@@ -1,6 +1,7 @@
 #include <GG/adobe/adam_function.hpp>
 
 #include <GG/adobe/dictionary.hpp>
+#include <GG/adobe/implementation/lex_shared.hpp>
 #include <GG/adobe/implementation/token.hpp>
 
 
@@ -96,8 +97,16 @@ adam_function_t::adam_function_t(name_t name,
             declared_vars.insert(m_statements[i][0].cast<name_t>());
         } else if (op_name == assign_k) {
             name_t var = m_statements[i][0].cast<name_t>();
-            if (declared_vars.find(var) == declared_vars.end())
-                m_variables.insert(var);
+            if (declared_vars.find(var) == declared_vars.end()) {
+                throw_parser_exception(
+                    make_string(
+                        m_function_name.c_str(),
+                        "(): Assignment to unknown variable ",
+                        var.c_str()
+                    ).c_str(),
+                    line_position_t()
+                );
+            }
         }
         for (array_t::const_iterator
                  it = m_statements[i].begin(),
@@ -109,8 +118,16 @@ adam_function_t::adam_function_t(name_t name,
                 name_t name;
                 if (next_it != end_it && next_it->cast(name) && name == variable_k) {
                     name_t var = it->cast<name_t>();
-                    if (declared_vars.find(var) == declared_vars.end())
-                        m_variables.insert(var);
+                    if (declared_vars.find(var) == declared_vars.end()) {
+                        throw_parser_exception(
+                            make_string(
+                                m_function_name.c_str(),
+                                "(): Use of unknown variable ",
+                                var.c_str()
+                            ).c_str(),
+                            line_position_t()
+                        );
+                    }
                 }
             }
         }
@@ -126,11 +143,7 @@ const std::vector<name_t>& adam_function_t::parameter_names() const
 const std::vector<array_t>& adam_function_t::statements() const
 { return m_statements; }
 
-const std::set<name_t>& adam_function_t::variables() const
-{ return m_variables; }
-
 any_regular_t adam_function_t::operator()(
-    const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
     const adam_function_lookup_t& adam_function_lookup,
@@ -138,8 +151,7 @@ any_regular_t adam_function_t::operator()(
 ) const
 {
     sheet_t local_scope;
-    common_init(variable_lookup,
-                array_function_lookup,
+    common_init(array_function_lookup,
                 dictionary_function_lookup,
                 adam_function_lookup,
                 local_scope);
@@ -164,7 +176,6 @@ any_regular_t adam_function_t::operator()(
 }
 
 any_regular_t adam_function_t::operator()(
-    const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
     const adam_function_lookup_t& adam_function_lookup,
@@ -172,8 +183,7 @@ any_regular_t adam_function_t::operator()(
 ) const
 {
     sheet_t local_scope;
-    common_init(variable_lookup,
-                array_function_lookup,
+    common_init(array_function_lookup,
                 dictionary_function_lookup,
                 adam_function_lookup,
                 local_scope);
@@ -200,7 +210,6 @@ any_regular_t adam_function_t::operator()(
 }
 
 void adam_function_t::common_init(
-    const variable_lookup_t& variable_lookup,
     const array_function_lookup_t& array_function_lookup,
     const dictionary_function_lookup_t& dictionary_function_lookup,
     const adam_function_lookup_t& adam_function_lookup,
@@ -211,15 +220,6 @@ void adam_function_t::common_init(
     local_scope.machine_m.set_dictionary_function_lookup(dictionary_function_lookup);
     local_scope.machine_m.set_adam_function_lookup(adam_function_lookup);
     local_scope.machine_m.set_variable_lookup(boost::bind(&sheet_t::get, &local_scope, _1));
-    for (std::set<name_t>::const_iterator
-             it = m_variables.begin(), end_it = m_variables.end();
-         it != end_it;
-         ++it) {
-        try {
-            any_regular_t value = variable_lookup(*it);
-            local_scope.add_constant(*it, line_position_t(), array_t(1, value));
-        } catch (const std::logic_error&) {}
-    }
 }
 
 any_regular_t adam_function_t::common_impl(sheet_t& local_scope) const

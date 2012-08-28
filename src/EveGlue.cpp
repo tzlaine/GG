@@ -65,8 +65,7 @@ namespace {
                                        const adobe::dictionary_t& arguments)
     {
         const adobe::adam_function_t& function = lookup.adamproc(f);
-        return function(boost::ref(lookup.var_function()),
-                        boost::bind(&adobe::vm_lookup_t::aproc, &lookup, _1, _2, _3),
+        return function(boost::bind(&adobe::vm_lookup_t::aproc, &lookup, _1, _2, _3),
                         boost::bind(&adobe::vm_lookup_t::dproc, &lookup, _1, _2, _3),
                         boost::bind(&adobe::vm_lookup_t::adamproc, &lookup, _1),
                         arguments);

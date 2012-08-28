@@ -16,17 +16,21 @@ f4 () {
 }
 
 f5 () {
+    c;
     c = 1 + 2;
 }
 
 f6 () {
+    d: 0;
     return d + 1;
 }
 
 f7 () {
     constant a: 1 + 2;
     b: 1 + 2;
+    c;
     c = 1 + 2;
+    d: 0;
     return d + 1;
 }
 
@@ -35,6 +39,7 @@ f8 (d) {
 }
 
 f9 () {
+    c: 0;
     d: c + 1;
     return d + 1;
 }
@@ -63,6 +68,7 @@ f13 () {
 }
 
 f14 () {
+    c;
     if (false) {
         c = 1 + 2;
         return 1;
@@ -80,6 +86,7 @@ f15 () {
 }
 
 f16 () {
+    c;
     if (false) {
         c = 1 + 2;
         return 1;
@@ -91,6 +98,7 @@ f16 () {
 
 f17 () {
     if (false) {
+        c;
         c = 1 + 2;
         return 1;
     } else if (false) {
@@ -101,11 +109,13 @@ f17 () {
 
 f18 () {
     if (false) {
+        c;
         c = 1 + 2;
         return 1;
     } else if (false) {
     } else if (false) {
     } else {
+        c;
         if (false) {
             c = 1 + 2;
             return 1;
@@ -122,6 +132,7 @@ f19 () {
     if (false) {
     } else if (false) {
     } else if (false) {
+        c;
         c = 1 + 2;
         return 1;
     } else {
@@ -162,14 +173,6 @@ decl_fn () {
 const_decl_fn () {
     constant b: @none;
     return b;
-}
-
-const_cell_fn () {
-    return const_cell;
-}
-
-interface_cell_fn () {
-    return interface_cell;
 }
 
 shadowed_param_1_fn (const_cell) {

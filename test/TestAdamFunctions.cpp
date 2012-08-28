@@ -60,8 +60,6 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("simple_number_fn()", adobe::any_regular_t(1)));
         retval.push_back(Test("decl_fn()", adobe::any_regular_t(adobe::static_name_t("none"))));
         retval.push_back(Test("const_decl_fn()", adobe::any_regular_t(adobe::static_name_t("none"))));
-        retval.push_back(Test("const_cell_fn()", adobe::any_regular_t(adobe::static_name_t("const_cell_contents"))));
-        retval.push_back(Test("interface_cell_fn()", adobe::any_regular_t(adobe::static_name_t("interface_cell_contents"))));
         retval.push_back(Test("shadowed_param_1_fn()", adobe::any_regular_t()));
         retval.push_back(Test("shadowed_param_1_fn(empty)", adobe::any_regular_t()));
         retval.push_back(Test("shadowed_param_1_fn(1)", adobe::any_regular_t(1)));

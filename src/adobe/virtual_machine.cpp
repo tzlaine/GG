@@ -765,8 +765,7 @@ void virtual_machine_t::implementation_t::function_operator()
 
         if (adam_function_lookup_m) {
             const adam_function_t& f = adam_function_lookup_m(function_name);
-            value_stack_m.push_back(f(variable_lookup_m,
-                                      array_function_lookup_m,
+            value_stack_m.push_back(f(array_function_lookup_m,
                                       dictionary_function_lookup_m,
                                       adam_function_lookup_m,
                                       arguments));
@@ -796,8 +795,7 @@ void virtual_machine_t::implementation_t::function_operator()
 
         if (adam_function_lookup_m) {
             const adam_function_t& f = adam_function_lookup_m(function_name);
-            value_stack_m.push_back(f(variable_lookup_m,
-                                      array_function_lookup_m,
+            value_stack_m.push_back(f(array_function_lookup_m,
                                       dictionary_function_lookup_m,
                                       adam_function_lookup_m,
                                       arguments));

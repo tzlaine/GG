@@ -78,6 +78,11 @@ aggregate_name_t decl_k                 = { ".decl" };
 aggregate_name_t lvalue_k               = { ".lvalue" };
 aggregate_name_t return_k               = { ".return" };
 aggregate_name_t stmt_ifelse_k          = { ".stmt_ifelse"};
+aggregate_name_t simple_for_k           = { ".simple_for"};
+aggregate_name_t for_decl_k             = { ".for_decl"};
+aggregate_name_t complex_for_k          = { ".complex_for"};
+aggregate_name_t continue_k             = { ".continue"};
+aggregate_name_t break_k                = { ".break"};
 
 /*************************************************************************************************/
 

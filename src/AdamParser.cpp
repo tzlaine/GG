@@ -71,6 +71,9 @@ namespace {
     adobe::aggregate_name_t relate_k     = { "relate" };
     adobe::aggregate_name_t if_k         = { "if" };
     adobe::aggregate_name_t else_k       = { "else" };
+    adobe::aggregate_name_t for_k        = { "for" };
+    adobe::aggregate_name_t continue_k   = { "continue" };
+    adobe::aggregate_name_t break_k      = { "break" };
     adobe::aggregate_name_t return_k     = { "return" };
 
 #define GET_REF(type_, name)                                            \
@@ -198,7 +201,7 @@ namespace {
             using qi::lit;
 
             lexer& tok = const_cast<lexer&>(AdamLexer());
-            assert(tok.keywords.size() == 13u);
+            assert(tok.keywords.size() == 16u);
             const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
             const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
             const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
@@ -209,7 +212,7 @@ namespace {
             const boost::spirit::lex::token_def<adobe::name_t>& unlink = tok.keywords[unlink_k];
             const boost::spirit::lex::token_def<adobe::name_t>& when = tok.keywords[when_k];
             const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
-            assert(tok.keywords.size() == 13u);
+            assert(tok.keywords.size() == 16u);
 
             const expression_parser_rules::expression_rule& expression = AdamExpressionParser();
 
@@ -531,6 +534,9 @@ const lexer& GG::AdamLexer()
         relate_k,
         if_k,
         else_k,
+        for_k,
+        continue_k,
+        break_k,
         return_k
     };
     static const std::size_t s_num_keywords = sizeof(s_keywords) / sizeof(s_keywords[0]);
@@ -547,7 +553,7 @@ const expression_parser_rules::expression_rule& GG::AdamExpressionParser()
     using boost::spirit::qi::_val;
 
     lexer& tok = const_cast<lexer&>(AdamLexer());
-    assert(tok.keywords.size() == 13u);
+    assert(tok.keywords.size() == 16u);
     const boost::spirit::lex::token_def<adobe::name_t>& input = tok.keywords[input_k];
     const boost::spirit::lex::token_def<adobe::name_t>& output = tok.keywords[output_k];
     const boost::spirit::lex::token_def<adobe::name_t>& interface = tok.keywords[interface_k];
@@ -560,8 +566,11 @@ const expression_parser_rules::expression_rule& GG::AdamExpressionParser()
     const boost::spirit::lex::token_def<adobe::name_t>& relate = tok.keywords[relate_k];
     const boost::spirit::lex::token_def<adobe::name_t>& if_ = tok.keywords[if_k];
     const boost::spirit::lex::token_def<adobe::name_t>& else_ = tok.keywords[else_k];
-    const boost::spirit::lex::token_def<adobe::name_t>& return_ = tok.keywords[relate_k];
-    assert(tok.keywords.size() == 13u);
+    const boost::spirit::lex::token_def<adobe::name_t>& for_ = tok.keywords[for_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& continue_ = tok.keywords[continue_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& break_ = tok.keywords[break_k];
+    const boost::spirit::lex::token_def<adobe::name_t>& return_ = tok.keywords[return_k];
+    assert(tok.keywords.size() == 16u);
 
     static expression_parser_rules::keyword_rule adam_keywords =
         input[_val = _1]
@@ -576,6 +585,9 @@ const expression_parser_rules::expression_rule& GG::AdamExpressionParser()
         | relate[_val = _1]
         | if_[_val = _1]
         | else_[_val = _1]
+        | for_[_val = _1]
+        | continue_[_val = _1]
+        | break_[_val = _1]
         | return_[_val = _1]
         ;
     adam_keywords.name("keyword");

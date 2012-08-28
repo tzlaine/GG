@@ -83,18 +83,125 @@ namespace {
                 output += ": " + initializer;
             output += ';';
         } else if (op == adobe::assign_k) {
+            ++it;
             output += end_it.base()->cast<adobe::name_t>().c_str();
             output += " = ";
             adobe::array_t::const_reverse_iterator expr_end =
-                boost::prior(end_it, 2);;
+                boost::prior(end_it, 2);
             adobe::array_t expr(expr_end.base(), it.base());
             output += WriteExpression(expr);
             output += ';';
+        } else if (op == adobe::break_k) {
+            ++it;
+            output += "break;";
+        } else if (op == adobe::continue_k) {
+            ++it;
+            output += "continue;";
         } else if (op == adobe::return_k) {
             ++it;
             adobe::array_t expr(end_it.base(), it.base());
             output += "return " + WriteExpression(expr);
             output += ';';
+        } else if (op == adobe::simple_for_k) {
+            ++it;
+
+            std::string statements;
+            {
+                const adobe::array_t& block = it->cast<adobe::array_t>();
+                for (adobe::array_t::const_iterator block_it = block.begin();
+                     block_it != block.end();
+                     ++block_it) {
+                    if (block_it != block.begin())
+                        statements += '\n';
+                    statements += WriteStatement(block_it->cast<adobe::array_t>(), indent + 1);
+                }
+            }
+            ++it;
+
+            std::string initial_value = WriteExpression(it->cast<adobe::array_t>());
+            ++it;
+
+            adobe::name_t second_var = it->cast<adobe::name_t>();
+            ++it;
+
+            output += "for ( ";
+            output += it->cast<adobe::name_t>().c_str();
+            if (second_var) {
+                output += ", ";
+                output += second_var.c_str();
+            }
+            output += ": " + initial_value + ") {\n";
+            output += statements + '\n';
+            output += std::string(indent * 4, ' ') + "}";
+
+            ++it;
+        } else if (op == adobe::complex_for_k) {
+            ++it;
+
+            std::string statements;
+            {
+                const adobe::array_t& block = it->cast<adobe::array_t>();
+                for (adobe::array_t::const_iterator block_it = block.begin();
+                     block_it != block.end();
+                     ++block_it) {
+                    if (block_it != block.begin())
+                        statements += '\n';
+                    statements += WriteStatement(block_it->cast<adobe::array_t>(), indent + 1);
+                }
+            }
+            ++it;
+
+            std::string assignments;
+            {
+                const adobe::any_regular_t assign_token(adobe::assign_k);
+                const adobe::array_t& block = it->cast<adobe::array_t>();
+                adobe::array_t::const_iterator block_it = block.begin();
+                const adobe::array_t::const_iterator block_end_it = block.end();
+                while (block_it != block_end_it) {
+                    if (block_it != block.begin())
+                        assignments += ", ";
+                    assignments += block_it->cast<adobe::name_t>().c_str();
+                    assignments += " = ";
+                    ++block_it;
+                    adobe::array_t::const_iterator assign_it =
+                        std::find(block_it, block_end_it, assign_token);
+                    adobe::array_t expr(block_it, assign_it);
+                    assignments += WriteExpression(expr);
+                    block_it = ++assign_it;
+                }
+            }
+            ++it;
+
+            std::string terminating_expression = WriteExpression(it->cast<adobe::array_t>());
+            ++it;
+
+            std::string initializers;
+            {
+                const adobe::array_t& initializers_ = it->cast<adobe::array_t>();
+                adobe::array_t::const_iterator initializers_it = initializers_.begin();
+                const adobe::array_t::const_iterator initializers_end_it = initializers_.end();
+                while (initializers_it != initializers_end_it) {
+                    if (initializers_it != initializers_.begin())
+                        initializers += ", ";
+                    initializers += initializers_it->cast<adobe::name_t>().c_str();
+                    initializers += ": ";
+                    ++initializers_it;
+                    initializers += WriteExpression(initializers_it->cast<adobe::array_t>());
+                    ++initializers_it;
+                    ++initializers_it;
+                }
+            }
+            ++it;
+
+            output += "for ( ";
+            output += initializers;
+            output += "; ";
+            output += terminating_expression;
+            output += "; ";
+            output += assignments;
+            output += ") {\n";
+            output += statements + '\n';
+            output += std::string(indent * 4, ' ') + "}\n";
         } else if (op == adobe::stmt_ifelse_k) {
             ++it;
 

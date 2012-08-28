@@ -256,3 +256,33 @@ slow_size_impl(state, value) {
 slow_size(seq) {
     return fold(seq, 0, @slow_size_impl);
 }
+
+simple_for_1(seq) {
+    z: {};
+    for (x: seq) {
+        z = insert(z, x.key, x.value);
+    }
+    return z == seq;
+}
+
+simple_for_2(seq) {
+    z: {};
+    for (key, value: seq) {
+        z = insert(z, key, value);
+    }
+    return z == seq;
+}
+
+complex_for_1(seq) {
+    z: [];
+    for (x: 0; x < size(seq); x = x + 1) {
+        z = append(z, seq[x]);
+    }
+}
+
+complex_for_2(seq) {
+    z: [];
+    for (x: 0, y: 1; x < size(seq) && y < size(seq); x = x + 1, y = y + 1) {
+        z = append(z, seq[x], seq[y]);
+    }
+}

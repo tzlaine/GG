@@ -15,8 +15,6 @@ public:
     typedef virtual_machine_t::dictionary_function_lookup_t dictionary_function_lookup_t;
     typedef virtual_machine_t::array_function_lookup_t      array_function_lookup_t;
     typedef virtual_machine_t::adam_function_lookup_t       adam_function_lookup_t;
-    typedef virtual_machine_t::create_const_decl_t          create_const_decl_t;
-    typedef virtual_machine_t::create_decl_t                create_decl_t;
 
     adam_function_t();
     adam_function_t(name_t name,

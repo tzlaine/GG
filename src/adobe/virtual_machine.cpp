@@ -97,7 +97,7 @@ typedef boost::function<adobe::any_regular_t (const adobe::dictionary_t&)>    di
 typedef adobe::vector<adobe::any_regular_t>                    stack_type; // REVISIT (sparent) : GCC 3.1 the symbol stack_t conflicts with a symbol in signal.h
 
 #if !defined(ADOBE_NO_DOCUMENTATION)
-typedef adobe::static_table<adobe::name_t, operator_t, 27>              operator_table_t;
+typedef adobe::static_table<adobe::name_t, operator_t, 22>              operator_table_t;
 typedef adobe::static_table<adobe::name_t, array_function_t, 8>         array_function_table_t;
 typedef adobe::static_table<adobe::name_t, dictionary_function_t, 2>    dictionary_function_table_t;
 typedef adobe::static_table<adobe::type_info_t, adobe::name_t, 8>       type_table_t;
@@ -322,12 +322,9 @@ class virtual_machine_t::implementation_t
     void pop_back();
 
     variable_lookup_t               variable_lookup_m;
-    lvalue_assign_t                 lvalue_assign_m;
     array_function_lookup_t         array_function_lookup_m;
     dictionary_function_lookup_t    dictionary_function_lookup_m;
     adam_function_lookup_t          adam_function_lookup_m;
-    create_const_decl_t             create_const_decl_m;
-    create_decl_t                   create_decl_m;
 
  private:
     stack_type              value_stack_m;
@@ -353,13 +350,6 @@ class virtual_machine_t::implementation_t
     void function_operator();
     void array_operator();
     void dictionary_operator();
-
-    // function-specific operators
-    void lvalue_operator();
-    void assign_operator();
-    void const_decl_operator();
-    void decl_operator();
-    void return_operator();
 
     static operator_table_t*            operator_table_g;
     static array_function_table_t*      array_function_table_g;
@@ -416,14 +406,7 @@ void virtual_machine_init_once()
         op_entry_type(adobe::dictionary_k,      &implementation_t::dictionary_operator),
         op_entry_type(adobe::variable_k,        &implementation_t::variable_operator),
         op_entry_type(adobe::and_k,             &implementation_t::logical_and_operator),
-        op_entry_type(adobe::or_k,              &implementation_t::logical_or_operator),
-
-        // function-specific operators
-        op_entry_type(adobe::lvalue_k,          &implementation_t::lvalue_operator),
-        op_entry_type(adobe::assign_k,          &implementation_t::assign_operator),
-        op_entry_type(adobe::const_decl_k,      &implementation_t::const_decl_operator),
-        op_entry_type(adobe::decl_k,            &implementation_t::decl_operator),
-        op_entry_type(adobe::return_k,          &implementation_t::return_operator)
+        op_entry_type(adobe::or_k,              &implementation_t::logical_or_operator)
     }};
 
     static array_function_table_t array_function_table_s =
@@ -750,69 +733,6 @@ void virtual_machine_t::implementation_t::dictionary_operator()
 
 /*************************************************************************************************/
 
-void virtual_machine_t::implementation_t::lvalue_operator()
-{}
-
-/*************************************************************************************************/
-
-void virtual_machine_t::implementation_t::assign_operator()
-{
-    stack_type::iterator iter(value_stack_m.end());
-
-    if (!lvalue_assign_m)
-        throw std::logic_error("No lvalue assign function installed.");
-
-    lvalue_assign_m((iter - 2)->cast<name_t>(), *(iter - 1));
-
-    pop_back();
-    pop_back();
-
-    value_stack_m.push_back(any_regular_t());
-}
-
-/*************************************************************************************************/
-
-void virtual_machine_t::implementation_t::const_decl_operator()
-{
-    stack_type::iterator iter(value_stack_m.end());
-
-    name_t var_name((iter - 2)->cast<name_t>());
-    any_regular_t value(*(iter - 1));
-
-    if (create_const_decl_m)
-        create_const_decl_m(var_name, value.cast<array_t>());
-
-    pop_back();
-    pop_back();
-
-    value_stack_m.push_back(any_regular_t());
-}
-
-/*************************************************************************************************/
-
-void virtual_machine_t::implementation_t::decl_operator()
-{
-    stack_type::iterator iter(value_stack_m.end());
-
-    name_t var_name((iter - 2)->cast<name_t>());
-    any_regular_t value(*(iter - 1));
-
-    if (create_decl_m)
-        create_decl_m(var_name, value.cast<array_t>());
-
-    pop_back();
-    pop_back();
-
-    value_stack_m.push_back(any_regular_t());
-}
-
-/*************************************************************************************************/
-
-void virtual_machine_t::implementation_t::return_operator()
-{}
-
-/*************************************************************************************************/
-
 void virtual_machine_t::implementation_t::function_operator()
 {
     ADOBE_ONCE_INSTANCE(adobe_virtual_machine);
@@ -928,13 +848,6 @@ void virtual_machine_t::set_variable_lookup(const variable_lookup_t& lookup)
     
 /*************************************************************************************************/
     
-void virtual_machine_t::set_lvalue_assign(const lvalue_assign_t& assign)
-{
-    object_m->lvalue_assign_m = assign;
-}
-    
-/*************************************************************************************************/
-    
 void virtual_machine_t::set_array_function_lookup(const array_function_lookup_t& function)
 {
     object_m->array_function_lookup_m = function;
@@ -952,20 +865,6 @@ void virtual_machine_t::set_dictionary_function_lookup(const dictionary_function
 void virtual_machine_t::set_adam_function_lookup(const adam_function_lookup_t& function)
 {
     object_m->adam_function_lookup_m = function;
-}
-
-/*************************************************************************************************/
-
-void virtual_machine_t::set_create_const_decl(const create_const_decl_t& function)
-{
-    object_m->create_const_decl_m = function;
-}
-
-/*************************************************************************************************/
-
-void virtual_machine_t::set_create_decl(const create_decl_t& function)
-{
-    object_m->create_decl_m = function;
 }
 
 /*************************************************************************************************/

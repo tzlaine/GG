@@ -6,19 +6,6 @@
 
 namespace {
 
-    struct lvalue_assign
-    {
-        lvalue_assign(adobe::sheet_t& sheet) :
-            m_sheet(sheet)
-            {}
-        void operator()(adobe::name_t name, const adobe::any_regular_t& value) const
-            {
-                m_sheet.set(name, value);
-                m_sheet.update();
-            }
-        adobe::sheet_t& m_sheet;
-    };
-
     adobe::any_regular_t exec_statement(const adobe::array_t& statement,
                                         adobe::sheet_t& local_scope,
                                         bool& done);
@@ -46,7 +33,24 @@ namespace {
     {
         adobe::name_t op;
         statement.back().cast(op);
-        if (op == adobe::stmt_ifelse_k) {
+
+        if (op == adobe::assign_k) {
+            adobe::any_regular_t value =
+                local_scope.inspect(adobe::array_t(statement.begin() + 2, statement.end() - 1));
+            local_scope.set(statement[0].cast<adobe::name_t>(), value);
+            local_scope.update();
+        } else if (op == adobe::const_decl_k) {
+            local_scope.add_constant(statement[0].cast<adobe::name_t>(),
+                                     adobe::line_position_t(),
+                                     statement[1].cast<adobe::array_t>());
+        } else if (op == adobe::decl_k) {
+            local_scope.add_interface(statement[0].cast<adobe::name_t>(),
+                                      false,
+                                      adobe::line_position_t(),
+                                      statement[1].cast<adobe::array_t>(),
+                                      adobe::line_position_t(),
+                                      adobe::array_t());
+        } else if (op == adobe::stmt_ifelse_k) {
             bool done_ = false;
             const adobe::array_t& condition_expr =
                statement[0].cast<adobe::array_t>();
@@ -60,13 +64,13 @@ namespace {
                 done = true;
                 return value;
             }
-        } else {
-            adobe::any_regular_t value = local_scope.inspect(statement);
-            if (op == adobe::return_k) {
-                done = true;
-                return value;
-            }
+        } else if (op == adobe::return_k) {
+            adobe::any_regular_t value =
+                local_scope.inspect(adobe::array_t(statement.begin(), statement.end() - 1));
+            done = true;
+            return value;
         }
+
         return adobe::any_regular_t();
     }
 
@@ -207,24 +211,6 @@ void adam_function_t::common_init(
     local_scope.machine_m.set_dictionary_function_lookup(dictionary_function_lookup);
     local_scope.machine_m.set_adam_function_lookup(adam_function_lookup);
     local_scope.machine_m.set_variable_lookup(boost::bind(&sheet_t::get, &local_scope, _1));
-    local_scope.machine_m.set_lvalue_assign(lvalue_assign(local_scope));
-    local_scope.machine_m.set_create_const_decl(
-        boost::bind(&sheet_t::add_constant,
-                    &local_scope,
-                    _1,
-                    line_position_t(),
-                    _2)
-    );
-    local_scope.machine_m.set_create_decl(
-        boost::bind(&sheet_t::add_interface,
-                    &local_scope,
-                    _1,
-                    false,
-                    line_position_t(),
-                    _2,
-                    line_position_t(),
-                    array_t())
-    );
     for (std::set<name_t>::const_iterator
              it = m_variables.begin(), end_it = m_variables.end();
          it != end_it;

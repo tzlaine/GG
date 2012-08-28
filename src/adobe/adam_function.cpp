@@ -17,13 +17,10 @@ namespace {
                                     bool& done)
     {
         for (; first != last; ++first) {
-            bool done_ = false;
             adobe::any_regular_t value =
-                exec_statement(first->cast<adobe::array_t>(), local_scope, done_);
-            if (done_) {
-                done = true;
+                exec_statement(first->cast<adobe::array_t>(), local_scope, done);
+            if (done)
                 return value;
-            }
         }
         return adobe::any_regular_t();
     }
@@ -52,7 +49,6 @@ namespace {
                                       adobe::line_position_t(),
                                       adobe::array_t());
         } else if (op == adobe::stmt_ifelse_k) {
-            bool done_ = false;
             const adobe::array_t& condition_expr =
                statement[0].cast<adobe::array_t>();
             const bool condition =
@@ -60,11 +56,9 @@ namespace {
             const adobe::array_t& stmt_block =
                 (condition ? statement[1] : statement[2]).cast<adobe::array_t>();
             adobe::any_regular_t value =
-                exec_block(stmt_block.begin(), stmt_block.end(), local_scope, done_);
-            if (done_) {
-                done = true;
+                exec_block(stmt_block.begin(), stmt_block.end(), local_scope, done);
+            if (done)
                 return value;
-            }
         } else if (op == adobe::return_k) {
             adobe::any_regular_t value =
                 local_scope.inspect(adobe::array_t(statement.begin(), statement.end() - 1));

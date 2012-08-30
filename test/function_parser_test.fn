@@ -286,3 +286,48 @@ complex_for_2(seq) {
         z = append(z, seq[x], seq[y]);
     }
 }
+
+lvalue_assignment_test_1(seq) {
+    seq.foo = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_2(seq) {
+    seq[@foo] = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_3(seq) {
+    seq[1] = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_4(seq) {
+    seq[1].foo = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_5(seq) {
+    seq[1][@foo] = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_6(seq) {
+    seq[1][1] = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_7(seq) {
+    seq.foo.foo = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_8(seq) {
+    seq.foo[1] = 'bar';
+    return seq;
+}
+
+lvalue_assignment_test_9(seq) {
+    seq[@foo][1] = 'bar';
+    return seq;
+}

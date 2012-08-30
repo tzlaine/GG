@@ -57,6 +57,20 @@ namespace {
         return false;
     }
 
+    void WriteLValue(const adobe::array_t& array, std::string& output)
+    {
+        adobe::name_t op;
+        if (array.back().cast(op) && op == adobe::ifelse_k) {
+            output += WriteExpression(array[0].cast<adobe::array_t>());
+            output += " ? ";
+            WriteLValue(array[1].cast<adobe::array_t>(), output);
+            output += " : ";
+            WriteLValue(array[2].cast<adobe::array_t>(), output);
+        } else {
+            output += WriteExpression(array);
+        }
+    }
+
     void WriteStatementImpl(adobe::array_t::const_reverse_iterator& it,
                             adobe::array_t::const_reverse_iterator end_it,
                             std::string& output,
@@ -84,10 +98,9 @@ namespace {
             output += ';';
         } else if (op == adobe::assign_k) {
             ++it;
-            output += end_it.base()->cast<adobe::name_t>().c_str();
+            WriteLValue(end_it.base()->cast<adobe::array_t>(), output);
             output += " = ";
-            adobe::array_t::const_reverse_iterator expr_end =
-                boost::prior(end_it, 2);
+            adobe::array_t::const_reverse_iterator expr_end = boost::prior(end_it, 1);
             adobe::array_t expr(expr_end.base(), it.base());
             output += WriteExpression(expr);
             output += ';';
@@ -160,8 +173,8 @@ namespace {
                 while (block_it != block_end_it) {
                     if (block_it != block.begin())
                         assignments += ", ";
-                    assignments += block_it->cast<adobe::name_t>().c_str();
-                    assignments += " = ";
+                    assignments += WriteExpression(block_it->cast<adobe::array_t>());
+                    assignments += "= ";
                     ++block_it;
                     adobe::array_t::const_iterator assign_it =
                         std::find(block_it, block_end_it, assign_token);

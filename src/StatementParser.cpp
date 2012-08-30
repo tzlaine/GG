@@ -150,9 +150,63 @@ statement_parser_rules::statement_parser_rules(
               ]
         ;
 
+    lvalue_expression
+        =     postfix_lvalue_expression(_r1)
+        |     (
+                   expression(_b)
+               >   "?"
+               >   postfix_lvalue_expression(_c)
+               >   ":"
+               >   postfix_lvalue_expression(_d)
+              )
+              [
+                  push(_r1, _b, _c, _d, adobe::ifelse_k)
+              ]
+        ;
+
+    postfix_lvalue_expression
+        =     primary_lvalue_expression(_r1)
+        >>  * (
+                   (
+                        '['
+                     >  expression(_b)
+                     >  ']'
+                   )
+                   [
+                       push(_r1, _b, adobe::bracket_index_k)
+                   ]
+                |  (
+                        '.'
+                     >  tok.identifier [push(_r1, _1)]
+                   )
+                   [
+                       push(_r1, adobe::dot_index_k)
+                   ]
+              )
+        ;
+
+    primary_lvalue_expression
+        =     (
+                   '('
+                >> lvalue_expression(_r1)
+                >  ')'
+              )
+              [
+                  push(_r1, adobe::parenthesized_expression_k)
+              ]
+        |     lvalue_variable(_r1)
+        ;
+
+    lvalue_variable
+        =     tok.identifier
+              [
+                  push(_r1, _1, adobe::variable_k)
+              ]
+        ;
+
     assignment_prefix
-        =     tok.identifier [_a = _1]
-        >>    lit('=') [push(_r1, _a, adobe::lvalue_k)]
+        =     lvalue_expression(_b)
+        >>    lit('=') [push(_r1, _b)]
         >     expression(_r1)
               [
                   push(_r1, adobe::assign_k)

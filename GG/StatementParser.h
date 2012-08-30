@@ -60,6 +60,8 @@ struct GG_API statement_parser_rules
         void(adobe::array_t&),
         boost::spirit::qi::locals<
             adobe::name_t,
+            adobe::array_t,
+            adobe::array_t,
             adobe::array_t
         >,
         skipper_type
@@ -81,6 +83,10 @@ struct GG_API statement_parser_rules
 
     statement_rule const_declaration;
     statement_rule declaration;
+    statement_rule_2 lvalue_expression;
+    statement_rule_2 postfix_lvalue_expression;
+    statement_rule_2 primary_lvalue_expression;
+    statement_rule_2 lvalue_variable;
     statement_rule_2 assignment_prefix;
     statement_rule assignment;
     statement_rule_2 block;

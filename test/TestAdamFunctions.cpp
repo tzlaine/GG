@@ -88,6 +88,54 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("slow_size({})", adobe::any_regular_t(0)));
         retval.push_back(Test("slow_size({one: 0})", adobe::any_regular_t(1)));
         retval.push_back(Test("slow_size({one: 0, two: @two})", adobe::any_regular_t(2)));
+
+        adobe::static_name_t foo("foo");
+        {
+            adobe::dictionary_t result;
+            result[foo] = adobe::any_regular_t(std::string("bar"));
+            retval.push_back(Test("lvalue_assignment_test_1({foo: 0})", adobe::any_regular_t(result)));
+            retval.push_back(Test("lvalue_assignment_test_2({foo: 0})", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(0));
+            result.push_back(adobe::any_regular_t(std::string("bar")));
+            retval.push_back(Test("lvalue_assignment_test_3([0, 0])", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(0));
+            adobe::dictionary_t dict;
+            dict[foo] = adobe::any_regular_t(std::string("bar"));
+            result.push_back(adobe::any_regular_t(dict));
+            retval.push_back(Test("lvalue_assignment_test_4([0, {foo: 0}])", adobe::any_regular_t(result)));
+            retval.push_back(Test("lvalue_assignment_test_5([0, {foo: 0}])", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(0));
+            adobe::array_t array;
+            array.push_back(adobe::any_regular_t(0));
+            array.push_back(adobe::any_regular_t(std::string("bar")));
+            result.push_back(adobe::any_regular_t(array));
+            retval.push_back(Test("lvalue_assignment_test_6([0, [0, 0]])", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::dictionary_t result;
+            adobe::dictionary_t dict;
+            dict[foo] = adobe::any_regular_t(std::string("bar"));
+            result[foo] = adobe::any_regular_t(dict);
+            retval.push_back(Test("lvalue_assignment_test_7({foo: {foo: 0}})", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::dictionary_t result;
+            adobe::array_t array;
+            array.push_back(adobe::any_regular_t(0));
+            array.push_back(adobe::any_regular_t(std::string("bar")));
+            result[foo] = adobe::any_regular_t(array);
+            retval.push_back(Test("lvalue_assignment_test_8({foo: [0, 0]})", adobe::any_regular_t(result)));
+            retval.push_back(Test("lvalue_assignment_test_9({foo: [0, 0]})", adobe::any_regular_t(result)));
+        }
     }
     return retval;
 }

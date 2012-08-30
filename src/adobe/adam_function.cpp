@@ -7,6 +7,62 @@
 
 namespace {
 
+    struct lvalue
+    {
+        lvalue(adobe::sheet_t& sheet, const adobe::array_t& expression) :
+            m_cell_name(expression[0].cast<adobe::name_t>()),
+            m_cell_value(new adobe::any_regular_t(sheet.get(m_cell_name))),
+            m_lvalue(m_cell_value.get())
+            {}
+        adobe::name_t m_cell_name;
+        boost::shared_ptr<adobe::any_regular_t> m_cell_value;
+        adobe::any_regular_t* m_lvalue;
+    };
+
+    lvalue evaluate_lvalue_expression(adobe::sheet_t& sheet, const adobe::array_t& expression)
+    {
+        lvalue retval(sheet, expression);
+        adobe::array_t value_stack;
+        for (adobe::array_t::const_iterator it(expression.begin()); it != expression.end(); ++it) {
+            adobe::name_t op;
+            if (it->cast(op) && op.c_str()[0] == '.') {                
+                if (op == adobe::variable_k) {
+                    value_stack.pop_back();
+                } else if (op == adobe::bracket_index_k) {
+                    adobe::any_regular_t index = sheet.inspect(value_stack.back().cast<adobe::array_t>());
+                    value_stack.pop_back();
+                    if (index.type_info() == adobe::type_info<adobe::name_t>()) {
+                        retval.m_lvalue =
+                            &retval.m_lvalue->cast<adobe::dictionary_t>()[index.cast<adobe::name_t>()];
+                    } else {
+                        adobe::array_t& array = retval.m_lvalue->cast<adobe::array_t>();
+                        std::size_t i = index.cast<std::size_t>();
+                        if (array.size() <= i)
+                            throw std::runtime_error("lvalue index: array index out of range");
+                        retval.m_lvalue = &array[i];
+                    }
+                } else if (op == adobe::dot_index_k) {
+                    retval.m_lvalue =
+                        &retval.m_lvalue->cast<adobe::dictionary_t>()[
+                            value_stack.back().cast<adobe::name_t>()
+                        ];
+                    value_stack.pop_back();
+                } else if (op == adobe::ifelse_k) {
+                    lvalue else_ = evaluate_lvalue_expression(sheet, value_stack.back().cast<adobe::array_t>());
+                    value_stack.pop_back();
+                    lvalue if_ = evaluate_lvalue_expression(sheet, value_stack.back().cast<adobe::array_t>());
+                    value_stack.pop_back();
+                    bool condition = sheet.inspect(value_stack.back().cast<adobe::array_t>()).cast<bool>();
+                    value_stack.pop_back();
+                    retval = condition ? if_ : else_;
+                }
+            } else {
+                value_stack.push_back(*it);
+            }
+        }
+        return retval;
+    }
+
     adobe::any_regular_t exec_statement(const adobe::array_t& statement,
                                         adobe::sheet_t& local_scope,
                                         bool in_loop,
@@ -49,8 +105,11 @@ namespace {
 
         if (op == adobe::assign_k) {
             adobe::any_regular_t value =
-                local_scope.inspect(adobe::array_t(statement.begin() + 2, statement.end() - 1));
-            local_scope.set(statement[0].cast<adobe::name_t>(), value);
+                local_scope.inspect(adobe::array_t(statement.begin() + 1, statement.end() - 1));
+            lvalue l_value =
+                evaluate_lvalue_expression(local_scope, statement[0].cast<adobe::array_t>());
+            *l_value.m_lvalue = value;
+            local_scope.set(l_value.m_cell_name, *l_value.m_cell_value);
             local_scope.update();
         } else if (op == adobe::const_decl_k) {
             local_scope.add_constant(statement[0].cast<adobe::name_t>(),
@@ -243,16 +302,23 @@ adam_function_t::adam_function_t(name_t name,
         if (op_name == decl_k || op_name == const_decl_k) {
             declared_vars.insert(m_statements[i][0].cast<name_t>());
         } else if (op_name == assign_k) {
-            name_t var = m_statements[i][0].cast<name_t>();
-            if (declared_vars.find(var) == declared_vars.end()) {
-                throw_parser_exception(
-                    make_string(
-                        m_function_name.c_str(),
-                        "(): Assignment to unknown variable ",
-                        var.c_str()
-                    ).c_str(),
-                    line_position_t()
-                );
+            const array_t lvalue = m_statements[i][0].cast<array_t>();
+            for (std::size_t j = 0; j < lvalue.size(); ++j) {
+                name_t op;
+                if (lvalue[j].cast(op) && op == variable_k) {
+                    assert(j);
+                    name_t var = lvalue[j - 1].cast<name_t>();
+                    if (declared_vars.find(var) == declared_vars.end()) {
+                        throw_parser_exception(
+                            make_string(
+                                m_function_name.c_str(),
+                                "(): Assignment to unknown variable ",
+                                var.c_str()
+                            ).c_str(),
+                            line_position_t()
+                        );
+                    }
+                }
             }
         }
         for (array_t::const_iterator

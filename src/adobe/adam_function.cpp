@@ -141,14 +141,16 @@ namespace {
                 return value;
         } else if (op == adobe::simple_for_k) {
             adobe::name_t loop_var_0 = statement[0].cast<adobe::name_t>();
-            local_scope.add_interface(loop_var_0,
-                                      false,
-                                      adobe::line_position_t(),
-                                      adobe::array_t(),
-                                      adobe::line_position_t(),
-                                      adobe::array_t());
+            if (!local_scope.has_input(loop_var_0)) {
+                local_scope.add_interface(loop_var_0,
+                                          false,
+                                          adobe::line_position_t(),
+                                          adobe::array_t(),
+                                          adobe::line_position_t(),
+                                          adobe::array_t());
+            }
             adobe::name_t loop_var_1 = statement[1].cast<adobe::name_t>();
-            if (loop_var_1) {
+            if (loop_var_1 && !local_scope.has_input(loop_var_1)) {
                 local_scope.add_interface(loop_var_1,
                                           false,
                                           adobe::line_position_t(),
@@ -184,18 +186,22 @@ namespace {
                         return value;
                 }
             } else if (sequence.type_info() == adobe::type_info<adobe::dictionary_t>()) {
-                const adobe::dictionary_t& dictionary = sequence.cast<adobe::dictionary_t>();
-                for (adobe::dictionary_t::const_iterator it = dictionary.begin(), end_it = dictionary.end();
+                const adobe::dictionary_t& dictionary =
+                    sequence.cast<adobe::dictionary_t>();
+                for (adobe::dictionary_t::const_iterator
+                         it = dictionary.begin(), end_it = dictionary.end();
                      it != end_it;
                      ++it) {
                     if (loop_var_1) {
-                        local_scope.set(loop_var_0, adobe::any_regular_t(it->first));
+                        local_scope.set(loop_var_0,
+                                        adobe::any_regular_t(it->first));
                         local_scope.update();
                         local_scope.set(loop_var_1, it->second);
                         local_scope.update();
                     } else {
                         adobe::dictionary_t value;
-                        value[adobe::static_name_t("key")] = adobe::any_regular_t(it->first);
+                        value[adobe::static_name_t("key")] =
+                            adobe::any_regular_t(it->first);
                         value[adobe::static_name_t("value")] = it->second;
                         local_scope.set(loop_var_0, adobe::any_regular_t(value));
                         local_scope.update();
@@ -219,15 +225,24 @@ namespace {
         } else if (op == adobe::complex_for_k) {
             const adobe::array_t& vars_array = statement[0].cast<adobe::array_t>();
             for (std::size_t i = 0; i < vars_array.size(); i += 3) {
-                local_scope.add_interface(vars_array[i + 0].cast<adobe::name_t>(),
-                                          false,
-                                          adobe::line_position_t(),
-                                          vars_array[i + 1].cast<adobe::array_t>(),
-                                          adobe::line_position_t(),
-                                          adobe::array_t());
+                adobe::name_t var_name = vars_array[i + 0].cast<adobe::name_t>();
+                const adobe::array_t& initializer =
+                    vars_array[i + 1].cast<adobe::array_t>();
+                if (local_scope.has_input(var_name)) {
+                    local_scope.set(var_name, local_scope.inspect(initializer));
+                    local_scope.update();
+                } else {
+                    local_scope.add_interface(var_name,
+                                              false,
+                                              adobe::line_position_t(),
+                                              initializer,
+                                              adobe::line_position_t(),
+                                              adobe::array_t());
+                }
             }
             const adobe::array_t& condition = statement[1].cast<adobe::array_t>();
-            const adobe::array_t& assignments_array = statement[2].cast<adobe::array_t>();
+            const adobe::array_t& assignments_array =
+                statement[2].cast<adobe::array_t>();
             const adobe::array_t& stmt_block = statement[3].cast<adobe::array_t>();
             const adobe::any_regular_t assign_token(adobe::assign_k);
             adobe::any_regular_t condition_result = local_scope.inspect(condition);
@@ -247,7 +262,8 @@ namespace {
                 if (function_done)
                     return value;
                 adobe::array_t::const_iterator it = assignments_array.begin();
-                const adobe::array_t::const_iterator end_it = assignments_array.end();
+                const adobe::array_t::const_iterator end_it =
+                    assignments_array.end();
                 while (it != end_it) {
                     adobe::array_t::const_iterator assign_it =
                         std::find(it, end_it, assign_token);
@@ -273,7 +289,8 @@ namespace {
             block_break = true;
         } else if (op == adobe::return_k) {
             adobe::any_regular_t value =
-                local_scope.inspect(adobe::array_t(statement.begin(), statement.end() - 1));
+                local_scope.inspect(adobe::array_t(statement.begin(),
+                                                   statement.end() - 1));
             function_done = true;
             return value;
         }
@@ -295,7 +312,8 @@ adam_function_t::adam_function_t(name_t name,
     m_parameter_names(parameter_names),
     m_statements(statements)
 {
-    std::set<name_t> declared_vars(m_parameter_names.begin(), m_parameter_names.end());
+    std::set<name_t> declared_vars(m_parameter_names.begin(),
+                                   m_parameter_names.end());
     for (std::size_t i = 0; i < m_statements.size(); ++i) {
         name_t op_name;
         m_statements[i][m_statements[i].size() - 1].cast(op_name);

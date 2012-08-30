@@ -116,6 +116,72 @@ const std::vector<Test>& Tests()
             retval.push_back(Test("complex_for_2([0, @two, 3, '4'])", adobe::any_regular_t(result)));
         }
 
+        {
+            adobe::array_t result;
+            adobe::array_t element(2);
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(2);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(1);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(1);
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(1);
+            element[1] = adobe::any_regular_t(2);
+            result.push_back(adobe::any_regular_t(element));
+            retval.push_back(Test("complex_for_3(2, 3)", adobe::any_regular_t(result)));
+        }
+
+        {
+            adobe::array_t result;
+            adobe::array_t element(2);
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(1);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(1);
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(2);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(2);
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            retval.push_back(Test("complex_for_3(3, 2)", adobe::any_regular_t(result)));
+        }
+
+        {
+            adobe::array_t result;
+            adobe::array_t element(2);
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(adobe::static_name_t("two"));
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(adobe::static_name_t("two"));
+            element[1] = adobe::any_regular_t(1);
+            result.push_back(adobe::any_regular_t(element));
+            retval.push_back(Test("complex_for_4({one: 0, two: @two}, 2)", adobe::any_regular_t(result)));
+        }
+
         adobe::static_name_t foo("foo");
         {
             adobe::dictionary_t result;

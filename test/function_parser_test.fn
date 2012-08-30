@@ -289,6 +289,26 @@ complex_for_2(seq) {
     return z;
 }
 
+complex_for_3(i_, j_) {
+    z: [];
+    for (i: 0; i < i_; i = i + 1) {
+        for (j: 0; j < j_; j = j + 1) {
+            z = append(z, [i, j]);
+        }
+    }
+    return z;
+}
+
+complex_for_4(seq, j_) {
+    z: [];
+    for (key, value: seq) {
+        for (j: 0; j < j_; j = j + 1) {
+            z = append(z, [value, j]);
+        }
+    }
+    return z;
+}
+
 lvalue_assignment_test_1(seq) {
     seq.foo = 'bar';
     return seq;

@@ -278,6 +278,7 @@ complex_for_1(seq) {
     for (x: 0; x < size(seq); x = x + 1) {
         z = append(z, seq[x]);
     }
+    return z == seq;
 }
 
 complex_for_2(seq) {
@@ -285,6 +286,7 @@ complex_for_2(seq) {
     for (x: 0, y: 1; x < size(seq) && y < size(seq); x = x + 1, y = y + 1) {
         z = append(z, seq[x], seq[y]);
     }
+    return z;
 }
 
 lvalue_assignment_test_1(seq) {

@@ -89,6 +89,33 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("slow_size({one: 0})", adobe::any_regular_t(1)));
         retval.push_back(Test("slow_size({one: 0, two: @two})", adobe::any_regular_t(2)));
 
+        retval.push_back(Test("simple_for_1({})", adobe::any_regular_t(true)));
+        retval.push_back(Test("simple_for_1({one: 0})", adobe::any_regular_t(true)));
+        retval.push_back(Test("simple_for_1({one: 0, two: @two})", adobe::any_regular_t(true)));
+
+        retval.push_back(Test("simple_for_2({})", adobe::any_regular_t(true)));
+        retval.push_back(Test("simple_for_2({one: 0})", adobe::any_regular_t(true)));
+        retval.push_back(Test("simple_for_2({one: 0, two: @two})", adobe::any_regular_t(true)));
+
+        retval.push_back(Test("complex_for_1([])", adobe::any_regular_t(true)));
+        retval.push_back(Test("complex_for_1([0])", adobe::any_regular_t(true)));
+        retval.push_back(Test("complex_for_1([0, @two])", adobe::any_regular_t(true)));
+
+        retval.push_back(Test("complex_for_2([])", adobe::any_regular_t(adobe::array_t())));
+        retval.push_back(Test("complex_for_2([0])", adobe::any_regular_t(adobe::array_t())));
+
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(0));
+            result.push_back(adobe::any_regular_t(adobe::static_name_t("two")));
+            retval.push_back(Test("complex_for_2([0, @two])", adobe::any_regular_t(result)));
+            result.push_back(adobe::any_regular_t(adobe::static_name_t("two")));
+            result.push_back(adobe::any_regular_t(3));
+            result.push_back(adobe::any_regular_t(3));
+            result.push_back(adobe::any_regular_t(std::string("4")));
+            retval.push_back(Test("complex_for_2([0, @two, 3, '4'])", adobe::any_regular_t(result)));
+        }
+
         adobe::static_name_t foo("foo");
         {
             adobe::dictionary_t result;

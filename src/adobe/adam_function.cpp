@@ -219,10 +219,10 @@ namespace {
         } else if (op == adobe::complex_for_k) {
             const adobe::array_t& vars_array = statement[0].cast<adobe::array_t>();
             for (std::size_t i = 0; i < vars_array.size(); i += 3) {
-                local_scope.add_interface(vars_array[i / 3 + 0].cast<adobe::name_t>(),
+                local_scope.add_interface(vars_array[i + 0].cast<adobe::name_t>(),
                                           false,
                                           adobe::line_position_t(),
-                                          vars_array[i / 3 + 1].cast<adobe::array_t>(),
+                                          vars_array[i + 1].cast<adobe::array_t>(),
                                           adobe::line_position_t(),
                                           adobe::array_t());
             }

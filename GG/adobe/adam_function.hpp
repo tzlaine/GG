@@ -37,12 +37,6 @@ private:
     name_t m_function_name;
     std::vector<name_t> m_parameter_names;
     std::vector<array_t> m_statements;
-
-    void common_init(const array_function_lookup_t& array_function_lookup,
-                     const dictionary_function_lookup_t& dictionary_function_lookup,
-                     const adam_function_lookup_t& adam_function_lookup,
-                     sheet_t& local_scope) const;
-    any_regular_t common_impl(sheet_t& local_scope) const;
 };
 
 }

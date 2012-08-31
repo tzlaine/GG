@@ -249,6 +249,107 @@ chained_ifs_fn (x, y, z) {
     }
 }
 
+scoped_decl_if_test_1_fn () {
+    x: true;
+    x: false;
+}
+
+scoped_decl_if_test_2_fn () {
+    if (true) {
+        x: true;
+        x: false;
+    }
+}
+
+scoped_decl_if_test_3_fn () {
+    x: true;
+    y: false;
+    if (x) {
+        x: 2;
+        y = true;
+    }
+    return [x, y];
+}
+
+scoped_decl_simple_for_test_1_fn () {
+    seq: [];
+    for (key, value: seq) {
+    }
+}
+
+scoped_decl_simple_for_test_2_fn () {
+    seq: [0, 1];
+    x: 3;
+    retval: [];
+    for (x: seq) {
+        y: true;
+        retval = append(retval, x);
+    }
+    for (x: seq) {
+        y: true;
+        retval = append(retval, x);
+    }
+    return retval;
+}
+
+scoped_decl_simple_for_test_3_fn () {
+    seq: {one: 0, two: 1};
+    key;
+    value: 3;
+    retval: [];
+    for (key, value: seq) {
+        y: true;
+        retval = append(retval, value);
+    }
+    for (key, value: seq) {
+        y: true;
+        retval = append(retval, value);
+    }
+    return retval;
+}
+
+scoped_decl_complex_for_test_1_fn () {
+    seq: [0, 1];
+    x: 3;
+    retval: [];
+    for (i: 0; i < size(seq); i = i + 1) {
+        y: true;
+        x: seq[i];
+        retval = append(retval, x);
+    }
+    for (i: 0; i < size(seq); i = i + 1) {
+        y: true;
+        x: seq[i];
+        retval = append(retval, x);
+    }
+    return retval;
+}
+
+scoped_decl_simple_for_test_4_fn () {
+    seq: [0, 1];
+    x: 3;
+    for (x: seq) {
+    }
+    return x;
+}
+
+scoped_decl_simple_for_test_5_fn () {
+    seq: {one: 0, two: 1};
+    value: 3;
+    for (key, value: seq) {
+    }
+    return value;
+}
+
+scoped_decl_complex_for_test_2_fn () {
+    seq: [0, 1];
+    x: 3;
+    for (i: 0; i < size(seq); i = i + 1) {
+        x: seq[i];
+    }
+    return x;
+}
+
 slow_size_impl(state, value) {
     return state + 1;
 }

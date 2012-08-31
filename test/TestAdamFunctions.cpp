@@ -82,6 +82,32 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("chained_ifs_fn(false, true, true)", adobe::any_regular_t(1)));
         retval.push_back(Test("chained_ifs_fn(false, false, true)", adobe::any_regular_t(2)));
         retval.push_back(Test("chained_ifs_fn(false, false, false)", adobe::any_regular_t(3)));
+
+        retval.push_back(Test("scoped_decl_if_test_1_fn()", adobe::any_regular_t(), true));
+        retval.push_back(Test("scoped_decl_if_test_2_fn()", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(true));
+            result.push_back(adobe::any_regular_t(true));
+            retval.push_back(Test("scoped_decl_if_test_3_fn()", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("scoped_decl_simple_for_test_1_fn()", adobe::any_regular_t(), true));
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(0));
+            result.push_back(adobe::any_regular_t(1));
+            result.push_back(adobe::any_regular_t(0));
+            result.push_back(adobe::any_regular_t(1));
+            retval.push_back(Test("scoped_decl_simple_for_test_2_fn()", adobe::any_regular_t(result)));
+            retval.push_back(Test("scoped_decl_simple_for_test_3_fn()", adobe::any_regular_t(result)));
+            retval.push_back(Test("scoped_decl_complex_for_test_1_fn()", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("scoped_decl_simple_for_test_4_fn()", adobe::any_regular_t(3)));
+        retval.push_back(Test("scoped_decl_simple_for_test_5_fn()", adobe::any_regular_t(3)));
+        retval.push_back(Test("scoped_decl_complex_for_test_2_fn()", adobe::any_regular_t(3)));
+
         retval.push_back(Test("slow_size([])", adobe::any_regular_t(0)));
         retval.push_back(Test("slow_size([0])", adobe::any_regular_t(1)));
         retval.push_back(Test("slow_size([0, @two])", adobe::any_regular_t(2)));

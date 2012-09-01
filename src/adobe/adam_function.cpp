@@ -243,11 +243,10 @@ namespace {
                                                     stmt_block.end(),
                                                     local_scope,
                                                     stack,
-                                                    false,
+                                                    in_loop,
                                                     block_continue,
                                                     block_break,
                                                     function_done);
-            assert(!block_continue && !block_break);
             if (function_done)
                 return value;
         } else if (op == adobe::simple_for_k) {
@@ -364,7 +363,7 @@ namespace {
                     exec_statement(adobe::array_t(it, assign_it),
                                    local_scope,
                                    stack,
-                                   false,
+                                   true,
                                    block_continue,
                                    block_break,
                                    function_done);

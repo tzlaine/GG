@@ -410,6 +410,99 @@ complex_for_4(seq, j_) {
     return z;
 }
 
+simple_for_return_test_1(seq) {
+    z: {};
+    for (x: seq) {
+        if (true)
+            return 3;
+    }
+    return z == seq;
+}
+
+simple_for_return_test_2(seq) {
+    z: {};
+    for (key, value: seq) {
+        if (true)
+            return 3;
+    }
+    return z == seq;
+}
+
+complex_for_return_test_1(seq) {
+    z: [];
+    for (x: 0; x < size(seq); x = x + 1) {
+        if (true)
+            return 3;
+    }
+    return z == seq;
+}
+
+complex_for_return_test_2(i_, j_) {
+    z: [];
+    for (i: 0; i < i_; i = i + 1) {
+        for (j: 0; j < j_; j = j + 1) {
+            if (true)
+                return 3;
+        }
+    }
+    return z;
+}
+
+
+
+simple_for_continue_test_1(seq, key) {
+    z: {};
+    for (x: seq) {
+        continue;
+        z = insert(z, x.key, x.value);
+    }
+    return z;
+}
+
+simple_for_continue_test_2(seq, key) {
+    z: {};
+    for (x: seq) {
+        if (x.key == key)
+            continue;
+        z = insert(z, x.key, x.value);
+    }
+    return z;
+}
+
+simple_for_continue_test_3(seq, key_) {
+    z: {};
+    for (key, value: seq) {
+        if (key == key_)
+            continue;
+        z = insert(z, key, value);
+    }
+    return z;
+}
+
+complex_for_continue_test_1(seq, i) {
+    z: [];
+    for (x: 0; x < size(seq); x = x + 1) {
+        if (x == i)
+            continue;
+        z = append(z, seq[x]);
+    }
+    return z;
+}
+
+complex_for_continue_test_2(i_, j_, x, y) {
+    z: [];
+    for (i: 0; i < i_; i = i + 1) {
+        if (i == x)
+            continue;
+        for (j: 0; j < j_; j = j + 1) {
+            if (j == y)
+                continue;
+            z = append(z, [i, j]);
+        }
+    }
+    return z;
+}
+
 lvalue_assignment_test_1(seq) {
     seq.foo = 'bar';
     return seq;

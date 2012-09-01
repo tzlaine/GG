@@ -345,6 +345,12 @@ const std::vector<Test>& Tests()
         retval.push_back(Test("join(['a', 'b'])", adobe::any_regular_t(std::string("ab"))));
         retval.push_back(Test("join(['a', 'b'], ' ')", adobe::any_regular_t(std::string("a b"))));
         retval.push_back(Test("join(split('foo\n\nbar\n', '\n'), '\n')", adobe::any_regular_t(std::string("foo\n\nbar\n"))));
+
+        retval.push_back(Test("assert()", adobe::any_regular_t(), true));
+        retval.push_back(Test("assert(true)", adobe::any_regular_t(), true));
+        retval.push_back(Test("assert(true, false)", adobe::any_regular_t(), true));
+        retval.push_back(Test("assert(true, 'message')", adobe::any_regular_t()));
+        retval.push_back(Test("assert(false, 'message')", adobe::any_regular_t(), true));
     }
     return retval;
 }

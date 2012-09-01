@@ -638,6 +638,19 @@ namespace adobe { namespace implementation {
         return any_regular_t();
     }
 
+    any_regular_t assert_(const array_t& parameters)
+    {
+        if (parameters.size() != 2u)
+            throw std::runtime_error("assert() requires 2 parameters");
+        if (parameters[0].type_info() != type_info<bool>())
+            throw std::runtime_error("assert() requires a bool as its first parameter");
+        if (parameters[1].type_info() != type_info<string_t>())
+            throw std::runtime_error("assert() requires a string as its second parameter");
+        if (!parameters[0].cast<bool>())
+            throw std::runtime_error("Failed assertion! \"" + parameters[1].cast<std::string>() + "\"");
+        return any_regular_t();
+    }
+
 } }
 
 namespace {
@@ -660,6 +673,7 @@ namespace {
         GG::RegisterArrayFunction(adobe::static_name_t("to_string"), &adobe::implementation::to_string);
         GG::RegisterArrayFunction(adobe::static_name_t("to_name"), &adobe::implementation::to_name);
         GG::RegisterArrayFunction(adobe::static_name_t("print"), &adobe::implementation::print);
+        GG::RegisterArrayFunction(adobe::static_name_t("assert"), &adobe::implementation::assert_);
 
         return true;
     }

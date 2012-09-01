@@ -261,6 +261,49 @@ const std::vector<Test>& Tests()
             retval.push_back(Test("complex_for_continue_test_2(3, 2, 1, 1)", adobe::any_regular_t(result)));
         }
 
+        retval.push_back(Test("simple_for_break_test_1({one: 0, two: @two})", adobe::any_regular_t(adobe::dictionary_t())));
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("one")] = adobe::any_regular_t(0);
+            retval.push_back(Test("simple_for_break_test_2({one: 0, two: @two})", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("simple_for_break_test_3({one: 0, two: @two}, @one)", adobe::any_regular_t(adobe::dictionary_t())));
+        retval.push_back(Test("simple_for_break_test_4({one: 0, two: @two}, @one)", adobe::any_regular_t(adobe::dictionary_t())));
+        {
+            adobe::dictionary_t result;
+            result[adobe::static_name_t("one")] = adobe::any_regular_t(0);
+            retval.push_back(Test("simple_for_break_test_3({one: 0, two: @two}, @two)", adobe::any_regular_t(result)));
+            retval.push_back(Test("simple_for_break_test_4({one: 0, two: @two}, @two)", adobe::any_regular_t(result)));
+        }
+
+        retval.push_back(Test("complex_for_break_test_1([0, 1], 0)", adobe::any_regular_t(adobe::array_t())));
+        {
+            adobe::array_t result;
+            result.push_back(adobe::any_regular_t(0));
+            retval.push_back(Test("complex_for_break_test_1([0, 1], 1)", adobe::any_regular_t(result)));
+        }
+
+        {
+            adobe::array_t result;
+            adobe::array_t element(2);
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            retval.push_back(Test("complex_for_break_test_2(2, 3, 1, 1)", adobe::any_regular_t(result)));
+        }
+        {
+            adobe::array_t result;
+            adobe::array_t element(2);
+            element[0] = adobe::any_regular_t(0);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            element[0] = adobe::any_regular_t(1);
+            element[1] = adobe::any_regular_t(0);
+            result.push_back(adobe::any_regular_t(element));
+            retval.push_back(Test("complex_for_break_test_2(3, 2, 2, 1)", adobe::any_regular_t(result)));
+        }
+
         adobe::static_name_t foo("foo");
         {
             adobe::dictionary_t result;

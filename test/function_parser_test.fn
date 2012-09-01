@@ -448,8 +448,6 @@ complex_for_return_test_2(i_, j_) {
     return z;
 }
 
-
-
 simple_for_continue_test_1(seq, key) {
     z: {};
     for (x: seq) {
@@ -497,6 +495,68 @@ complex_for_continue_test_2(i_, j_, x, y) {
         for (j: 0; j < j_; j = j + 1) {
             if (j == y)
                 continue;
+            z = append(z, [i, j]);
+        }
+    }
+    return z;
+}
+
+simple_for_break_test_1(seq) {
+    z: {};
+    for (x: seq) {
+        break;
+        z = insert(z, x.key, x.value);
+    }
+    return z;
+}
+
+simple_for_break_test_2(seq) {
+    z: {};
+    for (x: seq) {
+        z = insert(z, x.key, x.value);
+        break;
+    }
+    return z;
+}
+
+simple_for_break_test_3(seq, key) {
+    z: {};
+    for (x: seq) {
+        if (x.key == key)
+            break;
+        z = insert(z, x.key, x.value);
+    }
+    return z;
+}
+
+simple_for_break_test_4(seq, key_) {
+    z: {};
+    for (key, value: seq) {
+        if (key == key_)
+            break;
+        z = insert(z, key, value);
+    }
+    return z;
+}
+
+complex_for_break_test_1(seq, i) {
+    z: [];
+    for (x: 0; x < size(seq); x = x + 1) {
+        if (x == i)
+            break;
+        z = append(z, seq[x]);
+    }
+    return z;
+}
+
+complex_for_break_test_2(i_, j_, x, y) {
+    z: [];
+    for (i: 0; i < i_; i = i + 1) {
+        if (i == x)
+            break;
+        for (j: 0; j < j_; j = j + 1) {
+            if (j == y)
+                break;
             z = append(z, [i, j]);
         }
     }

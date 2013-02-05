@@ -63,6 +63,7 @@ function_parser_rules::function_parser_rules(
     namespace phoenix = boost::phoenix;
     namespace qi = boost::spirit::qi;
     using phoenix::construct;
+    using phoenix::push_back;
     using qi::_1;
     using qi::_2;
     using qi::_3;

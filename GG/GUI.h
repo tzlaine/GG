@@ -32,18 +32,26 @@
 #include <GG/Font.h>
 #include <GG/WndEvent.h>
 
+#include <boost/version.hpp>
+
 
 namespace boost {
     namespace archive {
         class xml_oarchive;
         class xml_iarchive;
     }
+#if BOOST_VERSION < 105000
     namespace filesystem3 {
         class path;
     }
     namespace filesystem {
         using filesystem3::path;
     }
+#else
+    namespace filesystem {
+        class path;
+    }
+#endif
 }
 
 

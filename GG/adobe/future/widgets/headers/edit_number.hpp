@@ -22,7 +22,6 @@
 #include <GG/adobe/future/widgets/headers/platform_edit_number.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>
 #include <GG/adobe/future/locale.hpp>
-#include <GG/adobe/future/cursor.hpp>
 
 #include <boost/noncopyable.hpp>
 

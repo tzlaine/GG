@@ -12,7 +12,6 @@
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>
 
 #include <GG/adobe/algorithm/for_each.hpp>
-#include <GG/adobe/future/resources.hpp>
 
 #include <GG/GUI.h>
 

@@ -17,7 +17,6 @@
 #include <GG/adobe/adam_evaluate.hpp>
 #include <GG/adobe/adam_parser.hpp>
 #include <GG/adobe/future/assemblage.hpp>
-#include <GG/adobe/future/resources.hpp>
 #include <GG/adobe/future/widgets/headers/platform_window.hpp>
 #include <GG/adobe/future/widgets/headers/widget_factory.hpp>
 #include <GG/adobe/future/widgets/headers/widget_utils.hpp>

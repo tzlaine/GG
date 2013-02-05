@@ -10,7 +10,6 @@
 
 #include <GG/adobe/future/widgets/headers/platform_image.hpp>
 
-#include <GG/adobe/future/resources.hpp>
 #include <GG/adobe/future/widgets/headers/factory.hpp>
 #include <GG/adobe/future/widgets/headers/image_factory.hpp>
 #include <GG/adobe/future/widgets/headers/virtual_machine_extension.hpp>

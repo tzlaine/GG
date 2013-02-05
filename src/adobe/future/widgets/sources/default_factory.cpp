@@ -17,7 +17,6 @@
 #include <GG/adobe/eve_parser.hpp>
 #include <GG/adobe/eve.hpp>
 #include <GG/adobe/enum_ops.hpp>
-#include <GG/adobe/future/resources.hpp>
 #include <GG/adobe/future/widgets/headers/button_factory.hpp>
 #include <GG/adobe/future/widgets/headers/checkbox_factory.hpp>
 #include <GG/adobe/future/widgets/headers/control_button_factory.hpp>
